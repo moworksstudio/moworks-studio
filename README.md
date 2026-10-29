@@ -233,6 +233,7 @@ named under each still.
    | Python components (After Effects export, PSD / PowerPoint / PDF reading, music beats, lyric timing) | about 160 MB | downloaded by **Download all** |
    | Whisper, for voice-over and lyric timing | about 1.7 GB with its engine | optional |
    | Whisper's CUDA libraries, on an NVIDIA graphics card | about 1.3 GB | optional, offered only on a suitable card |
+   | FFmpeg 9.0 | installed by winget, not by the app | you run the winget line the screen shows |
    | HyperFrames' skills and registry, fonts, code libraries, film-style sources, the library | in the repository | nothing to download |
 5. **Add a voice key** *(optional)*: Settings › General › Voice-over. The key is encrypted for your Windows account.
 6. **Make a film:** Projects › New project.
@@ -285,7 +286,7 @@ Settings › Update brings the app folder to the newest version of this reposito
 `package-lock.json` changed, rebuilds the interface, checks that the app starts and restarts it. If any step fails, the folder goes back
 to the commit it came from. Only files tracked by git change; your projects, library, settings and keys are never touched.
 
-You can also update by hand: close the app, run `git pull` in the app folder, and start `Moworks Studio.bat` again.
+You can also update by hand: close the app, run `git pull`, `npm install` and `npm run build` in the app folder, and start `Moworks Studio.bat` again.
 
 ## Troubleshooting
 
@@ -309,7 +310,7 @@ The known limitations are listed in [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
 - **Claude** runs through Claude Code under your own account; the app never handles your password.
 - **Projects stay local.** Briefs, assets and films live in your projects folder. Claude reads them through Claude Code to do the work;
   nothing else uploads them.
-- **App backup:** off unless you choose a backup folder.
+- **App backup:** off unless a backup folder (`storage.backupRoot`) is set in this computer's local settings.
 - **No telemetry.** HyperFrames telemetry and update checks are turned off; the app sends no usage data. Network access is limited to the
   services you use (Claude, the voice service, Mixkit and Openverse when you ask for music or sound effects, and component downloads).
 

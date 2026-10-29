@@ -29,8 +29,10 @@ export default function Qa({ id, setCrumbs = () => {} }) {
   useEffect(() => { const j = qa.data?.job; if (j?.status === "running" && j.id !== job?.id) follow(j); }, [qa.data]); // eslint-disable-line react-hooks/exhaustive-deps
   const follow = (j) => { setJob(j); watchJob(j.id, (x) => { if (!x) return; setJob(x); if (x.status !== "running") { qa.reload(); if (x.status === "failed") toast(x.error?.message, "error"); } }, 1200); };
   const run = async () => { try { follow(await post(`/api/projects/${id}/qa`)); } catch (e) { toast(e.message, "error"); } };
+  // the request lands in the user's own chat box, which has no hidden part: the check's id and the file's path stay out (the shot,
+  // the check's title and the finding say where)
   const fix = (check, f) => {
-    const text = (f.shot ? t("Fix this check finding in shot {n}:", { n: f.shot }) : t("Fix this check finding:")) + ` ${check.title} (${check.id}). ${describe(f)}${f.file ? ` (${f.file})` : ""}. ` + t("Keep everything else unchanged.");
+    const text = (f.shot ? t("Fix this check finding in shot {n}:", { n: f.shot }) : t("Fix this check finding:")) + ` ${check.title}. ${describe(f)}. ` + t("Keep everything else unchanged.");
     stage.askClaude(text);
   };
   const running = job?.status === "running";
@@ -53,7 +55,8 @@ export default function Qa({ id, setCrumbs = () => {} }) {
     <div className="panel-head">{icon}<h2>{title}</h2><span className="muted end num">{items.reduce((n, c) => n + (c.notSeen ? 1 : c.items.length || 1), 0)}</span></div>
     {items.map((c) => <div key={c.id} className="qa-check">
       <div className="qa-check-head"><b>{scriptTimedOut(c) ? checkLabel(c, t) : c.title}</b></div>
-      <p className="hint">{c.notSeen ? (scriptTimedOut(c) ? t("No script error was found before the check stopped.") : notCheckedWhy(c, t)) : c.explain}</p>
+      {/* a check that could not run says why in its own plain words when the server gives them (`why`: the pose check ran out of time) */}
+      <p className="hint">{c.notSeen ? (scriptTimedOut(c) ? t("No script error was found before the check stopped.") : c.why ? t(c.why) : notCheckedWhy(c, t)) : c.explain}</p>
       {!c.notSeen && c.items.length > 0 && <ul className="plain">{c.items.slice(0, 20).map((f, i) => <Finding key={i} c={c} f={f} />)}</ul>}
     </div>)}
     {children}

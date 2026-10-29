@@ -1,5 +1,5 @@
 {
-  "_about": "Style Gallery catalog. A style sets a project's overall direction and which rules Claude loads: HyperFrames' skills of the pinned HF version (a film type's references/types file, or Slideshow), or for General Style the Moworks Motion kit's rules (no HF genre skill). Only styles with a real rule source are listed; no invented styles. preview: a placeholder picture (poster of a related HyperFrames registry block) until it is replaced; files in ui/public/styles/, sources in ui/public/styles/_sources.json. look: whether the New project dialog offers a Look (a Brand Kit: one of HF's frame presets or the owner's own). pipeline: the same 6 stages for every style: needs (done or skipped first), after (order only), when (shown only for the film's flags or way of working: assets, way:<id>|<id>), done (what counts as done; a file a step must leave), skippable, action (a Claude task, a dialog or a job), review (the dialog that shows its result). Every style starts with the brief, the assets analysis and HF's own steps, one storyboard option as a board (another on request), a Motion Plan, the build and the checks. rules.readFirst: the rule files Claude reads before anything else (the others when those route to them). qc: the Moworks quality review every style carries, read only in the QC step. hidden: kept for existing projects, not offered for new ones.",
+  "_about": "Style Gallery catalog. A style sets a project's overall direction and which rules Claude loads: HyperFrames' skills of the pinned HF version (a film type's references/types file, or Slideshow), or for General Style the Moworks Motion kit's rules (no HF genre skill). Only styles with a real rule source are listed; no invented styles. preview: a placeholder picture (poster of a related HyperFrames registry block) until it is replaced; files in ui/public/styles/, sources in ui/public/styles/_sources.json. look: whether the New project dialog offers a Look (a Brand Kit: one of HF's frame presets or the owner's own). pipeline: the same 6 stages for every style: needs (done or skipped first), after (order only), when (shown only for the film's flags or way of working: assets, way:<id>|<id>), done (what counts as done; a file a step must leave), skippable, action (a Claude task, a dialog or a job), review (the dialog that shows its result). Every style starts with the brief, the assets analysis and HF's own steps, one storyboard option as a board (another on request), a Motion Plan, the build and the checks. rules.readFirst: the rule files Claude reads before anything else (the others when those route to them). qc: the Moworks quality review every style carries, read only in the QC step. hidden: kept for existing projects, not offered for new ones. derivedFrom: the Moworks Motion kit files a Moworks rule pack was rewritten from (moworksstudio/moworks-motion-dev at commit), fixed values: the kit is retired and never read at run time; hash null: the kit had left this computer before its files' hashes were stored.",
   "categories": [
     "Explainer",
     "Motion graphics",
@@ -34,16 +34,16 @@
           "config/rules/general-style/SKILL.md"
         ],
         "derivedFrom": [
-          "engine/skill/moworks-motion/SKILL.md",
-          "engine/skill/moworks-motion/workflow/story.md",
-          "engine/skill/moworks-motion/workflow/free-design.md",
-          "engine/skill/moworks-motion/workflow/keep-design.md",
-          "engine/skill/moworks-motion/workflow/remake.md",
-          "engine/skill/moworks-motion/workflow/reframe.md",
-          "engine/skill/moworks-motion/workflow/film.md",
-          "engine/skill/moworks-motion/workflow/recipes.md",
-          "engine/skill/moworks-motion/workflow/review.md",
-          "engine/skill/moworks-motion/brands/other.md"
+          { "name": "engine/skill/moworks-motion/SKILL.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null },
+          { "name": "engine/skill/moworks-motion/workflow/story.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null },
+          { "name": "engine/skill/moworks-motion/workflow/free-design.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null },
+          { "name": "engine/skill/moworks-motion/workflow/keep-design.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null },
+          { "name": "engine/skill/moworks-motion/workflow/remake.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null },
+          { "name": "engine/skill/moworks-motion/workflow/reframe.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null },
+          { "name": "engine/skill/moworks-motion/workflow/film.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null },
+          { "name": "engine/skill/moworks-motion/workflow/recipes.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null },
+          { "name": "engine/skill/moworks-motion/workflow/review.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null },
+          { "name": "engine/skill/moworks-motion/brands/other.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null }
         ],
         "uses": [
           "hyperframes",
@@ -568,9 +568,9 @@
   "studio": {
     "file": "config/rules/moworks-studio/SKILL.md",
     "derivedFrom": [
-      "engine/skill/moworks-motion/SKILL.md",
-      "engine/skill/moworks-motion/workflow/characters.md",
-      "engine/skill/moworks-motion/brands/other.md"
+      { "name": "engine/skill/moworks-motion/SKILL.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null },
+      { "name": "engine/skill/moworks-motion/workflow/characters.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null },
+      { "name": "engine/skill/moworks-motion/brands/other.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null }
     ]
   },
   "kinds": [
@@ -583,9 +583,9 @@
   "alive": {
     "file": "config/rules/moworks-alive/SKILL.md",
     "derivedFrom": [
-      "engine/skill/moworks-motion/workflow/film.md",
-      "engine/skill/moworks-motion/workflow/recipes.md",
-      "engine/skill/moworks-motion/workflow/review.md"
+      { "name": "engine/skill/moworks-motion/workflow/film.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null },
+      { "name": "engine/skill/moworks-motion/workflow/recipes.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null },
+      { "name": "engine/skill/moworks-motion/workflow/review.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null }
     ]
   },
   "vocab": {
@@ -595,7 +595,7 @@
   "qc": {
     "file": "config/rules/moworks-qc/SKILL.md",
     "derivedFrom": [
-      "engine/skill/moworks-motion/workflow/review.md"
+      { "name": "engine/skill/moworks-motion/workflow/review.md", "commit": "30b7dcb65808b2a5299ad6a3357280a12773395f", "hash": null }
     ]
   }
 }

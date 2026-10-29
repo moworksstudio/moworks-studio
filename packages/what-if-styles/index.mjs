@@ -11,7 +11,6 @@ import { APP_ROOT, expandEnv, loadPins, sourceHead } from "../version-manager/in
 import { codeLibDir } from "../offline-assets/index.mjs";
 
 export const AUTHOR = { id: "freshstack", name: "FreshStack (kelano86)", source: "what-if-animation" };
-export const LICENCE = "MIT";
 export const SHIMS = join(import.meta.dirname, "shims");
 const readText = (p) => { try { return readFileSync(p, "utf8"); } catch { return ""; } };
 

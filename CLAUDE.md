@@ -49,7 +49,7 @@ Tell the user what the first start shows; they do it in the app, not you:
 
 1. **Choose a look**: The Desk (dark) or The Studio (light table). Settings › General changes it later.
 2. **Set up Moworks Studio**: the work folder, then **Download all**: HyperFrames 0.8.214 and its Chrome (about 550 MB) and the Python
-   components (about 160 MB). Fonts, the library, HyperFrames' skills and the six film-style sources come with the repository. Whisper
+   components (about 160 MB). Fonts, the library, HyperFrames' skills, the five film-style sources and Motion Prompt (the Vocabulary, not a style) come with the repository. Whisper
    (voice and lyric timing, about 1.7 GB with its engine) and, on an NVIDIA graphics card, its CUDA libraries (about 1.3 GB) are optional.
 3. **Sign in to Claude** in the app (it runs `claude auth login` and opens the browser).
 

@@ -112,9 +112,9 @@ export function libraryFromBundle(root = APP_ROOT) {
   }
   // the vocabulary's previews sit beside its store, by item: the bundle's are taken for items that have none here as they are now
   try { if (existsSync(join(b, "vocab", "previews")) && vocab.adoptPreviews(join(b, "vocab", "previews"), root)) copied.push("vocab previews"); } catch { /* no store yet */ }
-  // what is there stays: the gallery's tiles (made again here when a still is newer), the character media (beside the user's own) and
-  // anidoodle's cards and previews (a folder per pinned commit: a new pin is a new folder)
-  for (const d of ["thumbs", "anidoodle", "characters"]) if (existsSync(join(b, d))) {
+  // what is there stays: the gallery's tiles (made again here when a still is newer), the character media (beside the user's own),
+  // anidoodle's cards and previews and the Lemo fonts' Vietnamese check (a folder per pinned commit: a new pin is a new folder)
+  for (const d of ["thumbs", "anidoodle", "characters", "lemo"]) if (existsSync(join(b, d))) {
     cpSync(join(b, d), join(lib, d), { recursive: true, force: false, errorOnExist: false });
     copied.push(d);
   }

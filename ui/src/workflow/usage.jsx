@@ -20,13 +20,13 @@ export function stepLine(t, what, estimate) {
     : t("{what}: about {min} min.", { what, min: minutesOf(estimate) });
 }
 
-/** The cost line of a confirm (what the step costs is the warning, in red); under it at most one more short line (`children`),
- *  and with `used` what the film used so far. */
+/** The cost line of a confirm, in the dialog's normal text (red is only for a warning: the time and price are not one, Test 20);
+ *  under it at most one more short line (`children`), and with `used` what the film used so far. */
 export default function UsageHint({ projectId, line, used = false, children = null }) {
   const t = useT();
   const [u, setU] = useState(null);
   useEffect(() => { if (used) get(`/api/projects/${projectId}/tasks`).then((r) => setU(r.usage ?? null)).catch(() => setU(null)); }, [projectId, used]);
   return <div className="usage-hint"><Coins size={14} aria-hidden="true" />
-    <div className="dlg-lines"><p className="dlg-warn">{line}</p>{children}
+    <div className="dlg-lines"><p className="usage-line">{line}</p>{children}
       {used && u?.costUsd != null && <p className="hint">{t("Used so far: {usd}", { usd: usd(u.costUsd) })}</p>}</div></div>;
 }

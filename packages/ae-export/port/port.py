@@ -460,7 +460,7 @@ def ae_font(family_css, weight, style, notes, size=None):
                 if ops:
                     n = min(ops + [14], key=lambda o: abs(math.log(max(1.0, size) / o)))   # 14: the source font's own named weights
                     if n != 14: return f"RobotoFlexOpsz{n}-{sub}"
-                else: notes.add("the Roboto Flex optical sizes for AE are not installed (install.bat, Font step): large text is a little heavier in AE")
+                else: notes.add("the Roboto Flex optical sizes (RobotoFlexOpsz<n>) are not installed in Windows, so AE uses the regular Roboto Flex: large text is a little heavier in AE")
             return f"{ps_base}-{sub}"
         # the CSS name may lack the spaces of the font's own family name: a brand pack's brand.css calls "Brand SS Head" "BrandSS Head"
         # (no match, so every text in the pack's font fell back to Arial and AE-PORT.md said "not installed" although it was)
@@ -1687,7 +1687,7 @@ def run_jsx(jsx, done, timeout=3600, say=say):
     res = Path(done).with_name(Path(done).stem + ".out"); res.unlink(missing_ok=True)
     with open(res, "w", encoding="utf-8") as fh:
         pr = subprocess.Popen(["powershell", "-ExecutionPolicy", "Bypass", "-File", str(ps), str(jsx), str(done), str(timeout)], stdout=fh,
-                              stderr=subprocess.STDOUT)
+                              stderr=subprocess.STDOUT, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))   # no console window
         seen = 0
         while pr.poll() is None:
             time.sleep(2)

@@ -16,6 +16,7 @@ import numpy as np
 from appenv import ffmpeg
 
 SR = 48000
+NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)    # Windows: ffmpeg without a console window (0 elsewhere)
 TAIL = 1.8
 
 
@@ -27,7 +28,8 @@ def probe(path):
             with wave.open(str(p)) as w: return w.getnframes() / float(w.getframerate()), w.getnchannels()
         except wave.Error:
             pass                                           # e.g. float or extensible WAV: ask ffmpeg
-    r = subprocess.run([ffmpeg(), "-hide_banner", "-i", str(p)], capture_output=True, text=True, encoding="utf-8", errors="replace")
+    r = subprocess.run([ffmpeg(), "-hide_banner", "-i", str(p)], capture_output=True, text=True, encoding="utf-8", errors="replace",
+                       creationflags=NO_WINDOW)
     m = re.search(r"Duration:\s*(\d+):(\d+):([\d.]+)", r.stderr)
     if not m: raise SystemExit(f"cannot read the length of {p}: {r.stderr.strip().splitlines()[-1] if r.stderr.strip() else 'no output'}")
     ch = 1 if re.search(r"Audio:.*\bmono\b", r.stderr) else 2
@@ -43,14 +45,14 @@ def load(path, start=0.0, dur=None):
     # no -ss at 0: ffmpeg's input seek fails on the shortest MP3s (a 0.37 s click decoded to nothing)
     args = [ffmpeg(), "-v", "quiet"] + (["-ss", f"{start:.4f}"] if start else []) + ["-i", str(path)] + (["-t", f"{dur:.4f}"] if dur else [])
     args += (["-af", "pan=stereo|c0=c0|c1=c0"] if mono else ["-ac", "2"]) + ["-ar", str(SR), "-f", "f32le", "-"]
-    raw = subprocess.run(args, capture_output=True, check=True).stdout
+    raw = subprocess.run(args, capture_output=True, check=True, creationflags=NO_WINDOW).stdout
     return np.frombuffer(raw, np.float32).reshape(-1, 2).copy()
 
 
 def write(path, x, bits=24):
     path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
     subprocess.run([ffmpeg(), "-v", "error", "-y", "-f", "f32le", "-ar", str(SR), "-ac", "2", "-i", "-", "-c:a", f"pcm_s{bits}le", str(path)],
-                   input=np.ascontiguousarray(x, np.float32).tobytes(), check=True)
+                   input=np.ascontiguousarray(x, np.float32).tobytes(), check=True, creationflags=NO_WINDOW)
 
 
 def _place(buf, x, t):
@@ -108,7 +110,7 @@ def master(project, cl, total, out_dir=None):
     tmp = Path(out_dir or Path(project) / "qa") / "_master_raw.wav"; write(tmp, mix)
     I, P = targets(project)
     m = subprocess.run([ffmpeg(), "-hide_banner", "-i", str(tmp), "-af", f"loudnorm=I={I}:TP={P}:print_format=json", "-f", "null", "-"],
-                       capture_output=True, text=True, encoding="utf-8", errors="replace").stderr
+                       capture_output=True, text=True, encoding="utf-8", errors="replace", creationflags=NO_WINDOW).stderr
     tmp.unlink(missing_ok=True)
     j = json.loads(m[m.rindex("{"):m.rindex("}") + 1])
     tp = float(j["input_tp"]) if j.get("input_tp") not in (None, "-inf") else 20 * np.log10(np.abs(mix).max() + 1e-9)

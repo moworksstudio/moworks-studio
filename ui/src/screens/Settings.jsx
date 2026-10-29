@@ -1,7 +1,7 @@
 // Settings: grouped sections with real health checks from the backend. Every check says what to do next. Nothing is
 // installed or downloaded without a confirmation that states the size and the source (speech-to-text models).
 // One round simpler. The selected section names the page (no second title); each setting has one short line, the
-// longer explanation in a quiet "?" tooltip; technical lists sit behind a single "Details" fold; no paths (but the projects folder).
+// longer explanation in a quiet "?" tooltip; technical lists sit behind a single "Details" fold; no paths (the projects folder by its name).
 // Second round: four sections. General in small groups (Account, Projects folder,
 // Appearance, Voice-over, Render & export), Director (the AI that makes the films: model, effort, mode, web, bypass), System (one
 // "Components" checklist, folded while all is ready, the speech models in it; "Sources and licences" folded; backups one line), Update.
@@ -13,7 +13,7 @@ import { BackButton, Banner, Dialog, StatusIcon, useChecks } from "../components
 import { go, useData, useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 import { SignInFlow, useClaude } from "../workflow/claude.jsx";
-import { DriveNote } from "../workflow/folder.jsx";
+import { DriveNote, folderName } from "../workflow/folder.jsx";
 import { FirstRunList, SourcesFold, mb as mbOf } from "../workflow/FirstRun.jsx";
 import AppUpdate from "../workflow/AppUpdate.jsx";          // the app updates itself from the user's repo
 import { KEEP_ON_RESET, SIZES, THEMES_SHOWN, useAppearance } from "../theme.jsx";
@@ -78,7 +78,8 @@ function Account({ claude, onRecheck }) {
   </Group>;
 }
 
-/** Projects folder: the folder's real path (the user allows it here), a click opens it in Explorer; Choose… on the same row. */
+/** Projects folder: the folder's name ("Standard folder" for the app's own), never its address; a click opens it in Explorer;
+ *  Choose… on the same row. */
 function ProjectsFolder() {
   const t = useT();
   const toast = useToast();
@@ -94,7 +95,7 @@ function ProjectsFolder() {
   const d = place.data;
   return <Group title={t("Projects folder")}>
     {d ? <><div className="folder-line">
-      <button type="button" className="path-link mono" onClick={open} title={t("Open in Explorer")}><FolderOpen size={14} />{d.location}</button>
+      <button type="button" className="path-link mono" onClick={open} title={t("Open in Explorer")}><FolderOpen size={14} />{d.location === d.standard ? t("Standard folder") : folderName(d.location)}</button>
       <span className="spacer" />
       <button type="button" className="btn sm" onClick={choose} disabled={busy}>{busy ? <Loader2 size={14} className="spin" /> : <FolderOpen size={14} />}{t("Choose…")}</button></div>
       {d.drive && <DriveNote />}
@@ -214,15 +215,15 @@ function SetupJob({ url, label, done }) {
     : <button className="btn sm" style={{ marginTop: "0.4rem" }} onClick={start}><Download size={13} />{t(label)}</button>;
 }
 
-/** Backups (the backup folder: next to the app by default, Google Drive on a computer that set it): only when it is set, one line at
- *  the foot of System. */
+/** Backups: the app's git history, written to the backup folder after each commit (settings in runtime\ are not in it). Off unless
+ *  storage.backupRoot names a folder (Google Drive on a computer that set it); when on, one line at the foot of System. */
 function Backups() {
   const t = useT();
   const { data } = useData(() => get("/api/backup").catch(() => null));
   if (!data?.configured) return null;
   const bad = !data.reachable || (data.last && !data.last.ok);
   return <p className="sys-line hint"><StatusIcon status={bad ? "error" : "ok"} size={13} />{!data.reachable ? t("The backup folder is not reachable. On Google Drive: start Google Drive for desktop.")
-    : data.last && !data.last.ok ? t("The last backup did not finish.") : t("App settings are backed up after each change.")}</p>;
+    : data.last && !data.last.ok ? t("The last backup did not finish.") : t("The app is backed up after each commit.")}</p>;
 }
 
 /** System: one "Components" checklist (what is on this computer, the speech models with it), folded while all is ready and

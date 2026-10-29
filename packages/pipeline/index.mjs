@@ -114,12 +114,23 @@ export const VOICE_WAITS = { make: "Waiting for you: make the voice-over", check
 /** The warnings of the last Tech checks (the findings of the checks that do not stop the render, each with its plain line for the
  *  user), for the Pipeline's Tech checks row; checks that could not run (out of time, skipped) are no warning about the film. null: no report
  *  for the film's last checks. The same count as the Tech checks sheet (lookAt: one line found at several places is one). */
-export function qaWarnings(lastQa, dir) {
+export function qaWarnings(lastQa, dir) { return qaLook(lastQa, dir)?.count ?? null; }
+/** The checks of the last Tech checks that could not run (out of time, an error of their own): neither a pass nor a warning about the film,
+ *  for the Pipeline's Tech checks row ("1 not checked"). null: no report for the film's last checks. */
+export function qaNotChecked(lastQa, dir) { return qaLook(lastQa, dir)?.skipped.length ?? null; }
+function qaLook(lastQa, dir) {
   if (!lastQa) return null;
   let r = null; try { r = JSON.parse(readFileSync(join(dir, ".moworks", "cache", "qa", "last.json"), "utf8")); } catch { return null; }
   const gates = r?.checks ?? r?.gates;
   if (!Array.isArray(gates) || (lastQa.revision && r.revision !== lastQa.revision)) return null;
-  return lookAt({ checks: gates }).count;
+  return lookAt({ checks: gates });
+}
+
+/** The film's cast as CHARACTERS.json lists it: { "characters": [...] }, or a bare list (Prepare once wrote one, and the Character step
+ *  never showed: three people drawn from words alone, a grandmother read as an old man, Test 21); null with no file or no list in it. */
+export function castList(dir) {
+  try { const j = JSON.parse(readFileSync(join(dir, "CHARACTERS.json"), "utf8")); return Array.isArray(j) ? j : Array.isArray(j?.characters) ? j.characters : null; }
+  catch { return null; }
 }
 
 /** Everything the steps are judged on, read from the project folder and its metadata. */
@@ -159,12 +170,12 @@ export function gatherFacts(project, { shots = [], head = null, jobs = [], runni
     qa: qaFacts(m.lastQa, dir), head, qaStale, qaRunning: running("qa"),
     // the film handed over (the autopilot's finished, else delivered; a new build clears finished): the feedback loop
     finished: !!(m.pipeline?.finished !== undefined ? m.pipeline.finished : m.pipeline?.delivered),
-    castEmpty: (() => { try { const c = JSON.parse(readFileSync(join(dir, "CHARACTERS.json"), "utf8")); return Array.isArray(c?.characters) && c.characters.length === 0; } catch { return false; } })(),
+    castEmpty: castList(dir)?.length === 0,
     // humanHand: an anidoodle medium whose hand draws the author's human characters: its films get a Character step
     flags: { characters: !!m.flags?.characters, assets: (() => { const a = assetFacts(dir); return a.count + a.sources > 0; })(), humanHand: !!humanHandOf(m.style?.id),
       // a film whose cast Prepare wrote (the user chose "Claude makes them", any medium) gets its Character step too, before
       // the Storyboard, with one approval: three animals were made inside the Build with none (38 min, the gate failing 5 times)
-      cast: !!humanHandOf(m.style?.id) || (() => { try { return (JSON.parse(readFileSync(join(dir, "CHARACTERS.json"), "utf8")).characters ?? []).length > 0; } catch { return false; } })() },
+      cast: !!humanHandOf(m.style?.id) || (castList(dir)?.length ?? 0) > 0 },
     way: normalWay(m.way?.id ?? chosenWay(dir) ?? "free"), wayChosen: !!(m.way?.id ?? chosenWay(dir)), wayAt: time(m.way?.at), proposedWay: proposedWay(dir),
     // the QC review runs on the first build only, and again after a new storyboard approval
     reviewedAt: time(m.pipeline?.reviewed?.at), storyboardAt: time(m.approvals?.storyboard?.at),
@@ -332,6 +343,7 @@ const isRunning = (step, f) => f.runningStep === step.id || (step.done?.kind ===
 export function computePipeline(steps, f) {
   const by = new Map();
   const out = [];
+  let answering = null;          // the step whose question the running chat turn answers
   for (const step of steps ?? []) {
     const visible = shown(step, f);
     const s = { ...step, visible, status: "ready", reason: null, doneAt: null };
@@ -396,6 +408,13 @@ export function computePipeline(steps, f) {
     else if (last?.asked && s.status === "failed") { s.status = "ready"; s.asking = true; s.reason = { key: "Claude is asking: answer in the chat" }; }
     // a revision of a storyboard option Claude stopped to ask about (its notes did not fit their panels): the user answers
     if (step.id === "storyboard" && f.revisionAsked && s.status === "needs-you") s.asking = true;
+    // the user answered: the chat turn running now (no step of its own) is that answer, and Claude works on the step's question. The
+    // first step that asks is at work, as its stage's row already says (T21-6: the API said "Claude is asking" for 45 s meanwhile)
+    if (s.asking && f.claudeBusy && !f.runningStep && !answering) {
+      answering = step.id;
+      s.status = "running"; s.reason = { key: "Claude is working on it" }; s.answering = true;
+      delete s.asking;
+    }
     // a Storyboard not drawn yet waits for the voice-over's words (or the lyrics timed); one drawn before them is timed again to them
     // (autopilot's transcriptLanded), as before
     if (step.id === "storyboard" && f.voiceWait && s.status === "ready" && !f.boards && !f.storyboard?.real && !f.ran?.storyboard) {

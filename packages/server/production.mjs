@@ -125,6 +125,13 @@ export function stampedName(dir, name, ext = "", now = new Date()) {
   for (let i = 2; ; i++) { const s = stem(`${hm}${sec}-${i}`); if (!existsSync(join(dir, s + ext))) return s + ext; }
 }
 const FORMATS = { mp4: ".mp4", webm: ".webm", mov: ".mov" };
+/** What Play / Open may hand to Windows: films, sounds, pictures, documents and text, each opened by its own program. Never a script or a
+ *  program (.bat, .exe, .vbs…) a project folder might hold. */
+const OPENABLE = new Set([".mp4", ".mov", ".webm", ".mkv", ".m4v", ".avi", ".gif", ".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".opus",
+  ".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tif", ".tiff", ".svg", ".psd", ".ai", ".pdf", ".pptx", ".ppt", ".docx", ".doc", ".xlsx", ".xls",
+  ".txt", ".md", ".srt", ".vtt", ".csv", ".json"]);
+// the file's own program through the shell's "open" (no cmd: the path arrives in the environment, never in a command line)
+const OPEN_SCRIPT = Buffer.from("Invoke-Item -LiteralPath $env:MW_TARGET", "utf16le").toString("base64");
 const AUDIO_EXT = /\.(mp3|wav|m4a|flac|ogg|aac)$/i;
 const QUALITIES = ["draft", "standard", "high"];
 /** HF's capture workers for a Render the user waits for (4 is where a 30 s anidoodle film stops getting faster; a
@@ -261,7 +268,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       // script's, at Whisper's times; when what was heard is far from the script (another take, an edited file) the user checks them
       const v0 = voiceOf(p), read = ["elevenlabs", "fishaudio"].includes(v0?.source) && v0?.script && v0.file === t.audio ? transcript.fromScript(t.segments, v0.script) : null;
       if (read && read.match < 0.6) {
-        note(p, { kind: "voice", status: "warning", text: "The words heard differ from the script the voice was read from ({pct}% the same): check them in Lời before the film is timed to them",
+        note(p, { kind: "voice", status: "warning", text: "The words heard differ from the script the voice was read from ({pct}% the same): check them in Transcript before the film is timed to them",
           vars: { pct: Math.round(read.match * 100) } });
         return { segments: result.segments.length, language: result.language, device: result.device, words: 0, script: { match: read.match } };
       }
@@ -269,7 +276,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       // transcript dialog and sends them again when needed
       const words = saveTranscript(projects.getProject(p.id, root), read ? read.segments : t.segments);
       note(p, { kind: "voice", text: read && read.changed + read.missed ? "Transcript ready: {n} words, the film is timed to them; {k} word(s) taken from the script the voice was read from"
-        : "Transcript ready: {n} words, the film is timed to them; open Lời to correct them", vars: { n: words, k: read ? read.changed + read.missed : 0 } });
+        : "Transcript ready: {n} words, the film is timed to them; open Transcript to correct them", vars: { n: words, k: read ? read.changed + read.missed : 0 } });
       return { segments: result.segments.length, language: result.language, device: result.device, words, ...(read ? { script: { match: read.match, changed: read.changed, missed: read.missed } } : {}) };
     });
   }
@@ -656,7 +663,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   ];
 
   const routes = [
-    // ---- service keys and speech-to-text settings (Settings › Voice & Transcription)
+    // ---- service keys and speech-to-text settings (Settings › General › Voice-over; the speech models in Settings › System)
     r("GET", "/voice/settings", () => ({ settings: asr.voiceSettings(root), models: asr.models(root), modelsRoot: asr.modelsRoot(root), keys: secrets.status(root),
       providers: Object.entries(PROVIDERS).map(([id, x]) => ({ id, title: x.title })), jobs: jobs.list({ kind: "model-install" }).slice(0, 5) })),
     r("PATCH", "/voice/settings", (_p, b) => ({ settings: asr.saveVoiceSettings(b, root) })),
@@ -833,8 +840,11 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       const f = resolve(p.path, String(b.path ?? ""));
       if (!f.startsWith(resolve(p.path) + sep) || !existsSync(f)) throw err("NOT_FOUND", "File not found in this project");
       // the file selected in its folder (a folder opened as is), the Explorer window brought to the front
-      if (how === "reveal") showInExplorer(f, { select: true });
-      else spawn("cmd", ["/c", "start", "", f], { detached: true, stdio: "ignore", windowsHide: true }).unref();
+      if (how === "reveal") { showInExplorer(f, { select: true }); return { ok: true }; }
+      if (!statSync(f).isFile() || !OPENABLE.has(extname(f).toLowerCase())) throw err("INVALID", "Only films, sounds, pictures, documents and text files open from here");
+      // not detached: a detached Windows PowerShell has no console and runs nothing; MW_NO_OPEN: tests
+      if (process.env.MW_NO_OPEN !== "1") spawn("powershell.exe", ["-NoProfile", "-NonInteractive", "-EncodedCommand", OPEN_SCRIPT],
+        { stdio: "ignore", windowsHide: true, env: { ...process.env, MW_TARGET: f } }).on("error", () => {}).unref();
       return { ok: true };
     }),
 

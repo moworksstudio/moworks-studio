@@ -1,8 +1,9 @@
-// Backups to Google Drive (always a clean backup: no project, no model). Only the
-// app is backed up: its git history is written as ONE file (`git bundle`, the whole history) into the backup folder on Drive, so a dead
-// disk loses nothing that was committed. Projects (and the user's assets in them) and models are never backed up; a project folder is
-// self-contained, so copying it is how a film moves. A bundle is written only when the app has changed since the last backup. One file
-// is safe for Drive (no thousands of small files, nothing that Drive's locking can corrupt). Restore: backup/README.md.
+// Backups of the app to `storage.backupRoot` when this computer sets one (its local pins); off otherwise. Always a clean backup: no
+// project, no model. Only the app is backed up: its git history is written as ONE file (`git bundle`, the whole history) into the backup
+// folder, so a dead disk loses nothing that was committed. Projects (and the user's assets in them) and models are never backed up; a
+// project folder is self-contained, so copying it is how a film moves. A bundle is written only when the app has changed since the last
+// backup. One file is safe on a synced drive such as Google Drive (no thousands of small files, nothing its locking can corrupt).
+// Restore: backup/README.md.
 import { execFileSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -35,8 +36,8 @@ Restore after a disk failure (Git for Windows installed):
     git clone "app.bundle" "${app}"
 
 Then in ${app}: \`npm install\`, \`npm run hf -- install <version>\` (HyperFrames, Chromium), and start Moworks Studio.bat.
-Not in the backups (re-installed or downloaded again): node_modules, app\\runtime (HyperFrames, Chromium, work files), models, the HF source
-in vendor\\, and every project.
+Not in the backups (re-installed or downloaded again): node_modules, app\\runtime (HyperFrames, Chromium, work files), models, and every
+project.
 `;
 
 function writeBundle(dir, dest) {

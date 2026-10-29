@@ -11,6 +11,7 @@ import { join } from "node:path";
 import { heldRuns, measureVideo, stillGate, stillLines, stillReport } from "../packages/hf-qa/stillness.mjs";
 import { qcText } from "../packages/hf-qa/qc.mjs";
 import { ffmpegExe } from "../packages/library/preview-media.mjs";
+import { workRoot } from "../packages/project-service/index.mjs";
 
 const T = mkdtempSync(join(tmpdir(), "mw-still-"));
 after(() => rmSync(T, { recursive: true, force: true }));
@@ -72,7 +73,8 @@ test("the report: stretches by shot and place, the 1-2 s ones for a strong film,
   assert.deepEqual([stillGate(null, "the film has no length yet").pass, stillGate(null, "x").blocking], [true, false]);
 });
 
-const SHOWCASE = "D:/Moworks Studio/projects/moworks-studio-tu-y-tuong-thanh-phim/renders/moworks-studio-tu-y-tuong-thanh-phim.mp4";
+// the app's showcase film, in the work folder's projects (or MW_SHOWCASE_FILM): skipped where it is not
+const SHOWCASE = process.env.MW_SHOWCASE_FILM ?? join(workRoot(), "projects", "moworks-studio-tu-y-tuong-thanh-phim", "renders", "moworks-studio-tu-y-tuong-thanh-phim.mp4");
 test("the showcase film (read only): its panes hold after they land, about 6-9 s in shot 2; nothing else over 2 s", { skip: existsSync(SHOWCASE) ? false : "not on this computer", timeout: 180000 }, async () => {
   const shots = [{ number: 1, title: "wish", start: 0, duration: 4 }, { number: 2, title: "panes", start: 4, duration: 5 }, { number: 3, title: "film", start: 9, duration: 3.4 },
     { number: 4, title: "line", start: 12.4, duration: 1 }, { number: 5, title: "logo", start: 13.4, duration: 1.6 }];

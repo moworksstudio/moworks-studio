@@ -17,7 +17,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, r
 import { dirname, join, relative } from "node:path";
 import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
 import { claudeEnv, findClaude } from "../system-status/index.mjs";
-import { getStyle } from "../style-catalog/index.mjs";
+import { getStyle, stylePipeline } from "../style-catalog/index.mjs";
 import * as rev from "../revisions/index.mjs";
 import { finalize, fontMap } from "../hf-edit/finalize.mjs";
 import { fitMusicToFilm } from "../hf-edit/tracks.mjs";
@@ -467,10 +467,15 @@ export function actorsLine(meta) {
   if (!id) return "";
   let s = null; try { s = getStyle(id); } catch { /* the style's words only */ }
   const engine = id === "brush-cartoon" || !!anidoodleId(id) || !!s?.characters;
-  const how = engine
-    ? "this style has its own character engine. When the brief has actors and none of them is in this film yet (CHARACTERS.json, the characters the owner picked in New project), ask one question with three choices and stop: 1) pick them from the owner's library (the Characters page), 2) you make them with the Character creator, 3) go on without them (they appear as pictures in the scene). A character from the library used in its own author's style is never redrawn and never asked about again (#406). A new character is shown for approval only once its checks pass, and is approved once. When the owner chose that you make them, end Prepare by writing CHARACTERS.json with one entry per new actor ({ \"id\", \"name\", \"about\", \"kind\": \"human\" | \"animal\" | \"thing\" }, plus the owner's library picks already in it): the app's Character step then makes them and the owner approves them once, before the Storyboard. Never make a character in the Storyboard or the Build (Test 11 #447)."
+  // the step that makes a new cast: Brush and every anidoodle medium have it; What If draws its cast on its own rig and has none. The
+  // reply never promises a step the film does not have (Test 21: "you will approve the three characters", and no step came)
+  let castStep = false; try { castStep = stylePipeline(id).some((x) => x.id === "character"); } catch { /* none */ }
+  const how = engine && castStep
+    ? "this style has its own character engine. When the brief has actors and none of them is in this film yet (CHARACTERS.json, the characters the owner picked in New project), ask one question with three choices and stop: 1) pick them from the owner's library (the Characters page), 2) you make them with the Character creator, 3) go on without them (they appear as pictures in the scene). A character from the library used in its own author's style is never redrawn and never asked about again (#406). A new character is shown for approval only once its checks pass, and is approved once. When the owner chose that you make them, end Prepare by writing CHARACTERS.json as {\"characters\": [ … ]} (that object, never a bare list: the app finds the cast there), one entry per new actor ({ \"id\", \"name\", \"about\", \"kind\": \"human\" | \"animal\" | \"thing\" }) plus the owner's library picks already in it: the app's Character step then makes them and the owner approves them once, before the Storyboard. Never make a character in the Storyboard or the Build (Test 11 #447)."
       // the anidoodle-human value names anidoodle's engine for every actor; an animal's gate is its own rig
       + (anidoodleId(id) ? " The Character step completes each entry. A person: no rig, its check \"check-<id>.ts\". An animal or a thing on anidoodle's engine: { id, name, about, engine: \"anidoodle-human\" (the app's name for anidoodle's engine, people and animals alike), kind: \"animal\" or \"thing\", rig: \"<id>\", import: \"./characters/<id>\", check: \"characters/<id>/check.ts\", hand }; its gate checks its own rig (bone lengths, its own joint ranges, planted feet), never the human limits." : "")
+    : engine
+      ? "this style draws its cast on its own rig, as its rules say, and has no Character step: a new actor is made on that rig with the film and is first seen on the storyboard, which the owner approves. Say so in one line; never promise a Character step or a separate approval of the characters."
     : NO_REDRAW.includes(s?.category)
       ? `this style's category (${s.category}) never redraws a character: an actor appears only from a real picture or footage the owner gave, else as a picture in the scene; say so in one line.`
       : "this style has no character engine: an actor is drawn again in the film's own design (from the owner's saved character when there is one), and your reply says once that it is redrawn in this style, not the original.";
@@ -565,7 +570,7 @@ export function systemPrompt({ meta, style, rules, first = [], qc = [], shots, d
     : meta.voice?.file ? `Voice-over: ${meta.voice.file} (${meta.voice.info?.duration ?? "?"} s, ${meta.voice.source === "upload" ? "uploaded" : `read by ${meta.voice.source}`}). When the owner chooses not to use it, call the app's voice_off tool (it takes it off the timeline and keeps the file); never only mute it. ${meta.voice.transcript?.status === "saved"
       ? "Its reviewed transcript is transcript.json (HyperFrames word timings: [{id, text, start, end}], film seconds): time shots, captions and kinetic text to it; never edit it." + (meta.voice.from ? "" : " It is on the timeline already (<audio id=\"el-voice\">, from 0 s): never add another voice element.")
       : "Its transcript is not reviewed yet: do not time the film to it until the owner saves it."}${meta.voice.transcript?.status === "saved" ? " With no SCRIPT.md, the transcript is the script." : ""}` : "",
-    voiceFitText(meta),          // a voice longer than the set length is the user's choice, never a film stretched to it
+    voiceFitText(meta),          // a voice longer than the set length, or well short of it, is the user's choice: never a film stretched or a gap filled
     rulesLine(rules, first, qc, dir, required),
     // fewer turns: each turn re-reads the whole conversation
     "Work in few turns: each turn re-reads the whole conversation. Put independent reads in one turn (several Read calls at once) and independent edits in one turn; never read a file again that you already read in this task unless it changed; never Glob or Grep for a rule file whose path you were given.",
@@ -835,8 +840,8 @@ export class Agent {
       const own = step || freshChat ? null : conv.sessions[key];
       const before = freshChat && prev ? `Just before (this chat starts a new, small conversation; the project's files hold the work): ${prev.step ? `the ${prev.step} step` : `the request "${String(prev.text ?? "").split("\n")[0].slice(0, 200)}"`} ended with: ${String(prev.resultText ?? "").slice(0, 1500)}\nRead only the files this request needs, the part you change (Grep for it, then Edit).` : "";
       const sessionArgs = own?.sessionId ? ["--resume", own.sessionId] : ["--session-id", randomUUID()];
-      const target = scope.kind === "selection" && scope.selection      // an element picked in HyperFrames Studio: its own request block (HF's format)
-        ? `Target: the element selected in HyperFrames Studio${scope.shot ? ` (shot ${scope.shot.number} "${scope.shot.title}")` : ""}. Change only this element unless the request says otherwise.\n${String(scope.selection).slice(0, 6000)}`
+      const target = scope.kind === "selection" && scope.selection      // an element picked in the Editor's preview: its own request block (HF's format)
+        ? `Target: the element selected in the Editor's preview${scope.shot ? ` (shot ${scope.shot.number} "${scope.shot.title}")` : ""}. Change only this element unless the request says otherwise.\n${String(scope.selection).slice(0, 6000)}`
         : scope.kind === "shot" && scope.shot
         ? `Target: Shot ${scope.shot.number} "${scope.shot.title}" (${scope.shot.src ?? "no file yet"}, ${scope.shot.start ?? "?"}-${scope.shot.start != null && scope.shot.duration != null ? +(scope.shot.start + scope.shot.duration).toFixed(2) : "?"} s)${scope.object ? `, object: ${scope.object}` : ""}. Change only this shot unless the request says otherwise.`
         : "Target: the whole project.";
@@ -887,6 +892,9 @@ export class Agent {
       const pins = loadPins(this.root);
       const env = claudeEnv();
       for (const k of Object.keys(env)) if (/^ANTHROPIC_(API_KEY|AUTH_TOKEN|BASE_URL)$/i.test(k) || (pins.stripEnv ?? []).includes(k.toUpperCase())) delete env[k];
+      // Claude's Bash sees this environment: never the app's session token (MW_TOKEN of a dev or test start), only the permit token,
+      // which the server takes for Claude's questions and the app's tools alone
+      delete env.MW_TOKEN;
       Object.assign(env, { MW_REQUIRED_READS: JSON.stringify(required), MW_TASK: task.id, MW_PROJECT: dir });
       if (this.permitUrl) Object.assign(env, { MW_PERMIT_URL: this.permitUrl, MW_PERMIT_TOKEN: this.permitToken ?? "", MW_PERMIT_TASK: task.id, MCP_TOOL_TIMEOUT: String(35 * 60 * 1000),
         MW_APP_TOOLS: JSON.stringify(tools.map((n) => ({ name: n, ...APP_TOOLS[n] }))) });
@@ -1153,26 +1161,6 @@ export class Agent {
     this.persist(live ?? { ...t, events: t.events ?? [] });
     return t;
   }
-
-  accept(projectId, taskId) {
-    const t = this.list(projectId).find((x) => x.id === taskId);
-    if (!t) throw Object.assign(new Error("Task not found"), { code: "NOT_FOUND" });
-    t.accepted = { at: new Date().toISOString() };
-    const live = this.tasks.get(taskId); if (live) live.accepted = t.accepted;
-    this.persist(live ?? t);
-    return t;
-  }
-
-  /** Forget the Claude conversation of a project (the task history stays). */
-  newConversation(projectId) {
-    const p = this.getProject(projectId);
-    if (this.running.has(projectId)) throw Object.assign(new Error("Wait until Claude has finished"), { code: "BUSY" });
-    const conv = readConversation(p.path);          // the conversation the next chat message would continue starts again; the history stays
-    if (conv.current) delete conv.sessions[conv.current];
-    conv.current = null;
-    writeJson(join(p.path, ".moworks", "claude.json"), conv);
-    return { ok: true };
-  }
 }
 
 /** Fresh eyes (moworks-qc §5): a separate short Claude run that sees only the given sheets (its folder is the QC round's), says in one
@@ -1217,7 +1205,7 @@ export function voiceLine(meta, root = APP_ROOT) {
   let keys = []; try { keys = Object.entries(secretsStatus(root)).filter(([, v]) => v.saved).map(([k]) => ({ elevenlabs: "ElevenLabs", fishaudio: "Fish Audio" })[k] ?? k); } catch { /* none */ }
   return keys.length
     ? `Voice-over (the app says): none in the project yet, and ${keys.join(" and ")} is set up. When the brief already says which way (e.g. the voice made in the app), take it without asking (QC4-4). A film with a narration (made here or recorded by the owner) gets its words to read in VOICEOVER.md, the words only, one line per scene: the app then holds the Storyboard until the voice is made and its words are timed, so the Storyboard is timed to them in one pass (D39); never ask the owner to tell you when it is made. A film with no narration gets no VOICEOVER.md. When the brief wants a narration and does not say how, offer the ways on in this order: 1) make it here: the owner opens the Voice screen, picks a voice (a Vietnamese one for Vietnamese) and the app reads the script with ${keys[0]}; you write the words to read into VOICEOVER.md (the words only, one line per scene: the Voice screen's Script box is filled with them); 2) upload a recording with the Assets button; 3) no narration.`
-    : "Voice-over (the app says): none in the project yet, and no voice service is set up. When the brief wants a narration, offer the ways on: upload a recording with the Assets button, add an ElevenLabs or Fish Audio key in Settings › Voice to make it here, or no narration. A film with a narration (made here or recorded by the owner) gets its words to read in VOICEOVER.md, the words only, one line per scene: the app then holds the Storyboard until the voice is made and its words are timed, so the Storyboard is timed to them in one pass (D39); never ask the owner to tell you when it is made. A film with no narration gets no VOICEOVER.md.";
+    : "Voice-over (the app says): none in the project yet, and no voice service is set up. When the brief wants a narration, offer the ways on: upload a recording with the Assets button, add an ElevenLabs or Fish Audio key in Settings › General › Voice-over to make it here, or no narration. A film with a narration (made here or recorded by the owner) gets its words to read in VOICEOVER.md, the words only, one line per scene: the app then holds the Storyboard until the voice is made and its words are timed, so the Storyboard is timed to them in one pass (D39); never ask the owner to tell you when it is made. A film with no narration gets no VOICEOVER.md.";
 }
 
 /** The user's lyrics (lyrics.txt) are placed only by the app's timing (LYRICS-TIMED.md, .moworks/lyrics/words.json), never by guess (Claude once

@@ -20,7 +20,7 @@
     "registryRoot": "{app}/bundle/hf/registry",
     "skillsRoot": "{app}/bundle/hf/skills",
     "source": { "url": "https://github.com/heygen-com/hyperframes.git", "commit": "4719543e972548a261b8354f0a8dada479ae5d93", "_about": "the commit the skills and registry are pinned to (v0.8.214); a new computer fetches only skills/ and registry/ at it into runtime/hf-src (packages/setup/hf-skills.mjs)" },
-    "_sourceAbout": "registryRoot / skillsRoot: the read-only HF clone at the pinned release (v0.8.214, 4719543); never edited from here. Update path: fetch the clone and check out the new tag; npm run hf -- install <v> (versions entry first), then switch (smoke test); set default and source.commit; node tools/make-bundle.mjs --only hf-skills,hf-registry; re-import the Blocks and Looks stores; node tools/intake-motion-prompt.mjs (the Vocabulary cites HF's registry); node tools/make-bundle.mjs --only library-blocks,library-looks,library-vocab; a golden run and the full suite"
+    "_sourceAbout": "registryRoot / skillsRoot: HF's skills/ and registry/ bundled with the app ({app}/bundle/hf, at source.commit, with its PINNED file; v0.8.214, 4719543), never edited. Update path: clone HF at the new tag into a temporary folder and point this computer's local pins at it (runtime/state/local-pins.json: hyperframes.skillsRoot and hyperframes.registryRoot = <clone>/skills and <clone>/registry); npm run hf -- install <v> (versions entry first), then switch (smoke test); set default and source.commit; node tools/make-bundle.mjs --only hf-skills,hf-registry; remove the two local pins (back to the bundle) and the clone; re-import the Blocks and Looks stores; node tools/intake-motion-prompt.mjs (the Vocabulary cites HF's registry); node tools/make-bundle.mjs --only library-blocks,library-looks,library-vocab; a golden run and the full suite"
   },
   "chromium": {
     "152.0.7977.30": {
@@ -304,10 +304,6 @@
     "licence": "MIT (Copyright (c) 2026 FreshStack)",
     "root": "{app}/bundle/styles/what-if-animation",
     "react": "19.0.0"
-  },
-  "kit": {
-    "_about": "Moworks Motion kit (read-only). Not used at run time. The kit's motion group was removed from the Motion Library; the General style still records the hashes of the kit rules it was adapted from (style-catalog derivedFrom), so the root stays",
-    "root": "{work}/moworks-motion"
   },
   "stripEnv": [
     "GEMINI_API_KEY",

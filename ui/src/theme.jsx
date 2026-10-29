@@ -1,7 +1,7 @@
-// Themes and text size: the theme is switched in Settings > Appearance when there is more than one; Small / Medium /
-// Large on top of the window-scaled root size. Stored in this browser like the other UI prefs; applied to <html> before the first paint
-// (main.jsx). Two themes, The Desk (the default) and The Studio (Light Table: an animation studio at night, paper
-// on a light table); the first start asks which one (workflow/FirstRun.jsx), once; Settings › General › Appearance changes it.
+// Themes and text size: two themes, The Desk (the default) and The Studio (Light Table: an animation studio at night, paper on a
+// light table); the first start asks which one (workflow/FirstRun.jsx), once; Settings › General › Appearance changes it. Small /
+// Medium / Large on top of the window-scaled root size. Stored in this browser like the other UI prefs; applied to <html> before the
+// first paint (main.jsx).
 import { useCallback, useState, useSyncExternalStore } from "react";
 
 export const THEMES = [
@@ -15,7 +15,7 @@ const KEY_THEME = "mw-pref:theme", KEY_SIZE = "mw-pref:text-size", KEY_ASKED = "
 export const KEEP_ON_RESET = [KEY_THEME, KEY_SIZE, KEY_ASKED];
 
 const read = (k, ok, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return ok(v) ? v : d; } catch { return d; } };
-const readTheme = () => read(KEY_THEME, (v) => THEMES_SHOWN.some((x) => x.id === v), "pelagra");          // a stored theme that is gone (Splicerack, Nocturne) reads as The Desk
+const readTheme = () => read(KEY_THEME, (v) => THEMES_SHOWN.some((x) => x.id === v), "pelagra");          // a stored theme that is neither The Desk nor The Studio reads as The Desk
 const readSize = () => read(KEY_SIZE, (v) => SIZES.some((x) => x[0] === v), "md");
 
 const seen = new Set();          // the useThemeId hooks listening

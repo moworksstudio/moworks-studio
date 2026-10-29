@@ -17,7 +17,7 @@ import { runPy } from "../setup/python.mjs";
 import { creditMusic, optionsText, readOptions, saveOptions } from "../sfx/music.mjs";
 import { planEpisode, planText } from "../what-if-plan/index.mjs";
 import { autoSfx } from "../sfx/auto.mjs";
-import { mount, readState, unmuteAll, writeCredits } from "../sfx/index.mjs";
+import { cuesChanged, mount, placedNote, readState, unmuteAll, writeCredits } from "../sfx/index.mjs";
 import * as plan from "../motion-plan/index.mjs";
 import { snapStop, stopContext } from "../sfx/stop-snap.mjs";
 import * as pipe from "../pipeline/index.mjs";
@@ -244,14 +244,28 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     projects.updateMeta(p.id, (m) => { m.music = { ...m.music, title: track.title, artist: track.artist, page: track.page, licence: track.licence, option: track.file }; }, root);
     return placed;
   });
-  /** Sound effects placed by the app from the storyboard's cues and the motion plan (the Final Mix's "Place", and the autopilot). */
+  /** Sound effects placed by the app from the storyboard's cues and the motion plan (the Final Mix's "Place", and the autopilot). The
+   *  chat's line names the sounds left out or on a stand-in (placedNote: a warning, which the chat shows). */
   const placeSfx = (p, signal = null) => mixChange(p, "sound effects", async () => {
     const { shots, root: comp } = await readShots(p.path);          // a one-page code film: the storyboard's planned times
     const mp = plan.read(p.path);
     const res = await autoSfx(p.path, placedShots(shots, comp?.duration), mp.exists && !mp.error ? mp.plan : null, { signal, root });
-    projects.addNote(p.path, { kind: "sfx", text: "Sound effects placed by the app: {n} ({names})", vars: { n: res.placed, names: res.names.join(", ") || "none" } });
+    projects.addNote(p.path, { kind: "sfx", ...placedNote(res) });
     return res;
   });
+  /** After a chat turn that changed STORYBOARD.md: when its named cues (`- sfx:`) changed since the sounds were placed, they are placed
+   *  again now, as a job the Editor shows (Test 20: Claude said "the app is finding the sounds", and nothing happened until "Place them
+   *  again"). Resolves once they are placed; null when nothing changed, none were placed yet, or a placement is running already. */
+  const cuesAgain = async (p) => {
+    const { shots, root: comp } = await readShots(p.path).catch(() => ({ shots: [] }));
+    if (!cuesChanged(p.path, placedShots(shots, comp?.duration))) return null;
+    let end;
+    const ended = new Promise((r) => { end = r; });
+    try { ctx.jobs.start("mix-sfx", { projectId: p.id, title: "Sound effects", onEnd: (j) => end(j) }, async (job) => { job.update({ stage: "placing sound effects" }); return placeSfx(p, job.signal); }); }
+    catch (e) { if (e.code === "BUSY") return null; throw e; }
+    const job = await ended;
+    return job.status === "done" ? job.result : null;
+  };
   /** The plan's musicStop, once the music is on the timeline (the app once put the music on after Claude's music step and it played
    *  all 40 s past the plan's stop at 26.5 s, so Claude told the user to set it in the Final Mix), unless a stop
    *  is set already or someone chose "play to the end". Its second, or null. */
@@ -269,7 +283,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
   };
   /** The plan's musicStop as the music step will apply it (for Claude's words before the app places the music). */
   const planStop = (p) => { const mp = plan.read(p.path); return mp.exists && !mp.error && mp.plan.musicStop > 0 && planStopAllowed(p, mp.plan) && p.meta?.music?.stopAt == null && !p.meta?.music?.toEnd ? snapped(p, mp.plan.musicStop).at : null; };
-  ctx.mix = { useOption, placeSfx, stopFromPlan };
+  ctx.mix = { useOption, placeSfx, stopFromPlan, cuesAgain };
   // the app tools (Agent.callTool)
   const tools = {
     psd_layers: async ({ project, args }) => {
@@ -444,7 +458,10 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       const sfx = readState(p.path);
       return { music: m.music ? { ...m.music, url: url(id, m.music.file) } : null, voice: m.voice?.file ? { file: m.voice.file, saved: m.voice.transcript?.status === "saved", used: !m.voice.offTimeline } : null,          // used: false once the user chose not to use it
         options: rounds.map((r0) => ({ ...r0, tracks: r0.tracks.map((t) => ({ ...t, url: url(id, t.file), current: m.music?.option === t.file || m.music?.file === t.file })) })),
-        sfx: (sfx.mounted ?? []).map((x) => ({ name: x.name, start: x.start, file: x.file, auto: !!x.auto })), loudness: m.lastExport?.loudness ?? null, carved: m.carve ?? null };
+        sfx: (sfx.mounted ?? []).map((x) => ({ name: x.name, start: x.start, file: x.file, auto: !!x.auto })), loudness: m.lastExport?.loudness ?? null, carved: m.carve ?? null,
+        // the last placement: when (the dialog follows it), the named sounds it left out and those on a stand-in ({ name, as })
+        sfxAt: sfx.placedAt ?? null, sfxMissing: sfx.left?.missing ?? [], sfxNear: sfx.left?.near ?? [],
+        sfxPlacing: ctx.jobs.list({ kind: "mix-sfx" }).some((j) => j.projectId === id && j.status === "running") };
     }),
     r("POST", `/projects/${P}/mix/music`, async ([id], b) => {
       const p = mustProject(id, root);
@@ -467,7 +484,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
         return placeSfx(p, job.signal);
       }) };
     }),
-    r("POST", `/projects/${P}/mix/sfx/clear`, ([id]) => { const p = mustProject(id, root); return mixChange(p, "sound effects removed", () => { mount(p.path, []); writeCredits(p.path); return { placed: 0 }; }); }),
+    r("POST", `/projects/${P}/mix/sfx/clear`, ([id]) => { const p = mustProject(id, root); return mixChange(p, "sound effects removed", () => { mount(p.path, [], { left: { missing: [], near: [] } }); writeCredits(p.path); return { placed: 0 }; }); }),
     r("POST", `/projects/${P}/mix/carve`, async ([id]) => {
       const p = mustProject(id, root);
       if (!p.meta?.music?.file || !p.meta?.voice?.file) throw new HttpError(400, "INVALID", "The carve needs a voice-over and a music track on the timeline");

@@ -170,9 +170,10 @@ function SizeField({ w, h, rule, onChange, invalid }) {
   </div>;
 }
 /** Which characters a style can take: an author's actors only in that author's styles (Anidoodle's people only where the
- *  style draws people); a style without a hand of its own redraws any saved character (Graphic & Type and the format categories); the
- *  painted, printed, game, cartoon, 3D, cinema and documentary styles of other authors keep "Follows film style". */
-const REDRAW_OK = ["Custom", "Explainer", "Motion graphics", "Music / Lyrics", "Brand / Product", "Presentation", "Video overlays", "Information & Keynote", "Graphic & Type"];
+ *  style draws people); a style without a hand of its own redraws any saved character (Graphic & Type, the format categories, and
+ *  HyperFrames' Story, whose films are acted by characters; its Social clips draw none); the painted, printed, game, cartoon, 3D,
+ *  cinema and documentary styles of other authors keep "Follows film style". */
+const REDRAW_OK = ["Custom", "Explainer", "Motion graphics", "Music / Lyrics", "Brand / Product", "Story", "Presentation", "Video overlays", "Information & Keynote", "Graphic & Type"];
 const ENGINE_OF = { johnheibel: ["brush-kit"], alexgreensh: ["anidoodle-human"] };          // Anidoodle's people, animals and things all use this engine
 function castRule(style) {
   const au = style ? authorOf(style) : null;

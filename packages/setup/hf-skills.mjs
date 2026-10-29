@@ -1,7 +1,7 @@
 // HyperFrames' skills and registry for the app: the styles' rules and the Blocks library come from HF's own
-// repository at the pinned commit. On the maintainer's computer they sit in the read-only clone (pins hyperframes.skillsRoot / registryRoot);
-// on a new computer the app fetches only those two folders (skills/ and registry/, about 120 MB, not the whole 884 MB clone) with git, thin
-// (sparse, no history, blobs on demand), into runtime/hf-src. Nothing is ever edited. Integrity: the checkout must be the pinned commit,
+// repository at the pinned commit. They come with the app in bundle/hf (pins hyperframes.skillsRoot / registryRoot; a temporary clone set
+// in local pins only while HF is updated); without the bundle the app fetches only those two folders (skills/ and registry/, about
+// 120 MB, not the whole 884 MB clone) with git, thin (sparse, no history, blobs on demand), into runtime/hf-src. Nothing is ever edited. Integrity: the checkout must be the pinned commit,
 // with no file changed, and every skill's fingerprint must equal HF's own skills-manifest.json (the same hash HF computes:
 // packages/cli/src/utils/skillsManifest.ts hashSkillBundle, Apache-2.0, ported here). A skill that does not match locks the styles using it.
 import { spawnSync } from "node:child_process";

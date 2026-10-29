@@ -93,6 +93,7 @@ No music library is bundled.
 | NVIDIA CUDA libraries: nvidia-cublas-cu12 12.9.2.10, nvidia-cudnn-cu12 9.27.0.42, nvidia-cuda-nvrtc-cu12 12.9.86 | PyPI (SHA-256 of each wheel in `packages/voice/cuda.mjs`) | NVIDIA proprietary (CUDA Toolkit EULA, cuDNN Software License Agreement), free to use | Optional, offered only on a computer with a suitable NVIDIA card and downloaded only on the user's yes |
 | psd-tools 1.23.0 · python-pptx 1.0.2 · pypdfium2 5.14.0 · Pillow 12.3.0 · numpy 2.5.1 | PyPI | MIT · MIT · Apache-2.0 / BSD-3-Clause · MIT-CMU · BSD-3-Clause | Reading PSD / PSB, PowerPoint and PDF assets; installed into `runtime/python-libs`, never into the system Python |
 | librosa 1.0.0 · soundfile 0.14.0 | PyPI | ISC · BSD-3-Clause | Music tempo and beats (the app's file scan and lyric timing) |
+| playwright 1.63.0 · fonttools 4.66.1 | PyPI ([playwright-python](https://github.com/microsoft/playwright-python), [fonttools](https://github.com/fonttools/fonttools)) | Apache-2.0 · MIT | The After Effects export: Playwright drives the pinned Chromium (no browser download of its own), fontTools reads the film's fonts; installed into `runtime/python-libs`, never into the system Python |
 | Lyrics alignment method | Moworks Motion kit (`engine/audio/align.py`) | MIT, © 2026 Moworks | Adapted in `tools/asr/align_lyrics.py` |
 | After Effects port | Moworks Motion kit 2.0.4 (`engine/ae/`) | MIT, © 2026 Moworks | Adapted in `packages/ae-export`; changes listed in `packages/ae-export/PROVENANCE.md` |
 

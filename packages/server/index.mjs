@@ -2,6 +2,8 @@
 // the separate preview origin (packages/hf-preview, 07 S-05).
 // Security: binds loopback only; every /api request needs the per-session token (header X-MW-Token); the Host header must be this server's
 // own address (no DNS rebinding) and a write from another site's Origin is refused. The UI gets the token from the launch URL (?t=...).
+// Claude Code's MCP channel (packages/agent/permit-mcp.mjs) gets a token of its own, good for AGENT_API only: Claude's Bash sees that
+// environment, and with the session token it could call any API.
 import { createServer } from "node:http";
 import { createHash, randomBytes } from "node:crypto";
 import { createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
@@ -16,22 +18,20 @@ import { thumbFile } from "../style-catalog/thumbs.mjs";
 import { runtimeStatusAsync } from "../system-status/index.mjs";
 import { cachedCheck } from "./checkCache.mjs";
 import { showInExplorer } from "../project-service/explorer.mjs";
-import { placedShots, readShots, updateFrame } from "../hf-edit/shots.mjs";
-import { ensureMotionPath, finalize } from "../hf-edit/finalize.mjs";
+import { placedShots, readShots } from "../hf-edit/shots.mjs";
+import { finalize } from "../hf-edit/finalize.mjs";
 import { viCatalog } from "../hf-edit/googleFontsVi.mjs";
 import { snapshotAt, snapshotAtAsync } from "../hf-qa/cli.mjs";
 import { render as renderFilm } from "../hf-render-worker/client.mjs";
-import { encodePoster } from "../library/preview-media.mjs";
+import { encodePoster, tidyStore } from "../library/preview-media.mjs";
 import * as characterKit from "../character-kit/index.mjs";
 import { startPreviewServer } from "../hf-preview/index.mjs";
-import { createStudioHost, selectionContext } from "../hf-studio/index.mjs";
 import * as rev from "../revisions/index.mjs";
 import { Agent, EFFORTS, MODELS, MODES, WEB, agentSettings, effectiveSettings, projectSettingsPatch, saveAgentSettings, usageTotals } from "../agent/index.mjs";
 import { status as backupStatus } from "../backup/index.mjs";
 import * as blocks from "../blocks-library/index.mjs";
 import { renderMissing } from "../blocks-library/previews.mjs";
 import * as offlineAssets from "../offline-assets/index.mjs";
-import * as sfx from "../sfx/index.mjs";
 import * as looks from "../looks-library/index.mjs";
 import * as customLooks from "../looks-library/custom.mjs";
 import * as lemo from "../lemo-styles/index.mjs";
@@ -45,13 +45,14 @@ import { renderPreviews as renderIntakePreviews } from "../intake-library/previe
 import * as plan from "../motion-plan/index.mjs";
 import * as pipe from "../pipeline/index.mjs";
 import { scanAssets } from "../project-service/scan.mjs";
-import { freshFilm } from "../hf-edit/codeFilm.mjs";
 import { isOption, listRounds, nextLetter, ownerRoundOf, ownerRounds, pendingRevision, recordPick } from "../hf-edit/boards.mjs";
 import { spawn } from "node:child_process";
 import { createJobs } from "./jobs.mjs";
+import { plainMessage } from "./plainError.mjs";
 import { RESUME, createAutopilot, createRenderQueue, estimateMinutes, estimateNow, hasCast, isFinished } from "./autopilot.mjs";
 import { productionRoutes } from "./production.mjs";
 import { boardRoutes, etaWords, runningEstimate, stillsBehind } from "./boards.mjs";
+import { readState as readSfxState } from "../sfx/index.mjs";
 import { editorRoutes } from "./editor.mjs";
 import { assetRoutes } from "./assets.mjs";
 import { characterRoutes } from "./characters.mjs";
@@ -86,17 +87,33 @@ function backupJobs(root, enabled) {
   };
 }
 
+/** The old PNG / JPEG posters a library store keeps beside the WebP that replaced them (recodePreview with the originals kept aside)
+ *  go once the app runs on the WebP: tidyStore() for the Blocks, Looks and intake stores, in the background after start. */
+export function tidyPreviews(root = APP_ROOT) {
+  for (const st of [blocks.currentStore(root), looks.currentStore(root), intake.currentStore(root)]) {
+    if (!st) continue;
+    try {
+      const items = JSON.parse(readFileSync(join(st.dir, "catalog.json"), "utf8")).items ?? [];          // every item, a hidden one too
+      const r = tidyStore(st.dir, items.flatMap((x) => [x.preview?.video, x.preview?.poster]).filter(Boolean));
+      if (r.removed) console.log(`[library] ${r.removed} old poster(s) removed (${(r.bytes / 1e6).toFixed(1)} MB)`);
+    } catch { /* a store being written: the next start */ }
+  }
+}
+
 const MIME = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png",
   ".jpg": "image/jpeg", ".webp": "image/webp", ".mp4": "video/mp4", ".ttf": "font/ttf", ".woff2": "font/woff2", ".json": "application/json", ".ico": "image/x-icon", ".txt": "text/plain" };
 
 class HttpError extends Error { constructor(status, code, message) { super(message); this.status = status; this.code = code; } }
 const STATUS = { NOT_FOUND: 404, INVALID: 400, BUSY: 409, RENDERING: 409, CONFLICT: 409, NO_CLAUDE: 503, CLAUDE_SIGNED_OUT: 412, STEP_BLOCKED: 409, MODEL_MISSING: 409, AE_NOT_RUNNING: 409, TOO_LARGE: 413,
   PROVIDER: 502, PROVIDER_OFFLINE: 502, HF_IMPORT: 500 };
-const fail = (e) => { const s = STATUS[e.code] ?? e.status ?? 500; return [s, { error: { code: e.code ?? "ERROR", message: e.message } }]; };
+// the message the UI shows: a system error (ENOENT…) in plain words, no path of this computer (plainError.mjs)
+const fail = (e) => { const s = STATUS[e.code] ?? e.status ?? 500; return [s, { error: { code: e.code ?? "ERROR", message: plainMessage(e) } }]; };
 // the voice list's samples play in the page: ElevenLabs serves them from its API (previews/audio, US or main host) and its public
 // bucket; nothing else of those hosts is allowed
 export const VOICE_SAMPLES = "https://api.elevenlabs.io https://api.us.elevenlabs.io https://storage.googleapis.com/eleven-public-prod/";
 const sha = (s) => createHash("sha256").update(s).digest("hex");
+/** What Claude Code's own token may call: its permission questions and the app's tools. */
+const AGENT_API = /^\/api\/agent\/(?:permit|permit\/wait|tool)$/;
 /** A style's pipeline straight from config/styles.json, or config/lemo-pipeline.json for a Lemo-Opuscar style (cheap enough to read on
  *  every poll; the style catalog also hashes rule files). */
 /** the status button says only Idle, Working, Downloading or Updating. The app's own update wins, then a download
@@ -206,8 +223,8 @@ function posterJobs(root, previewBase, stopSignal = null) {
 
 /** Project thumbnails: once a film has built shots, HF stills at the middle of up to 5 shots, and the one with the most detail
  *  (the largest PNG: flat frames compress small) becomes the card's picture. Made again only when the film's pictures changed (a new
- *  revision of compositions / index.html / assets, Studio's element ids left out); one project at a time, in the background, never per
- *  keystroke: asked for when the project list is read, after a Claude task, and when Studio stops. */
+ *  revision of compositions / index.html / assets, the Editor's element ids left out); one project at a time, in the background, never per
+ *  keystroke: asked for when the project list is read and after a Claude task. */
 function thumbnailJobs(root, enabled, stopSignal = null) {
   const queue = [], queued = new Set();
   let busy = false;
@@ -378,17 +395,7 @@ export function routes(ctx) {
       importing: false, blocksJob: ctx.jobs.list({ kind: "blocks-import" })[0] ?? null,
       previewJob: ctx.jobs.list({ kind: "blocks-previews" })[0] ?? null, looksJob: ctx.jobs.list({ kind: "looks-import" })[0] ?? null })),
     r("GET", "/library/item", (_p, _b, q) => { const it = library.getItem(q.get("uid") ?? "", root); if (!it) throw new HttpError(404, "NOT_FOUND", "Library item not found"); return it; }),
-    // Library intake: Magic UI, Codrops, TakayuStudio written as HyperFrames components; previews rendered as films
-    r("GET", "/library/intake", () => ({ store: intake.currentStore(root)?.manifest ?? null, job: ctx.jobs.list({ kind: "intake-previews" })[0] ?? null })),
-    r("POST", "/library/intake/build", async () => { const r0 = await intake.buildStore({ root }); intake.reloadItems(); library.reload(); return r0; }),
-    r("POST", "/library/intake/previews", () => ctx.jobs.start("intake-previews", { title: "Rendering intake previews" }, async (job) => {
-      job.update({ stage: "starting", progress: 0 });
-      const res = await renderIntakePreviews({ root, signal: job.signal, onProgress: ({ done, total, failed }) =>
-        job.update({ progress: Math.floor((done / Math.max(1, total)) * 100), stage: `${done} of ${total} (${failed} failed)` }) });
-      library.reload();
-      return res;
-    })),
-    r("POST", "/library/intake/drop", (_p, b) => { const r0 = intake.setDropped(String(b?.uid ?? ""), b?.dropped !== false, root); library.reload(); return r0; }),
+    // Library intake (Magic UI, Codrops, TakayuStudio written as HyperFrames components; built and rendered by its cli.mjs):
     // delete for good (cards with deletable: true); restore puts it back: built again, its preview rendered again
     r("POST", "/library/intake/delete", (_p, b) => { const r0 = intake.deleteItem(String(b?.uid ?? ""), root); library.reload(); return r0; }),
     r("GET", "/library/intake/deleted", () => ({ items: intake.deletedList(root) })),
@@ -431,20 +438,7 @@ export function routes(ctx) {
       return ctx.jobs.start("character-demo", { title: `Drawing ${c.name}'s demo`, key: id }, async (job) => characterKit.renderDemo(id, { root, signal: job.signal,
         finalize, snapshotAt, render: (j, o) => renderFilm(j, { ...o, root }), encodePoster, onProgress: ({ stage, progress }) => job.update({ stage, progress }) }));
     }),
-    // Lemo-Opuscar styles: the Vietnamese check of the fonts each STYLE.md names, asked of Google Fonts once and kept
-    // then the After Effects badge of any style not measured at the pinned commit (every library import)
-    r("POST", "/library/lemo/import", () => ctx.jobs.start("lemo-import", { title: "Checking the fonts of the Lemo-Opuscar styles" }, async (job) => {
-      const out = await lemo.importLemo({ root, onProgress: ({ done, total }) => job.update({ progress: Math.floor((done / total) * 100), stage: `${done} of ${total}` }) });
-      ctx.styleAe?.measure();
-      return out;
-    })),
-    // Blocks: HyperFrames registry blocks and components, from the pinned registry
-    r("GET", "/library/blocks", (_p, _b, q) => ({ ...blocks.search({ q: q.get("q") ?? "", collection: q.get("collection") ?? "all", category: q.get("category") ?? "all",
-      kind: q.get("kind") ?? "all", vi: q.get("vi") ?? "all", ids: q.get("ids") ? q.get("ids").split(",") : null, offset: Number(q.get("offset") ?? 0), limit: Math.min(60, Number(q.get("limit") ?? 15)) }, root),
-      store: blocks.currentStore(root)?.manifest ?? null, job: ctx.jobs.list({ kind: "blocks-import" })[0] ?? null,
-      previewJob: ctx.jobs.list({ kind: "blocks-previews" })[0] ?? null })),
-    r("GET", "/library/blocks/item", (_p, _b, q) => { const it = blocks.getItem(q.get("id") ?? "", root); if (!it) throw new HttpError(404, "NOT_FOUND", "Block not found");
-      return { ...it, spec: blocks.specText(it) }; }),
+    // Blocks: HyperFrames registry blocks and components, from the pinned registry (listed through /library)
     r("POST", "/library/blocks/import", () => ctx.jobs.start("blocks-import", { title: "Importing HyperFrames blocks" }, async (job) => {
       job.update({ stage: "reading the registry, downloading previews", progress: 0 });
       const st = await blocks.importFromRegistry({ root, signal: job.signal, onProgress: ({ done, total }) => job.update({ progress: Math.floor((done / total) * 100), stage: `item ${done} of ${total}` }) });
@@ -463,26 +457,6 @@ export function routes(ctx) {
     // the gallery's and New project's light list, and one style in full when it is picked
     r("GET", "/styles/list", () => styleList(root)),
     r("GET", "/styles/([A-Za-z0-9][A-Za-z0-9-]*)", ([id]) => { const s = getStyle(id, root); if (!s) throw new HttpError(404, "NOT_FOUND", "No such style"); return s; }),
-    // a Lemo-Opuscar style's STYLE.md as shipped, for the gallery's drawer
-    r("GET", "/styles/brush-cartoon/style-md", () => ({ id: "brush-cartoon", title: "Brush cartoon", text: characterKit.ruleText(root) ?? "", credit: getStyle("brush-cartoon", root)?.credit ?? null })),
-    r("GET", "/styles/lemo-([a-z0-9-]+)/style-md", ([slug]) => {
-      const s = lemo.getLemo(slug, root);
-      if (!s) throw Object.assign(new Error("No such style"), { code: "NOT_FOUND" });
-      return { id: `lemo-${slug}`, title: s.en, text: readFileSync(join(lemo.lemoSource(root).root, ...s.paths.style.split("/")), "utf8"), credit: s.credit };
-    }),
-    // an mg-styles-15 style's prompt as shipped, for the same drawer
-    r("GET", "/styles/mg-(\\d\\d-[a-z0-9-]+)/style-md", ([slug]) => {
-      const s = mgStyles.getMg(slug, root);
-      if (!s) throw Object.assign(new Error("No such style"), { code: "NOT_FOUND" });
-      return { id: `mg-${slug}`, title: s.en, text: readFileSync(join(mgStyles.mgSource(root).root, ...s.paths.prompt.split("/")), "utf8"), credit: s.credit };
-    }),
-    // an anidoodle medium's reference as shipped (or its registry line), for the same drawer
-    r("GET", "/styles/anidoodle-([A-Za-z0-9]+)/style-md", ([id]) => {
-      const s = anidoodle.getMedium(id, root);
-      if (!s) throw Object.assign(new Error("No such style"), { code: "NOT_FOUND" });
-      const text = s.doc ? readFileSync(join(anidoodle.anidoodleSource(root).skillDir, ...s.doc.split("/")), "utf8") : `# ${s.name}\n\n${s.medium}\n`;
-      return { id: `anidoodle-${id}`, title: s.name, text, credit: s.credit };
-    }),
     // OPUSCAR 98's style prompts: New project's sample prompts (with the author's frame of each; not styles)
     r("GET", "/library/lemo/sample-prompts", () => lemo.samplePrompts(root)),
     r("GET", "/projects", async () => {
@@ -502,15 +476,6 @@ export function routes(ctx) {
       const max = projects.MAX_DURATION_SEC;
       try { return { ok: true, maxDurationSec: max, ...projects.projectFolder({ aspect: "16:9", ...b, title: String(b.title ?? "") }, root) }; }
       catch (e) { if (e.code === "INVALID" || e.code === "NOT_FOUND") return { ok: false, code: e.code, message: e.message, maxDurationSec: max }; throw e; }
-    }),
-    // the same as a GET with the fields in the query (the New project dialog): { folder } is the folder the server will really use
-    r("GET", "/projects/folder-name", (_p, _b, q) => {
-      const max = projects.MAX_DURATION_SEC, input = { aspect: "16:9", title: q.get("title") ?? "", folderName: q.get("folderName") || undefined, location: q.get("location") || undefined, durationSec: q.get("durationSec") ? projects.lengthSeconds(q.get("durationSec"), q.get("fps") ?? 30) : undefined };
-      try { const f = projects.projectFolder(input, root); return { ok: true, folder: f.name, ...f, reserved: false, reason: null, maxDurationSec: max }; }
-      catch (e) {
-        if (e.code === "INVALID" || e.code === "NOT_FOUND") return { ok: false, folder: null, taken: false, reserved: /keeps for itself/.test(e.message), code: e.code, reason: e.message, message: e.message, maxDurationSec: max };
-        throw e;
-      }
     }),
     r("POST", "/projects", async (_p, b) => {
       // the request's own fields first: a wrong one is answered at once, not after Claude Code's sign-in check (up to 20 s when it is slow)
@@ -547,7 +512,6 @@ export function routes(ctx) {
       if (process.env.MW_NO_OPEN !== "1") showInExplorer(l);
       return { ok: true };
     }),
-    r("GET", "/storage/check", (_p, _b, q) => { const d = resolve(q.get("path") ?? ""); return { path: d, exists: existsSync(d) && statSync(d).isDirectory(), drive: isDrivePath(d) }; }),
     r("POST", "/dialog/folder", async (_p, b) => { const path = await pickFolder({ title: String(b.title ?? ""), initial: String(b.initial ?? "") }); return { path, drive: path ? isDrivePath(path) : false }; }),
     r("GET", `/projects/${P}`, async ([id]) => {
       const p0 = projects.getProject(id, root);
@@ -578,9 +542,6 @@ export function routes(ctx) {
       if (b.styleId) { const s = getStyle(b.styleId, root); if (!s) throw new HttpError(400, "INVALID", "Unknown style"); patch.style = selection(s); }
       return projects.updateProject(id, patch, root);
     }),
-    // the output format after New project (the user, or Claude's project_format after the user chose the brief's): aspect, fps, length
-    r("PATCH", `/projects/${P}/format`, ([id], b) => { const p = projects.setOutputFormat(id, { aspect: b.aspect, fps: b.fps, durationSec: b.durationSec, by: "owner" }, root);
-      return { format: p.meta.format, durationSec: p.meta.targetDurationSec, changed: p.changed }; }),
     r("POST", `/projects/${P}/reveal`, ([id]) => projects.revealProject(id, root)),
     r("POST", `/projects/${P}/relocate`, ([id], b) => projects.relocateProject(id, b.path, root)),
     r("DELETE", `/projects/${P}`, ([id]) => projects.removeFromList(id, root)),
@@ -598,60 +559,6 @@ export function routes(ctx) {
       // an earlier step changed after this approval (redo, canKeep): the dialog offers "Approve again" too, beside the Pipeline's Keep
       const moved = approval ? await movedSince(id, "storyboard") : null;
       return { ...s, ...(starter ? { shots: [], placeholder: s.shots } : {}), approval, changedSinceApproval: changed || !!moved, movedBy: moved, starter };
-    }),
-    r("PATCH", `/projects/${P}/shots/(\\d+)`, async ([id, index], b) => {
-      const p = mustProject(id, root);
-      const out = await updateFrame(p.path, Number(index), b);
-      try { rev.ensureRepo(p.path); rev.commitAll(p.path, `Storyboard: edit frame ${index}`); } catch { /* revisions optional */ }
-      ctx.backupProject(id);
-      return out;
-    }),
-    // Sound effects: the app's sfx cues on storyboard frames; sounds from Openverse (Freesound, CC0 / CC BY) or HF's bundled set
-    r("GET", "/sfx/search", async (_p, _b, q) => {
-      const words = (q.get("q") ?? "").trim();
-      const local = sfx.bundled(root).map(({ file: _f, ...b }) => b);          // no local paths to the browser
-      if (!words) return { results: [], bundled: local };
-      let results = [], error = null;
-      try { results = await sfx.search(words, { limit: 20 }); } catch (e) { error = e.message; }
-      return { results, bundled: local.filter((b) => b.title.includes(words.toLowerCase().split(/\s+/)[0])), error };
-    }),
-    r("GET", `/projects/${P}/sfx`, async ([id]) => {
-      const p = mustProject(id, root);
-      const { shots } = await readShots(p.path);
-      const st = sfx.readState(p.path);
-      return { cues: sfx.cuesOf(shots), sounds: st.sounds, mounted: st.mounted ?? [],
-        shots: shots.filter((s) => s.index != null).map(({ index, number, title, start }) => ({ index, number, title, start })) };   // the panel's shot picker
-    }),
-    r("POST", `/projects/${P}/sfx`, async ([id], b) => {        // the user picks a sound for a shot: { index, name, soundId, offset? }
-      const p = mustProject(id, root);
-      const name = String(b.name ?? "").trim().toLowerCase().replace(/[,@]/g, " ").replace(/\s+/g, " ").slice(0, 40);
-      if (!name || !Number.isInteger(b.index)) throw new HttpError(400, "INVALID", "A shot and a name are needed");
-      const item = await sfx.details(b.soundId, { root });
-      if (!item) throw new HttpError(400, "INVALID", "That sound is not available as CC0 / CC BY");
-      const { shots } = await readShots(p.path);
-      const shot = shots.find((s) => s.index === b.index);
-      if (!shot) throw new HttpError(404, "NOT_FOUND", "Shot not found");
-      const cue = b.offset ? `${name}@${Number(b.offset)}` : name;
-      const parts = String(shot.sfx ?? "").split(",").map((x) => x.trim()).filter((x) => x && !/^none$/i.test(x) && x.split("@")[0].toLowerCase() !== name);
-      await sfx.useSound(p.path, name, item);
-      await updateFrame(p.path, b.index, { sfx: [...parts, cue].join(", ") });
-      const res = await sfx.apply(p.path, (await readShots(p.path)).shots, { root });
-      try { rev.ensureRepo(p.path); rev.commitAll(p.path, `Sound effect "${name}" on shot ${shot.number}`); } catch { /* revisions optional */ }
-      ctx.backupProject(id);
-      return res;
-    }),
-    r("DELETE", `/projects/${P}/sfx`, async ([id], _b, q) => {      // ?index=&name=: the cue leaves that shot
-      const p = mustProject(id, root);
-      const index = Number(q.get("index")), name = String(q.get("name") ?? "").toLowerCase();
-      const { shots } = await readShots(p.path);
-      const shot = shots.find((s) => s.index === index);
-      if (!shot) throw new HttpError(404, "NOT_FOUND", "Shot not found");
-      const parts = String(shot.sfx ?? "").split(",").map((x) => x.trim()).filter((x) => x && !/^none$/i.test(x) && x.split("@")[0].toLowerCase() !== name);
-      await updateFrame(p.path, index, { sfx: parts.join(", ") });
-      const res = await sfx.apply(p.path, (await readShots(p.path)).shots, { root });
-      try { rev.ensureRepo(p.path); rev.commitAll(p.path, `Sound effect "${name}" removed from shot ${shot.number}`); } catch { /* revisions optional */ }
-      ctx.backupProject(id);
-      return res;
     }),
     r("POST", `/projects/${P}/storyboard/approve`, async ([id], b) => {
       // the step that records this approval for the film's way of working: Storyboard, or Rebuild your frames for keep / re-layout
@@ -741,22 +648,6 @@ export function routes(ctx) {
     r("GET", `/projects/${P}/posters`, ([id]) => ctx.posters.get(id)),
     r("POST", `/projects/${P}/posters`, ([id]) => ctx.posters.start(id)),
     r("GET", `/projects/${P}/preview`, ([id]) => { mustProject(id, root); return { url: `${ctx.preview.base}/p/${id}/__preview`, origin: ctx.preview.origin }; }),
-    // HyperFrames Studio for this project, as HF ships it (packages/hf-studio); its element ids are written into the files on open
-    r("POST", `/projects/${P}/studio`, async ([id]) => {
-      const p = mustProject(id, root);
-      try { ensureMotionPath(p.path); } catch { /* the plugin is not downloaded yet: Studio reports it */ }
-      const s = await ctx.studio.open({ id, dir: p.path });
-      try { rev.ensureRepo(p.path); rev.commitAll(p.path, "Opened in HyperFrames Studio (element ids)"); } catch { /* revisions optional */ }
-      return s;
-    }),
-    // the element selected in Studio, for the Claude panel's Selection scope (polled while the Editor is open; keeps Studio running)
-    r("GET", `/projects/${P}/studio/selection`, async ([id]) => {
-      const s = await ctx.studio.selection(id);
-      if (!s) return { selection: null };
-      const key = [s.sourceFile || s.compositionPath, s.target?.hfId ?? s.target?.selector ?? s.target?.id ?? "", s.target?.selectorIndex ?? ""].join("|");
-      return { selection: { key, label: s.label || `<${s.tagName}>`, tagName: s.tagName, sourceFile: s.sourceFile || s.compositionPath,
-        compositionPath: s.compositionPath, currentTime: s.currentTime, context: selectionContext(s) } };
-    }),
     r("GET", `/projects/${P}/revisions`, ([id]) => { const p = mustProject(id, root); return { revisions: existsSync(join(p.path, ".git")) ? rev.log(p.path, 100) : [] }; }),
 
     // ---- the pipeline in the Editor state from the server, the Editor only shows it
@@ -797,6 +688,8 @@ export function routes(ctx) {
         // the last task was stopped by Exit and nothing ran since: the Editor offers to run it again (POST …/tasks/<id>/again)
         interrupted: ctx.agent.interrupted(id),
         appBusy: (() => { const j = ctx.jobs.list({ kind: "mix" }).find((x) => x.projectId === id && x.status === "running"); if (j) return { stage: "build", key: "Placing the music and sound effects", jobId: j.id };
+          // the sound effects placed again (the Final Mix's Place, or after a chat turn changed the storyboard's cues)
+          const fx = ctx.jobs.list({ kind: "mix-sfx" }).find((x) => x.projectId === id && x.status === "running"); if (fx) return { stage: "finalMix", key: "Placing the sound effects", jobId: fx.id };
           // the app reads the user's files (audio, decks, PSD) before Prepare
           const sc = ctx.jobs.list({ kind: "scan" }).find((x) => x.projectId === id && x.status === "running"); if (sc) return { stage: "prepare", key: "Reading your files", jobId: sc.id };
           // the voice being made or transcribed is the app at work too; when it ends the Editor loads the timeline again (NARRATION)
@@ -808,6 +701,7 @@ export function routes(ctx) {
         // (the autopilot's one fix per build: autoFix set and Claude at work) or already tried (autoFix set, Claude idle, still failing)
         checks: { pass: facts.qa?.pass ?? null, blocking: facts.qa?.blocking ?? 0, at: facts.qa?.at ?? null, running: !!facts.qaRunning,
           warnings: pipe.qaWarnings(p.meta?.lastQa, p.path),          // the Pipeline's "Tech checks · N warnings"
+          notChecked: pipe.qaNotChecked(p.meta?.lastQa, p.path),          // checks that could not run: no pass and no warning (T21-5)
           fixing: !!p.meta?.pipeline?.autoFix && ctx.agent.running.has(id), tried: !!p.meta?.pipeline?.autoFix && !ctx.agent.running.has(id) },
         // what the Motion dialog's confirm says before the approval: the same estimate for the plan's shots as it is now
         estimateIfApproved: facts.motionShots ? estimateMinutes(facts.motionShots, root, { seconds: p.meta?.targetDurationSec, styleId: p.meta?.style?.id }) : null,
@@ -815,6 +709,9 @@ export function routes(ctx) {
           : asking ? { kind: p.meta?.style?.id === "general" && existsSync(join(p.path, "ASSETS.md")) && !pipe.chosenWay(p.path) ? "way" : "missing" }
           // Claude's question in the chat is open (a font to choose, a revision's notes): the user answers there
           : facts.chatAsked || facts.revisionAsked ? { kind: "chat" } : null,
+        // the sound effects as last placed: the Editor reads the Final Mix and the timeline again when `at` changes (the dialog showed
+        // 26 after only 6 were left: it read them once, 4 s after Place, while the placement still searched)
+        sfx: (() => { const s = readSfxState(p.path); return { placed: (s.mounted ?? []).length, at: s.placedAt ?? null }; })(),
         render: ctx.renders.status() };
     }),
     // a step's own work: its Claude task (the text the Editor sends, else the step's prompt, the way's own one for General) or its job (the checks)
@@ -840,8 +737,6 @@ export function routes(ctx) {
     r("POST", `/projects/${P}/pipeline/resume`, async ([id], b) => (await ctx.autopilot.resume(id, String(b.text ?? ""))) ?? { idle: true }),
     // named versions: made when the film is first built, after each round of changes, at each render, before a redo
     r("GET", `/projects/${P}/versions`, ([id]) => ({ versions: [...(mustProject(id, root).meta?.versions ?? [])].reverse() })),
-    // the film's language (vi | en), set from the brief, by Prepare's question, or by the user here: { language: { id, by, at } }
-    r("PUT", `/projects/${P}/language`, ([id], b) => { mustProject(id, root); return { language: projects.setLanguage(id, b?.language, "owner", root).meta.language }; }),
     r("POST", `/projects/${P}/versions/([\\w.-]+)/restore`, ([id, vid]) => { mustProject(id, root); return ctx.autopilot.openVersion(id, decodeURIComponent(vid)); }),
     // the brief changed after the film was built: the user's choice
     r("POST", `/projects/${P}/brief/after-change`, async ([id], b) => { mustProject(id, root); return ctx.autopilot.briefChanged(id, String(b.choice ?? "")); }),
@@ -973,39 +868,11 @@ export function routes(ctx) {
       const t = ctx.agent.get(taskId); return { projectId, taskId, kind: "claude", stage: t?.stage ?? null, title: projects.getProject(projectId, root)?.title ?? "" }; }),
       jobs: ctx.jobs.running().map((j) => ({ id: j.id, kind: j.kind, projectId: j.projectId, title: j.title, stage: j.stage, progress: j.progress,
         project: j.projectId ? projects.getProject(j.projectId, root)?.title ?? "" : null })) })),
-    // stills of what a task changed (only when "See stills" is pressed, so no task waits for them): one HF snapshot at
-    // the middle of each changed shot (every shot, up to 6, when only the root changed), as the film is now; cached per task and revision
-    r("POST", `/projects/${P}/tasks/${T}/stills`, async ([id, tid]) => {
-      const p = mustProject(id, root);
-      const task = ctx.agent.list(id).find((x) => x.id === tid);
-      if (!task) throw new HttpError(404, "NOT_FOUND", "Task not found");
-      const head = (existsSync(join(p.path, ".git")) ? rev.head(p.path) : null) ?? "none";
-      const rel = `.moworks/cache/posters/stills/${tid}-${head.slice(0, 10)}`;          // under posters/: the only .moworks folder the preview origin serves
-      const out = join(p.path, ...rel.split("/"));
-      await freshFilm(p.path);          // a chat fix's stills show the film as it is now
-      const { shots, root: comp } = await readShots(p.path);
-      const placed = placedShots(shots, comp?.duration).filter((s) => s.duration);          // a one-page code film: its planned shots
-      const touched = new Set((task.changed ?? []).map((c) => c.path));
-      let pick = placed.filter((s) => s.src && touched.has(s.src));
-      if (!pick.length) pick = placed;
-      pick = pick.slice(0, 6);
-      if (!pick.length) return { stills: [] };
-      const list = () => (existsSync(out) ? readdirSync(out).filter((f) => /^frame-\d+-at-[\d.]+s\.png$/.test(f)).sort() : []);
-      if (list().length < pick.length) {
-        mkdirSync(out, { recursive: true });
-        const x = await snapshotAtAsync(p.path, pick.map((s) => +(s.start + s.duration / 2).toFixed(3)), out, { signal: ctx.stopping.signal });
-        if (x.exitCode !== 0 && !list().length) throw new HttpError(500, "STILLS_FAILED", `HyperFrames could not take the stills: ${x.stderrTail.join(" ").slice(-200)}`);
-      }
-      return { stills: list().slice(0, pick.length).map((f, i) => ({ shot: pick[i].number, title: pick[i].title, t: +(pick[i].start + pick[i].duration / 2).toFixed(2),
-        url: `${ctx.preview.base}/p/${id}/${rel}/${f}` })) };
-    }),
     r("GET", `/tasks/${T}`, ([tid]) => { const t = ctx.agent.get(tid); if (!t) throw new HttpError(404, "NOT_FOUND", "Task not found"); return t; }),
     r("POST", `/tasks/${T}/cancel`, ([tid]) => ctx.agent.cancel(tid)),
     // a task Exit stopped, run again as it was ("Resume / Send again")
     r("POST", `/projects/${P}/tasks/${T}/again`, async ([id, tid]) => { mustProject(id, root); return { task: await ctx.agent.again(id, tid) }; }),
     r("POST", `/projects/${P}/tasks/${T}/revert`, ([id, tid]) => ctx.agent.revert(id, tid)),
-    r("POST", `/projects/${P}/tasks/${T}/accept`, ([id, tid]) => ctx.agent.accept(id, tid)),
-    r("POST", `/projects/${P}/conversation/new`, ([id]) => ctx.agent.newConversation(id)),
   ];
 }
 
@@ -1013,6 +880,7 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
   autoBackup = process.env.MW_NO_BACKUP !== "1", autoLibrary = process.env.MW_NO_LIBRARY_IMPORT !== "1", autoAssets = process.env.MW_NO_ASSET_INSTALL !== "1",
   onExit = null, onRestart = null, onWindowGone = null, windowGraceMs = Number(process.env.MW_WINDOW_GRACE_MS ?? 10000), thumbnails = false } = {}) {
   const ctx = { root, preview: null, onExit, onRestart, lastSeen: Date.now() };
+  const agentToken = randomBytes(24).toString("hex");          // Claude Code's (AGENT_API only)
   const server = createServer(async (req, res) => {
     const addr = server.address();
     const own = [`127.0.0.1:${addr.port}`, `localhost:${addr.port}`];
@@ -1026,7 +894,8 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
     if (url.pathname.startsWith("/api/")) {
       const origin = (req.headers.origin ?? "").toLowerCase();
       if (req.method !== "GET" && origin && !own.map((h) => `http://${h}`).includes(origin)) return send(403, { error: { code: "FORBIDDEN", message: "Request from another site" } });
-      if (req.headers["x-mw-token"] !== token) return send(401, { error: { code: "UNAUTHORIZED", message: "Missing or wrong session token" } });
+      const t = req.headers["x-mw-token"];
+      if (t !== token && !(t === agentToken && AGENT_API.test(url.pathname))) return send(401, { error: { code: "UNAUTHORIZED", message: "Missing or wrong session token" } });
       ctx.lastSeen = Date.now();                             // an app window is open (the background service stops when none calls for a while)
       for (const [method, re, fn] of ctx.raw) {           // streaming routes: the request body or the response is a file
         const m = re.exec(url.pathname);
@@ -1044,13 +913,6 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
     }
     // static UI: files under ui/dist, everything else -> index.html (single-page app)
     if (req.method !== "GET" && req.method !== "HEAD") return send(405, { error: { code: "METHOD", message: "Method not allowed" } });
-    if (url.pathname.startsWith("/media/sfx/pixabay/")) {    // the offline Pixabay set (shipped in HF's media-use skill), to listen to in the Sounds panel
-      const key = decodeURIComponent(url.pathname.slice("/media/sfx/pixabay/".length)).replace(/\.mp3$/, "");
-      const b = sfx.bundled(root).find((x) => x.id === `pixabay:${key}`);
-      if (!b || !existsSync(b.file)) return send(404, { error: { code: "NOT_FOUND", message: "No such file" } });
-      res.writeHead(200, { "Content-Type": "audio/mpeg", "Cache-Control": "public, max-age=86400", "X-Content-Type-Options": "nosniff", "Content-Length": statSync(b.file).size });
-      return res.end(req.method === "HEAD" ? undefined : readFileSync(b.file));
-    }
     if (url.pathname.startsWith("/media/blocks/") || url.pathname.startsWith("/media/looks/") || url.pathname.startsWith("/media/intake/")) {   // Blocks, Looks and intake previews (the app's own stores)
       const prefix = ["/media/blocks/", "/media/looks/", "/media/intake/"].find((x) => url.pathname.startsWith(x));
       const store = prefix === "/media/looks/" ? looks : prefix === "/media/intake/" ? intake : blocks;
@@ -1118,10 +980,12 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
     if (!file.startsWith(resolve(uiDir) + sep) && file !== resolve(uiDir)) return send(403, { error: { code: "FORBIDDEN", message: "Outside the UI folder" } });
     if (!existsSync(file) || statSync(file).isDirectory()) file = join(uiDir, "index.html");
     if (!existsSync(file)) return send(503, { error: { code: "UI_NOT_BUILT", message: "UI not built: run npm run build" } });
-    const pv = ctx.preview?.origin ?? "";
+    // the preview origin is any loopback port: a page loaded before the server started again (a fixed port: dev, tests) still
+    // reaches the new preview server's port (its storyboard frames went black, T21-1); the page talks only to the app (connect-src)
+    const pv = "http://127.0.0.1:*";
     res.writeHead(200, { "Content-Type": MIME[extname(file)] ?? "application/octet-stream", "Cache-Control": file.endsWith("index.html") ? "no-store" : "public, max-age=3600",
       "X-Content-Type-Options": "nosniff",
-      "Content-Security-Policy": `default-src 'self'; img-src 'self' data: blob: ${pv}; media-src 'self' blob: ${pv} https://cdn.freesound.org ${VOICE_SAMPLES}; frame-src ${pv} ${ctx.studio?.origins.join(" ") ?? ""}; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; frame-ancestors 'none'` });
+      "Content-Security-Policy": `default-src 'self'; img-src 'self' data: blob: ${pv}; media-src 'self' blob: ${pv} https://cdn.freesound.org ${VOICE_SAMPLES}; frame-src ${pv}; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; frame-ancestors 'none'` });
     res.end(req.method === "HEAD" ? undefined : readFileSync(file));
   });
   await new Promise((ok) => server.listen(port, "127.0.0.1", ok));
@@ -1130,11 +994,6 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
   ctx.preview = await startPreviewServer({ uiOrigin, resolveProject: (id) => {
     const x = projects.getProject(id, root);
     return x && !x.missing ? { dir: x.path, width: x.width ?? x.meta?.format?.width, height: x.height ?? x.meta?.format?.height } : null;
-  } });
-  // one HyperFrames Studio at a time, on the first free port of 4320-4324 (MW_STUDIO_PORT moves the range); hand edits become a revision
-  ctx.studio = createStudioHost({ port: Number(process.env.MW_STUDIO_PORT ?? 4320), pidFile: join(process.env.MW_STATE_DIR ?? join(root, "runtime", "state"), "studio.json"), onStop: (proj) => {
-    try { rev.ensureRepo(proj.dir); rev.commitAll(proj.dir, "Hand edits in HyperFrames Studio"); } catch { /* revisions optional */ }
-    ctx.thumbs?.ask(proj.id);
   } });
   ctx.stopping = new AbortController();          // aborted when the app stops: every still being taken ends with it
   ctx.posters = posterJobs(root, () => ctx.preview.base, ctx.stopping.signal);
@@ -1157,7 +1016,7 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
     signIn: () => ctx.claude.requireSignedIn(), onSignedOut: () => ctx.claude.signedOutSeen(),
     pipeline: async (id) => pipe.promptBlock((await ctx.pipelineOf(id)).state),
     stepOf: (meta, stepId, all = false) => (all ? pipelineSteps(meta?.style?.id, root) : pipelineSteps(meta?.style?.id, root).find((x) => x.id === stepId) ?? null),
-    permitUrl: `http://127.0.0.1:${p}/api/agent/permit`, permitToken: token });
+    permitUrl: `http://127.0.0.1:${p}/api/agent/permit`, permitToken: agentToken });
   // a setup or download job that ends changes what Settings › System finds: its checks run again on the next read
   ctx.jobs = createJobs({ ended: (job) => { if (DOWNLOADS.has(job.kind) || job.kind === "app-update") { ctx.checks?.system.clear(); ctx.checks?.firstRun.clear(); } } });
   // the bundled fonts, GSAP and three.js (24 MB, pinned upstream files): downloaded at the first start, or from Settings > Health
@@ -1181,7 +1040,7 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
   const chars = characterRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject, HttpError });
   ctx.table.push(...chars.routes);
   ctx.table.push(...proxyRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject }).routes);          // a code film's smooth preview
-  ctx.table.push(...styleAeRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn] }).routes);          // the styles' After Effects badges
+  ctx.table.push(...styleAeRoutes(ctx).routes);          // the styles' After Effects badges (measured in the background, no route)
   ctx.table.push(...prefsRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn] }).routes);          // the UI's settings on this computer (the port changes each start)
   ctx.agent.appTools = { ...boards.tools, ...assets.tools, ...chars.tools,
     // the user chose the brief's output over the New project fields (Claude asked in Prepare): the project's output changes
@@ -1196,7 +1055,7 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
       return p.changed.length ? `The film's output is now ${f.aspect} (${f.width}x${f.height}), ${f.fps} fps, ${p.meta.targetDurationSec} s (changed: ${p.changed.join(", ")}).` : "Nothing changed: the output already is that.";
     } };          // board_stills, qc_sheets: Claude calls them through the MCP channel
   // the app window holds this stream open (the window's X is Exit). When the last window has gone for windowGraceMs (so a
-  // reload or F5 does not stop anything), onWindowGone stops every task, job, Studio and the service. A stream, not a heartbeat: a hidden
+  // reload or F5 does not stop anything), onWindowGone stops every task, job and the service. A stream, not a heartbeat: a hidden
   // or minimized window's timers are throttled by the browser, its open connection is not.
   ctx.presence = { open: 0, timer: null };
   const presence = ["GET", /^\/api\/app\/presence$/, async (_p, req, _q, res) => {
@@ -1242,6 +1101,7 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
       const original = m[1] === "lemo" ? lemo.mediaFile(m[2], root) : m[1] === "mg" ? mgStyles.mediaFile(m[2], root) : join(uiDir, ...m[2].split("/"));
       if (original && existsSync(original)) thumbFile(m[1], m[2], original, root).catch(() => {});
     }
+    tidyPreviews(root);          // the stores' old posters: this start serves the WebP that replaced them
     // the styles' After Effects badges: a new style or a pinned source at another commit is measured on its demo
     setTimeout(() => { if (!ctx.stopping.signal.aborted) ctx.styleAe?.measure(); }, 60000).unref?.();
   });
@@ -1250,22 +1110,20 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
   const within = (p, ms) => Promise.race([Promise.resolve(p).catch(() => {}), new Promise((r) => setTimeout(r, ms).unref?.())]);
   const close = async () => {
     ctx.claude.stop();
-    // Studio, the preview and the server stop side by side (one after the other, Exit took 17-27 s)
-    await Promise.all([within(ctx.studio.stop(), 5000), within(ctx.preview.close(), 3000),
+    // the preview and the server stop side by side (one after the other, Exit took 17-27 s)
+    await Promise.all([within(ctx.preview.close(), 3000),
       within(new Promise((r) => { server.close(() => r()); server.closeAllConnections?.(); }), 3000)]);
   };
   /** What Exit (or closing the window) stops, per project: Claude tasks, background jobs (render, transcription with its Whisper model,
-   *  checks, Export to AE, downloads) and HyperFrames Studio. */
+   *  checks, Export to AE, downloads). */
   ctx.running = () => {
     const name = (id) => (id ? projects.getProject(id, root)?.title ?? id : null);
-    const studio = ctx.studio?.current?.();
     return [
       ...[...ctx.agent.running.keys()].map((projectId) => ({ kind: "claude", project: name(projectId), title: `Claude is working on "${name(projectId)}"`, label: "Claude task" })),
       // the app's own background work (the film's pre-render, checks it runs after a change) is stopped too, but is no task the
       // user started: Exit's "Stop N task(s)" leaves it out (idle)
       ...ctx.jobs.running().map((j) => ({ kind: j.kind, project: name(j.projectId), title: j.projectId ? `${j.title} (${name(j.projectId)})` : j.title, label: j.title,
         ...(j.kind === "preview-proxy" || j.background ? { idle: true } : {}) })),
-      ...(studio ? [{ kind: "studio", project: name(studio.projectId), title: `HyperFrames Studio (${name(studio.projectId)})`, label: "HyperFrames Studio", idle: true }] : []),
     ];
   };
   /** Stop running Claude tasks and jobs, then the servers (Exit, or idle in the background). */

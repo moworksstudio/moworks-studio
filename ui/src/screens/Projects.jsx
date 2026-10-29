@@ -63,9 +63,9 @@ function CardActions({ p, onRename, onRemove, onLocate, toast }) {
   </div>;
 }
 
-function PathDialog({ title, icon, help, cta, initial = "", onClose, onSubmit }) {
+function PathDialog({ title, icon, help, cta, onClose, onSubmit }) {
   const t = useT();
-  const [path, setPath] = useState(initial);
+  const [path, setPath] = useState("");          // starts empty: a project's old address is never shown
   const [drive, setDrive] = useState(false);
   const [err, setErr] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -115,7 +115,7 @@ export default function Projects() {
     if (p.gitOnDrive) return setDlg({ kind: "move-git", p });          // a Drive project with its own .git folder: ask before moving it
     setDlg(null); go(`/projects/${p.id}`);
   };
-  const moveGit = async (p) => { try { const r = await post(`/api/projects/${p.id}/move-git`); toast(t("History moved to this PC: {path}", { path: r.gitdir })); } catch (e) { toast(e.message, "error"); } setDlg(null); go(`/projects/${p.id}`); };
+  const moveGit = async (p) => { try { await post(`/api/projects/${p.id}/move-git`); toast(t("History moved to this PC")); } catch (e) { toast(e.message, "error"); } setDlg(null); go(`/projects/${p.id}`); };
   const rename = async (p, title) => { await patch(`/api/projects/${p.id}`, { title }); setDlg(null); toast(t("Project renamed")); reload(); };
   const remove = async (p) => { await del(`/api/projects/${p.id}`); setDlg(null); toast(t("“{title}” removed from the list; its folder stays", { title: p.title })); reload(); };
   const locate = async (p, path) => { await post(`/api/projects/${p.id}/relocate`, { path }); setDlg(null); toast(t("Project found")); reload(); };
@@ -138,7 +138,7 @@ export default function Projects() {
         <button className="btn primary" onClick={() => setDlg({ kind: "locate", p: dlg.p })}><FolderSearch size={14} />{t("Relink…")}</button></>}>
         <div className="dlg-lines"><p className="dlg-warn">{t("“{title}” was deleted, moved or renamed outside the app.", { title: dlg.p.title })}</p>
           <p className="hint">{t("If you moved it, Relink and choose where it is now.")}</p></div></Dialog>}
-      {dlg?.kind === "locate" && <PathDialog icon={<FolderSearch size={18} />} title={t("Locate “{title}”", { title: dlg.p.title })} cta={t("Use this folder")} initial={dlg.p.path} onClose={() => setDlg(null)} onSubmit={(path) => locate(dlg.p, path)}
+      {dlg?.kind === "locate" && <PathDialog icon={<FolderSearch size={18} />} title={t("Locate “{title}”", { title: dlg.p.title })} cta={t("Use this folder")} onClose={() => setDlg(null)} onSubmit={(path) => locate(dlg.p, path)}
         help={t("The folder was moved or renamed. Paste where it is now.")} />}
       {dlg?.kind === "rename" && <RenameDialog p={dlg.p} onClose={() => setDlg(null)} onSubmit={(t) => rename(dlg.p, t)} />}
       {dlg?.kind === "remove" && <Dialog icon={<ListX size={18} />} danger title={t("Remove from list?")} onClose={() => setDlg(null)} footer={<><span className="spacer" /><button className="btn" onClick={() => setDlg(null)}>{t("Cancel")}</button>
@@ -152,7 +152,7 @@ export default function Projects() {
   return (
     <div className="page">
       <div className="page-head">
-        <div><h1 title={data?.root ? t("New projects are made in {path}", { path: data.root }) : undefined}>{t("Projects")}</h1></div>
+        <div><h1>{t("Projects")}</h1></div>
         <div className="actions">
           <button className="btn" onClick={() => setDlg({ kind: "open" })}><FolderInput size={16} />{t("Import project")}</button>
           <button className="btn primary" onClick={() => go("/new")}><Plus size={16} />{t("New project")}</button>

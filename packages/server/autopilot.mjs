@@ -34,16 +34,19 @@ function buildTimesFile(root) { return join(process.env.MW_STATE_DIR ?? join(roo
 // the whole stage as build-times.json measured it, Build to the finished film: Lemo 20 s 17 min and 30 s 33, mg 30 s
 // 36, anidoodle 30 s 37 and 49, Brush 10 s 23-25, What If 30 s 27 ("about 14" was planned for a 30 s Lemo film that took 32)
 // a 40 s anidoodle film took 100 min against "54-73" (Review alone 60), a 50 s mg film about 125 (Review
-// 100, partly the build's checks running beside it). Rates raised and the range widened; past the plan the Pipeline works the time
-// out again (estimateNow)
-const RATES = [[/^anidoodle-/, [12, 1.5]], [/^brush-cartoon$/, [15, 0.9]], [/^(lemo-|mg-)/, [5, 1.2]], [/^what-if$/, [10, 0.6]]];
-const HIGH = 1.4;
+// 100, partly the build's checks running beside it): Tests 14-16, three films at once on one computer. The rates raised for them made the
+// next films' range about twice the real time ("120-168", really 64.7: T20-7), so the rates are fitted again on films made one or two at a
+// time, "Approve and build" to the finished film: Lemo / mg 34 s 44 min, 43 s 36, 72.8 s 54, 105 s 65 (Tests 17-20); anidoodle 30 s 37
+// and 49, 100 s 82 (Test 21): the build, the Review and the checks grow much less than the film. The range's top is half again the middle
+// for a slower computer, and past the plan the Pipeline works the time out again from what is done (estimateNow)
+const RATES = [[/^anidoodle-/, [26, 0.56]], [/^brush-cartoon$/, [15, 0.9]], [/^(lemo-|mg-)/, [18, 0.45]], [/^what-if$/, [10, 0.6]]];
+const HIGH = 1.5;
 export function estimateMinutes(shots, root, { seconds = null, styleId = null } = {}) {
   const sec = Number(seconds) > 0 ? Number(seconds) : Math.max(1, Number(shots) || 1) * 4;
   const [base, perSec] = RATES.find(([re]) => re.test(String(styleId ?? "")))?.[1] ?? [16, 0.8];
-  const minutes = Math.max(3, Math.min(120, Math.round(base + perSec * sec)));
-  // a range (a shared machine runs slower), and what it covers, for the confirm's words
-  return { minutes, high: Math.min(170, Math.round(minutes * HIGH)), covers: "build, review, music and checks", basis: "length" };
+  const minutes = Math.max(3, Math.min(240, Math.round(base + perSec * sec)));
+  // a range (a slower or shared computer takes longer), and what it covers, for the confirm's words
+  return { minutes, high: Math.round(minutes * HIGH), covers: "build, review, music and checks", basis: "length" };
 }
 /** the estimate while the stage runs. Past the planned time the Editor's "about N min left" stood at "about 1 min left" for an
  *  hour (a Review took 1 h 40 min). Once the elapsed time reaches the plan, the whole is worked out again from what is done: the
@@ -347,6 +350,9 @@ export function createAutopilot(ctx) {
     }
     if (p.meta?.pipeline?.buildFix) meta(id, (m) => { delete m.pipeline.buildFix; });          // it compiles again: a later error gets its fix
     if (!step) {          // a chat turn: in the feedback loop, each round of changes is a version
+      // Claude changed a frame's `- sfx:` cues in the chat: the sounds are placed again now, as its rules promise ("after your turn the
+      // app finds each sound"), before the version, the preview and the checks take the film (Test 20 waited for "Place them again")
+      if (storyboardChanged(task.changed)) { try { await ctx.mix?.cuesAgain?.(p); } catch { /* the Final Mix's Place them again */ } }
       if (p.meta?.pipeline?.delivered && task.changed?.length) saveVersion(id, "edit");
       // a finished code film changed by the chat: its preview is made again, once, now (never on open)
       if (isFinished(p.meta) && task.changed?.length) { try { ctx.previewProxy?.(id); } catch { /* next change */ } }
@@ -575,6 +581,8 @@ export function createAutopilot(ctx) {
 
 /** Did a task change a storyboard option's own files (boards/<option>/…, not the rounds' copies)? */
 export const boardsChanged = (changed) => (changed ?? []).some((c) => /^boards\/(?!rounds\/)[^/]+\//.test(String(c?.path ?? c)));
+/** A task changed the film's own STORYBOARD.md (its frames' cues), not an option's board. */
+export const storyboardChanged = (changed) => (changed ?? []).some((c) => String(c?.path ?? c) === "STORYBOARD.md");
 
 /** The film's cast (CHARACTERS.json), [] when it has none. */
 export function castOf(dir) {

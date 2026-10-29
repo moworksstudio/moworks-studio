@@ -1,6 +1,6 @@
 // Exit: stops the app's background service and closes the app window. Closing the window with its X does
 // the same after ~10 s (the service sees the window's stream end), so the two are one action. The confirmation is short, with a warning
-// icon, and lists per project what will be stopped (Claude tasks, render, transcription and its Whisper model, checks, HyperFrames Studio).
+// icon, and lists per project what will be stopped (Claude tasks, render, transcription and its Whisper model, checks).
 // Shown only when the app was started from its launcher.
 import { useEffect, useState } from "react";
 import { AlertTriangle, Loader2, Power } from "lucide-react";
@@ -9,7 +9,7 @@ import { Dialog } from "./components.jsx";
 import { useT } from "./i18n.jsx";
 
 const KIND = { claude: "Claude task", export: "Render", transcribe: "Transcription (Whisper)", tts: "Voice-over", qa: "Checks", ae: "Export to AE", "ae-estimate": "Export to AE",
-  studio: "HyperFrames Studio", "model-install": "Download", "offline-assets": "Download" };          // English keys for t()
+  "model-install": "Download", "offline-assets": "Download" };          // English keys for t()
 
 export default function ExitButton({ className = "chip-status" }) {
   const t = useT();

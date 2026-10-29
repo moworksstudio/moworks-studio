@@ -12,7 +12,7 @@ import { capWebBitrate, smoothCopy, webCeilingMbps } from "../packages/hf-qa/web
 import { filmHash, filmParts, proxyRoutes } from "../packages/server/proxy.mjs";
 import { currentOptions, takeStills } from "../packages/hf-edit/boards.mjs";
 import { ffmpegExe } from "../packages/library/preview-media.mjs";
-import { createStudioHost, freePort } from "../packages/hf-studio/index.mjs";
+import { stampIds } from "../packages/hf-edit/handEdit.mjs";
 
 const T = mkdtempSync(join(tmpdir(), "mw-t19-"));
 after(() => rmSync(T, { recursive: true, force: true }));
@@ -30,6 +30,8 @@ test("the page lets ElevenLabs' voice samples play, and only those hosts", async
     assert.ok(!media.includes("https:") && !media.includes("*") && !media.includes("https://storage.googleapis.com"), "no wider source than the samples");
     assert.ok(VOICE_SAMPLES.split(" ").every((h) => media.includes(h)));
     assert.match(csp, /connect-src 'self'/, "the page still talks only to the app");
+    // T21-1: the preview on any loopback port, so a page loaded before a restart still shows the new preview server's frames
+    for (const d of ["img-src", "media-src", "frame-src"]) assert.ok(new RegExp(`${d} [^;]*http://127\\.0\\.0\\.1:\\*`).test(csp), `${d}: ${csp}`);
   } finally { await s.close(); }
 });
 
@@ -138,11 +140,11 @@ test("the Editor plays the Smooth copy of the render it is made from; a render w
   assert.ok(get(["smooth"]).url.endsWith(`${hash}.mp4`), "a copy of another render is never played");
 });
 
-test("opening the Editor stamps HF Studio's ids into the film; its render stays current; a real text edit makes it stale", { timeout: 120000 }, async () => {
+test("opening the Editor stamps HF's element ids into the film (older films carry HF Studio's); its render stays current; a real text edit makes it stale", { timeout: 120000 }, async () => {
   const dir = join(T, "demo-stamp");
   cpSync(join(import.meta.dirname, "fixtures", "minimal"), dir, { recursive: true });
   mkdirSync(join(dir, ".moworks", "cache", "proxy"), { recursive: true });
-  // a sound on the root page as the Final Mix places it: Studio stamps it too (sfx and voice)
+  // a sound on the root page as the Final Mix places it: it is stamped too (sfx and voice)
   writeFileSync(join(dir, "index.html"), readFileSync(join(dir, "index.html"), "utf8").replace("</div>\n<script>", '  <audio id="el-voice" src="assets/voice.mp3" data-start="0" data-duration="4" data-track-index="10"></audio>\n</div>\n<script>'));
   const p = { id: "stamp", path: dir, title: "stamp", meta: { style: { id: "brush-cartoon" }, format: { fps: 24 } } };
   const ctx = { root: T, preview: { base: "http://127.0.0.1:1/k" }, jobs: { start: () => { throw new Error("no render in this test"); }, get: () => null } };
@@ -155,12 +157,11 @@ test("opening the Editor stamps HF Studio's ids into the film; its render stays 
   assert.equal(get(["stamp"]).status, "fresh");
   const h0 = filmHash(dir, 24), before = readFileSync(join(dir, "index.html"), "utf8");
 
-  const host = createStudioHost({ port: await freePort(4380, 0).catch(() => freePort(4390)) });
-  try { await host.open({ id: "stamp", dir }); } finally { await host.stop(); }
+  await stampIds(dir);          // what the Editor's opening does (edit/prepare), HF's own stamping as shipped
   const stamped = readFileSync(join(dir, "index.html"), "utf8");
-  assert.ok(/<audio data-hf-id="[^"]+"/.test(stamped) && /<h1 data-hf-id="[^"]+"/.test(stamped), "Studio, as shipped, stamped its ids on the elements and the sound");
+  assert.ok(/<audio data-hf-id="[^"]+"/.test(stamped) && /<h1 data-hf-id="[^"]+"/.test(stamped), "HF stamped its ids on the elements and the sound");
   assert.equal(stamped.replace(/\s+data-hf-id="[^"]*"/g, ""), before, "and nothing else");
-  assert.equal(filmHash(dir, 24), h0, "the film's hash reads no Studio id");
+  assert.equal(filmHash(dir, 24), h0, "the film's hash reads no element id");
   assert.deepEqual([get(["stamp"]).status, get(["stamp"]).soundOnly], ["fresh", false], "the render is still the film: played and reused");
 
   // a render recorded while the hash still read the ids (made after the Editor opened): recorded again in today's terms, once

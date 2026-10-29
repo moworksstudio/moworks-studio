@@ -1,12 +1,12 @@
-// Looks: HyperFrames' own looks, read from the pinned clone's hyperframes skill: its frame presets, the look of a whole video (the
+// Looks: HyperFrames' own looks, read from its hyperframes skill at the pinned commit (bundle/hf): its frame presets, the look of a whole video (the
 // "video style" kind, kept apart from motions and blocks):
 //   frame presets  assets/frame-presets/<name>/FRAME.md (+ caption-skin.html, frame-showcase.html): a design spec HF adopts as frame.md
 //                  (references/look.md, "The project's design spec" and "Presets")
-// The list comes from the clone at run time; a small store (<work>/library/looks/hf-<version>-<commit>) keeps what needs the network
+// The list comes from the skill at run time; a small store (<work>/library/looks/hf-<version>-<commit>) keeps what needs the network
 // or a browser once: the Vietnamese font check and the previews (HF's own frame-showcase.html, its 16:9 frames captured with the
-// pinned Chromium and joined into a short slideshow). Only the store named for the pinned clone is read: one built at another pin is never
-// used (its folders may be gone from the clone), the looks then come straight from the clone until the store is built or copied.
-// Each look carries its credit: HeyGen (HyperFrames), the permalink at the clone's commit, Apache-2.0, as shipped.
+// pinned Chromium and joined into a short slideshow). Only the store named for the pinned commit is read: one built at another pin is never
+// used (its folders may be gone from the skill), the looks then come straight from the skill until the store is built or copied.
+// Each look carries its credit: HeyGen (HyperFrames), the permalink at the pinned commit, Apache-2.0, as shipped.
 import { execFileSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -31,7 +31,7 @@ function source(root) {
   const commit = sourceHead(dirname(skills)) ?? pins.hyperframes.source?.commit ?? `v${pins.hyperframes.default}`;
   return { dir: join(skills, HF_SKILL), repo: pins.hyperframes.repo, version: pins.hyperframes.default, commit };
 }
-/** The pinned clone's hyperframes skill folder (assets/frame-presets, references/look.md). */
+/** HF's hyperframes skill folder at the pinned commit (assets/frame-presets, references/look.md). */
 export const hfLookDir = (root = APP_ROOT) => source(root).dir;
 /** HyperFrames' guide to a design spec, in the skill folder: how a FRAME.md becomes a project's frame.md. */
 export const LOOK_GUIDE = "references/look.md";
@@ -57,15 +57,15 @@ function framePresets(src) {
         licence: "Apache-2.0", made: "as shipped", madeNote: "HyperFrames' frame preset, unchanged" } };
   });
 }
-/** Every look in the pinned clone (no network). */
+/** Every look in HF's skill at the pinned commit (no network). */
 export function registryLooks(root = APP_ROOT) {
   return framePresets(source(root));
 }
 
 // ---- the store: Vietnamese check and previews, once per HF version
-/** The folder of the store for the pinned clone: hf-<version>-<commit>. */
+/** The folder of the store for the pinned commit: hf-<version>-<commit>. */
 export const storeName = (root = APP_ROOT) => { const s = source(root); return `hf-${s.version}-${s.commit.slice(0, 7)}`; };
-/** The store built at the pinned clone: { dir, manifest } or null. */
+/** The store built at the pinned commit: { dir, manifest } or null. */
 export function currentStore(root = APP_ROOT) {
   const dir = join(storeRoot(root), storeName(root));
   if (!existsSync(join(dir, "catalog.json"))) return null;
@@ -147,7 +147,7 @@ export async function importLooks({ root = APP_ROOT, google = googleHasVietnames
 
 // ---- reading
 let cacheItems = null;
-/** The looks with their check and previews; straight from the clone (no previews, no check) when the store is not built yet. */
+/** The looks with their check and previews; straight from the skill (no previews, no check) when the store is not built yet. */
 export function items(root = APP_ROOT) {
   const st = currentStore(root);
   const key = st?.dir ?? "clone";

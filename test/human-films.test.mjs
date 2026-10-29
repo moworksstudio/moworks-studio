@@ -1,7 +1,7 @@
 // anidoodle's human characters in films: a saved human goes into an anidoodle film whose hand draws people as its module
 // (copied into the film's own modules, its gate beside it, its sheet for the dialog, a CHARACTERS.json entry that the Brush schema leaves
 // alone); the cast's gates run the author's way; a film page posing the copy bundles and draws (one frame). Uses the characters saved on
-// this computer (Grandma, Mira): skipped where they are not.
+// this computer (Grandma, Mira; the work folder's library, or MW_REAL_CHARACTERS): skipped where they are not.
 import { test, after } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
@@ -9,7 +9,7 @@ import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statS
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-const REAL = "D:/Moworks Studio/library/characters";
+const REAL = process.env.MW_REAL_CHARACTERS ?? join((await import("../packages/project-service/index.mjs")).workRoot(), "library", "characters");
 const T = mkdtempSync(join(tmpdir(), "mw-human-films-"));
 after(() => rmSync(T, { recursive: true, force: true }));
 const have = ["grandma", "mira"].every((id) => existsSync(join(REAL, "anidoodle-human", id, "character.json")));

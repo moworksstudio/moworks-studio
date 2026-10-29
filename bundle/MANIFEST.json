@@ -1,7 +1,7 @@
 {
   "about": "What Moworks Studio ships with the repository instead of downloading (audit 60 §6). Made by tools/make-bundle.mjs.",
-  "made": "2026-10-29T08:30:14.931Z",
-  "bytes": 359191240,
+  "made": "2026-10-29T15:38:10.858Z",
+  "bytes": 362856617,
   "parts": [
     {
       "name": "fonts",
@@ -27,7 +27,7 @@
       "files": 302,
       "bytes": 3484260,
       "source": "https://github.com/heygen-com/hyperframes.git",
-      "commit": null,
+      "commit": "4719543e972548a261b8354f0a8dada479ae5d93",
       "licence": "Apache-2.0"
     },
     {
@@ -36,7 +36,7 @@
       "files": 1669,
       "bytes": 107048376,
       "source": "https://github.com/heygen-com/hyperframes.git",
-      "commit": null,
+      "commit": "4719543e972548a261b8354f0a8dada479ae5d93",
       "licence": "Apache-2.0"
     },
     {
@@ -146,6 +146,33 @@
       "source": "built by Moworks Studio from Motion Prompt (Vocabulary, audit 79)",
       "commit": null,
       "licence": "MIT (Copyright (c) 2026 Shohei Ohtaki)"
+    },
+    {
+      "name": "what-if-animation",
+      "path": "styles/what-if-animation",
+      "files": 52,
+      "bytes": 352594,
+      "source": "https://github.com/kelano86/what-if-animation",
+      "commit": "3725a22d2d101320cae5b7d761af8d75120c4987",
+      "licence": "MIT (Copyright (c) 2026 FreshStack)"
+    },
+    {
+      "name": "library-what-if",
+      "path": "library/what-if",
+      "files": 2,
+      "bytes": 3298634,
+      "source": "made by Moworks Studio in the What If style (FreshStack's engine): the app's ElevenLabs voice-over, Mixkit music",
+      "commit": null,
+      "licence": "Moworks; engine MIT (FreshStack)"
+    },
+    {
+      "name": "library-lemo",
+      "path": "library/lemo/lemo-ea34ff9",
+      "files": 1,
+      "bytes": 14149,
+      "source": "the Vietnamese check of the fonts each Lemo-Opuscar style names, made by Moworks Studio (packages/lemo-styles importLemo)",
+      "commit": null,
+      "licence": "Moworks (a check; no font files)"
     }
   ]
 }

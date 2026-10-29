@@ -35,7 +35,7 @@ export default function FilmCard({ id, project, locked, onRestored }) {
   return <div className="fc">
     <section><h4>{t("Film style")}</h4>
       <p>{m.style?.title ? t(m.style.title) : t("No style")}</p>
-      {au && <p className="fc-by">{t("by {name}", { name: AUTHORS[au].by })} <AuthorBadge a={au} /></p>}
+      {au && <p className="fc-by">{t("by {name}", { name: m.style?.contributor ? `${m.style.contributor} · ${AUTHORS[au].by}` : AUTHORS[au].by })} <AuthorBadge a={au} /></p>}
       <button type="button" className="clink" disabled={locked} onClick={() => go(`/styles?project=${id}`)}>{t("Change the film style")}</button></section>
     <section><h4>{t("Design")}</h4>
       {m.designLocked ? <><dl><dt>{t("Brand Kit")}</dt><dd>{t("Follows film style")}</dd></dl>

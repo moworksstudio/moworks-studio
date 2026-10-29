@@ -6,6 +6,9 @@ import { post } from "../api.js";
 import { useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 
+/** A folder by its name, never its address ("C:\Work\Films\" → "Films"). */
+export const folderName = (path) => String(path ?? "").replace(/[\\/]+$/, "").split(/[\\/]/).pop();
+
 export function DriveNote() {
   const t = useT();
   return <span className="hint drive-note"><Cloud size={13} />{t("Google Drive folder: the history is kept on this PC; the film files sync with Drive.")}</span>;
@@ -24,7 +27,7 @@ export function FolderField({ id, value, drive, onChange, title, editable = fals
   return <div className="folder-field">
     <div className="row">
       {editable ? <input id={id} className="input mono" value={value ?? ""} onChange={(e) => onChange(e.target.value, null)} placeholder={placeholder} spellCheck={false} />
-        : <span id={id} className="path">{String(value ?? "").replace(/[\\/]+$/, "").split(/[\\/]/).pop()}</span>}          {/* the folder's name, never its address */}
+        : <span id={id} className="path">{folderName(value)}</span>}
       <button type="button" className="btn sm" onClick={choose} disabled={busy}>{busy ? <Loader2 size={14} className="spin" /> : <FolderOpen size={14} />}{t("Choose…")}</button>
     </div>
     {drive && <DriveNote />}

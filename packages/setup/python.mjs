@@ -51,7 +51,7 @@ export function status(root = APP_ROOT) {
   return { python: exe, ready: missing.length === 0, components, missing };
 }
 
-/** pip install the missing ones into runtime/python-libs (a download: the user starts it from Settings > Health). { installed, log }. */
+/** pip install the missing ones into runtime/python-libs (a download: the user starts it from Settings › System). { installed, log }. */
 export function install(root = APP_ROOT, { only = null, signal = null, onLine = () => {} } = {}) {
   const exe = pythonExe(root);
   if (!exe) return Promise.reject(Object.assign(new Error("Python is not on this computer"), { code: "NO_PYTHON" }));

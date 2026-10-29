@@ -1,13 +1,14 @@
 // Sound effects placed by the app at the Final Mix (only after the picture is locked, never during the build):
 // the app reads the film's cuts (the timeline) and when things appear (the approved motion plan) and picks from the library the way the
-// kit did: a whoosh into each cut, a pop when something enters, typing when text is typed. Cues the storyboard names (`- sfx:`) come first;
+// kit did: a whoosh into a cut where the picture really changes, a pop when something enters, typing when text is typed. Cues the
+// storyboard names (`- sfx:`, or a `- sound:` list) come first;
 // an automatic cue never lands within 0.6 s of another. The sounds are HyperFrames' bundled set first (Pixabay, shipped in its media-use
 // skill), then Openverse / Freesound for a name it lacks; mounted and credited by packages/sfx.
 import { execFile } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import { cuesOf, mount, readState, resolveCues, setVolumes, slug, useOwnerSound, writeCredits } from "./index.mjs";
+import { cueKey, cuesOf, mount, readState, resolveCues, setVolumes, slug, useOwnerSound, writeCredits } from "./index.mjs";
 import { ffmpegExe } from "../library/preview-media.mjs";
 
 const run = promisify(execFile);
@@ -15,19 +16,40 @@ const run = promisify(execFile);
 const GAP = 0.6, PER_SHOT = 2;
 const r3 = (n) => Math.round(n * 1000) / 1000;
 
+/** Text being typed: typing, types / typed out (or in), type-on, a typewriter, a keyboard, a caret, gõ chữ. Not the noun "type" (a
+ *  film's type block, a typeface): Test 20 got 13 typing sounds from "the type block slides in". */
+export const TYPING = /\btyping\b|\btyp(?:es|ed)\s+(?:out|in)\b|\btype-on\b|\btypewriter|\bkeyboard|\bcaret\b|g[õo] ch[ữu]/i;
+
+// What a frame's transition says: one continuous scene (no cut: a camera move, a match cut), a soft dissolve, or a real change of picture.
+const CONTINUOUS = /\bcontinu|same (scene|shot|place|room|set|location|frame)|match[- ]?cut|(one|single) (shot|take)|\boner\b|no cut|seamless|cùng (một )?(cảnh|khung)|cảnh liền|liền mạch|không cắt|nối tiếp/i;
+const SOFT = /cross-?fade|dissolve|\bfades?\b|mờ dần|hoà tan|hòa tan/i;
+const CHANGE = /whoosh|swoosh|swish|whip|wipe|swipe|slide|spin|flip|iris|smash|\bcut\b|cutaway|\btransition\b|new (scene|place|location)|chuyển cảnh|cắt sang|cảnh mới/i;
+const said = (t) => (!String(t ?? "").trim() ? null : CONTINUOUS.test(t) ? "continuous" : SOFT.test(t) ? "soft" : CHANGE.test(t) ? "change" : null);
+/** Does the cut into shot `s` (after `prev`) get a whoosh? Only where the picture really changes: the frame's `transition_in` says so
+ *  (a cut, a wipe, a whip…), its `- location:` differs from the shot before's, or the Motion Plan places a transition at the shot's start.
+ *  One continuous scene, a dissolve, or a cut that nothing describes: none (Test 20 got 10 whooshes over one continuous scene). */
+export function whooshInto(s, prev, plan = null) {
+  const own = said(s.transitionIn);
+  if (own === "continuous" || own === "soft") return false;
+  const a = String(prev?.location ?? "").trim().toLowerCase(), b = String(s.location ?? "").trim().toLowerCase();
+  if (a && b) return a !== b;
+  if ((plan?.shots?.find((x) => x.shot === s.number)?.motions ?? []).some((m) => m.type === "transition" && (Number(m.start) || 0) <= 0.5)) return true;
+  return own === "change";
+}
+
 /** The automatic cues: [{ shot, index, name, offset, start, auto: true }] (start = the shot's start, offset within it). */
 export function autoCues(shots, plan = null) {
   const placed = shots.filter((s) => s.start != null && s.duration).sort((a, b) => a.start - b.start);
   const out = [];
   placed.forEach((s, i) => {
-    if (i > 0) out.push({ shot: s.number, index: s.index, name: "whoosh", offset: 0, start: r3(Math.max(0, s.start - 0.2)), auto: true });       // lands on the cut
+    if (i > 0 && whooshInto(s, placed[i - 1], plan)) out.push({ shot: s.number, index: s.index, name: "whoosh", offset: 0, start: r3(Math.max(0, s.start - 0.2)), auto: true });       // lands on the cut
     const motions = plan?.shots?.find((x) => x.shot === s.number)?.motions ?? [];
     let n = 0;
     for (const m of [...motions].sort((a, b) => (a.start ?? 0) - (b.start ?? 0))) {
       if (n >= PER_SHOT) break;
       const at = r3(s.start + (Number(m.start) || 0));
       if (at >= s.start + s.duration) continue;
-      const typed = /\btyp(e|es|ed|ing|ewriter)\b|keyboard|caret|g[õo] ch[ữu]/i.test(`${m.behavior ?? ""} ${m.target ?? ""}`);
+      const typed = TYPING.test(`${m.behavior ?? ""} ${m.target ?? ""}`);
       if (typed) { out.push({ shot: s.number, index: s.index, name: "typing", offset: 0, start: at, auto: true }); n++; }
       else if (m.type === "entrance" || m.type === "text") { out.push({ shot: s.number, index: s.index, name: "pop", offset: 0, start: at, auto: true }); n++; }
     }
@@ -124,7 +146,9 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   let cues = afterWords(mixCues(shots, plan), words);
   const owned = await applyOwnerSounds(dir, cues, opts);
   const local = await resolveCues(dir, cues, { ...opts, online: false });
-  const rest = local.missing.length ? await resolveCues(dir, cues.filter((c) => local.missing.includes(c.name)), opts) : { added: [], missing: [] };
+  // the names the bundled set lacks, and those on a stand-in while the search did not answer (looked up again)
+  const st0 = readState(dir), ask = new Set([...local.missing, ...cues.map((c) => c.name).filter((n) => st0.sounds[n]?.near)]);
+  const rest = ask.size ? await resolveCues(dir, cues.filter((c) => ask.has(c.name)), opts) : { added: [], missing: [], failed: [], near: [], offline: false };
   const lv = await levels(dir, [...new Set(cues.map((c) => c.name))], opts).catch(() => null);
   if (lv) setVolumes(dir, lv.volumes);
   if (words) {          // the attack of each sound on its cue
@@ -133,9 +157,11 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
     cues = cues.map((c) => ({ ...c, onset: onsets[c.name] ?? 0 }));
   }
   const ends = (shots ?? []).map((s) => Number(s.start) + Number(s.duration)).filter((x) => Number.isFinite(x) && x > 0);
-  const placed = mount(dir, cues, { filmEnd: ends.length ? Math.max(...ends) : null });
+  const near = rest.near ?? [];
+  const placed = mount(dir, cues, { filmEnd: ends.length ? Math.max(...ends) : null, cueKey: cueKey(shots ?? []), left: { missing: rest.missing, near } });
   writeCredits(dir);
-  return { levels: lv, cues: cues.length, placed: placed.length, owned, added: [...local.added, ...rest.added], missing: rest.missing, names: [...new Set(placed.map((p) => p.name))] };
+  return { levels: lv, cues: cues.length, placed: placed.length, owned, added: [...local.added, ...rest.added], missing: rest.missing, failed: rest.failed ?? [],
+    near, offline: !!rest.offline, names: [...new Set(placed.map((p) => p.name))] };
 }
 
 /** Loudness (LUFS, FFmpeg EBU R128): a bed or a voice by its integrated loudness; a short effect by its loudest 400 ms (momentary max),

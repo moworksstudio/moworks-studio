@@ -34,7 +34,7 @@ public static class MwPick {
 /** Open the picker; resolves the chosen folder or null (cancelled). MW_PICK_FOLDER (tests) answers without a dialog. */
 export function pickFolder({ title = "", initial = "" } = {}) {
   if (process.env.MW_PICK_FOLDER !== undefined) return Promise.resolve(process.env.MW_PICK_FOLDER || null);
-  const esc = (s) => String(s).replace(/'/g, "''");
+  // the title and the start folder arrive in the environment, never inside the script (a quote in a folder name ran as code)
   const script = `Add-Type -AssemblyName System.Windows.Forms
 Add-Type -TypeDefinition @'
 ${CS}
@@ -43,11 +43,12 @@ Add-Type -Namespace MW -Name K -MemberDefinition '[DllImport("user32.dll")] publ
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $f = New-Object System.Windows.Forms.Form; $f.TopMost = $true; $f.ShowInTaskbar = $false; $f.Opacity = 0; $f.StartPosition = 'CenterScreen'; $f.Size = '1,1'
 $f.Show(); [MW.K]::keybd_event(0x12, 0, 0, [System.UIntPtr]::Zero); [MW.K]::keybd_event(0x12, 0, 2, [System.UIntPtr]::Zero); $f.Activate()
-$p = [MwPick]::Pick($f.Handle, '${esc(title)}', '${esc(initial)}')
+$p = [MwPick]::Pick($f.Handle, [string]$env:MW_PICK_TITLE, [string]$env:MW_PICK_INITIAL)
 $f.Close()
 if ($p) { [Console]::Out.Write($p) }`;
   return new Promise((ok, no) => {
-    const c = spawn("powershell.exe", ["-NoProfile", "-NonInteractive", "-STA", "-EncodedCommand", Buffer.from(script, "utf16le").toString("base64")], { windowsHide: true });
+    const c = spawn("powershell.exe", ["-NoProfile", "-NonInteractive", "-STA", "-EncodedCommand", Buffer.from(script, "utf16le").toString("base64")],
+      { windowsHide: true, env: { ...process.env, MW_PICK_TITLE: String(title), MW_PICK_INITIAL: String(initial) } });
     let out = "", err = "";
     c.stdout.on("data", (d) => { out += d; }); c.stderr.on("data", (d) => { err += d; });
     const t = setTimeout(() => c.kill(), 15 * 60 * 1000);

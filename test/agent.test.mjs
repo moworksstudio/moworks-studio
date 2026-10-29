@@ -231,6 +231,7 @@ test("Prepare sorts pictures in the scene from actors; one question with three c
 test("the 5-minute prompt cache for every Claude call; effort per step: only the Motion Plan at medium, every other step and the chat at least high", async () => {
   const { claudeEnv } = await import("../packages/system-status/index.mjs");
   assert.equal(claudeEnv({}).FORCE_PROMPT_CACHING_5M, "1");
+  assert.deepEqual([claudeEnv({}).HYPERFRAMES_NO_TELEMETRY, claudeEnv({}).DO_NOT_TRACK], ["1", "1"], "HF's usage data off in Claude's Bash too");
   assert.deepEqual(A.stepEffort("high", { id: "motionSpec", effort: "medium" }), { effort: "medium", rule: "step" });
   assert.deepEqual(A.stepEffort("max", { id: "motionSpec", effort: "medium" }), { effort: "medium", rule: "step" }, "a higher project effort: the Motion Plan stays medium");
   assert.deepEqual(A.stepEffort("medium", { id: "storyboard" }), { effort: "high", rule: "min" });
@@ -345,7 +346,7 @@ test("a step after the approved storyboard never rewrites its frames: they go ba
 test("with a voice service set up, Prepare offers making the voice here first; the Voice screen's settings only", async () => {
   const secrets = await import("../packages/secrets/index.mjs");
   const root = mkdtempSync(join(T, "voice-root-"));
-  assert.match(A.voiceLine({}, root), /no voice service is set up[^]*upload a recording[^]*Settings › Voice/);
+  assert.match(A.voiceLine({}, root), /no voice service is set up[^]*upload a recording[^]*Settings › General › Voice-over/);
   assert.equal(A.voiceLine({ voice: { file: "v.mp3" } }, root), "", "a film with its voice: nothing to offer");
   try { secrets.setSecret("elevenlabs", "sk_test", root); } catch (e) { return; }          // the secret store needs Windows
   const line = A.voiceLine({}, root);

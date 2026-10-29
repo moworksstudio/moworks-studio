@@ -12,13 +12,13 @@ import { useT } from "../i18n.jsx";
 
 const day = (d) => { try { return new Date(d).toLocaleDateString(); } catch { return d ?? ""; } };
 
-/** The last update, as one line in the state colours. */
+/** The last update, as one line in the state colours. No commit hash: the "In use" line above names the version by its date and subject. */
 function LastResult({ last }) {
   const t = useT();
   if (!last?.status) return null;
-  if (last.status === "done") return <p className="state-line ok"><Check size={14} />{t("Updated from {from} to {to}, {when}", { from: last.from, to: last.to, when: ago(last.at) })}</p>;
+  if (last.status === "done") return <p className="state-line ok"><Check size={14} />{t("Updated {when}.", { when: ago(last.at) })}</p>;
   return <p className="state-line stop"><AlertTriangle size={14} />{last.status === "rolled-back"
-    ? t("The update to {to} failed at “{step}”; the app went back to {from}, {when}.", { to: last.to ?? "?", step: t(last.failedAt ?? "?"), from: last.from, when: ago(last.at) })
+    ? t("The update failed at “{step}”; the app went back to the version before, {when}.", { step: t(last.failedAt ?? "?"), when: ago(last.at) })
     : t("The last update failed, {when}.", { when: ago(last.at) })}{last.error ? ` ${t(last.error)}` : ""}</p>;
 }
 
@@ -73,7 +73,9 @@ export default function AppUpdate() {
     {check?.available && <div className="panel">
       <div className="panel-head"><h2>{t("What changed")}</h2><span className="muted num">{t("{n} change(s)", { n: check.ahead ?? check.commits?.length ?? 0 })}</span>
         <button className="btn ok sm end" onClick={() => setAsk(true)} disabled={running || done || blocked.length > 0}><Download size={14} />{t("Update and restart")}</button></div>
-      {blocked.map((b) => <p key={b.code} className="warn-note"><AlertTriangle size={13} />{t(b.message)}</p>)}
+      {/* changed files by their count, never their paths in the repo */}
+      {blocked.map((b) => <p key={b.code} className="warn-note"><AlertTriangle size={13} />{b.code === "LOCAL_CHANGES"
+        ? t("{n} app file(s) were changed on this computer.", { n: b.files?.length ?? 0 }) : t(b.message)}</p>)}
       <ol className="plain upd-commits">{(check.commits ?? []).map((c) => <li key={c.short}><span className="muted">{day(c.date)}</span><span>{c.subject}</span></li>)}</ol>
       {(check.files != null || check.packages) && <p className="hint">{t("{n} file(s) change", { n: check.files ?? 0 })}{check.packages ? ` · ${t("the app's packages change too")}` : ""}</p>}
       {check.changelog && <details className="upd-log"><summary>CHANGELOG.md</summary><pre>{check.changelog}</pre></details>}
@@ -81,13 +83,14 @@ export default function AppUpdate() {
 
     {(running || done) && <div className="panel">
       {running && <p className="state-line run"><Loader2 size={14} className="spin" />{job.stage ? t(job.stage) : t("Starting…")}{job.progress != null ? ` · ${job.progress}%` : ""}</p>}
-      {done && <p className="state-line ok"><RotateCcw size={14} />{t("Updated to {to}. The app restarts now: a new window opens and this one closes.", { to: job.result?.to ?? "" })}</p>}
+      {done && <p className="state-line ok"><RotateCcw size={14} />{check?.latest?.date ? t("Updated to the version of {date}. The app restarts now: a new window opens and this one closes.", { date: day(check.latest.date) })
+        : t("Updated. The app restarts now: a new window opens and this one closes.")}</p>}
     </div>}
 
     {ask && <Dialog title={t("Update and restart?")} onClose={() => setAsk(false)} footer={<><span className="spacer" />
       <button className="btn" onClick={() => setAsk(false)}>{t("Not now")}</button>
       <button className="btn ok" onClick={apply}><Download size={14} />{t("Update and restart")}</button></>}>
-      <p>{t("The app updates to {to} and restarts. Your projects stay as they are. If a step fails, it goes back to the version you have now.", { to: check?.latest ?? "" })}</p>
+      <p>{t("The app updates to the version of {date} and restarts. Your projects stay as they are. If a step fails, it goes back to the version you have now.", { date: day(check?.latest?.date) })}</p>
     </Dialog>}
   </div>;
 }

@@ -3,8 +3,8 @@
 //             skills-manifest.json: Slideshow, or one style per film type of skills/hyperframes/references/types (rules.type), on the
 //             shared pipeline config/hf-pipeline.json; nothing is loaded from the network.
 //   moworks:  General Style: the app's rule pack config/rules/general-style (the Moworks Motion kit's process and taste, rewritten for the
-//             app; the kit's own skill drives kit.py / film.json, which this app does not use), with the SHA-256 of the whole pack and of the
-//             kit files it came from, on top of HyperFrames' skills.
+//             app; the kit's own skill drives kit.py / film.json, which this app does not use), with the SHA-256 of the whole pack and the
+//             kit files it came from (derivedFrom: fixed in config/styles.json; the kit is retired and never read), on top of HyperFrames' skills.
 //   qc:       every style also carries the Moworks QC review (config/rules/moworks-qc, role "qc", read only in the QC step).
 //   lemo-style: a Lemo-Opuscar style: its STYLE.md from the pinned clone (as shipped), the app's rule pack for building such a
 //             film inside HyperFrames (config/rules/lemo-opuscar), HF's core skills and the QC review; the 66 styles come from the clone's
@@ -35,7 +35,7 @@ function sources(root) {
   const skillsRoot = expandEnv(pins.hyperframes.skillsRoot ?? "");
   const manifestFile = join(dirname(skillsRoot), "skills-manifest.json");
   const manifest = existsSync(manifestFile) ? JSON.parse(readFileSync(manifestFile, "utf8")).skills : {};
-  return { pins, skillsRoot, manifest, kitRoot: expandEnv(pins.kit.root ?? "") };
+  return { pins, skillsRoot, manifest };
 }
 
 function skillRef(src, name) {
@@ -53,11 +53,12 @@ function hashFolder(d) {
   walk(d); return h.digest("hex");
 }
 
-/** A Moworks rule pack (a folder under config/rules holding SKILL.md and its references). */
+/** A Moworks rule pack (a folder under config/rules holding SKILL.md and its references). derived: the kit files it was rewritten from,
+ *  as config/styles.json records them ({ name, commit, hash }). */
 function moworksRule(src, root, file, derived, role = null) {
   const path = join(root, file);
   const ok = existsSync(path);
-  const derivedFrom = (derived ?? []).map((k) => { const kp = join(src.kitRoot, k); return { name: k, hash: existsSync(kp) ? sha256(kp) : null }; });
+  const derivedFrom = (derived ?? []).map((k) => ({ ...k }));
   return { kind: "moworks-rule", name: file.split("/").at(-2) ?? file, path, available: ok, hash: ok ? hashFolder(dirname(path)) : null,
     source: "Moworks Motion (adapted)", derivedFrom, ...(role ? { role } : {}) };
 }
@@ -136,7 +137,6 @@ function lemoEntries(src, root, qc) {
       preview: { image: s.styleframe ? `/media/lemo/${s.styleframe}` : null, poster: s.poster ? `/media/lemo/${s.poster}` : null, placeholder: false,
         credit: `LemoLab, CC BY 4.0: a still of the demo film "${s.film}"` },
       demo: { url: s.demoUrl, title: s.film, dur: s.dur },
-      styleMd: `/api/styles/lemo-${s.slug}/style-md`,
       warnings,
       lemo: { slug: s.slug, num: s.num, lineOriginal: s.lineCn, engines: s.engines, voiceExcluded: s.voiceExcluded, fanFilm: s.fanFilm, sceneContent: s.sceneContent,
         subtitles: s.subtitles, fonts: s.fonts, vi: v, fps: lemoFps(lemo.root, s) },
@@ -168,7 +168,6 @@ function mgEntries(src, root, qc) {
       preview: { image: s.card ? `/media/mg/${s.card}` : null, poster: s.card ? `/media/mg/${s.card}` : null, placeholder: false,
         credit: `Vincentwei1021, MIT: the demo film "${s.film}"` },
       demo: { url: s.credit.demo, title: s.film, dur: s.dur },
-      styleMd: `/api/styles/mg-${s.slug}/style-md`,
       warnings,
       mg: { slug: s.slug, filmOriginal: s.filmOriginal, size: s.size, fps: s.fps, score: s.score, engines: s.engines },
       credit: { ...s.credit, url: s.credit.link }, pipeline,
@@ -205,7 +204,7 @@ function anidoodleEntries(src, root, qc) {
       ...(humanHandOf(`anidoodle-${s.id}`, root) ? { characters: true, characterEngine: "anidoodle-human", humanHand: humanHandOf(`anidoodle-${s.id}`, root) } : { characters: false }),
       preview: { image: card, poster: card, placeholder: !card, ...(pv?.video ? { video: `/media/anidoodle/previews/${pv.video}` } : {}),
         credit: `Alex Greenshpun (10x Company), Apache-2.0: ${s.card ? "the medium's tile of the author's style sheet" : "the last frame of the author's plate"}${pv?.video ? `; the film is the author's own drawing film (${s.drawFilm}), rendered here` : ""}` },
-      demo: null, styleMd: `/api/styles/anidoodle-${s.id}/style-md`, warnings: [],
+      demo: null, warnings: [],
       anidoodle: { id: s.id, family: s.family, fps: aniFps(ani.skillDir, s.module), nearest: s.nearest ? `anidoodle-${s.nearest}` : null, module: s.module, drawFilm: s.drawFilm, ...(s.house ? { house: s.house } : {}) },
       credit: { ...s.credit, url: s.credit.link }, pipeline,
     };
@@ -238,7 +237,7 @@ function brushEntries(src, root, qc) {
       // short: what the preview shows, and its credit in the standard form
       demo: true, label: "Preview: Clawd, the kit's sample character",
       credit: "Clawd · ClaudeAnimationBase (John Heibel) · MIT" },
-    demo: null, styleMd: `/api/styles/${BRUSH_ID}/style-md`,
+    demo: null,
     // short; a "route" line is a note, not a warning
     warnings: [{ kind: "route", text: "16:9 only. Each film gets characters of its own." }],
     credit: { author: BRUSH_AUTHOR.name, link: tree, url: tree, commit: kit.commit, licence: "MIT (p5.js LGPL-2.1, p5.brush MIT)", made: "adapted",
@@ -275,7 +274,7 @@ function whatIfEntries(src, root, qc) {
       preview: { image: `/media/what-if/${WI_DEMO.poster}`, poster: `/media/what-if/${WI_DEMO.poster}`, placeholder: false,
         ...(wiMedia(WI_DEMO.video, root) ? { video: `/media/what-if/${WI_DEMO.video}` } : {}), credit: WI_DEMO.credit },
       demo: wiMedia(WI_DEMO.video, root) ? { url: `/media/what-if/${WI_DEMO.video}`, title: WI_DEMO.title, dur: WI_DEMO.dur } : null,
-    } : { preview: { image: null, poster: null, placeholder: true }, demo: null }), styleMd: null,
+    } : { preview: { image: null, poster: null, placeholder: true }, demo: null }),
     warnings: [{ kind: "route", text: "16:9 only. The narration is your own voice-over." }],
     credit: { author: WI_AUTHOR.name, link: tree, url: tree, commit: wi.commit, licence: "MIT", made: "adapted",
       madeNote: "the engine, the cast, the rooms and the two worked episodes as shipped; the steps rewritten for the app (no Remotion, no Python, no ElevenLabs)" },
@@ -319,15 +318,22 @@ export async function warmCatalog(root = APP_ROOT) {
   memo = { root, files, stamp: stamp(files), value };
   return true;
 }
+/** The credit line the gallery and New project show for a style: its author, licence, source at the commit and how it was made; the
+ *  person a source credits for a style its author merged from them (Lemo-Opuscar style.json "by": Memphis Diorama by EianLu) stays in
+ *  it, so the "by" line names them first (it read "by Lemomo" alone, T20-5). The full credit (notes) is on the style's own read. */
+export function listCredit(credit) {
+  if (!credit) return null;
+  const link = credit.url ?? credit.link ?? null;
+  return { author: credit.author, licence: credit.licence ?? null, link, url: link, commit: credit.commit ?? null, made: credit.made ?? null,
+    ...(credit.contributor?.name ? { contributor: { name: credit.contributor.name, url: credit.contributor.url ?? null } } : {}) };
+}
 /** The gallery's and New project's list: every style without what only a project reads (its pipeline, its rule files and their
  *  reading order: GET /api/styles/<id> has them), plus how many rule files it has. */
 export function styleList(root = APP_ROOT) {
   const c = catalog(root);
   return { categories: c.categories, authors: c.authors,
     styles: c.styles.map(({ pipeline, rules, readFirst, credit, ...s }) => ({ ...structuredClone(s), ruleCount: rules?.length ?? 0,
-      design: styleDesign(s), format: styleFormat(s),
-      // the credit line the tiles show; the full credit (how it was made, notes) is on the style's own read
-      credit: credit ? { author: credit.author, licence: credit.licence ?? null, link: credit.url ?? credit.link ?? null, url: credit.url ?? credit.link ?? null, commit: credit.commit ?? null } : null })),
+      design: styleDesign(s), format: styleFormat(s), credit: listCredit(credit) })),
     comingSoon: COMING_SOON.map((x) => structuredClone(x)) };
 }
 
@@ -449,6 +455,8 @@ export function getStyle(id, root = APP_ROOT) {
 /** What a project records when a style is chosen: identity, rule source and the exact versions / hashes loaded. */
 export function selection(style) {
   return { id: style.id, title: style.title, source: style.ruleSource, ...(style.author ? { author: AUTHOR_NAMES[style.author] ?? style.author } : {}),
+    // the person the source credits for the style (Memphis Diorama: EianLu), named first in the film's "by" line
+    ...(style.credit?.contributor?.name ? { contributor: style.credit.contributor.name } : {}),
     ...(style.credit?.commit ? { commit: style.credit.commit } : {}),
     rules: style.rules.map(({ kind, name, hash, hfVersion, role }) => ({ kind, name, hash, ...(hfVersion ? { hfVersion } : {}), ...(role ? { role } : {}) })) };
 }

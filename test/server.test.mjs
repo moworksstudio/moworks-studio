@@ -34,6 +34,32 @@ test("API needs the session token, the server's own Host, and same-origin writes
   assert.equal(status, 403);
 });
 
+test("errors reach the UI without this computer's paths; a system error in plain words", async () => {
+  const { noPaths, plainMessage } = await import("../packages/server/plainError.mjs");
+  assert.equal(noPaths("Folder not found: D:\\Moworks Studio\\projects\\my film"), "Folder not found: my film");
+  assert.equal(noPaths("Cannot read C:/Work/proj/x.json, try again. Then \\\\nas\\share\\films\\a.mp4"), "Cannot read x.json, try again. Then a.mp4");
+  assert.equal(noPaths("open '/home/me/films/a b.json' failed (/tmp/x/)"), "open 'a b.json' failed (x)");
+  assert.equal(noPaths("see https://github.com/a/b/blob/c/d.md, assets/3_audio/sfx/pop.mp3 and 1/2 and/or"), "see https://github.com/a/b/blob/c/d.md, assets/3_audio/sfx/pop.mp3 and 1/2 and/or", "URLs and project paths stay");
+  const enoent = Object.assign(new Error("ENOENT: no such file or directory, open 'D:\\Moworks Studio\\app\\config\\x.json'"), { code: "ENOENT", syscall: "open", path: "D:\\Moworks Studio\\app\\config\\x.json" });
+  assert.equal(plainMessage(enoent), "x.json was not found");
+  assert.equal(plainMessage(Object.assign(new Error("spawn git ENOENT"), { code: "ENOENT", syscall: "spawn git", path: "git" })), "A program the app needs (git) was not found on this computer");
+  assert.equal(plainMessage(Object.assign(new Error("EPERM: operation not permitted, rename 'C:\\a\\b.tmp'"), { code: "EPERM", path: "C:\\a\\b.tmp" })), "Windows refused access to b.tmp: it may be open in another program or read-only");
+  assert.equal(plainMessage(Object.assign(new Error("x"), { code: "EXDEV" })), "The computer could not finish this");
+  assert.equal(plainMessage(Object.assign(new Error("Busy"), { code: "ERROR" })), "Busy", "the app's own codes keep their words");
+  const r = await api("POST", "/api/projects/open", { path: "C:/Work/nowhere/my film" });
+  assert.equal(r.status, 404);
+  assert.equal(r.json.error.message, "Folder not found: my film");
+});
+
+test("Claude Code gets a token of its own: its questions and the app's tools only, never the rest of the API", async () => {
+  const agent = s.agent.permitToken;
+  assert.ok(agent && agent !== "t0k", "not the session token");
+  for (const p of ["/api/health", "/api/projects", "/api/agent/settings", "/api/agent/permitx"]) assert.equal((await api("GET", p, null, { "X-MW-Token": agent })).status, 401, p);
+  assert.equal((await api("POST", "/api/projects/open", { path: "x" }, { "X-MW-Token": agent })).status, 401);
+  for (const p of ["/api/agent/permit", "/api/agent/permit/wait", "/api/agent/tool"]) assert.notEqual((await api("POST", p, {}, { "X-MW-Token": agent })).status, 401, p);
+  assert.notEqual((await api("POST", "/api/agent/permit/wait", {})).status, 401, "the session token works there too");
+});
+
 test("Style Gallery: General Style = the Moworks layer over HyperFrames' skills; every style carries the Moworks QC review", async () => {
   const { json } = await api("GET", "/api/styles");
   const general = json.styles.find((x) => x.id === "general");
@@ -43,9 +69,9 @@ test("Style Gallery: General Style = the Moworks layer over HyperFrames' skills;
   const hf = general.rules.filter((r) => r.kind === "hf-skill").map((r) => r.name);
   assert.deepEqual(hf, [HF_SKILL, "hyperframes-cli", "hyperframes-registry", "media-use"], "HyperFrames' skills under the Moworks layer");
   assert.deepEqual(general.readFirst, ["general-style"], "only its router first: it names the file each step needs (QC #185)");
-  // the retired kit is only on the maintainer's computer: elsewhere its files have no hash (null), never a wrong one
-  const kitRoot = (await import("../packages/version-manager/index.mjs")).loadPins().kit?.root, kitHere = !!kitRoot && existsSync(kitRoot);
-  assert.ok(general.rules[0].derivedFrom.every((k) => /^[0-9a-f]{64}$/.test(k.hash) || (k.hash === null && !kitHere)), "kit sources recorded");
+  // the retired kit's files it was rewritten from: fixed in config/styles.json (the kit is never read), each at the kit's commit
+  assert.ok(general.rules[0].derivedFrom.length && general.rules[0].derivedFrom.every((k) => /^engine\/skill\/moworks-motion\//.test(k.name) && /^[0-9a-f]{40}$/.test(k.commit)
+    && (k.hash === null || /^[0-9a-f]{64}$/.test(k.hash))), "kit sources recorded");
   for (const s of json.styles) {
     const qc = s.rules.filter((r) => r.role === "qc");
     assert.equal(qc.length, 1, `${s.id}: the QC review`);

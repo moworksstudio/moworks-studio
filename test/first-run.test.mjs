@@ -20,18 +20,18 @@ test("portable pins: {app} and {work} filled, this computer's local pins first, 
   mkdirSync(join(root, "bundle", "hf", "skills"), { recursive: true }); mkdirSync(join(root, "bundle", "hf", "registry"), { recursive: true });
   writeFileSync(join(root, "config", "pins.json"), JSON.stringify({
     hyperframes: { skillsRoot: "{app}/nowhere/skills", registryRoot: "{app}/nowhere/registry" },
-    lemo: { root: "{app}/bundle/styles/lemo-opuscar", commit: "x" }, kit: { root: "{work}/moworks-motion" },
+    lemo: { root: "{app}/bundle/styles/lemo-opuscar", commit: "x" },
     storage: { workRoot: "{app}/..", backupRoot: "{work}/backup" }, ffmpeg: { version: "9.0", dir: "{app}/no-ffmpeg" } }));
   const prev = process.env.MW_LOCAL_PINS;
   process.env.MW_LOCAL_PINS = join(T, "local-pins.json");
   try {
     let p = vm.loadPins(root);
     assert.equal(p.lemo.root, `${root}/bundle/styles/lemo-opuscar`);
-    assert.equal(p.kit.root, `${root}/../moworks-motion`);
+    assert.equal(p.storage.backupRoot, `${root}/../backup`);
     assert.equal(p.hyperframes.skillsRoot, join(root, "bundle", "hf", "skills"), "the bundled skills when the configured folder is missing");
     vm.setLocalPins({ "lemo.root": "E:/clones/lemo", "storage.workRoot": "E:/Work" }, root);
     p = vm.loadPins(root);
-    assert.deepEqual([p.lemo.root, p.kit.root, p.storage.backupRoot], ["E:/clones/lemo", "E:/Work/moworks-motion", "E:/Work/backup"]);
+    assert.deepEqual([p.lemo.root, p.storage.backupRoot], ["E:/clones/lemo", "E:/Work/backup"]);
     vm.setLocalPins({ "lemo.root": null }, root);
     assert.equal(vm.loadPins(root).lemo.root, `${root}/bundle/styles/lemo-opuscar`, "a cleared local pin falls back to the default");
   } finally { if (prev === undefined) delete process.env.MW_LOCAL_PINS; else process.env.MW_LOCAL_PINS = prev; }
@@ -72,6 +72,9 @@ test("the library stores that came with the app: one folder per pin; the store f
       for (const f of [`${id}.mp4`, `${id}.webp`]) put(join(root, "bundle", "library", "vocab", "previews", f), "bundled");
     }
     put(join(root, "bundle", "library", "thumbs", "lemo", "a.webp"), "new");
+    // the Lemo fonts' Vietnamese check made by make-bundle, a folder per pinned commit
+    const lemoDir = `lemo-${JSON.parse(readFileSync(join(root, "config", "pins.json"), "utf8")).lemo.commit.slice(0, 7)}`, vi = { "a-style": { status: "missing", families: [{ family: "X", vi: false }] } };
+    put(join(root, "bundle", "library", "lemo", lemoDir, "catalog.json"), JSON.stringify({ vi }));
     // this computer: looks built at an older pin (current.json points at it), blocks built here at the current pin, a vocab preview made here
     put(join(work, "library", "looks", "hf-0.0.1-0000000", "catalog.json"), "old pin"); put(join(work, "library", "looks", "current.json"), JSON.stringify({ dir: "hf-0.0.1-0000000" }));
     put(join(work, "library", "blocks", names.blocks, "catalog.json"), "mine");
@@ -88,6 +91,7 @@ test("the library stores that came with the app: one folder per pin; the store f
     assert.equal(read("vocab", "previews", "001.mp4"), "bundled", "a preview of the item as it is now is taken");
     assert.equal(read("vocab", "previews", "002.mp4"), "mine", "a preview made here stays");
     assert.equal(read("thumbs", "lemo", "a.webp"), "mine", "what is there stays");
+    assert.deepEqual((await import("../packages/lemo-styles/index.mjs")).viChecks(root), vi, "the Lemo check reaches the Style Gallery");
     assert.deepEqual(fr.libraryState(root).stores, { blocks: true, intake: true, looks: true, vocab: true });
     // the next start: nothing new
     assert.ok(!fr.libraryFromBundle(root).copied.some((c) => ["blocks", "looks", "intake", "vocab"].includes(c)));

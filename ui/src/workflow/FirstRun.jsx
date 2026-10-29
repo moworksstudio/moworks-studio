@@ -184,8 +184,10 @@ export default function FirstRun() {
 function SetUp({ d, reload, onLater }) {
   const t = useT();
   const yours = d.items.filter((it) => it.from === "yours" && it.id !== "work" && !it.ready).map((it) => t(it.title));
+  // the user's own steps still missing, by name; none missing: no clause
   const lead = yours.length > 1 ? t("What the app needs on this computer, in order. Choose the work folder, then download the rest in one go; {steps} are steps you do yourself.", { steps: yours.join(t(" and ")) })
-    : t("What the app needs on this computer, in order. Choose the work folder, then download the rest in one go; FFmpeg is the one step you do yourself.");
+    : yours.length === 1 ? t("What the app needs on this computer, in order. Choose the work folder, then download the rest in one go; the one step you do yourself is {step}.", { step: yours[0] })
+      : t("What the app needs on this computer, in order. Choose the work folder, then download the rest in one go.");
   const hide = onLater;
   return <div className="overlay fr-overlay">
     <div className="dialog fr-dialog" role="dialog" aria-modal="true" aria-labelledby="fr-h">

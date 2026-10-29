@@ -41,7 +41,7 @@ export async function details(id, { fetchImpl = fetch, signal, root = APP_ROOT }
     url: x.url, durationS: x.duration != null ? x.duration / 1000 : null, attribution: x.attribution ?? null, provider: x.provider ?? "freesound" };
 }
 
-/** The offline set: Pixabay sounds that HyperFrames ships in its media-use skill (media-use/audio/assets/sfx at the pinned clone; HF's
+/** The offline set: Pixabay sounds that HyperFrames ships in its media-use skill (media-use/audio/assets/sfx in HF's skills at the pinned commit, bundle/hf; HF's
  *  CREDITS.md: "sourced from Pixabay … Pixabay Content License"). They are Pixabay's, not HyperFrames': credited to Pixabay, with the
  *  permalink of the copy HF ships. */
 let bundledCache = null;
@@ -64,14 +64,45 @@ export function matchBundled(name, list) {
   const n = String(name).toLowerCase(), s = slug(name);
   return list.find((b) => b.title === n || `${b.title}.mp3` === n || slug(b.title) === s) ?? null;
 }
+// Words that name the same kind of sound as one of the bundled set (its manifest's descriptions), used only while the sound search does
+// not answer: Openverse answered 504 to every search in Test 20 and "lamp ting", "boat bell" were dropped without a word.
+const NEAR = [
+  [/^(ting|tink|ding|dong|bells?|chimes?|jingle|tinkle)$/, "chime"], [/^(ping|beep|bleep|blip|boop)$/, "ping"],
+  [/^(sparkles?|sparkling|shimmer|twinkle|glitter|glint|shine|magic)$/, "sparkle"], [/^(clicks?|tap|taps|tick|ticks|toggle|button|clack)$/, "click"],
+  [/^(keypress|keystroke)$/, "key-press"], [/^(typing|typewriter|keyboard)$/, "typing"], [/^(pops?|plop|bloop)$/, "pop"],
+  [/^(whoosh|woosh|swoosh|swish|swipe|whip)$/, "whoosh"], [/^(impact|thud|thump|boom|slam|bang|stomp)$/, "impact-bass-1"],
+  [/^(riser|rise|swell)$/, "riser"], [/^(glitch|static|distortion)$/, "glitch-1"], [/^(error|buzzer|buzz|wrong)$/, "error"],
+  [/^(notification|alert|notify)$/, "notification"],
+];
+/** The bundled sound closest to a cue's name, by the name's own words, the last first ("lamp ting": a ting, so the chime); null when no
+ *  word names a kind of sound the set has (water, wind, an oar). */
+export function nearBundled(name, list) {
+  const exact = matchBundled(name, list);
+  if (exact) return exact;
+  for (const w of slug(name).split("-").reverse()) {
+    const key = NEAR.find(([re]) => re.test(w))?.[1];
+    const b = key && list.find((x) => x.title === key);
+    if (b) return b;
+  }
+  return null;
+}
 
-/** Cues of the storyboard: [{ shot, index, name, offset }] ("whoosh@0.4" = 0.4 s after the shot starts; "none" = no sound). */
+const CUE = /^\s*(.+?)\s*(?:@\s*([\d.]+)\s*s?)?\s*$/;
+/** A `- sound:` line that is a list of sound names ("water drip, bell, ting@0.4"), not a sentence about the sound ("nhạc vào nhẹ; tiếng
+ *  nước; "ting" khi đèn sáng"): every part at most 4 words, no quotes or sentence marks. */
+const soundList = (line) => !/[;"“”.!?:()]/.test(String(line).replace(/@\s*[\d.]+/g, "")) && String(line).split(",").every((p) => (CUE.exec(p)?.[1] ?? "").split(/\s+/).length <= 4);
+/** Cues of the storyboard: [{ shot, index, name, offset }] ("whoosh@0.4" = 0.4 s after the shot starts; "none" = no sound). A frame's
+ *  `- sfx:` line; a frame without one has its `- sound:` line read the same way when it is a list of names (Claude wrote
+ *  `- sound: water drip, bell, ting` and the sounds were dropped). */
 export function cuesOf(shots) {
   const out = [];
-  for (const s of shots) for (const part of String(s.sfx ?? "").split(",")) {
-    const m = /^\s*(.+?)\s*(?:@\s*([\d.]+)\s*s?)?\s*$/.exec(part);
-    if (!m || !m[1] || /^none$/i.test(m[1])) continue;
-    out.push({ shot: s.number, index: s.index, name: m[1].toLowerCase(), offset: m[2] ? Number(m[2]) : 0, start: s.start });
+  for (const s of shots) {
+    const line = s.sfx != null ? s.sfx : s.sound != null && soundList(s.sound) ? s.sound : "";
+    for (const part of String(line).split(",")) {
+      const m = CUE.exec(part);
+      if (!m || !m[1] || /^none$/i.test(m[1])) continue;
+      out.push({ shot: s.number, index: s.index, name: m[1].toLowerCase(), offset: m[2] ? Number(m[2]) : 0, start: s.start });
+    }
   }
   return out;
 }
@@ -112,10 +143,13 @@ export function useOwnerSound(dir, name, srcRel, { durationS = null } = {}) {
 }
 
 /** Find a sound for every cue that has none yet: Openverse first (the first result of at most 6 s, else the first), HF's bundled set when
- *  offline or nothing is found. Returns { added: [names], missing: [names], offline }. */
+ *  offline or nothing is found. While the search does not answer (online, but every try failed), a name that only sounds like one of the
+ *  bundled set ("lamp ting": the chime) gets that sound as a stand-in, looked up again the next time the search may answer.
+ *  Returns { added: [names], missing: [names], offline, near: [{ name, as }] } (near: the cues on a stand-in now). */
 export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root = APP_ROOT, online = true } = {}) {
-  const st = readState(dir), local = bundled(root), added = [], missing = [];
-  const names = [...new Set(cues.map((c) => c.name))].filter((name) => !(st.sounds[name] && existsSync(join(dir, st.sounds[name].file))));
+  const st = readState(dir), local = bundled(root), added = [], missing = [], failed = [], near = [];
+  const has = (name) => !!st.sounds[name] && existsSync(join(dir, st.sounds[name].file));
+  const names = [...new Set(cues.map((c) => c.name))].filter((name) => !has(name) || (online && st.sounds[name].near));
   // the searches run four at a time (one at a time took about 5 minutes), each tried twice; one failed search no longer sends
   // every other sound offline (the automatic pass placed 0 of 13 that way): offline only after three names in a row could not be searched
   const hits = new Map();
@@ -131,20 +165,41 @@ export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root =
     const queue = [...names];
     await Promise.all(Array.from({ length: Math.min(4, queue.length) }, async () => { while (queue.length && !offline) { const n = queue.shift(); hits.set(n, await one(n)); } }));
   }
+  // a stand-in for a name the search could not look up (online, and it gave no answer); none in the bundled-only pass (online false)
+  const standIn = (name) => { const b = nearBundled(name, local); return b ? { ...b, near: b.title } : null; };
   for (const name of names) {
-    const h = hits.get(name) ?? null;
+    const h = hits.get(name) ?? null;          // null: the search failed or never ran (offline); []: it answered with nothing
     let item = h ? h.find((x) => x.durationS != null && x.durationS <= MAX_AUTO_S) ?? h[0] ?? null : null;
     item ??= matchBundled(name, local);
-    if (!item) { missing.push(name); continue; }
-    try { await useSound(dir, name, item, { fetchImpl, signal }); added.push(name); }
+    // a stand-in already in use stays until the search finds the sound itself
+    if (!item && has(name)) { near.push({ name, as: st.sounds[name].near }); continue; }
+    if (!item && online && !h) item = standIn(name);
+    const unanswered = online && !h;          // its search failed: said apart from a name the search found nothing for
+    if (!item) { missing.push(name); if (unanswered) failed.push(name); continue; }
+    try { await useSound(dir, name, item, { fetchImpl, signal }); added.push(name); if (item.near) near.push({ name, as: item.near }); }
     catch (e) {
       if (signal?.aborted) throw e;
-      const b = item.source !== "pixabay" && matchBundled(name, local);      // a failed download: the offline sound of that name, if any
-      if (b) { await useSound(dir, name, b); added.push(name); } else missing.push(name);
+      // a failed download: the offline sound of that name, else one that sounds like it
+      const b = item.source !== "pixabay" ? matchBundled(name, local) ?? standIn(name) : null;
+      if (b) { await useSound(dir, name, b); added.push(name); if (b.near) near.push({ name, as: b.near }); } else { missing.push(name); failed.push(name); }
     }
   }
   // offline: no search answered at all (the bundled sounds were the only source)
-  return { added, missing, offline: offline || (online && names.length > 0 && [...hits.values()].every((h) => h == null)) };
+  return { added, missing, failed, near, offline: offline || (online && names.length > 0 && [...hits.values()].every((h) => h == null)) };
+}
+
+/** The Final Mix's line about a placement, for the chat: what was placed, which named sounds use a stand-in and which could not be found
+ *  (the search did not answer, or found nothing), in plain words with no paths. A sound left out or on a stand-in makes it a warning, which
+ *  the chat always shows (Test 20: "placed 6 (pop, typing, whoosh)" and seven named sounds gone without a word). { text, vars, status? } */
+export function placedNote(res) {
+  const quote = (xs) => xs.map((x) => `"${x}"`).join(", ");
+  const near = (res.near ?? []).filter((x) => !res.names || res.names.includes(x.name));
+  const failed = (res.missing ?? []).filter((m) => (res.failed ?? []).includes(m)), none = (res.missing ?? []).filter((m) => !failed.includes(m));
+  const parts = ["Sound effects placed by the app: {n} ({names})"], vars = { n: res.placed ?? 0, names: res.names?.length ? res.names.join(", ") : "none" };
+  if (near.length) { parts.push("A close built-in sound stands in for now: {near}"); vars.near = near.map((x) => `"${x.name}" (${x.as})`).join(", "); }
+  if (failed.length) { parts.push("Left out because the sound search did not answer: {failed}. Press Place them again in the Final Mix later"); vars.failed = quote(failed); }
+  if (none.length) { parts.push("No sound found for {missing}: ask Claude for other names"); vars.missing = quote(none); }
+  return parts.length > 1 ? { text: `${parts.join(". ")}.`, vars, status: "warning" } : { text: parts[0], vars };
 }
 
 const BEGIN = "<!-- mw:sfx (Moworks Studio: the storyboard's sfx: cues; rewritten on every change) -->", END = "<!-- /mw:sfx -->";
@@ -157,7 +212,7 @@ const ALWAYS_KEPT = new Set(["data-volume"]);          // a volume set by hand i
  * edits these elements too (HF first), so an element that is still there with the same sound keeps what Studio wrote: its
  * data-hf-id and any other attribute the app does not set, its volume, and, while the storyboard has not moved that cue, its timing.
  */
-export function mount(dir, cues, { filmEnd = null } = {}) {
+export function mount(dir, cues, { filmEnd = null, cueKey: key = undefined, left = undefined } = {}) {
   const st = readState(dir), f = join(dir, "index.html");
   let html = readFileSync(f, "utf8");
   // a 181 s "film-projector" clip went into a 40 s film from 0 s and covered the whole SFX lane. A clip plays at most
@@ -199,8 +254,21 @@ export function mount(dir, cues, { filmEnd = null } = {}) {
   }
   writeFileSync(f, html);
   st.mounted = placed;
+  st.placedAt = new Date().toISOString();          // the Editor reads the Final Mix again when this changes (GET /pipeline's sfx)
+  if (key !== undefined) st.cueKey = key;          // the storyboard's named cues this placement was made from
+  if (left !== undefined) st.left = left;          // { missing, near }: named sounds left out or on a stand-in (GET /mix)
   saveState(dir, st);
   return placed;
+}
+
+/** The storyboard's named cues as one line ("1:whoosh@0|3:lamp ting@2.1"), whatever their times: what a placement was made from. */
+export const cueKey = (shots) => cuesOf(shots).map((c) => `${c.shot}:${c.name}@${c.offset}`).sort().join("|");
+/** Did the storyboard's named cues change since the sounds were last placed? false while none were ever placed (the Final Mix places
+ *  them first). A placement from before cueKey was kept counts as changed once. */
+export function cuesChanged(dir, shots) {
+  const st = readState(dir);
+  if (!st.mounted && st.cueKey == null) return false;
+  return st.cueKey !== cueKey(shots);
 }
 
 /** The Final Mix's "Place" again: the cues the user took off come back. */
@@ -244,7 +312,7 @@ export async function apply(dir, shots, opts = {}) {
   const st = readState(dir);
   if (!cues.length && !(st.mounted ?? []).length) return { cues: 0, placed: 0, added: [], missing: [] };
   const res = await resolveCues(dir, cues, opts);
-  const placed = mount(dir, cues);
+  const placed = mount(dir, cues, { cueKey: cueKey(shots), left: { missing: res.missing, near: res.near } });
   writeCredits(dir);
   return { cues: cues.length, placed: placed.length, ...res };
 }

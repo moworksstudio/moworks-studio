@@ -10,9 +10,9 @@
 // tools do. The HyperFrames calls stay in the lab tools (child processes) or come from the caller, so this package is outside that
 // boundary.
 import { execFile, spawn, spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { basename, extname, join, resolve } from "node:path";
+import { basename, extname, isAbsolute, join, relative, resolve } from "node:path";
 import { APP_ROOT } from "../version-manager/index.mjs";
 import * as kit from "../character-kit/index.mjs";
 import { brushGate } from "../character-kit/brushgate.mjs";
@@ -71,14 +71,17 @@ export function newId(text, root = APP_ROOT) {
 }
 
 const fill = (t, v) => Object.entries(v).reduce((s, [k, x]) => s.split(`{{${k}}}`).join(x ?? ""), t);
-/** A reference picture into the lab (a data: URL or a file path): its path relative to the lab, or null. */
-function placePicture(lab, image) {
+/** Is `p` a file inside `dir` (links followed, so a junction cannot lead out)? */
+const inside = (dir, p) => { try { const rel = relative(realpathSync(dir), realpathSync(p)); return !!rel && !rel.startsWith("..") && !isAbsolute(rel); } catch { return false; } };
+/** A reference picture into the lab (a data: URL, as the creator sends it, or a file in the character library): its path relative to
+ *  the lab, or null. A file anywhere else on the disk is refused. */
+function placePicture(lab, image, root) {
   if (!image) return null;
   mkdirSync(join(lab, "reference"), { recursive: true });
   const m = /^data:image\/(png|jpe?g|webp);base64,(.+)$/s.exec(String(image));
   if (m) { const f = `reference/picture.${m[1].replace("jpeg", "jpg")}`; writeFileSync(join(lab, f), Buffer.from(m[2], "base64")); return f; }
-  if (existsSync(image) && /\.(png|jpe?g|webp)$/i.test(image)) { const f = `reference/picture${extname(image).toLowerCase()}`; cpSync(image, join(lab, f)); return f; }
-  throw Object.assign(new Error("The reference picture must be a PNG, JPEG or WebP"), { code: "INVALID" });
+  if (/\.(png|jpe?g|webp)$/i.test(image) && inside(kit.mediaRoot(root), image)) { const f = `reference/picture${extname(image).toLowerCase()}`; cpSync(image, join(lab, f)); return f; }
+  throw Object.assign(new Error("The reference picture must be a PNG, JPEG or WebP added in the creator"), { code: "INVALID" });
 }
 function copyTools(lab, names, root) {
   mkdirSync(join(lab, "tools"), { recursive: true });
@@ -93,7 +96,7 @@ export function prepareLab(job, root = APP_ROOT) {
   if (!st) throw Object.assign(new Error(`No such style: ${engine}${hand ? ` / ${hand}` : ""}`), { code: "INVALID" });
   const lab = join(labRoot(root), job.jobId);
   rmSync(lab, { recursive: true, force: true }); mkdirSync(lab, { recursive: true });
-  const pic = placePicture(lab, image);
+  const pic = placePicture(lab, image, root);
   const vars = { DESCRIPTION: description, ID: id, NAME: name ? `${name} (use exactly this name, in its name and wherever its about names it)` : "(choose one from the description, and use it in its name and its about)", HAND: hand ?? "brush", HAND_LABEL: st.label, RIG_LABEL: rigLabel, RENDER: st.render ?? "",
     REFERENCE: pic ? `A reference picture: \`${pic}\` (look at it with Read; the character must read as it).\n` : "",
     CHANGE: change ? `\nThis character already exists (its files are in place, from the library): change it as asked, keep everything else as it is. The change: ${change}\nDraw the sheet again after the change and look at it: the change must show. End your reply with one line \`Changed: <what you changed>\`, and, for any part you could not do, one line \`Could not: <what, and why: e.g. the character layer has no such part>\`. Keep the two labels \`Changed:\` and \`Could not:\` in English (the app reads them); write what follows them in the language of the description.\n` : "" };
@@ -380,7 +383,8 @@ export const kindOf = (c) => (c?.rig && c.made === "as shipped" && kit.AUTHOR_RI
  *  new Brush character is approved only after a pass too. Each member says whether it came from the library in its own style
  *  (ownStyle, only its gate to run). */
 export async function filmGate(projectDir, { root = APP_ROOT, signal = null } = {}) {
-  const all = readJson(join(projectDir, kit.CAST_FILE), { characters: [] }).characters ?? [], runs = new Map(), out = [];
+  // a bare list in CHARACTERS.json is the cast too (kit.readCast reads both)
+  const all = kit.readCast(projectDir).characters, runs = new Map(), out = [];
   const cast = all.filter((c) => c?.engine === kit.HUMAN_ENGINE), brush = all.filter((c) => c && c.engine !== kit.HUMAN_ENGINE);
   if (brush.length) {
     const { stillStd } = await import("../hf-qa/gates.mjs");

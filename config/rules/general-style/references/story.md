@@ -59,7 +59,8 @@ HyperFrames' storyboard format). 1-2 sentences per spoken beat (6-20 words), con
 ("Content, sentiment, reach, in one place"): each cue is a moment something new appears on screen. Silent beats are fine.
 A brief that already holds the narration: keep its words when the owner wants it verbatim (cut only at sentence / clause boundaries),
 else restructure it. A recorded voice-over (its saved transcript is `transcript.json`) is the narration: time the film to it, never edit it, within the
-film's length set in New project; a voice longer than that length is the owner's choice (moworks-studio §2b), never a longer film.
+film's length set in New project; a voice longer than that length is the owner's choice (moworks-studio §2b), never a longer film, and
+so is a voice well short of it, never a wordless stretch you add on your own.
 Shapes that work, by role:
 - Hook: a punchy claim whose key word swaps or escalates; a relatable line typed and corrected live; "could be X, or Y, or Z? No: it is
   all of them"; one number counting up, no context yet; one small widget turning into the big claim.

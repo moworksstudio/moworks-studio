@@ -28,8 +28,8 @@ test("an anidoodle film edited after its bundle is bundled again before a look; 
   assert.ok((await freshFilm(d)).error, "a compile error comes back as words, never a throw");
 });
 
-test("the server's looks (a chat fix's stills, Tech checks) use the one shared function", () => {
-  for (const f of ["index.mjs", "production.mjs"]) {
+test("the server's looks (Tech checks) use the one shared function", () => {
+  for (const f of ["production.mjs"]) {          // index.mjs lost its chat-fix stills route (sweep 29/10)
     assert.match(readFileSync(new URL(`../packages/server/${f}`, import.meta.url), "utf8"), /import \{ freshFilm \} from "\.\.\/hf-edit\/codeFilm\.mjs";/, f);
   }
 });

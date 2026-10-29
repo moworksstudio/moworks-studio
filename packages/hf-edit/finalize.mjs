@@ -209,7 +209,7 @@ async function applyFonts(projectDir, file, html, report, hfAliases, { googleFon
     for (const f of map[kitName]) {
       const dst = join(projectDir, "assets", "_app", "fonts", "kit", f.file.split("/").pop());
       if (!existsSync(dst)) {
-        if (!existsSync(join(kitDir, f.file))) throw Object.assign(new Error(`The bundled font ${f.file} is not downloaded yet (Settings > Health > Download)`), { code: "FONTS_MISSING" });
+        if (!existsSync(join(kitDir, f.file))) throw Object.assign(new Error(`The bundled font ${f.file} is not downloaded yet (Settings › System › Download all)`), { code: "FONTS_MISSING" });
         mkdirSync(dirname(dst), { recursive: true }); copyFileSync(join(kitDir, f.file), dst);
       }
     }

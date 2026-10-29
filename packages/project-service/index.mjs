@@ -69,8 +69,6 @@ export function cleanAnswers(a, styleId = null) {
   return out;
 }
 
-/** Rough narration words for a length: 150 spoken words a minute. */
-export const wordsFor = (sec) => Math.round(sec / 60 * 150);
 export const countWords = (text) => (String(text ?? "").trim().match(/\S+/g) ?? []).length;
 
 function isHfProject(dir) {

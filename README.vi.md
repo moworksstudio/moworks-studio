@@ -235,6 +235,7 @@ Mọi style còn theo hai bộ luật chung của app: **phim luôn sống độ
    | Thành phần Python (xuất After Effects, đọc PSD / PowerPoint / PDF, phân tích nhịp nhạc, canh thời gian lời bài hát) | khoảng 160 MB | tải bằng **Download all** |
    | Whisper, để canh thời gian lời đọc và lời bài hát | khoảng 1,7 GB kèm engine | tuỳ chọn |
    | Thư viện CUDA cho Whisper, trên card đồ hoạ NVIDIA | khoảng 1,3 GB | tuỳ chọn, chỉ đề xuất khi máy có card phù hợp |
+   | FFmpeg 9.0 | cài bằng winget, không phải bởi app | bạn tự chạy dòng winget mà màn hình hiện ra |
    | Skill và registry của HyperFrames, font, thư viện code, nguồn film style, thư viện | có sẵn trong repo | không cần tải |
 5. **Thêm key giọng đọc** *(tuỳ chọn)*: Settings › General › Voice-over. Key được mã hoá cho tài khoản Windows của bạn.
 6. **Làm phim:** Projects › New project.
@@ -288,7 +289,7 @@ Settings › Update đưa thư mục app lên bản mới nhất của repo này
 lại giao diện, kiểm tra app khởi động được rồi khởi động lại. Nếu một bước lỗi, thư mục quay về đúng commit trước đó. Chỉ những file git
 theo dõi mới thay đổi; dự án, thư viện, cài đặt và key của bạn không bao giờ bị đụng tới.
 
-Bạn cũng có thể cập nhật bằng tay: đóng app, chạy `git pull` trong thư mục app, rồi mở lại `Moworks Studio.bat`.
+Bạn cũng có thể cập nhật bằng tay: đóng app, chạy `git pull`, `npm install` và `npm run build` trong thư mục app, rồi mở lại `Moworks Studio.bat`.
 
 ## Xử lý sự cố
 
@@ -312,7 +313,7 @@ Các giới hạn đã biết nằm ở [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
 - **Claude** chạy qua Claude Code bằng tài khoản của chính bạn; app không bao giờ xử lý mật khẩu của bạn.
 - **Dự án nằm trên máy.** Brief, chất liệu và phim nằm trong thư mục dự án. Claude đọc chúng qua Claude Code để làm việc; ngoài ra không gì
   tải chúng lên.
-- **Backup của app:** tắt, trừ khi bạn chọn một thư mục backup.
+- **Backup của app:** tắt, trừ khi một thư mục backup (`storage.backupRoot`) được đặt trong cài đặt cục bộ của máy này.
 - **Không telemetry.** Telemetry và kiểm tra cập nhật của HyperFrames bị tắt; app không gửi dữ liệu sử dụng. Truy cập mạng chỉ dành cho các
   dịch vụ bạn dùng (Claude, dịch vụ giọng đọc, Mixkit và Openverse khi bạn cần nhạc hoặc hiệu ứng âm thanh, và việc tải thành phần).
 

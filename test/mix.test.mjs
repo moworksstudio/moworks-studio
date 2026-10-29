@@ -10,7 +10,7 @@ import { join } from "node:path";
 import { librarySearch, scoreCard, searchText, words } from "../packages/library/search-tool.mjs";
 import { HF_SKILL, SCRIPTS, listScripts, needsWeb, runScript } from "../packages/hf-edit/hf-scripts.mjs";
 import { creditMusic, optionsText, readOptions, saveOptions } from "../packages/sfx/music.mjs";
-import { autoCues, mixCues } from "../packages/sfx/auto.mjs";
+import { TYPING, autoCues, mixCues } from "../packages/sfx/auto.mjs";
 import { ffmpegExe } from "../packages/library/preview-media.mjs";
 
 const T = mkdtempSync(join(tmpdir(), "mw-mix-"));
@@ -105,15 +105,41 @@ test("Final Mix music: only Mixkit audio links are downloaded, each round kept, 
   assert.match(credits, /Rain.*Mixkit Stock Music Free License.*not for TV or radio broadcast/);
 });
 
-test("Final Mix sound effects: a whoosh into each cut, a pop when something enters, typing for typed text, spaced; the storyboard's own cues first", () => {
-  const shots = [{ number: 1, index: 0, start: 0, duration: 3 }, { number: 2, index: 1, start: 3, duration: 3, sfx: "chime@0.5" }, { number: 3, index: 2, start: 6, duration: 4 }];
+test("Final Mix sound effects: a whoosh into a cut that changes the picture, a pop when something enters, typing for typed text, spaced; the storyboard's own cues first", () => {
+  const shots = [{ number: 1, index: 0, start: 0, duration: 3 }, { number: 2, index: 1, start: 3, duration: 3, sfx: "chime@0.5", transitionIn: "whip pan" },
+    { number: 3, index: 2, start: 6, duration: 4 }];
   const plan = { shots: [
     { shot: 1, motions: [{ type: "entrance", start: 0.3, target: "Title" }, { type: "entrance", start: 0.5, target: "Sub" }, { type: "entrance", start: 1, target: "Third" }] },
-    { shot: 3, motions: [{ type: "text", start: 1.2, target: "Caption", behavior: "typed out letter by letter, typewriter caret" }] }] };
+    { shot: 3, motions: [{ type: "transition", start: 0, target: "#wipe" }, { type: "text", start: 1.2, target: "Caption", behavior: "typed out letter by letter, typewriter caret" }] }] };
   const auto = autoCues(shots, plan);
   assert.deepEqual(auto.map((c) => [c.name, c.start]), [["pop", 0.3], ["pop", 0.5], ["whoosh", 2.8], ["whoosh", 5.8], ["typing", 7.2]]);
   const all = mixCues(shots, plan);
   assert.deepEqual(all.map((c) => [c.name, c.start]), [["pop", 0.3], ["whoosh", 2.8], ["chime", 3.5], ["whoosh", 5.8], ["typing", 7.2]], "0.6 s apart; the named cue kept");
+});
+
+test("typing only for text being typed: the noun \"type\" (a type block, a typeface) is no keyboard (Test 20: 13 typing sounds)", () => {
+  for (const t of ["the type block slides in", "Type: bold display typeface", "set the type tighter", "types of lamps", "kinetic type rises"]) assert.doesNotMatch(t, TYPING, t);
+  for (const t of ["typing the headline", "the caption types out", "the name is typed out letter by letter", "type-on reveal", "a typewriter", "keyboard clicks", "the caret blinks", "gõ chữ từng chữ"]) assert.match(t, TYPING, t);
+  const shots = [{ number: 1, index: 0, start: 0, duration: 4 }];
+  const plan = { shots: [{ shot: 1, motions: [{ type: "entrance", start: 0.5, target: ".type-block", behavior: "the type block slides in from the left" }] }] };
+  assert.deepEqual(autoCues(shots, plan).map((c) => c.name), ["pop"]);
+});
+
+test("a whoosh only where the picture really changes: one continuous scene, a dissolve or a cut nothing describes gets none (Test 20: 10 whooshes)", () => {
+  const at = (extra) => [{ number: 1, index: 0, start: 0, duration: 3, ...extra[0] }, { number: 2, index: 1, start: 3, duration: 3, ...extra[1] }];
+  const whooshes = (shots, plan = null) => autoCues(shots, plan).filter((c) => c.name === "whoosh").length;
+  assert.equal(whooshes(at([{}, {}])), 0, "nothing tells: no whoosh");
+  assert.equal(whooshes(at([{}, { transitionIn: "cùng một cảnh, máy bay lên và trượt dọc phố" }])), 0, "the same scene, a camera move");
+  assert.equal(whooshes(at([{}, { transitionIn: "match cut on the lamp" }])), 0);
+  assert.equal(whooshes(at([{}, { transitionIn: "crossfade" }])), 0, "a dissolve is no whoosh");
+  assert.equal(whooshes(at([{}, { transitionIn: "hard cut to the street" }])), 1);
+  assert.equal(whooshes(at([{}, { transitionIn: "whip pan" }])), 1);
+  assert.equal(whooshes(at([{ location: "Kitchen" }, { location: "kitchen" }])), 0, "the same place");
+  assert.equal(whooshes(at([{ location: "Kitchen" }, { location: "Harbour" }])), 1, "a new place");
+  const plan = (start) => ({ shots: [{ shot: 2, motions: [{ type: "transition", start, target: "#gl wave" }] }] });
+  assert.equal(whooshes(at([{}, {}]), plan(0)), 1, "the plan's transition at the shot's start");
+  assert.equal(whooshes(at([{}, {}]), plan(2)), 0, "a transition later in the shot is no cut");
+  assert.equal(whooshes(at([{}, { transitionIn: "one continuous take" }]), plan(0)), 0, "the frame's own words win");
 });
 
 test("a Final Mix revision is sound only: the picture's check stays valid; a picture change after it still counts", { timeout: 60000 }, async () => {
@@ -164,7 +190,8 @@ test("Final Mix uses the user's own sound when the brief names it as the tick; P
   execFileSync(ffmpegExe(), ["-v", "error", "-y", "-f", "lavfi", "-i", "sine=frequency=880:duration=0.4", join(d, "assets", "audio", "qc-tone.wav")], { windowsHide: true });
   writeFileSync(join(d, "BRIEF.md"), "# Brief\n- assets/audio/qc-tone.wav — the small test sound; plays softly as a tick on each word change.\n- Calm, no other sounds named.\n");
   writeFileSync(join(d, "index.html"), "<div data-composition-id=\"root\" data-width=\"1920\" data-height=\"1080\" data-duration=\"6\">\n</div>");
-  const shots = [{ number: 1, index: 0, start: 0, duration: 3 }, { number: 2, index: 1, start: 3, duration: 3 }];
+  // a hard cut into shot 2: its whoosh (a cut nothing describes gets none since Test 20)
+  const shots = [{ number: 1, index: 0, start: 0, duration: 3 }, { number: 2, index: 1, start: 3, duration: 3, transitionIn: "hard cut" }];
   const plan = { shots: [{ shot: 1, motions: [{ type: "entrance", start: 0.5, target: "Title" }] }] };
   const r = await autoSfx(d, shots, plan, { fetchImpl: async () => { throw new Error("offline"); } });
   assert.deepEqual(r.owned.sort(), ["pop", "tick"], "the brief's tick: the owner's file stands for the entrance cue (and a 'tick' cue)");

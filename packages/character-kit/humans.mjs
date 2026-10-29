@@ -14,8 +14,8 @@ import { humanHandOf } from "../style-catalog/hands.mjs";
 export const handOfStyle = (styleId, root = APP_ROOT) => humanHandOf(styleId, root);
 export const HUMANS_FILE = "CHARACTERS.json";          // an anidoodle film's cast, as a Brush film's (the Brush pipeline reads it); entries carry engine "anidoodle-human"
 const readJson = (f, d = null) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
-/** The film's humans: [{ id, name, about, hand, import, check, made, credit, from }]. */
-export const readHumans = (projectDir) => readJson(join(projectDir, HUMANS_FILE), { characters: [] }).characters ?? [];
+/** The film's humans: [{ id, name, about, hand, import, check, made, credit, from }]; a bare list in the file is read as the cast too. */
+export const readHumans = (projectDir) => { const j = readJson(join(projectDir, HUMANS_FILE), { characters: [] }); return Array.isArray(j) ? j : j?.characters ?? []; };
 
 /** Put saved humans into an anidoodle film (one that draws people). Returns the ids added. */
 export function useHumans(projectDir, ids, { styleId = null, root = APP_ROOT } = {}) {

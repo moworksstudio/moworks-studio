@@ -118,11 +118,11 @@ test("the film-done note is one green block that hands the film over, with no sc
 test("tool lines name a file by its name, a search by its last plain segment, the project's folder as project files", async () => {
   const { shortPath } = await load("/src/editor/ClaudePanel.jsx");
   assert.equal(shortPath(".moworks/rules/general-style/SKILL.md"), "SKILL.md");
-  assert.equal(shortPath("D:/Moworks Studio/projects/human-test-01/BRIEF.md"), "BRIEF.md");
-  assert.equal(shortPath("D:/Moworks Studio/projects/human-test-01"), "project files");
+  assert.equal(shortPath("C:/Work/projects/demo-film/BRIEF.md"), "BRIEF.md");
+  assert.equal(shortPath("C:/Work/projects/demo-film"), "project files");
   assert.equal(shortPath(".moworks/rules/general-style/**/*"), "general-style");
   assert.equal(shortPath(".moworks"), "project files");
-  assert.equal(shortPath(String.raw`D:\Moworks Studio\projects\human-test-01\NOTES.md`), "NOTES.md");
+  assert.equal(shortPath(String.raw`C:\Work\projects\demo-film\NOTES.md`), "NOTES.md");
 });
 
 test("the chat keeps Claude's, the user's and the milestones, leaves out the app's side notices, the running task last", async () => {
@@ -386,11 +386,12 @@ test("a task with no step of its own is named by its label (a storyboard revisio
   assert.doesNotMatch(html, /Changed the film/);
 });
 
-test("a confirm says what the step takes from its estimate in one red line; no basis or closing lines", async () => {
+test("a confirm says what the step takes from its estimate in one line of normal text (red is only for a warning, T20-6); no basis or closing lines", async () => {
   const { default: UsageHint, stepLine } = await load("/src/workflow/usage.jsx");
   const t = (s, v = {}) => s.replace(/\{(\w+)\}/g, (_, k) => v[k] ?? "");
   const html = await render(h(UsageHint, { projectId: "p1", line: stepLine(t, "Claude makes Option B2 from your feedback", { minutes: 12, costUsd: 3.04, basis: "this film", runs: 2 }) }));
-  assert.match(html, /<p class="dlg-warn">Claude makes Option B2 from your feedback: about 12 min, about \$3\.04\.<\/p>/);          // the cost in red
+  assert.match(html, /<p class="usage-line">Claude makes Option B2 from your feedback: about 12 min, about \$3\.04\.<\/p>/);
+  assert.doesNotMatch(html, /dlg-warn/, "the time and price are not a warning");
   assert.doesNotMatch(html, /As it did earlier|Usual for this film style|Used so far/);
 });
 

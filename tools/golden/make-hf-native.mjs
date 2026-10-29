@@ -1,5 +1,7 @@
 // Builds the HF-native golden film: scenes as sub-compositions (two registry blocks installed the way `hyperframes add`
 // lays them out, from a local HyperFrames clone) + one templated sub-composition with Vietnamese text.
+// Kept as provenance: test/golden/hf-native was made once with this script, its Inter font and GSAP taken from the vendor folder of the
+// Moworks Motion kit. The kit is retired and gone, so the script cannot run again as written; the golden film is not remade.
 // node tools/golden/make-hf-native.mjs <hyperframes clone> <kit vendor dir> <out dir>
 import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";

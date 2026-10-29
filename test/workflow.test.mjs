@@ -749,20 +749,21 @@ test("the Assets tab: list, missing and new files from Explorer, relink, move, d
   const tc = await api("POST", "/api/projects", { title: "Timecode", brief: "Thử", aspect: "16:9", durationSec: "0:00:12:15", fps: 30, styleId: "slideshow" });
   assert.equal(tc.json.meta.targetDurationSec, 12.5);
   assert.equal((await api("POST", "/api/projects", { title: "Quá dài", brief: "Thử", aspect: "16:9", durationSec: "1:00:00:01", styleId: "slideshow" })).status, 400, "over 60:00");
-  assert.equal((await api("GET", `/api/projects/folder-name?title=X&durationSec=${encodeURIComponent("1:00:00:01")}`)).json.ok, false);
+  assert.equal((await api("POST", "/api/projects/folder", { title: "X", durationSec: "1:00:00:01" })).json.ok, false);
   assert.equal((await api("PATCH", `/api/projects/${tc.json.id}/brief`, { durationSec: "0:00:20:12", text: "Thử" })).status, 200);
   assert.equal((await api("GET", `/api/projects/${tc.json.id}`)).json.meta.targetDurationSec, 20.4);
-  // the brief's output chosen over the New project fields: the project's format, rate and length change, the root follows
+  // the brief's output chosen over the New project fields (Claude's project_format, after the user chose): the project's format, rate
+  // and length change, the root follows
+  const { setOutputFormat } = await import("../packages/project-service/index.mjs");
   const fm = (await api("POST", "/api/projects", { title: "Khổ dọc", brief: "Phim 16:9, 60 fps", aspect: "9:16", durationSec: 20, fps: 30, styleId: "general" })).json;
-  const fr = await api("PATCH", `/api/projects/${fm.id}/format`, { aspect: "16:9", fps: 60, durationSec: "0:30" });
-  assert.equal(fr.status, 200); assert.deepEqual(fr.json.changed, ["aspect", "fps", "durationSec"]);
+  assert.deepEqual(setOutputFormat(fm.id, { aspect: "16:9", fps: 60, durationSec: "0:30", by: "claude" }).changed, ["aspect", "fps", "durationSec"]);
   const fmp = (await api("GET", `/api/projects/${fm.id}`)).json;
   assert.deepEqual([fmp.meta.format.aspect, fmp.meta.format.width, fmp.meta.format.height, fmp.meta.format.fps, fmp.meta.targetDurationSec], ["16:9", 1920, 1080, 60, 30]);
   assert.equal(rootFps(fmp.path), 60); assert.match(readFileSync(join(fmp.path, "index.html"), "utf8"), /data-width="1920"[^>]*data-height="1080"|data-height="1080"[^>]*data-width="1920"/);
   assert.equal(fmp.meta.formatChanges.at(-1).from.aspect, "9:16");
-  assert.equal((await api("PATCH", `/api/projects/${fm.id}/format`, { fps: 50 })).status, 400, "a rate the style does not allow");
-  assert.equal((await api("PATCH", `/api/projects/${b60.id}/format`, { fps: 60 })).status, 400, "Brush: never 60");
-  assert.deepEqual((await api("PATCH", `/api/projects/${fm.id}/format`, { fps: 60 })).json.changed, [], "nothing to change");
+  assert.throws(() => setOutputFormat(fm.id, { fps: 50, by: "claude" }), { code: "INVALID" }, "a rate the style does not allow");
+  assert.throws(() => setOutputFormat(b60.id, { fps: 60, by: "claude" }), { code: "INVALID" }, "Brush: never 60");
+  assert.deepEqual(setOutputFormat(fm.id, { fps: 60, by: "claude" }).changed, [], "nothing to change");
   rmSync(join(dir, "boards", "rounds"), { recursive: true, force: true });
   // Claude's copy tool: a picture already in the project into assets/, sorted by the app or into the folder it names
   mkdirSync(join(dir, ".moworks", "scan", "deck"), { recursive: true });
@@ -990,16 +991,16 @@ test("New project, server side: the real folder name is told, Windows device nam
   assert.equal((await api("POST", "/api/projects/folder", { title: "Just right", durationSec: 3600 })).json.ok, true);
 });
 
-test("GET /api/projects/folder-name answers { folder } for the New project dialog: the real name, or the reason it cannot be used", { timeout: 60000 }, async () => {
-  const get = (q) => api("GET", `/api/projects/folder-name?${new URLSearchParams(q)}`).then((r) => r.json);
+test("POST /api/projects/folder answers the New project dialog: the folder the server will really use, or the reason it cannot be used", { timeout: 60000 }, async () => {
+  const get = (b) => api("POST", "/api/projects/folder", b).then((r) => r.json);
   const free = await get({ title: "Một Tên Chưa Có" });
-  assert.deepEqual([free.ok, free.folder, free.taken, free.reserved, free.maxDurationSec], [true, "mot-ten-chua-co", false, false, 3600]);
+  assert.deepEqual([free.ok, free.name, free.taken, free.maxDurationSec], [true, "mot-ten-chua-co", false, 3600]);
   assert.equal((await api("POST", "/api/projects", { title: "Một Tên Chưa Có", aspect: "16:9", durationSec: 30, styleId: "general" })).status, 200);
   const taken = await get({ title: "Một Tên Chưa Có" });
-  assert.deepEqual([taken.folder, taken.taken], ["mot-ten-chua-co-2", true]);
+  assert.deepEqual([taken.name, taken.taken], ["mot-ten-chua-co-2", true]);
   const reserved = await get({ title: "NUL." });
-  assert.deepEqual([reserved.ok, reserved.folder, reserved.reserved], [false, null, true]);
-  assert.match(reserved.reason, /name Windows keeps for itself/);
+  assert.deepEqual([reserved.ok, reserved.code], [false, "INVALID"]);
+  assert.match(reserved.message, /name Windows keeps for itself/);
   assert.equal((await get({ title: "Quá dài", durationSec: "4000" })).ok, false);
   assert.equal((await get({ title: "" })).ok, false);
 });

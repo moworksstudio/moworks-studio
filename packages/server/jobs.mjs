@@ -1,6 +1,8 @@
 // Background jobs of the app (model install, transcription, text-to-speech, export, QA, Port to AE): one record per job with stage,
 // progress, a short log, result or error, and a Stop. Kept in memory (the last 100); results that matter are also written to disk by the
 // job itself (renders, transcript, QA report, AE result).
+import { plainMessage } from "./plainError.mjs";
+
 export function createJobs({ ended = null } = {}) {          // ended(job): every job's end (the setup checks run again)
   const jobs = new Map();
   let seq = 0;
@@ -28,7 +30,7 @@ export function createJobs({ ended = null } = {}) {          // ended(job): ever
       job.status = ctl.signal.aborted ? "cancelled" : "done";
     }).catch((e) => {
       job.status = ctl.signal.aborted || e?.code === "CANCELLED" ? "cancelled" : "failed";
-      job.error = { code: e?.code ?? "ERROR", message: String(e?.message ?? e), detail: e?.detail ?? null };
+      job.error = { code: e?.code ?? "ERROR", message: plainMessage(e), detail: e?.detail ?? null };          // as the API's errors: no path of this computer
     }).finally(() => {
       job.endedAt = now(); job.stage = job.status;
       const done = [...jobs.values()].filter(({ job: j }) => j.status !== "running");

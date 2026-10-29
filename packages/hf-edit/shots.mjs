@@ -94,7 +94,9 @@ export async function readShots(dir, { version = null } = {}) {
     return { index: f.index, number: f.number ?? i + 1, title: untimedTitle(f.title) || `Shot ${i + 1}`, status: f.status ?? "outline", scene: f.scene ?? "",
       narrative: f.narrative ?? "", voiceover: f.voiceover ?? "", plannedDuration: f.durationSeconds ?? null,
       start: m?.start ?? null, duration: m?.duration ?? f.durationSeconds ?? null, src: m?.src ?? src, mountId: m?.id ?? null, block: f.extra?.block ?? null,
-      sfx: f.extra?.sfx ?? null };        // the app's per-frame sound-effect cues ("whoosh, pop"), resolved and mounted by packages/sfx
+      sfx: f.extra?.sfx ?? null,          // the app's per-frame sound-effect cues ("whoosh, pop"), resolved and mounted by packages/sfx
+      // what the sound effects also read: a `- sound:` line (cues when it is a list of names), HF's `transition_in`, a `- location:`
+      sound: f.extra?.sound ?? null, transitionIn: f.transitionIn ?? null, location: f.extra?.location ?? null };
   });
   // a What If film is one page whose cuts the engine reads from whatif/timeline.json (the app's whatif_plan): frame N is the timeline's
   // shot N (the storyboard is one frame per shot in the edit's order), placed where it is first cut in, not by the frames' planned seconds

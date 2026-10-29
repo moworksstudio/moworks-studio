@@ -133,20 +133,33 @@ test("staging copies the registry original into the project for Claude to read",
   assert.throws(() => blocks.stageForProject(dir, "block/nope"), { code: "NOT_FOUND" });
 });
 
+test("tidyPreviews: an old poster whose original is kept aside goes once the app runs; a poster the catalog names stays", async () => {
+  const { tidyPreviews } = await import("../packages/server/index.mjs");
+  const keep = join(store.dir, "previews-original");
+  mkdirSync(keep, { recursive: true });
+  const named = blocks.getItem(HF).preview.poster?.split("/").pop();
+  for (const f of ["old-thing.png", named].filter(Boolean)) { writeFileSync(join(keep, f), "original"); if (!existsSync(join(store.dir, "previews", f))) writeFileSync(join(store.dir, "previews", f), "old"); }
+  tidyPreviews();
+  assert.ok(!existsSync(join(store.dir, "previews", "old-thing.png")), "the old poster is gone");
+  if (named) assert.ok(existsSync(join(store.dir, "previews", named)), "the catalog's own poster stays");
+  rmSync(keep, { recursive: true, force: true });
+});
+
 test("preview files stay inside the store", () => {
   assert.ok(blocks.mediaFile("previews/block__app-showcase.mp4"));
   for (const bad of ["previews/../catalog.json", "../current.json", "catalog.json", "previews/a/b.mp4", "previews/missing.mp4"]) assert.equal(blocks.mediaFile(bad), null, bad);
 });
 
-test("blocks API: search with facets, item with spec, media without the token, nothing outside", async () => {
-  const r = await api("/library/blocks?q=showcase");
+test("blocks in the library API: search with facets, item with spec, media without the token, nothing outside", async () => {
+  const r = await api("/library?q=showcase&kinds=block,motion");
   assert.equal(r.status, 200);
-  assert.deepEqual(r.json.items.map((x) => x.id), [HF]);
-  assert.deepEqual(r.json.collections, { HyperFrames: 3 });
-  assert.equal(r.json.store.items, 3);
-  const it = await api("/library/blocks/item?id=" + encodeURIComponent(HF));
+  assert.deepEqual(r.json.items.map((x) => x.uid), [`hf:${HF}`]);
+  assert.deepEqual(r.json.authors, { HyperFrames: 3 });
+  assert.equal(r.json.stores.blocks.items, 3);
+  const it = await api("/library/item?uid=" + encodeURIComponent(`hf:${HF}`));
+  assert.equal(it.json.library, "blocks");
   assert.match(it.json.spec, /HyperFrames block: "App Showcase"/);
-  assert.equal((await api("/library/blocks/item?id=block%2Fnope")).status, 404);
+  assert.equal((await api("/library/item?uid=hf%3Ablock%2Fnope")).status, 404);
   const m = await fetch(`http://127.0.0.1:${s.port}/media/blocks/previews/block__app-showcase.mp4`);
   assert.equal(m.status, 200);
   assert.equal(await m.text(), "bytes of app-showcase.mp4");

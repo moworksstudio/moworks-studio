@@ -39,7 +39,7 @@ test("every bundled file is pinned to google/fonts at one commit (OFL), GSAP to 
   assert.equal(g.url, `https://cdn.jsdelivr.net/npm/gsap@${g.version}/dist/gsap.min.js`);
   assert.equal(g.motionPath.url, `https://cdn.jsdelivr.net/npm/gsap@${g.version}/dist/MotionPathPlugin.min.js`, "the plugin at the same version");
   assert.match(g.motionPath.sha256, /^[0-9a-f]{64}$/);
-  assert.equal(loadPins().kit.fontsDir, undefined, "no kit font folder any more");
+  assert.equal(loadPins().kit, undefined, "no kit pin any more (the kit is retired)");
   const t = loadPins().three;
   assert.equal(t.default, "0.184.0");
   assert.deepEqual(Object.keys(t.versions).sort(), ["0.147.0", "0.170.0", "0.181.2", "0.184.0", "0.186.1"], "the default, the versions HF registry blocks pin, and the code-film styles' (audit 53, 55)");

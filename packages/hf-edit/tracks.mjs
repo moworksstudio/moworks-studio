@@ -19,18 +19,20 @@ const r3 = (n) => Math.round(n * 1000) / 1000;
 /** The music plays to the film's end and fades down with the picture (ending.mjs): HyperFrames' own clip-edge fade (data-fade-out,
  *  core/src/audioFade.ts at the pinned version: linear, anchored at the clip's end, honoured in Studio's preview and in the render). HF's render
  *  trims every track at the film's end (engine audioMixer.ts), so a song longer than the film would lose its fade: the clip is fitted to end
- *  with the film (its file's length kept in data-mw-track), so the song covers the content and the fade after it; its fade the ending's
- *  (ending.mjs fadeOfTotal: of the content, shorter after an end card, inside the film's length when MOTION-PLAN.json's ending.inside says
- *  so or the style's author ends the film), a quarter of a song that ends sooner. What the app fitted is kept in data-mw-fit ("length
+ *  with the film (its file's length kept in data-mw-track), so the song covers the content and the fade after it; its fade the ending's:
+ *  the plan's own ending.fade when it gives one (any kind: an author's ending of 2.5 s once got the 105 s film's 5 s, and the music outlasted
+ *  the picture), else ending.mjs fadeOfTotal (of the content, shorter after an end card, inside the film's length when MOTION-PLAN.json's
+ *  ending.inside says so or the style's author ends the film); a quarter of a song that ends sooner. What the app fitted is kept in data-mw-fit ("length
  *  fade"): a length or fade the user changed since (Studio) stays theirs; a stopped music (a cut) and a film placed before the fade are left
  *  as they are. */
 const r2 = (n) => Math.round(n * 100) / 100;
 const metaOf = (dir) => { try { return JSON.parse(readFileSync(join(dir, ".moworks", "project.json"), "utf8")); } catch { return {}; } };
 const endingOf = (dir) => {
   const e = planEnding(dir);
-  return { endCard: e.kind === "endCard", inside: e.inside === true || e.kind === "author" || styleTraits(metaOf(dir).style?.id ?? null).ownEnding };
+  return { endCard: e.kind === "endCard", inside: e.inside === true || e.kind === "author" || styleTraits(metaOf(dir).style?.id ?? null).ownEnding,
+    fade: Number(e.fade) > 0 ? Number(e.fade) : null };
 };
-function fitMusic(a, film, { endCard = false, inside = false } = {}) {
+function fitMusic(a, film, { endCard = false, inside = false, fade = null } = {}) {
   if (a["data-mw-stop"] != null || a["data-fade-out"] == null) return a;
   if (a["data-mw-fit"] != null && a["data-mw-fit"] !== `${a["data-duration"]} ${a["data-fade-out"]}`) return a;          // the user's own
   const start = Number(a["data-start"]) || 0, from = Number(a["data-media-start"]) || 0;
@@ -38,7 +40,8 @@ function fitMusic(a, film, { endCard = false, inside = false } = {}) {
   const len = film > start ? Math.min(plays, film - start) : plays;
   const toEnd = film > 0 && start + len >= film - 0.05;
   a["data-duration"] = String(r3(len));
-  a["data-fade-out"] = String(r2(toEnd ? fadeOfTotal(film, { endCard, inside }) : Math.min(film ? fadeOfTotal(film, { endCard, inside }) : endFade(len, { endCard }), len / 4)));
+  const ending = fade ?? (film ? fadeOfTotal(film, { endCard, inside }) : endFade(len, { endCard }));          // the plan's own fade first
+  a["data-fade-out"] = String(r2(toEnd ? Math.min(ending, len) : Math.min(ending, len / 4)));
   a["data-mw-fit"] = `${a["data-duration"]} ${a["data-fade-out"]}`;
   return a;
 }

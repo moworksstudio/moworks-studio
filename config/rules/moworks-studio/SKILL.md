@@ -1,7 +1,7 @@
 ---
 name: moworks-studio
 description: Moworks Studio's house rules for every film style, read first in every step - the five rules of every film (collisions, readable text, determinism, truth, logos), the guideline or Brand Kit on every piece of text, the client's logo used as given, Vietnamese text, hand-drawn styles under a Brand Kit, character acting, text over a canvas film, and how every film ends. Adds only what HyperFrames and the style leave open.
-version: 1.3.0
+version: 1.3.2
 derived-from: Moworks Motion kit 2.0.4 (Moworks; commit 30b7dcb65808b2a5299ad6a3357280a12773395f) - engine/skill/moworks-motion/SKILL.md step 3 ("Brand") and "Rules in every film" 1-5, workflow/characters.md sections 2, 3 ("Faces", "Hands") and 6 ("Collisions and physics"), brands/other.md; written from the idea for Moworks Studio. HyperFrames (Apache-2.0, 0.8.214 at 4719543) read as shipped where cited. Owner rules 24/10/2026 (#345, #346); the ending, owner 29/10/2026.
 source: https://github.com/moworksstudio/moworks-motion-dev/blob/30b7dcb65808b2a5299ad6a3357280a12773395f/engine/skill/moworks-motion/SKILL.md
 ---
@@ -53,7 +53,10 @@ This is the one rule for every conflict and every gap, in every step and every s
   guideline; a file, link, logo, voice or text the film needs and nobody gave; a voice-over longer than the film's length set in New
   project (a 45.6 s voice made a 40 s film 47.5 s, said only after): offer a longer film (the voice plus the end hold), a shorter
   script with the voice made again, a faster voice (the Voice screen's speed), and tighter pauses only when they add up to the difference;
-  never lengthen the film, drop the end hold or cut the voice on your own; and any change to a Brand Kit value: a colour, or a font that cannot draw Vietnamese or
+  never lengthen the film, drop the end hold or cut the voice on your own; a voice-over well short of that length (an 80 s voice on a
+  100 s film got a 24 s wordless shot, said only after it was drawn): offer a shorter film (the voice plus the end hold), a longer script
+  with the voice made again, or wordless stretches planned with the owner (where each falls and how long); never fill the gap with a
+  wordless or longer shot on your own; and any change to a Brand Kit value: a colour, or a font that cannot draw Vietnamese or
   that the app does not have (offer 2-3 Vietnamese fonts the app can use, nearest first with a short reason, "upload the font file" when
   it is missing, "keep it, accept the missing accents" only when the font exists); the same for the film style's own font (the author's
   face) when it cannot draw the Vietnamese letters the film writes: never swap it for a near one on your own; and a note
@@ -125,6 +128,8 @@ applied to motion graphics, line art, ink or paper styles. With the board stills
 4. **Continuity:** the same costume, the same layout and the same props in the same places across the shots of one place.
 5. **On the word:** an action that illustrates a word lands within about 3 frames of it; a realisation holds about 2 frames before the
    reaction; a landing overshoots and settles (§5); nothing jumps between two frames unless it is meant to (a cut, a flash, a "paste").
+6. **Sounds named:** HyperFrames' `- sound:` line describes a frame's sound in words; the app places effects only from short names. A
+   frame whose sound has effects (a bell, water, a click) also gets `- sfx:` with short English names (`- sfx: bell, water drip`).
 
 The Review scores these under its own criteria (moworks-qc: Composition, Motion, Sync); moworks-alive keeps the still-stretch numbers.
 

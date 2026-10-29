@@ -211,6 +211,14 @@ test("export: checks first, then the render worker at the film's own rate (an fp
   const list = (await api("GET", `/projects/${id}/exports`)).json;
   assert.equal(list.files[0].name, filmName);
   assert.equal((await api("POST", `/projects/${id}/files/reveal`, { path: "../../outside.txt" })).status, 404);
+  // Open hands Windows only films, sounds, pictures, documents and text (no script or program a folder might hold)
+  process.env.MW_NO_OPEN = "1";
+  try {
+    writeFileSync(join(dir, "run.bat"), "@echo off\r\n");
+    assert.equal((await api("POST", `/projects/${id}/files/open`, { path: "run.bat" })).status, 400);
+    assert.equal((await api("POST", `/projects/${id}/files/open`, { path: "renders" })).status, 400, "a folder is not opened");
+    assert.equal((await api("POST", `/projects/${id}/files/open`, { path: done.result.file })).status, 200);
+  } finally { delete process.env.MW_NO_OPEN; rmSync(join(dir, "run.bat"), { force: true }); }
   const again = (await api("POST", `/projects/${id}/exports`, { filename: "Phim thử", quality: "draft", fps: 25 })).json;
   assert.match(again.output, /\d{6}_Phim thử_\d{4,6}(-\d+)?\.mp4$/); assert.notEqual(again.output, done.result.file, "never overwrites");
   assert.ok(!/\(\d+\)/.test(again.output), "never a (2)");
@@ -339,7 +347,7 @@ test("a one-page code film (no scene files) counts as built for the AE export; t
   mkdirSync(cache, { recursive: true });
   writeFileSync(join(cache, "estimate.json"), JSON.stringify({ kind: "canvas", layers: 1, hash: "another film" }));
   writeFileSync(join(cache, "last.json"), JSON.stringify({ status: "done", at: new Date().toISOString(),
-    log: ["  copied to D:/Moworks Studio/projects/x/renders/ae/261027_x_1401", "HF page http://localhost:5000/index.html; out D:/Moworks Studio/projects/x"] }));
+    log: ["  copied to C:/Work/proj/x/renders/ae/261027_x_1401", "HF page http://localhost:5000/index.html; out C:/Work/proj/x"] }));
   const ae2 = (await api("GET", `/projects/${cid}/ae`)).json;
   assert.equal(ae2.estimate, null);
   assert.deepEqual(ae2.last.log, ["  copied to 261027_x_1401", "HF page the film's page; out x"]);

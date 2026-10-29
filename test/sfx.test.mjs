@@ -18,7 +18,6 @@ process.env.MW_BACKUP_ROOT = join(T, "backup");
 const sfx = await import("../packages/sfx/index.mjs");
 const { scaffold } = await import("../packages/hf-edit/scaffold.mjs");
 const { readShots, updateFrame } = await import("../packages/hf-edit/shots.mjs");
-const { startServer } = await import("../packages/server/index.mjs");
 const { render } = await import("../packages/hf-render-worker/client.mjs");
 const { runGates } = await import("../packages/hf-qa/gates.mjs");
 const { expandEnv, loadPins } = await import("../packages/version-manager/index.mjs");
@@ -34,23 +33,30 @@ const online = async (url) => {
   return new Response(readFileSync(sfx.bundled()[0].file));       // any real mp3 stands in for the download
 };
 const offline = async () => { throw new Error("offline"); };
-let dir, s, id;
-const api = async (method, path, body) => {
-  const r = await fetch(`http://127.0.0.1:${s.port}/api${path}`, { method, headers: { "X-MW-Token": "k", ...(body ? { "Content-Type": "application/json" } : {}) }, body: body && JSON.stringify(body) });
-  return { status: r.status, json: await r.json().catch(() => null) };
-};
+let dir;
 
 before(async () => {
   dir = join(T, "work", "projects", "sfx");
   await scaffold(dir, SB, { registryRoot: expandEnv(loadPins().hyperframes.registryRoot) });
-  s = await startServer({ token: "k" });
-  id = (await api("POST", "/projects/open", { path: dir })).json.id;
 });
-after(async () => { await s?.close(); rmSync(T, { recursive: true, force: true }); });
+after(() => rmSync(T, { recursive: true, force: true }));
 
 test("cues: a comma list per frame, an offset with @, none means silent", () => {
   const c = sfx.cuesOf([{ number: 1, index: 1, start: 0, sfx: "Whoosh, pop@0.8" }, { number: 2, index: 2, start: 3, sfx: "none" }, { number: 3, index: 3, start: 6 }]);
   assert.deepEqual(c.map((x) => [x.shot, x.name, x.offset]), [[1, "whoosh", 0], [1, "pop", 0.8]]);
+});
+
+test("cues: a frame's `- sound:` list is read like `- sfx:`; a sentence about the sound is not, and an sfx line wins", async () => {
+  const c = sfx.cuesOf([{ number: 1, index: 1, start: 0, sound: "water drip, Bell, ting@0.4" }, { number: 2, index: 2, start: 3, sound: "none" },
+    { number: 3, index: 3, start: 6, sound: "nhạc vào nhẹ cùng khung mở; tiếng nước; \"ting\" khi đèn sáng" },
+    { number: 4, index: 4, start: 9, sfx: "lamp ting@2.1", sound: "a soft ting, the river" }]);
+  assert.deepEqual(c.map((x) => [x.shot, x.name, x.offset]), [[1, "water drip", 0], [1, "bell", 0], [1, "ting", 0.4], [4, "lamp ting", 2.1]]);
+  // the line reaches the shots from STORYBOARD.md (HF keeps an unknown `- key:` in the frame's extra)
+  const d = join(T, "sound-line"); mkdirSync(d, { recursive: true });
+  writeFileSync(join(d, "index.html"), "<div data-composition-id=\"root\" data-width=\"1920\" data-height=\"1080\"></div>");
+  writeFileSync(join(d, "STORYBOARD.md"), "# Storyboard\n\n## Frame 1 — Drip\n- duration: 3s\n- sound: water drip, bell, ting\n\n## Frame 2 — Harbour\n- duration: 2s\n- transition_in: hard cut\n- location: harbour\n");
+  const { shots } = await readShots(d);
+  assert.deepEqual(shots.map((x) => [x.sound, x.transitionIn, x.location]), [["water drip, bell, ting", null, null], [null, "hard cut", "harbour"]]);
 });
 
 test("search: Freesound through Openverse, CC0 and CC BY only, with the credit line", async () => {
@@ -135,24 +141,19 @@ test("the film with its sounds passes the checks (HF lint included) and renders 
   assert.equal(probe, "audio");
 });
 
-test("API: the user picks a sound for a shot, sees it with its credit, removes it; only CC0 / CC BY ids", async () => {
-  const list = await api("GET", "/sfx/search?q=");
-  assert.ok(list.json.bundled.length >= 19 && list.json.bundled.every((b) => !("file" in b)), "Pixabay set listed, no local paths");
-  const m = await fetch(`http://127.0.0.1:${s.port}/media/sfx/pixabay/click.mp3`);
-  assert.deepEqual([m.status, m.headers.get("content-type")], [200, "audio/mpeg"]);
-  assert.equal((await fetch(`http://127.0.0.1:${s.port}/media/sfx/pixabay/..%2F..%2Fmanifest.json`)).status, 404);
-  assert.ok((await api("GET", `/projects/${id}/sfx`)).json.shots.length >= 3, "the panel's shot picker");
-  const shots = (await readShots(dir)).shots;
-  const shot2 = shots.find((x) => x.number === 2);
-  const r = await api("POST", `/projects/${id}/sfx`, { index: shot2.index, name: "Click", soundId: "pixabay:click" });
-  assert.equal(r.status, 200, JSON.stringify(r.json));
-  assert.equal((await readShots(dir)).shots.find((x) => x.number === 2).sfx, "click");
-  const g = await api("GET", `/projects/${id}/sfx`);
-  assert.ok(g.json.cues.some((c) => c.shot === 2 && c.name === "click"));
-  assert.equal(g.json.sounds.click.licence, "Pixabay Content License");
-  assert.equal((await api("POST", `/projects/${id}/sfx`, { index: shot2.index, name: "x", soundId: "../../etc" })).status, 400);
-  const d = await api("DELETE", `/projects/${id}/sfx?index=${shot2.index}&name=click`);
-  assert.equal(d.status, 200);
+test("a sound picked for a shot: its id read again (CC0 / CC BY, or Pixabay's set), the cue on the shot with its credit; taken off, the file stays", async () => {
+  assert.equal(await sfx.details("../../etc"), null, "only an Openverse id or one of Pixabay's set");
+  const item = await sfx.details("pixabay:click");
+  assert.equal(item.licence, "Pixabay Content License");
+  const shot2 = (await readShots(dir)).shots.find((x) => x.number === 2);
+  await sfx.useSound(dir, "click", item);
+  await updateFrame(dir, shot2.index, { sfx: "click" });
+  await sfx.apply(dir, (await readShots(dir)).shots, { fetchImpl: offline });
+  assert.ok(sfx.cuesOf((await readShots(dir)).shots).some((c) => c.shot === 2 && c.name === "click"));
+  assert.equal(sfx.readState(dir).sounds.click.licence, "Pixabay Content License");
+  assert.ok(readFileSync(join(dir, "index.html"), "utf8").includes('src="assets/3_audio/sfx/click.mp3"'));
+  await updateFrame(dir, shot2.index, { sfx: "" });
+  await sfx.apply(dir, (await readShots(dir)).shots, { fetchImpl: offline });
   assert.equal((await readShots(dir)).shots.find((x) => x.number === 2).sfx, "none");
   assert.ok(!readFileSync(join(dir, "index.html"), "utf8").includes('src="assets/3_audio/sfx/click.mp3"'));
   assert.ok(existsSync(join(dir, "assets", "3_audio", "sfx", "click.mp3")), "the file stays (undo, other shots)");

@@ -30,7 +30,7 @@ export function all(root = APP_ROOT) {
     list.push({ uid: `hf:${it.id}`, origin: "hf", id: it.id, kind: it.kind === "component" ? "motion" : "block", author: it.collection, category: it.category,
       title: it.title, sub: it.kind === "component" ? "HyperFrames component" : "", desc: it.description, poster: it.preview?.poster ? `/media/blocks/${it.preview.poster}` : null,
       video: it.preview?.video ? `/media/blocks/${it.preview.video}` : null, vi: it.vi?.status ?? null, viFamilies: (it.vi?.families ?? []).filter((f) => f.vi !== true).map((f) => f.family),
-      credit: it.credit, previewNote: it.preview?.source === "rendered" ? "Preview rendered here the way HyperFrames makes its own" : it.preview?.source === "kit" ? "Preview from the Moworks kit" : null, tags: it.tags });
+      credit: it.credit, previewNote: it.preview?.source === "rendered" ? "Preview rendered here the way HyperFrames makes its own" : null, tags: it.tags });
   }
   for (const it of looks.items(root)) {
     list.push({ uid: `look:${it.id}`, origin: "look", id: it.id, kind: "look", author: "HyperFrames", category: it.category, title: it.title,
@@ -77,7 +77,7 @@ export function search({ q = "", author = "all", kind = "all", category = "all",
     categories: count(byKind, (x) => x.category) };
 }
 
-/** Read the stores again on the next call (after an import or a keep / drop). */
+/** Read the stores again on the next call (after an import or a delete). */
 export function reload() { cache = null; intake.reloadItems(); vocab.reloadItems(); }
 
 /** The full item with the text for Claude and how the agent stages it (`library`: motion | blocks | looks | intake | vocab). */

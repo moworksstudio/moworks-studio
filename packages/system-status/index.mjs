@@ -1,7 +1,7 @@
 // Health checks behind the Settings screens and the Claude chip in the top bar. Read-only: nothing is installed,
 // downloaded or changed here (sign-in and sign-out are Claude Code's own commands, run only when the user asks). Each check
 // returns { status: "ok" | "warning" | "error", label, detail, action? } in plain words.
-import { execFileSync, spawn, spawnSync } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { join, normalize } from "node:path";
 import { APP_ROOT, checkFfmpeg, expandEnv, installed, loadPins, readState, resolveRuntime } from "../version-manager/index.mjs";
@@ -59,9 +59,10 @@ export function findClaude(root = APP_ROOT) {
 /** The environment every Claude Code call of the app runs with: no API key from the shell (the user's sign-in only), and
  *  MW_CLAUDE_CONFIG_DIR, when set, as Claude Code's own config folder (tests use an empty one to see "signed out" without signing the
  *  user out). The prompt cache lives 5 minutes, not an hour (same model and answers, about -17 % cost: a
- *  step's turns follow each other within minutes, so the dearer 1-hour cache write was rarely read again). */
+ *  step's turns follow each other within minutes, so the dearer 1-hour cache write was rarely read again). HyperFrames' usage data
+ *  stays off for the `npx hyperframes` Claude runs in Bash, as for the app's own HF processes (config/pins.json env). */
 export function claudeEnv(base = process.env) {
-  const env = { ...base, ANTHROPIC_API_KEY: "", FORCE_PROMPT_CACHING_5M: "1" };
+  const env = { ...base, ANTHROPIC_API_KEY: "", FORCE_PROMPT_CACHING_5M: "1", HYPERFRAMES_NO_TELEMETRY: "1", DO_NOT_TRACK: "1" };
   if (base.MW_CLAUDE_CONFIG_DIR) env.CLAUDE_CONFIG_DIR = base.MW_CLAUDE_CONFIG_DIR;
   return env;
 }
@@ -72,15 +73,6 @@ const parseStatus = (exe, version, stdout) => {
   return { installed: true, path: exe, version, loggedIn: !!s.loggedIn, authMethod: s.authMethod ?? null,
     subscriptionType: s.subscriptionType ?? null, email: s.email ?? null, orgName: s.orgName ?? null };
 };
-
-/** Sign-in state of Claude Code (its own `auth status`): { installed, path, version, loggedIn, authMethod, subscriptionType, email }. */
-export function claudeStatus(root = APP_ROOT) {
-  const exe = findClaude(root);
-  if (!exe) return { installed: false, loggedIn: false };
-  const run = (args) => spawnSync(exe, args, { encoding: "utf8", timeout: 20000, windowsHide: true, env: claudeEnv() });
-  const v = run(["--version"]);
-  return parseStatus(exe, (v.stdout ?? "").trim().split(/\s/)[0] || null, run(["auth", "status"]).stdout);
-}
 
 /** Run one Claude Code command without blocking the server; resolves { code, stdout, stderr } (a timeout ends it). */
 function runClaude(exe, args, timeout = 20000) {
@@ -94,7 +86,8 @@ function runClaude(exe, args, timeout = 20000) {
   });
 }
 
-/** claudeStatus without blocking the server's event loop (the server's chip and the agent's sign-in check use this one). */
+/** Sign-in state of Claude Code (its own `auth status`), without blocking the server's event loop (the server's chip and the agent's
+ *  sign-in check): { installed, path, version, loggedIn, authMethod, subscriptionType, email }. */
 export async function claudeStatusAsync(root = APP_ROOT) {
   const exe = findClaude(root);
   if (!exe) return { installed: false, loggedIn: false };
@@ -149,7 +142,7 @@ export function runtimeStatus(root = APP_ROOT) {
   checks.ffmpeg = tryCheck("FFmpeg", () => { const f = checkFfmpeg(root); return ok("FFmpeg / ffprobe", `${f.ffmpeg.split(" Copyright")[0]}`); });
   checks.node = ok("Node.js", process.version);
   // normalize(): one kind of slash (pins.json writes them forward, so the path showed half and half)
-  checks.python = (() => { const p = checkPython(root); return p.ok ? ok("Python (AE export)", normalize(p.message)) : bad("Python (AE export)", p.message, "Install the Python modules listed in config/pins.json"); })();
+  checks.python = (() => { const p = checkPython(root); return p.ok ? ok("Python (AE export)", normalize(p.message)) : bad("Python (AE export)", p.message, "Install from Settings › System"); })();
   const skills = verifySkills(root, { fresh: true });
   const bad0 = Object.entries(skills.skills).filter(([, x]) => !x.ok).map(([n]) => n);
   checks.hfSkills = skills.error ? bad("HyperFrames skills", `${skills.error}. The app fetches only skills/ and registry/ at the pinned commit (about 120 MB).`, "Click Download")
@@ -169,13 +162,13 @@ export function runtimeStatus(root = APP_ROOT) {
     : running ? ok("After Effects", "Installed and running. Export to AE needs it open with no dialog showing.", { installs: ae, running })
     : warn("After Effects", "Installed but not running.", "Open After Effects before Export to AE", { installs: ae, running });
   const wr = workRoot(root);
-  // the real places (not <work>\skills, which does not exist; HyperFrames' skills are the pinned clone or the app's own thin
-  // copy), one kind of slash, and only folders that are there
+  // the real places (not <work>\skills, which does not exist; HyperFrames' skills are the app's own copy of skills/ and registry/
+  // at the pinned commit), one kind of slash, and only folders that are there
   const all = { workRoot: wr, projects: projectsRoot(root), library: join(wr, "library"), skills: expandEnv(loadPins(root).hyperframes?.skillsRoot ?? ""), models: join(wr, "models"),
     logs: join(root, "runtime", "logs") };
   const storage = Object.fromEntries(Object.entries(all).filter(([k, v]) => v && (k === "workRoot" || existsSync(v))).map(([k, v]) => [k, normalize(v)]));
   checks.storage = /My Drive|Google Drive/i.test(wr)
-    ? bad("Storage", "Work folder is on Google Drive; projects must stay off Drive.", "Change storage.workRoot in config/pins.json")
+    ? bad("Storage", "Work folder is on Google Drive; projects must stay off Drive.", "Choose another work folder in Set up")
     : ok("Storage", `Projects and libraries are kept in ${wr} (not on Google Drive).`);
   return { checks, storage };
 }

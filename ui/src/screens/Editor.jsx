@@ -307,6 +307,13 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     if (lastAppWork.current && !appWork) { project.reload(); loadTimeline(); reloadAssets(); pv.send("reload"); setTimeout(loadPosters, 1500); }
     lastAppWork.current = appWork;
   }, [appWork]); // eslint-disable-line react-hooks/exhaustive-deps
+  // the sound effects placed again (the Final Mix's Place, or by the app after Claude changed the storyboard's cues): the SFX lane and the
+  // Final Mix read them again (the dialog showed 26 after only 6 were left: it read them once, 4 s after Place, while the app still searched)
+  const sfxAt = pipeline?.sfx?.at ?? null;
+  const lastSfx = useRef(sfxAt);
+  useEffect(() => {          // the film plays the new sounds too (not on the first read of the pipeline)
+    if (lastSfx.current !== sfxAt) { const was = lastSfx.current; lastSfx.current = sfxAt; loadTimeline(); if (was) pv.send("reload"); }
+  }, [sfxAt]); // eslint-disable-line react-hooks/exhaustive-deps
   // The voice-over's words saved (by the app, or by the user in the Voice screen) put them on the timeline at
   // once, however the Editor heard of it (the transcription can end between two pipeline reads)
   const voiceStamp = `${p?.meta?.voice?.file ?? ""}|${p?.meta?.voice?.transcript?.status ?? ""}|${p?.meta?.voice?.transcript?.savedAt ?? ""}`;
@@ -523,7 +530,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
       {sheet.kind === "lyrics" && <LyricsSheet projectId={id} onChanged={refreshAll} />}
       {sheet.kind === "music-map" && <MusicMapSheet projectId={id} />}
       {sheet.kind === "character" && <CharacterSheet projectId={id} onChanged={refreshAll} />}
-      {sheet.kind === "mix" && <MixSheet projectId={id} project={p} onChanged={refreshAll} />}      {sheet.kind === "assets" && <ImportSheet projectId={id} project={p} onChanged={refreshAll} />}
+      {sheet.kind === "mix" && <MixSheet key={sfxAt ?? "none"} projectId={id} project={p} onChanged={refreshAll} />}      {sheet.kind === "assets" && <ImportSheet projectId={id} project={p} onChanged={refreshAll} />}
     </Sheet></ErrorBoundary></StageCtx.Provider>;
 
   const viewerEl = viewer && fileUrl && <Dialog title={String(viewer).split("/").pop()} onClose={() => setViewer(null)} wide>

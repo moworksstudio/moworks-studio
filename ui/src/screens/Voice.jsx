@@ -233,7 +233,7 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
           {!models.some((m) => m.ready) && <button className="btn ghost sm" onClick={() => go("/settings/runtime")}><Settings2 size={14} />{t("Install a model")}</button>}
         </div>}
       {(tstat === "failed" || tstat === "cancelled") && !running && <Banner kind={tstat === "failed" ? "error" : "warning"}>{tstat === "failed" ? t("The last transcription failed.") + (job?.error ? ` ${job.error.message}` : "") + " " + t("Try again, or pick another model.") : t("The last transcription was stopped.")}</Banner>}
-      {tstat === "pending" && !running && !tr && <Banner kind="warning">{t("Not transcribed yet.")} {models.some((m) => m.ready) ? t("Press Transcribe.") : t("Install a speech-to-text model first (Settings › Voice).")}</Banner>}
+      {tstat === "pending" && !running && !tr && <Banner kind="warning">{t("Not transcribed yet.")} {models.some((m) => m.ready) ? t("Press Transcribe.") : t("Install a speech-to-text model first (Settings › System).")}</Banner>}
 
       {segs && <>
         <div className="transcript-tools">
@@ -372,7 +372,7 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
       setModel(same ?? r.models.find((m) => m.id === r.defaultModel)?.id ?? r.models.find((m) => m.vietnamese)?.id ?? r.models[0]?.id ?? "");          // the server's pick first
     }).catch(setErr);
   }, [provider, keySaved]); // eslint-disable-line react-hooks/exhaustive-deps
-  if (!keySaved) return <section className="panel"><Banner kind="warning" action={<button className="btn sm" onClick={() => go("/settings/general")}>{t("Add key")}</button>}>{t("Add your {name} key in Settings › Voice to choose a voice.", { name })}</Banner></section>;
+  if (!keySaved) return <section className="panel"><Banner kind="warning" action={<button className="btn sm" onClick={() => go("/settings/general")}>{t("Add key")}</button>}>{t("Add your {name} key in Settings › General › Voice-over to choose a voice.", { name })}</Banner></section>;
   const voice = list?.voices.find((x) => x.id === voiceId);
   // the voice settings are left at the service's defaults: only what the user changed is sent
   const fields = list?.settings ?? [];

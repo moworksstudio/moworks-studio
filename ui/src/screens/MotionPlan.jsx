@@ -28,10 +28,10 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /** The library item a row cites: its preview (the clip plays on hover) and its name in the library (name and the library's own
  *  description, no source text). */
-function LibrarySource({ card, id }) {
+function LibrarySource({ card }) {
   const t = useT();
   const [hover, setHover] = useState(false);
-  if (!card) return <span className="chip amber" title={id}>{t("Library: {id}", { id })}</span>;
+  if (!card) return <span className="chip amber">{t("Library item not found")}</span>;          // never the item's id
   return <div className="mp-src" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
     <span className="mp-src-thumb">{hover && card.video ? <video src={card.video} autoPlay muted loop playsInline /> : card.poster ? <img src={card.poster} alt="" loading="lazy" /> : <Film size={14} />}</span>
     <span className="mp-src-t"><b>{card.title}</b></span>
@@ -133,7 +133,7 @@ function ShotCard({ shot, motions, base, types, cardOf, projectId, onSaved, onDi
           {(() => { const what = m.plain || (m.source?.kind === "library" ? cardOf(m.source.id)?.desc || m.behavior : m.behavior);
             return <button type="button" className={"mo-c mo-c-desc" + (full === i ? " full" : "")} onClick={() => setFull(full === i ? null : i)} aria-expanded={full === i}
               title={m.plain && m.behavior ? `${m.plain}\n\n${m.behavior}` : what}><span className={"mo-what" + (m.plain ? " plain" : "")}>{what}</span></button>; })()}
-          <span className="mo-c mo-c-src">{m.source?.kind === "library" ? <LibrarySource card={cardOf(m.source.id)} id={m.source.id} /> : <span className={"src-tag k-" + srcOf(m)} title={m.source?.id || undefined}>{t(SRC[srcOf(m)])}</span>}</span>
+          <span className="mo-c mo-c-src">{m.source?.kind === "library" ? <LibrarySource card={cardOf(m.source.id)} /> : <span className={"src-tag k-" + srcOf(m)} title={t(SRC_HINT[srcOf(m)])}>{t(SRC[srcOf(m)])}</span>}</span>
           <span className="mo-c mo-c-act">
             <button className="btn ghost icon sm" onClick={() => onLibrary.open(shot.number, i)} title={t("Replace with a motion from the library")} aria-label={t("Replace with a motion from the library")}><Library size={14} /></button>
             <button className="btn ghost icon sm" onClick={() => setEditing(editing === i ? null : i)} aria-expanded={editing === i} aria-label={t("Edit this motion")} title={t("Edit this motion")}><Pencil size={14} /></button></span>

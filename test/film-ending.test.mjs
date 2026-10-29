@@ -71,6 +71,13 @@ test("the music covers the whole film and its data-fade-out is the ending's fade
   const exact = film("exact", 60, { ending: { kind: "fade", inside: true } });
   placeTrack(exact, { kind: "music", src: "assets/3_audio/music/song.mp3", duration: 180 });
   assert.deepEqual([music(exact)["data-duration"], music(exact)["data-fade-out"]], ["60", "5"]);
+  // the plan's own fade, any kind: picture and music end together (Test 20: an author's 2.5 s ending, the music faded over 5 s)
+  const author = film("author", 105, { ending: { kind: "author", fade: 2.5, inside: false } });
+  placeTrack(author, { kind: "music", src: "assets/3_audio/music/song.mp3", duration: 180 });
+  assert.deepEqual([music(author)["data-duration"], music(author)["data-fade-out"]], ["105", "2.5"]);
+  const planned = film("planned", 65, { ending: { kind: "fade", fade: 4 } });
+  placeTrack(planned, { kind: "music", src: "assets/3_audio/music/song.mp3", duration: 180 });
+  assert.deepEqual([music(planned)["data-duration"], music(planned)["data-fade-out"]], ["65", "4"]);
   const own = film("own", 10, { style: "what-if" });
   placeTrack(own, { kind: "music", src: "assets/3_audio/music/song.mp3", duration: 180 });
   assert.deepEqual([music(own)["data-duration"], music(own)["data-fade-out"]], ["10", "1.5"]);
@@ -119,7 +126,7 @@ test("the plan keeps its ending; the rules and the plan prompt say how a film en
   assert.match(plan.PROMPT, /"inside": true only when the brief or the owner asks for exactly or at most that length/);
   assert.match(plan.PROMPT, /10 s: 1\.5, 20 s: 2\.4, 30 s: 3\.6, 60 s and longer: 5/);
   const house = rule("moworks-studio/SKILL.md");
-  assert.match(house, /version: 1\.3\.0/);
+  assert.match(house, /version: 1\.3\.\d+/);          // the ending came in 1.3.0; later patches keep it
   assert.match(house, /## 9\. The ending: no film stops dead/);
   assert.match(house, /the picture fades out while the music fades down, together/);
   assert.match(house, /The fade comes after the length the owner set, never out of it/);

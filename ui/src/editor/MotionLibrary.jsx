@@ -120,7 +120,7 @@ function useLibrary(size, onPick, kinds = KINDS) {
   };
   const runJob = (path, field, every = 1500) => async () => { setAsk(false); try { const j = await post(path); setData((d) => ({ ...d, [field]: j })); watchJob(j.id, (x) => { if (x && x.status !== "running") load(); else if (x) setData((d) => ({ ...d, [field]: x })); }, every); } catch (e) { toast(e.message, "error"); } };
   const st = data?.stores ?? {};
-  const pv = st.blocks?.previews ?? {}, temporary = Math.max(0, (pv.kit ?? 0) + (pv.none ?? 0) - (pv.failed ?? 0));
+  const pv = st.blocks?.previews ?? {}, temporary = Math.max(0, (pv.none ?? 0) - (pv.failed ?? 0));          // the blocks with no preview yet (none comes from the retired kit)
   const running = (j) => (j?.status === "running" ? j : null);
   const authors = useMemo(() => Object.entries(data?.authors ?? {}).sort((a, b) => (a[0] === "HyperFrames" ? -1 : b[0] === "HyperFrames" ? 1 : a[0] === "Moworks" ? -1 : b[0] === "Moworks" ? 1 : b[1] - a[1])), [data?.authors]);
   const cats = useMemo(() => Object.entries(data?.categories ?? {}).sort((a, b) => a[0].localeCompare(b[0])), [data?.categories]);

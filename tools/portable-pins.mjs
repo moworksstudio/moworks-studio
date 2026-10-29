@@ -14,7 +14,6 @@ const DEFAULTS = {
   "anidoodle.root": "{app}/bundle/styles/anidoodle",
   "motionPrompt.root": "{app}/bundle/styles/motion-prompt",
   "characterKit.root": "{app}/bundle/styles/ClaudeAnimationBase",
-  "kit.root": "{work}/moworks-motion",          // the Moworks Motion kit on Google Drive: optional (its motions are being moved into the app)
   "storage.workRoot": "{app}/..",
 };
 const file = join(APP_ROOT, "config", "pins.json"), text = readFileSync(file, "utf8"), pins = JSON.parse(text);

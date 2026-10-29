@@ -91,3 +91,35 @@ provided are gone from the app:
 - Art Direction and Colours (HyperFrames' former visual styles and palettes) and the route questions of New project;
 - the music map's own beat analysis: the Music map sheet stays and now shows what HyperFrames' `beats` command measures on the track,
   with the lyric lines the app timed.
+
+### Fixes after the release review
+A review of the whole app before the release found these; all are fixed in 0.8.214.
+- **Update:** the in-app update reaches GitHub again, and its dialog shows the new version's date and subject instead of a commit code.
+- **Set up:** the lead line names the step that is still open, "Included with the app" lists What If, and HyperFrames' parts show the
+  commit they are pinned to.
+- **Storyboard:** frames stay visible after the app restarts.
+- **No file paths on screen:** messages, Settings and the Projects page show names, not paths.
+- **Files:** opening a file from a project opens only media and documents, and the name of an imported PowerPoint file cannot run
+  commands.
+- **Claude's access:** Claude's own token reaches only its permission prompts, and HyperFrames telemetry is off for Claude's commands
+  too.
+- **Film styles:** HyperFrames' new "Social" and "Story" styles sort with their categories.
+- **Sound effects:** typing sounds only where text is typed (a "type block" is not typing), a whoosh only where the picture changes,
+  and a frame's named sounds are placed; the music fades with the style's own ending, so picture and music end together.
+- **Sound effects in the chat:** sounds Claude changes on a frame are placed again by themselves, without "Place them again".
+- **Sound effects not found:** the chat names each sound that could not be found; while the sound search does not answer, a close
+  built-in sound stands in. The Final Mix's count follows what is placed.
+- **Tech checks:** a check that could not run shows as "Not checked" with the reason, not as a warning; the pose check gets more time
+  on a longer film.
+- **Pipeline:** while Claude works on your answer to its question, the step says Claude is working, not that it is still asking.
+- **Build time:** "Approve and build" estimates from the real times of recent films (a 105 s Lemo film: about 65-98 min, not 120-168).
+- **Library:** old posters are tidied away, and the Vietnamese-letters check on the Lemo-Opuscar fonts now runs.
+- **Less code:** code left from removed features is gone: the HyperFrames Studio host, the old sound-effect routes and a route that
+  hid a library item.
+- **Confirm dialogs:** the time and price line of an approval or feedback confirm is normal text, no longer red like a warning.
+- **Film styles:** a style its author took from someone else names them too: Memphis Diorama reads "by EianLu · Lemomo" in the gallery,
+  New project and the film's card.
+- **Storyboard:** a voice-over well short of the film's length is asked about before anything is drawn (a shorter film, a longer script,
+  or wordless stretches you plan), as a longer one already was; Claude no longer fills the gap by itself.
+- **Characters:** when you choose to have Claude make new characters in Prepare, the Character step now really runs: Claude makes
+  them and you approve them before the Storyboard (the step was skipped and the Storyboard drew them from words alone).

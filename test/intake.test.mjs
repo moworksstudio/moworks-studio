@@ -1,6 +1,6 @@
 // The library intake: Magic UI and Codrops written as HyperFrames components (packages/intake-library). Credits at the commit,
 // no remote URL and no wall clock in any motion, Vietnamese typed in NFD splitting into whole letters, the library listing them under
-// their authors, staging for Claude, keep / drop, and one real preview made the way a film is exported (finalize, the export checks,
+// their authors (every item, none hidden), staging for Claude, and one real preview made the way a film is exported (finalize, the export checks,
 // the render worker).
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
@@ -24,6 +24,7 @@ const { HELPERS, helperSource } = await import("../packages/intake-library/helpe
 const { previewOne } = await import("../packages/intake-library/previews.mjs");
 const library = await import("../packages/library/index.mjs");
 const { loadHf } = await import("../packages/hf-edit/load.mjs");
+const { expandEnv, loadPins } = await import("../packages/version-manager/index.mjs");
 
 let items;
 before(async () => { items = await intake.loadItems(); await intake.buildStore(); intake.reloadItems(); library.reload(); });
@@ -45,8 +46,9 @@ test("every intake item is credited at its source: author, permalink at the comm
     assert.ok(["adapted", "as shipped", "written from the idea"].some((m) => c.made.startsWith(m)), it.uid);
     assert.ok(c.author && (c.commit || it.author === "takayu") && c.read, it.uid);
   }
-  // the source file each permalink names exists in the clone read for the intake (when the clone is on this computer)
-  const clone = "D:/Moworks Studio/vendor/intake/magicui";
+  // the source file each permalink names exists in the clone read for the intake (when the clone is on this computer: vendor/intake/magicui
+  // in the work folder, or MW_MAGICUI_CLONE)
+  const clone = process.env.MW_MAGICUI_CLONE ?? join(expandEnv(loadPins().storage.workRoot), "vendor", "intake", "magicui");
   if (existsSync(clone)) for (const it of items.filter((x) => x.author === "magicui")) assert.ok(existsSync(join(clone, it.source.path)), it.source.path);
 });
 
@@ -78,7 +80,7 @@ test("Vietnamese typed in NFD splits into whole letters (each mark stays on its 
   assert.ok(Object.keys(HELPERS).includes("spring"));
 });
 
-test("the library lists the intake under its authors, with credits; Claude gets the component; a dropped item leaves the list", () => {
+test("the library lists the intake under its authors, with credits, every item shown; Claude gets the component", () => {
   const r = library.search({ limit: 5 });
   assert.equal(r.authors["Magic UI"], 79);
   assert.equal(r.authors["Codrops"], 34);
@@ -98,12 +100,8 @@ test("the library lists the intake under its authors, with credits; Claude gets 
   const globe = intake.stageForProject(proj, "in:magicui/globe");
   assert.ok(existsSync(join(proj, ".moworks/library/intake/magicui/globe/assets/vendor/cobe-0.6.4.js")), "the vendored cobe travels with the globe");
   void globe;
-  intake.setDropped("in:codrops/smear", true);
-  library.reload();
-  assert.equal(library.search({ author: "Codrops" }).authors["Codrops"], 33);
-  intake.setDropped("in:codrops/smear", false);
-  library.reload();
-  assert.equal(library.search({ author: "Codrops" }).authors["Codrops"], 34);
+  assert.equal(library.search({ author: "Codrops" }).authors["Codrops"], 34, "every item of the source");
+  assert.equal(typeof intake.setDropped, "undefined", "no item is hidden (owner: a source's items as shipped)");
 });
 
 test("the user deletes an item for good: card, component and preview leave, a rebuild keeps it out, restore brings it back", async () => {

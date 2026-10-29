@@ -1,8 +1,8 @@
 // HyperFrames' own scripts and CLI commands, run by the app when Claude asks: the skills tell their agent to run
 // `node scripts/<x>.mjs …` (media-use/audio: carve; hyperframes: locate…) or the CLI (`hyperframes capture`, `beats`, `audio`, `normalize-audio`…).
-// Claude cannot run commands here, so it calls the app's hf_script tool and the app runs the script as HF ships it, from the read-only clone
-// at the pinned commit, in the project folder. Only the skills the project loaded, only allow-listed scripts and CLI commands, no path
-// outside the project; a run that goes online (needsWeb) follows the project's web setting.
+// Claude cannot run commands here, so it calls the app's hf_script tool and the app runs the script as HF ships it, from HF's skills at the
+// pinned commit (bundle/hf, as the app ships them; never edited), in the project folder. Only the skills the project loaded, only
+// allow-listed scripts and CLI commands, no path outside the project; a run that goes online (needsWeb) follows the project's web setting.
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readdirSync } from "node:fs";
 import { isAbsolute, join, normalize, resolve, sep } from "node:path";
@@ -37,7 +37,7 @@ export function needsWeb(name, args = []) {
   if (cli) return CLI_WEB.has(cli);
   return !!SCRIPTS[scriptBase(name)]?.web(args.map(String));
 }
-const skillsRoot = (root) => loadPins(root).hyperframes?.skillsRoot ?? join(root, "..", "vendor", "hyperframes", "skills");
+const skillsRoot = (root) => loadPins(root).hyperframes?.skillsRoot ?? join(root, "bundle", "hf", "skills");
 
 /** The scripts of the given skills: [{ skill, name, file, kind: "node" | "python" }]: <skill>/scripts and a part's own <skill>/<part>/scripts
  *  (media-use/audio/scripts holds carve). */

@@ -1,0 +1,861 @@
+{
+ "commit": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+ "checkedAt": "2026-10-29T06:10:25.066Z",
+ "vi": {
+  "archive-lighttable": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "IBM Plex Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "Inter",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "art-deco": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Italiana",
+     "vi": false,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "Josefin",
+     "vi": null,
+     "via": "not on Google Fonts"
+    },
+    {
+     "family": "Limelight",
+     "vi": false,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "Poiret",
+     "vi": null,
+     "via": "not on Google Fonts"
+    }
+   ]
+  },
+  "ascii-crt": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "VT323",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "backrooms": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "IBM Plex Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "blueprint": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Allura",
+     "vi": true,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "Architects",
+     "vi": null,
+     "via": "not on Google Fonts"
+    },
+    {
+     "family": "B612",
+     "vi": false,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "brick-toy": {
+   "status": null,
+   "families": []
+  },
+  "briefing-board": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "LXGW Marker Gothic",
+     "vi": true,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "caption-news": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Inter",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "cel-anime-80s": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Barlow",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "Dela Gothic One",
+     "vi": true,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "chalkboard": {
+   "status": null,
+   "families": []
+  },
+  "circuit-board": {
+   "status": null,
+   "families": []
+  },
+  "city-symphony": {
+   "status": null,
+   "families": []
+  },
+  "countdown": {
+   "status": "unknown",
+   "families": [
+    {
+     "family": "Barlow",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "IBM Plex Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "Plex",
+     "vi": null,
+     "via": "not on Google Fonts"
+    }
+   ]
+  },
+  "crayon-book": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Gaegu",
+     "vi": false,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "Patrick Hand",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "dark-keynote": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Inter",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "JetBrains Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "data-physical": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Inter",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "dataviz": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Caveat",
+     "vi": false,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "IBM Plex Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "Newsreader",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "desktop-flythrough": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "JetBrains Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "Space Grotesk",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "engraving": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Bodoni Moda",
+     "vi": false,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "Pinyon Script",
+     "vi": true,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "game-show": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Fredoka",
+     "vi": false,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "glass-product": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Inter",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "Inter Tight",
+     "vi": true,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "halftone-dossier": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Bagel Fat One",
+     "vi": false,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "JetBrains Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "hd-2d": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Cinzel",
+     "vi": false,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "Cormorant Garamond",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "hologram-hud": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Rajdhani",
+     "vi": false,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "impasto": {
+   "status": null,
+   "families": []
+  },
+  "ink-wash": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Cormorant",
+     "vi": true,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "Cormorant Garamond",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "iso-infographic": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Jost",
+     "vi": false,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "isometric-picture-book": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Newsreader",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "kino-montage": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Oswald",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "lidar-survey": {
+   "status": "unknown",
+   "families": [
+    {
+     "family": "Barlow",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "Barlow Condensed",
+     "vi": true,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "IBM Plex Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "Plex Mono",
+     "vi": null,
+     "via": "not on Google Fonts"
+    }
+   ]
+  },
+  "living-screencast": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Inter",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "JetBrains Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "lowpoly-island": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Josefin Sans",
+     "vi": true,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "Quicksand",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "memphis-diorama": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "IBM Plex Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "Inter",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "microgame": {
+   "status": "unknown",
+   "families": [
+    {
+     "family": "Lilita",
+     "vi": null,
+     "via": "not on Google Fonts"
+    },
+    {
+     "family": "Titan",
+     "vi": null,
+     "via": "not on Google Fonts"
+    }
+   ]
+  },
+  "microscope": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Barlow",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "IBM Plex Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "midcentury-toon": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Jost",
+     "vi": false,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "Oleo",
+     "vi": null,
+     "via": "not on Google Fonts"
+    },
+    {
+     "family": "Slab",
+     "vi": null,
+     "via": "not on Google Fonts"
+    }
+   ]
+  },
+  "news-package": {
+   "status": "unknown",
+   "families": [
+    {
+     "family": "Barlow",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "IBM Plex Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "Plex",
+     "vi": null,
+     "via": "not on Google Fonts"
+    }
+   ]
+  },
+  "newsreel": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Oswald",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "one-line": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Caveat",
+     "vi": false,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "Sacramento",
+     "vi": false,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "paper-lantern": {
+   "status": null,
+   "families": []
+  },
+  "paper-popup": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Fredoka",
+     "vi": false,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "IM Fell English",
+     "vi": false,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "Lilita One",
+     "vi": false,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "papercut-red": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Fraunces",
+     "vi": true,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "pictogram-motion": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "DM Mono",
+     "vi": false,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "Inter",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "Inter Tight",
+     "vi": true,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "pixel-rpg": {
+   "status": null,
+   "families": []
+  },
+  "printed-long-take": {
+   "status": null,
+   "families": []
+  },
+  "risograph": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Bricolage",
+     "vi": null,
+     "via": "not on Google Fonts"
+    },
+    {
+     "family": "Jost",
+     "vi": false,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "rubber-hose": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Limelight",
+     "vi": false,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "Shrikhand",
+     "vi": false,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "satellite-briefing": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Barlow",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "IBM Plex Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "scifi-toon": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Baloo 2",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "VT323",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "shadow-puppet": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Cormorant Garamond",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "silent-film": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Old Standard TT",
+     "vi": true,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "Playfair Display",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "silkscreen-poster": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Outfit",
+     "vi": false,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "spy-titles": {
+   "status": null,
+   "families": []
+  },
+  "stained-glass": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Cinzel",
+     "vi": false,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "IM Fell English",
+     "vi": false,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "swiss-motion": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Archivo",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "Inter",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "teardown": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Inter",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "JetBrains Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "telestrator": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Barlow",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "IBM Plex Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "tilt-shift": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Overpass",
+     "vi": true,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "transit-map": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "Inter",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "ukiyoe": {
+   "status": "unknown",
+   "families": [
+    {
+     "family": "Shippori",
+     "vi": null,
+     "via": "not on Google Fonts"
+    },
+    {
+     "family": "Yuji",
+     "vi": null,
+     "via": "not on Google Fonts"
+    }
+   ]
+  },
+  "urban-sketch": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Caveat",
+     "vi": false,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "Reenie Beanie",
+     "vi": false,
+     "via": "Google Fonts"
+    }
+   ]
+  },
+  "visual-investigation": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "IBM Plex Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "Source Serif 4",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "watercolor": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "Caveat",
+     "vi": false,
+     "via": "Google Fonts"
+    },
+    {
+     "family": "Cormorant Garamond",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "IBM Plex Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "white-model": {
+   "status": "ok",
+   "families": [
+    {
+     "family": "IBM Plex Mono",
+     "vi": true,
+     "via": "bundled with the app"
+    },
+    {
+     "family": "Inter",
+     "vi": true,
+     "via": "bundled with the app"
+    }
+   ]
+  },
+  "whiteboard": {
+   "status": null,
+   "families": []
+  },
+  "woodcut": {
+   "status": "missing",
+   "families": [
+    {
+     "family": "IM Fell English",
+     "vi": false,
+     "via": "Google Fonts"
+    }
+   ]
+  }
+ }
+}

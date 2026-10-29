@@ -42,6 +42,18 @@ test("an anidoodle lab: the engine staged as shipped, the author's gate as a ref
   assert.deepEqual(allowed, ["Bash(node tools/still.mjs:*)", "Bash(node tools/gate.mjs:*)", "Bash(node tools/render.mjs:*)"]);
 });
 
+test("a reference picture given as a file: only one in the character library; any other file on the disk is refused", () => {
+  const outside = mkdtempSync(join(tmpdir(), "mw-maker-out-"));
+  try {
+    writeFileSync(join(outside, "secret.png"), "x");
+    assert.throws(() => maker.prepareLab({ jobId: "p1", engine: "brush-kit", hand: "brush", id: "pic", description: "a cup", image: join(outside, "secret.png") }), { code: "INVALID" });
+    mkdirSync(join(T, "ref"), { recursive: true }); writeFileSync(join(T, "ref", "cup.png"), "x");
+    const { lab } = maker.prepareLab({ jobId: "p2", engine: "brush-kit", hand: "brush", id: "pic", description: "a cup", image: join(T, "ref", "cup.png") });
+    assert.ok(existsSync(join(lab, "reference", "picture.png")));
+    assert.throws(() => maker.prepareLab({ jobId: "p3", engine: "brush-kit", hand: "brush", id: "pic", description: "a cup", image: join(T, "ref", "..", "..", "x.png") }), { code: "INVALID" });
+  } finally { rmSync(outside, { recursive: true, force: true }); }
+});
+
 test("a Brush lab: the kit's guide, ClaudeAnimationBase's rules and the app's, the sheet tool; a run that wrote nothing fails plainly", async () => {
   const { lab, brief, allowed } = maker.prepareLab({ jobId: "t2", engine: "brush-kit", hand: "brush", id: "biscuit", description: "a round biscuit mascot" });
   assert.ok(existsSync(join(lab, ".moworks", "library", "character-kit", "examples", "definition.json")));

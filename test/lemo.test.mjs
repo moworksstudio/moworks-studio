@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { getStyle, listStyles, stylePipeline } from "../packages/style-catalog/index.mjs";
+import { getStyle, listStyles, styleList, stylePipeline } from "../packages/style-catalog/index.mjs";
 import { lemoSource, mediaFile, samplePrompts, stageDemo } from "../packages/lemo-styles/index.mjs";
 import { rewriteLemoText, withBridge } from "../packages/hf-edit/lemoPage.mjs";
 import { prepareRules } from "../packages/agent/index.mjs";
@@ -37,7 +37,6 @@ test("the catalog: 66 Lemo-Opuscar styles by Lemomo (LemoLab) beside HyperFrames
   for (const s of lemo) {
     assert.ok(s.available && !s.hidden, s.id);
     assert.equal(s.kind, "video-style");
-    assert.equal(s.styleMd, `/api/styles/${s.id}/style-md`);
     assert.match(s.credit.link, /^https:\/\/github\.com\/lemomo-ai\/lemo-opuscar\/blob\/ea34ff9546f675f9fd65a3c84e869a1da7471ad7\/styles\/[a-z0-9-]+\/STYLE\.md$/);
     assert.equal(s.credit.made, "as shipped");
     assert.match(s.credit.licence, /MIT.*CC BY 4\.0/);
@@ -55,6 +54,9 @@ test("the catalog: 66 Lemo-Opuscar styles by Lemomo (LemoLab) beside HyperFrames
   // a style the author merged from someone else names that contributor first (style.json by)
   const md = lemo.find((s) => s.id === "lemo-memphis-diorama");
   assert.deepEqual([md.credit.author, md.credit.contributor], ["EianLu, in Lemo-Opuscar by Lemomo (LemoLab)", { name: "EianLu", url: "https://x.com/EianLu" }]);
+  // the gallery's and New project's light list keeps the contributor too (the tiles' "by" line read "by Lemomo" alone, T20-5)
+  const listed = styleList().styles.find((s) => s.id === "lemo-memphis-diorama");
+  assert.deepEqual([listed.credit.contributor, listed.credit.made], [{ name: "EianLu", url: "https://x.com/EianLu" }, "as shipped"]);
   assert.equal(mediaFile("../poster.jpg"), null); assert.equal(mediaFile("watercolor/../../LICENSE"), null);
   assert.equal(getStyle("lemo-watercolor").rules[0].kind, "lemo-style");
   const seen = new Set();

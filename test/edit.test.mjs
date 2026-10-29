@@ -1,12 +1,12 @@
-// Edit service tests (real SDK + renders; slow). Run: npm test
+// Finalize, scaffold and the golden render (real SDK + renders; slow). Run: npm test
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { cpSync, existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { openFile, LeafOnlyError } from "../packages/hf-edit/session.mjs";
-import { finalize, htmlFiles } from "../packages/hf-edit/finalize.mjs";
+import { finalize } from "../packages/hf-edit/finalize.mjs";
 import { scaffold } from "../packages/hf-edit/scaffold.mjs";
+import { workRoot } from "../packages/project-service/index.mjs";
 import { check } from "../packages/hf-qa/cli.mjs";
 import { render } from "../packages/hf-render-worker/client.mjs";
 import { APP_ROOT, expandEnv, loadPins } from "../packages/version-manager/index.mjs";
@@ -14,18 +14,13 @@ import { compareFrames, fringeCount } from "../tools/golden/media.mjs";
 
 const T = join(APP_ROOT, "test-output", "edit");
 const G = join(APP_ROOT, "test", "golden");
-const REGISTRY = expandEnv(loadPins().hyperframes.registryRoot);   // pinned local registry source (the clone at the pinned commit)
+const REGISTRY = expandEnv(loadPins().hyperframes.registryRoot);   // HF's registry at the pinned commit (bundle/hf)
 const NONET = { NODE_OPTIONS: `--import ${pathToFileURL(join(APP_ROOT, "test", "support", "nonet.mjs")).href}` };
 const fresh = (name, from) => { const d = join(T, name); rmSync(d, { recursive: true, force: true }); cpSync(from, d, { recursive: true }); return d; };
 const png = (dir, fps) => ({ projectDir: dir, outputPath: `${dir}-out`, fps: { num: fps, den: 1 }, format: "png-sequence", workers: 4 });
 
-test("open + save without edits leaves every file byte-identical and the render identical to the golden run", { timeout: 300000 }, async () => {
+test("the golden film renders identical to the golden run", { timeout: 300000 }, async () => {
   const dir = fresh("roundtrip", join(G, "hf-native"));
-  for (const f of htmlFiles(dir)) {
-    const before = readFileSync(join(dir, f), "utf8");
-    const s = await openFile(dir, f); await s.save(); s.close();
-    assert.equal(readFileSync(join(dir, f), "utf8"), before, `${f} changed`);
-  }
   rmSync(`${dir}-out`, { recursive: true, force: true });
   const r = await render({ ...png(dir, 30), browserGpuMode: "software" });          // the CPU path, byte for byte (the GPU one is in gpu.test)
   assert.equal(r.type, "done");
@@ -35,28 +30,8 @@ test("open + save without edits leaves every file byte-identical and the render 
   assert.equal(c.counts.identical, c.frames, JSON.stringify(c.counts));
 });
 
-test("edits: leaf-only text, style + undo, timing, tween; the edited film renders", { timeout: 300000 }, async () => {
-  const dir = fresh("edits", join(G, "bench"));
-  const s = await openFile(dir, "index.html");
-  assert.throws(() => s.setText("s1in", "x"), LeafOnlyError);
-  s.setText("h1", "Sản phẩm mới đã có mặt");
-  s.setStyle("h1", { color: "#d81d3f" });
-  s.undo();
-  s.setTiming("s3", { duration: 3.5 });
-  const tween = s.addTween("dot", { method: "to", position: 1.5, duration: 0.8, properties: { rotation: 180 }, ease: "power2.inOut" });
-  await s.save(); s.close();
-  const saved = readFileSync(join(dir, "index.html"), "utf8");
-  assert.ok(saved.includes("Sản phẩm mới đã có mặt"));
-  assert.ok(!saved.includes("#d81d3f"), "undo did not revert the colour");
-  assert.match(saved, /id="s3"[^>]*data-duration="3.5"/);
-  assert.ok(tween && saved.includes("rotation"));
-  rmSync(`${dir}-out`, { recursive: true, force: true });
-  const r = await render(png(dir, 30));
-  assert.equal(r.type, "done", JSON.stringify(r));
-});
-
-// the test bed's kit film, on the maintainer's computer only: skipped where it is not
-const KIT_FILM = "D:/Moworks Studio/dev/poc/films/01_Bench/03_HTML";
+// the test bed's kit film, on the maintainer's computer only (dev/poc in the work folder, or MW_KIT_FILM): skipped where it is not
+const KIT_FILM = process.env.MW_KIT_FILM ?? join(workRoot(), "dev", "poc", "films", "01_Bench", "03_HTML");
 test("finalize on the unfixed kit film: backgrounds moved, CSP + runtime added, LCD fringes 0, idempotent", { timeout: 300000, skip: existsSync(KIT_FILM) ? false : "the kit's test film is not on this computer" }, async () => {
   const dir = fresh("finalize", KIT_FILM);
   const r1 = await finalize(dir);

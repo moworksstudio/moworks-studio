@@ -83,10 +83,10 @@ const MIXED = `
   <div id="box" style="position: absolute; left: 12px; top: 150px; width: 40px; height: 20px; background: #06c"></div>`;
 
 test("the Log has no addresses: the film's page is named, a path keeps only its last name", () => {
-  const B = String.fromCharCode(92), win = ["D:", "Moworks Studio", "projects", "test-17", "renders", "ae", "261027_t_1401"].join(B);
+  const B = String.fromCharCode(92), win = ["C:", "Work", "proj", "renders", "ae", "261027_t_1401"].join(B);
   assert.equal(plainLog(`HF 0.6.1 page http://localhost:57748/index.html; 25/1 fps; out ${win}`), "HF 0.6.1 page the film's page; 25/1 fps; out 261027_t_1401");
   assert.equal(plainLog(`  copied to ${win} (12 MB)`), "  copied to 261027_t_1401 (12 MB)");
-  assert.equal(plainLog("  data: 1 comps -> D:/Moworks Studio/app/runtime/work/ae/x/build.jsx"), "  data: 1 comps -> build.jsx");
+  assert.equal(plainLog("  data: 1 comps -> C:/Work/proj/runtime/work/ae/x/build.jsx"), "  data: 1 comps -> build.jsx");
   assert.equal(plainLog("AE: ERROR at https://github.com/a/b"), "AE: ERROR at https://github.com/a/b", "a web link and 'AE:' stay");
 });
 

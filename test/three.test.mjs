@@ -1,17 +1,18 @@
 // three.js offline: the pinned copies reach a film through its import map (R-THREE), CDN URLs of pinned libraries in
 // HyperFrames registry blocks and in Claude's own files become local (R-VENDOR), and G-REMOTE also reads the film's own scripts.
+// GSAP's MotionPathPlugin comes from the app's copy too (R-MOTIONPATH), never from the CDN the film's CSP blocks.
 import { test, after } from "node:test";
 import assert from "node:assert/strict";
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { finalize } from "../packages/hf-edit/finalize.mjs";
+import { ensureMotionPath, finalize } from "../packages/hf-edit/finalize.mjs";
 import { installBlock } from "../packages/hf-edit/registry.mjs";
 import { rewriteRemoteLibs, threeImportMap, withThreeMap } from "../packages/hf-edit/vendorLibs.mjs";
 import { gateRemote } from "../packages/hf-qa/gates.mjs";
 import { check } from "../packages/hf-qa/cli.mjs";
 import { render } from "../packages/hf-render-worker/client.mjs";
-import { gsapFile, status, threeDir } from "../packages/offline-assets/index.mjs";
+import { gsapFile, motionPathFile, status, threeDir } from "../packages/offline-assets/index.mjs";
 import { APP_ROOT, loadPins } from "../packages/version-manager/index.mjs";
 
 const T = mkdtempSync(join(tmpdir(), "mw-three-"));
@@ -120,4 +121,15 @@ test("a three.js film end to end: finalize, HyperFrames check, G-REMOTE, and an 
   const frames = readdirSync(`${dir}-out`).filter((f) => f.endsWith(".png")).sort();
   assert.equal(frames.length, 10);
   assert.notDeepEqual(readFileSync(join(`${dir}-out`, frames[0])), readFileSync(join(`${dir}-out`, frames[9])), "the box turns with HyperFrames time");
+});
+
+test("R-MOTIONPATH: the film loads MotionPathPlugin from assets/_app/vendor right after GSAP, once", { skip: !existsSync(motionPathFile() ?? "") && "MotionPathPlugin not downloaded (Settings > Health)" }, () => {
+  const dir = join(T, "mp-film");
+  cpSync(join(import.meta.dirname, "fixtures", "minimal"), dir, { recursive: true });
+  assert.equal(ensureMotionPath(dir), true);
+  const html = readFileSync(join(dir, "index.html"), "utf8");
+  assert.match(html, /<script src="assets\/vendor\/gsap\.min\.js"><\/script>\n<script src="assets\/_app\/vendor\/MotionPathPlugin\.min\.js"><\/script>/);
+  assert.deepEqual(readFileSync(join(dir, "assets", "_app", "vendor", "MotionPathPlugin.min.js")), readFileSync(motionPathFile()));
+  assert.equal(ensureMotionPath(dir), false, "idempotent");
+  assert.equal(readFileSync(join(dir, "index.html"), "utf8").match(/MotionPathPlugin/g).length, 1);
 });

@@ -11,6 +11,8 @@ export const STYLE_ROWS = [
   ["Motion graphics", [R("", "3D, simulations and generative pieces", "", "Liquid Motion", "", "", ""), R("", "", "", "Shape Morph", "", "", ""), R("", "", "", "Aurora & Glassmorphism", "", "", "")]],
   ["Music / Lyrics", [R("", "Music videos and films cut to a track", "", "", "", "", "")]],
   ["Brand / Product", [R("", "Launch, promo and feature films", "", "", "", "", "")]],
+  ["Social", [R("", "Vertical and social clips (9:16)", "", "", "", "", "")]],
+  ["Story", [R("", "Characters, mascots and story shorts", "", "", "", "", "")]],
   ["Presentation", [R("", "Slideshow", "", "", "", "", "")]],
   ["Video overlays", [R("", "", "", "Variety Captions", "", "", "")]],
   ["Information & Keynote", [R("", "", "Dark Tech Keynote", "", "", "", ""), R("", "", "Data Storytelling", "", "", "", ""), R("", "", "Isometric Infographic", "", "", "", ""),

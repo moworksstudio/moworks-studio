@@ -14,6 +14,7 @@ process.env.MW_NO_LIBRARY_IMPORT = "1";
 process.env.MW_BACKUP_ROOT = join(T, "backup");
 const { startServer } = await import("../packages/server/index.mjs");
 const { scaffold } = await import("../packages/hf-edit/scaffold.mjs");
+const { updateFrame } = await import("../packages/hf-edit/shots.mjs");
 const rev = await import("../packages/revisions/index.mjs");
 const { expandEnv, loadPins } = await import("../packages/version-manager/index.mjs");
 
@@ -39,15 +40,15 @@ test("shots: storyboard frames joined with the mounted scenes", async () => {
 });
 
 test("storyboard edit through HF's writers, approval, and 'changed since approval'", async () => {
-  const e = await api("PATCH", `/projects/${id}/shots/2`, { title: "Con số mới", duration: 6, voiceover: "Doanh thu tăng gấp đôi" });
-  assert.equal(e.status, 200, JSON.stringify(e.json));
-  assert.equal(e.json.shots[1].title, "Con số mới");
-  assert.equal(e.json.shots[1].plannedDuration, 6);
-  assert.equal(e.json.shots[1].voiceover, "Doanh thu tăng gấp đôi");
+  const e = await updateFrame(dir, 2, { title: "Con số mới", duration: 6, voiceover: "Doanh thu tăng gấp đôi" });
+  assert.equal(e.shots[1].title, "Con số mới");
+  assert.equal(e.shots[1].plannedDuration, 6);
+  assert.equal(e.shots[1].voiceover, "Doanh thu tăng gấp đôi");
+  assert.equal((await api("GET", `/projects/${id}/shots`)).json.shots[1].title, "Con số mới");
   const a = await api("POST", `/projects/${id}/storyboard/approve`);
   assert.equal(a.json.meta.approvals.storyboard.by, "owner");
   assert.equal((await api("GET", `/projects/${id}/shots`)).json.changedSinceApproval, false);
-  await api("PATCH", `/projects/${id}/shots/1`, { scene: "Một cảnh khác" });
+  await updateFrame(dir, 1, { scene: "Một cảnh khác" });
   assert.equal((await api("GET", `/projects/${id}/shots`)).json.changedSinceApproval, true);
 });
 

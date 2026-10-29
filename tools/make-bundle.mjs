@@ -5,8 +5,8 @@
 //   styles/    lemo-opuscar, mg-styles-15, anidoodle, ClaudeAnimationBase, motion-prompt, what-if-animation: the run-time files at each
 //              pinned commit, PINNED; the gallery stills re-encoded at 960 px under their own names (JPEG stays JPEG, WebP stays WebP),
 //              no demo films, no audio
-//   library/   the built stores (Blocks, intake, Looks, Vocabulary, tiles, anidoodle cards, the Clawd demo media at the shipped size) and
-//              What If's demo film (made in the app, kept as it is)
+//   library/   the built stores (Blocks, intake, Looks, Vocabulary, tiles, anidoodle cards, the Clawd demo media at the shipped size, the
+//              Lemo-Opuscar fonts' Vietnamese check) and What If's demo film (made in the app, kept as it is)
 //   MANIFEST.json  every part: files, bytes, source, commit, licence
 // Usage: node tools/make-bundle.mjs [outDir] [--only part,part]   (default app/bundle; each part's folder is replaced, a part whose pinned
 //   source is its own bundle folder is kept as it is, and a folder no part makes stays). Nothing is downloaded.
@@ -21,6 +21,7 @@ import { ffmpegExe } from "../packages/library/preview-media.mjs";
 import { storeName as blocksStore } from "../packages/blocks-library/index.mjs";
 import { storeName as looksStore } from "../packages/looks-library/index.mjs";
 import { storeName as vocabStore } from "../packages/vocab-library/index.mjs";
+import { importLemo } from "../packages/lemo-styles/index.mjs";
 
 const argv = process.argv.slice(2), onlyAt = argv.indexOf("--only");
 const ONLY = onlyAt >= 0 ? new Set(String(argv[onlyAt + 1] ?? "").split(",").filter(Boolean)) : null;
@@ -40,7 +41,7 @@ function walk(dir, keep = () => true, base = dir) {
 }
 const ff = (args) => execFileSync(ffmpegExe(), ["-v", "error", "-y", ...args], { windowsHide: true, stdio: "ignore" });
 /** Copy the files of `from` that `keep` accepts into `to`; `recode(r)` names files re-encoded smaller (stills, demo films). */
-function copyPart(name, from, to, { keep = () => true, recode = () => null, source, commit = null, licence }) {
+function copyPart(name, from, to, { keep = () => true, recode = () => null, source, commit = null, licence, pinFile = true }) {
   if (!wanted(name)) return;
   if (resolve(from) === resolve(to)) {          // pinned to the bundled copy itself (no clone on this computer): kept, only counted
     const files = walk(to), bytes = files.reduce((a, r) => a + statSync(join(to, ...r.split("/"))).size, 0);
@@ -61,7 +62,7 @@ function copyPart(name, from, to, { keep = () => true, recode = () => null, sour
     else cpSync(s, d);
     bytes += statSync(d).size;
   }
-  if (commit) writeFileSync(join(to, "PINNED"), `${source} ${commit}\n`);
+  if (commit && pinFile) writeFileSync(join(to, "PINNED"), `${source} ${commit}\n`);
   parts.push({ name, path: rel(OUT, to), files: files.length, bytes, source, commit, licence });
   console.log(`${name}: ${files.length} files, ${(bytes / 1048576).toFixed(1)} MB`);
 }
@@ -75,8 +76,8 @@ copyPart("libraries", join(APP_ROOT, "runtime", "vendor"), join(OUT, "runtime", 
 
 // hf: skills/ and registry/ at the pinned commit (the layout of the thin fetch, runtime/hf-src)
 const hf = pins.hyperframes, hfRepo = dirname(expandEnv(hf.skillsRoot));
-copyPart("hf-skills", expandEnv(hf.skillsRoot), join(OUT, "hf", "skills"), { source: hf.source.url, commit: null, licence: "Apache-2.0" });
-copyPart("hf-registry", expandEnv(hf.registryRoot), join(OUT, "hf", "registry"), { source: hf.source.url, commit: null, licence: "Apache-2.0" });
+copyPart("hf-skills", expandEnv(hf.skillsRoot), join(OUT, "hf", "skills"), { source: hf.source.url, commit: hf.source.commit, licence: "Apache-2.0", pinFile: false });
+copyPart("hf-registry", expandEnv(hf.registryRoot), join(OUT, "hf", "registry"), { source: hf.source.url, commit: hf.source.commit, licence: "Apache-2.0", pinFile: false });
 if (wanted("hf-skills") || wanted("hf-registry")) {
   for (const f of ["skills-manifest.json", "LICENSE", "NOTICE"]) if (existsSync(join(hfRepo, f)) && resolve(hfRepo) !== resolve(OUT, "hf")) cpSync(join(hfRepo, f), join(OUT, "hf", f));
   writeFileSync(join(OUT, "hf", "PINNED"), `${hf.source.url} ${hf.source.commit}\n`);
@@ -136,6 +137,16 @@ if (wanted("library-vocab") && !existsSync(join(lib, "vocab", vocabCur, "catalog
 copyPart("library-vocab", join(lib, "vocab"), join(OUT, "library", "vocab"), { keep: (r) => r.startsWith(`${vocabCur}/`) || r.startsWith("previews/"),
   source: "built by Moworks Studio from Motion Prompt (Vocabulary, audit 79)", licence: "MIT (Copyright (c) 2026 Shohei Ohtaki)" });
 if (wanted("library-vocab")) pointAt("vocab", vocabCur);
+// the Vietnamese check of the fonts each Lemo-Opuscar style names (the Style Gallery's VN mark; its only caller): made here once per
+// pinned commit when this computer has none (importLemo: the pinned google/fonts list, Google Fonts asked only for a family it lacks),
+// shipped as is; a new computer takes it into its work library (setup/first-run libraryFromBundle)
+const lemoStore = `lemo-${lemo.commit.slice(0, 7)}`;
+if (wanted("library-lemo") && !existsSync(join(lib, "lemo", lemoStore, "catalog.json"))) {
+  const r = await importLemo();
+  console.log(`lemo: the fonts' Vietnamese check made (${r.styles} styles, ${r.missing} with a font lacking Vietnamese)`);
+}
+copyPart("library-lemo", join(lib, "lemo", lemoStore), join(OUT, "library", "lemo", lemoStore), {
+  source: "the Vietnamese check of the fonts each Lemo-Opuscar style names, made by Moworks Studio (packages/lemo-styles importLemo)", licence: "Moworks (a check; no font files)" });
 copyPart("library-thumbs", join(lib, "thumbs"), join(OUT, "library", "thumbs"), { source: "the Style Gallery's tiles (#202)", licence: "as each style's still" });
 // the pinned commit's cards and previews only (the previews are the author's own drawing films rendered here; no logs, no older pin)
 const aniStore = `anidoodle-${pins.anidoodle.commit.slice(0, 7)}`;

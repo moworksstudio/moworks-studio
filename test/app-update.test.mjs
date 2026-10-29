@@ -56,6 +56,19 @@ test("up to date, then a new version: the commits and what changed; not a git cl
   await assert.rejects(up.check(app), { code: "NO_REPO" });
 });
 
+test("the repo in config/update.json: a bare GitHub owner/name becomes its https URL; a URL or a folder stays as is", () => {
+  assert.equal(up.repoUrl("moworksstudio/moworks-studio"), "https://github.com/moworksstudio/moworks-studio.git");
+  assert.equal(up.repoUrl("moworksstudio/moworks-studio.git"), "https://github.com/moworksstudio/moworks-studio.git");
+  assert.equal(up.repoUrl("https://github.com/a/b.git"), "https://github.com/a/b.git");
+  assert.equal(up.repoUrl("git@github.com:a/b.git"), "git@github.com:a/b.git");
+  assert.equal(up.repoUrl("C:\\Work\\repo.git"), "C:\\Work\\repo.git");
+  const dir = join(T, "cfg"); mkdirSync(join(dir, "config"), { recursive: true });
+  writeFileSync(join(dir, "config", "update.json"), JSON.stringify({ repo: "moworksstudio/moworks-studio" }));
+  assert.deepEqual(up.updateConfig(dir), { repo: "https://github.com/moworksstudio/moworks-studio.git", branch: "main" });
+  const shipped = JSON.parse(readFileSync(new URL("../config/update.json", import.meta.url), "utf8"));
+  assert.match(up.repoUrl(shipped.repo), /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\.git$/);
+});
+
 test("apply: fast-forward, packages because they changed, interface, start check; the user's files untouched", async () => {
   const { dev, app } = setup("apply");
   commit(dev, "app.txt", "v2", "Second version"); commit(dev, "package-lock.json", "{}", "Lock");

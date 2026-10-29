@@ -6,7 +6,8 @@
 //                     Lemo-Opuscar does: the material is found and logged with the demo's own tools and sources
 //                     (CREDITS, FACTS.md, a licence per item), fetched into the project's assets during the work; the render stays offline
 //   voiceExcluded     the 3 demos whose narration the author excludes from CC BY (the gallery warns; never reused)
-//   vi                the Vietnamese check of the fonts STYLE.md names (Google Fonts asked once, by importLemo(), kept in a small store)
+//   vi                the Vietnamese check of the fonts STYLE.md names (importLemo(), run once per pinned commit by tools/make-bundle.mjs and
+//                     shipped in bundle/library/lemo; a new computer takes it into its work library at first start, setup/first-run)
 // Credit: Lemomo (LemoLab), https://github.com/lemomo-ai/lemo-opuscar at the pinned commit; style prompts, code and docs MIT, demo films
 // and stills CC BY 4.0 (credit LemoLab); used as shipped.
 import { createHash } from "node:crypto";

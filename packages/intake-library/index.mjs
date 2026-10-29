@@ -187,12 +187,10 @@ export function items(root = APP_ROOT) {
   const st = currentStore(root);
   if (!st) return [];
   if (cache?.dir === st.dir) return cache.items;
+  // every item of a source, as shipped (owner: never hide an item; one the user deletes leaves the store itself)
   const list = readJson(join(st.dir, "catalog.json"), { items: [] }).items;
-  const picks = readJson(join(st.dir, "picks.json"), { dropped: [] });
-  const dropped = new Set(picks.dropped ?? []);
-  const shown = list.filter((x) => !dropped.has(x.uid));
-  cache = { dir: st.dir, items: shown };
-  return shown;
+  cache = { dir: st.dir, items: list };
+  return list;
 }
 export const getItem = (uid, root = APP_ROOT) => items(root).find((x) => x.uid === uid) ?? null;
 
@@ -216,19 +214,6 @@ export function stageForProject(projectDir, uid, root = APP_ROOT) {
   cpSync(join(st.dir, it.folder), dest, { recursive: true });
   const rel = `.moworks/library/intake/${it.author}/${it.id}`;
   return { item: it, files: [`${rel}/${it.file}`, `${rel}/demo.html`, `${rel}/registry-item.json`] };
-}
-
-/** Keep or drop an item (the user cherry-picks: a dropped item leaves the Motion Library; its files stay in the store). */
-export function setDropped(uid, dropped = true, root = APP_ROOT) {
-  const st = currentStore(root);
-  if (!st) throw Object.assign(new Error("The intake store is not built yet"), { code: "NO_STORE" });
-  const all = readJson(join(st.dir, "catalog.json"), { items: [] }).items;
-  if (!all.some((x) => x.uid === uid)) throw Object.assign(new Error("Library item not found"), { code: "NOT_FOUND" });
-  const picks = readJson(join(st.dir, "picks.json"), { dropped: [] }), set = new Set(picks.dropped ?? []);
-  if (dropped) set.add(uid); else set.delete(uid);
-  writeFileSync(join(st.dir, "picks.json"), JSON.stringify({ dropped: [...set].sort(), at: new Date().toISOString() }, null, 2) + "\n");
-  cache = null;
-  return { uid, dropped, total: set.size };
 }
 
 /** The items the user deleted for good (kept outside the store's folder, so a rebuild into a new folder keeps them out too). */

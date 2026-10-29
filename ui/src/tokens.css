@@ -1,4 +1,5 @@
-/* Moworks Studio design tokens. Themes on <html data-theme>: "pelagra" is the one theme (Splicerack and Nocturne removed; a second theme comes later).
+/* Moworks Studio design tokens. Two themes on <html data-theme>: The Desk ("pelagra", the default, no attribute) is this file;
+   The Studio ("studio") re-points these variables in studio-shell.css and studio-editor.css.
    Components use these variables only. Sizes are rem and the root size follows the window, so a small screen gets a small UI.
    Metrics (spacing, control heights, line boxes, type sizes) are shared by both themes: switching theme never moves a line. */
 @font-face { font-family: "Be Vietnam Pro"; src: url("./fonts/BeVietnamPro-Light.woff2") format("woff2"); font-weight: 300; font-display: block; }

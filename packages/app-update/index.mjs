@@ -3,7 +3,7 @@
 // package.json / package-lock.json changed), the interface build and a start check, then a restart. A step that fails puts the folder back
 // on the commit it came from (packages and interface rebuilt for it). Only files git tracks change: the user's work (the work folder:
 // projects, library, characters; runtime/: settings, local pins, HF runtimes, logs) is outside git and is never touched.
-// The repo and branch come from config/update.json; the sign-in is git's own (Git Credential Manager on Windows asks once).
+// The repo (GitHub `owner/name`, or a URL) and branch come from config/update.json; the sign-in is git's own (Git Credential Manager on Windows asks once).
 import { execFile, spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -30,9 +30,12 @@ export function git(root, args, { timeout = 120000 } = {}) {
   }));
 }
 
+/** The repo as git fetches it: a bare GitHub `owner/name` becomes its https URL (git would read it as a folder); a URL or path as is. */
+export const repoUrl = (repo) => (/^[\w.-]+\/[\w.-]+$/.test(repo) ? `https://github.com/${repo.replace(/\.git$/, "")}.git` : repo);
+
 export function updateConfig(root = APP_ROOT) {
   const c = readJson(configFile(root), {});
-  return { repo: c.repo || null, branch: c.branch || "main" };
+  return { repo: c.repo ? repoUrl(String(c.repo)) : null, branch: c.branch || "main" };
 }
 
 const commitInfo = async (root, rev) => {

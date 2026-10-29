@@ -28,12 +28,12 @@ const { projectFps } = projects;
 const DIR = [".moworks", "cache", "proxy"];
 const AUDIO_TAG = /<audio\b[^>]*>(?:[\s\S]*?<\/audio>)?/gi;
 const AUDIO_FILE = /\.(mp3|wav|m4a|aac|flac|ogg|opus)$/i;
-// HF Studio's element ids, written into the film's HTML when the Editor first opens it (not a film change). Opening the
-// Editor stamped them on every element and <audio>, and the film's render and pre-render went stale with nothing drawn or heard changed.
+// HF's element ids, written into the film's HTML when the Editor opens it (not a film change; older films also carry the ones HF Studio
+// wrote). Opening the Editor stamped them on every element and <audio>, and the film's render and pre-render went stale with nothing drawn or heard changed.
 const STUDIO_ID = /\s+data-hf-id="[^"]*"/g;
 /** The film's files, hashed in two parts: the picture (index.html and the compositions without their <audio> tags,
  *  CHARACTERS.json, every asset but sound files: names, sizes and dates) at its fps, and the sound (every <audio> tag and the sound files
- *  under assets/ and audio/). Studio's element ids count in neither. */
+ *  under assets/ and audio/). HF's element ids count in neither. */
 export function filmParts(dir, fps, { stamps = false } = {}) {
   const pic = createHash("sha256"), snd = createHash("sha256");
   pic.update(`fps:${fps}`);

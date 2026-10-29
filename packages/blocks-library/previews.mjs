@@ -108,7 +108,7 @@ function saveCatalog(dir, items) {
   renameSync(join(dir, "catalog.json.part"), join(dir, "catalog.json"));
   const m = readJson(join(dir, "manifest.json"), {});
   const n = (src) => items.filter((x) => (src ? x.preview?.source === src : !x.preview)).length;
-  m.previews = { hf: n("hf"), rendered: n("rendered"), kit: n("kit"), none: n(null), failed: items.filter((x) => x.previewError).length };
+  m.previews = { hf: n("hf"), rendered: n("rendered"), none: n(null), failed: items.filter((x) => x.previewError).length };
   writeFileSync(join(dir, "manifest.json"), JSON.stringify(m, null, 2) + "\n");
   reloadItems();
 }

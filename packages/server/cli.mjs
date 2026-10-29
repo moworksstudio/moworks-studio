@@ -111,10 +111,15 @@ function openWindow(url) {
   console.log(`Opening the app window${exe ? ` (${exe.includes("msedge") ? "Edge" : "Chrome"})` : ""}. If no window appears, paste the address above into Chrome or Edge.`);
 }
 
-/** PowerShell's -like pattern for the app profile's main browser process (its command line names the profile; helpers carry --type=).
- *  Function declarations, not consts: the top-level code above calls them before this line runs. */
-function profileLike() { return profile.replace(/'/g, "''").replace(/[[\]*?]/g, "`$&"); }
-function ps(script, opts = {}) { return ["powershell.exe", ["-NoProfile", "-NonInteractive", "-EncodedCommand", Buffer.from(script, "utf16le").toString("base64")], { windowsHide: true, ...opts }]; }
+/** The app profile's main browser process (its command line names the profile; helpers carry --type=), in PowerShell: $b. The values
+ *  a script uses (the browser, the profile, the icon, a message) arrive in its environment (MW_*), never quoted into the script: a quote in
+ *  a folder name would run as code. Function declarations, not consts: the top-level code above calls them before this line runs. */
+function appProcess() { return `$like = '*' + [WildcardPattern]::Escape($env:MW_PROFILE) + '*'
+    $b = Get-CimInstance Win32_Process -Filter "name='$env:MW_EXE'" | Where-Object { $_.CommandLine -like $like -and $_.CommandLine -notlike '*--type=*' }`; }
+function ps(script, opts = {}, vars = {}) {
+  return ["powershell.exe", ["-NoProfile", "-NonInteractive", "-EncodedCommand", Buffer.from(script, "utf16le").toString("base64")],
+    { windowsHide: true, ...opts, env: { ...process.env, MW_PROFILE: profile, ...vars } }];
+}
 
 /** Maximize the app window once it appears (up to 20 s) through user32 ShowWindow(SW_MAXIMIZE). The process started here hands over to
  *  the browser process of the app profile, so the window is found through that profile's main process. */
@@ -125,7 +130,8 @@ function maximizeWhenShown(exeName) {
     $ok = 0
     for ($i = 0; $i -lt 80 -and $ok -lt 3; $i++) {
       Start-Sleep -Milliseconds 250
-      $b = Get-CimInstance Win32_Process -Filter "name='${exeName}'" | Where-Object { $_.CommandLine -like '*${profileLike()}*' -and $_.CommandLine -notlike '*--type=*' } | Select-Object -First 1
+      ${appProcess()}
+      $b = $b | Select-Object -First 1
       if (-not $b) { continue }
       $h = (Get-Process -Id $b.ProcessId -ErrorAction SilentlyContinue).MainWindowHandle
       if (-not $h -or $h -eq 0 -or -not [MW.U]::IsWindowVisible($h)) { continue }
@@ -133,7 +139,7 @@ function maximizeWhenShown(exeName) {
     }`;
   // -EncodedCommand (UTF-16LE base64): Windows PowerShell drops the double quotes of a -Command argument. Not detached: a detached
   // PowerShell has no console and stops at once; it ends with the app anyway.
-  const [cmd, args, o] = ps(script, { stdio: "ignore" });
+  const [cmd, args, o] = ps(script, { stdio: "ignore" }, { MW_EXE: exeName });
   spawn(cmd, args, o).on("error", () => {}).unref();
 }
 
@@ -146,7 +152,6 @@ function dressWindow(exeName) {
   const ico = [join(APP_ROOT, "ui", "dist", "brand", "app.ico"), join(APP_ROOT, "ui", "public", "brand", "app.ico")].find((f) => existsSync(f));
   if (!ico) return;
   const bat = join(APP_ROOT, "Moworks Studio.bat");
-  const q = (x) => x.replace(/'/g, "''");
   const script = `Add-Type -TypeDefinition @'
 using System; using System.Runtime.InteropServices;
 [StructLayout(LayoutKind.Sequential, Pack=4)] public struct PKEY { public Guid f; public uint p; }
@@ -168,26 +173,27 @@ public static class MWD {
 }
 '@
     [MWD]::SetProcessDPIAware() | Out-Null
-    $ico = '${q(ico)}'
+    $ico = $env:MW_ICO
     $cx = [MWD]::GetSystemMetrics(11); $sx = [MWD]::GetSystemMetrics(49)
     $big = [MWD]::LoadImage([IntPtr]::Zero, $ico, 1, $cx, $cx, 0x10); $small = [MWD]::LoadImage([IntPtr]::Zero, $ico, 1, $sx, $sx, 0x10)
     $done = [IntPtr]::Zero; $gone = 0
     for ($i = 0; $i -lt 100000 -and $gone -lt 4; $i++) {
       Start-Sleep -Milliseconds ($(if ($done -eq [IntPtr]::Zero) { 250 } else { 3000 }))
-      $b = Get-CimInstance Win32_Process -Filter "name='${exeName}'" | Where-Object { $_.CommandLine -like '*${profileLike()}*' -and $_.CommandLine -notlike '*--type=*' } | Select-Object -First 1
+      ${appProcess()}
+      $b = $b | Select-Object -First 1
       if (-not $b) { if ($done -ne [IntPtr]::Zero -or $i -gt 80) { $gone++ }; continue }
       $h = (Get-Process -Id $b.ProcessId -ErrorAction SilentlyContinue).MainWindowHandle
       if (-not $h -or $h -eq 0 -or -not [MWD]::IsWindow($h)) { continue }
       $gone = 0
       if ($h -ne $done) {
-        [MWD]::Prop($h, 3, "$ico,0"); [MWD]::Prop($h, 4, 'Moworks Studio'); [MWD]::Prop($h, 2, '"${q(bat)}"'); [MWD]::Prop($h, 5, 'MoworksStudio.App')
+        [MWD]::Prop($h, 3, "$ico,0"); [MWD]::Prop($h, 4, 'Moworks Studio'); [MWD]::Prop($h, 2, ('"' + $env:MW_BAT + '"')); [MWD]::Prop($h, 5, 'MoworksStudio.App')
         $done = $h
       }
       if ([MWD]::SendMessage($h, 0x7F, [IntPtr]1, [IntPtr]::Zero) -ne $big) {
         [MWD]::SendMessage($h, 0x80, [IntPtr]1, $big) | Out-Null; [MWD]::SendMessage($h, 0x80, [IntPtr]0, $small) | Out-Null
       }
     }`;
-  const [cmd, args, o] = ps(script, { stdio: "ignore" });
+  const [cmd, args, o] = ps(script, { stdio: "ignore" }, { MW_EXE: exeName, MW_ICO: ico, MW_BAT: bat });
   spawn(cmd, args, o).on("error", () => {}).unref();
 }
 
@@ -199,7 +205,8 @@ function focusAppWindow() {
   const script = `Add-Type -Namespace MW -Name F -MemberDefinition '[DllImport("user32.dll")] public static extern bool ShowWindow(System.IntPtr h, int c);
       [DllImport("user32.dll")] public static extern bool SetForegroundWindow(System.IntPtr h); [DllImport("user32.dll")] public static extern bool IsIconic(System.IntPtr h);
       [DllImport("user32.dll")] public static extern void keybd_event(byte k, byte s, uint f, System.UIntPtr e);';
-    $b = Get-CimInstance Win32_Process -Filter "name='${basename(exe)}'" | Where-Object { $_.CommandLine -like '*${profileLike()}*' -and $_.CommandLine -notlike '*--type=*' } | Select-Object -First 1
+    ${appProcess()}
+    $b = $b | Select-Object -First 1
     if (-not $b) { exit 3 }
     $h = (Get-Process -Id $b.ProcessId -ErrorAction SilentlyContinue).MainWindowHandle
     if (-not $h -or $h -eq 0) { exit 3 }
@@ -207,7 +214,7 @@ function focusAppWindow() {
     [MW.F]::keybd_event(0x12, 0, 0, [System.UIntPtr]::Zero); [MW.F]::keybd_event(0x12, 0, 2, [System.UIntPtr]::Zero)
     [MW.F]::SetForegroundWindow($h) | Out-Null
     exit 0`;
-  const [cmd, args, o] = ps(script, { timeout: 15000 });
+  const [cmd, args, o] = ps(script, { timeout: 15000 }, { MW_EXE: basename(exe) });
   return spawnSync(cmd, args, o).status === 0;
 }
 
@@ -216,17 +223,18 @@ function focusAppWindow() {
 function closeAppWindows() {
   const exe = findBrowser();
   if (!exe) return;
-  const script = `$p = Get-CimInstance Win32_Process -Filter "name='${basename(exe)}'" | Where-Object { $_.CommandLine -like '*${profileLike()}*' -and $_.CommandLine -notlike '*--type=*' }
+  const script = `${appProcess()}
+    $p = $b
     foreach ($x in $p) { taskkill /PID $x.ProcessId | Out-Null }
     for ($i = 0; $i -lt 20; $i++) { Start-Sleep -Milliseconds 250; if (-not ($p | Where-Object { Get-Process -Id $_.ProcessId -ErrorAction SilentlyContinue })) { break } }
     foreach ($x in $p) { if (Get-Process -Id $x.ProcessId -ErrorAction SilentlyContinue) { taskkill /PID $x.ProcessId /T /F | Out-Null } }`;
-  const [cmd, args, o] = ps(script, { timeout: 15000 });
+  const [cmd, args, o] = ps(script, { timeout: 15000 }, { MW_EXE: basename(exe) });
   return new Promise((done) => { const c = spawn(cmd, args, { ...o, stdio: "ignore" }); const t = setTimeout(() => { try { c.kill(); } catch { /* gone */ } done(); }, 15000); c.on("exit", () => { clearTimeout(t); done(); }); c.on("error", () => { clearTimeout(t); done(); }); });
 }
 
 /** A Windows message box (background mode has no console to show an error in). */
 function messageBox(text) {
-  const t = String(text).replace(/'/g, "''");
-  const [cmd, args, o] = ps(`Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show('${t}', 'Moworks Studio', 'OK', 'Error') | Out-Null`, { timeout: 600000 });
+  const [cmd, args, o] = ps("Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show($env:MW_MESSAGE, 'Moworks Studio', 'OK', 'Error') | Out-Null",
+    { timeout: 600000 }, { MW_MESSAGE: String(text) });
   spawnSync(cmd, args, o);
 }

@@ -1,7 +1,7 @@
 // One-off reclassification of the intake (judged as an experienced motion designer would; Motion / Block need not be strict, new categories allowed). Reads the built catalog, the site's own
 // categories (takayu/specs.json) and the item files, applies the rules below and writes classification.json: { uid: { kind, category } }.
 // The app reads that file when it builds the store (index.mjs loadItems), so the user can edit one line to move one item.
-//   node packages/intake-library/tools/classify-intake.mjs [catalog.json]
+//   node packages/intake-library/tools/classify-intake.mjs [catalog.json]   (default: the intake store in use in the work folder's library)
 //
 // How an After Effects person files motion: by what you reach for it to DO (text reveal, transition, UI state, texture, camera …), not by
 // the site's own grouping. Kind: a Block is a piece that stands alone (a mockup, a chart, a HUD widget, a title card, a lesson); a Motion
@@ -9,9 +9,11 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { currentStore } from "../index.mjs";
 
 const HERE = fileURLToPath(new URL("..", import.meta.url));
-const catalogFile = process.argv[2] ?? "D:/Moworks Studio/library/intake/intake-1/catalog.json";
+const catalogFile = process.argv[2] ?? (currentStore() ? join(currentStore().dir, "catalog.json") : null);
+if (!catalogFile) { console.log("usage: node packages/intake-library/tools/classify-intake.mjs [catalog.json] (no intake store is built in the work folder)"); process.exit(1); }
 const storeDir = catalogFile.replace(/catalog\.json$/, "");
 const items = JSON.parse(readFileSync(catalogFile, "utf8")).items;
 const SPEC = new Map(JSON.parse(readFileSync(join(HERE, "takayu", "specs.json"), "utf8")).items.map((s) => [`in:takayu/${s.name.replace("/", "-")}`, s]));

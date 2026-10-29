@@ -85,19 +85,22 @@ async function wordsOf(file, outDir, root, { song = false } = {}) {
   return { words, model: card.short };
 }
 
+// The deck and the folder come in through the environment, never inside the script text (a name with a quote cannot run as code).
+const SLIDES_PS = String.raw`$ErrorActionPreference = 'Stop'
+$app = New-Object -ComObject PowerPoint.Application
+$p = $app.Presentations.Open($env:MW_PPTX, $true, $false, $false)
+$w = 1600; $h = [int](1600 * $p.PageSetup.SlideHeight / $p.PageSetup.SlideWidth)
+foreach ($s in $p.Slides) { $s.Export((Join-Path $env:MW_SLIDES ('slide-{0:D2}.png' -f $s.SlideIndex)), 'PNG', $w, $h) }
+$p.Close()
+if ($app.Presentations.Count -eq 0) { $app.Quit() }`;
+
 /** PowerPoint's own slide pictures (only when PowerPoint is installed; it is opened read-only, without a window, and closed again). */
 async function powerpointSlides(file, outDir) {
   if (!existsSync(POWERPOINT)) return null;
   const dir = join(outDir, "slides");
   mkdirSync(dir, { recursive: true });
-  const ps = `$ErrorActionPreference = 'Stop'
-$app = New-Object -ComObject PowerPoint.Application
-$p = $app.Presentations.Open('${file.replace(/'/g, "''")}', $true, $false, $false)
-$w = 1600; $h = [int](1600 * $p.PageSetup.SlideHeight / $p.PageSetup.SlideWidth)
-foreach ($s in $p.Slides) { $s.Export(('${dir.replace(/'/g, "''")}\\slide-{0:D2}.png' -f $s.SlideIndex), 'PNG', $w, $h) }
-$p.Close()
-if ($app.Presentations.Count -eq 0) { $app.Quit() }`;
-  await new Promise((ok) => { const c = spawn("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", ps], { windowsHide: true }); const t = setTimeout(() => c.kill(), 180000); c.on("close", () => { clearTimeout(t); ok(); }); c.on("error", () => ok()); });
+  const args = ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-EncodedCommand", Buffer.from(SLIDES_PS, "utf16le").toString("base64")];
+  await new Promise((ok) => { const c = spawn("powershell.exe", args, { windowsHide: true, env: { ...process.env, MW_PPTX: file, MW_SLIDES: dir } }); const t = setTimeout(() => c.kill(), 180000); c.on("close", () => { clearTimeout(t); ok(); }); c.on("error", () => ok()); });
   const files = existsSync(dir) ? readdirSync(dir).filter((n) => /^slide-\d+\.png$/.test(n)).sort() : [];
   return files.length ? files.map((n) => join(dir, n)) : null;
 }
