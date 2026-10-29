@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-tracking-blur-build",
+  "hash": "b0373fb3a072707d",
+  "at": "2026-10-17T09:39:31.631Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-tracking-blur-build.mp4",
+    "poster": "previews/takayu__text-tracking-blur-build.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "1ad70aa03f59ca2f8100505b813981ef467835579a50164dcd5d577647ffa6d9",
+    "size": 18687,
+    "seconds": 24.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

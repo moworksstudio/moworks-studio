@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-view-word-reveal",
+  "hash": "ebdcd0bdcc9be1ac",
+  "at": "2026-10-17T08:33:37.848Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-view-word-reveal.mp4",
+    "poster": "previews/takayu__text-view-word-reveal.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "9cf556bb30dc5f48c0ec72182b34e5b0094f774d9aefb884035a6b9cce53d6fb",
+    "size": 23765,
+    "seconds": 29.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

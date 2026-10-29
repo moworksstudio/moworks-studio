@@ -1,0 +1,57 @@
+<!--
+  Clock Wipe (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tr-clock (read 12/10/2026).
+  Cảnh mới hiện trong một hình quạt quét trọn một vòng từ 12 giờ theo chiều kim đồng hồ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.transitionClockWipe(q(".tk-b"), tl, 1.1, {});
+
+  Options (defaults in brackets):
+      - duration: s (0.7)
+      - start: degrees from 12 o'clock (0)
+      - clockwise: true (default)
+      - ease: sine.inOut
+      - from: the outgoing scene
+
+  Notes: Idea and numbers (TakayuStudio tr-clock, written here): Pie clip centred on the frame, from 12 o'clock clockwise, sweep 0 -> 360 deg over 700 ms easeInOutSine, radius past the far corner; incoming scene inside the pie, outgoing still underneath. Use a polygon clip with a fixed vertex count. HF showcase-mechanical ships a Clock Wipe (Apache-2.0). Params: duration (0.7 s) · start (12 giờ) · direction (thuận chiều kim).
+-->
+
+<section class="tk-scene tk-a"><div class="tk-mark circle"></div><div class="tk-sc-text"><div class="tk-sc-letter">A</div><div class="tk-sc-cap">Cảnh mở đầu</div></div></section>
+<section class="tk-scene tk-b"><div class="tk-mark square"></div><div class="tk-sc-text"><div class="tk-sc-letter">B</div><div class="tk-sc-cap">Cảnh tiếp theo</div></div></section>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.7,"start":0,"clockwise":true,"ease":"sine.inOut","from":null};
+  var run = function (el, tl, at, o) {
+        var out = o.from ? MW.el(o.from) : el.previousElementSibling, ease = gsap.parseEase(o.ease), N = 72;
+        var W = el.offsetWidth, H = el.offsetHeight, R = Math.hypot(W, H), dir = o.clockwise ? 1 : -1, a0 = (o.start - 90) * Math.PI / 180;
+        return MW.drive(tl, at, o.duration, function (t) {
+          var p = ease(t / o.duration), pts = ["50% 50%"];
+          // a pie with a fixed number of vertices (the clip's shape never changes its point count)
+          for (var i = 0; i <= N; i++) { var a = a0 + dir * (p * 2 * Math.PI) * (i / N); pts.push((W / 2 + R * Math.cos(a)) + "px " + (H / 2 + R * Math.sin(a)) + "px"); }
+          el.style.clipPath = p >= 1 ? "none" : "polygon(" + pts.join(",") + ")"; el.style.visibility = t > 0 ? "visible" : "hidden";
+          if (out) out.style.visibility = p >= 1 ? "hidden" : "visible";
+        });
+      };
+  MW.transitionClockWipe = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,78 @@
+<!--
+  Sidebar Reveal (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=sidebar-reveal (read 12/10/2026).
+  Bấm nút menu, ngăn kéo trượt vào từ mép trái và nền phía sau tối dần trễ một nhịp; bấm ra ngoài thì ngăn kéo rút về.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiSidebarDrawer(q(".gm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - loop: s (3.2)
+
+  Notes: Idea and numbers (TakayuStudio sidebar-reveal, written here): App window 240x146 (two content cards). Panel 104 px wide slides x −104 → 0 over 0.45-1.1 s (650 ms) power2.out; backdrop dims to 62 % over 0.53-1.18 s (starts 80 ms later) power2.out. Panel: accent pill header 88x18, 4 icon rows 20 px apart. Close: panel back 2.05-2.45 s, backdrop out 2.05-2.4 s, both power2.in. Cursor taps the menu icon at 0.3 s and the backdrop at 1.9 s. Params: width (104 px) · duration (0.65 s) · backdrop (62 %, trễ 0.08 s) · ease (power2.out / power2.in khi đóng).
+-->
+
+<div class="gm"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"loop":3.2};
+  var run = function (el, tl, at, o) {
+        var S = MW.stage320(el), c = S.ctx, out = gsap.parseEase("power2.out"), pin = gsap.parseEase("power2.in");
+        return MW.drive(tl, at, o.loop, function (t) {
+          S.clear(); c.save(); MW.rr(c, 40, 27, 240, 146, 10); c.clip(); c.fillStyle = "#151a28"; c.fillRect(40, 27, 240, 146);
+          c.fillStyle = "#222a42"; c.fillRect(40, 27, 240, 22); c.strokeStyle = "#c9d2ea"; c.lineWidth = 1.6; [33, 38, 43].forEach(function (y) { c.beginPath(); c.moveTo(50, y); c.lineTo(62, y); c.stroke(); });
+          MW.txt(c, "Dự án của tôi", 120, 38.5, 9, "#e8ebf3", 800);
+          c.fillStyle = "#1b2130"; MW.rr(c, 54, 60, 104, 100, 8); c.fill(); MW.rr(c, 166, 60, 100, 100, 8); c.fill(); c.fillStyle = "#3dd6f5"; MW.rr(c, 62, 68, 88, 44, 5); c.fill(); c.fillStyle = "#ffd23d"; MW.rr(c, 174, 68, 84, 44, 5); c.fill();
+          var p = out(Math.max(0, Math.min(1, (t - 0.45) / 0.65))) * (1 - pin(Math.max(0, Math.min(1, (t - 2.05) / 0.4)))), bd = 0.62 * out(Math.max(0, Math.min(1, (t - 0.53) / 0.65))) * (1 - pin(Math.max(0, Math.min(1, (t - 2.05) / 0.35))));
+          c.fillStyle = "rgba(5,6,10," + bd + ")"; c.fillRect(40, 27, 240, 146);
+          var x = 40 - 104 * (1 - p); c.fillStyle = "#1b2130"; c.fillRect(x, 27, 104, 146); c.fillStyle = "#8b7bff"; MW.rr(c, x + 8, 36, 88, 18, 9); c.fill(); MW.txt(c, "MENU", x + 52, 45.5, 8, "#fff", 900);
+          for (var i = 0; i < 4; i++) { c.fillStyle = "#3a4466"; MW.rr(c, x + 12, 66 + i * 20, 10, 10, 3); c.fill(); MW.rr(c, x + 28, 68 + i * 20, 50 - i * 6, 6, 3); c.fill(); }
+          c.restore(); var cp = MW.path([[0, 200, 180], [0.1, 200, 180], [0.3, 56, 38], [1.6, 56, 38], [1.9, 230, 120], [2.6, 230, 120], [3.2, 200, 180]], t); MW.cursor(c, cp[0], cp[1], (t > 0.3 && t < 0.4) || (t > 1.9 && t < 2.0) ? 0.9 : 1);
+        });
+      };
+  MW.uiSidebarDrawer = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

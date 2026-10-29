@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Afterimage Dash - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; }
+.gm { position: absolute; inset: 0; } .gm .w { font-weight: 900; letter-spacing: -0.02em; white-space: nowrap; } .gm .lab { font-size: 34px; font-weight: 700; color: #8f9ab3; letter-spacing: 0.08em; white-space: nowrap; }
+.bd-copy { position: absolute; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4">
+<div class="gm"><div class="bd" style="width:140px;height:140px;border-radius:35px;background:linear-gradient(160deg,#a693ff,#6a4cf0)"></div><div class="puff" style="width:70px;height:40px;border-radius:50%;background:#8f9ab3;opacity:0"></div><div class="puff" style="width:70px;height:40px;border-radius:50%;background:#8f9ab3;opacity:0"></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"at":0.5,"backAt":2.5,"from":60,"distance":200,"duration":0.35};
+  var run = function (el, tl, at, o) {
+        var S = MW.stage320(el), body = el.querySelector(".bd"), k = S.k, ex = gsap.parseEase("expo.out"), copies = [], puffs = el.querySelectorAll(".puff");
+        S.put(body, o.from, 138);
+        var ctx = S.ctx; S.clear(); ctx.strokeStyle = "#3a4260"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(20, 152); ctx.lineTo(300, 152); ctx.stroke();
+        for (var i = 0; i < 8; i++) { var c = body.cloneNode(true); c.className = "bd-copy"; c.style.boxShadow = "inset 0 0 0 " + (1.5 * k) + "px rgba(255,255,255,0.6)"; el.insertBefore(c, body); copies.push(c); }
+        var X = function (d, dir) { var a = dir > 0 ? o.from : o.from + o.distance; return a + dir * o.distance * ex(Math.max(0, Math.min(1, d / o.duration))); };
+        return MW.drive(tl, at, o.backAt + 1.4, function (t) {
+          var back = t >= o.backAt, s0 = back ? o.backAt : o.at, dir = back ? -1 : 1, d = t - s0, x = t < o.at ? o.from : X(d, dir);
+          var v = Math.abs(X(d + 0.005, dir) - X(d - 0.005, dir)) / 0.01, st = d > 0 && d < o.duration ? 1 + 0.5 * Math.min(1, v / 1600) : 1;
+          var sq = d > 0.3 && d < 0.55 ? 0.15 * Math.exp(-10 * (d - 0.3)) * Math.sin(Math.PI * (d - 0.3) / 0.25) : 0;
+          gsap.set(body, { x: (x - o.from) * k, scaleX: st * (1 + sq), scaleY: (1 / st) * (1 - sq), transformOrigin: "50% 100%" });
+          copies.forEach(function (c, i) {
+            var ci = i * 0.035, on = d >= ci && t >= o.at, fade = Math.max(0, Math.min(1, (d - (0.45 + 0.06 * i)) / 0.2));
+            gsap.set(c, { x: (X(ci, dir) - o.from) * k }); c.style.opacity = on ? String((0.12 + 0.3 * i / 7) * (1 - fade)) : "0";
+          });
+          Array.prototype.forEach.call(puffs, function (p, i) { var u = (d - o.duration * 0.8) / 0.5; var px = x + (dir > 0 ? 14 : -14) * (i ? 1 : 0.5); S.put(p, px, 150); gsap.set(p, { scale: u > 0 && u < 1 ? 0.5 + u : 0, x: (i ? 1 : -1) * 18 * k * Math.max(0, u) }); p.style.opacity = u > 0 && u < 1 ? String(1 - u) : "0"; });
+        });
+      };
+  MW.motionAfterimageDash = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionAfterimageDash(q(".gm"), tl, 0, {});
+          tl.set({}, {}, 4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

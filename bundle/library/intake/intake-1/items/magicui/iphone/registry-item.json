@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "iphone",
+  "type": "hyperframes:block",
+  "title": "iPhone",
+  "description": "A flat phone frame shaped like a recent iPhone (Dynamic Island, side buttons) with a screenshot or screen recording on its screen.",
+  "tags": [
+    "phone",
+    "iphone",
+    "device",
+    "mockup",
+    "frame",
+    "brand look",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "iphone.html",
+      "target": "compositions/components/iphone.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/iphone",
+    "author": "magicui",
+    "call": "MW.iphone(q(\".i1\"), tl, 0.3, { src: \"assets/screen.svg\", enter: \"rise\" });",
+    "function": "MW.iphone",
+    "options": {
+      "src": "screen picture",
+      "dark": "false",
+      "enter": "null | rise | fade",
+      "enterDuration": "s (0.9)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/iphone.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/iphone.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Looks like an Apple product (brand look): fine for showing an app, never to suggest Apple's endorsement. For a video put a HyperFrames <video class=\"clip\"> inside .mw-iphone-screen.",
+    "titleVi": "Khung iPhone phẳng có Dynamic Island"
+  }
+}

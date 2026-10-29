@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Loot Beam Column - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; }
+.gm { position: absolute; inset: 0; } .gm .w { font-weight: 900; letter-spacing: -0.02em; white-space: nowrap; } .gm .lab { font-size: 34px; font-weight: 700; color: #8f9ab3; letter-spacing: 0.08em; white-space: nowrap; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4">
+<div class="gm"><div class="gem" style="width:120px;height:120px;transform:rotate(45deg);background:linear-gradient(135deg,#d6ccff,#8b7bff 50%,#4a33b8);border-radius:14px;opacity:0"></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"dropAt":0.3,"beamAt":0.9,"height":140,"retractAt":3.55};
+  var run = function (el, tl, at, o) {
+        var S = MW.stage320(el), ctx = S.ctx, gem = el.querySelector(".gem"), ex = gsap.parseEase("expo.out"), bo = gsap.parseEase("bounce.out"), inn = gsap.parseEase("power2.in"), gy = 150;
+        return MW.drive(tl, at, o.retractAt + 0.4, function (t) {
+          var u = Math.max(0, Math.min(1, (t - o.dropAt) / 0.5)), y = 30 + (gy - 12 - 30) * bo(u); S.put(gem, 160, y); gem.style.opacity = t >= o.dropAt ? "1" : "0";
+          S.clear(); ctx.strokeStyle = "#3a4260"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(20, gy); ctx.lineTo(300, gy); ctx.stroke();
+          var g = t < o.beamAt ? 0 : ex(Math.min(1, (t - o.beamAt) / 0.45)), top = 0;
+          if (t > o.retractAt) top = inn(Math.min(1, (t - o.retractAt) / 0.35));
+          if (g > 0 && top < 1) {
+            var Hb = o.height * g, wv = 16 + 2 * Math.sin(8 * t), yTop = gy - Hb, yCut = yTop + Hb * top;
+            var gr = ctx.createLinearGradient(0, gy, 0, gy - o.height); gr.addColorStop(0, "rgba(139,123,255,0.8)"); gr.addColorStop(1, "rgba(139,123,255,0)");
+            ctx.fillStyle = gr; ctx.fillRect(160 - wv / 2, yCut, wv, gy - yCut);
+            ctx.save(); ctx.shadowColor = "#d6ccff"; ctx.shadowBlur = 12; ctx.strokeStyle = "#f2eeff"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(160, gy); ctx.lineTo(160, Math.max(yCut, gy - Hb * 0.75)); ctx.stroke(); ctx.restore();
+            var rr = 20 + 4 * Math.sin(6 * t); ctx.strokeStyle = "#8b7bff"; ctx.lineWidth = 4; ctx.globalAlpha = 1 - top; ctx.beginPath(); ctx.ellipse(160, gy, rr, rr * 0.3, 0, 0, 2 * Math.PI); ctx.stroke();
+            for (var i = 0; i < 10; i++) { var ph = ((t - o.beamAt) / 1.43 + i / 10) % 1, sy = gy - o.height * ph; if (sy < yCut) continue; ctx.globalAlpha = (1 - ph) * (1 - top); ctx.fillStyle = "#ffd23d"; ctx.beginPath(); ctx.arc(160 + 6 * Math.sin(i * 2.3 + t * 3), sy, 1.6, 0, 2 * Math.PI); ctx.fill(); }
+            ctx.globalAlpha = 1;
+          }
+        });
+      };
+  MW.effectLootLightBeam = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.effectLootLightBeam(q(".gm"), tl, 0, {});
+          tl.set({}, {}, 4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

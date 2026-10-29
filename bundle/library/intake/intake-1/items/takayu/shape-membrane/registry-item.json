@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "shape-membrane",
+  "type": "hyperframes:block",
+  "title": "Elastic Membrane Press",
+  "description": "Một màng căng giữa hai chốt bị ngón tay ấn lõm xuống 36 px ở giữa, thả ra thì màng bật lên rung mạnh nhiều nhịp rồi phẳng lại.",
+  "tags": [
+    "elastic",
+    "membrane",
+    "press",
+    "spring",
+    "material-surface-motion",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "shape-membrane.html",
+      "target": "compositions/components/shape-membrane.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/shape-membrane",
+    "author": "takayu",
+    "call": "MW.shapeMembrane(q(\".gm\"), tl, 0, {});",
+    "function": "MW.shapeMembrane",
+    "options": {
+      "dip": "units (36)",
+      "release": "s (1.4)",
+      "k": "spring stiffness (180)",
+      "c": "damping (5): a strong wobble",
+      "accent": "",
+      "loop": "s (3.4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-material-membrane-press",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-material-membrane-press (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-material-membrane-press, written here): A 208 px line pinned at both ends (small posts). A finger (r11) comes down 0.15-0.5 s and presses the centre: dip 0 → 36 px over 0.5-1.0 s power2.inOut, profile depth × (1 − u²)(1 − 0.25 u²) (u = −1 to 1). Release at 1.4 s: depth returns on a spring k180 d5 (strong wobble); the finger lifts 1.4-1.75 s and fades. 14 % accent fill under the curve, 4 px round-cap stroke. Params: dip (36 px, 0.5 s, power2.inOut) · release (1.4 s) · spring (k180 c5) · span (208 px). Profile depth × (1 − u²)(1 − 0.25 u²) across the span.",
+    "titleVi": "Màng đàn hồi bị ấn lõm"
+  }
+}

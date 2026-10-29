@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-gradient-flow",
+  "hash": "dbdf1ce77e2e1b16",
+  "at": "2026-10-17T10:31:05.846Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-gradient-flow.mp4",
+    "poster": "previews/takayu__text-gradient-flow.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "684bebced04245396f90e2025c6285a711289f9bb88c4145b265834899a500ee",
+    "size": 20267,
+    "seconds": 27.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

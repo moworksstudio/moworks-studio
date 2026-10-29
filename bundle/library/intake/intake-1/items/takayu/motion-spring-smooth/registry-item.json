@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-spring-smooth",
+  "type": "hyperframes:component",
+  "title": "Smooth",
+  "description": "Lò xo không vượt đích, tới nơi êm như cửa có giảm chấn trong khoảng 0.83 giây; hợp gần chữ.",
+  "tags": [
+    "spring",
+    "smooth",
+    "no-overshoot",
+    "springs",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-spring-smooth.html",
+      "target": "compositions/components/motion-spring-smooth.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.36,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-spring-smooth",
+    "author": "takayu",
+    "call": "MW.motionSpringSmooth(q(\".sp-b\"), tl, 0.4, { back: 1.83 });",
+    "function": "MW.motionSpringSmooth",
+    "options": {
+      "stiffness": "",
+      "damping": "",
+      "mass": "",
+      "prop": "the property it drives: x | y | scale | rotation (x)",
+      "from": "(0)",
+      "to": "(560 px)",
+      "back": "s after the start to spring back (null)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=s-smooth",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=s-smooth (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio s-smooth, written here): Target moves 0 → 1 on an over-damped spring, stiffness 120, damping 26, mass 1 (damping ratio 1.19): no overshoot, within 1 % by ~830 ms. Kit form: springk(120, 26) over 0.83 s. Site rule: elegant arrivals, near body text. Site demo: the target moves 102 px beside the response graph, with overshoot and settle readouts. Params: stiffness (120) · damping (26) · mass (1) · duration (0.83 s). Over-damped (ratio 1.19): no overshoot, in by ~0.83 s, like a damped door; fine near body text.",
+    "titleVi": "Lò xo êm (cửa giảm chấn)"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/data-circular-progress",
+  "hash": "3c616a5f20af949d",
+  "at": "2026-10-17T11:27:21.895Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__data-circular-progress.mp4",
+    "poster": "previews/takayu__data-circular-progress.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "e890e89b36e0a048e7c9271be643755f802a9a3661bd622c4b5981a898429e9f",
+    "size": 10412,
+    "seconds": 23.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/light-rays",
+  "hash": "26ae8cb5a4807566",
+  "at": "2026-10-17T06:01:07.432Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__light-rays.mp4",
+    "poster": "previews/magicui__light-rays.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "2a3270ce5b815dcb7f9ae8b2b4a86df80cd6c009d84389f9f36a652b889ae73b",
+    "size": 35169,
+    "seconds": 41,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

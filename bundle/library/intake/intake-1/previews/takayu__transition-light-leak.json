@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/transition-light-leak",
+  "hash": "43ac4b6a2b0e3573",
+  "at": "2026-10-17T07:21:59.940Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__transition-light-leak.mp4",
+    "poster": "previews/takayu__transition-light-leak.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ce98843ea0f7ba947526efa9d6521067fb5bdbc9afde31ed358da783331de5f2",
+    "size": 22905,
+    "seconds": 28.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/shine-border",
+  "hash": "e689d12b346bd086",
+  "at": "2026-10-17T06:03:04.335Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__shine-border.mp4",
+    "poster": "previews/magicui__shine-border.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "55e878fb80bb3bb43174371281244ff5ea4eb35aa6b08d53d2b812380f61c5fb",
+    "size": 19080,
+    "seconds": 28.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

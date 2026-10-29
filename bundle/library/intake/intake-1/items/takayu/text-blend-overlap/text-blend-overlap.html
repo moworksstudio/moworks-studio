@@ -1,0 +1,83 @@
+<!--
+  Blend Overlap (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-blend-overlap (read 12/10/2026).
+  Các ký tự ba màu xen kẽ khép sát vào nhau và phóng nhẹ, chỗ chồng lên nhau hoà thành màu mới.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textBlendOverlap(q(".tk-head"), tl, 0.4, {});
+
+  Options (defaults in brackets):
+      - tracking: em (−0.3)
+      - scale: (1.12)
+      - duration: s each way (0.9, power2.inOut)
+      - backAt: s after the start (2.2)
+      - blend: screen on dark, multiply on light
+      - colors: 
+
+  Notes: Idea and numbers (TakayuStudio tx-blend-overlap, written here): Chars coloured in a repeating 3-colour cycle (demo violet #7d64ff, cyan #22bdd6, yellow #f2c84b), mix-blend-mode screen on dark (multiply on light); letter-spacing 0 → −0.3 em (chars move toward the line centre) with scale 1 → 1.12 over 0.9 s power2.inOut so neighbours overlap into mixed colours; GSAP yoyo: hold 1.3 s, return 0.9 s. Demo: in 0.4–1.3 s, back 2.6–3.3 s; loop 3.6 s. Params: tracking: khép chữ (−0.3 em) · scale (1.12) · duration (0.9 s) · blend: screen / multiply · colors: ba màu.
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">HOÀ SẮC</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"tracking":-0.3,"scale":1.12,"duration":0.9,"backAt":2.2,"blend":"screen","colors":["#7d64ff","#22bdd6","#f2c84b"]};
+  var run = function (el, tl, at, o) {
+        var ch = MW.split(el, "chars").chars, io = gsap.parseEase("power2.inOut"); ch.forEach(function (c, i) { c.style.color = o.colors[i % o.colors.length]; c.style.mixBlendMode = o.blend; });
+        return MW.drive(tl, at, o.backAt + o.duration, function (t) { var p = io(Math.max(0, Math.min(1, t / o.duration))) - io(Math.max(0, Math.min(1, (t - o.backAt) / o.duration))); el.style.letterSpacing = (o.tracking * p).toFixed(4) + "em"; gsap.set(el, { scale: 1 + (o.scale - 1) * p }); });
+      };
+  MW.textBlendOverlap = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

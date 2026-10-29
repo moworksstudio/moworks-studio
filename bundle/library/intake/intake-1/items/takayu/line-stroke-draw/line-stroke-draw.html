@@ -1,0 +1,51 @@
+<!--
+  SVG Stroke Draw (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=svg-stroke-draw (read 12/10/2026).
+  Một đường SVG tự vẽ từ đầu tới cuối bằng cách rút dần khoảng lệch của nét đứt.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.lineStrokeDraw(q(".sd"), tl, 0.2, { duration: 1.4, ease: "power2.inOut", eraseAt: 2.0 });
+
+  Options (defaults in brackets):
+      - duration: s (1.1)
+      - ease: power2.out (the site's card: power2.inOut over 1.4 s)
+      - eraseAt: s after the start to erase forward in 0.5 s (null: stay drawn)
+
+  Notes: Idea and numbers (TakayuStudio svg-stroke-draw, written here): pathLength = 1, stroke-dasharray 1, dashoffset 1 -> 0 over 1100 ms easeOutCubic. Site card (sh-draw): a two-segment cubic curve, 5 px round-cap stroke, draws over 1.4 s ease-in-out from 0.2 s, holds, then erases forward (offset 0 -> -1) over 0.5 s from 2.2 s; 2.8 s loop. Params: duration (1.1 s) · ease (power2.out) · width: độ dày nét.
+-->
+
+<div class="sv"><svg width="1400" height="700" viewBox="0 0 280 140"><path class="sd" d="M20 110 C60 20 100 20 140 70 S220 120 260 30" fill="none" stroke="#a99bff" stroke-width="5" stroke-linecap="round"/></svg></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":1.1,"ease":"power2.out","eraseAt":null};
+  var run = function (el, tl, at, o) {
+        var paths = el.tagName.toLowerCase() === "path" ? [el] : Array.prototype.slice.call(el.querySelectorAll("path")), ease = gsap.parseEase(o.ease), io = gsap.parseEase("power2.inOut");
+        paths.forEach(function (p) { p.setAttribute("pathLength", "1"); p.style.strokeDasharray = "1 1"; });
+        return MW.drive(tl, at, o.eraseAt == null ? o.duration : o.eraseAt + 0.5, function (t) {
+          var d = ease(Math.max(0, Math.min(1, t / o.duration))), e = o.eraseAt != null ? io(Math.max(0, Math.min(1, (t - o.eraseAt) / 0.5))) : 0;
+          paths.forEach(function (p) { p.style.strokeDashoffset = String(e > 0 ? -e : 1 - d); });
+        });
+      };
+  MW.lineStrokeDraw = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

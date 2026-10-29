@@ -1,0 +1,33 @@
+{
+ "spec": "aimk-motionspec/0", "title": "Bench film", "size": [1920, 1080], "brand": null, "background": "#ffffff",
+ "scenes": [
+  { "id": "s1", "name": "Title", "duration": 3, "bg": "#ffffff",
+    "elements": [
+      { "id": "h1", "type": "text", "text": "Ra mắt sản phẩm mới", "style": { "left": "160px", "top": "380px", "font-size": "120px", "font-weight": "760", "color": "#111111", "white-space": "nowrap" } },
+      { "id": "e1", "type": "text", "text": "Chữ nhỏ 14px: ả ạ ặ ẫ ể ọ ở ữ ỹ đ — kiểm tra viền màu", "style": { "left": "160px", "top": "560px", "font-size": "14px", "color": "#111111", "white-space": "nowrap" } },
+      { "id": "e2", "type": "text", "text": "Chữ 18px: Tiếng Việt có dấu đầy đủ", "style": { "left": "160px", "top": "600px", "font-size": "18px", "color": "#111111", "white-space": "nowrap" } },
+      { "id": "dot", "type": "box", "style": { "left": "1500px", "top": "380px", "width": "200px", "height": "200px", "border-radius": "50%", "background": "#ff7a1a" } }
+    ],
+    "motion": [ { "preset": "text/mask-rise", "target": "h1", "at": 0.2 }, { "preset": "shape/pop", "target": "dot", "at": 0.4 } ] },
+  { "id": "s2", "name": "Blue", "duration": 3, "bg": "#1d3fd8",
+    "transition_in": { "preset": "transition/push", "duration": 0.6 },
+    "elements": [
+      { "id": "h2", "type": "text", "text": "Nhanh hơn, gọn hơn", "style": { "left": "160px", "top": "420px", "font-size": "110px", "font-weight": "700", "color": "#ffffff", "white-space": "nowrap" } },
+      { "id": "e3", "type": "text", "text": "Chữ trắng 14px trên nền xanh: ơ ư ằ ẳ ẵ ậ", "style": { "left": "160px", "top": "600px", "font-size": "14px", "color": "#ffffff", "white-space": "nowrap" } }
+    ],
+    "motion": [ { "preset": "text/blur-in", "target": "h2", "at": 0.3 } ] },
+  { "id": "s3", "name": "Grid", "duration": 3, "bg": "#f4f1ea",
+    "transition_in": { "preset": "transition/directional-wipe", "duration": 0.6 },
+    "elements": [
+      { "id": "b1", "type": "box", "style": { "left": "200px", "top": "300px", "width": "400px", "height": "400px", "background": "#14161c" } },
+      { "id": "b2", "type": "box", "style": { "left": "760px", "top": "300px", "width": "400px", "height": "400px", "background": "#ff7a1a" } },
+      { "id": "b3", "type": "box", "style": { "left": "1320px", "top": "300px", "width": "400px", "height": "400px", "background": "#1d3fd8" } },
+      { "id": "c1", "type": "text", "text": "Ba điểm chính · 24px", "style": { "left": "200px", "top": "760px", "font-size": "24px", "color": "#14161c", "white-space": "nowrap" } }
+    ],
+    "motion": [ { "preset": "shape/pop", "target": ["b1", "b2", "b3"], "at": 0.2 } ] },
+  { "id": "s4", "name": "End", "duration": 2.5, "bg": "#14161c",
+    "transition_in": { "preset": "transition/iris-reveal", "duration": 0.6 },
+    "elements": [ { "id": "h4", "type": "text", "text": "Cảm ơn", "style": { "left": "760px", "top": "440px", "font-size": "140px", "font-weight": "800", "color": "#f5f5f2", "white-space": "nowrap" } } ],
+    "motion": [ { "preset": "text/mask-rise", "target": "h4", "at": 0.2 } ] }
+ ]
+}

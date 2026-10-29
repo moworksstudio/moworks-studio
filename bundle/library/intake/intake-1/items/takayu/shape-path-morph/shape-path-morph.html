@@ -1,0 +1,52 @@
+<!--
+  SVG Path Morph (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=svg-path-morph (read 12/10/2026).
+  Một đường SVG biến mượt từ hình tròn sang hình thoi rồi sang một hình hữu cơ, các điểm điều khiển nội suy theo nhau.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.shapePathMorph(q(".pm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - shapes: path d strings with the same commands (circle, diamond, organic)
+      - keys: s: [hold A until, B reached, hold B until, C reached, end]
+
+  Notes: Idea and numbers (TakayuStudio svg-path-morph, written here): Three paths with matching commands (4 cubic segments each): circle A -> diamond-ish B -> organic C; CSS d interpolation, no wrapper scale, easeInOutCubic, 1000 ms per leg. Demo loop 2.2 s: hold A to 12 %, B at 38 %, C at 66 %, hold C. Site card (sh-morph): circle -> star -> square -> triangle -> circle, 64 resampled points r 56, each morph 600 ms ease-in-out after a 300 ms hold. Params: duration (1 s) · paths: hình A / B / C · ease (power2.inOut).
+-->
+
+<div class="sv"><svg width="800" height="800" viewBox="0 0 200 200"><path class="pm" fill="#8b7bff" d=""/></svg></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"shapes":["M100 30 C138 30 170 62 170 100 C170 138 138 170 100 170 C62 170 30 138 30 100 C30 62 62 30 100 30 Z","M100 20 C112 60 140 88 180 100 C140 112 112 140 100 180 C88 140 60 112 20 100 C60 88 88 60 100 20 Z","M96 26 C150 18 184 70 160 110 C140 150 120 176 86 166 C44 156 26 120 40 88 C52 56 64 30 96 26 Z"],"keys":[0.26,0.84,1.1,1.45,2.2]};
+  var run = function (el, tl, at, o) {
+        var io = gsap.parseEase("power2.inOut"), nums = function (d) { return d.match(/-?\d*\.?\d+/g).map(Number); }, tpl = o.shapes[0].replace(/-?\d*\.?\d+/g, "#"), S = o.shapes.map(nums);
+        var fill = function (v) { var i = 0; return tpl.replace(/#/g, function () { return (Math.round(v[i++] * 100) / 100).toString(); }); };
+        return MW.drive(tl, at, o.keys[o.keys.length - 1], function (t) {
+          // keys: hold the first shape until keys[0], move to the next by keys[1], hold until keys[2], move by keys[3], hold
+          var from = S[0], to = S[0], u = 0;
+          for (var j = 0; j + 1 < S.length; j++) { var a = o.keys[2 * j], b = o.keys[2 * j + 1]; if (t >= a) { from = S[j]; to = S[j + 1]; u = io(Math.min(1, (t - a) / (b - a))); } }
+          el.setAttribute("d", fill(from.map(function (v, q) { return v + (to[q] - v) * u; })));
+        });
+      };
+  MW.shapePathMorph = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

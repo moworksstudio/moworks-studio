@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "title-raid-start-lineup",
+  "type": "hyperframes:block",
+  "title": "Raid Start",
+  "description": "Bốn thẻ thành viên lần lượt lao vào xen kẽ từ trên và dưới bằng lò xo, mỗi thẻ hiện chữ \"READY\"; đủ đội thì cả hàng nhún một nhịp, tiêu đề đập từ to về cỡ và hai vạch kẻ chạy ra hai bên.",
+  "tags": [
+    "cards",
+    "stagger",
+    "spring",
+    "slam",
+    "game-cinematics",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "title-raid-start-lineup.html",
+      "target": "compositions/components/title-raid-start-lineup.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.9,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/title-raid-start-lineup",
+    "author": "takayu",
+    "call": "MW.titleRaidStartLineup(q(\".rs\"), tl, 0, {});",
+    "function": "MW.titleRaidStartLineup",
+    "options": {
+      "start": "s (0.3)",
+      "stagger": "s (0.14), spring k260 d20, alternating from above and below",
+      "goAt": "s the title slams (1.25)",
+      "outAt": "s (2.4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-cinematic-raid-start",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-cinematic-raid-start (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-cinematic-raid-start, written here): px @320x200. 4 cards 48 x 64 (r 8, coloured role strip), 64 px apart, arrive 140 ms apart from 0.3 s, alternating from 160 px above / below, by spring k260 d20; 'READY' fades in under each 300-450 ms after its start. At 1.25 s all cards hop 6 px (half-sine 1.2-1.45 s); the title scales 1.6 → 1 in 220 ms outExpo (opacity in ~110 ms); side rules extend 60 px outward (400 ms outExpo at 1.3 s). Out 2.4-2.7 s in-cubic. Params: cards: số thẻ (4) · stagger: cách nhau (0.14 s) · spring: lò xo (k260 d20) · goAt: lúc tiêu đề (1.25 s) · title: tiêu đề.",
+    "titleVi": "Đội hình vào đủ, tiêu đề đập xuống"
+  }
+}

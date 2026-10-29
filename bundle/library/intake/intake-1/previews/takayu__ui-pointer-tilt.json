@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-pointer-tilt",
+  "hash": "e5aadf9ff40d7d3e",
+  "at": "2026-10-17T10:05:50.284Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__ui-pointer-tilt.mp4",
+    "poster": "previews/takayu__ui-pointer-tilt.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a29c86a23ee843f2022bc58fb1f4613cbd9073abd6ffd267efd876c5766f178f",
+    "size": 14867,
+    "seconds": 27,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

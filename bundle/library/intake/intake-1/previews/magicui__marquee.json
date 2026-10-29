@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/marquee",
+  "hash": "7102f9d9df81131d",
+  "at": "2026-10-17T06:01:05.784Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__marquee.mp4",
+    "poster": "previews/magicui__marquee.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "dc90e95951f49a2396948a240d374f7b6382e2ae26a4e3c3bc1c75cf9dac3f5d",
+    "size": 90676,
+    "seconds": 38.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

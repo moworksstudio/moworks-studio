@@ -1,0 +1,93 @@
+<!--
+  3-step Blur In (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-blur-in-3step (read 12/10/2026).
+  Từng từ rơi từ trên xuống 50 px, vượt nhẹ 5 px rồi về chỗ, độ nhoè giảm qua hai nấc 10 → 5 → 0 px.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textBlurInSteps(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - step: s per step (0.35)
+      - y: px [start, overshoot, rest] ([−100, 10, 0])
+      - blur: px per step ([16, 8, 0])
+      - stagger: s per word (0.2)
+      - cap: s the words start within (1)
+      - start: s (0.3)
+      - exitAt: s (2.6)
+      - exitBlur: px on the way out (8)
+      - loop: s (3.2)
+
+  Notes: Idea and numbers (TakayuStudio tx-blur-in-3step, written here): Split words; each word runs two 0.35 s steps: blur 10 → 5 → 0 px, y −50 → +5 → 0 px (drops from above, overshoots 5 px), opacity 0 → 0.5 → 1 (demo: y easeOutQuad per step, blur / opacity linear; CSS 0.7 s ease-out with keys at 0 / 50 / 100 %); words 0.2 s apart (demo capped 1 s total) from 0.3 s. Loop exit: fade with blur 5 px 2.6–3.0 s; loop 3.2 s. Params: steps: mỗi nấc (0.35 s) · y (−50 → 5 → 0 px) · blur (10 → 5 → 0 px) · stagger: mỗi từ (0.2 s).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Mỗi khung hình kể một câu chuyện</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"step":0.35,"y":[-100,10,0],"blur":[16,8,0],"stagger":0.2,"cap":1,"start":0.3,"exitAt":2.6,"exitBlur":8,"loop":3.2};
+  var run = function (el, tl, at, o) {
+        var w = MW.split(el, "words").words, n = w.length, st = Math.min(o.stagger, o.cap / Math.max(1, n - 1)), p1 = gsap.parseEase("power1.out");
+        return MW.drive(tl, at, o.loop, function (t) {
+          var x = Math.max(0, Math.min(1, (t - o.exitAt) / 0.4));
+          w.forEach(function (c, i) {
+            var s = (t - o.start - i * st) / o.step, y = o.y[2], b = o.blur[2], a = 1;
+            if (s <= 0) { y = o.y[0]; b = o.blur[0]; a = 0; } else if (s < 1) { y = o.y[0] + (o.y[1] - o.y[0]) * p1(s); b = o.blur[0] + (o.blur[1] - o.blur[0]) * s; a = 0.5 * s; } else if (s < 2) { var u = s - 1; y = o.y[1] + (o.y[2] - o.y[1]) * p1(u); b = o.blur[1] + (o.blur[2] - o.blur[1]) * u; a = 0.5 + 0.5 * u; }
+            b += o.exitBlur * x; gsap.set(c, { y: y }); c.style.filter = b > 0.01 ? "blur(" + b.toFixed(2) + "px)" : ""; c.style.opacity = String(a * (1 - x));
+          });
+        });
+      };
+  MW.textBlurInSteps = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-xp-overflow-bar",
+  "hash": "5ce83fb9bb976b06",
+  "at": "2026-10-17T10:45:18.704Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-xp-overflow-bar.mp4",
+    "poster": "previews/takayu__ui-xp-overflow-bar.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "1adf66039f4ba150eb0aef958a2c17ae06a1be01b357458c64d3f02c33cb32f3",
+    "size": 12662,
+    "seconds": 29,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

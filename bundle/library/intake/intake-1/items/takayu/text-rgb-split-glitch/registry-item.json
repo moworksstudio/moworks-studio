@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-rgb-split-glitch",
+  "type": "hyperframes:component",
+  "title": "RGB Split Glitch",
+  "description": "Hai bản đỏ và xanh lơ của chữ lệch sang hai bên trong những dải ngang chạy lên xuống, giật từng đợt ngắn.",
+  "tags": [
+    "glitch",
+    "rgb",
+    "bands",
+    "chromatic",
+    "text-distortion-glitch",
+    "crisp",
+    "distortion-glitch",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-rgb-split-glitch.html",
+      "target": "compositions/components/text-rgb-split-glitch.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-rgb-split-glitch",
+    "author": "takayu",
+    "call": "MW.textRgbSplitGlitch(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textRgbSplitGlitch",
+    "options": {
+      "colors": "[red, cyan]",
+      "band": "[min, max] % of the height ([6, 22])",
+      "shift": "[min, max] px ([16, 48])",
+      "jitter": "± px (8)",
+      "bursts": "[[from, to] s, ...] ([[0.35, 1.05], [2.4, 2.78]])",
+      "fps": "updates a second (12)",
+      "seed": "(3)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-rgb-split-glitch",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-rgb-split-glitch (read 12/10/2026)",
+      "upstream": "the site credits react-bits (MIT + Commons Clause): written from the idea only, no react-bits code"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-rgb-split-glitch, written here): Two copies over the text, each clipped to a horizontal band. CSS: cyan copy (x −2 px, cyan shadow +5 px) on a 2 s cycle, red copy (x +2, red shadow −5 px) on 3 s; bands slide through 6 inset keys (20/50, 60/12, 43/40, 8/78, 70/6, 32/55 %), linear alternate-reverse. Canvas demo (12 fps): bursts only in 0.35–1.05 / 2.4–2.78 s on ~70 % of frames: red band in the upper half, cyan in the lower (6–22 % tall), shifted −/+4–12 px, screen blend; text jitters ±2 px. Loop 3 s. Params: offset: độ lệch (5–12 px) · band: chiều cao dải (6–22 %) · cycles: chu kỳ hai bản (2 s / 3 s) · seed. In a burst about 70 % of frames glitch: a red band in the upper half, a cyan band in the lower, shifted opposite ways.",
+    "titleVi": "Nhiễu tách màu theo dải ngang"
+  }
+}

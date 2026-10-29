@@ -1,0 +1,57 @@
+<!--
+  Hormozi-Style Pop Captions (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-hormozi-caption (read 12/10/2026).
+  Phụ đề kiểu mạng xã hội chữ in hoa rất đậm viền đen dày, mỗi trang bật lên vượt cỡ rồi về, trang chứa từ khoá to hơn, đổi màu và nghiêng nhẹ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textCaptionKeyPop(q(".kw"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - start: s (0.25)
+      - every: s per page (0.62)
+      - exitAt: s (3.3)
+      - pages: selector of the pages (the key page has .key)
+      - loop: s (3.8)
+
+  Notes: Idea and numbers (TakayuStudio tx-hormozi-caption, written here): Words grouped into ≤ 4 pages, uppercase, weight 900, 42 px (key page 52 px = the longest), dark stroke 7 px under the fill plus a hard shadow copy offset (2, 3) px with a 9 px stroke. A page every 0.62 s from 0.25 s: opacity 0 → 1 in 0.05 s, scale 0.8 → 1.1 (100 ms) → 1.0 (180 ms) power1.out; the key page is accent coloured and rotates 0 → −4° with back.out(1.7) in 0.12 s. Exit 3.3–3.45 s: fade and scale × 0.7. Loop 3.8 s. Params: nhịp trang (0.62 s) · bật (0.8 → 1.1 → 1) · góc từ khoá (−4°) · viền (0.17 em).
+-->
+
+<div class="th"></div><div class="kw"><div class="kp">Bí quyết</div><div class="kp">là làm</div><div class="kp key">mỗi ngày</div><div class="kp">một chút</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"start":0.25,"every":0.62,"exitAt":3.3,"pages":".kp","loop":3.8};
+  var run = function (el, tl, at, o) {
+        var pages = Array.prototype.slice.call(el.querySelectorAll(o.pages)), p1 = gsap.parseEase("power1.out"), bk = gsap.parseEase("back.out(1.7)");
+        return MW.drive(tl, at, o.loop, function (t) {
+          var ex = Math.max(0, Math.min(1, (t - o.exitAt) / 0.15));
+          pages.forEach(function (p, i) {
+            var s0 = o.start + o.every * i, d = t - s0, on = d >= 0 && (i === pages.length - 1 ? t < o.exitAt + 0.15 : d < o.every), key = p.classList.contains("key");
+            p.style.visibility = on ? "visible" : "hidden"; if (!on) return;
+            var s = d < 0.1 ? 0.8 + 0.3 * p1(d / 0.1) : d < 0.28 ? 1.1 - 0.1 * p1((d - 0.1) / 0.18) : 1; if (ex) s *= 1 - 0.3 * ex;
+            gsap.set(p, { scale: s, rotation: key ? -4 * bk(Math.min(1, d / 0.12)) : 0 }); p.style.opacity = String(Math.min(1, d / 0.05) * (1 - ex));
+          });
+        });
+      };
+  MW.textCaptionKeyPop = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,64 @@
+<!--
+  Metric Odometer Cascade (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=catalog-data-story-odometer-cascade (read 12/10/2026).
+  Các chữ số cuộn như công-tơ-mét, số hàng thấp cuộn nhiều vòng hơn và dừng muộn hơn, mỗi số dừng có nhịp rung và vòng sáng nhỏ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.dataOdometerCascade(q(".oc-n"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - value: digits (128)
+      - suffix: fixed text after (K)
+      - laps: extra turns per digit, left to right ([1, 2, 3])
+      - start: s (0.35)
+      - stops: s each digit stops ([1.25, 1.75, 2.25])
+
+  Notes: Idea and numbers (TakayuStudio catalog-data-story-odometer-cascade, written here): Digits 1, 2, 8 + a fixed K. All reels start at 350 ms and roll (digit + laps x 10) steps, laps 1 / 2 / 3 from left to right, easeOutCubic, stopping at 1250 / 1750 / 2250 ms. On stop: settle wobble 0.2 step x sin(20 t) x e^(-10 t) and a ring flash (border grows 4 px and fades over 350 ms easeOutCubic). While fast: ghost copies +-6 px at ~14 % opacity. Params: value (128K) · laps (1 / 2 / 3) · stops (1.25 / 1.75 / 2.25 s).
+-->
+
+<div class="gm oc"><div><div class="oc-n">128K</div><p>người theo dõi</p></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"value":"128","suffix":"K","laps":[1,2,3],"start":0.35,"stops":[1.25,1.75,2.25]};
+  var run = function (el, tl, at, o) {
+        var out = gsap.parseEase("power2.out"), digits = String(o.value).split(""), reels = [];
+        el.textContent = ""; el.style.display = "inline-flex"; el.style.fontVariantNumeric = "tabular-nums";
+        digits.forEach(function (d, i) {
+          var w = document.createElement("span"); w.style.cssText = "display:inline-block;position:relative;overflow:hidden;height:1.2em;border-radius:0.12em;";
+          var s = document.createElement("span"); s.style.cssText = "display:block;line-height:1.2em;"; var steps = +d + (o.laps[i] || 1) * 10;
+          for (var j = 0; j <= steps; j++) { var e = document.createElement("span"); e.style.display = "block"; e.textContent = String(j % 10); s.appendChild(e); }
+          w.appendChild(s); el.appendChild(w); reels.push({ w: w, s: s, steps: steps, stop: o.stops[i] });
+        });
+        if (o.suffix) { var k = document.createElement("span"); k.textContent = o.suffix; el.appendChild(k); }
+        return MW.drive(tl, at, o.stops[o.stops.length - 1] + 0.6, function (t) {
+          reels.forEach(function (r) {
+            var u = Math.max(0, Math.min(1, (t - o.start) / (r.stop - o.start))), pos = r.steps * out(u), d = t - r.stop, sp = u > 0 && u < 1 ? r.steps * 2 * (1 - u) / (r.stop - o.start) : 0;
+            if (d > 0) pos = r.steps + 0.2 * Math.sin(20 * d) * Math.exp(-10 * d);
+            gsap.set(r.s, { y: -pos * 1.2 + "em" }); r.w.style.filter = sp > 6 ? "blur(" + Math.min(6, sp / 6) + "px)" : "";
+            var g = d > 0 && d < 0.35 ? 1 - d / 0.35 : 0; r.w.style.boxShadow = g ? "0 0 0 " + (4 * (1 - g) + 2) + "px rgba(139,123,255," + g + ")" : "none";
+          });
+        });
+      };
+  MW.dataOdometerCascade = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

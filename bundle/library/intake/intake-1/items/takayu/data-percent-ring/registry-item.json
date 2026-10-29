@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-percent-ring",
+  "type": "hyperframes:block",
+  "title": "Percent With Ring",
+  "description": "Vòng tròn tiến độ và con số phần trăm ở giữa cùng chạy từ một giá trị, từ 0 lên 87 % trong 1.6 giây.",
+  "tags": [
+    "progress",
+    "ring",
+    "counter",
+    "percent",
+    "text-numbers-data",
+    "smooth",
+    "numbers-data",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "data-percent-ring.html",
+      "target": "compositions/components/data-percent-ring.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/data-percent-ring",
+    "author": "takayu",
+    "call": "MW.dataPercentRing(q(\".pr\"), tl, 0, {});",
+    "function": "MW.dataPercentRing",
+    "options": {
+      "value": "% (87)",
+      "duration": "s (1.6), ease-out quad",
+      "start": "s (0.3)",
+      "resetAt": "s (3.05)",
+      "loop": "s (3.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-progress-percent",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-progress-percent (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-progress-percent, written here): Ring (pathLength 100, round cap, from 12 o'clock clockwise; demo r 58 px, 8 px stroke on a dim track, a small dot at the tip) and the centred number driven by one value: 0 → 87 over 1.6 s easeOutQuad (CSS cubic-bezier(.5,1,.89,1), labelled power2.out); stroke-dashoffset 100 → 13; the number rounded, tabular, '%' at half size and muted. Demo from 0.3 s, reset 3.05–3.6 s; loop 3.6 s. Params: value: phần trăm đích (87) · duration (1.6 s) · ease (easeOutQuad) · stroke: độ dày vòng (8 px).",
+    "titleVi": "Vòng tiến độ kèm số phần trăm"
+  }
+}

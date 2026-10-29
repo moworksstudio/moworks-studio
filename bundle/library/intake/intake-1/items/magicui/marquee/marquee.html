@@ -1,0 +1,62 @@
+<!--
+  Marquee (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/marquee.tsx.
+  An endless row (or column) of items, such as logos, review cards or words, scrolling at a constant speed; two rows in opposite directions for a wall.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.marquee(q(".r1"), tl, 0, { duration: 20, gap: 24, hold: 8 });
+
+  Options (defaults in brackets):
+      - duration: s per copy (40)
+      - gap: px (16)
+      - repeat: copies (4)
+      - reverse: false
+      - vertical: false
+      - hold: seconds (10)
+
+  Notes: el is the marquee box; its children are the items. pauseOnHover has no meaning in a film. Upstream's demo avatars and logos (remote) are not taken.
+-->
+
+<div class="mw-marquee"><div>A</div><div>B</div><div>C</div></div>
+
+<style>
+.mw-marquee { display: flex; overflow: hidden; padding: 8px; gap: var(--mw-mq-gap, 16px); }
+.mw-marquee.vertical { flex-direction: column; }
+.mw-marquee > .mw-mq-copy { display: flex; flex-shrink: 0; justify-content: space-around; gap: var(--mw-mq-gap, 16px); }
+.mw-marquee.vertical > .mw-mq-copy { flex-direction: column; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"duration":40,"gap":16,"repeat":4,"reverse":false,"vertical":false,"hold":10};
+  var run = function (el, tl, at, o) {
+      el.style.setProperty("--mw-mq-gap", o.gap + "px");
+      if (o.vertical) el.classList.add("vertical");
+      var items = Array.prototype.slice.call(el.children), first = document.createElement("div");
+      first.className = "mw-mq-copy"; items.forEach(function (n) { first.appendChild(n); }); el.appendChild(first);
+      var copies = [first];
+      for (var i = 1; i < o.repeat; i++) { var c = first.cloneNode(true); c.setAttribute("aria-hidden", "true"); el.appendChild(c); copies.push(c); }
+      var size = (o.vertical ? first.offsetHeight : first.offsetWidth) + o.gap;          // calc(-100% - gap)
+      var s = { t: 0 };
+      var set = function () {
+        var f = (s.t % o.duration) / o.duration; if (o.reverse) f = 1 - f;
+        var v = -size * f, tr = o.vertical ? "translateY(" + v + "px)" : "translateX(" + v + "px)";
+        for (var i = 0; i < copies.length; i++) copies[i].style.transform = tr;
+      };
+      set();
+      tl.fromTo(s, { t: 0 }, { t: o.hold, duration: o.hold, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + o.hold;
+    };
+  MW.marquee = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

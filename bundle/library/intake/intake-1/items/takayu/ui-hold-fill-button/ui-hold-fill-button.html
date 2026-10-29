@@ -1,0 +1,88 @@
+<!--
+  Hold to Confirm (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=catalog-ui-button-hold-confirm (read 12/10/2026).
+  Giữ nút, màu nhấn tô dần từ trái sang; thả sớm thì màu rút về và báo đã huỷ, giữ đủ 1.2 s thì nút thành ĐÃ XÁC NHẬN có dấu tích.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiHoldFillButton(q(".hf"), tl, 0, { cursor: ".ui-cursor" });
+
+  Options (defaults in brackets):
+      - hold: s to fill, linear (1.2)
+      - cancel: s the fill runs back after an early release (0.25, power2.out)
+      - presses: [[s down, s up], ...]
+      - resetAt: s it fades back (3.55)
+      - accent: 
+      - ink: label colour in the fill
+      - label: the label
+      - hint: a line shown after an early release
+      - bar: a thin bar that mirrors the fill
+      - doneText: 
+      - cursor: an optional cursor that makes the clicks
+      - approach: [x, y] px the cursor comes from
+      - lead: s it arrives before a click
+
+  Notes: Idea and numbers (TakayuStudio catalog-ui-button-hold-confirm, written here): Outlined button 150x46 r14. While held, the accent fill wipes left to right linearly over 1.2 s (dark label copy inside). Early release at 50 % (hold 0.4-1.0 s): the fill returns to 0 in 250 ms power2.out with a 'released → cancelled' hint (1.0-1.7 s). Second hold from 1.6 s completes at 2.8 s: 'CONFIRMED' with a check popping (back.out 0.22 s). A thin 100x4 bar below mirrors the fill. Fade back 3.55-3.8 s. Params: hold (1.2 s, none) · cancel (0.25 s, power2.out) · presses [[giây bắt đầu, giây thả]] · label.
+-->
+
+<div class="ui-wrap"><div class="bw"><div class="b b-out hf" style="min-width:700px"><span>GIỮ ĐỂ XÁC NHẬN</span></div><div class="hf-t"><div class="hf-b"></div></div><div class="hf-h">Đã thả tay: huỷ</div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  var defaults = {"hold":1.2,"cancel":0.25,"presses":[[0.4,1],[1.6,3]],"resetAt":3.55,"accent":"#8b7bff","ink":"#0b0d12","label":"span","hint":".hf-h","bar":".hf-b","doneText":"ĐÃ XÁC NHẬN","cursor":null,"approach":[260,200],"lead":0.12};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var cur = o.cursor ? (host.querySelector(o.cursor) || document.querySelector(o.cursor)) : null, curKeys = null;
+  var cursorPlan = function (clicks) { if (!cur) return; var base = (cur.offsetParent || host).getBoundingClientRect(), k = [];
+    clicks.forEach(function (c, i) { var r = (c[4] || el).getBoundingClientRect(), x = r.left - base.left + r.width * c[1], y = r.top - base.top + r.height * c[2];
+      if (!i) k.push([0, x + o.approach[0], y + o.approach[1]]); k.push([Math.max(0.01, c[0] - o.lead), x, y]); k.push([c[0] + (c[3] || 0.12) + 0.3, x, y]); });
+    var z = k[k.length - 1]; k.push([z[0] + 0.5, z[1] + o.approach[0] * 0.6, z[2] + o.approach[1] * 0.6]); curKeys = { k: k, c: clicks }; };
+  var cursorAt = function (t) { if (!cur || !curKeys) return; var p = MW.path(curKeys.k, t, "power2.inOut"), dn = 0; curKeys.c.forEach(function (c) { var u = t - c[0]; if (u >= 0 && u < (c[3] || 0.12)) dn = 1; });
+    gsap.set(cur, { x: p[0] - 12, y: p[1] - 6, scale: dn ? 0.86 : 1, transformOrigin: "20% 10%" }); };
+  if (getComputedStyle(el).position === "static") el.style.position = "relative"; el.style.overflow = "hidden";
+  var lb = el.querySelector(o.label), t0 = lb.textContent, hint = o.hint ? host.querySelector(o.hint) : null, bar = o.bar ? host.querySelector(o.bar) : null, p2 = gsap.parseEase("power2.out"), bo = gsap.parseEase("back.out(2)");
+  var fill = document.createElement("div"), fl = document.createElement("span"), ck = document.createElement("span"); fill.style.cssText = "position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;background:" + o.accent + ";color:" + o.ink + ";";
+  fl.textContent = t0; ck.style.cssText = "display:inline-block;width:0.3em;height:0.55em;border:solid currentColor;border-width:0 0.12em 0.12em 0;margin:0 0.5em 0.12em 0;"; fill.appendChild(ck); fill.appendChild(fl); el.appendChild(fill);
+  cursorPlan(o.presses.map(function (p) { return [p[0], 0.5, 0.55, p[1] - p[0]]; }));
+  var doneAt = null; o.presses.forEach(function (p) { if (doneAt == null && p[1] - p[0] >= o.hold) doneAt = p[0] + o.hold; });
+  var F = function (t) { var f = 0; o.presses.forEach(function (p) { if (t < p[0]) return; var v = Math.min(1, (Math.min(t, p[1]) - p[0]) / o.hold); f = v >= 1 || t <= p[1] ? v : v * (1 - p2(Math.min(1, (t - p[1]) / o.cancel))); }); return f; };
+  return MW.drive(tl, at, o.resetAt + 0.45, function (t) {
+    var f = F(t), done = doneAt != null && t >= doneAt, rs = Math.max(0, Math.min(1, (t - o.resetAt) / 0.25));
+    fill.style.clipPath = "inset(0 " + (100 * (1 - f)).toFixed(2) + "% 0 0)"; fill.style.opacity = String(1 - rs); fl.textContent = done ? o.doneText : t0;
+    ck.style.display = done ? "inline-block" : "none"; ck.style.transform = "rotate(45deg) scale(" + (done ? bo(Math.min(1, (t - doneAt) / 0.22)) : 0).toFixed(3) + ")";
+    if (bar) gsap.set(bar, { scaleX: f * (1 - rs), transformOrigin: "0% 50%" });
+    if (hint) { var h = 0; o.presses.forEach(function (p) { var u = t - p[1]; if (p[1] - p[0] < o.hold && u > 0 && u < 0.7) h = Math.min(1, u / 0.15, (0.7 - u) / 0.15); }); hint.style.opacity = String(h); }
+    cursorAt(t);
+  });
+  };
+  MW.uiHoldFillButton = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

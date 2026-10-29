@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Scroll Clip Write-on - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { --ink: #e8ebf3; --acc: #8b7bff; --acc2: #3dd6f5; --warm: #ffb547; --rose: #ff5d8f; --mute: #6c778b; --tk-card: #151a24; --tk-line: #262c3a; background: #0b0d12; color: var(--ink); }
+.tk-stage { position: absolute; inset: 0; display: grid; place-items: center; }
+.tk-cap { font-size: 30px; font-weight: 500; color: var(--mute); letter-spacing: 0.01em; }
+.tk-head { margin: 0; font-family: 'Inter', sans-serif; font-size: 150px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; text-align: center; max-width: 1600px; }
+.tk-sub { margin-top: 36px; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.6">
+<div class="tk-stage"><div><h1 class="tk-head ">Chữ hiện theo vệt quét</h1></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"ghost":0.07,"line":6,"color":"#8b7bff"};
+  var run = function (el, tl, at, o) {
+        var io = MW.ez("in-out"), ghost = el.cloneNode(true), line = document.createElement("div");
+        el.style.position = "relative"; ghost.removeAttribute("id"); ghost.style.cssText = "position:absolute;left:0;top:0;width:100%;margin:0;opacity:" + o.ghost + ";pointer-events:none;"; el.parentNode.insertBefore(ghost, el); ghost.style.left = el.offsetLeft + "px"; ghost.style.top = el.offsetTop + "px"; ghost.style.width = el.offsetWidth + "px";
+        line.style.cssText = "position:absolute;top:-0.4em;bottom:-0.3em;width:" + o.line + "px;background:" + o.color + ";pointer-events:none;"; el.appendChild(line);
+        return MW.drive(tl, at, 3.4, function (t) {
+          var s = io(Math.max(0, Math.min(1, (t - 0.3) / 2.0))), w = Math.max(0, Math.min(1, (s - 0.3) / 0.4)); if (t > 2.95) w *= 1 - io(Math.min(1, (t - 2.95) / 0.45));
+          var W = el.offsetWidth; el.style.clipPath = "inset(-0.4em " + (W * (1 - w) - 2) + "px -0.3em -2px)"; line.style.left = (W * w - o.line / 2) + "px"; line.style.opacity = w > 0 && w < 1 ? "1" : "0";
+        });
+      };
+  MW.textClipWipeOn = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textClipWipeOn(q(".tk-head"), tl, 0, {});
+          tl.set({}, {}, 3.6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

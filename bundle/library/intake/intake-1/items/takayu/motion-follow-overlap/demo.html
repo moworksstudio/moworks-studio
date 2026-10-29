@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Follow-through &amp; Overlap - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { --ink: #e8ebf3; --acc: #8b7bff; --acc2: #3dd6f5; --warm: #ffb547; --rose: #ff5d8f; --mute: #6c778b; --tk-card: #151a24; --tk-line: #262c3a; background: #0b0d12; color: var(--ink); }
+.tk-stage { position: absolute; inset: 0; display: grid; place-items: center; }
+.tk-cap { font-size: 30px; font-weight: 500; color: var(--mute); letter-spacing: 0.01em; }
+.ui-wrap { position: absolute; inset: 0; display: grid; place-items: center; }
+.ui-card { position: relative; background: var(--tk-card); border: 2px solid var(--tk-line); border-radius: 36px; padding: 48px 56px; box-shadow: 0 40px 100px rgba(0, 0, 0, 0.35); }
+.ui-h { font-size: 46px; font-weight: 700; margin: 0 0 14px; } .ui-p { font-size: 30px; color: #9aa3b8; margin: 0; }
+.ui-btn { display: inline-grid; place-items: center; height: 104px; padding: 0 64px; border-radius: 30px; background: linear-gradient(180deg, #9c88ff, #7357f5); color: #fff; font-size: 40px; font-weight: 700; box-shadow: 0 18px 40px rgba(115, 87, 245, 0.35); }
+.ui-btn.ghost { background: transparent; border: 3px solid var(--tk-line); color: #c3cadb; box-shadow: none; }
+.ui-row { display: flex; align-items: center; gap: 28px; height: 110px; padding: 0 34px; border-radius: 24px; background: #1b2130; margin: 14px 0; font-size: 34px; color: #c9d2ea; }
+.ui-dot { width: 56px; height: 56px; border-radius: 16px; background: #2a3350; flex: none; }
+.ui-field { width: 760px; height: 112px; border-radius: 26px; border: 3px solid #36405a; background: #10141d; display: flex; align-items: center; padding: 0 36px; font-size: 36px; color: #c9d2ea; }
+.ui-pill { display: inline-grid; place-items: center; height: 96px; padding: 0 52px; border-radius: 48px; font-size: 34px; font-weight: 800; letter-spacing: 0.08em; }
+.ui-avatar { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #b8a9ff, #6a4cf0); display: grid; place-items: center; font-size: 84px; font-weight: 800; color: #fff; }
+.ui-avatar.grey { background: #2a3142; color: #6c778b; }
+.ui-icon { width: 200px; height: 200px; border-radius: 48px; display: grid; place-items: center; background: linear-gradient(160deg, #ffd27a, #ff9b3d); font-size: 110px; }
+.ui-cursor { position: absolute; left: 0; top: 0; z-index: 20; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5)); }
+.fo { position: relative; width: 900px; height: 520px; } .fo-c { position: absolute; left: 60px; top: 40px; width: 780px; box-sizing: border-box; } .fo-t { font-size: 52px; font-weight: 800; margin-bottom: 30px; padding-bottom: 24px; border-bottom: 3px solid #262c3a; }
+.fo-l1, .fo-l2 { font-size: 34px; color: #9aa3b8; margin-top: 14px; } .fo-sh { position: absolute; left: 140px; top: 440px; width: 620px; height: 50px; border-radius: 50%; background: rgba(0, 0, 0, 0.55); filter: blur(16px); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.7">
+<div class="ui-wrap"><div class="fo"><div class="fo-sh"></div><div class="ui-card fo-c"><div class="fo-t">Lịch quay tuần này</div><div class="fo-l1">Thứ hai: phỏng vấn khách mời</div><div class="fo-l2">Thứ tư: quay cảnh ngoài trời</div></div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"k":170,"c":18,"y":-240,"parts":[[".fo-t",0.06],[".fo-l1",0.1],[".fo-l2",0.14]],"shadow":null,"shadowDelay":0.05,"exitAt":null,"rise":120,"exit":0.3};
+  var run = function (el, tl, at, o) {
+        var sp = MW.spring(o.k, o.c), host = el.parentNode, sh = o.shadow ? host.querySelector(o.shadow) : null, parts = o.parts.map(function (p) { return [el.querySelector(p[0]), p[1]]; }).filter(function (p) { return p[0]; });
+        var Y = function (t) { return o.y * (1 - (t > 0 ? sp.at(t) : 0)); }, end = sp.duration + Math.max.apply(null, o.parts.map(function (p) { return p[1]; }).concat([o.shadowDelay]));
+        return MW.drive(tl, at, o.exitAt == null ? end : o.exitAt + o.exit, function (t) {
+          var x = o.exitAt != null && t > o.exitAt ? Math.min(1, (t - o.exitAt) / o.exit) : 0, lift = -o.rise * gsap.parseEase("power2.in")(x), y = Y(t);
+          gsap.set(el, { y: y + lift }); el.style.opacity = String(Math.min(1, t / 0.12) * (1 - x));
+          parts.forEach(function (p) { gsap.set(p[0], { y: Y(t - p[1]) - y }); });
+          if (sh) { var v = t - o.shadowDelay > 0 ? sp.at(t - o.shadowDelay) : 0; gsap.set(sh, { scaleX: 0.6 + 0.4 * v }); sh.style.opacity = String(Math.min(1, v) * (1 - x)); }
+        });
+      };
+  MW.motionFollowOverlap = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionFollowOverlap(q(".fo-c"), tl, 0.3, { shadow: ".fo-sh", exitAt: 1.9 });
+          tl.set({}, {}, 2.7);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

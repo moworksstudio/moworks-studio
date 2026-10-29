@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-stripe-shadow",
+  "type": "hyperframes:component",
+  "title": "Line Shadow Text",
+  "description": "Sau chữ là một bản bóng lệch xuống phải phủ sọc chéo 45°, các sọc trôi chậm liên tục.",
+  "tags": [
+    "shadow",
+    "stripes",
+    "loop",
+    "text-colour-light",
+    "crisp",
+    "colour-light",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-stripe-shadow.html",
+      "target": "compositions/components/text-stripe-shadow.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-stripe-shadow",
+    "author": "takayu",
+    "call": "MW.textStripeShadow(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textStripeShadow",
+    "options": {
+      "offset": "em the shadow sits down-right (0.09)",
+      "pitch": "em between stripes (0.14)",
+      "line": "share of the pitch that is stripe (0.42)",
+      "pitches": "pitches the stripes travel per loop (3)",
+      "color": "",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-line-shadow",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-line-shadow (read 12/10/2026)",
+      "upstream": "the site credits Magic UI (MIT); a faithful port is in the Magic UI collection"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-line-shadow, written here): A copy of the text offset +0.04 em x / y behind it, filled with 45° stripes (stripe 0.06 em, colour / transparent) via background-clip; stripes scroll background-position 0 0 → 100 % −100 % over 15 s linear, loop; main text static. Demo exaggerates: offset 0.09 em, pitch 0.14 em (lines 42 % of it), main text with a 2 px background-colour outline; 3 pitches per 3 s loop. Params: offset: độ lệch bóng (0.04 em) · stripe: bước sọc (0.06 em) · duration: một vòng trôi (15 s).",
+    "titleVi": "Bóng sọc chéo trôi sau chữ"
+  }
+}

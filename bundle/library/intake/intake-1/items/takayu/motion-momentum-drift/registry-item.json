@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-momentum-drift",
+  "type": "hyperframes:component",
+  "title": "Momentum Drift",
+  "description": "Thẻ bị con trỏ hất đi, trôi quá đích một đoạn rồi lùi về dừng, vệt tốc độ dài theo vận tốc.",
+  "tags": [
+    "move",
+    "drift",
+    "inertia",
+    "movement",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-momentum-drift.html",
+      "target": "compositions/components/motion-momentum-drift.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-momentum-drift",
+    "author": "takayu",
+    "call": "MW.motionMomentumDrift(q(\".md\"), tl, 0, {});",
+    "function": "MW.motionMomentumDrift",
+    "options": {
+      "keys": "[fast, past, rest] px ([1040, 1140, 1085])",
+      "nudge": "px under the pressed cursor first (60)",
+      "flickAt": "s (0.6)",
+      "cursor": ""
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=momentum-drift",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=momentum-drift (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio momentum-drift, written here): Card flicked by a cursor: x 0 → 168 px at 598 ms (power2.out) → 184 at 739 ms (sine.out, drifting past) → 175 at 880 ms (power2.inOut) (demo ×1.03); three speed lines behind it scale with speed. In the demo a 10 px nudge under the pressed cursor precedes it (300 ms). Params: duration (0.88 s) · x (175 px) · drift: trôi quá (9 px) · lines: vệt tốc độ (bật/tắt).",
+    "titleVi": "Bị hất rồi trôi quá đà"
+  }
+}

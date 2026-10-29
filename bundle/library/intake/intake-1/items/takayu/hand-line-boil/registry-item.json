@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "hand-line-boil",
+  "type": "hyperframes:component",
+  "title": "Line Boil",
+  "description": "Hình vẽ được vẽ lại 12 lần mỗi giây, mỗi lần lệch một chút nên nét run rẩy như phim vẽ tay.",
+  "tags": [
+    "boil",
+    "hand-drawn",
+    "jitter",
+    "loop",
+    "loops-ambient",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "hand-line-boil.html",
+      "target": "compositions/components/hand-line-boil.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/hand-line-boil",
+    "author": "takayu",
+    "call": "MW.handLineBoil(q(\".lb\"), tl, 0, {});",
+    "function": "MW.handLineBoil",
+    "options": {
+      "fps": "drawings a second (12)",
+      "amp": "± px (6; 1.5 at UI size)",
+      "variants": "drawings it cycles through (3)",
+      "frequency": "of the noise (0.02)",
+      "seed": "(1)",
+      "duration": "s (4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=lp-boil",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=lp-boil (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio lp-boil, written here): Redraw at 12 fps (2 frames per drawing at 24 fps, ~83 ms), cycling 3 variants, each jittering the drawing +-1.5 px. Demo: a face circle r 50 from 41 points, radius jitter +-2 px re-seeded every 1/12 s (no fixed variants), eyes +-1 px. Params: fps (12) · amp (±1.5 px) · variants (3). An SVG displacement filter whose noise seed changes 12 times a second, cycling a few variants, so any drawing or text boils like hand animation.",
+    "titleVi": "Nét vẽ run 12 hình mỗi giây"
+  }
+}

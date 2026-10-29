@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-inertia-letters",
+  "hash": "bcb0d5e52be0d93f",
+  "at": "2026-10-17T08:45:03.401Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-inertia-letters.mp4",
+    "poster": "previews/takayu__text-inertia-letters.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "60028e0aa0624a4b01436267a856d7aed25aeb3ee420e9c86e37c8f08e0d4757",
+    "size": 20092,
+    "seconds": 23.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

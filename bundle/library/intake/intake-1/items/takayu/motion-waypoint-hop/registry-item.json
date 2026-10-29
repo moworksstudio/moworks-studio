@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-waypoint-hop",
+  "type": "hyperframes:component",
+  "title": "Waypoint Hop",
+  "description": "Điểm đánh dấu nhảy qua bốn mốc, đáp xuống bẹp nhẹ, mốc nào tới thì bật sáng và vạch tiến độ dài theo.",
+  "tags": [
+    "move",
+    "hop",
+    "progress",
+    "movement",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-waypoint-hop.html",
+      "target": "compositions/components/motion-waypoint-hop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-waypoint-hop",
+    "author": "takayu",
+    "call": "MW.motionWaypointHop(q(\".wh\"), tl, 0.3, {});",
+    "function": "MW.motionWaypointHop",
+    "options": {
+      "points": "the waypoints",
+      "line": "a progress line that fills",
+      "hop": "s per hop (0.25, x power2.out)",
+      "land": "s on the ground (0.05)",
+      "height": "px of the arc (150)",
+      "accent": ""
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=waypoint-hop",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=waypoint-hop (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio waypoint-hop, written here): A marker hops across 4 points ~67 px apart: each hop 250 ms (x power2.out, y = −24 to −28·sin(π q) px arc), then a 50 ms ground beat with landing squash scaleY 0.92 (120 ms sine bump); each reached point pops (scale back.out, 200 ms) and a progress line fills behind. Total 860–900 ms. Params: hop: mỗi bước (0.25 s) · height (24–28 px) · land (0.05 s) · squash (0.92) · points (4).",
+    "titleVi": "Nhảy qua từng điểm mốc"
+  }
+}

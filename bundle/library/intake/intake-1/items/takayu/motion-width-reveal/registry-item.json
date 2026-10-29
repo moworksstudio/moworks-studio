@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-width-reveal",
+  "type": "hyperframes:component",
+  "title": "Width Reveal",
+  "description": "Thanh màu giãn ngang từ mép trái, vượt 8 % rồi về, thanh phụ theo sau 80 ms và chữ hiện ra.",
+  "tags": [
+    "reveal",
+    "scale",
+    "bar",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-width-reveal.html",
+      "target": "compositions/components/motion-width-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.7,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-width-reveal",
+    "author": "takayu",
+    "call": "MW.motionWidthReveal(q(\".wr\"), tl, 0.3, { exitAt: 1.9 });",
+    "function": "MW.motionWidthReveal",
+    "options": {
+      "bars": "the bars, in order",
+      "label": "the label over them",
+      "from": "(0.04)",
+      "peak": "(1.08)",
+      "peakAt": "share of the length (0.78), power3.out up, power2.inOut back",
+      "duration": "s (0.65)",
+      "delay": "s between bars (0.08)",
+      "labelAt": "s (0.52, fades in 0.2 s)",
+      "exitAt": "s after the start to shrink back (null)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=width-reveal",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=width-reveal (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio width-reveal, written here): Bar (origin left edge) scaleX 0.04 → 1.08 at 507 ms (power3.out) → 1 at 650 ms (power2.inOut); a second, thinner bar repeats it 80 ms later; the label fades in over 200 ms from 520 ms. Site exit: both scaleX → 0 in 350 ms power2.in. Params: duration (0.65 s) · from (0.04) · peak (1.08) · origin (mép trái) · delay thanh 2 (80 ms).",
+    "titleVi": "Thanh giãn ngang từ mép trái"
+  }
+}

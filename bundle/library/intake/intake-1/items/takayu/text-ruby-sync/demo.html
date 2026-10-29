@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Ruby Sync Reveal - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .rs { font-size: 190px; font-weight: 700; line-height: 1.75; display: flex; gap: 70px; } .rb { opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.4">
+<div class="st"><div class="rs"><span class="rb" data-r="phúc">福</span><span class="rb" data-r="lộc">祿</span><span class="rb" data-r="thọ">壽</span><span class="rb" data-r="an">安</span><span class="rb" data-r="khang">康</span></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"unit":".rb","rise":0.4,"duration":0.6,"stagger":0.16,"cap":1,"delay":0.08,"size":0.34,"start":0.35,"exitAt":2.95,"accent":"#ffb547","loop":3.4};
+  var run = function (el, tl, at, o) {
+        var U = Array.prototype.slice.call(el.querySelectorAll(o.unit)), n = U.length, st = Math.min(o.stagger, o.cap / Math.max(1, n - 1)), p2 = gsap.parseEase("power2.out"), pin = gsap.parseEase("power2.in"), fs = parseFloat(getComputedStyle(el).fontSize), R = [];
+        U.forEach(function (u) { u.style.display = "inline-block"; u.style.position = "relative"; var r = document.createElement("span"); r.textContent = u.getAttribute("data-r") || ""; r.style.cssText = "position:absolute;left:50%;bottom:100%;transform:translateX(-50%);white-space:nowrap;font-family:Inter,sans-serif;font-weight:700;font-size:" + o.size + "em;color:" + o.accent + ";opacity:0;"; u.appendChild(r); R.push(r); });
+        return MW.drive(tl, at, o.loop, function (t) {
+          var x = pin(Math.max(0, Math.min(1, (t - o.exitAt) / 0.3)));
+          U.forEach(function (u, i) { var s0 = o.start + i * st, a = p2(Math.max(0, Math.min(1, (t - s0) / o.duration))), b = p2(Math.max(0, Math.min(1, (t - s0 - o.delay) / o.duration))); gsap.set(u, { y: o.rise * fs * (1 - a) }); u.style.opacity = String(a * (1 - x)); R[i].style.opacity = String(b); });
+        });
+      };
+  MW.textRubySync = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textRubySync(q(".rs"), tl, 0, {});
+          tl.set({}, {}, 3.4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

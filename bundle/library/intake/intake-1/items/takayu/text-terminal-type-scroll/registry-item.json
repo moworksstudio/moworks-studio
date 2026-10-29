@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-terminal-type-scroll",
+  "type": "hyperframes:component",
+  "title": "Terminal Type & Scroll",
+  "description": "Khung terminal: lệnh gõ ra 60 ký tự mỗi giây, kết quả hiện cả dòng, mỗi dòng mới đẩy cả khối cuộn lên một dòng, con trỏ khối nhấp nháy.",
+  "tags": [
+    "typing",
+    "terminal",
+    "scroll",
+    "mono",
+    "text-typing-decoding",
+    "crisp",
+    "typing-decoding",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-terminal-type-scroll.html",
+      "target": "compositions/components/text-terminal-type-scroll.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-terminal-type-scroll",
+    "author": "takayu",
+    "call": "MW.textTerminalTypeScroll(q(\".tt\"), tl, 0, {});",
+    "function": "MW.textTerminalTypeScroll",
+    "options": {
+      "lines": "lines; '$ ' starts a typed command, '+ ' a success line",
+      "cps": "characters a second typing (60)",
+      "rows": "visible rows (4)",
+      "start": "s (0.3)",
+      "body": "the panel's text area",
+      "accent": "prompt colour",
+      "loop": "s (5)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-terminal-typing",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-terminal-typing (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-terminal-typing, written here): Mono terminal panel (title bar with 3 dots), 4 visible lines (line-height 1.6; demo 22 px pitch at 12 px type). Command lines type at 60 cps (recipe 30–60), output lines appear whole, 0.17 s apart, 0.12 s after their command; once the panel is full each new line scrolls the block up one line over 0.14 s easeOutCubic (cubic-bezier(.33,1,.68,1)). Prompt sign accent, success lines green. Block cursor █ 0.6 × 1.2 em, solid while typing, blinks 1 Hz (steps). Loop 5 s. Params: lines: các dòng lệnh / kết quả · rate: tốc độ gõ (60 ký tự/giây) · rows: số dòng hiện (4) · scroll (0.14 s).",
+    "titleVi": "Terminal gõ lệnh và cuộn dòng"
+  }
+}

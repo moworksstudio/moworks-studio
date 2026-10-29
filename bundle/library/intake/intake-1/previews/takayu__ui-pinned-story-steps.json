@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-pinned-story-steps",
+  "hash": "6cb358a459440756",
+  "at": "2026-10-17T09:23:41.484Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-pinned-story-steps.mp4",
+    "poster": "previews/takayu__ui-pinned-story-steps.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a02f03e449e7f7dd4262852f52cfef2ae98f4954520022d33aaa3520816c943d",
+    "size": 30082,
+    "seconds": 28,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-error-shake",
+  "type": "hyperframes:component",
+  "title": "Error Shake",
+  "description": "Ô email lắc ngang mạnh rồi nhỏ dần, viền chuyển đỏ và dòng báo lỗi hiện ra.",
+  "tags": [
+    "error",
+    "shake",
+    "form",
+    "attention-emphasis",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-error-shake.html",
+      "target": "compositions/components/motion-error-shake.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-error-shake",
+    "author": "takayu",
+    "call": "MW.motionErrorShake(q(\".ef\"), tl, 0.85, { message: \".em\", badge: \".eb\" });",
+    "function": "MW.motionErrorShake",
+    "options": {
+      "amp": "px of the first swing (36; 12 on the site's demo), then 10 / 6 / 4 in proportion",
+      "color": "error outline colour",
+      "base": "outline colour before",
+      "width": "px before (3)",
+      "widthError": "px in error (5)",
+      "message": "the error line (fades in sliding down)",
+      "badge": "the ! badge",
+      "slide": "px the message slides (12)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=error-shake",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=error-shake (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio error-shake, written here): After a click on 'Log in', the email field shakes x 0 → −12 → +10 → −6 → +4 → 0 px at 0 / 90 / 200 / 310 / 420 / 540 ms (sine.inOut between keys); within the first 120 ms its outline turns red and thickens 1.5 → 2.5 px and a '!' badge appears; the error message fades in, sliding 4 px down, 300–550 ms. Params: keys (−12 / 10 / −6 / 4 px) · duration (0.54 s) · color lỗi.",
+    "titleVi": "Ô nhập lắc báo lỗi"
+  }
+}

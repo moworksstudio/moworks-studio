@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-rubber-stretch",
+  "type": "hyperframes:component",
+  "title": "Rubber Band",
+  "description": "Con trỏ kéo viên thuốc giãn dài 1.8 lần theo hướng kéo, thả ra nó co lại quá tay rồi về chỗ nghỉ mới.",
+  "tags": [
+    "drag",
+    "stretch",
+    "spring",
+    "bounce-reaction",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-rubber-stretch.html",
+      "target": "compositions/components/motion-rubber-stretch.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-rubber-stretch",
+    "author": "takayu",
+    "call": "MW.motionRubberStretch(q(\".rs\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.motionRubberStretch",
+    "options": {
+      "pullAt": "s (0.4)",
+      "pull": "s (0.38, power2.inOut)",
+      "stretch": "scaleX at full pull (1.8)",
+      "distance": "px the front end is pulled (525)",
+      "rest": "px of the new rest (185)",
+      "k": "spring stiffness on release (300)",
+      "c": "damping (11): about 35 % overshoot",
+      "backAt": "s it returns to its first slot (2.0)",
+      "back": "s (0.4)",
+      "cursor": "an optional cursor"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=rubber-band",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=rubber-band (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio rubber-band, written here): A cursor grabs a pill and pulls it x +105 px with scaleX 1 → 1.8 (scaleY = 1/scaleX) over 380 ms power2.inOut; on release x and scaleX return by one spring (k 300, d 11): scaleX dips to ~0.72 then 1, x settles at a new rest +37 px from the start, ~520 ms. (Demo px.) The spring overshoots 35 %; the site returns the pill to its first slot in 400 ms at 2000 ms. Params: pull: quãng kéo (105 px) · stretch (1.8) · spring (k 300, d 11) · rest: chỗ nghỉ mới (+37 px). Stretched toward the pull from its left end; on release one spring brings the stretch back (dipping to about 0.72) and carries it to a new rest.",
+    "titleVi": "Kéo giãn như dây chun rồi bật"
+  }
+}

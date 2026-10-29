@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-heart-burst",
+  "hash": "c6e91f1b0658eb46",
+  "at": "2026-10-17T10:41:05.894Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-heart-burst.mp4",
+    "poster": "previews/takayu__ui-heart-burst.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "86d316901ebcef5b21a33ce02141e8031059870b1e5135f19a46d8fe2c10948f",
+    "size": 10738,
+    "seconds": 28.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

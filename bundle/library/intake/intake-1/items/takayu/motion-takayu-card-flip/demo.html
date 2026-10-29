@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Card Flip - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .kf { position: relative; width: 700px; height: 440px; } .kf > div { position: absolute; inset: 0; border-radius: 40px; padding: 56px 60px; box-sizing: border-box; color: #fff; }
+.kf-f { background: linear-gradient(135deg, #a693ff, #5b3fe0); } .kf-f b { display: block; font-size: 44px; letter-spacing: 0.06em; } .kf-f i { display: block; width: 110px; height: 80px; border-radius: 16px; background: linear-gradient(135deg, #ffe08a, #d9a400); margin: 50px 0 40px; } .kf-f span { font-size: 48px; font-weight: 700; letter-spacing: 0.1em; }
+.kf-b { background: #1b2130; visibility: hidden; padding: 0; } .kf-b i { display: block; height: 90px; background: #0b0d12; margin-top: 60px; } .kf-b b { display: block; margin: 50px 60px 10px; font-size: 44px; letter-spacing: 0.06em; } .kf-b span { margin: 0 60px; font-size: 32px; color: #8f9ab3; letter-spacing: 0.08em; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.9">
+<div class="st"><div class="kf"><div class="kf-f"><b>THẺ MOWORKS</b><i></i><span>•••• 2026</span></div><div class="kf-b"><i></i><b>MẶT SAU</b><span>CHI TIẾT</span></div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.7,"hold":0.65,"bulge":0.06,"ease":"power2.inOut","perspective":1600,"returns":true,"front":".kf-f","back":".kf-b"};
+  var run = function (el, tl, at, o) {
+        var f = el.querySelector(o.front), b = el.querySelector(o.back), e = gsap.parseEase(o.ease), back = o.duration + o.hold;
+        return MW.drive(tl, at, o.returns ? back + o.duration : o.duration, function (t) {
+          var A = 180 * e(Math.max(0, Math.min(1, t / o.duration))); if (o.returns) A -= 180 * e(Math.max(0, Math.min(1, (t - back) / o.duration)));
+          var face = A > 90 ? 1 : 0; gsap.set(el, { rotationY: face ? A - 180 : A, scaleY: 1 + o.bulge * Math.sin(A * Math.PI / 180), transformPerspective: o.perspective });
+          f.style.visibility = face ? "hidden" : "visible"; b.style.visibility = face ? "visible" : "hidden";
+        });
+      };
+  MW.motionTakayuCardFlip = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionTakayuCardFlip(q(".kf"), tl, 0.4, {});
+          tl.set({}, {}, 2.9);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

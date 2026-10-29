@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "lower-side-super",
+  "type": "hyperframes:block",
+  "title": "Side Super",
+  "description": "Góc trên trái luôn có nhãn tên chương trình, góc trên phải là nhãn tên mục; khi đổi mục, nhãn cũ nhích lên và mờ đi, nhãn mới trồi lên vào chỗ.",
+  "tags": [
+    "super",
+    "corner",
+    "swap",
+    "broadcast",
+    "text-broadcast-telop",
+    "smooth",
+    "broadcast-telop",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "lower-side-super.html",
+      "target": "compositions/components/lower-side-super.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/lower-side-super",
+    "author": "takayu",
+    "call": "MW.lowerSideSuper(q(\".ss\"), tl, 0, {});",
+    "function": "MW.lowerSideSuper",
+    "options": {
+      "a": "the first segment plate",
+      "b": "the next",
+      "swaps": "s each swap starts ([1.0, 4.4])",
+      "frames": "frames at 30 fps per swap (10)",
+      "shift": "px (32)",
+      "ease": "(cubic-bezier(.65,0,.35,1))",
+      "loop": "s (5.2)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-telop-side-super",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-telop-side-super (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-telop-side-super, written here): Top-left show plate (dark, 20 px tall, radius 2, 3 px accent edge on the left, 12 px bold) always on. Top-right segment plate (15 px weight 800, right-aligned, ≤ 2 lines, dark plate with a 3 px second-accent edge on its right). Swap at 1.0 s: old plate fades out moving −8 px, new fades in from +8 px, 10 frames at 30 fps (0.33 s) cubic-bezier(.65,0,.35,1); swaps back at 4.4 s. Nothing else moves. Loop 5.2 s. Params: thời gian đổi (10 khung ở 30 fps) · độ dịch (8 px) · cỡ chữ (12 / 15 px). The show plate (top left) never moves; only the segment plate changes.",
+    "titleVi": "Nhãn góc màn hình đổi tên mục"
+  }
+}

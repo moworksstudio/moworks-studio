@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-grid-diagonal",
+  "type": "hyperframes:component",
+  "title": "Grid Diagonal Wave",
+  "description": "Lưới 4×4 ô trượt chéo từ dưới trái vào, các ô cùng đường chéo tới cùng lúc.",
+  "tags": [
+    "grid",
+    "stagger",
+    "diagonal",
+    "list-grid",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-grid-diagonal.html",
+      "target": "compositions/components/motion-grid-diagonal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-grid-diagonal",
+    "author": "takayu",
+    "call": "MW.motionGridDiagonal(q(\".gd\"), tl, 0.3, {});",
+    "function": "MW.motionGridDiagonal",
+    "options": {
+      "items": "",
+      "cols": "(4)",
+      "offset": "[x, y] px it comes from ([−72, 72]): from the lower left",
+      "step": "s per diagonal (0.078)",
+      "duration": "s (0.472, power3.out)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=grid-diagonal",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=grid-diagonal (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio grid-diagonal, written here): 4×4 tiles (28 px, 34 px pitch) slide in from the lower-left: x −18 → 0, y +18 → 0 px, opacity in over the first half, each 472 ms power3.out, delay (row + col) × 78 ms (940 ms in all); tiles on one diagonal arrive together (alternate diagonals in two colours, delay labels in the demo). Params: offset (−18, +18 px) · step (78 ms) · each (0.472 s) · ease (power3.out). Tiles on one diagonal arrive together.",
+    "titleVi": "Lưới trượt vào theo đường chéo"
+  }
+}

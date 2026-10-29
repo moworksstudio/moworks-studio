@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-edge-aware-placement",
+  "hash": "e9c14286101ccf25",
+  "at": "2026-10-17T08:02:08.240Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-edge-aware-placement.mp4",
+    "poster": "previews/takayu__motion-edge-aware-placement.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "1524620fe2eac5a73975430a900445b79543b8dc08c0888a067f6443c99fb329",
+    "size": 21098,
+    "seconds": 34.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

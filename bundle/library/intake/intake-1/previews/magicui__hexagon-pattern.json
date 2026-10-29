@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/hexagon-pattern",
+  "hash": "ac541df5ed79b055",
+  "at": "2026-10-17T05:57:18.783Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__hexagon-pattern.mp4",
+    "poster": "previews/magicui__hexagon-pattern.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6a1f985d716fc9ee00fb93cdb168e125c4b244538b43cedc8974f6784f2bff7a",
+    "size": 38560,
+    "seconds": 200.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

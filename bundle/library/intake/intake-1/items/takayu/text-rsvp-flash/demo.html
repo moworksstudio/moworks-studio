@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>RSVP Word Flash - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: #0b0d12; color: #e8ebf3; font-family: Inter, sans-serif; } .rv { position: absolute; left: 0; right: 0; top: 470px; font-size: 150px; font-weight: 700; }
+.rvl { position: absolute; left: 400px; right: 400px; height: 4px; background: #2a3350; } .rvt { position: absolute; left: 50%; width: 6px; height: 50px; margin-left: -3px; background: #ff5d6c; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4.2">
+<div class="rvl" style="top:410px"></div><div class="rvl" style="top:680px"></div><div class="rvt" style="top:410px"></div><div class="rvt" style="top:630px"></div><div class="rv"></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"text":"Đọc nhanh hơn bằng cách nhìn vào một điểm duy nhất.","per":0.2,"start":0.35,"cutAt":3.85,"accent":"#ff5d6c","loop":4.2};
+  var run = function (el, tl, at, o) {
+        var words = o.text.split(/\s+/), seq = [], t0 = o.start, seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+        var gr = function (s) { s = s.normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+        while (t0 < o.cutAt) words.forEach(function (w) { if (t0 >= o.cutAt) return; var d = o.per * (/[.,!?;:]$/.test(w) || gr(w).length > 8 ? 1.5 : 1); seq.push({ w: w, t: t0 }); t0 += d; });
+        var L = document.createElement("span"), M = document.createElement("span"), R = document.createElement("span"); el.textContent = ""; el.style.position = "relative"; el.style.width = "100%"; el.style.height = "1.3em";
+        L.style.cssText = "position:absolute;right:50%;top:0;white-space:pre;"; M.style.cssText = "position:absolute;left:50%;top:0;transform:translateX(-50%);color:" + o.accent + ";"; R.style.cssText = "position:absolute;top:0;white-space:pre;";
+        el.appendChild(L); el.appendChild(M); el.appendChild(R);
+        return MW.drive(tl, at, o.loop, function (t) {
+          var cur = null; seq.forEach(function (s) { if (t >= s.t) cur = s; }); var on = cur && t < o.cutAt; el.style.visibility = on ? "visible" : "hidden"; if (!on) return;
+          var g = gr(cur.w), k = Math.floor(0.35 * g.length); L.textContent = g.slice(0, k).join(""); M.textContent = g[k] || ""; R.textContent = g.slice(k + 1).join("");
+          L.style.marginRight = (M.offsetWidth / 2) + "px"; R.style.left = "calc(50% + " + (M.offsetWidth / 2) + "px)";
+        });
+      };
+  MW.textRsvpFlash = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textRsvpFlash(q(".rv"), tl, 0, {});
+          tl.set({}, {}, 4.2);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

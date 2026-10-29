@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-scan-line",
+  "type": "hyperframes:component",
+  "title": "Scan Line",
+  "description": "Một vạch sáng có đuôi mờ chạy từ trên xuống dưới thẻ với tốc độ đều, lặp lại, các góc khung đứng yên.",
+  "tags": [
+    "scan",
+    "loop",
+    "light",
+    "hud",
+    "light-glow",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-scan-line.html",
+      "target": "compositions/components/effect-scan-line.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-scan-line",
+    "author": "takayu",
+    "call": "MW.effectScanLine(q(\".sl-c\"), tl, 0, {});",
+    "function": "MW.effectScanLine",
+    "options": {
+      "pass": "s per pass, linear (1.1)",
+      "passes": "(3)",
+      "line": "px (8)",
+      "glow": "px (48)",
+      "tail": "px (120)",
+      "color": "line colour"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=scan-line",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=scan-line (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio scan-line, written here): Inside a card: a 2 px accent line with a 12 px glow sweeps y −10 % → 110 % of the card height, linear, 1100 ms per pass, looping; a 30 px tail above it fades from 28 % to 0 opacity; clipped to the card (6 px bleed). Corner brackets stay still. Params: pass: một lượt (1.1 s) · line (2 px) · glow (12 px) · tail (30 px) · color.",
+    "titleVi": "Vạch quét chạy dọc thẻ"
+  }
+}

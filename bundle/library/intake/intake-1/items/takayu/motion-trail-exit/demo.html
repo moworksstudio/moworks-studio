@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Trail Exit - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; }
+.fl { position: absolute; left: 160px; right: 160px; top: 760px; height: 4px; border-radius: 2px; background: #262c3a; } .te { position: absolute; left: 360px; top: 560px; width: 200px; height: 200px; border-radius: 36px; background: linear-gradient(150deg, #a693ff, #6a4cf0); } .te { opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="1.8">
+<div class="fl"></div><div class="te"></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"x":1050,"duration":0.52,"copies":3,"delay":0.032,"weights":[0.42,0.24,0.12],"fadeIn":0.25};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var ghost = function () { var g = el.cloneNode(true); g.removeAttribute("id"); g.style.position = "absolute"; g.style.margin = "0"; g.style.pointerEvents = "none"; g.style.opacity = "0"; g.style.left = el.offsetLeft + "px"; g.style.top = el.offsetTop + "px"; g.style.width = el.offsetWidth + "px"; g.style.height = el.offsetHeight + "px"; host.insertBefore(g, el); return g; };
+  var add = function (css) { var d = document.createElement("div"); d.style.cssText = "position:absolute;pointer-events:none;" + css; host.appendChild(d); return d; };
+  var cx0 = el.offsetLeft + el.offsetWidth / 2, cy0 = el.offsetTop + el.offsetHeight / 2;
+  var e = gsap.parseEase("power3.in"), p2 = gsap.parseEase("power2.out"), G = []; for (var i = 0; i < o.copies; i++) G.push(ghost());
+  return MW.drive(tl, at, o.fadeIn + o.duration + o.copies * o.delay + 0.1, function (t) { var a = p2(Math.min(1, t / o.fadeIn)), X = function (tt) { return e(Math.max(0, Math.min(1, (tt - o.fadeIn - 0.1) / o.duration))); }, u = X(t);
+    gsap.set(el, { x: o.x * u }); el.style.opacity = String(a * (1 - u)); G.forEach(function (g, i) { var v = X(t - o.delay * (i + 1)); gsap.set(g, { x: o.x * v }); g.style.opacity = v > 0 ? String(o.weights[i] * (1 - v)) : "0"; }); });
+  };
+  MW.motionTrailExit = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionTrailExit(q(".te"), tl, 0.3, {});
+          tl.set({}, {}, 1.8);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

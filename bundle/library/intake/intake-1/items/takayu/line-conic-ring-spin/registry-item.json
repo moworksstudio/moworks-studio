@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "line-conic-ring-spin",
+  "type": "hyperframes:block",
+  "title": "Rotating Gradient Ring",
+  "description": "Một vòng tròn viền gradient hình nón xoay đều, như viền nút hay ánh sáng chờ.",
+  "tags": [
+    "ring",
+    "gradient",
+    "loop",
+    "glow",
+    "loops-ambient",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "line-conic-ring-spin.html",
+      "target": "compositions/components/line-conic-ring-spin.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/line-conic-ring-spin",
+    "author": "takayu",
+    "call": "MW.lineConicRingSpin(q(\".gm\"), tl, 0, {});",
+    "function": "MW.lineConicRingSpin",
+    "options": {
+      "radius": "px outer (50)",
+      "width": "px (8)",
+      "period": "s a turn (2), linear",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=lp-conic",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=lp-conic (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio lp-conic, written here): Ring (outer r 50, 8 px band) filled with a conic gradient: accent -> yellow at 30 % -> transparent at 60 % -> accent; the gradient's start angle turns 0 -> 360 deg every 2000 ms linear, looping seamlessly. Params: radius (50 px) · width (8 px) · period (2 s) · colors. A conic gradient accent → yellow (30 %) → transparent (60 %) → accent whose start angle turns.",
+    "titleVi": "Vòng sáng gradient xoay tròn"
+  }
+}

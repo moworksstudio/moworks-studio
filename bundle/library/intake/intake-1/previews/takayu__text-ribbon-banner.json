@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-ribbon-banner",
+  "hash": "f2ae7cbab87971e6",
+  "at": "2026-10-17T08:03:11.957Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-ribbon-banner.mp4",
+    "poster": "previews/takayu__text-ribbon-banner.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "2bafe3d654409a211b6bf7014b70c71552e65441b9a349b795e7a5a61489b9f2",
+    "size": 10040,
+    "seconds": 35.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

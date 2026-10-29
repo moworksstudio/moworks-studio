@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/iphone",
+  "hash": "e776eea35d8da86c",
+  "at": "2026-10-17T06:30:54.870Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/magicui__iphone.mp4",
+    "poster": "previews/magicui__iphone.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "5a09d572c3ea097ba2e2d44fdbde5c2e6d7c4d2c8f64cd1dafc148b6821bd7b2",
+    "size": 23700,
+    "seconds": 29.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

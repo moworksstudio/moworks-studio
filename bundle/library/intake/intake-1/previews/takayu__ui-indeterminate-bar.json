@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-indeterminate-bar",
+  "hash": "d183e734cb7c4dfa",
+  "at": "2026-10-17T11:15:44.566Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-indeterminate-bar.mp4",
+    "poster": "previews/takayu__ui-indeterminate-bar.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c1e600aefbb28bd032ab6a8a64212d63ea43590142ca75c6b8d10e26712c6a48",
+    "size": 10301,
+    "seconds": 29.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,65 @@
+<!--
+  Orbiting Circles (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/orbiting-circles.tsx.
+  Icons orbit a centre on a ring, evenly spaced and staying upright (one lap every 20 s), with a faint orbit line; stack rings for depth.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.orbitingCircles(q(".outer"), tl, 0, { radius: 380, iconSize: 104, pathColor: "rgba(255,255,255,0.14)", hold: 8 });
+
+  Options (defaults in brackets):
+      - radius: px (160)
+      - duration: s per lap (20)
+      - speed: 1
+      - reverse: false
+      - iconSize: px (30)
+      - path: true
+      - pathColor: rgba(255,255,255,0.1)
+      - hold: seconds (20)
+
+  Notes: el holds the orbiting children (each gets position absolute at the centre). The path ring is drawn behind them.
+-->
+
+<div class="mw-orbiting-circles"><span>●</span><span>●</span><span>●</span></div>
+
+<style>
+.mw-orbiting-circles { position: absolute; inset: 0; pointer-events: none; }
+.mw-orbiting-circles > * { position: absolute; left: 50%; top: 50%; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.mw-orbiting-circles > svg.mw-orbit-path { left: 0; top: 0; width: 100%; height: 100%; border-radius: 0; overflow: visible; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"radius":160,"duration":20,"speed":1,"reverse":false,"iconSize":30,"path":true,"pathColor":"rgba(255,255,255,0.1)","hold":20};
+  var run = function (el, tl, at, o) {
+      var kids = Array.prototype.slice.call(el.children).filter(function (k) { return !k.classList.contains("mw-orbit-path"); });
+      if (o.path) {
+        var NS = "http://www.w3.org/2000/svg", svg = document.createElementNS(NS, "svg"); svg.setAttribute("class", "mw-orbit-path");
+        var c = document.createElementNS(NS, "circle"); c.setAttribute("cx", "50%"); c.setAttribute("cy", "50%"); c.setAttribute("r", o.radius);
+        c.setAttribute("fill", "none"); c.setAttribute("stroke", o.pathColor); c.setAttribute("stroke-width", "1"); svg.appendChild(c); el.insertBefore(svg, el.firstChild);
+      }
+      var D = o.duration / o.speed, dir = o.reverse ? -1 : 1;
+      kids.forEach(function (k) { k.style.width = k.style.height = o.iconSize + "px"; k.style.margin = (-o.iconSize / 2) + "px 0 0 " + (-o.iconSize / 2) + "px"; });
+      var s = { t: 0 };
+      var set = function () {
+        for (var i = 0; i < kids.length; i++) {
+          var a = (360 / kids.length) * i + dir * 360 * (s.t / D);
+          kids[i].style.transform = "rotate(" + a + "deg) translateY(" + o.radius + "px) rotate(" + -a + "deg)";
+        }
+      };
+      set();
+      tl.fromTo(s, { t: 0 }, { t: o.hold, duration: o.hold, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + o.hold;
+    };
+  MW.orbitingCircles = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

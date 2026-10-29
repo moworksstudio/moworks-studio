@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "border-beam",
+  "type": "hyperframes:component",
+  "title": "Border Beam",
+  "description": "A short gradient beam (#ffaa40 to #9c40ff) travels around the border of a card or button, one lap every 6 s, linear, looping for as long as the shot holds.",
+  "tags": [
+    "border",
+    "beam",
+    "glow",
+    "card",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "border-beam.html",
+      "target": "compositions/components/border-beam.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/border-beam",
+    "author": "magicui",
+    "call": "MW.borderBeam(q(\".login .mw-border-beam\"), tl, 0, { duration: 8, size: 200, borderWidth: 3, hold: 8 });",
+    "function": "MW.borderBeam",
+    "options": {
+      "size": "beam length in px (50)",
+      "duration": "seconds per lap (6)",
+      "delay": "seconds the lap is advanced (0)",
+      "reverse": "run the other way (false)",
+      "initialOffset": "start point, % of the lap (0)",
+      "borderWidth": "px (1)",
+      "colorFrom": "#ffaa40",
+      "colorTo": "#9c40ff",
+      "hold": "seconds it runs in the film (10)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/border-beam.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/border-beam.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Put .mw-border-beam inside any element with position: relative and a border-radius; it inherits the radius. AE: pictures (gradient on a path).",
+    "titleVi": "Vệt sáng chạy quanh viền thẻ"
+  }
+}

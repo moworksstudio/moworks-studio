@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "terminal",
+  "type": "hyperframes:block",
+  "title": "Terminal",
+  "description": "A terminal window whose lines play one after another: commands type out at 60 ms a letter, output lines fade in, like a CLI install running.",
+  "tags": [
+    "terminal",
+    "cli",
+    "code",
+    "typing",
+    "install",
+    "developer",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "terminal.html",
+      "target": "compositions/components/terminal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/terminal",
+    "author": "magicui",
+    "call": "MW.terminal(q(\".mw-terminal\"), tl, 0.3, {});",
+    "function": "MW.terminal",
+    "options": {
+      "duration": "s a character (0.06)",
+      "delay": "s before the first line (0)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/terminal.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/terminal.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is the terminal; its children are the lines in order: class mw-type types, anything else fades in (upstream's AnimatedSpan).",
+    "titleVi": "Cửa sổ terminal gõ lệnh từng dòng"
+  }
+}

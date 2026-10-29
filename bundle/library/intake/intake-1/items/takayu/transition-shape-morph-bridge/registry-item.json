@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-shape-morph-bridge",
+  "type": "hyperframes:component",
+  "title": "Shape-morph Bridge",
+  "description": "Một hình của cảnh cũ biến dần thành hình của cảnh mới và trượt sang chỗ mới, cảnh đổi giữa chừng dưới một lớp màu.",
+  "tags": [
+    "morph",
+    "shape",
+    "bridge",
+    "transitions",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "transition-shape-morph-bridge.html",
+      "target": "compositions/components/transition-shape-morph-bridge.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/transition-shape-morph-bridge",
+    "author": "takayu",
+    "call": "MW.transitionShapeMorphBridge(q(\".tk-b\"), tl, 1.1, { duration: 0.9 });",
+    "function": "MW.transitionShapeMorphBridge",
+    "options": {
+      "duration": "s (0.7)",
+      "fromShape": "the outgoing scene's shape (its .tk-mark)",
+      "toShape": "the incoming scene's shape",
+      "color": "the morphing shape's colour",
+      "veil": "the veil's colour (it peaks half-way, the scenes swap behind it)",
+      "from": "the outgoing scene"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tr-morph",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tr-morph (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tr-morph, written here): q = easeInOutCubic over 700 ms: a shape from scene A (circle r 46, left) morphs point by point into scene B's shape (square r 46, right) with equal point counts (64), travelling across; a full-frame colour veil peaks mid-way (opacity sin(pi q)) and the scenes swap behind it at q = 0.5. Params: shapeA / shapeB · duration (0.7 s) · ease (power2.inOut).",
+    "titleVi": "Hình biến hình nối hai cảnh"
+  }
+}

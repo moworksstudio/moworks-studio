@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "shine-border",
+  "type": "hyperframes:component",
+  "title": "Shine Border",
+  "description": "A card's border lit by a soft multi-colour glow that slides slowly around it (one pass every 14 s).",
+  "tags": [
+    "border",
+    "glow",
+    "shine",
+    "card",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "shine-border.html",
+      "target": "compositions/components/shine-border.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 7,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/shine-border",
+    "author": "magicui",
+    "call": "MW.shineBorder(q(\".mw-shine-border\"), tl, 0, { borderWidth: 4, duration: 7, shineColor: [\"#A07CFE\", \"#FE8FB5\", \"#FFBE7B\"], hold: 7 });",
+    "function": "MW.shineBorder",
+    "options": {
+      "borderWidth": "px (1)",
+      "duration": "s (14)",
+      "shineColor": "a colour or a list (#000000)",
+      "hold": "seconds (14)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/shine-border.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/shine-border.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Put .mw-shine-border inside the card (position: relative; border-radius inherited).",
+    "titleVi": "Viền thẻ ánh màu trôi chậm"
+  }
+}

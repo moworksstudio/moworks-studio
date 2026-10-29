@@ -1,0 +1,73 @@
+<!--
+  Image Expand: Full Line (Codrops, MIT, adapted).
+  Source: codrops/ImageExpansionTypography at 0d61479, js/effect-3/expandImageEffect.js.
+  A wide picture opens across a full line of the headline (sine out); the paragraph below loosens its line height and lifts away. (Codrops Image Expansion Typography, effect 3)
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.imageExpand3(document.querySelector(".mw-image-expansion"), tl, 0.5, { duration: 2.4 });
+
+  Options (defaults in brackets):
+      - duration: s (2.4)
+      - block: the paragraph that drifts (the next element)
+      - openWidth: em an inline picture opens to (7.9)
+
+  Notes: el is the headline (.mw-image-expansion) holding .type__expand boxes as in the source; the paragraph that drifts is the next element (or `block`). The headline's pictures are the film's own.
+-->
+
+<h2 class="mw-image-expansion">…<span class="type__expand"><span class="type__expand-img"><span class="type__expand-img-inner" style="background-image:url(assets/picture.svg)"></span></span><span class="anim skewed">từ</span></span></h2><p>…</p>
+
+<style>
+.mw-image-expansion { margin: 0; line-height: 1.1; font-weight: normal; }
+.mw-image-expansion .type__expand { vertical-align: top; display: inline-grid; grid-template-columns: min-content; }
+.mw-image-expansion .type__expand--center, .mw-image-expansion .type__expand--full { display: block; }
+.mw-image-expansion .type__expand--mini { vertical-align: middle; padding: 0 0.125em; }
+.mw-image-expansion .type__expand--stack { vertical-align: bottom; grid-template-columns: 100%; justify-items: center; }
+.mw-image-expansion .type__expand-img { display: block; position: relative; aspect-ratio: 16/9; width: 0%; overflow: hidden; border-radius: 4rem; }
+.mw-image-expansion .type__expand-img-inner { display: block; width: 100%; height: 100%; background-size: cover; background-position: center; }
+.mw-image-expansion .type__expand-img--small { aspect-ratio: 1; }
+.mw-image-expansion .type__expand-img--tiny { aspect-ratio: 25/9; }
+.mw-image-expansion .type__expand--reveal .type__expand-img-inner { width: 100vw; aspect-ratio: 16/9; }
+.mw-image-expansion .anim { display: inline-block; white-space: nowrap; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"duration":2.4,"block":null,"openWidth":7.9};
+  var run = function (el,tl,at,o
+  ) {
+  
+  var R = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16, em = parseFloat(getComputedStyle(el).fontSize);
+  var parts = [];
+  Array.prototype.forEach.call(el.querySelectorAll(".type__expand"), function (box) {
+    var stack = box.classList.contains("type__expand--stack"), first = stack && box.firstElementChild && box.firstElementChild.classList.contains("type__expand-img");
+    parts.push([box, { gap: 0 }, { gap: (stack ? 0.5 : 1.5) * R }]);
+    if (stack) parts.push([box, { paddingTop: 0, paddingBottom: 0 }, first ? { paddingTop: R, paddingBottom: 0 } : { paddingTop: 0, paddingBottom: R }]);
+  });
+  Array.prototype.forEach.call(el.querySelectorAll(".type__expand-img"), function (img) {
+    // open widths: small 3.25em, tiny 2em, a full-line picture 100 %; an inline / centred reveal measured on the source page (1920 px wide,
+    // 80 px type: 634 px, 7.9em), since its 100 % resolves against the source's own grid
+    var full = img.closest(".type__expand--full");
+    var to = img.classList.contains("type__expand-img--small") ? 3.25 * em + "px" : img.classList.contains("type__expand-img--tiny") ? 2 * em + "px" : full ? "100%" : o.openWidth * em + "px";
+    parts.push([img, { width: "0%" }, { width: to }]);
+  });
+  Array.prototype.forEach.call(el.querySelectorAll(".skewed"), function (w) { parts.push([w, { skewX: 0 }, { skewX: -20 }]); });
+  Array.prototype.forEach.call(el.querySelectorAll(".rotated"), function (w) { parts.push([w, { skewX: 0, rotation: 0 }, { skewX: -5, rotation: -10 }]); });
+  var open = function (ease) { parts.forEach(function (p) { tl.fromTo(p[0], p[1], Object.assign({}, p[2], { duration: o.duration, ease: ease, immediateRender: true }), at); }); };
+  var block = o.block ? MW.el(o.block) : el.nextElementSibling;
+  open("sine");
+  if (block) tl.fromTo(block, { lineHeight: 1.2, yPercent: 0, skewX: 0, opacity: 1 }, { yPercent: -40, skewX: -2, lineHeight: 2, opacity: 0.2, duration: o.duration, ease: "sine.inOut", immediateRender: true }, at);
+  return at + o.duration;
+  };
+  MW.imageExpand3 = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

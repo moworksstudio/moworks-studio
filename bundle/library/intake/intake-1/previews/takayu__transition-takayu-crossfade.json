@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/transition-takayu-crossfade",
+  "hash": "b74af74078c68dd5",
+  "at": "2026-10-17T08:17:25.080Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__transition-takayu-crossfade.mp4",
+    "poster": "previews/takayu__transition-takayu-crossfade.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c66f28b9ab0c1a5050eae23a2ec097ebbde6e281fb62df4c4ba96a15c0607f30",
+    "size": 18781,
+    "seconds": 33.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/magic-card",
+  "hash": "d0eb8408984dede3",
+  "at": "2026-10-17T06:01:14.234Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__magic-card.mp4",
+    "poster": "previews/magicui__magic-card.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "663779652e44d15b44a7d43420867d8ca43649852f192fed57f30a8cea2cf39d",
+    "size": 28380,
+    "seconds": 33.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

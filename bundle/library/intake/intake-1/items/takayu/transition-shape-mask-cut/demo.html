@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Shape-Mask Transition - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: #0b0d12; color: #e8ebf3; }
+.sm { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+.sm-a { background: radial-gradient(120% 120% at 50% 30%, #1b2440, #0b0d12); } .sm-b { background: radial-gradient(120% 120% at 50% 30%, #a28cff, #5232d8); }
+.sm h2 { margin: 0; font-size: 150px; font-weight: 800; letter-spacing: -0.03em; } .sm p { margin: 18px 0 0; font-size: 44px; opacity: 0.75; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4.8">
+<section class="sm sm-a"><div><h2>Phần I</h2><p>Câu chuyện bắt đầu</p></div></section><section class="sm sm-b"><div><h2>Phần II</h2><p>Mọi thứ thay đổi</p></div></section>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.6,"ease":"power2.in","start":0,"inner":0.45,"rotate":30,"center":null,"outline":"#0b0d12","stroke":4.5,"back":null,"from":null};
+  var run = function (el, tl, at, o) {
+        var out = o.from ? MW.el(o.from) : el.previousElementSibling, root = el.parentNode, W = el.offsetWidth, Hh = el.offsetHeight, ease = gsap.parseEase(o.ease), N = 10;
+        var c = o.center ? MW.el(o.center).getBoundingClientRect() : null, rb = root.getBoundingClientRect(), cx = c ? c.left - rb.left + c.width / 2 : W / 2, cy = c ? c.top - rb.top + c.height / 2 : Hh / 2;
+        var NS = "http://www.w3.org/2000/svg", svg = document.createElementNS(NS, "svg"), pl = document.createElementNS(NS, "polygon");
+        svg.setAttribute("width", W); svg.setAttribute("height", Hh); svg.style.cssText = "position:absolute;left:0;top:0;pointer-events:none;z-index:6;";
+        pl.setAttribute("fill", "none"); pl.setAttribute("stroke", o.outline); pl.setAttribute("stroke-width", o.stroke); svg.appendChild(pl); root.appendChild(svg);
+        var R = Math.hypot(W, Hh), r0 = o.start;
+        var star = function (r, rot) { var pts = []; for (var i = 0; i < N; i++) { var a = rot + (i / N) * 2 * Math.PI - Math.PI / 2, rr = i % 2 ? r * o.inner : r; pts.push([cx + rr * Math.cos(a), cy + rr * Math.sin(a)]); } return pts; };
+        var end = o.back == null ? o.duration : o.back + o.duration;
+        return MW.drive(tl, at, end, function (t) {
+          var p = o.back != null && t >= o.back ? 1 - ease(Math.min(1, (t - o.back) / o.duration)) : ease(Math.min(1, t / o.duration));
+          var r = r0 + (R / o.inner * 1.1 - r0) * p, pts = star(r, (o.rotate * Math.PI / 180) * p), s = pts.map(function (q) { return q[0] + "px " + q[1] + "px"; }).join(",");
+          var full = p >= 1;
+          el.style.clipPath = full ? "none" : p <= 0 ? "polygon(0 0, 0 0, 0 0)" : "polygon(" + s + ")"; el.style.visibility = "visible";
+          pl.setAttribute("points", pts.map(function (q) { return q[0] + "," + q[1]; }).join(" ")); svg.style.visibility = p > 0 && r * o.inner < R ? "visible" : "hidden";
+          if (out) out.style.visibility = full ? "hidden" : "visible";
+        });
+      };
+  MW.transitionShapeMaskCut = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.transitionShapeMaskCut(q(".sm-b"), tl, 1.2, { back: 1.8 });
+          tl.set({}, {}, 4.8);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

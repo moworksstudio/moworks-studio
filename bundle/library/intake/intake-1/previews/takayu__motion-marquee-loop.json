@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-marquee-loop",
+  "hash": "b4a4c2442108ce8c",
+  "at": "2026-10-17T11:40:14.188Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-marquee-loop.mp4",
+    "poster": "previews/takayu__motion-marquee-loop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ce0f1ad6522a0dfb745c9f86d47ed25166a1345829ac7f2d7c8212d18f2fefb3",
+    "size": 59120,
+    "seconds": 34.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

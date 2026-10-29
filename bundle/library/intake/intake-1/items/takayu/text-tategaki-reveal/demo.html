@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Tategaki Reveal - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .tg { font-size: 84px; font-weight: 800; color: #ffe2a8; } .tg-p { padding: 60px 90px; border-radius: 30px; background: linear-gradient(180deg, #b3122e, #7a0b1f); box-shadow: 0 40px 100px rgba(0,0,0,0.5); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.4">
+<div class="st"><div class="tg-p"><div class="tg">Thịt mỡ dưa hành câu đối đỏ | Cây nêu tràng pháo bánh chưng xanh</div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"drop":80,"duration":0.5,"stagger":0.05,"cap":1.4,"gap":1.5,"start":0.35,"exitAt":2.95,"accent":"#ffb547","loop":3.4};
+  var run = function (el, tl, at, o) {
+        var cols = el.textContent.split("|").map(function (s) { return s.trim().split(/\s+/); }), ex = gsap.parseEase("expo.out"), pin = gsap.parseEase("power2.in"), U = [];
+        el.textContent = ""; el.style.display = "flex"; el.style.flexDirection = "row-reverse"; el.style.gap = o.gap + "em"; el.style.alignItems = "flex-start";
+        cols.forEach(function (ws) { var c = document.createElement("div"); c.style.cssText = "display:flex;flex-direction:column;align-items:center;"; ws.forEach(function (w) { var s = document.createElement("span"); s.textContent = w; s.style.cssText = "display:block;line-height:1.2;white-space:nowrap;opacity:0;"; c.appendChild(s); U.push(s); }); el.appendChild(c); });
+        var col = getComputedStyle(el).color, st = Math.min(o.stagger, o.cap / Math.max(1, U.length - 1));
+        return MW.drive(tl, at, o.loop, function (t) {
+          var x = pin(Math.max(0, Math.min(1, (t - o.exitAt) / 0.3)));
+          U.forEach(function (s, i) { var u = ex(Math.max(0, Math.min(1, (t - o.start - i * st) / o.duration))); gsap.set(s, { y: -o.drop * (1 - u) }); s.style.opacity = String(u * (1 - x)); s.style.color = u > 0 && u < 0.98 ? o.accent : col; });
+        });
+      };
+  MW.textTategakiReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textTategakiReveal(q(".tg"), tl, 0, {});
+          tl.set({}, {}, 3.4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

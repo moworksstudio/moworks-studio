@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-ease-glide",
+  "hash": "1dc717a8e763bbc5",
+  "at": "2026-10-17T09:01:27.161Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-ease-glide.mp4",
+    "poster": "previews/takayu__motion-ease-glide.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4e3b06f48d2dceb807c985566c878df86244b08b5b7b8f0ff748895d7ca7dfe4",
+    "size": 8921,
+    "seconds": 25.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

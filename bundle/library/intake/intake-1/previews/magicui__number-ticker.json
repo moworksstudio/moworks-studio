@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/number-ticker",
+  "hash": "172b1c513cd0d7c3",
+  "at": "2026-10-17T06:01:44.601Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__number-ticker.mp4",
+    "poster": "previews/magicui__number-ticker.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "1cb9761a7a364071b6e7b717d2b52462d9b36d68a2a4650512a5389f99ed13ea",
+    "size": 34223,
+    "seconds": 33.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

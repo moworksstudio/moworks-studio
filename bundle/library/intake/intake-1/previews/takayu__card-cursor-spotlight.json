@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/card-cursor-spotlight",
+  "hash": "136dae5797a7b048",
+  "at": "2026-10-17T10:06:17.299Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__card-cursor-spotlight.mp4",
+    "poster": "previews/takayu__card-cursor-spotlight.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f0f470b4eb11b78e1df6689305bcc2d3875a1ba4f86719fff03bbd484f5d2f50",
+    "size": 23398,
+    "seconds": 27.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

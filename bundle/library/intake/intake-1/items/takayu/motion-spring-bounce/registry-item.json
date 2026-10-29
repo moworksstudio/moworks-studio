@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-spring-bounce",
+  "type": "hyperframes:component",
+  "title": "Bounce",
+  "description": "Lò xo nảy rõ hai lần, vượt 24 % rồi dừng sau khoảng 0.82 giây; chỉ cho trò chơi, linh vật, khoảnh khắc chính.5, 11.25)).",
+  "tags": [
+    "spring",
+    "bouncy",
+    "playful",
+    "springs",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-spring-bounce.html",
+      "target": "compositions/components/motion-spring-bounce.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.34,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-spring-bounce",
+    "author": "takayu",
+    "call": "MW.motionSpringBounce(q(\".sp-b\"), tl, 0.4, { back: 1.82 });",
+    "function": "MW.motionSpringBounce",
+    "options": {
+      "stiffness": "",
+      "damping": "",
+      "mass": "",
+      "prop": "the property it drives: x | y | scale | rotation (x)",
+      "from": "(0)",
+      "to": "(560 px)",
+      "back": "s after the start to spring back (null)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=s-bounce",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=s-bounce (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio s-bounce, written here): Target moves 0 → 1 on a spring, stiffness 150, damping 9, mass 0.8 (damping ratio 0.41): 24.3 % overshoot, within 1 % by ~820 ms. Kit form: springk(187.5, 11.25) over 0.82 s. Site rule: clearly bounces twice; play, mascots and hero moments only. Site demo: the target moves 102 px beside the response graph, with overshoot and settle readouts. Params: stiffness (150) · damping (9) · mass (0.8) · duration (0.82 s). Damping ratio 0.41: about 24 % past, two clear bounces, settled by ~0.82 s. Only for play, mascots and hero moments.",
+    "titleVi": "Lò xo nảy (bóng)"
+  }
+}

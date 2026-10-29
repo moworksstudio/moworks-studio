@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-soft-mask-wipe",
+  "hash": "fefde66823827a7e",
+  "at": "2026-10-17T07:40:36.959Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-soft-mask-wipe.mp4",
+    "poster": "previews/takayu__text-soft-mask-wipe.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6762d2956b82fc86a12370d0a74f9e8a0e3c31f83600d97d8d52601e6be9277b",
+    "size": 10381,
+    "seconds": 25.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

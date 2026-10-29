@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Aurora Glow - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.ui-cursor { position: absolute; left: 0; top: 0; z-index: 30; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5)); }
+#demo { background: #06070c; } .ag { position: absolute; inset: 0; display: grid; place-items: center; } .ag-t { position: relative; width: 420px; height: 420px; border-radius: 100px; background: #151a28; border: 3px solid rgba(255,255,255,0.12); display: grid; place-items: center; font-size: 220px; font-weight: 900; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3">
+<div class="gm ag"><div class="ag-t">A</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"colors":["#ff4d6d","#3d7bff"],"radius":205,"blur":56,"offset":[120,90],"swing":1.3,"period":1.5,"hue":70,"cycles":1};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, G = [];
+        if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        [[o.colors[0], 0.55, 1], [o.colors[1], 0.5, -1]].forEach(function (g) { var d = document.createElement("div"); d.style.cssText = "position:absolute;border-radius:50%;pointer-events:none;mix-blend-mode:plus-lighter;background:" + g[0] + ";opacity:" + g[1] + ";filter:blur(" + o.blur + "px);"; host.insertBefore(d, el); G.push({ d: d, s: g[2] }); });
+        return MW.drive(tl, at, o.period * 2 * o.cycles, function (t) {
+          var k = Math.sin(Math.PI * t / o.period - Math.PI / 2), ang = o.swing * k, hue = o.hue * (0.5 + 0.5 * k), cx = el.offsetLeft + el.offsetWidth / 2, cy = el.offsetTop + el.offsetHeight / 2;
+          G.forEach(function (g) { var x = cx + g.s * o.offset[0] * Math.cos(ang), y = cy + g.s * o.offset[1] * Math.sin(ang); g.d.style.width = g.d.style.height = 2 * o.radius + "px"; g.d.style.left = (x - o.radius) + "px"; g.d.style.top = (y - o.radius) + "px"; g.d.style.filter = "blur(" + o.blur + "px) hue-rotate(" + (g.s > 0 ? hue : -hue) + "deg)"; });
+        });
+      };
+  MW.effectAuroraGlow = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.effectAuroraGlow(q(".ag-t"), tl, 0, {});
+          tl.set({}, {}, 3);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

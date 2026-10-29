@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/social-danmaku-comments",
+  "hash": "d112ecade3a7ef4a",
+  "at": "2026-10-17T10:21:07.960Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__social-danmaku-comments.mp4",
+    "poster": "previews/takayu__social-danmaku-comments.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "27c34bafc40d711302bece7b15ea12c13d55dcc85d05f2e1461ec50ac2ff413f",
+    "size": 61265,
+    "seconds": 28.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

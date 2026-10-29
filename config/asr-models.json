@@ -1,0 +1,59 @@
+{
+  "_about": "Speech-to-text engines the app can run on this PC. Model files are downloaded from Hugging Face into <work folder>/models/<dir> only after the user confirms, pinned to one commit and checked by size and SHA-256 (the Moworks Motion kit is not used). The transcript itself is HyperFrames' transcript.json (word level), imported through `hyperframes transcribe`; HyperFrames' own engines (whisper.cpp, Parakeet TDT v3 on Apple Silicon) do not cover Vietnamese on Windows. NVIDIA Parakeet CTC Vietnamese was dropped: it trails Vietnamese-tuned Whisper on natural speech and needs about 5 GB of PyTorch + NeMo. Engines run with faster-whisper (CTranslate2) on the CPU, or the NVIDIA GPU when its CUDA libraries are present. Compared on a Vietnamese voice-over: Whisper turbo was clearly best; EraX WoW Turbo (Vietnamese fine-tune) returned one unpunctuated block with an invented tail and was dropped. Whisper small was dropped: Turbo only, for voice and transcripts; songs are not transcribed, the user gives the lyrics.",
+  "models": [
+    {
+      "id": "whisper-turbo",
+      "engine": "faster-whisper",
+      "runtime": {
+        "python": [
+          "faster_whisper"
+        ],
+        "pip": [
+          "faster-whisper==1.2.1"
+        ],
+        "size": "faster-whisper 1.2.1 with CTranslate2, about 70 MB",
+        "install": "Install adds it to the app's Python components"
+      },
+      "label": "Whisper large-v3 turbo (faster-whisper)",
+      "short": "Whisper turbo",
+      "languages": "99 languages, Vietnamese included",
+      "licence": "MIT (OpenAI Whisper weights, converted to CTranslate2 by deepdml)",
+      "author": "OpenAI; conversion by deepdml",
+      "source": "https://huggingface.co/deepdml/faster-whisper-large-v3-turbo-ct2/tree/4df90f75321148c3a29a9e2351b7ddf8f5b115a8",
+      "dir": "faster-whisper-large-v3-turbo",
+      "note": "Recommended: in a Vietnamese ad voice-over test it got the brand, \"EGCG\", \"Thái Nguyên\" and most words right (32 s of voice in 18 s on the CPU). Words to expect (brand, script) improve it further. It transcribes speech (voice-overs, interviews), not singing: for a lyric video paste the song's lyrics in the Lyrics step and the app times them.",
+      "files": [
+        {
+          "to": "config.json",
+          "size": 2263,
+          "sha256": "b0253ea6c0d3bea6b1e19e91a02acfd3b53f4467362efcb5a3e6b16c9b3a9b7e",
+          "url": "https://huggingface.co/deepdml/faster-whisper-large-v3-turbo-ct2/resolve/4df90f75321148c3a29a9e2351b7ddf8f5b115a8/config.json"
+        },
+        {
+          "to": "model.bin",
+          "size": 1617884929,
+          "sha256": "e76620f83d5f5b69efd3d87e3dc180c1bd21df9fbebacfd4335e5e1efcc018da",
+          "url": "https://huggingface.co/deepdml/faster-whisper-large-v3-turbo-ct2/resolve/4df90f75321148c3a29a9e2351b7ddf8f5b115a8/model.bin"
+        },
+        {
+          "to": "preprocessor_config.json",
+          "size": 340,
+          "sha256": "7ccc62c6f2765af1f3b46c00c9b5894426835a05021c8b9c01eecb6dfb542711",
+          "url": "https://huggingface.co/deepdml/faster-whisper-large-v3-turbo-ct2/resolve/4df90f75321148c3a29a9e2351b7ddf8f5b115a8/preprocessor_config.json"
+        },
+        {
+          "to": "tokenizer.json",
+          "size": 2710337,
+          "sha256": "297b13372ac43916285644fb9687add3cc62ee2a1adb60da3dc25cc94c1871fd",
+          "url": "https://huggingface.co/deepdml/faster-whisper-large-v3-turbo-ct2/resolve/4df90f75321148c3a29a9e2351b7ddf8f5b115a8/tokenizer.json"
+        },
+        {
+          "to": "vocabulary.json",
+          "size": 1068114,
+          "sha256": "c69260f2ab26d659b7c398f9a2b2b48ed0df16c3b47d7326782fd9cba71690c1",
+          "url": "https://huggingface.co/deepdml/faster-whisper-large-v3-turbo-ct2/resolve/4df90f75321148c3a29a9e2351b7ddf8f5b115a8/vocabulary.json"
+        }
+      ]
+    }
+  ]
+}

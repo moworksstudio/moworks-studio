@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-glow-pulse",
+  "type": "hyperframes:component",
+  "title": "Glow Pulse",
+  "description": "Quầng sáng quanh chữ phồng từ 4 lên 16 px rồi tắt dần theo nhịp 1.5 lần mỗi giây, kèm viền sáng mỏng ở đỉnh.",
+  "tags": [
+    "glow",
+    "pulse",
+    "beat",
+    "loop",
+    "text-colour-light",
+    "soft",
+    "bouncy",
+    "colour-light",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-glow-pulse.html",
+      "target": "compositions/components/text-glow-pulse.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-glow-pulse",
+    "author": "takayu",
+    "call": "MW.textGlowPulse(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textGlowPulse",
+    "options": {
+      "rate": "beats a second (1.5)",
+      "blur": "[rest, peak] px of glow ([12, 48])",
+      "outline": "share of the font size at the peak (0.08)",
+      "color": "",
+      "loop": "s (2: three beats)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-glow-pulse",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-glow-pulse (read 12/10/2026)",
+      "upstream": "the site credits troika-three-text"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-glow-pulse, written here): Repeat at 1.5 Hz (period 0.667 s): glow blur 4 → 16 px, glow opacity 0.55 → 1, outline 0 → 8 % of font size at 50 % alpha; envelope: 15 % attack (easeOutQuad), then 85 % decay as (1 − x)^2.5 (fast fall, slow tail); core slightly whiter at the peak. CSS keys 0 / 15 / 100 % ease-out. Loop 2 s (3 beats). Params: rate: nhịp (1.5 Hz) · blur: quầng (4 → 16 px) · outline: viền ở đỉnh (8 % cỡ chữ). Each beat: a 15 % attack (ease-out quad), then a fall as (1 − x)^2.5, fast at first with a slow tail.",
+    "titleVi": "Chữ phát sáng theo nhịp"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/transition-clock-wipe",
+  "hash": "44d3249d92a78723",
+  "at": "2026-10-17T07:21:03.777Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__transition-clock-wipe.mp4",
+    "poster": "previews/takayu__transition-clock-wipe.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "70cb04e56a00092dd82ba8fcc03ef7aeb371d75c3ddd8fcca9a129f3f540d109",
+    "size": 15230,
+    "seconds": 27.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

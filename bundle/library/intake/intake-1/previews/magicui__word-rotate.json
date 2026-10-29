@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/word-rotate",
+  "hash": "d85b324e4860326b",
+  "at": "2026-10-17T06:32:25.535Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__word-rotate.mp4",
+    "poster": "previews/magicui__word-rotate.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "8ed86cb2ac944afb4d71d5333aa783aeadd988256d82e546ff2808a4ad25625b",
+    "size": 21093,
+    "seconds": 19.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

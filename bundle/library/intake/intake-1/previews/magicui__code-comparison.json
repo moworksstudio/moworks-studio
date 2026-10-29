@@ -1,0 +1,26 @@
+{
+  "uid": "in:magicui/code-comparison",
+  "hash": "2d8d49bb5ed7fadf",
+  "at": "2026-10-17T06:31:52.020Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "JetBrains Mono"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__code-comparison.mp4",
+    "poster": "previews/magicui__code-comparison.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6cb62a45f59d41dc0d0c44185dca77fcf86f6b7e88fc7b9ee755e635a19206fb",
+    "size": 11260,
+    "seconds": 33.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

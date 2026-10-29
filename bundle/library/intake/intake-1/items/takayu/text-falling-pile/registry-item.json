@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-falling-pile",
+  "type": "hyperframes:component",
+  "title": "Falling Text Physics",
+  "description": "Các từ thành viên thuốc lần lượt rơi xuống sàn, nảy nhẹ, nghiêng ngả rồi xếp chồng thành đống, từ ở dưới khẽ lún khi từ trên rơi trúng.",
+  "tags": [
+    "physics",
+    "gravity",
+    "pile",
+    "words",
+    "text-glyph-physics",
+    "heavy",
+    "bouncy",
+    "glyph-physics",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-falling-pile.html",
+      "target": "compositions/components/text-falling-pile.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-falling-pile",
+    "author": "takayu",
+    "call": "MW.textFallingPile(q(\".fp\"), tl, 0, {});",
+    "function": "MW.textFallingPile",
+    "options": {
+      "gravity": "px/s² (6000)",
+      "restitution": "(0.4)",
+      "gap": "px (16)",
+      "shift": "px odd rows shift (24)",
+      "unit": "px per reference unit (4)",
+      "start": "s (0.3)",
+      "exitAt": "s (3.75)",
+      "accent": "first pill",
+      "seed": "drops"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-falling-pile",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-falling-pile (read 12/10/2026)",
+      "upstream": "the site credits react-bits (MIT + Commons Clause): written from the idea only, no react-bits code"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-falling-pile, written here): Units = words (chars if < 3 words) as pills: text + 0.7 em × 1.3 em, radius 0.39 em, first one accent; rest slots packed in rows on the floor (4 px gaps, odd rows +6 px, upper rows tilted ±0.07 rad). Release every min(0.2, 1.5 / n) s from 0.3 s, each from 30–80 px above its slot: g 1500 px/s², restitution 0.4; x drifts ±25 px → slot (power1.out); tilt ±0.6 rad settles as e^(−7t) cos 16t; pills below dip 2.4 px × e^(−12t) sin 34t. Exit 3.75 s: fall, fade 3.85–4.25 s. Params: cách nhau (0.2 s) · độ nảy (0.4) · trọng lực (1500 px/s²) · độ nghiêng (±0.6 rad).",
+    "titleVi": "Chữ rơi chồng đống trên sàn"
+  }
+}

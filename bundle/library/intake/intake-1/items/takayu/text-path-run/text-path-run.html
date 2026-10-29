@@ -1,0 +1,69 @@
+<!--
+  Text Along Path (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-text-along-path (read 12/10/2026).
+  Dòng chữ chạy vào theo một đường cong, mỗi chữ xoay theo hướng đường, dừng ở giữa một nhịp rồi tăng tốc chạy ra đầu bên kia.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textPathRun(q(".pr"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - text: 
+      - fit: px of text (1000)
+      - amp: px of the wave (200)
+      - margin: px past each side (250)
+      - start: s (0.3)
+      - inTime: s (1.2, power2.out)
+      - holdAt: s it holds from (1.5)
+      - outAt: s (2.6)
+      - outTime: s (1.1, power2.in)
+      - accent: the last letter
+      - loop: s (4)
+
+  Notes: Idea and numbers (TakayuStudio tx-text-along-path, written here): Text on an open path (demo: one full sine wave, amplitude 40 px, across the frame plus 50 px each side); each glyph at its arc-length point, rotated to the tangent (chord ±6 px). Text centre runs from fully off the start (−half width − 20 px) to the path middle 0.3–1.5 s power2.out, holds 1.1 s, then to fully off the end 2.6–3.7 s power2.in. Size fits about 190 px of text (12–34 px). Last char accent. Loop 4 s. Params: đường cong (sóng 40 px) · thời gian vào (1.2 s) · giữ (1.1 s) · thời gian ra (1.1 s).
+-->
+
+<div class="pr"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"text":"Theo dòng sóng","fit":1000,"amp":200,"margin":250,"start":0.3,"inTime":1.2,"holdAt":1.5,"outAt":2.6,"outTime":1.1,"accent":"#ffd23d","loop":4};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var rail = function (pts, closed) { var L = [0]; for (var i = 1; i < pts.length; i++) L.push(L[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])); var tot = L[L.length - 1];
+    return { len: tot, at: function (s) { s = closed ? ((s % tot) + tot) % tot : Math.max(0, Math.min(tot, s)); var lo = 0, hi = L.length - 1; while (hi - lo > 1) { var m = (lo + hi) >> 1; if (L[m] <= s) lo = m; else hi = m; } var f = (s - L[lo]) / ((L[hi] - L[lo]) || 1), a = pts[lo], b = pts[hi]; return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]; } }; };
+  var ang = function (R, s, ch) { var a = R.at(s - ch), b = R.at(s + ch); return Math.atan2(b[1] - a[1], b[0] - a[0]); };
+  var glyphs = function (host, list, fs, sepColor) { return list.map(function (g) { var s = document.createElement("span"); s.textContent = g; s.style.cssText = "position:absolute;left:0;top:0;white-space:pre;line-height:1;font-size:" + fs + "px;" + (g === "•" && sepColor ? "color:" + sepColor + ";" : ""); host.appendChild(s); return { s: s, w: s.offsetWidth, h: s.offsetHeight }; }); };
+  var place = function (q, x, y, a, op) { gsap.set(q.s, { x: x - q.w / 2, y: y - q.h * 0.8, rotation: a * 180 / Math.PI, transformOrigin: "50% 80%" }); q.s.style.opacity = op == null ? "1" : String(op); };
+  var W = el.clientWidth, Hh = el.clientHeight, pts = []; for (var i = 0; i <= 200; i++) { var u = i / 200; pts.push([-o.margin + (W + 2 * o.margin) * u, Hh / 2 + o.amp * Math.sin(2 * Math.PI * u)]); }
+  var R = rail(pts, false), list = gr(o.text), probe = glyphs(el, list, 100, null), tw = probe.reduce(function (a, q) { return a + q.w; }, 0); probe.forEach(function (q) { q.s.remove(); });
+  var fs = 100 * o.fit / tw, G = glyphs(el, list, fs, null), s0 = 0; G.forEach(function (q, i) { q.o = s0 + q.w / 2; s0 += q.w; if (i === G.length - 1) q.s.style.color = o.accent; }); var TW = s0, p2 = gsap.parseEase("power2.out"), pin = gsap.parseEase("power2.in");
+  var A = -TW / 2 - 20, M = R.len / 2, B = R.len + TW / 2 + 20;
+  return MW.drive(tl, at, o.loop, function (t) {
+    var c = t < o.holdAt ? A + (M - A) * p2(Math.max(0, Math.min(1, (t - o.start) / o.inTime))) : M + (B - M) * pin(Math.max(0, Math.min(1, (t - o.outAt) / o.outTime)));
+    G.forEach(function (q) { var s = c - TW / 2 + q.o, p = R.at(s); place(q, p[0], p[1], ang(R, s, 36), s < 0 || s > R.len ? 0 : 1); });
+  });
+  };
+  MW.textPathRun = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

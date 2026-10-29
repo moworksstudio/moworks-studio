@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-split-flap-board",
+  "hash": "4601d70a2e7c6701",
+  "at": "2026-10-17T09:13:58.995Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-split-flap-board.mp4",
+    "poster": "previews/takayu__text-split-flap-board.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "fc92ecf500079ff6e740170756bde029eab68433a5f775e2c520d22e09849c17",
+    "size": 18317,
+    "seconds": 29.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

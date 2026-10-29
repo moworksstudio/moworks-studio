@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-odometer-roll",
+  "type": "hyperframes:component",
+  "title": "Odometer Digit Roll",
+  "description": "Mỗi chữ số cuộn dọc trong khung có mép mờ tới chữ số mới, cuộn lên khi số tăng, cuộn xuống khi số giảm.",
+  "tags": [
+    "counter",
+    "odometer",
+    "digits",
+    "roll",
+    "text-numbers-data",
+    "crisp",
+    "numbers-data",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "data-odometer-roll.html",
+      "target": "compositions/components/data-odometer-roll.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/data-odometer-roll",
+    "author": "takayu",
+    "call": "MW.dataOdometerRoll(q(\".or-n\"), tl, 0, {});",
+    "function": "MW.dataOdometerRoll",
+    "options": {
+      "values": "the values as text, same layout (['1.024', '2.048', '1.024'])",
+      "times": "s of each change ([0.4, 2.45])",
+      "duration": "s per roll (0.75)",
+      "tint": "accent while rolling",
+      "loop": "s (4.4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-odometer-roll",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-odometer-roll (read 12/10/2026)",
+      "upstream": "the site credits barvian/number-flow (MIT): its numbers, not its runtime"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-odometer-roll, written here): Per digit a 0–9 strip in a window one line tall (demo pitch 1.4 em) with a 0.25 em soft fade top / bottom; on a change each digit rolls to its new digit in 750 ms easeOutQuart (CSS cubic-bezier(.25,1,.5,1); GSAP power3.out), forward when the value rises, backward when it falls, tinting accent while rolling; added / removed chars fade over 350 ms ease-out while sliding with the roll; line-height 0.85–1. Demo: 1,024 → 2,048 at 0.4 s, back at 2.45 s; loop 4.4 s. Params: from, to: số đầu / cuối (1.024 → 2.048) · duration (0.75 s) · fade: chữ số mới hiện (0.35 s) · mask: mép mờ (0.25 em).",
+    "titleVi": "Từng chữ số cuộn sang số mới"
+  }
+}

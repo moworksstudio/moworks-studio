@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-count-up-percent",
+  "type": "hyperframes:component",
+  "title": "Count Up",
+  "description": "Con số đếm từng số nguyên từ 0 lên 100 với chữ số đều nhau nên không xô ngang, rồi đứng yên ở đích.",
+  "tags": [
+    "counter",
+    "number",
+    "percent",
+    "data",
+    "loading-data",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "data-count-up-percent.html",
+      "target": "compositions/components/data-count-up-percent.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/data-count-up-percent",
+    "author": "takayu",
+    "call": "MW.dataCountUpPercent(q(\".cu\"), tl, 0, {});",
+    "function": "MW.dataCountUpPercent",
+    "options": {
+      "from": "(0)",
+      "to": "(100)",
+      "start": "s (0.26)",
+      "duration": "s (1.28), linear through every integer",
+      "suffix": "(%)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=count-up",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=count-up (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio count-up, written here): Number 48 px weight 850, tabular digits, right-aligned in a 104x56 window, % unit beside. In a 2.2 s loop it steps through every integer 0 → 100 linearly from 12 % to 70 % (0.26-1.54 s; recipe floor(progress × 100)); holds 100. Motion data: 1 s easeOutCubic. Params: from (0) · to (100) · duration (1.28 s) · suffix (%) · ease (none). Tabular digits, so the number does not shift sideways; right-align it in a fixed box.",
+    "titleVi": "Số phần trăm đếm lên từng đơn vị"
+  }
+}

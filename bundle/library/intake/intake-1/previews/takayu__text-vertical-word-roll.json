@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-vertical-word-roll",
+  "hash": "d63941f41ee29c9d",
+  "at": "2026-10-17T09:13:59.828Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-vertical-word-roll.mp4",
+    "poster": "previews/takayu__text-vertical-word-roll.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b3b9dc8e25e308111efadcf07a785b961d0174ed8ec27ab06c1aa78e205f9c58",
+    "size": 13300,
+    "seconds": 29.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

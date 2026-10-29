@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-elastic-scale",
+  "hash": "6d8a790160019997",
+  "at": "2026-10-17T09:38:35.643Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-elastic-scale.mp4",
+    "poster": "previews/takayu__motion-elastic-scale.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "67250243447c006e58ecaee75970f115f58b57bada82e8b28ba1912f7955a3fa",
+    "size": 9984,
+    "seconds": 27.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

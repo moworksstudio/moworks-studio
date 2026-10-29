@@ -1,0 +1,63 @@
+<!--
+  Grid Pattern (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/grid-pattern.tsx.
+  A fine line grid with a few filled cells, usually skewed and faded at the edges with a radial mask: a calm SaaS backdrop (static, or drifting slowly).
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.gridPattern(q(".mw-grid-pattern"), tl, 0, { width: 80, height: 80, color: "rgba(156,163,175,0.35)", squares: [[4,4],[5,1],[8,2],[5,3],[5,5],[10,10],[12,15],[15,10],[10,15],[15,10],[10,15],[15,10]], drift: [0, 20], hold: 6 });
+
+  Options (defaults in brackets):
+      - width: cell px (40)
+      - height: cell px (40)
+      - x: -1
+      - y: -1
+      - strokeDasharray: '0'
+      - squares: [[col, row], ...] filled cells
+      - color: rgba(156,163,175,0.3)
+      - drift: [x, y] px/s ([0, 0])
+      - hold: seconds the drift runs (10)
+
+  Notes: Static upstream; drift is this port's option. Mask and skew are plain CSS on the holder, as in upstream's demos (radial mask 400 px, skewY(12deg), inset-y -30 %, height 200 %).
+-->
+
+<svg class="mw-grid-pattern" aria-hidden="true"></svg>
+
+<style>
+.mw-grid-pattern { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"width":40,"height":40,"x":-1,"y":-1,"strokeDasharray":"0","squares":[],"color":"rgba(156,163,175,0.3)","drift":[0,0],"hold":10};
+  var run = function (el, tl, at, o) {
+      var NS = "http://www.w3.org/2000/svg", id = "mw-grid-" + (MW.__gp = (MW.__gp || 0) + 1), w = o.width, h = o.height;
+      el.innerHTML = '<defs><pattern id="' + id + '" width="' + w + '" height="' + h + '" patternUnits="userSpaceOnUse" x="' + o.x + '" y="' + o.y + '">' +
+        '<path d="M.5 ' + h + "V.5H" + w + '" fill="none" stroke="' + o.color + '" stroke-dasharray="' + o.strokeDasharray + '"/></pattern></defs>' +
+        '<rect width="100%" height="100%" stroke-width="0" fill="url(#' + id + ')"/>';
+      var cells = document.createElementNS(NS, "svg"); cells.setAttribute("x", o.x); cells.setAttribute("y", o.y); cells.style.overflow = "visible";
+      o.squares.forEach(function (sq) {
+        var r = document.createElementNS(NS, "rect");
+        r.setAttribute("width", w - 1); r.setAttribute("height", h - 1); r.setAttribute("x", sq[0] * w + 1); r.setAttribute("y", sq[1] * h + 1);
+        r.setAttribute("fill", o.color); r.setAttribute("stroke-width", "0"); cells.appendChild(r);
+      });
+      el.appendChild(cells);
+      if (!o.drift[0] && !o.drift[1]) return at;
+      var pat = el.querySelector("pattern"), s = { t: 0 };
+      var set = function () { var dx = o.drift[0] * s.t, dy = o.drift[1] * s.t; pat.setAttribute("x", o.x + dx); pat.setAttribute("y", o.y + dy); cells.setAttribute("x", o.x + dx); cells.setAttribute("y", o.y + dy); };
+      set();
+      tl.fromTo(s, { t: 0 }, { t: o.hold, duration: o.hold, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + o.hold;
+    };
+  MW.gridPattern = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

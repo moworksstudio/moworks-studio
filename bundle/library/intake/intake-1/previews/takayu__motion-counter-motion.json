@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-counter-motion",
+  "hash": "059e7e3f87879ca1",
+  "at": "2026-10-17T09:34:43.309Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-counter-motion.mp4",
+    "poster": "previews/takayu__motion-counter-motion.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "8d8ca61c4db2068a708fc8fc114f2057bea67cf2a6d789b2d4d4104a1c9d93b2",
+    "size": 18408,
+    "seconds": 27,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

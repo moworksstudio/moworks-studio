@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-reaction-bar",
+  "type": "hyperframes:block",
+  "title": "Emoji Bar",
+  "description": "Con trỏ lướt trên thanh cảm xúc, biểu tượng đang trỏ nhô lên 16 px và to 1.4 lần bằng lò xo với nhãn tên bên trên, các biểu tượng khác mờ đi.",
+  "tags": [
+    "reactions",
+    "emoji",
+    "hover",
+    "spring",
+    "feedback-reactions",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-reaction-bar.html",
+      "target": "compositions/components/ui-reaction-bar.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-reaction-bar",
+    "author": "takayu",
+    "call": "MW.uiReactionBar(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiReactionBar",
+    "options": {
+      "picks": "[[s, icon or −1], ...]",
+      "labels": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-feedback-emoji-bar",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-feedback-emoji-bar (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-feedback-emoji-bar, written here): 5 icons 43 px apart in a pill 220x44. Selected icon: y −16 px and scale 1.4 on a spring k320 d22 (sum of springs); the others drop to opacity 0.45 while one is lifted; a light label pill 44x18 with dark text appears above it. Selection: icon 2 at 0.55 s, icon 4 at 1.4 s, none at 2.25 s. The cursor follows on a spring k120 c20. Params: lift (16 px) · scale (1.4) · spring (k320 c22) · dim (0.45) · picks [[giây, ô]]. The picked icon rises 16 units and grows 1.4× on springs k320 c22; the others dim to 0.45; the cursor follows on a softer spring (k120 c20).",
+    "titleVi": "Thanh cảm xúc, biểu tượng nhô lên"
+  }
+}

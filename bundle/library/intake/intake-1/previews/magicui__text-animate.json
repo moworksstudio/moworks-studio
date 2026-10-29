@@ -1,0 +1,26 @@
+{
+  "uid": "in:magicui/text-animate",
+  "hash": "10ce1a0f12a1a20b",
+  "at": "2026-10-17T06:03:32.550Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "JetBrains Mono"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__text-animate.mp4",
+    "poster": "previews/magicui__text-animate.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "056619e339cf07b40f63eda725465a0d0a4f39aefe4206d0623143a5acbb70fe",
+    "size": 25000,
+    "seconds": 32.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

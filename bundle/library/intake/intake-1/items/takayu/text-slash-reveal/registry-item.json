@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-slash-reveal",
+  "type": "hyperframes:component",
+  "title": "Directional Slash Reveal",
+  "description": "Một nhát chém nghiêng lướt ngang khung, chữ hiện ra đúng phần nhát chém đã đi qua, kéo theo một dải màu mờ; sau đó bóng nhát chém trôi đi và tắt, vài tia lửa bám theo và gạch chân mọc ra.",
+  "tags": [
+    "slash",
+    "mask",
+    "reveal",
+    "diagonal",
+    "game-impact-fx",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-slash-reveal.html",
+      "target": "compositions/components/text-slash-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-slash-reveal",
+    "author": "takayu",
+    "call": "MW.textSlashReveal(q(\".gm\"), tl, 0, {});",
+    "function": "MW.textSlashReveal",
+    "options": {
+      "at": "s of the slash (0.5)",
+      "duration": "s it takes (0.35), in-out cubic",
+      "tilt": "degrees from vertical (24)",
+      "band": "units of the trailing band (70)",
+      "outAt": "s of the exit (3.5)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-impact-fx-slash-reveal",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-impact-fx-slash-reveal (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-impact-fx-slash-reveal, written here): px @320x200. A slash line (accent 3 px + 1 px light core) tilted 24° from vertical sweeps from x −80 to 400 (−25 % → 125 % of the frame width) in 350 ms inOutCubic at 0.5 s; the word (52 px) is clipped to the side the line has passed, edge exactly on the line; a 70 px accent band at 25 % trails it. A ghost line drifts 30 px and fades over 0.85-1.25 s; 4 yellow sparks ride the line; underline grows to 96 px (0.9-1.2 s outCubic). Out 3.5-3.85 s. Params: at: lúc chém (0.5 s) · duration: thời gian chém (0.35 s) · tilt: độ nghiêng (24°) · band: dải màu (70 px) · underline: gạch chân (96 px).",
+    "titleVi": "Nhát chém chéo làm lộ chữ"
+  }
+}

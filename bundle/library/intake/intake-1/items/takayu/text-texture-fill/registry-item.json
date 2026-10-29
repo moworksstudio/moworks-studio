@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-texture-fill",
+  "type": "hyperframes:component",
+  "title": "Texture / Video Fill",
+  "description": "Chữ rất đậm làm khuôn cắt cho ảnh, video hoặc hoạ tiết bên trong; phần hình trôi chậm qua lòng chữ còn nét chữ đứng yên.",
+  "tags": [
+    "fill",
+    "mask",
+    "video",
+    "texture",
+    "text-mask-clip",
+    "smooth",
+    "heavy",
+    "mask-clip",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-texture-fill.html",
+      "target": "compositions/components/text-texture-fill.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-texture-fill",
+    "author": "takayu",
+    "call": "MW.textTextureFill(q(\".tk-head\"), tl, 0, { duration: 5, period: 6 });",
+    "function": "MW.textTextureFill",
+    "options": {
+      "image": "a picture to run inside the letters (an assets/ path); none: a drawn pattern (gradient, wavy lines, rising bubbles)",
+      "colors": "the pattern's gradient",
+      "period": "s for one pass across, ping-pong (20; the site's 0 → 100 % in 20 s)",
+      "duration": "s it runs"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-texture-fill",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-texture-fill (read 12/10/2026)",
+      "upstream": "the site credits Magic UI (MIT); a faithful port is in the Magic UI collection"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-texture-fill, written here): Heavy text (weight 900, 10–20 vw) as a mask over an image / video / pattern (background-clip text, or a mask with mask-size contain for video), fill 200 % of the box, vertical position 50 %; background-position-x 0 % → 100 % over 20 s linear, ping-pong (CSS alternate) (a 5 s shot moves 25 %); video frame-locked to the film; letters still. Demo pattern: blue → accent gradient with 2 px wavy lines that drift 10 px and rising bubbles per 5 s loop. Params: fill: ảnh / video / hoạ tiết · drift: trôi nền (0 → 100 % trong 20 s) · size: cỡ nền (200 %).",
+    "titleVi": "Ảnh hoặc video chạy trong lòng chữ"
+  }
+}

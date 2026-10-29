@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Card Stack Fan - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .cf { position: relative; width: 320px; height: 440px; } .cf-c { position: absolute; inset: 0; border-radius: 40px; box-shadow: 0 30px 70px rgba(0,0,0,0.45); display: grid; place-items: end start; padding: 34px; box-sizing: border-box; font-size: 40px; font-weight: 800; }
+.cf-c:nth-child(1) { background: #e8ebf3; color: #1b1440; } .cf-c:nth-child(2) { background: #3d9bff; color: #fff; } .cf-c:nth-child(3) { background: linear-gradient(150deg, #a693ff, #6a4cf0); color: #fff; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3">
+<div class="st"><div class="cf"><div class="cf-c">Ba lô</div><div class="cf-c">Giày</div><div class="cf-c">Mũ</div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"cards":".cf-c","spread":280,"angle":18,"start":0.3,"each":0.06,"k":220,"c":[22,12],"closeAt":2.3,"close":0.4};
+  var run = function (el, tl, at, o) {
+        var cards = Array.prototype.slice.call(el.querySelectorAll(o.cards)), n = cards.length, soft = MW.spring(o.k, o.c[0]), top = MW.spring(o.k, o.c[1]), io = gsap.parseEase("power2.inOut");
+        return MW.drive(tl, at, o.closeAt + o.close + 0.2, function (t) {
+          var cl = io(Math.max(0, Math.min(1, (t - o.closeAt) / o.close)));
+          cards.forEach(function (cd, k) { var side = (n - 1) / 2 - k, st = o.start + k * o.each, sp = k === n - 1 ? top : soft, v = t > st ? sp.at(t - st) : 0; v *= 1 - cl; gsap.set(cd, { x: side * o.spread * v, rotation: side * o.angle * v }); });
+        });
+      };
+  MW.motionCardFan = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionCardFan(q(".cf"), tl, 0, {});
+          tl.set({}, {}, 3);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

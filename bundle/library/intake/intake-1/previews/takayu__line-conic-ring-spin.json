@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/line-conic-ring-spin",
+  "hash": "d64035d69ace19f1",
+  "at": "2026-10-17T11:40:14.192Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__line-conic-ring-spin.mp4",
+    "poster": "previews/takayu__line-conic-ring-spin.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ef50ae9ffa865f8386ea067746bf363dbe7e4978ed3d6f14cbcd02c2f805a056",
+    "size": 25221,
+    "seconds": 32.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

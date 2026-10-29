@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-glide",
+  "type": "hyperframes:component",
+  "title": "Glide",
+  "description": "Đường cong mềm kiểu Material, dùng gần chữ hoặc khi giải thích giao diện, cho cảm giác cao cấp.",
+  "tags": [
+    "ease",
+    "glide",
+    "premium",
+    "easing",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-glide.html",
+      "target": "compositions/components/motion-ease-glide.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-ease-glide",
+    "author": "takayu",
+    "call": "MW.motionEaseGlide(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseGlide",
+    "options": {
+      "duration": "s (0.3)",
+      "ease": "the curve (glide)",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=e-glide",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=e-glide (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio e-glide, written here): cubic-bezier(.4, 0, .2, 1) (the older Material standard), 300 ms (site motion_ms). Gentle; near text and for UI explanations, a premium default. Writable now as custom(M0,0 C .4,0 .2,1 1,1); proposed alias glide. Site demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: duration (0.3 s) · ease (custom .4,0,.2,1).",
+    "titleVi": "Đường cong lướt êm (glide)"
+  }
+}

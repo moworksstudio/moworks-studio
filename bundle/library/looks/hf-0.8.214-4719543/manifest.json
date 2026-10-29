@@ -1,0 +1,14 @@
+{
+  "source": "HyperFrames skill hyperframes (assets/frame-presets)",
+  "repo": "heygen-com/hyperframes",
+  "version": "0.8.214",
+  "commit": "4719543e972548a261b8354f0a8dada479ae5d93",
+  "items": 13,
+  "kinds": {
+    "frame": 13,
+    "style": 0,
+    "palette": 0
+  },
+  "previews": 13,
+  "importedAt": "2026-10-29T07:05:51.994Z"
+}

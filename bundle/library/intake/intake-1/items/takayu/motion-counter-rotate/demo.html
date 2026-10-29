@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Counter Rotation - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .cr { position: relative; width: 680px; height: 680px; } .cr-o { position: absolute; inset: 0; } .cr-o i { position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: #3dd6f5; }
+.cr-o i.big { width: 76px; height: 76px; margin: -38px 0 0 -38px; background: #ffd23d; } .cr-i { position: absolute; left: 50%; top: 50%; width: 250px; height: 250px; margin: -125px 0 0 -125px; border-radius: 40px; background: linear-gradient(150deg, #a693ff, #6a4cf0); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4.2">
+<div class="st"><div class="cr"><div class="cr-o"><i class="big" style="left:340.0px;top:30.0px"></i><i style="left:559.2px;top:120.8px"></i><i style="left:650.0px;top:340.0px"></i><i style="left:559.2px;top:559.2px"></i><i style="left:340.0px;top:650.0px"></i><i style="left:120.8px;top:559.2px"></i><i style="left:30.0px;top:340.0px"></i><i style="left:120.8px;top:120.8px"></i></div><div class="cr-i"></div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":1,"outerTurn":360,"innerTurn":-360,"ease":"sine.inOut","loop":2,"loops":2,"outer":".cr-o","inner":".cr-i"};
+  var run = function (el, tl, at, o) {
+        var a = el.querySelector(o.outer), b = el.querySelector(o.inner), e = gsap.parseEase(o.ease);
+        return MW.drive(tl, at, o.loop * o.loops, function (t) { var k = Math.floor(t / o.loop), u = e(Math.min(1, (t - k * o.loop) / o.duration)); gsap.set(a, { rotation: o.outerTurn * u }); gsap.set(b, { rotation: o.innerTurn * u }); });
+      };
+  MW.motionCounterRotate = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionCounterRotate(q(".cr"), tl, 0.2, {});
+          tl.set({}, {}, 4.2);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

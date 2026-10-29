@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-exit-faster",
+  "hash": "790dc1313a7574d9",
+  "at": "2026-10-17T10:49:19.592Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-exit-faster.mp4",
+    "poster": "previews/takayu__motion-exit-faster.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "12cb3c564cc08ef5b953792f2c89d13b7af5e30dc138d58f636211fbff217eba",
+    "size": 8973,
+    "seconds": 26.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

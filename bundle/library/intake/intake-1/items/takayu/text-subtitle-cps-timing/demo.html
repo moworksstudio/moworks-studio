@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Japanese Subtitle 4 cps - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; }
+.ft { position: absolute; inset: 0; background: url(assets/shot.svg) center / cover; } .ft::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.55)); }
+.cs { position: absolute; inset: 0; } .cs-s { position: absolute; left: 0; right: 0; bottom: 90px; text-align: center; font-size: 60px; font-weight: 700; line-height: 1.35; color: #fff; -webkit-text-stroke: 0.24em #0b0d12; paint-order: stroke fill; }
+.cs-m { position: absolute; right: 60px; top: 50px; font-family: 'JetBrains Mono', monospace; font-size: 30px; color: rgba(255,255,255,0.75); background: rgba(0,0,0,0.45); padding: 10px 18px; border-radius: 10px; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4.6">
+<div class="ft"></div><div class="cs"><div class="cs-s"></div><div class="cs-m"></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"cues":["Sáng nay cả nhà dậy thật sớm\nđể kịp chuyến tàu ra biển.","Ai cũng háo hức."],"rate":17,"min":0.5,"gap":0.12,"start":0.35,"sub":".cs-s","meta":".cs-m","loop":4.6};
+  var run = function (el, tl, at, o) {
+        var sub = el.querySelector(o.sub), meta = o.meta ? el.querySelector(o.meta) : null, t0 = o.start, plan = o.cues.map(function (c) { var n = Array.from(c.replace(/\s+/g, " ")).length, d = Math.max(o.min, n / o.rate); return { c: c, n: n, d: d }; });
+        var tot = plan.reduce(function (a, p) { return a + p.d; }, 0) + o.gap * (plan.length - 1), k = tot > o.loop - o.start - 0.2 ? (o.loop - o.start - 0.2) / tot : 1; plan.forEach(function (p) { p.t = t0; t0 += p.d * k + o.gap * k; });
+        return MW.drive(tl, at, o.loop, function (t) {
+          var cur = null; plan.forEach(function (p) { if (t >= p.t && t < p.t + p.d * k) cur = p; }); sub.innerHTML = cur ? cur.c.replace(/\n/g, "<br>") : ""; sub.style.visibility = cur ? "visible" : "hidden";
+          if (meta) meta.textContent = cur ? cur.n + " ký tự · " + (cur.d * k).toFixed(1) + " s" : "";
+        });
+      };
+  MW.textSubtitleCpsTiming = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textSubtitleCpsTiming(q(".cs"), tl, 0, {});
+          tl.set({}, {}, 4.6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

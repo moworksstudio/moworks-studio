@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Paper Fold - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #151a28; font-family: Inter, sans-serif; } .pf-w { position: absolute; inset: 0; display: grid; place-items: center; }
+.pf { position: relative; width: 1300px; height: 560px; border-radius: 20px; background: #f4f1ea; display: grid; place-items: center; padding: 0; } .pf h2 { margin: 0; font-size: 150px; font-weight: 900; letter-spacing: -0.02em; text-align: center; } .pf i { position: absolute; left: 100px; right: 100px; bottom: 90px; height: 4px; background: #8b7bff; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.6">
+<div class="pf-w"><div class="pf"><h2>Mở ra từng nếp</h2><i></i></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"panels":4,"angle":81,"start":0.35,"refoldAt":2.65,"perspective":2.3,"shade":"#0b0d12"};
+  var run = function (el, tl, at, o) {
+        var W = el.offsetWidth, H = el.offsetHeight, ph = H / o.panels, html = el.innerHTML, bg = getComputedStyle(el).backgroundColor, p1 = gsap.parseEase("power1.out"), pio = gsap.parseEase("power1.inOut"), panels = [];
+        var cs = getComputedStyle(el); el.innerHTML = ""; el.style.background = "transparent"; el.style.border = "none"; el.style.boxShadow = "none"; el.style.perspective = o.perspective * H + "px";
+        var parent = el;
+        for (var k = 0; k < o.panels; k++) {
+          var p = document.createElement("div"); p.style.cssText = "position:absolute;left:0;top:" + (k ? ph : 0) + "px;width:" + W + "px;height:" + ph + "px;transform-origin:50% 0;transform-style:preserve-3d;";
+          var face = document.createElement("div"); face.style.cssText = "position:absolute;inset:0;overflow:hidden;background:" + bg + ";border-radius:" + (k === 0 ? cs.borderRadius + " " + cs.borderRadius + " 0 0" : k === o.panels - 1 ? "0 0 " + cs.borderRadius + " " + cs.borderRadius : "0") + ";";
+          var inner = document.createElement("div"); inner.innerHTML = html; inner.style.cssText = "position:absolute;left:0;top:" + (-k * ph) + "px;width:" + W + "px;height:" + H + "px;box-sizing:border-box;padding:" + cs.padding + ";display:" + cs.display + ";place-items:" + cs.placeItems + ";";
+          var shade = document.createElement("div"); shade.style.cssText = "position:absolute;inset:0;background:" + o.shade + ";opacity:0;";
+          face.appendChild(inner); face.appendChild(shade); p.appendChild(face); parent.appendChild(p); panels.push({ p: p, shade: shade, k: k }); parent = p;
+        }
+        return MW.drive(tl, at, o.refoldAt + 0.45 + 0.08 * o.panels, function (t) {
+          panels.forEach(function (q) {
+            var sgn = q.k % 2 ? -1 : 1, open = p1(Math.max(0, Math.min(1, (t - o.start - 0.12 * q.k) / 0.7))), ref = pio(Math.max(0, Math.min(1, (t - o.refoldAt - 0.08 * (o.panels - 1 - q.k)) / 0.45))), a = sgn * o.angle * (1 - open * (1 - ref));
+            // each panel hangs from the one above: angles add up along the chain
+            q.p.style.transform = "rotateX(" + a + "deg)"; q.shade.style.opacity = String(Math.abs(Math.sin(a * Math.PI / 180)) * (q.k % 2 ? 0.75 : 0.25));
+          });
+          el.style.opacity = t < o.start ? "0" : "1";
+        });
+      };
+  MW.textPaperFold = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textPaperFold(q(".pf"), tl, 0, {});
+          tl.set({}, {}, 3.6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

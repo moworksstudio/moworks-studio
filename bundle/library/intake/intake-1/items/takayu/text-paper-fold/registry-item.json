@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-paper-fold",
+  "type": "hyperframes:component",
+  "title": "Paper Fold",
+  "description": "Một thẻ chữ chia bốn dải ngang gấp kiểu đàn xếp, từng dải lần lượt duỗi phẳng từ trên xuống, có bóng tối theo góc gấp.",
+  "tags": [
+    "3d",
+    "fold",
+    "unfold",
+    "card",
+    "text-3d-depth",
+    "smooth",
+    "soft",
+    "3d-depth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-paper-fold.html",
+      "target": "compositions/components/text-paper-fold.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-paper-fold",
+    "author": "takayu",
+    "call": "MW.textPaperFold(q(\".pf\"), tl, 0, {});",
+    "function": "MW.textPaperFold",
+    "options": {
+      "panels": "(4)",
+      "angle": "degrees folded (81)",
+      "start": "s (0.35; 0.12 s apart, 0.7 s ease-out quad)",
+      "refoldAt": "s (2.65)",
+      "perspective": "× the card's height (2.3)",
+      "shade": "shade colour"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-paper-fold",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-paper-fold (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-paper-fold, written here): Card (text + 52 × text + 44 px, radius 3, thin rule near the bottom) split into 4 horizontal panels, each hanging from the one above. Panel k unfolds ±81° (alternating) → 0 in 0.7 s power1.out from 0.35 + 0.12 k s. Shade: background colour over each panel at |sin angle| × 0.25 (even) / 0.75 (odd). Exit: refold from the last panel, 2.65 s + 0.08 × (3 − k), 0.45 s power1.inOut. Perspective ≈2.3 × card height (recipe 800 px). Loop 3.6 s. Params: số dải (4) · góc đầu (±81°) · thời gian (0.7 s) · cách nhau (0.12 s).",
+    "titleVi": "Thẻ chữ mở ra như giấy gấp xếp"
+  }
+}

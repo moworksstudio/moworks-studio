@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-jelly-letters",
+  "type": "hyperframes:component",
+  "title": "Jelly Rubber Band",
+  "description": "Từng ký tự nhún bẹp rồi dài ra vài nhịp như viên thạch, lan từ trái sang.",
+  "tags": [
+    "emphasis",
+    "jelly",
+    "squash",
+    "letters",
+    "text-emphasis",
+    "bouncy",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-jelly-letters.html",
+      "target": "compositions/components/text-jelly-letters.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-jelly-letters",
+    "author": "takayu",
+    "call": "MW.textJellyLetters(q(\".tk-head\"), tl, 0.4, {});",
+    "function": "MW.textJellyLetters",
+    "options": {
+      "duration": "s per letter (0.9)",
+      "stagger": "s (0.06, ≤ 0.5 s)",
+      "accent": "flash colour while squashed"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-jelly-rubber-band",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-jelly-rubber-band (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-jelly-rubber-band, written here): Split chars, pivot bottom centre. Each char runs 0.9 s of scaleX/scaleY keys: 0 % (1, 1), 30 % (1.25, 0.75), 40 % (0.75, 1.25), 50 % (1.15, 0.85), 65 % (0.95, 1.05), 75 % (1.05, 0.95), 100 % (1, 1), sine in-out between keys; 60 ms stagger (capped 0.5 s total), from 0.4 s. Chars flash accent while either scale < 0.9. Source trigger: hover (demo cursor arrives 0.02–0.38 s, leaves 2.15–2.6 s). Loop 2.8 s. Params: duration: mỗi ký tự (0.9 s) · stagger (0.06 s) · squash: bẹp đỉnh (1.25 / 0.75).",
+    "titleVi": "Ký tự nhún như thạch"
+  }
+}

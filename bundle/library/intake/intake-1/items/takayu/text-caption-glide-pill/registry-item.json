@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-caption-glide-pill",
+  "type": "hyperframes:block",
+  "title": "Moving Highlight Pill",
+  "description": "Một viên nền màu nhấn bo tròn trượt nhanh từ từ này sang từ kia theo giọng đọc, đổi rộng theo từ, chữ nằm trong viên đổi sang màu tối.",
+  "tags": [
+    "captions",
+    "pill",
+    "highlight",
+    "glide",
+    "text-captions-subtitles",
+    "crisp",
+    "captions-subtitles",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-caption-glide-pill.html",
+      "target": "compositions/components/text-caption-glide-pill.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-caption-glide-pill",
+    "author": "takayu",
+    "call": "MW.textCaptionGlidePill(q(\".gpw\"), tl, 0, {});",
+    "function": "MW.textCaptionGlidePill",
+    "options": {
+      "from": "s (0.4)",
+      "to": "s (3.4): word times even (a stand-in for transcript times)",
+      "pad": "em each side (0.22)",
+      "accent": "pill colour",
+      "ink": "text colour inside the pill",
+      "outAt": "s (3.85)",
+      "caption": "the caption"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-highlight-pill",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-highlight-pill (read 12/10/2026)",
+      "upstream": "the site credits Remotion"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-highlight-pill, written here): Caption 34 px weight 800, ≤ 2 lines; word times even across 0.4–3.4 s (stand-in for transcript). One pill (height 1.18 em, full radius, accent) sits behind the spoken word with 0.22 em pad each side; on each new word its x, y and width interpolate from the previous word's box in 100 ms power2.out (80–120 ms). It grows from its centre 0.3–0.42 s power2.out and shrinks 3.85–4.0 s power2.in; text inside the pill is drawn in the dark background colour (clip). Loop 4.4 s. Params: thời gian trượt (100 ms) · lề (0.22 em) · cao (1.18 em).",
+    "titleVi": "Viên nền trượt theo từ đang đọc"
+  }
+}

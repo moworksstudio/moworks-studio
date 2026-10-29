@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-squeeze-rebound",
+  "type": "hyperframes:component",
+  "title": "Critical Lens Compression",
+  "description": "Cả cảnh bị ép hẹp ngang và cao lên trong tích tắc, bật ngược ra rộng quá cỡ rồi về đúng cỡ bằng lò xo, như ống kính bị nén lúc đòn chí mạng; chữ \"CRITICAL\" bật lên sau đó.",
+  "tags": [
+    "squash",
+    "rebound",
+    "spring",
+    "impact",
+    "game-impact-fx",
+    "heavy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-squeeze-rebound.html",
+      "target": "compositions/components/motion-squeeze-rebound.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-squeeze-rebound",
+    "author": "takayu",
+    "call": "MW.motionSqueezeRebound(q(\".sq\"), tl, 0, { label: \".crit\" });",
+    "function": "MW.motionSqueezeRebound",
+    "options": {
+      "at": "s of the squeeze (0.45)",
+      "squeeze": "scaleX (0.72)",
+      "rebound": "scaleX (1.14), then a spring k260 d14",
+      "volume": "scaleY = 1 + (1 − scaleX) × this (0.45)",
+      "label": "the title that pops after (0.2 s back.out)",
+      "outAt": "s the label leaves (3.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-impact-fx-critical-compress",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-impact-fx-critical-compress (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-impact-fx-critical-compress, written here): Whole scene, pivot at its centre: scaleX 1 → 0.72 in 150 ms in-cubic (0.45-0.6 s), → 1.14 in 140 ms outCubic (to 0.74 s), then to 1 by spring k260 d14; scaleY = 1 + (1 − scaleX) × 0.45 (1.126 at the squeeze, 0.937 at the rebound). 'CRITICAL' pops at 0.74 s (200 ms back.out), out 3.6-3.9 s. Params: at: lúc ép (0.45 s) · squeeze: bóp ngang (0.72) · rebound: bật ra (1.14) · volume: bù chiều cao (0.45) · spring: lò xo (k260 d14).",
+    "titleVi": "Cả khung bóp lại rồi bật ra"
+  }
+}

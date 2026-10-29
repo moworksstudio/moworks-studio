@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/line-signature-write",
+  "hash": "41b12ffaf7319b6a",
+  "at": "2026-10-17T08:57:56.945Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__line-signature-write.mp4",
+    "poster": "previews/takayu__line-signature-write.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "80246ca40e602f946f24c89c266c3393b3b5026fcdb63b07ee04179cb6ac114d",
+    "size": 10012,
+    "seconds": 32.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

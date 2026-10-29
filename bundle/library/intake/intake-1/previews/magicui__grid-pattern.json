@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/grid-pattern",
+  "hash": "659bb148f522b9df",
+  "at": "2026-10-17T05:57:13.031Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__grid-pattern.mp4",
+    "poster": "previews/magicui__grid-pattern.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c1a3b49df0b8aa756e15e42bcc5c777d5bd40939856ed9a3abd73ce7d1bcd0ba",
+    "size": 21944,
+    "seconds": 202.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

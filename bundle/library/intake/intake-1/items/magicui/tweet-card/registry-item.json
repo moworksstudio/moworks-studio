@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "tweet-card",
+  "type": "hyperframes:block",
+  "title": "Tweet Card",
+  "description": "A social post card (avatar, name, badge, handle, text, optional picture) built from the post's own text, for testimonial and social-proof scenes.",
+  "tags": [
+    "social",
+    "post",
+    "tweet",
+    "x",
+    "testimonial",
+    "card",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "tweet-card.html",
+      "target": "compositions/components/tweet-card.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/tweet-card",
+    "author": "magicui",
+    "call": "MW.tweetCard(q(\".mw-tweet-card\"), tl, 0.3, { name: \"Ngọc Lan\", handle: \"@ngoclan.design\", avatar: \"linear-gradient(135deg,#f97316,#ec4899)\", text: \"Vừa làm xong video ra mắt sản phẩm trong một buổi chiều. Chuyển động mượt, chữ tiếng Việt đẹp, khách duyệt ngay 🎉\", image: \"assets/picture.svg\", enter: \"rise\" });",
+    "function": "MW.tweetCard",
+    "options": {
+      "name": "display name",
+      "handle": "@handle",
+      "text": "post text",
+      "avatar": "picture path or CSS colour",
+      "verified": "true",
+      "image": "picture path (none)",
+      "enter": "null | rise",
+      "enterDuration": "s (0.8)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/tweet-card.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/tweet-card.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Upstream fetches the post from X at runtime: here everything is an option. The X logo and X's verified mark are trademarks and are not drawn. avatar: a picture path (or a colour for drawn initials).",
+    "titleVi": "Thẻ bài đăng X tĩnh"
+  }
+}

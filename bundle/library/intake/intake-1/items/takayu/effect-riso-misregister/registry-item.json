@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-riso-misregister",
+  "type": "hyperframes:component",
+  "title": "Misregistration",
+  "description": "Hai bản màu in xanh và hồng chồng nhân màu, lệch nhau vài pixel và nhích về từng khung như in riso.",
+  "tags": [
+    "riso",
+    "print",
+    "misregistration",
+    "texture",
+    "texture-look",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-riso-misregister.html",
+      "target": "compositions/components/effect-riso-misregister.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-riso-misregister",
+    "author": "takayu",
+    "call": "MW.effectRisoMisregister(q(\".rz\"), tl, 0, {});",
+    "function": "MW.effectRisoMisregister",
+    "options": {
+      "layers": "[cyan layer, pink layer], each a copy of the art",
+      "steps": "px offsets per frame ([16, 12, 8, 4, 8, 12])",
+      "fps": "(12)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=lk-riso",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=lk-riso (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio lk-riso, written here): Two copies of the art in print inks (cyan #2ec4e8, pink #ff4fa3) blended multiply, offset in opposite directions by (o, o/2): o steps 4 -> 3 -> 2 -> 1 -> 2 -> 3 px, one step per 12 fps frame (~83 ms; recipe 4 -> 3 -> 2 over 3 frames), cycling. Params: offset (4 → 1 px) · fps (12) · colors (#2ec4e8 / #ff4fa3). The two inks (cyan #2ec4e8, pink #ff4fa3) are blended multiply on paper white.",
+    "titleVi": "Lệch bản in kiểu riso"
+  }
+}

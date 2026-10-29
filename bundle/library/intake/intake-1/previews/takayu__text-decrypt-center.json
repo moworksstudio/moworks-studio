@@ -1,0 +1,26 @@
+{
+  "uid": "in:takayu/text-decrypt-center",
+  "hash": "190404e89094a1f9",
+  "at": "2026-10-17T09:35:10.380Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "JetBrains Mono"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-decrypt-center.mp4",
+    "poster": "previews/takayu__text-decrypt-center.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "558e3803062553a1aa0a2e911a59e20cd816260a6ce7bf90f80db1f13bcb787d",
+    "size": 25951,
+    "seconds": 29.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

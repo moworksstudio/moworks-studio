@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-secondary-action",
+  "type": "hyperframes:component",
+  "title": "Secondary Action",
+  "description": "Thẻ chính trồi lên, biểu tượng “+” trên thẻ xoay trễ 100 ms và vài ngôi sao nhỏ lấp lánh bay lên.",
+  "tags": [
+    "secondary",
+    "overlap",
+    "principle",
+    "principles",
+    "soft",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-secondary-action.html",
+      "target": "compositions/components/motion-secondary-action.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-secondary-action",
+    "author": "takayu",
+    "call": "MW.motionSecondaryAction(q(\".sa\"), tl, 0.3, {});",
+    "function": "MW.motionSecondaryAction",
+    "options": {
+      "rise": "px the card rises (520)",
+      "duration": "s (0.6)",
+      "ease": "(expo.out)",
+      "icon": "the icon that turns",
+      "turn": "degrees (90)",
+      "delay": "s behind the card (0.1)",
+      "iconTime": "s (0.6, back.out)",
+      "sparkles": "(6)",
+      "drift": "px up (72)",
+      "accent": "sparkle colour"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=secondary",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=secondary (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio secondary, written here): Hero card rises 130 px in 600 ms expo.out; its '+' icon turns 0 → 90° starting 100 ms later (600 ms back.out); six small stars drift up 18 px and fade, 60 ms apart from 200 ms (500 ms each). Recipe: hero 0–500 ms ease-out, secondary 80–500 ms at 40 % of the amount, ease-in-out (30–50 %, 50–100 ms late). Params: delay (0.1 s) · amount: tỷ lệ so với động tác chính (40 %) · sparkles (6).",
+    "titleVi": "Động tác phụ đi kèm"
+  }
+}

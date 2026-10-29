@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/scatter",
+  "hash": "ea03879986506880",
+  "at": "2026-10-17T06:38:48.222Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Archivo"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__scatter.mp4",
+    "poster": "previews/codrops__scatter.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "048d69d36ceef6b12dfd55e6d27eaef22e7789903235417a79047c9f9045dc3a",
+    "size": 21081,
+    "seconds": 34,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

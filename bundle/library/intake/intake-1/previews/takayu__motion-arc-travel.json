@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-arc-travel",
+  "hash": "1fd697190947c103",
+  "at": "2026-10-17T11:03:00.837Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-arc-travel.mp4",
+    "poster": "previews/takayu__motion-arc-travel.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3b96564dc191d68d2fba7f28941f4dc92869f493f0e81c7b9a49f4e1a076a0a9",
+    "size": 6530,
+    "seconds": 24.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

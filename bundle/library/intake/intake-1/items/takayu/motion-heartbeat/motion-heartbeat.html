@@ -1,0 +1,52 @@
+<!--
+  Heartbeat (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=catalog-ui-button-heartbeat (read 12/10/2026).
+  Biểu tượng tim (hoặc nút) đập hai nhịp liền như tim thật: nhịp mạnh phồng 1.2, nhịp nhẹ 1.1, rồi nghỉ, lặp lại.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionHeartbeat(q(".hb"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - period: s (1.4)
+      - beats: s into each period ([0.15, 0.45])
+      - amp: peak scales ([1.2, 1.1])
+      - rise: s (0.08, power1.out)
+      - fall: s (0.22, power2.inOut)
+      - cycles: (3)
+
+  Notes: Idea and numbers (TakayuStudio catalog-ui-button-heartbeat, written here): Loop 1.4 s: at 0.15 s scale 1 → 1.20 in 80 ms (power1.out) and back to 1 in 220 ms (power2.inOut); at 0.45 s 1 → 1.10 in 80 ms and back in 220 ms; rest until 1.4 s (about 650 ms). For a heart, an icon or a CTA. Params: period (1.4 s) · beats ([0.15, 0.45] s) · amp ([1.2, 1.1]) · rise (0.08 s) · fall (0.22 s).
+-->
+
+<div class="st"><svg class="hb" viewBox="0 0 24 24"><path d="M12 21 C5 15.5 2 12.3 2 8.6 C2 5.6 4.3 3.5 7 3.5 C9 3.5 10.9 4.6 12 6.4 C13.1 4.6 15 3.5 17 3.5 C19.7 3.5 22 5.6 22 8.6 C22 12.3 19 15.5 12 21 Z" fill="#ff5d8f"/></svg></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"period":1.4,"beats":[0.15,0.45],"amp":[1.2,1.1],"rise":0.08,"fall":0.22,"cycles":3};
+  var run = function (el, tl, at, o) {
+        var p1 = gsap.parseEase("power1.out"), io = gsap.parseEase("power2.inOut");
+        return MW.drive(tl, at, o.period * o.cycles, function (t) {
+          var ph = t % o.period, s = 1; o.beats.forEach(function (b, i) { var u = ph - b, a = o.amp[i]; if (u > 0 && u < o.rise) s = 1 + (a - 1) * p1(u / o.rise); else if (u >= o.rise && u < o.rise + o.fall) s = a + (1 - a) * io((u - o.rise) / o.fall); }); gsap.set(el, { scale: s });
+        });
+      };
+  MW.motionHeartbeat = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

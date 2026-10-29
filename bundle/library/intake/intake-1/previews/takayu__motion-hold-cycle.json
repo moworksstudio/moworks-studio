@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-hold-cycle",
+  "hash": "ccbad3e87d498ff4",
+  "at": "2026-10-17T11:40:43.319Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-hold-cycle.mp4",
+    "poster": "previews/takayu__motion-hold-cycle.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "32ba2349fe2ed82038109df0968e5b44e07201e08f6ab9c716491db1e15f8c50",
+    "size": 16508,
+    "seconds": 30.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Split Reveal - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .sr { width: 1080px; height: 720px; border-radius: 50px; background: radial-gradient(circle at 50% 40%, #2a2350, #10131d); display: grid; place-items: center; } .sr i { width: 280px; height: 280px; border-radius: 70px; background: linear-gradient(150deg, #a693ff, #6a4cf0); display: grid; place-items: center; font-style: normal; font-size: 160px; font-weight: 900; color: #fff; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.7">
+<div class="st"><div class="sr"><i>M</i></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.72,"close":0.45,"closeAt":null,"color":"#2a3142"};
+  var run = function (el, tl, at, o) {
+        var io = gsap.parseEase("power2.inOut"), P = []; if (getComputedStyle(el).position === "static") el.style.position = "relative"; el.style.overflow = "hidden";
+        [-1, 1].forEach(function (s) { var p = document.createElement("div"); p.style.cssText = "position:absolute;top:0;bottom:0;width:50%;pointer-events:none;background:" + o.color + ";" + (s < 0 ? "left:0;" : "right:0;"); var e = document.createElement("i"); e.style.cssText = "position:absolute;top:0;bottom:0;width:2px;background:rgba(255,255,255,0.25);" + (s < 0 ? "right:0;" : "left:0;"); var g = document.createElement("b"); g.style.cssText = "position:absolute;top:50%;width:12px;height:96px;margin-top:-48px;border-radius:6px;background:rgba(255,255,255,0.4);" + (s < 0 ? "right:40px;" : "left:40px;"); p.appendChild(e); p.appendChild(g); el.appendChild(p); P.push([p, s]); });
+        return MW.drive(tl, at, o.closeAt == null ? o.duration : o.closeAt + o.close, function (t) { var u = io(Math.max(0, Math.min(1, t / o.duration))); if (o.closeAt != null && t > o.closeAt) u = 1 - io(Math.min(1, (t - o.closeAt) / o.close)); P.forEach(function (q) { q[0].style.transform = "translateX(" + (q[1] * 105 * u).toFixed(2) + "%)"; }); });
+      };
+  MW.motionSplitReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionSplitReveal(q(".sr"), tl, 0.4, { closeAt: 1.7 });
+          tl.set({}, {}, 2.7);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

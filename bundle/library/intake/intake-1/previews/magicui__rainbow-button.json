@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/rainbow-button",
+  "hash": "202251e975393642",
+  "at": "2026-10-17T06:20:17.739Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__rainbow-button.mp4",
+    "poster": "previews/magicui__rainbow-button.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "e6201eef54e37bab0042cc4db5544b30faeeb4cc6ad56a50e2b48e6764fad93b",
+    "size": 12289,
+    "seconds": 31.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

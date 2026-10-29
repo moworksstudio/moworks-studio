@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Misregistration - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: #f6f1e6; font-family: Inter, sans-serif; } .rz { position: absolute; inset: 0; } .rz > div { position: absolute; inset: 0; mix-blend-mode: multiply; } .rz i { position: absolute; left: 1320px; top: 280px; width: 520px; height: 520px; border-radius: 50%; background: currentColor; }
+.rz b { position: absolute; left: 150px; top: 380px; font-size: 240px; font-weight: 900; letter-spacing: -0.02em; } .rz-c { color: #2ec4e8; } .rz-p { color: #ff4fa3; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3">
+<div class="rz"><div class="rz-c"><i></i><b>IN RISO</b></div><div class="rz-p"><i style="left:1240px;top:380px;width:360px;height:360px"></i><b>IN RISO</b></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"layers":[".rz-c",".rz-p"],"steps":[16,12,8,4,8,12],"fps":12,"loop":3};
+  var run = function (el, tl, at, o) {
+        var L = o.layers.map(function (s) { return el.querySelector(s); });
+        return MW.drive(tl, at, o.loop, function (t) { var k = Math.floor(t * o.fps) % o.steps.length, d = o.steps[k]; if (L[0]) gsap.set(L[0], { x: -d, y: -d / 2 }); if (L[1]) gsap.set(L[1], { x: d, y: d / 2 }); });
+      };
+  MW.effectRisoMisregister = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.effectRisoMisregister(q(".rz"), tl, 0, {});
+          tl.set({}, {}, 3);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

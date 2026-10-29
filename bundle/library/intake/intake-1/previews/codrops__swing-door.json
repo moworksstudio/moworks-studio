@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/swing-door",
+  "hash": "e7933d0f5eca1127",
+  "at": "2026-10-17T06:39:22.165Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Archivo"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__swing-door.mp4",
+    "poster": "previews/codrops__swing-door.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3c1751380f3656b93ef2587414fe83c16ee010841ce81d230e75c05821206736",
+    "size": 17516,
+    "seconds": 31.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

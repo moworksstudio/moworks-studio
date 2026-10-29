@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-fit-stack",
+  "type": "hyperframes:component",
+  "title": "Stacked Justified Words",
+  "description": "Mỗi từ một dòng, được phóng to hay thu nhỏ để cùng một bề rộng, xếp chồng thành khối chữ vuông vức; từng từ lần lượt trồi vào và đẩy khối lên.",
+  "tags": [
+    "stack",
+    "justify",
+    "words",
+    "layout",
+    "text-layout-reflow",
+    "crisp",
+    "heavy",
+    "layout-reflow",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-fit-stack.html",
+      "target": "compositions/components/text-fit-stack.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-fit-stack",
+    "author": "takayu",
+    "call": "MW.textFitStack(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textFitStack",
+    "options": {
+      "width": "px every word spans (840)",
+      "height": "px the stack fits in (680)",
+      "cap": "largest font size (550)",
+      "gap": "px between lines (30)",
+      "start": "s (0.3)",
+      "each": "s per word (0.45)",
+      "rise": "px a word rises in (130)",
+      "accent": "the last word's colour",
+      "exitAt": "s (3.75)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-stacked-justified",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-stacked-justified (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-stacked-justified, written here): Words grouped into ≤ 5 lines; each scaled so its ink bounds (actualBoundingBox) span the block width (168 px in the demo, shrunk so the stack fits 136 px tall; cap 110 px), 6 px gap between lines. From 0.3 s a word enters every 0.45 s: y +26 px → 0 and opacity 0 → 1 in 0.3 s power2.out; the stack re-centres vertically as each word adds its height. Last word accent. Exit 3.75–4.1 s: fade and up 10 px, power2.in. Loop 4.4 s. Params: bề rộng khối (168 px) · nhịp (0.45 s mỗi từ) · thời gian vào (0.3 s) · khoảng dòng (6 px).",
+    "titleVi": "Từ xếp chồng, cùng bề rộng khối"
+  }
+}

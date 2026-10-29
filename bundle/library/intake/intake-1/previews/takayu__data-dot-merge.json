@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/data-dot-merge",
+  "hash": "0400cb1900500fe2",
+  "at": "2026-10-17T08:26:05.760Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__data-dot-merge.mp4",
+    "poster": "previews/takayu__data-dot-merge.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "5a29a8c97155f5506e929dda594f37cdd89745de0805959ade08e8ca29330be5",
+    "size": 15276,
+    "seconds": 27.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

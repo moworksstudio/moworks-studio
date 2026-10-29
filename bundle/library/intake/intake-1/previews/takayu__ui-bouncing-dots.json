@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-bouncing-dots",
+  "hash": "76991ea03287e1b3",
+  "at": "2026-10-17T11:15:14.496Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-bouncing-dots.mp4",
+    "poster": "previews/takayu__ui-bouncing-dots.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f1be82952192c0978c2d82fe89b249cdcfc98214f47bf4fe311915d86a2fd9d1",
+    "size": 12076,
+    "seconds": 30,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

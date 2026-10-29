@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-thumbnail-to-hero",
+  "hash": "16e22f1c827fbe1d",
+  "at": "2026-10-17T09:50:26.205Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-thumbnail-to-hero.mp4",
+    "poster": "previews/takayu__ui-thumbnail-to-hero.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "666082b8624604248d5d750f2304d7ed921d3f88a87929c46fb90539a2f76ebf",
+    "size": 27263,
+    "seconds": 28.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

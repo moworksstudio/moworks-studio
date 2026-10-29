@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/backlight",
+  "hash": "076283f41edb8165",
+  "at": "2026-10-17T05:56:11.208Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/magicui__backlight.mp4",
+    "poster": "previews/magicui__backlight.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4ec364171412b23e06a6510871c39ff36953d67ef7cc677fa316b50ea77c0522",
+    "size": 9883,
+    "seconds": 29.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

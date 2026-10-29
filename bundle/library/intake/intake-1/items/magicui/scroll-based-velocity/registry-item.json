@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "scroll-based-velocity",
+  "type": "hyperframes:component",
+  "title": "Scroll Based Velocity",
+  "description": "Rows of big text scrolling endlessly in opposite directions; bursts of speed (authored, like a scroll) make them race and can flip their direction.",
+  "tags": [
+    "marquee",
+    "ticker",
+    "big type",
+    "speed",
+    "band",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "scroll-based-velocity.html",
+      "target": "compositions/components/scroll-based-velocity.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/scroll-based-velocity",
+    "author": "magicui",
+    "call": "MW.scrollBasedVelocity(q(\".r1\"), tl, 0, { baseVelocity: 20, direction: 1, scroll: burst, hold: 8 });",
+    "function": "MW.scrollBasedVelocity",
+    "options": {
+      "baseVelocity": "% of a copy per second (5)",
+      "direction": "1 left, -1 right (1)",
+      "scroll": "[[t, px/s], ...] (none)",
+      "hold": "seconds (8)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/scroll-based-velocity.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/scroll-based-velocity.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "scroll: [[t, px/s], ...] relative to `at`, linear between keys (a page scrolled at 1000 px/s gives factor 5: six times the speed). Without keys the rows run at the base speed. Side fades as upstream's demo: 1/4 of the width.",
+    "titleVi": "Hàng chữ lớn chạy ngược chiều, tăng tốc"
+  }
+}

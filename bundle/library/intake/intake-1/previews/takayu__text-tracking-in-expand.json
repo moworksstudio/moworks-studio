@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-tracking-in-expand",
+  "hash": "bcfee8969999edf6",
+  "at": "2026-10-17T11:42:07.919Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-tracking-in-expand.mp4",
+    "poster": "previews/takayu__text-tracking-in-expand.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "79d77c9c29811da6ee7c545512b7118b73e2b079ebbd6282a91a6e594927d8ef",
+    "size": 13262,
+    "seconds": 16.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

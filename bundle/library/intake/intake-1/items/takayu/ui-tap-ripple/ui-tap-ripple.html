@@ -1,0 +1,80 @@
+<!--
+  Tap Ripple (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=catalog-ui-button-tap-ripple (read 12/10/2026).
+  Mỗi lần chạm, một vòng sáng mờ loang ra từ đúng điểm chạm tới góc xa nhất của nút rồi tan, chỉ nằm trong nút.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiTapRipple(q(".tr"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - taps: [[s, x share, y share], ...]
+      - grow: s to the farthest corner (0.55, power2.out)
+      - opacity: (0.38)
+      - fade: [from, to] s after the tap ([0.2, 0.75])
+      - ink: ripple colour
+      - dot: px radius of the touch mark (30)
+      - cursor: an optional cursor that makes the clicks
+      - approach: [x, y] px the cursor comes from
+      - lead: s it arrives before a click
+
+  Notes: Idea and numbers (TakayuStudio catalog-ui-button-tap-ripple, written here): Accent button 160x52, radius 14. Each tap: a light ink circle (#e8ebf3) at the tap point, radius 0 → distance of the farthest corner in 550 ms power2.out, opacity 38 % fading to 0 from 200 to 750 ms after the tap, clipped to the button. Two taps 1.1 s apart at different points (0.55 s left-low, 1.65 s right-high); a small touch dot (r3 + ring r6) marks each tap for 0.35 s. Params: taps [[giây, x, y]] · grow (0.55 s, power2.out) · opacity (0.38) · fade (0.2 → 0.75 s).
+-->
+
+<div class="ui-wrap"><div class="bw"><div class="b b-acc tr" style="padding:0 150px">Chạm vào đây</div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  var defaults = {"taps":[[0.55,0.3,0.68],[1.65,0.76,0.3]],"grow":0.55,"opacity":0.38,"fade":[0.2,0.75],"ink":"#e8ebf3","dot":30,"cursor":null,"approach":[260,200],"lead":0.12};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var cur = o.cursor ? (host.querySelector(o.cursor) || document.querySelector(o.cursor)) : null, curKeys = null;
+  var cursorPlan = function (clicks) { if (!cur) return; var base = (cur.offsetParent || host).getBoundingClientRect(), k = [];
+    clicks.forEach(function (c, i) { var r = (c[4] || el).getBoundingClientRect(), x = r.left - base.left + r.width * c[1], y = r.top - base.top + r.height * c[2];
+      if (!i) k.push([0, x + o.approach[0], y + o.approach[1]]); k.push([Math.max(0.01, c[0] - o.lead), x, y]); k.push([c[0] + (c[3] || 0.12) + 0.3, x, y]); });
+    var z = k[k.length - 1]; k.push([z[0] + 0.5, z[1] + o.approach[0] * 0.6, z[2] + o.approach[1] * 0.6]); curKeys = { k: k, c: clicks }; };
+  var cursorAt = function (t) { if (!cur || !curKeys) return; var p = MW.path(curKeys.k, t, "power2.inOut"), dn = 0; curKeys.c.forEach(function (c) { var u = t - c[0]; if (u >= 0 && u < (c[3] || 0.12)) dn = 1; });
+    gsap.set(cur, { x: p[0] - 12, y: p[1] - 6, scale: dn ? 0.86 : 1, transformOrigin: "20% 10%" }); };
+  if (getComputedStyle(el).position === "static") el.style.position = "relative"; el.style.overflow = "hidden";
+  var p2 = gsap.parseEase("power2.out"), W = el.offsetWidth, Hh = el.offsetHeight, R = [];
+  o.taps.forEach(function (tp) { var x = W * tp[1], y = Hh * tp[2], ink = document.createElement("div"), dot = document.createElement("div");
+    ink.style.cssText = "position:absolute;border-radius:50%;pointer-events:none;opacity:0;background:" + o.ink + ";"; dot.style.cssText = "position:absolute;border-radius:50%;pointer-events:none;opacity:0;box-sizing:border-box;border:4px solid rgba(255,255,255,0.85);width:" + 2 * o.dot + "px;height:" + 2 * o.dot + "px;left:" + (x - o.dot) + "px;top:" + (y - o.dot) + "px;background:radial-gradient(circle, #fff 0 " + o.dot / 2.4 + "px, transparent " + (o.dot / 2.4 + 1) + "px);";
+    el.appendChild(ink); el.appendChild(dot); R.push({ t: tp[0], x: x, y: y, far: Math.max(Math.hypot(x, y), Math.hypot(W - x, y), Math.hypot(x, Hh - y), Math.hypot(W - x, Hh - y)), ink: ink, dot: dot }); });
+  cursorPlan(o.taps.map(function (tp) { return [tp[0], tp[1], tp[2], 0.12]; }));
+  return MW.drive(tl, at, o.taps[o.taps.length - 1][0] + o.fade[1] + 0.1, function (t) {
+    R.forEach(function (q) { var u = t - q.t, r = q.far * p2(Math.max(0, Math.min(1, u / o.grow))); q.ink.style.width = q.ink.style.height = 2 * r + "px"; q.ink.style.left = q.x - r + "px"; q.ink.style.top = q.y - r + "px";
+      q.ink.style.opacity = u > 0 ? String(o.opacity * (1 - Math.max(0, Math.min(1, (u - o.fade[0]) / (o.fade[1] - o.fade[0]))))) : "0"; q.dot.style.opacity = u > 0 && u < 0.35 ? String(1 - u / 0.35) : "0"; });
+    cursorAt(t);
+  });
+  };
+  MW.uiTapRipple = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

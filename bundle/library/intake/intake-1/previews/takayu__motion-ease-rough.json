@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-ease-rough",
+  "hash": "66458c35a6c5a40f",
+  "at": "2026-10-17T09:02:18.751Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-ease-rough.mp4",
+    "poster": "previews/takayu__motion-ease-rough.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6fa6e1e37bc9168d84bcccb1fc31a408dcae1bd8c7fa6aad2d923c2ad9797f3d",
+    "size": 9206,
+    "seconds": 26.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

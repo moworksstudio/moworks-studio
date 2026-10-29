@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/cool-mode",
+  "hash": "34965e5bbbddcdef",
+  "at": "2026-10-17T05:56:40.598Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__cool-mode.mp4",
+    "poster": "previews/magicui__cool-mode.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "197f70ad8be2124ad9a62491a8023cb703ca258b6ede0fda832fe88c296851ae",
+    "size": 78223,
+    "seconds": 34,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

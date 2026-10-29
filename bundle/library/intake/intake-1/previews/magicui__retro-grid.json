@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/retro-grid",
+  "hash": "fe928da04c9ad020",
+  "at": "2026-10-17T06:02:18.218Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__retro-grid.mp4",
+    "poster": "previews/magicui__retro-grid.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "0e81ba1b114fc18540ca8028750f2b0a7b4e0450f7ed3069f7de8ae8094200f0",
+    "size": 76000,
+    "seconds": 46.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

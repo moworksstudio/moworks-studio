@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Finisher Title Cut - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #2a1f55, #0b0d12); font-family: Inter, sans-serif; color: #fff; } .fc { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+.fcw { font-size: 230px; font-weight: 900; letter-spacing: -0.02em; margin: 0; } .ko { font-size: 60px; font-weight: 800; color: #ffd23d; letter-spacing: 0.2em; margin-top: 30px; opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4">
+<div class="fc"><div><div class="fcw">KẾT LIỄU</div><div class="ko">K.O.</div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"at":0.4,"duration":0.45,"from":1800,"line":8,"color":"#8b7bff","label":null,"outAt":3.5};
+  var run = function (el, tl, at, o) {
+        var html = el.innerHTML, A = document.createElement("span"), B = document.createElement("span"), line = document.createElement("div"), lab = o.label ? MW.el(o.label) : null;
+        el.innerHTML = ""; el.style.position = "relative"; A.innerHTML = html; B.innerHTML = html; A.style.display = "block"; B.style.cssText = "display:block;position:absolute;left:0;top:0;width:100%;";
+        A.style.clipPath = "inset(-0.4em -0.3em 50% -0.3em)"; B.style.clipPath = "inset(50% -0.3em -0.3em -0.3em)";
+        line.style.cssText = "position:absolute;left:0;top:50%;height:" + o.line + "px;margin-top:-" + o.line / 2 + "px;background:" + o.color + ";pointer-events:none;"; el.appendChild(A); el.appendChild(B); el.appendChild(line);
+        var ex = gsap.parseEase("expo.out"), ei = gsap.parseEase("expo.in"), io = gsap.parseEase("power2.inOut"), out = gsap.parseEase("power2.out");
+        return MW.drive(tl, at, o.outAt + 0.4, function (t) {
+          var W = el.offsetWidth, u = Math.max(0, Math.min(1, (t - o.at) / o.duration)), D = o.from * (1 - ex(u)), n = t > 0.9 ? 15 * Math.exp(-10 * (t - 0.9)) * Math.cos(30 * (t - 0.9)) : 0;
+          var e = t > o.outAt ? ei(Math.min(1, (t - o.outAt) / 0.35)) * o.from : 0;
+          gsap.set(A, { x: -D + n - e }); gsap.set(B, { x: D - n + e }); A.style.opacity = B.style.opacity = t < o.at ? "0" : "1";
+          var h = io(Math.max(0, Math.min(1, (t - 0.85) / 0.2))), tl2 = out(Math.max(0, Math.min(1, (t - 0.85) / 0.35))), x0 = -0.05 * W + 1.1 * W * tl2 * 0.999, x1 = -0.05 * W + 1.1 * W * h;
+          line.style.left = Math.min(x0, x1) + "px"; line.style.width = Math.max(0, x1 - x0) + "px"; line.style.opacity = t > 0.85 && x1 - x0 > 1 ? "1" : "0";
+          if (lab) lab.style.opacity = String(Math.max(0, Math.min(1, (t - 1.1) / 0.3)) * (t > o.outAt ? 0 : 1));
+        });
+      };
+  MW.textSplitHalvesCut = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textSplitHalvesCut(q(".fcw"), tl, 0, { label: ".ko" });
+          tl.set({}, {}, 4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

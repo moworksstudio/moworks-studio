@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-accordion-open",
+  "type": "hyperframes:block",
+  "title": "Accordion Open",
+  "description": "Bấm tiêu đề, phần nội dung mở cao dần từ mép trên và hiện ra, mục bên dưới bị đẩy xuống cùng nhịp rồi đóng lại.",
+  "tags": [
+    "accordion",
+    "expand",
+    "height",
+    "reflow",
+    "web-interaction",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-accordion-open.html",
+      "target": "compositions/components/ui-accordion-open.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-accordion-open",
+    "author": "takayu",
+    "call": "MW.uiAccordionOpen(q(\".ac\"), tl, 0, {});",
+    "function": "MW.uiAccordionOpen",
+    "options": {
+      "body": "the part that opens (its first child is measured)",
+      "open": "[from, to] share of the loop ([0.08, 0.47])",
+      "close": "[from, to] ([0.86, 1])",
+      "period": "s per loop (1.6)",
+      "cycles": "(2)",
+      "ease": "(power2.inOut)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=accordion-open",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=accordion-open (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio accordion-open, written here): Heading row stays; body scales Y 0.04 → 1 from the top edge with opacity 0 → 1 over about 620 ms (8-47 % of a 1.6 s loop, eased in-out); the next section moves y −38 → 0 in sync; hold to 86 %; closes back the same way. Recipe: grid rows 0fr → 1fr, inner overflow hidden (real height, text not stretched). Params: open (0.62 s) · hold (0.6 s) · push (38 px) · ease (power2.inOut). Real height, not a stretch: the text keeps its shape and the next section is pushed down.",
+    "titleVi": "Mục xổ xuống, phần dưới bị đẩy"
+  }
+}

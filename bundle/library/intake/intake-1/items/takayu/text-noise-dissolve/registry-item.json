@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-noise-dissolve",
+  "type": "hyperframes:component",
+  "title": "Noise Dissolve",
+  "description": "Chữ bị ăn mòn dần theo một vân nhiễu cố định, mép các lỗ cháy màu nhấn, cho tới khi biến mất hẳn.",
+  "tags": [
+    "exit",
+    "noise",
+    "dissolve",
+    "mask",
+    "text-exit",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-noise-dissolve.html",
+      "target": "compositions/components/text-noise-dissolve.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-noise-dissolve",
+    "author": "takayu",
+    "call": "MW.textNoiseDissolve(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textNoiseDissolve",
+    "options": {
+      "cell": "px per noise cell (6)",
+      "freq": "noise frequency per px (0.02)",
+      "rim": "how wide the burning rim is (0.07)",
+      "start": "s (1.0)",
+      "duration": "s the threshold rises (1.2), linear",
+      "accent": "the rim",
+      "backAt": "s (2.6)",
+      "seed": "(3)",
+      "loop": "s (3.2)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-noise-dissolve-out",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-noise-dissolve-out (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-noise-dissolve-out, written here): Fixed noise mask on the text: fractalNoise baseFrequency 0.8, 2 octaves, seed 3 (canvas demo: 0.6 × value noise at 0.09/px + 0.4 per-cell hash, 2 px cells). A threshold rises linearly over 1.2 s (demo 1.0–2.2 s, −0.06 → 1.04; recipe brightness +100 → −100) and every cell whose noise is below it is cut out; cells within 0.07 above the threshold are painted accent as a thin burning rim. Loop: text fades back 2.6–3.1 s; loop 3.2 s. Params: duration (1.2 s) · scale: cỡ hạt nhiễu (baseFrequency 0.8) · seed (3) · rim: viền cháy màu nhấn (bật). A fixed noise mask: cells under the rising threshold are cut, those just above it burn in the accent colour.",
+    "titleVi": "Chữ tan rã theo vân nhiễu"
+  }
+}

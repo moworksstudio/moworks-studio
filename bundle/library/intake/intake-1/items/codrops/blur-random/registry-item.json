@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "blur-random",
+  "type": "hyperframes:component",
+  "title": "Blur Random",
+  "description": "Letters come into focus from a heavy blur in random order (0.25 s each, 0.05 s apart). (Codrops fx10)",
+  "tags": [
+    "text",
+    "letters",
+    "entrance",
+    "codrops",
+    "on-scroll",
+    "per letter"
+  ],
+  "files": [
+    {
+      "path": "blur-random.html",
+      "target": "compositions/components/blur-random.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:codrops/blur-random",
+    "author": "codrops",
+    "call": "MW.blurRandom(document.querySelector(\".mw-blur-random\"), tl, 0.5, { duration: 1.6 });",
+    "function": "MW.blurRandom",
+    "options": {
+      "duration": "s the whole entrance takes (1.6)",
+      "seed": "for the random parts (1)",
+      "split": "chars"
+    },
+    "credit": {
+      "author": "Codrops",
+      "collection": "Codrops",
+      "link": "https://github.com/codrops/OnScrollTypographyAnimations/blob/af28d61d1f8d3d117f5d1e9b09d5209e20a1a212/src/js/index.js#L334-L357",
+      "commit": "af28d61d1f8d3d117f5d1e9b09d5209e20a1a212",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) 2009 - 2022 / 2024 Codrops (LICENSE)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "codrops/OnScrollTypographyAnimations at af28d61, src/js/index.js lines 334-357",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Codrops fx10: the source's GSAP values; time-based in the source, so it keeps its own timing.",
+    "titleVi": "Chữ cái rõ dần từ vùng nhoè"
+  }
+}

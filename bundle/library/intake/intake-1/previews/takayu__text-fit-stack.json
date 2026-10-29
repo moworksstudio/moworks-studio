@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-fit-stack",
+  "hash": "3fc2aaa68fc5c27f",
+  "at": "2026-10-17T08:04:45.166Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-fit-stack.mp4",
+    "poster": "previews/takayu__text-fit-stack.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "52a90daedf68fe1be10f3741e02254f14a693920cc03448320667884aa45e0ae",
+    "size": 14412,
+    "seconds": 32.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

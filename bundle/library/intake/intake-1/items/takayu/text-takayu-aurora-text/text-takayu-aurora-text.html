@@ -1,0 +1,54 @@
+<!--
+  Aurora Text (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-aurora-text (read 12/10/2026).
+  Lòng chữ là các vùng màu cực quang mềm trôi vòng quanh, cả lớp màu xoay nhẹ và phồng xẹp như đang thở.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textTakayuAuroraText(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - colors: four aurora colours (6-digit hex)
+      - base: tint under them
+      - cycle: s per drift (6)
+      - rotate: ± degrees (5), 2 per cycle
+      - loops: (1)
+
+  Notes: Idea and numbers (TakayuStudio tx-aurora-text, written here): Colour layer clipped to the letters: a tinted base plus 4 soft radial blobs (accent, cyan, green, yellow; radius 0.42 × text width, min 46 px) orbiting on Lissajous paths (x ±0.42 w, y ±0.6 h, rates 1× / 2× of a 6 s cycle). The whole layer rotates −5° ↔ +5° and scales 0.9 ↔ 1.1 as −cos, period 3 s (two per 6 s loop); letters still. CSS fallback: 135° gradient of 5 stops (first = last), size 200 %, background-position 0 → 100 → 0 % over 8 s ease-in-out. Params: colors: bốn màu cực quang · cycle: chu kỳ trôi (6 s) · rotate (±5°) · scale (0.9 ↔ 1.1). Four soft blobs on Lissajous paths (1× and 2× the cycle), the layer turning ±5° and breathing 0.9 ↔ 1.1; the letters stay still.
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Cực quang phương Bắc</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"colors":["#8b7bff","#3dd6f5","#3ddc84","#ffd23d"],"base":"#5a4fb0","cycle":6,"rotate":5,"loops":1};
+  var run = function (el, tl, at, o) {
+        var r = el.getBoundingClientRect(), W = r.width, Hh = r.height, R = Math.max(46 * 5, 0.42 * W);
+        return MW.drive(tl, at, o.cycle * o.loops, function (t) {
+          var w = 2 * Math.PI * t / o.cycle, rot = o.rotate * Math.sin(2 * w) * Math.PI / 180, sc = 1 - 0.1 * Math.cos(2 * w), layers = [];
+          o.colors.forEach(function (c, i) { var ph = i * Math.PI / 2, x = 0.42 * W * Math.sin(w + ph), y = 0.6 * Hh * Math.sin(2 * w + ph * 1.3), xr = (x * Math.cos(rot) - y * Math.sin(rot)) * sc + W / 2, yr = (x * Math.sin(rot) + y * Math.cos(rot)) * sc + Hh / 2;
+            layers.push("radial-gradient(circle " + (R * sc).toFixed(0) + "px at " + xr.toFixed(0) + "px " + yr.toFixed(0) + "px, " + c + " 0%, " + c + "00 70%)"); });
+          layers.push("linear-gradient(" + o.base + ", " + o.base + ")"); el.style.backgroundImage = layers.join(", ");
+        });
+      };
+  MW.textTakayuAuroraText = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

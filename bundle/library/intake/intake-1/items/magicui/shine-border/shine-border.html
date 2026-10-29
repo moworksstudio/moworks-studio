@@ -1,0 +1,50 @@
+<!--
+  Shine Border (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/shine-border.tsx.
+  A card's border lit by a soft multi-colour glow that slides slowly around it (one pass every 14 s).
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.shineBorder(q(".mw-shine-border"), tl, 0, { borderWidth: 4, duration: 7, shineColor: ["#A07CFE", "#FE8FB5", "#FFBE7B"], hold: 7 });
+
+  Options (defaults in brackets):
+      - borderWidth: px (1)
+      - duration: s (14)
+      - shineColor: a colour or a list (#000000)
+      - hold: seconds (14)
+
+  Notes: Put .mw-shine-border inside the card (position: relative; border-radius inherited).
+-->
+
+<div class="card" style="position:relative"><div class="mw-shine-border"></div></div>
+
+<style>
+.mw-shine-border { pointer-events: none; position: absolute; inset: 0; width: 100%; height: 100%; border-radius: inherit; background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#fff 0 0) content-box exclude, linear-gradient(#fff 0 0); }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"borderWidth":1,"duration":14,"shineColor":"#000000","hold":14};
+  var run = function (el, tl, at, o) {
+      var colors = Array.isArray(o.shineColor) ? o.shineColor.join(",") : o.shineColor;
+      el.style.backgroundImage = "radial-gradient(transparent,transparent, " + colors + ",transparent,transparent)";
+      el.style.padding = o.borderWidth + "px";
+      var s = { t: 0 }, D = o.duration;
+      var set = function () { var f = (s.t % D) / D, p = (f < 0.5 ? f * 2 : 2 - f * 2) * 100; el.style.backgroundPosition = p + "% " + p + "%"; };
+      set();
+      tl.fromTo(s, { t: 0 }, { t: o.hold, duration: o.hold, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + o.hold;
+    };
+  MW.shineBorder = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

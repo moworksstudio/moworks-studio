@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/flip-around",
+  "hash": "21000888553a26ca",
+  "at": "2026-10-17T06:39:53.519Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Archivo"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__flip-around.mp4",
+    "poster": "previews/codrops__flip-around.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "96d9561ff0d9e56e9c0481686e91440d46d104322d0b5db507bd65a21bb79b1b",
+    "size": 18715,
+    "seconds": 32.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

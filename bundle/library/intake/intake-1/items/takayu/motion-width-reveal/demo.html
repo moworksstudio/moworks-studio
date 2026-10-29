@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Width Reveal - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .wr { position: relative; width: 900px; } .wr-a { height: 170px; border-radius: 12px; background: #8b7bff; opacity: 0; } .wr-b { width: 600px; height: 40px; margin-top: 24px; border-radius: 8px; background: #3dd6f5; opacity: 0; }
+.wr-l { position: absolute; left: 56px; top: 0; line-height: 170px; font-size: 96px; font-weight: 900; color: #0b0d12; letter-spacing: 0.04em; opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.7">
+<div class="st"><div class="wr"><div class="wr-a"></div><div class="wr-b"></div><div class="wr-l">RA MẮT</div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"bars":[".wr-a",".wr-b"],"label":".wr-l","from":0.04,"peak":1.08,"peakAt":0.78,"duration":0.65,"delay":0.08,"labelAt":0.52,"exitAt":null};
+  var run = function (el, tl, at, o) {
+        var bars = o.bars.map(function (s) { return el.querySelector(s); }).filter(Boolean), lb = o.label ? el.querySelector(o.label) : null, p3 = gsap.parseEase("power3.out"), io = gsap.parseEase("power2.inOut"), pin = gsap.parseEase("power2.in"), tp = o.duration * o.peakAt;
+        bars.forEach(function (b) { gsap.set(b, { transformOrigin: "0% 50%" }); });
+        var S = function (t) { if (t <= 0) return o.from; return t < tp ? o.from + (o.peak - o.from) * p3(t / tp) : o.peak + (1 - o.peak) * io(Math.min(1, (t - tp) / (o.duration - tp))); };
+        return MW.drive(tl, at, o.exitAt == null ? Math.max(o.duration + o.delay * (bars.length - 1), o.labelAt + 0.2) : o.exitAt + 0.35, function (t) {
+          var x = o.exitAt != null && t > o.exitAt ? pin(Math.min(1, (t - o.exitAt) / 0.35)) : 0;
+          bars.forEach(function (b, i) { var tt = t - i * o.delay; gsap.set(b, { scaleX: S(tt) * (1 - x) }); b.style.opacity = tt > 0 ? "1" : "0"; });
+          if (lb) lb.style.opacity = String(Math.max(0, Math.min(1, (t - o.labelAt) / 0.2)) * (1 - x));
+        });
+      };
+  MW.motionWidthReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionWidthReveal(q(".wr"), tl, 0.3, { exitAt: 1.9 });
+          tl.set({}, {}, 2.7);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

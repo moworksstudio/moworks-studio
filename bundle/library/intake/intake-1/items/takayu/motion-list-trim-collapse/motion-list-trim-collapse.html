@@ -1,0 +1,81 @@
+<!--
+  List Trim Collapse (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=list-trim-collapse (read 12/10/2026).
+  Con trỏ bấm xoá dòng 2: dòng đó co lại và mờ đi, các dòng dưới dồn lên lấp chỗ, rồi thông báo “Đã xoá · Hoàn tác” nảy lên.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionListTrimCollapse(q(".tc"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - items: 
+      - row: the row deleted (2)
+      - clickAt: s (0.5)
+      - close: the delete button inside a row
+      - toast: a toast that springs up (k260 c22)
+      - cursor: 
+      - cols: 
+
+  Notes: Idea and numbers (TakayuStudio list-trim-collapse, written here): Row 2 of 4 (24 px rows, 30 px pitch) is deleted after a cursor clicks its ×: opacity 1 → 0 and scaleY 1 → 0 (centre origin) in 250 ms power2.in; 100 ms later rows 3–4 move up one pitch (−30 px) in 350 ms power2.out and hold. A toast ('Deleted · Undo') springs up from below (spring k 260, d 22) 500 ms after the collapse starts. Params: collapse (0.25 s) · shift (0.35 s, −30 px) · toast: thông báo (k 260, d 22) · row: dòng xoá.
+-->
+
+<div class="ui-wrap"><div class="tc"><div class="rw"><i></i><b style="width:60%"></b><u>×</u></div><div class="rw"><i></i><b style="width:46%"></b><u>×</u></div><div class="rw"><i></i><b style="width:66%"></b><u>×</u></div><div class="rw"><i></i><b style="width:52%"></b><u>×</u></div></div><div class="tc-t">Đã xoá · <b>Hoàn tác</b></div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  var defaults = {"items":".rw","row":2,"clickAt":0.5,"close":"u","toast":".tc-t","cursor":".ui-cursor","cols":0};
+  var run = function (el,tl,at,o
+  ) {
+  var it = Array.prototype.slice.call(el.querySelectorAll(o.items)), n = it.length, cols = o.cols || n;
+  var del = it[o.row - 1], pin = gsap.parseEase("power2.in"), p2 = gsap.parseEase("power2.out"), sp = MW.spring(260, 22), toast = o.toast ? document.querySelector(o.toast) : null, cur = o.cursor ? document.querySelector(o.cursor) : null, pitch = it.length > 1 ? it[1].offsetTop - it[0].offsetTop : 0;
+  var x = del.querySelector(o.close), base = cur ? (cur.offsetParent || el).getBoundingClientRect() : null, xr = x ? x.getBoundingClientRect() : null, tx = xr && base ? xr.left - base.left + xr.width / 2 : 0, ty = xr && base ? xr.top - base.top + xr.height / 2 : 0;
+  return MW.drive(tl, at, o.clickAt + 1.6, function (t) { var u = pin(Math.max(0, Math.min(1, (t - o.clickAt) / 0.25))), m = p2(Math.max(0, Math.min(1, (t - o.clickAt - 0.1) / 0.35)));
+    gsap.set(del, { scaleY: 1 - u }); del.style.opacity = String(1 - u); it.forEach(function (r, i) { if (i >= o.row) gsap.set(r, { y: -pitch * m }); }); if (toast) { var k = t > o.clickAt + 0.5 ? sp.at(t - o.clickAt - 0.5) : 0; gsap.set(toast, { y: 240 * (1 - k) }); toast.style.opacity = String(Math.min(1, k * 3)); }
+    if (cur) { var p = MW.path([[0, tx + 260, ty + 220], [o.clickAt - 0.12, tx, ty], [o.clickAt + 0.3, tx, ty], [o.clickAt + 0.9, tx + 200, ty + 160]], t, "power2.inOut"); gsap.set(cur, { x: p[0] - 12, y: p[1] - 6, scale: t > o.clickAt && t < o.clickAt + 0.1 ? 0.86 : 1, transformOrigin: "20% 10%" }); } });
+  };
+  MW.motionListTrimCollapse = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "cylinder-travel",
+  "type": "hyperframes:component",
+  "title": "Cylinder Travel",
+  "description": "The line slides in from the left while its letters roll over a cylinder behind the text (rotationX 380° about a point 200 px deep). (Codrops fx15)",
+  "tags": [
+    "text",
+    "letters",
+    "entrance",
+    "codrops",
+    "on-scroll",
+    "per letter"
+  ],
+  "files": [
+    {
+      "path": "cylinder-travel.html",
+      "target": "compositions/components/cylinder-travel.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:codrops/cylinder-travel",
+    "author": "codrops",
+    "call": "MW.cylinderTravel(document.querySelector(\".mw-cylinder-travel\"), tl, 0.5, { duration: 1.6 });",
+    "function": "MW.cylinderTravel",
+    "options": {
+      "duration": "s the whole entrance takes (1.6)",
+      "seed": "for the random parts (1)",
+      "split": "chars"
+    },
+    "credit": {
+      "author": "Codrops",
+      "collection": "Codrops",
+      "link": "https://github.com/codrops/OnScrollTypographyAnimations/blob/af28d61d1f8d3d117f5d1e9b09d5209e20a1a212/src/js/index.js#L485-L526",
+      "commit": "af28d61d1f8d3d117f5d1e9b09d5209e20a1a212",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) 2009 - 2022 / 2024 Codrops (LICENSE)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "codrops/OnScrollTypographyAnimations at af28d61, src/js/index.js lines 485-526",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Codrops fx15: the source's GSAP values; the scroll range is now `duration`.",
+    "titleVi": "Chữ cuộn như trụ xoay khi dòng chạy vào"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-score-rollup",
+  "type": "hyperframes:block",
+  "title": "Score Roll-up",
+  "description": "Viên \"+1,200\" bật ra trước, rồi tổng điểm chạy từ 1,200 lên 2,400, chạm đích thì phồng nhẹ và đổi màu nhấn, giữ yên cho người xem đọc.",
+  "tags": [
+    "counter",
+    "score",
+    "pop",
+    "number",
+    "game-hud",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "data-score-rollup.html",
+      "target": "compositions/components/data-score-rollup.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/data-score-rollup",
+    "author": "takayu",
+    "call": "MW.dataScoreRollup(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataScoreRollup",
+    "options": {
+      "from": "(1200)",
+      "to": "(2400)",
+      "label": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-hud-score-rollup",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-hud-score-rollup (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-hud-score-rollup, written here): px @320x200. Increment pill '+1,200' (80 x 24, r 12, accent outline) pops at 0.2 s (300 ms back.out). Total 1,200 → 2,400 (en-US grouping, mono 46 px) rolls 0.55-1.6 s outCubic (1.05 s) and turns accent on arrival; landing bump scale 1.07 (half-sine, 250 ms inOut, 1.6-1.85 s). Holds to 2.4 s (0.8 s), then fades out 2.4-2.6 s in-quad and back in at the start state 2.6-2.8 s outQuad (loop). Params: from / to: điểm đầu và cuối (1200 → 2400) · roll: thời gian chạy số (1.05 s) · delta: nhãn phần cộng (\"+1,200\") · hold: giữ số cuối (0.8 s). The increment pops first; the total rolls 1.05 s (ease-out cubic), lands with a small bump and holds 0.8 s to be read.",
+    "titleVi": "Điểm cuộn lên, tách phần cộng thêm"
+  }
+}

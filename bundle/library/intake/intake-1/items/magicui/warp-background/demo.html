@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Warp Background - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-warp-background { position: relative; border-radius: 6px; border: 1px solid var(--mw-wb-grid, rgba(255,255,255,0.12)); padding: 80px; }
+.mw-warp-background > .mw-wb-3d { container-type: size; pointer-events: none; position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; clip-path: inset(0); transform-style: preserve-3d; }
+.mw-wb-wall { container-type: inline-size; position: absolute; height: 100cqmax; background-size: var(--mw-wb-size) var(--mw-wb-size);
+  background: linear-gradient(var(--mw-wb-grid) 0 1px, transparent 1px var(--mw-wb-size)) 50% -0.5px / var(--mw-wb-size) var(--mw-wb-size), linear-gradient(90deg, var(--mw-wb-grid) 0 1px, transparent 1px var(--mw-wb-size)) 50% 50% / var(--mw-wb-size) var(--mw-wb-size);
+  transform-style: preserve-3d; }
+.mw-wb-wall.top { z-index: 20; width: 100cqi; transform-origin: 50% 0%; transform: rotateX(-90deg); }
+.mw-wb-wall.bottom { top: 100%; width: 100cqi; transform-origin: 50% 0%; transform: rotateX(-90deg); }
+.mw-wb-wall.left { top: 0; left: 0; width: 100cqh; transform-origin: 0% 0%; transform: rotate(90deg) rotateX(-90deg); }
+.mw-wb-wall.right { top: 0; right: 0; width: 100cqh; transform-origin: 100% 0%; transform: rotate(-90deg) rotateX(-90deg); }
+.mw-wb-beam { position: absolute; top: 0; }
+.mw-warp-background > .mw-wb-content { position: relative; }
+.mw-warp-background { width: 1400px; height: 860px; display: flex; align-items: center; justify-content: center; }
+.promo { width: 760px; padding: 54px; border-radius: 28px; background: #111114; border: 2px solid #27272a; }
+.promo h3 { margin: 0 0 16px; font-size: 58px; } .promo p { margin: 0; font-size: 30px; opacity: .65; line-height: 1.4; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="7">
+<div class="center"><div class="mw-warp-background"><div class="promo"><h3>Tốc độ ánh sáng</h3><p>Từ ý tưởng tới video hoàn chỉnh trong vài phút, không cần dựng tay từng khung.</p></div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  var defaults = {"perspective":100,"beamsPerSide":3,"beamSize":5,"beamDelayMax":3,"beamDelayMin":0,"beamDuration":3,"gridColor":"rgba(255,255,255,0.12)","hold":10,"seed":1};
+  var run = function (el, tl, at, o) {
+      el.style.setProperty("--mw-wb-grid", o.gridColor); el.style.setProperty("--mw-wb-size", o.beamSize + "%");
+      var content = document.createElement("div"); content.className = "mw-wb-content";
+      while (el.firstChild) content.appendChild(el.firstChild);
+      var box = document.createElement("div"); box.className = "mw-wb-3d"; box.style.perspective = o.perspective + "px";
+      el.appendChild(box); el.appendChild(content);
+      var r = MW.rand(o.seed * 401), beams = [], cells = Math.floor(100 / o.beamSize), step = cells / o.beamsPerSide;
+      ["top", "bottom", "left", "right"].forEach(function (side) {
+        var wall = document.createElement("div"); wall.className = "mw-wb-wall " + side; box.appendChild(wall);
+        for (var i = 0; i < o.beamsPerSide; i++) {
+          var x = Math.floor(i * step), delay = r() * (o.beamDelayMax - o.beamDelayMin) + o.beamDelayMin, hue = Math.floor(r() * 360), ar = Math.floor(r() * 10) + 1;
+          var b = document.createElement("div"); b.className = "mw-wb-beam";
+          b.style.left = x * o.beamSize + "%"; b.style.width = o.beamSize + "%"; b.style.aspectRatio = "1 / " + ar; b.style.background = "linear-gradient(hsl(" + hue + " 80% 60%), transparent)";
+          wall.appendChild(b); beams.push({ el: b, delay: delay });
+        }
+      });
+      var s = { t: 0 }, D = o.beamDuration;
+      var set = function () {
+        for (var i = 0; i < beams.length; i++) {
+          var u = s.t - beams[i].delay, f = u < 0 ? 0 : (u % D) / D;
+          beams[i].el.style.transform = "translate(-50%, calc(100cqmax * " + (1 - f) + " - 100% * " + f + "))";
+        }
+      };
+      set();
+      tl.fromTo(s, { t: 0 }, { t: o.hold, duration: o.hold, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + o.hold;
+    };
+  MW.warpBackground = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.warpBackground(q(".mw-warp-background"), tl, 0, { gridColor: "rgba(255,255,255,0.14)", hold: 7 });
+          tl.set({}, {}, 7);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

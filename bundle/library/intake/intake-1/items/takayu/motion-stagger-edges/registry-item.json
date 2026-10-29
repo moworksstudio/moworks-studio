@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-stagger-edges",
+  "type": "hyperframes:component",
+  "title": "Stagger: From Edges",
+  "description": "Các ô hiện từ hai mép trái phải khép dần vào giữa, hợp cho đoạn kết, hội tụ.",
+  "tags": [
+    "stagger",
+    "grid",
+    "edges",
+    "timing-rhythm",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-stagger-edges.html",
+      "target": "compositions/components/motion-stagger-edges.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-stagger-edges",
+    "author": "takayu",
+    "call": "MW.motionStaggerEdges(q(\".se\"), tl, 0.3, {});",
+    "function": "MW.motionStaggerEdges",
+    "options": {
+      "from": "edges",
+      "each": "s per column from the nearer side (0.08)",
+      "rowEach": "s per row (0.02)",
+      "cols": "tiles per row (8)",
+      "k": "spring stiffness (260)",
+      "c": "damping (20: about 8 % overshoot)",
+      "outAt": "s they fade (2.0)",
+      "spread": "",
+      "seed": ""
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=t-stagger-edges",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=t-stagger-edges (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio t-stagger-edges, written here): 8 × 4 grid of 24 px tiles (32 px pitch): delay = distance from the nearer side edge × 40 ms (recipe; site demo (3.5 − |col − 3.5|) × 80 ms + row × 20 ms), 400 ms power2.out each (demo: spring k 260, c 20). Rule: closing in from the outside, for endings and convergence. Params: each (40 ms) · duration (0.4 s) · from (edges). Closing in from both sides: for endings and convergence.",
+    "titleVi": "So le từ hai mép vào giữa"
+  }
+}

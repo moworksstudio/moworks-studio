@@ -1,0 +1,52 @@
+<!--
+  Sticky Pin (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=sticky-pin (read 12/10/2026).
+  Chủ thể đứng ghim giữa khung và phồng nhẹ trong khi các khối chữ trôi qua từ dưới lên, hiện ra rồi mờ đi.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiStickyPinSection(q(".sp"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - pass: s per caption pass, linear (1.1)
+      - unit: px per reference unit (5)
+      - subject: the pinned subject
+      - captions: the caption blocks
+
+  Notes: Idea and numbers (TakayuStudio sticky-pin, written here): Pinned subject centred: scale 0.96 → 1.04 at 50 % → 0.96 over the pass. Text blocks scroll past: y +62 opacity 0 → y −4 opacity 1 at 35 % → y −72 opacity 0 at 100 %. 1.1 s per pass, linear (scroll progress), loops. Params: duration (1.1 s / lượt) · pulse (0.96 → 1.04) · rise (62 → −72 px) · ease (none).
+-->
+
+<div class="sp"><div class="sp-s"></div><div class="sp-c">Nhẹ hơn<span>Chỉ 180 gam</span></div><div class="sp-c">Bền hơn<span>Vỏ nhôm nguyên khối</span></div><div class="sp-c">Lâu hơn<span>Pin dùng cả ngày</span></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"pass":1.1,"unit":5,"subject":".sp-s","captions":".sp-c"};
+  var run = function (el, tl, at, o) {
+        var subj = el.querySelector(o.subject), caps = Array.prototype.slice.call(el.querySelectorAll(o.captions));
+        return MW.drive(tl, at, o.pass * caps.length, function (t) {
+          var k = Math.min(caps.length - 1, Math.floor(t / o.pass)), p = (t / o.pass) - k;
+          gsap.set(subj, { scale: 0.96 + 0.08 * Math.sin(Math.PI * p) });
+          caps.forEach(function (c, i) { if (i !== k) { c.style.opacity = "0"; return; } var y = p < 0.35 ? 62 + (-4 - 62) * p / 0.35 : -4 + (-72 + 4) * (p - 0.35) / 0.65, a = p < 0.35 ? p / 0.35 : 1 - (p - 0.35) / 0.65; gsap.set(c, { y: y * o.unit }); c.style.opacity = String(a); });
+        });
+      };
+  MW.uiStickyPinSection = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

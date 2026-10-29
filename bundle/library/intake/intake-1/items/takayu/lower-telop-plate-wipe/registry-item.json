@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "lower-telop-plate-wipe",
+  "type": "hyperframes:block",
+  "title": "Zabuton Plate Wipe",
+  "description": "Tấm nền màu (zabuton) quét ra từ trái trong bảy khung, ba khung sau chữ trượt nhẹ vào trên nền; khi ra chữ tắt trước rồi nền quét đi.",
+  "tags": [
+    "plate",
+    "wipe",
+    "telop",
+    "lower",
+    "text-broadcast-telop",
+    "crisp",
+    "smooth",
+    "broadcast-telop",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "lower-telop-plate-wipe.html",
+      "target": "compositions/components/lower-telop-plate-wipe.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/lower-telop-plate-wipe",
+    "author": "takayu",
+    "call": "MW.lowerTelopPlateWipe(q(\".zp\"), tl, 0.35, {});",
+    "function": "MW.lowerTelopPlateWipe",
+    "options": {
+      "plate": "",
+      "text": "",
+      "frames": "frames at 30 fps per wipe (7)",
+      "delay": "frames before the text (3)",
+      "slide": "px (56)",
+      "outAt": "s after the start the text fades (2.3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-telop-zabuton",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-telop-zabuton (read 12/10/2026)",
+      "upstream": "the site credits other:booth.pm"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-telop-zabuton, written here): Plate (accent, radius 3, text + 32 px wide, text + 12 px tall) scaleX 0 → 1 from the left in 7 frames at 30 fps (0.23 s) expo.out from 0.35 s. 3 frames later the text (26 px heavy, light colour) fades in and slides −14 px → 0 in 0.3 s expo.out, clipped to the plate. Exit: text fades 2.65–2.8 s, then the plate wipes off to the right in 7 frames power2.in from 2.82 s. Loop 3.4 s. Params: quét nền (7 khung ở 30 fps) · trễ chữ (3 khung) · lề nền (16 / 6 px). Exit: the text fades first, then the plate wipes off to the right.",
+    "titleVi": "Tấm nền quét ra rồi chữ trượt vào"
+  }
+}

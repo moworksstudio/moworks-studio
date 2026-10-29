@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Letter Collision Bounce - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .lc { position: absolute; inset: 0; }
+.lc span { position: absolute; top: 400px; font-size: 240px; font-weight: 900; line-height: 1; } .lc-a { left: 800px; color: #a99bff; } .lc-b { left: 1050px; } .lc::after { content: ""; position: absolute; left: 260px; right: 260px; top: 650px; height: 4px; background: #2a3350; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4.1">
+<div class="lc"><span class="lc-a">Đ</span><span class="lc-b">Ơ</span></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  var defaults = {"a":".lc-a","b":".lc-b","run":1.8,"slide":1.9,"unit":5};
+  var run = function (el, tl, at, o) {
+        var A = el.querySelector(o.a), B = el.querySelector(o.b), fs = parseFloat(getComputedStyle(A).fontSize), pin = gsap.parseEase("power1.in"), p2 = gsap.parseEase("power2.out"), cv = MW.canvas(el), c = cv.ctx;
+        A.style.transformOrigin = B.style.transformOrigin = "50% 100%";
+        return MW.drive(tl, at, 4.1, function (t) {
+          var x = -o.run * fs * (1 - pin(Math.max(0, Math.min(1, (t - 0.4) / 0.6)))), d = t - 1.0, tri = Math.max(0, 1 - Math.abs(d) / 0.07), rec = d > 0 && d < 0.25 ? 4 * o.unit * Math.sin(Math.PI * d / 0.25) * Math.exp(-6 * d) : 0;
+          var fade = t < 3.3 ? 1 : t < 3.6 ? 1 - (t - 3.3) / 0.3 : t < 3.8 ? 0 : (t - 3.8) / 0.3;
+          gsap.set(A, { x: x - rec, scaleX: 1 - 0.2 * tri, scaleY: 1 + 0.2 * tri }); gsap.set(B, { x: o.slide * fs * p2(Math.max(0, Math.min(1, d / 0.7))), scaleX: 1 + 0.12 * tri, scaleY: 1 - 0.12 * tri });
+          if (t >= 3.6) { gsap.set(A, { x: -o.run * fs }); gsap.set(B, { x: 0 }); } A.style.opacity = B.style.opacity = String(Math.max(0, Math.min(1, fade)));
+          c.clearRect(0, 0, cv.w, cv.h); if (d > 0 && d < 0.25) { var r = B.getBoundingClientRect(), hb = el.getBoundingClientRect(), px = r.left - hb.left - o.slide * fs * p2(Math.min(1, d / 0.7)), py = r.top - hb.top + r.height * 0.45, u = d / 0.25;
+            c.strokeStyle = "rgba(255,210,61," + (1 - u) + ")"; c.lineWidth = 8; c.lineCap = "round"; for (var i = 0; i < 5; i++) { var a = -Math.PI / 2 - 0.9 + i * 0.45; c.beginPath(); c.moveTo(px + Math.cos(a) * (40 + 60 * u), py + Math.sin(a) * (40 + 60 * u)); c.lineTo(px + Math.cos(a) * (80 + 90 * u), py + Math.sin(a) * (80 + 90 * u)); c.stroke(); } }
+        });
+      };
+  MW.textLetterCollision = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textLetterCollision(q(".lc"), tl, 0, {});
+          tl.set({}, {}, 4.1);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

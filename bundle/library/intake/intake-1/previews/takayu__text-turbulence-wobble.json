@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-turbulence-wobble",
+  "hash": "c8b903eae9ea0abc",
+  "at": "2026-10-17T10:37:44.238Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-turbulence-wobble.mp4",
+    "poster": "previews/takayu__text-turbulence-wobble.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "29c013411102af88935b6e335aac652e45a20cd5eb134913f462570629dc37f4",
+    "size": 25862,
+    "seconds": 25.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

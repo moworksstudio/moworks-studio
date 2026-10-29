@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-slice-in",
+  "type": "hyperframes:component",
+  "title": "Sliced Bars Title",
+  "description": "Tiêu đề bị cắt thành sáu dải ngang, các dải lần lượt trượt vào xen kẽ từ trái và phải, mỗi dải có vạch màu chạy trước, giật nhẹ một nhịp rồi bay xuyên ra phía bên kia.",
+  "tags": [
+    "slice",
+    "strips",
+    "title",
+    "slide",
+    "text-titles-film",
+    "crisp",
+    "titles-film",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-slice-in.html",
+      "target": "compositions/components/text-slice-in.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-slice-in",
+    "author": "takayu",
+    "call": "MW.textSliceIn(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textSliceIn",
+    "options": {
+      "slices": "strips (6)",
+      "distance": "px each slides in from (2300, ≈120 % of the frame)",
+      "start": "s (0.32; 0.06 s apart, 0.7 s expo.out)",
+      "jolt": "px (25) at 1.6-1.9 s",
+      "bar": "px of the accent bar (10)",
+      "barWidth": "px (1600)",
+      "color": "bar colour",
+      "exitAt": "s (2.55): on through to the other side"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-split-bars-title",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-split-bars-title (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-split-bars-title, written here): 6 copies of the title, each clipped to one horizontal strip (1/6 of text height + 4 px). Strip k (top first) slides in from the left for even k, right for odd: x ±380 px (≈120 % of a 320 px frame) → 0, 0.7 s expo.out from 0.32 + 0.06 k s. A 300 × 2 px accent bar at its top runs ahead 0.1 s earlier (0.6 s expo.out), fading 0.7–1.0 s (+0.06 k). At 1.6–1.9 s strips jolt ±5 px and back. Exit 2.55 + 0.04 k s, 0.4 s expo.in, on through to the other side. Loop 3.4 s. Params: số dải (6) · quãng trượt (≈ 120 % khung) · thời gian (0.7 s) · cách nhau (0.06 s).",
+    "titleVi": "Tiêu đề ghép từ sáu dải ngang"
+  }
+}

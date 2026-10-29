@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-velocity-skew",
+  "type": "hyperframes:component",
+  "title": "Velocity Skew",
+  "description": "Khi khối chữ trượt lên xuống, nó nghiêng xiên theo tốc độ, càng nhanh càng nghiêng, dừng lại thì lắc nhẹ qua rồi đứng thẳng.",
+  "tags": [
+    "skew",
+    "velocity",
+    "spring",
+    "scroll",
+    "text-scroll",
+    "bouncy",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-velocity-skew.html",
+      "target": "compositions/components/motion-velocity-skew.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-velocity-skew",
+    "author": "takayu",
+    "call": "MW.motionVelocitySkew(q(\".vs h2\"), tl, 0, {});",
+    "function": "MW.motionVelocitySkew",
+    "options": {
+      "distance": "px it moves (230)",
+      "vmax": "px/s that gives full skew (875)",
+      "max": "degrees at full speed (16)",
+      "clamp": "degrees (20)",
+      "k": "follow spring stiffness (150)",
+      "c": "damping (11)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-scroll-skew",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-scroll-skew (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-scroll-skew, written here): Block (50 px text, placeholder rows above and below) moves up 46 px over 0.3–0.8 s and back 2.0–2.5 s, cubic-bezier(.65,0,.35,1). Normalised velocity sv = clamp(v / 175 px/s, −1, 1); skewY = clamp(−16° × follow(sv), −20°, 20°), where follow is a spring k 150, c 11 (ζ≈0.45) summed over the velocity changes, so it lags, swings past 0 on the stop and settles. Origin at the block centre. Loop 3.8 s. Params: độ nghiêng tối đa (16°, chặn 20°) · lò xo (k 150, c 11) · quãng di chuyển (46 px).",
+    "titleVi": "Chữ nghiêng theo tốc độ di chuyển"
+  }
+}

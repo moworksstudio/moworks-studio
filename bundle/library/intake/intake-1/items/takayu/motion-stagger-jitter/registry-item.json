@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-stagger-jitter",
+  "type": "hyperframes:component",
+  "title": "Anti-robotic Jitter",
+  "description": "Hàng ô cùng nảy lên nhưng mỗi ô lệch thời gian và cỡ một chút theo hạt giống cố định, trông bớt máy móc.",
+  "tags": [
+    "stagger",
+    "jitter",
+    "seed",
+    "principle",
+    "principles",
+    "soft",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-stagger-jitter.html",
+      "target": "compositions/components/motion-stagger-jitter.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-stagger-jitter",
+    "author": "takayu",
+    "call": "MW.motionStaggerJitter(q(\".sj-a\"), tl, 0.3, { jitter: 0, size: 0, exitAt: 2.4 });",
+    "function": "MW.motionStaggerJitter",
+    "options": {
+      "items": "",
+      "k": "spring stiffness (220)",
+      "c": "damping (20)",
+      "stagger": "s (0.07)",
+      "jitter": "± s per item (0.045; the recipe 0.016–0.033)",
+      "size": "± scale (0.04; the recipe 0.03)",
+      "rise": "px (160)",
+      "seed": "(7)",
+      "exitAt": "s after the start to fade (null)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=jitter",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=jitter (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio jitter, written here): Two rows of 7 squares rise 40 px on a spring (k 220, c 20), 70 ms apart: the top row evenly; the bottom row adds a seeded per-item delay (±45 ms) and size (±4 %) (site seed 7). Recipe: base stagger 60 ms + ±16–33 ms and ±3 % scale per element. Site exit: fade 300 ms. Params: stagger (60 ms) · time_jitter (±16–33 ms) · size_jitter (±3 %) · seed.",
+    "titleVi": "Lệch nhịp tự nhiên, bớt máy móc"
+  }
+}

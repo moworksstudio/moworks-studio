@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Percent With Ring - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.pr { position: absolute; left: 660px; top: 170px; width: 600px; height: 600px; } .pr-c { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+.pr-num { font-size: 190px; font-weight: 900; font-variant-numeric: tabular-nums; } .pr-num small { font-size: 95px; color: #8f9ab3; } .pr-lab { position: absolute; left: 0; right: 0; top: 640px; text-align: center; font-size: 54px; color: #9aa3b8; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.6">
+<div class="pr"><svg viewBox="0 0 600 600" width="600" height="600"><circle cx="300" cy="300" r="270" fill="none" stroke="#222a42" stroke-width="34"/><circle class="pr-arc" cx="300" cy="300" r="270" fill="none" stroke="#8b7bff" stroke-width="34" stroke-linecap="round" transform="rotate(-90 300 300)"/><circle class="pr-dot" cx="300" cy="30" r="10" fill="#fff"/></svg>
+<div class="pr-c"><div class="pr-num">0<small>%</small></div></div><div class="pr-lab">khách hàng hài lòng</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"value":87,"duration":1.6,"start":0.3,"resetAt":3.05,"loop":3.6};
+  var run = function (el, tl, at, o) {
+        var arc = el.querySelector(".pr-arc"), dot = el.querySelector(".pr-dot"), num = el.querySelector(".pr-num"), pq = gsap.parseEase("power1.out"), R = +arc.getAttribute("r"), C = 2 * Math.PI * R;
+        arc.setAttribute("stroke-dasharray", C + " " + C);
+        return MW.drive(tl, at, o.loop, function (t) {
+          var v = o.value * pq(Math.max(0, Math.min(1, (t - o.start) / o.duration))), f = 1 - Math.max(0, Math.min(1, (t - o.resetAt) / 0.55)), a = -Math.PI / 2 + 2 * Math.PI * v / 100;
+          arc.setAttribute("stroke-dashoffset", String(C * (1 - v / 100))); dot.setAttribute("cx", 300 + R * Math.cos(a)); dot.setAttribute("cy", 300 + R * Math.sin(a)); dot.style.opacity = v > 0.5 ? "1" : "0";
+          num.firstChild.nodeValue = String(Math.round(v)); el.style.opacity = String(f);
+        });
+      };
+  MW.dataPercentRing = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.dataPercentRing(q(".pr"), tl, 0, {});
+          tl.set({}, {}, 3.6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

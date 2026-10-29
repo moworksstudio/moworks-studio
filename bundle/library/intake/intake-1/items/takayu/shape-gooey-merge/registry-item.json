@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "shape-gooey-merge",
+  "type": "hyperframes:component",
+  "title": "Gooey Merge",
+  "description": "Hai hình tròn tiến lại gần, một cổ dẻo như chất lỏng mọc ra trước khi chạm rồi nhập thành một khối, sau đó tách ra.",
+  "tags": [
+    "gooey",
+    "metaball",
+    "merge",
+    "shape",
+    "svg-path",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "shape-gooey-merge.html",
+      "target": "compositions/components/shape-gooey-merge.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.1,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/shape-gooey-merge",
+    "author": "takayu",
+    "call": "MW.shapeGooeyMerge(q(\".gm-g\"), tl, 0, {});",
+    "function": "MW.shapeGooeyMerge",
+    "options": {
+      "from": "half distance at rest (64)",
+      "to": "half distance merged (22)",
+      "cx": "centre x in the SVG's units (160)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=svg-gooey-merge",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=svg-gooey-merge (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio svg-gooey-merge, written here): Two circles r 26 px in a group with a goo filter (Gaussian blur 7 px, then alpha x 22 - 9). Centres start +-64 px from the middle, hold 300 ms, move to +-22 px over 1000 ms easeInOut (a neck forms before contact), hold 900 ms, return over 900 ms. One fill colour. Params: distance (±64 → ±22 px) · blur (7 px) · threshold (22a − 9) · color. The two circles sit in a group with a goo filter: Gaussian blur 7, then alpha × 22 − 9 (feColorMatrix).",
+    "titleVi": "Hai giọt dẻo dính vào nhau"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-achievement-toast",
+  "hash": "de054834c8eb7d10",
+  "at": "2026-10-17T10:24:33.180Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-achievement-toast.mp4",
+    "poster": "previews/takayu__ui-achievement-toast.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "cd4f0a214bab35d0b925ef4e7d56ee3061532e9ea9f7903722be2cc1558709de",
+    "size": 13920,
+    "seconds": 28.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,67 @@
+<!--
+  Avatar Circles (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/avatar-circles.tsx.
+  A row of overlapping round avatars ending in a '+N' bubble, for social proof ('joined by 2,000 creators').
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.avatarCircles(q(".mw-avatar-circles"), tl, 0.4, { numPeople: 99, size: 140, enter: "pop" });
+
+  Options (defaults in brackets):
+      - numPeople: 0
+      - size: px (40)
+      - enter: null | pop
+      - each: s (0.08)
+
+  Notes: el holds the avatars (img or any element) in order; numPeople adds the +N bubble. enter: null (static, as upstream) | pop (each 0.08 s apart).
+-->
+
+<div class="mw-avatar-circles"><img src="a.png" alt=""><img src="b.png" alt=""></div>
+
+<style>
+.mw-avatar-circles { position: relative; z-index: 10; display: flex; }
+.mw-avatar-circles > * { border-radius: 9999px; border: 2px solid #1f2937; object-fit: cover; flex: none; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.mw-avatar-circles > * + * { margin-left: -16px; }
+.mw-avatar-circles > .mw-ac-more { background: #fff; color: #000; font-weight: 500; text-align: center; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  var defaults = {"numPeople":0,"size":40,"enter":null,"each":0.08};
+  var run = function (el, tl, at, o) {
+      var list = Array.prototype.slice.call(el.children);
+      if (o.numPeople > 0) { var m = document.createElement("div"); m.className = "mw-ac-more"; m.textContent = "+" + o.numPeople; m.style.fontSize = o.size * 0.3 + "px"; el.appendChild(m); list.push(m); }
+      list.forEach(function (n) { n.style.width = n.style.height = o.size + "px"; });
+      if (!o.enter) return at;
+      var sp = MW.spring(500, 25, 1);
+      list.forEach(function (n, i) { tl.fromTo(n, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: sp.duration, ease: sp.ease, immediateRender: true }, at + i * o.each); });
+      return at + (list.length - 1) * o.each + sp.duration;
+    };
+  MW.avatarCircles = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

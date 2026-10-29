@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Boss Phase Shatter - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; }
+.gm { position: absolute; inset: 0; } .gm .w { font-weight: 900; letter-spacing: -0.02em; white-space: nowrap; } .gm .lab { font-size: 34px; font-weight: 700; color: #8f9ab3; letter-spacing: 0.08em; white-space: nowrap; }
+.pn-tile { pointer-events: none; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3">
+<div class="gm"><div class="pn" style="width:800px;height:450px;border-radius:40px;background:linear-gradient(160deg,#a693ff,#6a4cf0);display:grid;place-items:center;font-size:110px;font-weight:900">GIAI ĐOẠN 1</div>
+<div class="nx w" style="font-size:150px;opacity:0">GIAI ĐOẠN 2</div><div class="nxu" style="height:12px;border-radius:6px;background:#ffd23d;width:0"></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"crackAt":0.55,"breakAt":0.95,"nextAt":1.85};
+  var run = function (el, tl, at, o) {
+        var panel = el.querySelector(".pn"), next = el.querySelector(".nx"), ul = el.querySelector(".nxu"), S = MW.stage320(el), ctx = S.ctx, k = S.k, out = gsap.parseEase("power2.out"), bk = gsap.parseEase("back.out");
+        var W = 160 * k, Hh = 90 * k, cols = 3, rows = 2, tiles = [];
+        S.put(panel, 160, 100); S.put(next, 160, 96); if (ul) S.put(ul, 160, 120);
+        for (var j = 0; j < rows; j++) for (var i = 0; i < cols; i++) {
+          var c = panel.cloneNode(true); c.className = "pn-tile"; c.style.clipPath = "inset(" + (j * Hh / rows) + "px " + (W - (i + 1) * W / cols) + "px " + (Hh - (j + 1) * Hh / rows) + "px " + (i * W / cols) + "px)";
+          c.style.visibility = "hidden"; el.appendChild(c); S.put(c, 160, 100);
+          var cx = (i + 0.5) / cols - 0.5, cy = (j + 0.5) / rows - 0.5, a = Math.atan2(cy * 0.7, cx), sp = 110 + ((i * 7 + j * 3) % 5) / 4 * 70;
+          tiles.push({ c: c, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.7 - 60, rot: (i + j) % 2 ? 3.5 : -3.5, ox: (i + 0.5) * W / cols, oy: (j + 0.5) * Hh / rows });
+        }
+        return MW.drive(tl, at, o.nextAt + 0.6, function (t) {
+          var broke = t >= o.breakAt, jit = t >= o.crackAt && !broke ? (Math.floor(t * 40) % 2 ? 1 : -1) * k : 0;
+          panel.style.visibility = broke ? "hidden" : "visible"; gsap.set(panel, { x: jit });
+          S.clear();
+          if (t >= o.crackAt && !broke) {
+            var f = out(Math.min(1, (t - o.crackAt) / 0.3)); ctx.strokeStyle = "#0b0d12"; ctx.lineWidth = 2;
+            [[133.3, 55, 133.3, 55 + 90 * f], [186.7, 145, 186.7, 145 - 90 * f], [80, 100, 80 + 160 * f, 100]].forEach(function (l) { ctx.beginPath(); ctx.moveTo(l[0], l[1]); ctx.lineTo(l[2], l[3]); ctx.stroke(); });
+          }
+          tiles.forEach(function (q) {
+            var d = t - o.breakAt; q.c.style.visibility = d >= 0 && d < 0.85 ? "visible" : "hidden"; if (d < 0) return;
+            var u = Math.min(1, d / 0.85); q.c.style.transformOrigin = q.ox + "px " + q.oy + "px";
+            gsap.set(q.c, { x: q.vx * d * k, y: (q.vy * d + 260 * d * d) * k, rotation: q.rot * d * 57.3, scale: 1 - 0.3 * u }); q.c.style.opacity = String(1 - u);
+          });
+          var v = Math.max(0, Math.min(1, (t - o.nextAt) / 0.4)); gsap.set(next, { scale: 0.85 + 0.15 * bk(v) }); next.style.opacity = String(Math.min(1, v * 2));
+          if (ul) ul.style.width = (140 * k * out(Math.max(0, Math.min(1, (t - o.nextAt - 0.15) / 0.4)))) + "px";
+        });
+      };
+  MW.effectPanelTileShatter = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.effectPanelTileShatter(q(".gm"), tl, 0, {});
+          tl.set({}, {}, 3);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

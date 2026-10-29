@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-rack-focus",
+  "hash": "8f684d5a4fdd2e66",
+  "at": "2026-10-17T07:44:57.220Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-rack-focus.mp4",
+    "poster": "previews/takayu__motion-rack-focus.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "764624d20f5a4752ed5a33c3717dab0b88870d7cb28b0bbd44a3142bd7d95d76",
+    "size": 15135,
+    "seconds": 34.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

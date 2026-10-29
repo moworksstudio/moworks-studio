@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-crack-spread",
+  "hash": "80460ebe5f4c7934",
+  "at": "2026-10-17T07:43:00.725Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__effect-crack-spread.mp4",
+    "poster": "previews/takayu__effect-crack-spread.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "9e62b830da5ddf1939a85ae114fa9098e21d5b07fe56920d7207f55d57f4bcd9",
+    "size": 10659,
+    "seconds": 29.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

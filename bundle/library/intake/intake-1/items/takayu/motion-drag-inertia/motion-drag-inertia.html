@@ -1,0 +1,75 @@
+<!--
+  Drag Inertia (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=drag-inertia (read 12/10/2026).
+  Con trỏ kéo núm một đoạn rồi thả, núm giữ tốc độ lúc thả và trôi chậm dần tới khi dừng trong giới hạn, giãn ngang theo tốc độ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionDragInertia(q(".di"), tl, 0, { cursor: ".ui-cursor" });
+
+  Options (defaults in brackets):
+      - grab: s (0.35)
+      - dragAt: s (0.45)
+      - drag: s (0.2, power2.in)
+      - pull: px dragged (240)
+      - glide: px it glides on (468)
+      - decay: per second (7.67: speed × 0.88 per 60 fps frame)
+      - backAt: s the mirror throw starts (1.85)
+      - end: s it lands back on the start (3.3)
+      - speedFull: px a second for the full stretch (24000)
+      - accent: speed ticks
+      - cursor: an optional cursor
+
+  Notes: Idea and numbers (TakayuStudio drag-inertia, written here): Knob 36x36 r8 in a 264x52 pill track (stops at both ends). Cursor grabs 0.35 s (knob scale 1.06 while held); 0.45-0.65 s dragged 60 px right (power2.in); released, it glides x = 117 × (1 − e^(−7.67 t)) (= speed × 0.88 per 60 fps frame), at rest by about 1.85 s. While moving scaleX = 1 + min(0.14, speed / 6000 px/s), scaleY inverse; velocity ticks trail below. Mirror throw back 1.85-3.3 s landing exactly on the start. Params: drag (60 px, 0.2 s) · glide (117 px) · decay (0.88 / khung 60 fps) · stretch (tối đa 1.14) · held (1.06).
+-->
+
+<div class="ui-wrap"><div class="di-w"><div class="di-t"><div class="di"></div></div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  var defaults = {"grab":0.35,"dragAt":0.45,"drag":0.2,"pull":240,"glide":468,"decay":7.67,"backAt":1.85,"end":3.3,"speedFull":24000,"accent":"#8b7bff","cursor":null};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, cur = o.cursor ? (host.querySelector(o.cursor) || document.querySelector(o.cursor)) : null, pin = gsap.parseEase("power2.in"), k = o.decay, ticks = [];
+        if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        for (var i = 0; i < 4; i++) { var d = document.createElement("div"); d.style.cssText = "position:absolute;height:6px;border-radius:3px;background:" + o.accent + ";opacity:0;pointer-events:none;"; (cur && cur.offsetParent ? cur.offsetParent : host).appendChild(d); ticks.push(d); }
+        var G = function (tau, T) { return (1 - Math.exp(-k * tau)) / (1 - Math.exp(-k * T)); };
+        var X = function (t) { if (t < o.dragAt) return 0; if (t < o.dragAt + o.drag) return o.pull * pin((t - o.dragAt) / o.drag); var r = o.dragAt + o.drag; if (t < o.backAt) return o.pull + o.glide * G(Math.min(t - r, o.backAt - r), o.backAt - r);
+          var e = o.pull + o.glide, b0 = o.backAt + 0.1; if (t < b0) return e; if (t < b0 + o.drag) return e - o.pull * pin((t - b0) / o.drag); var r2 = b0 + o.drag; return e - o.pull - o.glide * G(Math.min(t - r2, o.end - r2), o.end - r2); };
+        var cb = cur ? (cur.offsetParent || host).getBoundingClientRect() : host.getBoundingClientRect(), er = el.getBoundingClientRect(), bx = er.left - cb.left + er.width / 2, by = er.top - cb.top + er.height / 2;
+        return MW.drive(tl, at, o.end + 0.3, function (t) {
+          var x = X(t), v = (X(t + 0.005) - X(t - 0.005)) / 0.01, held = (t > o.grab && t < o.dragAt + o.drag) || (t > o.backAt && t < o.backAt + 0.1 + o.drag), sx = 1 + Math.min(0.14, Math.abs(v) / o.speedFull);
+          gsap.set(el, { x: x, scaleX: sx * (held ? 1.06 : 1), scaleY: (held ? 1.06 : 1) / sx });
+          ticks.forEach(function (d, i) { var len = Math.min(120, Math.abs(v) * 0.05) * (1 - i * 0.2); d.style.width = len + "px"; d.style.left = bx + x - Math.sign(v) * (60 + i * 30) - (v > 0 ? len : 0) + "px"; d.style.top = by + el.offsetHeight * 0.75 + i * 12 + "px"; d.style.opacity = Math.abs(v) > 40 ? String(0.6 - i * 0.12) : "0"; });
+          if (cur) { var cxp = held ? bx + x : t < o.grab ? bx + 260 * (1 - Math.min(1, t / o.grab)) : bx + X(Math.min(t, o.dragAt + o.drag)) * (t < o.backAt ? 1 : 0) + (t >= o.backAt ? X(o.backAt) - (t > o.backAt + 0.1 ? o.pull * pin(Math.min(1, (t - o.backAt - 0.1) / o.drag)) : 0) : 0); gsap.set(cur, { x: cxp - 12, y: by - 6 + (t < o.grab ? 200 * (1 - t / o.grab) : 0), scale: held ? 0.86 : 1, transformOrigin: "20% 10%" }); }
+        });
+      };
+  MW.motionDragInertia = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

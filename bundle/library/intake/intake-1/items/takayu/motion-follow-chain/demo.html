@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Follow Through - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.fl { position: absolute; left: 260px; right: 260px; top: 860px; height: 4px; border-radius: 2px; background: #262c3a; } .fc { position: absolute; left: 400px; top: 660px; width: 200px; height: 200px; border-radius: 30px; background: linear-gradient(150deg, #a693ff, #6a4cf0); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4">
+<div class="fl"></div><div class="fc"></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"segments":5,"seg":50,"k":240,"ratio":0.26,"lean":0.46,"limit":66,"distance":900,"move":0.88,"backAt":2,"color":"#c9d2ea","tip":"#ff5d8f"};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, io = gsap.parseEase("power2.inOut"), ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg"), pl = document.createElementNS(ns, "polyline"), tip = document.createElementNS(ns, "circle"), dt = 1 / 240, n = o.segments;
+        if (getComputedStyle(host).position === "static") host.style.position = "relative"; svg.setAttribute("width", host.clientWidth); svg.setAttribute("height", host.clientHeight); svg.style.cssText = "position:absolute;left:0;top:0;overflow:visible;pointer-events:none;";
+        pl.setAttribute("fill", "none"); pl.setAttribute("stroke", o.color); pl.setAttribute("stroke-width", "10"); pl.setAttribute("stroke-linecap", "round"); pl.setAttribute("stroke-linejoin", "round"); tip.setAttribute("r", "18"); tip.setAttribute("fill", o.tip); svg.appendChild(pl); svg.appendChild(tip); host.appendChild(svg);
+        var bx = el.offsetLeft + el.offsetWidth / 2, by = el.offsetTop, X = function (t) { return o.distance * (io(Math.max(0, Math.min(1, t / o.move))) - io(Math.max(0, Math.min(1, (t - o.backAt) / o.move)))); };
+        return MW.drive(tl, at, o.backAt + o.move + 1, function (t) {
+          var p = [], v = [], i; for (i = 0; i < n; i++) { p.push(0); v.push(0); }
+          for (var s = 0; s <= t; s += dt) { var x = X(s); for (i = 0; i < n; i++) { var k = o.k / (1 + 0.8 * i), c = 2 * o.ratio * Math.sqrt(k); v[i] += (k * (x - p[i]) - c * v[i]) * dt; p[i] += v[i] * dt; } }
+          var bxx = X(t); gsap.set(el, { x: bxx }); var px = bx + bxx, py = by, pts = [px.toFixed(1) + "," + py.toFixed(1)], ang = 0;
+          for (i = 0; i < n; i++) { ang = Math.max(-o.limit, Math.min(o.limit, o.lean * (p[i] - bxx))) * Math.PI / 180; px += o.seg * Math.sin(ang); py -= o.seg * Math.cos(ang); pts.push(px.toFixed(1) + "," + py.toFixed(1)); }
+          pl.setAttribute("points", pts.join(" ")); tip.setAttribute("cx", px); tip.setAttribute("cy", py);
+        });
+      };
+  MW.motionFollowChain = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionFollowChain(q(".fc"), tl, 0.2, {});
+          tl.set({}, {}, 4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

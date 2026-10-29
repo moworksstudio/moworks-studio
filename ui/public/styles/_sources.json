@@ -1,0 +1,128 @@
+{
+ "general": {
+  "file": "styles/general.jpg",
+  "block": "glass-shard-title",
+  "source": "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/blocks/glass-shard-title.png",
+  "bytes": 448036,
+  "size": [
+   960,
+   540
+  ],
+  "author": "HeyGen (HyperFrames)",
+  "licence": "Apache-2.0",
+  "item": "https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/registry/blocks/glass-shard-title",
+  "made": "the block's catalog picture from HyperFrames, as a 960 px JPEG"
+ },
+ "hf-explainer": {
+  "file": "styles/hf-explainer.jpg",
+  "block": "code-slice-hero",
+  "source": "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/blocks/code-slice-hero.png",
+  "bytes": 81944,
+  "size": [
+   960,
+   540
+  ],
+  "author": "HeyGen (HyperFrames)",
+  "licence": "Apache-2.0",
+  "item": "https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/registry/blocks/code-slice-hero",
+  "made": "the block's catalog picture from HyperFrames, as a 960 px JPEG"
+ },
+ "hf-launch": {
+  "file": "styles/hf-launch.jpg",
+  "block": "app-showcase",
+  "source": "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/blocks/app-showcase.png",
+  "bytes": 1054050,
+  "size": [
+   960,
+   540
+  ],
+  "author": "HeyGen (HyperFrames)",
+  "licence": "Apache-2.0",
+  "item": "https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/registry/blocks/app-showcase",
+  "made": "the block's catalog picture from HyperFrames, as a 960 px JPEG"
+ },
+ "hf-music": {
+  "file": "styles/hf-music.jpg",
+  "block": "spotify-card",
+  "source": "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/blocks/spotify-card.png",
+  "bytes": 227947,
+  "size": [
+   960,
+   1707
+  ],
+  "author": "HeyGen (HyperFrames)",
+  "licence": "Apache-2.0",
+  "item": "https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/registry/blocks/spotify-card",
+  "made": "the block's catalog picture from HyperFrames, as a 960 px JPEG"
+ },
+ "hf-data": {
+  "file": "styles/hf-data.jpg",
+  "block": "data-chart",
+  "source": "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/blocks/data-chart.png",
+  "bytes": 68367,
+  "size": [
+   960,
+   540
+  ],
+  "author": "HeyGen (HyperFrames)",
+  "licence": "Apache-2.0",
+  "item": "https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/registry/blocks/data-chart",
+  "made": "the block's catalog picture from HyperFrames, as a 960 px JPEG"
+ },
+ "hf-vertical": {
+  "file": "styles/hf-vertical.jpg",
+  "block": "tiktok-follow",
+  "source": "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/blocks/tiktok-follow.png",
+  "bytes": 33655,
+  "size": [
+   960,
+   1706
+  ],
+  "author": "HeyGen (HyperFrames)",
+  "licence": "Apache-2.0",
+  "item": "https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/registry/blocks/tiktok-follow",
+  "made": "the block's catalog picture from HyperFrames, as a 960 px JPEG"
+ },
+ "hf-3d": {
+  "file": "styles/hf-3d.jpg",
+  "block": "orbit-card",
+  "source": "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/blocks/orbit-card.png",
+  "bytes": 20662,
+  "size": [
+   960,
+   540
+  ],
+  "author": "HeyGen (HyperFrames)",
+  "licence": "Apache-2.0",
+  "item": "https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/registry/blocks/orbit-card",
+  "made": "the block's catalog picture from HyperFrames, as a 960 px JPEG"
+ },
+ "hf-character": {
+  "file": "styles/hf-character.jpg",
+  "block": "lottie-character-walk",
+  "source": "https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/registry/blocks/lottie-character-walk",
+  "bytes": 8086,
+  "size": [
+   960,
+   540
+  ],
+  "author": "HeyGen (HyperFrames)",
+  "licence": "Apache-2.0",
+  "item": "https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/registry/blocks/lottie-character-walk",
+  "made": "a frame of the block's preview as the app renders it (the block has no catalog picture), as a 960 px JPEG"
+ },
+ "slideshow": {
+  "file": "styles/slideshow.jpg",
+  "block": "cuboid-carousel",
+  "source": "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/blocks/cuboid-carousel.png",
+  "bytes": 65900,
+  "size": [
+   960,
+   540
+  ],
+  "author": "HeyGen (HyperFrames)",
+  "licence": "Apache-2.0",
+  "item": "https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/registry/blocks/cuboid-carousel",
+  "made": "the block's catalog picture from HyperFrames, as a 960 px JPEG"
+ }
+}

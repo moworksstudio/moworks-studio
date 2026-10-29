@@ -1,0 +1,52 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-vertical-pager-snap",
+  "type": "hyperframes:block",
+  "title": "Section Snap",
+  "description": "Ngón tay vuốt trang dọc toàn màn hình: vuốt chưa quá nửa thì trang bật về, quá nửa thì trang bám khít sang phần kế tiếp.",
+  "tags": [
+    "snap",
+    "pager",
+    "swipe",
+    "scroll",
+    "web-scroll",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-vertical-pager-snap.html",
+      "target": "compositions/components/ui-vertical-pager-snap.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-vertical-pager-snap",
+    "author": "takayu",
+    "call": "MW.uiVerticalPagerSnap(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiVerticalPagerSnap",
+    "options": {},
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=section-snap",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=section-snap (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio section-snap, written here): Phone viewport 96x160, three full-height panels (160 px). 0.3-0.8 s finger drags content up 50 px (power2.inOut); released under 50 % it returns to 0 in 0.85 s power3.out. 1.85-2.35 s drag to 100 px; released over 50 % it snaps to 160 (next panel) in 0.85 s power3.out; hold; reset 3.9-4.3 s. Finger dot fades in 0.1 s before each drag, out 0.1 s after; a small page map frame follows. Params: panel (160 px) · threshold (50 %) · snap (0.85 s, power3.out) · drags [[giây, px]]. Released under half a panel it springs back; over half it snaps to the next panel (0.85 s power3.out).",
+    "titleVi": "Trang dọc bám khít từng phần"
+  }
+}

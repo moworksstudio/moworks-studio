@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-scroll-progress-bar",
+  "hash": "c41eb6e4941603ef",
+  "at": "2026-10-17T09:23:15.226Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-scroll-progress-bar.mp4",
+    "poster": "previews/takayu__ui-scroll-progress-bar.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a2f7fbf69ae74943693c4758a5dadddce6c9748efd892e7bad7bd3052c55f601",
+    "size": 5771,
+    "seconds": 27.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

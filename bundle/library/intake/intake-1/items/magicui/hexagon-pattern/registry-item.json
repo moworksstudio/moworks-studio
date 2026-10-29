@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "hexagon-pattern",
+  "type": "hyperframes:component",
+  "title": "Hexagon Pattern",
+  "description": "A honeycomb background (flat-top or pointy-top hexagons) with optional gaps, dashes and filled cells, for tech, science and gaming frames.",
+  "tags": [
+    "hexagon",
+    "honeycomb",
+    "pattern",
+    "background",
+    "tech",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "hexagon-pattern.html",
+      "target": "compositions/components/hexagon-pattern.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/hexagon-pattern",
+    "author": "magicui",
+    "call": "MW.hexagonPattern(q(\".mw-hexagon-pattern\"), tl, 0, { radius: 64, color: \"rgba(156,163,175,0.35)\", hexagons: [[10,4],[11,5],[12,4],[8,6],[13,6],[9,3],[14,3],[10,7],[12,7]], drift: [12, 6], hold: 6 });",
+    "function": "MW.hexagonPattern",
+    "options": {
+      "radius": "40",
+      "gap": "0",
+      "x": "-1",
+      "y": "-1",
+      "direction": "horizontal | vertical (horizontal)",
+      "strokeDasharray": "'0'",
+      "hexagons": "[[col, row], ...]",
+      "color": "rgba(156,163,175,0.3)",
+      "drift": "[x, y] px/s ([0, 0])",
+      "hold": "seconds (10)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/hexagon-pattern.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/hexagon-pattern.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Static upstream; drift is this port's option. hexagons lists [col, row] cells to fill.",
+    "titleVi": "Nền tổ ong lục giác"
+  }
+}

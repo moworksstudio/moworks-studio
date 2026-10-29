@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-glitch-in",
+  "hash": "40ee5a780bc5aa40",
+  "at": "2026-10-17T10:20:14.038Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__effect-glitch-in.mp4",
+    "poster": "previews/takayu__effect-glitch-in.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "5574e59a72b6628ad9da484490e04eb874fc32661df117d1ad3a67481896bf93",
+    "size": 15512,
+    "seconds": 26.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

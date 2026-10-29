@@ -1,0 +1,75 @@
+<!--
+  Stagger: From Center (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=t-stagger-center (read 12/10/2026).
+  Các ô hiện lan ra từ tâm lưới như gợn sóng.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionStaggerCenter(q(".sc"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - from: center
+      - each: s per tile of distance (0.07; 0.04 in the recipe)
+      - cols: tiles per row (8)
+      - k: spring stiffness (260)
+      - c: damping (20: about 8 % overshoot)
+      - outAt: s they fade (2.0)
+      - spread: 
+      - rowEach: 
+      - seed: 
+
+  Notes: Idea and numbers (TakayuStudio t-stagger-center, written here): 8 × 4 grid of 24 px tiles (32 px pitch): each tile starts at its distance from the grid centre × 40 ms (recipe; site demo × 70 ms per cell), 400 ms power2.out each (demo: spring k 260, c 20). Rule: ripples for hero entrances and spreading reactions. Params: each (40 ms mỗi đơn vị khoảng cách) · duration (0.4 s) · from (center). A ripple from the middle: for hero entrances and spreading reactions.
+-->
+
+<div class="st"><div class="sc"><i class="a"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":"center","each":0.07,"cols":8,"k":260,"c":20,"outAt":2,"spread":0,"rowEach":0,"seed":1};
+  var run = function (el, tl, at, o) {
+    var it = Array.prototype.slice.call(el.children), n = o.cols, sp = MW.spring(o.k, o.c), r = MW.rand(o.seed), rows = Math.ceil(it.length / n), cx = (n - 1) / 2, cy = (rows - 1) / 2;
+    var D = it.map(function (_, i) { var col = i % n, row = Math.floor(i / n); if (o.from === "center") return Math.hypot(col - cx, row - cy) * o.each; if (o.from === "edges") return (cx - Math.abs(col - cx)) * o.each + row * o.rowEach; if (o.from === "random") return r() * o.spread; if (o.from === "diagonal") return (row + col) * o.each; return i * o.each; });
+    return MW.drive(tl, at, o.outAt + 0.3, function (t) { var f = 1 - Math.max(0, Math.min(1, (t - o.outAt) / 0.25)); it.forEach(function (x, i) { var u = t - D[i]; gsap.set(x, { scale: u > 0 ? sp.at(u) : 0 }); x.style.opacity = String(f); }); });
+  };
+  MW.motionStaggerCenter = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

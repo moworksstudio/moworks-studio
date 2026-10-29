@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-collapse-to-center",
+  "type": "hyperframes:component",
+  "title": "Collapse To Center",
+  "description": "Các ký tự từ hai đầu lần lượt bị hút vào tâm dòng chữ, thu nhỏ và mờ đi, kết bằng một chấm sáng loé thành vòng.",
+  "tags": [
+    "exit",
+    "letters",
+    "collapse",
+    "center",
+    "text-exit",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-collapse-to-center.html",
+      "target": "compositions/components/text-collapse-to-center.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-collapse-to-center",
+    "author": "takayu",
+    "call": "MW.textCollapseToCenter(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textCollapseToCenter",
+    "options": {
+      "duration": "s per letter (0.5)",
+      "stagger": "s from both ends inward (0.05)",
+      "cap": "s (0.4)",
+      "ease": "(cubic-bezier(.55,.055,.675,.19))",
+      "accent": "",
+      "outAt": "s (0.9)",
+      "ringAt": "s the ring pulses (1.45)",
+      "backAt": "s (2.4)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-collapse-to-center",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-collapse-to-center (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-collapse-to-center, written here): Per char: move to the text box centre (offset = box centre − char centre, measured, x and y), scale 1 → 0, opacity 1 → 0 (demo only to 0.6), 0.5 s easeInCubic (CSS cubic-bezier(.55,.055,.675,.19), labelled power3.in); stagger 30 ms from the edges inward (outer chars first; demo 50 ms capped 0.4 s), from 0.9 s. Demo: a centre dot grows 1.5 → 5.5 px with the collapse, then an accent ring 6 → 28 px pulses out 1.45–1.9 s. Loop: text fades back 2.4–2.9 s; loop 3 s. Params: duration (0.5 s) · stagger: từ hai đầu vào (0.03 s) · ease (easeInCubic) · ring: vòng loé ở tâm (bật).",
+    "titleVi": "Ký tự hút về một điểm giữa"
+  }
+}

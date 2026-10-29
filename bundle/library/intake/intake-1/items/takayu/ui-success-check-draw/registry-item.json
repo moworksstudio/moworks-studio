@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-success-check-draw",
+  "type": "hyperframes:block",
+  "title": "Success Check Draw",
+  "description": "Vòng tròn tự vẽ theo chiều kim đồng hồ từ đỉnh, rồi dấu tích vẽ ra bên trong, cả khối phồng nhẹ một nhịp và dòng chữ hiện dưới.",
+  "tags": [
+    "success",
+    "check",
+    "draw",
+    "stroke",
+    "loading-data",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-success-check-draw.html",
+      "target": "compositions/components/ui-success-check-draw.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.7,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-success-check-draw",
+    "author": "takayu",
+    "call": "MW.uiSuccessCheckDraw(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiSuccessCheckDraw",
+    "options": {
+      "radius": "px (34)",
+      "stroke": "px (5)",
+      "pop": "scale (1.06)",
+      "label": "",
+      "outAt": "s (2.3)",
+      "loop": "s (2.7)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=success-check",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=success-check (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio success-check, written here): Faint track ring r34 (2 px) fades in 0-0.25 s. Accent ring 5 px, round caps, draws from 12 o'clock clockwise over 0.25-0.95 s power2.inOut. Check path (−15,1) → (−5,11) → (16,−12) draws over 0.9-1.3 s power2.out. Pop scale 1 → 1.06 → 1 (half sine) over 1.28-1.55 s. Label fades in rising 6 px over 1.2-1.5 s. All fade out 2.3-2.55 s. Recipe: ring 8-40 %, check 39-65 % of the loop. Params: ring (0.7 s) · check (0.4 s) · pop (1.06) · radius (34 px) · stroke (5 px). The ring draws from 12 o'clock (0.25–0.95 s power2.inOut), then the check (0.9–1.3 s power2.out); a half-sine pop and the label rising 6 px follow.",
+    "titleVi": "Vòng tròn vẽ ra rồi dấu tích"
+  }
+}

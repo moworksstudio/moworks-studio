@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "hand-brush-write-on",
+  "type": "hyperframes:component",
+  "title": "Brush Write-on",
+  "description": "Chữ hay hình vẽ hiện ra từng nét theo đúng thứ tự viết, nét sau bắt đầu ngay khi nét trước xong.",
+  "tags": [
+    "write-on",
+    "brush",
+    "stroke",
+    "handwritten",
+    "texture-look",
+    "smooth",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "hand-brush-write-on.html",
+      "target": "compositions/components/hand-brush-write-on.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/hand-brush-write-on",
+    "author": "takayu",
+    "call": "MW.handBrushWriteOn(q(\".bw\"), tl, 0, {});",
+    "function": "MW.handBrushWriteOn",
+    "options": {
+      "duration": "s per stroke (0.4)",
+      "gap": "s between strokes (0.06)",
+      "start": "s (0.2)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=lk-handwrite",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=lk-handwrite (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio lk-handwrite, written here): Strokes drawn in writing order, each 200-400 ms ease-in-out, 60 ms between strokes, ~1500 ms total (recipe). Demo: 4 polyline strokes (9 px, round caps and joins), stroke i drawn by length from 0.2 + 0.5 i s over 400 ms ease-in-out. Params: duration mỗi nét (0.2–0.4 s) · gap (60 ms) · width. Strokes are drawn in document order, so put them in writing order.",
+    "titleVi": "Viết từng nét cọ"
+  }
+}

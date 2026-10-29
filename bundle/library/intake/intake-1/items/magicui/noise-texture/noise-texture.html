@@ -1,0 +1,55 @@
+<!--
+  Noise Texture (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/noise-texture.tsx.
+  A subtle grey fractal-noise overlay for a grainy surface; static as upstream, or re-seeded at a set rate for moving grain.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.noiseTexture(q(".mw-noise-texture"), tl, 0, { slope: 0.6, noiseOpacity: 0.9, animate: true, hold: 5 });
+
+  Options (defaults in brackets):
+      - frequency: 0.4
+      - octaves: 6
+      - slope: 0.15
+      - noiseOpacity: 0.6
+      - layerOpacity: 0.75 (dark), 0.5 (light)
+      - animate: false
+      - fps: 12
+      - hold: seconds when animated (10)
+
+  Notes: Static upstream; animate / fps are this port's options (each frame a new feTurbulence seed).
+-->
+
+<svg class="mw-noise-texture"></svg>
+
+<style>
+.mw-noise-texture { pointer-events: none; position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; user-select: none; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"frequency":0.4,"octaves":6,"slope":0.15,"noiseOpacity":0.6,"layerOpacity":0.75,"animate":false,"fps":12,"hold":10};
+  var run = function (el, tl, at, o) {
+      var id = "mw-noise-" + (MW.__nt = (MW.__nt || 0) + 1);
+      el.style.opacity = o.layerOpacity;
+      el.innerHTML = '<filter id="' + id + '"><feTurbulence type="fractalNoise" baseFrequency="' + o.frequency + '" numOctaves="' + o.octaves + '" stitchTiles="stitch" seed="0"/>' +
+        '<feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="linear" slope="' + o.slope + '"/><feFuncG type="linear" slope="' + o.slope + '"/><feFuncB type="linear" slope="' + o.slope + '"/></feComponentTransfer></filter>' +
+        '<rect width="100%" height="100%" filter="url(#' + id + ')" opacity="' + o.noiseOpacity + '"/>';
+      if (!o.animate) return at;
+      var turb = el.querySelector("feTurbulence"), s = { t: 0 }, set = function () { turb.setAttribute("seed", Math.floor(s.t * o.fps)); };
+      set();
+      tl.fromTo(s, { t: 0 }, { t: o.hold, duration: o.hold, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + o.hold;
+    };
+  MW.noiseTexture = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

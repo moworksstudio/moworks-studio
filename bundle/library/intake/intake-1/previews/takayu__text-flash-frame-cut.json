@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-flash-frame-cut",
+  "hash": "75ed121a59d474de",
+  "at": "2026-10-17T08:03:50.113Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-flash-frame-cut.mp4",
+    "poster": "previews/takayu__text-flash-frame-cut.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "dbe1706497a466052f931cfe8290c40d6ba1a167b1fa51ba599b25dd3a77d235",
+    "size": 25872,
+    "seconds": 28.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

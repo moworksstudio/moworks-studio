@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/animated-shiny-text",
+  "hash": "02e884af839d628a",
+  "at": "2026-10-17T05:55:38.082Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__animated-shiny-text.mp4",
+    "poster": "previews/magicui__animated-shiny-text.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "60a1222aab3239d28431d344e2f2381eb8ce3ae7da97b0e559ce11c3ce9949fb",
+    "size": 10564,
+    "seconds": 33.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

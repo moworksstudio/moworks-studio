@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-iris-open",
+  "type": "hyperframes:component",
+  "title": "Iris",
+  "description": "Một vòng tròn từ giữa khung mở rộng tới góc xa nhất, lộ cảnh mới.",
+  "tags": [
+    "iris",
+    "circle",
+    "clip-path",
+    "transitions",
+    "crisp",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "transition-iris-open.html",
+      "target": "compositions/components/transition-iris-open.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/transition-iris-open",
+    "author": "takayu",
+    "call": "MW.transitionIrisOpen(q(\".tk-b\"), tl, 1.2, {});",
+    "function": "MW.transitionIrisOpen",
+    "options": {
+      "duration": "s (0.6; a 2-4 frame iris also works)",
+      "x": "centre, 0-1 of the width (0.5)",
+      "y": "centre, 0-1 of the height (0.5)",
+      "ease": "power2.in (cubic); the site's demo eases in-out",
+      "from": "the outgoing scene"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tr-iris",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tr-iris (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tr-iris, written here): Incoming scene inside a circle centred on the frame, radius 0 -> the centre-to-corner distance (hypot(W, H) / 2; the recipe writes hypot(W, H)), 600 ms easeInCubic (the demo eases in-out); outgoing scene still; no rim, no dimming. A fast 2-4 frame iris also works. Params: duration (0.6 s) · x, y: tâm (giữa khung) · ease (power2.in).",
+    "titleVi": "Mở vòng tròn từ tâm"
+  }
+}

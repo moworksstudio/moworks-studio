@@ -1,0 +1,110 @@
+/* Screens: Voice-over, speech-to-text models, service keys, Export, Checks, Port to AE. Tokens in tokens.css. */
+.radio-card[aria-pressed="true"] { border-color: var(--select); box-shadow: 0 0 0 1px var(--select) inset; }
+.form-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--sp-3); }
+@media (max-width: 1000px) {.radio-cards.four { grid-template-columns: repeat(2, 1fr); } }
+.ico.muted { color: var(--text-muted); }
+.ico.spin { color: var(--status-pending); }
+.kv.small { font-size: var(--fs-meta); grid-template-columns: 6rem minmax(0, 1fr); }
+a.ext { display: inline-flex; align-items: center; gap: 3px; color: var(--accent-ink); text-decoration: none; overflow-wrap: anywhere; }
+@media (hover: hover) and (pointer: fine) { a.ext:hover { text-decoration: underline; } }
+
+/* model and key cards */
+.model-card { border: 0; border-bottom: 1px solid var(--border); border-radius: 0; background: transparent; padding: 0.75rem 0; display: flex; flex-direction: column; gap: 0.6667rem; }
+.model-head { display: flex; align-items: flex-start; gap: 0.6667rem; }
+.model-head .t { font-weight: var(--strong-weight); display: flex; align-items: center; flex-wrap: wrap; gap: 0.2667rem; }
+.model-head .d { font-size: var(--fs-meta); color: var(--text-muted); margin-top: 2px; }
+.model-head .end { margin-left: auto; display: inline-flex; align-items: center; gap: 0.2667rem; white-space: nowrap; }
+.model-actions { display: flex; flex-wrap: wrap; gap: 0.5333rem; align-items: center; }
+.key-edit { display: flex; flex-wrap: wrap; gap: 0.5333rem; align-items: center; }
+.key-edit .input { flex: 1; min-width: 14.6667rem; }
+
+/* progress */
+.progress-line { display: flex; align-items: center; gap: 0.6667rem; font-size: var(--fs-meta); }
+.progress-line.big { align-items: flex-start; font-size: var(--fs-control); }
+.progress-line.big > div { display: flex; flex-direction: column; gap: 0.4rem; }
+.bar { height: 0.4rem; border-radius: var(--r-pill); background: var(--surface-3); overflow: hidden; flex: 1; min-width: 5.3333rem; }
+.bar > span { display: block; height: 100%; background: var(--state-run); border-radius: var(--r-pill); transition: width var(--t-dialog) var(--ease-out); }
+.dropzone .bar { width: 16rem; flex: none; }
+
+/* voice-over */
+.radio-cards.four { grid-template-columns: repeat(4, 1fr); }
+.player-row { display: flex; align-items: center; gap: 0.8rem; }
+.player-row .timecode { font-size: var(--fs-control); color: var(--text-secondary); white-space: nowrap; min-width: 6.1333rem; }
+.waveform { flex: 1; height: 4.2667rem; min-width: 0; cursor: pointer; border-radius: var(--r-md); background: var(--surface-1); display: block; }
+.waveform rect { fill: var(--border-strong); }
+.waveform rect.played { fill: var(--accent); }
+.waveform .head { stroke: var(--accent); stroke-width: 0.6; vector-effect: non-scaling-stroke; }
+.waveform:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.asr-controls { display: flex; flex-wrap: wrap; gap: 0.6667rem; align-items: center; }
+.field-inline { display: inline-flex; align-items: center; gap: 0.4rem; font-size: var(--fs-control); color: var(--text-secondary); }
+.field-inline .select { width: auto; height: 2.1333rem; }
+.transcript-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6667rem; }
+.transcript-tools .search { width: 17.3333rem; }
+.transcript { display: flex; flex-direction: column; gap: 2px; max-height: 37.3333rem; overflow-y: auto; padding-right: 0.2667rem; }
+.seg { display: grid; grid-template-columns: 7.7333rem minmax(0, 1fr) 1.2rem; gap: 0.5333rem; align-items: start; padding: 0.2667rem; border-radius: var(--r-sm); }
+.seg.current { background: var(--accent-soft); }
+.seg-time { background: none; border: 0; color: var(--text-primary); font-size: var(--fs-meta); text-align: left; padding: 0.5333rem 0.2667rem; cursor: pointer; border-radius: var(--r-sm); }
+@media (hover: hover) and (pointer: fine) { .seg-time:hover { background: var(--surface-2); } }
+.seg-time .muted { margin-left: 2px; }
+.seg-text { min-height: 2.2667rem; resize: vertical; font-size: var(--fs-body); line-height: 1.45; padding: 0.4rem 0.5333rem; }
+.seg-flag { color: var(--warning); padding-top: 0.6rem; }
+
+/* lists */
+.checklist { display: flex; flex-direction: column; gap: 0.5333rem; font-size: var(--fs-control); }
+.checklist li { display: flex; align-items: flex-start; gap: 0.5333rem; }
+.checklist li > svg { flex: none; margin-top: 2px; }
+.checklist li .btn { margin-left: auto; }
+.file-list { display: flex; flex-direction: column; }
+.file-list li { display: flex; align-items: center; gap: 0.6667rem; padding: 0.5333rem 0; border-bottom: 1px solid var(--border); font-size: var(--fs-control); }
+.file-list .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+pre.log { max-height: 17.3333rem; overflow: auto; white-space: pre-wrap; font-size: var(--fs-dense); }
+
+/* checks */
+.qa-check { border-top: 1px solid var(--border); padding-top: 0.6667rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.qa-check:first-of-type { border-top: 0; padding-top: 0; }
+.qa-check-head { display: flex; align-items: center; gap: 0.5333rem; flex-wrap: wrap; }
+.finding { display: grid; grid-template-columns: 4.2667rem minmax(0, 1fr) auto; gap: 0.5333rem; align-items: center; padding: 0.4rem 0; border-bottom: 1px dashed var(--border); font-size: var(--fs-control); }
+.finding .where { color: var(--text-secondary); }
+.finding .acts { display: flex; gap: 0.2667rem; }
+.contact-sheet { display: grid; grid-template-columns: repeat(auto-fill, minmax(13.3333rem, 1fr)); gap: 0.6667rem; }
+.still { padding: 0; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--app-bg); overflow: hidden; cursor: pointer; display: flex; flex-direction: column; text-align: left; }
+.still img { width: 100%; aspect-ratio: 16 / 9; object-fit: contain; background: var(--media-bg); display: block; }
+.still span { font-size: var(--fs-dense); color: var(--text-secondary); padding: 0.2667rem 0.4rem; }
+@media (hover: hover) and (pointer: fine) { .still:hover { border-color: var(--accent-line); } }
+
+/* Exit */
+.app-closed { position: fixed; inset: 0; z-index: 100; background: var(--app-bg); display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.6667rem; color: var(--text-secondary); text-align: center; }
+.app-closed h2 { color: var(--text-primary); font-size: var(--fs-title); }
+.field-inline.hints { flex: 1; min-width: 17.3333rem; }
+.field-inline.hints .input { flex: 1; height: 2.1333rem; }
+.model-card:last-child { border-bottom: 0; }
+/* The Voice sheet as wide as New project with room above and below; the
+   sources compact (what each is on hover); the voice and its settings left, the script right; each setting a narrow field, its hint on hover */
+.sheet-overlay > .sheet.narrow:has(> .sheet-body > .vo-page) { width: min(84rem, calc(100vw - 2 * var(--sp-5))); max-height: calc(100vh - 2 * var(--sp-7)); }
+/* the source cards as designed (name, a one-line description in small print, the key's chip) */
+.vo-src .radio-card .d { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vo-src .radio-card { min-height: 6.5rem; }          /* as large as with the chip on its own line */
+.vo-src .radio-card .t .chip { margin-left: auto; flex: none; font-weight: normal; }
+.vo-info { color: var(--text-muted); margin-left: 0.3rem; vertical-align: -1px; cursor: help; flex: none; }
+/* the voice and its settings left (40 %), the script right (60 %), both columns the same height: the script fills its column */
+.vo-tts { display: grid; grid-template-columns: minmax(0, 40fr) minmax(0, 60fr); gap: var(--sp-5); align-items: stretch; }
+.vo-tts-l, .vo-tts-r { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; }
+.vo-tts-r .vo-script { flex: 1; min-height: 0; }
+.vo-script .textarea { flex: 1 1 0; min-height: 10rem; height: auto; resize: none; }
+.vo-go { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-meta); }
+.vo-settings[open] > summary { margin-bottom: var(--sp-2); }
+/* the settings two to a row (Speed, Stability / Similarity, Style / the tick box) */
+.vo-set-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: var(--sp-2) var(--sp-3); }
+.vo-set { gap: 0.3rem; min-width: 0; }
+
+.vo-set > span:first-child { display: block; font-size: var(--fs-meta); line-height: 1.2; white-space: nowrap; }
+.vo-set > span:first-child .vo-info { display: inline-block; margin-left: 0.2rem; }
+.vo-set .input { width: 100%; min-width: 0; }
+.vo-bool { display: inline-flex; align-items: center; gap: 0.4rem; height: var(--ctl-lg); font-size: var(--fs-meta); white-space: nowrap; cursor: pointer; }
+.vo-settings > .clink { margin-top: var(--sp-2); white-space: nowrap; }
+.vo-settings > summary, .vo-tts-l .field > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 900px) { .vo-tts { grid-template-columns: 1fr; } }
+/* the voice list is the app's own dropdown, as wide as its field, opening down */
+.vo-pick-list, ul.vo-pick-list { width: 100%; max-height: min(22rem, 50vh); }
+.vo-pick .pick-btn { height: var(--ctl); }

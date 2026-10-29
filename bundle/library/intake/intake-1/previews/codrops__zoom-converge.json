@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/zoom-converge",
+  "hash": "9df0801df4526032",
+  "at": "2026-10-17T06:40:26.385Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Archivo"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__zoom-converge.mp4",
+    "poster": "previews/codrops__zoom-converge.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b8dbef0cc9eacf9da46743ee7917bc6695726f0d14aa6f66d0de7eea6bf24554",
+    "size": 21110,
+    "seconds": 31.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-optimistic-update",
+  "type": "hyperframes:block",
+  "title": "Optimistic Update",
+  "description": "Bấm ô, dòng tích ngay lập tức và hiện ĐANG CHỜ với vòng xoay nhỏ, vài nhịp sau đổi thành ĐÃ XÁC NHẬN màu xanh.",
+  "tags": [
+    "state",
+    "pending",
+    "confirm",
+    "ui",
+    "loading-data",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-optimistic-update.html",
+      "target": "compositions/components/ui-optimistic-update.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-optimistic-update",
+    "author": "takayu",
+    "call": "MW.uiOptimisticUpdate(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiOptimisticUpdate",
+    "options": {
+      "tapAt": "s (0.35)",
+      "confirmAt": "s the server answers (1.95)",
+      "bump": "scale (1.12, 0.2 s)",
+      "spin": "rad a second (9)",
+      "resetAt": "s (2.85)",
+      "task": "",
+      "labels": "[pending, confirmed]",
+      "lanes": "[interface, server] timeline lanes",
+      "loop": "s (3.2)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=optimistic-update",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=optimistic-update (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio optimistic-update, written here): Row 240x40 r10 with a checkbox, label and status. Tap at 0.35 s: the checkbox fills accent at once with a bump 1 → 1.12 → 1 (0.2 s), the row tints accent 14 %; status PENDING with a small spinner arc (r5, 9 rad/s) until 1.95 s; then '✓ CONFIRMED' (green) fades in 0.25 s and the tint fades out 0.5 s; reset 2.85-3.1 s. The UI / server timeline lanes below are the lesson part (optional). Params: tap (0.35 s) · confirm (1.95 s) · bump (1.12) · labels (PENDING → ✓ CONFIRMED). The row changes at once on the tap (accent tint 14 %, checkbox bump), shows a pending spinner, then turns confirmed when the server lane catches up.",
+    "titleVi": "Đổi trạng thái ngay, xác nhận sau"
+  }
+}

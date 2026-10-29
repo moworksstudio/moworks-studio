@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-melt-drip",
+  "type": "hyperframes:component",
+  "title": "Melt Drip",
+  "description": "Phần dưới của chữ chảy dài xuống như sáp nóng, mỗi chữ một nhịp, từ vệt dài nhất một giọt rơi xuống.",
+  "tags": [
+    "melt",
+    "liquid",
+    "drip",
+    "distortion",
+    "text-distortion-glitch",
+    "heavy",
+    "soft",
+    "distortion-glitch",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-melt-drip.html",
+      "target": "compositions/components/text-melt-drip.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-melt-drip",
+    "author": "takayu",
+    "call": "MW.textMeltDrip(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textMeltDrip",
+    "options": {
+      "drip": "[min, max] px of the drips ([32, 264])",
+      "duration": "s per letter (1.6, ease-in quad)",
+      "spread": "s the letters start within, in a seeded order (0.5)",
+      "start": "s (0.3)",
+      "resetAt": "s (3.0)",
+      "accent": "the falling drops",
+      "seed": "(6)",
+      "loop": "s (3.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-melt-drip",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-melt-drip (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-melt-drip, written here): Per char (seeded order, starts spread over 0.5 s): the lower half (baseline − 0.3 to + 0.26 em) stretches down per column by melt × (8 + 58 × noise(x·0.11)^1.8) px, melt 0 → 1 over 1.6 s easeInQuad (SVG: Y displacement 0 → 40 px, 2 s, spline (.55,0,1,.45), turbulence 0.02 / 0.15); tops pinned; gooey alpha (blur 4, alpha ×18 −7); Each char sheds one accent drop from its longest drip: swells 0.25 s, falls y = 220·t² px. Reset 3.0–3.5 s; loop 3.8 s. Params: drip: độ dài vệt chảy (8–66 px) · duration: mỗi chữ (1.6–2 s, ease-in) · spread: lệch giữa các chữ (0.5 s) · drops (bật). The tops stay pinned; only the lower part of each column stretches down by melt × the drip length.",
+    "titleVi": "Chữ tan chảy nhỏ giọt"
+  }
+}

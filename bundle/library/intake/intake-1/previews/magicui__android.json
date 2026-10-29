@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/android",
+  "hash": "b534db4af76e7e1c",
+  "at": "2026-10-17T06:29:47.064Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/magicui__android.mp4",
+    "poster": "previews/magicui__android.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "d7959a403d837fb2169845318692a3f47392a395cb6a69e92517e64d4895e6f8",
+    "size": 22943,
+    "seconds": 30.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

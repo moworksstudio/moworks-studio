@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-slot-shuffle",
+  "type": "hyperframes:component",
+  "title": "Slot Shuffle",
+  "description": "Mỗi ký tự là một cuộn sáu chữ ngẫu nhiên quay rồi dừng đúng chữ, ô chẵn cuộn xuống, ô lẻ cuộn lên, các ô dừng lệch nhau 0.06 giây.",
+  "tags": [
+    "slot",
+    "reel",
+    "roll",
+    "stagger",
+    "text-typing-decoding",
+    "crisp",
+    "bouncy",
+    "typing-decoding",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-slot-shuffle.html",
+      "target": "compositions/components/text-slot-shuffle.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-slot-shuffle",
+    "author": "takayu",
+    "call": "MW.textSlotShuffle(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textSlotShuffle",
+    "options": {
+      "rows": "random letters before the target (6)",
+      "duration": "s per reel (0.8)",
+      "stagger": "s (0.06, ≤ 1 s)",
+      "start": "s (0.35)",
+      "stretch": "stretch per row a second (0.035)",
+      "card": "window colour",
+      "accent": "landing underline",
+      "fadeAt": "s (3.0)",
+      "seed": "letters"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-slot-shuffle",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-slot-shuffle (read 12/10/2026)",
+      "upstream": "the site credits react-bits (MIT + Commons Clause): written from the idea only, no react-bits code"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-slot-shuffle, written here): Each char window (glyph width + 0.16 em × 1.18 em, card, radius 5 px; row pitch 1.18 em) holds a reel of 6 seeded random letters of its class + the target; the reel travels 6 rows in 0.8 s easeOutCubic (labelled power3.out), reels start 60 ms apart (capped 1 s) from 0.35 s; even slots scroll down, odd up; while fast, scaleY = 1 + min(0.45, 0.035 × rows/s), scaleX = 1/√scaleY. an accent underline appears as a reel lands. Exit fade 3.0–3.3 s; loop 3.4 s. Params: rows: số chữ ngẫu nhiên (6) · duration (0.8 s) · stagger (0.06 s) · direction: chẵn xuống / lẻ lên · stretch (0.035).",
+    "titleVi": "Từng chữ quay cuộn, ô lên ô xuống"
+  }
+}

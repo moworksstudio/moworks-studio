@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-magnetic-converge",
+  "type": "hyperframes:block",
+  "title": "Magnetic Constellation",
+  "description": "Bảy nút trên mạng lưới cùng bị hút về lõi ở giữa, mỗi nút đi 55 % quãng đường của nó nên tất cả tới cùng lúc bằng một lò xo, lõi phát vòng sóng; rồi trở về.",
+  "tags": [
+    "converge",
+    "nodes",
+    "spring",
+    "network",
+    "spatial-ui-depth",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "data-magnetic-converge.html",
+      "target": "compositions/components/data-magnetic-converge.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/data-magnetic-converge",
+    "author": "takayu",
+    "call": "MW.dataMagneticConverge(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataMagneticConverge",
+    "options": {
+      "pull": "share of each node's distance it moves (0.55)",
+      "pullAt": "s (0.45), one spring k120 c15",
+      "releaseAt": "s (2.9)",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-spatial-magnetic-constellation",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-spatial-magnetic-constellation (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-spatial-magnetic-constellation, written here): 7 nodes (r5) at fixed spots around a centre core r8 (accent). From 0.45 s every node moves toward the centre by 0.55 × its own distance on one spring k120 c15 (so all arrive together); back over 2.9-3.6 s power2.inOut. Ghost rings and dashed tethers mark the start spots; a polygon joins the nodes plus 4 spokes. While attracted, a ring pulses from the core every 0.7 s (r 8 → 48, fading). Params: pull (0.55 × khoảng cách) · spring (k120 c15) · release (2.9-3.6 s) · pulse (0.7 s).",
+    "titleVi": "Các nút cùng hút về tâm"
+  }
+}

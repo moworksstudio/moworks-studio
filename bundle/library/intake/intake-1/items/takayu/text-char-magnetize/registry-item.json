@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-char-magnetize",
+  "type": "hyperframes:component",
+  "title": "Character Magnetize",
+  "description": "Các chữ cái bắt đầu văng lệch và nghiêng ngả, rồi lần lượt từ trái sang được lò xo hút về đúng chỗ trên dòng, lơ lửng nhẹ cho tới khi đứng yên.",
+  "tags": [
+    "reveal",
+    "spring",
+    "stagger",
+    "letters",
+    "text-glyph-physics",
+    "smooth",
+    "glyph-physics",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-char-magnetize.html",
+      "target": "compositions/components/text-char-magnetize.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-char-magnetize",
+    "author": "takayu",
+    "call": "MW.textCharMagnetize(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textCharMagnetize",
+    "options": {
+      "k": "spring stiffness (220)",
+      "c": "damping (20)",
+      "start": "s (0.5; 0.07 s apart, left to right)",
+      "float": "px of the drift while unsettled (16)",
+      "accent": "first letter's colour",
+      "loop": "s (4.2): back to the scatter 3.3-4.0 s"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-kinetic-type-character-magnetize",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-kinetic-type-character-magnetize (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-kinetic-type-character-magnetize, written here): Per letter (demo ALIGN, 40 px): starts 1.2–1.8 em off its slot in x and y, tilted −0.8 / 0.9 / −0.5 / 0.7 / −0.9 rad (about ±50°). From 0.5 s each springs to its slot, stagger 70 ms left→right: spring k 220, c 20, m 1 (ζ≈0.67, settles ~0.5 s); tilt → 0 with the same progress. While unsettled a float of 4 px × (1 − progress) (sin on x, cos on y, period 4.2 s). Loop only: back to the scatter 3.3–4.0 s cubic-bezier(.65,0,.35,1); loop 4.2 s. First letter accent. Params: lò xo (k 220, c 20) · cách nhau (70 ms) · độ nghiêng (±0.9 rad) · độ lơ lửng (4 px).",
+    "titleVi": "Chữ cái được lò xo hút về hàng"
+  }
+}

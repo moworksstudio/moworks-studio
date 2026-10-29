@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-thumbnail-to-hero",
+  "type": "hyperframes:block",
+  "title": "Hero Expand",
+  "description": "Bấm một ảnh nhỏ trong lưới, chính ảnh đó lớn lên thành ảnh bìa đầy bề ngang ở đầu trang, tiêu đề trên ảnh lớn theo, các ảnh khác mờ đi rồi phần chi tiết trồi lên.",
+  "tags": [
+    "hero",
+    "flip",
+    "expand",
+    "image",
+    "navigation-overlays",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-thumbnail-to-hero.html",
+      "target": "compositions/components/ui-thumbnail-to-hero.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-thumbnail-to-hero",
+    "author": "takayu",
+    "call": "MW.uiThumbnailToHero(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiThumbnailToHero",
+    "options": {
+      "places": "the four thumbnails' captions",
+      "posts": "line under each thumbnail",
+      "title": "the detail heading",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-navigation-hero-expand",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-navigation-hero-expand (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-navigation-hero-expand, written here): Window 180x162: grid of thumbnails 72x50 r6 (84 / 66 px pitch). Click the first at 0.34 s; over 0.45-1.15 s power2.inOut it grows to a full-width hero 180x80 at the top, radius 6 → 0; its caption 'ALPINE' grows 8 → 15 px and keeps its inset (6 → 12 px); other thumbnails and labels fade out. Details (heading + 3 lines) fade in rising 8 px over 0.95-1.25 s power2.out. Reverse 2.0-2.55 s (details out 1.92-2.05 s). Params: duration (0.7 s, power2.inOut) · hero (cao 80 px) · details (0.3 s, rise 8 px).",
+    "titleVi": "Ảnh nhỏ mở thành ảnh bìa"
+  }
+}

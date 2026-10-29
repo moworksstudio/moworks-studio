@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "pointer",
+  "type": "hyperframes:component",
+  "title": "Pointer",
+  "description": "A custom pointer (an arrow, an emoji, any element) pops in over an area and follows a path, popping out at the end.",
+  "tags": [
+    "cursor",
+    "pointer",
+    "emoji",
+    "follow",
+    "pop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "pointer.html",
+      "target": "compositions/components/pointer.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/pointer",
+    "author": "magicui",
+    "call": "MW.pointer(q(\".a\"), tl, 0.3, { size: 72, path: [[0, 500, 300], [1.2, 900, 500], [2.4, 700, 760]] });",
+    "function": "MW.pointer",
+    "options": {
+      "path": "[[t, x, y], ...]",
+      "enter": "s (path start)",
+      "leave": "s (path end)",
+      "size": "px (24)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/pointer.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/pointer.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is a layer over the area (position absolute, inset 0); put your own element inside it with class mw-pt-item, or leave it empty for the arrow. path: [[t, x, y], ...] px of el (linear).",
+    "titleVi": "Con trỏ tuỳ chọn bật ra, đi theo"
+  }
+}

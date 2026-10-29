@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-char-offset-cycle",
+  "type": "hyperframes:component",
+  "title": "Character Offset Cycle",
+  "description": "Mỗi ký tự bắt đầu lệch 10 bậc trong bảng chữ cái rồi đếm lùi từng bậc về đúng chữ, lần lượt từ trái sang.",
+  "tags": [
+    "decode",
+    "character-offset",
+    "per-frame",
+    "text-typing-decoding",
+    "crisp",
+    "typing-decoding",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-char-offset-cycle.html",
+      "target": "compositions/components/text-char-offset-cycle.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-char-offset-cycle",
+    "author": "takayu",
+    "call": "MW.textCharOffsetCycle(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textCharOffsetCycle",
+    "options": {
+      "offset": "steps it starts shifted by (10)",
+      "duration": "s per letter (1), ease-out quad",
+      "stagger": "s (0.12, ≤ 0.9 s)",
+      "start": "s (0.4)",
+      "backAt": "s it shifts away again (3.0)",
+      "accent": "colour while shifted",
+      "loop": "s (3.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-char-code-cycle",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-char-code-cycle (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-char-code-cycle, written here): Per char: shown char = target shifted forward k code points inside its class, wrapping (a–z, A–Z, 0–9, hiragana, katakana, CJK ideographs, fullwidth A–Z / a–z); k = ceil(10 × (1 − p_i)) (AE Character Offset 10 → 0); p_i = easeOutQuad over 1 s per char, chars staggered min(120 ms, 0.9 s/n) left → right from 0.4 s; integer steps, no fade; accent while k > 0. Demo loop: all ease back to +10 over 3.0–3.5 s (inQuad); loop 3.6 s. Mono font keeps widths. Params: offset: số bậc lệch ban đầu (10) · duration: mỗi ký tự (1 s) · stagger (0.12 s) · ease (easeOutQuad).",
+    "titleVi": "Ký tự đếm lùi về đúng chữ"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "tilt-pop",
+  "type": "hyperframes:component",
+  "title": "Tilt Pop",
+  "description": "Letters pop up from 60 % size, each tilted at random up to 20° and straightening, one after another. (Codrops fx1)",
+  "tags": [
+    "text",
+    "letters",
+    "entrance",
+    "codrops",
+    "on-scroll",
+    "per letter"
+  ],
+  "files": [
+    {
+      "path": "tilt-pop.html",
+      "target": "compositions/components/tilt-pop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:codrops/tilt-pop",
+    "author": "codrops",
+    "call": "MW.tiltPop(document.querySelector(\".mw-tilt-pop\"), tl, 0.5, { duration: 1.6 });",
+    "function": "MW.tiltPop",
+    "options": {
+      "duration": "s the whole entrance takes (1.6)",
+      "seed": "for the random parts (1)",
+      "split": "chars"
+    },
+    "credit": {
+      "author": "Codrops",
+      "collection": "Codrops",
+      "link": "https://github.com/codrops/OnScrollTypographyAnimations/blob/af28d61d1f8d3d117f5d1e9b09d5209e20a1a212/src/js/index.js#L62-L86",
+      "commit": "af28d61d1f8d3d117f5d1e9b09d5209e20a1a212",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) 2009 - 2022 / 2024 Codrops (LICENSE)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "codrops/OnScrollTypographyAnimations at af28d61, src/js/index.js lines 62-86",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Codrops fx1: the source's GSAP values; the scroll range is now `duration`.",
+    "titleVi": "Chữ cái bung ra, nghiêng rồi thẳng"
+  }
+}

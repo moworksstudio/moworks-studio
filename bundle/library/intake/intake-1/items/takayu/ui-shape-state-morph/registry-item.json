@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-shape-state-morph",
+  "type": "hyperframes:block",
+  "title": "One Shape, Never Cut",
+  "description": "Một khối duy nhất đổi liên tục từ nút bấm thành vòng tải, thành dấu tích rồi thành thẻ và trở lại, chỉ cỡ, bo góc và màu đổi bằng lò xo, nội dung đổi kèm nhoè ngắn.",
+  "tags": [
+    "morph",
+    "state",
+    "spring",
+    "container",
+    "ui-buttons",
+    "smooth",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-shape-state-morph.html",
+      "target": "compositions/components/ui-shape-state-morph.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-shape-state-morph",
+    "author": "takayu",
+    "call": "MW.uiShapeStateMorph(q(\".sm\"), tl, 0, {});",
+    "function": "MW.uiShapeStateMorph",
+    "options": {
+      "states": "[[s, width, height, radius, content, colour, border], ...]",
+      "k": "spring stiffness (300)",
+      "c": "damping (26)",
+      "fade": "[in from, in to, out from, out to]: in after the state starts, out before the next ([0.25, 0.4, 0.15, 0.05])",
+      "spin": "part that turns (the loader)",
+      "loop": "s (5)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=ui-morph",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=ui-morph (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio ui-morph, written here): One element, 5 s loop: states button 120x44 r22 (accent, label) at 0 s → loader 44x44 r22 (spinning arc) at 1.2 s → success 56x56 r28 (green, tick) at 2.2 s → card 200x120 r14 (dark, outlined, title + 2 lines) at 3.2 s → back to the button at 4.4 s. Width, height and radius each follow these targets on a sum of springs k300 c26. Each state's content fades in 0.25-0.4 s into its second and out 0.85-0.95 s (recipe: 120 ms blur swap). Params: states [[giây, rộng, cao, bo]] · spring (k300 c26) · content (vào 0.25-0.4 s, ra 0.85-0.95 s mỗi trạng thái). One element, never cut: only its size, radius and colour change, each on a sum of springs; the content swaps with a short blur.",
+    "titleVi": "Một khối đổi dáng qua các trạng thái"
+  }
+}

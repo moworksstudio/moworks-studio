@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Brush Wipe - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { --ink: #e8ebf3; --acc: #8b7bff; --acc2: #3dd6f5; --warm: #ffb547; --rose: #ff5d8f; --mute: #6c778b; --tk-card: #151a24; --tk-line: #262c3a; background: #0b0d12; color: var(--ink); }
+.tk-stage { position: absolute; inset: 0; display: grid; place-items: center; }
+.tk-cap { font-size: 30px; font-weight: 500; color: var(--mute); letter-spacing: 0.01em; }
+.tk-scene { position: absolute; inset: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 110px; }
+.tk-a { background: radial-gradient(120% 120% at 30% 30%, #1b2440 0%, #10141f 55%, #0b0d12 100%); }
+.tk-b { background: radial-gradient(120% 120% at 70% 30%, #a28cff 0%, #7a5cf5 50%, #5232d8 100%); }
+.tk-mark { width: 340px; height: 340px; flex: none; }
+.tk-mark.circle { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #8ff0ff, #2bb7e6 60%, #1580b8); box-shadow: 0 40px 120px rgba(61, 214, 245, 0.25); }
+.tk-mark.square { border-radius: 56px; background: linear-gradient(160deg, #ffffff, #e2dcff); box-shadow: 0 40px 120px rgba(20, 0, 80, 0.35); }
+.tk-mark.coin { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff1b0, #ffc633 60%, #d99400); }
+.tk-sc-text { display: flex; flex-direction: column; gap: 18px; }
+.tk-sc-letter { font-size: 260px; font-weight: 800; line-height: 0.85; letter-spacing: -0.04em; }
+.tk-a .tk-sc-letter { color: #e8ebf3; } .tk-b .tk-sc-letter { color: #ffffff; }
+.tk-sc-cap { font-size: 44px; font-weight: 600; }
+.tk-a .tk-sc-cap { color: #8f9ab3; } .tk-b .tk-sc-cap { color: rgba(255, 255, 255, 0.82); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3">
+<section class="tk-scene tk-a"><div class="tk-mark circle"></div><div class="tk-sc-text"><div class="tk-sc-letter">A</div><div class="tk-sc-cap">Cảnh mở đầu</div></div></section>
+<section class="tk-scene tk-b"><div class="tk-mark square"></div><div class="tk-sc-text"><div class="tk-sc-letter">B</div><div class="tk-sc-cap">Cảnh tiếp theo</div></div></section>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"strokes":5,"stagger":0.06,"each":0.36,"slant":30,"ease":"power2.out","from":null};
+  var run = function (el, tl, at, o) {
+        var out = o.from ? MW.el(o.from) : el.previousElementSibling, ease = gsap.parseEase(o.ease), W = el.offsetWidth, H = el.offsetHeight, n = o.strokes;
+        var pitch = H / n, bh = H / 4, slant = o.slant, total = (n - 1) * o.stagger + o.each;
+        return MW.drive(tl, at, total, function (t) {
+          var pts = ["0px 0px"], done = true;
+          for (var i = 0; i < n; i++) {
+            var p = ease(Math.max(0, Math.min(1, (t - i * o.stagger) / o.each))), x = -0.05 * W + 1.12 * W * p, top = i * pitch - (bh - pitch) / 2, bot = top + bh;
+            if (p < 1) done = false;
+            if (p <= 0) continue;
+            // a band from the left edge to its leading edge, the top edge slanting up toward the lead
+            pts.push("0px " + top + "px", x + "px " + (top - slant) + "px", x + "px " + bot + "px", "0px " + bot + "px", "0px " + top + "px", "0px 0px");
+          }
+          el.style.clipPath = done ? "none" : pts.length < 3 ? "inset(50%)" : "polygon(" + pts.join(",") + ")"; el.style.visibility = t > 0 ? "visible" : "hidden";
+          if (out) out.style.visibility = done ? "hidden" : "visible";
+        });
+      };
+  MW.transitionBrushWipe = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.transitionBrushWipe(q(".tk-b"), tl, 1.2, {});
+          tl.set({}, {}, 3);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

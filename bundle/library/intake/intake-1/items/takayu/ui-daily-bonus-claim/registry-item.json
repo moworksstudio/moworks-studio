@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-daily-bonus-claim",
+  "type": "hyperframes:block",
+  "title": "Daily Bonus",
+  "description": "Sáu ô ngày đã nhận đứng yên, chỉ ô ngày 7 nhấc lên bằng lò xo; con trỏ bấm vào, ô đổ màu nhấn, dấu tích bật ra ở góc, hạt nổ và nhãn \"đã nhận\" hiện, rồi ô hạ xuống.",
+  "tags": [
+    "calendar",
+    "spring",
+    "tap",
+    "check",
+    "rewards-loot",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-daily-bonus-claim.html",
+      "target": "compositions/components/ui-daily-bonus-claim.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-daily-bonus-claim",
+    "author": "takayu",
+    "call": "MW.uiDailyBonusClaim(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiDailyBonusClaim",
+    "options": {
+      "claimAt": "s (1.15)",
+      "dropAt": "s (1.85)",
+      "accent": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-reward-daily-bonus",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-reward-daily-bonus (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-reward-daily-bonus, written here): px @320x200. 7 cards 34 x 58 (r 8), 6 px gap; days 1-6 claimed (green check badges), never move. Day 7 lifts −14 px by spring k220 d16 at 0.35 s (shadow 30 %), returns by spring k220 d22 at 1.85 s. Cursor arrives 0.6-1.0 s outCubic, presses 1.05-1.12 s (card 0.94), releases 1.15-1.25 s. Claim at 1.15 s: accent fill in 150 ms, icon colours invert, check badge pops (300 ms back.out), 10-dot burst to 30 px (450 ms), 'claimed' label. Loop fade 2.44-2.8 s. Params: days: số ô (7) · lift: nhấc lên (14 px, k220 d16) · claimAt: lúc bấm nhận (1.15 s) · dropAt: lúc hạ (1.85 s). Days one to six never move; only day seven lifts (spring k220 c16), is pressed, fills and drops back (k220 c22).",
+    "titleVi": "Nhận quà ngày thứ bảy"
+  }
+}

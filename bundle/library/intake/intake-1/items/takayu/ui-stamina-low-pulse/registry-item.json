@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-stamina-low-pulse",
+  "type": "hyperframes:block",
+  "title": "Stamina Pulse",
+  "description": "Thanh thể lực tụt hai nấc; xuống dưới vạch 30 % thì đổi màu và thở nhịp nhẹ (mờ đi, có viền sáng), hồi lại trên vạch thì ngừng nhấp nháy.",
+  "tags": [
+    "bar",
+    "threshold",
+    "pulse",
+    "warning",
+    "game-hud",
+    "heavy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-stamina-low-pulse.html",
+      "target": "compositions/components/ui-stamina-low-pulse.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-stamina-low-pulse",
+    "author": "takayu",
+    "call": "MW.uiStaminaLowPulse(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiStaminaLowPulse",
+    "options": {
+      "threshold": "% warning line (30)",
+      "period": "s of the pulse (0.8)",
+      "recoverAt": "s (2.1)",
+      "label": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-hud-stamina-pulse",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-hud-stamina-pulse (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-hud-stamina-pulse, written here): px @320x200. Bar 220 x 14, r 4. Value steps 80 → 52 % (0.3-0.42 s) and 52 → 22 % (0.75-0.87 s), each 120 ms outCubic; dashed tick at 30 %. Below it the fill turns accent (from green) and pulses: opacity 1 → 0.5 and an outline 3 px outside (r 6, stroke 1.5) at 0 → 80 %, cosine period 800 ms, envelope in 200 ms from 0.9 s. Recovery to 80 % (2.1-2.6 s outCubic) ends the pulse 2.12-2.3 s. '−28' / '−30' float up 14 px over 700 ms, fade 350-700 ms. Params: threshold: vạch cảnh báo (30 %) · period: chu kỳ nhịp (0.8 s) · steps: các mức tụt (80 → 52 → 22 %) · recoverAt: lúc hồi (2.1 s).",
+    "titleVi": "Thanh thể lực nhấp nháy khi cạn"
+  }
+}

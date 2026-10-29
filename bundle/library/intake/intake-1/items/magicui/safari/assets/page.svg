@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1400" viewBox="0 0 2400 1400"><defs><radialGradient id="glow" cx=".5" cy=".1" r=".7"><stop offset="0" stop-color="#7c3aed" stop-opacity=".7"/><stop offset="1" stop-color="#7c3aed" stop-opacity="0"/></radialGradient></defs>
+<rect width="2400" height="1400" fill="#09090b"/><rect width="2400" height="1400" fill="url(#glow)"/>
+<rect x="120" y="70" width="180" height="40" rx="20" fill="#fafafa"/><g fill="#a1a1aa"><rect x="1500" y="80" width="140" height="22" rx="11"/><rect x="1690" y="80" width="140" height="22" rx="11"/><rect x="1880" y="80" width="140" height="22" rx="11"/></g>
+<rect x="2080" y="62" width="200" height="58" rx="29" fill="#fafafa"/>
+<rect x="700" y="330" width="1000" height="90" rx="45" fill="#fafafa"/><rect x="820" y="450" width="760" height="90" rx="45" fill="#fafafa"/><rect x="900" y="600" width="600" height="30" rx="15" fill="#a1a1aa"/>
+<rect x="960" y="700" width="220" height="76" rx="38" fill="#7c3aed"/><rect x="1220" y="700" width="220" height="76" rx="38" fill="none" stroke="#3f3f46" stroke-width="4"/>
+<g fill="#18181b" stroke="#27272a" stroke-width="4"><rect x="220" y="900" width="600" height="380" rx="36"/><rect x="900" y="900" width="600" height="380" rx="36"/><rect x="1580" y="900" width="600" height="380" rx="36"/></g></svg>

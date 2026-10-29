@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-shared-element-hero",
+  "hash": "c677155a66fb68de",
+  "at": "2026-10-17T08:17:25.070Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-shared-element-hero.mp4",
+    "poster": "previews/takayu__ui-shared-element-hero.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a7ef7795bfba59c38bd31de0d8309e3e3ac06d375bda458f26044bd0dc9d3a15",
+    "size": 10903,
+    "seconds": 27.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

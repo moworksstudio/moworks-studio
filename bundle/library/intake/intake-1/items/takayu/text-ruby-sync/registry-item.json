@@ -1,0 +1,65 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-ruby-sync",
+  "type": "hyperframes:component",
+  "title": "Ruby Sync Reveal",
+  "description": "Mỗi cụm chữ cùng dòng phiên âm nhỏ phía trên nổi lên như một khối, phiên âm hiện rõ trễ hơn một nhịp rất ngắn.",
+  "tags": [
+    "ruby",
+    "annotation",
+    "reveal",
+    "stagger",
+    "text-japanese",
+    "smooth",
+    "japanese",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-ruby-sync.html",
+      "target": "compositions/components/text-ruby-sync.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-ruby-sync",
+    "author": "takayu",
+    "call": "MW.textRubySync(q(\".rs\"), tl, 0, {});",
+    "function": "MW.textRubySync",
+    "options": {
+      "unit": "base units with data-r = the reading",
+      "rise": "em (0.4)",
+      "duration": "s (0.6, power2.out)",
+      "stagger": "s (0.16)",
+      "cap": "s (1)",
+      "delay": "s the reading trails (0.08)",
+      "size": "em of the reading (0.34)",
+      "start": "s (0.35)",
+      "exitAt": "s (2.95)",
+      "accent": "",
+      "loop": "s (3.4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-ruby-sync",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-ruby-sync (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-ruby-sync, written here): Line height 1.75; each base word / segment and its reading (ruby above: 0.42 em for CJK, 0.34 em syllables for Latin, accent, spread evenly over the base when shorter) form one unit. From 0.35 s unit k rises y 0.4 em → 0 with opacity 0 → 1, 0.6 s power2.out, stagger 0.16 s (capped at 1 s total); the reading moves with its base but its opacity runs the same curve 80 ms later. Exit 2.95–3.25 s. Loop 3.4 s. Params: độ nổi (0.4 em) · thời gian (0.6 s) · cách nhau (0.16 s) · trễ phiên âm (80 ms). The Hán characters use the system's CJK font.",
+    "titleVi": "Chữ và phiên âm hiện cùng nhau"
+  }
+}

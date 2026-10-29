@@ -1,0 +1,89 @@
+<!--
+  Keyword Punch (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-keyword-punch (read 12/10/2026).
+  Từ khoá phóng lên 1.3 lần rồi đứng ở 1.1 lần, đổi sang màu nhấn, các từ khác mờ đi một nửa, kèm tám tia bật ra quanh từ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textKeywordPunch(q(".tk-head"), tl, 0.5, { word: "hết" });
+
+  Options (defaults in brackets):
+      - word: the keyword (matched by its text; default: the last word)
+      - dim: other words' opacity (0.5)
+      - accent: colour
+      - tick: [w, h] px of the ticks ([36, 8])
+      - restAt: s after the punch it settles back (1.8)
+
+  Notes: Idea and numbers (TakayuStudio tx-keyword-punch, written here): Held line; keyword (matched by text) scales 1 → 1.3 in 120 ms power2.out, then 1.3 → 1.1 in 120 ms power2.inOut and stays 1.1; colour → accent over 80 ms; other words opacity 1 → 0.5; same-line words shift sideways by half the keyword growth; 8 accent ticks (9 × 2 px) burst radially from the word (+12 px over 380 ms outCubic, fade). Demo punch at 0.5 s; rest again 2.3–2.6 s; loop 2.8 s. Params: word: từ khoá · scale: đỉnh / nghỉ (1.3 / 1.1) · dim: độ mờ các từ khác (0.5) · ticks: tia bật (8).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Chất lượng là trên hết</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"word":"","dim":0.5,"accent":"#ffd23d","tick":[36,8],"restAt":1.8};
+  var run = function (el, tl, at, o) {
+        var ws = MW.split(el, "words").words, key = ws.filter(function (w) { return w.textContent.toLowerCase() === o.word.toLowerCase(); })[0] || ws[ws.length - 1], others = ws.filter(function (w) { return w !== key; }), p2o = gsap.parseEase("power2.out"), p2io = gsap.parseEase("power2.inOut"), col = getComputedStyle(el).color;
+        el.style.position = "relative"; var ticks = []; for (var i = 0; i < 8; i++) { var d = document.createElement("span"); d.style.cssText = "position:absolute;width:" + o.tick[0] + "px;height:" + o.tick[1] + "px;border-radius:2px;background:" + o.accent + ";pointer-events:none;opacity:0;"; el.appendChild(d); ticks.push(d); }
+        return MW.drive(tl, at, o.restAt + 0.3, function (t) {
+          var rest = Math.max(0, Math.min(1, (t - o.restAt) / 0.3)), s = (t < 0.12 ? 1 + 0.3 * p2o(Math.max(0, t) / 0.12) : t < 0.24 ? 1.3 - 0.2 * p2io((t - 0.12) / 0.12) : 1.1), sc = 1 + (s - 1) * (1 - rest), grow = (sc - 1) * key.offsetWidth / 2;
+          gsap.set(key, { scale: sc }); key.style.color = t > 0 && rest < 1 ? gsap.utils.interpolate(col, o.accent, Math.min(1, t / 0.08) * (1 - rest)) : col;
+          var kx = key.offsetLeft + key.offsetWidth / 2; others.forEach(function (w) { var right = w.offsetLeft > key.offsetLeft, same = Math.abs(w.offsetTop - key.offsetTop) < 4; gsap.set(w, { x: same ? (right ? grow : -grow) : 0 }); w.style.opacity = String(1 - (1 - o.dim) * (t > 0 ? 1 - rest : 0)); });
+          var u = Math.max(0, Math.min(1, t / 0.38)), e = p2o(u), R = key.offsetWidth * sc / 2 + 10 + 48 * e;
+          ticks.forEach(function (d, i) { var a = i / 8 * 2 * Math.PI, ky = key.offsetTop + key.offsetHeight / 2; d.style.left = (kx + Math.cos(a) * R * 1.1 - o.tick[0] / 2) + "px"; d.style.top = (ky + Math.sin(a) * R * 0.7 - o.tick[1] / 2) + "px"; d.style.transform = "rotate(" + a + "rad)"; d.style.opacity = t > 0 && u < 1 ? String(1 - u) : "0"; });
+        });
+      };
+  MW.textKeywordPunch = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

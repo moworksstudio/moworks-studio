@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-3d-flip",
+  "type": "hyperframes:component",
+  "title": "Text 3D Flip",
+  "description": "Each letter is a little 3D cube that rolls 90° to a second face (up, down, left or right), staggered across the word on a firm spring.",
+  "tags": [
+    "3d",
+    "flip",
+    "roll",
+    "cube",
+    "letters",
+    "stagger",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "text-3d-flip.html",
+      "target": "compositions/components/text-3d-flip.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/text-3d-flip",
+    "author": "magicui",
+    "call": "MW.text3dFlip(q(\".f1\"), tl, 0.5, { starts: [0, 2], snapBack: false });",
+    "function": "MW.text3dFlip",
+    "options": {
+      "rotateDirection": "top | right | bottom | left (right)",
+      "staggerDuration": "s (0.05)",
+      "staggerFrom": "first | last | center | index | random (first)",
+      "stiffness": "300",
+      "damping": "30",
+      "starts": "roll times in s after `at` ([0])",
+      "snapBack": "true",
+      "seed": "1"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/text-3d-flip.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/text-3d-flip.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Style the second face with .mw-flip-back (upstream's flipTextClassName). Like upstream, each roll snaps back to the front face when it ends (snapBack false keeps the second face).",
+    "titleVi": "Chữ cái lật khối 3D sang mặt mới"
+  }
+}

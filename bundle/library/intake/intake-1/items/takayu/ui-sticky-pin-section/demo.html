@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Sticky Pin - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.sp { position: absolute; left: 50%; top: 50%; width: 1500px; height: 820px; margin: -410px 0 0 -750px; border-radius: 30px; background: #10131d; border: 3px solid #2a3350; overflow: hidden; }
+.sp-s { position: absolute; left: 160px; top: 160px; width: 500px; height: 500px; border-radius: 60px; background: linear-gradient(160deg, #a693ff, #6a4cf0); } .sp-c { position: absolute; left: 780px; top: 340px; width: 600px; font-size: 64px; font-weight: 800; opacity: 0; } .sp-c span { display: block; font-size: 34px; font-weight: 500; color: #9aa3b8; margin-top: 16px; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.3">
+<div class="sp"><div class="sp-s"></div><div class="sp-c">Nhẹ hơn<span>Chỉ 180 gam</span></div><div class="sp-c">Bền hơn<span>Vỏ nhôm nguyên khối</span></div><div class="sp-c">Lâu hơn<span>Pin dùng cả ngày</span></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"pass":1.1,"unit":5,"subject":".sp-s","captions":".sp-c"};
+  var run = function (el, tl, at, o) {
+        var subj = el.querySelector(o.subject), caps = Array.prototype.slice.call(el.querySelectorAll(o.captions));
+        return MW.drive(tl, at, o.pass * caps.length, function (t) {
+          var k = Math.min(caps.length - 1, Math.floor(t / o.pass)), p = (t / o.pass) - k;
+          gsap.set(subj, { scale: 0.96 + 0.08 * Math.sin(Math.PI * p) });
+          caps.forEach(function (c, i) { if (i !== k) { c.style.opacity = "0"; return; } var y = p < 0.35 ? 62 + (-4 - 62) * p / 0.35 : -4 + (-72 + 4) * (p - 0.35) / 0.65, a = p < 0.35 ? p / 0.35 : 1 - (p - 0.35) / 0.65; gsap.set(c, { y: y * o.unit }); c.style.opacity = String(a); });
+        });
+      };
+  MW.uiStickyPinSection = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.uiStickyPinSection(q(".sp"), tl, 0, {});
+          tl.set({}, {}, 3.3);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

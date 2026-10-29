@@ -1,0 +1,88 @@
+<!--
+  Sparkles Text (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/sparkles-text.tsx.
+  Bold text with small four-point stars that keep popping, spinning and fading at random spots over it (0.8 s cycles, purple and pink).
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.sparklesText(q(".mw-sparkles-text"), tl, 0, { sparklesCount: 14, size: 56, hold: 6 });
+
+  Options (defaults in brackets):
+      - sparklesCount: 10
+      - size: star size in px (21)
+      - colors: { first: #9E7AFF, second: #FE8BBB }
+      - hold: seconds (10)
+      - seed: 1
+
+  Notes: Upstream uses Math.random and a 100 ms interval: here a seeded table (seed option), so every render is the same. The star path is upstream's (MIT).
+-->
+
+<span class="mw-sparkles-text">Lấp lánh</span>
+
+<style>
+.mw-sparkles-text { position: relative; display: inline-block; font-weight: 700; }
+.mw-sparkles-text > svg { position: absolute; z-index: 20; pointer-events: none; width: 21px; height: 21px; overflow: visible; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  var defaults = {"sparklesCount":10,"size":21,"colors":{"first":"#9E7AFF","second":"#FE8BBB"},"hold":10,"seed":1};
+  var run = function (el, tl, at, o) {
+      var NS = "http://www.w3.org/2000/svg", D = "M9.82531 0.843845C10.0553 0.215178 10.9446 0.215178 11.1746 0.843845L11.8618 2.72026C12.4006 4.19229 12.3916 6.39157 13.5 7.5C14.6084 8.60843 16.8077 8.59935 18.2797 9.13822L20.1561 9.82534C20.7858 10.0553 20.7858 10.9447 20.1561 11.1747L18.2797 11.8618C16.8077 12.4007 14.6084 12.3916 13.5 13.5C12.3916 14.6084 12.4006 16.8077 11.8618 18.2798L11.1746 20.1562C10.9446 20.7858 10.0553 20.7858 9.82531 20.1562L9.13819 18.2798C8.59932 16.8077 8.60843 14.6084 7.5 13.5C6.39157 12.3916 4.19225 12.4007 2.72023 11.8618L0.843814 11.1747C0.215148 10.9447 0.215148 10.0553 0.843814 9.82534L2.72023 9.13822C4.19225 8.59935 6.39157 8.60843 7.5 7.5C8.60843 6.39157 8.59932 4.19229 9.13819 2.72026L9.82531 0.843845Z";
+      var ease = MW.bezier.apply(null, MW.CSS_EASE.easeInOut), stars = [];
+      for (var i = 0; i < o.sparklesCount; i++) {
+        var svg = document.createElementNS(NS, "svg"); svg.setAttribute("viewBox", "0 0 21 21"); svg.style.width = svg.style.height = o.size + "px";
+        var p = document.createElementNS(NS, "path"); p.setAttribute("d", D); svg.appendChild(p); el.appendChild(svg);
+        // a star's lives: spot, colour, scale, first delay, lifespan; each new life is a new star at a new spot (upstream regenerates it)
+        var r = MW.rand(o.seed * 1013 + i * 7), lives = [], t = 0;
+        while (t < o.hold + 1) { var life = { x: r() * 100, y: r() * 100, c: r() > 0.5 ? o.colors.first : o.colors.second, s: r() + 0.3, d: r() * 2, l: r() * 10 + 5, t0: t }; lives.push(life); t += life.l; }
+        stars.push({ svg: svg, path: p, lives: lives });
+      }
+      var s = { t: 0 };
+      var draw = function () {
+        for (var i = 0; i < stars.length; i++) {
+          var st = stars[i], L = st.lives[0];
+          for (var k = 0; k < st.lives.length; k++) if (st.lives[k].t0 <= s.t) L = st.lives[k];
+          var local = s.t - L.t0 - L.d, op = 0, sc = 0, rot = 75;
+          if (local >= 0) {
+            var f = (local % 0.8) / 0.8, half = f < 0.5, u = ease(half ? f * 2 : f * 2 - 1);
+            op = half ? u : 1 - u; sc = half ? L.s * u : L.s * (1 - u); rot = half ? 75 + 45 * u : 120 + 30 * u;
+          }
+          st.svg.style.left = L.x + "%"; st.svg.style.top = L.y + "%"; st.path.setAttribute("fill", L.c);
+          st.svg.style.opacity = op; st.svg.style.transform = "scale(" + sc + ") rotate(" + rot + "deg)";
+        }
+      };
+      draw();
+      tl.fromTo(s, { t: 0 }, { t: o.hold, duration: o.hold, ease: "none", onUpdate: draw, immediateRender: false }, at);
+      return at + o.hold;
+    };
+  MW.sparklesText = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

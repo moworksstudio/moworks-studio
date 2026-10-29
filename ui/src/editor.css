@@ -1,0 +1,877 @@
+/* Editor, Claude panel and storyboard styles. Tokens in tokens.css. */
+/* the film's frame never takes the pointer while a splitter is dragged */
+.panes.dragging iframe { pointer-events: none; }
+/* shot cards (Motion Plan) and the time code (Voice-over) */
+.timecode { font-size: var(--fs-control); margin-left: 0.4rem; white-space: nowrap; }
+.timecode b { color: var(--accent-ink); font-weight: var(--strong-weight); }
+.claude { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.claude-head { display: flex; align-items: center; gap: 0.5rem; height: 3rem; padding: 0 var(--sp-3) 0 var(--sp-4); border-bottom: 1px solid var(--border); flex: none; min-width: 0; }
+.claude-head b { font: var(--label-weight) calc(var(--fs-label) * 1.08 * var(--label-scale)) / 1.2 var(--font-label); text-transform: uppercase; letter-spacing: var(--label-track); }
+.claude-head .mono { font-size: var(--fs-dense); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+/* the stream (screenshot/72, /85): steps as quiet lines with the file as a code chip; the result as a card with +/- per file */
+.cstep { display: flex; align-items: center; gap: 0.4667rem; flex-wrap: wrap; font-size: var(--fs-control); color: var(--text-secondary); margin: 0.4rem 0; min-width: 0; }
+.cstep svg { color: var(--success); flex: none; }
+.cstep code { font-family: var(--font-mono); font-size: var(--fs-meta); background: var(--surface-2); color: var(--accent-ink); border-radius: var(--r-sm); padding: 1px 0.4rem; overflow-wrap: anywhere; }
+.cstep.err svg { color: var(--danger); }
+.cstep.note { color: var(--text-muted); font-size: var(--fs-meta); }
+.cfiles { display: flex; flex-wrap: wrap; gap: 2px 0.9333rem; font-size: var(--fs-meta); font-family: var(--font-mono); }
+.cfiles li { display: inline-flex; gap: 0.4rem; min-width: 0; max-width: 100%; }
+.cfiles li > :not(.p) { flex: none; white-space: nowrap; }
+.cfiles .p { color: var(--text-secondary); overflow-wrap: anywhere; min-width: 0; }
+.cfiles .add { color: var(--success); } .cfiles .del { color: var(--danger); }
+/* composer: target chip, queue, suggestions, scope */
+.ctarget, .cqueue, .csuggest { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; min-width: 0; }
+.cchip { display: inline-flex; align-items: center; gap: 0.375rem; max-width: 100%; min-width: 0; font-size: var(--fs-meta); padding: 3px 0.25rem 3px 0.75rem; border-radius: var(--r-pill); border: 1px solid var(--border); background: var(--surface-2); color: var(--text-primary); }
+.cchip .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.cchip.amber { border-color: color-mix(in srgb, var(--accent) 45%, transparent); color: var(--accent-ink); }
+.cchip.sug { padding: 0.2667rem 0.6667rem; background: transparent; color: var(--text-secondary); cursor: pointer; text-align: left; white-space: normal; }
+@media (hover: hover) and (pointer: fine) { .cchip.sug:hover { color: var(--text-primary); border-color: var(--accent-line); } }
+.clink { border: 0; background: none; color: var(--text-muted); font-size: var(--fs-meta); cursor: pointer; padding: 2px 0.2667rem; }
+@media (hover: hover) and (pointer: fine) { .clink:hover { color: var(--text-primary); } }
+.composer-actions .btn.on { color: var(--accent-ink); }
+ol.plain.conversation, .conversation { flex: 1; overflow-y: auto; overflow-x: hidden; padding: var(--sp-4) var(--sp-4) var(--sp-5); display: flex; flex-direction: column; gap: 1.3333rem; }
+.conv-empty { margin: auto; text-align: center; color: var(--text-muted); font-size: var(--fs-control); display: flex; flex-direction: column; gap: 0.4rem; align-items: center; max-width: 18.6667rem; }
+.conv-empty b { color: var(--text-secondary); }
+/* Chat as in a chat app: the request as a bubble on the right, the reply as plain readable text; nothing scrolls sideways */
+.task { display: flex; flex-direction: column; gap: 0.6667rem; min-width: 0; }
+.msg { min-width: 0; font-size: var(--fs-body); line-height: 1.6; overflow-wrap: anywhere; }
+.msg.user { align-self: flex-end; max-width: 88%; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-xl) var(--r-xl) var(--r-sm) var(--r-xl); padding: 0.625rem 0.875rem; }
+.msg.claude { padding: 2px 2px 0; }
+.msg-meta { display: flex; align-items: center; gap: 0.4rem; font-size: var(--fs-dense); color: var(--text-muted); margin-bottom: 0.4rem; }
+.msg-meta time { margin-left: auto; }
+.msg-meta b { color: var(--text-secondary); font-weight: var(--strong-weight); }
+.md { color: var(--text-primary); }
+.md > * { margin: 0 0 0.6667rem; }
+.md > :last-child { margin-bottom: 0; }
+.md h4, .md h5, .md h6 { font-size: var(--fs-body); font-weight: var(--strong-weight); margin-top: 0.9333rem; }
+.md h4 { font-size: var(--fs-heading); }
+.md ul, .md ol { padding-left: 1.3333rem; display: flex; flex-direction: column; gap: 0.2667rem; }
+.md li::marker { color: var(--text-muted); }
+.md strong { font-weight: var(--strong-weight); }
+.md code { font-family: var(--font-mono); font-size: var(--fs-meta); background: var(--surface-2); color: var(--accent-ink); border-radius: var(--r-sm); padding: 1px 0.3333rem; overflow-wrap: anywhere; }
+.md pre { background: var(--well); border: 1px solid var(--border); border-radius: var(--r-md); padding: 0.6667rem 0.8rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.md pre code { background: none; padding: 0; color: var(--text-primary); }
+.md a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
+.md-table { overflow-x: auto; }
+.md table { border-collapse: collapse; font-size: var(--fs-control); }
+.md th, .md td { border: 1px solid var(--border); padding: 0.3333rem 0.5333rem; text-align: left; vertical-align: top; }
+.md th { background: var(--surface-2); color: var(--text-secondary); }
+.qa-line { display: flex; gap: 0.4rem; align-items: center; font-size: var(--fs-meta); }
+.qa-line.ok { color: var(--success); }
+.qa-line.bad { color: var(--danger); }
+.composer { border-top: 1px solid var(--border); padding: var(--sp-3) var(--sp-4) var(--sp-4); display: flex; flex-direction: column; gap: 0.625rem; background: transparent; }
+.composer-input { min-height: 5.5rem; font-size: var(--fs-body); line-height: 1.5; border-radius: var(--r-lg); }
+.msg.user .msg-meta { margin: 0.2667rem 0 0; }
+.composer-actions { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+.composer-actions .hint { margin-left: auto; }
+.composer-actions .btn.primary { margin-left: auto; }
+
+.card-thumb { overflow: hidden; }
+.cchip.sug svg { color: var(--accent-ink); flex: none; }
+/* motion trial: Claude's reply and result arrive softly (the user's own bubble, sent from the keyboard, appears at once) */
+
+/* usage under each reply, a question Claude waits on, the project's run settings under the composer */
+.cquestion { display: flex; align-items: flex-start; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.6667rem; padding: 0.6rem 0.75rem; border: 1px solid var(--warning, var(--accent-line)); border-radius: var(--r-lg); background: var(--accent-soft); font-size: var(--fs-control); }
+.cquestion > svg { flex: none; margin-top: 0.15rem; color: var(--accent-ink); }
+.cquestion .tx { flex: 1 1 12rem; min-width: 0; display: flex; flex-direction: column; gap: 0.25rem; }
+.cquestion code { font-family: var(--font-mono); font-size: var(--fs-meta); overflow-wrap: anywhere; color: var(--text-secondary); }
+.cquestion .acts { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+
+/* ---------------------------------------------------------------------------------------------------------------------------------
+   The Editor: the project strip, SHOTS above the PIPELINE, the player and its bar, the edit card, the timeline, the motion
+   drawer, the Claude column kept short. Every colour and size comes from tokens.css; nothing here changes the theme.
+   --------------------------------------------------------------------------------------------------------------------------------- */
+.ed { height: 100%; display: flex; flex-direction: column; min-height: 0; }
+.ed-body { flex: 1; min-height: 0; }
+.ed-narrow { flex: 1; min-height: 0; flex-direction: column; }
+.ed-tabs { background: var(--surface-1); }
+/* the project strip */
+.ed-strip { container: eds / inline-size; flex: none; display: flex; align-items: center; gap: 0.625rem; min-width: 0; height: 3.25rem; padding: 0 var(--sp-3); border-bottom: 1px solid var(--border); background: var(--surface-1); }
+.ed-title { flex: 0 1 auto; field-sizing: content; min-width: 6rem; max-width: 30rem; font: var(--display-weight) calc(var(--fs-title) * var(--display-scale)) / 1.1 var(--font-display); letter-spacing: var(--display-track);
+  text-transform: uppercase; color: var(--text-primary); background: transparent; border: 1px solid transparent; border-radius: var(--r-sm); padding: 0.125rem 0.375rem; text-overflow: ellipsis; }
+@media (hover: hover) and (pointer: fine) { .ed-title:hover { border-color: var(--border); } }
+.ed-title:focus { outline: none; border-color: var(--accent-line); background: var(--surface-2); }
+.ed-gap { flex: 1; }
+.ed-strip > .btn, .ed-strip .menu-wrap { flex: none; }
+/* left column: SHOTS above, PIPELINE below, set apart by space and a strong rule */
+.ed-left { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.ed-pipe { flex: 0 1 auto; max-height: 50%; display: flex; flex-direction: column; overflow: auto; border-top: 1px solid var(--border-strong); margin-top: var(--sp-2); }
+.sl { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 2px; padding: 0 var(--sp-2) var(--sp-2); }
+.sl-empty { margin: var(--sp-4); display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-start; color: var(--text-muted); font-size: var(--fs-meta); }
+.sl li { border-radius: var(--r-md); }
+.sl li.on { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--accent); }
+.sl-row { width: 100%; display: grid; grid-template-columns: 1.1rem 4.5rem minmax(0, 1fr); gap: 0.5rem; align-items: center; padding: 0.3125rem 0.375rem; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; border-radius: var(--r-md); }
+@media (hover: hover) and (pointer: fine) { .sl li:not(.on) .sl-row:hover { background: var(--surface-2); } }
+.sl-n { font-size: var(--fs-meta); color: var(--text-muted); text-align: right; }
+.sl-thumb { width: 4.5rem; aspect-ratio: 16 / 9; border-radius: var(--r-sm); background: var(--app-bg); border: 1px solid var(--border); display: grid; place-items: center; overflow: hidden; color: var(--text-muted); }
+.sl-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.sl-t { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.sl-title { font-size: var(--fs-control); color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sl-meta { font-size: var(--fs-dense); color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sl-open { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.25rem 0.625rem 0.625rem 2rem; }
+.sl-timing { display: flex; align-items: center; gap: 0.625rem; flex-wrap: wrap; font-size: var(--fs-meta); color: var(--text-secondary); }
+.sl-timing label { display: inline-flex; align-items: center; gap: 0.375rem; }
+.sl-timing .input { width: 4.5rem; }
+.sl-timing .segmented button { height: 1.5rem; padding: 0 0.5rem; font-size: var(--fs-dense); }
+.sl-words { display: flex; flex-direction: column; gap: 0.25rem; }
+.sl-words .input.edited { border-color: var(--accent-line); }
+.sl-note { font-size: var(--fs-dense); color: var(--text-muted); }
+/* centre: the player, its bar, then the timeline (or the motion drawer in its place) */
+.ed-center { flex: 1; min-height: 0; display: flex; flex-direction: column; background: var(--app-bg); container: edc / inline-size; }
+.pv { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.pv:fullscreen { background: var(--media-bg); }
+.pv-stage { position: relative; flex: 1; min-height: 0; background: #050504; }
+.pv-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+.pv-wait { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 0.5rem; color: var(--text-muted); font-size: var(--fs-control); }
+.pv-wait.err { color: var(--status-stop); padding: var(--sp-5); text-align: center; }
+.pv-bar { overflow: hidden; flex: none; display: flex; align-items: center; gap: 0.25rem; min-width: 0; height: 2.75rem; padding: 0 var(--sp-3); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface-1); }
+.pv-bar .btn.icon.sm.on { color: var(--accent-ink); background: var(--accent-soft); }
+.pv-play.btn { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.pv-time { margin-left: 0.5rem; font-family: var(--font-num); font-size: calc(var(--fs-heading) * var(--num-scale)); letter-spacing: var(--num-track); white-space: nowrap; color: var(--text-primary); }
+.pv-time .muted { font-size: 0.75em; }
+.pv-shot { margin-left: 0.625rem; font-size: var(--fs-meta); color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.pv-gap { flex: 1; min-width: 0.5rem; }
+/* the edit card beside a picked element */
+.pe-card { position: absolute; z-index: 5; width: 18rem; max-width: calc(100% - 1.5rem); background: var(--surface-2); border: 1px solid var(--accent-line); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-pop); padding: 0.625rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: var(--fs-meta); }
+.pe-card.multi { flex-direction: row; align-items: center; width: auto; color: var(--text-secondary); }
+.pe-head { display: flex; align-items: center; gap: 0.375rem; min-width: 0; }
+.pe-head .lbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); color: var(--accent-ink); font-size: var(--fs-dense); }
+.pe-note { display: flex; gap: 0.375rem; align-items: flex-start; color: var(--text-muted); }
+.pe-text { font-size: var(--fs-control); }
+.pe-row { display: grid; grid-template-columns: minmax(0, 1fr) 4.25rem 2.75rem; gap: 0.375rem; align-items: end; }
+.pe-field { display: flex; flex-direction: column; gap: 0.1875rem; min-width: 0; }
+.pe-field > span { font-size: var(--fs-dense); color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pe-field input[type="color"] { width: 100%; height: 1.875rem; padding: 0; border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: transparent; }
+.pe-reset { align-self: flex-start; }
+.pe-hint { color: var(--text-muted); font-size: var(--fs-dense); }
+/* timeline */
+.tl { flex: none; height: 13rem; display: flex; flex-direction: column; background: var(--surface-1); min-height: 0; }
+.tl.folded { height: 5.5rem; }
+.tl-head { flex: none; display: flex; align-items: center; gap: 0.5rem; height: 2rem; padding: 0 var(--sp-2) 0 var(--sp-3); font-size: var(--fs-dense); color: var(--text-muted); }
+.tl-tools { display: flex; align-items: center; gap: 0.125rem; }
+.tl-body { flex: 1; min-height: 0; display: flex; overflow: auto hidden; position: relative; }
+.tl-labels { position: sticky; left: 0; z-index: 3; flex: none; width: 104px; background: var(--surface-1); border-right: 1px solid var(--border); }
+.tl-label { height: 2.25rem; display: flex; align-items: center; gap: 0.375rem; padding-left: var(--sp-3); font: var(--label-weight) calc(var(--fs-dense) * var(--label-scale)) / 1 var(--font-label);
+  text-transform: uppercase; letter-spacing: var(--label-track); color: var(--text-muted); border-bottom: 1px solid var(--border); }
+.tl-label.ruler { height: 1.25rem; }
+.tl-label.shots { height: 2.75rem; }
+.tl-lanes { position: relative; flex: none; cursor: text; touch-action: none; }
+.tl-ruler { position: relative; height: 1.25rem; border-bottom: 1px solid var(--border); font-size: var(--fs-dense); color: var(--text-muted); }
+.tl-ruler i { position: absolute; top: 0.125rem; font-style: normal; padding-left: 3px; border-left: 1px solid var(--border-strong); line-height: 1; }
+/* a tech check's warning is red like a blocking one (yellow means waiting); The Studio keeps its own colours */
+.tl-qc { position: absolute; top: 0.25rem; width: 0.625rem; height: 0.625rem; margin-left: -0.3125rem; border-radius: 50%; border: 0; padding: 0; background: var(--status-stop); cursor: pointer; z-index: 2; }
+[data-theme="studio"] .tl-qc:not(.stop) { background: var(--status-pending); }
+.tl-row { position: relative; height: 2.25rem; border-bottom: 1px solid var(--border); }
+.tl-row.shots { height: 2.75rem; }
+.tl-shot { position: absolute; top: 0.3125rem; bottom: 0.3125rem; border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--surface-3); color: var(--text-primary);
+  font-size: var(--fs-dense); text-align: left; padding: 0 0.375rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer; }
+.tl-shot b { color: var(--text-secondary); font-weight: 400; }
+.tl-shot.sel { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
+/* a shot before the build, where the storyboard plans it: dashed, not yet a clip */
+.tl-shot.planned { border-style: dashed; }
+.tl-word { position: absolute; top: 0.375rem; bottom: 0.375rem; border-radius: var(--r-sm); background: color-mix(in srgb, var(--tag-2) 16%, transparent); border: 1px solid color-mix(in srgb, var(--tag-2) 32%, transparent);
+  color: var(--tag-2); font-size: var(--fs-dense); padding: 0 0.25rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 1.4rem; pointer-events: none; }
+.tl-tick { position: absolute; top: 0.5rem; width: 0.375rem; height: 1.25rem; border-radius: var(--r-xs); background: var(--status-pending); opacity: 0.8; pointer-events: none; }
+.tl-music { position: absolute; top: 0.25rem; bottom: 0.25rem; border-radius: var(--r-sm); background: color-mix(in srgb, var(--accent) 8%, transparent); border: 1px solid var(--accent-line); overflow: hidden; pointer-events: none; }
+.tl-music svg { width: 100%; height: 100%; display: block; }
+.tl-music path { fill: var(--accent); opacity: 0.55; }
+.tl-empty { position: absolute; left: 0.5rem; top: 0.625rem; font-size: var(--fs-dense); color: var(--text-muted); pointer-events: none; }
+.tl-range { position: absolute; top: 0; bottom: 0; background: var(--accent-soft); border-left: 1px solid var(--accent); border-right: 1px solid var(--accent); pointer-events: none; }
+.tl-head-line { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--accent); pointer-events: none; z-index: 2; }
+.tl-head-line::before { content: ""; position: absolute; top: 0; left: -4px; border: 5px solid transparent; border-top: 7px solid var(--accent); }
+/* the motion drawer, in the timeline's place and at its height */
+.mdr { flex: none; height: 13rem; display: flex; flex-direction: column; gap: 0.5rem; padding: 0.5rem var(--sp-3) 0.625rem; background: var(--surface-1); border-top: 1px solid var(--accent); min-height: 0; }
+.mdr-head { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.mdr-title { font: var(--label-weight) calc(var(--fs-label) * var(--label-scale)) / 1 var(--font-label); text-transform: uppercase; letter-spacing: var(--label-track); color: var(--text-primary); flex: none; }
+.mdr-groups { display: flex; gap: 0.25rem; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.mdr-chip { flex: none; height: 1.625rem; padding: 0 0.625rem; border: 1px solid var(--border-strong); border-radius: var(--r-pill); background: transparent; color: var(--text-secondary); font-size: var(--fs-dense); cursor: pointer; white-space: nowrap; }
+.mdr-chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-soft); }
+.mdr-search { flex: 0 1 10rem; min-width: 6rem; display: flex; align-items: center; gap: 0.375rem; height: 1.625rem; padding: 0 0.5rem; border: 1px solid var(--border-strong); border-radius: var(--r-sm); color: var(--text-muted); }
+.mdr-search input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text-primary); font: inherit; font-size: var(--fs-meta); outline: none; }
+.mdr-for { margin-left: auto; flex: 0 1 auto; min-width: 0; font-size: var(--fs-meta); color: var(--accent-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mdr-count { font-size: var(--fs-dense); color: var(--text-muted); flex: none; }
+.mdr-row { flex: 1; min-height: 0; display: flex; gap: 0.625rem; overflow-x: auto; overflow-y: hidden; align-items: stretch; padding-bottom: 0.25rem; }
+.mdr-card { flex: none; width: 11rem; display: flex; flex-direction: column; gap: 0.25rem; border: 0; background: transparent; padding: 0; color: inherit; text-align: left; cursor: pointer; }
+.mdr-card.skeleton { height: 8rem; border-radius: var(--r-md); }
+.mdr-media { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: var(--r-md); overflow: hidden; background: var(--app-bg); border: 1px solid var(--border); }
+.mdr-media img, .mdr-media video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+@media (hover: hover) and (pointer: fine) { .mdr-card:hover .mdr-media { border-color: var(--accent); } }
+.mdr-card:focus-visible .mdr-media { border-color: var(--accent); }
+.mdr-noposter { position: absolute; inset: 0; display: grid; place-items: center; padding: 0.5rem; font-size: var(--fs-dense); color: var(--text-muted); text-align: center; }
+.mdr-note { position: absolute; left: 0.25rem; right: 0.25rem; bottom: 0.25rem; font-size: var(--fs-dense); background: var(--media-label); color: var(--accent-ink); border-radius: var(--r-sm); padding: 1px 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mdr-name { font-size: var(--fs-meta); color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mdr-by { font-size: var(--fs-dense); color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mdr-sep { flex: none; align-self: center; writing-mode: vertical-rl; transform: rotate(180deg); display: inline-flex; align-items: center; gap: 0.25rem;
+  font: var(--label-weight) calc(var(--fs-dense) * var(--label-scale)) / 1 var(--font-label); text-transform: uppercase; letter-spacing: var(--label-track); color: var(--accent-ink); }
+.mdr-empty { align-self: center; color: var(--text-muted); font-size: var(--fs-meta); }
+@media (prefers-reduced-motion: no-preference) { .mdr { animation: mdr-in 180ms var(--ease-out); } }
+@keyframes mdr-in { from { opacity: 0; transform: translateY(0.5rem); } }
+/* the hand search for sound effects, now inside Final Mix */
+
+/* the Claude column kept short */
+.claude { container-type: inline-size; }
+.msg { font-size: var(--fs-control); line-height: 1.55; }
+.msg.claude .md { color: var(--text-secondary); font-weight: var(--body-weight); }
+.msg.claude .md strong { color: var(--text-primary); }
+.msg.user { background: color-mix(in srgb, var(--accent) 6%, var(--surface-1)); border: 1px solid var(--accent-line); border-radius: var(--r-lg); max-width: 92%; }
+.cstep { font-size: var(--fs-meta); margin: 0.25rem 0; }
+.csuggest { flex-wrap: nowrap; overflow: hidden; }
+.cchip.sug { flex: 0 1 auto; min-width: 0; font-size: var(--fs-dense); padding: 0.125rem 0.5rem; white-space: nowrap; }
+.composer-actions { flex-wrap: nowrap; min-width: 0; }
+.composer-actions .hint { margin-left: auto; }
+.composer-actions .btn.primary { margin-left: 0; }
+.cmodel { position: relative; flex: none; }
+.cmodel-chip { display: inline-flex; align-items: center; gap: 0.25rem; height: 1.75rem; padding: 0 0.5rem; border: 1px solid var(--border); border-radius: var(--r-pill); background: transparent; color: var(--text-secondary);
+  font-size: var(--fs-dense); cursor: pointer; white-space: nowrap; }
+.cmodel-chip:disabled { opacity: 0.5; cursor: default; }
+.cmodel-pop { position: absolute; bottom: calc(100% + 0.375rem); right: 0; z-index: 30; width: 15rem; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-pop); padding: var(--sp-3); display: flex; flex-direction: column; gap: 0.5rem; font-size: var(--fs-meta); }
+.cmodel-pop label { display: flex; flex-direction: column; gap: 0.25rem; color: var(--text-muted); }
+@container (max-width: 24rem) { .csend .lbl { display: none; } .composer-actions .hint { display: none; } }
+@container (max-width: 19rem) { .cmodel-chip { max-width: 6.5rem; overflow: hidden; text-overflow: ellipsis; } }
+
+.md.sent { margin-top: 0.375rem; font-size: var(--fs-meta); color: var(--text-muted); }
+.md table { overflow-wrap: normal; word-break: normal; }
+.md th, .md td { min-width: 4.5rem; }
+/* the design document as a page */
+.dv { display: flex; flex-direction: column; gap: var(--sp-5); }
+.dv section { display: flex; flex-direction: column; gap: var(--sp-2); }
+.dv h4 { margin: 0; font: var(--label-weight) calc(var(--fs-label) * var(--label-scale)) / 1.2 var(--font-label); text-transform: uppercase; letter-spacing: var(--label-track); color: var(--text-muted); }
+.dv-kicker { font-size: var(--fs-meta); color: var(--accent-ink); }
+.dv-name { margin: 0.25rem 0; font: var(--display-weight) calc(var(--fs-title) * var(--display-scale)) / 1.15 var(--font-display); letter-spacing: var(--display-track); color: var(--text-primary); }
+.dv-desc { margin: 0; color: var(--text-secondary); max-width: 70ch; }
+.dv-kv { display: grid; grid-template-columns: 6rem minmax(0, 1fr); gap: 0.25rem 0.75rem; margin: 0.5rem 0 0; font-size: var(--fs-meta); }
+.dv-kv dt { color: var(--text-muted); } .dv-kv dd { margin: 0; color: var(--text-secondary); }
+.dv-colors { display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); gap: 0.5rem; }
+.dv-colors li { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr); grid-template-rows: auto auto auto; column-gap: 0.625rem; align-items: center; padding: 0.375rem; border: 1px solid var(--border); border-radius: var(--r-md); }
+.dv-swatch { grid-row: 1 / 4; width: 2.5rem; height: 2.5rem; border-radius: var(--r-sm); border: 1px solid var(--border-strong); }
+.dv-cname { font-size: var(--fs-meta); color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dv-hex { font-size: var(--fs-dense); color: var(--text-muted); }
+.dv-note { font-size: var(--fs-dense); color: var(--text-muted); overflow-wrap: anywhere; }
+.dv-type { display: flex; flex-direction: column; gap: 0.375rem; }
+.dv-type li { display: grid; grid-template-columns: 8rem minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+.dv-tname { grid-row: 1 / 3; font-size: var(--fs-dense); color: var(--accent-ink); }
+.dv-sample { font-size: var(--fs-title); line-height: 1.2; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dv-tmeta { font-size: var(--fs-dense); color: var(--text-muted); }
+.dv-chips { display: flex; flex-wrap: wrap; gap: 0.375rem; font-size: var(--fs-meta); }
+.dv-chips li { border: 1px solid var(--border); border-radius: var(--r-pill); padding: 0.125rem 0.625rem; color: var(--text-secondary); }
+.dv-comps { display: flex; flex-direction: column; gap: 0.375rem; font-size: var(--fs-meta); color: var(--text-secondary); }
+.dv-comps b { color: var(--text-primary); font-weight: var(--strong-weight); margin-right: 0.25rem; }
+.cchip.cpick { border-color: var(--accent-line); color: var(--accent-ink); background: var(--accent-soft); }
+
+/* responsive: the player bar sheds what it can spare as the film column narrows (measured on the column, not the window,
+   because the side columns take their share first). Most important stay: previous / play / next, the time, sound, loop, full screen. */
+@container edc (max-width: 40rem) { .pv-shot { display: none; }}
+@container edc (max-width: 32rem) {.pv-time { margin-left: 0.25rem; } }
+
+/* responsive: nothing in the chat shrinks below its content, so the app's lines can no longer sit on
+   Claude's words; the step card and the message meta keep their words whole; the head's usage line gives up parts from the right; the
+   suggestions wrap instead of being cut; the lock label sits above the picture; the timeline's label column fits its longest label. */
+.conversation > * { flex: none; }
+/* a reply carries the class .claude too (.msg.claude), so it inherited the whole panel's column, flex: 1, min-height: 0 and container rules */
+.msg.claude { display: block; flex: none; min-height: auto; container-type: normal; }
+.msg-meta { flex-wrap: wrap; }
+.msg-meta > span, .msg-meta > time { white-space: nowrap; flex: none; }
+.csuggest { flex-wrap: wrap; max-height: 3.625rem; overflow: hidden; }
+.cchip.sug { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.tl-label { min-width: 0; white-space: nowrap; overflow: hidden; }
+/* the project strip drops what it can spare as it narrows: the voice pill, then the saved label's words, then the second pill */
+
+/* the error boundary */
+.err-boundary { margin: var(--sp-5); max-width: 36rem; display: flex; flex-direction: column; gap: var(--sp-2); align-items: flex-start; padding: var(--sp-4); border: 1px solid color-mix(in srgb, var(--status-stop) 45%, transparent); border-radius: var(--r-lg); background: var(--status-stop-soft); color: var(--text-primary); }
+.err-boundary svg { color: var(--status-stop); }
+.err-boundary p { margin: 0; color: var(--text-secondary); font-size: var(--fs-control); }
+.err-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.err-boundary details { width: 100%; font-size: var(--fs-meta); color: var(--text-muted); }
+.err-boundary pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 12rem; overflow: auto; font-family: var(--font-mono); font-size: var(--fs-dense); margin: 0.375rem 0 0; }
+.pv-sound.muted { color: var(--status-pending); background: var(--status-pending-soft); gap: 0.25rem; }
+.pv-sound .lbl { font-size: var(--fs-dense); text-transform: none; letter-spacing: 0; }
+.dv-swatch.sm { display: inline-block; width: 1rem; height: 1rem; vertical-align: -0.2em; }
+.pv-dl { display: flex; flex-direction: column; gap: 0.5rem; margin: 0; }
+.pv-row { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: 0.75rem; }
+.pv-row > dt { color: var(--text-muted); font-size: var(--fs-meta); }
+.pv-row > dd { margin: 0; color: var(--text-secondary); min-width: 0; overflow-wrap: anywhere; }
+.pv-dl.d0 > .pv-row { padding-bottom: 0.625rem; border-bottom: 1px solid var(--border); }
+.pv-dl.d0 > .pv-row > dt { color: var(--accent-ink); font: var(--label-weight) calc(var(--fs-label) * var(--label-scale)) / 1.2 var(--font-label); text-transform: uppercase; letter-spacing: var(--label-track); }
+.pv-list { display: flex; flex-direction: column; gap: 0.25rem; }
+.pv-cards { display: flex; flex-direction: column; gap: 0.5rem; }
+.pv-card { border: 1px solid var(--border); border-radius: var(--r-md); padding: 0.5rem 0.75rem; }
+.pv-val code { font-family: var(--font-mono); font-size: var(--fs-meta); color: var(--accent-ink); }
+.doc-raw { white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--font-mono); font-size: var(--fs-meta); }
+@media (max-width: 40rem) { .pv-row { grid-template-columns: 1fr; gap: 0.125rem; } }
+
+/* the timeline hint at the floor size for meta text; headings inside sheets step up from the body so a long document has a hierarchy */
+.sheet-body .md h1 { font-size: calc(var(--fs-title) * 0.9); }
+.sheet-body .md h2 { font-size: calc(var(--fs-title) * 0.8); text-transform: none; letter-spacing: 0; font-family: var(--font-body); font-weight: var(--strong-weight); color: var(--text-primary); }
+.sheet-body .md h3 { font-size: calc(var(--fs-body) * 1.06); }
+.sheet-body .md h4, .sheet-body .md h5, .sheet-body .md h6 { font-size: var(--fs-body); }
+.tl-empty { font-size: var(--fs-meta); }
+
+/* ---------------------------------------------------------------------------------------------------------------------------------
+   Editor v2: neutral greys come from the [data-zone="editor"] scope in
+   tokens.css; here only the three zones and less on screen. Strip: one quiet line, Versions, Render. Left: Shots | Assets tabs above
+   the six stages. Centre: the film in its dark well, tools named in words. Right: one status line per Claude task.
+   --------------------------------------------------------------------------------------------------------------------------------- */
+.ed { background: var(--surface-1); }
+.ed-strip { height: 2.75rem; gap: 0.5rem; background: var(--surface-2); }
+.ed-title { font-size: calc(var(--fs-heading) * var(--display-scale)); max-width: 22rem; min-width: 4rem; }
+.ed-meta { flex: 0 1 auto; min-width: 0; font-size: var(--fs-meta); color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ed-state { flex: 0 1 auto; min-width: 0; display: inline-flex; align-items: center; gap: 0.375rem; font-size: var(--fs-meta); color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ed-state.on { color: var(--accent-ink); }
+.ed-render { flex: none; }
+.ed-ver { position: relative; flex: none; }
+.ed-ver-pop { position: absolute; top: calc(100% + 0.375rem); right: 0; z-index: 60; width: 21rem; max-height: 24rem; overflow: auto; background: var(--surface-2); border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-pop); padding: var(--sp-2); display: flex; flex-direction: column; gap: 0.375rem; }
+.ed-ver-pop > .hint { margin: 0.25rem 0.375rem; font-size: var(--fs-dense); }
+.ed-ver-list { display: flex; flex-direction: column; }
+.ed-ver-list li { display: flex; align-items: center; gap: 0.5rem; padding: 0.375rem; border-radius: var(--r-md); font-size: var(--fs-meta); color: var(--text-muted); }
+@media (hover: hover) and (pointer: fine) { .ed-ver-list li:hover { background: var(--surface-3); } }
+.ed-ver-list .t { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; color: var(--text-primary); white-space: nowrap; text-overflow: ellipsis; }
+.ed-ver-list .t b { font-weight: var(--strong-weight); overflow: hidden; text-overflow: ellipsis; }
+.ed-ver-list time { font-size: var(--fs-dense); color: var(--text-muted); flex: none; }
+@container eds (max-width: 52rem) { .ed-meta { display: none; } }
+@container eds (max-width: 40rem) { .ed-state { display: none; } }
+
+/* left: tabs, then the six stages */
+.ed-ltabs { flex: none; display: flex; gap: 0.25rem; height: 2.25rem; padding: 0 var(--sp-2); border-bottom: 1px solid var(--border); }
+.ed-ltabs button { display: inline-flex; align-items: center; gap: 0.375rem; height: 100%; padding: 0 0.5rem; border: 0; border-bottom: 2px solid transparent; background: none; cursor: pointer;
+  font: var(--label-weight) calc(var(--fs-label) * var(--label-scale)) / 1 var(--font-label); text-transform: uppercase; letter-spacing: var(--label-track); color: var(--text-muted); }
+.ed-ltabs button[aria-selected="true"] { color: var(--text-primary); border-bottom-color: var(--accent); }
+.ed-count { font: 500 var(--fs-dense) / 1 var(--font-body); text-transform: none; letter-spacing: 0; color: var(--text-muted); padding: 0.125rem 0.375rem; border-radius: var(--r-pill); background: var(--surface-3); }
+.ed-count:empty { display: none; }
+.ed-count.stop { color: var(--status-stop); background: var(--status-stop-soft); }
+.ed-count.new { color: var(--accent-ink); background: var(--accent-soft); }
+.ed-tabbody { flex: 1 1 auto; min-height: 5rem; display: flex; flex-direction: column; overflow: hidden; }
+.ed-tabbody > .sl { padding-top: var(--sp-1); }
+.ed-pipe { flex: 0 0 auto; max-height: 62%; margin-top: 0; border-top: 1px solid var(--border); overflow: auto; }
+.pl2 { display: flex; flex-direction: column; padding-bottom: var(--sp-2); }
+.pl-head { display: flex; align-items: center; justify-content: space-between; height: 2rem; padding: 0 var(--sp-3); flex: none;
+  font: var(--label-weight) calc(var(--fs-label) * var(--label-scale)) / 1 var(--font-label); text-transform: uppercase; letter-spacing: var(--label-track); color: var(--text-muted); }
+.pl-head .pl-count { font-family: var(--font-num); letter-spacing: var(--num-track); }
+.pl-ask { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 0 var(--sp-2) var(--sp-2); padding: 0.5rem; border-radius: var(--r-md); background: var(--status-pending-soft);
+  color: var(--text-primary); font-size: var(--fs-meta); }
+.pl-stages { display: flex; flex-direction: column; }
+.pl-stage { display: grid; grid-template-columns: 1.25rem minmax(0, 1fr) auto; column-gap: 0.5rem; row-gap: 0.125rem; align-items: center; padding: 0.3125rem var(--sp-3); font-size: var(--fs-meta); }
+.pl-stage.now { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--accent); padding-block: 0.5rem; }
+.pl-no { width: 1.125rem; height: 1.125rem; border-radius: 50%; display: grid; place-items: center; font-size: var(--fs-dense); font-weight: var(--strong-weight); border: 1px solid var(--border-strong); color: var(--text-muted); }
+.pl-stage.done .pl-no { background: var(--status-ok); border-color: var(--status-ok); color: var(--surface-1); }
+.pl-stage.waiting .pl-no, .pl-stage.redo .pl-no { background: var(--status-pending); border-color: var(--status-pending); color: var(--surface-1); }
+.pl-stage.running .pl-no { border-color: var(--accent); color: var(--accent-ink); }
+.pl-stage.stopped .pl-no, .pl-stage.failed .pl-no { background: var(--status-stop); border-color: var(--status-stop); color: var(--surface-1); }
+.pl-stage .pl-name { font-size: var(--fs-control); font-weight: var(--strong-weight); color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl-stage.todo .pl-name { color: var(--text-muted); font-weight: 400; }
+.pl-tag { font-size: var(--fs-dense); color: var(--text-muted); white-space: nowrap; }
+.pl-stage.waiting .pl-tag, .pl-stage.redo .pl-tag { color: var(--status-pending); }
+.pl-stage.running .pl-tag { color: var(--accent-ink); }
+.pl-stage.stopped .pl-tag, .pl-stage.failed .pl-tag { color: var(--status-stop); }
+.pl-links .clink:disabled { opacity: 0.45; cursor: not-allowed; text-decoration: none; }
+.pl-line { grid-column: 2 / 4; min-width: 0; font-size: var(--fs-dense); color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl-links, .pl-acts { grid-column: 2 / 4; display: flex; flex-wrap: wrap; gap: 0.25rem 0.5rem; }
+.pl-links .clink { padding: 0; font-size: var(--fs-dense); text-decoration: underline; text-underline-offset: 2px; color: var(--text-secondary); }
+.pl-acts { padding-top: 0.25rem; }
+.pl-hint { grid-column: 2 / 4; font-size: var(--fs-dense); color: var(--text-muted); }
+
+/* the Assets tab */
+.as { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; }
+.as-empty { margin: var(--sp-3); font-size: var(--fs-meta); color: var(--text-muted); }
+.as-grp h3 { display: flex; justify-content: space-between; margin: 0; padding: 0.5rem var(--sp-3) 0.25rem; font: var(--label-weight) calc(var(--fs-dense) * var(--label-scale)) / 1 var(--font-label);
+  text-transform: uppercase; letter-spacing: var(--label-track); color: var(--text-muted); }
+.as-grp.missing h3 { color: var(--status-stop); }
+.as-row { display: grid; grid-template-columns: 2rem minmax(0, 1fr) auto; gap: 0.5rem; align-items: center; padding: 0.3125rem var(--sp-3); border-bottom: 1px solid var(--border); }
+.as-row.missing { background: var(--status-stop-soft); }
+.as-thumb { width: 2rem; height: 2rem; border-radius: var(--r-sm); background: var(--surface-3); display: grid; place-items: center; overflow: hidden; color: var(--text-secondary); }
+.as-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.as-t { display: flex; flex-direction: column; min-width: 0; gap: 1px; }
+.as-name { display: flex; align-items: center; gap: 0.375rem; min-width: 0; font-size: var(--fs-meta); color: var(--text-primary); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.as-new { flex: none; font-size: var(--fs-dense); color: var(--accent-ink); background: var(--accent-soft); border-radius: var(--r-pill); padding: 0 0.375rem; }
+.as-sub, .as-used { font-size: var(--fs-dense); color: var(--text-muted); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.as-row.missing .as-sub { color: var(--status-stop); }
+.as-used .clink { padding: 0 0.125rem; font-size: inherit; color: var(--text-secondary); }
+.as-busy { color: var(--text-muted); }
+
+/* centre: the film in its well; the tools named in words */
+.ed-center, .pv-stage { background: var(--ed-well, #0a0a0a); }
+.pv-bar { height: 2.5rem; padding: 0 var(--sp-2); gap: 0.125rem; background: var(--surface-2); }
+.pv-time { font-family: var(--font-num); font-size: var(--fs-control); margin-left: 0.375rem; }
+.pv-bar .menu-wrap > .btn.icon.sm { width: auto; padding: 0 0.375rem; }
+.pv-lb { display: inline-flex; align-items: center; gap: 0.3125rem; font-size: var(--fs-meta); color: var(--text-secondary); white-space: nowrap; }
+.pv-lb .lbl { font-size: var(--fs-meta); }
+.btn.pv-lb { padding: 0 0.4375rem; }
+.btn.pv-lb.on { color: var(--accent-ink); background: var(--accent-soft); }
+.pv-sound.muted .lbl { color: var(--status-pending); }
+@container edc (max-width: 40rem) { .pv-shot { display: none; } }
+@container edc (max-width: 34rem) { .pv-time .muted { display: none; } }
+@container edc (max-width: 26rem) { .pv-lb .lbl { display: none; } }
+.tl { height: 11.5rem; }
+.tl-head { height: 1.75rem; }
+.tl-name { font: var(--label-weight) calc(var(--fs-dense) * var(--label-scale)) / 1 var(--font-label); text-transform: uppercase; letter-spacing: var(--label-track); color: var(--text-muted); }
+.tl-gap { flex: 1; }
+.tl-label, .tl-row { height: 1.875rem; }
+.tl-label.shots, .tl-row.shots { height: 2.25rem; }
+.tl-labels { width: 84px; }
+/* the shot length field shows its number whole (no spinner over it) */
+.sl-timing input[type="number"] { width: 4.75rem; padding-right: 0.375rem; -moz-appearance: textfield; }
+.sl-timing input[type="number"]::-webkit-inner-spin-button, .sl-timing input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* right: Claude, one status line per task */
+.claude-head { height: 2.25rem; gap: 0.375rem; padding: 0 var(--sp-3); background: var(--surface-1); }
+.claude-head .gap { flex: 1; }
+.claude-head .cmodel-pop { top: calc(100% + 0.375rem); bottom: auto; right: 0; }
+.cmodel-pop .hint { font-size: var(--fs-dense); }
+ol.plain.conversation, .conversation { padding: var(--sp-3); gap: 0.875rem; }
+.task { gap: 0.375rem; }
+.msg.user { align-self: stretch; max-width: none; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: var(--r-md); padding: 0.5rem 0.625rem; }
+.msg.user .msg-meta { margin: 0.25rem 0 0; gap: 0.5rem; }
+.msg.claude .md, .cmile .md { color: var(--text-secondary); }
+.cmile { display: flex; flex-direction: column; align-items: flex-start; gap: 0.375rem; font-size: var(--fs-control); line-height: 1.55; }
+.cstatus { display: flex; align-items: center; gap: 0.375rem; flex-wrap: wrap; font-size: var(--fs-meta); color: var(--text-muted); }
+.cstatus .cs-t { color: var(--text-secondary); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.cstatus.running .cs-t { color: var(--accent-ink); }
+.cstatus .cs-m { white-space: nowrap; }
+.cstatus .clink { display: inline-flex; align-items: center; gap: 0.125rem; padding: 0; text-decoration: underline; text-underline-offset: 2px; }
+.cstatus .cs-bad { color: var(--status-stop); display: inline-flex; align-items: center; gap: 0.25rem; font-size: var(--fs-dense); cursor: help; }
+.cstatus.undone .cs-t { text-decoration: line-through; }
+.cdot { width: 0.4375rem; height: 0.4375rem; border-radius: 50%; background: var(--status-ok); flex: none; }
+.cstatus.failed .cdot, .cstatus.cancelled .cdot { background: var(--status-stop); }
+/* a quiet fill, not a side stripe (DESIGN.md) */
+.cdetail { display: flex; flex-direction: column; gap: 0.125rem; padding: 0.375rem 0.625rem; border-radius: var(--r-sm); background: var(--surface-2); }
+[data-theme="studio"] .cdetail { padding: 0 0 0 0.625rem; border-radius: 0; background: none; border-left: 2px solid var(--border-strong); }          /* The Studio keeps its look */
+.cdetail .cstep { margin: 0.125rem 0; }
+.csent summary { cursor: pointer; font-size: var(--fs-dense); color: var(--text-muted); }
+.cretry { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; font-size: var(--fs-meta); color: var(--status-pending); }
+.cnote-line { margin: 0; font-size: var(--fs-dense); color: var(--text-muted); }
+.composer { padding: var(--sp-2) var(--sp-3) var(--sp-3); gap: 0.5rem; }
+.composer-input { min-height: 4rem; font-size: var(--fs-control); }
+.composer-actions .gap { flex: 1; }
+.composer-actions .btn .lbl { font-size: var(--fs-meta); }
+.btn.cstop { color: var(--status-stop); border-color: color-mix(in srgb, var(--status-stop) 55%, transparent); background: transparent; }
+@container (max-width: 20rem) { .composer-actions .btn .lbl { display: none; } }
+/* the player bar's menus open upward, over the film (the bar itself never scrolls: its labels fold first) */
+.pv-bar { overflow: visible; }
+.pv-bar .menu { top: auto; bottom: calc(100% + 0.375rem); z-index: 40; }
+.ed-strip .menu, .as .menu { z-index: 40; }
+/* a question Claude waits on (web, a tool) shows above an open sheet, not only in the chat behind it */
+.ed-ask { position: fixed; top: 0.75rem; left: 50%; transform: translateX(-50%); z-index: 75; width: min(36rem, calc(100vw - 2rem)); background: var(--surface-2); border-radius: var(--r-lg); box-shadow: var(--shadow-pop); }
+.ed-ask .cquestion { margin: 0; }
+
+/* ---------------------------------------------------------------------------------------------------------------------------------
+   Panels with gaps between them, as in After Effects: the panes go transparent over a
+   darker ground and each block inside is its own rounded panel. The timeline grows (drag the bar above it) and the chat input takes the
+   same height. State colours from the tokens: yellow = working, red = stop, green = done; the theme's accent stays
+   for the primary action (Render) and what waits for the user.
+   --------------------------------------------------------------------------------------------------------------------------------- */
+.ed { --ed-gap: 6px; --ed-tl-def: clamp(13rem, 32vh, 24rem); }
+.ed-body { background: #070707; }
+.ed .panes { padding: var(--ed-gap); }
+.ed .pane, .ed .pane.center, :root:not([data-theme]) .ed .pane { background: transparent; border: 0; }
+.ed .splitter { width: var(--ed-gap); margin: 0; }
+.ed .splitter::before { background: transparent; }
+.ed-box, .ed .pv, .ed .tl, .ed .mdr, .ed .cpanel { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+.ed-left { gap: var(--ed-gap); background: transparent; overflow: visible; }
+.ed-lib { flex: 1 1 auto; min-height: 7rem; display: flex; flex-direction: column; }
+.ed-pipe { flex: 0 0 auto; max-height: 62%; border-top: 1px solid var(--border); }
+.ed-center { gap: 0; background: transparent; }
+.ed .pv { flex: 1; min-height: 8rem; }
+.ed .pv-stage { background: var(--ed-well, #0a0a0a); }
+.ed .pv-bar { border-bottom: 0; }
+.ed-hsplit { flex: none; height: var(--ed-gap); cursor: row-resize; position: relative; touch-action: none; }
+.ed-hsplit::before { content: ""; position: absolute; left: 45%; right: 45%; top: 2px; height: 2px; border-radius: var(--r-xs); background: var(--border-strong); opacity: 0; transition: opacity var(--t-hover) var(--ease-out); }
+@media (hover: hover) and (pointer: fine) { .ed-hsplit:hover::before { opacity: 1; } }
+.ed-hsplit.dragging::before { opacity: 1; }
+/* Pipeline text clear of the panel's edges */
+.pl-head, .pl-stage { padding-left: var(--sp-4); padding-right: var(--sp-4); }
+.pl-stage { padding-block: 0.4375rem; }
+.pl-stage.now { padding-block: 0.625rem; }
+.pl2 { padding: var(--sp-1) 0 var(--sp-3); }
+.ed-ltabs { padding: 0 var(--sp-3); }
+.as-row, .as-grp h3 { padding-left: var(--sp-4); padding-right: var(--sp-4); }
+
+/* states in their own colours; the theme's orange only where the user must act */
+.pv-play.btn { background: var(--surface-3); border-color: var(--border-strong); color: var(--text-primary); }
+.pl-stage.running .pl-no { border-color: var(--state-run); color: var(--state-run); }
+.pl-stage.running .pl-tag, .pl-stage.running .pl-line { color: var(--state-run); }
+.pl-stage.now { box-shadow: inset 2px 0 0 var(--accent); }
+.pl-stage.running.now { box-shadow: inset 2px 0 0 var(--state-run); }
+.pl-stage.stopped.now, .pl-stage.failed.now { box-shadow: inset 2px 0 0 var(--state-stop); }
+.pl-stage.waiting .pl-no, .pl-stage.redo .pl-no { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.pl-stage.waiting .pl-tag, .pl-stage.redo .pl-tag { color: var(--accent-ink); }
+.pl-stage.done .pl-no { background: var(--state-done); border-color: var(--state-done); color: var(--state-done-ink); }
+.pl-stage.stopped .pl-no, .pl-stage.failed .pl-no { background: var(--state-stop); border-color: var(--state-stop); color: var(--state-stop-ink); }
+.pl-stage.stopped .pl-tag, .pl-stage.failed .pl-tag { color: var(--state-stop); }
+.ed-state, .ed-state.on { color: var(--state-run); }
+.cstatus.running .cs-t, .cstatus.running svg { color: var(--state-run); }
+.cdot { background: var(--state-done); }
+.cstatus.failed .cdot, .cstatus.cancelled .cdot { background: var(--state-stop); }
+.btn.cstop { color: var(--state-stop); border-color: var(--state-stop-line); }
+.btn.csend { background: var(--surface-3); border-color: var(--border-strong); color: var(--text-primary); }
+@media (hover: hover) and (pointer: fine) { .btn.csend:not(:disabled):hover { background: var(--text-primary); color: var(--surface-1); } }
+
+/* the chat in three blocks: the conversation, the dialogs to open, the input (as tall as the timeline) */
+.claude { gap: var(--ed-gap); background: transparent; }
+.cpanel { flex: none; display: flex; flex-direction: column; min-height: 0; }
+.chist { flex: 1 1 auto; }
+.chist .conversation { flex: 1; }
+.cacts { flex-direction: row; flex-wrap: wrap; gap: 0.375rem; padding: var(--sp-2); }
+.cact { flex: 1 1 auto; justify-content: center; }
+.cact.att { border-color: var(--accent-line); background: var(--accent-soft); color: var(--text-primary); }
+.ed .composer { height: var(--ed-tl-h, var(--ed-tl-def)); border-top: 1px solid var(--border); }
+.ed .composer-input { flex: 1; min-height: 3rem; resize: none; }
+.csuggest { flex-wrap: wrap; max-height: none; }
+
+/* the timeline after HF Studio's colours (packages/studio/src/styles/theme.css @ 490ecaf): pictures on the shots, a teal voice,
+   blue sound effects, a purple music clip with a white waveform; it grows with its height */
+.ed .tl { height: var(--ed-tl-h, var(--ed-tl-def)); container-type: size; --tl-voice: oklch(0.72 0.12 170); --tl-sfx: oklch(0.7 0.14 245); --tl-music: oklch(0.45 0.12 300); }
+.ed .tl.folded { height: 6.25rem; }
+.tl-body { --tl-lanes: max(9rem, calc(100cqh - 3.5rem)); --tl-h-shots: max(2.75rem, calc(var(--tl-lanes) * 0.36)); --tl-h-voice: max(1.875rem, calc(var(--tl-lanes) * 0.22));
+  --tl-h-sfx: max(1.5rem, calc(var(--tl-lanes) * 0.16)); --tl-h-music: max(2rem, calc(var(--tl-lanes) * 0.26)); background: #1b1b1b; }
+.tl.folded .tl-body { --tl-h-shots: 3rem; }
+.tl-labels { background: #171717; }
+.tl-label.shots, .tl-row.shots { height: var(--tl-h-shots); }
+.tl-label.voice, .tl-row.voice { height: var(--tl-h-voice); }
+.tl-label.sfx, .tl-row.sfx { height: var(--tl-h-sfx); }
+.tl-label.music, .tl-row.music { height: var(--tl-h-music); }
+.tl-row { border-bottom-color: rgba(255, 255, 255, 0.05); }
+.tl-shot { top: 0.25rem; bottom: 0.25rem; padding: 0; border-radius: 6px; border: 1px solid var(--hairline-light); background: #2a2a2a; background-size: auto 100%; background-repeat: repeat-x;
+  background-position: left center; display: flex; align-items: flex-end; }
+.tl-chip { margin: 0.25rem; padding: 0.0625rem 0.375rem; border-radius: var(--r-xs); background: var(--media-overlay); color: var(--on-media); font-size: var(--fs-dense); max-width: calc(100% - 0.5rem);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 2px var(--shade); }
+.tl-chip b { color: color-mix(in srgb, var(--on-media) 70%, transparent); font-weight: 400; }
+.tl-shot.sel { border-color: var(--text-primary); box-shadow: 0 0 0 1px var(--text-primary), inset 0 0 0 1px var(--shade); background-color: var(--tl-clip-sel); }
+.tl-word { top: 0.25rem; bottom: 0.25rem; border-radius: var(--r-sm); line-height: normal; display: flex; align-items: center; color: var(--tl-word-ink);
+  background: color-mix(in oklab, var(--tl-voice) 30%, transparent); border: 1px solid color-mix(in oklab, var(--tl-voice) 60%, transparent); }
+.tl-tick { top: 0.25rem; bottom: 0.25rem; height: auto; border-radius: var(--r-xs); background: var(--tl-sfx); opacity: 0.9; }
+.tl-music { top: 0.25rem; bottom: 0.25rem; border-radius: var(--r-md); background: var(--tl-music); border: 1px solid var(--tl-music-line); }
+.tl-music path { fill: var(--tl-wave); opacity: 0.8; }
+.tl-head-line { background: var(--text-primary); }
+.tl-head-line::before { border-top-color: var(--text-primary); }
+.tl-range { background: var(--fill-active); border-color: var(--text-secondary); }
+.ed .mdr { height: var(--ed-tl-h, var(--ed-tl-def)); border-top: 1px solid var(--border); }
+/* inside the Editor, buttons are outlined in grey, not in the theme's orange (the primary action keeps its fill) */
+.ed { --btn-line: var(--border-strong); }
+.ed .cact.att { --btn-line: var(--accent-line); }
+.tl-tick { top: 30%; bottom: 30%; }
+/* orange only for the brand and the one primary action (Render); what waits for the user is yellow too */
+.pl-stage.now { box-shadow: inset 2px 0 0 var(--state-run); }
+.pl-stage.waiting .pl-no, .pl-stage.redo .pl-no { background: var(--state-run); border-color: var(--state-run); color: var(--state-run-ink); }
+.pl-stage.waiting .pl-tag, .pl-stage.redo .pl-tag { color: var(--state-run); }
+.ed .cact.att { --btn-line: var(--state-run-line); background: var(--state-run-soft); }
+/* the Render dialog's frame rate, the film's own: a read-only value in the field's place */
+.field > .input.ro { display: flex; align-items: center; color: var(--text-secondary); background: transparent; cursor: default; }
+/* a drag on the timeline never selects its words (the brown patches over the labels, the ruler's numbers dragged
+   as a second row); the arrow, not the text cursor; the labels whole; a picked shot keeps its picture under the white outline */
+.tl, .tl-body, .tl-lanes, .tl-labels, .tl-ruler { user-select: none; -webkit-user-select: none; }
+.tl-lanes { cursor: default; }
+.tl-labels { width: 116px; }
+.tl-label { overflow: visible; text-overflow: clip; }
+.tl-shot.sel { background-color: #2a2a2a; background-size: auto 100%; background-repeat: repeat-x; background-position: left center; }
+/* the chat's title bar is taller and set off from the conversation; the usage is said in words beside the title */
+.claude-head { height: 2.75rem; border-bottom: 1px solid var(--border); flex: none; }
+.cusage-head { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-dense); color: var(--text-muted); margin-left: 0.25rem; }
+@container (max-width: 22rem) { .cusage-head { display: none; } }
+/* Claude's working line wraps inside its own box, where it is */
+.cstatus.running { display: flex; flex-wrap: wrap; align-items: flex-start; padding: 0.5rem 0.625rem; border: 1px solid var(--state-run-line); border-radius: var(--r-md); background: var(--state-run-soft); }
+.cstatus.running .cs-t { white-space: normal; overflow: visible; text-overflow: clip; flex: 1 1 12rem; }
+/* the next-step drafts may take two lines */
+.csuggest { max-height: none; }
+.cchip.sug { white-space: normal; text-align: left; }
+.cchip.sug .t { white-space: normal; overflow: visible; }
+/* the open shot, set apart by a tinted ground, with a compact panel of its own (length, words on screen) */
+.sl li.on { background: color-mix(in oklab, var(--accent) 7%, var(--surface-2)); box-shadow: inset 0 0 0 1px var(--accent-line); }
+.sl-open { margin: 0 0.375rem 0.375rem 1.75rem; padding: 0.5rem 0.625rem; gap: 0.375rem; border-radius: var(--r-sm); background: var(--surface-1); border: 1px solid var(--border); }
+.sl-timing { gap: 0.375rem; font-size: var(--fs-dense); }
+.sl-len { width: 3.75rem; height: 1.5rem; padding: 0 0.375rem; border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--surface-2); color: var(--text-primary);
+  font-size: var(--fs-meta); -moz-appearance: textfield; }
+.sl-len::-webkit-inner-spin-button, .sl-len::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.sl-words { gap: 1px; }
+.sl-word { width: 100%; height: 1.5rem; padding: 0 0.375rem; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; background: transparent; color: var(--text-primary);
+  font: inherit; font-size: var(--fs-meta); text-overflow: ellipsis; }
+@media (hover: hover) and (pointer: fine) { .sl-word:hover { background: var(--surface-2); } }
+.sl-word:focus { outline: none; background: var(--surface-2); border-bottom-color: var(--accent-line); }
+.sl-word.edited { border-bottom-color: var(--accent-line); }
+.sl-word:disabled { opacity: 0.6; }
+/* the user's own messages stay clearly apart from Claude's words */
+.msg.user { border: 1px solid var(--accent-line); background: color-mix(in oklab, var(--accent) 6%, var(--surface-2)); }
+/* the film is done, in one green block with the self-check's score */
+.cdone { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem 0.875rem; border: 1px solid var(--state-done-line); border-radius: var(--r-md); background: var(--state-done-soft); }
+.cdone-head { display: flex; align-items: center; gap: 0.5rem; color: var(--state-done); }
+.cdone-head b { font-size: var(--fs-control); font-weight: var(--strong-weight); }
+.cdone p { margin: 0; font-size: var(--fs-meta); color: var(--text-primary); }
+/* with the tokens: the open shot's row stays as the others; its nested panel and the user's messages are tinted */
+.sl li.on { background: var(--surface-2); box-shadow: inset 2px 0 0 var(--accent); }
+.sl-open { background: var(--ed-sub, color-mix(in oklab, var(--accent) 7%, var(--surface-2))); border: 1px solid var(--ed-sub-line, var(--accent-line)); border-radius: var(--r-md);
+  padding: var(--sp-2) var(--sp-3); }
+.msg.user { background: var(--ed-user, color-mix(in oklab, var(--accent) 6%, var(--surface-2))); border: 1px solid var(--ed-user-line, var(--accent-line)); }
+/* final: the open shot's row is tinted, its panel sits on the column ground inside it */
+.sl li.on { background: var(--ed-sub); box-shadow: inset 0 0 0 1px var(--ed-sub-line); }
+.sl-open { background: var(--surface-1); border: 1px solid var(--border); }
+.msg.user { background: var(--ed-user); border: 1px solid var(--ed-user-line); }
+/* no coloured side stripes (the design rules): the current stage is marked by a full 1px border in its state colour */
+.pl-stage.now, .pl-stage.running.now { box-shadow: inset 0 0 0 1px var(--state-run-line); }
+.pl-stage.stopped.now, .pl-stage.failed.now { box-shadow: inset 0 0 0 1px var(--state-stop-line); }
+/* the words on screen in the boxed fields, a little more compact than before  */
+.sl-words { gap: 0.25rem; }
+.input.sm.sl-word { height: 1.875rem; padding: 0 0.5rem; border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--surface-2); font-size: var(--fs-meta); }
+@media (hover: hover) and (pointer: fine) { .input.sm.sl-word:hover { background: var(--surface-2); border-color: var(--text-muted); } }
+.input.sm.sl-word:focus { background: var(--surface-2); border-color: var(--accent-line); }
+.input.sm.sl-word.edited { border-color: var(--accent-line); }
+/* the bottom panels' height: about a quarter of the window; the Pipeline box matches it */
+.ed { --ed-tl-def: clamp(12rem, 25vh, 21rem); }
+.ed-pipe { height: var(--ed-tl-h, var(--ed-tl-def)); max-height: none; flex: 0 0 auto; }
+/* the motion drawer in rows that wrap (two at this height) and scroll down, not sideways */
+.mdr-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); grid-auto-rows: min-content; gap: 0.5rem 0.625rem; overflow-x: hidden; overflow-y: auto; align-items: start; }
+.mdr-card { width: auto; }
+.mdr-sep { writing-mode: horizontal-tb; transform: none; grid-column: 1 / -1; }
+/* shots read as separate clips: rounder, with a gap between them */
+.tl-shot { border-radius: 10px; }
+/* sounds as clips; the music green, its waveform half as tall */
+.ed .tl { --tl-music: oklch(0.5 0.12 150); --tl-music-line: oklch(0.4 0.11 150); }
+.tl-aclip { position: absolute; top: 0.25rem; bottom: 0.25rem; border-radius: var(--r-md); overflow: hidden; cursor: grab; touch-action: none; }
+.tl-aclip.locked { cursor: default; }
+.tl-aclip.moving { cursor: grabbing; opacity: 0.85; z-index: 3; box-shadow: 0 4px 12px var(--shade); }
+.tl-aclip.sel { box-shadow: 0 0 0 2px var(--text-primary); z-index: 2; }
+.tl-aclip.voice { background: color-mix(in oklab, var(--tl-voice) 22%, transparent); border: 1px solid color-mix(in oklab, var(--tl-voice) 55%, transparent); }
+.tl-aclip.sfx { top: 28%; bottom: 28%; border-radius: var(--r-xs); background: var(--tl-sfx); }
+.tl-aclip.music { background: var(--tl-music); border: 1px solid var(--tl-music-line); }
+.tl-aclip svg { width: 100%; height: 100%; display: block; pointer-events: none; }
+.tl-aclip path { fill: var(--tl-wave-voice); }
+.tl-music { background: var(--tl-music); border-color: var(--tl-music-line); }
+.tl-row.voice .tl-word { z-index: 1; pointer-events: none; }
+.as-fold { display: inline-flex; align-items: center; gap: 0.25rem; border: 0; background: none; padding: 0; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
+/* Assets tab: Add files on the tabs' row; folder and type icons; a sound's icon in its lane's colour; text as
+   bright as the Pipeline's. The lane colours live on the Editor so the tab and the timeline share them. */
+.ed { --tl-voice: oklch(0.72 0.12 170); --tl-sfx: oklch(0.7 0.14 245); --tl-music: oklch(0.5 0.12 150); --tl-music-line: oklch(0.4 0.11 150); }
+.ed-ltabs { align-items: center; }
+.ed-addfiles { margin-left: auto; flex: none; }
+.chat-sk { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.8rem; list-style: none; }
+.chat-sk .skeleton { height: 0.75rem; border-radius: var(--r-sm); }
+.chat-sk .skeleton.short { width: 60%; }
+.as-grp h3 { color: var(--text-primary); }
+.as-grp h3 .num { color: var(--text-secondary); }
+.as-fold svg { flex: none; }
+.as-fold svg + svg { color: var(--text-secondary); margin-right: 0.125rem; }
+.as-name { color: var(--text-primary); }
+.as-sub, .as-used { color: var(--text-secondary); }
+.as-thumb { color: var(--text-primary); }
+.as-thumb.audio.voiceover { color: var(--tl-voice); background: color-mix(in oklab, var(--tl-voice) 18%, var(--surface-3)); }
+.as-thumb.audio.sfx { color: var(--tl-sfx); background: color-mix(in oklab, var(--tl-sfx) 18%, var(--surface-3)); }
+.as-thumb.audio.music { color: var(--tl-music-ink); background: color-mix(in oklab, var(--tl-music) 30%, var(--surface-3)); }
+/* as settled: 5_Audio holds its three folders (Voice, SFX, Music), indented as a tree */
+.as-grp.sub h3 { padding-left: calc(var(--sp-4) + 1rem); }
+.as-grp.sub .as-row { padding-left: calc(var(--sp-4) + 1rem); }
+/* on a narrow column, Add files keeps its icon only (its name stays in the tooltip) */
+.ed-lib { container: edlib / inline-size; }
+.ed-ltabs { gap: 0.125rem; }
+/* "Add files" keeps its word next to the + down to a very narrow column; the tabs tighten first */
+@container edlib (max-width: 20rem) { .ed-addfiles { padding: 0 0.375rem; font-size: var(--fs-dense); } .ed-ltabs button[role="tab"] { padding: 0 0.375rem; } }
+/* Shots, Assets and the label need about 18.5rem; below that the button keeps only its + (its name is in the tooltip) */
+@container edlib (max-width: 18.5rem) { .ed-addfiles .lbl { display: none; } }
+/* the film's title row is taller (no Back button any more: the rail's Projects is the way back) */
+.ed-strip { height: 3.5rem; padding: 0 var(--sp-4); gap: 0.75rem; }
+.ed-title { font-size: calc(var(--fs-title) * var(--display-scale)); max-width: 28rem; }
+/* the brief as the conversation's first line, folded to two lines until Details */
+.cbrief { display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem; padding: 0.5rem 0.625rem; border-radius: var(--r-md); background: var(--ed-user); border: 1px solid var(--ed-user-line); }
+.cbrief-t { font-size: var(--fs-control); line-height: 1.5; color: var(--text-primary); white-space: pre-wrap; overflow-wrap: anywhere; }
+.cbrief:not(.open) .cbrief-t { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cbrief .clink { display: inline-flex; align-items: center; gap: 0.125rem; padding: 0; text-decoration: underline; text-underline-offset: 2px; }
+/* Claude's words read lighter, as in Claude's own chat: regular weight, a little more air, the softer tone; bold
+   words stand out in the primary colour; code and lists stay tidy */
+.msg.claude .md, .cmile .md, .cdone p { font-weight: 400; line-height: 1.65; color: var(--text-secondary); letter-spacing: 0; }
+.msg.claude .md strong, .cmile .md strong, .msg.claude .md b, .cmile .md b { font-weight: 600; color: var(--text-primary); }
+.msg.claude .md code, .cmile .md code { font-weight: 400; font-size: 0.92em; color: var(--text-primary); background: var(--surface-3); padding: 0.0625rem 0.3125rem; }
+.msg.claude .md ul, .msg.claude .md ol, .cmile .md ul, .cmile .md ol { gap: 0.125rem; padding-left: 1.125rem; }
+.msg.claude .md li::marker, .cmile .md li::marker { color: var(--text-muted); }
+.msg.user .md { font-weight: 400; line-height: 1.6; }
+/* the Pipeline box always holds its six stages and a gap under Feedback; at least as tall as the timeline, taller
+   when its stages need it, and on a short window its list scrolls inside the box (it is never clipped: .ed-box hid the overflow) */
+.ed-left > .ed-pipe { height: auto; min-height: min(var(--ed-tl-h, var(--ed-tl-def)), 70%); max-height: 70%; flex: 0 0 auto; overflow-y: auto; overflow-x: hidden; }
+.ed-pipe .pl2 { padding-bottom: var(--sp-5); }
+/* a folder's files read as its children: indented past the folder's arrow, a size smaller and lighter, a thin guide
+   line down the left and no rule between them, so the uppercase folder name stands above its files */
+.as-grp h3 { padding-top: 0.75rem; padding-bottom: 0.375rem; }
+.as-grp + .as-grp { border-top: 1px solid var(--border); }
+.as-grp .as-grp { border-top: 0; }
+.as-grp > ul { position: relative; padding-bottom: 0.375rem; }
+.as-grp > ul::before { content: ""; position: absolute; left: calc(var(--sp-4) + 0.375rem); top: 0; bottom: 0.625rem; border-left: 1px solid color-mix(in oklab, var(--text-muted) 40%, transparent); }
+.as-grp.sub > ul::before { left: calc(var(--sp-4) + 1.375rem); }
+.as-grp > ul > .as-row { padding: 0.25rem var(--sp-4) 0.25rem calc(var(--sp-4) + 1.125rem); border-bottom: 0; grid-template-columns: 1.625rem minmax(0, 1fr) auto; }
+.as-grp.sub > ul > .as-row { padding-left: calc(var(--sp-4) + 2.125rem); }
+@media (hover: hover) and (pointer: fine) { .as-grp > ul > .as-row:hover { background: var(--surface-2); } }
+.as-grp .as-thumb { width: 1.625rem; height: 1.625rem; }
+.as-grp .as-thumb svg { width: 0.875rem; height: 0.875rem; }
+.as-grp .as-name { font-size: var(--fs-dense); font-weight: 400; }
+.as-grp .as-sub, .as-grp .as-used { font-size: var(--fs-dense); color: var(--text-muted); }
+/* the running stage's activity line is set apart from its name: smaller, italic, lighter, breathing slowly like the
+   loading line of Projects, to say the work is under way; still with reduced motion */
+.pl-stage.running .pl-line { font-style: italic; font-weight: 400; font-size: var(--fs-dense); color: color-mix(in oklab, var(--state-run) 70%, var(--text-secondary)); }
+@media (prefers-reduced-motion: no-preference) { .pl-stage.running .pl-line { animation: pl-breathe 2.4s var(--ease-in-out) infinite; } }
+@keyframes pl-breathe { 50% { opacity: 0.5; } }
+/* follow-up: the activity line wraps to a second line before it is cut */
+.pl-stage.running .pl-line { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; text-overflow: ellipsis; overflow-wrap: anywhere; }
+/* a chat's two sides: the user's messages and brief on the right, in a cool slate box (red is kept for errors, the
+   app's colour rule), Claude on the left */
+.ed[data-zone="editor"] { --ed-user: oklch(0.27 0.03 250); --ed-user-line: oklch(0.46 0.07 250); }
+.msg.user, .cbrief { align-self: flex-end; width: fit-content; max-width: 85%; border-radius: var(--r-lg) var(--r-lg) var(--r-sm) var(--r-lg); }
+.cbrief { margin-left: auto; }
+/* the running card holds Claude's whole message (no clamp, no ellipsis): it grows, the last item of the chat */
+.cstatus.running .cs-t { display: block; white-space: pre-wrap; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+/* a code film's smooth preview in the player bar: green when it is ready (done, the app's colour rule), a quiet line while it is made */
+.pv-smooth { padding: 0 0.375rem; }
+.pv-smooth.on, .pv-smooth.on svg { color: var(--state-done); }
+/* a film that cannot play live is shown as the app's render of it; until it exists, a clear line with its progress (working: yellow) */
+.pv-video { object-fit: contain; background: var(--media-bg); }
+.pv-render { padding: var(--sp-5); text-align: center; color: var(--text-secondary); }
+.pv-render .spin { color: var(--state-run); }
+.pv-prog { display: block; width: min(18rem, 70%); height: 4px; border-radius: var(--r-pill); background: var(--surface-3); overflow: hidden; }
+.pv-prog i { display: block; width: 100%; height: 100%; background: var(--state-run); transform-origin: left center; transition: transform 220ms var(--ease-out); }          /* transform only, under 300ms */
+.pv-update { position: absolute; left: var(--sp-3); top: var(--sp-3); display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.25rem 0.5rem; border-radius: var(--r-pill);
+  font-size: var(--fs-dense); color: var(--state-run); background: color-mix(in oklab, var(--media-bg) 70%, transparent); border: 1px solid var(--state-run-line); }
+.pv-update.old { color: var(--text-secondary); border-color: var(--border-strong); }
+.pv-only { color: var(--text-muted); }
+.tl-lanes.ro { cursor: default; }
+/* the Editor's floating layers (the model chip's menu, Versions, the Motions / Sounds panel, the edit card
+   over the film) are the app's glass; a panel that sits in the layout (the Final Mix's own list) stays solid. Same fallbacks as app.css. */
+.cmodel-pop, .ed-ver-pop, .ml-panel, .pe-card { background: var(--glass-bg); -webkit-backdrop-filter: var(--glass-blur-thin); backdrop-filter: var(--glass-blur-thin);
+  border-color: var(--glass-edge); box-shadow: var(--glass-hi), var(--glass-shadow); }
+@media (prefers-reduced-transparency: reduce) {
+  .cmodel-pop, .ed-ver-pop, .ml-panel, .pe-card { background: var(--surface-2); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@media (prefers-contrast: more) {
+  .cmodel-pop, .ed-ver-pop, .ml-panel, .pe-card { background: var(--surface-2); -webkit-backdrop-filter: none; backdrop-filter: none; border-color: var(--border-strong); }
+}
+/* a card that reports something finished (a task done, a render, an
+   approval) has a green edge and a check; working stays yellow, stopped or failed red */
+.cstatus.done:not(.undone) { padding: 0.375rem 0.625rem; border: 1px solid var(--state-done-line); border-radius: var(--r-md); background: var(--state-done-soft); }
+.cstatus.done:not(.undone) .cs-t { color: var(--text-primary); }
+.cstatus .cs-ok, .cmile .cs-ok, .cnote.ok > svg { color: var(--state-done); flex: none; }
+.cstatus.failed, .cstatus.cancelled:not(.undone) { padding: 0.375rem 0.625rem; border: 1px solid var(--state-stop-line); border-radius: var(--r-md); background: var(--state-stop-soft); }
+.cmile.done { flex-direction: row; align-items: flex-start; gap: 0.5rem; padding: 0.5rem 0.75rem; border: 1px solid var(--state-done-line); border-radius: var(--r-md); background: var(--state-done-soft); }
+.cmile.done .cs-ok { margin-top: 0.25rem; }
+.cnote.ok { border-color: var(--state-done-line); background: var(--state-done-soft); }
+.cnote.warn { border-color: var(--state-run-line); }
+.cnote.warn > svg { color: var(--state-run); }
+/* the dialogs' buttons under the chat say what they open in the body face, sentence case; the panel that holds them is
+   its own block (a tinted ground and edge), the buttons themselves unchanged */
+.ed .cpanel.cacts { background: color-mix(in oklab, var(--accent) 11%, var(--surface-1)); border: 1px solid color-mix(in oklab, var(--accent) 55%, var(--border)); }
+.ed .cacts .cact { font-family: var(--font-body); text-transform: none; letter-spacing: 0; font-size: var(--fs-control); font-weight: 500; }
+/* the Shots / Assets tabs are buttons, so they take the app's button face in sentence case like the rest */
+.ed .ed-ltabs button { font-family: var(--font-body); text-transform: none; letter-spacing: 0; font-size: var(--fs-control); font-weight: 500; }
+/* the Render sheet's spec line and its progress bar (the sheet's glass is the shared one, for every sheet) */
+.render-spec { margin: 0; color: var(--text-secondary); }
+.render-sheet .progress-line .bar { flex: none; height: 0.5rem; margin: 0.25rem 0 0.375rem; border-radius: var(--r-pill); background: var(--surface-3); overflow: hidden; }
+.render-sheet .progress-line .bar > span { display: block; width: 100%; height: 100%; background: var(--state-run); transform-origin: left center; transition: transform 220ms var(--ease-out); }
+@media (prefers-reduced-motion: reduce) { .render-sheet .progress-line .bar > span { transition: none; } }
+/* a stage's line that opens its dialog reads as a link (the stage stays one row) */
+.pl-line.pl-go { all: unset; grid-column: 2 / 4; min-width: 0; font-size: var(--fs-dense); color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  cursor: pointer; text-decoration: underline; text-decoration-color: color-mix(in oklab, currentColor 45%, transparent); text-underline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) { .pl-line.pl-go:hover { color: var(--text-primary); } }
+.pl-line.pl-go:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r-xs); }
+.pl-stage.waiting .pl-line.pl-go, .pl-stage.redo .pl-line.pl-go { color: var(--state-run); }
+/* the running card's words take the whole width; its time and Details go to a row of their own, as on the other cards */
+.cstatus.running .cs-t { flex: 1 1 calc(100% - 1.5rem); }
+/* the column's head is the usage line alone */
+.claude-head .cusage-head { margin-left: 0; }
+/* a render plays in the app */
+.ed-viewer { display: block; width: 100%; max-height: 70vh; background: var(--media-bg); border-radius: var(--r-md); }
+/* AE Export beside Render, the same height, secondary; its mark is After Effects' own "Ae" tile */
+.ed-ae { flex: none; gap: 0.4375rem; }
+.ae-tile { display: inline-grid; place-items: center; width: 1.25rem; height: 1.25rem; border-radius: var(--r-xs); background: var(--ae-bg); color: var(--ae-ink);
+  border: 1px solid #9999FF; font: 700 0.6875rem/1 var(--font-body); letter-spacing: 0; }
+.ed-ae:disabled .ae-tile { opacity: 0.5; }
+/* the Motion Plan says what the user approves; a row's plain description reads in full, the numbers come on demand */
+.mo2 .mo-intro { margin: 0.5rem 0 0; font-size: var(--fs-control); color: var(--text-secondary); line-height: 1.5; }
+.mo2 .page-head > div:first-child { flex: 1 1 auto; }          /* the line runs the dialog's width (it wrapped at 60rem) */
+.mo2 .mo-sel { font-size: var(--fs-dense); color: var(--text-muted); background: var(--surface-3); padding: 0.0625rem 0.3125rem; border-radius: var(--r-sm); white-space: nowrap; max-width: 14rem; overflow: hidden; text-overflow: ellipsis; }
+.mo2 .mo-says { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; padding: 0 0.5rem 0.25rem; font-size: var(--fs-dense); line-height: 1.4; color: var(--text-secondary); text-align: left; }
+.mo2 .mo-shot-says { margin: 0 0 0.375rem; padding: 0.5rem 0.75rem; box-shadow: inset 0 0 0 1px var(--state-done-line); border-radius: var(--r-sm); background: var(--state-done-soft);
+  font-size: var(--fs-control); line-height: 1.5; color: var(--text-primary); }
+[data-theme="studio"] .mo2 .mo-shot-says { box-shadow: none; border-left: 3px solid var(--state-done); }          /* The Studio keeps its look */
+/* the Motion Plan's rows are a table: fixed columns, every one left-aligned at the same x, light rules between rows instead of
+   a box per row, a little less padding (impeccable / emil: align to a grid, let the rows breathe, one weight of separator) */
+.mo2 .mo-rows { gap: 0; }
+.mo2 .mo-row { border: 0; border-bottom: 1px solid color-mix(in oklab, var(--border) 75%, transparent); border-radius: 0; background: transparent; padding: 0.3125rem 0.5rem; }
+@media (hover: hover) and (pointer: fine) { .mo2 .mo-row:hover { background: color-mix(in oklab, var(--surface-2) 60%, transparent); } }
+.mo2 .mo-row.changed { background: color-mix(in oklab, var(--state-run) 6%, transparent); box-shadow: inset 2px 0 0 var(--state-run); border-color: color-mix(in oklab, var(--border) 75%, transparent); }
+/* the element's name had 9.5rem and was cut while "What it does" had room: 13rem, and two lines before it is cut */
+.mo2 .mo-line { display: grid; grid-template-columns: 13rem minmax(0, 1fr) 10rem 4.5rem; column-gap: 1rem; align-items: center; flex-wrap: nowrap; }
+.mo2 .mo-rows.nums .mo-line { grid-template-columns: 13rem 16rem minmax(0, 1fr) 10rem 4.5rem; }
+.mo2 .mo-head { padding: 0 0.5rem 0.375rem; border-bottom: 1px solid var(--border); font-size: var(--fs-dense); font-weight: 600; color: var(--text-muted); text-transform: none; letter-spacing: 0; }
+.mo2 .mo-c { min-width: 0; }
+.mo2 .mo-c-name { display: flex; align-items: center; gap: 0.375rem; }
+.mo2 .mo-c-name .mo-target { flex: 0 1 auto; min-width: 0; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.35; font-size: var(--fs-control); font-weight: 600; }
+.mo2 .mo-changed { flex: none; width: 0.4375rem; height: 0.4375rem; border-radius: 50%; background: var(--state-run); }
+.mo2 .mo-c-tech { display: flex; align-items: center; gap: 0.375rem; overflow: hidden; white-space: nowrap; }
+.mo2 .mo-c-tech .mo-when { flex: none; font-size: var(--fs-dense); }
+.mo2 .mo-c-desc { all: unset; display: block; min-width: 0; cursor: pointer; text-align: left; }
+.mo2 .mo-c-desc .mo-what, .mo2 .mo-c-desc .mo-what.plain { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-control); line-height: 1.45; }
+.mo2 .mo-c-desc .mo-what { color: var(--text-secondary); }
+.mo2 .mo-c-desc .mo-what.plain { color: var(--text-primary); }
+.mo2 .mo-c-desc.full .mo-what, .mo2 .mo-c-desc.full .mo-what.plain { white-space: normal; overflow: visible; }
+.mo2 .mo-c-desc:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r-xs); }
+.mo2 .mo-line:has(.mo-c-desc.full) { align-items: start; }
+.mo2 .mo-c-src { display: flex; justify-content: flex-start; }
+.mo2 .mo-c-src .mp-src { min-width: 0; max-width: 100%; gap: 0.4375rem; }
+.mo2 .mo-c-src .mp-src-thumb { width: 2.25rem; }
+.mo2 .mo-c-src .mp-src-t { font-size: var(--fs-dense); }
+.mo2 .mo-c-act { display: flex; justify-content: flex-end; gap: 0.125rem; }
+/* the Storyboard sheet is as tall as its rounds (no empty band under two options), up to the window, then it scrolls */
+.sheet-overlay > .sheet:has(> .sheet-body > .sb2) { height: auto; max-height: calc(100vh - 2 * var(--sp-4)); }
+/* every shape is a 3 x 3 sheet (pages past nine) as large as a 16:9 one: the sheet narrows by the square root of
+   its panels' shape against 16:9, so a 1:1, 4:5 or 9:16 sheet covers the area a 16:9 sheet does, centred in the card */
+.sb2 .bd-col[style] .bd-stills { width: min(100%, calc(100% * sqrt(var(--bd-ar) * 9 / 16))); margin-inline: auto; }
+/* under the file name, the name the render gets (with its date and time) */
+.render-name { display: block; margin-top: 0.25rem; font-size: var(--fs-dense); color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.checks-card .checks-fixing { display: inline-flex; align-items: center; gap: 0.3125rem; color: var(--state-run); }
+.cstep-f { color: var(--text-muted); }
+/* the live "Now: …" line under a running task: a slow pulse, the step in words, how long it has been on it */
+.cnow { display: flex; align-items: center; gap: 0.4rem; margin: 0.25rem 0 0 1.4rem; font-size: var(--fs-meta); color: var(--text-secondary); min-width: 0; }
+.cnow-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cnow-dot { width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--state-run); flex: none; animation: cnow-pulse 1.6s ease-in-out infinite; }
+@keyframes cnow-pulse { 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .cnow-dot { animation: none; } }          /* what the file is, in words, after the action */
+/* a waiting stage's line wraps so it can be read whole */
+.pl-stage.waiting .pl-line { white-space: normal; }
+
+/* a stage's line wraps to a second line instead of an ellipsis ("Ready to render · Music: …") */
+.pl-line, .pl-line.pl-go { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
+/* lanes keep a modest height instead of filling the panel, and the music lane has room below it */
+.tl-body { --tl-h-shots: clamp(2.75rem, calc(var(--tl-lanes) * 0.3), 3.5rem); --tl-h-voice: clamp(1.75rem, calc(var(--tl-lanes) * 0.16), 2.125rem);
+  --tl-h-sfx: clamp(1.5rem, calc(var(--tl-lanes) * 0.13), 1.875rem); --tl-h-music: clamp(2rem, calc(var(--tl-lanes) * 0.2), 2.5rem); }
+.tl-row.music, .tl-label.music { margin-bottom: 0.75rem; }
+/* the edit card's Google font search: a small field over the font list */
+.pe-field .pe-font-find { height: 1.75rem; font-size: var(--fs-meta); }
+/* the Pipeline column underlines nothing at rest. The links (Brief, Assets, Voice-over…) carry the link
+   colour; a stage's status line that opens its sheet reads as plain text and shows its underline only under the pointer or keyboard focus */
+:root:not([data-theme="studio"]) .pl-links .clink:not(:disabled) { text-decoration: none; color: var(--link); }
+:root:not([data-theme="studio"]) .pl-line.pl-go { text-decoration: none; }
+@media (hover: hover) and (pointer: fine) {
+  :root:not([data-theme="studio"]) .pl-links .clink:not(:disabled):hover, :root:not([data-theme="studio"]) .pl-line.pl-go:hover { text-decoration: underline; text-decoration-color: currentColor; text-underline-offset: 2px; }
+}
+:root:not([data-theme="studio"]) .pl-line.pl-go:focus-visible { text-decoration: underline; }
+/* a timeline clip's label sits on its own dark strip along the clip's bottom edge, under the thumbnail,
+   never over the still's own text; the thumbnail fills the space above it */
+:root:not([data-theme="studio"]) .tl-shot { overflow: hidden; }
+:root:not([data-theme="studio"]) .tl-shot.pic { background-size: auto calc(100% - 1.125rem); background-position: left top; }
+:root:not([data-theme="studio"]) .tl-chip { margin: 0; width: 100%; max-width: 100%; height: 1.125rem; display: block; line-height: 1.125rem; padding: 0 0.375rem;
+  border-radius: 0; background: var(--surface-1); text-shadow: none; }
+/* Render cuts nothing it shows: the stamped file name wraps, and the Loudness field takes two columns so its
+   choice reads in full */
+:root:not([data-theme="studio"]) .render-name { white-space: normal; overflow-wrap: anywhere; }
+@media (min-width: 64rem) { :root:not([data-theme="studio"]) .render-sheet .form-cols > .field:has(> select option[value="kit"]) { grid-column: span 2; } }
+/* a code film's words field while the film is made again from its code: the pending edge (amber: waiting) */
+.input.cw-busy, .input.cw-busy:disabled { border-color: var(--status-pending); box-shadow: 0 0 0 1px var(--status-pending-soft); cursor: progress; }
+/* while the film plays the clock keeps one width (each digit as wide as a 0, the running time in a box of eight), so
+   "Shot N · …" after it never moves */
+.pv-time { font-variant-numeric: tabular-nums; }
+.pv-time .pv-now { display: inline-block; min-width: 8ch; }
+/* a code film's word has font and size only (no colour) */
+.pe-row.code-style { grid-template-columns: minmax(0, 1fr) 4.25rem; }
+/* Build and review's four parts on The Desk, in the Prepare row's link style; a part done carries a green check, one at
+   work the yellow spinner (status colours), Build itself is a state */
+.pl-subs .pl-sub { display: inline-flex; align-items: center; gap: 0.25rem; }
+.pl-subs span.pl-sub { font-size: var(--fs-dense); color: var(--text-secondary); }
+.pl-subs .pl-sub.done > svg { color: var(--state-done); }
+.pl-subs .pl-sub.running > svg { color: var(--state-run); }
+.pl-subs .pl-sub b { font-weight: var(--strong-weight); }
+.pl-subs .pl-sub .pl-warn { color: var(--status-stop); font-weight: var(--strong-weight); }          /* "Tech checks · 5 warnings" */

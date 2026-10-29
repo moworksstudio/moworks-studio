@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-goal-projection",
+  "type": "hyperframes:block",
+  "title": "Goal Projection Arc",
+  "description": "Mục tiêu đứng sẵn trên biểu đồ, đường thực tế vẽ xong thì một đường dự phóng nét đứt cong tới mục tiêu, chạm tới thì phát một vòng sáng.",
+  "tags": [
+    "chart",
+    "forecast",
+    "goal",
+    "line",
+    "data-storytelling",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "data-goal-projection.html",
+      "target": "compositions/components/data-goal-projection.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/data-goal-projection",
+    "author": "takayu",
+    "call": "MW.dataGoalProjection(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataGoalProjection",
+    "options": {
+      "goal": "(120)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-data-story-goal-projection",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-data-story-goal-projection (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-data-story-goal-projection, written here): Goal marker fixed from the start (ring r 8 + dot, dashed goal line, label). Actual line (5 points) draws 300-1300 ms easeInOut, end dot; divider + labels fade 1200-1500; dashed (5/4, yellow) projection curves from the last point to the goal 1500-2600 ms easeInOut with an open head dot; on arrival a ring 9 -> 29 px fades over 700 ms easeOutCubic. Fade 3600-3950. Params: goal (120) · projection (1.1 s) · color dự phóng (vàng).",
+    "titleVi": "Dự phóng nét đứt tới mục tiêu"
+  }
+}

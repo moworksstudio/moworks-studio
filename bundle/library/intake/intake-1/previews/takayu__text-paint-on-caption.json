@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-paint-on-caption",
+  "hash": "3d0f3bb411e876b5",
+  "at": "2026-10-17T08:56:21.030Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-paint-on-caption.mp4",
+    "poster": "previews/takayu__text-paint-on-caption.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "07c24e86fe4a9bdbabc7282b74e4706c892ef05f3c75a824379c8d566634df4a",
+    "size": 11632,
+    "seconds": 34.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

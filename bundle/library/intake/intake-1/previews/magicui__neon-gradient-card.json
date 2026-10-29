@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/neon-gradient-card",
+  "hash": "451a895225c28af8",
+  "at": "2026-10-17T06:01:43.413Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__neon-gradient-card.mp4",
+    "poster": "previews/magicui__neon-gradient-card.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "d087724c425c9481a770c7f1226cc6fbfd6b72c504effe4659870720d403609d",
+    "size": 41449,
+    "seconds": 34.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

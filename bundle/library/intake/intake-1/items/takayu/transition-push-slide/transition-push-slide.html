@@ -1,0 +1,55 @@
+<!--
+  Push / Slide (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tr-push (read 12/10/2026).
+  Cảnh mới từ bên phải đẩy cảnh cũ ra bên trái, hai cảnh dính liền nhau.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.transitionPushSlide(q(".tk-b"), tl, 1.2, {});
+
+  Options (defaults in brackets):
+      - duration: s (0.4; 0.3-0.5)
+      - direction: where the new scene comes from: left (from the right, default), right, up, down
+      - ease: power2.inOut (cubic)
+      - from: the outgoing scene
+
+  Notes: Idea and numbers (TakayuStudio tr-push, written here): Incoming scene x +100 % -> 0 while the outgoing x 0 -> -100 % (one frame width), together, 400 ms easeInOutCubic (recipe range 300-500 ms), from the right; no gap, no scale, no fade. Params: duration (0.4 s) · direction (từ phải) · ease (power2.inOut).
+-->
+
+<section class="tk-scene tk-a"><div class="tk-mark circle"></div><div class="tk-sc-text"><div class="tk-sc-letter">A</div><div class="tk-sc-cap">Cảnh mở đầu</div></div></section>
+<section class="tk-scene tk-b"><div class="tk-mark square"></div><div class="tk-sc-text"><div class="tk-sc-letter">B</div><div class="tk-sc-cap">Cảnh tiếp theo</div></div></section>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.4,"direction":"left","ease":"power2.inOut","from":null};
+  var run = function (el, tl, at, o) {
+        var out = o.from ? MW.el(o.from) : el.previousElementSibling, ease = gsap.parseEase(o.ease);
+        var ax = o.direction === "left" || o.direction === "right" ? "x" : "y", s = o.direction === "right" || o.direction === "down" ? -1 : 1;
+        var W = el.offsetWidth, H = el.offsetHeight, L = ax === "x" ? W : H;
+        return MW.drive(tl, at, o.duration, function (t) {
+          var p = ease(t / o.duration), a = s * L * (1 - p), b = -s * L * p;
+          gsap.set(el, ax === "x" ? { x: a, y: 0 } : { y: a, x: 0 }); el.style.visibility = t > 0 ? "visible" : "hidden";
+          if (out) gsap.set(out, ax === "x" ? { x: t > 0 ? b : 0 } : { y: t > 0 ? b : 0 });
+        });
+      };
+  MW.transitionPushSlide = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

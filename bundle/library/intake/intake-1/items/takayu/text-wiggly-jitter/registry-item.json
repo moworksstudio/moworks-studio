@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-wiggly-jitter",
+  "type": "hyperframes:component",
+  "title": "Wiggly Jitter",
+  "description": "Từng ký tự rung lắc nhẹ theo nhịp nhiễu riêng (lệch ±6 px, xoay ±5°), như chữ đang hồi hộp.",
+  "tags": [
+    "emphasis",
+    "jitter",
+    "noise",
+    "letters",
+    "text-emphasis",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-wiggly-jitter.html",
+      "target": "compositions/components/text-wiggly-jitter.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-wiggly-jitter",
+    "author": "takayu",
+    "call": "MW.textWigglyJitter(q(\".wj .a\"), tl, 0.3, {});",
+    "function": "MW.textWigglyJitter",
+    "options": {
+      "amp": "px (24)",
+      "turn": "degrees (5)",
+      "rate": "changes a second (8)",
+      "correlation": "0: each letter its own, 1: the word shakes as one",
+      "duration": "s (2.5)",
+      "seed": "noise"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-wiggly-jitter",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-wiggly-jitter (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-wiggly-jitter, written here): Split chars; each char has its own seeded noise: x, y ±6 px, rotate ±5°, ~8 changes / s (smooth noise or 3 steps per 0.24 s), correlation 0; amplitude eases 0 → 1 over 0.3 s (outQuad) and back to 0 over 0.3 s at the end (inQuad). Demo: in 0.3–0.6 s, out 2.5–2.8 s, loop 3 s (a second, 100 % correlated copy shows the whole word shaking as one). Params: amplitude: biên độ (6 px · 5°) · rate: số lần đổi mỗi giây (8) · correlation: độ đồng bộ giữa các chữ (0 %) · ramp (0.3 s).",
+    "titleVi": "Ký tự run rẩy, mỗi chữ một nhịp"
+  }
+}

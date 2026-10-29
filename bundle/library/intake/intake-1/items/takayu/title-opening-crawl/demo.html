@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Perspective Opening Crawl - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: #0b0d12; color: #e8ebf3; font-family: Inter, sans-serif; }
+.oc { position: absolute; inset: 0; overflow: hidden; background: #03040a; } .oc i { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #fff; opacity: 0.7; }
+.oc-plane { position: absolute; left: 50%; bottom: -40px; width: 1000px; height: 1300px; margin-left: -500px; overflow: hidden; -webkit-mask-image: linear-gradient(0deg, #000 55%, transparent 92%); mask-image: linear-gradient(0deg, #000 55%, transparent 92%); }
+.oc-plane > div { color: #ffd23d; font-size: 52px; font-weight: 700; line-height: 1.5; text-align: justify; } .oc-plane h2 { text-align: center; font-size: 80px; margin: 0 0 40px; letter-spacing: 0.06em; } .oc-plane p { margin: 0 0 50px; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="6">
+<div class="oc"><i style="left:0px;top:0px"></i><i style="left:397px;top:233px"></i><i style="left:794px;top:466px"></i><i style="left:1191px;top:699px"></i><i style="left:1588px;top:932px"></i><i style="left:65px;top:85px"></i><i style="left:462px;top:318px"></i><i style="left:859px;top:551px"></i><i style="left:1256px;top:784px"></i><i style="left:1653px;top:1017px"></i><i style="left:130px;top:170px"></i><i style="left:527px;top:403px"></i><i style="left:924px;top:636px"></i><i style="left:1321px;top:869px"></i><i style="left:1718px;top:22px"></i><i style="left:195px;top:255px"></i><i style="left:592px;top:488px"></i><i style="left:989px;top:721px"></i><i style="left:1386px;top:954px"></i><i style="left:1783px;top:107px"></i><i style="left:260px;top:340px"></i><i style="left:657px;top:573px"></i><i style="left:1054px;top:806px"></i><i style="left:1451px;top:1039px"></i><i style="left:1848px;top:192px"></i><i style="left:325px;top:425px"></i><i style="left:722px;top:658px"></i><i style="left:1119px;top:891px"></i><i style="left:1516px;top:44px"></i><i style="left:1913px;top:277px"></i><i style="left:390px;top:510px"></i><i style="left:787px;top:743px"></i><i style="left:1184px;top:976px"></i><i style="left:1581px;top:129px"></i><i style="left:58px;top:362px"></i><i style="left:455px;top:595px"></i><i style="left:852px;top:828px"></i><i style="left:1249px;top:1061px"></i><i style="left:1646px;top:214px"></i><i style="left:123px;top:447px"></i><i style="left:520px;top:680px"></i><i style="left:917px;top:913px"></i><i style="left:1314px;top:66px"></i><i style="left:1711px;top:299px"></i><i style="left:188px;top:532px"></i><i style="left:585px;top:765px"></i><div class="oc-plane"><div><h2>PHẦN MỘT</h2><p>Ngày xửa ngày xưa, ở một ngôi làng ven sông, có một xưởng phim nhỏ làm những thước phim bằng tay.</p><p>Họ mơ về một cỗ máy biết kể chuyện, biết dựng cảnh và biết lắng nghe từng ý tưởng.</p><p>Rồi một ngày, cỗ máy ấy thức dậy, và mọi khung hình bắt đầu chuyển động.</p><p>Đây là câu chuyện của họ.</p></div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"tilt":25,"perspective":1200,"duration":60,"plane":".oc-plane"};
+  var run = function (el, tl, at, o) {
+        var plane = el.querySelector(o.plane), body = plane.firstElementChild;
+        plane.style.transformOrigin = "50% 100%"; plane.style.transform = "perspective(" + o.perspective + "px) rotateX(" + o.tilt + "deg)";
+        return MW.drive(tl, at, o.duration, function (t) { var H = plane.offsetHeight, B = body.offsetHeight, p = t / o.duration; gsap.set(body, { y: H - (H + B) * p }); });
+      };
+  MW.titleOpeningCrawl = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.titleOpeningCrawl(q(".oc"), tl, 0, { duration: 9 });
+          tl.set({}, {}, 6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

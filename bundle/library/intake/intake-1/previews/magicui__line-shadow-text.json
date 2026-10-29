@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/line-shadow-text",
+  "hash": "cd21b14f13658791",
+  "at": "2026-10-17T06:01:11.350Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__line-shadow-text.mp4",
+    "poster": "previews/magicui__line-shadow-text.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "0f710343a8d94ca043673e6bc8344a62d8105070b7de9cfd2258b679129579db",
+    "size": 70177,
+    "seconds": 32.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

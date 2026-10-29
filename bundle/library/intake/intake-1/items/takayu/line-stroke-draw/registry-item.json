@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "line-stroke-draw",
+  "type": "hyperframes:component",
+  "title": "SVG Stroke Draw",
+  "description": "Một đường SVG tự vẽ từ đầu tới cuối bằng cách rút dần khoảng lệch của nét đứt.",
+  "tags": [
+    "svg",
+    "draw",
+    "stroke",
+    "line",
+    "svg-path",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "line-stroke-draw.html",
+      "target": "compositions/components/line-stroke-draw.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/line-stroke-draw",
+    "author": "takayu",
+    "call": "MW.lineStrokeDraw(q(\".sd\"), tl, 0.2, { duration: 1.4, ease: \"power2.inOut\", eraseAt: 2.0 });",
+    "function": "MW.lineStrokeDraw",
+    "options": {
+      "duration": "s (1.1)",
+      "ease": "power2.out (the site's card: power2.inOut over 1.4 s)",
+      "eraseAt": "s after the start to erase forward in 0.5 s (null: stay drawn)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=svg-stroke-draw",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=svg-stroke-draw (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio svg-stroke-draw, written here): pathLength = 1, stroke-dasharray 1, dashoffset 1 -> 0 over 1100 ms easeOutCubic. Site card (sh-draw): a two-segment cubic curve, 5 px round-cap stroke, draws over 1.4 s ease-in-out from 0.2 s, holds, then erases forward (offset 0 -> -1) over 0.5 s from 2.2 s; 2.8 s loop. Params: duration (1.1 s) · ease (power2.out) · width: độ dày nét.",
+    "titleVi": "Nét SVG tự vẽ ra"
+  }
+}

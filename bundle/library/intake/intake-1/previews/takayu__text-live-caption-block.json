@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-live-caption-block",
+  "hash": "6e232caf9fae67d5",
+  "at": "2026-10-17T08:56:21.043Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-live-caption-block.mp4",
+    "poster": "previews/takayu__text-live-caption-block.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "61bcd0a04dfe72829664595e37889e5ebdeaea9f4b7c0c96987fe7cd42d2c1fd",
+    "size": 17243,
+    "seconds": 35.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

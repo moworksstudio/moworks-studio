@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-scroll-blur-tilt",
+  "type": "hyperframes:component",
+  "title": "Scroll Reveal Blur + Tilt",
+  "description": "Cả đoạn chữ đang nghiêng nhẹ 3° xoay về thẳng trong khi từng từ lần lượt rõ nét từ vùng mờ, như hiệu ứng cuộn trang.",
+  "tags": [
+    "blur",
+    "tilt",
+    "words",
+    "reveal",
+    "text-scroll",
+    "smooth",
+    "soft",
+    "scroll",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-scroll-blur-tilt.html",
+      "target": "compositions/components/text-scroll-blur-tilt.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-scroll-blur-tilt",
+    "author": "takayu",
+    "call": "MW.textScrollBlurTilt(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textScrollBlurTilt",
+    "options": {
+      "tilt": "degrees at the start (3)",
+      "blur": "px (12)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-scroll-blur-tilt",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-scroll-blur-tilt (read 12/10/2026)",
+      "upstream": "the site credits react-bits (MIT + Commons Clause): written from the idea only, no react-bits code"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-scroll-blur-tilt, written here): Progress p 0 → 1 over 0.3–2.2 s, cubic-bezier(.4,0,.6,1) (stands in for scroll), back 3.0–3.5 s. Block (34 px, left-aligned, up to 3 lines) rotates 3° → 0 about its left edge at mid-height. Word k uses q = (p − k × st) / (1 − st × (n − 1)), st = min(0.05, 0.5 / (n − 1)): opacity 0.1 → 1 and blur 4 px → 0, linear in q. Loop 3.8 s. Params: góc nghiêng (3°) · độ mờ (4 px) · độ trong đầu (0.1) · lệch mỗi từ (0.05).",
+    "titleVi": "Đoạn chữ hết nghiêng, rõ dần từng từ"
+  }
+}

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Pop-In Double-Outline Telop - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.ft { position: absolute; inset: 0; background: url(assets/shot.svg) center / cover; } .ft::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.55)); }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .td { font-size: 150px; font-weight: 900; letter-spacing: 0.03em; visibility: hidden; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.6">
+<div class="ft"></div><div class="st"><div class="td">Thật luôn hả?!</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"inner":0.18,"outer":0.34,"offset":0.05,"fill":"#ffe14d","light":"#ffffff","accent":"#ff4f8b","shadow":"#1b1030","offAt":1.95};
+  var run = function (el, tl, at, o) {
+        var txt = el.textContent, p1 = gsap.parseEase("power1.out"); el.textContent = ""; if (getComputedStyle(el).position === "static") el.style.position = "relative"; el.style.display = "inline-block";
+        [[o.outer * 2, o.shadow, o.shadow, o.offset], [o.outer * 2, o.accent, o.accent, 0], [o.inner * 2, o.light, o.fill, 0]].forEach(function (s, i) { var sp = document.createElement("span"); sp.textContent = txt; sp.style.cssText = "display:block;white-space:nowrap;" + (i ? "position:absolute;left:0;top:0;" : "") + "-webkit-text-stroke:" + s[0] + "em " + s[1] + ";paint-order:stroke fill;color:" + s[2] + ";" + (s[3] ? "transform:translate(" + s[3] + "em," + s[3] + "em);" : ""); el.appendChild(sp); });
+        var a = 4 / 30, b = a + 6 / 30;
+        return MW.drive(tl, at, o.offAt + 0.05, function (t) {
+          var s = t <= 0 ? 0 : t < a ? 1.1 * p1(t / a) : t < b ? 1.1 - 0.1 * p1((t - a) / (b - a)) : 1; gsap.set(el, { scale: s }); el.style.visibility = t > 0 && t < o.offAt ? "visible" : "hidden";
+        });
+      };
+  MW.textTelopDoubleOutline = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textTelopDoubleOutline(q(".td"), tl, 0.35, {});
+          tl.set({}, {}, 2.6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

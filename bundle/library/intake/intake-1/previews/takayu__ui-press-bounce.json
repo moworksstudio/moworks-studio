@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-press-bounce",
+  "hash": "aca372a19e6f7def",
+  "at": "2026-10-17T09:50:55.053Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__ui-press-bounce.mp4",
+    "poster": "previews/takayu__ui-press-bounce.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f8576f2ddda900b7ce692d785c2202a656094381521515cba17dbddcd5657546",
+    "size": 7087,
+    "seconds": 25.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

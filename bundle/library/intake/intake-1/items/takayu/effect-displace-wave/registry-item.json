@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-displace-wave",
+  "type": "hyperframes:component",
+  "title": "Displacement Wave",
+  "description": "Chữ được cắt thành nhiều dải mỏng, mỗi dải lệch ngang theo một làn sóng chạy qua hai lượt, đầu và cuối đều thẳng hàng.",
+  "tags": [
+    "wave",
+    "distort",
+    "bands",
+    "text",
+    "effects-transitions",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-displace-wave.html",
+      "target": "compositions/components/effect-displace-wave.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-displace-wave",
+    "author": "takayu",
+    "call": "MW.effectDisplaceWave(q(\".tk-head\"), tl, 0.3, {});",
+    "function": "MW.effectDisplaceWave",
+    "options": {
+      "bands": "(26)",
+      "amp": "px (48)",
+      "duration": "s (2.2, linear): the crest crosses twice"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=displacement-wave",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=displacement-wave (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio displacement-wave, written here): Element cut into 26 horizontal bands (recipe: 10). Band i shifts x by 16 px x sin(0.16 i - 4 pi tau) x sin^2(pi tau), tau 0 -> 1 linear over 2200 ms (recipe 1000 ms): the crest travels across the bands twice and the envelope is zero at both ends, so the outline is clean at start and end. Areas outside the band zone stay still. Params: bands (26) · amp (16 px) · duration (2.2 s). x = amp × sin(0.16 i − 4π τ) × sin²(π τ): clean at the start and at the end.",
+    "titleVi": "Sóng ngang chạy qua dải chữ"
+  }
+}

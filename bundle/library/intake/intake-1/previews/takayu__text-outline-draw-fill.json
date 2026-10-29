@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-outline-draw-fill",
+  "hash": "ffbb753354ef5cac",
+  "at": "2026-10-17T10:37:44.203Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-outline-draw-fill.mp4",
+    "poster": "previews/takayu__text-outline-draw-fill.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "bd1990e39b91ff25e929080e48986095be12fc2fa91c81a6880a5d11f49d1570",
+    "size": 18361,
+    "seconds": 26.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

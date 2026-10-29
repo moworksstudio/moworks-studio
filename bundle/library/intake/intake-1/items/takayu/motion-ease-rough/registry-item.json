@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-rough",
+  "type": "hyperframes:component",
+  "title": "RoughEase",
+  "description": "Vừa tiến lên vừa rung giật nhẹ, gợi cảm giác nhiễu, bất ổn.",
+  "tags": [
+    "ease",
+    "rough",
+    "jitter",
+    "seed",
+    "easing",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-rough.html",
+      "target": "compositions/components/motion-ease-rough.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-ease-rough",
+    "author": "takayu",
+    "call": "MW.motionEaseRough(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseRough",
+    "options": {
+      "duration": "s (1.2)",
+      "ease": "the curve (rough)",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)",
+      "seed": "the wobble (3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=e-rough",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=e-rough (read 12/10/2026)",
+      "upstream": "the site credits GSAP"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio e-rough, written here): Target moves 0 → 100 % along a jittery curve, 1200 ms: rough({points: 20, strength: 1}). Site demo approximation: p + (noise(22 p, seed 3) − 0.5)·0.18·sin(π p), clamped to −0.1…1.1 — up to ±9 % wobble mid-way, none at the ends (seeded value noise, smoothstep between 22 points). Site demo: 1200 ms across 114 px. Params: duration (1.2 s) · points (20) · strength (1) · seed.",
+    "titleVi": "RoughEase (tiến lên rung giật)"
+  }
+}

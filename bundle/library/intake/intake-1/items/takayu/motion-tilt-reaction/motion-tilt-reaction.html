@@ -1,0 +1,66 @@
+<!--
+  Tilt Reaction (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tilt-reaction (read 12/10/2026).
+  Thẻ nghiêng 16° về phía bị bấm rồi bật về, hơi quá một chút, bóng đổ rộng ra theo góc nghiêng.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionTiltReaction(q(".tr-c"), tl, 0, { shadow: ".tr-sh", cursor: ".ui-cursor" });
+
+  Options (defaults in brackets):
+      - angle: degrees (16)
+      - duration: s per reaction (0.48)
+      - taps: [[s, 'left' | 'right'], ...]
+      - shadow: contact shadow (widens 0.6 % a degree)
+      - cursor: an optional cursor that makes the taps
+
+  Notes: Idea and numbers (TakayuStudio tilt-reaction, written here): Rotation about the centre after a press on one side (sign follows the side): 0 → 16° in 120 ms power2.out, → −3° by 300 ms, → 0 by 480 ms (power2.inOut segments); contact shadow widens with |angle| (+0.6 % per degree). Recipe variant: 0 → 18° (308 ms) → 0 (560 ms) back.out. Demo: the cursor taps the right side, then the left 1.1 s later. Params: angle: góc (16°) · side: bên bấm (trái | phải) · duration (0.48 s).
+-->
+
+<div class="ui-wrap"><div class="tr"><div class="tr-sh"></div><div class="ui-card tr-c"><p class="ui-h">Bấm vào thẻ</p><p class="ui-p">Thẻ nghiêng về phía bị bấm</p></div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  var defaults = {"angle":16,"duration":0.48,"taps":[[0.5,"right"],[1.6,"left"]],"shadow":null,"cursor":null};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, sh = o.shadow ? host.querySelector(o.shadow) : null, cur = o.cursor ? host.querySelector(o.cursor) : null, p2 = gsap.parseEase("power2.out"), io = gsap.parseEase("power2.inOut"), k = o.duration / 0.48;
+        var one = function (u) { u /= k; if (u <= 0) return 0; if (u < 0.12) return 16 * p2(u / 0.12); if (u < 0.3) return 16 - 19 * io((u - 0.12) / 0.18); if (u < 0.48) return -3 + 3 * io((u - 0.3) / 0.18); return 0; };
+        var pt = function (side) { return [el.offsetLeft + el.offsetWidth * (side === "left" ? 0.18 : 0.82), el.offsetTop + el.offsetHeight * 0.55]; };
+        var keys = [[0, el.offsetLeft + el.offsetWidth * 1.15, el.offsetTop + el.offsetHeight * 1.2]]; o.taps.forEach(function (p) { var q = pt(p[1]); keys.push([p[0] - 0.08, q[0], q[1]]); keys.push([p[0] + 0.25, q[0], q[1]]); });
+        var last = o.taps[o.taps.length - 1][0];
+        return MW.drive(tl, at, last + o.duration + 0.2, function (t) {
+          var r = 0; o.taps.forEach(function (p) { r += (p[1] === "left" ? -1 : 1) * one(t - p[0]) * o.angle / 16; }); gsap.set(el, { rotation: r });
+          if (sh) gsap.set(sh, { scaleX: 1 + 0.006 * Math.abs(r) });
+          if (cur) { var c = MW.path(keys, t, "power2.inOut"), press = 0; o.taps.forEach(function (p) { var u = (t - p[0] + 0.04) / 0.16; if (u > 0 && u < 1) press = Math.sin(Math.PI * u); }); gsap.set(cur, { x: c[0] - 12, y: c[1] - 6, scale: 1 - 0.15 * press, transformOrigin: "20% 10%" }); }
+        });
+      };
+  MW.motionTiltReaction = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

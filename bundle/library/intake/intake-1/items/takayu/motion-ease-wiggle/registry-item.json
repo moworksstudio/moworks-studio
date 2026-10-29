@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-wiggle",
+  "type": "hyperframes:component",
+  "title": "CustomWiggle",
+  "description": "Giá trị lắc quanh vị trí nghỉ một số lần cố định, biên độ giảm dần rồi dừng đúng chỗ cũ; cho chuông báo, lắc báo lỗi.",
+  "tags": [
+    "wiggle",
+    "shake",
+    "decay",
+    "easing",
+    "bouncy",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-wiggle.html",
+      "target": "compositions/components/motion-ease-wiggle.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-ease-wiggle",
+    "author": "takayu",
+    "call": "MW.motionEaseWiggle(q(\".bell\"), tl, 0.4, { duration: 0.9 });",
+    "function": "MW.motionEaseWiggle",
+    "options": {
+      "wiggles": "swings (6)",
+      "amp": "amplitude (28.6° or px)",
+      "duration": "s (0.6; the site's bell 0.9)",
+      "prop": "rotation, x or y",
+      "decay": "linear (default) or exp"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=e-wiggle",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=e-wiggle (read 12/10/2026)",
+      "upstream": "the site credits GSAP"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio e-wiggle, written here): CustomWiggle(6, easeOut): the value swings 6 times around rest, amplitude falling linearly to 0, ending at rest; recipe 600 ms. Site demo: a bell rotates sin(6·2π p)·(1 − p)·0.5 rad (±28.6° at first) about its top over 900 ms. Mode params: prop x | y | rotation, cycles, amp, decay linear | exp; a regular sine, not noise. Params: wiggles (6) · amp (≈28° | px) · duration (0.6 s) · prop (rotation | x).",
+    "titleVi": "Lắc qua lại rồi về chỗ (wiggle)"
+  }
+}

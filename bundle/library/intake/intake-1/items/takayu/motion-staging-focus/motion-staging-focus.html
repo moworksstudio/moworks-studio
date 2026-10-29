@@ -1,0 +1,55 @@
+<!--
+  Staging (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=staging (read 12/10/2026).
+  Vai chính phóng từ 90 % lên đủ cỡ trong khi các phần tử xung quanh mờ còn 40 %.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionStagingFocus(q(".sf"), tl, 0.4, {});
+
+  Options (defaults in brackets):
+      - items: the cards
+      - hero: index of the hero (−1: the middle)
+      - from: everyone's scale (0.9)
+      - dim: opacity of the rest (0.4)
+      - duration: s (0.3; the recipe 0.2 s power2.out)
+      - ease: (expo.out)
+      - hold: s held before going back (1.2; null: stay)
+      - back: s (0.3)
+
+  Notes: Idea and numbers (TakayuStudio staging, written here): Five cards (all at scale 0.9): the hero scales 0.9 → 1 while the others fade 1 → 0.4 (recipe 200 ms power2.out together; site demo 300 ms expo.out), held 1.2 s, then reversed in 300 ms power2.inOut. Rule: one subject at a time, dim the rest to 40–60 %. Params: dim (0.4) · hero scale (0.9 → 1) · duration (0.2 s) · ease (power2.out).
+-->
+
+<div class="st"><div class="sf"><div class="sf-c">1</div><div class="sf-c">2</div><div class="sf-c h">3</div><div class="sf-c">4</div><div class="sf-c">5</div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"items":".sf-c","hero":-1,"from":0.9,"dim":0.4,"duration":0.3,"ease":"expo.out","hold":1.2,"back":0.3};
+  var run = function (el, tl, at, o) {
+        var it = Array.prototype.slice.call(el.querySelectorAll(o.items)), hero = it[o.hero < 0 ? Math.floor(it.length / 2) : o.hero], e = gsap.parseEase(o.ease), r = gsap.parseEase("power2.inOut");
+        return MW.drive(tl, at, o.hold == null ? o.duration : o.duration + o.hold + o.back, function (t) {
+          var p = e(Math.min(1, t / o.duration)); if (o.hold != null && t > o.duration + o.hold) p = 1 - r(Math.min(1, (t - o.duration - o.hold) / o.back));
+          it.forEach(function (x) { if (x === hero) gsap.set(x, { scale: o.from + (1 - o.from) * p }); else { gsap.set(x, { scale: o.from }); x.style.opacity = String(1 - (1 - o.dim) * p); } });
+        });
+      };
+  MW.motionStagingFocus = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

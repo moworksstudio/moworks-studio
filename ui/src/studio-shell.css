@@ -1,0 +1,687 @@
+/* The Studio (data-theme="studio"): an animation studio at night. The room is dark and warm; the work lies on
+   paper on a lit light table. A film is drawn in blue pencil (not yet), then ink (done), then colour (rendered); registration red is the one
+   colour that acts or approves; the desk lamp is Claude and what is lit now. The app's state colours (green done, yellow working, red stop)
+   stay for the small dots. The tokens, the shell and the outer pages are here; the Editor is in studio-editor.css.
+   Loaded after every other stylesheet (main.jsx) and every selector starts with [data-theme="studio"], so The Desk keeps every pixel.
+   Fonts: Fraunces (titles), Bricolage Grotesque (interface), DM Mono (numbers, labels), Patrick Hand (notes). */
+
+/* ---- the fonts (the concept's four, fonts/studio/README.md). A face is only fetched when The Studio's text uses it. ---- */
+@font-face { font-family: "Fraunces"; src: url("./fonts/studio/Fraunces-latin.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Fraunces"; src: url("./fonts/studio/Fraunces-latin-ext.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Fraunces"; src: url("./fonts/studio/Fraunces-vietnamese.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB; }
+@font-face { font-family: "Fraunces"; src: url("./fonts/studio/Fraunces-Italic-latin.woff2") format("woff2"); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Fraunces"; src: url("./fonts/studio/Fraunces-Italic-latin-ext.woff2") format("woff2"); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Fraunces"; src: url("./fonts/studio/Fraunces-Italic-vietnamese.woff2") format("woff2"); font-weight: 100 900; font-style: italic; font-display: swap; unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB; }
+@font-face { font-family: "Bricolage Grotesque"; src: url("./fonts/studio/BricolageGrotesque-latin.woff2") format("woff2"); font-weight: 200 800; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Bricolage Grotesque"; src: url("./fonts/studio/BricolageGrotesque-latin-ext.woff2") format("woff2"); font-weight: 200 800; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Bricolage Grotesque"; src: url("./fonts/studio/BricolageGrotesque-vietnamese.woff2") format("woff2"); font-weight: 200 800; font-display: swap; unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB; }
+@font-face { font-family: "DM Mono"; src: url("./fonts/studio/DMMono-400-latin.woff2") format("woff2"); font-weight: 400; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "DM Mono"; src: url("./fonts/studio/DMMono-400-latin-ext.woff2") format("woff2"); font-weight: 400; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "DM Mono"; src: url("./fonts/studio/DMMono-500-latin.woff2") format("woff2"); font-weight: 500 700; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "DM Mono"; src: url("./fonts/studio/DMMono-500-latin-ext.woff2") format("woff2"); font-weight: 500 700; font-display: swap; unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Patrick Hand"; src: url("./fonts/studio/PatrickHand.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+
+/* ---- tokens: the room ------------------------------------------------------------------------------------------------------------ */
+[data-theme="studio"] {
+  /* the room: warm umber dark, never pure black */
+  --room: #16130F; --room-2: #1F1B16; --room-3: #2A251E; --room-line: #3A332A; --room-ink: #EDE5D4; --room-ink-2: #B9AE99; --room-ink-3: #8F8571;
+  /* the light table and its paper */
+  --paper: #F6F1E6; --paper-2: #EFE8D9; --paper-3: #E5DCC8; --paper-white: #FFFDF7; --paper-line: rgba(60, 44, 20, 0.12); --rule: rgba(84, 120, 170, 0.22);
+  --ink: #1D1A15; --ink-2: #4A4339; --ink-3: #685F52;
+  /* the three materials, which are also the three states of a film */
+  --pencil: #3F86C9; --pencil-ink: #255C95; --pencil-light: #8DB9E2; --pencil-hint: #5B8FC4; --pencil-soft: rgba(63, 134, 201, 0.14);
+  --registration: #D23C22; --registration-hover: #DE4628; --registration-soft: rgba(210, 60, 34, 0.12); --registration-ink: #B5321B;          /* small red text on paper (5.4:1) */
+  --lamp: #FFC872; --tape: #F2D88A;
+  /* the literals the rooms used again and again, named once */
+  --lamp-paper: #FFFBF2; --paper-edge: #CDBFA5; --paper-chip: #E9DFC9; --rule-tint: #EAF1F8;
+  --label-tape: #121010; --label-ink: #F4EBD8; --label-ink-2: #6B6253; --stop-on-room: #F08A73; --room-hover: rgba(255, 240, 210, 0.05);
+  --plank-ink: #E8E2D6; --plank-ink-2: #BFB4A0;          /* words printed on the wooden plank (10:1 and 6:1 where they sit) */
+  --st-r-xs: 0.2rem; --st-r-sm: 0.3rem; --st-r-md: 0.4rem; --st-r-lg: 0.6rem; --st-r-xl: 0.9rem;
+  --colour: linear-gradient(135deg, #E9B44C, #D9603A);
+  --wood: linear-gradient(#5A4934, #463828 0.5rem, #2E241A 0.55rem, #3A2F22 40%, #2B2219);
+  --out: cubic-bezier(0.23, 1, 0.32, 1); --settle: cubic-bezier(0.34, 1.32, 0.64, 1);
+  --font-studio-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-studio-hand: "Patrick Hand", "Segoe Print", "Comic Sans MS", cursive;
+  /* ruled paper: one line height for everything written on rules, the rule just under each line's baseline (Patrick Hand at
+     1.3-1.45rem sits its baseline at about 0.7 of a 2.2rem line). Paint --st-ruled with background-size: 100% var(--st-line) and
+     background-origin: content-box, so the first rule lands under the first line of text. */
+  --st-line: 2.2rem; --st-rule-at: calc(var(--st-line) * 0.74);
+  --st-ruled: linear-gradient(transparent var(--st-rule-at), var(--rule) var(--st-rule-at) calc(var(--st-rule-at) + 1px), transparent calc(var(--st-rule-at) + 1px));
+  /* the concept's own names, for the Editor */
+  --cel: var(--ink); --ok: #3E9B5B; --run: #D99A16; --stop: #D23C22;
+  --display: var(--font-studio-display); --ui: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif; --mono: "DM Mono", Consolas, monospace; --hand: var(--font-studio-hand);
+
+  /* The Desk's tokens, re-pointed: every shared component takes the room's colours from them */
+  --app-bg: var(--room);
+  --app-bg-image: radial-gradient(70rem 40rem at 50% -8rem, rgba(255, 200, 114, 0.07), transparent 70%);
+  --surface-1: #1F1B16; --surface-2: #2A251E; --surface-3: #332C23;
+  --border: #3A332A; --border-strong: #4E4434;
+  --text-primary: #EDE5D4; --text-secondary: #B9AE99; --text-muted: #8F8571;
+  --accent: var(--registration); --accent-hover: var(--registration-hover); --on-accent: #FFF8F0;
+  --accent-soft: rgba(210, 60, 34, 0.16); --accent-line: rgba(210, 60, 34, 0.55); --accent-glow: rgba(210, 60, 34, 0.35);
+  --accent-ink: var(--lamp);               /* the current thing, written on the room: lit by the lamp */
+  --tag-2: var(--pencil-light);
+  --btn-light: rgba(255, 220, 170, 0.18); --sheen: rgba(255, 248, 230, 0.4);
+  --link: var(--pencil-light);
+  --btn-line: #5B5141;
+  --focus-ring: var(--registration);
+  --scrim: rgba(10, 8, 6, 0.62);
+  --shadow-pop: 0 1.2rem 2.4rem rgba(0, 0, 0, 0.45);
+  --glow: 0 0 0 0.25rem rgba(255, 200, 114, 0.22), 0 0 0.875rem rgba(255, 200, 114, 0.6);
+  --input-bg: rgba(0, 0, 0, 0.25);
+  /* no glass in the studio: floating layers are paper or solid room */
+  --glass-tint: 31, 27, 22;
+  --glass-bg: var(--paper-white); --glass-bg-thick: var(--paper-white); --glass-bg-sheet: var(--paper-white);
+  --glass-blur: none; --glass-blur-thin: none;
+  --glass-edge: var(--paper-3); --glass-hi: 0 0 0 0 transparent;
+  --glass-sheen: none;
+  --glass-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.45), 0 0 4rem rgba(255, 214, 150, 0.12);
+  --glass-scrim: rgba(10, 8, 6, 0.62);
+
+  --font-body: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-label: "DM Mono", Consolas, "Cascadia Mono", monospace;
+  --font-display: var(--font-studio-display);
+  --font-num: "DM Mono", Consolas, monospace;
+  --font-mono: "DM Mono", Consolas, "Cascadia Mono", monospace;
+  --body-weight: 400; --body-track: 0; --strong-weight: 600;
+  --label-weight: 500; --label-track: 0.16em; --control-track: 0.04em;
+  --display-weight: 400; --display-track: -0.02em;
+  --num-scale: 1; --num-track: 0.02em;
+  color-scheme: dark;
+}
+
+/* ---- paper: what lies on the light table takes the paper's tokens (dialogs, menus, lists, toasts, and .studio-paper) ---------------- */
+[data-theme="studio"] :is(.dialog, .np-dialog, .fr-dialog, .scx, .plx, .menu, .claude-pop, .pick-list, .toast, .studio-paper, .page-settings .panel) {
+  --surface-1: var(--paper-white); --surface-2: var(--paper); --surface-3: var(--paper-2);
+  --border: var(--paper-3); --border-strong: var(--paper-edge);
+  --text-primary: var(--ink); --text-secondary: var(--ink-2); --text-muted: var(--ink-3);
+  --accent-ink: var(--registration-ink); --accent-soft: var(--registration-soft);
+  --link: var(--pencil-ink); --tag-2: var(--pencil-ink);
+  --btn-line: var(--paper-edge); --btn-light: rgba(255, 255, 255, 0.5);
+  --input-bg: #FFFFFF;
+  --state-run: #A87406; --state-run-soft: rgba(217, 154, 22, 0.14); --state-run-line: rgba(217, 154, 22, 0.5);
+  --state-stop: #C2361D; --state-stop-soft: rgba(210, 60, 34, 0.1); --state-stop-line: rgba(210, 60, 34, 0.45);
+  --state-done: #2F7E48; --state-done-soft: rgba(62, 155, 91, 0.12); --state-done-line: rgba(62, 155, 91, 0.45);
+  --status-ok: var(--state-done); --status-pending: var(--state-run); --status-stop: var(--state-stop);
+  --status-ok-soft: var(--state-done-soft); --status-pending-soft: var(--state-run-soft); --status-stop-soft: var(--state-stop-soft);
+  --success: var(--state-done); --warning: var(--state-run); --danger: var(--state-stop);
+  --select: var(--state-done); --select-soft: var(--state-done-soft); --select-ink: #F4FFF7;
+  color: var(--ink); color-scheme: light;
+}
+[data-theme="studio"] :is(.dialog, .np-overlay .np-dialog, .fr-dialog, .scx, .plx, .menu, .claude-pop, .pick-list, .toast) {
+  background: var(--paper-white); background-image: none; -webkit-backdrop-filter: none; backdrop-filter: none;
+  border-color: var(--paper-3); box-shadow: var(--glass-shadow); }
+[data-theme="studio"] :is(.overlay, .np-overlay, .fr-overlay) { background: var(--glass-scrim); -webkit-backdrop-filter: none; backdrop-filter: none; }
+[data-theme="studio"] :is(.dialog, .np-dialog) .panel { background: rgba(255, 255, 255, 0.55); border-color: var(--paper-3); }
+[data-theme="studio"] :is(.dialog-head, .dialog-foot) { border-color: var(--paper-line); }
+[data-theme="studio"] .dialog-head h2 { font-family: var(--font-studio-display); font-weight: 500; letter-spacing: -0.005em; text-transform: none; }
+
+/* ---- shared pieces on the room ---------------------------------------------------------------------------------------------------- */
+[data-theme="studio"] body { background: var(--app-bg-image), var(--app-bg); }
+[data-theme="studio"] :focus-visible { outline-color: var(--registration); }
+[data-theme="studio"] * { scrollbar-color: #4A4032 transparent; }
+[data-theme="studio"] .studio-paper, [data-theme="studio"] .studio-paper * { scrollbar-color: var(--paper-edge) transparent; }
+[data-theme="studio"] h1 { font-family: var(--font-studio-display); font-weight: 400; letter-spacing: -0.02em; text-transform: none; }
+[data-theme="studio"] .btn.primary { box-shadow: 0 0.4rem 1.2rem rgba(210, 60, 34, 0.32); }
+
+/* ---- the theme cards (Settings › Appearance and the first run): a swatch of each theme, the same in both themes ------------------ */
+/* (the swatches are new with the second theme: they show only where both themes are offered, so they are drawn the same in both) */
+.theme-swatch[data-t="pelagra"] {
+  background: radial-gradient(10rem 5rem at 80% -1rem, rgba(18, 52, 74, 0.9), transparent 70%), #06111A; color: #D6E3E9; }
+.theme-swatch[data-t="pelagra"] i:nth-of-type(1) { background: #39B2CB; } .theme-swatch[data-t="pelagra"] i:nth-of-type(2) { background: #132B3D; }
+.theme-swatch[data-t="pelagra"] i:nth-of-type(3) { background: #86D8E5; }
+.theme-swatch[data-t="pelagra"] b { font-family: "Saira Condensed", "Arial Narrow", sans-serif; font-weight: 300; }
+.theme-swatch[data-t="studio"] {
+  background: linear-gradient(#FFFBF2, #EFE8D9) 62% 40% / 46% 62% no-repeat, radial-gradient(9rem 4rem at 62% 40%, rgba(255, 214, 150, 0.35), transparent 70%), #16130F;
+  color: #1D1A15; }
+.theme-swatch[data-t="studio"] i:nth-of-type(1) { background: #3F86C9; } .theme-swatch[data-t="studio"] i:nth-of-type(2) { background: #1D1A15; }
+.theme-swatch[data-t="studio"] i:nth-of-type(3) { background: linear-gradient(135deg, #E9B44C, #D9603A); }
+.theme-swatch[data-t="studio"] b { font-family: Georgia, "Times New Roman", serif; color: #D23C22; }
+.theme-swatch[data-t="studio"] i { box-shadow: 0 0 0 1px rgba(255, 240, 210, 0.3); }
+
+/* ---- the outer pages: a room that never scrolls; each screen lays out in what is left, only a long list scrolls inside its frame ---- */
+[data-theme="studio"] .st-room { height: 100%; min-height: 0; display: flex; flex-direction: column; overflow: hidden;
+  padding: clamp(1rem, 2.2vh, 2.25rem) clamp(1.25rem, 3vw, 3.5rem) clamp(1rem, 2vh, 2rem); animation: st-lands 220ms var(--out) both; }
+@keyframes st-lands { from { opacity: 0; transform: translateY(-14px) rotate(-0.4deg); } }
+[data-theme="studio"] .st-head { flex: none; display: flex; align-items: flex-end; gap: 1rem 1.5rem; flex-wrap: wrap; margin-bottom: clamp(0.9rem, 2vh, 1.75rem); }
+[data-theme="studio"] .st-head h1 { margin: 0; font: 400 clamp(2.6rem, 2rem + 2vw, 4.2rem) / 0.95 var(--font-studio-display); letter-spacing: -0.02em; color: var(--room-ink); }
+[data-theme="studio"] .st-aside { font: 1.25rem / 1.2 var(--font-studio-hand); color: var(--room-ink-2); transform: rotate(-2deg); margin-bottom: 0.4rem; }
+[data-theme="studio"] .st-head .st-acts { margin-left: auto; display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+[data-theme="studio"] .st-room > .banner { flex: none; margin-bottom: 1rem; }
+[data-theme="studio"] .st-hand { font: 1.25rem / 1.35 var(--font-studio-hand); color: var(--room-ink-2); margin: 0; }
+[data-theme="studio"] .studio-paper .st-hand { color: var(--pencil-ink); }
+[data-theme="studio"] .st-label { font: 500 max(0.72rem, 11px) / 1 var(--font-label); letter-spacing: 0.16em; text-transform: uppercase; color: var(--room-ink-3); }
+[data-theme="studio"] .studio-paper .st-label { color: var(--ink-3); }
+[data-theme="studio"] .st-table { position: relative; border-radius: var(--st-r-xl); color: var(--ink);
+  background: radial-gradient(120% 90% at 50% 40%, var(--lamp-paper) 0%, var(--paper) 45%, var(--paper-2) 100%);
+  box-shadow: 0 0 0 1px rgba(255, 240, 210, 0.25), 0 0 4rem rgba(255, 214, 150, 0.16), 0 1.5rem 3rem rgba(0, 0, 0, 0.45); }
+[data-theme="studio"] .st-skel { min-height: 12rem; border-radius: var(--st-r-xl); background: var(--room-2); animation: st-breathe 1.6s ease-in-out infinite alternate; }
+[data-theme="studio"] .st-table.st-skel { background: var(--paper-2); }
+@keyframes st-breathe { to { opacity: 0.55; } }
+[data-theme="studio"] .st-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 0.9rem; padding: 2rem 0.5rem; }
+/* the label maker: a black strip with raised letters, the studio's search box */
+[data-theme="studio"] .st-labelmaker { display: flex; align-items: center; gap: 0.5rem; height: 2.5rem; padding: 0 0.6rem 0 0.9rem; border-radius: var(--st-r-sm); background: var(--label-tape);
+  border: 1px solid #000; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8); min-width: 16rem; color: var(--label-ink-2); }
+[data-theme="studio"] .st-labelmaker input { flex: 1; min-width: 0; border: 0; background: none; color: var(--label-ink); font: 500 0.95rem var(--font-label); letter-spacing: 0.12em; text-transform: uppercase; outline: none; }
+[data-theme="studio"] .st-labelmaker input::placeholder { color: var(--label-ink-2); }
+[data-theme="studio"] .st-labelmaker:focus-within { box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8), 0 0 0 2px var(--registration); }
+[data-theme="studio"] .st-labelmaker button { display: grid; place-items: center; width: 1.6rem; height: 1.6rem; border: 0; border-radius: var(--st-r-xs); background: none; color: #8F8571; cursor: pointer; }
+/* paper tabs (a category, a type) and a chip on the room */
+[data-theme="studio"] .st-cats { display: flex; gap: 0.35rem; min-width: 0; overflow-x: auto; scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 2.5rem), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 2.5rem), transparent); }
+[data-theme="studio"] .st-cats::-webkit-scrollbar { display: none; }
+[data-theme="studio"] .st-cats button, [data-theme="studio"] .st-chip { flex: none; display: inline-flex; align-items: center; gap: 0.3rem; border: 1px solid var(--room-line); background: none; color: var(--room-ink-2);
+  border-radius: 0.3rem 0.3rem 0 0; padding: 0.35rem 0.7rem; font: 500 max(0.8rem, 12px) var(--font-body); cursor: pointer; transition: background 150ms var(--out), color 150ms var(--out); }
+[data-theme="studio"] .st-chip { border-radius: var(--st-r-sm); }
+[data-theme="studio"] .st-cats button[aria-pressed="true"], [data-theme="studio"] .st-chip[aria-pressed="true"] { background: var(--paper-chip); border-color: var(--paper-chip); color: var(--ink); }
+[data-theme="studio"] .st-count { flex: none; font: 500 max(0.75rem, 11px) var(--font-label); color: var(--room-ink-3); white-space: nowrap; }
+
+/* ---- Film Styles: the light table on the left, the crates on the right ---- */
+[data-theme="studio"] .st-digs { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(19rem, 26rem) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 2rem; }
+[data-theme="studio"] .st-viewer { align-self: start; max-height: 100%; overflow-y: auto; padding: 1.1rem; display: flex; flex-direction: column; }
+[data-theme="studio"] .st-develop { display: flex; flex-direction: column; gap: 0.75rem; }
+[data-theme="studio"] .st-viewer .sgb-big { border-radius: var(--st-r-md); aspect-ratio: 16 / 10; background: var(--paper-3); box-shadow: 0 0.6rem 1.4rem rgba(70, 50, 20, 0.2); }
+/* the style in hand develops: blue pencil, then ink, then colour (0.9 s) */
+[data-theme="studio"] .st-viewer .sgb-big :is(img, video) { animation: st-develop 320ms var(--out) both; }
+@keyframes st-develop { 0% { filter: grayscale(1) contrast(1.9) brightness(1.18) sepia(1) hue-rotate(172deg) saturate(2.6); } 45% { filter: grayscale(1) contrast(1.4); } 100% { filter: none; } }
+[data-theme="studio"] .st-viewer .sgb-title { font: 400 2.1rem / 1.05 var(--font-studio-display); letter-spacing: -0.01em; text-transform: none; color: var(--ink); }
+[data-theme="studio"] .st-viewer .sgb-sub { font-size: max(0.85rem, 12px); color: var(--ink-3); }
+[data-theme="studio"] .st-viewer .sgb-by { font: 500 max(0.95rem, 12px) var(--font-body); color: var(--pencil-ink); display: inline-flex; align-items: center; gap: 0.4rem; }
+[data-theme="studio"] .st-viewer .sgb-desc { font-size: 0.95rem; color: var(--ink-2); }
+[data-theme="studio"] .st-viewer .kv { grid-template-columns: 6.5rem minmax(0, 1fr); font-size: max(0.85rem, 12px); }
+[data-theme="studio"] .st-viewer .hint { color: var(--ink-3); }
+[data-theme="studio"] .st-digcol { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+[data-theme="studio"] .st-finder { flex: none; display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem; }
+[data-theme="studio"] .st-crates { flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-auto-flow: row dense; grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: minmax(15rem, 1fr); align-content: start; gap: 0.6rem 1.5rem; padding-right: 0.3rem; }
+[data-theme="studio"] .st-crate { position: relative; min-width: 0; min-height: 0; display: flex; flex-direction: column; grid-column: span var(--span, 2); }
+/* the shelf: a thick wooden body with a lit top edge the sleeves stand on, the author's name on its front (the tall one) */
+[data-theme="studio"] .st-box { --plank: 4.4rem; position: relative; flex: 1; min-height: 0; container-type: size; }
+[data-theme="studio"] .st-box::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: var(--plank); border-radius: 0.25rem 0.25rem 0.55rem 0.55rem; pointer-events: none;
+  background: var(--wood); box-shadow: inset 0 1px 0 rgba(255, 220, 170, 0.2), inset 0 -0.2rem 0.4rem rgba(0, 0, 0, 0.35), 0 0.7rem 1.4rem rgba(0, 0, 0, 0.5); }
+[data-theme="studio"] .st-box::before { content: attr(data-name); position: absolute; left: 1.4rem; bottom: calc((var(--plank) - 0.55rem) / 2 - 0.4rem); z-index: 2;
+  font: 500 max(0.75rem, 11px) var(--font-label); letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255, 230, 190, 0.5); pointer-events: none; }
+@media (max-height: 1040px) and (min-width: 1101px) { [data-theme="studio"] .st-box { --plank: 3.4rem; } }
+[data-theme="studio"] .st-sleeves { position: relative; z-index: 1; display: flex; align-items: flex-end; height: 100%; padding: 1.4rem 1rem calc(var(--plank) - 0.3rem) 1.6rem;
+  overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+[data-theme="studio"] .st-sleeves::-webkit-scrollbar { display: none; }
+/* a sleeve takes the crate's height: the top room, the shelf, the caption and the pulled-out lift all fit */
+[data-theme="studio"] .st-sleeve { --cw: clamp(5.5rem, calc((100cqh - 6rem - var(--plank)) / 0.86), 10.5rem); flex: 0 0 var(--cw); min-width: 0; margin-left: calc(var(--cw) * -0.51);
+  position: relative; border: 0; padding: 0; background: var(--paper-white); border-radius: var(--st-r-sm); text-align: left; color: var(--ink); cursor: pointer; transform-origin: 50% 100%;
+  transform: rotate(-7deg); box-shadow: -0.4rem 0 1rem rgba(0, 0, 0, 0.35); transition: transform 260ms var(--settle), margin 260ms var(--out), box-shadow 200ms var(--out); }
+[data-theme="studio"] .st-sleeve:first-child { margin-left: 0; }
+[data-theme="studio"] .st-sleeve img, [data-theme="studio"] .st-sleeve .st-noimg { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 0.3rem 0.3rem 0 0; background: var(--paper-3); }
+[data-theme="studio"] .st-sleeve .st-noimg { display: grid; place-items: center; overflow: hidden; }
+[data-theme="studio"] .st-cap { display: block; padding: 0.45rem 0.55rem 0.6rem; font: 500 max(0.82rem, 12px) / 1.2 var(--font-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+[data-theme="studio"] .st-cap small { display: block; color: var(--ink-3); font-weight: 400; font-size: max(0.72rem, 12px); margin-top: 0.15rem; overflow: hidden; text-overflow: ellipsis; }
+[data-theme="studio"] .st-sleeve:focus-visible { transform: rotate(0deg) translateY(-1.6rem); z-index: 3; }
+/* the sleeve in hand or in focus shows its whole name */
+[data-theme="studio"] :is(.st-sleeve:focus-visible, .st-sleeve[aria-pressed="true"]) :is(.st-cap, .st-cap small) { white-space: normal; text-overflow: clip; }
+[data-theme="studio"] .st-sleeve:focus-visible + .st-sleeve { margin-left: -1.5rem; }
+[data-theme="studio"] .st-sleeve[aria-pressed="true"] { transform: rotate(0deg) translateY(-2.6rem); z-index: 4; box-shadow: 0 0 0 2px var(--lamp), 0 0 2rem rgba(255, 200, 114, 0.45); }
+[data-theme="studio"] .st-wi { display: grid; place-items: center; aspect-ratio: 4 / 3; border-radius: 0.3rem 0.3rem 0 0; background: repeating-linear-gradient(0deg, var(--paper-white) 0 15px, var(--rule-tint) 15px 16px);
+  font: 1.5rem var(--font-studio-hand); color: var(--pencil-ink); border-bottom: 1.5px dashed var(--pencil); }
+[data-theme="studio"] .st-warn { position: absolute; right: 0.35rem; top: 0.35rem; display: grid; place-items: center; width: 1.1rem; height: 1.1rem; border-radius: 50%;
+  background: #FACC15; color: #1F1A00; font: 700 max(0.72rem, 12px) / 1 var(--font-body); }
+/* What After Effects gets of a film style (AeBadge.jsx): an ink stamp in the paper's state inks, green editable, yellow partly,
+   red video only, wherever it lies (the sleeves in the room, the style on the table, the chooser, Export to After Effects). The mark, the
+   AE Export button's own "Ae" tile, takes the ink through currentColor (app.css) */
+[data-theme="studio"] .ae-badge[class] { --ae-lvl: var(--ink-2); color: var(--ae-lvl); background: transparent; border: 1.5px solid currentColor; border-radius: 0.2rem;
+  font: 600 max(0.72rem, 11px) / 1 var(--font-mono); letter-spacing: 0.03em; }
+[data-theme="studio"] .ae-badge.editable { --ae-lvl: #2F7E48; }
+[data-theme="studio"] .ae-badge.partial { --ae-lvl: #A87406; }
+[data-theme="studio"] .ae-badge.video { --ae-lvl: #C2361D; }
+[data-theme="studio"] .ae-badge .ae-tile { font-family: var(--font-body); font-weight: 700; letter-spacing: 0; }          /* the tile's letters as on the AE Export button, not the stamp's mono */
+/* on a picture (a sleeve, a style tile): the stamp alone on a paper chip; on a sleeve top left, the warning mark keeps the top right */
+[data-theme="studio"] .ae-badge.compact[class] { border: 0; padding: 0.15rem; height: auto; background: var(--paper-white); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); }
+[data-theme="studio"] .st-sleeve .ae-badge.compact { left: 0.35rem; top: 0.35rem; bottom: auto; }
+@media (max-width: 1100px) {
+  [data-theme="studio"] .st-room { height: auto; overflow: visible; }
+  [data-theme="studio"] .st-digs { grid-template-columns: 1fr; }
+  [data-theme="studio"] .st-crates { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
+  [data-theme="studio"] .st-crate { grid-column: span 2; }
+  [data-theme="studio"] .st-finder { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="studio"] .st-room, [data-theme="studio"] .st-viewer .sgb-big :is(img, video) { animation: none; }
+  [data-theme="studio"] .st-sleeve { transition: none; }
+}
+
+/* ---- Characters: the line-up by author on the light table; a click lays the model sheet on top ---- */
+[data-theme="studio"] .st-chars .st-head .st-acts { gap: 0.8rem; }
+[data-theme="studio"] .st-types { overflow: visible; -webkit-mask-image: none; mask-image: none; }
+[data-theme="studio"] .st-chars .st-finder { flex-wrap: wrap; }
+[data-theme="studio"] .st-chars .st-finder .st-cats { flex: 0 1 auto; }
+/* one metre on the chart: the whole line-up fits the window's height */
+[data-theme="studio"] .st-lineup { --m: max(5.5rem, min(14rem, calc((100dvh - 33rem) / 2.2))); flex: 1; min-height: 0; overflow: auto; padding: clamp(1rem, 2.4vh, 2.25rem) 2rem 1.25rem; }
+[data-theme="studio"] .st-lineup.st-skel { min-height: 0; }
+[data-theme="studio"] .st-lu { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 1.5rem 2.4rem; align-items: start; }
+[data-theme="studio"] .st-lu-au { min-width: 0; }
+[data-theme="studio"] .st-lu-au.has-people { grid-row: span 3; }
+[data-theme="studio"] .st-lu-au:not(.has-people) { border-left: 1px dashed var(--paper-3); padding-left: 2.2rem; }
+[data-theme="studio"] .st-lu-head { display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap; }
+[data-theme="studio"] .st-lu-head .au-name { display: flex; align-items: baseline; gap: 0.7rem; }
+[data-theme="studio"] .st-lu-head .au-name b { font: 500 1.2rem var(--font-studio-display); color: var(--ink); }
+[data-theme="studio"] .st-lu-head .au-name small { display: inline-flex; align-items: center; gap: 0.4rem; font-size: max(0.8rem, 12px); color: var(--ink-3); }
+[data-theme="studio"] .st-note { margin-left: auto; font: 1.1rem var(--font-studio-hand); color: var(--pencil-ink); }
+[data-theme="studio"] .st-chart { position: relative; height: calc(var(--m) * 2); margin: 1.4rem 0 4.2rem;
+  background: repeating-linear-gradient(to top, var(--rule) 0 1px, transparent 1px calc(var(--m) / 2)); border-bottom: 3px solid var(--ink); }
+[data-theme="studio"] .st-tick { position: absolute; left: 0; bottom: calc(var(--m) * var(--at)); font: 500 max(0.7rem, 11px) var(--font-label); color: var(--pencil-ink); transform: translateY(50%); }
+[data-theme="studio"] .st-people { position: absolute; left: 3.5rem; right: 1rem; bottom: 0; display: flex; align-items: flex-end; gap: clamp(0.5rem, 1.2vw, 1.5rem); }
+[data-theme="studio"] .st-toons { display: flex; gap: 1.4rem; padding: 1rem 0 0.6rem; align-items: flex-end; flex-wrap: wrap; }
+[data-theme="studio"] .st-lu-au.has-people .st-toons { padding-left: 3.5rem; }
+[data-theme="studio"] .st-fig { position: relative; border: 0; padding: 0; background: none; color: var(--ink); display: flex; flex-direction: column; align-items: center; cursor: pointer;
+  transition: transform 240ms var(--settle), opacity 200ms var(--out), filter 200ms var(--out); }
+[data-theme="studio"] .st-fig .st-card { position: relative; display: block; overflow: hidden; background: #fff; }
+[data-theme="studio"] .st-fig img { width: 100%; height: 100%; object-fit: cover; display: block; }
+[data-theme="studio"] .st-fig.person { flex: 0 1 calc(var(--m) * var(--h) * 0.415); min-width: 2.5rem; }
+[data-theme="studio"] .st-fig.person .st-card { width: 100%; height: calc(var(--m) * var(--h)); border-radius: 0.35rem 0.35rem 0 0; box-shadow: 0 -0.2rem 1rem rgba(70, 50, 20, 0.15); }
+[data-theme="studio"] .st-fig.person img { object-position: 50% 30%; }
+[data-theme="studio"] .st-fig.person .st-tag { position: absolute; top: 100%; margin-top: 0.4rem; }
+[data-theme="studio"] .st-fig.toon .st-card { width: calc(var(--m) * 0.62); aspect-ratio: 1; border-radius: 50% 50% 0.4rem 0.4rem / 40% 40% 0.4rem 0.4rem; box-shadow: 0 0.6rem 1.4rem rgba(70, 50, 20, 0.15); }
+[data-theme="studio"] .st-fig.demo .st-card { outline: 2px dashed var(--ink-3); outline-offset: 3px; }
+[data-theme="studio"] .st-fig.fresh .st-card { box-shadow: 0 0 0 2px var(--state-done), 0 0.6rem 1.4rem rgba(70, 50, 20, 0.15); }
+[data-theme="studio"] .st-fig:focus-visible .st-card { transform: translateY(-0.4rem); }
+[data-theme="studio"] .st-fig.off { opacity: 0.25; filter: grayscale(1); }
+[data-theme="studio"] .st-tag { display: block; max-width: 100%; text-align: center; white-space: nowrap; margin-top: 0.5rem; font: 500 0.95rem var(--font-body); }
+[data-theme="studio"] .st-tag b { font-weight: 500; }
+[data-theme="studio"] .st-tag small { display: block; max-width: calc(var(--m) * 0.9); margin: 0 auto; white-space: normal; font: 0.95rem / 1.2 var(--font-studio-hand); color: var(--pencil-ink); }
+[data-theme="studio"] .st-fig.person .st-tag small { font: 400 max(0.72rem, 11px) / 1.35 var(--font-label); color: var(--ink-3); white-space: normal; max-width: 9rem; }
+[data-theme="studio"] .st-drawing { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 0.4rem; background: rgba(255, 253, 247, 0.78); color: var(--ink-2); font-size: max(0.8rem, 12px); }
+[data-theme="studio"] .st-fig.making .st-card { display: grid; place-items: center; border: 2px dashed var(--pencil); background: var(--pencil-soft); box-shadow: none; color: var(--pencil-ink); }
+[data-theme="studio"] .st-making-in { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; font: 1.1rem var(--font-studio-hand); }
+[data-theme="studio"] .st-soon .st-hand { margin-top: 0.3rem; }
+[data-theme="studio"] .st-kit { margin-top: 1rem; padding-top: 0.6rem; border-top: 1px dashed var(--paper-3); }
+/* the model sheet: paper laid on the table, over a dim room */
+[data-theme="studio"] .st-sheet-scrim { position: fixed; inset: 3.5rem 0 0; z-index: 60; display: grid; place-items: center; padding: 1.5rem; background: var(--glass-scrim); animation: st-fade 200ms both; }
+@keyframes st-fade { from { opacity: 0; } }
+[data-theme="studio"] .st-modelsheet { width: min(84rem, 100%); max-height: 100%; overflow: auto; padding: 1.2rem 2rem 1.8rem; animation: st-slide-card 300ms var(--settle) both; }
+@keyframes st-slide-card { from { opacity: 0; transform: translateY(2.5rem) rotate(1.2deg); } }
+[data-theme="studio"] .st-ms-top { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.4rem; }
+[data-theme="studio"] .st-ms-top .btn { margin-left: auto; }
+[data-theme="studio"] .st-stamp { display: inline-grid; place-items: center; padding: 0.3rem 0.8rem; border: 2.5px solid currentColor; border-radius: var(--st-r-md); color: var(--registration);
+  font: 700 max(0.9rem, 12px) / 1 var(--font-body); letter-spacing: 0.18em; text-transform: uppercase; transform: rotate(-6deg); opacity: 0.88; }
+/* The Desk's details, as a sheet: the big picture on the left, the rest on the right */
+[data-theme="studio"] .st-ms-body { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 0.8rem 1.8rem; align-items: start; }
+/* the big picture takes the shape of what it shows (a walk clip, a tall sheet), on the sheet's paper, never white bands */
+[data-theme="studio"] .st-ms-body > .sgb-big { grid-row: 1 / span 9; aspect-ratio: auto; display: grid; place-items: center; border-radius: var(--st-r-sm); border: 1px solid var(--paper-3); background: var(--paper-2); overflow: hidden; }
+[data-theme="studio"] .st-ms-body > .sgb-big :is(img, video) { width: 100%; height: auto; max-height: min(70vh, 46rem); object-fit: contain; }
+[data-theme="studio"] .st-ms-body > .cc-result { grid-column: 1 / -1; }
+[data-theme="studio"] .st-ms-body .sgb-title { font: 400 2.6rem / 1 var(--font-studio-display); text-transform: none; letter-spacing: -0.01em; color: var(--ink); }
+[data-theme="studio"] .st-ms-body .ch-about { font: 1.2rem / 1.45 var(--font-studio-hand); color: var(--ink-2); background: rgba(242, 216, 138, 0.35); padding: 0.8rem 1rem; border-radius: var(--st-r-xs); transform: rotate(0.6deg); }
+@media (max-width: 1100px) {
+  [data-theme="studio"] .st-lu, [data-theme="studio"] .st-ms-body { grid-template-columns: 1fr; }
+  [data-theme="studio"] .st-lu-au:not(.has-people) { border-left: 0; padding-left: 0; }
+  [data-theme="studio"] .st-ms-body > .sgb-big { grid-row: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="studio"] .st-fig, [data-theme="studio"] .st-modelsheet, [data-theme="studio"] .st-sheet-scrim { transition: none; animation: none; }
+}
+
+/* ---- New project: the pitch paper. The same eight numbered boxes as The Desk, on ruled paper with a red margin
+   line and two strips of tape, slid up into the dark room; the box numbers in registration red, the title on a dashed pencil line, the
+   brief written by hand on the rules, Create as the red stamp button. Only colours, type and the paper change: the boxes stay where they are. */
+[data-theme="studio"] .np-overlay { background: radial-gradient(60rem 36rem at 50% 20%, rgba(255, 200, 114, 0.1), transparent 70%), rgba(14, 12, 9, 0.9); }
+[data-theme="studio"] .np-overlay .np-dialog.np2 { --np-margin: 3.4rem; position: relative; overflow: visible; border: 0; border-radius: var(--st-r-md);
+  background: linear-gradient(90deg, transparent calc(var(--np-margin) - 1.2rem), rgba(210, 60, 34, 0.38) calc(var(--np-margin) - 1.2rem) calc(var(--np-margin) - 1.2rem + 1px), transparent 0),
+    var(--paper-white);          /* the ruled lines only where one writes (Title, Brief), no longer through the fields */
+  box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.5), 0 0 5rem rgba(255, 210, 140, 0.14); animation: st-slide-card 320ms var(--settle) both; }
+[data-theme="studio"] .np2::before, [data-theme="studio"] .np2::after { content: ""; position: absolute; top: -0.6rem; z-index: 2; width: 4.2rem; height: 1.2rem; pointer-events: none;
+  background: rgba(242, 216, 138, 0.72); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); }
+[data-theme="studio"] .np2::before { left: 2rem; transform: rotate(-6deg); }
+[data-theme="studio"] .np2::after { right: 2rem; transform: rotate(5deg); }
+[data-theme="studio"] .np2 > .dialog-head, [data-theme="studio"] .np2 > .dialog-body, [data-theme="studio"] .np2 > .dialog-foot { padding-left: var(--np-margin); }
+[data-theme="studio"] .np2-head { border-bottom: 0; }
+[data-theme="studio"] .np2-head h2 { font: 400 1rem / 1 var(--font-label); letter-spacing: 0.22em; text-transform: uppercase; color: var(--registration-ink); }
+[data-theme="studio"] .np2-head .np2-draft { font: 1.05rem var(--font-studio-hand); color: var(--pencil-ink); }
+[data-theme="studio"] .np2-step { background: transparent; border: 0; border-radius: 0; padding: 0.35rem 0 0.6rem; }
+[data-theme="studio"] .np2-step-h h3 { font: 500 1.12rem / 1 var(--font-studio-display); color: var(--ink); }
+[data-theme="studio"] .np2-n { width: 1.45rem; height: 1.45rem; border: 1.5px solid var(--registration); color: var(--registration-ink); font: 600 max(0.72rem, 11px) var(--font-label); }
+[data-theme="studio"] .np2-note { font: 1.05rem var(--font-studio-hand); color: var(--pencil-ink); }
+[data-theme="studio"] .np2-l { font: max(0.72rem, 11px) var(--font-label); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+[data-theme="studio"] .np2 .input, [data-theme="studio"] .np2 .select, [data-theme="studio"] .np2 .pick-btn { background-color: #fff; border-color: var(--paper-3); border-radius: var(--st-r-sm); color: var(--ink); }
+/* the title on a dashed pencil line, in the display face */
+[data-theme="studio"] .np2 .np2-title { height: auto; padding: 0.1rem 0.2rem 0.25rem; border: 0; border-bottom: 2px dashed var(--pencil); border-radius: 0; background: none;
+  font: 400 clamp(1.4rem, 1rem + 0.9vw, 2rem) / 1.2 var(--font-studio-display); box-shadow: none; }
+[data-theme="studio"] .np2 .np2-title::placeholder { color: var(--pencil-hint); font-style: italic; }
+[data-theme="studio"] .np2 .np2-title:focus { border-bottom-color: var(--registration); box-shadow: none; }
+[data-theme="studio"] .np2 .np2-title.invalid { border-bottom-color: var(--registration); }
+/* the brief: handwriting on the paper's own rules */
+[data-theme="studio"] .np2 .np2-brief { padding: 0 0.2rem; border: 0; border-radius: 0; background: var(--st-ruled); background-size: 100% var(--st-line); background-origin: content-box;
+  background-attachment: local; font: 1.45rem / var(--st-line) var(--font-studio-hand); color: var(--ink); box-shadow: none; }
+[data-theme="studio"] .np2 .np2-brief::placeholder { color: var(--pencil-hint); }
+[data-theme="studio"] .np2 .np2-brief.is-sample { color: var(--ink-3); }
+[data-theme="studio"] .np2 .np2-brief:focus { box-shadow: inset 0 -2px 0 var(--registration); }
+[data-theme="studio"] .np2 .np-style { background: #fff; border-color: var(--paper-3); border-radius: var(--st-r-md); }
+[data-theme="studio"] .np2 .np-style .nm { font: 500 1.1rem / 1.2 var(--font-studio-display); }
+[data-theme="studio"] .np2 .asset-drop { border: 2px dashed rgba(63, 134, 201, 0.45); border-radius: var(--st-r-md); background: rgba(63, 134, 201, 0.04); color: var(--ink-2); }
+[data-theme="studio"] .np2 .asset-drop > svg { color: var(--pencil-ink); }
+/* the drop frame fills the Assets box: a blue-pencil dashed edge on the paper; its line is a pencil note; a file dragged over it lights
+   the frame like the light table under it (lamp paper, a solid pencil edge) */
+[data-theme="studio"] .np2 .drop-fine { font: 1.05rem / 1.3 var(--font-studio-hand); color: var(--pencil-ink); }
+[data-theme="studio"] .np2 .asset-drop.over { border-style: solid; border-color: var(--pencil); background: var(--lamp-paper); box-shadow: inset 0 0 2.5rem rgba(255, 200, 114, 0.22); }
+[data-theme="studio"] .np2 .asset-drop.over > svg { color: var(--pencil); }
+@media (hover: hover) and (pointer: fine) { [data-theme="studio"] .np2 .asset-drop:not(.over):hover { border-color: var(--pencil); } }
+[data-theme="studio"] .np2-foot { border-top: 1px solid var(--paper-line); }
+[data-theme="studio"] .np2-foot .np-why { font: 1.2rem var(--font-studio-hand); color: var(--registration-ink); }
+/* Create project: the red stamp */
+[data-theme="studio"] .np2-foot .btn.primary { height: 3rem; padding: 0 1.6rem; border-radius: var(--st-r-lg); font: 700 0.95rem var(--font-body); letter-spacing: 0.1em; text-transform: uppercase;
+  box-shadow: 0 0.5rem 1.3rem rgba(210, 60, 34, 0.35); }
+[data-theme="studio"] .np2-foot .btn.primary.blocked, [data-theme="studio"] .np2-foot .btn.primary:disabled { background: var(--paper-edge); border-color: var(--paper-edge); color: #FFF8F0; box-shadow: none; }
+[data-theme="studio"] .np2 .np-fold { background: var(--ink); color: var(--paper); }
+@media (prefers-reduced-motion: reduce) { [data-theme="studio"] .np-overlay .np-dialog.np2 { animation: none; } }
+
+/* ---- Brand Kits: swatch books on shelves by source; the open book lies on the light table ---- */
+[data-theme="studio"] .st-shelves { flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-auto-rows: minmax(15rem, 22rem); align-content: start; gap: 0.6rem; padding-right: 0.3rem; }
+[data-theme="studio"] .st-shelf { min-height: 0; display: flex; flex-direction: column; }
+[data-theme="studio"] .st-shelf-name { font: 500 1.35rem / 1 var(--font-studio-display); color: var(--room-ink); }
+[data-theme="studio"] .st-shelf .st-label { margin-left: auto; }
+[data-theme="studio"] .st-books { position: relative; z-index: 1; display: flex; align-items: flex-end; gap: 0.35rem; height: 100%; padding: 1.4rem 1rem calc(var(--plank) - 0.3rem) 1.6rem;
+  overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+[data-theme="studio"] .st-books::-webkit-scrollbar { display: none; }
+[data-theme="studio"] .st-book { --bh: clamp(8rem, calc(100cqh - 2.8rem - var(--plank)), 15rem); flex: 0 0 auto; width: calc(var(--bh) * 0.24); height: var(--bh); position: relative; display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto; padding: 0; border: 0; border-radius: 0.2rem 0.2rem 0.1rem 0.1rem; overflow: hidden; cursor: pointer; text-align: center;
+  background: var(--paper-white); color: var(--ink); box-shadow: inset -0.25rem 0 0.4rem rgba(0, 0, 0, 0.12), inset 0.15rem 0 0 rgba(255, 255, 255, 0.6), 0 0.4rem 0.8rem rgba(0, 0, 0, 0.4);
+  transform-origin: 50% 100%; transition: transform 240ms var(--settle), box-shadow 200ms var(--out); }
+[data-theme="studio"] .st-book:nth-child(3n + 2) { height: calc(var(--bh) * 0.94); }
+[data-theme="studio"] .st-book:nth-child(4n + 3) { height: calc(var(--bh) * 0.97); }
+[data-theme="studio"] .st-bands { display: flex; flex-direction: column; height: calc(var(--bh) * 0.3); }
+[data-theme="studio"] .st-bands i { flex: 1; }
+[data-theme="studio"] .st-bands i.none { background: repeating-linear-gradient(-45deg, var(--paper-2) 0 5px, var(--paper-3) 5px 6px); }
+[data-theme="studio"] .st-spine { min-height: 0; overflow: hidden; padding: 0.5rem 0; writing-mode: vertical-rl; transform: rotate(180deg); justify-self: center;
+  font: 500 max(0.92rem, 12px) / 1.1 var(--font-studio-display); white-space: nowrap; text-overflow: ellipsis; }
+[data-theme="studio"] .st-foot { display: grid; place-items: center; height: 1.4rem; font: 600 max(0.58rem, 11px) var(--font-label); letter-spacing: 0.06em; color: var(--ink-3); border-top: 1px solid var(--paper-3); }
+[data-theme="studio"] .st-book:focus-visible { transform: translateY(-0.9rem); }
+[data-theme="studio"] .st-book[aria-pressed="true"] { transform: translateY(-1.4rem) rotate(-3deg); box-shadow: 0 0 0 2px var(--lamp), 0 0 1.6rem rgba(255, 200, 114, 0.45); }
+[data-theme="studio"] .st-openbook .lk-stills { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.35rem; }
+[data-theme="studio"] .st-openbook .lk-stills img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: var(--st-r-xs); border: 1px solid var(--paper-3); }
+[data-theme="studio"] .st-openbook .lk-sw.big i { width: 2.4rem; height: 2.4rem; border-radius: var(--st-r-xs); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08); }
+@media (prefers-reduced-motion: reduce) { [data-theme="studio"] .st-book { transition: none; } }
+
+/* ---- the gallery pages' shared layout in the room (Motion Library): filters on the room, flipbooks in a cabinet, the item in hand on the
+   light table. Scoped to .st-motionlib so the Editor's Motions drawer is untouched. ---- */
+[data-theme="studio"] .st-motionlib { animation: st-lands 220ms var(--out) both; }
+[data-theme="studio"] .st-motionlib > .st-head { margin-bottom: clamp(0.9rem, 2vh, 1.5rem); }
+[data-theme="studio"] .st-motionlib .sgb-layout { border: 0; border-radius: 0; background: none; gap: 0 1.6rem; }
+[data-theme="studio"] .st-motionlib .sgb-facets { border-right: 1px solid var(--room-line); padding: 0.2rem 1rem 0.5rem 0; }
+[data-theme="studio"] .st-motionlib .sgb-facets .search .input { background: var(--label-tape); border-color: #000; color: var(--label-ink); font-family: var(--font-label); letter-spacing: 0.08em; }
+[data-theme="studio"] .st-motionlib .sgb-opt.on .sgb-box { background: var(--paper-chip); border-color: var(--paper-chip); color: var(--ink); }
+[data-theme="studio"] .st-motionlib .sgb-center { border-radius: var(--st-r-lg); background: linear-gradient(#1C1813, #15120E); box-shadow: inset 0 0 0 1px var(--room-line), inset 0 1.2rem 2rem rgba(0, 0, 0, 0.35); }
+[data-theme="studio"] .st-motionlib .sgb-bar { background: transparent; border-bottom: 1px solid var(--room-line); }
+/* a flipbook: a stack of paper pages under the picture; it riffles (lifts a little) while the pointer is on it and its clip plays */
+[data-theme="studio"] .st-motionlib .sgb-card .shot { border: 0; border-radius: var(--st-r-xs); background: var(--paper-white);
+  box-shadow: 2px 2px 0 var(--paper-2), 4px 4px 0 var(--paper-3), 6px 6px 0 #D8CDB6, 6px 8px 1rem rgba(0, 0, 0, 0.45); transform-origin: 0 100%; transition: transform 240ms var(--settle); }
+[data-theme="studio"] .st-motionlib .sgb-card:focus-visible .shot { transform: rotate(-1.5deg) translateY(-0.2rem); }
+[data-theme="studio"] .st-motionlib .sgb-card.on .shot { box-shadow: 0 0 0 2px var(--lamp), 2px 2px 0 var(--paper-2), 4px 4px 0 var(--paper-3), 0 0 1.4rem rgba(255, 200, 114, 0.45); }
+[data-theme="studio"] .st-motionlib .mlp-tile .shot { background: var(--paper-white); }
+[data-theme="studio"] .st-motionlib .sgb-card .nm { color: var(--room-ink); }
+[data-theme="studio"] .st-motionlib .sgb-insp { --surface-1: var(--paper-white); --surface-2: var(--paper); --surface-3: var(--paper-2); --border: var(--paper-3); --border-strong: var(--paper-edge);
+  --text-primary: var(--ink); --text-secondary: var(--ink-2); --text-muted: var(--ink-3); --accent-ink: var(--registration-ink); --link: var(--pencil-ink); --input-bg: #fff; --btn-line: var(--paper-edge);
+  color: var(--ink); color-scheme: light; border: 0; border-radius: var(--st-r-xl); background: radial-gradient(120% 90% at 50% 40%, var(--lamp-paper) 0%, var(--paper) 45%, var(--paper-2) 100%);
+  box-shadow: 0 0 0 1px rgba(255, 240, 210, 0.25), 0 0 4rem rgba(255, 214, 150, 0.16), 0 1.5rem 3rem rgba(0, 0, 0, 0.45); }
+[data-theme="studio"] .st-motionlib .sgb-insp .sgb-title { font: 400 1.9rem / 1.05 var(--font-studio-display); text-transform: none; letter-spacing: -0.01em; color: var(--ink); }
+[data-theme="studio"] .st-motionlib .mlp-big { border-radius: var(--st-r-md); box-shadow: 0 0.6rem 1.4rem rgba(70, 50, 20, 0.2); }
+@media (prefers-reduced-motion: reduce) { [data-theme="studio"] .st-motionlib, [data-theme="studio"] .st-motionlib .sgb-card .shot { animation: none; transition: none; } }
+
+/* ---- the materials a picture is drawn in: blue pencil (not yet), ink (done), colour (rendered) ---- */
+[data-theme="studio"] .st-dev-pencil { filter: grayscale(1) contrast(1.9) brightness(1.18) sepia(1) hue-rotate(172deg) saturate(2.6); mix-blend-mode: multiply; opacity: 0.92; }
+[data-theme="studio"] .st-dev-ink { filter: grayscale(1) contrast(1.45) brightness(1.08); mix-blend-mode: multiply; }
+[data-theme="studio"] .st-dev-colour { filter: none; }
+[data-theme="studio"] .st-devbar { display: flex; gap: 2px; }
+[data-theme="studio"] .st-devbar i { flex: 1; height: 0.3rem; border-radius: 1px; background: var(--room-3); }
+[data-theme="studio"] .st-devbar i.p { background: var(--pencil); } [data-theme="studio"] .st-devbar i.k { background: #CFC6B4; } [data-theme="studio"] .st-devbar i.c { background: var(--colour); }
+[data-theme="studio"] .st-devbar i.now { box-shadow: 0 0 0 1px var(--lamp), 0 0 8px var(--lamp); }
+
+/* ---- Projects (Mix v3): the pitch card and the film in hand on top, two shelves of every film below ---- */
+[data-theme="studio"] .st-projects .st-sort { display: inline-flex; align-items: center; gap: 0.4rem; height: 2.5rem; padding: 0 0.3rem 0 0.7rem; border: 1px solid var(--room-line); border-radius: var(--st-r-sm); color: var(--room-ink-3); }
+[data-theme="studio"] .st-projects .st-sort select { border: 0; background: none; color: var(--room-ink-2); font: 500 max(0.82rem, 12px) var(--font-body); cursor: pointer; outline: none; }
+[data-theme="studio"] .st-projects .st-sort select option { background: var(--paper-white); color: var(--ink); }
+[data-theme="studio"] .st-mixwrap { flex: 1; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: clamp(0.5rem, 1.6vh, 1.2rem); }
+[data-theme="studio"] .st-projects { --mix-pitch: minmax(15rem, 19rem); --mix-info: minmax(19rem, 25rem); --mix-frame-h: calc(30vh - 2rem); --sleeve-min: 8rem; --sleeve-max: 20rem; --sleeve-overlap: 0.32; }
+[data-theme="studio"] .st-mixtop { min-height: 0; display: grid; grid-template-columns: var(--mix-pitch) minmax(0, 1fr); gap: 2rem; align-items: start; }
+[data-theme="studio"] .st-pitchcol { display: flex; flex-direction: column; gap: 0.9rem; padding-top: 0.5rem; }
+/* the pitch card: ruled index card with a red margin, taped to the wall */
+[data-theme="studio"] .st-pitch { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 0; padding: var(--st-line) 1.4rem var(--st-line) 3rem; border: 0; border-radius: var(--st-r-sm);
+  text-align: left; color: var(--ink); cursor: pointer; transform: rotate(-1.2deg);
+  background: var(--st-ruled), linear-gradient(90deg, transparent 2.2rem, rgba(210, 60, 34, 0.35) 2.2rem calc(2.2rem + 1px), transparent calc(2.2rem + 1px)), var(--paper-white);
+  background-size: 100% var(--st-line), auto, auto; background-origin: content-box, padding-box, padding-box;
+  box-shadow: 0 1.2rem 2.4rem rgba(0, 0, 0, 0.45), 0 0 3rem rgba(255, 210, 140, 0.12); transition: transform 240ms var(--settle); }
+[data-theme="studio"] .st-pitch:focus-visible { transform: rotate(0deg) translateY(-4px); }
+[data-theme="studio"] .st-tape { position: absolute; top: -0.55rem; left: 40%; width: 4.2rem; height: 1.2rem; background: rgba(242, 216, 138, 0.72); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); transform: rotate(-4deg); }
+[data-theme="studio"] .st-pitch .st-label { color: var(--registration-ink); }
+/* every line of the card on a rule: the label, the title (its large face lifted onto the rule) and the note a line each; the stamp
+   button covers the rules below */
+[data-theme="studio"] .st-pitch .st-label { line-height: var(--st-line); }
+[data-theme="studio"] .st-pitch b { position: relative; top: calc(var(--st-line) * -0.12); font: 400 2.2rem / var(--st-line) var(--font-studio-display); letter-spacing: -0.01em; }
+[data-theme="studio"] .st-pitch-p { font: 1.3rem / var(--st-line) var(--font-studio-hand); color: var(--pencil-ink); }
+[data-theme="studio"] .st-pitch .btn { pointer-events: none; margin-top: calc(var(--st-line) * 0.5); }
+[data-theme="studio"] .st-import { align-self: flex-start; display: inline-flex; align-items: center; gap: 0.4rem; margin-left: 0.6rem; border: 0; background: none; padding: 0.2rem 0;
+  font: 1.1rem var(--font-studio-hand); color: var(--room-ink-2); cursor: pointer; text-decoration: underline; text-decoration-color: var(--room-line); text-underline-offset: 3px; }
+/* the film in hand: strip | info */
+[data-theme="studio"] .st-mixrow { max-height: 100%; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) var(--mix-info); gap: 1.6rem; align-items: center; padding: 0.9rem 1rem; border-radius: var(--st-r-xl);
+  border: 1px solid var(--room-line); background: rgba(255, 240, 210, 0.025); animation: st-slideup 280ms var(--settle) both; }
+@keyframes st-slideup { from { opacity: 0; transform: translateY(3.5rem) scale(0.94); } }
+[data-theme="studio"] .st-mixrow.st-skel { min-height: 14rem; }
+/* no film yet: the logo intro lies on the light table in the film in hand's place, drawn in ink with registration red, lit by the
+   lamp (its glow); the stage's grid is the paper's blue rules and its hint a pencil note */
+[data-theme="studio"] .st-mixrow.st-intro { display: flex; flex-direction: column; align-items: stretch; padding: 0; overflow: hidden; min-height: 20rem; border: 0; color: var(--ink); color-scheme: light;
+  background: radial-gradient(120% 90% at 50% 40%, var(--lamp-paper) 0%, var(--paper) 45%, var(--paper-2) 100%);
+  box-shadow: 0 0 0 1px rgba(255, 240, 210, 0.25), 0 0 4rem rgba(255, 214, 150, 0.16), 0 1.5rem 3rem rgba(0, 0, 0, 0.45);
+  --text-primary: var(--ink); --text-secondary: var(--ink-2); --text-muted: var(--ink-3); --border: var(--rule); --accent-line: var(--registration-soft);
+  --accent-soft: rgba(255, 200, 114, 0.3); --accent-glow: rgba(255, 190, 100, 0.55); --btn-line: var(--paper-edge); --link: var(--pencil-ink); }
+[data-theme="studio"] .st-intro .intro-stage { flex: 1 1 auto; min-height: 20rem; margin-inline: 0; }
+[data-theme="studio"] .st-intro .intro-stage::after { opacity: 1; }
+[data-theme="studio"] .st-intro .i-hint { margin-top: 0.6rem; font: 1.35rem / 1.3 var(--font-studio-hand); color: var(--pencil-ink); }
+[data-theme="studio"] .st-intro .i-again { right: 0.75rem; bottom: 0.75rem; color: var(--ink-2); }
+[data-theme="studio"] .st-mixrow.st-none { display: flex; align-items: center; gap: 1rem; min-height: 8rem; }
+[data-theme="studio"] .st-stripbox { container-type: inline-size; min-width: 0; display: flex; justify-content: center; }
+[data-theme="studio"] .st-strip { position: relative; display: flex; gap: 0.6rem; padding: 0.95rem 0.6rem; border-radius: var(--st-r-sm); background: #2B241B; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6), 0 0.6rem 1.4rem rgba(0, 0, 0, 0.4); }
+[data-theme="studio"] .st-strip::before, [data-theme="studio"] .st-strip::after { content: ""; position: absolute; left: 0; right: 0; height: 0.42rem; border-radius: 2px;
+  background: repeating-linear-gradient(90deg, transparent 0 0.55rem, rgba(246, 241, 230, 0.78) 0.55rem 1.25rem, transparent 1.25rem 1.6rem); }
+[data-theme="studio"] .st-strip::before { top: 0.27rem; } [data-theme="studio"] .st-strip::after { bottom: 0.27rem; }
+/* every frame keeps its film's shape at one height: five 16:9 frames fill the width; a portrait film's five stand, centred */
+[data-theme="studio"] .st-fr { position: relative; flex: none; height: min(calc((100cqw - 4.8rem) / 8.9), var(--mix-frame-h)); aspect-ratio: 16 / 9; border-radius: 2px; overflow: hidden; background: var(--paper); }
+[data-theme="studio"] .st-fr.tall { aspect-ratio: 9 / 16; }
+[data-theme="studio"] .st-fr img { width: 100%; height: 100%; object-fit: cover; display: block; }
+[data-theme="studio"] .st-fr-blank { display: block; width: 100%; height: 100%; background: repeating-linear-gradient(0deg, var(--paper-white) 0 15px, var(--rule-tint) 15px 16px); }
+[data-theme="studio"] .st-fno { position: absolute; left: 0.3rem; bottom: 0.2rem; font: 500 max(0.62rem, 11px) var(--font-label); color: rgba(29, 26, 21, 0.55); }
+@keyframes st-flip { 0% { box-shadow: 0 0 0 2px var(--lamp), 0 0 1.2rem rgba(255, 200, 114, 0.6); } 20% { box-shadow: none; } }
+[data-theme="studio"] .st-mixinfo { min-width: 0; display: grid; gap: 0.35rem; justify-items: start; }
+[data-theme="studio"] .st-mixinfo h2 { margin: 0; max-width: 100%; font: 500 clamp(1.35rem, 1rem + 0.8vw, 1.9rem) / 1.12 var(--font-studio-display); letter-spacing: -0.01em; text-transform: none; color: var(--room-ink);
+  overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow-wrap: anywhere; }          /* two lines before it is cut */
+[data-theme="studio"] .st-status.s-needs_review { color: var(--lamp); } [data-theme="studio"] .st-status.s-exported { color: #8FD3A6; } [data-theme="studio"] .st-status.s-missing { color: var(--stop-on-room); }
+[data-theme="studio"] .st-facts { font: 400 max(0.8rem, 11px) var(--font-label); color: var(--room-ink-3); }
+[data-theme="studio"] .st-where { font: 1.2rem var(--font-studio-hand); color: var(--lamp); }
+[data-theme="studio"] .st-where em { font-style: normal; color: var(--registration-hover); }
+[data-theme="studio"] .st-mixinfo .st-devbar { width: min(100%, 16rem); }
+[data-theme="studio"] .st-when { font-size: max(0.78rem, 12px); color: var(--room-ink-3); }
+[data-theme="studio"] .st-open { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.4rem; }
+[data-theme="studio"] .st-gone { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--stop-on-room); font-size: 1.1rem; }
+/* the shelves: two tiers, the sleeves the size of the style sleeves, packed and fanned, newest first */
+[data-theme="studio"] .st-tiers { min-height: 0; display: grid; grid-template-rows: repeat(var(--tiers, 2), minmax(0, 1fr)); gap: 0.6rem; }
+[data-theme="studio"] .st-tier .st-sleeves { padding-top: 2.7rem; }
+/* covers stand apart while the shelf has room and overlap (up to --sleeve-overlap) only when it is full */
+[data-theme="studio"] .st-tier .st-sleeve { --cw: clamp(var(--sleeve-min), calc((100cqh - 2.7rem - var(--plank) - 3.9rem) / 0.75), var(--sleeve-max));
+  margin-left: calc(-1 * clamp(-2rem, (var(--n, 6) * var(--cw) - 100cqw + 3rem) / max(var(--n, 6) - 1, 1), var(--cw) * var(--sleeve-overlap))); }
+/* an empty shelf is only its plank and its note, so the full one above gets the height (and bigger covers) */
+[data-theme="studio"] .st-tiers:has(> .st-tier-empty) { grid-template-rows: minmax(0, 1fr) auto; }
+[data-theme="studio"] .st-tier.st-tier-empty { flex: none; height: calc(var(--plank) + 3.2rem); }
+[data-theme="studio"] .st-tier .st-sleeve:first-child { margin-left: 0; }
+[data-theme="studio"] .st-tier .st-sleeve:focus-visible + .st-sleeve { margin-left: -0.6rem; }
+[data-theme="studio"] .st-film:focus-visible { transform: rotate(0deg) translateY(-1.2rem); }
+[data-theme="studio"] .st-film[aria-pressed="true"] { transform: rotate(0deg) translateY(-1rem); }
+[data-theme="studio"] .st-film-img { display: block; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 0.3rem 0.3rem 0 0; background: var(--paper); }
+[data-theme="studio"] .st-film-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 0; aspect-ratio: auto; }
+[data-theme="studio"] .st-film .st-devbar { padding: 0 0.55rem 0.45rem; } [data-theme="studio"] .st-film .st-devbar i { height: 0.2rem; }
+[data-theme="studio"] .st-film.gone { background: rgba(255, 253, 247, 0.9); outline: 2px dashed var(--pencil); outline-offset: -2px; }
+[data-theme="studio"] .st-gone-img { display: grid; place-items: center; align-content: center; gap: 0.3rem; width: 100%; height: 100%; font: 1.05rem var(--font-studio-hand); color: var(--pencil-ink);
+  background: repeating-linear-gradient(0deg, var(--paper-white) 0 15px, var(--rule-tint) 15px 16px); }
+[data-theme="studio"] .st-next { align-self: flex-end; padding: 0 0 1.1rem 0.5rem; }
+@media (max-width: 1100px) { [data-theme="studio"] .st-projects .st-mixwrap, [data-theme="studio"] .st-mixrow { grid-template-columns: 1fr; } [data-theme="studio"] .st-projects :is(.st-pitchcol, .st-mixtop > .st-mixrow, .st-tiers) { grid-column: 1; grid-row: auto; } [data-theme="studio"] .st-tiers { min-height: 28rem; } }
+@media (prefers-reduced-motion: reduce) { [data-theme="studio"] .st-mixrow, [data-theme="studio"] .st-mixrow:hover .st-fr, [data-theme="studio"] .st-pitch { animation: none; transition: none; } }
+
+/* ---- the shell: the peg bar. No left rail: the pages hang from the bar as paper tabs between the pegs, the page in hand
+   is the lit sheet with its punched hole; on the right the running chips, the Claude lamp, the gear for Settings and Exit. ---- */
+[data-theme="studio"] .shell { grid-template-columns: minmax(0, 1fr); grid-template-rows: 3.5rem minmax(0, 1fr); }
+[data-theme="studio"] .shell .main { grid-column: 1; }
+[data-theme="studio"] .topbar { background: linear-gradient(#24201A, #1B1813); border-bottom: 1px solid #000; box-shadow: 0 1px 0 var(--room-hover) inset, 0 6px 18px rgba(0, 0, 0, 0.35); position: relative; z-index: 30; }
+[data-theme="studio"] .pegbar { gap: 0.75rem; padding: 0 1.25rem; }
+[data-theme="studio"] .pegbar .topbar-spacer { display: none; }
+[data-theme="studio"] .pegbar .brand-sub { border-left: 0; padding-left: 0; margin-left: 0.1rem; font: italic 400 max(0.85rem, 12px) / 1 var(--font-studio-display); letter-spacing: 0; color: var(--room-ink-2); opacity: 1; }
+[data-theme="studio"] .pegs { flex: 1; justify-content: center; display: flex; align-items: center; gap: 0.35rem; min-width: 0; align-self: stretch; }
+[data-theme="studio"] .peg { flex: none; height: 0.62rem; border-radius: 999px; background: #0E0C09; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(255, 240, 210, 0.08); }
+[data-theme="studio"] .peg.slot { width: 2.1rem; } [data-theme="studio"] .peg.round { width: 0.62rem; }
+[data-theme="studio"] .peg-tabs { display: flex; align-items: flex-end; align-self: stretch; gap: 0.25rem; margin: 0 0.75rem; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+[data-theme="studio"] .peg-tabs::-webkit-scrollbar { display: none; }
+[data-theme="studio"] .peg-tab { position: relative; flex: none; padding: 0.55rem 0.85rem 0.6rem; border-radius: 0.5rem 0.5rem 0 0; color: var(--room-ink-2); font: 500 0.95rem / 1.2 var(--font-body);
+  text-decoration: none !important; white-space: nowrap; transition: color 160ms var(--out), background 160ms var(--out); }
+[data-theme="studio"] .peg-tab[aria-current="page"] { color: var(--ink); background: var(--paper); box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.6) inset; }
+[data-theme="studio"] .peg-tab[aria-current="page"]::after { content: ""; position: absolute; left: 50%; top: 0.3rem; width: 0.42rem; height: 0.42rem; margin-left: -0.21rem; border-radius: 50%;
+  background: var(--room-2); box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.5); }
+[data-theme="studio"] .peg-gear { color: var(--room-ink-2); border: 1px solid transparent; border-radius: var(--st-r-lg); }
+[data-theme="studio"] .peg-gear.on { color: var(--room-ink); border-color: var(--room-line); }
+[data-theme="studio"] .peg-gear.on svg { color: var(--lamp); }
+@media (max-width: 1100px) { [data-theme="studio"] .pegbar .brand-sub { display: none; } [data-theme="studio"] .peg.slot { width: 1.2rem; } }
+[data-theme="studio"] .chip-status { border-color: var(--room-line); color: var(--room-ink-2); }
+/* the lamp: Claude's chip glows warm when Claude is ready */
+[data-theme="studio"] .claude-chip > .chip-status .dot.ok { background: var(--lamp); box-shadow: 0 0 6px rgba(255, 200, 114, 0.8); }
+[data-theme="studio"] .dot.busy, [data-theme="studio"] .dot.warning { box-shadow: 0 0 0.5rem rgba(250, 204, 21, 0.5); }
+[data-theme="studio"] .dot.error { box-shadow: 0 0 0.5rem rgba(255, 92, 92, 0.5); }
+[data-theme="studio"] .toast { color: var(--ink); }
+
+/* ---- Settings: a drawer of index cards. The sections are paper tabs on the room; each section's panels are paper on the light table ---- */
+[data-theme="studio"] .page-settings .settings-nav { gap: 0.3rem; }
+[data-theme="studio"] .page-settings .settings-nav .rail-item { border-radius: 0.5rem 0 0 0.5rem; color: var(--room-ink-2); font-family: var(--font-body); letter-spacing: 0.04em; }
+[data-theme="studio"] .page-settings .settings-nav .rail-item.active { color: var(--ink); background: var(--paper); box-shadow: inset -3px 0 0 var(--registration), 0 0.4rem 1rem rgba(0, 0, 0, 0.35); }
+[data-theme="studio"] .page-settings .settings-nav .rail-item.active svg { color: var(--registration); }
+[data-theme="studio"] .page-settings .panel { border: 0; border-radius: var(--st-r-lg); color: var(--ink);
+  background: radial-gradient(120% 90% at 50% 40%, var(--lamp-paper) 0%, var(--paper) 45%, var(--paper-2) 100%);
+  box-shadow: 0 0 0 1px rgba(255, 240, 210, 0.2), 0 0 3rem rgba(255, 214, 150, 0.12), 0 1rem 2.4rem rgba(0, 0, 0, 0.4); }
+[data-theme="studio"] .page-settings .panel .theme-card { background: #fff; border-color: var(--paper-3); }
+[data-theme="studio"] .page-settings .panel .theme-card[aria-pressed="true"] { border-color: var(--registration); box-shadow: 0 0 0 1px var(--registration) inset; }
+[data-theme="studio"] .fr-dialog .theme-card { background: #fff; border-color: var(--paper-3); }
+[data-theme="studio"] .fr-dialog .theme-card[aria-pressed="true"] { border-color: var(--registration); box-shadow: 0 0 0 1px var(--registration) inset; }
+[data-theme="studio"] .st-shelf-empty .st-books { align-items: center; }
+[data-theme="studio"] .st-shelf-empty .st-hand { padding-bottom: calc(var(--plank) - 0.3rem); }
+[data-theme="studio"] .st-linkish { border: 0; background: none; padding: 0; cursor: pointer; text-align: left; text-decoration: underline; text-decoration-color: var(--room-line); text-underline-offset: 4px; }
+/* a person's Front figure cut from its model sheet: the card takes the figure's proportions, the sheet's paper behind it */
+[data-theme="studio"] .st-fig.person.front { flex: 0 0 max(calc(var(--m) * var(--h) * var(--fw)), 9.5rem); min-width: 0; }
+[data-theme="studio"] .st-fig.person.front .st-card { width: calc(var(--m) * var(--h) * var(--fw)); background: #E9E4D6; }
+[data-theme="studio"] .st-fig.person img.st-front { position: absolute; max-width: none; object-fit: fill; }
+
+/* hover only where there is a mouse (Emil): touch screens fire hover on tap */
+@media (hover: hover) and (pointer: fine) {
+  [data-theme="studio"] .btn.primary:hover:not(:disabled) { background: var(--registration-hover); border-color: var(--registration-hover); }
+  [data-theme="studio"] .st-cats button:hover, [data-theme="studio"] .st-chip:hover { color: var(--room-ink); background: var(--room-hover); }
+  [data-theme="studio"] .st-sleeve:hover { transform: rotate(0deg) translateY(-1.6rem); z-index: 3; }
+  [data-theme="studio"] .st-sleeve:hover :is(.st-cap, .st-cap small) { white-space: normal; text-overflow: clip; }
+  [data-theme="studio"] .st-sleeve:hover + .st-sleeve { margin-left: -1.5rem; }
+  [data-theme="studio"] .st-fig:hover .st-card { transform: translateY(-0.4rem); }
+  [data-theme="studio"] .st-fig.toon:hover .st-card { transform: translateY(-0.4rem) rotate(-1deg); }
+  [data-theme="studio"] .st-book:hover { transform: translateY(-0.9rem); }
+  [data-theme="studio"] .st-motionlib .sgb-card:hover .shot { transform: rotate(-1.5deg) translateY(-0.2rem); }
+  [data-theme="studio"] .st-pitch:hover { transform: rotate(0deg) translateY(-4px); }
+  [data-theme="studio"] .st-import:hover { color: var(--room-ink); }
+  [data-theme="studio"] .st-mixrow:hover .st-fr { animation: st-flip 850ms steps(1) infinite; }
+  [data-theme="studio"] .st-mixrow:hover .st-fr:nth-child(2) { animation-delay: 170ms; }
+  [data-theme="studio"] .st-mixrow:hover .st-fr:nth-child(3) { animation-delay: 340ms; }
+  [data-theme="studio"] .st-mixrow:hover .st-fr:nth-child(4) { animation-delay: 510ms; }
+  [data-theme="studio"] .st-mixrow:hover .st-fr:nth-child(5) { animation-delay: 680ms; }
+  [data-theme="studio"] .st-tier .st-sleeve:hover + .st-sleeve { margin-left: -0.6rem; }
+  [data-theme="studio"] .st-film:hover { transform: rotate(0deg) translateY(-1.2rem); }
+  [data-theme="studio"] .peg-tab:hover { color: var(--room-ink); background: var(--room-hover); }
+  [data-theme="studio"] .peg-gear:hover { color: var(--room-ink); border-color: var(--room-line); }
+  [data-theme="studio"] .chip-status:hover { border-color: #5B5141; color: var(--room-ink); }
+  [data-theme="studio"] .page-settings .settings-nav .rail-item:hover { background: var(--room-hover); color: var(--room-ink); }
+  [data-theme="studio"] .st-linkish:hover { color: var(--room-ink); }
+}
+/* a press answers at once (Emil): the sleeve, film, book, figure or pitch card gives a little under the finger */
+[data-theme="studio"] :is(.st-sleeve, .st-film, .st-book, .st-fig, .st-pitch):active { scale: 0.98; }
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="studio"] .st-mixrow:hover .st-fr { animation: none; }
+  [data-theme="studio"] :is(.st-sleeve, .st-film, .st-book, .st-fig, .st-pitch):active { scale: none; }
+}
+/* the style chooser's tiles are sleeves like the crates on Film Styles: paper, a slight tilt, lifted when in hand */
+[data-theme="studio"] .scx .sgb-card { background: var(--paper-white); border: 0; border-radius: var(--st-r-sm); padding: 0 0 0.3rem; box-shadow: -0.3rem 0.4rem 1rem rgba(60, 44, 20, 0.22);
+  transform: rotate(-2deg); transform-origin: 50% 100%; transition: transform 220ms var(--out), box-shadow 200ms var(--out); }
+[data-theme="studio"] .scx .sgb-card:nth-child(even) { transform: rotate(1.5deg); }
+[data-theme="studio"] .scx .sgb-card :is(.nm, .by) { padding-inline: 0.55rem; }
+[data-theme="studio"] .scx .sgb-card.on, [data-theme="studio"] .scx .sgb-card:focus-visible { transform: rotate(0deg) translateY(-0.5rem); box-shadow: 0 0 0 2px var(--registration), 0 0.8rem 1.6rem rgba(60, 44, 20, 0.28); }
+@media (hover: hover) and (pointer: fine) { [data-theme="studio"] .scx .sgb-card:hover { transform: rotate(0deg) translateY(-0.4rem); } }
+@media (prefers-reduced-motion: reduce) { [data-theme="studio"] .scx .sgb-card { transition: none; } }
+[data-theme="studio"] .scx .sgb-card.on .shot { border-color: transparent; box-shadow: none; }          /* the red ring of the sleeve is the one mark */
+/* Settings and the Motion Library stand on the same margins and head as the other rooms (titles no longer jump) */
+[data-theme="studio"] .page:is(.page-settings, .st-motionlib) { max-width: none; margin: 0;
+  padding: clamp(1rem, 2.2vh, 2.25rem) clamp(1.25rem, 3vw, 3.5rem) clamp(1rem, 2vh, 2rem); }
+[data-theme="studio"] .page-settings .page-head { margin-bottom: clamp(0.9rem, 2vh, 1.75rem); }
+[data-theme="studio"] .page-settings .page-head h1 { margin: 0; font: 400 clamp(2.6rem, 2rem + 2vw, 4.2rem) / 0.95 var(--font-studio-display); letter-spacing: -0.02em; color: var(--room-ink); }
+[data-theme="studio"] .page-settings .page-head .back-btn { display: none; }          /* the gear and the peg bar are the way in and out */
+[data-theme="studio"] .page-settings .settings { max-width: calc(15rem + 1.5rem + 62rem); }
+/* Create a character fits what it holds (The Desk keeps its wide sheet) */
+[data-theme="studio"] .dialog.wide:has(.cc-form), [data-theme="studio"] .dialog.wide:has(.cc-confirm) { width: min(82rem, calc(100vw - 3rem)); }
+/* Writing ideas: the prompt runs under the sticky actions with a fade, card names get two lines */
+[data-theme="studio"] .plx-detail .sgb-acts::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 2rem; pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--surface-2)); }
+[data-theme="studio"] .plx .sgb-card .nm { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+/* a Brand Kit's buttons stay on one row; its still shows whole on the table's paper */
+[data-theme="studio"] .st-viewer .sgb-acts { flex-wrap: nowrap; gap: 0.4rem; }
+[data-theme="studio"] .st-viewer .sgb-acts .btn { padding-inline: 0.75rem; }
+[data-theme="studio"] .st-kits .st-viewer .sgb-big img { object-fit: contain; }
+/* the deleted-items note reads as one line with its button */
+[data-theme="studio"] .st-motionlib .ml-note.ml-pv { flex-wrap: wrap; gap: 0.2rem 0.6rem; }
+[data-theme="studio"] .st-motionlib .ml-note.ml-pv .btn { margin-left: 0; }
+/* Use in a project: the film's name on its own line, the style and how it is drawn under it */
+[data-theme="studio"] .ch-projects button { flex-wrap: wrap; row-gap: 0.1rem; }
+[data-theme="studio"] .ch-projects button b { flex: 1 1 calc(100% - 2rem); white-space: normal; }
+[data-theme="studio"] .ch-projects button .muted { order: 3; flex-basis: 100%; }
+/* a cover that lifts under the pointer kept flickering when the pointer was on its name: it rose out from under it,
+   lost the hover, dropped back. The strip it leaves below stays part of it, and a figure lifts only its picture (its name tag stays). */
+[data-theme="studio"] :is(.st-sleeve, .st-book)::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 1.8rem; }
+[data-theme="studio"] .st-fig .st-card { transition: transform 240ms var(--settle); }
+@media (prefers-reduced-motion: reduce) { [data-theme="studio"] .st-fig .st-card { transition: none; } }
+/* the film in hand keeps its facts to the right of its strip at every size, and the shelves stand in the
+   strip's column (same left and right edges), the pitch card alone on the left; a shelf is as tall as its covers need */
+[data-theme="studio"] .st-projects { --tier-h: calc(2.7rem + var(--sleeve-max) * 0.75 + 3.9rem + 4.4rem + 0.5rem); }
+[data-theme="studio"] .st-projects .st-mixwrap { grid-template-columns: var(--mix-pitch) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); column-gap: 2rem; }
+[data-theme="studio"] .st-projects .st-mixtop { display: contents; }
+[data-theme="studio"] .st-projects .st-pitchcol { grid-column: 1; grid-row: 1; align-self: start; }
+[data-theme="studio"] .st-projects .st-mixtop > .st-mixrow { grid-column: 2; grid-row: 1; }
+[data-theme="studio"] .st-projects .st-tiers { grid-column: 2; grid-row: 2; align-content: start; grid-template-rows: repeat(var(--tiers, 2), minmax(0, var(--tier-h))); }
+[data-theme="studio"] .st-projects .st-tiers:has(> .st-tier-empty) { grid-template-rows: minmax(0, var(--tier-h)) auto; }
+/* no film yet: the light table with the intro takes the height, the bare shelf stands under it */
+[data-theme="studio"] .st-projects .st-mixwrap:has(> .st-mixtop > .st-intro) { grid-template-rows: minmax(0, 1fr) auto; }
+[data-theme="studio"] .st-projects .st-mixtop > .st-intro { align-self: stretch; }
+[data-theme="studio"] .st-projects .st-mixwrap:has(> .st-mixtop > .st-intro) > .st-tiers { grid-column: 2; grid-row: 2; grid-template-rows: auto; }
+/* a narrow window: the shelves stay in the strip's column under the film in hand, never squeezed under the pitch card */
+@media (max-width: 1100px) { [data-theme="studio"] .st-projects .st-mixwrap > .st-tiers { grid-column: 2; grid-row: 2; } }
+/* the category tabs wrap (two lines on a desktop window), they never scroll sideways */
+[data-theme="studio"] .st-cats { flex-wrap: wrap; overflow: visible; }
+[data-theme="studio"] .st-styles .st-finder { flex-wrap: wrap; row-gap: 0.6rem; }
+[data-theme="studio"] .st-styles .st-finder .st-cats { order: 9; flex: 1 0 100%; gap: 0.2rem; }
+[data-theme="studio"] .st-styles .st-finder .st-cats button { padding: 0.25rem 0.5rem; font-size: max(0.75rem, 11px); }          /* DESIGN: chips may be 11 px */
+[data-theme="studio"] .st-styles .st-count { margin-left: auto; }
+/* the crates stand in shelves of even weight: an author with many styles has a row of its own, the authors with few share
+   one; a crate is as wide as its sleeves need (at least its label) and packs them like a record shelf: the more, the closer, never a
+   scroll; the author's name, maker and tag are a paper label on the shelf's front */
+[data-theme="studio"] .st-crates { display: flex; flex-direction: column; gap: 0.8rem; overflow: hidden; }
+[data-theme="studio"] .st-crow { flex: 1; min-height: 0; display: flex; gap: 0.8rem; }
+[data-theme="studio"] .st-crow .st-crate { flex-shrink: 1; flex-basis: 0; min-width: 13rem; }
+[data-theme="studio"] .st-crate .st-sleeves { overflow: hidden; }
+[data-theme="studio"] .st-crate .st-sleeve { margin-left: calc(-1 * max(-1.2rem, (var(--n, 6) * var(--cw) - 100cqw + 2.8rem) / max(var(--n, 6) - 1, 1))); }
+[data-theme="studio"] .st-crate .st-sleeve:first-child { margin-left: 0; }
+[data-theme="studio"] .st-plate { position: absolute; z-index: 2; left: 0.9rem; right: 0.9rem; bottom: 0.45rem; display: flex; pointer-events: none; }
+[data-theme="studio"] .st-plate .au-name { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.5rem; row-gap: 0.1rem; max-width: 100%; min-width: 0; padding: 0 0.2rem; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55); }
+[data-theme="studio"] .st-plate .au-name b { flex: 0 1 auto; min-width: 0; font: 500 1.05rem / 1.1 var(--font-studio-display); color: var(--plank-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+[data-theme="studio"] .st-plate .au-name small { display: inline-flex; align-items: center; gap: 0.35rem; font-size: max(0.75rem, 12px); color: var(--plank-ink-2); white-space: nowrap; }
+@media (max-width: 1100px) { [data-theme="studio"] .st-crow { flex-direction: column; } [data-theme="studio"] .st-crow .st-crate { min-height: 16rem; } [data-theme="studio"] .st-crates { overflow: visible; } }
+[data-theme="studio"] .st-crate .st-box { --plank: 4.6rem; }          /* the label can take two lines on a narrow shelf */
+/* the shelf is one thick plank, drawn over the covers: each cover stands tilted with its
+   lower corner tucked behind the plank's front edge, like a record in a rack; its label sits on the plank */
+[data-theme="studio"] .st-box::after { z-index: 2; }
+[data-theme="studio"] .st-box::before, [data-theme="studio"] .st-plate { z-index: 3; }
+[data-theme="studio"] .st-box .st-sleeves { padding-bottom: calc(var(--plank) - 0.7rem); }
+/* the shelf's words are printed on the wood, no paper label; the author's tag stays, compact for the dark plank */
+[data-theme="studio"] .st-plate .au-tag { height: 1rem; padding: 0 0.3rem; font-size: max(0.68rem, 11px); text-shadow: none; }
+[data-theme="studio"] .st-box::before { color: var(--plank-ink-2); text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55); }
+/* the Motion Plan's "Film style" / "HF formula" tags were the light pencil on paper; on paper they take the pencil's ink */
+[data-theme="studio"] :is(.sheet, .lt-sheet, .dialog, .np-dialog, .studio-paper) .src-tag:is(.k-hf, .k-style) { color: var(--pencil-ink); background: var(--pencil-soft); }

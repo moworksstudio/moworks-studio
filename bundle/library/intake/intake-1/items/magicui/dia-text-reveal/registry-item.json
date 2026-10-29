@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "dia-text-reveal",
+  "type": "hyperframes:component",
+  "title": "Dia Text Reveal",
+  "description": "A band of colours sweeps left to right across hidden text and leaves it in its final colour (1.5 s, ease-in-out cubic); with several phrases it rotates through them.",
+  "tags": [
+    "reveal",
+    "gradient",
+    "sweep",
+    "headline",
+    "text",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "dia-text-reveal.html",
+      "target": "compositions/components/dia-text-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 7,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/dia-text-reveal",
+    "author": "magicui",
+    "call": "MW.diaTextReveal(q(\".r1\"), tl, 0.4, {});",
+    "function": "MW.diaTextReveal",
+    "options": {
+      "texts": "list of phrases (the element's own text)",
+      "colors": "#c679c4, #fa3d1d, #ffb005, #e1e1fe, #0358f7",
+      "textColor": "final colour (currentColor of the parent)",
+      "duration": "s per sweep (1.5)",
+      "delay": "s (0)",
+      "repeat": "rotate through the phrases (false)",
+      "repeatDelay": "s (0.5)",
+      "cycles": "phrases shown when repeating (all)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/dia-text-reveal.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/dia-text-reveal.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Phrases change on a fixed schedule (duration + repeatDelay); widths are measured once. The band reaches past the letters, so marks above Vietnamese capitals are coloured too.",
+    "titleVi": "Dải màu quét lộ chữ (kiểu Dia)"
+  }
+}

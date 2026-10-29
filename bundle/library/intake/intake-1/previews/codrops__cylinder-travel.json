@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/cylinder-travel",
+  "hash": "c1553124343e32e2",
+  "at": "2026-10-17T06:39:53.519Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Archivo"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__cylinder-travel.mp4",
+    "poster": "previews/codrops__cylinder-travel.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "e0b2e0b9cbd39bdb4077b26f0a166aaf3f9b2dfbe5357a7dfd9ea24a102bd9fa",
+    "size": 20082,
+    "seconds": 32.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

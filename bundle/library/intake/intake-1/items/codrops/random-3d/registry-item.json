@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "random-3d",
+  "type": "hyperframes:component",
+  "title": "Random 3D",
+  "description": "Letters arrive from random 3D tilts and depths and settle flat, in order. (Codrops fx17)",
+  "tags": [
+    "text",
+    "letters",
+    "entrance",
+    "codrops",
+    "on-scroll",
+    "per letter"
+  ],
+  "files": [
+    {
+      "path": "random-3d.html",
+      "target": "compositions/components/random-3d.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:codrops/random-3d",
+    "author": "codrops",
+    "call": "MW.random3d(document.querySelector(\".mw-random-3d\"), tl, 0.5, { duration: 1.6 });",
+    "function": "MW.random3d",
+    "options": {
+      "duration": "s the whole entrance takes (1.6)",
+      "seed": "for the random parts (1)",
+      "split": "chars"
+    },
+    "credit": {
+      "author": "Codrops",
+      "collection": "Codrops",
+      "link": "https://github.com/codrops/OnScrollTypographyAnimations/blob/af28d61d1f8d3d117f5d1e9b09d5209e20a1a212/src/js/index2.js#L85-L111",
+      "commit": "af28d61d1f8d3d117f5d1e9b09d5209e20a1a212",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) 2009 - 2022 / 2024 Codrops (LICENSE)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "codrops/OnScrollTypographyAnimations at af28d61, src/js/index2.js lines 85-111",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Codrops fx17: the source's GSAP values; the scroll range is now `duration`.",
+    "titleVi": "Chữ cái lật 3D ngẫu nhiên"
+  }
+}

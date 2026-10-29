@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-heavy-stop",
+  "hash": "e856466b324f58e8",
+  "at": "2026-10-17T11:03:00.443Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-heavy-stop.mp4",
+    "poster": "previews/takayu__motion-heavy-stop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4e597d212350b412d8f725173325a90bed6b29c3568498fbb702f37929fbff90",
+    "size": 6128,
+    "seconds": 24.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

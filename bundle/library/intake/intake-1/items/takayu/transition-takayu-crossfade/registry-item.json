@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-takayu-crossfade",
+  "type": "hyperframes:component",
+  "title": "View Crossfade",
+  "description": "Cảnh cũ mờ đi trong lúc cảnh mới hiện lên cùng lúc, không di chuyển và không có khung trống ở giữa.",
+  "tags": [
+    "crossfade",
+    "dissolve",
+    "fade",
+    "transition",
+    "layout-navigation",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "transition-takayu-crossfade.html",
+      "target": "compositions/components/transition-takayu-crossfade.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/transition-takayu-crossfade",
+    "author": "takayu",
+    "call": "MW.transitionTakayuCrossfade(q(\".tk-b\"), tl, 1.2, {});",
+    "function": "MW.transitionTakayuCrossfade",
+    "options": {
+      "duration": "s (0.52)",
+      "ease": "power2.inOut",
+      "from": "the outgoing scene"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=view-crossfade",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=view-crossfade (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio view-crossfade, written here): Two scenes overlap: outgoing opacity 1 → 0 and incoming 0 → 1 at the same time, 520 ms power2.inOut (easeInOutCubic), no movement, no empty frame between. Targets [out inner, in inner] as in transition/push. Params: duration (0.52 s) · ease (power2.inOut) · targets: [cảnh ra, cảnh vào]. Unlike the dissolve, the outgoing scene fades out at the same time (no movement, no empty frame).",
+    "titleVi": "Hoà cảnh cũ sang cảnh mới"
+  }
+}

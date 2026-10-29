@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>News Ticker Crawl - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.ft { position: absolute; inset: 0; background: url(assets/shot.svg) center / cover; } .ft::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.55)); }
+.nc { position: absolute; left: 0; right: 0; bottom: 70px; height: 120px; background: rgba(10,12,18,0.94); border-top: 8px solid #8b7bff; overflow: hidden; } .nc-l { position: absolute; left: 0; top: 0; bottom: 0; width: 232px; z-index: 2; background: #8b7bff; display: grid; place-items: center; font-size: 46px; font-weight: 800; color: #fff; }
+.nc-v { position: absolute; left: 232px; right: 0; top: 0; bottom: 0; overflow: hidden; } .nc-t { position: absolute; left: 0; top: 0; height: 100%; display: flex; white-space: nowrap; } .nc-u { display: flex; align-items: center; height: 100%; font-size: 58px; font-weight: 700; padding-left: 40px; }
+.nc-u i { width: 22px; height: 22px; border-radius: 50%; background: #8b7bff; margin: 0 40px; flex: none; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4">
+<div class="ft"></div><div class="nc"><div class="nc-l">TIN MỚI</div><div class="nc-v"><div class="nc-t"><div class="nc-u">Hà Nội đón đợt không khí lạnh đầu mùa<i></i>Giá vé tàu Tết bắt đầu mở bán<i></i></div></div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"track":".nc-t","loop":4,"minPx":8,"loops":1};
+  var run = function (el, tl, at, o) {
+        var tr = el.querySelector(o.track), unit = tr.firstElementChild, fr = Math.round(o.loop * 60), w = unit.offsetWidth, px = Math.max(o.minPx, Math.ceil(w / fr)), W = px * fr;
+        unit.style.paddingRight = (W - w + (parseFloat(getComputedStyle(unit).paddingRight) || 0)) + "px"; unit.style.boxSizing = "content-box"; var w2 = unit.offsetWidth, k = W / w2;
+        for (var i = 0; i < 3; i++) tr.appendChild(unit.cloneNode(true));
+        return MW.drive(tl, at, o.loop * o.loops, function (t) { var pos = (Math.floor(t * 60 + 1e-6) * px) % W; gsap.set(tr, { x: -pos / (k || 1) }); });
+      };
+  MW.lowerNewsCrawl = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.lowerNewsCrawl(q(".nc"), tl, 0, {});
+          tl.set({}, {}, 4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

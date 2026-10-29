@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-shared-element-hero",
+  "type": "hyperframes:block",
+  "title": "Shared Element",
+  "description": "Một ô màu nhỏ trong danh sách bay lên góc trên, lớn dần thành ảnh chính của trang chi tiết, bo góc nhỏ lại, giữ nguyên danh tính.",
+  "tags": [
+    "shared element",
+    "morph",
+    "flip",
+    "hero",
+    "layout-navigation",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-shared-element-hero.html",
+      "target": "compositions/components/ui-shared-element-hero.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-shared-element-hero",
+    "author": "takayu",
+    "call": "MW.uiSharedElementHero(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiSharedElementHero",
+    "options": {
+      "at": "s (0.4)",
+      "duration": "s (0.65), in-out",
+      "backAt": "s it flies back (1.9)",
+      "loop": "s (3.2)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=shared-element",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=shared-element (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio shared-element, written here): Element 44x34 (accent) starts in the list slot (offset −88, +20 px from centre, scale 0.55, radius 12) and travels to the detail hero slot (offset +54, −17, scale 1.45, radius 5) by 76 % of an 850 ms pass (≈650 ms, eased in-out), then holds. Dashed start slot 42x32 lower left, end slot 72x55 upper right, arrow between. Params: from / to: khung đầu, khung cuối · duration (0.65 s) · radius (12 → 5 px) · ease (power2.inOut).",
+    "titleVi": "Thẻ trong danh sách bay thành ảnh lớn"
+  }
+}

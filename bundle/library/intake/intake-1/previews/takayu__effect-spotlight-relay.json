@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-spotlight-relay",
+  "hash": "e7b79755d5f1f67f",
+  "at": "2026-10-17T08:26:07.167Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__effect-spotlight-relay.mp4",
+    "poster": "previews/takayu__effect-spotlight-relay.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "fe4d8958c5f8b2dc01368a039f587652a5d611419ed2e209c8722aa7c22d4274",
+    "size": 20882,
+    "seconds": 28.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

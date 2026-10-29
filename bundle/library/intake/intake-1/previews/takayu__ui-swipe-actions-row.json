@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-swipe-actions-row",
+  "hash": "0029f9590a5623e9",
+  "at": "2026-10-17T10:45:47.686Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-swipe-actions-row.mp4",
+    "poster": "previews/takayu__ui-swipe-actions-row.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6237ec268c4cf2edec7841003a61a29ec3d549a18a5a9f0874a595d27f242f38",
+    "size": 11443,
+    "seconds": 28.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

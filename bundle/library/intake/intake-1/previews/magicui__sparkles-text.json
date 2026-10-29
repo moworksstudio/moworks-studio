@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/sparkles-text",
+  "hash": "8a6fe843e2d67311",
+  "at": "2026-10-17T06:03:09.861Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__sparkles-text.mp4",
+    "poster": "previews/magicui__sparkles-text.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "937209368eccc17e32ea2d02b9fa4599f4644255781b536d658dc3916eef9731",
+    "size": 20686,
+    "seconds": 25.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

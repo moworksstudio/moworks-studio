@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-achievement-toast",
+  "type": "hyperframes:block",
+  "title": "Achievement Unlock",
+  "description": "Thẻ thành tựu rơi xuống từ mép trên bằng lò xo, biểu tượng cúp bật ra, hai dòng chữ trượt vào, thanh thời gian ngắn dần trong lúc giữ cho kịp đọc, rồi thẻ bay lên khỏi khung.",
+  "tags": [
+    "toast",
+    "spring",
+    "notification",
+    "pop",
+    "rewards-loot",
+    "heavy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-achievement-toast.html",
+      "target": "compositions/components/ui-achievement-toast.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-achievement-toast",
+    "author": "takayu",
+    "call": "MW.uiAchievementToast(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiAchievementToast",
+    "options": {
+      "inAt": "s (0.3, spring k240 c22)",
+      "exitAt": "s (2.25)",
+      "kicker": "",
+      "title": "",
+      "accent": "the read bar",
+      "loop": "s (2.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-reward-achievement",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-reward-achievement (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-reward-achievement, written here): px @320x200. Toast 208 x 48 (r 10) drops y −56 → 18 by spring k240 d22 from 0.3 s. Trophy disc r 15 pops at 0.45 s (300 ms back.out). Kicker fades in 0.5-0.7 s while sliding 8 px left (0.5-0.75 s outCubic); title the same at 0.58-0.83 s. A 2 px read bar 188 px shrinks linearly 0.9-2.2 s. Exit: up 80 px in 250 ms in-cubic at 2.25 s. Params: inAt: lúc vào (0.3 s) · spring: lò xo (k240 d22) · hold: giữ đọc (1.3 s) · exitAt: lúc ra (2.25 s) · kicker / title: hai dòng chữ. A thin bar shrinks while it holds, so there is time to read it.",
+    "titleVi": "Thông báo mở khoá thành tựu"
+  }
+}

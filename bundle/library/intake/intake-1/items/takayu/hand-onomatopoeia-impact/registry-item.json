@@ -1,0 +1,69 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "hand-onomatopoeia-impact",
+  "type": "hyperframes:component",
+  "title": "Manga Onomatopoeia Impact",
+  "description": "Chữ tượng thanh kiểu manga to gấp ba lao vào khớp cỡ trong bốn khung hình, loé sáng một khung, rung mạnh rồi tắt dần, phía sau bung các tia tập trung.",
+  "tags": [
+    "impact",
+    "comic",
+    "shake",
+    "speed-lines",
+    "text-japanese",
+    "heavy",
+    "crisp",
+    "japanese",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "hand-onomatopoeia-impact.html",
+      "target": "compositions/components/hand-onomatopoeia-impact.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/hand-onomatopoeia-impact",
+    "author": "takayu",
+    "call": "MW.handOnomatopoeiaImpact(q(\".om\"), tl, 0.4, {});",
+    "function": "MW.handOnomatopoeiaImpact",
+    "options": {
+      "outer": "em of the coloured outline (0.38)",
+      "inner": "em of the dark inner outline (0.11)",
+      "fill": "",
+      "accent": "",
+      "dark": "",
+      "skew": "degrees (−7)",
+      "angle": "degrees (−3.4)",
+      "shake": "± px for 8 frames (40)",
+      "flash": "light flash on the landing frame (0.22)",
+      "rays": "(64)",
+      "inner2": "[min, max] px of the clear ellipse ([370, 600])",
+      "bg": "the shot that shakes",
+      "exitAt": "s after the start (1.65)",
+      "seed": "(3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-onomatopoeia-impact",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-onomatopoeia-impact (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-onomatopoeia-impact, written here): Stepped at 24 fps. At 0.4 s the word (66 px) scales 3 → 1 linearly in 4 frames; landing frame: full-frame 22 % light flash; then seeded shake ±10 px × (1 − f / 8) for 8 frames. Word skewX −7°, rotated −3.4°; 9 px accent outline under a 3.5 px dark inner outline under the fill. From landing, 64 radial wedges (0.012–0.032 rad) from off-frame to an inner ellipse 74–120 px (×0.7 tall), grey 85 %, until the exit. Exit 2.05–2.35 s: fade, scale +15 %. Loop 2.6 s. Params: tỉ lệ đầu (300 %, 4 khung) · rung (±10 px, 8 khung) · số tia (64) · nhịp hình (24 fps). Stepped at 24 fps: 3 → 1 in four frames, a flash on the landing frame, then a seeded shake fading over eight frames.",
+    "titleVi": "Chữ tượng thanh manga đập, tia tập trung"
+  }
+}

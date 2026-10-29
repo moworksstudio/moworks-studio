@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-sidechain-duck",
+  "type": "hyperframes:component",
+  "title": "Sidechain Duck",
+  "description": "Mỗi tiếng trống kick, chuyển động nền khựng lại một chút rồi hồi về chậm như sidechain trong nhạc.",
+  "tags": [
+    "beat",
+    "duck",
+    "music",
+    "pulse",
+    "sound-sync",
+    "crisp",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-sidechain-duck.html",
+      "target": "compositions/components/motion-sidechain-duck.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-sidechain-duck",
+    "author": "takayu",
+    "call": "MW.motionSidechainDuck(q(\".sd-bg\"), tl, 0, { subject: \".sd-d\" });",
+    "function": "MW.motionSidechainDuck",
+    "options": {
+      "beat": "s between kicks (0.5)",
+      "attack": "s (0.025, linear)",
+      "release": "decay rate (12: e^(−12 t))",
+      "amount": "the background dips (0.08)",
+      "grow": "the subject grows (0.5)",
+      "start": "s (0)",
+      "subject": "the foreground element (optional)",
+      "duration": "s (4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=sd-duck",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=sd-duck (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio sd-duck, written here): On each kick the ambient motion (camera, background) dips: attack ~3 frames (100 ms), release 24-36 frames (800-1200 ms). Demo: every 0.5 s the duck rises linearly over 25 ms then decays e^(-12 t); background scale 1 - 0.08 x duck while the foreground dot grows 20 -> 30 px. Params: amount (−8 %) · attack (0.1 s) · release (0.8–1.2 s). Like a sidechain compressor: on each kick the ambient motion dips fast and recovers slowly.",
+    "titleVi": "Nhún nền theo tiếng trống"
+  }
+}

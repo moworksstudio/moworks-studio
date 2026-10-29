@@ -1,0 +1,53 @@
+<!--
+  Depth Zoom (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=depth-zoom (read 12/10/2026).
+  Thẻ từ rất nhỏ và nhoè lao tới, phóng vượt cỡ gốc lên 135 % và rõ nét dần.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionDepthZoom(q(".dz"), tl, 0.3, { exitAt: 1.8 });
+
+  Options (defaults in brackets):
+      - from: (0.15)
+      - to: ends larger than its layout size (1.35)
+      - blur: px at the start (24)
+      - duration: s (0.74)
+      - ease: (power4.inOut)
+      - exitAt: s after the start to fade (null)
+
+  Notes: Idea and numbers (TakayuStudio depth-zoom, written here): Card scales about its centre 0.15 → 1.35 (ends larger than its layout size), blur 6 → 0 px and opacity 0.2 → 1, together in 740 ms power4.inOut (easeInOutQuint). Site: fade in over the first 250 ms of the loop; exit fade 300 ms power2.in. Perspective guide lines are not ported. Params: duration (0.74 s) · scale (0.15 → 1.35) · blur (6 px) · ease (power4.inOut).
+-->
+
+<div class="st"><div class="dz">Lại gần</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":0.15,"to":1.35,"blur":24,"duration":0.74,"ease":"power4.inOut","exitAt":null};
+  var run = function (el, tl, at, o) {
+        var e = gsap.parseEase(o.ease), pin = gsap.parseEase("power2.in");
+        return MW.drive(tl, at, o.exitAt == null ? o.duration : o.exitAt + 0.3, function (t) {
+          var p = e(Math.min(1, t / o.duration)), a = (0.2 + 0.8 * p) * Math.min(1, t / 0.25); if (o.exitAt != null && t > o.exitAt) a *= 1 - pin(Math.min(1, (t - o.exitAt) / 0.3));
+          gsap.set(el, { scale: o.from + (o.to - o.from) * p }); el.style.filter = p < 1 ? "blur(" + (o.blur * (1 - p)).toFixed(2) + "px)" : ""; el.style.opacity = String(a);
+        });
+      };
+  MW.motionDepthZoom = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

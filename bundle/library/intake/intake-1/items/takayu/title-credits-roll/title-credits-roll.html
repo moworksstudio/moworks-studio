@@ -1,0 +1,49 @@
+<!--
+  End Credits Roll (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-credits-roll (read 12/10/2026).
+  Cột danh sách cuối phim (chức danh nhỏ, tên to) cuộn từ dưới lên với số px nguyên mỗi khung nên chạy mượt không giật.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.titleCreditsRoll(q(".cr"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - column: the moving column (its first child is one pass of the list)
+      - loop: s for one pass (6)
+      - minPx: px a frame at least (4)
+      - loops: (1)
+
+  Notes: Idea and numbers (TakayuStudio tx-credits-roll, written here): Rows: role (mono 10 px, mute) with the name (18 px) 20 px below, centred, rows evenly spaced. The column moves up at a whole number of px per 60 fps frame (2 px = 120 px/s; 1–4 allowed), position = floor(t × 60) × px, never fractional; duration = (content height + frame height) ÷ speed; linear. Recipe colours: text #ebebeb on #101010. Demo loops the rows seamlessly in 6 s. Params: tốc độ (2 px / khung ở 60 fps) · cỡ chức danh / tên (10 / 18 px) · màu (#ebebeb trên #101010). A whole number of px per 60 fps frame, never fractional; recipe colours #ebebeb on #101010.
+-->
+
+<div class="cr"><div class="cr-c"><div><p><b>ĐẠO DIỄN</b><span>Trần Bảo Ngọc</span></p><p><b>BIÊN KỊCH</b><span>Lê Hoàng Phúc</span></p><p><b>QUAY PHIM</b><span>Phạm Quốc Huy</span></p><p><b>DỰNG PHIM</b><span>Võ Thanh Hà</span></p><p><b>ÂM THANH</b><span>Đỗ Minh Khoa</span></p><p><b>SẢN XUẤT</b><span>Moworks Studio</span></p></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"column":".cr-c","loop":6,"minPx":4,"loops":1};
+  var run = function (el, tl, at, o) {
+        var col = el.querySelector(o.column), unit = col.firstElementChild, fr = Math.round(o.loop * 60), h = unit.offsetHeight, px = Math.max(o.minPx, Math.ceil(h / fr)), H = px * fr;
+        unit.style.paddingBottom = (H - h) + "px"; col.appendChild(unit.cloneNode(true)); col.appendChild(unit.cloneNode(true));
+        return MW.drive(tl, at, o.loop * o.loops, function (t) { gsap.set(col, { y: -((Math.floor(t * 60 + 1e-6) * px) % H) }); });
+      };
+  MW.titleCreditsRoll = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

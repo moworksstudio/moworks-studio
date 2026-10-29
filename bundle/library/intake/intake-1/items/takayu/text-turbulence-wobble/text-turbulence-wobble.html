@@ -1,0 +1,53 @@
+<!--
+  Turbulence Wobble (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-turbulence-wobble (read 12/10/2026).
+  Viền chữ uốn éo, đổi dáng mười lần mỗi giây như nét vẽ tay đang sôi.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textTurbulenceWobble(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - freq: turbulence base frequency (0.008 for large type; 0.02 at UI size)
+      - octaves: (2)
+      - scale: px of displacement at full (36)
+      - rate: new poses a second (10)
+      - in: [from, to] s it ramps up ([0.3, 0.8])
+      - out: [from, to] s back ([2.4, 2.85])
+      - loop: s (3)
+
+  Notes: Idea and numbers (TakayuStudio tx-turbulence-wobble, written here): SVG filter on the text: feTurbulence baseFrequency 0.02, numOctaves 2, seed = floor(t × 10) (new pose every 100 ms; the SMIL source cycles seeds 0–9 each second); feDisplacementMap scale 5–15 px (SVG 10), so outlines squirm like boiling line art. GSAP: scale 0 → 12, 0.6 s sine.inOut yoyo, 0.8 s rest. Demo: scale ramps 0 → 12 over 0.3–0.8 s, back 2.4–2.85 s; loop 3 s. Params: baseFrequency (0.02) · scale: độ uốn (5–15 px) · rate: đổi dáng (10 lần/giây) · octaves (2).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Nét vẽ sôi</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"freq":0.008,"octaves":2,"scale":36,"rate":10,"in":[0.3,0.8],"out":[2.4,2.85],"loop":3};
+  var run = function (el, tl, at, o) {
+        window.__mwTurb = (window.__mwTurb || 0) + 1; var id = "mw-turb-" + window.__mwTurb, ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg"), si = gsap.parseEase("sine.inOut");
+        svg.setAttribute("width", "0"); svg.setAttribute("height", "0"); svg.style.position = "absolute"; svg.innerHTML = '<filter id="' + id + '" x="-10%" y="-20%" width="120%" height="140%"><feTurbulence type="turbulence" baseFrequency="' + o.freq + '" numOctaves="' + o.octaves + '" seed="0" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter>'; document.body.appendChild(svg);
+        var tb = svg.querySelector("feTurbulence"), dm = svg.querySelector("feDisplacementMap"); el.style.filter = "url(#" + id + ")";
+        return MW.drive(tl, at, o.loop, function (t) { var s = o.scale * (si(Math.max(0, Math.min(1, (t - o.in[0]) / (o.in[1] - o.in[0])))) - si(Math.max(0, Math.min(1, (t - o.out[0]) / (o.out[1] - o.out[0]))))); tb.setAttribute("seed", String(Math.floor(t * o.rate) % 10)); dm.setAttribute("scale", s.toFixed(2)); });
+      };
+  MW.textTurbulenceWobble = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

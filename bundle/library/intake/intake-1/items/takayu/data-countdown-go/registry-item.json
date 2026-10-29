@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-countdown-go",
+  "type": "hyperframes:component",
+  "title": "Countdown GO!",
+  "description": "Ba chữ số lớn hiện lần lượt mỗi 0.8 giây, mỗi số thu từ to về cỡ rồi co và mờ cuối nhịp, vòng tròn quanh số cạn dần theo nhịp; tới \"GO!\" thì chữ bật vọt, vòng đổi màu nhấn và một vòng sóng nở ra.",
+  "tags": [
+    "countdown",
+    "beat",
+    "ring",
+    "pop",
+    "game-cinematics",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "data-countdown-go.html",
+      "target": "compositions/components/data-countdown-go.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/data-countdown-go",
+    "author": "takayu",
+    "call": "MW.dataCountdownGo(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataCountdownGo",
+    "options": {
+      "start": "s (0.3)",
+      "beat": "s per number (0.8)",
+      "outAt": "s (3.55)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-cinematic-countdown-go",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-cinematic-countdown-go (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-cinematic-countdown-go, written here): px @320x200. Beats 800 ms apart from 0.3 s: digits 3, 2, 1 (60 px) each fade in 80 ms and scale 1.5 → 1 in 250 ms outExpo; at 700-800 ms into the beat they shrink to 0.85 and fade. An accent arc on a grey ring (r 52, stroke 4) shrinks from full to 0 over each beat, anchored at 12 o'clock. 'GO!' at 2.7 s: 300 ms back.out, full accent ring, burst ring r 52 → 82 (stroke 3.5 → 0.5) fading 500 ms outCubic; 4 pips light per beat. Out 3.55-3.8 s in-cubic. Params: beat: nhịp (0.8 s) · from: số đầu (3) · go: chữ cuối (\"GO!\") · start: lúc bắt đầu (0.3 s). Markup: one .cg-d per number (3, 2, 1) and the final .cg-go word.",
+    "titleVi": "Đếm 3 · 2 · 1 · GO!"
+  }
+}

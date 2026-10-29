@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-paper-fold",
+  "type": "hyperframes:component",
+  "title": "Paper Fold Reveal",
+  "description": "Nửa phải của tấm thiệp gập lật quanh nếp giữa (180°) về phía người xem, tối dần theo góc và đổ bóng lên trang dưới, để lộ nội dung bên trong; rồi gập lại.",
+  "tags": [
+    "fold",
+    "paper",
+    "hinge",
+    "reveal",
+    "material-surface-motion",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-paper-fold.html",
+      "target": "compositions/components/motion-paper-fold.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-paper-fold",
+    "author": "takayu",
+    "call": "MW.motionPaperFold(q(\".pf\"), tl, 0.4, { closeAt: 2.2 });",
+    "function": "MW.motionPaperFold",
+    "options": {
+      "duration": "s (1.1, power2.inOut)",
+      "ease": "",
+      "perspective": "px (2100)",
+      "darken": "at 90° (0.55)",
+      "shadow": "cast on the page under it (0.45)",
+      "closeAt": "s after the start to fold back (null)",
+      "cover": "the flap's front (on the right half)",
+      "back": "the flap's back (laid over the left half)",
+      "base": "the page under the flap"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-material-paper-fold",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-material-paper-fold (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-material-paper-fold, written here): Right half (80x96) folds about the centre crease toward the viewer: rotateY 0 → 180° (perspective 420) over 1.1 s power2.inOut at 0.4 s, back 2.6-3.6 s. Darken by angle, max 55 % (× sin); a cast shadow on the base page (45 % × sin). The front face shows the cover (accent, 'OPEN', foreshortened), the back face the inside content (bars); the base page holds the inner spread ('INSIDE' + lines). Params: angle (180°) · duration (1.1 s, power2.inOut) · darken (55 %) · shadow (45 %) · perspective (420). Folds toward the viewer about the centre crease; the faces swap at 90°, so neither reads mirrored.",
+    "titleVi": "Gấp giấy mở ra trang trong"
+  }
+}

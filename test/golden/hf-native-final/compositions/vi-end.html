@@ -1,0 +1,20 @@
+<template id="vi-end-template">
+  <div data-composition-id="vi-end" data-width="1920" data-height="1080">
+    <div class="vi-bg"></div>
+    <h1 class="vi-title">Cảm ơn đã xem – ạ ặ ễ ộ ữ ỹ đ Ơ Ư</h1>
+    <p class="vi-small">Chữ nhỏ 16px: Tiếng Việt rõ nét, không viền màu</p>
+    <style>
+      @font-face { font-family: "VI Inter"; src: url("assets/fonts/Inter/Inter[opsz,wght].ttf"); font-weight: 100 900; }
+      [data-composition-id="vi-end"] { position: relative; width: 1920px; height: 1080px; overflow: hidden; font-family: "VI Inter"; }
+      [data-composition-id="vi-end"] .vi-bg { position: absolute; inset: 0; background: #14161c; will-change: transform; }
+      [data-composition-id="vi-end"] .vi-title { position: absolute; left: 160px; top: 420px; margin: 0; font-size: 96px; color: #f5f5f2; }
+      [data-composition-id="vi-end"] .vi-small { position: absolute; left: 160px; top: 600px; margin: 0; font-size: 16px; color: #f5f5f2; }
+    </style>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo('[data-composition-id="vi-end"] .vi-title', { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, 0.2);
+      tl.to({}, { duration: 4 }, 0);
+      window.__timelines["vi-end"] = tl;
+    </script>
+  </div>
+</template>

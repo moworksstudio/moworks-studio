@@ -1,0 +1,50 @@
+<!--
+  Stat Card (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=dv-stat (read 12/10/2026).
+  Một con số lớn đếm lên và thanh so sánh dài ra cùng một nhịp, dùng số liệu làm bằng chứng.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.dataStatCard(q(".sc"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - value: % (40)
+      - bar: % the bar fills (80)
+      - start: s (0.3)
+      - duration: s (1.1), expo.out, one curve for both
+      - number: the number
+      - fill: the bar's fill
+
+  Notes: Idea and numbers (TakayuStudio dv-stat, written here): Card (200 x 120): '+N%' counts 0 -> 40 and a comparison bar (152 px track) fills 0 -> 80 % in sync, one easeOutExpo over 900 ms (recipe: number 600-1200 ms; demo 1.1 s from 0.3 s). Number in the accent, mono, weight 600. Params: value (+40 %) · duration (0.9 s) · ease (expo.out).
+-->
+
+<div class="gm"><div class="sc"><div class="sc-n">+0%</div><p>doanh thu so với năm ngoái</p><div class="sc-t"><div class="sc-fill"></div></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"value":40,"bar":80,"start":0.3,"duration":1.1,"number":".sc-n","fill":".sc-fill"};
+  var run = function (el, tl, at, o) {
+        var num = el.querySelector(o.number), bar = el.querySelector(o.fill), ex = gsap.parseEase("expo.out");
+        return MW.drive(tl, at, o.start + o.duration + 0.2, function (t) { var p = ex(Math.max(0, Math.min(1, (t - o.start) / o.duration))); num.textContent = "+" + Math.round(o.value * p) + "%"; bar.style.width = (o.bar * p) + "%"; });
+      };
+  MW.dataStatCard = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

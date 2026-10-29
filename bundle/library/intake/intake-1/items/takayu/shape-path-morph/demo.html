@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>SVG Path Morph - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .sv { position: absolute; inset: 0; display: grid; place-items: center; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.2">
+<div class="sv"><svg width="800" height="800" viewBox="0 0 200 200"><path class="pm" fill="#8b7bff" d=""/></svg></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"shapes":["M100 30 C138 30 170 62 170 100 C170 138 138 170 100 170 C62 170 30 138 30 100 C30 62 62 30 100 30 Z","M100 20 C112 60 140 88 180 100 C140 112 112 140 100 180 C88 140 60 112 20 100 C60 88 88 60 100 20 Z","M96 26 C150 18 184 70 160 110 C140 150 120 176 86 166 C44 156 26 120 40 88 C52 56 64 30 96 26 Z"],"keys":[0.26,0.84,1.1,1.45,2.2]};
+  var run = function (el, tl, at, o) {
+        var io = gsap.parseEase("power2.inOut"), nums = function (d) { return d.match(/-?\d*\.?\d+/g).map(Number); }, tpl = o.shapes[0].replace(/-?\d*\.?\d+/g, "#"), S = o.shapes.map(nums);
+        var fill = function (v) { var i = 0; return tpl.replace(/#/g, function () { return (Math.round(v[i++] * 100) / 100).toString(); }); };
+        return MW.drive(tl, at, o.keys[o.keys.length - 1], function (t) {
+          // keys: hold the first shape until keys[0], move to the next by keys[1], hold until keys[2], move by keys[3], hold
+          var from = S[0], to = S[0], u = 0;
+          for (var j = 0; j + 1 < S.length; j++) { var a = o.keys[2 * j], b = o.keys[2 * j + 1]; if (t >= a) { from = S[j]; to = S[j + 1]; u = io(Math.min(1, (t - a) / (b - a))); } }
+          el.setAttribute("d", fill(from.map(function (v, q) { return v + (to[q] - v) * u; })));
+        });
+      };
+  MW.shapePathMorph = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.shapePathMorph(q(".pm"), tl, 0, {});
+          tl.set({}, {}, 2.2);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "uid": "in:takayu/text-width-stretch",
+  "hash": "9bfca011434a3a63",
+  "at": "2026-10-17T11:27:39.452Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Roboto Flex"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-width-stretch.mp4",
+    "poster": "previews/takayu__text-width-stretch.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "022543abc3424657f36b3eaa395b4f4714b5052e0bff408abbbe60ebe9a1c23d",
+    "size": 19270,
+    "seconds": 28.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

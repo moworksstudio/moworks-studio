@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-fade-slide",
+  "hash": "63446b92580dfb2f",
+  "at": "2026-10-17T11:02:08.605Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-fade-slide.mp4",
+    "poster": "previews/takayu__motion-fade-slide.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c390c980468fe6197ed6c6ee2532b23792f6d591977e08fdc98c14f17d88498f",
+    "size": 8108,
+    "seconds": 26.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

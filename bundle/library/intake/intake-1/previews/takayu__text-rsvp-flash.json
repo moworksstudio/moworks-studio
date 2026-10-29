@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-rsvp-flash",
+  "hash": "5dcdb7a2dc7cb0cc",
+  "at": "2026-10-17T08:56:55.543Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__text-rsvp-flash.mp4",
+    "poster": "previews/takayu__text-rsvp-flash.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "fff9435c6f2735bfcf81b37e3ceddea821a43e483b2298891b22c00dcacbd68e",
+    "size": 11959,
+    "seconds": 32.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

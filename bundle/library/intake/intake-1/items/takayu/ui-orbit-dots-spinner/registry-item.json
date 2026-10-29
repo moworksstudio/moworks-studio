@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-orbit-dots-spinner",
+  "type": "hyperframes:block",
+  "title": "Orbit Trail",
+  "description": "Một chấm đầu và năm chấm theo sau, mỗi chấm nhỏ và mờ hơn, cách nhau 20°, quay đều quanh một vòng mảnh.",
+  "tags": [
+    "spinner",
+    "orbit",
+    "dots",
+    "loop",
+    "loading-progress",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-orbit-dots-spinner.html",
+      "target": "compositions/components/ui-orbit-dots-spinner.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-orbit-dots-spinner",
+    "author": "takayu",
+    "call": "MW.uiOrbitDotsSpinner(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiOrbitDotsSpinner",
+    "options": {
+      "period": "s a turn (1.4), linear, clockwise from 12 o'clock",
+      "gap": "degrees between dots (20)",
+      "radius": "px (42)",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-loading-orbit-trail",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-loading-orbit-trail (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-loading-orbit-trail, written here): Thin ring r42 (1.5 px). Six dots on it: the head and 5 followers 20° behind each other, opacity 1 / .72 / .5 / .34 / .2 / .12, radius 6.5 / 5.6 / 4.9 / 4.3 / 3.7 / 3.2 px. The group rotates clockwise from 12 o'clock, linear, 1.4 s per turn. Params: period (1.4 s / vòng) · dots (6, cách 20°) · radius (42 px) · fade (1 → 0.12).",
+    "titleVi": "Chuỗi chấm quay vòng có đuôi"
+  }
+}

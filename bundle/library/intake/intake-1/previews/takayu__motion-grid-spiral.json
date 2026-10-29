@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-grid-spiral",
+  "hash": "541e31c34a064a58",
+  "at": "2026-10-17T10:56:31.935Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-grid-spiral.mp4",
+    "poster": "previews/takayu__motion-grid-spiral.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "99d7cfd41aff86eb6ce63cee4d3449a48207d872acc52c65de02c2c52ce02564",
+    "size": 9568,
+    "seconds": 26,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

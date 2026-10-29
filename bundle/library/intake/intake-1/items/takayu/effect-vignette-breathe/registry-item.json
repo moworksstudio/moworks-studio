@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-vignette-breathe",
+  "type": "hyperframes:component",
+  "title": "Vignette Breathe",
+  "description": "Bốn góc khung tối nhẹ và đậm nhạt chậm theo nhịp thở để kéo mắt vào giữa.",
+  "tags": [
+    "vignette",
+    "overlay",
+    "loop",
+    "focus",
+    "texture-look",
+    "smooth",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-vignette-breathe.html",
+      "target": "compositions/components/effect-vignette-breathe.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-vignette-breathe",
+    "author": "takayu",
+    "call": "MW.effectVignetteBreathe(q(\".vg\"), tl, 0, {});",
+    "function": "MW.effectVignetteBreathe",
+    "options": {
+      "edge": "[min, max] edge darkness ([0.25, 0.45])",
+      "inner": "clear radius in the 320 frame (60)",
+      "outer": "full at (200)",
+      "period": "s (3)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=lk-vignette",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=lk-vignette (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio lk-vignette, written here): Radial gradient overlay, clear in the middle, edges darkening; edge darkness 15 % <-> 25 % on a 3000 ms sine loop (opacity yoyo). Demo: clear inside r 60, full at r 200 on a 320 x 200 frame, edge alpha 0.25-0.45. House lesson: no grade + vignette over footage by default. Params: amount (15 ↔ 25 %) · period (3 s). House rule: no grade and vignette over footage by default.",
+    "titleVi": "Viền tối thở chậm"
+  }
+}

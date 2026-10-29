@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Spinning Text - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-spinning-text { position: relative; display: inline-block; width: 0; height: 0; }
+.mw-spinning-text .mw-w { display: contents !important; }
+.mw-spinning-text .mw-ch, .mw-spinning-text .mw-sp { position: absolute; left: 50%; top: 50%; transform-origin: center; white-space: pre; }
+.badge { position: relative; width: 640px; height: 640px; display: grid; place-items: center; }
+.logo { position: absolute; width: 220px; height: 220px; border-radius: 50%; background: linear-gradient(135deg,#a78bfa,#f472b6); display: grid; place-items: center; font-size: 110px; font-weight: 800; color: #09090b; }
+.mw-spinning-text { font-size: 62px; font-weight: 600; letter-spacing: 0.02em; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="6">
+<div class="center"><div class="badge"><div class="logo">M</div><div class="mw-spinning-text">học nhanh • làm đẹp • ra mắt sớm •</div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  var defaults = {"duration":10,"reverse":false,"radius":5,"hold":10};
+  var run = function (el, tl, at, o) {
+      if (!el.__mwRing) {
+        var text = el.textContent.normalize("NFC");
+        el.textContent = "";
+        var seg = new Intl.Segmenter("vi", { granularity: "grapheme" }), letters = [];
+        var it = seg.segment(text + " ")[Symbol.iterator](), r;
+        while (!(r = it.next()).done) letters.push(r.value.segment);
+        el.__mwRing = letters.map(function (ch, i) {
+          var s = document.createElement("span"); s.className = "mw-ch"; s.textContent = ch;
+          s.style.transform = "translate(-50%, -50%) rotate(" + (360 / letters.length) * i + "deg) translateY(" + (-o.radius) + "ch)";
+          el.appendChild(s); return s;
+        });
+      }
+      var turns = o.hold / o.duration * 360 * (o.reverse ? -1 : 1);
+      tl.fromTo(el, { rotation: 0 }, { rotation: turns, duration: o.hold, ease: "none", immediateRender: true }, at);
+      return at + o.hold;
+    };
+  MW.spinningText = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.spinningText(q(".mw-spinning-text"), tl, 0, { radius: 4.6, duration: 10, hold: 6 });
+          tl.set({}, {}, 6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

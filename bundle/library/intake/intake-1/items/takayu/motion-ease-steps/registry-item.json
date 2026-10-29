@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-steps",
+  "type": "hyperframes:component",
+  "title": "Steps / Posterize",
+  "description": "Giá trị nhảy theo từng nấc thay vì chạy mượt, kiểu stop-motion hay rớt khung.",
+  "tags": [
+    "ease",
+    "steps",
+    "stop-motion",
+    "easing",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-steps.html",
+      "target": "compositions/components/motion-ease-steps.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-ease-steps",
+    "author": "takayu",
+    "call": "MW.motionEaseSteps(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseSteps",
+    "options": {
+      "duration": "s (0.5)",
+      "ease": "the curve (steps)",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)",
+      "steps": "holds (6); the site's levels 0, 0.2 … 1, reaching 1 at 5/6 of the time"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=e-steps",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=e-steps (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio e-steps, written here): Target moves 0 → 100 % in 6 equal holds, 500 ms (steps(6)): a stop-motion or dropped-frame feel. Note: the site's demo levels are 0, 0.2 … 1 (reaching 1 at 5/6 of the time); GSAP steps(6) gives 0 … 5/6, then 1 at the end. Site demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: duration (0.5 s) · steps (6).",
+    "titleVi": "Steps (giật nấc, posterize)"
+  }
+}

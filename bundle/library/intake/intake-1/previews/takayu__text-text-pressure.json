@@ -1,0 +1,26 @@
+{
+  "uid": "in:takayu/text-text-pressure",
+  "hash": "10316891d9dc6126",
+  "at": "2026-10-17T11:31:26.795Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Roboto Flex"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-text-pressure.mp4",
+    "poster": "previews/takayu__text-text-pressure.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "332063786d85585138e9843ae688beb1fd9b6b56fe7c7dd08de9fde5658ee056",
+    "size": 32975,
+    "seconds": 29.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

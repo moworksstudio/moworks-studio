@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-shape-iris",
+  "type": "hyperframes:component",
+  "title": "Shaped Iris",
+  "description": "Cảnh mới hiện trong một hình có nghĩa (trái tim, ổ khoá, ngôi sao) phóng từ 0 tới phủ kín khung.",
+  "tags": [
+    "iris",
+    "shape",
+    "heart",
+    "clip-path",
+    "transitions",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "transition-shape-iris.html",
+      "target": "compositions/components/transition-shape-iris.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/transition-shape-iris",
+    "author": "takayu",
+    "call": "MW.transitionShapeIris(q(\".tk-b\"), tl, 1.1, { duration: 0.9 });",
+    "function": "MW.transitionShapeIris",
+    "options": {
+      "shape": "heart (default), star, diamond",
+      "size": "0-1 of the width at scale 1 (0.16)",
+      "duration": "s (0.7)",
+      "ease": "power2.in",
+      "from": "the outgoing scene"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tr-shapeiris",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tr-shapeiris (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tr-shapeiris, written here): Incoming scene clipped to a shape centred on the frame, scale 0 -> cover (until the shape clears every corner; ~7 x a heart 16 % of frame width) over 700 ms easeInCubic. Use a polygon clip (KI-03: clip-path path() fails in After Effects). HF showcase-radial ships a Diamond Iris. Params: shape (trái tim) · duration (0.7 s) · ease (power2.in).",
+    "titleVi": "Mở cảnh qua hình trái tim"
+  }
+}

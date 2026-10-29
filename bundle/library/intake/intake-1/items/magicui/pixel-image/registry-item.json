@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "pixel-image",
+  "type": "hyperframes:component",
+  "title": "Pixel Image",
+  "description": "A picture appears tile by tile in random order, then turns from grey to colour (6 x 4 tiles, 1 s fades, colour after 1.3 s).",
+  "tags": [
+    "image",
+    "reveal",
+    "tiles",
+    "pixel",
+    "grayscale",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "pixel-image.html",
+      "target": "compositions/components/pixel-image.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/pixel-image",
+    "author": "magicui",
+    "call": "MW.pixelImage(q(\".mw-pixel-image\"), tl, 0.4, { grid: \"8x8\" });",
+    "function": "MW.pixelImage",
+    "options": {
+      "src": "picture path",
+      "grid": "6x4 | 8x8 | 8x3 | 4x6 | 3x8",
+      "customGrid": "{ rows, cols } 1-16",
+      "grayscaleAnimation": "true",
+      "pixelFadeInDuration": "s (1)",
+      "maxAnimationDelay": "s (1.2)",
+      "colorRevealDelay": "s (1.3)",
+      "radius": "px (40)",
+      "seed": "1"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/pixel-image.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/pixel-image.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is the holder (position relative, sized); src is the film's picture. Docs say 8x8 and a 1500 ms colour delay: the code has 6x4 and 1300 ms (the code wins).",
+    "titleVi": "Ảnh hiện từng ô rồi lên màu"
+  }
+}

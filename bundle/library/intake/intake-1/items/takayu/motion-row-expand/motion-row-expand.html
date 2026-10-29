@@ -1,0 +1,74 @@
+<!--
+  Row Expand (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=list-expand (read 12/10/2026).
+  Mỗi dòng mở chiều cao từ một nét kẻ mảnh ở mép trên, hơi vượt rồi về, nội dung hiện sau.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionRowExpand(q(".re"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - items: 
+      - from: start height scale (0.08)
+      - duration: s (0.525)
+      - stagger: s (0.065)
+      - ease: (cubic-bezier(.34,1.56,.64,1): back.out)
+      - cols: 
+
+  Notes: Idea and numbers (TakayuStudio list-expand, written here): Four rows open downward from a 1.5 px line (origin top): height scale 0.08 → 1 with overshoot (back.out, CSS bezier .34,1.56,.64,1), each 525 ms, 65 ms apart (720 ms in all); the row box fades in over the first third of its move and its content (clipped) fades in over the second half. Params: from: chiều cao đầu (0.08) · stagger (65 ms) · each (0.525 s) · ease (back.out).
+-->
+
+<div class="st"><div class="re"><div class="rw"><i></i><b style="width:62%"></b></div><div class="rw"><i></i><b style="width:48%"></b></div><div class="rw"><i></i><b style="width:70%"></b></div><div class="rw"><i></i><b style="width:54%"></b></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"items":".rw","from":0.08,"duration":0.525,"stagger":0.065,"ease":"cubic-bezier(.34,1.56,.64,1)","cols":0};
+  var run = function (el,tl,at,o
+  ) {
+  var it = Array.prototype.slice.call(el.querySelectorAll(o.items)), n = it.length, cols = o.cols || n;
+  var e = MW.ez(o.ease); it.forEach(function (r) { gsap.set(r, { transformOrigin: "50% 0%" }); r.style.overflow = "hidden"; });
+  return MW.drive(tl, at, (n - 1) * o.stagger + o.duration, function (t) { it.forEach(function (r, i) { var u = Math.max(0, Math.min(1, (t - i * o.stagger) / o.duration)); gsap.set(r, { scaleY: o.from + (1 - o.from) * e(u) }); r.style.opacity = String(Math.min(1, u * 3)); Array.prototype.forEach.call(r.children, function (k) { k.style.opacity = String(Math.max(0, Math.min(1, (u - 0.5) / 0.5))); }); }); });
+  };
+  MW.motionRowExpand = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

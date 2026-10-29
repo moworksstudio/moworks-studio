@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/animated-subscribe-button",
+  "hash": "e2dd0bf787c74310",
+  "at": "2026-10-17T06:29:47.080Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__animated-subscribe-button.mp4",
+    "poster": "previews/magicui__animated-subscribe-button.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "cf01206ff598c343b6a9fb6a2780d8c4255997a03feff3d9a477fc58a97f13a5",
+    "size": 9923,
+    "seconds": 32.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/line-trim-window",
+  "hash": "8302e66458681554",
+  "at": "2026-10-17T08:57:29.562Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__line-trim-window.mp4",
+    "poster": "previews/takayu__line-trim-window.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3daf0113e6f58ef7abf8f83e2531b306a7627d663ddba8fbdc3d22dc29e455cb",
+    "size": 7251,
+    "seconds": 30.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

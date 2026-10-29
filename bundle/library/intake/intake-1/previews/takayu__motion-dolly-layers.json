@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-dolly-layers",
+  "hash": "20a096db0db3008d",
+  "at": "2026-10-17T08:02:07.018Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-dolly-layers.mp4",
+    "poster": "previews/takayu__motion-dolly-layers.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "2a833aa6c0e0aba2aaa1a398141794ce0b2d36f3cb766998883a3b65fc23815f",
+    "size": 22614,
+    "seconds": 35,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

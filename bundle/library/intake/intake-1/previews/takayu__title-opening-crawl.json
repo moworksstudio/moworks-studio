@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/title-opening-crawl",
+  "hash": "7ac0e8300b09e446",
+  "at": "2026-10-17T08:03:47.211Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__title-opening-crawl.mp4",
+    "poster": "previews/takayu__title-opening-crawl.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "acd64b93220c231e5c5a543ee66c146323a2dd71eefc2d273f0bb749ec294552",
+    "size": 75887,
+    "seconds": 32.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Striped Pattern - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-striped-pattern { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+.holder { position: absolute; inset: 0; color: rgba(250,250,250,.35); -webkit-mask-image: radial-gradient(700px circle at center, white, transparent); mask-image: radial-gradient(700px circle at center, white, transparent); }
+.tag { position: relative; z-index: 20; padding: 30px 60px; border-radius: 20px; background: #09090b; border: 2px solid #3f3f46; font-size: 64px; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="6">
+<div class="holder"><svg class="mw-striped-pattern" aria-hidden="true"></svg></div><div class="center"><div class="tag">Đang thi công</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"direction":"left","width":10,"height":10,"strokeWidth":0.5,"dasharray":"","color":"currentColor","drift":[0,0],"hold":10};
+  var run = function (el, tl, at, o) {
+      var id = "mw-stripe-" + (MW.__sp = (MW.__sp || 0) + 1), w = o.width, h = o.height, st = ' stroke="' + o.color + '" stroke-width="' + o.strokeWidth + '"' + (o.dasharray ? ' stroke-dasharray="' + o.dasharray + '"' : "");
+      var lines = o.direction === "left"
+        ? '<line x1="0" y1="' + h + '" x2="' + w + '" y2="0"' + st + '/><line x1="' + -w + '" y1="' + h + '" x2="0" y2="0"' + st + '/><line x1="' + w + '" y1="' + h + '" x2="' + w * 2 + '" y2="0"' + st + "/>"
+        : '<line x1="0" y1="0" x2="' + w + '" y2="' + h + '"' + st + '/><line x1="' + -w + '" y1="0" x2="0" y2="' + h + '"' + st + '/><line x1="' + w + '" y1="0" x2="' + w * 2 + '" y2="' + h + '"' + st + "/>";
+      el.innerHTML = '<defs><pattern id="' + id + '" width="' + w + '" height="' + h + '" patternUnits="userSpaceOnUse">' + lines + '</pattern></defs><rect width="100%" height="100%" fill="url(#' + id + ')"/>';
+      if (!o.drift[0] && !o.drift[1]) return at;
+      var pat = el.querySelector("pattern"), s = { t: 0 };
+      var set = function () { pat.setAttribute("x", o.drift[0] * s.t); pat.setAttribute("y", o.drift[1] * s.t); };
+      set();
+      tl.fromTo(s, { t: 0 }, { t: o.hold, duration: o.hold, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + o.hold;
+    };
+  MW.stripedPattern = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.stripedPattern(q(".mw-striped-pattern"), tl, 0, { width: 28, height: 28, strokeWidth: 2, drift: [14, 0], hold: 6 });
+          tl.set({}, {}, 6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

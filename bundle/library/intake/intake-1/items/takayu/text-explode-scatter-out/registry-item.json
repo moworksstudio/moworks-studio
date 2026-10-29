@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-explode-scatter-out",
+  "type": "hyperframes:component",
+  "title": "Explode Scatter Out",
+  "description": "Các ký tự nổ tung từ giữa ra, bay tứ tung, xoay tròn và mờ đi, kèm một vòng sóng nổ.",
+  "tags": [
+    "exit",
+    "letters",
+    "explode",
+    "random",
+    "text-exit",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-explode-scatter-out.html",
+      "target": "compositions/components/text-explode-scatter-out.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-explode-scatter-out",
+    "author": "takayu",
+    "call": "MW.textExplodeScatterOut(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textExplodeScatterOut",
+    "options": {
+      "spread": "[x, y] ± px ([600, 400])",
+      "rotate": "± degrees (180)",
+      "duration": "s (0.8, power3.out)",
+      "stagger": "s from the centre out (0.015)",
+      "cap": "s (0.15)",
+      "ring": "[from, to] px of the burst ring ([30, 450])",
+      "accent": "",
+      "outAt": "s (0.9)",
+      "backAt": "s (2.4)",
+      "seed": "(7)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-explode-scatter-out",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-explode-scatter-out (read 12/10/2026)",
+      "upstream": "the site credits Codrops (MIT); a faithful port of Codrops' effects is in the Codrops collection"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-explode-scatter-out, written here): Split chars; from the centre outward (stagger 10 ms; demo 15 ms capped 0.15 s), each char flies to a seeded random offset x ±300 px, y ±200 px (demo ×0.62 for its small stage), rotates ±180° and fades 1 → 0 (linear over the move), 0.8 s easeOutCubic (labelled power3.out), from 0.9 s. Demo adds an accent ring burst from the text centre: radius 6 → 90 px over 0.45 s outCubic, stroke 2 → 0.3 px. Loop: text fades back 2.4–2.9 s; loop 3 s. Params: spreadX / spreadY (±300 / ±200 px) · rotate (±180°) · duration (0.8 s) · stagger: từ giữa (0.01 s) · seed.",
+    "titleVi": "Ký tự nổ tung, bay tứ tung"
+  }
+}

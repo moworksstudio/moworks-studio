@@ -1,0 +1,71 @@
+<!--
+  Comic Text (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/comic-text.tsx.
+  A comic sound word: skewed yellow letters with red halftone dots, a thick black outline and a black + red hard shadow, popping in on a soft spring.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.comicText(q(".mw-comic-text"), tl, 0.5, { fontSize: 11 });
+
+  Options (defaults in brackets):
+      - fontSize: rem (5)
+      - font: family ('Baloo 2')
+      - dot: #EF4444
+      - fill: #FACC15
+
+  Notes: fontSize in rem as upstream (5). Upstream font: 'Bangers', 'Comic Sans MS', 'Impact' (no Vietnamese); pass a font that has Vietnamese letters.
+-->
+
+<div class="mw-comic-text">Bùm!</div>
+
+<style>
+.mw-comic-text { display: inline-block; text-align: center; font-weight: 900; text-transform: uppercase; line-height: 1.25; padding: 0.1em 0.15em;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  var defaults = {"fontSize":5,"font":"'Baloo 2', sans-serif","dot":"#EF4444","fill":"#FACC15"};
+  var run = function (el, tl, at, o) {
+      var fs = o.fontSize * 16;
+      el.style.fontSize = o.fontSize + "rem";
+      el.style.fontFamily = o.font;
+      el.style.webkitTextStroke = (o.fontSize * 0.35) + "px #000000";
+      el.style.filter = "drop-shadow(5px 5px 0px #000000) drop-shadow(3px 3px 0px " + o.dot + ")";
+      el.style.backgroundColor = o.fill;
+      el.style.backgroundImage = "radial-gradient(circle at 1px 1px, " + o.dot + " 1px, transparent 0)";
+      el.style.backgroundSize = "8px 8px";
+      var sp = MW.springDB(0.6, 0.3);
+      gsap.set(el, { skewX: -10, transformOrigin: "50% 50%" });
+      tl.fromTo(el, { opacity: 0, scale: 0.8, rotation: -2 }, { opacity: 1, scale: 1, rotation: 0, duration: sp.duration, ease: sp.ease, immediateRender: true }, at);
+      void fs;
+      return at + sp.duration;
+    };
+  MW.comicText = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Rainbow Button - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-rainbow-button { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 2px; white-space: nowrap; font-weight: 500;
+  --c1: oklch(66.2% 0.225 25.9); --c2: oklch(60.4% 0.26 302); --c3: oklch(69.6% 0.165 251); --c4: oklch(80.2% 0.134 225); --c5: oklch(90.7% 0.231 133);
+  border: 0.125rem solid transparent; background-size: 200%; background-clip: padding-box, border-box, border-box; background-origin: border-box; color: #fafafa; }
+.mw-rainbow-button > .mw-rb-glow { position: absolute; bottom: -20%; left: 50%; z-index: 0; height: 20%; width: 60%; transform: translateX(-50%); filter: blur(0.75rem);
+  background: linear-gradient(90deg, var(--c1), var(--c5), var(--c3), var(--c4), var(--c2)); background-size: 200%; }
+.mw-rainbow-button > .mw-rb-label { position: relative; z-index: 1; }
+.mw-rainbow-button { font-size: 52px; padding: 26px 64px; border-radius: 14px; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="6">
+<div class="center"><div class="col"><div class="h2">Phiên bản mới đã có</div><div class="mw-rainbow-button">Tải ứng dụng</div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"speed":2,"variant":"default","hold":6};
+  var run = function (el, tl, at, o) {
+      var fill = o.variant === "outline" ? "#ffffff" : "#121213", fade = o.variant === "outline" ? "linear-gradient(#ffffff 50%, rgba(18,18,19,0.6) 80%, rgba(18,18,19,0))" : "linear-gradient(#121213 50%, rgba(18,18,19,0.6) 80%, rgba(18,18,19,0))";
+      el.style.backgroundImage = "linear-gradient(" + fill + "," + fill + "), " + fade + ", linear-gradient(90deg, var(--c1), var(--c5), var(--c3), var(--c4), var(--c2))";
+      if (o.variant === "outline") el.style.color = "#121213";
+      var label = document.createElement("span"); label.className = "mw-rb-label"; while (el.firstChild) label.appendChild(el.firstChild);
+      var glow = document.createElement("span"); glow.className = "mw-rb-glow"; el.appendChild(glow); el.appendChild(label);
+      var s = { t: 0 }, set = function () { var p = ((s.t % o.speed) / o.speed) * 200 + "%"; el.style.backgroundPosition = p; glow.style.backgroundPosition = p; };
+      set();
+      tl.fromTo(s, { t: 0 }, { t: o.hold, duration: o.hold, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + o.hold;
+    };
+  MW.rainbowButton = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.rainbowButton(q(".mw-rainbow-button"), tl, 0, { hold: 6 });
+          tl.set({}, {}, 6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

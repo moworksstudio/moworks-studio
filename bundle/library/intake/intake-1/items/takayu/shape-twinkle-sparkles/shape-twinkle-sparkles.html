@@ -1,0 +1,71 @@
+<!--
+  Twinkle Sparkles (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=pt-twinkle (read 12/10/2026).
+  Các ngôi sao bốn cánh nhỏ lần lượt loé lên rồi tắt ở các chỗ khác nhau, không bao giờ cùng lúc.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.shapeTwinkleSparkles(q(".gm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - count: (12)
+      - period: s each sparkle repeats (1.5); it glows in the first 35 %
+      - duration: s (4.5)
+      - seed: spots and phases
+
+  Notes: Idea and numbers (TakayuStudio pt-twinkle, written here): 12 four-point sparkles at seeded spots; each repeats every 1.5 s with a seeded phase and glows only in the first 35 % of its cycle: size 4 -> 4 + 10 x seed -> 4 as sin(pi u) (recipe: 600 ms, scale 0 -> 1 -> 0, ease-in-out), turning slowly at 0.5 rad / s; 2 in 3 yellow, 1 in 3 accent. Never all at once. Params: count (12) · duration mỗi lần loé (0.6 s) · seed.
+-->
+
+<div class="gm"><div style="position:absolute;left:50%;top:50%;width:620px;height:620px;margin:-310px;border-radius:60px;background:url(assets/product.svg) center / cover"></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"count":12,"period":1.5,"duration":4.5,"seed":9};
+  var run = function (el, tl, at, o) {
+        var S = MW.stage320(el), c = S.ctx, r = MW.rand(o.seed), sp = [];
+        for (var i = 0; i < o.count; i++) sp.push({ x: 60 + 200 * r(), y: 30 + 140 * r(), ph: r(), big: r(), col: i % 3 === 2 ? "#a99bff" : "#ffd23d" });
+        var star = function (x, y, R, a) { c.beginPath(); for (var k = 0; k < 8; k++) { var rr = k % 2 ? R * 0.28 : R, aa = a + k * Math.PI / 4; c.lineTo(x + rr * Math.cos(aa), y + rr * Math.sin(aa)); } c.closePath(); c.fill(); };
+        return MW.drive(tl, at, o.duration, function (t) {
+          S.clear(); sp.forEach(function (s) { var u = ((t / o.period + s.ph) % 1) / 0.35; if (u > 1) return; c.fillStyle = s.col; c.globalAlpha = Math.sin(Math.PI * u); star(s.x, s.y, (4 + 10 * s.big) * Math.sin(Math.PI * u) / 2 + 1, 0.5 * t); }); c.globalAlpha = 1;
+        });
+      };
+  MW.shapeTwinkleSparkles = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

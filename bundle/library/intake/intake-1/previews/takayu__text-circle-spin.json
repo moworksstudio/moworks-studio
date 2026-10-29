@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-circle-spin",
+  "hash": "59d9078c506c4953",
+  "at": "2026-10-17T10:32:00.749Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__text-circle-spin.mp4",
+    "poster": "previews/takayu__text-circle-spin.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "eb1ae7f54e907f0c57e39053d21745d4c374457ed54c0deb5564bf77900fdee2",
+    "size": 68260,
+    "seconds": 31.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

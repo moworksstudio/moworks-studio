@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/scroll-based-velocity",
+  "hash": "5379af6d7db005ce",
+  "at": "2026-10-17T06:03:06.374Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__scroll-based-velocity.mp4",
+    "poster": "previews/magicui__scroll-based-velocity.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f95cda2bb10c0bdb903803aea3b9e40e28e16002e3e8370cd89ec00096a2c70a",
+    "size": 146979,
+    "seconds": 30.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

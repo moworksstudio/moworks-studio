@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-jump-squash",
+  "type": "hyperframes:component",
+  "title": "Jump",
+  "description": "Nhân vật nhún xuống lấy đà, vươn dài khi bật lên, rơi xuống rồi bẹp ra lúc tiếp đất và nảy về dáng cũ.",
+  "tags": [
+    "jump",
+    "squash",
+    "stretch",
+    "character",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-jump-squash.html",
+      "target": "compositions/components/motion-jump-squash.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-jump-squash",
+    "author": "takayu",
+    "call": "MW.motionJumpSquash(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionJumpSquash",
+    "options": {
+      "crouch": "scaleY (0.78, 0.2 s)",
+      "height": "units (80)",
+      "land": "scaleY on landing (0.65 → 1 in 0.18 s)",
+      "start": "s (0.3)",
+      "loop": "s (1.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=ch-jump",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=ch-jump (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio ch-jump, written here): Crouch 200 ms: scaleY 1 -> 0.78 (scaleX = 1/scaleY, bottom origin). Rise 300 ms easeOutQuad to the jump height (80 px demo) with an early stretch scaleY ~1.2, fall 300 ms easeInQuad, land: squash scaleY 0.65 -> 1 over 180 ms (recipe 'land 1.35 -> 1'). ~1 s total. Params: crouch (0.78) · height (80 px) · land (0.65 → 1, 0.18 s). Rise 0.3 s ease-out quad with an early stretch, fall 0.3 s ease-in quad.",
+    "titleVi": "Nhún, bật nhảy rồi tiếp đất"
+  }
+}

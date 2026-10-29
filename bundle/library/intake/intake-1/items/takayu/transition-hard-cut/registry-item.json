@@ -1,0 +1,53 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-hard-cut",
+  "type": "hyperframes:component",
+  "title": "Hard Cut",
+  "description": "Cảnh mới hiện trọn ngay khung đầu tiên sau điểm cắt, không có khung chuyển tiếp, cắt đúng phách nhạc.",
+  "tags": [
+    "cut",
+    "beat",
+    "edit",
+    "transitions",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "transition-hard-cut.html",
+      "target": "compositions/components/transition-hard-cut.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/transition-hard-cut",
+    "author": "takayu",
+    "call": "MW.transitionHardCut(q(\".tk-b\"), tl, 1.5, {});",
+    "function": "MW.transitionHardCut",
+    "options": {
+      "from": "the outgoing scene (the previous sibling)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tr-cut",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tr-cut (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tr-cut, written here): No interpolation: the outgoing scene shows until the cut frame and the incoming scene is 100 % complete on the next frame (nothing assembles late, or it reads as loading). Cut on a beat or a word; shift the composition's weight across the cut. Demo: scene A (dark card, circle + 'A') <-> scene B (accent, square + 'B'), cut halfway through each 1.5 s half. Params: cut: điểm cắt (phách / từ) · không có duration.",
+    "titleVi": "Cắt thẳng đúng phách"
+  }
+}

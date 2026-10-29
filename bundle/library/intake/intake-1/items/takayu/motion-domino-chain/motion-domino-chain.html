@@ -1,0 +1,54 @@
+<!--
+  Cause-and-effect Chain (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=cause (read 12/10/2026).
+  Chín quân domino đổ lần lượt, mỗi quân trễ 120 ms như quân trước làm đổ quân sau.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionDominoChain(q("#demo"), tl, 0.3, { standAt: 2.1 });
+
+  Options (defaults in brackets):
+      - items: the dominoes, in order
+      - angle: degrees (66)
+      - each: s per fall (0.25, power2.in)
+      - stagger: s (0.12)
+      - standAt: s after the start to stand back up (null)
+      - stand: s (0.3)
+
+  Notes: Idea and numbers (TakayuStudio cause, written here): Nine dominoes (8×50 px, 30 px apart, pivot at the base): each tips 0 → 66° in 250 ms power2.in, 120 ms after the previous, so each fall seems to cause the next (recipe: element n starts at n × 100 ms, 400 ms ease-out each; 2–6 frames apart, never all at once). Site: all stand back up over 300 ms. Params: angle (66°) · each (0.25 s) · stagger (0.12 s) · pivot (đáy).
+-->
+
+<div class="fl"></div><div class="dm" style="left:340px"></div><div class="dm" style="left:490px"></div><div class="dm" style="left:640px"></div><div class="dm" style="left:790px"></div><div class="dm" style="left:940px"></div><div class="dm" style="left:1090px"></div><div class="dm" style="left:1240px"></div><div class="dm" style="left:1390px"></div><div class="dm" style="left:1540px"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"items":".dm","angle":66,"each":0.25,"stagger":0.12,"standAt":null,"stand":0.3};
+  var run = function (el, tl, at, o) {
+        var ds = Array.prototype.slice.call(el.querySelectorAll(o.items)), pin = gsap.parseEase("power2.in"), io = gsap.parseEase("power2.inOut"); ds.forEach(function (d) { gsap.set(d, { transformOrigin: "100% 100%" }); });
+        var fall = (ds.length - 1) * o.stagger + o.each;
+        return MW.drive(tl, at, o.standAt == null ? fall : o.standAt + o.stand, function (t) {
+          var up = o.standAt != null && t > o.standAt ? io(Math.min(1, (t - o.standAt) / o.stand)) : 0;
+          ds.forEach(function (d, i) { gsap.set(d, { rotation: o.angle * pin(Math.max(0, Math.min(1, (t - i * o.stagger) / o.each))) * (1 - up) }); });
+        });
+      };
+  MW.motionDominoChain = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

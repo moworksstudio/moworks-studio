@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "cursor-magnetic-button",
+  "type": "hyperframes:block",
+  "title": "Magnetic Button",
+  "description": "Khi con trỏ vào vùng hút, cả nút nghiêng lệch về phía con trỏ (tối đa 12 px), chữ trong nút lệch thêm một nửa; ra khỏi vùng thì nút nảy về giữa bằng lò xo.",
+  "tags": [
+    "magnetic",
+    "cursor",
+    "spring",
+    "button",
+    "web-interaction",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "cursor-magnetic-button.html",
+      "target": "compositions/components/cursor-magnetic-button.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/cursor-magnetic-button",
+    "author": "takayu",
+    "call": "MW.cursorMagneticButton(q(\".gm\"), tl, 0, {});",
+    "function": "MW.cursorMagneticButton",
+    "options": {
+      "radius": "units of the pull zone (74)",
+      "pull": "share of the cursor's offset (0.18)",
+      "max": "units (12)",
+      "k": "spring stiffness (240)",
+      "c": "damping (22)",
+      "path": "[[s, x, y], ...] cursor keys in the 320 frame",
+      "label": "",
+      "accent": ""
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=magnetic-button",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=magnetic-button (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio magnetic-button, written here): Pill button 120x44 at centre, magnetic radius 74 px (dashed). Inside the radius, target offset = (cursor − centre) × 0.18, clamped to 12 px; outside it is 0. The button follows the target on a spring k240 c22 (mass 1; about 420 ms back). The label moves an extra half of the button offset (1.5× total). Cursor 3.6 s, power2.inOut per leg: (292,172) hold to 0.3, (214,74) 0.9, (186,124) 1.5, (126,78) 2.1, (36,44) 2.6, (70,184) 3.05, (292,172) 3.6. Params: radius (74 px) · pull (0.18) · max (12 px) · label (+0.5 × độ lệch nút) · spring (k240 c22) · path [[giây, x, y]]. The label moves an extra half of the button's offset; the spring is integrated from the start, so each frame is a function of time.",
+    "titleVi": "Nút bị con trỏ hút lệch"
+  }
+}

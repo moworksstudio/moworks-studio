@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/random-3d",
+  "hash": "861f7b0e9c544c82",
+  "at": "2026-10-17T06:39:54.207Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Archivo"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__random-3d.mp4",
+    "poster": "previews/codrops__random-3d.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "1ff15110a57b4ff5bda520869f3de0da7e2da752b58fb445e5d1d5cd83940863",
+    "size": 16886,
+    "seconds": 32.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

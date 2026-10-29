@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-drag-snap",
+  "hash": "cf4d689efaa54595",
+  "at": "2026-10-17T10:06:16.406Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-drag-snap.mp4",
+    "poster": "previews/takayu__motion-drag-snap.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f2657a9a4b7cb59795bc69df3d7f5da0be1b623db974438f92f17125495f99c0",
+    "size": 10924,
+    "seconds": 27,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

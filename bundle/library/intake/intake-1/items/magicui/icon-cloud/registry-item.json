@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "icon-cloud",
+  "type": "hyperframes:block",
+  "title": "Icon Cloud",
+  "description": "A sphere of icons or round pictures turning in 3D, nearer ones larger and brighter, and turning to bring one icon to the front on cue.",
+  "tags": [
+    "icons",
+    "sphere",
+    "3d",
+    "integrations",
+    "cloud",
+    "rotate",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "icon-cloud.html",
+      "target": "compositions/components/icon-cloud.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/icon-cloud",
+    "author": "magicui",
+    "call": "MW.iconCloud(q(\".mw-icon-cloud\"), tl, 0, { size: 900, focus: [[3.5, 7]] });",
+    "function": "MW.iconCloud",
+    "options": {
+      "size": "px (400)",
+      "pointer": "[0, 0]",
+      "focus": "[[t, index], ...] (none)",
+      "focusDuration": "s (1.2)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/icon-cloud.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/icon-cloud.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el holds the icons (any elements, about 40 px). pointer: [x, y] px in the 400 px canvas (default the corner (0, 0), upstream's idle pointer). focus: [[t, index], ...].",
+    "titleVi": "Quả cầu biểu tượng xoay 3D"
+  }
+}

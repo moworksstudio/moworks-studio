@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/line-stroke-draw",
+  "hash": "e96ee9948b5224e5",
+  "at": "2026-10-17T08:57:27.788Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__line-stroke-draw.mp4",
+    "poster": "previews/takayu__line-stroke-draw.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "d0d5eb032cf099a550943d51e346590610af325c1adec4f13b4d5995860ede4a",
+    "size": 7548,
+    "seconds": 31,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

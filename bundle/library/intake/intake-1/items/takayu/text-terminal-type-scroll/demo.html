@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Terminal Type &amp; Scroll - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.tt { position: absolute; left: 50%; top: 50%; width: 1500px; height: 600px; margin: -300px 0 0 -750px; border-radius: 30px; background: #0a0c12; border: 3px solid #2a3350; font-family: 'JetBrains Mono', monospace; overflow: hidden; }
+.tt-h { height: 70px; border-bottom: 2px solid #1d2232; display: flex; align-items: center; gap: 14px; padding: 0 30px; } .tt-h i { width: 22px; height: 22px; border-radius: 50%; background: #3a4466; }
+.tt-b { position: relative; margin: 30px 50px; height: 384px; font-size: 60px; overflow: hidden; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="5">
+<div class="tt"><div class="tt-h"><i></i><i></i><i></i></div><div class="tt-b"></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"lines":["$ moworks new 'Phim giới thiệu'","Tạo dự án trong thư mục projects/","+ Đã tạo kịch bản mẫu","$ moworks render --draft","Đang dựng 24 khung hình mỗi giây...","+ Xuất xong phim-gioi-thieu.mp4"],"cps":60,"rows":4,"start":0.3,"body":".tt-b","accent":"#a99bff","loop":5};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var cells = function (el, text) { el.textContent = ""; var word = null; return gr(text).map(function (g) { var s = document.createElement("span"); s.textContent = g; s.style.display = "inline-block"; s.style.whiteSpace = "pre";
+    if (g === " ") { word = null; el.appendChild(s); } else { if (!word) { word = document.createElement("span"); word.style.display = "inline-block"; word.style.whiteSpace = "nowrap"; el.appendChild(word); } word.appendChild(s); } return s; }); };
+  var body = el.querySelector(o.body), lh = parseFloat(getComputedStyle(body).fontSize) * 1.6, rows = [], t0 = o.start, out = gsap.parseEase("power2.out");
+  o.lines.forEach(function (l) { var d = document.createElement("div"); d.style.cssText = "position:absolute;left:0;right:0;height:" + lh + "px;line-height:" + lh + "px;white-space:pre;"; var cmd = l.charAt(0) === "$";
+    if (cmd) { var p = document.createElement("span"); p.textContent = "$ "; p.style.color = o.accent; d.appendChild(p); var tx = document.createElement("span"); d.appendChild(tx); rows.push({ d: d, cmd: true, text: gr(l.slice(2)), tx: tx, t: t0 }); t0 += (l.length - 2) / o.cps + 0.12; }
+    else { d.textContent = l.replace(/^\+ /, "OK "); if (/^\+ /.test(l)) d.style.color = "#3ddc84"; else d.style.color = "#8f9ab3"; rows.push({ d: d, cmd: false, t: t0 }); t0 += 0.17; }
+    body.appendChild(d); });
+  var cur = document.createElement("span"); cur.style.cssText = "display:inline-block;width:0.6em;height:1.2em;vertical-align:middle;background:#e8ebf3;margin-left:2px;";
+  return MW.drive(tl, at, o.loop, function (t) {
+    var shown = rows.filter(function (r) { return t >= r.t; }), n = shown.length, scroll = 0;
+    shown.forEach(function (r, i) { if (i >= o.rows) scroll += out(Math.min(1, (t - r.t) / 0.14)); });
+    var active = null;
+    rows.forEach(function (r, i) { var on = t >= r.t; r.d.style.visibility = on ? "visible" : "hidden"; r.d.style.top = ((i - scroll) * lh) + "px"; r.d.style.opacity = i - scroll < -0.5 ? "0" : "1";
+      if (r.cmd && on) { var k = Math.min(r.text.length, Math.floor((t - r.t) * o.cps) + 1); r.tx.textContent = r.text.slice(0, k).join(""); if (k < r.text.length) active = r; } });
+    var last = shown[n - 1]; var host = active || (last && last.cmd ? last : null);
+    if (host) { host.d.appendChild(cur); cur.style.visibility = active ? "visible" : (Math.floor(t) % 2 ? "hidden" : "visible"); } else cur.style.visibility = "hidden";
+  });
+  };
+  MW.textTerminalTypeScroll = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textTerminalTypeScroll(q(".tt"), tl, 0, {});
+          tl.set({}, {}, 5);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

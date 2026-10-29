@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-alternating-line-reveal",
+  "type": "hyperframes:component",
+  "title": "Alternating Line Reveal",
+  "description": "Dòng lẻ trồi lên từ dưới, dòng chẵn trượt xuống từ trên, mỗi dòng trong mặt nạ riêng; sau đó các ký tự lệch nhẹ chốt về dòng theo thứ tự ngẫu nhiên.",
+  "tags": [
+    "reveal",
+    "mask",
+    "lines",
+    "alternate",
+    "text-reveal",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-alternating-line-reveal.html",
+      "target": "compositions/components/text-alternating-line-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-alternating-line-reveal",
+    "author": "takayu",
+    "call": "MW.textAlternatingLineReveal(q(\".al\"), tl, 0, {});",
+    "function": "MW.textAlternatingLineReveal",
+    "options": {
+      "lines": "",
+      "start": "s (0.3)",
+      "stagger": "s between lines (0.125)",
+      "duration": "s (0.65)",
+      "ease": "(ease-in-out cubic)",
+      "jitter": "± em the letters start off (0.22)",
+      "settle": "s the letters settle over, in a seeded order (0.35)",
+      "seed": "(4)",
+      "outAt": "s (3.15)",
+      "loop": "s (3.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-alternating-line-direction",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-alternating-line-direction (read 12/10/2026)",
+      "upstream": "the site credits anime.js (MIT)"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-alternating-line-direction, written here): Lines each in a mask 1.32 em tall. Line j slides y ±100 % → 0 (1st, 3rd from below, 2nd from above), 0.65 s easeInOutCubic (recipe power2.inOut), 125 ms apart from 0.3 s. Chars start jittered y ±0.22 em (seeded; recipe ±25 %) and settle once all lines are in: random order 10 ms apart (demo spreads 0.35 s), 0.3 s easeOutCubic (recipe power3.out). Loop exit: fade 3.15–3.45 s; loop 3.6 s. Params: duration: mỗi dòng (0.65 s) · stagger: giữa các dòng (0.125 s) · jitter: độ lệch ký tự (25 %) · charStagger: ngẫu nhiên (0.01 s). Odd lines rise from below, even lines drop from above, each in its own mask; then the jittered letters settle (0.3 s ease-out cubic).",
+    "titleVi": "Dòng lên dòng xuống xen kẽ"
+  }
+}

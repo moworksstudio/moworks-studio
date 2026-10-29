@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-scroll-resolve-letters",
+  "hash": "17f500e78465e96e",
+  "at": "2026-10-17T09:23:40.972Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-scroll-resolve-letters.mp4",
+    "poster": "previews/takayu__text-scroll-resolve-letters.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "81e232f84e69c7b64908cf143dbcc9e29c84f46390ab8b815232e79ded6c25d5",
+    "size": 10679,
+    "seconds": 27.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

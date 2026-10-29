@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-ease-in-out-cubic",
+  "hash": "69311f5a0d1c7305",
+  "at": "2026-10-17T09:01:00.920Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-ease-in-out-cubic.mp4",
+    "poster": "previews/takayu__motion-ease-in-out-cubic.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3e1b897cc2c62e674a4c3be4554f181185743392c3dfe3c6b487f6ee1b57c5c6",
+    "size": 8983,
+    "seconds": 26.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

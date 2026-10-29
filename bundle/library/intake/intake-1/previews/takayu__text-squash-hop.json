@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-squash-hop",
+  "hash": "372ea89691c2c6b1",
+  "at": "2026-10-17T08:44:56.530Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-squash-hop.mp4",
+    "poster": "previews/takayu__text-squash-hop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c5f00eb0ef7742154c883f1795ae4bc5316b331c70d7cc221cc24b02e4415070",
+    "size": 17046,
+    "seconds": 24,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

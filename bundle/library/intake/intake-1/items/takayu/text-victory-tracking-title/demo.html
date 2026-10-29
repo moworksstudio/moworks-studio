@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Victory Title - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.vt { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; } .vt h1 { margin: 0; font-size: 210px; font-weight: 900; color: #a99bff; } .vt p { margin: 60px 0 0; font-size: 50px; color: #c9d2ea; opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3">
+<div class="gm vt"><div><h1>CHIẾN THẮNG</h1><p>Màn 3 · Thời gian 02:41</p></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":2.6,"rule":550,"color":"#8b7bff","sub":null,"outAt":2.45,"seed":12};
+  var run = function (el, tl, at, o) {
+        var ch = MW.split(el, "chars").chars, host = el.parentNode, rule = document.createElement("div"), sub = o.sub ? MW.el(o.sub) : null, r = MW.rand(o.seed), ex = gsap.parseEase("expo.out"), out = gsap.parseEase("power2.out"), pi = gsap.parseEase("power2.in"), sparks = [];
+        if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        rule.style.cssText = "position:absolute;left:50%;height:8px;width:" + 2 * o.rule + "px;margin-left:-" + o.rule + "px;background:" + o.color + ";border-radius:4px;transform:scaleX(0);"; host.appendChild(rule);
+        for (var i = 0; i < 16; i++) { var s = document.createElement("div"); s.style.cssText = "position:absolute;left:50%;width:40px;height:40px;margin:-20px;background:#ffd23d;clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);opacity:0;pointer-events:none;"; host.appendChild(s); sparks.push({ s: s, x: (r() * 2 - 1) * o.rule, rise: 200 + r() * 250, t0: 0.95 + r() * 0.25, life: 0.9 + r() * 0.4, sc: 0.5 + r() * 0.7 }); }
+        var mid = function (c) { return c.offsetLeft + c.offsetWidth / 2; }, cx = null;
+        return MW.drive(tl, at, o.outAt + 0.25, function (t) {
+          if (cx == null) { var L = ch[0].offsetLeft, R = ch[ch.length - 1].offsetLeft + ch[ch.length - 1].offsetWidth; cx = (L + R) / 2; }
+          var p = ex(Math.max(0, Math.min(1, (t - 0.25) / 0.7))), f = 1 - pi(Math.max(0, Math.min(1, (t - o.outAt) / 0.25)));
+          ch.forEach(function (c) { gsap.set(c, { x: (mid(c) - cx) * (o.from - 1) * (1 - p) }); }); el.style.opacity = String(Math.min(1, 1.6 * p) * f);
+          rule.style.top = (el.offsetTop + el.offsetHeight + 10) + "px"; gsap.set(rule, { scaleX: ex(Math.max(0, Math.min(1, (t - 0.85) / 0.4))) }); rule.style.opacity = String(f);
+          if (sub) sub.style.opacity = String(Math.max(0, Math.min(1, (t - 1.1) / 0.3)) * f);
+          sparks.forEach(function (q) { var u = (t - q.t0) / q.life; if (u < 0 || u > 1) { q.s.style.opacity = "0"; return; } var e = out(u); q.s.style.top = (el.offsetTop + el.offsetHeight + 10 - q.rise * e) + "px"; gsap.set(q.s, { x: q.x, scale: q.sc, rotation: 90 * e }); q.s.style.opacity = String((1 - u) * f); });
+        });
+      };
+  MW.textVictoryTrackingTitle = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textVictoryTrackingTitle(q(".vt h1"), tl, 0, { sub: ".vt p" });
+          tl.set({}, {}, 3);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

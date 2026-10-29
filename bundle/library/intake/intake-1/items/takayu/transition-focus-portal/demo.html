@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Focus Portal - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.ui-cursor { position: absolute; left: 0; top: 0; z-index: 20; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5)); }
+.grid { position: absolute; inset: 120px 200px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; } .grid div { border-radius: 30px; background: #1b2130; border: 3px solid #262c3a; }
+.portal { position: absolute; inset: 0; background: #241f45; display: grid; place-items: center; z-index: 5; } .portal .pc { width: 580px; height: 430px; border-radius: 40px; background: linear-gradient(160deg, #a693ff, #6a4cf0); display: grid; place-items: center; font-size: 64px; font-weight: 800; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.8">
+<div class="gm"><div class="grid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div><div class="portal"><div class="pc">Nội dung mới</div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"x":0.5,"y":0.5,"from":54,"to":390,"rim":6,"openAt":0.45,"closeAt":3,"content":null};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, rim = document.createElement("div"), card = o.content ? el.querySelector(o.content) : el.firstElementChild, q5 = gsap.parseEase("power4.out"), inn = gsap.parseEase("power2.in");
+        rim.style.cssText = "position:absolute;pointer-events:none;border-radius:50%;box-sizing:border-box;border:" + o.rim + "px solid #8b7bff;z-index:9;"; host.appendChild(rim);
+        return MW.drive(tl, at, o.closeAt + 0.6, function (t) {
+          var W = el.offsetWidth, Hh = el.offsetHeight, cx = o.x * W, cy = o.y * Hh;
+          var u = Math.max(0, Math.min(1, (t - o.openAt) / 0.7)), c = t > o.closeAt + 0.1 ? 1 - inn(Math.min(1, (t - o.closeAt - 0.1) / 0.45)) : 1, r = (o.from + (o.to - o.from) * q5(u)) * c;
+          el.style.clipPath = "circle(" + r + "px at " + cx + "px " + cy + "px)"; el.style.visibility = t >= o.openAt && r > 0.5 ? "visible" : "hidden";
+          rim.style.left = (cx - r) + "px"; rim.style.top = (cy - r) + "px"; rim.style.width = rim.style.height = 2 * r + "px"; rim.style.opacity = el.style.visibility === "visible" ? "1" : "0";
+          if (card) { var v = Math.max(0, Math.min(1, (t - o.openAt - 0.12) / 0.7)), cc = t > o.closeAt ? 1 - inn(Math.min(1, (t - o.closeAt) / 0.4)) : 1; gsap.set(card, { scale: (0.6 + 0.4 * q5(v)) * (0.6 + 0.4 * cc) }); card.style.opacity = String(q5(v) * cc); }
+        });
+      };
+  MW.transitionFocusPortal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.transitionFocusPortal(q(".portal"), tl, 0, { content: ".pc" });
+          tl.set({}, {}, 3.8);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

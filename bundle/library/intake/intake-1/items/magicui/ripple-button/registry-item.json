@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ripple-button",
+  "type": "hyperframes:component",
+  "title": "Ripple Button",
+  "description": "A circular ink ripple spreads from the press point inside a button and fades (0.6 s), for each tap of a scripted cursor or finger.",
+  "tags": [
+    "button",
+    "ripple",
+    "tap",
+    "press",
+    "click",
+    "material",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "ripple-button.html",
+      "target": "compositions/components/ripple-button.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/ripple-button",
+    "author": "magicui",
+    "call": "MW.rippleButton(q(\".mw-ripple-button\"), tl, 0.5, { rippleColor: \"#ADD8E6\", duration: 0.6, clicks: [[0, 120, 60], [1.2, 420, 80], [2.4, 260, 50]] });",
+    "function": "MW.rippleButton",
+    "options": {
+      "rippleColor": "#ffffff",
+      "duration": "s (0.6)",
+      "clicks": "[[0, x, y], ...]"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/ripple-button.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/ripple-button.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "clicks: [[t, x, y], ...] in s after `at` and px inside the button (default: its centre at 0 s).",
+    "titleVi": "Gợn mực tròn lan từ điểm bấm"
+  }
+}

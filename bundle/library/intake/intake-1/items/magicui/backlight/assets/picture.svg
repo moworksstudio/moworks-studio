@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000"><defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1e1b4b"/><stop offset=".45" stop-color="#9d174d"/><stop offset=".7" stop-color="#f97316"/><stop offset="1" stop-color="#fde68a"/></linearGradient>
+<radialGradient id="sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff7ed"/><stop offset=".6" stop-color="#fdba74"/><stop offset="1" stop-color="#fb923c" stop-opacity="0"/></radialGradient>
+<linearGradient id="lake" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7c2d12"/><stop offset="1" stop-color="#0f172a"/></linearGradient></defs>
+<rect width="1600" height="640" fill="url(#sky)"/><circle cx="1050" cy="520" r="230" fill="url(#sun)"/>
+<path d="M0 560 L180 430 L330 520 L520 360 L700 500 L860 410 L1040 540 L1240 380 L1420 500 L1600 420 L1600 660 L0 660Z" fill="#4c1d95" opacity=".85"/>
+<path d="M0 610 L220 520 L420 600 L640 500 L880 610 L1100 520 L1340 610 L1600 540 L1600 680 L0 680Z" fill="#2e1065"/>
+<rect y="660" width="1600" height="340" fill="url(#lake)"/>
+<g fill="#fdba74" opacity=".55"><rect x="930" y="690" width="240" height="6" rx="3"/><rect x="960" y="730" width="180" height="5" rx="2.5"/><rect x="990" y="770" width="120" height="4" rx="2"/><rect x="1010" y="810" width="80" height="3" rx="1.5"/></g></svg>

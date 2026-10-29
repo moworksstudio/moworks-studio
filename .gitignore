@@ -1,0 +1,36 @@
+node_modules/
+# the app's own runtime folder only (downloads, logs, state); bundle/runtime/ (offline fonts and libraries) ships
+/runtime/
+# a font lookup that failed, cached as a marker (it names the family the film asked for)
+bundle/runtime/fonts/**/*.missing
+test-output/
+*.log
+**/.hyperframes/
+__pycache__/
+ui/dist/
+# Impeccable's design memory, mocks and drafts: the design tool's own working files, local only
+.impeccable/
+.env
+*.bak
+*.old
+*~
+Thumbs.db
+# secrets and local tool settings never go to git
+.env.*
+**/secrets*.json
+*.pem
+*.key
+*.pfx
+.claude/
+desktop.ini
+# editors, OS and tool caches
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.tmp
+*.orig
+*.rej
+*.pyc
+.vite/
+coverage/

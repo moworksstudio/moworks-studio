@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-gravity-drop-out",
+  "hash": "422898a9b61462f7",
+  "at": "2026-10-17T11:31:56.189Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-gravity-drop-out.mp4",
+    "poster": "previews/takayu__text-gravity-drop-out.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ef1e5a1b43ee8096af7c992119184ed3345a82d1f6177d641d1e0246d977463e",
+    "size": 12778,
+    "seconds": 21.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

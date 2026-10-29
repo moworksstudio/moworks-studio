@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-nudge",
+  "hash": "f9ee25277b1664d1",
+  "at": "2026-10-17T07:36:02.979Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-nudge.mp4",
+    "poster": "previews/takayu__motion-nudge.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ba37ee2256593eae7938c37534a6fb04b0f74d41e0c74df198847172c06f586d",
+    "size": 7278,
+    "seconds": 46,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

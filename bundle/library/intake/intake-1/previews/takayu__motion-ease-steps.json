@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-ease-steps",
+  "hash": "1b3de21ed677433b",
+  "at": "2026-10-17T09:02:18.931Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-ease-steps.mp4",
+    "poster": "previews/takayu__motion-ease-steps.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "07a21a1def02fd809e3040152d24bb54ba74fe3cf98dd66f1d58383793dfccda",
+    "size": 8692,
+    "seconds": 26.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

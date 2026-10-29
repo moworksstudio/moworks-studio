@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-subtitle-cps-timing",
+  "type": "hyperframes:component",
+  "title": "Japanese Subtitle 4 cps",
+  "description": "Mỗi câu phụ đề hiện bằng nhát cắt và đứng đúng thời lượng tính theo số chữ (tiếng Nhật 4 chữ mỗi giây, tối thiểu 0.5 giây), có quãng nghỉ ngắn giữa các câu.",
+  "tags": [
+    "subtitle",
+    "timing",
+    "cut",
+    "reading-speed",
+    "text-japanese",
+    "crisp",
+    "japanese",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-subtitle-cps-timing.html",
+      "target": "compositions/components/text-subtitle-cps-timing.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-subtitle-cps-timing",
+    "author": "takayu",
+    "call": "MW.textSubtitleCpsTiming(q(\".cs\"), tl, 0, {});",
+    "function": "MW.textSubtitleCpsTiming",
+    "options": {
+      "cues": "subtitle lines (a newline breaks the line; two lines at most)",
+      "rate": "characters a second (17 for Vietnamese; 4 for Japanese)",
+      "min": "s (0.5)",
+      "gap": "s between cues (0.12: three frames at 24 fps)",
+      "start": "s (0.35)",
+      "sub": "the subtitle element",
+      "meta": "an optional readout of the timing",
+      "loop": "s (4.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-jp-subtitle-timing",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-jp-subtitle-timing (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-jp-subtitle-timing, written here): Cue time = max(0.5 s, chars ÷ 4) (half-width chars count 0.5); ≤ 13 chars per line, ≤ 2 lines; 0.12 s gap (3 frames at 24 fps) between cues; schedule scaled to fit if longer; '、' → space, final '。' dropped, inner '。' → full-width space. Text 15 px, white with a 3.5 px dark outline, centred at the bottom of the picture; cuts only. Demo: cues from 0.35 s. Loop 4.6 s. For Vietnamese use a Latin-script rate (≈ 17 chars/s). Params: tốc độ đọc (4 chữ/s; tiếng Việt ≈ 17 ký tự/s) · tối đa (13 chữ × 2 dòng) · tối thiểu (0.5 s) · nghỉ (3 khung). Cue length = max(0.5 s, characters ÷ rate), cut in and out; the plan is scaled to fit when longer.",
+    "titleVi": "Phụ đề tính thời lượng theo số chữ"
+  }
+}

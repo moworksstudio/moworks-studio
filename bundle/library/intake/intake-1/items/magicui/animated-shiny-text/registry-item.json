@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "animated-shiny-text",
+  "type": "hyperframes:component",
+  "title": "Animated Shiny Text",
+  "description": "Muted grey text with a narrow light glint (100 px) that sweeps across, waits, sweeps back, on an 8 s loop.",
+  "tags": [
+    "shimmer",
+    "shine",
+    "glint",
+    "text",
+    "loop",
+    "badge",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "animated-shiny-text.html",
+      "target": "compositions/components/animated-shiny-text.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/animated-shiny-text",
+    "author": "magicui",
+    "call": "MW.animatedShinyText(q(\".mw-animated-shiny-text\"), tl, 0, { shimmerWidth: 220, hold: 8 });",
+    "function": "MW.animatedShinyText",
+    "options": {
+      "shimmerWidth": "px (100)",
+      "period": "seconds per loop (8)",
+      "color": "text colour (rgba(163,163,163,.7))",
+      "shine": "band colour (rgba(255,255,255,.8))",
+      "hold": "seconds (8)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/animated-shiny-text.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/animated-shiny-text.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Registry keyframe shiny-text: 0%, 90%, 100% background-position calc(-100% - width) 0; 30%, 60% calc(100% + width) 0; 8 s infinite (CSS ease per segment). Text colour neutral-400/70 on dark, neutral-600/70 on light.",
+    "titleVi": "Ánh sáng lướt qua chữ xám, lặp"
+  }
+}

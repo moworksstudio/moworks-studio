@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-split-reveal",
+  "type": "hyperframes:component",
+  "title": "Split Reveal",
+  "description": "Hai tấm che phẳng gặp nhau ở giữa rồi trượt sang hai bên, để lộ chủ thể đứng yên phía sau.",
+  "tags": [
+    "reveal",
+    "split",
+    "doors",
+    "entrance-exit",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-split-reveal.html",
+      "target": "compositions/components/motion-split-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.7,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-split-reveal",
+    "author": "takayu",
+    "call": "MW.motionSplitReveal(q(\".sr\"), tl, 0.4, { closeAt: 1.7 });",
+    "function": "MW.motionSplitReveal",
+    "options": {
+      "duration": "s (0.72, power2.inOut)",
+      "close": "s (0.45)",
+      "closeAt": "s after the start to close again (null)",
+      "color": "panel colour"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=split-reveal",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=split-reveal (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio split-reveal, written here): Two flat panels, each half the frame wide, meet at the centre over still content and slide apart: left x 0 → −105 % of its width, right 0 → +105 %, 720 ms power2.inOut (easeInOutCubic), symmetric. A 1 px edge line and a 3×24 px grip bar (10 px in from the edge) ride each inner edge. Closing: the same move reversed in 450 ms. (Demo frame 180×120 px, radius 10 px.) Params: duration (0.72 s) · close: thời gian đóng (0.45 s) · edge: vạch mép + tay nắm (bật/tắt) · ease (power2.inOut).",
+    "titleVi": "Hai cánh cửa phẳng tách đôi"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-squash-hop",
+  "hash": "81eb17f4577595dd",
+  "at": "2026-10-17T10:13:58.581Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-squash-hop.mp4",
+    "poster": "previews/takayu__motion-squash-hop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "abe1b42b763390849b0d40a6ebaa8157f5dacf5333bdd75f39d1ddc8d1ee3c59",
+    "size": 14209,
+    "seconds": 17.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

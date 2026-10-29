@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-ease-expo-scale",
+  "hash": "2304274860060cbe",
+  "at": "2026-10-17T09:02:18.663Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-ease-expo-scale.mp4",
+    "poster": "previews/takayu__motion-ease-expo-scale.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f1a8077ab8ffd0e5e0fe9cd8da073445c75cd6927183cccdaf736fb5c1fa720b",
+    "size": 13165,
+    "seconds": 26.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

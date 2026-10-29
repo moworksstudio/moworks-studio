@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-word-swap-reflow",
+  "type": "hyperframes:component",
+  "title": "Layout-animated Word Swap",
+  "description": "Một từ trong câu đổi lần lượt sang từ khác, ô chứa nó co giãn theo bề rộng từ mới bằng lò xo nên các chữ xung quanh và khung câu dịch theo.",
+  "tags": [
+    "swap",
+    "word",
+    "spring",
+    "layout",
+    "text-layout-reflow",
+    "smooth",
+    "soft",
+    "layout-reflow",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-word-swap-reflow.html",
+      "target": "compositions/components/text-word-swap-reflow.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-word-swap-reflow",
+    "author": "takayu",
+    "call": "MW.textWordSwapReflow(q(\".ws\"), tl, 0, {});",
+    "function": "MW.textWordSwapReflow",
+    "options": {
+      "words": "the slot's words in order",
+      "swaps": "seconds of each swap ([0.4, 2.0, 3.6]); the slot's width follows on a spring k300 c30",
+      "pad": "px each side (24)",
+      "slot": "the slot element",
+      "loop": "s (5)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-layout-word-insert",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-layout-word-insert (read 12/10/2026)",
+      "upstream": "the site credits Aceternity UI: written from the idea only"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-layout-word-insert, written here): Sentence 30 px with one slot word (last word or [bracketed]): slot = word + 7 px pad each side, 1.5 px accent outline, radius 6, inside a card (radius 8). Swaps at 0.4 / 2.0 / 3.6 s (recipe every 2–3 s): slot width tracks the new word on a spring k 300, c 30 (ζ≈0.87); following text and card move with it. In the slot (clipped): old word exits up 0.7 × slot height with fade, 0.25 s power2.in; new enters from 0.7 × below with fade, 0.35 s expo.out. Loop 5 s. Params: lò xo (k 300, c 30) · nhịp đổi (1.6 s) · vào (0.35 s) · ra (0.25 s).",
+    "titleVi": "Đổi từ, câu co giãn theo bề rộng"
+  }
+}

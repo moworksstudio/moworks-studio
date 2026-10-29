@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Screen-edge Damage Pulse - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #233064, #0f1430); color: #e8ebf3; font-family: Inter, sans-serif; }
+.ed { position: absolute; inset: 0; } .hud { position: absolute; left: 110px; bottom: 110px; width: 700px; } .hpt { font-size: 56px; font-weight: 900; margin-bottom: 20px; letter-spacing: 0.04em; }
+.hpb { position: relative; height: 40px; border-radius: 20px; background: #1d2234; overflow: hidden; } .hpb div { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 20px; }
+.lag { background: rgba(255, 210, 61, 0.55); width: 56%; } .hpv { background: linear-gradient(90deg, #3ddc84, #2bb36a); width: 56%; }
+.ed .sun { position: absolute; left: 50%; top: 42%; width: 340px; height: 340px; margin: -170px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe08a, #ff8a3d); opacity: 0.85; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4">
+<div class="ed"><div class="sun"></div><div class="hud"><div class="hpt">MÁU 56</div><div class="hpb"><div class="lag"></div><div class="hpv"></div></div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"hitAt":0.5,"peak":0.85,"rise":0.08,"decay":0.55,"depth":264,"color":"#ff2d4a","readout":null,"bar":null,"lag":null,"fromHp":56,"toHp":24,"before":"MÁU 56","after":"MÁU 24","healAt":3.4};
+  var run = function (el, tl, at, o) {
+        var edges = [], out = gsap.parseEase("power2.out"), io = gsap.parseEase("power2.inOut"), hp = o.readout ? MW.el(o.readout) : null, bar = o.bar ? MW.el(o.bar) : null, lag = o.lag ? MW.el(o.lag) : null;
+        ["top", "bottom", "left", "right"].forEach(function (side) { var d = document.createElement("div"); d.style.cssText = "position:absolute;pointer-events:none;z-index:8;" + side + ":0;" + (side === "top" || side === "bottom" ? "left:0;right:0;" : "top:0;bottom:0;"); el.appendChild(d); edges.push([d, side]); });
+        return MW.drive(tl, at, o.healAt + 0.5, function (t) {
+          var d = t - o.hitAt, a = d < 0 ? 0 : d < o.rise ? out(d / o.rise) : Math.exp(-(d - o.rise) / o.decay), depth = (o.depth + 14 / 44 * o.depth * a);
+          edges.forEach(function (e) {
+            var dir = { top: "180deg", bottom: "0deg", left: "90deg", right: "270deg" }[e[1]];
+            e[0].style[e[1] === "top" || e[1] === "bottom" ? "height" : "width"] = depth + "px";
+            e[0].style.background = "linear-gradient(" + dir + ", " + o.color + ", rgba(255,40,60,0))"; e[0].style.opacity = String(o.peak * a);
+          });
+          if (hp) { var sh = d > 0 && d < 0.2 ? 9 * (1 - d / 0.2) : 0; gsap.set(hp, { x: sh * Math.sin(t * 190), y: sh * Math.cos(t * 170) }); hp.style.color = d > 0 && t < o.healAt ? o.color : ""; hp.firstChild.nodeValue = d > 0 && t < o.healAt + 0.25 ? o.after : o.before; }
+          var heal = t > o.healAt ? io(Math.min(1, (t - o.healAt) / 0.5)) : 0, lv = d > 0 ? o.toHp : o.fromHp;
+          if (bar) bar.style.width = (lv + (o.fromHp - lv) * heal) + "%";
+          if (lag) { var lg = d < 0.35 ? o.fromHp : d < 0.8 ? o.fromHp + (o.toHp - o.fromHp) * io((d - 0.35) / 0.45) : o.toHp; lag.style.width = (lg + (o.fromHp - lg) * heal) + "%"; }
+        });
+      };
+  MW.effectEdgeDamagePulse = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.effectEdgeDamagePulse(q(".ed"), tl, 0, { readout: ".hpt", bar: ".hpv", lag: ".lag" });
+          tl.set({}, {}, 4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

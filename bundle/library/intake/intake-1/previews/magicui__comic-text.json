@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/comic-text",
+  "hash": "596a19409b55b1da",
+  "at": "2026-10-17T05:56:11.181Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__comic-text.mp4",
+    "poster": "previews/magicui__comic-text.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "bf09d706f708750942ad4667b1568a1536c60a7c602dc9e4cb5ca094f3811c25",
+    "size": 17076,
+    "seconds": 28.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

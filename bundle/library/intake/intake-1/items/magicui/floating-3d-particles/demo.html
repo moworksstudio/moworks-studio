@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Floating 3D Particles - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-floating-3d-particles { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="8">
+<canvas class="mw-floating-3d-particles"></canvas><div class="center"><div class="col"><div class="h1">Không gian sâu</div><div class="p">Hạt trôi chậm, có chiều sâu</div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  var defaults = {"quantity":400,"color":"#8B5CF6","size":5,"opacity":0.3,"drift":0.8,"depth":0.5,"hold":10,"seed":1};
+  var run = function (el, tl, at, o) {
+      var rect = el.getBoundingClientRect(), w = Math.max(1, Math.round(rect.width)), h = Math.max(1, Math.round(rect.height)), dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+      el.width = Math.round(w * dpr); el.height = Math.round(h * dpr);
+      var ctx = el.getContext("2d", { alpha: true }); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var t = Math.max(0, Math.min(1, o.depth)), fov = 800 - t * 600, pd = 100 + t * 700, dr = t * Math.min(400, fov + pd - 1);
+      var hex = o.color.replace("#", ""), full = hex.length === 3 ? hex.split("").map(function (c) { return c + c; }).join("") : hex, n = parseInt(full, 16);
+      var rgb = /^[0-9a-f]{6}$/i.test(full) ? [(n >> 16) & 255, (n >> 8) & 255, n & 255] : [139, 92, 246];
+      var r = MW.rand(o.seed * 5309), P = [];
+      for (var i = 0; i < o.quantity; i++) {
+        var sv = o.size * 0.4;
+        P.push({ a0: r() * Math.PI * 2, r0: r() * Math.max(w, h) * 1.2, y0: (r() - 0.5) * h * 2, size: Math.max(0.5, o.size - sv + r() * sv * 2), w: 0.0015 + r() * 0.001,
+          op: Math.min(1, Math.max(0, o.opacity - 0.2 + r() * 0.4)), seed: o.seed * 9001 + i * 31, radii: [] });
+      }
+      // after frame n: y wrapped at -h back to h; the k-th wrap draws a new radius (seeded per particle)
+      var at2 = function (p, frames) {
+        var first = Math.floor((p.y0 + h) / o.drift) + 1, y, k = 0;
+        if (frames < first) y = p.y0 - o.drift * frames;
+        else { var m = Math.floor((2 * h) / o.drift) + 1, d = frames - first; k = Math.floor(d / m) + 1; y = h - o.drift * (d - (k - 1) * m); }
+        while (p.radii.length < k) p.radii.push(MW.rand(p.seed + p.radii.length * 7)() * Math.max(w, h) * 1.2);
+        return { y: y, radius: k ? p.radii[k - 1] : p.r0, angle: p.a0 + p.w * frames };
+      };
+      var s = { t: 0 }, draw = function () {
+        var frames = Math.round(s.t * 60), cx = w / 2, cy = h / 2, list = [];
+        ctx.clearRect(0, 0, w, h);
+        for (var i = 0; i < P.length; i++) {
+          var st = at2(P[i], frames), sc = fov / Math.max(1, fov + pd + Math.sin(st.angle) * dr);
+          list.push({ x: cx + Math.cos(st.angle) * st.radius * sc, y: cy + st.y * sc, s: sc, p: P[i] });
+        }
+        list.sort(function (a, b) { return a.s - b.s; });
+        for (var j = 0; j < list.length; j++) { var q = list[j], rr = Math.max(0, q.p.size * q.s); if (rr <= 0) continue; ctx.beginPath(); ctx.fillStyle = "rgba(" + rgb.join(",") + "," + q.p.op + ")"; ctx.arc(q.x, q.y, rr, 0, Math.PI * 2); ctx.fill(); }
+      };
+      draw();
+      tl.fromTo(s, { t: 0 }, { t: o.hold, duration: o.hold, ease: "none", onUpdate: draw, immediateRender: false }, at);
+      return at + o.hold;
+    };
+  MW.floating3dParticles = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.floating3dParticles(q(".mw-floating-3d-particles"), tl, 0, { quantity: 1000, color: "#c4b5fd", depth: 0.8, opacity: 0.55, size: 6, drift: 1.2, hold: 8 });
+          tl.set({}, {}, 8);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

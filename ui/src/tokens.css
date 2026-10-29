@@ -1,0 +1,170 @@
+/* Moworks Studio design tokens. Themes on <html data-theme>: "pelagra" is the one theme (Splicerack and Nocturne removed; a second theme comes later).
+   Components use these variables only. Sizes are rem and the root size follows the window, so a small screen gets a small UI.
+   Metrics (spacing, control heights, line boxes, type sizes) are shared by both themes: switching theme never moves a line. */
+@font-face { font-family: "Be Vietnam Pro"; src: url("./fonts/BeVietnamPro-Light.woff2") format("woff2"); font-weight: 300; font-display: block; }
+@font-face { font-family: "Be Vietnam Pro"; src: url("./fonts/BeVietnamPro-Regular.woff2") format("woff2"); font-weight: 400; font-display: block; }
+@font-face { font-family: "Be Vietnam Pro"; src: url("./fonts/BeVietnamPro-Medium.woff2") format("woff2"); font-weight: 500; font-display: block; }
+@font-face { font-family: "Be Vietnam Pro"; src: url("./fonts/BeVietnamPro-SemiBold.woff2") format("woff2"); font-weight: 600; font-display: block; }
+@font-face { font-family: "Be Vietnam Pro"; src: url("./fonts/BeVietnamPro-Bold.woff2") format("woff2"); font-weight: 700; font-display: block; }
+@font-face { font-family: "M PLUS 1 Code"; src: url("./fonts/MPLUS1Code-wght.woff2") format("woff2"); font-weight: 100 700; font-display: block; }
+@font-face { font-family: "Saira Condensed"; src: url("./fonts/SairaCondensed-Light.woff2") format("woff2"); font-weight: 300; font-display: block; }
+@font-face { font-family: "Saira Condensed"; src: url("./fonts/SairaCondensed-Regular.woff2") format("woff2"); font-weight: 400; font-display: block; }
+@font-face { font-family: "Agdasima"; src: url("./fonts/Agdasima-Regular.woff2") format("woff2"); font-weight: 400; font-display: block; }
+
+:root {
+  /* Root size: 15px on the 2560 px work area, about 13.6px at 1920, 12.4px at 1366; never under 12.5px; times the Text size setting. */
+  --ui-scale: 1;
+  font-size: calc(clamp(12.5px, min(9.5px + 0.215vw, 5.5px + 1.1vh), 15px) * var(--ui-scale));
+
+  /* ---- shared metrics (both themes) ---- */
+  --sp-1: 0.25rem; --sp-2: 0.5rem; --sp-3: 0.75rem; --sp-4: 1rem; --sp-5: 1.5rem; --sp-6: 2rem; --sp-7: 3rem;
+  --ctl-compact: 2rem; --ctl: 2.375rem; --ctl-lg: 2.75rem;
+  --topbar-h: 46px; --rail-w: max(14.5rem, 196px); --rail-w-collapsed: 64px;          /* the icon strip (whole, even pixels) */
+  --page-max: 150rem;                              /* grid pages use the whole 2560 px screen */
+
+  --fs-display: 2.75rem;  --lh-display: 3rem;      /* page titles */
+  --fs-title: 1.375rem;   --lh-title: 1.75rem;     /* section and dialog titles */
+  --fs-heading: 1.0625rem;                          /* panel heads, card titles */
+  --fs-body: 1rem;
+  --fs-control: max(0.875rem, 12px);                         /* inputs, menus, dense body */
+  --fs-meta: max(0.8125rem, 12px);                  /* secondary lines */
+  --fs-dense: max(0.75rem, 11px);                   /* chips, counts */
+  --fs-label: max(0.8125rem, 11px);                 /* caps labels: nav, buttons, tabs, table heads */
+  --fs-code: max(0.8125rem, 12px);
+  --lh-label: 1.125rem;                             /* one line box for caps labels in both themes */
+
+  /* ---- motion (Emil Kowalski's rules: custom curves, under 300 ms, transform and opacity) ---- */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --t-press: 120ms; --t-hover: 150ms; --t-pop: 180ms; --t-dialog: 220ms;
+
+  /* ---- The Desk (default): deep water, teal, mono caps labels, thin condensed titles ---- */
+  --app-bg: #06111A;
+  --app-bg-image: radial-gradient(90rem 50rem at 72% -10%, rgba(18, 52, 74, 0.55), transparent 70%);
+  --surface-1: #091A25;
+  --surface-2: #0D2231;
+  --surface-3: #132B3D;
+  --border: #1A3445;
+  --border-strong: #284B60;
+  --text-primary: #D6E3E9;
+  --text-secondary: #8DA4AE;
+  --text-muted: #78919D;
+  --accent: #39B2CB;            /* primary actions, current state */
+  --accent-hover: #5CC6DB;
+  --on-accent: #03121A;
+  --accent-soft: rgba(57, 178, 203, 0.13);
+  --accent-line: rgba(57, 178, 203, 0.45);
+  --tag-2: #B9AAFF;                         /* second tag colour (style), apart from the accent (format) and the status colours */
+  --accent-glow: rgba(57, 178, 203, 0.62);  /* light thrown by a primary action (stronger than at first) */
+  --btn-light: rgba(134, 216, 229, 0.32);   /* the pointer's light inside a button */
+  --sheen: rgba(255, 255, 255, 0.55);       /* the light that sweeps a primary button */
+  --accent-ink: #86D8E5;        /* accent as text on dark grounds */
+  --select: var(--state-done);  /* chosen = green, the app-wide state rule: red stopped, yellow working, green chosen / done */
+  --select-soft: var(--state-done-soft);
+  --select-ink: var(--state-done-ink);
+  --link: #86D8E5;
+  /* Status colours, the same in both themes:
+     green = running, ready, connected, installed; yellow = pending, downloading, in progress, waiting;
+     red = stopped, missing, not connected, error. Grey (--text-muted) stays for "not needed". At least 4.8:1 on every ground and surface. */
+  /* state colours, the same in both themes: yellow = in progress (working, waiting, queued), red = stop or
+     cancel (and failed), green = done (approved, exported). Orange is the brand accent only: never a state, never Play / Send / a status line.
+     Each has a tinted ground (-soft), a border (-line) and the ink to write on the full colour (-ink). */
+  --state-run: #FACC15;
+  --state-run-soft: rgba(250, 204, 21, 0.12);
+  --state-run-line: rgba(250, 204, 21, 0.45);
+  --state-run-ink: #1F1A00;
+  --state-stop: #FF5C5C;
+  --state-stop-soft: rgba(255, 92, 92, 0.13);
+  --state-stop-line: rgba(255, 92, 92, 0.5);
+  --state-stop-ink: #1F0606;
+  --state-done: #4ADE80;
+  --state-done-soft: rgba(74, 222, 128, 0.13);
+  --state-done-line: rgba(74, 222, 128, 0.45);
+  --state-done-ink: #04170B;
+  --status-ok: var(--state-done);               /* the older names, kept so nothing breaks */
+  --status-pending: var(--state-run);
+  --status-stop: var(--state-stop);
+  --status-ok-soft: var(--state-done-soft);
+  --status-pending-soft: var(--state-run-soft);
+  --status-stop-soft: var(--state-stop-soft);
+  --success: var(--status-ok);
+  --warning: var(--status-pending);
+  --danger: var(--status-stop);
+  --focus-ring: #86D8E5;
+  --scrim: rgba(2, 8, 13, 0.7);
+  /* named roles for the fixed values components had written by hand (DESIGN.md "Fixed roles") */
+  --media-bg: #000;                             /* the bed behind a picture or video (letterbox) */
+  --on-media: #fff;                             /* text and icons over a picture */
+  --media-paper: #fff;                          /* a white page a motion preview is drawn on */
+  --media-label: rgba(0, 0, 0, 0.62);           /* a label's ground over a picture: numbers, marks, notes */
+  --media-overlay: rgba(0, 0, 0, 0.74);         /* the overlay behind a lightbox or a full-window preview */
+  --shade: rgba(0, 0, 0, 0.6);                  /* drop and text shadows over pictures and lifted clips */
+  --well: rgba(0, 0, 0, 0.22);                  /* recessed grounds: inputs, code, read-only text, notes */
+  --input-bg: var(--well);
+  --fill-active: rgba(255, 255, 255, 0.07);     /* the chosen item's fill in navigation; a time range */
+  --hairline-light: rgba(255, 255, 255, 0.12);  /* a light outline on dark media */
+  --button-light: rgba(255, 255, 255, 0.25);    /* the top light inside a filled button */
+  --ink-on-tag: #101216;                        /* text on an author's coloured tag */
+  --ae-bg: #00005B; --ae-ink: #9999FF;          /* the After Effects app colours, for its icon */
+  --tl-clip-sel: #333;                          /* the chosen clip's ground in the timeline */
+  --tl-word-ink: oklch(0.92 0.05 170); --tl-music-line: oklch(0.37 0.12 300); --tl-music-ink: oklch(0.72 0.14 150);
+  --tl-wave: rgb(245, 237, 255); --tl-wave-voice: rgba(240, 255, 245, 0.85);
+  --r-xs: 0.1875rem;                            /* tiny marks (flags, ticks, number tags, focus corners); a segment's inset in its track */
+  --shadow-pop: 0 0.75rem 2rem rgba(0, 4, 8, 0.55);
+  --glow: 0 0 0 0.25rem rgba(57, 178, 203, 0.24), 0 0 0.875rem rgba(57, 178, 203, 0.75);
+  --grain: none;
+  --frame: none;
+  /* rounded, soft corners for every box and popup; same in both themes */
+  --r-sm: 0.375rem; --r-md: 0.625rem; --r-lg: 0.875rem; --r-xl: 1.125rem; --r-ctl: 0.625rem; --r-pill: 999px;
+  /* cards hold their media inset by --card-inset, so the outer corner is the media's corner plus the inset (concentric) */
+  --card-inset: 0.5rem; --r-media: 0.875rem; --r-card: calc(var(--r-media) + var(--card-inset));
+
+  --font-body: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
+  --font-label: "M PLUS 1 Code", "Cascadia Mono", Consolas, monospace;
+  --font-display: "Saira Condensed", "Arial Narrow", sans-serif;
+  --font-num: "Agdasima", "Saira Condensed", sans-serif;
+  --font-mono: "M PLUS 1 Code", "Cascadia Mono", Consolas, monospace;
+  /* Be Vietnam Pro 300 tracked +0.0076em has the advance width of 400 (measured over every string in vi.js) */
+  --body-weight: 300; --body-track: 0.0076em; --strong-weight: 500;
+  --label-weight: 500; --label-scale: 1; --label-track: 0.2em; --control-track: 0.1em;
+  --display-weight: 300; --display-scale: 1; --display-track: 0.03em;
+  --num-scale: 1.15; --num-track: 0.08em;
+  color-scheme: dark;
+}
+
+/* ---- Editor scope (the Editor in more neutral colours) ----
+   The Editor root carries data-zone="editor". Inside it only the surfaces, hairlines and the two grey texts become
+   neutral greys, the same in both themes; the theme's accent is kept for the primary action, the playhead, the selection and the current
+   stage only. Status colours and everything outside the Editor are untouched. --ed-well is the film's well (behind the player). */
+[data-zone="editor"] {
+  --surface-1: #141414;
+  --surface-2: #1B1B1B;
+  --surface-3: #242424;
+  --border: #2A2A2A;
+  --border-strong: #3A3A3A;
+  --text-secondary: #C4C4C4;
+  --text-muted: #8F8F8F;
+  --ed-well: #0A0A0A;
+  /* a layout nested inside a row (the expanded shot) sits on its own tinted ground with a lit edge, and the
+     the user's own chat message has a clear tinted box, so neither reads as part of what is around it. Tinted with the theme's accent. */
+  --ed-sub: color-mix(in srgb, var(--accent) 6%, #181818);
+  --ed-sub-line: color-mix(in srgb, var(--accent) 38%, #3A3A3A);
+  --ed-user: color-mix(in srgb, var(--accent) 12%, #1C1C1C);
+  --ed-user-line: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+/* ---- Glass: one translucent material for what floats above the page: dialogs, popovers, menus, toasts. A dark,
+   slightly saturated surface over a backdrop blur, a hairline light edge on top (light catching the material) and a soft deep shadow.
+   Bigger surfaces are thicker (more blur, more opaque); a layer that opens on top of glass is thicker still, so text never sits on two
+   translucent layers. Reduced transparency or more contrast: solid. */
+:root {
+  --glass-tint: 9, 26, 37;                     /* The Desk's surface-1 as r, g, b */
+  --glass-bg: rgba(var(--glass-tint), 0.72);
+  --glass-bg-thick: rgba(var(--glass-tint), 0.86);
+  --glass-blur: blur(20px) saturate(150%);
+  --glass-blur-thin: blur(14px) saturate(140%);
+  --glass-edge: rgba(255, 255, 255, 0.09);
+  --glass-hi: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --glass-shadow: 0 1.5rem 3.5rem -1.25rem rgba(0, 6, 12, 0.7), 0 0.25rem 0.75rem rgba(0, 6, 12, 0.35);
+  --glass-scrim: rgba(2, 10, 16, 0.5);
+}

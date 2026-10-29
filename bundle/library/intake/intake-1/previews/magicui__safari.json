@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/safari",
+  "hash": "35414e9176dd31cd",
+  "at": "2026-10-17T06:30:55.125Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/magicui__safari.mp4",
+    "poster": "previews/magicui__safari.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b8b3fe1304b80672fe36666aec1167b986561260a160c2f2ec34bc819c1a4df9",
+    "size": 17883,
+    "seconds": 31.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

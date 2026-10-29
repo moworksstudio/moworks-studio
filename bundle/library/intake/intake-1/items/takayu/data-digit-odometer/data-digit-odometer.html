@@ -1,0 +1,59 @@
+<!--
+  Monospace Data Shuffle (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=catalog-kinetic-type-mono-data-shuffle (read 12/10/2026).
+  Mỗi chữ số trong cửa sổ riêng cuộn tới chữ số mới, quay thêm một hoặc hai vòng, dừng lần lượt từ trái sang cách nhau 0.12 giây; dấu phân cách đứng yên.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.dataDigitOdometer(q(".od-n"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - from: start value as text (03,481)
+      - to: end value, same layout (12,907)
+      - start: s (0.4); digit k stops at 1.1 + 0.12 k s, spinning 1 or 2 extra turns
+      - loop: s (4.2): rolls on back to the start value from 2.7 s
+
+  Notes: Idea and numbers (TakayuStudio catalog-kinetic-type-mono-data-shuffle, written here): Tabular mono digits (38 px), each in a clip window 1 digit wide × 1.37 em tall, row pitch 1.16 em; separators fixed. Digit k rolls forward ((to − from) mod 10) + 10·spins rows, spins 1 / 2 alternating; all start 0.4 s, digit k ends 1.1 + 0.12·k s, easeOutCubic (power2.out). Example 03,481 → 12,907. At 2.7 s each digit keeps rolling forward ((from − to) mod 10) + 10 rows back to the start value, digit k ends 3.2 + 0.1·k s; loop 4.2 s. Params: from, to: số đầu / cuối (03,481 → 12,907) · duration: chữ số đầu (0.7 s) · stagger: độ lệch dừng (0.12 s) · spins: số vòng thêm (1 / 2 xen kẽ).
+-->
+
+<div class="gm od"><div><div class="od-n">03,481</div><p>lượt xem trong tuần</p></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":"03,481","to":"12,907","start":0.4,"loop":4.2};
+  var run = function (el, tl, at, o) {
+        var A = String(o.from), B = String(o.to), win = [], out = gsap.parseEase("power2.out"), k = 0;
+        el.textContent = ""; el.style.fontVariantNumeric = "tabular-nums"; el.style.display = "inline-flex";
+        for (var i = 0; i < B.length; i++) {
+          var a = A[i], b = B[i];
+          if (!/\d/.test(b)) { var s = document.createElement("span"); s.textContent = b; el.appendChild(s); continue; }
+          var w = document.createElement("span"); w.style.cssText = "display:inline-block;overflow:hidden;height:1.37em;position:relative;"; var strip = document.createElement("span"); strip.style.cssText = "display:block;line-height:1.16em;padding-top:0.105em;";
+          var ad = +a, bd = +b, spins = k % 2 ? 2 : 1, n1 = ((bd - ad + 10) % 10) + 10 * spins, n2 = ((ad - bd + 10) % 10) + 10;
+          for (var j = 0; j <= n1 + n2; j++) { var d = document.createElement("span"); d.style.display = "block"; d.textContent = String((ad + j) % 10); strip.appendChild(d); }
+          w.appendChild(strip); el.appendChild(w); win.push({ strip: strip, n1: n1, n2: n2, k: k }); k++;
+        }
+        return MW.drive(tl, at, o.loop, function (t) {
+          win.forEach(function (q) { var e1 = 1.1 + 0.12 * q.k, e2 = 3.2 + 0.1 * q.k, r = q.n1 * out(Math.max(0, Math.min(1, (t - o.start) / (e1 - o.start)))) + q.n2 * out(Math.max(0, Math.min(1, (t - 2.7) / (e2 - 2.7)))); gsap.set(q.strip, { y: -r * 1.16 + "em" }); });
+        });
+      };
+  MW.dataDigitOdometer = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

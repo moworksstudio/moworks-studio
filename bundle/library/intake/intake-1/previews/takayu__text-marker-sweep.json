@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-marker-sweep",
+  "hash": "413e89609a184cdc",
+  "at": "2026-10-17T09:12:59.917Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-marker-sweep.mp4",
+    "poster": "previews/takayu__text-marker-sweep.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3c018d3fab01e24a7517d8af110f634a9adbf8e7deb352e2304632595eaec0bf",
+    "size": 13506,
+    "seconds": 27.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

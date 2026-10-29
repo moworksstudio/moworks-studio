@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Mission Stamp Punch - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: #0b0d12; font-family: Inter, sans-serif; } .pg { position: absolute; left: 560px; top: 120px; width: 800px; height: 840px; border-radius: 30px; background: #f4f1ea; padding: 70px 80px; box-sizing: border-box; color: #2a2a35; }
+.pg h3 { margin: 0 0 40px; font-size: 54px; } .pg .it { display: flex; align-items: center; gap: 26px; font-size: 38px; margin: 26px 0; } .pg .it b { width: 44px; height: 44px; border-radius: 10px; border: 4px solid #8b7bff; display: grid; place-items: center; box-sizing: border-box; }
+.pg .it b::after { content: ""; width: 10px; height: 20px; border: solid #8b7bff; border-width: 0 5px 5px 0; transform: rotate(45deg); margin-top: -6px; }
+.stp { position: absolute; left: 50%; top: 58%; width: 480px; height: 190px; margin: -95px 0 0 -240px; border: 15px solid #8b7bff; border-radius: 22px; display: grid; place-items: center; color: #8b7bff; font-size: 66px; font-weight: 900; letter-spacing: 0.06em; opacity: 0; box-sizing: border-box; }
+.stp::after { content: ""; position: absolute; inset: 18px; border: 5px solid #8b7bff; border-radius: 10px; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4">
+<div class="pg"><h3>Nhiệm vụ hôm nay</h3><div class="it"><b></b>Viết kịch bản</div><div class="it"><b></b>Thu giọng đọc</div><div class="it"><b></b>Dựng phim</div><div class="stp">HOÀN THÀNH</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"at":0.6,"from":2.6,"drop":0.22,"tilt":-12.6,"color":"#8b7bff","page":null,"seed":4,"fadeAt":3.6};
+  var run = function (el, tl, at, o) {
+        var inq = gsap.parseEase("power1.in"), out = gsap.parseEase("power2.out"), page = o.page ? MW.el(o.page) : el.parentNode, r = MW.rand(o.seed), dots = [];
+        for (var i = 0; i < 7; i++) { var d = document.createElement("i"), a = r() * 2 * Math.PI, R = 230 + r() * 90, s = 5 + r() * 10; d.style.cssText = "position:absolute;left:50%;top:50%;border-radius:50%;pointer-events:none;background:" + o.color + ";width:" + s + "px;height:" + s + "px;opacity:0;"; el.appendChild(d); dots.push({ d: d, x: R * Math.cos(a), y: R * 0.6 * Math.sin(a) }); }
+        var hit = o.at + o.drop;
+        return MW.drive(tl, at, o.fadeAt + 0.3, function (t) {
+          var s = t < o.at ? o.from : t < hit ? o.from + (1 - o.from) * inq((t - o.at) / o.drop) : 1 - 0.06 * Math.exp(-18 * (t - hit)) * Math.cos(40 * (t - hit));
+          var f = t > o.fadeAt ? 1 - Math.min(1, (t - o.fadeAt) / 0.3) : 1;
+          gsap.set(el, { scale: s, rotation: o.tilt }); el.style.opacity = String(Math.min(1, Math.max(0, (t - o.at) / 0.1)) * f);
+          var lift = Math.max(0, s - 1); el.style.filter = t < hit ? "drop-shadow(" + (10 + lift * 50) + "px " + (20 + lift * 70) + "px 0 rgba(0,0,0,0.35))" : "";
+          var d = t - hit, sh = d > 0 && d < 0.14 ? 15 * (1 - d / 0.14) : 0; if (page) gsap.set(page, { x: sh * Math.sin(t * 190), y: sh * Math.cos(t * 170) });
+          dots.forEach(function (p) { var q = d > 0 ? out(Math.min(1, d / 0.12)) : 0; gsap.set(p.d, { x: p.x * q, y: p.y * q }); p.d.style.opacity = d > 0 ? "1" : "0"; });
+        });
+      };
+  MW.textStampPunch = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textStampPunch(q(".stp"), tl, 0, { page: ".pg" });
+          tl.set({}, {}, 4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

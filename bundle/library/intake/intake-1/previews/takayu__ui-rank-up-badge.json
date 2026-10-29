@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-rank-up-badge",
+  "hash": "675e5c907fe7762a",
+  "at": "2026-10-17T10:45:48.159Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-rank-up-badge.mp4",
+    "poster": "previews/takayu__ui-rank-up-badge.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "458186eacf8a7b181c48ced22d318b8806590a29d70442da807def89efb18bbe",
+    "size": 16951,
+    "seconds": 28.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

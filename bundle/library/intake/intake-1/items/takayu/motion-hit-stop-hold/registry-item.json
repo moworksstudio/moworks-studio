@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-hit-stop-hold",
+  "type": "hyperframes:component",
+  "title": "Hit-stop Frame",
+  "description": "Vật tấn công lao tới chạm mục tiêu, cả hai đứng sững một quãng ở đúng tư thế va chạm, rồi mục tiêu mới bị đẩy văng và xoay nhẹ.",
+  "tags": [
+    "hit-stop",
+    "impact",
+    "hold",
+    "timing",
+    "game-impact-fx",
+    "heavy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-hit-stop-hold.html",
+      "target": "compositions/components/motion-hit-stop-hold.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-hit-stop-hold",
+    "author": "takayu",
+    "call": "MW.motionHitStopHold(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionHitStopHold",
+    "options": {
+      "contactAt": "s to contact (1.16)",
+      "hold": "s both stand still (0.56; a real game holds 3-6 frames)",
+      "travel": "units the attacker travels (81 of 320)",
+      "push": "units the target is pushed (36)",
+      "rotate": "degrees it turns (15)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-impact-fx-hit-stop",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-impact-fx-hit-stop (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-impact-fx-hit-stop, written here): DOM study (4.0 s, linear keys): attacker x 0 → 81 px at 12-29 % (0.48-1.16 s); both hold still to 43 % (1.72 s) while 'CONTACT / HOLD' shows; then attacker 81 → 105 px and target 0 → 36 px + rotate 15° at 43-60 % (1.72-2.4 s), hold. The card shows atlas demo t-hitstop (2.4 s): ball 30 → 234 px linear in 1 s; at contact (1.0 s) time stops 120 ms under a 55 % dark overlay with 8 radial strokes (r 20 → 40), then rebounds at 140 px/s. Params: contactAt: lúc chạm (1.16 s) · hold: đứng sững (0.56 s; game thật 3-6 khung) · push: đẩy mục tiêu (36 px, 15°) · travel: quãng lao (81 px).",
+    "titleVi": "Khựng hình lúc va chạm"
+  }
+}

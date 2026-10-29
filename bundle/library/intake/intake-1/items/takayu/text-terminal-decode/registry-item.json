@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-terminal-decode",
+  "type": "hyperframes:component",
+  "title": "Terminal Decode",
+  "description": "Một từ chữ mono trong khung terminal: các ký tự nhiễu đổi 20 lần mỗi giây rồi chốt lần lượt từ trái sang, mỗi ký tự chốt nảy nhẹ 1.18 lần.",
+  "tags": [
+    "scramble",
+    "decode",
+    "mono",
+    "per-frame",
+    "text-typing-decoding",
+    "bouncy",
+    "typing-decoding",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-terminal-decode.html",
+      "target": "compositions/components/text-terminal-decode.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-terminal-decode",
+    "author": "takayu",
+    "call": "MW.textTerminalDecode(q(\".td-w\"), tl, 0, {});",
+    "function": "MW.textTerminalDecode",
+    "options": {
+      "text": "the word (mono)",
+      "glyphs": "noise characters",
+      "fps": "noise changes a second (20)",
+      "start": "s the first letter locks (0.8)",
+      "step": "s per letter (0.3)",
+      "backAt": "s it falls back to noise (3.7)",
+      "accent": "locked colour",
+      "mute": "noise colour",
+      "loop": "s (4.2)",
+      "seed": "noise"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-kinetic-type-terminal-decode",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-kinetic-type-terminal-decode (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-kinetic-type-terminal-decode, written here): Mono word (28 px, 30 px pitch) in a dark terminal card ('$ decode --msg'). From 0.5 s chars lock left → right, one per 300 ms (char i at 0.8 + 0.3·i s); unlocked chars cycle seeded noise from '#%&?*01<>/=_7Q' at 20 fps (muted, weight 500); a locked char turns accent, weight 700, pops 1.18 → 1 over 120 ms linear. Block caret under the next char, blinks 2 Hz once done. Loop: 3.7–3.95 s all chars fall back to noise (linear); loop 4.2 s. Params: glyphs: bộ ký tự nhiễu (#%&?*01<>/=_7Q) · step: mỗi ký tự chốt sau (0.3 s) · fps: tốc độ nhiễu (20) · pop: nảy khi chốt (1.18).",
+    "titleVi": "Giải mã chữ trong khung terminal"
+  }
+}

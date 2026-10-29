@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/words-fly",
+  "hash": "e3e033df4cd5b20b",
+  "at": "2026-10-17T06:40:56.048Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Archivo"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__words-fly.mp4",
+    "poster": "previews/codrops__words-fly.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "2ebffd2de0ce93833a932165966caf1ad2717d5b1d16ec02f009f75e54f7737e",
+    "size": 24454,
+    "seconds": 26.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

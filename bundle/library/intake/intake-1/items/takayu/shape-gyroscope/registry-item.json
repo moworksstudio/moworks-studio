@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "shape-gyroscope",
+  "type": "hyperframes:block",
+  "title": "Gyroscope Rotation",
+  "description": "Hai vòng tròn vuông góc quanh một lõi xoay một vòng quanh trục dọc trong khi nghiêng lên 55° rồi về.",
+  "tags": [
+    "3d",
+    "rings",
+    "loader",
+    "rotation",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "shape-gyroscope.html",
+      "target": "compositions/components/shape-gyroscope.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/shape-gyroscope",
+    "author": "takayu",
+    "call": "MW.shapeGyroscope(q(\".gm\"), tl, 0, {});",
+    "function": "MW.shapeGyroscope",
+    "options": {
+      "rings": "radii in the 320 frame ([58, 44])",
+      "strokes": "([4, 3])",
+      "tilt": "degrees at the middle (55)",
+      "perspective": "(360)",
+      "duration": "s per turn (1.1)",
+      "hold": "s between turns (0.6)",
+      "cycles": "(2)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=gyroscope",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=gyroscope (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio gyroscope, written here): Two rings (r 58 and 44 px, strokes 4 and 3 px; the inner one perpendicular to the outer) around a 10 px core: the assembly turns rotateY 0 → 360° (sine.inOut) while rotateX goes 0 → 55° → 0 (sine each half), 1100 ms, perspective 360 px; back halves at 30 % opacity behind the core; a marker dot on the outer ring (front half only). Params: duration (1.1 s) · rings (58 / 44 px) · tilt (55°) · perspective (360 px).",
+    "titleVi": "Con quay hồi chuyển 3D"
+  }
+}

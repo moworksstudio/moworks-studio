@@ -1,0 +1,26 @@
+{
+  "uid": "in:takayu/text-thin-to-bold-in",
+  "hash": "8dab678b23be66ab",
+  "at": "2026-10-17T11:30:56.985Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Roboto Flex"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-thin-to-bold-in.mp4",
+    "poster": "previews/takayu__text-thin-to-bold-in.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "39b39ef7ab0f29d4e695dfb55e342c4f567040b9d58de904392a125218db5c6a",
+    "size": 16117,
+    "seconds": 29.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

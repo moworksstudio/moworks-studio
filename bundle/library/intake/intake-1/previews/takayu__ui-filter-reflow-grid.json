@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-filter-reflow-grid",
+  "hash": "93b5daf2ab89e83f",
+  "at": "2026-10-17T08:17:25.097Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-filter-reflow-grid.mp4",
+    "poster": "previews/takayu__ui-filter-reflow-grid.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ad2b03c76d9ab67ba0badd4bf488097adb0c316ed096b0387530c9fa43b7dea7",
+    "size": 21516,
+    "seconds": 27.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

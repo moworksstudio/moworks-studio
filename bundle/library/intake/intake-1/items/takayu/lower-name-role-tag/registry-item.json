@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "lower-name-role-tag",
+  "type": "hyperframes:block",
+  "title": "Lower Third",
+  "description": "Vạch màu dọc mọc ra, dải tên tối quét vào từ trái, tag chức danh màu nhấn quét vào chậm hơn vài khung, chữ trượt nhẹ vào trong dải; giữ lâu rồi quét ra.",
+  "tags": [
+    "lower third",
+    "name",
+    "tag",
+    "wipe",
+    "text-broadcast-telop",
+    "crisp",
+    "smooth",
+    "broadcast-telop",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "lower-name-role-tag.html",
+      "target": "compositions/components/lower-name-role-tag.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/lower-name-role-tag",
+    "author": "takayu",
+    "call": "MW.lowerNameRoleTag(q(\".lt\"), tl, 0, {});",
+    "function": "MW.lowerNameRoleTag",
+    "options": {
+      "bar": "",
+      "name": "the name plate (its first child is the text)",
+      "role": "the role tag",
+      "start": "s (0.3)",
+      "outAt": "s the text starts to leave (4.3; hold 5–7 s in a film)",
+      "slide": "[name, role] px the text slides in ([72, 56])"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-lower-third",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-lower-third (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-lower-third, written here): Accent bar 4 × 50 px grows from its centre 0.3–0.55 s expo.out. Name plate (dark, 30 px, radius 2) wipes in from the left 0.35–0.75 s expo.out; role tag (accent, 16 px, 14 px indent) 0.52–0.92 s (≈5 frames later). Name (20 px) fades 0.45–0.7 s and slides −18 px → 0 (expo.out) inside its plate; role (11 px, light) fades 0.62–0.85 s, slides −14 → 0. Hold to 4.3 s (rule 5–7 s). Out: text fades 4.3–4.45 s, plates wipe off right 4.42–4.72 s, bar 4.5–4.75 s. Params: vào (0.3–0.9 s) · trễ chức danh (≈ 5 khung) · giữ (5–7 s) · ra (0.3 s). The role tag comes in about five frames after the name plate; plates wipe in from the left and off to the right (expo.out in, power2.in out).",
+    "titleVi": "Dải tên tối, tag chức danh màu"
+  }
+}

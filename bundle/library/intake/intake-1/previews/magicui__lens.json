@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/lens",
+  "hash": "e38057e353bae410",
+  "at": "2026-10-17T06:00:39.580Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/magicui__lens.mp4",
+    "poster": "previews/magicui__lens.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "614f205c0f42ef0967a0605a99ee7b428f83cff87eba9d85057ffb9190e5a9dd",
+    "size": 21391,
+    "seconds": 31.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

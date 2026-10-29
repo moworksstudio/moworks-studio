@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Bench film</title>
+<!-- Moworks Motion film, built by `kit.py build` from film.json (MotionSpec) on 2026-10-16 10:24. From here on this file is the
+     source: ask Claude, or edit it by hand in HyperFrames Studio (4. HF Studio (tuy chon).bat). Rebuilding from film.json backs this file up to
+     qa/backup/ first. -->
+<style>
+  @font-face { font-family: "RFlex"; font-weight: 100 1000; src: url("assets/fonts/RobotoFlex-var.woff2") format("woff2"); font-display: block; }
+  @font-face { font-family: "RMono"; font-weight: 100 700; src: url("assets/fonts/RobotoMono-var.woff2") format("woff2"); font-display: block; }
+  @font-face { font-family: "RMono"; font-style: italic; font-weight: 100 700; src: url("assets/fonts/RobotoMono-Italic-var.woff2") format("woff2"); font-display: block; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { overflow: hidden; }
+  #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; font-family: "RFlex", sans-serif; color: #111; font-kerning: normal; font-variant-ligatures: none; }
+  #bg { position: absolute; inset: 0; background: #ffffff; will-change: transform; }
+  .scene { position: absolute; inset: 0; overflow: hidden; }
+  .inner { position: absolute; inset: 0; overflow: hidden; }
+</style>
+<style data-aimk-preset="transition/directional-wipe">
+.dwp-fx { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.75), transparent); mix-blend-mode: screen; }
+.dwp-rgb { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: linear-gradient(90deg, rgba(239,68,68,0.35), transparent, rgba(34,211,238,0.35)); }
+.dwp-ring { position: absolute; inset: 0; pointer-events: none; }
+</style>
+<style data-aimk-preset="transition/iris-reveal">
+.irv-rim { position: absolute; box-sizing: border-box; border-radius: 50%; pointer-events: none; opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage" data-composition-id="root" data-width="1920" data-height="1080" data-duration="9.7" data-fps="60">
+  <div id="bg"></div>
+
+  <div id="s1" class="clip scene" data-start="0.0" data-duration="3.0" data-track-index="1" data-name="Title">
+    <div id="s1in" class="inner" style="background: rgb(255, 255, 255);">
+      <div data-aimk-mask="1" class="mask" style="position: absolute; left: 160px; top: 380px; overflow: hidden; padding-bottom: 22px; padding-top: 22px; margin-left: 0px; margin-top: -22px;"><div id="h1" style="font-size: 120px; font-weight: 760; color: rgb(17, 17, 17); white-space: nowrap; display: inline-block;">Ra mắt sản phẩm mới</div></div>
+      <div id="e1" style="position:absolute;left:160px;top:560px;font-size:14px;color:#111111;white-space:nowrap">Chữ nhỏ 14px: ả ạ ặ ẫ ể ọ ở ữ ỹ đ — kiểm tra viền màu</div>
+      <div id="e2" style="position:absolute;left:160px;top:600px;font-size:18px;color:#111111;white-space:nowrap">Chữ 18px: Tiếng Việt có dấu đầy đủ</div>
+      <div id="dot" style="position: absolute; left: 1500px; top: 380px; width: 200px; height: 200px; border-radius: 50%; background: rgb(255, 122, 26);"></div>
+    </div>
+  </div>
+
+  <div id="s2" class="clip scene" data-start="2.4" data-duration="3.0" data-track-index="2" data-name="Blue">
+    <div id="s2in" class="inner" style="background: rgb(29, 63, 216);">
+      <div id="h2" style="position:absolute;left:160px;top:420px;font-size:110px;font-weight:700;color:#ffffff;white-space:nowrap"><span id="h2_w0" style="display: inline-block;">Nhanh</span> <span id="h2_w1" style="display: inline-block;">hơn,</span> <span id="h2_w2" style="display: inline-block;">gọn</span> <span id="h2_w3" style="display: inline-block;">hơn</span></div>
+      <div id="e3" style="position:absolute;left:160px;top:600px;font-size:14px;color:#ffffff;white-space:nowrap">Chữ trắng 14px trên nền xanh: ơ ư ằ ẳ ẵ ậ</div>
+    </div>
+  </div>
+
+  <div id="s3" class="clip scene" data-start="4.8" data-duration="3.0" data-track-index="1" data-name="Grid">
+    <div id="s3in" class="inner" style="background: rgb(244, 241, 234); will-change: filter;">
+      <div id="b1" style="position: absolute; left: 200px; top: 300px; width: 400px; height: 400px; background: rgb(20, 22, 28);"></div>
+      <div id="b2" style="position: absolute; left: 760px; top: 300px; width: 400px; height: 400px; background: rgb(255, 122, 26);"></div>
+      <div id="b3" style="position: absolute; left: 1320px; top: 300px; width: 400px; height: 400px; background: rgb(29, 63, 216);"></div>
+      <div id="c1" style="position:absolute;left:200px;top:760px;font-size:24px;color:#14161c;white-space:nowrap">Ba điểm chính · 24px</div>
+    <div id="s3in_dwpring" class="dwp-ring" style="box-shadow: rgba(255, 255, 255, 0.28) 0px 0px 0px 5.05px inset;"></div></div>
+  <div id="s3_dwpfx" class="dwp-fx" style="transform: translateX(-2112px); translate: none; rotate: none; scale: none;"></div><div id="s3_dwprgb" class="dwp-rgb" style=""></div></div>
+
+  <div id="s4" class="clip scene" data-start="7.2" data-duration="2.5" data-track-index="2" data-name="End">
+    <div id="s4in" class="inner" style="background: rgb(20, 22, 28);">
+      <div data-aimk-mask="1" class="mask" style="position: absolute; left: 760px; top: 440px; overflow: hidden; padding-bottom: 25px; padding-top: 25px; margin-left: 0px; margin-top: -25px;"><div id="h4" style="font-size: 140px; font-weight: 800; color: rgb(245, 245, 242); white-space: nowrap; display: inline-block;">Cảm ơn</div></div>
+    </div>
+  <div id="s4_irvrim" class="irv-rim" style="border: 4.03px solid rgb(34, 197, 94);"></div></div>
+</div>
+<script src="assets/vendor/gsap.min.js"></script>
+<script>
+  document.querySelectorAll("#stage [style*='translate']").forEach(e => { if (!(e instanceof HTMLElement)) return; const m = (e.style.transform || "").trim().match(/^translate(X|Y)?\(\s*(-?[\d.]+)%\s*(?:,\s*(-?[\d.]+)%\s*)?\)(\s+(?:rotate|scale|skew)(?!.*(?:translate|matrix|perspective|3d\()).*)?$/); if (!m) return; const xp = m[1] === "Y" ? 0 : +m[2], yp = m[1] === "Y" ? +m[2] : m[1] === "X" ? 0 : +(m[3] || 0); (window.__aimkCenter = window.__aimkCenter || []).push(gsap.set(e, { xPercent: xp, yPercent: yp, x: 0, y: 0 })); });
+  const tl = gsap.timeline({ paused: true });
+  tl.fromTo("#h1", { yPercent: 135 }, { yPercent: 0, duration: 0.8, ease: "expo.out" }, 0.2);
+  tl.fromTo("#dot", { scale: 0, rotation: -12 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2.2)" }, 0.4);
+  tl.fromTo("#s1in", { x: 0 }, { x: -1920, duration: 0.6, ease: "power3.inOut" }, 2.4);
+  tl.fromTo("#s2in", { x: 1920 }, { x: 0, duration: 0.6, ease: "power3.inOut" }, 2.4);
+  tl.fromTo("#h2_w0", { opacity: 0, y: 8, filter: "blur(10px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.36, ease: "power3.out" }, 2.7);
+  tl.fromTo("#h2_w1", { opacity: 0, y: 8, filter: "blur(10px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.36, ease: "power3.out" }, 2.74);
+  tl.fromTo("#h2_w2", { opacity: 0, y: 8, filter: "blur(10px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.36, ease: "power3.out" }, 2.78);
+  tl.fromTo("#h2_w3", { opacity: 0, y: 8, filter: "blur(10px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.36, ease: "power3.out" }, 2.82);
+  tl.fromTo("#s3in", { clipPath: "inset(0% 100% 0% 0%)", x: 151.6, scale: 1.04 }, { clipPath: "inset(0% 0% 0% 0%)", x: 0, scale: 1, duration: 0.6, ease: "power3.inOut" }, 4.8);
+  tl.fromTo("#s2in", { x: 0, scale: 1, filter: "blur(0px)" }, { x: -58, scale: 1.0654, filter: "blur(12.6px)", duration: 0.6, ease: "power3.inOut", immediateRender: false }, 4.8);
+  tl.fromTo("#s3_dwpfx", { x: -2112 }, { x: 2112, duration: 0.3867, ease: "power2.inOut" }, 4.92);
+  tl.fromTo("#b1", { scale: 0, rotation: -12 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2.2)" }, 5);
+  tl.fromTo("#s3_dwprgb", { opacity: 0, x: -40 }, { opacity: 1, x: 40, duration: 0.0467, ease: "steps(1)", repeat: 3, yoyo: true }, 5.0133);
+  tl.fromTo("#b2", { scale: 0, rotation: 12 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2.2)" }, 5.08);
+  tl.fromTo("#b3", { scale: 0, rotation: -12 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2.2)" }, 5.16);
+  tl.fromTo("#s3in_dwpring", { opacity: 1 }, { opacity: 0, duration: 0.2333, ease: "power1.in" }, 5.1667);
+  tl.fromTo("#s3in", { filter: "grayscale(0) brightness(1)" }, { filter: "grayscale(1) brightness(0.76)", duration: 0.1324, ease: "power2.out" }, 7.2);
+  tl.fromTo("#s4in", { clipPath: "circle(0px at 960px 540px)" }, { clipPath: "circle(1125px at 960px 540px)", duration: 0.4552, ease: "power2.inOut" }, 7.3448);
+  tl.fromTo("#s4_irvrim", { left: 955.97, top: 535.97, width: 8.06, height: 8.06 }, { left: -167, top: -587, width: 2254.03, height: 2254.03, duration: 0.4552, ease: "power2.inOut" }, 7.3448);
+  tl.fromTo("#s4_irvrim", { opacity: 0 }, { opacity: 1, duration: 0.0745, ease: "power1.out", immediateRender: false }, 7.3448);
+  tl.fromTo("#h4", { yPercent: 135 }, { yPercent: 0, duration: 0.8, ease: "expo.out" }, 7.4);
+  tl.fromTo("#s4_irvrim", { opacity: 1 }, { opacity: 0, duration: 0.0993, ease: "power1.in", immediateRender: false }, 7.7007);
+  window.__timelines = window.__timelines || {};
+  window.__timelines["root"] = tl;
+</script>
+</body>
+</html>

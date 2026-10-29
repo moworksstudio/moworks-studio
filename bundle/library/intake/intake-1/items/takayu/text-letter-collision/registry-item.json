@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-letter-collision",
+  "type": "hyperframes:component",
+  "title": "Letter Collision Bounce",
+  "description": "Một chữ cái tăng tốc lao vào chữ đứng yên, cả hai bẹp giãn lúc chạm, chữ thứ nhất nảy lùi còn chữ thứ hai trượt đi như nhận trọn cú va.",
+  "tags": [
+    "impact",
+    "squash",
+    "physics",
+    "letters",
+    "text-glyph-physics",
+    "heavy",
+    "glyph-physics",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-letter-collision.html",
+      "target": "compositions/components/text-letter-collision.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.1,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-letter-collision",
+    "author": "takayu",
+    "call": "MW.textLetterCollision(q(\".lc\"), tl, 0, {});",
+    "function": "MW.textLetterCollision",
+    "options": {
+      "a": "the moving letter",
+      "b": "the letter it hits",
+      "run": "em A travels (1.8)",
+      "slide": "em B slides (1.9)",
+      "unit": "px per reference unit (5)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-kinetic-type-letter-collision",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-kinetic-type-letter-collision (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-kinetic-type-letter-collision, written here): Two letters on a floor (demo A and B, 48 px; A starts 2.6 em left of B). Hold 0.4 s; A accelerates 87 px (1.8 em) into B over 0.6 s power1.in. Contact at 1.0 s: for ±70 ms (triangle) A squashes scaleX 0.8 / scaleY 1.2 and B 1.12 / 0.88, origin at the baseline; A recoils 4 px × sin(πu) × e^(−6t) over 0.25 s; B slides +92 px (1.9 em) in 0.7 s power2.out; 5 short yellow impact lines fan out 0.25 s at the contact. Loop: fade 3.3–3.6 s, reset, fade in 3.8–4.1 s. Params: quãng lao (1.8 em) · thời gian lao (0.6 s) · quãng trượt (1.9 em) · độ bẹp (0.8 / 1.2).",
+    "titleVi": "Chữ va vào chữ, đẩy nhau đi"
+  }
+}

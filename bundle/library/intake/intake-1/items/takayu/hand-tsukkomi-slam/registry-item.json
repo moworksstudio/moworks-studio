@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "hand-tsukkomi-slam",
+  "type": "hyperframes:component",
+  "title": "Tsukkomi Slam Telop",
+  "description": "Câu chêm kiểu tsukkomi nghiêng −8° đập xuống từ cỡ to gấp rưỡi trong ba khung, cả khung hình rung mạnh tắt dần, các tia tập trung loé rồi mờ.",
+  "tags": [
+    "slam",
+    "shake",
+    "telop",
+    "speed-lines",
+    "text-broadcast-telop",
+    "crisp",
+    "bouncy",
+    "broadcast-telop",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "hand-tsukkomi-slam.html",
+      "target": "compositions/components/hand-tsukkomi-slam.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/hand-tsukkomi-slam",
+    "author": "takayu",
+    "call": "MW.handTsukkomiSlam(q(\".tk\"), tl, 0.35, {});",
+    "function": "MW.handTsukkomiSlam",
+    "options": {
+      "angle": "degrees (−8)",
+      "shake": "± px for 8 frames at 24 fps, fading (48); the text moves half as much",
+      "rays": "speed-line wedges (40)",
+      "inner": "[min, max] px of the inner ellipse ([360, 560])",
+      "outer": "px (1400)",
+      "bg": "the shot that shakes",
+      "offAt": "s after the start (1.9)",
+      "seed": "(9)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-telop-tsukkomi",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-telop-tsukkomi (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-telop-tsukkomi, written here): From 0.35 s: telop (44 px heavy, ink fill, accent outer stroke 0.32 em, dark (4, 4) px shadow) rotated −8°, scale 2.5 → 1 over 3 frames at 30 fps (0.1 s) power1.in. From impact the background shakes seeded ±12 px × (1 − k / 8) for 8 frames at 24 fps (the text moves half as much). 40 radial wedges (0.02–0.04 rad) from an inner ellipse 72–112 px (×0.7 vertically) to 230 px, re-jittered every 24 fps frame, 75 %, fading 0.1–0.5 s after impact. Off at 2.25 s. Loop 2.6 s. Params: tỉ lệ (250 % → 100 %, 3 khung) · góc (−8°) · rung (±12 px, 8 khung) · tia (40, mờ trong 0.4 s). Scale 2.5 → 1 in 3 frames (power1.in); the wedges re-jitter every 24 fps frame and fade 0.1–0.5 s after the hit.",
+    "titleVi": "Telop đập mạnh, rung khung, tia tập trung"
+  }
+}

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Inner Press - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { --ink: #e8ebf3; --acc: #8b7bff; --acc2: #3dd6f5; --warm: #ffb547; --rose: #ff5d8f; --mute: #6c778b; --tk-card: #151a24; --tk-line: #262c3a; background: #0b0d12; color: var(--ink); }
+.tk-stage { position: absolute; inset: 0; display: grid; place-items: center; }
+.tk-cap { font-size: 30px; font-weight: 500; color: var(--mute); letter-spacing: 0.01em; }
+.ui-wrap { position: absolute; inset: 0; display: grid; place-items: center; }
+.ui-card { position: relative; background: var(--tk-card); border: 2px solid var(--tk-line); border-radius: 36px; padding: 48px 56px; box-shadow: 0 40px 100px rgba(0, 0, 0, 0.35); }
+.ui-h { font-size: 46px; font-weight: 700; margin: 0 0 14px; } .ui-p { font-size: 30px; color: #9aa3b8; margin: 0; }
+.ui-btn { display: inline-grid; place-items: center; height: 104px; padding: 0 64px; border-radius: 30px; background: linear-gradient(180deg, #9c88ff, #7357f5); color: #fff; font-size: 40px; font-weight: 700; box-shadow: 0 18px 40px rgba(115, 87, 245, 0.35); }
+.ui-btn.ghost { background: transparent; border: 3px solid var(--tk-line); color: #c3cadb; box-shadow: none; }
+.ui-row { display: flex; align-items: center; gap: 28px; height: 110px; padding: 0 34px; border-radius: 24px; background: #1b2130; margin: 14px 0; font-size: 34px; color: #c9d2ea; }
+.ui-dot { width: 56px; height: 56px; border-radius: 16px; background: #2a3350; flex: none; }
+.ui-field { width: 760px; height: 112px; border-radius: 26px; border: 3px solid #36405a; background: #10141d; display: flex; align-items: center; padding: 0 36px; font-size: 36px; color: #c9d2ea; }
+.ui-pill { display: inline-grid; place-items: center; height: 96px; padding: 0 52px; border-radius: 48px; font-size: 34px; font-weight: 800; letter-spacing: 0.08em; }
+.ui-avatar { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #b8a9ff, #6a4cf0); display: grid; place-items: center; font-size: 84px; font-weight: 800; color: #fff; }
+.ui-avatar.grey { background: #2a3142; color: #6c778b; }
+.ui-icon { width: 200px; height: 200px; border-radius: 48px; display: grid; place-items: center; background: linear-gradient(160deg, #ffd27a, #ff9b3d); font-size: 110px; }
+.ui-cursor { position: absolute; left: 0; top: 0; z-index: 20; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5)); }
+.bw { position: relative; width: 1400px; height: 760px; display: grid; place-items: center; }
+.b { position: relative; display: inline-grid; place-items: center; box-sizing: border-box; height: 184px; padding: 0 110px; border-radius: 56px; font-size: 60px; font-weight: 800; letter-spacing: 0.02em; white-space: nowrap; }
+.b-acc { background: linear-gradient(180deg, #9c88ff, #7357f5); color: #fff; box-shadow: 0 24px 50px rgba(115, 87, 245, 0.35); } .b-out { background: #10131d; border: 6px solid #8b7bff; color: #c9c0ff; }
+.ck { display: inline-block; width: 0.3em; height: 0.55em; border: solid currentColor; border-width: 0 0.12em 0.12em 0; transform: rotate(45deg); margin: 0 0.45em 0.12em 0; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.6">
+<div class="ui-wrap"><div class="bw"><div class="b pi" style="background:#8b7bff;color:#fff">Ấn vào</div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  var defaults = {"press":0.7,"release":1.6,"down":0.12,"up":0.25,"inset":32,"y":4,"ease":"power2.out","shadow":"0 24px 50px rgba(115,87,245,0.35)","cursor":null,"approach":[260,200],"lead":0.12};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var cur = o.cursor ? (host.querySelector(o.cursor) || document.querySelector(o.cursor)) : null, curKeys = null;
+  var cursorPlan = function (clicks) { if (!cur) return; var base = (cur.offsetParent || host).getBoundingClientRect(), k = [];
+    clicks.forEach(function (c, i) { var r = (c[4] || el).getBoundingClientRect(), x = r.left - base.left + r.width * c[1], y = r.top - base.top + r.height * c[2];
+      if (!i) k.push([0, x + o.approach[0], y + o.approach[1]]); k.push([Math.max(0.01, c[0] - o.lead), x, y]); k.push([c[0] + (c[3] || 0.12) + 0.3, x, y]); });
+    var z = k[k.length - 1]; k.push([z[0] + 0.5, z[1] + o.approach[0] * 0.6, z[2] + o.approach[1] * 0.6]); curKeys = { k: k, c: clicks }; };
+  var cursorAt = function (t) { if (!cur || !curKeys) return; var p = MW.path(curKeys.k, t, "power2.inOut"), dn = 0; curKeys.c.forEach(function (c) { var u = t - c[0]; if (u >= 0 && u < (c[3] || 0.12)) dn = 1; });
+    gsap.set(cur, { x: p[0] - 12, y: p[1] - 6, scale: dn ? 0.86 : 1, transformOrigin: "20% 10%" }); };
+  var p2 = gsap.parseEase(o.ease); cursorPlan([[o.press, 0.5, 0.55, o.release - o.press]]);
+  return MW.drive(tl, at, o.release + o.up + 0.5, function (t) {
+    var k = 0; if (t > o.press && t <= o.release) k = p2(Math.min(1, (t - o.press) / o.down)); else if (t > o.release) k = 1 - p2(Math.min(1, (t - o.release) / o.up));
+    gsap.set(el, { y: o.y * k }); el.style.filter = k > 0.001 ? "brightness(" + (1 - 0.12 * k).toFixed(3) + ")" : "";
+    el.style.boxShadow = "inset 0 " + (o.inset * k).toFixed(1) + "px " + (o.inset * k * 1.2).toFixed(1) + "px rgba(0,0,0," + (0.45 * k).toFixed(3) + "), inset 0 4px 0 rgba(255,255,255," + (0.4 * (1 - k)).toFixed(3) + "), inset 0 -4px 0 rgba(255,255,255," + (0.3 * k).toFixed(3) + ")" + (o.shadow ? ", " + o.shadow : "");
+    cursorAt(t);
+  });
+  };
+  MW.uiPressInset = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.uiPressInset(q(".pi"), tl, 0, { cursor: ".ui-cursor" });
+          tl.set({}, {}, 2.6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

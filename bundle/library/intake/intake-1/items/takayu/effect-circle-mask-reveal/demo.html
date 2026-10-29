@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>SVG Mask Reveal - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .sv { position: absolute; inset: 0; display: grid; place-items: center; }
+.cm { position: relative; width: 1000px; height: 620px; border-radius: 40px; overflow: hidden; background: url(assets/shot.svg) center / cover; display: grid; place-items: end start; } .cm b { margin: 0 0 60px 70px; font-size: 120px; font-weight: 900; color: #fff; text-shadow: 0 6px 30px rgba(0,0,0,0.5); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.4">
+<div class="sv"><div class="cm"><b>Hoàng hôn</b></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"x":0.16,"y":0.58,"radius":950,"duration":0.98,"ease":"power2.out","guide":true,"exitAt":null};
+  var run = function (el, tl, at, o) {
+        var ease = gsap.parseEase(o.ease), pin = gsap.parseEase("power2.in"), ring = document.createElement("div"), host = el.parentNode;
+        if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        ring.style.cssText = "position:absolute;border-radius:50%;border:3px dashed rgba(233,235,243,0.35);pointer-events:none;"; host.appendChild(ring);
+        return MW.drive(tl, at, o.exitAt == null ? o.duration : o.exitAt + 0.35, function (t) {
+          var r = o.radius * ease(Math.max(0, Math.min(1, t / o.duration))); if (o.exitAt != null && t > o.exitAt) r = o.radius * (1 - pin(Math.min(1, (t - o.exitAt) / 0.35)));
+          var cx = o.x * el.offsetWidth, cy = o.y * el.offsetHeight; el.style.clipPath = "circle(" + r + "px at " + cx + "px " + cy + "px)";
+          var R = o.radius; ring.style.left = (el.offsetLeft + cx - R) + "px"; ring.style.top = (el.offsetTop + cy - R) + "px"; ring.style.width = ring.style.height = 2 * R + "px"; ring.style.opacity = o.guide ? "1" : "0";
+        });
+      };
+  MW.effectCircleMaskReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.effectCircleMaskReveal(q(".cm"), tl, 0.4, { duration: 1.6, ease: "power2.inOut", exitAt: 2.4 });
+          tl.set({}, {}, 3.4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

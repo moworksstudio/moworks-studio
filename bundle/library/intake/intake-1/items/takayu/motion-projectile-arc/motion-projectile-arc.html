@@ -1,0 +1,53 @@
+<!--
+  Projectile (Physics2D) (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=s-projectile (read 12/10/2026).
+  Vật bay theo đường parabol chỉ từ vận tốc đầu, góc ném và trọng lực.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionProjectileArc(q(".pa"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - items: 
+      - angles: degrees per item ([60, 67, 74, 81, 88])
+      - v: px/s (1045)
+      - g: px/s² (1650)
+      - xScale: (0.9)
+      - gap: s between launches (0.08)
+      - start: s (0.3)
+      - duration: s (2)
+
+  Notes: Idea and numbers (TakayuStudio s-projectile, written here): Projectile: x = v·cosθ·t, y = v·sinθ·t − ½·g·t² (recipe v 250 px/s, θ 80°, g 500 px/s²), a pure function of time. Site demo: five balls launched 80 ms apart at 60 / 67 / 74 / 81 / 88°, v 190, g 300 (x scaled 0.9), each hidden once it reaches the floor. For confetti and thrown objects. Params: velocity (250 px/s) · angle (80°) · gravity (500 px/s²). x = v cos θ t, y = v sin θ t − ½ g t²: a pure function of time; each item hides once it reaches the floor. For confetti and thrown objects.
+-->
+
+<div class="pa-f"></div><div class="pa"><i style="background:#75e4d2"></i><i style="background:#91a4ff"></i><i style="background:#ffd23d"></i><i style="background:#ff6f91"></i><i style="background:#a99bff"></i></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"items":"i","angles":[60,67,74,81,88],"v":1045,"g":1650,"xScale":0.9,"gap":0.08,"start":0.3,"duration":2};
+  var run = function (el, tl, at, o) {
+        var it = Array.prototype.slice.call(el.querySelectorAll(o.items));
+        return MW.drive(tl, at, o.duration, function (t) { it.forEach(function (b, i) { var d = t - o.start - i * o.gap, a = o.angles[i % o.angles.length] * Math.PI / 180, y = o.v * Math.sin(a) * d - 0.5 * o.g * d * d;
+          if (d <= 0) { gsap.set(b, { x: 0, y: 0 }); b.style.opacity = "1"; return; } gsap.set(b, { x: o.v * Math.cos(a) * d * o.xScale, y: -Math.max(0, y) }); b.style.opacity = y < 0 ? "0" : "1"; }); });
+      };
+  MW.motionProjectileArc = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

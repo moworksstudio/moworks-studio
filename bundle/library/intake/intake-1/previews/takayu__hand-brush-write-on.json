@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/hand-brush-write-on",
+  "hash": "8cf262ed2c85c892",
+  "at": "2026-10-17T10:42:03.139Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__hand-brush-write-on.mp4",
+    "poster": "previews/takayu__hand-brush-write-on.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "749a7d18b1d8a38eadf5900575fc89e3312d8dd98a037370ab5acf29d846cc6c",
+    "size": 7505,
+    "seconds": 30.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

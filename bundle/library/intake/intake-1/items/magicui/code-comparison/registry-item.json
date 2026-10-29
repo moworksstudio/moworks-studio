@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "code-comparison",
+  "type": "hyperframes:block",
+  "title": "Code Comparison",
+  "description": "Two code panes side by side, before and after, with a VS badge, highlighted and diff lines, and focus lines that stand out until revealed.",
+  "tags": [
+    "code",
+    "diff",
+    "before after",
+    "compare",
+    "developer",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "code-comparison.html",
+      "target": "compositions/components/code-comparison.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/code-comparison",
+    "author": "magicui",
+    "call": "MW.codeComparison(document.querySelector(\".mw-code-comparison\"), tl, 0.5, {});",
+    "function": "MW.codeComparison",
+    "options": {
+      "beforeCode": "text",
+      "afterCode": "text",
+      "filename": "name",
+      "highlightColor": "#ff3333",
+      "reveal": "s (none)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/code-comparison.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/code-comparison.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Lines ending in a comment // [!code ++], [!code --], [!code highlight] or [!code focus] get the mark (Shiki's notation, the comment removed). reveal: time the focus dimming lifts (upstream: on hover).",
+    "titleVi": "Hai khung code trước / sau"
+  }
+}

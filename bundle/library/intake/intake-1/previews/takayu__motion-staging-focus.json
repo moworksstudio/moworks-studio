@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-staging-focus",
+  "hash": "a23c3a485e5bea85",
+  "at": "2026-10-17T09:33:48.787Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-staging-focus.mp4",
+    "poster": "previews/takayu__motion-staging-focus.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "78414c7ab10ddedb704734d075eab94a8f80bdb9f6988a788cea58955ade655b",
+    "size": 9374,
+    "seconds": 30.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

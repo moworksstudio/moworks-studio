@@ -1,0 +1,22 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8" />
+<!-- brush-mini (audit 55 §9.4): the smallest Brush cartoon film the app must finalize (the kit and cast.js copied in, the bridge), check
+     and render: the template of config/rules/brush-cartoon-app §4 with one character of its own, Bao. -->
+<meta name="viewport" content="width=1920, height=1080" />
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<script src="assets/_app/vendor/lib/p5/2.3.3/lib/p5.min.js"></script>
+<script src="assets/_app/vendor/lib/p5.brush/2.2.3/dist/p5.brush.js"></script>
+<style>html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#F3EBDC}#root{position:relative;width:1920px;height:1080px;overflow:hidden}
+#out{position:absolute;inset:0;width:1920px;height:1080px;display:block}.p5Canvas{display:none!important}#scrub,#tt{display:none}</style></head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="2" data-width="1920" data-height="1080">
+  <canvas id="out" class="clip" width="1920" height="1080" data-start="0" data-duration="2" data-track-index="1"></canvas>
+</div>
+<input id="scrub" type="range" /><span id="tt"></span>
+<script>const PROJECT = { duration: 2, bpm: 120, offset: 0 };</script>
+<script src="compositions/kit/core.js"></script>
+<script src="compositions/kit/clawd-parts.js"></script>
+<script src="compositions/kit/timeline.js"></script>
+<script src="compositions/kit/character.js"></script>
+<script src="compositions/kit/cast.js"></script>
+<script src="compositions/film.js"></script>
+</body></html>

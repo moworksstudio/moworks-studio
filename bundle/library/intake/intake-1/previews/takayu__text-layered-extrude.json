@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-layered-extrude",
+  "hash": "db3b0ef1155595b8",
+  "at": "2026-10-17T08:58:29.086Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-layered-extrude.mp4",
+    "poster": "previews/takayu__text-layered-extrude.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "030bd6329f023c2904864b2ce3ddfd61626953aabb8eedb8d6b36b18ac38bd19",
+    "size": 31565,
+    "seconds": 20.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

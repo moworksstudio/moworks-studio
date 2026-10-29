@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "warp-background",
+  "type": "hyperframes:component",
+  "title": "Warp Background",
+  "description": "A card sits inside a 3D tunnel of grid walls while coloured light beams race along the walls toward the viewer: a light 'warp speed' frame.",
+  "tags": [
+    "warp",
+    "tunnel",
+    "3d",
+    "beams",
+    "grid",
+    "speed",
+    "background",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "warp-background.html",
+      "target": "compositions/components/warp-background.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 7,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/warp-background",
+    "author": "magicui",
+    "call": "MW.warpBackground(q(\".mw-warp-background\"), tl, 0, { gridColor: \"rgba(255,255,255,0.14)\", hold: 7 });",
+    "function": "MW.warpBackground",
+    "options": {
+      "perspective": "px (100)",
+      "beamsPerSide": "3",
+      "beamSize": "% (5)",
+      "beamDelayMax": "s (3)",
+      "beamDelayMin": "s (0)",
+      "beamDuration": "s (3)",
+      "gridColor": "rgba(255,255,255,0.12)",
+      "hold": "seconds (10)",
+      "seed": "1"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/warp-background.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/warp-background.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is the wrapper (its child is the content, upstream's children). Upstream re-rolls a beam's hue on every render (Math.random in render): here it is fixed per beam.",
+    "titleVi": "Đường hầm lưới có tia sáng lao tới"
+  }
+}

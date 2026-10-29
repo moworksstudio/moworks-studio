@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-letterbox-push",
+  "type": "hyperframes:component",
+  "title": "Letterbox Focus",
+  "description": "Hai dải đen trên dưới lớn dần thành khung điện ảnh trong khi cảnh phóng vào một điểm nhấn, cùng thời lượng và cùng đường cong; chú thích hiện ở dải dưới, rồi tất cả trở lại.",
+  "tags": [
+    "letterbox",
+    "push-in",
+    "cinematic",
+    "focus",
+    "game-cinematics",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-letterbox-push.html",
+      "target": "compositions/components/effect-letterbox-push.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.9,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-letterbox-push",
+    "author": "takayu",
+    "call": "MW.effectLetterboxPush(q(\".lp\"), tl, 0, { caption: \".lp-cap\" });",
+    "function": "MW.effectLetterboxPush",
+    "options": {
+      "bars": "each bar, share of the height (0.15)",
+      "scale": "push (1.14)",
+      "x": "focus, 0-1 (0.625)",
+      "y": "(0.54)",
+      "at": "s (0.3)",
+      "duration": "s (1.1), same curve for both",
+      "backAt": "s (2.3)",
+      "scene": "the picture",
+      "caption": "the caption on the bottom bar"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-cinematic-letterbox-focus",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-cinematic-letterbox-focus (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-cinematic-letterbox-focus, written here): Black bars grow from 0 to 15 % of the frame height each (top and bottom; 30 px @320x200, ~2.29:1 from 16:10) while the scene scales 1 → 1.14 around a focus point (62.5 %, 54 %), both 1.1 s inOut from 0.3 s on the same curve; the caption fades in 1.2-1.5 s on the bottom bar, out 2.2-2.35 s; bars and scale reverse over 400 ms inOut at 2.3 s. Params: bars: mỗi dải (15 % chiều cao) · scale: đẩy vào (1.14) · focus: điểm nhấn (62 %, 54 %) · duration: thời lượng (1.1 s) · caption: chú thích.",
+    "titleVi": "Dải đen điện ảnh kèm đẩy máy vào"
+  }
+}

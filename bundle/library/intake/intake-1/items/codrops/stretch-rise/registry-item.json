@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "stretch-rise",
+  "type": "hyperframes:component",
+  "title": "Stretch Rise",
+  "description": "Letters rise from below, stretched tall and thin, and snap to shape with a back ease. (Codrops fx2)",
+  "tags": [
+    "text",
+    "letters",
+    "entrance",
+    "codrops",
+    "on-scroll",
+    "per letter"
+  ],
+  "files": [
+    {
+      "path": "stretch-rise.html",
+      "target": "compositions/components/stretch-rise.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:codrops/stretch-rise",
+    "author": "codrops",
+    "call": "MW.stretchRise(document.querySelector(\".mw-stretch-rise\"), tl, 0.5, { duration: 1.6 });",
+    "function": "MW.stretchRise",
+    "options": {
+      "duration": "s the whole entrance takes (1.6)",
+      "seed": "for the random parts (1)",
+      "split": "chars"
+    },
+    "credit": {
+      "author": "Codrops",
+      "collection": "Codrops",
+      "link": "https://github.com/codrops/OnScrollTypographyAnimations/blob/af28d61d1f8d3d117f5d1e9b09d5209e20a1a212/src/js/index.js#L88-L116",
+      "commit": "af28d61d1f8d3d117f5d1e9b09d5209e20a1a212",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) 2009 - 2022 / 2024 Codrops (LICENSE)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "codrops/OnScrollTypographyAnimations at af28d61, src/js/index.js lines 88-116",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Codrops fx2: the source's GSAP values; the scroll range is now `duration`.",
+    "titleVi": "Chữ cái kéo giãn trồi lên"
+  }
+}

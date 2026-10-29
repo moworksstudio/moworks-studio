@@ -1,0 +1,53 @@
+<!--
+  Screen Shake on Hit (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=cam-shake (read 12/10/2026).
+  Khung rung mạnh ngay lúc va rồi tắt dần theo hàm mũ trong khoảng nửa giây.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionHitShake(q(".tk-cam"), tl, 0.5, {});
+
+  Options (defaults in brackets):
+      - amp: px at the hit (30; 10 on the site's frame)
+      - decay: per second, k = amp × e^(−decay·t) (9)
+      - duration: s (0.45)
+      - overscan: scale hiding the edges (1.04)
+
+  Notes: Idea and numbers (TakayuStudio cam-shake, written here): On a hit: x = sin(97 d) x k, y = cos(83 d) x k with k = 10 px x e^(-9 d), d = seconds since the hit (100 % -> ~26 % at 150 ms -> ~0 at 450 ms); scale 1.04 to hide the edges. Demo: one hit every 1.5 s, at 0.5 s. Params: amp (10 px) · decay (e^−9t) · duration (0.45 s). Call once per hit.
+-->
+
+<div class="tk-cam"><div class="tk-far" data-depth="0.2"><div class="sun"></div><div class="star" style="left:12%;top:14%"></div><div class="star" style="left:24%;top:30%"></div><div class="star" style="left:36%;top:10%"></div><div class="star" style="left:70%;top:18%"></div><div class="star" style="left:82%;top:34%"></div><div class="star" style="left:90%;top:12%"></div><div class="star" style="left:46%;top:22%"></div><div class="star" style="left:16%;top:40%"></div></div>
+<div class="tk-mid" data-depth="0.55"><svg viewBox="0 0 1000 300" preserveAspectRatio="none"><path d="M0 300 L0 170 Q120 90 240 150 T480 120 T720 160 T1000 110 L1000 300 Z" fill="#3b2f6b"/><path d="M0 300 L0 220 Q160 160 320 210 T640 190 T1000 200 L1000 300 Z" fill="#2a2150"/></svg></div>
+<div class="tk-near" data-depth="1"><div class="card">Toàn cảnh</div></div>
+<div class="tk-fore" data-depth="1.6"><div class="blob" style="left:6%;top:62%;width:380px;height:380px"></div><div class="blob" style="left:80%;top:8%;width:300px;height:300px"></div><div class="blob" style="left:86%;top:70%;width:420px;height:420px"></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"amp":30,"decay":9,"duration":0.45,"overscan":1.04};
+  var run = function (el, tl, at, o) {
+        return MW.drive(tl, at, o.duration, function (d) {
+          var k = d >= o.duration ? 0 : o.amp * Math.exp(-o.decay * d);
+          gsap.set(el, { x: Math.sin(97 * d) * k, y: Math.cos(83 * d) * k, scale: d >= o.duration ? 1 : o.overscan });
+        });
+      };
+  MW.motionHitShake = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

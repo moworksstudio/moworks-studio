@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-delta-compare",
+  "type": "hyperframes:block",
+  "title": "Comparison Delta Split",
+  "description": "Hai cột mọc trên cùng đường nền, phần chênh lệch ở đỉnh cột lớn đổi màu nhấn, có ngoặc đo và nhãn +24 bật ra.",
+  "tags": [
+    "chart",
+    "bars",
+    "compare",
+    "delta",
+    "data-storytelling",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "data-delta-compare.html",
+      "target": "compositions/components/data-delta-compare.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/data-delta-compare",
+    "author": "takayu",
+    "call": "MW.dataDeltaCompare(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataDeltaCompare",
+    "options": {
+      "a": "(40)",
+      "b": "(64)",
+      "labels": "bar labels"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-data-story-delta-split",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-data-story-delta-split (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-data-story-delta-split, written here): Two bars on one baseline at 2 px per unit: A 40 (80 px) grows 300-1100 ms, B 64 (128 px) 400-1200 ms, easeOutExpo, labels count with them. A dashed guide from A's top extends to B 1400-1800 easeOutCubic; B's top 48 px (the delta) turns accent 1700-2000; a bracket beside B grows 1800-2150 easeOutCubic; '+24' pops 2100-2450 back.out. Exit 3500-3850 ease-in. Params: values (40 / 64) · scale (2 px / đơn vị) · label (+24).",
+    "titleVi": "So sánh hai cột, nhấn phần chênh"
+  }
+}

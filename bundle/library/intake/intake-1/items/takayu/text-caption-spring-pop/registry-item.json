@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-caption-spring-pop",
+  "type": "hyperframes:block",
+  "title": "Caption Spring Pop",
+  "description": "Từng từ của câu phụ đề lần lượt bật lên bằng lò xo từ cỡ nhỏ, hơi vượt rồi về đúng cỡ, vừa bật vừa hiện.",
+  "tags": [
+    "captions",
+    "spring",
+    "pop",
+    "words",
+    "text-captions-subtitles",
+    "bouncy",
+    "captions-subtitles",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-caption-spring-pop.html",
+      "target": "compositions/components/text-caption-spring-pop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-caption-spring-pop",
+    "author": "takayu",
+    "call": "MW.textCaptionSpringPop(q(\".spw\"), tl, 0, {});",
+    "function": "MW.textCaptionSpringPop",
+    "options": {
+      "k": "spring stiffness (100)",
+      "c": "damping (10)",
+      "start": "s (0.3)",
+      "every": "s per word (0.167: 5 frames at 30 fps)",
+      "accent": "last word colour",
+      "outAt": "s (3.25)",
+      "caption": "the caption"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-caption-spring-pop",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-caption-spring-pop (read 12/10/2026)",
+      "upstream": "the site credits Remotion"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-caption-spring-pop, written here): Caption 34 px weight 800, ≤ 2 lines. Word k starts at 0.3 s + k × 5 frames at 30 fps (0.167 s): v = spring(k 100, c 10, m 1) (ζ = 0.5, overshoot ≈16 %); scale 0.6 + 0.4 v about the word's centre slightly below mid-height; opacity = clamp(v). Last word accent. Fade out 3.25–3.5 s. Loop 3.8 s. Params: lò xo (k 100, c 10, m 1) · cách nhau (5 khung ở 30 fps) · cỡ đầu (0.6).",
+    "titleVi": "Phụ đề từng từ bật lò xo"
+  }
+}

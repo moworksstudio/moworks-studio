@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-stagger-follow",
+  "type": "hyperframes:component",
+  "title": "Stagger Follow",
+  "description": "Bốn viên thuốc cùng trượt 165 px, mỗi lớp trễ 55 ms và nhạt dần, như một dòng chảy.",
+  "tags": [
+    "move",
+    "stagger",
+    "layers",
+    "movement",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-stagger-follow.html",
+      "target": "compositions/components/motion-stagger-follow.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-stagger-follow",
+    "author": "takayu",
+    "call": "MW.motionStaggerFollow(q(\".sfl\"), tl, 0.3, { backAt: 1.6 });",
+    "function": "MW.motionStaggerFollow",
+    "options": {
+      "items": "",
+      "x": "px (1140)",
+      "duration": "s each (0.9, power2.out)",
+      "stagger": "s (0.055)",
+      "backAt": "s after the start to return (null, 0.55 s power2.in)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=stagger-follow",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=stagger-follow (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio stagger-follow, written here): Four pills (50×18) in rows: x 0 → 165 px (demo 190) in 900 ms power2.out each, 55 ms apart; row opacities 1 / 0.72 / 0.5 / 0.32. Site return: same stagger, 550 ms power2.in back to the start. Params: duration (0.9 s) · x (165 px) · stagger (55 ms) · ease (power2.out).",
+    "titleVi": "Bốn lớp trôi theo nhau"
+  }
+}

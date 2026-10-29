@@ -1,0 +1,57 @@
+<!--
+  Particle Burst (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=particle-burst (read 12/10/2026).
+  Phần tử nảy lên quá cỡ rồi về đúng, tám chấm nhỏ bắn ra quanh nó theo hình elip, nhỏ dần và tan.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.shapeParticleBurst(q(".pb"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - duration: s (0.82, ease-out quart)
+      - radius: [x, y] px of the ellipse ([232, 184])
+      - count: (8)
+      - size: px (28)
+      - color: 
+
+  Notes: Idea and numbers (TakayuStudio particle-burst, written here): Core: scale 0.72 -> 1.12 (keyframes 1.14) at 42 % -> 1, opacity 0.5 -> 1, 820 ms easeOutQuart. 8 dots 7 px at 45 deg steps start 70 ms later at the core centre at scale 0.3; by 62 % they reach an ellipse 58 x 46 px (recipe radius 54) at full size, opacity 0.85; then drift on to 1.12 x that radius while shrinking to 0.2 and fading to 0. Dots in front of the core, accent colour. Params: duration (0.82 s) · radius (54 px) · count (8) · color.
+-->
+
+<div class="st"><div class="pb"><svg viewBox="0 0 24 24"><path d="M12 21 C5 15.5 2 12.3 2 8.6 C2 5.6 4.3 3.5 7 3.5 C9 3.5 10.9 4.6 12 6.4 C13.1 4.6 15 3.5 17 3.5 C19.7 3.5 22 5.6 22 8.6 C22 12.3 19 15.5 12 21 Z" fill="#ff5d8f"/></svg></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.82,"radius":[232,184],"count":8,"size":28,"color":"#8b7bff"};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, e = gsap.parseEase("power3.out"), dots = []; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        var cx = el.offsetLeft + el.offsetWidth / 2, cy = el.offsetTop + el.offsetHeight / 2;
+        for (var i = 0; i < o.count; i++) { var d = document.createElement("div"); d.style.cssText = "position:absolute;border-radius:50%;pointer-events:none;opacity:0;z-index:2;width:" + o.size + "px;height:" + o.size + "px;margin:-" + o.size / 2 + "px 0 0 -" + o.size / 2 + "px;background:" + o.color + ";"; host.appendChild(d); dots.push(d); }
+        var K = function (keys, u) { for (var i = 1; i < keys.length; i++) if (u <= keys[i][0]) { var a = keys[i - 1], b = keys[i]; return a[1] + (b[1] - a[1]) * (u - a[0]) / (b[0] - a[0]); } return keys[keys.length - 1][1]; };
+        return MW.drive(tl, at, o.duration, function (t) {
+          var u = e(Math.max(0, Math.min(1, t / o.duration))); gsap.set(el, { scale: K([[0, 0.72], [0.42, 1.12], [1, 1]], u) }); el.style.opacity = String(t > 0 ? 0.5 + 0.5 * Math.min(1, u / 0.42) : 0);
+          var v = e(Math.max(0, Math.min(1, (t - 0.07) / (o.duration - 0.07))));
+          dots.forEach(function (d, i) { var a = i / o.count * 2 * Math.PI, f = v < 0.62 ? v / 0.62 : 1 + 0.12 * (v - 0.62) / 0.38, s = v < 0.62 ? 0.3 + 0.7 * v / 0.62 : 1 - 0.8 * (v - 0.62) / 0.38, op = v <= 0 ? 0 : v < 0.62 ? 0.85 * v / 0.62 : 0.85 * (1 - (v - 0.62) / 0.38);
+            d.style.left = cx + o.radius[0] * f * Math.cos(a) + "px"; d.style.top = cy + o.radius[1] * f * Math.sin(a) + "px"; d.style.transform = "scale(" + s.toFixed(3) + ")"; d.style.opacity = String(Math.max(0, op)); });
+        });
+      };
+  MW.shapeParticleBurst = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "striped-pattern",
+  "type": "hyperframes:component",
+  "title": "Striped Pattern",
+  "description": "A background of thin diagonal hatch lines for placeholders, caution or editorial panels; static or sliding slowly.",
+  "tags": [
+    "stripes",
+    "hatch",
+    "diagonal",
+    "pattern",
+    "background",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "striped-pattern.html",
+      "target": "compositions/components/striped-pattern.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/striped-pattern",
+    "author": "magicui",
+    "call": "MW.stripedPattern(q(\".mw-striped-pattern\"), tl, 0, { width: 28, height: 28, strokeWidth: 2, drift: [14, 0], hold: 6 });",
+    "function": "MW.stripedPattern",
+    "options": {
+      "direction": "left | right (left)",
+      "width": "10",
+      "height": "10",
+      "strokeWidth": "0.5",
+      "dasharray": "none",
+      "color": "currentColor",
+      "drift": "[x, y] px/s ([0, 0])",
+      "hold": "seconds (10)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/striped-pattern.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/striped-pattern.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Static upstream; drift is this port's option. The docs say 40 px and an offset: the code has 10 px and none (the code wins).",
+    "titleVi": "Nền sọc chéo mảnh"
+  }
+}

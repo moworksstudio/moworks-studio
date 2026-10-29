@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-tumble-in",
+  "hash": "21ba3d7380872f61",
+  "at": "2026-10-17T09:33:18.115Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-tumble-in.mp4",
+    "poster": "previews/takayu__motion-tumble-in.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3176ea4e7b6d4684eaf0425dd2427d84b145674921a4dbfdf108d23aab1773ab",
+    "size": 9166,
+    "seconds": 29.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

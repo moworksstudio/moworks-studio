@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/transition-parallax-push",
+  "hash": "b8ce4dabf71e2cd6",
+  "at": "2026-10-17T09:50:26.242Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__transition-parallax-push.mp4",
+    "poster": "previews/takayu__transition-parallax-push.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "52235e71d1da227abdf2b75a11269303dc5014e61a10ce75a16bfe1a08e0c08f",
+    "size": 13441,
+    "seconds": 28.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

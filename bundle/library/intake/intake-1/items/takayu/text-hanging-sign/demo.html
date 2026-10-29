@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Hanging Sign Sway - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.hs-pin { position: absolute; left: 50%; top: 210px; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%; background: #c9d2ea; z-index: 2; } .hs { position: absolute; left: 50%; top: 546px; transform: translate(-50%, -50%); padding: 44px 60px; border-radius: 24px; border: 8px solid #8b7bff; background: #151a24; font-size: 120px; font-weight: 900; white-space: nowrap; }
+.hs svg { position: absolute; left: 0; bottom: 100%; width: 100%; height: 252px; overflow: visible; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4.8">
+<div class="hs-pin"></div><div class="hs"><svg viewBox="0 0 100 252" preserveAspectRatio="none"><path d="M50 32 L14 252 M50 32 L86 252" stroke="#6c778b" stroke-width="4" fill="none" vector-effect="non-scaling-stroke"/></svg>TIỆM CÀ PHÊ</div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"angle":4,"half":2.4,"cycles":1,"pin":336};
+  var run = function (el, tl, at, o) {
+        var si = gsap.parseEase("sine.inOut"); gsap.set(el, { transformOrigin: "50% " + (el.offsetHeight / 2 - o.pin) + "px" });
+        return MW.drive(tl, at, o.half * 2 * o.cycles, function (t) { var k = Math.floor(t / o.half), u = (t - k * o.half) / o.half, p = k % 2 ? 1 - si(u) : si(u); gsap.set(el, { rotation: -o.angle + 2 * o.angle * p }); });
+      };
+  MW.textHangingSign = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textHangingSign(q(".hs"), tl, 0, {});
+          tl.set({}, {}, 4.8);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

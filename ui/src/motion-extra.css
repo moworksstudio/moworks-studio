@@ -1,0 +1,41 @@
+/* Motion: ideas read from the Lucian UX/UI Prompt library (MIT, lucianlabs.dev/uxui-prompt), written new for the
+   app's own tokens and curves. Loaded after every other sheet (motion.js imports it). transform and opacity only; both themes; hover only
+   on a fine pointer; reduced motion drops the movement and keeps the meaning. Nothing here loops except the queued bar, which is a wait. */
+
+/* ---------- tooltip (tooltip.js) ---------- */
+.mw-tip { position: fixed; left: 0; top: 0; z-index: 90; max-width: 18rem; padding: 0.3125rem 0.625rem; border-radius: var(--r-md);
+  border: 1px solid var(--border-strong); background: var(--surface-3); color: var(--text-primary); box-shadow: var(--shadow-pop);
+  font-size: var(--fs-meta); line-height: 1.35; pointer-events: none; opacity: 0;
+  transform: translate(var(--tx, 0px), var(--ty, 0px)); translate: 0 0.25rem;
+  transition: opacity 100ms var(--ease-out), translate 100ms var(--ease-out), transform 200ms var(--ease-out); }
+.mw-tip.snap { transition-property: opacity, translate; }
+.mw-tip.on { opacity: 1; translate: 0 0; transition-duration: 140ms, 140ms, 200ms; }
+
+/* ---------- toasts: the newest rises into place, the ones before it step back ---------- */
+@keyframes toast-rise { from { opacity: 0; transform: translateY(0.75rem) scale(0.96); } }
+.toast { transform-origin: 50% 100%; animation: toast-rise 220ms var(--ease-out); }
+.toast:not(:last-child):not(.leaving) { opacity: 0.72; transform: scale(0.97); }
+
+/* ---------- a bar that is waiting (no real progress yet) slides a segment; real progress then takes over the same bar ----------
+   The screens show a small placeholder width (0, 3, 4 or 5 %) until the job reports a number; that is the "queued" state. */
+.bar { position: relative; }
+@keyframes bar-queue { from { transform: translateX(-100%); } to { transform: translateX(290%); } }
+.bar:has(> span[style*="width: 0%"], > span[style*="width: 3%"], > span[style*="width: 4%"], > span[style*="width: 5%"])::after {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 34%; border-radius: inherit; background: var(--state-run); opacity: 0.5;
+  animation: bar-queue 1.5s var(--ease-in-out) infinite; }
+
+/* ---------- a check that confirms something happened (the Copy button, a finished render): pops in once, 240 ms ---------- */
+@keyframes icon-pop { 0% { opacity: 0; transform: scale(0.5); } 60% { opacity: 1; transform: scale(1.12); } 100% { transform: scale(1); } }
+.icon-pop { animation: icon-pop 240ms var(--ease-out) both; }
+
+/* ---------- the empty list: the message and its button settle in, so an empty screen does not just appear ---------- */
+@keyframes empty-in { from { opacity: 0; transform: translateY(0.5rem); } }
+.empty { animation: empty-in 260ms var(--ease-out) 120ms both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mw-tip { translate: none; transition-property: opacity; }
+  .toast { animation: none; }
+  .icon-pop, .empty { animation: none; }
+  .toast:not(:last-child):not(.leaving) { transform: none; }
+  .bar:has(> span[style*="width: 0%"], > span[style*="width: 3%"], > span[style*="width: 4%"], > span[style*="width: 5%"])::after { animation: none; display: none; }
+}

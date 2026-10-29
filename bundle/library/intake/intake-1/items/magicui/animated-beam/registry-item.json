@@ -1,0 +1,70 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "animated-beam",
+  "type": "hyperframes:component",
+  "title": "Animated Beam",
+  "description": "A gradient light streak travels along a curve from one element to another over a faint base line, every 5 s, like data flowing between apps.",
+  "tags": [
+    "beam",
+    "connector",
+    "flow",
+    "integration",
+    "line",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "animated-beam.html",
+      "target": "compositions/components/animated-beam.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/animated-beam",
+    "author": "magicui",
+    "call": "MW.animatedBeam(container, tl, 0, { from: \".a\", to: \".b\", curvature: -75 });",
+    "function": "MW.animatedBeam",
+    "options": {
+      "from": "element or selector",
+      "to": "element or selector",
+      "curvature": "px (0)",
+      "reverse": "false",
+      "duration": "s (5)",
+      "delay": "s (0)",
+      "repeatDelay": "s (0)",
+      "pathColor": "gray",
+      "pathWidth": "2",
+      "pathOpacity": "0.2",
+      "gradientStartColor": "#ffaa40",
+      "gradientStopColor": "#9c40ff",
+      "startXOffset": "0",
+      "startYOffset": "0",
+      "endXOffset": "0",
+      "endYOffset": "0",
+      "hold": "seconds (10)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/animated-beam.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/animated-beam.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is the container (position: relative); from / to are elements inside it. Upstream's demo uses brand logos (trademarks): the demo here uses plain glyphs.",
+    "titleVi": "Tia sáng chạy giữa hai khối"
+  }
+}

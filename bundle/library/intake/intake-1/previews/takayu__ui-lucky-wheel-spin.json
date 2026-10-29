@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-lucky-wheel-spin",
+  "hash": "0128818f53c4850a",
+  "at": "2026-10-17T08:10:56.645Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__ui-lucky-wheel-spin.mp4",
+    "poster": "previews/takayu__ui-lucky-wheel-spin.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "810438016ec9d30ad54a3e3181405f59b18e57a886764afa43ea2b03625a8282",
+    "size": 54121,
+    "seconds": 31.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

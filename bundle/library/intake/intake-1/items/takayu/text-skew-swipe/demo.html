@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Skew Swipe - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .sw { position: absolute; inset: 0; display: grid; place-items: center; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.4">
+<div class="sw"><div class="ssw" style="position:relative;font-size:220px;font-weight:900;width:1200px;height:280px"><span class="ss-a" style="position:absolute;left:0;right:0;text-align:center">NHANH</span><span class="ss-b" style="position:absolute;left:0;right:0;text-align:center;color:#a99bff;opacity:0">GỌN</span></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"a":".ss-a","b":".ss-b","skew":20,"out":1200,"in":880,"at":0.5,"backAt":2,"accent":"#a99bff"};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var a = el.querySelector(o.a), b = el.querySelector(o.b), p3 = gsap.parseEase("power3.in"), ex = gsap.parseEase("expo.out"), p2 = gsap.parseEase("power2.out"), lines = [];
+  for (var i = 0; i < 4; i++) { var l = document.createElement("span"); l.style.cssText = "position:absolute;height:8px;border-radius:4px;background:" + o.accent + ";opacity:0;pointer-events:none;"; el.appendChild(l); lines.push(l); }
+  var swap = function (outEl, inEl, t0, t) {
+    var u = Math.max(0, Math.min(1, (t - t0) / 0.3)), e = p3(u); gsap.set(outEl, { x: -o.out * e, skewX: -o.skew * e }); outEl.style.opacity = String(t < t0 ? 1 : 1 - e);
+    var t1 = t0 + 0.3 - 0.18, v = Math.max(0, Math.min(1, (t - t1) / 0.4)), x = o.in * (1 - ex(v)), sk = v < 0.5 ? -o.skew : -o.skew * (1 - p2((v - 0.5) / 0.5));
+    gsap.set(inEl, { x: x, skewX: t < t1 ? -o.skew : sk }); inEl.style.opacity = String(t < t1 ? 0 : Math.min(1, v * 3));
+    return [v, x, inEl];
+  };
+  return MW.drive(tl, at, o.backAt + 1, function (t) {
+    var s = t < o.backAt ? swap(a, b, o.at, t) : swap(b, a, o.backAt, t);
+    var v = s[0], fast = v > 0 && v < 0.45;
+    lines.forEach(function (l, i) { l.style.opacity = fast ? String(0.7 * (1 - v / 0.45)) : "0"; l.style.width = (120 + 60 * i) + "px"; l.style.left = (s[2].offsetLeft + s[2].offsetWidth + s[1] * 0.5 + 30) + "px"; l.style.top = (s[2].offsetTop + s[2].offsetHeight * (0.25 + 0.17 * i)) + "px"; });
+  });
+  };
+  MW.textSkewSwipe = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textSkewSwipe(q(".ssw"), tl, 0, {});
+          tl.set({}, {}, 3.4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

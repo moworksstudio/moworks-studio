@@ -1,0 +1,51 @@
+<!--
+  Pixelate (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=lk-pixel (read 12/10/2026).
+  Hình bị vẽ thô thành các khối pixel lớn rồi mịn dần từng bậc tới rõ nét, kiểu game cổ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectPixelate(q(".px"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - max: pixels across at the coarsest (32)
+      - min: pixels across at the finest (4)
+      - period: s for a there-and-back (3), stepping through whole numbers
+      - loop: s (3)
+
+  Notes: Idea and numbers (TakayuStudio lk-pixel, written here): Picture drawn at low resolution and scaled up without smoothing: block size 32 -> 16 -> 8 -> 4 -> 1 px, 120 ms per step (steps, no tween), 600 ms total; reverse for an exit. Demo: the low-res width steps through every integer 32 -> 4 -> 32 pixels across the frame (blocks 10 -> 80 px on 320) on a 3 s |sine| yoyo. Params: steps (32 → 16 → 8 → 4 → 1 px) · duration mỗi bậc (0.12 s). An SVG filter samples one pixel per block and dilates it, so the picture is pixelated without smoothing; the site's steps are 32 → 16 → 8 → 4 → 1 px at 0.12 s each.
+-->
+
+<div class="st"><div class="px"></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"max":32,"min":4,"period":3,"loop":3};
+  var run = function (el, tl, at, o) {
+        window.__mwPix = (window.__mwPix || 0) + 1; var id = "mw-pix-" + window.__mwPix, ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg"), W = el.clientWidth;
+        svg.setAttribute("width", "0"); svg.setAttribute("height", "0"); svg.style.position = "absolute"; svg.innerHTML = '<filter id="' + id + '" x="0" y="0" width="100%" height="100%"><feFlood x="0" y="0" width="1" height="1"/><feComposite width="10" height="10"/><feTile result="a"/><feComposite in="SourceGraphic" in2="a" operator="in"/><feMorphology operator="dilate" radius="5"/></filter>'; document.body.appendChild(svg);
+        var fl = svg.querySelector("feFlood"), cp = svg.querySelector("feComposite"), mo = svg.querySelector("feMorphology");
+        return MW.drive(tl, at, o.loop, function (t) { var n = Math.round(o.max - (o.max - o.min) * Math.abs(Math.sin(Math.PI * t / o.period))), b = Math.max(2, Math.round(W / n)), h = Math.floor(b / 2);
+          fl.setAttribute("x", String(h)); fl.setAttribute("y", String(h)); cp.setAttribute("width", String(b)); cp.setAttribute("height", String(b)); mo.setAttribute("radius", String(h)); el.style.filter = "url(#" + id + ")"; });
+      };
+  MW.effectPixelate = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

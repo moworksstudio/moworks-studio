@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-spring-modal",
+  "hash": "14e7e1d21384f1fa",
+  "at": "2026-10-17T11:47:30.698Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-spring-modal.mp4",
+    "poster": "previews/takayu__motion-spring-modal.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "389d3052566f756246c18726987be579402e287144b8559f1b441dedad376bfa",
+    "size": 11493,
+    "seconds": 30.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

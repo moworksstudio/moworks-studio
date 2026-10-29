@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "number-ticker",
+  "type": "hyperframes:component",
+  "title": "Number Ticker",
+  "description": "A number counts up (or down) to its value on a soft overdamped spring: fast at first, then a long gentle landing, with thousands separators.",
+  "tags": [
+    "counter",
+    "number",
+    "count up",
+    "spring",
+    "stat",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "number-ticker.html",
+      "target": "compositions/components/number-ticker.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/number-ticker",
+    "author": "magicui",
+    "call": "MW.numberTicker(q(\".n1\"), tl, 0.4, { value: 12500, locale: \"vi-VN\" });",
+    "function": "MW.numberTicker",
+    "options": {
+      "value": "target (100)",
+      "startValue": "0",
+      "direction": "up | down (up)",
+      "delay": "s (0)",
+      "decimalPlaces": "0",
+      "locale": "en-US (vi-VN for 1.234,5)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/number-ticker.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/number-ticker.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Spring stiffness 100, damping 60 (damping ratio 3): it settles in about 4 s. tabular-nums keeps the width steady.",
+    "titleVi": "Số đếm lên bằng lò xo mềm"
+  }
+}

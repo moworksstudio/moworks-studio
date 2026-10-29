@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-ferro-badge",
+  "type": "hyperframes:block",
+  "title": "Magnetic Fluid Badge",
+  "description": "Một nam châm chữ U tiến lại gần, huy hiệu tròn như chất lỏng từ tính mọc gai nhọn về phía nam châm, rung nhẹ và lệch về phía đó; nam châm rời đi thì gai thu lại.",
+  "tags": [
+    "ferrofluid",
+    "magnet",
+    "spikes",
+    "badge",
+    "material-surface-motion",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-ferro-badge.html",
+      "target": "compositions/components/effect-ferro-badge.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-ferro-badge",
+    "author": "takayu",
+    "call": "MW.effectFerroBadge(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectFerroBadge",
+    "options": {
+      "count": "the badge number",
+      "accent": "",
+      "loop": "s (3.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-material-magnetic-fluid",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-material-magnetic-fluid (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-material-magnetic-fluid, written here): Badge r24 (accent, number) with 18 spikes. A U-magnet moves x 300 → 226 (0.3-1.1 s power2.inOut), back at 2.7-3.4 s. Spike length = (2 + 34 × max(0, cos θ)³) × k, θ = angle from the magnet direction, k on a spring k140 d9 (1 from 0.55 s, 0 from 2.85 s); spikes (triangles, base ±0.17 rad) wobble ±8 %; the badge shifts 3 px toward the magnet and stretches scaleX 1.06 / scaleY 0.96 with k. Dashed field lines flow while near. Params: spikes (18) · length (2 + 34 cos³) · spring (k140 c9) · wobble (±8 %) · magnet path. Spike length = (2 + 34 × max(0, cos θ)³) × k, θ from the magnet's direction, k on springs k140 c9.",
+    "titleVi": "Huy hiệu chất lỏng từ mọc gai"
+  }
+}

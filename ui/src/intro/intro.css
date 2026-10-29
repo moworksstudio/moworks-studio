@@ -1,0 +1,71 @@
+/* The Projects intro: see Intro.jsx for the timeline. Colours come from the theme's tokens, so both themes paint it. */
+/* no box. The stage has no ground or edge of its own and fills the page below the title; what lights it
+   (sparks, glow, grid) fades out towards every side like a feathered layer in After Effects, so the film melts into the page. */
+.intro-stage { --cy: 40%; position: relative; flex: 1 1 auto; min-height: 360px; overflow: hidden; isolation: isolate; text-align: center;
+  margin-inline: calc(-1 * var(--sp-4, 1rem)); }
+/* the page around it becomes a column that fills the scroller exactly, so the first screen never shows a scroll bar */
+.page:has(> .intro-stage) { height: 100%; display: flex; flex-direction: column; }
+/* --cy: the lockup sits a little above the middle, so with the two lines under it the group reads as centred */
+.intro-stage::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0.35;
+  background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px; background-position: center;
+  mask-image: radial-gradient(55% 55% at 50% var(--cy), #000, transparent 75%); }
+
+.i-sparks { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;
+  -webkit-mask-image: radial-gradient(closest-side at 50% var(--cy), #000 55%, transparent); mask-image: radial-gradient(closest-side at 50% var(--cy), #000 55%, transparent); }
+.intro-stage::before { content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none;
+  background: radial-gradient(45% 50% at 50% var(--cy), var(--accent-soft), transparent 75%); }
+.i-glow { position: absolute; left: 50%; top: var(--cy); width: min(70%, 760px); aspect-ratio: 2.4; translate: -50% -50%; z-index: -1; pointer-events: none;
+  background: radial-gradient(closest-side, var(--accent-glow), transparent); filter: blur(28px); }
+.i-flash { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0; mix-blend-mode: screen;
+  background: radial-gradient(35% 45% at 50% var(--cy), #fff, var(--accent) 35%, transparent 70%); }
+.i-scan { position: absolute; left: 0; right: 0; top: var(--cy); height: 1px; z-index: 1; pointer-events: none; opacity: 0; transform-origin: 50% 50%;
+  background: linear-gradient(90deg, transparent, var(--accent) 20%, #fff 50%, var(--accent) 80%, transparent);
+  box-shadow: 0 0 12px 1px var(--accent-glow); }
+
+.i-hud { position: absolute; z-index: 2; opacity: 0; font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.14em;
+  color: var(--text-muted); pointer-events: none; display: inline-flex; gap: 0.5em; align-items: center; white-space: nowrap; }
+.i-hud b { color: var(--accent); font-weight: 400; }
+.i-hud::before { content: ""; width: 10px; height: 10px; border: 1px solid var(--accent-line); }
+.i-hud.i-tl { top: 18px; left: calc(20px + var(--sp-4, 1rem)); } .i-hud.i-tl::before { border-width: 1px 0 0 1px; }
+.i-hud.i-tr { top: 18px; right: calc(20px + var(--sp-4, 1rem)); flex-direction: row-reverse; } .i-hud.i-tr::before { border-width: 1px 1px 0 0; }
+.i-hud.i-bl { bottom: 18px; left: calc(20px + var(--sp-4, 1rem)); } .i-hud.i-bl::before { border-width: 0 0 1px 1px; }
+
+/* the lockup is pinned to the stage's centre and scales with the window; the lines under it hang below without moving it */
+.i-shake { position: absolute; left: 50%; top: var(--cy); z-index: 2; width: clamp(300px, 34vw, 760px); translate: -50% -50%; }
+.i-below { position: absolute; left: 50%; top: 100%; translate: -50% 0; display: grid; justify-items: center; gap: 0.6rem; width: max-content; }
+.i-logo { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; color: inherit; border-radius: var(--r-md, 10px); }
+.i-logo:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
+.i-svg { display: block; width: 100%; height: auto; overflow: visible; }
+/* only the parts that move get a box origin: groups that carry a transform attribute must keep SVG's 0 0 origin */
+.i-badge, .i-m, .i-m-echo, .i-ring-echo, .i-l, .i-rule, .i-shock, .i-orbit, .i-glint { transform-box: fill-box; transform-origin: center; }
+.i-m-echo { fill: var(--accent); opacity: 0; }
+.i-ring-echo { fill: none; stroke: var(--accent); stroke-width: 1.5px; vector-effect: non-scaling-stroke; opacity: 0; }
+
+.i-ring-fill, .i-m, .i-word .i-l { fill: var(--text-primary); }
+.i-badge { filter: drop-shadow(0 0 10px var(--accent-glow)); }
+.i-ring-line { fill: none; stroke: var(--accent); stroke-width: 2px; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 0; opacity: 0;
+  filter: drop-shadow(0 0 4px var(--accent)); }
+.i-m-line { fill: none; stroke: var(--text-primary); stroke-width: 1.5px; vector-effect: non-scaling-stroke; stroke-dasharray: 1; opacity: 0;
+  filter: drop-shadow(0 0 3px var(--accent)); }
+.i-trail .i-l { fill: var(--accent); opacity: 0; }
+/* "AI motion studio" under the lockup, centred; one span per letter so it can focus in letter by letter */
+.i-sub { margin: 0.4em 0 0; font-family: var(--font-body); font-weight: 300; font-size: clamp(1rem, 0.4rem + 1.25vw, 1.9rem);
+  letter-spacing: 0.22em; text-transform: none; color: var(--text-secondary); white-space: nowrap; }
+.i-sub .i-ch { display: inline-block; }
+.i-rule { fill: var(--accent); transform: scaleX(0); }
+.i-shock { fill: none; stroke: var(--accent); stroke-width: 1.5px; vector-effect: non-scaling-stroke; opacity: 0; }
+.i-shock.b { stroke: var(--text-primary); }
+.i-orbit { fill: none; stroke: var(--accent-line); stroke-width: 0.6; stroke-dasharray: 2 5; opacity: 0; }
+.i-orbit.b { stroke: var(--text-muted); stroke-dasharray: 10 6 1 6; stroke-width: 0.4; }
+.i-glint { mix-blend-mode: overlay; }
+
+.i-hint { margin: 0.4rem 0 0; color: var(--text-muted); font-size: var(--fs-meta, 0.8125rem); }
+.i-again { position: absolute; z-index: 3; right: calc(16px + var(--sp-4, 1rem)); bottom: 40px; }
+
+/* reduced motion, or a page opened with it: the finished lockup, nothing moving */
+.intro-stage.is-still .i-hud, .intro-stage.is-still .i-scan, .intro-stage.is-still .i-flash, .intro-stage.is-still .i-sparks,
+.intro-stage.is-still .i-shock, .intro-stage.is-still .i-orbit, .intro-stage.is-still .i-trail, .intro-stage.is-still .i-ring-line,
+.intro-stage.is-still .i-rule, .intro-stage.is-still .i-again, .intro-stage.is-still .i-m-line { display: none; }
+@media (prefers-reduced-motion: reduce) { .i-glow { opacity: 0.55; } }
+@media (max-width: 640px) { .i-hud.i-bl { display: none; } .i-again { bottom: 16px; } }

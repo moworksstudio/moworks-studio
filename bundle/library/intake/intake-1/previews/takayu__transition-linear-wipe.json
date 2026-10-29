@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/transition-linear-wipe",
+  "hash": "0fd956180002afc5",
+  "at": "2026-10-17T07:21:03.597Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__transition-linear-wipe.mp4",
+    "poster": "previews/takayu__transition-linear-wipe.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "d6c3a64aec80deeacabc8a74cccabff001053738f44ad8dbfebb439b0b4b5fa6",
+    "size": 12621,
+    "seconds": 28.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

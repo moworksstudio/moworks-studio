@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Venetian Blinds Reveal - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { --ink: #e8ebf3; --acc: #8b7bff; --acc2: #3dd6f5; --warm: #ffb547; --rose: #ff5d8f; --mute: #6c778b; --tk-card: #151a24; --tk-line: #262c3a; background: #0b0d12; color: var(--ink); }
+.tk-stage { position: absolute; inset: 0; display: grid; place-items: center; }
+.tk-cap { font-size: 30px; font-weight: 500; color: var(--mute); letter-spacing: 0.01em; }
+.tk-head { margin: 0; font-family: 'Inter', sans-serif; font-size: 150px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; text-align: center; max-width: 1600px; }
+.tk-sub { margin-top: 36px; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4">
+<div class="tk-stage"><div><h1 class="tk-head ">Mười nan rèm<br>mở lần lượt</h1></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"slats":10,"duration":0.6,"stagger":0.05,"exit":null};
+  var run = function (el, tl, at, o) {
+        var html = el.innerHTML, n = o.slats, strips = [], fin = gsap.parseEase("power1.out"), fout = gsap.parseEase("power1.in");
+        el.style.position = "relative";
+        for (var i = 0; i < n; i++) { var s = document.createElement("div"); s.innerHTML = html; s.style.cssText = "position:absolute;left:0;top:0;width:100%;pointer-events:none;"; el.appendChild(s); strips.push(s); }
+        var orig = []; Array.prototype.slice.call(el.childNodes).forEach(function (c) { if (strips.indexOf(c) < 0) orig.push(c); });
+        var wrap = document.createElement("span"); wrap.style.visibility = "hidden"; el.insertBefore(wrap, el.firstChild); orig.forEach(function (c) { wrap.appendChild(c); });
+        var end = (n - 1) * o.stagger + o.duration + (o.exit == null ? 0 : o.exit);
+        return MW.drive(tl, at, end, function (t) {
+          var fs = parseFloat(getComputedStyle(el).fontSize), top = -0.3 * fs, bot = el.offsetHeight + 0.2 * fs, h = (bot - top) / n;
+          strips.forEach(function (s, i) {
+            var u = t - i * o.stagger, y0 = top + i * h, a, b;
+            if (o.exit != null && u >= o.exit) { var q = fout(Math.min(1, (u - o.exit) / 0.5)); a = y0 + h * q; b = y0 + h; }
+            else { var p = fin(Math.max(0, Math.min(1, u / o.duration))); a = y0; b = y0 + h * p; }
+            s.style.clipPath = "inset(" + a + "px -0.3em " + Math.max(0, el.offsetHeight - b) + "px -0.3em)";
+            if (b >= el.offsetHeight + 0.2 * fs - 0.5) s.style.clipPath = "inset(" + a + "px -0.3em -" + (0.3 * fs) + "px -0.3em)";
+            s.style.visibility = b - a > 0.2 ? "visible" : "hidden";
+          });
+        });
+      };
+  MW.textBlindsReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textBlindsReveal(q(".tk-head"), tl, 0.3, { exit: 2.5 });
+          tl.set({}, {}, 4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

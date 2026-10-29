@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-mission-step-check",
+  "hash": "392797a3da59aee1",
+  "at": "2026-10-17T10:45:47.066Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-mission-step-check.mp4",
+    "poster": "previews/takayu__ui-mission-step-check.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3ea9568fec7bffc5d3428772275d58fbc09432408aaefc1d8cee2876709e364f",
+    "size": 10601,
+    "seconds": 29,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

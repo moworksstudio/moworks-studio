@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-letter-dissolve-out",
+  "type": "hyperframes:component",
+  "title": "Defeat Dissolve",
+  "description": "Chữ đứng yên đủ để đọc, rồi từng chữ cái lần lượt bay lên, bẹp lại và mờ đi, mỗi chữ rơi rớt vài hạt vuông nhỏ trôi lên; cuối cùng nút \"Thử lại\" trồi lên và ở lại.",
+  "tags": [
+    "dissolve",
+    "exit",
+    "stagger",
+    "particles",
+    "game-cinematics",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-letter-dissolve-out.html",
+      "target": "compositions/components/text-letter-dissolve-out.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-letter-dissolve-out",
+    "author": "takayu",
+    "call": "MW.textLetterDissolveOut(q(\".ld h1\"), tl, 0, { button: \".ld .bt\" });",
+    "function": "MW.textLetterDissolveOut",
+    "options": {
+      "leaveAt": "s the letters start to go (1.0)",
+      "stagger": "s (0.09)",
+      "rise": "px (100)",
+      "bits": "squares shed per letter (6)",
+      "color": "their colour",
+      "button": "the retry button",
+      "buttonAt": "s (1.6)",
+      "outAt": "s (2.55)",
+      "seed": "bits"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-cinematic-defeat-dissolve",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-cinematic-defeat-dissolve (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-cinematic-defeat-dissolve, written here): px @320x200. Word (40 px) enters 0.05-0.35 s (fade, rise 6 px) and holds ~0.7 s. From 1.0 s letters leave 90 ms apart: each over 550 ms in-quad rises 20 px, scaleX 1 → 0.85, scaleY 1 → 0.65, fades; each sheds 6 seeded 3 px squares (within ±11 px, up to 26 px above the baseline) drifting up 24-44 px and ±8 px sideways, fading from 80 %, over 700 ms outCubic, 30 ms apart. 'TRY AGAIN' pill rises 8 px, 350 ms back.out at 1.6 s; out 2.55-2.75 s. Params: leaveAt: lúc bắt đầu tan (1.0 s) · stagger: cách nhau (0.09 s) · rise: bay lên (20 px) · bits: số hạt mỗi chữ (6) · button: nút (\"THỬ LẠI\").",
+    "titleVi": "Chữ thất bại tan từng chữ cái"
+  }
+}

@@ -1,0 +1,66 @@
+<!--
+  Paper Fold (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-paper-fold (read 12/10/2026).
+  Một thẻ chữ chia bốn dải ngang gấp kiểu đàn xếp, từng dải lần lượt duỗi phẳng từ trên xuống, có bóng tối theo góc gấp.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textPaperFold(q(".pf"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - panels: (4)
+      - angle: degrees folded (81)
+      - start: s (0.35; 0.12 s apart, 0.7 s ease-out quad)
+      - refoldAt: s (2.65)
+      - perspective: × the card's height (2.3)
+      - shade: shade colour
+
+  Notes: Idea and numbers (TakayuStudio tx-paper-fold, written here): Card (text + 52 × text + 44 px, radius 3, thin rule near the bottom) split into 4 horizontal panels, each hanging from the one above. Panel k unfolds ±81° (alternating) → 0 in 0.7 s power1.out from 0.35 + 0.12 k s. Shade: background colour over each panel at |sin angle| × 0.25 (even) / 0.75 (odd). Exit: refold from the last panel, 2.65 s + 0.08 × (3 − k), 0.45 s power1.inOut. Perspective ≈2.3 × card height (recipe 800 px). Loop 3.6 s. Params: số dải (4) · góc đầu (±81°) · thời gian (0.7 s) · cách nhau (0.12 s).
+-->
+
+<div class="pf-w"><div class="pf"><h2>Mở ra từng nếp</h2><i></i></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"panels":4,"angle":81,"start":0.35,"refoldAt":2.65,"perspective":2.3,"shade":"#0b0d12"};
+  var run = function (el, tl, at, o) {
+        var W = el.offsetWidth, H = el.offsetHeight, ph = H / o.panels, html = el.innerHTML, bg = getComputedStyle(el).backgroundColor, p1 = gsap.parseEase("power1.out"), pio = gsap.parseEase("power1.inOut"), panels = [];
+        var cs = getComputedStyle(el); el.innerHTML = ""; el.style.background = "transparent"; el.style.border = "none"; el.style.boxShadow = "none"; el.style.perspective = o.perspective * H + "px";
+        var parent = el;
+        for (var k = 0; k < o.panels; k++) {
+          var p = document.createElement("div"); p.style.cssText = "position:absolute;left:0;top:" + (k ? ph : 0) + "px;width:" + W + "px;height:" + ph + "px;transform-origin:50% 0;transform-style:preserve-3d;";
+          var face = document.createElement("div"); face.style.cssText = "position:absolute;inset:0;overflow:hidden;background:" + bg + ";border-radius:" + (k === 0 ? cs.borderRadius + " " + cs.borderRadius + " 0 0" : k === o.panels - 1 ? "0 0 " + cs.borderRadius + " " + cs.borderRadius : "0") + ";";
+          var inner = document.createElement("div"); inner.innerHTML = html; inner.style.cssText = "position:absolute;left:0;top:" + (-k * ph) + "px;width:" + W + "px;height:" + H + "px;box-sizing:border-box;padding:" + cs.padding + ";display:" + cs.display + ";place-items:" + cs.placeItems + ";";
+          var shade = document.createElement("div"); shade.style.cssText = "position:absolute;inset:0;background:" + o.shade + ";opacity:0;";
+          face.appendChild(inner); face.appendChild(shade); p.appendChild(face); parent.appendChild(p); panels.push({ p: p, shade: shade, k: k }); parent = p;
+        }
+        return MW.drive(tl, at, o.refoldAt + 0.45 + 0.08 * o.panels, function (t) {
+          panels.forEach(function (q) {
+            var sgn = q.k % 2 ? -1 : 1, open = p1(Math.max(0, Math.min(1, (t - o.start - 0.12 * q.k) / 0.7))), ref = pio(Math.max(0, Math.min(1, (t - o.refoldAt - 0.08 * (o.panels - 1 - q.k)) / 0.45))), a = sgn * o.angle * (1 - open * (1 - ref));
+            // each panel hangs from the one above: angles add up along the chain
+            q.p.style.transform = "rotateX(" + a + "deg)"; q.shade.style.opacity = String(Math.abs(Math.sin(a * Math.PI / 180)) * (q.k % 2 ? 0.75 : 0.25));
+          });
+          el.style.opacity = t < o.start ? "0" : "1";
+        });
+      };
+  MW.textPaperFold = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

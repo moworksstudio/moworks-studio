@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-blink",
+  "type": "hyperframes:component",
+  "title": "Blink",
+  "description": "Mắt nhắm thật nhanh rồi mở chậm hơn một chút, các lần chớp cách nhau không đều.anim.blink`.",
+  "tags": [
+    "blink",
+    "character",
+    "eyes",
+    "rig",
+    "soft",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-blink.html",
+      "target": "compositions/components/motion-blink.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-blink",
+    "author": "takayu",
+    "call": "MW.motionBlink(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionBlink",
+    "options": {
+      "blinks": "s each blink starts ([0.8, 2.1, 2.35, 3.4]: irregular, one double)",
+      "duration": "s per blink (0.2)",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=ch-blink",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=ch-blink (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio ch-blink, written here): Eyelid close 80 ms ease-in (2 frames), open 170 ms ease-out (3-4 frames), gaps 2-6 s, irregular. Demo: eye height x (1 - sin(pi u)) over 200 ms (symmetric), blinks at 0.8, 2.1, 2.35 (double) and 3.4 s in a 4 s loop. Params: close (80 ms) · open (170 ms) · gap (2–6 s) · seed. The recipe closes in 0.08 s (ease-in) and opens in 0.17 s (ease-out), 2–6 s apart.",
+    "titleVi": "Chớp mắt nhanh, mở chậm"
+  }
+}

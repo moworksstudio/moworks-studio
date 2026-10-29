@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-linear",
+  "type": "hyperframes:component",
+  "title": "Linear",
+  "description": "Phần tử đi với tốc độ không đổi từ đầu đến cuối, chỉ hợp cho xoay, trôi, chữ chạy.",
+  "tags": [
+    "ease",
+    "linear",
+    "easing",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-linear.html",
+      "target": "compositions/components/motion-ease-linear.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-ease-linear",
+    "author": "takayu",
+    "call": "MW.motionEaseLinear(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseLinear",
+    "options": {
+      "duration": "s (1.2)",
+      "ease": "the curve (none)",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=e-linear",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=e-linear (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio e-linear, written here): Target moves 0 → 100 % at constant speed (ease none), 1200 ms. Site rule: only for motion with no start or end — spins, drifts, clock hands, marquees. Site demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: duration (1.2 s) · prop: thuộc tính (x) · amount: quãng (100 %).",
+    "titleVi": "Đường cong đều tốc (linear)"
+  }
+}

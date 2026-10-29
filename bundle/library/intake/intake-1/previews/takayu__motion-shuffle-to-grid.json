@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-shuffle-to-grid",
+  "hash": "649606db3a974cc4",
+  "at": "2026-10-17T10:56:31.073Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-shuffle-to-grid.mp4",
+    "poster": "previews/takayu__motion-shuffle-to-grid.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "5dfc8df0a204378ac981ffc1b4ce5c386be8753e4cdbe9afa371d6e8a3be884f",
+    "size": 19382,
+    "seconds": 27.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-path-run",
+  "type": "hyperframes:component",
+  "title": "Text Along Path",
+  "description": "Dòng chữ chạy vào theo một đường cong, mỗi chữ xoay theo hướng đường, dừng ở giữa một nhịp rồi tăng tốc chạy ra đầu bên kia.",
+  "tags": [
+    "path",
+    "tangent",
+    "slide",
+    "curve",
+    "text-path-shape",
+    "smooth",
+    "path-shape",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-path-run.html",
+      "target": "compositions/components/text-path-run.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-path-run",
+    "author": "takayu",
+    "call": "MW.textPathRun(q(\".pr\"), tl, 0, {});",
+    "function": "MW.textPathRun",
+    "options": {
+      "text": "",
+      "fit": "px of text (1000)",
+      "amp": "px of the wave (200)",
+      "margin": "px past each side (250)",
+      "start": "s (0.3)",
+      "inTime": "s (1.2, power2.out)",
+      "holdAt": "s it holds from (1.5)",
+      "outAt": "s (2.6)",
+      "outTime": "s (1.1, power2.in)",
+      "accent": "the last letter",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-text-along-path",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-text-along-path (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-text-along-path, written here): Text on an open path (demo: one full sine wave, amplitude 40 px, across the frame plus 50 px each side); each glyph at its arc-length point, rotated to the tangent (chord ±6 px). Text centre runs from fully off the start (−half width − 20 px) to the path middle 0.3–1.5 s power2.out, holds 1.1 s, then to fully off the end 2.6–3.7 s power2.in. Size fits about 190 px of text (12–34 px). Last char accent. Loop 4 s. Params: đường cong (sóng 40 px) · thời gian vào (1.2 s) · giữ (1.1 s) · thời gian ra (1.1 s).",
+    "titleVi": "Chữ chạy dọc đường cong"
+  }
+}

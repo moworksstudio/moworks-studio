@@ -1,0 +1,91 @@
+<!--
+  Anagram FLIP (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-anagram-flip (read 12/10/2026).
+  Các chữ cái giống nhau của hai từ được ghép cặp và bay theo đường vòng sang chỗ mới để thành từ thứ hai, chữ thừa mờ đi, chữ thiếu hiện vào.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textAnagramFlip(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - from: first word(s)
+      - to: second word(s) sharing letters
+      - at: s (0.4)
+      - duration: s per letter (0.6), cubic-bezier(.2,.8,.2,1)
+      - stagger: s (0.02)
+      - backAt: s it goes back (2.3)
+      - tint: accent mid-flight
+
+  Notes: Idea and numbers (TakayuStudio tx-anagram-flip, written here): Map identical letters of word A to word B left to right (first unused match). From 0.4 s each pair travels to its new slot in 0.6 s cubic-bezier(.2,.8,.2,1), stagger 0.02 s, on an arc of height min(40 px, 16 px + 0.18 × |dx|): rightward movers pass above, leftward below; an accent tint peaks mid-flight (sin πp). Unmatched letters of A fade out rising 10 px, new letters of B fade in from +10 px, over 0.6 s. Reverse from 2.3 s. Loop 4.2 s. Params: thời gian (0.6 s) · cách nhau (0.02 s) · độ vồng (16 px + 18 % quãng, tối đa 40 px).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">SÔNG NÚI</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":"SÔNG NÚI","to":"NÚI SÔNG","at":0.4,"duration":0.6,"stagger":0.02,"backAt":2.3,"tint":"#a99bff"};
+  var run = function (el, tl, at, o) {
+        var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+        var gr = function (s) { s = s.normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+        var lay = function (s) { var box = document.createElement("div"); box.style.cssText = "position:absolute;left:0;top:0;visibility:hidden;white-space:pre;"; el.appendChild(box); var pos = gr(s).map(function (g) { var sp = document.createElement("span"); sp.textContent = g; box.appendChild(sp); return sp; }).map(function (sp) { return { g: sp.textContent, x: sp.offsetLeft }; }); var w = box.offsetWidth; el.removeChild(box); return { pos: pos, w: w }; };
+        var A = lay(o.from), B = lay(o.to), used = {}, pairs = [], ease = MW.ez("cubic-bezier(.2,.8,.2,1)");
+        el.textContent = ""; el.style.position = "relative"; el.style.width = Math.max(A.w, B.w) + "px"; el.style.height = "1.3em"; el.style.display = "inline-block";
+        var offA = (Math.max(A.w, B.w) - A.w) / 2, offB = (Math.max(A.w, B.w) - B.w) / 2;
+        A.pos.forEach(function (a) { if (a.g === " ") return; var j = -1; for (var i = 0; i < B.pos.length; i++) if (!used[i] && B.pos[i].g === a.g) { j = i; break; } if (j >= 0) used[j] = 1; pairs.push({ g: a.g, x0: a.x + offA, x1: j >= 0 ? B.pos[j].x + offB : null }); });
+        B.pos.forEach(function (b, i) { if (!used[i] && b.g !== " ") pairs.push({ g: b.g, x0: null, x1: b.x + offB }); });
+        pairs.forEach(function (p, i) { var s = document.createElement("span"); s.textContent = p.g; s.style.cssText = "position:absolute;left:0;top:0;white-space:pre;"; el.appendChild(s); p.s = s; p.i = i; });
+        var col = getComputedStyle(el).color, tint = gsap.utils.interpolate(col, o.tint), fs = parseFloat(getComputedStyle(el).fontSize);
+        return MW.drive(tl, at, o.backAt + o.duration + 0.5, function (t) {
+          pairs.forEach(function (p) {
+            var u = Math.max(0, Math.min(1, (t - o.at - p.i * o.stagger) / o.duration)), v = Math.max(0, Math.min(1, (t - o.backAt - p.i * o.stagger) / o.duration)), q = ease(u) * (1 - ease(v));
+            if (p.x0 != null && p.x1 != null) {
+              var dx = p.x1 - p.x0, h = Math.min(0.4 * fs, 0.16 * fs + 0.18 * Math.abs(dx)) * (dx > 0 ? -1 : 1);
+              gsap.set(p.s, { x: p.x0 + dx * q, y: h * Math.sin(Math.PI * q) }); p.s.style.opacity = "1"; p.s.style.color = tint(Math.sin(Math.PI * q));
+            } else if (p.x0 != null) { gsap.set(p.s, { x: p.x0, y: -0.1 * fs * q }); p.s.style.opacity = String(1 - q); }
+            else { gsap.set(p.s, { x: p.x1, y: 0.1 * fs * (1 - q) }); p.s.style.opacity = String(q); }
+          });
+        });
+      };
+  MW.textAnagramFlip = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

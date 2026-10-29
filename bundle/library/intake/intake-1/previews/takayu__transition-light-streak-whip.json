@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/transition-light-streak-whip",
+  "hash": "5f605f6b90e97f6a",
+  "at": "2026-10-17T07:22:28.571Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__transition-light-streak-whip.mp4",
+    "poster": "previews/takayu__transition-light-streak-whip.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3fb7008b7e2c0cc5ac6130f1aa04303208a79f5525e46d43f25d09b15548bb7f",
+    "size": 15504,
+    "seconds": 26.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

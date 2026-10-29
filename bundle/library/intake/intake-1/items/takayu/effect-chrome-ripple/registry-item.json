@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-chrome-ripple",
+  "type": "hyperframes:component",
+  "title": "Chrome Ripple Surface",
+  "description": "Chạm vào mặt kim loại bóng, bốn vòng sóng sáng tối xen nhau lan ra từ điểm chạm, mờ dần khi rộng ra, chỗ chạm lõm tối thoáng qua.",
+  "tags": [
+    "ripple",
+    "chrome",
+    "rings",
+    "tap",
+    "material-surface-motion",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-chrome-ripple.html",
+      "target": "compositions/components/effect-chrome-ripple.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-chrome-ripple",
+    "author": "takayu",
+    "call": "MW.effectChromeRipple(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectChromeRipple",
+    "options": {
+      "at": "s of the tap (0.6)",
+      "point": "[x, y] in the 320 frame ([144, 98])",
+      "rings": "(4)",
+      "gap": "s between rings (0.14)",
+      "radius": "units (170)",
+      "duration": "s (1.8, power2.out)",
+      "label": "",
+      "accent": "the first ring",
+      "loop": "s (3.2)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-material-chrome-ripple",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-material-chrome-ripple (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-material-chrome-ripple, written here): Chrome panel 228x120 r14 (vertical gradient bands dark / light / dark / light). Tap at 0.6 s at (144,98): 4 rings 0.14 s apart, radius 0 → 170 px power2.out over 1.8 s, opacity (1 − p) × (1 − 0.18 k); each ring = a dark 3.5 px contour at 55 %, a bright 1.4 px contour 3 px outside (the first ring accent 2.2 px) and a faint 0.8 px inner line. A dark dimple r7 at the tap point 0.55-1.2 s. Clipped to the panel. Params: at · rings (4, cách 0.14 s) · radius (170 px) · duration (1.8 s, power2.out) · fade.",
+    "titleVi": "Gợn sóng trên mặt kim loại bóng"
+  }
+}

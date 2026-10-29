@@ -1,0 +1,52 @@
+<!--
+  Forced-Narrative Fade Sync (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-forced-narrative-fade (read 12/10/2026).
+  Phụ đề dịch chữ trên màn hình (biển, bảng) hiện và tắt mờ 0.3 giây, canh đúng điểm giữa lúc biển hiệu trong cảnh hiện và tắt.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textSubtitleFadeSync(q(".fs"), tl, 0, { sign: ".sg" });
+
+  Options (defaults in brackets):
+      - fade: s each fade (0.3), centred on the sign's own fade
+      - sign: the sign in the shot
+      - signIn: [from, to] s the sign fades in ([0.4, 1.0])
+      - signOut: [from, to] s it fades out ([2.8, 3.4])
+      - loop: s (4.6)
+
+  Notes: Idea and numbers (TakayuStudio tx-forced-narrative-fade, written here): On-screen sign fades in 0.4–1.0 s and out 2.8–3.4 s (linear). The subtitle (17 px bold, dark outline, 1 line) fades in 0.55–0.85 s and out 2.95–3.25 s, 0.3 s linear each, centred on the sign's fade midpoints (0.7 s and 3.1 s); it must end ≥ 2 frames before a shot change. Optional bracketed label such as [SIGN]. Loop 4.6 s. ASS: \fad(300,300). Params: thời gian mờ (0.3 s) · canh giữa theo cảnh · kết thúc trước điểm cắt (2 khung). The subtitle must end at least 2 frames before a shot change.
+-->
+
+<div class="ft"></div><div class="sg">OPEN</div><div class="cap fs">[BIỂN HIỆU] ĐANG MỞ CỬA</div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"fade":0.3,"sign":null,"signIn":[0.4,1],"signOut":[2.8,3.4],"loop":4.6};
+  var run = function (el, tl, at, o) {
+        var sign = o.sign ? MW.el(o.sign) : null, lin = function (a, d, t) { return Math.max(0, Math.min(1, (t - a) / d)); };
+        return MW.drive(tl, at, o.loop, function (t) {
+          if (sign) sign.style.opacity = String(lin(o.signIn[0], o.signIn[1] - o.signIn[0], t) * (1 - lin(o.signOut[0], o.signOut[1] - o.signOut[0], t)));
+          var mi = (o.signIn[0] + o.signIn[1]) / 2, mo = (o.signOut[0] + o.signOut[1]) / 2; el.style.opacity = String(lin(mi - o.fade / 2, o.fade, t) * (1 - lin(mo - o.fade / 2, o.fade, t)));
+        });
+      };
+  MW.textSubtitleFadeSync = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

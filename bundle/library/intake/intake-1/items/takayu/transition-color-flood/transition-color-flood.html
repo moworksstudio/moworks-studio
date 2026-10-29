@@ -1,0 +1,56 @@
+<!--
+  Colour Flood (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tr-flood (read 12/10/2026).
+  Một đĩa màu loang từ một điểm phủ kín cảnh cũ, đổi cảnh dưới lớp màu, rồi đĩa rút về điểm cũ lộ cảnh mới.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.transitionColorFlood(q(".tk-b"), tl, 1, {});
+
+  Options (defaults in brackets):
+      - duration: s (0.8: 0.4 covering, 0.4 clearing)
+      - x: point, 0-1 of the width (0.12)
+      - y: 0-1 of the height (0.8)
+      - color: the flood colour
+      - from: the outgoing scene
+
+  Notes: Idea and numbers (TakayuStudio tr-flood, written here): A solid colour disc grows from a point (default 12 % x / 80 % y) to the farthest-corner radius over 400 ms easeInCubic, covering the outgoing scene; cut to the incoming scene underneath at 400 ms; the disc shrinks back to its point 400-800 ms easeOutCubic. 800 ms total. Params: duration (0.8 s) · x, y: điểm loang (12 % / 80 %) · color.
+-->
+
+<section class="tk-scene tk-a"><div class="tk-mark circle"></div><div class="tk-sc-text"><div class="tk-sc-letter">A</div><div class="tk-sc-cap">Cảnh mở đầu</div></div></section>
+<section class="tk-scene tk-b"><div class="tk-mark square"></div><div class="tk-sc-text"><div class="tk-sc-letter">B</div><div class="tk-sc-cap">Cảnh tiếp theo</div></div></section>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.8,"x":0.12,"y":0.8,"color":"#ffb547","from":null};
+  var run = function (el, tl, at, o) {
+        var out = o.from ? MW.el(o.from) : el.previousElementSibling, W = el.offsetWidth, H = el.offsetHeight, cx = o.x * W, cy = o.y * H;
+        var R = Math.max(Math.hypot(cx, cy), Math.hypot(W - cx, cy), Math.hypot(cx, H - cy), Math.hypot(W - cx, H - cy)), fin = gsap.parseEase("power2.in"), fout = gsap.parseEase("power2.out");
+        var disc = document.createElement("div"); disc.style.cssText = "position:absolute;inset:0;pointer-events:none;background:" + o.color + ";"; el.parentNode.appendChild(disc);
+        return MW.drive(tl, at, o.duration, function (t) {
+          var h = o.duration / 2, r = t < h ? R * fin(t / h) : R * (1 - fout((t - h) / h));
+          disc.style.clipPath = "circle(" + Math.max(0, r) + "px at " + cx + "px " + cy + "px)"; disc.style.visibility = t > 0 && t < o.duration ? "visible" : "hidden";
+          el.style.visibility = t >= h ? "visible" : "hidden"; if (out) out.style.visibility = t >= h ? "hidden" : "visible";
+        });
+      };
+  MW.transitionColorFlood = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

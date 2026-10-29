@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-slow-in-out",
+  "hash": "2644c3ebaec55e40",
+  "at": "2026-10-17T09:33:47.770Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-slow-in-out.mp4",
+    "poster": "previews/takayu__motion-slow-in-out.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "bcb564493f552b23bb9c380476ff6a1f279e23d74d72dcf7cafc116234d6cb4a",
+    "size": 12641,
+    "seconds": 29.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,62 @@
+<!--
+  Noise Blob (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=sh-blob (read 12/10/2026).
+  Một khối tròn có viền gợn mềm theo nhiễu, uốn éo liên tục và lặp liền mạch.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.shapeNoiseBlob(q(".nb-p"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - radius: (52) in the SVG's units
+      - amp: (20)
+      - loop: s (4), seamless
+      - loops: (1)
+      - cx: (160)
+      - cy: (100)
+      - seed: shape
+
+  Notes: Idea and numbers (TakayuStudio sh-blob, written here): Closed blob of 80 points: radius 52 px +- 20 px from smooth noise sampled around the circle; the noise time axis moves 0.5/s and loops every 4 s (sample noise on a circle in time so the last frame equals the first). Params: radius (52 px) · amp (±20 px) · loop (4 s) · seed.
+-->
+
+<div class="sv"><div class="nb"><svg width="1600" height="1000" viewBox="0 0 320 200"><path class="nb-p" fill="#7357f5"/></svg><b>MỀM MẠI</b></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"radius":52,"amp":20,"loop":4,"loops":1,"cx":160,"cy":100,"seed":5};
+  var run = function (el, tl, at, o) {
+        var r = MW.rand(o.seed), H = [], N = 80; for (var k = 2; k <= 5; k++) H.push({ k: k, a: (0.5 + r()) / k, ph: r() * 6.28, m: 1 + Math.floor(r() * 2) });
+        var norm = H.reduce(function (s, h) { return s + h.a; }, 0);
+        return MW.drive(tl, at, o.loop * o.loops, function (t) {
+          var w = 2 * Math.PI * t / o.loop, pts = [];
+          // smooth noise around the circle whose time axis is periodic: every harmonic turns a whole number of times per loop
+          for (var i = 0; i < N; i++) { var th = i / N * 2 * Math.PI, n = 0; H.forEach(function (h) { n += h.a * Math.sin(h.k * th + h.ph + h.m * w); }); var R = o.radius + o.amp * n / norm; pts.push([o.cx + R * Math.cos(th), o.cy + R * Math.sin(th)]); }
+          var d = "M" + pts.map(function (p) { return p[0].toFixed(2) + " " + p[1].toFixed(2); }).join(" L") + " Z"; el.setAttribute("d", d);
+        });
+      };
+  MW.shapeNoiseBlob = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

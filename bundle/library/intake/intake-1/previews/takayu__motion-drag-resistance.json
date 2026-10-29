@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-drag-resistance",
+  "hash": "1de60a0bd96c4455",
+  "at": "2026-10-17T10:13:34.935Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-drag-resistance.mp4",
+    "poster": "previews/takayu__motion-drag-resistance.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "280e58aa7cfd926643743d4da7d62fc8db253a213f5bce781080a8ade90da2e8",
+    "size": 7998,
+    "seconds": 23.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

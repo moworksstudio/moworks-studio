@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-lens-bulge",
+  "hash": "6eb6d9816b11c36c",
+  "at": "2026-10-17T11:49:05.633Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__effect-lens-bulge.mp4",
+    "poster": "previews/takayu__effect-lens-bulge.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "eed6f08f52fa3eb76be2adfe8f53111f294b9732c38288d681676fec19518474",
+    "size": 40926,
+    "seconds": 30.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

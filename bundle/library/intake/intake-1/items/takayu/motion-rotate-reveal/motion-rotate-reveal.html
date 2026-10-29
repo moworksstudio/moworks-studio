@@ -1,0 +1,53 @@
+<!--
+  Rotate Reveal (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=rotate-reveal (read 12/10/2026).
+  Thẻ có bản lề ở mép trái xoay từ gần vuông góc về phẳng như mở cửa, rõ dần theo góc.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionRotateReveal(q(".rr"), tl, 0.3, { closeAt: 1.8 });
+
+  Options (defaults in brackets):
+      - from: degrees (−88)
+      - duration: s (0.72)
+      - ease: (power2.out)
+      - perspective: px (1800)
+      - closeAt: s after the start to close (null)
+      - close: s (0.45, power2.in)
+
+  Notes: Idea and numbers (TakayuStudio rotate-reveal, written here): Card hinged on its left edge opens like a door: rotationY −88° → 0 in 720 ms power2.out, perspective 360 px; opacity follows the angle, 0.2 → 1. Site exit: closes back to −88° in 450 ms power2.in. (The DOM fallback adds a 5° overshoot at 84 %.) Params: duration (0.72 s) · from (−88°) · perspective (360 px) · origin (mép trái).
+-->
+
+<div class="ui-wrap"><div class="ui-card rr"><p class="ui-h">Ưu đãi tháng này</p><p class="ui-p">Giảm 20 % cho đơn đầu tiên</p><div class="ui-btn" style="margin-top:40px">Xem ngay</div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":-88,"duration":0.72,"ease":"power2.out","perspective":1800,"closeAt":null,"close":0.45};
+  var run = function (el, tl, at, o) {
+        var e = gsap.parseEase(o.ease), pin = gsap.parseEase("power2.in"); gsap.set(el, { transformOrigin: "0% 50%" });
+        return MW.drive(tl, at, o.closeAt == null ? o.duration : o.closeAt + o.close, function (t) {
+          var p = e(Math.min(1, t / o.duration)); if (o.closeAt != null && t > o.closeAt) p = 1 - pin(Math.min(1, (t - o.closeAt) / o.close));
+          gsap.set(el, { rotationY: o.from * (1 - p), transformPerspective: o.perspective }); el.style.opacity = String(0.2 + 0.8 * p);
+        });
+      };
+  MW.motionRotateReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

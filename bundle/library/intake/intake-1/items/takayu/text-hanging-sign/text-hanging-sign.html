@@ -1,0 +1,48 @@
+<!--
+  Hanging Sign Sway (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-hanging-sway (read 12/10/2026).
+  Chữ nằm trên một tấm biển treo bằng hai sợi dây từ một cái đinh, biển đung đưa nhẹ qua lại ±4° quanh đinh.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textHangingSign(q(".hs"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - angle: ± degrees (4)
+      - half: s each way (2.4)
+      - cycles: (1)
+      - pin: px from the card's centre up to the pin (336)
+
+  Notes: Idea and numbers (TakayuStudio tx-hanging-sway, written here): Sign card around the text (34 px; 15 px side pad, 11 px top and bottom, radius 6, 2 px accent border) hung by two strings from a pin 84 px above the card centre (strings to 36 % either side of the top edge, small rivets). Rotation about the pin = −4° + 8° × sine.inOut(ping), 2.4 s each way (alternate), loop 4.8 s. Recipe: origin 50 % −40 %, optional damped start elastic.out(1, 0.3). Params: góc (±4°) · nửa chu kỳ (2.4 s) · độ dài dây (84 px).
+-->
+
+<div class="hs-pin"></div><div class="hs"><svg viewBox="0 0 100 252" preserveAspectRatio="none"><path d="M50 32 L14 252 M50 32 L86 252" stroke="#6c778b" stroke-width="4" fill="none" vector-effect="non-scaling-stroke"/></svg>TIỆM CÀ PHÊ</div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"angle":4,"half":2.4,"cycles":1,"pin":336};
+  var run = function (el, tl, at, o) {
+        var si = gsap.parseEase("sine.inOut"); gsap.set(el, { transformOrigin: "50% " + (el.offsetHeight / 2 - o.pin) + "px" });
+        return MW.drive(tl, at, o.half * 2 * o.cycles, function (t) { var k = Math.floor(t / o.half), u = (t - k * o.half) / o.half, p = k % 2 ? 1 - si(u) : si(u); gsap.set(el, { rotation: -o.angle + 2 * o.angle * p }); });
+      };
+  MW.textHangingSign = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

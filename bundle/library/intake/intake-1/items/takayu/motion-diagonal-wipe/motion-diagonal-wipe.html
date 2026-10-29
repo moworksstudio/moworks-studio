@@ -1,0 +1,53 @@
+<!--
+  Diagonal Wipe (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=diagonal-wipe (read 12/10/2026).
+  Nội dung đứng yên, một mép chéo 45° quét từ góc dưới trái lên góc trên phải để lộ ra.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionDiagonalWipe(q(".dw"), tl, 0.3, { exitAt: 1.7 });
+
+  Options (defaults in brackets):
+      - duration: s (0.68, power4.inOut)
+      - angle: degrees of the gradient (45: from the lower left to the upper right)
+      - exitAt: s (null)
+
+  Notes: Idea and numbers (TakayuStudio diagonal-wipe, written here): Still content revealed by a 45° edge travelling from the lower-left corner to the upper-right: edge offset 0 → 145 % (of ~232 px on a 200×120 box; clip-path polygon) in 680 ms power4.inOut (easeInOutQuint); a 2 px light line rides the edge while it crosses. Site exit: fade 320 ms power2.in. Params: duration (0.68 s) · angle (45°) · from: góc bắt đầu (dưới trái) · ease (power4.inOut).
+-->
+
+<div class="st"><div class="dw"></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.68,"angle":45,"exitAt":null};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var ghost = function () { var g = el.cloneNode(true); g.removeAttribute("id"); g.style.position = "absolute"; g.style.margin = "0"; g.style.pointerEvents = "none"; g.style.opacity = "0"; g.style.left = el.offsetLeft + "px"; g.style.top = el.offsetTop + "px"; g.style.width = el.offsetWidth + "px"; g.style.height = el.offsetHeight + "px"; host.insertBefore(g, el); return g; };
+  var add = function (css) { var d = document.createElement("div"); d.style.cssText = "position:absolute;pointer-events:none;" + css; host.appendChild(d); return d; };
+  var cx0 = el.offsetLeft + el.offsetWidth / 2, cy0 = el.offsetTop + el.offsetHeight / 2;
+  var e = gsap.parseEase("power4.inOut"), pin = gsap.parseEase("power2.in"), line = add("left:" + el.offsetLeft + "px;top:" + el.offsetTop + "px;width:" + el.offsetWidth + "px;height:" + el.offsetHeight + "px;border-radius:" + getComputedStyle(el).borderRadius + ";opacity:0;");
+  return MW.drive(tl, at, o.exitAt == null ? o.duration : o.exitAt + 0.32, function (t) { var p = 100 * e(Math.min(1, t / o.duration)), x = o.exitAt != null ? pin(Math.max(0, Math.min(1, (t - o.exitAt) / 0.32))) : 0, m = "linear-gradient(" + o.angle + "deg, #000 " + p.toFixed(2) + "%, transparent " + (p + 0.01).toFixed(2) + "%)";
+    el.style.webkitMaskImage = el.style.maskImage = p >= 100 ? "none" : m; el.style.opacity = String(1 - x); line.style.background = "linear-gradient(" + o.angle + "deg, transparent " + (p - 0.6).toFixed(2) + "%, rgba(255,255,255,0.9) " + p.toFixed(2) + "%, transparent " + (p + 0.6).toFixed(2) + "%)"; line.style.opacity = p > 0 && p < 100 ? "1" : "0"; });
+  };
+  MW.motionDiagonalWipe = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

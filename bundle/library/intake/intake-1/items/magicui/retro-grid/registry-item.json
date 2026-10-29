@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "retro-grid",
+  "type": "hyperframes:component",
+  "title": "Retro Grid",
+  "description": "A synthwave perspective floor grid scrolling toward the viewer and fading into the horizon, for retro, gaming and tech intros.",
+  "tags": [
+    "retro",
+    "synthwave",
+    "grid",
+    "perspective",
+    "floor",
+    "webgl",
+    "background",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "retro-grid.html",
+      "target": "compositions/components/retro-grid.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/retro-grid",
+    "author": "magicui",
+    "call": "MW.retroGrid(q(\".mw-retro-grid\"), tl, 0, { opacity: 0.8, lineColor: \"#ff2975\", hold: 8 });",
+    "function": "MW.retroGrid",
+    "options": {
+      "angle": "deg (65)",
+      "cellSize": "px (60)",
+      "opacity": "0.5",
+      "lineColor": "gray",
+      "fade": "colour the floor fades to (#000)",
+      "hold": "seconds (15)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/retro-grid.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/retro-grid.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "WebGL with OES_standard_derivatives; the CSS fallback draws the same grid if WebGL is not there. The fade colour is an option (upstream: white, black in dark mode).",
+    "titleVi": "Sàn lưới phối cảnh kiểu synthwave"
+  }
+}

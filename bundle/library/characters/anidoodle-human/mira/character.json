@@ -1,0 +1,31 @@
+{
+  "id": "mira",
+  "name": "Mira",
+  "about": "A nine-year-old inventor: round red glasses, a dark-auburn bob with a cowlick, freckles, a yellow raincoat, a satchel, teal wellies (storybook child, 5.2 heads).",
+  "engine": "anidoodle-human",
+  "credit": {
+    "author": "Alex Greenshpun (10x Company)",
+    "link": "https://github.com/alexgreensh/anidoodle/tree/4db69644b994ae9caf9e20936506954b2f5e4872/skills/anidoodle/engine/src/canvas-core/characters/mira",
+    "commit": "4db69644b994ae9caf9e20936506954b2f5e4872",
+    "licence": "Apache-2.0 (with NOTICE)",
+    "made": "as shipped"
+  },
+  "hands": [
+    "storybook",
+    "marker",
+    "pencil",
+    "sumi",
+    "woodcut",
+    "scratch",
+    "riso",
+    "pixel",
+    "brick"
+  ],
+  "module": [
+    "mira/drawn.ts",
+    "mira/index.ts",
+    "mira/palettes.ts",
+    "mira/poses.ts"
+  ],
+  "savedAt": "2026-10-23T17:30:52.121Z"
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-keyword-punch",
+  "hash": "76426776152a7334",
+  "at": "2026-10-17T09:13:02.564Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-keyword-punch.mp4",
+    "poster": "previews/takayu__text-keyword-punch.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "d6315e0be545d56cbcb258c5cb4e58c7af06ebe7197d06ba84ac725756e8731b",
+    "size": 11195,
+    "seconds": 27.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-takayu-confetti-burst",
+  "type": "hyperframes:block",
+  "title": "Confetti",
+  "description": "Bốn mươi mảnh giấy màu bắn lên từ một điểm, rơi theo trọng lực, lắc ngang và lật mặt khi xoay.",
+  "tags": [
+    "confetti",
+    "particles",
+    "celebrate",
+    "gravity",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-takayu-confetti-burst.html",
+      "target": "compositions/components/effect-takayu-confetti-burst.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-takayu-confetti-burst",
+    "author": "takayu",
+    "call": "MW.effectTakayuConfettiBurst(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectTakayuConfettiBurst",
+    "options": {
+      "count": "(40)",
+      "gravity": "units/s² (320)",
+      "x": "launch point, of 320 (160)",
+      "y": "of 200 (196)",
+      "duration": "s (2)",
+      "colors": "the 4 colours",
+      "seed": "pieces"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=pt-confetti",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=pt-confetti (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio pt-confetti, written here): 40 pieces 8 x 5 px, 4 colours, launched from one point: x speed +-80 px/s, y speed -140 to -260 px/s, gravity 320 px/s^2, side flutter 8 px at 6 rad/s, spin 4-10 rad/s with scaleX = cos(spin) flip; launch 300 ms ease-out then fall 1700 ms; seeded. Params: count (40) · gravity (320 px/s²) · x, y: điểm bắn · seed.",
+    "titleVi": "Pháo giấy bắn lên rồi rơi"
+  }
+}

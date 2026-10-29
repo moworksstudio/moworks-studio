@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-underline-draw",
+  "type": "hyperframes:component",
+  "title": "Underline Draw",
+  "description": "Một nét gạch chân mọc từ trái sang dưới chữ trong 0.4 giây, khi rút thì thu về phía bên phải.",
+  "tags": [
+    "emphasis",
+    "underline",
+    "line",
+    "draw",
+    "text-emphasis",
+    "crisp",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-underline-draw.html",
+      "target": "compositions/components/text-underline-draw.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-underline-draw",
+    "author": "takayu",
+    "call": "MW.textUnderlineDraw(q(\".tk-head\"), tl, 0.5, { exitAt: 1.6 });",
+    "function": "MW.textUnderlineDraw",
+    "options": {
+      "duration": "s (0.4), in-out",
+      "thickness": "em (0.08)",
+      "offset": "em below the baseline (0.16)",
+      "color": "line colour",
+      "exitAt": "s after the start: it shrinks toward its right end in 0.35 s (null: stay)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-underline-draw",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-underline-draw (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-underline-draw, written here): Line under the text: 0.08 em thick (min 2 px), 0.16 em below the baseline (CSS bottom −0.12 em), round ends, accent; one line per text line. Draw: scaleX 0 → 1 from the left, 0.4 s cubic-bezier(.65,0,.35,1) (demo 0.5–0.9 s). Exit: origin flips to the right and the line shrinks toward its right end, 0.35 s same ease (demo 2.1–2.45 s). Loop 2.8 s. Params: duration (0.4 s) · thickness (0.08 em) · offset: cách chân chữ (0.16 em) · ease (cubic-bezier(.65,0,.35,1)).",
+    "titleVi": "Gạch chân mọc ra rồi rút về phải"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-fade-slide",
+  "type": "hyperframes:component",
+  "title": "Fade + Slide",
+  "description": "Phần tử hiện dần từ trong suốt và trượt lên 24 px cùng lúc, dừng êm vào chỗ.",
+  "tags": [
+    "entrance",
+    "fade",
+    "slide",
+    "entrance-exit",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-fade-slide.html",
+      "target": "compositions/components/motion-fade-slide.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-fade-slide",
+    "author": "takayu",
+    "call": "MW.motionFadeSlide(q(\".cd\"), tl, 0.3, { exitAt: 1.6 });",
+    "function": "MW.motionFadeSlide",
+    "options": {
+      "duration": "s (0.6)",
+      "y": "px (96; 12–32 at UI size)",
+      "ease": "(cubic-bezier(.33,1,.68,1))",
+      "exitAt": "s after the start to fade out, no move (null)",
+      "exit": "s (0.42, power2.in)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=fade-slide",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=fade-slide (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio fade-slide, written here): Card: y +24 → 0 px and opacity 0 → 1 together, 600 ms power2.out (easeOutCubic; site bezier .33,1,.68,1), both ending on the same frame. Site loop 2400 ms: enters at 300 ms, holds, then fades out (no move) in 420 ms power2.in from 1900 ms. Site tip: 12–32 px of travel. Params: duration (0.6 s) · y: quãng trượt (24 px) · ease (power2.out).",
+    "titleVi": "Hiện mờ kèm trượt lên"
+  }
+}

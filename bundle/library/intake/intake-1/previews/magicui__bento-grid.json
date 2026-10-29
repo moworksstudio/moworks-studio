@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/bento-grid",
+  "hash": "e8f0e756dd70f00b",
+  "at": "2026-10-17T06:29:47.093Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__bento-grid.mp4",
+    "poster": "previews/magicui__bento-grid.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ac9c88ab6356ae45416cb98a20bf953cd0dea2ebab5575f2b98ddedc706fb43b",
+    "size": 28135,
+    "seconds": 37.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

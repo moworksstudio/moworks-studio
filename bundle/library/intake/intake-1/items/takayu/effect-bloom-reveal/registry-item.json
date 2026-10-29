@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-bloom-reveal",
+  "type": "hyperframes:component",
+  "title": "Bloom Reveal",
+  "description": "Biểu tượng hiện ra trong ánh loá: sáng chói, nhoè và có quầng lớn, rồi dịu dần về rõ nét.",
+  "tags": [
+    "reveal",
+    "glow",
+    "bloom",
+    "light-glow",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-bloom-reveal.html",
+      "target": "compositions/components/effect-bloom-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-bloom-reveal",
+    "author": "takayu",
+    "call": "MW.effectBloomReveal(q(\".br-t\"), tl, 0.5, {});",
+    "function": "MW.effectBloomReveal",
+    "options": {
+      "duration": "s (0.78), power3.out",
+      "blur": "px at the start (12)",
+      "unit": "px per reference unit for the halo (5)",
+      "color": "halo colour"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=bloom-reveal",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=bloom-reveal (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio bloom-reveal, written here): Logo / icon reveal 780 ms power3.out (easeOutQuart): scale 0.82 → 1, brightness 3 → 1 (exposure +2), blur 4 → 0 px; an additive halo (two discs, radius 30 + 0.8 g and 44 + g px, opacity 0.9·g/38 and 0.6·g/38, blur g/2) with glow g 38 → 8 (at 540 ms) → 0 (780 ms) fading with it. Params: duration (0.78 s) · exposure (+2) · glow (38 → 8 → 0) · scale đầu (0.82).",
+    "titleVi": "Hiện ra từ ánh loá"
+  }
+}

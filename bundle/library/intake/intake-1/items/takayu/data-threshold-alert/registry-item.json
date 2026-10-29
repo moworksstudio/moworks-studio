@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-threshold-alert",
+  "type": "hyperframes:block",
+  "title": "Threshold Alarm Wave",
+  "description": "Đường biểu đồ vẽ từ trái sang, đoạn vượt ngưỡng chuyển đỏ, tại điểm cắt ngưỡng bật chấm, ba vòng sóng và nhãn vượt.",
+  "tags": [
+    "chart",
+    "line",
+    "threshold",
+    "alert",
+    "data-storytelling",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "data-threshold-alert.html",
+      "target": "compositions/components/data-threshold-alert.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/data-threshold-alert",
+    "author": "takayu",
+    "call": "MW.dataThresholdAlert(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataThresholdAlert",
+    "options": {
+      "values": "the 7 points",
+      "threshold": "(60)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-data-story-threshold-wave",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-data-story-threshold-wave (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-data-story-threshold-wave, written here): Line (7 points) draws left -> right linearly 300-2400 ms with a head dot + value label. Dashed threshold line (5/4 dash, yellow) at value 60; the line past the crossing is red (clip from the crossing x). When the head reaches the crossing: dot pops 300 ms back.out, 3 rings radius 5 -> 39 px, 1 s easeOutCubic, 280 ms apart, opacity 1 -> 0; tag 'over' fades in +150 to +400 ms. Fade out 3600-3950. Params: threshold (60) · draw: thời gian vẽ (2.1 s) · rings (3).",
+    "titleVi": "Đường vượt ngưỡng phát sóng báo"
+  }
+}

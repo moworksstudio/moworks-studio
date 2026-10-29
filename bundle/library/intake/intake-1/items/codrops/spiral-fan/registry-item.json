@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "spiral-fan",
+  "type": "hyperframes:component",
+  "title": "Spiral Fan",
+  "description": "The letters of each word start fanned out in a spiral (spread, raised, turned) and swirl back into the word. (Codrops fx22)",
+  "tags": [
+    "text",
+    "letters",
+    "entrance",
+    "codrops",
+    "on-scroll",
+    "per letter"
+  ],
+  "files": [
+    {
+      "path": "spiral-fan.html",
+      "target": "compositions/components/spiral-fan.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:codrops/spiral-fan",
+    "author": "codrops",
+    "call": "MW.spiralFan(document.querySelector(\".mw-spiral-fan\"), tl, 0.5, { duration: 1.6 });",
+    "function": "MW.spiralFan",
+    "options": {
+      "duration": "s the whole entrance takes (1.6)",
+      "seed": "for the random parts (1)",
+      "split": "chars"
+    },
+    "credit": {
+      "author": "Codrops",
+      "collection": "Codrops",
+      "link": "https://github.com/codrops/OnScrollTypographyAnimations/blob/af28d61d1f8d3d117f5d1e9b09d5209e20a1a212/src/js/index2.js#L237-L280",
+      "commit": "af28d61d1f8d3d117f5d1e9b09d5209e20a1a212",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) 2009 - 2022 / 2024 Codrops (LICENSE)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "codrops/OnScrollTypographyAnimations at af28d61, src/js/index2.js lines 237-280",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Codrops fx22: the source's GSAP values; the scroll range is now `duration`.",
+    "titleVi": "Chữ cái xoè quạt rồi xoắn về"
+  }
+}

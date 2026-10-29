@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-no-dead-frames",
+  "hash": "56a84302f35a68b1",
+  "at": "2026-10-17T09:34:48.149Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-no-dead-frames.mp4",
+    "poster": "previews/takayu__motion-no-dead-frames.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "5c8b2a6b4190c894a2f654fbbff09cc0037f108499739d6ebc50179666c87dea",
+    "size": 22821,
+    "seconds": 27.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

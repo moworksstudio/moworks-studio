@@ -1,0 +1,51 @@
+<!--
+  Elastic Scale (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=elastic-scale (read 12/10/2026).
+  Vòng tròn phóng lên 120 % rồi nảy qua lại 92 % và 106 % trước khi đứng yên.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionElasticScale(q(".es"), tl, 0.3, { exitAt: 1.9 });
+
+  Options (defaults in brackets):
+      - keys: [[s, scale], ...]: power2.out to the first peak, sine.inOut between the rest
+      - exitAt: s after the start to shrink to 0.5 and fade (null)
+      - exit: s (0.25)
+
+  Notes: Idea and numbers (TakayuStudio elastic-scale, written here): Circle scales about its centre by keys: 0.1 → 1.2 at 405 ms (power2.out) → 0.92 at 612 → 1.06 at 756 → 1 at 900 ms (sine.inOut between keys): an elastic.out look with shrinking rebounds. The curve graph is a guide. Site exit: shrink to 0.5 + fade, 250 ms power2.in. Params: duration (0.9 s) · from (0.1) · keys: các đỉnh nảy (1.2 / 0.92 / 1.06).
+-->
+
+<div class="st"><div class="es"></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"keys":[[0,0.1],[0.405,1.2],[0.612,0.92],[0.756,1.06],[0.9,1]],"exitAt":null,"exit":0.25};
+  var run = function (el, tl, at, o) {
+        var p2 = gsap.parseEase("power2.out"), si = gsap.parseEase("sine.inOut"), pin = gsap.parseEase("power2.in"), K = o.keys, d = K[K.length - 1][0];
+        var S = function (t) { if (t <= K[0][0]) return K[0][1]; for (var i = 1; i < K.length; i++) if (t <= K[i][0]) { var u = (t - K[i - 1][0]) / (K[i][0] - K[i - 1][0]); return K[i - 1][1] + (K[i][1] - K[i - 1][1]) * (i === 1 ? p2(u) : si(u)); } return K[K.length - 1][1]; };
+        return MW.drive(tl, at, o.exitAt == null ? d : o.exitAt + o.exit, function (t) {
+          var s = S(t), a = Math.min(1, t / 0.08); if (o.exitAt != null && t > o.exitAt) { var x = pin(Math.min(1, (t - o.exitAt) / o.exit)); s *= 1 - 0.5 * x; a *= 1 - x; }
+          gsap.set(el, { scale: s }); el.style.opacity = String(a);
+        });
+      };
+  MW.motionElasticScale = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,87 @@
+<!--
+  Active-Word Highlight (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-word-highlight-caption (read 12/10/2026).
+  Một trang phụ đề vài từ hiện sẵn, từ đang được nói phóng nhẹ lên 1.1 lần, nhích lên và đổi màu nhấn trong tích tắc, nói xong thì trở lại.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textActiveWordCaption(q(".awr"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - from: s the first word starts (0.4)
+      - to: s the last ends (3.4): split by word length, a stand-in for transcript times
+      - lift: px (8)
+      - accent: colour of the spoken word
+      - outAt: s (4.15)
+      - caption: the caption page
+
+  Notes: Idea and numbers (TakayuStudio tx-word-highlight-caption, written here): Page of 3–5 words, 30 px weight 800, white with a 4 px dark outline; page fades in 0.15–0.3 s and out 4.15–4.35 s. Word times split 0.4–3.4 s in proportion to word length (stand-in for transcript times). The active word scales 1 → 1.1 about its own centre and lifts 2 px in 80 ms power2.out, turns accent past half way, and returns in 80 ms after its end. Loop 4.6 s. Params: số từ mỗi trang (3–5) · độ phóng (1.1) · thời gian đổi (80 ms).
+-->
+
+<div class="ft"></div><div class="awr"><div class="cap aw">Hãy thử ngay hôm nay</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":0.4,"to":3.4,"lift":8,"accent":"#ffd23d","outAt":4.15,"caption":".aw","loop":4.6};
+  var run = function (el, tl, at, o) {
+        var cap = el.querySelector(o.caption), ws = MW.split(cap, "words").words, len = ws.map(function (w) { return w.textContent.length; }), tot = len.reduce(function (a, b) { return a + b; }, 0), p2 = gsap.parseEase("power2.out"), col = getComputedStyle(cap).color, mix = gsap.utils.interpolate(col, o.accent);
+        var tt = [], acc = o.from; len.forEach(function (l) { var d = (o.to - o.from) * l / tot; tt.push([acc, acc + d]); acc += d; });
+        return MW.drive(tl, at, o.loop, function (t) {
+          cap.style.opacity = String(Math.max(0, Math.min(1, (t - 0.15) / 0.15)) * (1 - Math.max(0, Math.min(1, (t - o.outAt) / 0.2))));
+          ws.forEach(function (w, i) { var a = tt[i][0], b = tt[i][1], k = t < a ? 0 : t < a + 0.08 ? p2((t - a) / 0.08) : t < b ? 1 : t < b + 0.08 ? 1 - p2((t - b) / 0.08) : 0; gsap.set(w, { scale: 1 + 0.1 * k, y: -o.lift * k }); w.style.color = k > 0.5 ? o.accent : col; void mix; });
+        });
+      };
+  MW.textActiveWordCaption = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

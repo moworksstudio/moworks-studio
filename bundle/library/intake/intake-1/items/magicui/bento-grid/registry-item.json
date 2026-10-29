@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "bento-grid",
+  "type": "hyperframes:block",
+  "title": "Bento Grid",
+  "description": "A bento grid of feature cards with uneven spans, each lifting its text and revealing a 'learn more' link when it gets the focus, card by card.",
+  "tags": [
+    "bento",
+    "grid",
+    "features",
+    "cards",
+    "saas",
+    "layout",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "bento-grid.html",
+      "target": "compositions/components/bento-grid.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/bento-grid",
+    "author": "magicui",
+    "call": "MW.bentoGrid(q(\".mw-bento-grid\"), tl, 0.3, { focus: [[0.3, 0, 1.3], [1.9, 1, 1.3], [3.5, 2, 1.3], [5.1, 3, 1.3]] });",
+    "function": "MW.bentoGrid",
+    "options": {
+      "focus": "[[t, card, seconds], ...]"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/bento-grid.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/bento-grid.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is the grid; each card has .mw-bg-bg (background), .mw-bg-icon, h3, p and .mw-bg-cta inside. focus: [[t, index, seconds], ...] in s after `at`.",
+    "titleVi": "Lưới thẻ tính năng kiểu bento"
+  }
+}

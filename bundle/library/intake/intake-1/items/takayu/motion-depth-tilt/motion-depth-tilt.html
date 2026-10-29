@@ -1,0 +1,50 @@
+<!--
+  Solid Drawing / Depth (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=solid (read 12/10/2026).
+  Thẻ nghiêng qua lại ±8° và bóng đổ trượt ngược chiều, tạo cảm giác có độ dày.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionDepthTilt(q(".dt-c"), tl, 0, { shadow: ".dt-sh" });
+
+  Options (defaults in brackets):
+      - angle: degrees each way (8)
+      - period: s (3)
+      - cycles: (1.5)
+      - perspective: px (1400)
+      - shadow: the shadow under it
+      - shift: px of shadow per radian, the other way (600)
+
+  Notes: Idea and numbers (TakayuStudio solid, written here): Card tilts about its vertical axis ±8° (0.14 rad); its drop shadow (a flat ellipse under it) moves opposite, x offset = −120 px per rad (±17 px), size unchanged, linked to the angle. Site demo: a continuous sine sway, 3 s period, drawn in 2D (width × cos 4θ, skewY 0.6 θ). Recipe: rotateY −8° → +8° in 800 ms power2.inOut, shadow x linked opposite. Params: angle (±8°) · period (3 s) · shadow: độ trượt bóng (120 px / rad).
+-->
+
+<div class="ui-wrap"><div class="dt"><div class="dt-sh"></div><div class="ui-card dt-c"><p class="ui-h">Thẻ có độ dày</p><p class="ui-p">Bóng đổ trượt ngược chiều nghiêng</p></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"angle":8,"period":3,"cycles":1.5,"perspective":1400,"shadow":null,"shift":600};
+  var run = function (el, tl, at, o) {
+        var sh = o.shadow ? el.parentNode.querySelector(o.shadow) : null;
+        return MW.drive(tl, at, o.period * o.cycles, function (t) { var a = o.angle * Math.sin(2 * Math.PI * t / o.period); gsap.set(el, { rotationY: a, transformPerspective: o.perspective }); if (sh) gsap.set(sh, { x: -o.shift * a * Math.PI / 180 }); });
+      };
+  MW.motionDepthTilt = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

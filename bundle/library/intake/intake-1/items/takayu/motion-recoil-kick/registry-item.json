@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-recoil-kick",
+  "type": "hyperframes:component",
+  "title": "Camera Kick HUD",
+  "description": "Mỗi phát bắn, lớp thế giới giật lên và lệch nhẹ trong tích tắc rồi trở về bằng lò xo, các phát cộng dồn; khung HUD, tâm ngắm và số đạn đứng yên, chỉ có vòng loé đầu nòng.",
+  "tags": [
+    "recoil",
+    "kick",
+    "spring",
+    "camera",
+    "game-impact-fx",
+    "heavy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-recoil-kick.html",
+      "target": "compositions/components/motion-recoil-kick.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-recoil-kick",
+    "author": "takayu",
+    "call": "MW.motionRecoilKick(q(\".wd\"), tl, 0, { muzzle: \".mz\", marker: \".hm\", ammo: \".ammo\" });",
+    "function": "MW.motionRecoilKick",
+    "options": {
+      "shots": "seconds of each shot ([0.5, 1.2, 1.9])",
+      "kx": "px (20)",
+      "ky": "px up (45)",
+      "kr": "degrees (0.57)",
+      "muzzle": "the muzzle ring (in the world)",
+      "marker": "the hit marker on the crosshair",
+      "ammo": "the ammo readout",
+      "ammoText": "its label",
+      "ammoFrom": "rounds (30)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-impact-fx-camera-kick",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-impact-fx-camera-kick (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-impact-fx-camera-kick, written here): px @320x200. World group only (the HUD stays fixed). Per shot at 0.5, 1.2, 1.9 s: k goes 0 → 1 in 50 ms outCubic, then back by 1 − spring k220 d18; kicks add up. World offset x +4k px, y −9k px, rotation −0.57k° (−0.01 rad). Muzzle ring r 4 → 16 (stroke 2) over 300 ms inOut in the world; hit-marker diagonals on the crosshair for 150 ms; ammo 30 → 27. Params: shots: lúc bắn (0.5 / 1.2 / 1.9 s) · kick: giật (y −9 px, x +4 px, −0.6°) · spring: lò xo về (k220 d18) · target: id lớp thế giới. Call it on the world group only: the HUD stays fixed.",
+    "titleVi": "Giật máy theo phát bắn, HUD đứng yên"
+  }
+}

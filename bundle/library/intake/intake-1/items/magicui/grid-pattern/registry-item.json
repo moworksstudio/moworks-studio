@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "grid-pattern",
+  "type": "hyperframes:component",
+  "title": "Grid Pattern",
+  "description": "A fine line grid with a few filled cells, usually skewed and faded at the edges with a radial mask: a calm SaaS backdrop (static, or drifting slowly).",
+  "tags": [
+    "grid",
+    "pattern",
+    "background",
+    "lines",
+    "tech",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "grid-pattern.html",
+      "target": "compositions/components/grid-pattern.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/grid-pattern",
+    "author": "magicui",
+    "call": "MW.gridPattern(q(\".mw-grid-pattern\"), tl, 0, { width: 80, height: 80, color: \"rgba(156,163,175,0.35)\", squares: [[4,4],[5,1],[8,2],[5,3],[5,5],[10,10],[12,15],[15,10],[10,15],[15,10],[10,15],[15,10]], drift: [0, 20], hold: 6 });",
+    "function": "MW.gridPattern",
+    "options": {
+      "width": "cell px (40)",
+      "height": "cell px (40)",
+      "x": "-1",
+      "y": "-1",
+      "strokeDasharray": "'0'",
+      "squares": "[[col, row], ...] filled cells",
+      "color": "rgba(156,163,175,0.3)",
+      "drift": "[x, y] px/s ([0, 0])",
+      "hold": "seconds the drift runs (10)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/grid-pattern.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/grid-pattern.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Static upstream; drift is this port's option. Mask and skew are plain CSS on the holder, as in upstream's demos (radial mask 400 px, skewY(12deg), inset-y -30 %, height 200 %).",
+    "titleVi": "Nền lưới kẻ mảnh, ô tô điểm"
+  }
+}

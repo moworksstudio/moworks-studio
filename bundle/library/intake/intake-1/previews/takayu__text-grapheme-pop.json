@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-grapheme-pop",
+  "hash": "52efb7684c99e684",
+  "at": "2026-10-17T12:18:39.908Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-grapheme-pop.mp4",
+    "poster": "previews/takayu__text-grapheme-pop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "53e2fad3c69350ef6a41d3d24da16130074b30fe480d53fe2b8da51e06a283b3",
+    "size": 12940,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72",
+    "seconds": 13.7
+  }
+}

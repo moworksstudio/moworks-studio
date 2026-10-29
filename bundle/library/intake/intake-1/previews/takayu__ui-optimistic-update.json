@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-optimistic-update",
+  "hash": "bb76f9aa5de97bd5",
+  "at": "2026-10-17T11:27:45.432Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-optimistic-update.mp4",
+    "poster": "previews/takayu__ui-optimistic-update.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c9855e5691f656b41a0060ac9d3cb898ab90e993493e952b893653303bf6a41d",
+    "size": 15717,
+    "seconds": 26.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

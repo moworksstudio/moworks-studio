@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-line-parallax",
+  "hash": "b128b7fcf86edda4",
+  "at": "2026-10-17T08:36:22.423Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-line-parallax.mp4",
+    "poster": "previews/takayu__text-line-parallax.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "aadc84ca4ffdbf1fcdcd9cbd7b9275fe3820b8c6fa9d9c4b256b430ae81def5e",
+    "size": 19924,
+    "seconds": 15,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

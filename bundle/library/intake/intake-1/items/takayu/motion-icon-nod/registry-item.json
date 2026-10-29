@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-icon-nod",
+  "type": "hyperframes:component",
+  "title": "Icon Nod",
+  "description": "Biểu tượng xoay quanh điểm gần mép trên, gật 16° rồi ngược −5° và về chỗ, một lần.",
+  "tags": [
+    "attention",
+    "nod",
+    "rotate",
+    "attention-emphasis",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-icon-nod.html",
+      "target": "compositions/components/motion-icon-nod.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-icon-nod",
+    "author": "takayu",
+    "call": "MW.motionIconNod(q(\".nod\"), tl, 0.6, {});",
+    "function": "MW.motionIconNod",
+    "options": {
+      "angle": "degrees of the nod (16)",
+      "back": "degrees of the counter-swing (5)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=icon-nod",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=icon-nod (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio icon-nod, written here): transform-origin 50 % 12 % (pivot near the top edge); rotation 0 → 16° (220 ms) → −5° (440 ms) → 0 (620 ms), sine.inOut between keys; once. Params: angle (16°) · back (−5°) · pivot (50 % 12 %) · duration (0.62 s).",
+    "titleVi": "Biểu tượng gật đầu"
+  }
+}

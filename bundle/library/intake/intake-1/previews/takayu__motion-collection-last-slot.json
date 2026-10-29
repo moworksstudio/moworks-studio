@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-collection-last-slot",
+  "hash": "bd1456955949c139",
+  "at": "2026-10-17T10:45:48.152Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-collection-last-slot.mp4",
+    "poster": "previews/takayu__motion-collection-last-slot.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "25b0a54cd651c42e69e1a195cc1ecf1adfb7d11c3912ba0e1083dacf1dcf03a3",
+    "size": 18669,
+    "seconds": 29.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id": "clawd",
+  "name": "Clawd",
+  "kind": "thing",
+  "heightM": 0.4,
+  "heightBy": "inferred",
+  "heightNote": "a desk-toy-sized mascot; the kit draws it in pixels, with no real size",
+  "demo": true,
+  "label": "Demo: Anthropic's mascot, not for use in films",
+  "about": "Clawd redrawn through the app's character layer from a definition (its body and key views copied as data from the kit's VIEWS), to show that the layer reproduces a character with many expressions. Never selectable, never copied into a project, never in a film.",
+  "credit": { "author": "John Heibel (ClaudeAnimationBase); Clawd is Anthropic's mascot", "link": "https://github.com/JohnHeibel/ClaudeAnimationBase/blob/0ac8bf2b31942376cb6b8c4074715595d512acd2/src/clawd.js", "licence": "MIT (the kit's code); the character is Anthropic's", "made": "adapted", "madeNote": "the body sizes and the five VIEWS of src/clawd.js copied as a definition, drawn by the app's layer" },
+  "colors": { "col": "#D97757", "dk": "#A84D33", "lt": "#F5B394" },
+  "body": { "shape": "box", "w": 10, "h": 6, "bottom": -2 },
+  "face": { "y": -6, "dx": 2.5, "mouth": 1.7, "bx": 3.6 },
+  "head": { "top": -8, "width": 10 },
+  "legs": { "xs": [-4, -2, 1, 3], "w": 1, "h": 2.2 },
+  "arms": { "x": 4.9, "y": -4.5, "len": 2.2, "th": 1 },
+  "views": {
+    "front": { "L": -5, "R": 5, "face": { "cx": 0, "fw": 1, "sides": [-1, 1], "mx": 0, "bx": 3.6 }, "hat": 0, "hw": 1, "legs": [[-4, 0], [-2, 0], [1, 0], [3, 0]], "arms": [[-4.9, -1, "L", 0], [4.9, 1, "R", 0]] },
+    "q": { "L": -5, "R": 5.1, "strip": [-5, -2.3], "seam": -2.3, "face": { "cx": 1.5, "fw": 0.74, "sides": [-1, 1], "mx": 0.3, "bx": 3.6 }, "hat": 0.6, "hw": 1, "legs": [[-4.3, 1], [-1.8, 0], [0.8, 0], [3.3, 0]], "arms": [[5, 1, "R", 2], [-4.7, -1, "L", 1]] },
+    "side": { "L": -3.1, "R": 3.1, "face": { "cx": 1.35, "fw": 0.55, "sides": [1], "mx": 1.7, "bx": 1 }, "hat": 0.3, "hw": 0.66, "legs": [[-2.1, 1], [1.3, 1], [-2.6, 0], [0.9, 0]], "arms": [[1.6, 0, "L", 1]] },
+    "qback": { "L": -5.1, "R": 5, "strip": [2.3, 5], "seam": 2.3, "face": null, "hat": -0.4, "hw": 1, "legs": [[3.3, 1], [0.8, 0], [-1.8, 0], [-4.3, 0]], "arms": [[-5, -1, "R", 2], [4.7, 1, "L", 1]] },
+    "back": { "L": -5, "R": 5, "face": null, "hat": 0, "hw": 1, "back": true, "legs": [[-4, 0], [-2, 0], [1, 0], [3, 0]], "arms": [[-4.9, -1, "R", 0], [4.9, 1, "L", 0]] }
+  }
+}

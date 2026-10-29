@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Bounce Landing - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.fl { position: absolute; left: 260px; right: 260px; top: 860px; height: 4px; border-radius: 2px; background: #262c3a; } .bl { position: absolute; left: 560px; top: 660px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #9af2ff, #2bb7e6 60%, #1278ad); } .bl-s { position: absolute; left: 540px; top: 846px; width: 240px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.6); filter: blur(8px); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="1.8">
+<div class="fl"></div><div class="bl-s"></div><div class="bl"></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"drop":424,"fall":0.266,"heights":[208,88,32],"durations":[0.225,0.142,0.086],"squash":[0.32,0.2,0.1,0.04],"drift":560,"driftTime":0.78,"shadow":null};
+  var run = function (el, tl, at, o) {
+        var sh = o.shadow ? el.parentNode.querySelector(o.shadow) : null, C = [o.fall], h = o.heights, d = o.durations; gsap.set(el, { transformOrigin: "50% 100%" });
+        for (var i = 0; i < d.length; i++) C.push(C[i] + d[i]); var end = C[C.length - 1];
+        return MW.drive(tl, at, Math.max(end + 0.05, o.driftTime), function (t) {
+          var y = 0; if (t < o.fall) { var u = t / o.fall; y = -o.drop * (1 - u * u); } else for (var k = 0; k < d.length; k++) if (t < C[k + 1]) { var v = (t - C[k]) / d[k]; y = -h[k] * 4 * v * (1 - v); break; }
+          var sq = 0; C.forEach(function (c, k) { var w = 1 - Math.abs(t - c) / 0.05; if (w > 0 && t > 0.01) sq = Math.max(sq, o.squash[k] * w); });
+          gsap.set(el, { y: y, x: o.drift * Math.min(1, t / o.driftTime), scaleY: 1 - sq, scaleX: 1 / (1 - sq) });
+          if (sh) { var f = 1 + y / o.drop; gsap.set(sh, { x: o.drift * Math.min(1, t / o.driftTime), scaleX: 0.4 + 0.6 * f }); sh.style.opacity = String(0.3 + 0.7 * f); }
+        });
+      };
+  MW.motionBounceLand = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionBounceLand(q(".bl"), tl, 0.3, { shadow: ".bl-s" });
+          tl.set({}, {}, 1.8);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

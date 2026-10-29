@@ -1,0 +1,86 @@
+<!--
+  Staggered Y Spin (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-y-spin-stagger (read 12/10/2026).
+  Từng chữ cái lần lượt xoay trọn một vòng quanh trục đứng, mặt sau hiện màu nhấn, tạo một làn xoay chạy qua dòng chữ rồi nghỉ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textYSpinStagger(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - duration: s per letter (0.8)
+      - stagger: s (0.08)
+      - cap: s all start within (1)
+      - ease: (power1.inOut)
+      - start: s (0.3)
+      - accent: the back side
+      - cycle: s (3.2)
+
+  Notes: Idea and numbers (TakayuStudio tx-y-spin-stagger, written here): Per char rotateY 0 → 360° in 0.8 s from 0.3 s + 0.08 s × i (capped at 1 s total), demo ease power1.inOut (recipe power2.inOut). Drawn as scaleX = cos θ (no perspective) with scaleY 1 + 0.05 × |sin θ|; back side (cos < 0) accent. Cycle 3.2 s (≈1.5 s rest). Params: thời gian (0.8 s) · cách nhau (0.08 s) · nghỉ (≈ 1.5 s). Drawn flat as scaleX = cos θ (no perspective); the back side shows the accent.
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Xoay một vòng</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.8,"stagger":0.08,"cap":1,"ease":"power1.inOut","start":0.3,"accent":"#a99bff","cycle":3.2};
+  var run = function (el, tl, at, o) {
+        var ch = MW.split(el, "chars").chars, n = ch.length, st = Math.min(o.stagger, o.cap / Math.max(1, n - 1)), e = gsap.parseEase(o.ease), col = getComputedStyle(el).color;
+        return MW.drive(tl, at, o.cycle, function (t) {
+          ch.forEach(function (c, i) { var th = 2 * Math.PI * e(Math.max(0, Math.min(1, (t - o.start - i * st) / o.duration))), cs = Math.cos(th); gsap.set(c, { scaleX: Math.abs(cs) < 0.02 ? 0.02 * Math.sign(cs || 1) : cs, scaleY: 1 + 0.05 * Math.abs(Math.sin(th)) }); c.style.color = cs < 0 ? o.accent : col; });
+        });
+      };
+  MW.textYSpinStagger = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

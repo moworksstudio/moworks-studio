@@ -1,0 +1,36 @@
+/* The music map (the beat file `hyperframes beats` writes) for the user to read: facts, one strip over the song (beats, lyric lines), the lyrics in words.
+   A beat's height is its strength as HF measured it (--s, 0..1). */
+.mm { display: flex; flex-direction: column; gap: var(--sp-4); }
+.mm .panel { gap: var(--sp-3); }
+.mm-facts { display: flex; flex-wrap: wrap; gap: var(--sp-3) var(--sp-5); margin: 0; }
+.mm-facts dt { font: var(--label-weight) var(--fs-meta) / 1.4 var(--font-label); letter-spacing: var(--label-track); text-transform: uppercase; color: var(--text-muted); }
+.mm-facts dd { margin: 0; font-size: var(--fs-control); color: var(--text-primary); }
+
+.mm-strip { display: flex; flex-direction: column; gap: 4px; padding: var(--sp-2) 0 0; }
+.mm-row { position: relative; border-radius: var(--r-sm); background: var(--surface-2); }
+.mm-beats { height: 2.5rem; display: block; overflow: hidden; }
+.mm-beat { position: absolute; bottom: 0; height: calc(20% + 80% * var(--s, 0.5)); width: 0; border-left: 1px solid var(--accent); opacity: calc(0.35 + 0.65 * var(--s, 0.5)); }
+.mm-beat.inline { position: static; display: inline-block; height: 0.9rem; vertical-align: -2px; margin-right: 0.35rem; }
+.mm-lyrics { height: 1.5rem; overflow: hidden; }
+.mm-ly { position: absolute; top: 2px; bottom: 2px; display: flex; align-items: center; padding: 0 0.35rem; overflow: hidden; white-space: nowrap;
+  font: var(--fs-meta) / 1 var(--font-num); border-radius: 3px; }
+.mm-ly, .mm-sw.ly { background: var(--accent-soft); color: var(--accent-ink); }
+.mm-axis { position: relative; height: 1.1rem; font: var(--fs-meta) / 1 var(--font-num); color: var(--text-muted); }
+.mm-axis span { position: absolute; transform: translateX(-50%); }
+.mm-axis span:first-child { transform: none; }
+.mm-legend { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-4); align-items: center; }
+.mm-sw { display: inline-block; width: 0.9rem; height: 0.6rem; border-radius: 2px; margin-right: 0.35rem; vertical-align: 0; }
+
+.mm-list { list-style: none; margin: 0; padding: 0; max-height: 46vh; overflow: auto; }
+.mm-list li { display: grid; grid-template-columns: 4.2rem 1fr; gap: var(--sp-2); padding: 0.3rem 0; border-bottom: 1px solid var(--border); font-size: var(--fs-control); }
+.mm-list li .num { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+/* The film plays part of the song: that part bracketed over the strip, the rest under a veil; lyric lines outside it dimmed */
+.mm-strip.part { position: relative; padding-top: 1.35rem; }
+.mm-out { position: absolute; top: 1.35rem; bottom: 1.1rem; z-index: 1; pointer-events: none; background: color-mix(in srgb, var(--surface-1, var(--bg)) 70%, transparent); }
+.mm-used { position: absolute; top: 0; height: 1.1rem; z-index: 1; border: 2px solid var(--accent); border-bottom: 0; border-radius: 3px 3px 0 0; pointer-events: none; }
+.mm-used b { position: absolute; left: 0.35rem; top: -0.05rem; font: var(--label-weight) var(--fs-meta) / 1 var(--font-label); letter-spacing: var(--label-track); text-transform: uppercase;
+  color: var(--accent-ink, var(--accent)); white-space: nowrap; background: var(--surface-1, var(--bg)); padding: 0 0.25rem; }
+.mm-ly.out { opacity: 0.45; }
+.mm-sw.out { background: var(--surface-2); outline: 1px dashed var(--border-strong); outline-offset: -1px; opacity: 0.7; }
+.mm-list li.out { opacity: 0.45; }

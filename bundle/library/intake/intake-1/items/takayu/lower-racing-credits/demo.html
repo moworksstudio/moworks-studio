@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Bass-style Racing Credits - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: #0b0d12; color: #e8ebf3; font-family: Inter, sans-serif; }
+.rc { position: absolute; inset: 0; transform: skewY(-11.3deg); overflow: hidden; } .rc-v { position: absolute; top: -200px; width: 2px; height: 1500px; background: rgba(139,123,255,0.18); transform-origin: 50% 0; }
+.rc-h { position: absolute; left: 0; right: 0; height: 2px; background: rgba(139,123,255,0.12); } .rc-bar { position: absolute; left: 50%; width: 550px; height: 20px; margin-left: -275px; background: #8b7bff; }
+.rc-role { position: absolute; left: 0; right: 0; top: 400px; text-align: center; font-size: 75px; font-weight: 800; color: #a99bff; letter-spacing: 0.1em; } .rc-name { position: absolute; left: 0; right: 0; top: 520px; text-align: center; font-size: 160px; font-weight: 900; letter-spacing: -0.01em; }
+.rc-ul { position: absolute; left: 50%; top: 495px; width: 520px; height: 8px; margin-left: -260px; background: #8b7bff; transform-origin: 0 50%; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.6">
+<div class="rc"><div class="rc-v" style="left:50px"></div><div class="rc-v" style="left:180px"></div><div class="rc-v" style="left:310px"></div><div class="rc-v" style="left:440px"></div><div class="rc-v" style="left:570px"></div><div class="rc-v" style="left:700px"></div><div class="rc-v" style="left:830px"></div><div class="rc-v" style="left:960px"></div><div class="rc-v" style="left:1090px"></div><div class="rc-v" style="left:1220px"></div><div class="rc-v" style="left:1350px"></div><div class="rc-v" style="left:1480px"></div><div class="rc-v" style="left:1610px"></div><div class="rc-v" style="left:1740px"></div><div class="rc-v" style="left:1870px"></div><div class="rc-h" style="top:0px"></div><div class="rc-h" style="top:120px"></div><div class="rc-h" style="top:240px"></div><div class="rc-h" style="top:360px"></div><div class="rc-h" style="top:480px"></div><div class="rc-h" style="top:600px"></div><div class="rc-h" style="top:720px"></div><div class="rc-h" style="top:840px"></div><div class="rc-h" style="top:960px"></div><div class="rc-h" style="top:1080px"></div>
+<div class="rc-bar" style="top:425px"></div><div class="rc-bar" style="top:600px"></div><div class="rc-role">ĐẠO DIỄN</div><div class="rc-ul"></div><div class="rc-name">Nguyễn Minh Anh</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"unit":5,"exitAt":3.2};
+  var run = function (el, tl, at, o) {
+        var k = o.unit, bars = el.querySelectorAll(".rc-bar"), role = el.querySelector(".rc-role"), name = el.querySelector(".rc-name"), ul = el.querySelector(".rc-ul"), vs = el.querySelectorAll(".rc-v"), p2 = gsap.parseEase("power2.out");
+        var lin = function (a, d, t) { return Math.max(0, Math.min(1, (t - a) / d)); };
+        return MW.drive(tl, at, o.exitAt + 0.4, function (t) {
+          var e = t > o.exitAt ? lin(o.exitAt, 0.16, t) : 0;
+          vs.forEach(function (v, i) { var c = Math.abs(i - (vs.length - 1) / 2); gsap.set(v, { scaleY: p2(lin(0.05 + 0.03 * c, 0.4, t)) }); });
+          gsap.set(bars[0], { x: (200 - 620 * lin(0.5, 0.4, t)) * k }); bars[0].style.opacity = t > 0.5 && t < 0.9 ? "1" : "0";
+          gsap.set(bars[1], { x: (-200 + 620 * lin(0.85, 0.4, t)) * k }); bars[1].style.opacity = t > 0.85 && t < 1.25 ? "1" : "0";
+          gsap.set(role, { x: (260 * (1 - lin(0.6, 0.27, t)) - 600 * e) * k }); role.style.opacity = t >= 0.6 ? "1" : "0";
+          gsap.set(name, { x: (-300 * (1 - lin(0.95, 0.27, t)) + 600 * e) * k }); name.style.opacity = t >= 0.95 ? "1" : "0";
+          if (ul) gsap.set(ul, { scaleX: p2(lin(0.87, 0.23, t)) * (1 - e) });
+        });
+      };
+  MW.lowerRacingCredits = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.lowerRacingCredits(q(".rc"), tl, 0, {});
+          tl.set({}, {}, 3.6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

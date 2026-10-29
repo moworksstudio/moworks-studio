@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Freeze-frame Color Drain - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: #0b0d12; color: #e8ebf3; font-family: Inter, sans-serif; }
+.fz { position: absolute; inset: 0; background: radial-gradient(90% 90% at 50% 45%, #233064, #0f1430); }
+.fz .o { position: absolute; left: 50%; top: 50%; border-radius: 50%; }
+.fz .o1 { width: 200px; height: 200px; margin: -100px; background: radial-gradient(circle at 35% 30%, #ffe08a, #ff8a3d); }
+.fz .o2 { width: 130px; height: 130px; margin: -65px; background: radial-gradient(circle at 35% 30%, #9af2ff, #2bb7e6); }
+.fz .o3 { width: 90px; height: 90px; margin: -45px; background: radial-gradient(circle at 35% 30%, #ffb3d1, #ff5d8f); }
+.fzl { position: absolute; left: 0; right: 0; top: 140px; text-align: center; font-size: 96px; font-weight: 900; letter-spacing: 0.12em; opacity: 0; }
+.fzb { position: absolute; inset: 70px 84px 130px 84px; opacity: 0; } .fzb i { position: absolute; width: 84px; height: 84px; border: 0 solid #fff; }
+.fzb i:nth-child(1) { left: 0; top: 0; border-left-width: 10px; border-top-width: 10px; } .fzb i:nth-child(2) { right: 0; top: 0; border-right-width: 10px; border-top-width: 10px; }
+.fzb i:nth-child(3) { left: 0; bottom: 0; border-left-width: 10px; border-bottom-width: 10px; } .fzb i:nth-child(4) { right: 0; bottom: 0; border-right-width: 10px; border-bottom-width: 10px; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4.2">
+<div class="fz"><div class="o o1"></div><div class="o o2"></div><div class="o o3"></div><div class="fzl">TẠM DỪNG</div><div class="fzb"><i></i><i></i><i></i><i></i></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"freezeAt":1.3,"resumeAt":3.1,"drain":0.15,"back":0.2,"label":null,"frame":null};
+  var run = function (el, tl, at, o) {
+        var out = gsap.parseEase("power2.out"), inn = gsap.parseEase("power2.in"), lab = o.label ? MW.el(o.label) : null, fr = o.frame ? MW.el(o.frame) : null, span = o.resumeAt - o.freezeAt;
+        // the scene's own motion reads its time from el.__mwTime(t): it runs, stands still from freezeAt, and resumes from the same frame
+        el.__mwTime = function (t) { return t < at + o.freezeAt ? t - at : t < at + o.resumeAt ? o.freezeAt : t - at - span; };
+        return MW.drive(tl, at, o.resumeAt + 0.2, function (t) {
+          var g = t < o.freezeAt ? 0 : t < o.freezeAt + o.drain ? out((t - o.freezeAt) / o.drain) : t < o.resumeAt - o.back ? 1 : t < o.resumeAt ? 1 - inn((t - o.resumeAt + o.back) / o.back) : 0;
+          el.style.filter = g > 0.001 ? "saturate(" + (1 - g) + ")" : "";
+          if (lab) lab.style.opacity = String(g); if (fr) fr.style.opacity = String(g);
+        });
+      };
+  MW.effectFreezeColorDrain = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          var sc = q(".fz"); MW.effectFreezeColorDrain(sc, tl, 0, { label: ".fzl", frame: ".fzb" });
+          var orb = qa(".fz .o"); MW.drive(tl, 0, 4.2, function (t) { var s = sc.__mwTime(t); orb.forEach(function (e, i) { var a = s * (1.4 + i * 0.6) + i * 2.1, r = 140 + i * 130; gsap.set(e, { x: r * Math.cos(a), y: r * 0.55 * Math.sin(a) }); }); });
+          tl.set({}, {}, 4.2);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

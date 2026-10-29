@@ -1,0 +1,26 @@
+{
+  "uid": "in:takayu/text-speed-width-slant",
+  "hash": "52b28db5fb4f78be",
+  "at": "2026-10-17T11:30:57.001Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Roboto Flex"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-speed-width-slant.mp4",
+    "poster": "previews/takayu__text-speed-width-slant.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6b761acd963ad379411a2e23a2200afdb817129a800bb0cf97dadc68527b3658",
+    "size": 16340,
+    "seconds": 29,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

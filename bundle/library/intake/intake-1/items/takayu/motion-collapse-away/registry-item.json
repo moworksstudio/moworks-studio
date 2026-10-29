@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-collapse-away",
+  "type": "hyperframes:component",
+  "title": "Collapse Away",
+  "description": "Phần tử co chiều cao về mép dưới, hơi vươn lên trước khi gập, rồi mờ hẳn.",
+  "tags": [
+    "exit",
+    "collapse",
+    "scale",
+    "entrance-exit",
+    "heavy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-collapse-away.html",
+      "target": "compositions/components/motion-collapse-away.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-collapse-away",
+    "author": "takayu",
+    "call": "MW.motionCollapseAway(q(\".cd\"), tl, 0.4, { returnAt: 1.5 });",
+    "function": "MW.motionCollapseAway",
+    "options": {
+      "duration": "s (0.56)",
+      "to": "scaleY left (0.05)",
+      "origin": "(50% 100%: the bottom edge)",
+      "ease": "(cubic-bezier(.36,0,.66,-.56): back.in, it first stretches to about 1.09)",
+      "returnAt": "s after the start to come back (null)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=collapse-away",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=collapse-away (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio collapse-away, written here): Origin bottom edge: scaleY 1 → 0.05 in 560 ms back.in (site bezier .36,0,.66,−.56: it first stretches to ~1.09), opacity 1 → 0 on the same curve, gone at ~91 % of the move. Site return: scaleY 0.05 → 1 with fade-in, 450 ms power2.out. Params: duration (0.56 s) · scaleY còn lại (0.05) · origin (50 % 100 %) · ease (back.in).",
+    "titleVi": "Gập về mép dưới rồi biến mất"
+  }
+}

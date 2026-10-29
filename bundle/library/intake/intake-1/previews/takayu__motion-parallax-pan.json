@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-parallax-pan",
+  "hash": "de8992df5d417f1c",
+  "at": "2026-10-17T08:02:41.985Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-parallax-pan.mp4",
+    "poster": "previews/takayu__motion-parallax-pan.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "bf124ce799b718536fb52992a213bd9f1f9e24088332d2b5a44d9d083ce0f4bb",
+    "size": 17256,
+    "seconds": 30.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

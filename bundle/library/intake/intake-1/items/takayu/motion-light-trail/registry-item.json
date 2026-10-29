@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-light-trail",
+  "type": "hyperframes:component",
+  "title": "Light Trail",
+  "description": "Đốm sáng bay theo cung, ba bóng mờ nhoè trễ phía sau cùng một vệt đuôi, gộp lại khi dừng.",
+  "tags": [
+    "light",
+    "trail",
+    "echo",
+    "blur",
+    "light-glow",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-light-trail.html",
+      "target": "compositions/components/motion-light-trail.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-light-trail",
+    "author": "takayu",
+    "call": "MW.motionLightTrail(q(\".gm\"), tl, 0.4, {});",
+    "function": "MW.motionLightTrail",
+    "options": {
+      "width": "units of the arc (185 of 320)",
+      "arc": "units high (34)",
+      "duration": "s (0.9), power2.out"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=light-trail",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=light-trail (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio light-trail, written here): Head (r 7 px dot, 12 px glow, 3 px bright core) travels an arc 185 px wide, 34 px high (sine) in 900 ms power2.out; three trailing copies 36 / 72 / 108 ms behind in the demo (recipe: 18 ms steps), opacity 0.45 / 0.30 / 0.18, blur ~1 / 2 / 3 px, radius 6 / 5 / 4, plus a 6 px gradient stroke over the last 90 ms of path; copies merge into the head at rest. Params: duration (0.9 s) · x (185 px) · arc (34 px) · copies (3) · delay (36 ms).",
+    "titleVi": "Đốm sáng kéo vệt đuôi"
+  }
+}

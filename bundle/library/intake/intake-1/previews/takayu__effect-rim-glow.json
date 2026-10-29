@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-rim-glow",
+  "hash": "040e470e2f27ce8f",
+  "at": "2026-10-17T08:34:42.107Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__effect-rim-glow.mp4",
+    "poster": "previews/takayu__effect-rim-glow.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c42a2a95273a040bcfc8c5f9628534f9a22ad547d4de3c1cece019e30270e243",
+    "size": 15546,
+    "seconds": 24.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

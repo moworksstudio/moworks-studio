@@ -1,0 +1,50 @@
+<!--
+  Liquid Morph (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=liquid-morph (read 12/10/2026).
+  Một khối tròn méo đi như giọt nước: bốn góc bo đổi riêng, co giãn ngang dọc rồi trở về đúng hình tròn ban đầu.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.shapeLiquidBlob(q(".lb"), tl, 0.2, {});
+
+  Options (defaults in brackets):
+      - keys: [[s, [TL, TR, BR, BL] % radii, scaleX, scaleY], ...], each leg ease-in-out cubic
+      - cycles: (2)
+      - gap: s between cycles (0.5)
+
+  Notes: Idea and numbers (TakayuStudio liquid-morph, written here): Box with per-corner radii (TL/TR/BR/BL, % of size): 50/50/50/50 -> 62/38/55/45 -> 34/66/42/58 -> 50/50/50/50 at 0 / 360 / 740 / 1100 ms, each leg easeInOutCubic; on the same keys scaleX 1 -> 1.12 -> 0.90 -> 1 and scaleY 1 -> 0.90 -> 1.10 -> 1. Ends exactly on the start shape. Params: duration (1.1 s) · amount: độ méo (12 %) · ease (power2.inOut). It ends exactly on the start shape.
+-->
+
+<div class="st"><div class="lb"></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"keys":[[0,[50,50,50,50],1,1],[0.36,[62,38,55,45],1.12,0.9],[0.74,[34,66,42,58],0.9,1.1],[1.1,[50,50,50,50],1,1]],"cycles":2,"gap":0.5};
+  var run = function (el, tl, at, o) {
+        var io = gsap.parseEase("power2.inOut"), K = o.keys, d = K[K.length - 1][0], per = d + o.gap;
+        return MW.drive(tl, at, per * o.cycles, function (t) {
+          var u = Math.min(d, t % per), i = 1; while (i < K.length - 1 && u > K[i][0]) i++; var a = K[i - 1], b = K[i], f = io(Math.max(0, Math.min(1, (u - a[0]) / (b[0] - a[0]))));
+          el.style.borderRadius = a[1].map(function (v, j) { return (v + (b[1][j] - v) * f).toFixed(2) + "%"; }).join(" "); gsap.set(el, { scaleX: a[2] + (b[2] - a[2]) * f, scaleY: a[3] + (b[3] - a[3]) * f });
+        });
+      };
+  MW.shapeLiquidBlob = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

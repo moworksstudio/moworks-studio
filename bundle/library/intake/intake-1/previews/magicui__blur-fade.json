@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/blur-fade",
+  "hash": "e494dc9f7106ef13",
+  "at": "2026-10-17T05:56:11.326Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__blur-fade.mp4",
+    "poster": "previews/magicui__blur-fade.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "9048048f8ac934e093a0de4739551fcc0f7e485c68d50b8fba1ebd035b65531f",
+    "size": 16570,
+    "seconds": 28.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

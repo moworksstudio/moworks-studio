@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Anticipated Move - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; }
+.fl { position: absolute; left: 160px; right: 160px; top: 760px; height: 4px; border-radius: 2px; background: #262c3a; } .am { position: absolute; left: 420px; top: 560px; width: 200px; height: 200px; border-radius: 36px; background: linear-gradient(150deg, #a693ff, #6a4cf0); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.6">
+<div class="fl"></div><div class="am"></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"pull":-150,"pullTime":0.148,"x":810,"duration":0.82,"stretch":0.28,"speedFull":2500,"fadeAt":1.8};
+  var run = function (el, tl, at, o) {
+        var p1 = gsap.parseEase("power1.out"), io = gsap.parseEase("power2.inOut"), a = o.pullTime; gsap.set(el, { transformOrigin: "50% 100%" });
+        var X = function (t) { if (t <= 0) return 0; if (t < a) return o.pull * p1(t / a); return o.pull + (o.x - o.pull) * io(Math.min(1, (t - a) / (o.duration - a))); };
+        return MW.drive(tl, at, o.fadeAt + 0.45, function (t) { var x = X(t), v = (X(t + 0.005) - X(t - 0.005)) / 0.01, sx = 1 - 0.12 * (t > 0 && t < 0.2 ? Math.sin(Math.PI * t / 0.2) : 0) + Math.min(o.stretch, Math.max(0, v) / o.speedFull * o.stretch), f = Math.max(0, Math.min(1, (t - o.fadeAt) / 0.2)), back = Math.max(0, Math.min(1, (t - o.fadeAt - 0.2) / 0.25));
+          gsap.set(el, { x: back > 0 ? 0 : x, scaleX: back > 0 ? 1 : sx, scaleY: back > 0 ? 1 : 1 / sx }); el.style.opacity = String(back > 0 ? back : 1 - f); });
+      };
+  MW.motionAnticipationMove = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionAnticipationMove(q(".am"), tl, 0.3, {});
+          tl.set({}, {}, 2.6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

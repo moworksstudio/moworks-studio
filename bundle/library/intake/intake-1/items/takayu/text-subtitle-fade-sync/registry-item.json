@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-subtitle-fade-sync",
+  "type": "hyperframes:component",
+  "title": "Forced-Narrative Fade Sync",
+  "description": "Phụ đề dịch chữ trên màn hình (biển, bảng) hiện và tắt mờ 0.3 giây, canh đúng điểm giữa lúc biển hiệu trong cảnh hiện và tắt.",
+  "tags": [
+    "subtitle",
+    "fade",
+    "sync",
+    "sign",
+    "text-captions-subtitles",
+    "smooth",
+    "captions-subtitles",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-subtitle-fade-sync.html",
+      "target": "compositions/components/text-subtitle-fade-sync.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-subtitle-fade-sync",
+    "author": "takayu",
+    "call": "MW.textSubtitleFadeSync(q(\".fs\"), tl, 0, { sign: \".sg\" });",
+    "function": "MW.textSubtitleFadeSync",
+    "options": {
+      "fade": "s each fade (0.3), centred on the sign's own fade",
+      "sign": "the sign in the shot",
+      "signIn": "[from, to] s the sign fades in ([0.4, 1.0])",
+      "signOut": "[from, to] s it fades out ([2.8, 3.4])",
+      "loop": "s (4.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-forced-narrative-fade",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-forced-narrative-fade (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-forced-narrative-fade, written here): On-screen sign fades in 0.4–1.0 s and out 2.8–3.4 s (linear). The subtitle (17 px bold, dark outline, 1 line) fades in 0.55–0.85 s and out 2.95–3.25 s, 0.3 s linear each, centred on the sign's fade midpoints (0.7 s and 3.1 s); it must end ≥ 2 frames before a shot change. Optional bracketed label such as [SIGN]. Loop 4.6 s. ASS: \\fad(300,300). Params: thời gian mờ (0.3 s) · canh giữa theo cảnh · kết thúc trước điểm cắt (2 khung). The subtitle must end at least 2 frames before a shot change.",
+    "titleVi": "Phụ đề dịch biển hiệu mờ theo hình"
+  }
+}

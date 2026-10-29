@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-neon-flicker",
+  "type": "hyperframes:component",
+  "title": "Neon Flicker-On",
+  "description": "Chữ như ống đèn neon tắt, từng ký tự chập chờn sáng tắt không đều trong khoảng 0.6 giây rồi sáng hẳn, hắt ánh lên tường.",
+  "tags": [
+    "glow",
+    "neon",
+    "flicker",
+    "light",
+    "text-colour-light",
+    "crisp",
+    "colour-light",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-neon-flicker.html",
+      "target": "compositions/components/text-neon-flicker.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-neon-flicker",
+    "author": "takayu",
+    "call": "MW.textNeonFlicker(q(\".nf\"), tl, 0, {});",
+    "function": "MW.textNeonFlicker",
+    "options": {
+      "stagger": "s between letters (0.08)",
+      "start": "s (0.35)",
+      "accent": "neon colour",
+      "core": "lit core colour",
+      "bg": "wall colour",
+      "offAt": "s (3.0)",
+      "wall": "a glow layer on the wall",
+      "wallGlow": "(0.22) × the average level",
+      "seed": "which flicker pattern each letter takes",
+      "loop": "s (3.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-neon-flicker",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-neon-flicker (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-neon-flicker, written here): Unlit: fill accent 82 % toward the background with a 1.2 px stroke at 60 %. Lit: colour + glows 4 / 11 / 19 / 40 px (CSS text-shadow, whitish core #fff4fb; demo blurs 18 / 8 / 3 px). Each char starts 80 ms after the previous (from 0.35 s) and steps through one of 3 seeded level patterns, e.g. 1 → 0.15 → 1 → 0.35 → 1 at 0 / 160 / 240 / 520 / 600 ms, then stays lit (<3 flashes/s). Wall glow: radial accent 22 % × average level. Off 3.0–3.25 s; loop 3.6 s. Params: glow: ba lớp sáng (4 / 11 / 19 px, thêm 40 px) · stagger: giữa các ký tự (0.08 s) · flicker (0.5–0.66 s) · wall: hắt sáng tường (22 %). Under three flashes a second; each letter settles lit after about 0.6 s.",
+    "titleVi": "Đèn neon chập chờn rồi sáng hẳn"
+  }
+}

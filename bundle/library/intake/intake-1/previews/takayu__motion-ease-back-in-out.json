@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-ease-back-in-out",
+  "hash": "9c152bd01c787fd1",
+  "at": "2026-10-17T09:01:51.998Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-ease-back-in-out.mp4",
+    "poster": "previews/takayu__motion-ease-back-in-out.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "d0d6e768859601a93dc066910df74c9d0100ef9be961c57f706a38bfb2eac7b0",
+    "size": 9662,
+    "seconds": 25.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

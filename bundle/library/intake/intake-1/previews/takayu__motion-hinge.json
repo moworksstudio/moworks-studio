@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-hinge",
+  "hash": "c2fc0e4cb4783cae",
+  "at": "2026-10-17T08:01:32.418Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-hinge.mp4",
+    "poster": "previews/takayu__motion-hinge.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "7583c1a5fb7e1b60c3ef2448ec6316329db767ae73571db7fa8029658c73ed66",
+    "size": 19207,
+    "seconds": 34.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

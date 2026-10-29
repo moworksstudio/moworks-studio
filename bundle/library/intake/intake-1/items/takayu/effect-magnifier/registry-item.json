@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-magnifier",
+  "type": "hyperframes:component",
+  "title": "Depth Lens",
+  "description": "Một kính lúp tròn có tay cầm lướt trên nội dung, bên trong kính chính nội dung đó hiện to gấp đôi, dừng ở từng điểm cần soi.",
+  "tags": [
+    "magnifier",
+    "lens",
+    "zoom",
+    "annotation",
+    "spatial-ui-depth",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-magnifier.html",
+      "target": "compositions/components/effect-magnifier.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-magnifier",
+    "author": "takayu",
+    "call": "MW.effectMagnifier(q(\".mp\"), tl, 0, {});",
+    "function": "MW.effectMagnifier",
+    "options": {
+      "zoom": "× inside the lens (2)",
+      "radius": "px (190)",
+      "rim": "px (8)",
+      "fill": "the lens' plain fill",
+      "path": "[[s, x, y], ...] in the content's 320-wide units",
+      "loop": "s (4.2)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-spatial-depth-lens",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-spatial-depth-lens (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-spatial-depth-lens, written here): Round lens r36 over the content: inside it the same content scaled 2× about the lens centre (grid 16 → 32 px), on a plain fill. Lens moves (92,92) → (196,124) at 0.3-1.0 s, to (236,72) at 1.9-2.6 s, back by 3.4-4.1 s, power2.inOut. 2 px accent rim, 12 px handle (4 px, round cap) at 45°, a '2×' pill 30x13 above. Params: zoom (2×) · radius (36 px) · path [[giây, x, y]] · move (0.7 s, power2.inOut) · rim (2 px).",
+    "titleVi": "Kính lúp phóng to nội dung"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-flip-reorder",
+  "hash": "2a5cd712f751b3dc",
+  "at": "2026-10-17T08:17:25.091Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-flip-reorder.mp4",
+    "poster": "previews/takayu__motion-flip-reorder.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "698a675347bf5cd251d21cec190eef6d73649dac77f7de100475eca1600016de",
+    "size": 23314,
+    "seconds": 30.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

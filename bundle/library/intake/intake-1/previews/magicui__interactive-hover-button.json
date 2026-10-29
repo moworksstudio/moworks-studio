@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/interactive-hover-button",
+  "hash": "9c20b59ab1c595c6",
+  "at": "2026-10-17T06:16:57.260Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__interactive-hover-button.mp4",
+    "poster": "previews/magicui__interactive-hover-button.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "5601738b381068fa1e08f9a2e42e72e9bc03040bbf57c6b93e5d6166d06d31d8",
+    "size": 11472,
+    "seconds": 162.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

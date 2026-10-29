@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/tilt-pop",
+  "hash": "ec1ea96c47b11790",
+  "at": "2026-10-17T06:38:48.207Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Archivo"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__tilt-pop.mp4",
+    "poster": "previews/codrops__tilt-pop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f4d5452a06009f14fbb1f76d6738764ff8711d9909283cf7b46bd632709287fe",
+    "size": 11728,
+    "seconds": 33.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

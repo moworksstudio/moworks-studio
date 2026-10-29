@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Radial Flash - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.ui-cursor { position: absolute; left: 0; top: 0; z-index: 30; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5)); }
+.rf { position: absolute; inset: 0; display: grid; place-items: center; } .rf-s { width: 300px; height: 300px; background: linear-gradient(160deg, #ffe39a, #ffb547); clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.4">
+<div class="gm rf"><div class="rf-s"></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  var defaults = {"unit":5,"color":"#ffd23d","color2":"#a99bff"};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, cv = MW.canvas(host), c = cv.ctx, ex = gsap.parseEase("expo.out"); cv.cv.style.zIndex = "1"; el.style.position = el.style.position || "relative"; el.style.zIndex = "2";
+        return MW.drive(tl, at, 0.6, function (t) {
+          var cx = el.offsetLeft + el.offsetWidth / 2, cy = el.offsetTop + el.offsetHeight / 2, k = o.unit, bump = t < 0.32 ? Math.pow(Math.sin(Math.PI * t / 0.32), 0.7) : 0, sc = t < Math.PI / 22 ? 1 + 0.14 * Math.exp(-7 * t) * Math.sin(22 * t) : 1;
+          el.style.filter = "brightness(" + (1 + 1.2 * bump) + ") drop-shadow(0 0 " + 40 * bump + "px " + o.color + ")"; gsap.set(el, { scale: sc });
+          c.clearRect(0, 0, cv.w, cv.h); var d = t - 0.06;
+          if (d > 0 && d < 0.5) { var q = ex(d / 0.5); c.globalAlpha = 0.9 * (1 - d / 0.5); c.strokeStyle = o.color; c.lineWidth = (4 - 3 * q) * k / 2; c.beginPath(); c.arc(cx, cy, (0.2 + 2.1 * q) * 40 * k, 0, 2 * Math.PI); c.stroke(); }
+          if (t < 0.35) { var r2 = ex(t / 0.35); c.globalAlpha = 1 - t / 0.35; for (var i = 0; i < 12; i++) { var a = i / 12 * 2 * Math.PI, R0 = (i % 2 ? 36 : 30) * k, R1 = (i % 2 ? 88 : 60) * k; c.strokeStyle = i % 2 ? o.color2 : o.color; c.lineWidth = 2 * k / 2; c.lineCap = "round"; c.beginPath(); c.moveTo(cx + Math.cos(a) * (R0 + (R1 - R0) * r2 * 0.6), cy + Math.sin(a) * (R0 + (R1 - R0) * r2 * 0.6)); c.lineTo(cx + Math.cos(a) * (R0 + (R1 - R0) * r2), cy + Math.sin(a) * (R0 + (R1 - R0) * r2)); c.stroke(); } }
+          c.globalAlpha = 1;
+        });
+      };
+  MW.effectRadialFlash = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.effectRadialFlash(q(".rf-s"), tl, 0.5, {}); MW.effectRadialFlash(q(".rf-s"), tl, 1.6, {});
+          tl.set({}, {}, 2.4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

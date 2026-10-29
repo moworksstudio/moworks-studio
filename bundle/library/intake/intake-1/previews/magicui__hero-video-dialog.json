@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/hero-video-dialog",
+  "hash": "624c3ccdca9820d0",
+  "at": "2026-10-17T06:30:19.795Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/magicui__hero-video-dialog.mp4",
+    "poster": "previews/magicui__hero-video-dialog.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "09c796216b7bbd48fc0a8127ed4ff02f42a6281240ffe31e561b630d1a728802",
+    "size": 27944,
+    "seconds": 40,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-spinner-arc",
+  "hash": "d82b2679fc3b7b1e",
+  "at": "2026-10-17T11:26:40.018Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-spinner-arc.mp4",
+    "poster": "previews/takayu__ui-spinner-arc.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ccd32b996edcc0dd041875fa7b1fc8c3b4e5acf6f244e27858db8f3bcd54c47d",
+    "size": 8058,
+    "seconds": 32.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

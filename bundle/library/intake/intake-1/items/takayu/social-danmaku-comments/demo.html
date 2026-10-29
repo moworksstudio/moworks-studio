@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Danmaku Comment Scroll - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; }
+.ft { position: absolute; inset: 0; background: url(assets/shot.svg) center / cover; } .ft::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.15) 30%, rgba(0,0,0,0.55)); }
+.dm { position: absolute; left: 0; right: 0; top: 40px; height: 820px; overflow: hidden; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4">
+<div class="ft"></div><div class="dm"></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"comments":[[0,"Đẹp quá trời!",0],[2,"Chỗ này ở đâu vậy",0.3],[4,"8888",0.7],[1,"Ước gì được đi",1.1],[3,"Nhạc hay ghê",1.5],[5,"Lần đầu xem kênh",1.9],[0,"Bình minh luôn",2.2],[2,"Cho xin tên bài",2.5],[4,"Like mạnh!",2.9],[5,"Quay bằng gì thế?",3.3]],"lanes":6,"cross":3.5,"cycle":4,"loops":1,"size":52,"accent":"#ffd23d"};
+  var run = function (el, tl, at, o) {
+        var W = el.clientWidth, lh = el.clientHeight / o.lanes, C = o.comments.map(function (c, i) { var s = document.createElement("span"); s.textContent = c[1]; s.style.cssText = "position:absolute;left:0;white-space:nowrap;font-weight:800;font-size:" + o.size + "px;-webkit-text-stroke:0.2em #0b0d12;paint-order:stroke fill;color:" + (i === 0 ? o.accent : "#fff") + ";top:" + (c[0] * lh + (lh - o.size * 1.2) / 2) + "px;"; el.appendChild(s); return { s: s, st: c[2], w: s.offsetWidth }; });
+        return MW.drive(tl, at, o.cycle * o.loops, function (t) {
+          C.forEach(function (q) { var u = (((t - q.st) % o.cycle) + o.cycle) % o.cycle, on = u < o.cross; gsap.set(q.s, { x: W - (W + q.w) * Math.min(1, u / o.cross) }); q.s.style.visibility = on ? "visible" : "hidden"; });
+        });
+      };
+  MW.socialDanmakuComments = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.socialDanmakuComments(q(".dm"), tl, 0, {});
+          tl.set({}, {}, 4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

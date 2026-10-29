@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "flow-day-night-toggle",
+  "type": "hyperframes:block",
+  "title": "Day and Night",
+  "description": "Bật chế độ tối: núm mặt trời lăn sang vừa xoay, tia nắng thu lại thành mặt trăng khuyết, bầu trời xanh tắt, mây chìm xuống và sao lần lượt bật lên.",
+  "tags": [
+    "toggle",
+    "dark mode",
+    "icon",
+    "morph",
+    "selection-controls",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "flow-day-night-toggle.html",
+      "target": "compositions/components/flow-day-night-toggle.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/flow-day-night-toggle",
+    "author": "takayu",
+    "call": "MW.flowDayNightToggle(q(\".gm\"), tl, 0, {});",
+    "function": "MW.flowDayNightToggle",
+    "options": {
+      "onAt": "s (0.3)",
+      "offAt": "s (1.7)",
+      "duration": "s (0.6, power2.inOut)",
+      "label": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-control-day-night",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-control-day-night (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-control-day-night, written here): Track 140x60 (radius 30); knob r15 moves x +80 px with rotation 0 → 135° over 0.6 s power2.inOut (0.3-0.9 s). Sun: 8 rays shrink 6 → 0 px over the first half; from 40 % the knob tints to night and the crescent is a sky-coloured circle r13 sliding in. Sky blue overlay 55 % → 0; two clouds sink 26 px and fade (0.1 apart); 5 stars pop (back.out) at 35 % + 10 % each of progress. Reverse at 1.7 s. Params: duration (0.6 s, power2.inOut) · travel (80 px) · rotate (135°) · stars (5). The knob rolls 80 units turning 135°; the rays shrink in the first half, the crescent slides in from 40 %, clouds sink and five stars pop.",
+    "titleVi": "Công tắc ngày đêm, mặt trời thành trăng"
+  }
+}

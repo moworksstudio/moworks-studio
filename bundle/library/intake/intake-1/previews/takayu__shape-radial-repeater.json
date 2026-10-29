@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/shape-radial-repeater",
+  "hash": "46177254e8d15555",
+  "at": "2026-10-17T08:58:00.184Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__shape-radial-repeater.mp4",
+    "poster": "previews/takayu__shape-radial-repeater.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b27a74f5c234864f4e2b29fa9ce1e9b2cd9aeeeaff5ca584b10214f2c8e95490",
+    "size": 24180,
+    "seconds": 30.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "shiny-button",
+  "type": "hyperframes:component",
+  "title": "Shiny Button",
+  "description": "An outlined button that pops in with a bounce while a gleam sweeps across its label again and again.",
+  "tags": [
+    "button",
+    "cta",
+    "shine",
+    "gleam",
+    "pop",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "shiny-button.html",
+      "target": "compositions/components/shiny-button.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/shiny-button",
+    "author": "magicui",
+    "call": "MW.shinyButton(q(\".mw-shiny-button\"), tl, 0.3, { hold: 7.5 });",
+    "function": "MW.shinyButton",
+    "options": {
+      "color": "label colour (rgba(255,255,255,0.9))",
+      "hold": "seconds (8)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/shiny-button.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/shiny-button.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is the button. Upstream's border gleam does not render (invalid CSS) and is not ported.",
+    "titleVi": "Nút viền có ánh lấp lánh quét nhãn"
+  }
+}

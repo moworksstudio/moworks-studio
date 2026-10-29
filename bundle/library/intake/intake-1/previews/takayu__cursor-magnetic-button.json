@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/cursor-magnetic-button",
+  "hash": "7177dde3123ee92f",
+  "at": "2026-10-17T10:05:49.396Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__cursor-magnetic-button.mp4",
+    "poster": "previews/takayu__cursor-magnetic-button.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "0980eb31cf98c4c0d3c637d1e7872f53be836c1ccadac30a177f13fa4b3f897f",
+    "size": 16742,
+    "seconds": 28.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

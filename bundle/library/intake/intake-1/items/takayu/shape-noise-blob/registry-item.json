@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "shape-noise-blob",
+  "type": "hyperframes:component",
+  "title": "Noise Blob",
+  "description": "Một khối tròn có viền gợn mềm theo nhiễu, uốn éo liên tục và lặp liền mạch.",
+  "tags": [
+    "blob",
+    "noise",
+    "organic",
+    "loop",
+    "svg-path",
+    "soft",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "shape-noise-blob.html",
+      "target": "compositions/components/shape-noise-blob.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/shape-noise-blob",
+    "author": "takayu",
+    "call": "MW.shapeNoiseBlob(q(\".nb-p\"), tl, 0, {});",
+    "function": "MW.shapeNoiseBlob",
+    "options": {
+      "radius": "(52) in the SVG's units",
+      "amp": "(20)",
+      "loop": "s (4), seamless",
+      "loops": "(1)",
+      "cx": "(160)",
+      "cy": "(100)",
+      "seed": "shape"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=sh-blob",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=sh-blob (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio sh-blob, written here): Closed blob of 80 points: radius 52 px +- 20 px from smooth noise sampled around the circle; the noise time axis moves 0.5/s and loops every 4 s (sample noise on a circle in time so the last frame equals the first). Params: radius (52 px) · amp (±20 px) · loop (4 s) · seed.",
+    "titleVi": "Khối mềm gợn theo nhiễu"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-segment-tint",
+  "hash": "4e264729a5757728",
+  "at": "2026-10-17T10:35:25.267Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-segment-tint.mp4",
+    "poster": "previews/takayu__ui-segment-tint.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "2a11bbef4858f4e05ef168efe8e2e30d92c544db2344fe1be8994743834e20b3",
+    "size": 12538,
+    "seconds": 15.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

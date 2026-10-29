@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-liquid-tab-blob",
+  "type": "hyperframes:block",
+  "title": "Liquid Blob",
+  "description": "Chỉ báo là hai giọt tròn dính nhau: giọt trước lao sang tab mới, giọt sau gom theo, cổ chất lỏng kéo dài rồi đứt, tới nơi thì rung nhẹ.",
+  "tags": [
+    "indicator",
+    "gooey",
+    "liquid",
+    "tabs",
+    "selection-controls",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-liquid-tab-blob.html",
+      "target": "compositions/components/ui-liquid-tab-blob.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-liquid-tab-blob",
+    "author": "takayu",
+    "call": "MW.uiLiquidTabBlob(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiLiquidTabBlob",
+    "options": {
+      "moves": "[[s, from, to], ...]",
+      "labels": "",
+      "accent": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-control-liquid-blob",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-control-liquid-blob (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-control-liquid-blob, written here): Pill bar 240x56 r28, tabs 72 px apart. Lead circle moves in 300 ms power2.out; trail circle starts 120 ms later and takes 380 ms power2.inOut. Radii shrink with the gap: lead 22 − 5 s, trail 22 − 9 s (s = gap / 72); a liquid neck joins them. On arrival (0.5 s after start) a scale wobble scaleX 1 + w, scaleY 1 − w, w = 0.14 × e^(−8 t) × sin(30 t). Labels flip to dark within 26 px of either circle. Moves at 0.3, 1.15, 2.0 s. Params: lead (0.3 s, power2.out) · trail (0.38 s, trễ 0.12 s) · radius (22 px) · wobble (±14 %). The lead drop moves in 0.3 s (power2.out), the trailing drop 0.12 s later in 0.38 s; both shrink with the gap; a wobble 0.14 e^(−8 t) sin 30 t on arrival.",
+    "titleVi": "Chỉ báo tab dạng giọt chất lỏng"
+  }
+}

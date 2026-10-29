@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-stretch-rise",
+  "type": "hyperframes:component",
+  "title": "Stretch Rise",
+  "description": "Từng ký tự vọt lên từ dưới, cao và hẹp lại, vượt nhẹ rồi về đúng tỉ lệ như co giãn hoạt hình.",
+  "tags": [
+    "reveal",
+    "letters",
+    "stretch",
+    "squash",
+    "text-reveal",
+    "bouncy",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-stretch-rise.html",
+      "target": "compositions/components/text-stretch-rise.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-stretch-rise",
+    "author": "takayu",
+    "call": "MW.textStretchRise(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textStretchRise",
+    "options": {
+      "y": "% of the letter it rises (120)",
+      "sy": "scaleY at the start (2.3)",
+      "sx": "scaleX at the start (0.7)",
+      "duration": "s (0.9, back.inOut(2))",
+      "stagger": "s (0.05)",
+      "cap": "s (0.7)",
+      "ease": "",
+      "start": "s (0.3)",
+      "outAt": "s (2.65)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-stretch-rise",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-stretch-rise (read 12/10/2026)",
+      "upstream": "the site credits react-bits (MIT + Commons Clause): written from the idea only, no react-bits code"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-stretch-rise, written here): Split chars, pivot top centre; each char from y +120 % (1.2 em), scaleY 2.3, scaleX 0.7 → 0, 1, 1, opacity full by 60 % (×1.6), 0.9 s back.inOut(2) (CSS cubic-bezier(.68,−.6,.32,1.6)); stagger 30 ms (demo 50 ms capped 0.7 s), from 0.3 s; chars hidden below a floor just under the baseline. The overshoot reads as a brief squash (scaleY < 1). Loop exit: fade 2.65–2.95 s; loop 3 s. Params: duration (0.9 s) · stagger (0.03 s) · scaleY / scaleX đầu (2.3 / 0.7) · y (120 %) · ease (back.inOut(2)). Pivot at the top; letters are hidden below a floor at the word's bottom edge, and the overshoot reads as a brief squash.",
+    "titleVi": "Ký tự vọt lên, co giãn về dáng"
+  }
+}

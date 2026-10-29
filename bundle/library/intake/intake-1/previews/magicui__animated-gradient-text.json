@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/animated-gradient-text",
+  "hash": "d4743e6b46c413f3",
+  "at": "2026-10-17T05:55:38.067Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__animated-gradient-text.mp4",
+    "poster": "previews/magicui__animated-gradient-text.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "14dce8e612a29aa5dd84c83c8cc022c9cb5bd9c1edac4fa67d6ec97cfb6eedb8",
+    "size": 51710,
+    "seconds": 33.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

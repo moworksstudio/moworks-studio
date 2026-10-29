@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "video-text",
+  "type": "hyperframes:component",
+  "title": "Video Text",
+  "description": "Big text used as a window onto a video: the footage plays only inside the letters (bold, centred, fitted to the box).",
+  "tags": [
+    "video",
+    "mask",
+    "knockout",
+    "title",
+    "footage",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "video-text.html",
+      "target": "compositions/components/video-text.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/video-text",
+    "author": "magicui",
+    "call": "MW.videoText(q(\".mw-video-text\"), tl, 0, { fontSize: 300, fontWeight: 900 });",
+    "function": "MW.videoText",
+    "options": {
+      "text": "the word (the holder's data-text)",
+      "fontSize": "px (fits the box: 0.8 x height)",
+      "fontWeight": "bold",
+      "font": "sans-serif family (Inter)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/video-text.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/video-text.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "The <video> is a normal HyperFrames clip (class clip, data-start, data-duration, muted) inside an untimed holder. The mask is drawn with the font named in `font`, so give the film a font with Vietnamese letters.",
+    "titleVi": "Video chạy bên trong nét chữ"
+  }
+}

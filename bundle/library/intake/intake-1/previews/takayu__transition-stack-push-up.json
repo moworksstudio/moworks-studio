@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/transition-stack-push-up",
+  "hash": "e9c23c1e54d1fc98",
+  "at": "2026-10-17T08:18:19.766Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__transition-stack-push-up.mp4",
+    "poster": "previews/takayu__transition-stack-push-up.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "9ef9c5d2edd284dffcdb4a494b3b2856e4c4a03e22a11fe27c53c74e912f9502",
+    "size": 20859,
+    "seconds": 26.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

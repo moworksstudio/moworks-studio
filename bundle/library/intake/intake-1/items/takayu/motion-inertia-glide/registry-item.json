@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-inertia-glide",
+  "type": "hyperframes:component",
+  "title": "Inertia / Momentum",
+  "description": "Thẻ được kéo rồi thả, trượt tiếp theo đà và dừng dần theo hàm mũ, đúng vào một khấc.",
+  "tags": [
+    "inertia",
+    "throw",
+    "snap",
+    "springs",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-inertia-glide.html",
+      "target": "compositions/components/motion-inertia-glide.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-inertia-glide",
+    "author": "takayu",
+    "call": "MW.motionInertiaGlide(q(\".ig\"), tl, 0, {});",
+    "function": "MW.motionInertiaGlide",
+    "options": {
+      "start": "s the drag starts (0.5)",
+      "drag": "px dragged (250)",
+      "dragTime": "s (0.4), linear",
+      "tau": "s time constant of the glide (0.3)",
+      "throw": "px of the natural glide (700)",
+      "snap": "px slot it lands on (240)",
+      "backAt": "s it returns (2.6)",
+      "cursor": ""
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=s-inertia",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=s-inertia (read 12/10/2026)",
+      "upstream": "the site credits GSAP"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio s-inertia, written here): Card dragged 50 px by a cursor (400 ms, linear), then released: it glides on x = release + D·(1 − e^(−t/τ)) and stops exactly on a slot tick (D chosen so the end lands on the 48 px grid). Recipe: τ 700 ms, power 0.8, end snapped (modifyTarget). Site demo: τ 250 ms, D 142 px. Params: tau: hằng số thời gian (0.7 s) · power (0.8) · snap: bước khấc (48 px). After release x = release + D (1 − e^(−t/τ)), normalised over 6 τ so it stops exactly on the slot (D chosen so the end lands on the grid).",
+    "titleVi": "Quán tính: ném rồi trượt dừng"
+  }
+}

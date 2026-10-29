@@ -1,0 +1,53 @@
+<!--
+  Long Shadow Grow (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-long-shadow-grow (read 12/10/2026).
+  Một bóng dài chéo 45° mọc ra sau chữ trong 0.8 giây, càng xa càng nhạt dần về màu nền.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textLongShadow(q(".tk-head"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - length: px (144)
+      - step: px between copies (3)
+      - duration: s it grows (0.8, power2.out)
+      - retractAt: s after the start (2.2, 0.4 s ease-in cubic)
+      - color: shadow colour
+      - bg: the background it fades into
+
+  Notes: Idea and numbers (TakayuStudio tx-long-shadow-grow, written here): Stack of copies (or text-shadows) behind the text, copy k offset (k px, k px) at 45° (demo every 0.75 px); length L grows 0 → 60 px (demo ≤ 48 px, limited by space) over 0.8 s power2.out (easeOutCubic); copies are accent mixed toward the background by 30 % → 85 % with distance (a colour fade, not opacity); main text on top. Demo grows 0.3–1.1 s, retracts 2.5–2.9 s (inCubic); loop 3.2 s. Params: length: độ dài bóng (60 px) · angle (45°) · duration (0.8 s, ease-out) · color: màu bóng (màu nhấn). A colour fade with distance (30 % → 85 % toward the background), not opacity.
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">BÓNG DÀI</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"length":144,"step":3,"duration":0.8,"retractAt":2.2,"color":"#8b7bff","bg":"#12141f"};
+  var run = function (el, tl, at, o) {
+        var p2 = gsap.parseEase("power2.out"), mix = gsap.utils.interpolate(o.color, o.bg);
+        return MW.drive(tl, at, o.retractAt + 0.4, function (t) {
+          var L = o.length * (p2(Math.max(0, Math.min(1, t / o.duration))) - Math.pow(Math.max(0, Math.min(1, (t - o.retractAt) / 0.4)), 3)), sh = [];
+          for (var k = o.step; k <= L; k += o.step) sh.push(k.toFixed(1) + "px " + k.toFixed(1) + "px 0 " + mix(0.3 + 0.55 * k / o.length)); el.style.textShadow = sh.length ? sh.join(", ") : "none";
+        });
+      };
+  MW.textLongShadow = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

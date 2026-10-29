@@ -1,0 +1,66 @@
+<!--
+  Noise Resolve (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=noise-reveal (read 12/10/2026).
+  Một đám hạt nhiễu phủ quanh chủ thể rồi thưa dần và tan, trong lúc chủ thể hết nhoè và đậm dần lên.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectNoiseResolve(q(".nr"), tl, 0.2, { exitAt: 2 });
+
+  Options (defaults in brackets):
+      - duration: s (1, ease-out sine)
+      - amount: grain opacity at the start (0.85)
+      - count: grains (420)
+      - speck: px (6)
+      - margin: px of grain field around the element (140)
+      - blur: px (24)
+      - ink: 
+      - accent: every third grain
+      - seed: (4)
+      - exitAt: s after the start to fade (null)
+
+  Notes: Idea and numbers (TakayuStudio noise-reveal, written here): Grain specks (1.6 px) in a disc ~64 px around the subject fade in over 250 ms while the subject shows at 20 %. Then over 1000 ms easeOutSine: speck opacity 0.85 -> 0 and count 420 -> 0, re-seeded 24 times / s (2 in 3 in the light ink colour, 1 in 3 accent); subject blur 8 px -> 0 and opacity 0.2 -> 1, all ending together. Exit 250 ms ease-in cubic. DOM keyframes also scale the subject 0.96 -> 1. Params: duration (1 s) · amount: độ đậm hạt (0.85) · blur (8 px) · seed. The grains are re-seeded 24 times a second.
+-->
+
+<div class="st"><div class="nr">M</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":1,"amount":0.85,"count":420,"speck":6,"margin":140,"blur":24,"ink":"#e8ebf3","accent":"#8b7bff","seed":4,"exitAt":null};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, si = gsap.parseEase("sine.out"), pi = gsap.parseEase("power3.in"), cv = document.createElement("canvas"); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        var m = o.margin, W = el.offsetWidth + 2 * m, Hh = el.offsetHeight + 2 * m; cv.width = W; cv.height = Hh; cv.style.cssText = "position:absolute;pointer-events:none;left:" + (el.offsetLeft - m) + "px;top:" + (el.offsetTop - m) + "px;width:" + W + "px;height:" + Hh + "px;"; host.appendChild(cv);
+        var c = cv.getContext("2d"), R = Math.max(W, Hh) / 2;
+        return MW.drive(tl, at, o.exitAt == null ? 0.25 + o.duration : o.exitAt + 0.25, function (t) {
+          var f = Math.floor(t * 24), r = MW.rand(o.seed * 101 + f), fin = Math.min(1, t / 0.25), p = si(Math.max(0, Math.min(1, (t - 0.25) / o.duration))), x = o.exitAt != null && t > o.exitAt ? pi(Math.min(1, (t - o.exitAt) / 0.25)) : 0;
+          c.clearRect(0, 0, W, Hh); var n = Math.round(o.count * (1 - p)), a = o.amount * fin * (1 - p);
+          if (t > 0 && a > 0.005) for (var i = 0; i < n; i++) { var ang = r() * 2 * Math.PI, d = Math.sqrt(r()) * R; c.globalAlpha = a; c.fillStyle = r() < 0.667 ? o.ink : o.accent; c.fillRect(W / 2 + d * Math.cos(ang), Hh / 2 + d * Math.sin(ang), o.speck, o.speck); }
+          c.globalAlpha = 1; var vis = t > 0 ? (0.2 + 0.8 * p) * (1 - x) : 0; el.style.opacity = String(vis); el.style.filter = p < 1 ? "blur(" + (o.blur * (1 - p)).toFixed(2) + "px)" : ""; gsap.set(el, { scale: 0.96 + 0.04 * p });
+        });
+      };
+  MW.effectNoiseResolve = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

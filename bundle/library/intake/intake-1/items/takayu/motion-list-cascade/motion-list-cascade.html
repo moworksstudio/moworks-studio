@@ -1,0 +1,51 @@
+<!--
+  Cascade List (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=list-cascade (read 12/10/2026).
+  Bốn dòng từ trên rơi xuống, lún quá 3 px rồi về chỗ, mỗi dòng trễ 60 ms.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionListCascade(q(".lc"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - items: 
+      - from: px (−80)
+      - dip: px it dips past (12)
+      - stagger: s (0.06)
+      - cols: 
+
+  Notes: Idea and numbers (TakayuStudio list-cascade, written here): Four rows, 60 ms apart (820 ms in all): y −20 → +3 px in 384 ms power3.out, then +3 → 0 in 256 ms power2.inOut (640 ms each); opacity 0 → 1 over the first 400 ms (power2.out). A side rail of dots lights as each row lands (guide). Params: from (−20 px) · dip: lún quá (3 px) · stagger (60 ms) · each (0.64 s). 0.384 s power3.out past the slot, then 0.256 s power2.inOut back: 0.64 s each.
+-->
+
+<div class="st"><div class="lc"><div class="rw"><i></i><b style="width:62%"></b></div><div class="rw"><i></i><b style="width:48%"></b></div><div class="rw"><i></i><b style="width:70%"></b></div><div class="rw"><i></i><b style="width:54%"></b></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"items":".rw","from":-80,"dip":12,"stagger":0.06,"cols":0};
+  var run = function (el,tl,at,o
+  ) {
+  var it = Array.prototype.slice.call(el.querySelectorAll(o.items)), n = it.length, cols = o.cols || n;
+  var p3 = gsap.parseEase("power3.out"), io = gsap.parseEase("power2.inOut"), p2 = gsap.parseEase("power2.out");
+  return MW.drive(tl, at, (n - 1) * o.stagger + 0.64, function (t) { it.forEach(function (r, i) { var u = t - i * o.stagger, y = u <= 0 ? o.from : u < 0.384 ? o.from + (o.dip - o.from) * p3(u / 0.384) : o.dip * (1 - io(Math.min(1, (u - 0.384) / 0.256))); gsap.set(r, { y: y }); r.style.opacity = String(p2(Math.max(0, Math.min(1, u / 0.4)))); }); });
+  };
+  MW.motionListCascade = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

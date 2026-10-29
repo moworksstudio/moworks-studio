@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-drag-lift",
+  "hash": "f7e619cdfbb5fe90",
+  "at": "2026-10-17T10:46:16.311Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-drag-lift.mp4",
+    "poster": "previews/takayu__motion-drag-lift.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "03735e5ef238ab6b86b418af0efd72dcd29da0a1c36de8f5c4dfb9104a876a8d",
+    "size": 10632,
+    "seconds": 25.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

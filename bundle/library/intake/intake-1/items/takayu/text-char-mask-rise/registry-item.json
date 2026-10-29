@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-char-mask-rise",
+  "type": "hyperframes:component",
+  "title": "Masked Character Rise",
+  "description": "Từng ký tự trồi lên khỏi mặt nạ của dòng, nối nhau rất sát, rồi lại thoát lên trên khi rời cảnh.",
+  "tags": [
+    "reveal",
+    "mask",
+    "letters",
+    "stagger",
+    "text-mask-clip",
+    "crisp",
+    "mask-clip",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-char-mask-rise.html",
+      "target": "compositions/components/text-char-mask-rise.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-char-mask-rise",
+    "author": "takayu",
+    "call": "MW.textCharMaskRise(q(\".tk-head\"), tl, 0.3, { exit: 2.2 });",
+    "function": "MW.textCharMaskRise",
+    "options": {
+      "duration": "s per character (0.5), ease-out cubic",
+      "stagger": "s (0.035, capped so the line takes ≤ 0.9 s)",
+      "exit": "s after the start to leave upward (null: stay)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-char-mask-rise",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-char-mask-rise (read 12/10/2026)",
+      "upstream": "the site credits Codrops (MIT); a faithful port of Codrops' effects is in the Codrops collection"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-char-mask-rise, written here): Split chars inside a per-line overflow-clip mask (baseline − 0.98 em to + 0.3 em). Each char y +100 % (one mask height) → 0, 0.5 s easeOutCubic (CSS cubic-bezier(.215,.61,.355,1); labelled power3.out), stagger 14–35 ms (demo min(35 ms, 0.9 s/(n−1))) from 0.3 s. Exit: chars continue up to −100 %, 0.4 s easeInCubic, same stagger (demo from 2.5 s); loop 3.6 s. Params: duration (0.5 s) · stagger (0.014–0.035 s) · ease (easeOutCubic) · exit: thoát lên trên (0.4 s).",
+    "titleVi": "Từng ký tự trồi khỏi mặt nạ"
+  }
+}

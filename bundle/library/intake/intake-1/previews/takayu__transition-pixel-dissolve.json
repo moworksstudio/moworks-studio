@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/transition-pixel-dissolve",
+  "hash": "f5fb04190ea4dd8c",
+  "at": "2026-10-17T07:21:31.483Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__transition-pixel-dissolve.mp4",
+    "poster": "previews/takayu__transition-pixel-dissolve.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "0d320692eae0018c4f9cb15950fd79697ac90fc5f78f8e78a022971a7ec5397b",
+    "size": 16183,
+    "seconds": 29.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

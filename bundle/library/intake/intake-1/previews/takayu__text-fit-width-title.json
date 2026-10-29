@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-fit-width-title",
+  "hash": "2aa5bdff6a160777",
+  "at": "2026-10-17T08:04:25.747Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-fit-width-title.mp4",
+    "poster": "previews/takayu__text-fit-width-title.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "acb4d15aa8c3c3c503990ef0e2f525b09f21913c43b56a65efe9ac7f5014253c",
+    "size": 20424,
+    "seconds": 27.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

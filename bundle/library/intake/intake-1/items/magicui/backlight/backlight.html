@@ -1,0 +1,55 @@
+<!--
+  Backlight (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/backlight.tsx.
+  An ambilight glow behind a picture or video, made from a blurred, over-saturated copy of the content itself, so the glow takes the picture's colours.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.backlight(q(".mw-backlight"), tl, 0.3, { blur: 40, fadeIn: 1.5 });
+
+  Options (defaults in brackets):
+      - blur: stdDeviation (20)
+      - saturate: 4
+      - fadeIn: s to bring the glow up (0: always on)
+
+  Notes: Static upstream; the glow follows whatever plays inside (a HyperFrames video clip works). fadeIn is this port's option. Upstream demos: blur 5 (logos), 20 (photo), 40 (video).
+-->
+
+<div class="mw-backlight"><img src="assets/picture.svg" alt=""></div>
+
+<style>
+.mw-backlight { position: relative; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"blur":20,"saturate":4,"fadeIn":0};
+  var run = function (el, tl, at, o) {
+      var NS = "http://www.w3.org/2000/svg", id = "mw-backlight-" + (MW.__bl = (MW.__bl || 0) + 1);
+      var svg = document.createElementNS(NS, "svg"); svg.setAttribute("width", "0"); svg.setAttribute("height", "0"); svg.setAttribute("aria-hidden", "true"); svg.style.position = "absolute";
+      svg.innerHTML = '<filter id="' + id + '" y="-50%" x="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="' + o.blur + '" result="blurred"></feGaussianBlur>' +
+        '<feColorMatrix type="saturate" in="blurred" values="' + o.saturate + '"></feColorMatrix><feComposite in="SourceGraphic" operator="over"></feComposite></filter>';
+      el.insertBefore(svg, el.firstChild);
+      var inner = document.createElement("div");
+      while (svg.nextSibling) inner.appendChild(svg.nextSibling);
+      el.appendChild(inner);
+      inner.style.filter = "url(#" + id + ")";
+      if (!o.fadeIn) return at;
+      var blur = svg.querySelector("feGaussianBlur"), s = { v: 0 };
+      var set = function () { blur.setAttribute("stdDeviation", o.blur * s.v); svg.querySelector("feColorMatrix").setAttribute("values", 1 + (o.saturate - 1) * s.v); };
+      set();
+      tl.fromTo(s, { v: 0 }, { v: 1, duration: o.fadeIn, ease: "power2.out", onUpdate: set, immediateRender: false }, at);
+      return at + o.fadeIn;
+    };
+  MW.backlight = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-frost-melt",
+  "type": "hyperframes:component",
+  "title": "Frost Melt Unlock",
+  "description": "Lớp băng mờ có bông tuyết phủ thẻ tan dần từ mép vào giữa với mép tan lởm chởm, để lộ nội dung đã mở khoá bên dưới; ổ khoá ở giữa là chỗ tan sau cùng.",
+  "tags": [
+    "frost",
+    "melt",
+    "reveal",
+    "unlock",
+    "material-surface-motion",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-frost-melt.html",
+      "target": "compositions/components/effect-frost-melt.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-frost-melt",
+    "author": "takayu",
+    "call": "MW.effectFrostMelt(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectFrostMelt",
+    "options": {
+      "rough": "± share of the edge noise (0.16)",
+      "aspect": "vertical share of the round mask (0.78)",
+      "locked": "",
+      "open": "",
+      "accent": "",
+      "seed": "flakes and edge",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-material-frost-melt",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-material-frost-melt (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-material-frost-melt, written here): Frost layer over a card 160x100 r12 (grey-blue fill, 16 seeded six-arm snowflakes, a LOCKED icon). Its round mask (radius 112 → 0, vertical × 0.78, edge noise ±16 % drifting slowly) shrinks from the edges to the centre over 1.65 s power1.inOut (0.45-2.1 s) with a thin light rim (1.5 px, 70 %) on the melting edge; the unlocked content (accent lock, UNLOCKED) shows beneath; the lock is the last thing covered. The frost returns by a fade 3.3-3.8 s. Params: melt (1.65 s, power1.inOut) · radius (112 → 0) · roughness (±16 %) · aspect (0.78) · refreeze (fade 0.5 s). The frost's mask shrinks from radius 112 to 0 over 1.65 s (power1.inOut), so the lock in the middle is the last thing covered; the frost comes back by a fade.",
+    "titleVi": "Lớp băng tan dần để mở khoá"
+  }
+}

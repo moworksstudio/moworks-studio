@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-takayu-card-flip",
+  "hash": "ad78dc4ac8b92dab",
+  "at": "2026-10-17T09:50:26.226Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-takayu-card-flip.mp4",
+    "poster": "previews/takayu__motion-takayu-card-flip.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "520eae8eb5fa2e6386911ddb30b8c107d283f744e33d9a2d8c01d6e036fa8847",
+    "size": 14639,
+    "seconds": 29,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

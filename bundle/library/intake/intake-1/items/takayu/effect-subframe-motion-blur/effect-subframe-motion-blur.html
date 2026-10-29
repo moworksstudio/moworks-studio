@@ -1,0 +1,54 @@
+<!--
+  Subframe Motion Blur (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=lk-mblur (read 12/10/2026).
+  Mỗi khung hình là trung bình của nhiều lần chụp lệch nhau trong một khung, nên vật chạy nhanh có vệt nhoè tự nhiên.py mp4 --blur`.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectSubframeMotionBlur(q(".mb"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - samples: copies averaged (8)
+      - gap: s between them (0.012: a 270° shutter over 8 subframes at 24 fps is about this)
+      - weight: opacity each (0.2)
+      - distance: px (1200)
+      - time: s each way (0.8, ease-in-out)
+      - plain: the box without blur
+      - blurred: the box with blur
+      - loop: s (3.2)
+
+  Notes: Idea and numbers (TakayuStudio lk-mblur, written here): Each output frame averages 8 renders between t - 0.75 frame and t (270 deg shutter; 4-8 subframes, or 1 sample per 5 px moved, max 64). Demo: a box moving 240 px each way in 0.8 s (ease-in-out ping-pong); top row without blur, bottom row = 8 copies 12 ms apart at 20 % each. Params: subframes (8) · shutter (270°). A real render averages 4–8 subframes between t − 0.75 frame and t; here copies at earlier times stand in for them.
+-->
+
+<div class="mb"><span style="top:140px">Không nhoè</span><span style="top:540px">Nhoè 8 khung con</span><div class="mb-a"></div><div class="mb-b"></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"samples":8,"gap":0.012,"weight":0.2,"distance":1200,"time":0.8,"plain":".mb-a","blurred":".mb-b","loop":3.2};
+  var run = function (el, tl, at, o) {
+        var A = el.querySelector(o.plain), B = el.querySelector(o.blurred), io = gsap.parseEase("power2.inOut"), G = [];
+        for (var i = 0; i < o.samples; i++) { var g = B.cloneNode(true); g.style.opacity = String(o.weight); B.parentNode.insertBefore(g, B); G.push(g); } B.style.visibility = "hidden";
+        var X = function (t) { var u = (t % (2 * o.time)) / o.time; return o.distance * (u <= 1 ? io(u) : 1 - io(u - 1)); };
+        return MW.drive(tl, at, o.loop, function (t) { gsap.set(A, { x: X(t) }); G.forEach(function (g, i) { gsap.set(g, { x: X(Math.max(0, t - o.gap * i)) }); }); });
+      };
+  MW.effectSubframeMotionBlur = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

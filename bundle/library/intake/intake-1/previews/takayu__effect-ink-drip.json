@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-ink-drip",
+  "hash": "c77610ce5dde226e",
+  "at": "2026-10-17T09:57:28.480Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__effect-ink-drip.mp4",
+    "poster": "previews/takayu__effect-ink-drip.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "e3a3636e0302bc30ff5086201bd65b0b2c2f1616b725bcbc6300ce6c829676f3",
+    "size": 9253,
+    "seconds": 30.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

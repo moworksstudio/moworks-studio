@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-crack-spread",
+  "type": "hyperframes:component",
+  "title": "Armor Crack Network",
+  "description": "Từ điểm va chạm, sáu nhánh nứt gấp khúc kèm nhánh con lan ra rất nhanh trên tấm giáp, vòng va chạm loé và khung rung nhẹ; vết nứt ở lại rồi mờ đi ở cuối.",
+  "tags": [
+    "crack",
+    "branch",
+    "impact",
+    "seeded",
+    "game-impact-fx",
+    "heavy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-crack-spread.html",
+      "target": "compositions/components/effect-crack-spread.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-crack-spread",
+    "author": "takayu",
+    "call": "MW.effectCrackSpread(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectCrackSpread",
+    "options": {
+      "hitAt": "s (0.62)",
+      "branches": "main branches (6)",
+      "spread": "s to draw outward, expo.out (0.3)",
+      "x": "hit point, of 320 (118)",
+      "y": "of 200 (84)",
+      "seed": "the crack pattern",
+      "fadeAt": "s (3.5)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-impact-fx-armor-crack",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-impact-fx-armor-crack (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-impact-fx-armor-crack, written here): px @320x200. From the hit point (0.62 s), seeded: 6 main branches at equal angles ±17°, each 4 segments of 12.5-20 px turning ±20° per segment; one twig per branch from point 1 or 2, at ±46°, 14-26 px in 2 segments (+17° bend). Accent strokes 2.2 / 1.3 px; all draw outward in 300 ms outExpo (twigs start when the branch passes their root); hit dot r 5; impact ring r 6 → 32 in 350 ms outCubic; shake ±3 px 180 ms. Cracks fade 3.5-3.9 s in-cubic. Params: hitAt: lúc va (0.62 s) · branches: số nhánh (6) · length: dài nhánh (50-80 px) · spread: thời gian lan (0.3 s) · seed.",
+    "titleVi": "Vết nứt lan ra từ điểm va"
+  }
+}

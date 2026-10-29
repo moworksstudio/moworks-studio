@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-duration-by-distance",
+  "type": "hyperframes:block",
+  "title": "Distance-scaled Duration",
+  "description": "Bài học: quãng đường gấp 4 thì thời lượng chỉ gấp khoảng 2, tỷ lệ với căn bậc hai quãng đường.",
+  "tags": [
+    "lesson",
+    "timing",
+    "distance",
+    "timing-rhythm",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-duration-by-distance.html",
+      "target": "compositions/components/motion-duration-by-distance.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-duration-by-distance",
+    "author": "takayu",
+    "call": "MW.motionDurationByDistance(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionDurationByDistance",
+    "options": {
+      "base": "s for the reference distance (0.3)",
+      "reference": "units (60 here; 200 px in a product)",
+      "start": "s (0.3)",
+      "backAt": "s (1.6)",
+      "loop": "s (2.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=t-distance",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=t-distance (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio t-distance, written here): Three dots travel 60 / 120 / 240 px from the same start in 300 / 420 / 600 ms power2.inOut. Rule: duration ≈ base × √(distance / reference): 200 px → 300 ms, 800 px → 600 ms. Params: base (0.3 s cho 200 px) · distance. Duration ≈ base × √(distance / reference): four times the distance takes about twice as long.",
+    "titleVi": "Thời lượng theo quãng đường"
+  }
+}

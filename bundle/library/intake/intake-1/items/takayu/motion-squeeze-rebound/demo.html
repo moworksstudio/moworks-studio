@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Critical Lens Compression - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: #0b0d12; color: #e8ebf3; font-family: Inter, sans-serif; } .sq { position: absolute; inset: 0; background: radial-gradient(90% 90% at 50% 50%, #2a1f55, #0b0d12); display: grid; place-items: center; }
+.burst { width: 620px; height: 620px; background: conic-gradient(from 0deg, #ffd23d 0 10deg, transparent 10deg 30deg, #ffd23d 30deg 40deg, transparent 40deg 60deg, #ffd23d 60deg 70deg, transparent 70deg 90deg, #ffd23d 90deg 100deg, transparent 100deg 120deg, #ffd23d 120deg 130deg, transparent 130deg 150deg, #ffd23d 150deg 160deg, transparent 160deg 180deg, #ffd23d 180deg 190deg, transparent 190deg 210deg, #ffd23d 210deg 220deg, transparent 220deg 240deg, #ffd23d 240deg 250deg, transparent 250deg 270deg, #ffd23d 270deg 280deg, transparent 280deg 300deg, #ffd23d 300deg 310deg, transparent 310deg 330deg, #ffd23d 330deg 340deg, transparent 340deg); border-radius: 50%; opacity: 0.55; }
+.crit { position: absolute; font-size: 200px; font-weight: 900; color: #fff; text-shadow: 0 0 40px #ff5d8f; opacity: 0; letter-spacing: -0.02em; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4">
+<div class="sq"><div class="burst"></div><div class="crit">CHÍ MẠNG</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"at":0.45,"squeeze":0.72,"rebound":1.14,"volume":0.45,"label":null,"outAt":3.6};
+  var run = function (el, tl, at, o) {
+        var inn = gsap.parseEase("power2.in"), out = gsap.parseEase("power2.out"), sp = MW.spring(260, 14), lab = o.label ? MW.el(o.label) : null, bk = gsap.parseEase("back.out");
+        return MW.drive(tl, at, o.outAt + 0.3, function (t) {
+          var d = t - o.at, sx = d < 0 ? 1 : d < 0.15 ? 1 - (1 - o.squeeze) * inn(d / 0.15) : d < 0.29 ? o.squeeze + (o.rebound - o.squeeze) * out((d - 0.15) / 0.14) : o.rebound + (1 - o.rebound) * sp.at(d - 0.29);
+          gsap.set(el, { scaleX: sx, scaleY: 1 + (1 - sx) * o.volume });
+          if (lab) { var u = Math.max(0, Math.min(1, (d - 0.29) / 0.2)), e = t > o.outAt ? 1 - Math.min(1, (t - o.outAt) / 0.3) : 1; gsap.set(lab, { scale: bk(u) * e, opacity: Math.min(1, u * 3) * e }); }
+        });
+      };
+  MW.motionSqueezeRebound = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionSqueezeRebound(q(".sq"), tl, 0, { label: ".crit" });
+          tl.set({}, {}, 4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

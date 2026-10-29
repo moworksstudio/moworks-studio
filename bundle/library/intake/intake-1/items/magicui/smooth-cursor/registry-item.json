@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "smooth-cursor",
+  "type": "hyperframes:component",
+  "title": "Smooth Cursor",
+  "description": "An arrow cursor glides between points on springs, turns to face where it travels and dips slightly while moving: the driver for 'a cursor uses the app' shots.",
+  "tags": [
+    "cursor",
+    "pointer",
+    "path",
+    "spring",
+    "ui demo",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "smooth-cursor.html",
+      "target": "compositions/components/smooth-cursor.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/smooth-cursor",
+    "author": "magicui",
+    "call": "MW.smoothCursor(q(\".mw-smooth-cursor\"), tl, 0.2, { scale: 2.4, path: [[0, 300, 900], [0.8, 560, 400], [1.4, 560, 400], [2.2, 1360, 400], [2.8, 1360, 400], [3.6, 960, 690], [4.2, 960, 690], [5, 1500, 860]] });",
+    "function": "MW.smoothCursor",
+    "options": {
+      "path": "[[t, x, y], ...]",
+      "springConfig": "{ stiffness: 400, damping: 45, mass: 1 }",
+      "scale": "cursor size (1)",
+      "fadeIn": "s (0.15)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/smooth-cursor.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/smooth-cursor.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is a layer over the scene (position absolute, inset 0); the cursor is drawn in it. path: [[t, x, y], ...] in s after `at` and px of el, linear between points (the springs smooth it). Any element can replace the arrow (put it inside el with class mw-sc-cursor).",
+    "titleVi": "Con trỏ lướt mượt, xoay theo hướng đi"
+  }
+}

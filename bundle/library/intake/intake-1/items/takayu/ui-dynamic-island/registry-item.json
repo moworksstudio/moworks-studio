@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-dynamic-island",
+  "type": "hyperframes:block",
+  "title": "Dynamic Island",
+  "description": "Viên thuốc đen nhỏ ở đỉnh điện thoại nở rộng thành viên thuốc lớn vẫn bo tròn, hiện biểu tượng và chữ bên trong, giữ một lúc rồi co về.",
+  "tags": [
+    "dynamic island",
+    "pill",
+    "spring",
+    "phone",
+    "feedback-reactions",
+    "smooth",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-dynamic-island.html",
+      "target": "compositions/components/ui-dynamic-island.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.9,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-dynamic-island",
+    "author": "takayu",
+    "call": "MW.uiDynamicIsland(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiDynamicIsland",
+    "options": {
+      "openAt": "s (0.3, spring k260 c22)",
+      "closeAt": "s (2.1, spring k260 c26)",
+      "text": "",
+      "time": "",
+      "accent": "",
+      "loop": "s (2.9)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=ui-island",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=ui-island (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio ui-island, written here): Black pill at the top of a phone frame: width 80 → 240 and height 26 → 60 px with radius = height / 2, driven by k = spring(k260 c22) from 0.3 s minus spring(k260 c26) from 2.1 s (≈ 500 ms open, 400 ms close). Content (accent circle r14 at the left, two text bars) fades in as k goes 0.6 → 1 and out the same way before the shrink completes. Params: size (80x26 → 240x60) · open (k260 c22) · close (k260 c26) · hold (1.8 s) · radius (½ chiều cao). Width 80 → 240 and height 26 → 60 (shown at half size on the 320 frame), the radius always half the height; content fades in as the spring passes 0.6.",
+    "titleVi": "Đảo động mở rộng hiện nội dung"
+  }
+}

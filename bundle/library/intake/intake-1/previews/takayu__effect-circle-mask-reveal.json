@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-circle-mask-reveal",
+  "hash": "8c6465449e086187",
+  "at": "2026-10-17T08:57:27.924Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__effect-circle-mask-reveal.mp4",
+    "poster": "previews/takayu__effect-circle-mask-reveal.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "61039e9a1157b36b5b85881b997e0384f3ffc29e6f8f6df3e0dcb431344aadeb",
+    "size": 12648,
+    "seconds": 31.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

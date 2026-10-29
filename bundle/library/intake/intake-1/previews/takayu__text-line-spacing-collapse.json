@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-line-spacing-collapse",
+  "hash": "2275850b01439e72",
+  "at": "2026-10-17T08:04:49.224Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-line-spacing-collapse.mp4",
+    "poster": "previews/takayu__text-line-spacing-collapse.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6e3ffd306d04fdcbb97cf69876c070b11320f72f1f9f8e39f5c3a70f6b76b2ad",
+    "size": 12436,
+    "seconds": 28.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

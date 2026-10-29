@@ -1,0 +1,337 @@
+{
+  "_about": "Pinned runtime for Moworks Studio. HyperFrames is installed per version under runtime/hf/<version>/ by the version manager (never as a dependency of this repo). current / previous are kept in runtime/hf/state.json.",
+  "hyperframes": {
+    "default": "0.8.214",
+    "packages": [
+      "@hyperframes/producer",
+      "@hyperframes/player",
+      "@hyperframes/sdk",
+      "hyperframes"
+    ],
+    "versions": {
+      "0.8.214": {
+        "chromium": "152.0.7977.30"
+      },
+      "0.8.163": {
+        "chromium": "152.0.7977.30"
+      }
+    },
+    "repo": "heygen-com/hyperframes",
+    "registryRoot": "{app}/bundle/hf/registry",
+    "skillsRoot": "{app}/bundle/hf/skills",
+    "source": { "url": "https://github.com/heygen-com/hyperframes.git", "commit": "4719543e972548a261b8354f0a8dada479ae5d93", "_about": "the commit the skills and registry are pinned to (v0.8.214); a new computer fetches only skills/ and registry/ at it into runtime/hf-src (packages/setup/hf-skills.mjs)" },
+    "_sourceAbout": "registryRoot / skillsRoot: the read-only HF clone at the pinned release (v0.8.214, 4719543); never edited from here. Update path: fetch the clone and check out the new tag; npm run hf -- install <v> (versions entry first), then switch (smoke test); set default and source.commit; node tools/make-bundle.mjs --only hf-skills,hf-registry; re-import the Blocks and Looks stores; node tools/intake-motion-prompt.mjs (the Vocabulary cites HF's registry); node tools/make-bundle.mjs --only library-blocks,library-looks,library-vocab; a golden run and the full suite"
+  },
+  "chromium": {
+    "152.0.7977.30": {
+      "path": "%USERPROFILE%/.cache/hyperframes/chrome/chrome-headless-shell/win64-152.0.7977.30/chrome-headless-shell-win64/chrome-headless-shell.exe"
+    }
+  },
+  "ffmpeg": {
+    "version": "9.0",
+    "dir": "%LOCALAPPDATA%/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-9.0-full_build/bin"
+  },
+  "env": {
+    "HYPERFRAMES_NO_TELEMETRY": "1",
+    "DO_NOT_TRACK": "1",
+    "HYPERFRAMES_NO_UPDATE_CHECK": "1",
+    "HYPERFRAMES_NO_AUTO_INSTALL": "1",
+    "HYPERFRAMES_SKIP_SKILLS": "1",
+    "PUPPETEER_SKIP_DOWNLOAD": "1"
+  },
+  "fonts": {
+    "_about": "Bundled fonts (HF's embedded fonts are latin-only): the files listed in config/fonts.json, downloaded once from google/fonts at the pinned commit into this folder (packages/offline-assets)",
+    "dir": "runtime/fonts/bundled"
+  },
+  "gsap": {
+    "_about": "GSAP copied into every project (assets/vendor) so films play offline; the same file as the Moworks Motion kit's 3.15.0 (SHA-256 checked 17/10/2026)",
+    "version": "3.15.0",
+    "url": "https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js",
+    "sha256": "92bb9a96476f983d212a2bc4f54c889039c1696dd4461d40a736860938570fbb",
+    "licence": "GSAP Standard no-charge license, https://gsap.com/standard-license",
+    "file": "runtime/vendor/gsap/3.15.0/gsap.min.js",
+    "motionPath": {
+      "_about": "MotionPathPlugin at the same version, copied next to gsap.min.js: HyperFrames Studio loads it from jsDelivr unless the film already has it, and the film's offline CSP blocks the CDN (SHA-256 checked 17/10/2026)",
+      "url": "https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/MotionPathPlugin.min.js",
+      "sha256": "ace44a07c6c179f5347d9b46a152d468e4c9f272ee0d68bf0354e00d60000693",
+      "file": "runtime/vendor/gsap/3.15.0/MotionPathPlugin.min.js"
+    }
+  },
+  "three": {
+    "_about": "three.js copied into a film that uses it (assets/_app/vendor/three/<version>/), so 3D films play offline. The film's import map (finalize R-THREE) maps 'three' and 'three/addons/' to the default version and 'three@<version>' to the others, which are only for HyperFrames registry blocks pinned to them (packages/hf-edit/vendorLibs.mjs). Files are jsDelivr's npm copy (the package's own files, not re-minified), SHA-256 checked 21/10/2026",
+    "default": "0.184.0",
+    "licence": "MIT, https://github.com/mrdoob/three.js/blob/r184/LICENSE",
+    "url": "https://cdn.jsdelivr.net/npm/three@{version}/{path}",
+    "dir": "runtime/vendor/three",
+    "versions": {
+      "0.184.0": {
+        "_size": 997915,
+        "files": [
+          { "path": "LICENSE", "size": 1081, "sha256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc" },
+          { "path": "build/three.module.min.js", "size": 364998, "sha256": "36a60b0120335f89a80a0dab70292292b0ec414b3d05e83cd09a3ea428c6712a" },
+          { "path": "examples/jsm/postprocessing/EffectComposer.js", "size": 8501, "sha256": "4e079a5886152d7e529a59aef644e968ab4d32c6a33ce016b36bf29b2eac26f7" },
+          { "path": "examples/jsm/postprocessing/Pass.js", "size": 4218, "sha256": "444b409c235ead986893c472e720da1b779a56985c7d10b279c7944b52bd61c5" },
+          { "path": "examples/jsm/postprocessing/RenderPass.js", "size": 4280, "sha256": "817f6c3cdcd0fd41515d112359ea0532568eefb5aabd3b33903957ebca1b8a6a" },
+          { "path": "examples/jsm/postprocessing/ShaderPass.js", "size": 3228, "sha256": "e2500a5913b26bbf5148ceaae644c6edcff06a18b01494ee37bf856353d2ab9d" },
+          { "path": "examples/jsm/postprocessing/MaskPass.js", "size": 4694, "sha256": "7cd08eee9d5d6f5578beaddbdcbe9c384f6873810af27f22ab7db3ceeb127aa3" },
+          { "path": "examples/jsm/postprocessing/UnrealBloomPass.js", "size": 14921, "sha256": "1158bb02f6467889aba19c1a788b9107054d7f6a558498b5e2152db5873bb859" },
+          { "path": "examples/jsm/postprocessing/OutputPass.js", "size": 4184, "sha256": "02e4a261af34de71338185e9e87f0cbe5cba9115608d984363e1269dec1d2272" },
+          { "path": "examples/jsm/postprocessing/FilmPass.js", "size": 2684, "sha256": "709a6e640b5ced2449e458d57656173208e81af064e414b9c6f775cbf1287ed2" },
+          { "path": "examples/jsm/postprocessing/BokehPass.js", "size": 5531, "sha256": "5b9b0bc5cee6e24b2417da95f40eb2d178943c2ffbacbc4c2993a89d0597bfb3" },
+          { "path": "examples/jsm/shaders/RGBShiftShader.js", "size": 1288, "sha256": "69e7872f4719533013da7ca2a0bbbf9f369bc85a6efb6db76361a75fd4816b8b" },
+          { "path": "examples/jsm/shaders/VignetteShader.js", "size": 1049, "sha256": "5b122990efab55aa39ac5c72a09bc840e572773f5037b9127acfc8e31ee08b83" },
+          { "path": "examples/jsm/shaders/FilmShader.js", "size": 1133, "sha256": "8da49468c1f058c6d75a5c9a6569f7774b61b6d4e923d14db3ac800e3de5b3dd" },
+          { "path": "examples/jsm/shaders/CopyShader.js", "size": 729, "sha256": "a33057d5ac91c43304c186ac0e8816e62bb2ed471d3a00ff3018dfd5c0389718" },
+          { "path": "examples/jsm/shaders/LuminosityHighPassShader.js", "size": 1291, "sha256": "5044f780b6e6cf863947f64c36fe1587132f7fbe395ada863cd1e5f0388dcf1e" },
+          { "path": "examples/jsm/shaders/OutputShader.js", "size": 1876, "sha256": "353479f77a8d7e2629d49ccac9fc2f5dbfdda5442e0adf867b00377a2fcb0cb2" },
+          { "path": "examples/jsm/shaders/BokehShader.js", "size": 5934, "sha256": "bd8525158e3574a803f2e2ce5d5e263349a80ee41bf789e71446b9caa256aa9a" },
+          { "path": "examples/jsm/geometries/RoundedBoxGeometry.js", "size": 6476, "sha256": "c1b7c9bd2cddff2e3f3a0723f618a3d364a47450e3d25771d21faed88410bec8" },
+          { "path": "examples/jsm/geometries/TextGeometry.js", "size": 3312, "sha256": "edf69c1cd6087c84d020156d1adbb29b40b098e4cbe8da4c0c36bbadc58dceac" },
+          { "path": "examples/jsm/loaders/GLTFLoader.js", "size": 114959, "sha256": "97642d720f16cc9a0c9844934198e4d0c023bea8e89576d0f7545d03b2d103d2" },
+          { "path": "examples/jsm/loaders/FontLoader.js", "size": 5292, "sha256": "a8d78ab85e596ef6c274023ee165520000f010011553dbfafe5c966387aca3d8" },
+          { "path": "examples/jsm/environments/RoomEnvironment.js", "size": 4960, "sha256": "55f466192cc84298755a424c5e040345006b2ee1455589b3b54126c2ea4123f4" },
+          { "path": "examples/jsm/utils/BufferGeometryUtils.js", "size": 35539, "sha256": "d700b4c4584b9ff53a04692624d2363019f6d1df2978a207389168c6ae647a65" },
+          { "path": "build/three.core.min.js", "size": 384222, "sha256": "6486aa0d719cfa87ec88dc47223b59b1fb8417a1a407fc0e52467c943e2f8cc9" },
+          { "path": "examples/jsm/utils/SkeletonUtils.js", "size": 11535, "sha256": "b1632a703206c3d830de9fcbe515696770d04b71a15ee6b50afa6d2c3298c86f" }
+        ]
+      },
+      "0.147.0": {
+        "_size": 999643,
+        "files": [
+          { "path": "LICENSE", "size": 1081, "sha256": "fbf3943930dacbf56aabb8dc5d816440bd16aa6f4cc78ddbdf12106ee1807832" },
+          { "path": "build/three.min.js", "size": 607784, "sha256": "f34446bf875b5fb0dcd93819ffe1d9e182d46634ee855f5d904c6c4ac7cdbc95" },
+          { "path": "examples/js/loaders/GLTFLoader.js", "size": 103311, "sha256": "b2edda923572c73e6b30b139756d182c87e2c34d022845c6e067a9a0a9544e01" },
+          { "path": "examples/js/loaders/DRACOLoader.js", "size": 12721, "sha256": "d508e5d3af5a4ec2e6572c112fcc24874dab5a065bd218ed3e089ee43478aed5" },
+          { "path": "examples/js/postprocessing/EffectComposer.js", "size": 6241, "sha256": "6c8bf2f6b06778fdadf7cfd09ef4c17d881428d1cdee953e3348b3f54df4bc75" },
+          { "path": "examples/js/postprocessing/RenderPass.js", "size": 1741, "sha256": "3c1a07df004b36c1fac6af2a443953ef589f88fb024dd0f01d5f9f6252dfc371" },
+          { "path": "examples/js/postprocessing/ShaderPass.js", "size": 1485, "sha256": "f0d8d767e089c99ad04f6714cd4fac29363d6b0207543cd4335922ea143856a6" },
+          { "path": "examples/js/postprocessing/MaskPass.js", "size": 2202, "sha256": "07734485ca2a1b57aa059a45f52af6994948230864ca686ffc42dbb3351fa61a" },
+          { "path": "examples/js/postprocessing/UnrealBloomPass.js", "size": 12675, "sha256": "1a5b8476addc578c179200bed5a0da54bb176c1b41ef89d2174ff76b0a4410e7" },
+          { "path": "examples/js/shaders/CopyShader.js", "size": 597, "sha256": "249592106188290488cb9419fc6231b701983cdc23c25c7805536cf06800ff48" },
+          { "path": "examples/js/shaders/LuminosityHighPassShader.js", "size": 1218, "sha256": "3c8552bb514a01009c07eb17e576f14db43cff64ce8cfab01667ab8db2e85afe" },
+          { "path": "examples/js/libs/draco/gltf/draco_wasm_wrapper.js", "size": 53604, "sha256": "fc724571efc24138ffb7e430fb1c5c59a9760e64c1c3fdb98cc2503d110a3846" },
+          { "path": "examples/js/libs/draco/gltf/draco_decoder.wasm", "size": 194983, "sha256": "32b19d590ca48d4478f74788170c7b713e0addf1f8dbab5cb07e3b2ad5f6e32e" }
+        ]
+      },
+      "0.170.0": {
+        "_size": 1265981,
+        "files": [
+          { "path": "LICENSE", "size": 1081, "sha256": "4c40a1ef62450b857c3b2aaf294936304cd552d965fbcd9d32d4c5bcf4ba4454" },
+          { "path": "build/three.module.min.js", "size": 691648, "sha256": "08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7" },
+          { "path": "examples/jsm/postprocessing/EffectComposer.js", "size": 4651, "sha256": "d234e578618fa816955ebdc059c049c577e203e650e33cf22bde3f232c29e669" },
+          { "path": "examples/jsm/postprocessing/RenderPass.js", "size": 1941, "sha256": "6c9b8a539ea16e898f65e4760f14937ef9ea94043bd9842c141e0301f41903e8" },
+          { "path": "examples/jsm/postprocessing/BokehPass.js", "size": 3394, "sha256": "581ad606035764f92a6c5124980ddeb78c09cb076d2bdeb6c760ca9d0a8332ec" },
+          { "path": "examples/jsm/shaders/CopyShader.js", "size": 571, "sha256": "4e3346db194db56a596cd074e9bdb39fb5eb52040c333e0d29dc4eb1324d3b1d" },
+          { "path": "examples/jsm/postprocessing/ShaderPass.js", "size": 1576, "sha256": "3b28a1ee27e0eb96c0eab137a1f442ccf127a926904eced2d51e125ec44af781" },
+          { "path": "examples/jsm/postprocessing/MaskPass.js", "size": 2231, "sha256": "328cf7db0da5d9be83ffe39d54b01d5ac1fddf108cc98182ddbb056f5c8b537f" },
+          { "path": "examples/jsm/postprocessing/Pass.js", "size": 1706, "sha256": "b3c6128340eaa37e40a6a2f1b738e894c855239417d50959759b34a2b5e89f92" },
+          { "path": "examples/jsm/shaders/BokehShader.js", "size": 5769, "sha256": "a6558cc4baf2c372c192828e9fffcf088d22f80291ac72a13a5be6d3b7a18ddc" },
+          { "path": "examples/jsm/environments/RoomEnvironment.js", "size": 3606, "sha256": "85869bdd22f7cf0b22e68dcefe6cb710480af0f5c901a76f7a7764fd07fc8014" },
+          { "path": "examples/jsm/geometries/RoundedBoxGeometry.js", "size": 4625, "sha256": "d20aeaf7077c459a8d952d215738d7b44fba028440bb862d84b622a34f0c80bb" },
+          { "path": "examples/jsm/lights/RectAreaLightUniformsLib.js", "size": 516, "sha256": "b35b74887bd558a05cd39be33e278a37852187591161f10ad5d96c9c2893343c" },
+          { "path": "examples/jsm/loaders/GLTFLoader.js", "size": 110273, "sha256": "45139faddd5aaf48ed2d62203d976e5cbd703db1a592de40527f9f6cf58abd44" },
+          { "path": "examples/jsm/loaders/RGBELoader.js", "size": 11377, "sha256": "f0e87d0008d9484d31358b32befd1bf80e4301f77573cc9a7cf7d871cc3f64b4" },
+          { "path": "examples/jsm/objects/Reflector.js", "size": 7043, "sha256": "012ecf98f5fc9bd262871e33d79392a25c04c2573ed68852eb3b8d2d39f9808b" },
+          { "path": "examples/jsm/postprocessing/GTAOPass.js", "size": 16582, "sha256": "980b036767c439cf2aadd0e869b2e51b2ec00736a75a5ad1bb69dddb03254fe8" },
+          { "path": "examples/jsm/postprocessing/OutputPass.js", "size": 2524, "sha256": "32f879d2179087676631c799857a885586b3cdd13b9731bd3b13f06428bd58b7" },
+          { "path": "examples/jsm/postprocessing/UnrealBloomPass.js", "size": 12410, "sha256": "3bd23a1097af75c7002d0ffc21a6c14f45c4dd701dbaf737030dfc61fb7c64d9" },
+          { "path": "examples/jsm/utils/BufferGeometryUtils.js", "size": 31768, "sha256": "c25b7930e570e9ec56173cd3b866ec8d2e10016630db3937efb439daf1cedbf6" },
+          { "path": "examples/jsm/lights/RectAreaLightTexturesLib.js", "size": 314097, "sha256": "438c9aa76f101f1f515e09ce674fb062a3ea04d33fc2d0320b0b9755fd17f5d2" },
+          { "path": "examples/jsm/shaders/GTAOShader.js", "size": 12990, "sha256": "e1f5dd89bca4ee679a4aca50c3ef3513926be71f6860c38e31a62cc9d7120b39" },
+          { "path": "examples/jsm/shaders/PoissonDenoiseShader.js", "size": 6614, "sha256": "3dab419b23529f8fd59e2713458502f9f51d2dd3af3e1285dc671fcc451d49fb" },
+          { "path": "examples/jsm/math/SimplexNoise.js", "size": 14351, "sha256": "9b8d541b77b0ddc79afaa6a1de8941452c191b8b9006f04e7b8fc422e2b263f7" },
+          { "path": "examples/jsm/shaders/OutputShader.js", "size": 1490, "sha256": "4944cecd49c0d4d1520a4d927bde8a590fd43f041ee913252b9451855a01d0f0" },
+          { "path": "examples/jsm/shaders/LuminosityHighPassShader.js", "size": 1147, "sha256": "9f4866f9abb2d96fd83eec46ba4bf2165b22155a7a37ff425c0f60eba18007cb" }
+        ]
+      },
+      "0.181.2": {
+        "_size": 1277464,
+        "files": [
+          { "path": "LICENSE", "size": 1081, "sha256": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601" },
+          { "path": "build/three.module.min.js", "size": 355035, "sha256": "979c1ae4b0579c9901eacf797602c0b46df129d87102c6443d14be4a1f790b70" },
+          { "path": "examples/jsm/loaders/FontLoader.js", "size": 5292, "sha256": "a8d78ab85e596ef6c274023ee165520000f010011553dbfafe5c966387aca3d8" },
+          { "path": "examples/jsm/loaders/TTFLoader.js", "size": 5553, "sha256": "1dcf427b59394d48c20f85d88e744b0f7d2c81f37614e8a81ae82cbfca91849a" },
+          { "path": "examples/jsm/postprocessing/EffectComposer.js", "size": 8477, "sha256": "4b8c855f28eed2570bed898adc0ab89c585a8a281ecb6d905c09d00697f9f50a" },
+          { "path": "examples/jsm/postprocessing/RenderPass.js", "size": 4112, "sha256": "fd91229aacc5830e3984b0f2bdefcf566163ea028f4c1f1ab233fa6665a133ac" },
+          { "path": "examples/jsm/postprocessing/ShaderPass.js", "size": 3228, "sha256": "e2500a5913b26bbf5148ceaae644c6edcff06a18b01494ee37bf856353d2ab9d" },
+          { "path": "examples/jsm/postprocessing/OutputPass.js", "size": 4029, "sha256": "f5b81c96e76b6b28b4b3ba8c41c4aeb982b1e03f3d82883242d951b2ab082fa2" },
+          { "path": "examples/jsm/lines/LineSegments2.js", "size": 11277, "sha256": "5d707b4e6056945b3b34cd8291b6afe16c913f6b1e8eac7b6d6892f41c45c26d" },
+          { "path": "examples/jsm/lines/LineSegmentsGeometry.js", "size": 6893, "sha256": "471f0a954a0c9c59d3d151392f424142a9164a722802f63b371971378a84a1b1" },
+          { "path": "build/three.core.min.js", "size": 380264, "sha256": "295a28f4a9786dd24a2a357a4ce90921eb041127e53a508335b9a0556c1e0875" },
+          { "path": "examples/jsm/libs/opentype.module.js", "size": 467478, "sha256": "6897287898532ec3b9e33e1db73bdd9fd3c6131101ea0c0f62da000a0584b2fb" },
+          { "path": "examples/jsm/shaders/CopyShader.js", "size": 729, "sha256": "a33057d5ac91c43304c186ac0e8816e62bb2ed471d3a00ff3018dfd5c0389718" },
+          { "path": "examples/jsm/postprocessing/MaskPass.js", "size": 4694, "sha256": "7cd08eee9d5d6f5578beaddbdcbe9c384f6873810af27f22ab7db3ceeb127aa3" },
+          { "path": "examples/jsm/postprocessing/Pass.js", "size": 4218, "sha256": "444b409c235ead986893c472e720da1b779a56985c7d10b279c7944b52bd61c5" },
+          { "path": "examples/jsm/shaders/OutputShader.js", "size": 1876, "sha256": "353479f77a8d7e2629d49ccac9fc2f5dbfdda5442e0adf867b00377a2fcb0cb2" },
+          { "path": "examples/jsm/lines/LineMaterial.js", "size": 13228, "sha256": "8450d827153d2509e43513cd123df786d7c8c7cdbfd4c7eea4c9e1621f2a7fb5" }
+        ]
+      },
+      "0.186.1": {
+        "_size": 1943505,
+        "_about": "for the mg-styles-15 films: their package.json pins three 0.186.1",
+        "files": [
+          { "path": "LICENSE", "size": 1081, "sha256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc" },
+          { "path": "build/three.module.min.js", "size": 392831, "sha256": "3bc833fceb6577bd1a380388f832ae61cd6e2f78ad02b0bf0d5adf5a4a9334fe" },
+          { "path": "examples/jsm/environments/RoomEnvironment.js", "size": 4960, "sha256": "55f466192cc84298755a424c5e040345006b2ee1455589b3b54126c2ea4123f4" },
+          { "path": "examples/jsm/geometries/RoundedBoxGeometry.js", "size": 6470, "sha256": "c5feab96123858ed8823c889b238dc8734adab7e760e3cfd21e7f3f2f3e348e3" },
+          { "path": "examples/jsm/postprocessing/EffectComposer.js", "size": 8501, "sha256": "4e079a5886152d7e529a59aef644e968ab4d32c6a33ce016b36bf29b2eac26f7" },
+          { "path": "examples/jsm/postprocessing/Pass.js", "size": 4218, "sha256": "444b409c235ead986893c472e720da1b779a56985c7d10b279c7944b52bd61c5" },
+          { "path": "examples/jsm/postprocessing/RenderPass.js", "size": 4280, "sha256": "817f6c3cdcd0fd41515d112359ea0532568eefb5aabd3b33903957ebca1b8a6a" },
+          { "path": "examples/jsm/postprocessing/ShaderPass.js", "size": 3228, "sha256": "e2500a5913b26bbf5148ceaae644c6edcff06a18b01494ee37bf856353d2ab9d" },
+          { "path": "examples/jsm/postprocessing/UnrealBloomPass.js", "size": 15397, "sha256": "ba8f2fcadfa6588384c9473498f974d81d120f02f0e63a0e59c265202a006b5a" },
+          { "path": "examples/jsm/utils/BufferGeometryUtils.js", "size": 37712, "sha256": "9fb63427ce6641fa14fd0baff9cc4d1b5f9c3d85fd084bf2e90e803c44ec1797" },
+          { "path": "build/three.core.js", "size": 1458113, "sha256": "9edde002b066a9a05676a6127f67735b62baf399bdea529f2f7e31657da769e6" },
+          { "path": "examples/jsm/shaders/CopyShader.js", "size": 729, "sha256": "a33057d5ac91c43304c186ac0e8816e62bb2ed471d3a00ff3018dfd5c0389718" },
+          { "path": "examples/jsm/postprocessing/MaskPass.js", "size": 4694, "sha256": "7cd08eee9d5d6f5578beaddbdcbe9c384f6873810af27f22ab7db3ceeb127aa3" },
+          { "path": "examples/jsm/shaders/LuminosityHighPassShader.js", "size": 1291, "sha256": "5044f780b6e6cf863947f64c36fe1587132f7fbe395ada863cd1e5f0388dcf1e" }
+        ]
+      }
+
+    }
+  },
+  "clipperLib": {
+    "_about": "clipper-lib, the one other library a HyperFrames three.js block loads from jsDelivr (wireframe-portal-title); copied into the film when it is used",
+    "version": "6.4.2",
+    "url": "https://cdn.jsdelivr.net/npm/clipper-lib@6.4.2/clipper.js",
+    "size": 203786,
+    "sha256": "a650c6946682edc1a64016f6553eeb5c32ce45eb7ca0ad5d8221961af011d97c",
+    "licence": "Boost Software License 1.0 (Angus Johnson; JS translation by Timo), https://github.com/junmer/clipper-lib",
+    "file": "runtime/vendor/clipper-lib/6.4.2/clipper.js"
+  },
+  "lemo": {
+    "_about": "Lemo-Opuscar (Lemomo, LemoLab): 66 film styles, each a STYLE.md and a demo film made in code. The read-only clone at the pinned commit; the app reads styles/*/style.json, STYLE.md, DEMO.md, demo/ and core/ from it and never edits it. Demo films are linked (release web), never downloaded. MIT (style prompts, code, docs); demo films and stills CC BY 4.0, credit LemoLab. A style the author merged from someone else names that contributor in its style.json \"by\" (Memphis Diorama: EianLu)",
+    "repo": "lemomo-ai/lemo-opuscar",
+    "commit": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+    "date": "2026-10-29",
+    "root": "{app}/bundle/styles/lemo-opuscar",
+    "three": "0.170.0",
+    "demoUrl": "https://github.com/lemomo-ai/lemo-opuscar/releases/download/web/{slug}.mp4"
+  },
+  "codeLibs": {
+    "_about": "npm libraries the code-film styles load (mg-styles-15), jsDelivr's npm copy at pinned versions: <dir>/<name>/<version>/<path>. opentype.js MIT, simplex-noise MIT, d3 ISC, topojson-client ISC (each LICENSE kept); p5.js LGPL-2.1 and p5.brush MIT for the character kit; react 19.0.0, react-dom 19.0.0 and scheduler 0.25.0 (MIT, Meta) for What If films, the versions of the author's package-lock.json (production files only)",
+    "dir": "runtime/vendor/lib",
+    "url": "https://cdn.jsdelivr.net/npm/{name}@{version}/{path}",
+    "packages": {
+      "opentype.js": { "version": "2.0.0", "files": [
+        { "path": "LICENSE", "size": 1085, "sha256": "a5b87c9bc191e7f9c06b07bd7cbbed3ed846dfdb50e859484b2c245aa1ab2e61" },
+        { "path": "dist/opentype.mjs", "size": 494695, "sha256": "e139522ac432bb38fb4878d772012f0ad351993c36d7815d65a9890fb3fe68fb" }
+      ] },
+      "simplex-noise": { "version": "4.0.3", "files": [
+        { "path": "LICENSE", "size": 1069, "sha256": "01951c4f7d8e7ce92540c4f575a2aec39738b39d25a06a96059d82ed83fb594e" },
+        { "path": "dist/esm/simplex-noise.js", "size": 18735, "sha256": "64e571e6d28da06fdd230110b8ce242285e76137e7258938f3b68a0fd6ff8146" }
+      ] },
+      "d3": { "version": "7.9.0", "files": [
+        { "path": "LICENSE", "size": 731, "sha256": "3e6849627f74ff73c257a3ae1efb574015d94fc1035c05ec3c15805165efcbc4" },
+        { "path": "dist/d3.min.js", "size": 279706, "sha256": "f2094bbf6141b359722c4fe454eb6c4b0f0e42cc10cc7af921fc158fceb86539" }
+      ] },
+      "topojson-client": { "version": "3.1.0", "files": [
+        { "path": "LICENSE", "size": 734, "sha256": "4c4d15b635e04e691825a76db7d33f7f2033b55669a7430011694f31e6c65999" },
+        { "path": "dist/topojson-client.min.js", "size": 7169, "sha256": "25cd02ae486cc5063e0215a4e4cfb15de83700c87ac48bac4d57dc6aaf3ebb89" }
+      ] },
+      "p5": { "version": "2.3.3", "files": [
+        { "path": "license.txt", "size": 24480, "sha256": "eb2f25f8f165d5f20682c1ce7e99ce69144ecfd80fbed8c17dfd327ecd8b6cb6" },
+        { "path": "lib/p5.min.js", "size": 990372, "sha256": "3f8a0c739bd3c6350e239ff7187d38656ed2247e30a2b8084fd16a91e6e843ac" }
+      ] },
+      "p5.brush": { "version": "2.2.3", "files": [
+        { "path": "LICENSE.md", "size": 1084, "sha256": "cabbece1a276329fa28ab40f1c99af3af2b7852a329551a9a485b2199616583a" },
+        { "path": "dist/p5.brush.js", "size": 71792, "sha256": "41c25108c69a8eb1cca500d68f3603593e33b53e90a773fc024a6cff461fc31a" }
+      ] },
+      "react": { "version": "19.0.0", "files": [
+        { "path": "LICENSE", "size": 1088, "sha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93" },
+        { "path": "package.json", "size": 1248, "sha256": "9000ced5f7bfae3479981149e94f5e3ac9025e6a5fb08ab95c0cebb186123161" },
+        { "path": "index.js", "size": 186, "sha256": "60caffdecbdc5db3bc4ec4e83df9488345ccb271d07533b9210bf5750918d97e" },
+        { "path": "jsx-runtime.js", "size": 210, "sha256": "b392951a77d0a2e6a6bd017e49d768481ae5b63c4109c6c31f622cf7b2433edc" },
+        { "path": "cjs/react.production.js", "size": 16856, "sha256": "9d5546ae8149c2fc0e966974abdb50bb10db08a24e653e6cd694bb08b5989c5c" },
+        { "path": "cjs/react-jsx-runtime.production.js", "size": 976, "sha256": "1e46f15002696985e80c61d47aaa30dabb03c954270a690f5f7dfbbacfa9002b" }
+      ] },
+      "react-dom": { "version": "19.0.0", "files": [
+        { "path": "LICENSE", "size": 1088, "sha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93" },
+        { "path": "package.json", "size": 3063, "sha256": "cc4fb5f07997d43a095bdae48ea26153970e21c774648bca1708e4ad4fd83469" },
+        { "path": "index.js", "size": 1359, "sha256": "ba1a3e33489f868371561777607e3ee5091df0f7ea3f1a10f789d6b86e4c1505" },
+        { "path": "client.js", "size": 1373, "sha256": "00e348ab3d6bc2eef908345d0bc4e008c95bcfecec060dfda5c4967953761396" },
+        { "path": "cjs/react-dom.production.js", "size": 6655, "sha256": "b1c376f7e6959e632ced55094e07fad3bd43f57dfd2928c21bbcb29a3445419e" },
+        { "path": "cjs/react-dom-client.production.js", "size": 508988, "sha256": "a17be057437336a17c14ee04288cacbc3877900483418951f034b00123e7233b" }
+      ] },
+      "scheduler": { "version": "0.25.0", "files": [
+        { "path": "LICENSE", "size": 1088, "sha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93" },
+        { "path": "package.json", "size": 564, "sha256": "3877c4465b7d25658b0aba07484191ab273aafcd2839c502da64a2da0fbe23eb" },
+        { "path": "index.js", "size": 194, "sha256": "145965504d60007bc25486ab930b0367867dcd5d579ccd343c148d69349a7cfb" },
+        { "path": "cjs/scheduler.production.js", "size": 10346, "sha256": "dc5b1f0458d97354aadf8aa39007fc2a8ed3eddceb53279176d7f6a1a83b1065" }
+      ] }
+    }
+  },
+  "characterKit": {
+    "_about": "ClaudeAnimationBase (John Heibel, MIT): the painted-character kit the app's character layer builds on. Its face, emotion, hat, emote and move code is used as shipped, cut out of src/clawd.js without clawd() itself. Clawd is Anthropic's mascot: a demo of the layer only, never in a film. Update: git fetch in the clone, compare, run test/characters.test.mjs, re-pin after the maintainer's OK.",
+    "repo": "JohnHeibel/ClaudeAnimationBase",
+    "commit": "0ac8bf2b31942376cb6b8c4074715595d512acd2",
+    "date": "2026-09-24",
+    "root": "{app}/bundle/styles/ClaudeAnimationBase",
+    "licence": "MIT",
+    "libs": { "p5": "2.3.3", "p5.brush": "2.2.3" }
+  },
+  "mgStyles": {
+    "_about": "mg-styles-15 (Vincentwei1021): 15 motion-design styles, each a prompt (prompts/<id>.md), a 10 s film made in code and its source. The read-only clone at the pinned commit, shallow and sparse (no videos/, no audio samples or WAV/FLAC/MP3); the app reads prompts/, demos/, docs/readme/films/ (the style cards) and assets/ from it and never edits it. Demo films are linked (GitHub Pages), never downloaded. MIT.",
+    "repo": "Vincentwei1021/mg-styles-15",
+    "commit": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
+    "date": "2026-10-05",
+    "root": "{app}/bundle/styles/mg-styles-15",
+    "three": "0.186.1",
+    "demoUrl": "https://vincentwei1021.github.io/mg-styles-15/#{id}"
+  },
+  "motionPrompt": {
+    "_about": "Motion Prompt (Shohei Ohtaki, MIT): 168 names in 7 packs for the things you ask an AI to make (motion graphics, camera moves, UI, landing page, photo looks), each with a one-line meaning, an example ask, its numbers in words and the author's Canvas 2D sample (SOURCES M08). The Library's fourth type \"Vocabulary\" under author Shohei Ohtaki: words and numbers for Claude, not runnable motions. The read-only clone at the pinned commit; the app reads api/v1 (catalog.json, en/e/<id>.txt, kit/<pack>.js), LICENSE and THIRD-PARTY-NOTICES.md from it, as shipped, and never edits it. Not used: the author's skill and CLI, the gallery, make-your-own, examples/found.json (other people's posts). Update: git fetch in the clone, git diff --stat <pin>..origin/main -- packs api, run tools/intake-motion-prompt.mjs (replaces items by number), re-pin after the maintainer's OK",
+    "repo": "showheyohtaki/motion-prompt",
+    "commit": "bd6bf08d8d412cc82c1bbc8f1a81638617a45cfb",
+    "date": "2026-10-23",
+    "licence": "MIT (Copyright (c) 2026 Shohei Ohtaki)",
+    "root": "{app}/bundle/styles/motion-prompt",
+    "demoUrl": "https://showheyohtaki.github.io/motion-prompt/#{id}"
+  },
+  "anidoodle": {
+    "_about": "anidoodle (Alex Greenshpun, 10x Company): a skill and a TypeScript engine that draw pictures and films entirely in code in 32 media (SOURCES M10). The read-only clone at the pinned commit; the app reads skills/anidoodle (SKILL.md, references/, the engine's src/) from it, never edits it, and bundles a film's own module with the engine through esbuild. Apache-2.0 with NOTICE.",
+    "repo": "alexgreensh/anidoodle",
+    "commit": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+    "date": "2026-10-23",
+    "version": "0.9.6",
+    "root": "{app}/bundle/styles/anidoodle",
+    "skill": "skills/anidoodle"
+  },
+  "whatIf": {
+    "_about": "What If animation (FreshStack, MIT): the sixth author of the Style Gallery. The stick-figure engine (studio/src/engine: React + SVG, one rig, rooms, light) is used as shipped through the app's stand-in for Remotion (packages/what-if-styles/shims, written from Remotion's docs; no Remotion package), bundled with the author's React (codeLibs react, react-dom, scheduler). Its knowledge also lives in config/rules (what-if, moworks-studio). The copy in bundle/styles/what-if-animation is the pinned commit's skill, references, scripts and studio/src, never edited; no sound (the author's voices and effects are ElevenLabs-made: studio/public and studio/library are left out). Update: git fetch in a clone, read the diff of studio/src and references, copy the same paths at the new commit, run test/what-if-engine.test.mjs and test/what-if.test.mjs, re-pin after the maintainer's OK",
+    "repo": "kelano86/what-if-animation",
+    "commit": "3725a22d2d101320cae5b7d761af8d75120c4987",
+    "date": "2026-10-21",
+    "licence": "MIT (Copyright (c) 2026 FreshStack)",
+    "root": "{app}/bundle/styles/what-if-animation",
+    "react": "19.0.0"
+  },
+  "kit": {
+    "_about": "Moworks Motion kit (read-only). Not used at run time. The kit's motion group was removed from the Motion Library; the General style still records the hashes of the kit rules it was adapted from (style-catalog derivedFrom), so the root stays",
+    "root": "{work}/moworks-motion"
+  },
+  "stripEnv": [
+    "GEMINI_API_KEY",
+    "GOOGLE_API_KEY",
+    "GOOGLE_GENERATIVE_AI_API_KEY",
+    "OPENROUTER_API_KEY",
+    "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "ELEVENLABS_API_KEY",
+    "HEYGEN_API_KEY",
+    "HYPERFRAMES_API_KEY"
+  ],
+  "python": {
+    "_about": "Python for the AE export (packages/ae-export/port, from the kit's port): Playwright drives the pinned Chromium; fontTools, numpy, Pillow",
+    "exe": "%LOCALAPPDATA%/Programs/Python/Python312/python.exe",
+    "modules": [
+      "playwright",
+      "fontTools",
+      "numpy",
+      "PIL"
+    ]
+  },
+  "storage": {
+    "_about": "Off Google Drive: app/, projects/, library/, models/, vendor/ under workRoot. No backupRoot here: the app backup (packages/backup, its whole git history, about 245 MB) is off unless a computer sets storage.backupRoot in its local pins.",
+    "workRoot": "{app}/.."
+  }
+}

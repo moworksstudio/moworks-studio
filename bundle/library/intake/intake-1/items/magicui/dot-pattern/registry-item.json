@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "dot-pattern",
+  "type": "hyperframes:component",
+  "title": "Dot Pattern",
+  "description": "A full-frame grid of small dots, static or softly twinkling (glow), for UI and data backdrops; mask it to fade at the edges.",
+  "tags": [
+    "dots",
+    "pattern",
+    "background",
+    "grid",
+    "twinkle",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "dot-pattern.html",
+      "target": "compositions/components/dot-pattern.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 7,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/dot-pattern",
+    "author": "magicui",
+    "call": "MW.dotPattern(q(\".mw-dot-pattern\"), tl, 0, { width: 32, height: 32, cx: 2, cy: 2, cr: 3, glow: true, color: \"rgba(196,181,253,0.9)\", hold: 7 });",
+    "function": "MW.dotPattern",
+    "options": {
+      "width": "16",
+      "height": "16",
+      "x": "0",
+      "y": "0",
+      "cx": "1",
+      "cy": "1",
+      "cr": "1",
+      "glow": "false",
+      "color": "rgba(161,161,161,0.8)",
+      "hold": "seconds (10)",
+      "seed": "1"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/dot-pattern.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/dot-pattern.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Static unless glow is on. Thousands of dots: for glow keep the spacing large (24 px or more) on a full HD frame.",
+    "titleVi": "Nền lưới chấm, có thể lấp lánh"
+  }
+}

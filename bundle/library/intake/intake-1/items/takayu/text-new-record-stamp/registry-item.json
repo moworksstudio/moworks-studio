@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-new-record-stamp",
+  "type": "hyperframes:block",
+  "title": "New Record Stamp",
+  "description": "Điểm chạy lên và dừng, 0.3 giây sau con dấu kỷ lục lao xuống từ to về đúng cỡ, nghiêng, chạm thì bẹp nhẹ, con số rung và mực bắn ra; điểm cao nhất đổi sang số mới.",
+  "tags": [
+    "stamp",
+    "counter",
+    "squash",
+    "impact",
+    "rewards-loot",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-new-record-stamp.html",
+      "target": "compositions/components/text-new-record-stamp.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-new-record-stamp",
+    "author": "takayu",
+    "call": "MW.textNewRecordStamp(q(\".gm\"), tl, 0, {});",
+    "function": "MW.textNewRecordStamp",
+    "options": {
+      "score": "(9150)",
+      "best": "the old best (8420)",
+      "stampAt": "s (1.4)",
+      "from": "stamp start scale (2.4)",
+      "tilt": "degrees (−12)",
+      "stamp": "",
+      "accent": "",
+      "seed": "ink dots",
+      "loop": "s (2.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-reward-new-record",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-reward-new-record (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-reward-new-record, written here): px @320x200. Score 0 → 9,150 outExpo (0.3-1.1 s). Stamp lands at 1.4 s: scale 2.4 → 1 in 140 ms in-cubic (fade in 60 ms), tilted −12°, outlined (2.5 px accent, r 5); on contact squash 12 % (scaleX 1.12 / Y 0.88, 160 ms half-sine); the score number shakes ±2.5 px for 120 ms; 8 seeded ink dots spread from an ellipse 34 x 18 to 50 x 28 px around the stamp over 400 ms outCubic, fading. 'BEST' swaps 8,420 → 9,150 (accent) 50 ms after contact. Params: score: điểm (0 → 9150) · stampAt: lúc đóng dấu (1.4 s) · from: cỡ dấu đầu (2.4) · tilt: nghiêng (−12°) · stamp: chữ trên dấu.",
+    "titleVi": "Đóng dấu kỷ lục mới"
+  }
+}

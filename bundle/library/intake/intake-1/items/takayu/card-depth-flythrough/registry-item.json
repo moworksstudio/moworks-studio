@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "card-depth-flythrough",
+  "type": "hyperframes:component",
+  "title": "Depth Stack",
+  "description": "Các thẻ xếp theo chiều sâu, máy quay bay thẳng về phía trước, thẻ gần to dần và lướt qua hai bên.",
+  "tags": [
+    "3d",
+    "depth",
+    "flythrough",
+    "cards",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "card-depth-flythrough.html",
+      "target": "compositions/components/card-depth-flythrough.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/card-depth-flythrough",
+    "author": "takayu",
+    "call": "MW.cardDepthFlythrough(q(\".df\"), tl, 0, {});",
+    "function": "MW.cardDepthFlythrough",
+    "options": {
+      "items": "",
+      "spacing": "px between cards in depth (360)",
+      "wrap": "px of depth before a card comes round again (2880)",
+      "speed": "px a second of the camera (600), linear",
+      "focal": "px: depth at scale 1 (2160)",
+      "x": "± px (360)",
+      "y": "px for rows −1 / 0 / +1 (180)",
+      "near": "px depth the card fades out over ([240, 700])",
+      "far": "px depth it fades in over (600)",
+      "duration": "s (4.8: one wrap)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=3d-depth",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=3d-depth (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio 3d-depth, written here): Cards placed along z (recipe 250 apart) and the camera moves forward z 0 -> 1000 over 4000 ms linear (perspective). Demo: 8 cards 60 x 40 at 60 z spacing (focal 360 on a 320 frame), camera 100 z / s, wrapping every 480 z; x alternates +-60 px, y -30 / 0 / +30; cards fade in far away and out just before the lens. Params: spacing (250) · travel (1000) · duration (4 s). Each card is projected by focal / depth; x alternates ±, y cycles −1 / 0 / +1, so cards grow and slide past both sides.",
+    "titleVi": "Bay xuyên qua các lớp thẻ"
+  }
+}

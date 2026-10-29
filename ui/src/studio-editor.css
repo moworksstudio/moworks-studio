@@ -1,0 +1,375 @@
+/* The Studio (data-theme="studio"): the Editor as a light table. The shell, the
+   outer pages and the tokens are in studio-shell.css. Every selector starts with [data-theme="studio"], so The Desk keeps
+   every pixel. Layout: the slate, the five stations on their rail, then Shots / Assets / This film · the light table
+   · the conversation, and the timeline across the bottom of the first two (no vertical X-sheet). The sheet of a station lies on the
+   table in the film's place; when it changes, the one before lifts away as onion skin. */
+
+/* ---- the frame ------------------------------------------------------------------------------------------------------------------ */
+/* the Editor's type steps: no line under 0.8rem (about 10 px at 1440 x 900, 11 px at 1920), the concept's faces kept */
+[data-theme="studio"] .st-ed { --st-fs-meta: 0.8rem; --st-fs-small: 0.86rem; --st-fs-body: 0.9rem; --st-fs-title: 1.35rem; --st-fs-sheet: 1.9rem; }
+[data-theme="studio"] .st-ed { --ed-gap: 0px; --ed-tl-def: clamp(11rem, 24vh, 15rem); --st-side: clamp(16rem, 18vw, 20rem); --st-chat: clamp(18rem, 21vw, 22rem);
+  background: var(--room); --btn-line: var(--room-line); }
+[data-theme="studio"] .st-body { flex: 1; min-height: 0; display: grid; background: #0F0D0A;
+  grid-template-columns: var(--st-side) minmax(0, 1fr) var(--st-chat);
+  grid-template-rows: minmax(0, 1fr) 6px var(--ed-tl-h, var(--ed-tl-def));
+  grid-template-areas: "side table chat" "split split chat" "tl tl chat"; }
+[data-theme="studio"] .st-body > .st-side { grid-area: side; }
+[data-theme="studio"] .st-body > .lt { grid-area: table; }
+[data-theme="studio"] .st-body > .ed-hsplit { grid-area: split; height: auto; background: #000; }
+[data-theme="studio"] .st-body > .ed-hsplit::before { background: var(--room-ink-3); }
+[data-theme="studio"] .st-body > .st-tl { grid-area: tl; min-height: 0; display: flex; flex-direction: column; }
+[data-theme="studio"] .st-body > .st-chat { grid-area: chat; min-height: 0; display: flex; flex-direction: column; border-left: 1px solid #000; background: var(--room-2); }
+
+/* ---- the slate ------------------------------------------------------------------------------------------------------------------ */
+[data-theme="studio"] .st-slate { height: auto; min-height: 3.4rem; gap: 1rem; padding: 0.55rem 1.25rem; background: var(--room-2); border-bottom: 1px solid #000; }
+[data-theme="studio"] .st-clap { flex: none; width: 2.4rem; height: 1.8rem; border-radius: 0.2rem;
+  background: repeating-linear-gradient(-45deg, var(--room-ink) 0 0.35rem, var(--room) 0.35rem 0.7rem); box-shadow: inset 0 -0.95rem 0 var(--room); }
+[data-theme="studio"] .st-name { min-width: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+[data-theme="studio"] .st-slate .ed-title { font: 500 1.35rem / 1.1 var(--font-studio-display); letter-spacing: -0.005em; text-transform: none; color: var(--room-ink); background: none;
+  border: 1px solid transparent; border-radius: 0.3rem; padding: 0.1rem 0.3rem; margin-left: -0.3rem; max-width: min(60ch, 46vw); }          /* the film's name takes the slate's free room */
+[data-theme="studio"] .st-slate .ed-title:hover { border-color: var(--room-line); }
+[data-theme="studio"] .st-slate .ed-title:focus { border-color: var(--lamp); background: transparent; }
+[data-theme="studio"] .st-slate .ed-meta { font: 400 var(--st-fs-meta) var(--font-mono); letter-spacing: 0.02em; color: var(--room-ink-3); }
+[data-theme="studio"] .st-state { gap: 0.45rem; font-size: var(--st-fs-meta); color: var(--room-ink-2); }
+[data-theme="studio"] .st-state > i { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--state-done, #3E9B5B); flex: none; }
+[data-theme="studio"] .st-state.run, [data-theme="studio"] .st-state.on { color: var(--lamp); }
+[data-theme="studio"] .st-state.wait { color: #F08A6E; }
+[data-theme="studio"] .st-state.wait > i { background: var(--registration); box-shadow: 0 0 6px rgba(210, 60, 34, 0.7); }
+[data-theme="studio"] .st-state .clink { color: var(--room-ink); text-decoration: underline; }
+[data-theme="studio"] .st-slate .btn { height: 2.15rem; }
+[data-theme="studio"] .st-slate .ae-tile { font: 700 0.62rem var(--font-body); color: #2A1A3A; background: #CFB5FF; border-radius: 0.2rem; padding: 0.1rem 0.25rem; }
+[data-theme="studio"] .st-slate .ed-ver-pop { background: var(--paper-white); color: var(--ink); border-color: var(--paper-3); --text-primary: var(--ink); --text-muted: var(--ink-3); --surface-3: var(--paper-2); }
+
+/* ---- the production line: five stations on one rail -------------------------------------------------------------------------------- */
+[data-theme="studio"] .sp-line { flex: none; position: relative; display: grid; align-items: stretch; gap: 0.5rem; padding: 0.65rem 1.25rem 0.85rem;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2.4fr) minmax(0, 1.25fr) auto;
+  background: linear-gradient(#1B1813, var(--room)); border-bottom: 1px solid #000; }
+[data-theme="studio"] .sp-rail { position: absolute; left: 1.25rem; right: 1.25rem; top: 50%; height: 2px; margin-top: -1px; pointer-events: none;
+  background: repeating-linear-gradient(90deg, rgba(63, 134, 201, 0.55) 0 6px, transparent 6px 11px); }
+[data-theme="studio"] .sp-rail i { position: absolute; inset: 0; transform-origin: left center; background: linear-gradient(90deg, #CFC6B4, var(--room-ink)); transition: transform 300ms var(--out); }
+[data-theme="studio"] .sp-st { position: relative; z-index: 1; min-width: 0; min-height: 3.15rem; display: flex; flex-direction: column; justify-content: center; gap: 0.15rem;
+  padding: 0.3rem 0.7rem; border-radius: 0.35rem; font: 500 0.86rem / 1.15 var(--font-body); transition: transform 240ms var(--settle), box-shadow 200ms, background 200ms; }
+[data-theme="studio"] .sp-st.skeleton { background: var(--room-2); }
+[data-theme="studio"] .sp-head { display: flex; align-items: center; gap: 0.4rem; min-width: 0; padding: 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; font: inherit; }
+[data-theme="studio"] .sp-head:disabled { cursor: default; }
+[data-theme="studio"] .sp-mark { flex: none; width: 0.85rem; height: 0.85rem; border-radius: 50%; display: grid; place-items: center; }
+[data-theme="studio"] .sp-no { flex: none; font: 500 var(--st-fs-meta) var(--font-mono); letter-spacing: 0.04em; opacity: 0.8; }
+[data-theme="studio"] .sp-no::after { content: " ·"; }
+[data-theme="studio"] .sp-name { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+[data-theme="studio"] .sp-tag { flex: none; margin-left: auto; font: 600 var(--st-fs-meta) var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--registration); }
+[data-theme="studio"] .sp-text { display: block; min-width: 0; padding: 0; border: 0; background: none; color: inherit; font: 400 var(--st-fs-meta) / 1.3 var(--font-body); opacity: 0.85; text-align: left;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+[data-theme="studio"] button.sp-text { cursor: pointer; }
+[data-theme="studio"] button.sp-text:hover { text-decoration: underline; }
+[data-theme="studio"] .sp-text.wait { color: var(--registration); font-weight: 600; opacity: 1; }
+[data-theme="studio"] .sp-acts { display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap; min-width: 0; }
+[data-theme="studio"] .sp-acts .btn { height: 1.75rem; padding: 0 0.6rem; font-size: var(--st-fs-meta); }
+[data-theme="studio"] .sp-pill { display: inline-flex; align-items: center; gap: 0.2rem; flex: none; border: 0; border-radius: 999px; padding: 0.1rem 0.55rem; font: 500 var(--st-fs-meta) var(--font-body);
+  background: rgba(29, 26, 21, 0.1); color: inherit; cursor: pointer; }
+[data-theme="studio"] .sp-pill:hover:not(:disabled) { background: rgba(29, 26, 21, 0.18); }
+[data-theme="studio"] .sp-pill:disabled { opacity: 0.45; cursor: default; }
+[data-theme="studio"] .sp-pill.running { color: #8A5E06; }
+[data-theme="studio"] .sp-pill.failed, [data-theme="studio"] .sp-pill.redo { color: var(--registration); }
+[data-theme="studio"] .sp-pill b { color: var(--registration); font-weight: 700; }
+[data-theme="studio"] .sp-hint { font: 1rem / 1.1 var(--font-studio-hand); color: var(--pencil-ink); }
+/* the materials: blue pencil (not yet) · half inked (at work, waiting) · ink (done) · colour (ready to render) */
+[data-theme="studio"] .sp-st.todo { background: rgba(22, 19, 15, 0.92); color: #93BEE6; box-shadow: inset 0 0 0 1px rgba(63, 134, 201, 0.55);
+  background-image: repeating-linear-gradient(-45deg, transparent 0 7px, rgba(63, 134, 201, 0.08) 7px 8px); }
+[data-theme="studio"] .sp-st.todo .sp-mark { border: 1.5px dashed #6FA5D8; width: 0.55rem; height: 0.55rem; }
+[data-theme="studio"] .sp-st.todo .sp-pill { background: rgba(63, 134, 201, 0.14); }
+[data-theme="studio"] .sp-st.done { background: var(--room-ink); color: var(--ink); box-shadow: inset 0 0 0 1px #D6CBB4, 0 1px 0 rgba(0, 0, 0, 0.4); }
+[data-theme="studio"] .sp-st.done .sp-mark { background: var(--ink); color: var(--room-ink); }
+[data-theme="studio"] .sp-st.wip { background: linear-gradient(180deg, var(--room-ink) 0 52%, #DCE7F2 52%); color: var(--ink); box-shadow: inset 0 0 0 1px #D6CBB4; }
+[data-theme="studio"] .sp-st.wip .sp-mark { background: var(--run); color: #2A1A0E; box-shadow: 0 0 6px rgba(217, 154, 22, 0.7); }
+[data-theme="studio"] .sp-st.final { background: linear-gradient(135deg, #FBE7BE, #F0B57C 60%, #E3845A); color: #2A1A0E; }
+[data-theme="studio"] .sp-st.final .sp-mark { background: #2A1A0E; color: #FBE7BE; }
+[data-theme="studio"] .sp-st.waiting, [data-theme="studio"] .sp-st.redo, [data-theme="studio"] .sp-st.att { box-shadow: inset 0 0 0 1.5px var(--registration), 0 0 0 3px rgba(210, 60, 34, 0.18); }
+[data-theme="studio"] .sp-st.waiting .sp-mark, [data-theme="studio"] .sp-st.redo .sp-mark { background: var(--registration); box-shadow: 0 0 6px rgba(210, 60, 34, 0.7); }
+[data-theme="studio"] .sp-st.stopped .sp-mark, [data-theme="studio"] .sp-st.failed .sp-mark { background: var(--registration); box-shadow: none; }
+@media (hover: hover) and (pointer: fine) { [data-theme="studio"] .sp-st:not(.here):hover { transform: translateY(-2px); } }
+[data-theme="studio"] :is(.sp-head, .sp-pill, button.sp-text) { transition: transform 120ms var(--out); }
+[data-theme="studio"] :is(.sp-head, .sp-pill, button.sp-text):active:not(:disabled) { transform: scale(0.97); }
+/* the stage whose sheet lies on the table: lifted, and the lamp throws a little light down onto the table */
+[data-theme="studio"] .sp-st.here { transform: translateY(-4px); box-shadow: 0 0 0 2px var(--lamp), 0 0.4rem 1.4rem rgba(255, 200, 114, 0.45); }
+[data-theme="studio"] .sp-st.here.waiting, [data-theme="studio"] .sp-st.here.redo { box-shadow: inset 0 0 0 1.5px var(--registration), 0 0 0 2px var(--lamp), 0 0.4rem 1.4rem rgba(255, 200, 114, 0.45); }
+[data-theme="studio"] .sp-st.here::after { content: ""; position: absolute; left: 18%; right: 18%; top: 100%; height: 0.85rem; pointer-events: none;
+  background: linear-gradient(rgba(255, 200, 114, 0.35), transparent); clip-path: polygon(12% 0, 88% 0, 100% 100%, 0 100%); }
+[data-theme="studio"] .sp-st .btn { --btn-line: #CDBFA5; background: rgba(255, 255, 255, 0.55); border-color: #CDBFA5; color: var(--ink); }
+[data-theme="studio"] .sp-st .btn.primary { background: var(--registration); border-color: var(--registration); color: #FFF8F0; }
+[data-theme="studio"] .sp-st.todo .btn { background: var(--room-2); border-color: var(--room-line); color: var(--room-ink); }
+[data-theme="studio"] .sp-ask { position: relative; z-index: 1; margin: 0; align-self: center; display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.6rem; border-radius: 0.35rem;
+  background: var(--registration-soft); border: 1px solid rgba(210, 60, 34, 0.55); color: var(--room-ink); font-size: 0.78rem; }
+@media (prefers-reduced-motion: reduce) { [data-theme="studio"] .sp-st, [data-theme="studio"] .sp-rail i { transition: none; } [data-theme="studio"] .sp-st:not(.here):hover { transform: none; } }
+
+/* ---- left: Shots, Assets, This film ------------------------------------------------------------------------------------------------- */
+[data-theme="studio"] .st-side { min-height: 0; display: flex; flex-direction: column; border-right: 1px solid #000; background: var(--room-2); overflow: hidden; }
+[data-theme="studio"] .st-tabs { height: auto; gap: 0.2rem; padding: 0.6rem 0.7rem 0; border-bottom: 1px solid #000; }
+[data-theme="studio"] .st-tabs button { flex: 1; justify-content: center; height: 2.1rem; padding: 0 0.4rem; border: 0; border-radius: 0.4rem 0.4rem 0 0; font: 500 0.84rem var(--font-body);
+  text-transform: none; letter-spacing: 0; color: var(--room-ink-3); white-space: nowrap; }
+[data-theme="studio"] .st-tabs button:hover { color: var(--room-ink); }
+[data-theme="studio"] .st-tabs button[aria-selected="true"] { background: var(--paper); color: var(--ink); border-bottom-color: transparent; }
+[data-theme="studio"] .st-tabs .ed-count { font: var(--st-fs-meta) var(--font-mono); background: none; padding: 0; opacity: 0.7; color: inherit; }
+[data-theme="studio"] .st-tabs .ed-count.stop { color: var(--registration); opacity: 1; }
+[data-theme="studio"] .st-tabs .ed-count.new { color: #B8301A; opacity: 1; }
+[data-theme="studio"] .st-side .ed-tabbody { min-height: 0; padding-top: 0.5rem; }
+[data-theme="studio"] .st-addfiles { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.5rem; padding: 0 0.7rem 0.6rem; }
+[data-theme="studio"] .st-addfiles .hint { flex: 1 1 100%; font-size: var(--st-fs-meta); line-height: 1.35; color: var(--room-ink-3); }
+/* the shot list: the shot under the playhead lit by the lamp */
+[data-theme="studio"] .st-side .sl li.on { background: rgba(255, 200, 114, 0.08); box-shadow: inset 0 0 0 1px rgba(255, 200, 114, 0.5); }
+[data-theme="studio"] .st-side .sl-n { font-family: var(--font-mono); color: var(--lamp); }
+[data-theme="studio"] .st-side .sl-thumb { border-color: var(--room-line); border-radius: 0.2rem; }
+/* a tall or square film's thumbnail in the film's shape, as tall as the shot's two lines (a 16:9 crop of a 9:16 still was white paper) */
+[data-theme="studio"] .st-ed[data-shape] .st-side .sl-thumb { width: auto; max-width: 100%; height: 3.5rem; aspect-ratio: var(--film-ar); justify-self: center; }
+[data-theme="studio"] .st-ed[data-shape="square"] .st-side .sl-thumb { height: 3rem; }
+[data-theme="studio"] .st-side .sl-open { border-left: 2px solid var(--lamp); margin-left: 1.2rem; padding-left: 0.65rem; }
+[data-theme="studio"] .st-side .sl-meta { font-family: var(--font-mono); font-size: var(--st-fs-meta); }
+[data-theme="studio"] .st-side .sl-title { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }          /* a shot's name on two lines */
+[data-theme="studio"] .st-side .as-grp h3 { font: 500 var(--st-fs-meta) var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--room-ink-3); }
+/* This film */
+[data-theme="studio"] .fc { flex: 1; min-height: 0; overflow: auto; display: grid; align-content: start; gap: 0.8rem; padding: 0.2rem 0.85rem 1rem; }
+[data-theme="studio"] .fc section { padding-bottom: 0.75rem; border-bottom: 1px solid var(--room-line); display: grid; gap: 0.3rem; justify-items: start; }
+[data-theme="studio"] .fc section:last-child { border-bottom: 0; }
+[data-theme="studio"] .fc h4 { margin: 0; font: 500 var(--st-fs-meta) var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--room-ink-3); }
+[data-theme="studio"] .fc p { margin: 0; font-size: 0.86rem; color: var(--room-ink); }
+[data-theme="studio"] .fc .fc-by { display: flex; align-items: center; gap: 0.4rem; font-size: var(--st-fs-meta); color: var(--room-ink-2); }
+[data-theme="studio"] .fc .fc-line, [data-theme="studio"] .fc-line { font-size: var(--st-fs-meta); line-height: 1.4; color: var(--room-ink-2); }
+[data-theme="studio"] .fc dl { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.7rem; margin: 0; font-size: 0.84rem; }
+[data-theme="studio"] .fc dt { color: var(--room-ink-3); } [data-theme="studio"] .fc dd { margin: 0; color: var(--room-ink); }
+[data-theme="studio"] .fc-list { display: grid; gap: 0.15rem; font-size: 0.84rem; color: var(--room-ink); }
+[data-theme="studio"] .fc .clink { color: var(--pencil-light); font-size: var(--st-fs-meta); }
+[data-theme="studio"] .fc .ed-ver.inline { display: block; width: 100%; }
+[data-theme="studio"] .ed-ver-in > .hint { margin: 0.4rem 0 0; font-size: var(--st-fs-meta); color: var(--room-ink-3); }
+[data-theme="studio"] .ed-ver-in .ed-ver-list li { padding: 0.3rem 0; color: var(--room-ink-3); }
+[data-theme="studio"] .ed-ver-in .ed-ver-list li:hover { background: none; }
+[data-theme="studio"] .ed-ver-in .ed-ver-list .t { color: var(--room-ink); }
+[data-theme="studio"] .ed-ver-in .ed-ver-list .t b { font-weight: 500; font-size: 0.82rem; }
+[data-theme="studio"] .ed-ver-in .ed-ver-list time { font-family: var(--font-mono); font-size: var(--st-fs-meta); }
+[data-theme="studio"] .ed-ver-in .btn { height: 1.75rem; padding: 0 0.55rem; font-size: var(--st-fs-meta); }
+
+/* ---- the light table ---------------------------------------------------------------------------------------------------------------- */
+[data-theme="studio"] .lt { position: relative; min-width: 0; min-height: 0; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); padding: 0.9rem; overflow: hidden;
+  background: radial-gradient(80% 70% at 50% 0%, rgba(255, 200, 114, 0.08), transparent 70%), #0F0D0A; }
+[data-theme="studio"] .lt > * { grid-area: 1 / 1; min-width: 0; min-height: 0; }
+/* paper on the table: the film's sheet (the player) and each station's sheet; three punched holes at the top edge hang it on the pegs */
+[data-theme="studio"] .lt-film, [data-theme="studio"] .lt-sheet { position: relative; display: flex; flex-direction: column; border-radius: 0.9rem; color: var(--ink);
+  background: radial-gradient(120% 90% at 50% 40%, #FFFBF2 0%, var(--paper) 45%, var(--paper-2) 100%);
+  box-shadow: 0 0 0 1px rgba(255, 240, 210, 0.25), 0 0 4rem rgba(255, 214, 150, 0.16), 0 1.5rem 3rem rgba(0, 0, 0, 0.45); }
+[data-theme="studio"] .lt-film::before, [data-theme="studio"] .lt-sheet::before { content: ""; position: absolute; left: 50%; top: 0.45rem; z-index: 3; width: 7.2rem; height: 0.62rem; margin-left: -3.6rem; pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, #0F0D0A 0 0.3rem, transparent 0.32rem) 50% 0 / 0.62rem 0.62rem no-repeat,
+    linear-gradient(#0F0D0A, #0F0D0A) 0 0 / 2.1rem 0.62rem no-repeat, linear-gradient(#0F0D0A, #0F0D0A) 100% 0 / 2.1rem 0.62rem no-repeat; border-radius: 999px; opacity: 0.9; }
+[data-theme="studio"] .lt-film.away { visibility: hidden; }
+/* a sheet lands on the pegs: it drops a little and settles */
+[data-theme="studio"] .lt-sheet { animation: st-register 240ms var(--settle) both; overflow: hidden; outline: none; }
+@keyframes st-register { from { opacity: 0; transform: translateY(-0.7rem); } to { opacity: 1; transform: none; } }
+/* onion skin (only the change between two sheets): the sheet before lifts away, blue and faint, gone in half a second */
+[data-theme="studio"] .lt-ghost { position: relative; z-index: 4; pointer-events: none; border-radius: 0.9rem; overflow: hidden; opacity: 0.26;
+  filter: grayscale(1) sepia(1) hue-rotate(172deg) saturate(2) brightness(1.15); mix-blend-mode: screen; animation: st-onion 320ms var(--out) forwards; }
+[data-theme="studio"] .lt-ghost > * { height: 100%; animation: none !important; visibility: visible !important; }
+@keyframes st-onion { from { opacity: 0.3; transform: none; } to { opacity: 0; transform: translate(0.5rem, -0.6rem); } }
+@media (prefers-reduced-motion: reduce) { [data-theme="studio"] .lt-sheet { animation: none; } [data-theme="studio"] .lt-ghost { display: none; } }
+
+/* the film on the table: the picture in a dark frame, the controls on the paper */
+[data-theme="studio"] .lt-film { padding: 1.5rem 1.25rem 0.75rem; }
+[data-theme="studio"] .lt-film .pv { flex: 1; min-height: 0; background: none; border: 0; border-radius: 0; overflow: visible; }
+[data-theme="studio"] .lt-film .pv-stage { border-radius: 0.35rem; overflow: hidden; background: #050504; box-shadow: 0 0.6rem 1.4rem rgba(70, 50, 20, 0.28), 0 0 0 1px rgba(29, 26, 21, 0.25); }
+[data-theme="studio"] .lt-film .pv-bar { margin-top: 0.6rem; height: 2.5rem; padding: 0; border: 0; background: none; color: var(--ink); overflow: visible;
+  --text-primary: var(--ink); --text-secondary: var(--ink-2); --text-muted: var(--ink-3); --surface-2: var(--paper-white); --surface-3: var(--paper-2); --border: var(--paper-3); --border-strong: #CDBFA5;
+  --btn-line: #CDBFA5; --accent-ink: #B8301A; --accent-soft: var(--registration-soft); }
+[data-theme="studio"] .lt-film .pv-bar .btn { color: var(--ink); }
+[data-theme="studio"] .lt-film .pv-play.btn { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+[data-theme="studio"] .lt-film .pv-time { font: 500 0.95rem var(--font-mono); color: var(--ink); }
+[data-theme="studio"] .lt-film .pv-time .muted { color: var(--ink-3); }
+[data-theme="studio"] .lt-film .pv-shot { color: var(--ink-2); }
+[data-theme="studio"] .lt-film .pv-wait { color: var(--room-ink-2); }
+/* a tall or square film's picture in its own shape, centred on the paper with the controls under it (before the Build too, not a
+   16:9 black box); the edit card already stays inside the film's own frame */
+[data-theme="studio"] .st-ed[data-shape] .lt-film .pv { container-type: size; justify-content: center; }
+[data-theme="studio"] .st-ed[data-shape] .lt-film .pv-stage { flex: none; align-self: center; aspect-ratio: var(--film-ar); width: min(100cqw, calc((100cqh - 3.1rem) * var(--film-ar))); }
+
+/* a station's sheet on the table: its head (the title once, ×), then what the Desk shows inside its sheet, on paper */
+[data-theme="studio"] .lt-sheet { --surface-1: var(--paper); --surface-2: var(--paper-white); --surface-3: var(--paper-2); --border: var(--paper-3); --border-strong: #CDBFA5;
+  --text-primary: var(--ink); --text-secondary: var(--ink-2); --text-muted: var(--ink-3); --accent-ink: #B8301A; --accent-soft: var(--registration-soft); --accent-line: rgba(210, 60, 34, 0.45);
+  --link: var(--pencil-ink); --btn-line: #CDBFA5; --btn-light: rgba(255, 255, 255, 0.5); --input-bg: #FFFFFF;
+  --state-run: #A87406; --state-run-soft: rgba(217, 154, 22, 0.14); --state-run-line: rgba(217, 154, 22, 0.5);
+  --state-stop: #C2361D; --state-stop-soft: rgba(210, 60, 34, 0.1); --state-stop-line: rgba(210, 60, 34, 0.45);
+  --state-done: #2F7E48; --state-done-soft: rgba(62, 155, 91, 0.12); --state-done-line: rgba(62, 155, 91, 0.45);
+  --status-ok: var(--state-done); --status-pending: var(--state-run); --status-stop: var(--state-stop);
+  --status-ok-soft: var(--state-done-soft); --status-pending-soft: var(--state-run-soft); --status-stop-soft: var(--state-stop-soft);
+  --success: var(--state-done); --warning: var(--state-run); --danger: var(--state-stop);
+  --select: var(--state-done); --select-soft: var(--state-done-soft); --select-ink: #F4FFF7; --grain: none; color-scheme: light; }
+[data-theme="studio"] .lt-sheet, [data-theme="studio"] .lt-sheet * { scrollbar-color: #CDBFA5 transparent; }
+[data-theme="studio"] .lt-head { flex: none; display: flex; align-items: center; gap: 1rem; padding: 1.5rem 1.5rem 0.4rem; }
+[data-theme="studio"] .lt-head h2 { margin: 0; flex: 1; min-width: 0; font: 400 var(--st-fs-sheet) / 1 var(--font-studio-display); letter-spacing: -0.01em; text-transform: none; color: var(--ink); }
+[data-theme="studio"] .lt-head .x { color: var(--ink-2); }
+[data-theme="studio"] .lt-sheet > .sheet-body { padding-top: var(--sp-3); }          /* the sides and the foot as the Desk's: the sticky bars reach the edges with them */
+[data-theme="studio"] .lt-sheet.narrow > .sheet-body { width: min(70rem, 100%); }          /* The Studio's type is smaller: the Voice-over's four source cards need this */
+[data-theme="studio"] .lt-sheet > .dialog-foot { border-top: 1px dashed var(--paper-3); background: var(--paper); }
+[data-theme="studio"] .lt-sheet .panel { background: rgba(255, 255, 255, 0.55); border-color: var(--paper-3); }
+[data-theme="studio"] .lt-sheet .btn { background: rgba(255, 255, 255, 0.55); border-color: var(--paper-3); color: var(--ink); }
+[data-theme="studio"] .lt-sheet .btn.primary { background: var(--registration); border-color: var(--registration); color: #FFF8F0; }
+[data-theme="studio"] .lt-sheet .btn.ghost { background: none; border-color: transparent; }
+[data-theme="studio"] .lt-sheet :is(.input, .select, .textarea) { background: #fff; border-color: var(--paper-3); color: var(--ink); }
+[data-theme="studio"] .lt-sheet h3 { font-family: var(--font-studio-display); font-weight: 500; text-transform: none; letter-spacing: 0; }
+[data-theme="studio"] .lt-sheet .hint { color: var(--ink-3); }
+[data-theme="studio"] .lt-sheet .label, [data-theme="studio"] .lt-sheet .sheet-cols h3.sub { color: var(--ink-3); }
+
+/* the Motions drawer: it slides up from the bottom of the table, on paper */
+[data-theme="studio"] .lt-drawer { position: absolute; left: 0.9rem; right: 0.9rem; bottom: 0.9rem; z-index: 5; max-height: 52%; display: flex; animation: st-drawer 260ms cubic-bezier(0.32, 0.72, 0, 1) both; }
+@keyframes st-drawer { from { transform: translateY(1.5rem); opacity: 0; } }
+[data-theme="studio"] .lt-drawer .mdr { flex: 1; height: auto; max-height: 100%; padding: 0.8rem 1rem 0.9rem; border-radius: 0.8rem; border: 1px solid var(--paper-3); background: var(--paper-white); color: var(--ink);
+  box-shadow: 0 -0.6rem 2rem rgba(0, 0, 0, 0.35); --text-primary: var(--ink); --text-secondary: var(--ink-2); --text-muted: var(--ink-3); --surface-2: #fff; --surface-3: var(--paper-2);
+  --border: var(--paper-3); --border-strong: #CDBFA5; --input-bg: #fff; --accent-ink: #B8301A; }
+[data-theme="studio"] .lt-drawer .mdr-title { font: 500 1.15rem var(--font-studio-display); text-transform: none; letter-spacing: 0; }
+[data-theme="studio"] .lt-drawer .mdr-chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { [data-theme="studio"] .lt-drawer { animation: none; } }
+
+/* ---- the conversation: the user's notes on tracing paper, Claude's replies under the lamp --------------------------------------- */
+[data-theme="studio"] .st-chat .claude { gap: 0; background: transparent; }
+[data-theme="studio"] .st-chat .cpanel { background: transparent; border: 0; border-radius: 0; }
+[data-theme="studio"] .st-chat .claude-head { height: auto; padding: 0.85rem 1rem 0.5rem; border-bottom: 0; background: transparent; }
+[data-theme="studio"] .st-who { display: inline-flex; align-items: center; gap: 0.5rem; min-width: 0; }
+[data-theme="studio"] .st-who i { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--lamp); box-shadow: 0 0 8px var(--lamp); flex: none; }
+[data-theme="studio"] .st-who b { font: 500 1.1rem var(--font-studio-display); text-transform: none; letter-spacing: 0; color: var(--room-ink); }
+[data-theme="studio"] .st-chat .cusage-head { font-family: var(--font-mono); font-size: var(--st-fs-meta); color: var(--room-ink-3); }
+[data-theme="studio"] .st-chat .cmodel-chip { border: 1px solid var(--room-line); background: none; color: var(--room-ink-2); border-radius: 999px; padding: 0.2rem 0.6rem; font: 500 var(--st-fs-meta) var(--font-body); }
+[data-theme="studio"] .st-chat .conversation { padding: 0.3rem 0.9rem 1rem; gap: 0.9rem; }
+[data-theme="studio"] .st-chat .msg.user { position: relative; align-self: stretch; max-width: none; padding: 0.65rem 0.8rem 0.7rem; border: 0; border-radius: 0.15rem; background: rgba(242, 216, 138, 0.88);
+  color: #2C2412; transform: rotate(-0.6deg); box-shadow: 0 0.3rem 0.6rem rgba(0, 0, 0, 0.3); --text-primary: #2C2412; --text-secondary: #4A3C1E; --text-muted: #6A5A36; }
+[data-theme="studio"] .st-chat .task:nth-child(even) .msg.user { transform: rotate(0.7deg); }
+[data-theme="studio"] .st-chat .msg.user .md { font: 1.08rem / 1.35 var(--font-studio-hand); color: #2C2412; }
+[data-theme="studio"] .st-chat .msg.claude { padding: 0.15rem 0.8rem 0.2rem 0.9rem; border-left: 2px solid var(--lamp); }
+[data-theme="studio"] .st-chat .msg.claude .md { color: var(--room-ink); font-size: 0.88rem; line-height: 1.5; }
+[data-theme="studio"] .st-chat .cmile { border-left: 2px solid rgba(255, 200, 114, 0.45); padding-left: 0.9rem; color: var(--room-ink-2); }
+[data-theme="studio"] .st-chat .cnote.warn { background: var(--registration-soft); border: 1px solid rgba(210, 60, 34, 0.55); border-radius: 0.45rem; color: var(--room-ink); }
+[data-theme="studio"] .st-chat .cnote.warn > svg { color: #F08A6E; }
+[data-theme="studio"] .st-chat .cbrief { background: rgba(242, 216, 138, 0.18); border-radius: 0.15rem; }
+[data-theme="studio"] .st-chat .cbrief-t { font: 1.02rem / 1.35 var(--font-studio-hand); color: var(--room-ink); }
+/* the composer: a sheet of tracing paper */
+[data-theme="studio"] .st-chat .composer { height: auto; border-top: 1px solid #000; background: #1A1712; padding: 0.75rem 0.9rem 0.9rem; }
+[data-theme="studio"] .st-chat .composer-input { border: 0; border-radius: 0.15rem; background: rgba(242, 216, 138, 0.9); color: #2C2412; font: 1.1rem / 1.35 var(--font-studio-hand); transform: rotate(-0.4deg); }
+[data-theme="studio"] .st-chat .composer-input::placeholder { color: rgba(44, 36, 18, 0.55); }
+[data-theme="studio"] .st-chat .composer-input:focus { outline: none; box-shadow: 0 0 0 2px var(--lamp); }
+[data-theme="studio"] .st-chat .cchip.sug { border: 1px dashed var(--room-line); background: none; color: var(--room-ink-2); }
+[data-theme="studio"] .st-chat .cchip.sug svg { color: var(--lamp); }
+[data-theme="studio"] .st-chat .cchip.cpick { border-color: rgba(255, 200, 114, 0.5); background: rgba(255, 200, 114, 0.1); color: var(--lamp); }
+[data-theme="studio"] .st-chat .btn.csend { background: var(--registration); border-color: var(--registration); color: #FFF8F0; }
+[data-theme="studio"] .st-chat .btn.csend:disabled { background: var(--room-3); border-color: var(--room-line); color: var(--room-ink-3); }
+
+/* ---- the timeline: read left to right, ruled like an exposure sheet, on paper ------------------------------------------------------ */
+[data-theme="studio"] .st-tl .tl, [data-theme="studio"] .st-ed .ed-narrow .tl { flex: 1; height: auto; border: 0; border-top: 1px solid #000; border-radius: 0; background: #F1EADB; color: var(--ink);
+  --text-primary: var(--ink); --text-secondary: var(--ink-2); --text-muted: var(--ink-3); --surface-2: var(--paper-white); --surface-3: var(--paper-2); --border: var(--paper-line); --border-strong: #CDBFA5;
+  --btn-line: #CDBFA5; --accent: var(--registration); --accent-ink: #B8301A;
+  --tl-voice: #2F8F7A; --tl-sfx: #7FA9D6; --tl-music: #D9B46A; }
+[data-theme="studio"] .st-ed .tl-head { background: #E9E0CC; border-bottom: 1px solid var(--paper-line); }
+[data-theme="studio"] .st-ed .tl-name { font: 500 var(--st-fs-meta) var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+[data-theme="studio"] .st-ed .tl-body { background: #F1EADB; }
+[data-theme="studio"] .st-ed .tl-labels { background: #E9E0CC; border-right: 1.5px solid var(--ink); }
+[data-theme="studio"] .st-ed .tl-label { font: 500 var(--st-fs-meta) var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--paper-line); }
+[data-theme="studio"] .st-ed .tl-ruler { border-bottom: 1.5px solid var(--ink); color: var(--ink-3); font-family: var(--font-mono); }
+[data-theme="studio"] .st-ed .tl-row { border-bottom-color: var(--paper-line); }
+[data-theme="studio"] .st-ed .tl-shot { border: 0; border-radius: 0.2rem; background-color: #fff; box-shadow: inset 0 0 0 1px rgba(29, 26, 21, 0.25); }
+[data-theme="studio"] .st-ed .tl-shot.sel { box-shadow: inset 0 0 0 2px var(--registration); background-color: #fff; }
+/* a shot the storyboard plans, before the build: pencilled in, a dashed outline on the paper */
+[data-theme="studio"] .st-ed .tl-shot.planned:not(.sel) { box-shadow: none; outline: 1px dashed rgba(29, 26, 21, 0.4); outline-offset: -1px; background-color: rgba(255, 255, 255, 0.55); }
+[data-theme="studio"] .st-ed .tl-chip { background: rgba(255, 253, 247, 0.9); color: var(--ink); text-shadow: none; }
+[data-theme="studio"] .st-ed .tl-chip b { color: var(--registration); font-family: var(--font-mono); font-weight: 500; }
+[data-theme="studio"] .st-ed .tl-word { color: #1E4D43; background: rgba(47, 143, 122, 0.16); border-color: rgba(47, 143, 122, 0.5); }
+[data-theme="studio"] .st-ed .tl-tick { background: #CFE0F2; box-shadow: inset 0 0 0 1px #7FA9D6; }
+[data-theme="studio"] .st-ed .tl-music { background: #F3DDB0 repeating-linear-gradient(90deg, rgba(122, 90, 30, 0.35) 0 1px, transparent 1px 3px); border-color: #D9B46A; }
+[data-theme="studio"] .st-ed .tl-music path { fill: #7A5A1E; opacity: 0.55; }
+[data-theme="studio"] .st-ed .tl-empty { font: 0.95rem var(--font-studio-hand); color: var(--ink-3); }
+[data-theme="studio"] .st-ed .tl-head-line { background: var(--registration); box-shadow: 0 0 6px rgba(210, 60, 34, 0.5); }
+[data-theme="studio"] .st-ed .tl-head-line::before { border-top-color: var(--registration); }
+[data-theme="studio"] .st-ed .tl-range { background: rgba(255, 200, 114, 0.22); border-color: #E9B44C; }
+
+/* ---- a narrow window: the stations wrap, the tabs as on the Desk ------------------------------------------------------------------- */
+[data-theme="studio"] .st-ed.narrow .sp-line { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+[data-theme="studio"] .st-ed.narrow .sp-rail { display: none; }
+[data-theme="studio"] .st-ed.narrow .ed-narrow > .st-side, [data-theme="studio"] .st-ed.narrow .ed-narrow > .lt { flex: 1; }
+[data-theme="studio"] .st-ed.narrow .ed-narrow > .tl { flex: none; height: var(--ed-tl-h, var(--ed-tl-def)); }
+
+/* ---- the sheets' own content on paper ----------------------------------------------------------------------------------------------- */
+/* Storyboard: each option is a row on the story wall (cork, pinned panels); the 3 × 3 grid and its pages stay as they are */
+[data-theme="studio"] .lt-sheet .bd-col { border: 0; border-radius: 0.4rem; padding: 0.9rem 0.9rem 1rem; background: #E7D9BF; box-shadow: inset 0 0 0 1px rgba(90, 60, 20, 0.12);
+  background-image: radial-gradient(rgba(120, 80, 30, 0.14) 1px, transparent 1.2px); background-size: 9px 9px; }
+[data-theme="studio"] .lt-sheet .bd-col.picked { box-shadow: inset 0 0 0 2px var(--select), 0 0 0 3px var(--select-soft); background-color: #E2D8BC; }
+[data-theme="studio"] .lt-sheet .bd-col header .bd-title, [data-theme="studio"] .lt-sheet .bd-round-h { font-family: var(--font-studio-display); }
+[data-theme="studio"] .lt-sheet .bd-col header .bd-title { font-size: 1.15rem; font-weight: 500; color: var(--ink); }
+[data-theme="studio"] .lt-sheet .bd-idea { font: 1.05rem / 1.3 var(--font-studio-hand); color: var(--ink-2); }
+[data-theme="studio"] .lt-sheet .bd-stills { gap: 0.7rem; padding-top: 0.35rem; }
+[data-theme="studio"] .lt-sheet .bd-still { overflow: visible; border: 0; border-radius: 0.15rem; padding: 0.3rem 0.3rem 0.45rem; background: var(--paper-white); aspect-ratio: auto;
+  box-shadow: 0 0.35rem 0.8rem rgba(70, 50, 20, 0.2); transform: rotate(var(--st-r, 0deg)); transition: transform 220ms var(--settle); }
+[data-theme="studio"] .lt-sheet .bd-still img { aspect-ratio: 16 / 9; height: auto; background: var(--ink); }
+[data-theme="studio"] .lt-sheet .bd-still:nth-child(3n + 1) { --st-r: -1.2deg; }
+[data-theme="studio"] .lt-sheet .bd-still:nth-child(3n + 2) { --st-r: 0.9deg; }
+[data-theme="studio"] .lt-sheet .bd-still:nth-child(3n) { --st-r: -0.5deg; }
+@media (hover: hover) and (pointer: fine) { [data-theme="studio"] .lt-sheet .bd-still:hover { transform: rotate(0deg) scale(1.03); z-index: 2; } }
+[data-theme="studio"] .lt-sheet .bd-still::before { content: ""; position: absolute; top: -0.35rem; left: 50%; z-index: 2; width: 0.85rem; height: 0.85rem; margin-left: -0.42rem; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 35% 30%, #FF8C72, var(--registration) 60%, #7D1E0E); box-shadow: 0 2px 3px rgba(0, 0, 0, 0.35); }
+[data-theme="studio"] .lt-sheet .bd-still .num { left: 0.5rem; top: 0.5rem; font-family: var(--font-mono); }
+/* a tall film's option (9:16) is one row of its nine panels across the wall, a square one (1:1, 4:5) two rows of five; the options
+   stack, a row each, each as large as the sheet's height lets it (the sheet body is a size container; 14rem: the round's and option's heads
+   and the pager). A 3 x 3 sheet of a 9:16 film was nine 50 px panels in the middle of an empty wall */
+[data-theme="studio"] .st-ed[data-shape] .lt-sheet .bd-cols { grid-template-columns: minmax(0, 1fr); }
+[data-theme="studio"] .st-ed[data-shape="tall"] .lt-sheet .bd-col[style] .bd-stills { grid-template-columns: repeat(9, minmax(0, 1fr));
+  width: min(100%, calc(9 * ((100cqh - 14rem) * var(--bd-ar) + 0.6rem) + 5.6rem)); }
+[data-theme="studio"] .st-ed[data-shape="square"] .lt-sheet .bd-col[style] .bd-stills { grid-template-columns: repeat(5, minmax(0, 1fr));
+  width: min(100%, calc(5 * ((100cqh - 15rem) / 2 * var(--bd-ar) + 0.6rem) + 2.8rem)); }
+@media (prefers-reduced-motion: reduce) { [data-theme="studio"] .lt-sheet .bd-still { transition: none; } }
+[data-theme="studio"] .lt-sheet .sb-bar { background: var(--paper); border-top: 1px dashed var(--paper-3); }
+/* Motion Plan: the dope sheet's rows on white paper, the shot cards as small pinned stills */
+[data-theme="studio"] .lt-sheet .mo-row, [data-theme="studio"] .lt-sheet .mo-tile { background: var(--paper-white); border-color: var(--paper-3); }
+[data-theme="studio"] .lt-sheet .mo2 .sb-bar { background: var(--paper); }
+/* the chat's result lines as the concept writes them: a quiet mono line under the reply (green: changed), the cards on the room's paper edge */
+[data-theme="studio"] .st-chat .cstatus { font: 400 var(--st-fs-meta) var(--font-mono); letter-spacing: 0.01em; color: var(--room-ink-3); }
+[data-theme="studio"] .st-chat .cstatus.done:not(.undone) { padding: 0; border: 0; background: none; }
+[data-theme="studio"] .st-chat .cstatus.done:not(.undone) .cs-t { color: #6FC08A; font-weight: 500; }
+[data-theme="studio"] .st-chat .cstatus .clink { color: var(--room-ink-2); }
+[data-theme="studio"] .st-chat .cstatus.running { border-color: rgba(217, 154, 22, 0.4); background: rgba(217, 154, 22, 0.12); border-radius: 0.45rem; font-family: var(--font-body); font-size: var(--st-fs-meta); }
+[data-theme="studio"] .st-chat :is(.cnote.ok, .cmile.done, .cdone) { border: 1px solid var(--room-line); border-radius: 0.4rem; background: rgba(255, 240, 210, 0.05); }
+[data-theme="studio"] .st-chat :is(.cnote.ok, .cmile.done, .cdone-head) > svg, [data-theme="studio"] .st-chat .cdone-head { color: #6FC08A; }
+[data-theme="studio"] .st-chat .cnote { font-size: var(--st-fs-meta); }
+[data-theme="studio"] .lt-sheet.narrow > .sheet-body { margin-inline: auto; }
+[data-theme="studio"] .lt-hint { flex: 1 1 0; min-width: 0; font: 1.1rem / 1.2 var(--font-studio-hand); color: var(--pencil-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+[data-theme="studio"] .lt-head:has(.lt-hint) h2 { flex: none; }
+/* an approved option wears the studio's red stamp */
+[data-theme="studio"] .lt-sheet .bd-col .state-badge.ok { height: auto; padding: 0.3rem 0.8rem; border: 2.5px solid currentColor; border-radius: 0.4rem; background: none; box-shadow: none;
+  color: var(--registration); font: 700 0.9rem / 1 var(--font-body); letter-spacing: 0.18em; text-transform: uppercase; transform: rotate(-6deg); opacity: 0.88; mix-blend-mode: multiply; }
+[data-theme="studio"] .lt-sheet .bd-col .state-badge.ok svg { display: none; }
+
+/* ---- fixes that keep the concept --------------------------------------------------------------------------- */
+/* on a short window the timeline folds to its Shots row while a sheet lies on the table, so the sheet has the room (concept "tlfold") */
+@media (max-height: 1000px) {
+  [data-theme="studio"] .st-body.sheet-on { grid-template-rows: minmax(0, 1fr) 6px 5.6rem; }
+  [data-theme="studio"] .st-body.sheet-on .tl-label:not(.ruler, .shots), [data-theme="studio"] .st-body.sheet-on .tl-row:not(.shots) { display: none; }
+  [data-theme="studio"] .st-body.sheet-on .tl-body { --tl-h-shots: 2.6rem; }
+}
+/* the Brief's words box as tall as the table leaves room for its length and Save */
+[data-theme="studio"] .lt-sheet .brief-one > .panel > .textarea { min-height: clamp(7rem, calc(100vh - 46rem), 30rem); }
+/* the Motions drawer's target in ink, whole; its kinds scroll with a soft edge */
+[data-theme="studio"] .lt-drawer .mdr-for { color: var(--ink-2); white-space: normal; overflow: visible; }
+[data-theme="studio"] .lt-drawer .mdr-groups { -webkit-mask: linear-gradient(90deg, #000 calc(100% - 1.5rem), transparent); mask: linear-gradient(90deg, #000 calc(100% - 1.5rem), transparent); padding-right: 1.5rem; }
+/* the registration red is the sheet's one main action; a second action is paper, a main action that cannot run yet is grey paper */
+[data-theme="studio"] .lt-sheet .mix .panel-head .btn.primary { background: rgba(255, 255, 255, 0.55); border-color: var(--paper-3); color: var(--ink); box-shadow: none; }
+[data-theme="studio"] .lt-sheet .btn.primary:disabled { background: var(--paper-3); border-color: var(--paper-3); color: var(--ink-3); box-shadow: none; opacity: 1; }
+[data-theme="studio"] .lt-sheet .mix .tag { color: var(--ink-2); background: var(--paper-2); }
+/* a narrow sheet's head sits over its body */
+[data-theme="studio"] .lt-sheet.narrow > .lt-head { width: min(70rem, 100%); margin-inline: auto; padding-inline: var(--sp-5); }
+/* notes pinned on the film in the concept's materials: a red pin for a point, the lamp for a box and for pinning */
+[data-theme="studio"] :is(.lt-film, .st-chat) .fn-mark { border-color: var(--lamp); }
+[data-theme="studio"] :is(.lt-film, .st-chat) .fn-mark.box { background: rgba(255, 200, 114, 0.18); border-width: 2px; border-radius: 0.2rem; }
+[data-theme="studio"] :is(.lt-film, .st-chat) .fn-mark.pt { border: 0; background: radial-gradient(circle at 35% 30%, #FF8C72, var(--registration) 60%, #7D1E0E); box-shadow: 0 2px 3px rgba(0, 0, 0, 0.35); }
+[data-theme="studio"] :is(.lt-film, .st-chat) .fn-mark b { background: var(--paper-white); color: var(--ink); font-family: var(--font-mono); box-shadow: 0 0 0 1px var(--paper-3); }
+[data-theme="studio"] .lt-film .fn-layer.pinning .fn-pic { outline: 2px dashed var(--lamp); outline-offset: 0; box-shadow: 0 0 0 100vmax rgba(15, 13, 10, 0.35); }
+[data-theme="studio"] .lt-film .fn-hint { position: absolute; left: 50%; bottom: 0.8rem; transform: translateX(-50%); padding: 0.2rem 0.7rem; border-radius: 0.2rem; white-space: nowrap; pointer-events: none;
+  background: rgba(242, 216, 138, 0.92); color: #2C2412; font: 1.05rem / 1.3 var(--font-studio-hand); box-shadow: 0 0.3rem 0.6rem rgba(0, 0, 0, 0.3); }
+[data-theme="studio"] .lt-film .pv-bar .pv-lb.on { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+[data-theme="studio"] .lt-sheet .mix-sel { text-transform: none; letter-spacing: 0; }          /* the chip in plain case, as the concept writes chips */
+[data-theme="studio"] .st-chat .claude-head .st-who { flex: none; }
+[data-theme="studio"] .st-chat .cusage-head { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }          /* a narrow chat never lets the usage run over the title */
+/* the live "Now: …" line in the narrow chat: the step on one or two lines, how long it has been on it below, never broken up */
+[data-theme="studio"] .st-chat .cnow { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.4rem; row-gap: 0.1rem; align-items: baseline; }
+[data-theme="studio"] .st-chat .cnow-t { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+[data-theme="studio"] .st-chat .cnow .cs-m { grid-column: 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* a good state on paper (Key saved, Words checked, Saved, Default) is inked like a done station, never the registration red */
+[data-theme="studio"] .lt-sheet .chip.teal { border-color: var(--ink); color: var(--ink); background: transparent; }

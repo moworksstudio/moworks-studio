@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-rack-focus",
+  "type": "hyperframes:component",
+  "title": "Rack Focus",
+  "description": "Hai dòng chữ ở hai độ sâu, tiêu điểm chuyển từ dòng xa sang dòng gần: dòng này nhoè 8 px thì dòng kia rõ lại.",
+  "tags": [
+    "blur",
+    "focus",
+    "depth",
+    "cinematic",
+    "text-blur-focus",
+    "smooth",
+    "heavy",
+    "blur-focus",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-rack-focus.html",
+      "target": "compositions/components/text-rack-focus.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-rack-focus",
+    "author": "takayu",
+    "call": "MW.textRackFocus(q(\".rf\"), tl, 0, {});",
+    "function": "MW.textRackFocus",
+    "options": {
+      "far": "the far line",
+      "near": "the near line",
+      "blur": "px on the line out of focus (16)",
+      "dim": "its opacity (0.6)",
+      "duration": "s per pull (1.2; 0.8–1.5)",
+      "ease": "(cubic-bezier(.65,0,.35,1))",
+      "pulls": "[[s, 'near' | 'far'], ...]",
+      "start": "the line in focus at the start",
+      "loop": "s (5)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-rack-focus",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-rack-focus (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-rack-focus, written here): Two lines at different depths: far (≈0.6× size, upper left, dimmer) and near (large, lower right). Focus pull: the sharp line blurs 0 → 8 px and dims (opacity ~0.6–0.7) while the other goes 8 → 0 px and full, 1.2 s ease-in-out (cubic-bezier(.65,0,.35,1); GSAP power2.inOut; recipe range 0.8–1.5 s). Demo: starts on far, pull to near 0.6–1.8 s, hold, back 3.1–4.3 s; loop 5 s (GSAP yoyo with 1.3 s holds). Params: duration: chuyển nét (1.2 s) · blur (8 px) · dim: độ mờ dòng nhoè (0.6) · hold (1.3 s).",
+    "titleVi": "Chuyển nét giữa hai dòng chữ"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/text-reveal",
+  "hash": "66f367291660babf",
+  "at": "2026-10-17T06:03:35.752Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__text-reveal.mp4",
+    "poster": "previews/magicui__text-reveal.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c5ef8bf1bff7656d3932f7c1f0baf1273cdf6bccd00e350c546bf2b748adc117",
+    "size": 19764,
+    "seconds": 31,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

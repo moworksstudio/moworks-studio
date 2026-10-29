@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Spiral Text - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .sf { position: relative; width: 860px; height: 860px; font-weight: 800; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="5">
+<div class="st"><div class="sf"></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"text":"Moworks Studio","turns":3.2,"radius":360,"size":0.24,"flow":1.8,"inner":[30,140],"sep":"#8b7bff","loop":5};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var rail = function (pts, closed) { var L = [0]; for (var i = 1; i < pts.length; i++) L.push(L[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])); var tot = L[L.length - 1];
+    return { len: tot, at: function (s) { s = closed ? ((s % tot) + tot) % tot : Math.max(0, Math.min(tot, s)); var lo = 0, hi = L.length - 1; while (hi - lo > 1) { var m = (lo + hi) >> 1; if (L[m] <= s) lo = m; else hi = m; } var f = (s - L[lo]) / ((L[hi] - L[lo]) || 1), a = pts[lo], b = pts[hi]; return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]; } }; };
+  var ang = function (R, s, ch) { var a = R.at(s - ch), b = R.at(s + ch); return Math.atan2(b[1] - a[1], b[0] - a[0]); };
+  var glyphs = function (host, list, fs, sepColor) { return list.map(function (g) { var s = document.createElement("span"); s.textContent = g; s.style.cssText = "position:absolute;left:0;top:0;white-space:pre;line-height:1;font-size:" + fs + "px;" + (g === "•" && sepColor ? "color:" + sepColor + ";" : ""); host.appendChild(s); return { s: s, w: s.offsetWidth, h: s.offsetHeight }; }); };
+  var place = function (q, x, y, a, op) { gsap.set(q.s, { x: x - q.w / 2, y: y - q.h * 0.8, rotation: a * 180 / Math.PI, transformOrigin: "50% 80%" }); q.s.style.opacity = op == null ? "1" : String(op); };
+  var cx = el.clientWidth / 2, cy = el.clientHeight / 2, F = 100, unit = gr(o.text + " • "), probe = glyphs(el, unit, F, o.sep), uem = probe.map(function (q) { return q.w / F; }); probe.forEach(function (q) { q.s.remove(); });
+  var ua = uem.reduce(function (a, b) { return a + b; }, 0) * o.size, TH = 2 * Math.PI * o.turns, reps = Math.ceil(TH / ua) + 2, list = [], A = []; for (var k = 0; k < reps; k++) { list = list.concat(unit); A = A.concat(uem); }
+  var G = glyphs(el, list, F, o.sep), a0 = 0; G.forEach(function (q, i) { q.o = a0 + A[i] * o.size / 2; a0 += A[i] * o.size; });
+  var speed = Math.max(1, Math.round(o.flow / ua)) * ua / o.loop;
+  return MW.drive(tl, at, o.loop, function (t) {
+    var off = (speed * t) % ua; G.forEach(function (q) { var th = TH - (q.o - ua + off), r = o.radius * th / TH; if (th <= 0 || th > TH) { q.s.style.opacity = "0"; return; }
+      var a = th, x = cx + r * Math.cos(a), y = cy + r * Math.sin(a), sc = o.size * r / F, fade = Math.min(1, (TH - th) / 1.4, (r - o.inner[0]) / (o.inner[1] - o.inner[0]));
+      gsap.set(q.s, { x: x - q.w / 2, y: y - q.h * 0.8, rotation: a * 180 / Math.PI - 90, scale: sc, transformOrigin: "50% 80%" }); q.s.style.opacity = String(Math.max(0, fade)); });
+  });
+  };
+  MW.textSpiralFlow = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textSpiralFlow(q(".sf"), tl, 0, {});
+          tl.set({}, {}, 5);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

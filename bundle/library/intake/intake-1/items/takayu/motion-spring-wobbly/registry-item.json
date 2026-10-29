@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-spring-wobbly",
+  "type": "hyperframes:component",
+  "title": "react-spring wobbly",
+  "description": "Lò xo rung rinh, vượt khoảng 21 % rồi dừng sau 0.65 giây; cho nhân vật, sticker.",
+  "tags": [
+    "spring",
+    "wobbly",
+    "playful",
+    "springs",
+    "bouncy",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-spring-wobbly.html",
+      "target": "compositions/components/motion-spring-wobbly.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.05,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-spring-wobbly",
+    "author": "takayu",
+    "call": "MW.motionSpringWobbly(q(\".sp-b\"), tl, 0.4, { back: 1.70 });",
+    "function": "MW.motionSpringWobbly",
+    "options": {
+      "stiffness": "",
+      "damping": "",
+      "mass": "",
+      "prop": "the property it drives: x | y | scale | rotation (x)",
+      "from": "(0)",
+      "to": "(560 px)",
+      "back": "s after the start to spring back (null)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=s-wobbly",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=s-wobbly (read 12/10/2026)",
+      "upstream": "the site credits other:react-spring"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio s-wobbly, written here): Target moves 0 → 1 on tension 180, friction 12, mass 1 (damping ratio 0.45): 20.8 % overshoot, within 1 % by ~650 ms. Kit form: springk(180, 12) over 0.65 s. Site rule: jiggly; characters and stickers. Site demo: the target moves 102 px beside the response graph, with overshoot and settle readouts. Params: tension (180) · friction (12) · duration (0.65 s). react-spring's wobbly (180 / 12): about 21 % past, settled by ~0.65 s; characters and stickers.",
+    "titleVi": "Lò xo lắc lư (wobbly)"
+  }
+}

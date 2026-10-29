@@ -1,0 +1,26 @@
+{
+  "uid": "in:takayu/text-weight-breathe",
+  "hash": "420d065f32f1a5bf",
+  "at": "2026-10-17T11:30:56.979Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Roboto Flex"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-weight-breathe.mp4",
+    "poster": "previews/takayu__text-weight-breathe.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "8d7aef313e9373874231a77b66df2382121ea653e095717573761c4e498d7e6d",
+    "size": 42469,
+    "seconds": 33.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

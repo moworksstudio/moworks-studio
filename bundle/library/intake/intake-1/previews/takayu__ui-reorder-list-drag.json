@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-reorder-list-drag",
+  "hash": "12d5f60f24129b0c",
+  "at": "2026-10-17T10:46:17.299Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-reorder-list-drag.mp4",
+    "poster": "previews/takayu__ui-reorder-list-drag.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3e7d4c6254f76f7b3e927ff4f6ad0d7e783766e0da20597aa90e082c300a10ff",
+    "size": 20133,
+    "seconds": 25.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-after-shake",
+  "hash": "084165248f1107d8",
+  "at": "2026-10-17T10:13:32.926Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-after-shake.mp4",
+    "poster": "previews/takayu__motion-after-shake.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c5412b97ae5e03fdc886666bda4a2943013ebe62867e379691330529781b9606",
+    "size": 7183,
+    "seconds": 25.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

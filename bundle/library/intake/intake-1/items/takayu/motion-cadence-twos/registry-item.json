@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-cadence-twos",
+  "type": "hyperframes:component",
+  "title": "On Ones / Twos / Threes",
+  "description": "Giữ mỗi hình qua nhiều khung (12 hoặc 8 hình mỗi giây) để chuyển động có chất vẽ tay thay vì mượt tuyệt đối.",
+  "tags": [
+    "cadence",
+    "stepped",
+    "hand-drawn",
+    "timing-rhythm",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-cadence-twos.html",
+      "target": "compositions/components/motion-cadence-twos.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-cadence-twos",
+    "author": "takayu",
+    "call": "MW.motionCadenceTwos(q(\".c1\"), tl, 0, { fps: 24 });",
+    "function": "MW.motionCadenceTwos",
+    "options": {
+      "fps": "drawings a second: 24 ones, 12 twos, 8 threes (12)",
+      "distance": "px (1150)",
+      "period": "s each way, linear (1)",
+      "loops": "(1)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=t-twos",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=t-twos (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio t-twos, written here): Keep the motion's own ease but hold each value on a fixed drawing rate: ones = 24 drawings/s (alternate 2 and 3 frames at 60 fps), twos = 12/s (hold 5 frames), threes = 8/s (alternate 7 and 8 frames). Site demo: three dots ping-pong 230 px (1 s each way, linear) sampled at 24 / 12 / 8 fps. Param fps (or a film-level cadence) snaps the progress to that grid. Params: cadence: ones | twos | threes (24 / 12 / 8 hình mỗi giây) · ease: giữ nguyên ease gốc. The motion keeps its own ease; only its progress is held on the drawing rate.",
+    "titleVi": "Nhịp vẽ một, hai, ba khung"
+  }
+}

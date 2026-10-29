@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-roll-up-caption",
+  "type": "hyperframes:block",
+  "title": "Roll-Up Caption",
+  "description": "Phụ đề kiểu truyền hình trực tiếp: dòng mới luôn viết ở hàng dưới cùng, mỗi lần có dòng mới cả khối cuộn lên một hàng và hàng trên cùng mờ đi.",
+  "tags": [
+    "caption",
+    "roll-up",
+    "lines",
+    "broadcast",
+    "text-captions-subtitles",
+    "crisp",
+    "captions-subtitles",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-roll-up-caption.html",
+      "target": "compositions/components/text-roll-up-caption.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-roll-up-caption",
+    "author": "takayu",
+    "call": "MW.textRollUpCaption(q(\".rw\"), tl, 0, {});",
+    "function": "MW.textRollUpCaption",
+    "options": {
+      "lines": "the caption lines in order",
+      "start": "s (0.4)",
+      "every": "s per new line (0.85)",
+      "clearAt": "s (4.55)",
+      "box": "box colour",
+      "window": "the 3-row window",
+      "loop": "s (5)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-roll-up-caption",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-roll-up-caption (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-roll-up-caption, written here): 3-row window (row 1.45 em, text 17 px bold, left-aligned), clipped. A new line starts every 0.85 s from 0.4 s; 0.27 s before each new line all rows shift up one row, power2.out (cubic-bezier .33,1,.68,1), and the top row fades as it leaves. The new line paints on in the bottom row left → right over 0.5 s, char by char; each line has a dark box behind its shown chars (5 px pad). Clear 4.55–4.75 s. Loop 5 s. Params: số hàng (3) · cao hàng (1.45 em) · thời gian cuộn (0.27 s) · nhịp dòng (0.85 s).",
+    "titleVi": "Phụ đề cuộn lên kiểu truyền hình"
+  }
+}

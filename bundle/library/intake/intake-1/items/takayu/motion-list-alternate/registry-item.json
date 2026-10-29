@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-list-alternate",
+  "type": "hyperframes:component",
+  "title": "Alternating List",
+  "description": "Các dòng lần lượt vào từ trái rồi từ phải, xen kẽ, cùng dừng trên một trục.",
+  "tags": [
+    "list",
+    "stagger",
+    "alternate",
+    "list-grid",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-list-alternate.html",
+      "target": "compositions/components/motion-list-alternate.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-list-alternate",
+    "author": "takayu",
+    "call": "MW.motionListAlternate(q(\".la\"), tl, 0.3, {});",
+    "function": "MW.motionListAlternate",
+    "options": {
+      "items": "",
+      "dist": "px (112)",
+      "first": "−1 the first row from the left, 1 from the right",
+      "duration": "s (0.615, power2.out)",
+      "stagger": "s (0.055)",
+      "cols": ""
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=list-alternate",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=list-alternate (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio list-alternate, written here): Four rows, alternating sides: rows 1 and 3 from x −28 px, rows 2 and 4 from +28 px, → 0 with opacity 0 → 1, each 615 ms power2.out, 55 ms apart (780 ms in all). Small side arrows hint each row's direction and fade as it arrives. Params: dist (28 px) · first: dòng đầu từ trái (−1) / phải (1) · stagger (55 ms) · each (0.615 s).",
+    "titleVi": "Danh sách vào xen kẽ hai bên"
+  }
+}

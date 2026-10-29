@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Countdown Zoom - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.cz { position: absolute; inset: 0; } .cz svg { position: absolute; left: 50%; top: 50%; width: 800px; height: 800px; margin: -400px; }
+.cz-n, .cz-fin { position: absolute; inset: 0; display: grid; place-items: center; font-size: 320px; font-weight: 900; opacity: 0; } .cz-fin { font-size: 170px; color: #a99bff; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4.2">
+<div class="gm cz"><svg viewBox="0 0 800 800"><circle cx="400" cy="400" r="360" fill="none" stroke="#222a42" stroke-width="12"/><circle class="cz-arc" cx="400" cy="400" r="360" fill="none" stroke="#8b7bff" stroke-width="12" transform="rotate(-90 400 400)"/></svg>
+<div class="cz-n">3</div><div class="cz-n">2</div><div class="cz-n">1</div><div class="cz-fin">BẮT ĐẦU</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"start":0.2,"per":1,"loop":4.2};
+  var run = function (el, tl, at, o) {
+        var nums = Array.prototype.slice.call(el.querySelectorAll(".cz-n")), fin = el.querySelector(".cz-fin"), arc = el.querySelector(".cz-arc"), bk = gsap.parseEase("back.out(1.7)"), pq = gsap.parseEase("power1.in"), R = +arc.getAttribute("r"), C = 2 * Math.PI * R;
+        arc.setAttribute("stroke-dasharray", C + " " + C);
+        return MW.drive(tl, at, o.loop, function (t) {
+          nums.forEach(function (n, i) { var d = t - o.start - i * o.per; if (d < 0 || d >= o.per) { n.style.opacity = "0"; return; } var s = d < 0.15 ? 0.6 + 0.4 * bk(d / 0.15) : 1 + 1.2 * pq((d - 0.15) / (o.per - 0.15)); gsap.set(n, { scale: s }); n.style.opacity = String(Math.min(1, d / 0.1) * (d < 0.15 ? 1 : 1 - pq((d - 0.15) / (o.per - 0.15)))); });
+          var k = (t - o.start) / o.per, on = k >= 0 && k < nums.length; arc.setAttribute("stroke-dashoffset", String(on ? C * (1 - (k % 1)) : C)); arc.style.opacity = on ? "1" : "0";
+          if (fin) { var f = t - o.start - nums.length * o.per; gsap.set(fin, { scale: f >= 0 ? 0.6 + 0.4 * bk(Math.min(1, f / 0.25)) : 0.6 }); fin.style.opacity = f >= 0 ? "1" : "0"; }
+        });
+      };
+  MW.dataCountdownZoom = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.dataCountdownZoom(q(".cz"), tl, 0, {});
+          tl.set({}, {}, 4.2);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

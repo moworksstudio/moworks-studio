@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-counterweight-seesaw",
+  "type": "hyperframes:component",
+  "title": "Counterweight Headline",
+  "description": "Hai chữ nhẹ và nặng ngồi hai đầu một đòn bập bênh đang nghiêng 13°, đòn lắc qua lại như lò xo rồi nằm ngang thăng bằng.",
+  "tags": [
+    "spring",
+    "balance",
+    "rotation",
+    "words",
+    "text-layout-reflow",
+    "smooth",
+    "layout-reflow",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-counterweight-seesaw.html",
+      "target": "compositions/components/text-counterweight-seesaw.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-counterweight-seesaw",
+    "author": "takayu",
+    "call": "MW.textCounterweightSeesaw(q(\".cw\"), tl, 0, {});",
+    "function": "MW.textCounterweightSeesaw",
+    "options": {
+      "angle": "degrees, the heavy side down (13)",
+      "k": "spring stiffness (70)",
+      "c": "damping (6)",
+      "start": "s (0.4)",
+      "arm": "px from the pivot (420)",
+      "lift": "px above the beam (120)",
+      "loop": "s (4.2)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-kinetic-type-counterweight-headline",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-kinetic-type-counterweight-headline (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-kinetic-type-counterweight-headline, written here): Beam 228 × 6 px (radius 3) on a triangle fulcrum (28 px wide, 30 px tall) at frame centre. Words LIGHT (left, ink) and HEAVY (right, accent), 22 px, ride the beam 84 px from the pivot, 24 px above it, staying upright. Beam starts at 0.23 rad (13°, HEAVY side down) and springs to level from 0.4 s: spring k 70, c 6, m 1 (ζ≈0.36, overshoot ≈30 %, settles ~1.3 s). Loop only: re-tilts 3.55–4.1 s cubic-bezier(.65,0,.35,1); loop 4.2 s. Params: góc nghiêng (13°) · lò xo (k 70, c 6) · chữ trái / phải.",
+    "titleVi": "Hai chữ trên đòn bập bênh lò xo"
+  }
+}

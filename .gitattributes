@@ -1,0 +1,7 @@
+# every text file checks out as it is stored (LF), whatever core.autocrlf says: a new computer's copy is the same as this one's
+# (generated rule files are compared word for word, and shell hooks need LF)
+* text=auto eol=lf
+*.bat text eol=crlf
+*.vbs text eol=crlf
+# bundle/: third-party files shipped byte for byte (their SHA-256 is pinned in config/pins.json): no line-ending conversion
+bundle/** -text

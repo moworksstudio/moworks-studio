@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "morphing-text",
+  "type": "hyperframes:component",
+  "title": "Morphing Text",
+  "description": "Words melt into each other in a loop: the old word blurs away while the next one forms through a gooey threshold filter (1.5 s morph, 0.5 s pause).",
+  "tags": [
+    "morph",
+    "gooey",
+    "blur",
+    "words",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "morphing-text.html",
+      "target": "compositions/components/morphing-text.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/morphing-text",
+    "author": "magicui",
+    "call": "MW.morphingText(q(\".mw-morphing-text\"), tl, 0, { texts: [\"Xin chào\", \"Thiết kế\", \"Chuyển động\", \"Ra mắt\"], cycles: 4 });",
+    "function": "MW.morphingText",
+    "options": {
+      "texts": "list of words",
+      "cycles": "morphs to play (one loop)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/morphing-text.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/morphing-text.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "The SVG filter is added once to the page (#mw-morph-threshold). Text 40 pt / 6 rem bold as upstream; leading none: give the holder a height.",
+    "titleVi": "Từ tan chảy sang từ khác"
+  }
+}

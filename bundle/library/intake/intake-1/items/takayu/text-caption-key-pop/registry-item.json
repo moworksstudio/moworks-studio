@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-caption-key-pop",
+  "type": "hyperframes:block",
+  "title": "Hormozi-Style Pop Captions",
+  "description": "Phụ đề kiểu mạng xã hội chữ in hoa rất đậm viền đen dày, mỗi trang bật lên vượt cỡ rồi về, trang chứa từ khoá to hơn, đổi màu và nghiêng nhẹ.",
+  "tags": [
+    "captions",
+    "pop",
+    "uppercase",
+    "keyword",
+    "text-captions-subtitles",
+    "bouncy",
+    "crisp",
+    "captions-subtitles",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-caption-key-pop.html",
+      "target": "compositions/components/text-caption-key-pop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-caption-key-pop",
+    "author": "takayu",
+    "call": "MW.textCaptionKeyPop(q(\".kw\"), tl, 0, {});",
+    "function": "MW.textCaptionKeyPop",
+    "options": {
+      "start": "s (0.25)",
+      "every": "s per page (0.62)",
+      "exitAt": "s (3.3)",
+      "pages": "selector of the pages (the key page has .key)",
+      "loop": "s (3.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-hormozi-caption",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-hormozi-caption (read 12/10/2026)",
+      "upstream": "the site credits Remotion"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-hormozi-caption, written here): Words grouped into ≤ 4 pages, uppercase, weight 900, 42 px (key page 52 px = the longest), dark stroke 7 px under the fill plus a hard shadow copy offset (2, 3) px with a 9 px stroke. A page every 0.62 s from 0.25 s: opacity 0 → 1 in 0.05 s, scale 0.8 → 1.1 (100 ms) → 1.0 (180 ms) power1.out; the key page is accent coloured and rotates 0 → −4° with back.out(1.7) in 0.12 s. Exit 3.3–3.45 s: fade and scale × 0.7. Loop 3.8 s. Params: nhịp trang (0.62 s) · bật (0.8 → 1.1 → 1) · góc từ khoá (−4°) · viền (0.17 em).",
+    "titleVi": "Phụ đề in hoa bật, từ khoá nghiêng"
+  }
+}

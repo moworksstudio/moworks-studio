@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-spring-modal",
+  "type": "hyperframes:component",
+  "title": "Apple modal",
+  "description": "Lò xo hiện hộp thoại: vượt rất nhẹ (0.8 %) rồi nằm yên sau khoảng 0.26 giây.",
+  "tags": [
+    "spring",
+    "modal",
+    "ui",
+    "springs",
+    "smooth",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-spring-modal.html",
+      "target": "compositions/components/motion-spring-modal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.66,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-spring-modal",
+    "author": "takayu",
+    "call": "MW.motionSpringModal(q(\".sp-b\"), tl, 0.4, { back: 1.70 });",
+    "function": "MW.motionSpringModal",
+    "options": {
+      "stiffness": "",
+      "damping": "",
+      "mass": "",
+      "prop": "the property it drives: x | y | scale | rotation (x)",
+      "from": "(0)",
+      "to": "(560 px)",
+      "back": "s after the start to spring back (null)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=s-modal",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=s-modal (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio s-modal, written here): Target moves 0 → 1 on stiffness 280, damping 28, mass 1 (damping ratio 0.84): 0.8 % overshoot, within 1 % by ~260 ms. Kit form: springk(280, 28) over 0.26 s. Site rule: the modal-presentation spring, barely past then settled. Site demo: the target moves 102 px beside the response graph, with overshoot and settle readouts. Params: stiffness (280) · damping (28) · duration (0.26 s). The modal-presentation spring (280 / 28): barely past (0.8 %), settled by ~0.26 s.",
+    "titleVi": "Lò xo hộp thoại kiểu Apple"
+  }
+}

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Snap, then Hold - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .sh { display: flex; gap: 90px; } .sh i { display: block; width: 220px; height: 220px; transform: scale(0); color: #ffd23d; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.6">
+<div class="st"><div class="sh"><i><svg viewBox="-12 -12 24 24" width="100%" height="100%"><path d="M0 -11 L3.2 -3.8 L11 -3.4 L5 1.8 L6.8 9.6 L0 5.4 L-6.8 9.6 L-5 1.8 L-11 -3.4 L-3.2 -3.8 Z" fill="currentColor"/></svg></i><i><svg viewBox="-12 -12 24 24" width="100%" height="100%"><path d="M0 -11 L3.2 -3.8 L11 -3.4 L5 1.8 L6.8 9.6 L0 5.4 L-6.8 9.6 L-5 1.8 L-11 -3.4 L-3.2 -3.8 Z" fill="currentColor"/></svg></i><i><svg viewBox="-12 -12 24 24" width="100%" height="100%"><path d="M0 -11 L3.2 -3.8 L11 -3.4 L5 1.8 L6.8 9.6 L0 5.4 L-6.8 9.6 L-5 1.8 L-11 -3.4 L-3.2 -3.8 Z" fill="currentColor"/></svg></i><i><svg viewBox="-12 -12 24 24" width="100%" height="100%"><path d="M0 -11 L3.2 -3.8 L11 -3.4 L5 1.8 L6.8 9.6 L0 5.4 L-6.8 9.6 L-5 1.8 L-11 -3.4 L-3.2 -3.8 Z" fill="currentColor"/></svg></i></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"items":"i","each":0.45,"pop":1.25,"snap":0.06,"settle":0.2,"hold":0.6};
+  var run = function (el, tl, at, o) {
+        var it = Array.prototype.slice.call(el.querySelectorAll(o.items)), p2 = gsap.parseEase("power2.out");
+        return MW.drive(tl, at, (it.length - 1) * o.each + o.snap + o.settle + o.hold, function (t) { it.forEach(function (x, i) { var u = t - i * o.each, s = u < 0 ? 0 : u < o.snap ? o.pop : o.pop + (1 - o.pop) * p2(Math.min(1, (u - o.snap) / o.settle)); gsap.set(x, { scale: s }); }); });
+      };
+  MW.motionSnapHold = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionSnapHold(q(".sh"), tl, 0.3, {});
+          tl.set({}, {}, 2.6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

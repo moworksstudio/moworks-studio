@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-light-leak-burn",
+  "type": "hyperframes:block",
+  "title": "Light-Leak Title Burn",
+  "description": "Các vệt sáng ấm trôi qua khung rồi bùng sáng gần trắng, đúng đỉnh chớp thì tiêu đề hiện ra với quầng sáng mạnh rồi dịu dần.",
+  "tags": [
+    "light-leak",
+    "glow",
+    "burn",
+    "title",
+    "text-titles-film",
+    "soft",
+    "smooth",
+    "titles-film",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-light-leak-burn.html",
+      "target": "compositions/components/text-light-leak-burn.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-light-leak-burn",
+    "author": "takayu",
+    "call": "MW.textLightLeakBurn(q(\".lb\"), tl, 0, {});",
+    "function": "MW.textLightLeakBurn",
+    "options": {
+      "cutAt": "s the title cuts in, at the burn's peak (1.0)",
+      "offAt": "s (3.15)",
+      "glow": "accent glow colour (18 → 4 px, ×3 here)",
+      "title": "the title",
+      "loop": "s (3.8)",
+      "seed": "drift"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-light-leak-burn",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-light-leak-burn (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-light-leak-burn, written here): Three additive radial blobs (yellow, accent, yellow) drifting with noise; strength 0.35 × leak (in 0.25–0.9 s, out 3.15–3.65 s) + 0.55 × burn; burn keyed 0 (0.55 s) → 1 (1.0 s) → 0 (1.55 s), cubic-bezier(.65,0,.35,1); blob radii grow with burn (+100–140 px), plus a full-frame white at 85 % × burn. Title (44 px) cuts in at the burn peak (1.0 s) with an accent glow 18 → 4 px over 0.9 s power2.out; off 3.15–3.6 s. Loop 3.8 s. Params: đỉnh cháy (1.0 s) · thời gian cháy (0.55 → 1.55 s) · quầng sáng (18 → 4 px).",
+    "titleVi": "Vệt sáng loé cháy rồi hiện tiêu đề"
+  }
+}

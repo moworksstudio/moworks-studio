@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "comic-text",
+  "type": "hyperframes:component",
+  "title": "Comic Text",
+  "description": "A comic sound word: skewed yellow letters with red halftone dots, a thick black outline and a black + red hard shadow, popping in on a soft spring.",
+  "tags": [
+    "comic",
+    "halftone",
+    "pop",
+    "sticker",
+    "text",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "comic-text.html",
+      "target": "compositions/components/comic-text.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/comic-text",
+    "author": "magicui",
+    "call": "MW.comicText(q(\".mw-comic-text\"), tl, 0.5, { fontSize: 11 });",
+    "function": "MW.comicText",
+    "options": {
+      "fontSize": "rem (5)",
+      "font": "family ('Baloo 2')",
+      "dot": "#EF4444",
+      "fill": "#FACC15"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/comic-text.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/comic-text.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "fontSize in rem as upstream (5). Upstream font: 'Bangers', 'Comic Sans MS', 'Impact' (no Vietnamese); pass a font that has Vietnamese letters.",
+    "titleVi": "Chữ truyện tranh chấm halftone"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "uid": "in:magicui/typing-animation",
+  "hash": "ba1098aa982d559c",
+  "at": "2026-10-17T06:32:24.166Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "JetBrains Mono"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__typing-animation.mp4",
+    "poster": "previews/magicui__typing-animation.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f13e81ea58ff0b1f4637a61df23b2455409beef279f11e561ceca4156f59cc39",
+    "size": 18469,
+    "seconds": 23.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

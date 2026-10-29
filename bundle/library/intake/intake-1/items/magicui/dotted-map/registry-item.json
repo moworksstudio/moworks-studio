@@ -1,0 +1,68 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "dotted-map",
+  "type": "hyperframes:component",
+  "title": "Dotted Map",
+  "description": "A world map drawn as staggered dots with orange location markers that pulse, optionally with label pills: for 'global offices' and 'customers worldwide'.",
+  "tags": [
+    "map",
+    "world",
+    "dots",
+    "markers",
+    "pulse",
+    "locations",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "dotted-map.html",
+      "target": "compositions/components/dotted-map.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 7,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/dotted-map",
+    "author": "magicui",
+    "call": "MW.dottedMap(q(\".mw-dotted-map\"), tl, 0, { dotColor: \"#52525b\", dotRadius: 0.32, markers: [\n  { lat: 21.03, lng: 105.85, size: 0.7, label: \"Hà Nội\" }, { lat: 10.82, lng: 106.63, size: 0.7, label: \"TP.HCM\" }, { lat: 35.68, lng: 139.69, size: 0.6, label: \"Tokyo\" },\n  { lat: 1.35, lng: 103.82, size: 0.5 }, { lat: 51.5, lng: -0.12, size: 0.6, label: \"London\" }, { lat: 40.71, lng: -74.0, size: 0.6, label: \"New York\" }, { lat: -33.87, lng: 151.21, size: 0.5 }], hold: 7 });",
+    "function": "MW.dottedMap",
+    "options": {
+      "dotRadius": "0.2",
+      "dotColor": "#6b7280",
+      "markerColor": "#FF6900",
+      "markers": "[{ lat, lng, size (0.3), label }]",
+      "pulse": "true",
+      "hold": "seconds (8)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/dotted-map.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/dotted-map.tsx",
+      "upstream": null
+    },
+    "thirdParty": [
+      {
+        "name": "Natural Earth 1:110m land (via world-atlas 2.0.2)",
+        "author": "Natural Earth; packaged by Michael Bostock",
+        "licence": "Public domain (data); ISC (package)",
+        "link": "https://github.com/topojson/world-atlas",
+        "npm": "https://www.npmjs.com/package/world-atlas/v/2.0.2",
+        "made": "sampled on the 150 x 75 dot grid"
+      }
+    ],
+    "notes": "Markers are { lat, lng, size, label }. Antarctica is left out. Upstream's flags come from flagcdn.com at runtime (remote): not taken; labels are text pills.",
+    "titleVi": "Bản đồ chấm, ghim nhấp nháy"
+  }
+}

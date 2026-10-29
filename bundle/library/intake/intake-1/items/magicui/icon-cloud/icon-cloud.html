@@ -1,0 +1,73 @@
+<!--
+  Icon Cloud (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/icon-cloud.tsx.
+  A sphere of icons or round pictures turning in 3D, nearer ones larger and brighter, and turning to bring one icon to the front on cue.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.iconCloud(q(".mw-icon-cloud"), tl, 0, { size: 900, focus: [[3.5, 7]] });
+
+  Options (defaults in brackets):
+      - size: px (400)
+      - pointer: [0, 0]
+      - focus: [[t, index], ...] (none)
+      - focusDuration: s (1.2)
+
+  Notes: el holds the icons (any elements, about 40 px). pointer: [x, y] px in the 400 px canvas (default the corner (0, 0), upstream's idle pointer). focus: [[t, index], ...].
+-->
+
+<div class="mw-icon-cloud" style="width:400px;height:400px"></div>
+
+<style>
+.mw-icon-cloud { position: relative; }
+.mw-icon-cloud > * { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; will-change: transform, opacity; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"size":400,"pointer":[0,0],"focus":[],"focusDuration":1.2};
+  var run = function (el, tl, at, o) {
+      var icons = Array.prototype.slice.call(el.children), n = icons.length || 20, k = o.size / 400, P = [], inc = Math.PI * (3 - Math.sqrt(5)), off = 2 / n;
+      el.style.width = el.style.height = o.size + "px";
+      for (var i = 0; i < n; i++) { var y = i * off - 1 + off / 2, r = Math.sqrt(1 - y * y), ph = i * inc; P.push([Math.cos(ph) * r * 100, y * 100, Math.sin(ph) * r * 100]); }
+      var cx = 200, cy = 200, maxD = Math.sqrt(cx * cx + cy * cy), dx = o.pointer[0] - cx, dy = o.pointer[1] - cy, speed = 0.003 + (Math.sqrt(dx * dx + dy * dy) / maxD) * 0.01;
+      var rate = [(dy / 400) * speed, (dx / 400) * speed];          // radians a frame
+      var cubic = function (t) { return 1 - Math.pow(1 - t, 3); };
+      var rotAt = function (t) {
+        var rx = 0, ry = 0, last = 0;
+        for (var q = 0; q < o.focus.length; q++) {
+          var f = o.focus[q], tf = f[0];
+          if (t < tf) break;
+          rx += rate[0] * (tf - last) * 60; ry += rate[1] * (tf - last) * 60;
+          var p = P[f[1] % n], tx = -Math.atan2(p[1], Math.sqrt(p[0] * p[0] + p[2] * p[2])), ty = Math.atan2(p[0], p[2]);
+          var u = Math.min(1, (t - tf) / o.focusDuration), e = cubic(u);
+          var ex = rx + (tx - rx) * e, ey = ry + (ty - ry) * e;
+          if (u < 1) return [ex, ey];
+          rx = tx; ry = ty; last = tf + o.focusDuration;
+        }
+        return [rx + rate[0] * (t - last) * 60, ry + rate[1] * (t - last) * 60];
+      };
+      var s = { t: 0 }, set = function () {
+        var R = rotAt(s.t), cX = Math.cos(R[0]), sX = Math.sin(R[0]), cY = Math.cos(R[1]), sY = Math.sin(R[1]);
+        for (var i = 0; i < icons.length; i++) {
+          var p = P[i], x = p[0] * cY - p[2] * sY, z = p[0] * sY + p[2] * cY, yy = p[1] * cX + z * sX, sc = (z + 200) / 300, op = Math.max(0.2, Math.min(1, (z + 150) / 200));
+          icons[i].style.transform = "translate(" + x * k + "px, " + yy * k + "px) scale(" + sc * k + ")"; icons[i].style.opacity = op; icons[i].style.zIndex = Math.round(z + 200);
+        }
+      };
+      set();
+      var end = Math.max(8, o.focus.length ? o.focus[o.focus.length - 1][0] + o.focusDuration + 2 : 8);
+      tl.fromTo(s, { t: 0 }, { t: end, duration: end, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + end;
+    };
+  MW.iconCloud = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

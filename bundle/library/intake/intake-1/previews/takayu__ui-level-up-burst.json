@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-level-up-burst",
+  "hash": "8ec1d0bc9b02d8fa",
+  "at": "2026-10-17T10:24:03.155Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-level-up-burst.mp4",
+    "poster": "previews/takayu__ui-level-up-burst.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "0be856858aedb776a1fe8a5e2e2f3eaaed4bf3391d70fcd046af69735451454d",
+    "size": 21209,
+    "seconds": 30,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

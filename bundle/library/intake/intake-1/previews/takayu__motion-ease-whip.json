@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-ease-whip",
+  "hash": "6e1f027767d9d099",
+  "at": "2026-10-17T09:01:00.935Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-ease-whip.mp4",
+    "poster": "previews/takayu__motion-ease-whip.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "bce3afd00967d05f339bba6f542d025630943f5adc07531f373c16e98cc485c3",
+    "size": 8742,
+    "seconds": 26.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

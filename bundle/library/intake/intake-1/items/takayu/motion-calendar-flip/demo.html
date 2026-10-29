@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Perspective Calendar Fold - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.ui-cursor { position: absolute; left: 0; top: 0; z-index: 20; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5)); }
+.cal { position: absolute; left: 50%; top: 170px; width: 604px; margin-left: -302px; } .cal .hd { height: 150px; border-radius: 40px 40px 0 0; background: linear-gradient(180deg, #9c88ff, #7357f5); display: grid; place-items: center; font-size: 60px; font-weight: 900; letter-spacing: 0.1em; position: relative; }
+.cal .hd i { position: absolute; top: -26px; width: 28px; height: 70px; border-radius: 14px; background: #c9d2ea; } .pgs { position: relative; height: 500px; }
+.pg2 { position: absolute; inset: 0; border-radius: 0 0 40px 40px; background: #f4f1ea; color: #2a2a35; display: grid; place-items: center; text-align: center; }
+.pg2 b { display: block; font-size: 260px; line-height: 1; } .pg2 span { font-size: 48px; font-weight: 800; letter-spacing: 0.08em; color: #8b7bff; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.8">
+<div class="gm"><div class="cal"><div class="hd">THÁNG 10<i style="left:140px"></i><i style="right:140px"></i></div><div class="pgs"><div class="pg2"><div><b>25</b><span>THỨ SÁU · RA MẮT</span></div></div><div class="pg2 top"><div><b>24</b><span style="color:#5a6275">THỨ NĂM</span></div></div></div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"angle":-170,"duration":0.8,"at":0.45,"backAt":3.05,"shade":0.45,"perspective":2300};
+  var run = function (el, tl, at, o) {
+        var io = gsap.parseEase("power2.inOut"), shade = document.createElement("div"), back = document.createElement("div");
+        shade.style.cssText = "position:absolute;inset:0;background:#05060a;pointer-events:none;opacity:0;border-radius:inherit;"; el.appendChild(shade);
+        back.style.cssText = "position:absolute;inset:0;background:#d9d6cc;border-radius:inherit;visibility:hidden;"; el.appendChild(back);
+        el.parentNode.style.perspective = o.perspective + "px";
+        return MW.drive(tl, at, o.backAt + 0.45, function (t) {
+          var p = t < o.at ? 0 : t < o.at + o.duration ? io((t - o.at) / o.duration) : t < o.backAt ? 1 : 1 - io(Math.min(1, (t - o.backAt) / 0.45)), a = o.angle * p, aa = Math.abs(a);
+          gsap.set(el, { rotationX: a, transformOrigin: "50% 0%" });
+          var over = aa > 90; back.style.visibility = over ? "visible" : "hidden"; shade.style.opacity = over ? "0" : String(o.shade * Math.sin(aa * Math.PI / 180));
+          el.style.opacity = aa < 110 ? "1" : String(Math.max(0, 1 - (aa - 110) / 48));
+        });
+      };
+  MW.motionCalendarFlip = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionCalendarFlip(q(".top"), tl, 0, {});
+          tl.set({}, {}, 3.8);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

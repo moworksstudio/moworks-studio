@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-range-soft-wave",
+  "hash": "14dda923728e441b",
+  "at": "2026-10-17T11:41:45.675Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-range-soft-wave.mp4",
+    "poster": "previews/takayu__text-range-soft-wave.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "9e8c79aa0c1e97099a3998e8675f230eb72da115aabefba4d707831050cd0ee5",
+    "size": 13504,
+    "seconds": 25.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

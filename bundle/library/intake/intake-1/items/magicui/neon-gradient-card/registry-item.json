@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "neon-gradient-card",
+  "type": "hyperframes:component",
+  "title": "Neon Gradient Card",
+  "description": "A card with a thin two-colour neon border and a large blurred glow behind it, the gradient sliding up and down (3 s each way).",
+  "tags": [
+    "neon",
+    "glow",
+    "border",
+    "card",
+    "gradient",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "neon-gradient-card.html",
+      "target": "compositions/components/neon-gradient-card.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/neon-gradient-card",
+    "author": "magicui",
+    "call": "MW.neonGradientCard(q(\".mw-neon-gradient-card\"), tl, 0, { borderSize: 4, borderRadius: 28, hold: 6 });",
+    "function": "MW.neonGradientCard",
+    "options": {
+      "borderSize": "px (2)",
+      "borderRadius": "px (20)",
+      "firstColor": "#ff00aa",
+      "secondColor": "#00FFF1",
+      "panel": "inner colour (#171717)",
+      "hold": "seconds (6)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/neon-gradient-card.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/neon-gradient-card.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is the card (its content gets the inner panel). Docs say a 5 px border: the code has 2 px (the code wins).",
+    "titleVi": "Viền neon hai màu, quầng sáng sau thẻ"
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "globe",
+  "type": "hyperframes:component",
+  "title": "Globe",
+  "description": "An auto-rotating dotted globe with glowing location markers (WebGL, cobe): a staple for 'worldwide', fintech and SaaS shots.",
+  "tags": [
+    "globe",
+    "earth",
+    "world",
+    "map",
+    "3d",
+    "webgl",
+    "markers",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "globe.html",
+      "target": "compositions/components/globe.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/globe",
+    "author": "magicui",
+    "call": "MW.globe(q(\".mw-globe\"), tl, 0, { size: 820, hold: 8 });",
+    "function": "MW.globe",
+    "options": {
+      "size": "px (600)",
+      "phi": "start angle (0)",
+      "speed": "rad/s (0.3)",
+      "theta": "0.3",
+      "dark": "0",
+      "diffuse": "0.4",
+      "mapSamples": "16000",
+      "mapBrightness": "1.2",
+      "mapBaseBrightness": "0 (passed explicitly: left unset, cobe sends NaN to its shader, which software WebGL draws black)",
+      "baseColor": "[1, 1, 1]",
+      "markerColor": "[251/255, 100/255, 21/255]",
+      "glowColor": "[1, 1, 1]",
+      "markers": "upstream's ten cities",
+      "fadeIn": "s (0.5)",
+      "hold": "seconds (10)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/globe.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/globe.tsx",
+      "upstream": null
+    },
+    "thirdParty": [
+      {
+        "name": "cobe 0.6.4",
+        "author": "Shu Ding",
+        "licence": "MIT",
+        "link": "https://github.com/shuding/cobe",
+        "npm": "https://www.npmjs.com/package/cobe/v/0.6.4",
+        "made": "as shipped"
+      },
+      {
+        "name": "phenomenon 1.6.0",
+        "author": "Colin van Eenige",
+        "licence": "MIT",
+        "link": "https://github.com/vaneenige/phenomenon",
+        "npm": "https://www.npmjs.com/package/phenomenon/v/1.6.0",
+        "made": "as shipped"
+      }
+    ],
+    "notes": "Needs assets/vendor/cobe-0.6.4.js in the film (it ships with the item). Markers are [lat, lon] with a size; colours are 0-1 RGB as cobe takes them. cobe's map texture is part of its MIT package.",
+    "titleVi": "Quả địa cầu chấm sáng xoay (WebGL)"
+  }
+}

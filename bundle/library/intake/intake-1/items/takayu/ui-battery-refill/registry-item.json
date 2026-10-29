@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-battery-refill",
+  "type": "hyperframes:block",
+  "title": "Energy Refill",
+  "description": "Khối pin năm vạch đầy dần từ 15 % lên 100 %, phần đầy thở nhấp nháy trong lúc sạc và số phần trăm chạy theo; đầy thì ngừng nhấp nháy, pin phồng nhẹ và chữ \"FULL\" bật ra.",
+  "tags": [
+    "battery",
+    "charge",
+    "pulse",
+    "progress",
+    "progression-quests",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-battery-refill.html",
+      "target": "compositions/components/ui-battery-refill.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.9,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-battery-refill",
+    "author": "takayu",
+    "call": "MW.uiBatteryRefill(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiBatteryRefill",
+    "options": {
+      "from": "% (15)",
+      "to": "% (100)",
+      "charge": "s (1.45, ease-in-out)",
+      "pulse": "Hz while charging (2.5)",
+      "drainAt": "s (2.5)",
+      "label": "",
+      "loop": "s (2.9)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-progress-energy-refill",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-progress-energy-refill (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-progress-energy-refill, written here): px @320x200. Battery outline 170 x 52 (r 9, 2 px) + tip, 5 segments (dark dividers). Fill 15 → 100 % inOut over 1.45 s (0.45-1.9 s); its opacity pulses 1 → 0.6 at 2.5 Hz whenever not full; the percent readout counts. Bolt glyph grey, switching to the dark bg colour once the fill passes it (52 %). Full 1.9-2.5 s: pulse stops, battery pops 5 % (200 ms half-sine), readout accent, 'FULL' pops at 1.95 s (200 ms back.out). Drain to 15 % 2.5-2.72 s in-cubic. Params: from / to: mức sạc (15 → 100 %) · charge: thời gian sạc (1.45 s) · pulse: nhịp nháy (2.5 lần/giây) · drainAt: lúc xả (2.5 s).",
+    "titleVi": "Pin sạc đầy, nhấp nháy khi đang sạc"
+  }
+}

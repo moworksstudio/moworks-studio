@@ -1,0 +1,59 @@
+<!--
+  RSVP Word Flash (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-rsvp-flash (read 12/10/2026).
+  Từng từ một hiện tại cùng một chỗ và thay nhau bằng nhát cắt, chữ cái điểm nhìn của mỗi từ tô màu nhấn và luôn nằm đúng vạch giữa.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textRsvpFlash(q(".rv"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - text: the sentence
+      - per: s per word (0.2: 300 words a minute), × 1.5 after punctuation or for long words
+      - start: s (0.35)
+      - cutAt: s (3.85)
+      - accent: the focus letter
+      - loop: s (4.2)
+
+  Notes: Idea and numbers (TakayuStudio tx-rsvp-flash, written here): One word at a fixed spot, hard cut every 0.2 s (300 wpm), × 1.5 after punctuation or for words over 8 letters; from 0.35 s the list (≤ 10 words) repeats to fill ~2.4 s, cut at 3.85 s. ORP letter (index floor(0.35 × length)) accent, centred between two short accent ticks; the part before right-aligned to it, the part after left-aligned. Size: largest ≤ 40 px (weight 700) keeping every word within ±140 px; two thin frame lines 60 px apart. Loop 4.2 s. Params: tốc độ (300 từ/phút = 0.2 s) · chậm lại (×1.5 sau dấu câu, từ dài) · điểm nhìn (35 %).
+-->
+
+<div class="rvl" style="top:410px"></div><div class="rvl" style="top:680px"></div><div class="rvt" style="top:410px"></div><div class="rvt" style="top:630px"></div><div class="rv"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"text":"Đọc nhanh hơn bằng cách nhìn vào một điểm duy nhất.","per":0.2,"start":0.35,"cutAt":3.85,"accent":"#ff5d6c","loop":4.2};
+  var run = function (el, tl, at, o) {
+        var words = o.text.split(/\s+/), seq = [], t0 = o.start, seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+        var gr = function (s) { s = s.normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+        while (t0 < o.cutAt) words.forEach(function (w) { if (t0 >= o.cutAt) return; var d = o.per * (/[.,!?;:]$/.test(w) || gr(w).length > 8 ? 1.5 : 1); seq.push({ w: w, t: t0 }); t0 += d; });
+        var L = document.createElement("span"), M = document.createElement("span"), R = document.createElement("span"); el.textContent = ""; el.style.position = "relative"; el.style.width = "100%"; el.style.height = "1.3em";
+        L.style.cssText = "position:absolute;right:50%;top:0;white-space:pre;"; M.style.cssText = "position:absolute;left:50%;top:0;transform:translateX(-50%);color:" + o.accent + ";"; R.style.cssText = "position:absolute;top:0;white-space:pre;";
+        el.appendChild(L); el.appendChild(M); el.appendChild(R);
+        return MW.drive(tl, at, o.loop, function (t) {
+          var cur = null; seq.forEach(function (s) { if (t >= s.t) cur = s; }); var on = cur && t < o.cutAt; el.style.visibility = on ? "visible" : "hidden"; if (!on) return;
+          var g = gr(cur.w), k = Math.floor(0.35 * g.length); L.textContent = g.slice(0, k).join(""); M.textContent = g[k] || ""; R.textContent = g.slice(k + 1).join("");
+          L.style.marginRight = (M.offsetWidth / 2) + "px"; R.style.left = "calc(50% + " + (M.offsetWidth / 2) + "px)";
+        });
+      };
+  MW.textRsvpFlash = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

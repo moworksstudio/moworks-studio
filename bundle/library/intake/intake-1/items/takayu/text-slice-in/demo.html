@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Sliced Bars Title - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { --ink: #e8ebf3; --acc: #8b7bff; --acc2: #3dd6f5; --warm: #ffb547; --rose: #ff5d8f; --mute: #6c778b; --tk-card: #151a24; --tk-line: #262c3a; background: #0b0d12; color: var(--ink); }
+.tk-stage { position: absolute; inset: 0; display: grid; place-items: center; }
+.tk-cap { font-size: 30px; font-weight: 500; color: var(--mute); letter-spacing: 0.01em; }
+.tk-head { margin: 0; font-family: 'Inter', sans-serif; font-size: 220px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.15; text-align: center; max-width: 1600px; }
+.tk-sub { margin-top: 36px; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.4">
+<div class="tk-stage"><div><h1 class="tk-head ">BẢN TIN TỐI</h1></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"slices":6,"distance":2300,"start":0.32,"jolt":25,"bar":10,"barWidth":1600,"color":"#8b7bff","exitAt":2.55};
+  var run = function (el, tl, at, o) {
+        var html = el.innerHTML, n = o.slices, strips = [], bars = [], ex = gsap.parseEase("expo.out"), ei = gsap.parseEase("expo.in");
+        el.innerHTML = ""; el.style.position = "relative";
+        var base = document.createElement("span"); base.innerHTML = html; base.style.visibility = "hidden"; base.style.display = "block"; el.appendChild(base);
+        for (var i = 0; i < n; i++) { var s = document.createElement("span"); s.innerHTML = html; s.style.cssText = "display:block;position:absolute;left:0;top:0;width:100%;"; el.appendChild(s); strips.push(s);
+          var b = document.createElement("span"); b.style.cssText = "position:absolute;left:50%;height:" + o.bar + "px;width:" + o.barWidth + "px;margin-left:-" + o.barWidth / 2 + "px;background:" + o.color + ";pointer-events:none;"; el.appendChild(b); bars.push(b); }
+        return MW.drive(tl, at, o.exitAt + 0.04 * n + 0.4, function (t) {
+          var Hh = el.offsetHeight, fs = parseFloat(getComputedStyle(el).fontSize), top = -0.25 * fs, sh = (Hh - top + 0.1 * fs) / n;
+          strips.forEach(function (s, k) {
+            var dir = k % 2 ? 1 : -1, y0 = top + k * sh, u = Math.max(0, Math.min(1, (t - o.start - 0.06 * k) / 0.7)), ue = Math.max(0, Math.min(1, (t - o.exitAt - 0.04 * k) / 0.4));
+            var jolt = t > 1.6 && t < 1.9 ? Math.sin(Math.PI * (t - 1.6) / 0.3) * o.jolt * dir : 0, x = dir * o.distance * (1 - ex(u)) - dir * o.distance * ei(ue) + jolt;
+            s.style.clipPath = "inset(" + y0 + "px -40px " + Math.max(0, Hh - y0 - sh - 4) + "px -40px)"; gsap.set(s, { x: x }); s.style.visibility = u > 0 ? "visible" : "hidden";
+            var bu = Math.max(0, Math.min(1, (t - o.start - 0.06 * k + 0.1) / 0.6)); bars[k].style.top = y0 + "px"; gsap.set(bars[k], { x: dir * o.distance * (1 - ex(bu)) });
+            bars[k].style.opacity = bu > 0 ? String(1 - Math.max(0, Math.min(1, (t - 0.7 - 0.06 * k) / 0.3))) : "0";
+          });
+        });
+      };
+  MW.textSliceIn = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textSliceIn(q(".tk-head"), tl, 0, {});
+          tl.set({}, {}, 3.4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

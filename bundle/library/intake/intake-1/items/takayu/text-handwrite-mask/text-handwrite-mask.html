@@ -1,0 +1,75 @@
+<!--
+  Handwriting Write-on (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-handwriting (read 12/10/2026).
+  Chữ hiện ra như đang được viết tay từng chữ một theo thứ tự, mỗi chữ mất thời gian theo độ dài nét, có đầu bút chạy theo.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textHandwriteMask(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - total: s of writing, split by letter width (2.2)
+      - step: em between zig-zag strokes (0.17)
+      - slant: em (0.07)
+      - start: s (0.3)
+      - fadeAt: s (3.6)
+      - ink: 
+      - mute: the faint copy under it
+      - accent: pen tip
+      - loop: s (4.2)
+
+  Notes: Idea and numbers (TakayuStudio tx-handwriting, written here): Write time 2.2 s from 0.3 s, split across glyphs by glyph width (≈ stroke length), one after another. Each glyph is revealed by a thick zig-zag stroke (segments 0.17 em apart, top ↔ bottom with ±0.07 em slant, width 1.7 × segment + 1 px, round caps) drawn with sine.inOut, used as a mask over the filled font. Under it a 55 % mute copy and a baseline; a pen (short line + accent dot) rides the stroke head. Fade out 3.6–4.0 s. Loop 4.2 s. Params: tổng thời gian (2.2 s) · độ dày nét quét (1.7 × bước) · đầu bút (bật / tắt). Each letter is revealed by a thick zig-zag stroke drawn as a mask (sine.inOut), with a pen riding its head.
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Viết tay từng chữ</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"total":2.2,"step":0.17,"slant":0.07,"start":0.3,"fadeAt":3.6,"ink":"#e8ebf3","mute":"rgba(233,235,243,0.12)","accent":"#ffd23d","loop":4.2};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var rail = function (pts, closed) { var L = [0]; for (var i = 1; i < pts.length; i++) L.push(L[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])); var tot = L[L.length - 1];
+    return { len: tot, at: function (s) { s = closed ? ((s % tot) + tot) % tot : Math.max(0, Math.min(tot, s)); var lo = 0, hi = L.length - 1; while (hi - lo > 1) { var m = (lo + hi) >> 1; if (L[m] <= s) lo = m; else hi = m; } var f = (s - L[lo]) / ((L[hi] - L[lo]) || 1), a = pts[lo], b = pts[hi]; return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]; } }; };
+  var ang = function (R, s, ch) { var a = R.at(s - ch), b = R.at(s + ch); return Math.atan2(b[1] - a[1], b[0] - a[0]); };
+  var glyphs = function (host, list, fs, sepColor) { return list.map(function (g) { var s = document.createElement("span"); s.textContent = g; s.style.cssText = "position:absolute;left:0;top:0;white-space:pre;line-height:1;font-size:" + fs + "px;" + (g === "•" && sepColor ? "color:" + sepColor + ";" : ""); host.appendChild(s); return { s: s, w: s.offsetWidth, h: s.offsetHeight }; }); };
+  var place = function (q, x, y, a, op) { gsap.set(q.s, { x: x - q.w / 2, y: y - q.h * 0.8, rotation: a * 180 / Math.PI, transformOrigin: "50% 80%" }); q.s.style.opacity = op == null ? "1" : String(op); };
+  var ns = "http://www.w3.org/2000/svg", txt = el.textContent, fs = parseFloat(getComputedStyle(el).fontSize), fw = getComputedStyle(el).fontWeight, svg = document.createElementNS(ns, "svg"), list = gr(txt), si = gsap.parseEase("sine.inOut");
+  el.textContent = ""; el.appendChild(svg); svg.style.overflow = "visible"; svg.style.display = "block"; svg.style.margin = "0 auto"; window.__mwHW = (window.__mwHW || 0) + 1; var id = "mw-hw-" + window.__mwHW, x = 0, G = [], base = fs * 0.92;
+  var defs = document.createElementNS(ns, "defs"), mask = document.createElementNS(ns, "mask"); mask.setAttribute("id", id); mask.setAttribute("maskUnits", "userSpaceOnUse"); defs.appendChild(mask); svg.appendChild(defs);
+  var mute = document.createElementNS(ns, "g"), ink = document.createElementNS(ns, "g"); ink.setAttribute("mask", "url(#" + id + ")"); svg.appendChild(mute); svg.appendChild(ink);
+  var mkT = function (g, parent, col) { var t = document.createElementNS(ns, "text"); t.textContent = g; t.setAttribute("x", x); t.setAttribute("y", base); t.setAttribute("font-size", fs); t.setAttribute("font-weight", fw); t.setAttribute("font-family", "Inter, sans-serif"); t.setAttribute("fill", col); parent.appendChild(t); return t; };
+  list.forEach(function (g) { var m = mkT(g, mute, o.mute), f = mkT(g, ink, o.ink), w = g === " " ? fs * 0.28 : f.getComputedTextLength(); if (g !== " ") { var step = o.step * fs, pts = [], top = base - fs * 0.95, bot = base + fs * 0.2, k = 0; for (var xx = x - step * 0.3; xx <= x + w + step * 0.3; xx += step) { pts.push((xx + (k % 2 ? 1 : -1) * o.slant * fs).toFixed(1) + "," + (k % 2 ? bot : top).toFixed(1)); k++; }
+      var pl = document.createElementNS(ns, "polyline"); pl.setAttribute("points", pts.join(" ")); pl.setAttribute("fill", "none"); pl.setAttribute("stroke", "#fff"); pl.setAttribute("stroke-width", (1.7 * step + 1).toFixed(1)); pl.setAttribute("stroke-linecap", "round"); pl.setAttribute("stroke-linejoin", "round"); mask.appendChild(pl); var L = pl.getTotalLength(); pl.style.strokeDasharray = L + " " + L; pl.style.strokeDashoffset = String(L); G.push({ pl: pl, L: L, w: w }); }
+    x += w; });
+  svg.setAttribute("width", x); svg.setAttribute("height", fs * 1.25); var bl = document.createElementNS(ns, "line"); bl.setAttribute("x1", 0); bl.setAttribute("x2", x); bl.setAttribute("y1", base + fs * 0.08); bl.setAttribute("y2", base + fs * 0.08); bl.setAttribute("stroke", "rgba(233,235,243,0.18)"); bl.setAttribute("stroke-width", 3); svg.insertBefore(bl, mute);
+  var pen = document.createElementNS(ns, "g"); pen.innerHTML = '<line x1="0" y1="0" x2="' + fs * 0.25 + '" y2="' + -fs * 0.35 + '" stroke="#c9d2ea" stroke-width="5" stroke-linecap="round"/><circle r="' + fs * 0.05 + '" fill="' + o.accent + '"/>'; svg.appendChild(pen);
+  var tw = G.reduce(function (a, q) { return a + q.w; }, 0), t0 = o.start; G.forEach(function (q) { q.t = t0; q.d = o.total * q.w / tw; t0 += q.d; });
+  return MW.drive(tl, at, o.loop, function (t) {
+    var out = 1 - Math.max(0, Math.min(1, (t - o.fadeAt) / 0.4)), head = null; svg.style.opacity = String(out);
+    G.forEach(function (q) { var u = si(Math.max(0, Math.min(1, (t - q.t) / q.d))); q.pl.style.strokeDashoffset = String(q.L * (1 - u)); if (u > 0 && u < 1) head = q.pl.getPointAtLength(q.L * u); });
+    if (head) { pen.setAttribute("transform", "translate(" + head.x + " " + head.y + ")"); pen.style.opacity = "1"; } else pen.style.opacity = "0";
+  });
+  };
+  MW.textHandwriteMask = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

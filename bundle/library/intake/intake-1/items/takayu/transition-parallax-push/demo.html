@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Parallax Push - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .ph { position: relative; width: 520px; height: 956px; border-radius: 70px; overflow: hidden; background: #10131d; border: 4px solid #2a3350; }
+.pg { position: absolute; inset: 0; padding: 90px 40px; box-sizing: border-box; background: #10131d; } .pg h3 { margin: 0 0 40px; font-size: 52px; } .pg .r { height: 110px; border-radius: 24px; background: #1b2130; margin-bottom: 24px; } .pg .r.on { background: #2a3350; }
+.pp-b { background: #151a28; } .pp-b .hero { height: 360px; border-radius: 30px; background: linear-gradient(160deg, #ffd27a, #ff9b3d); margin-bottom: 30px; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3">
+<div class="st"><div class="ph"><div class="pg pp-a"><h3>Dự án</h3><div class="r"></div><div class="r on"></div><div class="r"></div><div class="r"></div></div><div class="pg pp-b"><h3>Phim mùa hè</h3><div class="hero"></div><div class="r"></div></div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":".pp-a","delay":0.08,"duration":0.7,"ease":"power2.inOut","under":0.3,"dim":0.4,"shadow":30,"edge":0.5,"backAt":null,"tap":null,"ringWidth":4};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, out = o.from ? host.querySelector(o.from) : null, e = gsap.parseEase(o.ease), dim = document.createElement("div"), edge = document.createElement("div"), ring = document.createElement("div"), W = el.offsetWidth;
+        if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        dim.style.cssText = "position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;"; if (out) { if (getComputedStyle(out).position === "static") out.style.position = "relative"; out.appendChild(dim); }
+        edge.style.cssText = "position:absolute;top:0;bottom:0;pointer-events:none;opacity:0;left:-" + o.shadow + "px;width:" + o.shadow + "px;background:linear-gradient(90deg,rgba(0,0,0,0),rgba(0,0,0,1));"; el.appendChild(edge);
+        ring.style.cssText = "position:absolute;border-radius:50%;pointer-events:none;opacity:0;z-index:30;border:" + o.ringWidth + "px solid rgba(255,255,255,0.85);"; host.appendChild(ring);
+        return MW.drive(tl, at, o.backAt == null ? o.delay + o.duration : o.backAt + o.duration, function (t) {
+          var p = e(Math.max(0, Math.min(1, (t - o.delay) / o.duration))); if (o.backAt != null && t > o.backAt) p = 1 - e(Math.min(1, (t - o.backAt) / o.duration));
+          gsap.set(el, { x: W * (1 - p) }); if (out) gsap.set(out, { x: -o.under * W * p }); dim.style.opacity = String(o.dim * p); edge.style.opacity = String(o.edge * p);
+          if (o.tap) { var u = t / 0.32, rr = 10 + 50 * u; ring.style.width = ring.style.height = 2 * rr + "px"; ring.style.left = host.clientWidth * o.tap[0] - rr - o.ringWidth + "px"; ring.style.top = host.clientHeight * o.tap[1] - rr - o.ringWidth + "px"; ring.style.opacity = t > 0 && u < 1 ? String(1 - u) : "0"; }
+        });
+      };
+  MW.transitionParallaxPush = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.transitionParallaxPush(q(".pp-b"), tl, 0.4, { tap: [0.5, 0.37], backAt: 1.6 });
+          tl.set({}, {}, 3);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

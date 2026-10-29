@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "backlight",
+  "type": "hyperframes:component",
+  "title": "Backlight",
+  "description": "An ambilight glow behind a picture or video, made from a blurred, over-saturated copy of the content itself, so the glow takes the picture's colours.",
+  "tags": [
+    "glow",
+    "ambilight",
+    "halo",
+    "image",
+    "video",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "backlight.html",
+      "target": "compositions/components/backlight.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/backlight",
+    "author": "magicui",
+    "call": "MW.backlight(q(\".mw-backlight\"), tl, 0.3, { blur: 40, fadeIn: 1.5 });",
+    "function": "MW.backlight",
+    "options": {
+      "blur": "stdDeviation (20)",
+      "saturate": "4",
+      "fadeIn": "s to bring the glow up (0: always on)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/backlight.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/backlight.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Static upstream; the glow follows whatever plays inside (a HyperFrames video clip works). fadeIn is this port's option. Upstream demos: blur 5 (logos), 20 (photo), 40 (video).",
+    "titleVi": "Quầng sáng lấy màu từ chính ảnh"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-liquid-stretch-switch",
+  "hash": "bd671f3603f99adb",
+  "at": "2026-10-17T10:34:27.350Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-liquid-stretch-switch.mp4",
+    "poster": "previews/takayu__ui-liquid-stretch-switch.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "8821b80bf25917c678786742b0d85c17c7cf58a9be401f7bf530dd9dfc6cdfd2",
+    "size": 12057,
+    "seconds": 29.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

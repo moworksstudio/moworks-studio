@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/shimmer-button",
+  "hash": "2adb9bee476fbdc9",
+  "at": "2026-10-17T06:20:27.677Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__shimmer-button.mp4",
+    "poster": "previews/magicui__shimmer-button.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "35da1481823c03d80a1c28067b87f7183421831793b69739a75ba625914b3bfe",
+    "size": 10414,
+    "seconds": 26.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

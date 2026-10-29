@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-spiral-flow",
+  "type": "hyperframes:component",
+  "title": "Spiral Text",
+  "description": "Dòng chữ lặp lại chạy theo đường xoắn ốc, nhỏ dần khi tiến vào tâm và mờ mất ở giữa, quay vòng liên tục.",
+  "tags": [
+    "spiral",
+    "path",
+    "loop",
+    "scale",
+    "text-path-shape",
+    "smooth",
+    "heavy",
+    "path-shape",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-spiral-flow.html",
+      "target": "compositions/components/text-spiral-flow.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-spiral-flow",
+    "author": "takayu",
+    "call": "MW.textSpiralFlow(q(\".sf\"), tl, 0, {});",
+    "function": "MW.textSpiralFlow",
+    "options": {
+      "text": "",
+      "turns": "(3.2)",
+      "radius": "px at the outer end (360)",
+      "size": "letter size as a share of the radius (0.24)",
+      "flow": "radians of spiral per loop (1.8), rounded to whole units",
+      "inner": "[gone, full] px near the centre ([30, 140])",
+      "sep": "",
+      "loop": "s (5)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-spiral-text",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-spiral-text (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-spiral-text, written here): Text + ' • ' (separator accent) repeated on an Archimedean spiral of 3.2 turns, r = 72 px × θ / θmax. Font size = 0.24 × r, so each char takes a constant angle (0.24 × its width in em). The string flows inward linearly about 1.8 rad of spiral angle per 5 s (whole units, seamless). Each glyph rotated to its angle + 90°; fades in from the outer end over 1.4 rad and out near the centre (r 6 → 28 px). Demo loop 5 s (recipe: 8 s loop). Params: số vòng (3.2) · bán kính (72 px) · cỡ chữ (0.24 × bán kính) · tốc độ (1.8 rad / 5 s). An Archimedean spiral; since the size grows with the radius, each letter takes a constant angle.",
+    "titleVi": "Chữ chạy xoắn ốc vào tâm"
+  }
+}

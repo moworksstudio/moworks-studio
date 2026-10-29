@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-impact-squash",
+  "type": "hyperframes:component",
+  "title": "Impact Squash",
+  "description": "Quả bóng rơi xuống, giãn dài khi rơi, bẹp ra 155 / 55 % đúng lúc chạm đất rồi bật về tròn.",
+  "tags": [
+    "drop",
+    "squash",
+    "impact",
+    "scale",
+    "heavy",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-impact-squash.html",
+      "target": "compositions/components/motion-impact-squash.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-impact-squash",
+    "author": "takayu",
+    "call": "MW.motionImpactSquash(q(\".is\"), tl, 0.3, { shadow: \".is-sh\" });",
+    "function": "MW.motionImpactSquash",
+    "options": {
+      "drop": "px (450)",
+      "fall": "share of the length falling (0.65, power1.in)",
+      "duration": "s (0.62)",
+      "squash": "[scaleX, scaleY] at contact ([1.55, 0.55]), then back.out to 1",
+      "tick": "[length, thickness] px of the impact ticks ([60, 10])",
+      "reach": "[from, to] px out from the centre ([170, 240])",
+      "accent": "",
+      "shadow": "floor shadow (grows and darkens with the fall)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=impact-squash",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=impact-squash (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio impact-squash, written here): Ball (r 20, origin bottom) drops 90 px (demo 99) in 403 ms power1.in, stretching to scaleY 1.1 / scaleX 1/1.1 by contact; on contact it is 1.55 / 0.55 at once and recovers to 1/1 by 620 ms through back.out (217 ms, slightly past 1). Two pairs of impact ticks flick out at the sides over 250 ms; the floor shadow grows and darkens with the fall. Params: duration (0.62 s) · drop: độ cao rơi (90 px) · squash (1.55 / 0.55) · recover (0.22 s).",
+    "titleVi": "Rơi xuống bẹp ra khi chạm đất"
+  }
+}

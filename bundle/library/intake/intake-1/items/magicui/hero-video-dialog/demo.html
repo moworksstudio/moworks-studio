@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Hero Video Dialog - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-hero-video-dialog { position: absolute; inset: 0; display: grid; place-items: center; }
+.mw-hv-thumb { position: relative; width: 62%; }
+.mw-hv-thumb > img { display: block; width: 100%; border-radius: 6px; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 10px 15px -3px rgba(0,0,0,.3); }
+.mw-hv-play { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.mw-hv-ring { width: 112px; height: 112px; border-radius: 9999px; background: rgba(250,250,250,0.1); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; }
+.mw-hv-disc { width: 80px; height: 80px; border-radius: 9999px; background: linear-gradient(to bottom, rgba(250,250,250,0.3), #fafafa); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,.1); }
+.mw-hv-disc svg { width: 32px; height: 32px; fill: #fff; color: #fff; }
+.mw-hv-back { position: absolute; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(12px); opacity: 0; }
+.mw-hv-player { position: relative; aspect-ratio: 16 / 9; width: 56rem; max-width: 80%; }
+.mw-hv-player > .mw-hv-frame { position: relative; isolation: isolate; width: 100%; height: 100%; overflow: hidden; border-radius: 16px; border: 2px solid #fff; }
+.mw-hv-player > .mw-hv-frame > img, .mw-hv-player > .mw-hv-frame > video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mw-hv-close { position: absolute; top: -64px; right: 0; border-radius: 9999px; background: rgba(23,23,23,0.5); padding: 8px; color: #fff; box-shadow: 0 0 0 1px rgba(255,255,255,0.4); backdrop-filter: blur(12px); display: flex; }
+.mw-hv-close svg { width: 20px; height: 20px; }
+.mw-hv-player { width: 1300px; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="5">
+<div class="mw-hero-video-dialog"></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  var defaults = {"thumbnail":"assets/picture.svg","media":null,"animationStyle":"from-center","hover":null,"open":1,"close":null};
+  var run = function (el, tl, at, o) {
+      var esc = function (s) { return String(s).replace(/"/g, "&quot;"); };
+      el.innerHTML = '<div class="mw-hv-thumb"><img src="' + esc(o.thumbnail) + '" alt=""><div class="mw-hv-play"><div class="mw-hv-ring"><div class="mw-hv-disc"><svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3l14 9-14 9z"/></svg></div></div></div></div>' +
+        '<div class="mw-hv-back"><div class="mw-hv-player"><div class="mw-hv-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></div>' +
+        '<div class="mw-hv-frame"><img src="' + esc(o.media || o.thumbnail) + '" alt=""></div></div></div>';
+      var img = el.querySelector(".mw-hv-thumb > img"), play = el.querySelector(".mw-hv-play"), disc = el.querySelector(".mw-hv-disc"), back = el.querySelector(".mw-hv-back"), player = el.querySelector(".mw-hv-player");
+      var out = MW.bezier(0, 0, 0.2, 1), fade = MW.bezier(0.25, 0.1, 0.35, 1), sp = MW.spring(300, 30, 1);
+      gsap.set(play, { scale: 0.9 });
+      if (o.hover != null) {
+        tl.to(img, { filter: "brightness(0.8)", duration: 0.2, ease: out }, at + o.hover);
+        tl.to(play, { scale: 1, duration: 0.2, ease: out }, at + o.hover);
+        tl.to(disc, { scale: 1.2, duration: 0.2, ease: out }, at + o.hover);
+      }
+      var V = { "from-bottom": [{ y: "100%" }, { y: "100%" }], "from-center": [{ scale: 0.5 }, { scale: 0.5 }], "from-top": [{ y: "-100%" }, { y: "-100%" }], "from-left": [{ x: "-100%" }, { x: "-100%" }],
+        "from-right": [{ x: "100%" }, { x: "100%" }], fade: [{}, {}], "top-in-bottom-out": [{ y: "-100%" }, { y: "100%" }], "left-in-right-out": [{ x: "-100%" }, { x: "100%" }] }[o.animationStyle] || [{ scale: 0.5 }, { scale: 0.5 }];
+      var t0 = at + o.open, inFrom = Object.assign({ opacity: 0 }, V[0]), inTo = { opacity: 1, x: 0, y: 0, scale: 1, duration: sp.duration, ease: sp.ease, immediateRender: false };
+      tl.fromTo(back, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: fade, immediateRender: false }, t0);
+      tl.fromTo(player, inFrom, inTo, t0);
+      var end = t0 + sp.duration;
+      if (o.close != null) { var t1 = at + o.close; tl.to(player, Object.assign({ opacity: 0, duration: sp.duration, ease: sp.ease }, V[1]), t1); tl.to(back, { opacity: 0, duration: 0.3, ease: fade }, t1); end = t1 + sp.duration; }
+      return end;
+    };
+  MW.heroVideoDialog = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.heroVideoDialog(q(".mw-hero-video-dialog"), tl, 0, { hover: 0.6, open: 1.4, close: 4.2 });
+          tl.set({}, {}, 5);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

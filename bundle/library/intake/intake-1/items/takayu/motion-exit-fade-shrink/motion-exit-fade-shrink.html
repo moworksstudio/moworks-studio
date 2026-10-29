@@ -1,0 +1,52 @@
+<!--
+  Discrete Property Exit (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=discrete-exit (read 12/10/2026).
+  Bấm dấu X, thẻ mờ dần, thu nhỏ còn 0.96 và hạ 8 px rồi ẩn hẳn khỏi bố cục; sau đó hiện lại bằng mờ dần ngược lại.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionExitFadeShrink(q(".ex-card"), tl, 0.5, { returnAt: 1.5 });
+
+  Options (defaults in brackets):
+      - duration: s (0.48), ease-in
+      - scale: (0.96)
+      - drop: px (40)
+      - returnAt: s after the start to come back (0.4 s ease-out, no drop; null: stay hidden)
+
+  Notes: Idea and numbers (TakayuStudio discrete-exit, written here): Card 140x64 r10 with a close X; click at 0.38 s. Exit over 0.5-0.98 s (480 ms) power2.in: opacity 1 → 0, scale 1 → 0.96, y 0 → +8 px; then hidden (display none, a dashed placeholder shows the empty slot). Demo re-entry at 2.0-2.4 s power2.out: opacity 0 → 1, scale 0.96 → 1, no y move. Params: duration (0.48 s) · scale (0.96) · drop (8 px) · ease (power2.in) · back (0.4 s, power2.out). After the exit the element is display: none (out of the layout), as a discrete property ends a CSS exit.
+-->
+
+<div class="gm"><div class="ex"><div class="ex-slot"></div><div class="ex-card"><div class="ex-x"></div><b>Đã lưu bản nháp</b><span>Tự động lưu lúc 14:20</span></div></div></div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.48,"scale":0.96,"drop":40,"returnAt":null};
+  var run = function (el, tl, at, o) {
+        var pin = gsap.parseEase("power2.in"), out = gsap.parseEase("power2.out");
+        return MW.drive(tl, at, o.returnAt == null ? o.duration : o.returnAt + 0.4, function (t) {
+          var e = pin(Math.max(0, Math.min(1, t / o.duration))), back = o.returnAt != null && t >= o.returnAt, r = back ? out(Math.min(1, (t - o.returnAt) / 0.4)) : 0;
+          if (!back) { gsap.set(el, { scale: 1 - (1 - o.scale) * e, y: o.drop * e }); el.style.opacity = String(1 - e); el.style.display = e >= 1 ? "none" : ""; }
+          else { el.style.display = ""; gsap.set(el, { scale: o.scale + (1 - o.scale) * r, y: 0 }); el.style.opacity = String(r); }
+        });
+      };
+  MW.motionExitFadeShrink = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

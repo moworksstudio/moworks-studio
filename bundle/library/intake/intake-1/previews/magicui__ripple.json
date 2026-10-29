@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/ripple",
+  "hash": "f46d60c0be3c3ec9",
+  "at": "2026-10-17T06:02:18.927Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/magicui__ripple.mp4",
+    "poster": "previews/magicui__ripple.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "299c07d4d1b86d05c5bf42c30aded022b264d25f561545c6cdbb7a5244496ef4",
+    "size": 16187,
+    "seconds": 38.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

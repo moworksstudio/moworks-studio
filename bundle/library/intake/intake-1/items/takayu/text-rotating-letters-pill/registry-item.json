@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-rotating-letters-pill",
+  "type": "hyperframes:component",
+  "title": "Rotating Text (Spring)",
+  "description": "Từ trong viên thuốc màu nhấn đổi theo từng chữ cái: chữ cũ bay lên, chữ mới trồi lên bằng lò xo, viên thuốc co giãn theo bề rộng từ mới.",
+  "tags": [
+    "swap",
+    "spring",
+    "pill",
+    "letters",
+    "text-swap",
+    "bouncy",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-rotating-letters-pill.html",
+      "target": "compositions/components/text-rotating-letters-pill.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-rotating-letters-pill",
+    "author": "takayu",
+    "call": "MW.textRotatingLettersPill(q(\".rp\"), tl, 0, {});",
+    "function": "MW.textRotatingLettersPill",
+    "options": {
+      "words": "the words in turn",
+      "swaps": "s of each swap ([0.7, 2.7])",
+      "k": "spring stiffness (300)",
+      "c": "damping (25)",
+      "pad": "px (56)",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-rotating-letters-spring",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-rotating-letters-spring (read 12/10/2026)",
+      "upstream": "the site credits react-bits (MIT + Commons Clause): written from the idea only, no react-bits code"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-rotating-letters-spring, written here): Word in a rounded accent pill (padding 14 px). Every 2 s: old letters y 0 → −120 % and fade, new letters y +100 % → 0 and fade in, each on a spring (stiffness 300, damping 25, ratio ~0.72), letters 30 ms apart; new word waits until the old leaves (~0.22 s). Pill width / height track the new word size on the same spring. Demo: pill height = text + 0.18 em, radius 9 px, dark text on accent, letters clipped to the pill; swaps at 0.7 s and 2.7 s; loop 4 s. Params: words: danh sách từ · interval (2 s) · spring: độ cứng / giảm chấn (300 / 25) · stagger (0.03 s) · padding (14 px).",
+    "titleVi": "Đổi từ trong viên thuốc lò xo"
+  }
+}

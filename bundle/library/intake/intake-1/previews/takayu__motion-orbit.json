@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-orbit",
+  "hash": "183919f02376b29a",
+  "at": "2026-10-17T09:32:47.241Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-orbit.mp4",
+    "poster": "previews/takayu__motion-orbit.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6bcbdfbea718d5b6a7e20bdcce57627fb01e1ef1cbd32c036850cc6de9a9ae31",
+    "size": 11339,
+    "seconds": 30.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

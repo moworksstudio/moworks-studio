@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/elastic-rise",
+  "hash": "7ee28bf8222184b8",
+  "at": "2026-10-17T06:40:25.710Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Archivo"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__elastic-rise.mp4",
+    "poster": "previews/codrops__elastic-rise.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "30241f51634d4f7de3a98202490551fd5cda77652cb1f9e698c451bf84a1cb1d",
+    "size": 21407,
+    "seconds": 31.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

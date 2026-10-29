@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-balanced-reflow",
+  "type": "hyperframes:component",
+  "title": "Balanced Wrap Reflow",
+  "description": "Đoạn chữ được ngắt dòng cân đều chiều dài, mỗi dòng trồi lên từ khe riêng; khi khung hẹp lại, chữ được chia dòng lại và trồi lên lần nữa.",
+  "tags": [
+    "lines",
+    "balance",
+    "reveal",
+    "reflow",
+    "text-layout-reflow",
+    "smooth",
+    "layout-reflow",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-balanced-reflow.html",
+      "target": "compositions/components/text-balanced-reflow.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-balanced-reflow",
+    "author": "takayu",
+    "call": "MW.textBalancedReflow(q(\".brt\"), tl, 0, {});",
+    "function": "MW.textBalancedReflow",
+    "options": {
+      "wide": "card px (1120)",
+      "narrow": "px (640)",
+      "pad": "px (60)",
+      "card": "the card (the text's parent)",
+      "loop": "s (4.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-balanced-reflow",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-balanced-reflow (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-balanced-reflow, written here): Card width 280 px; text 34 px wrapped with text-wrap: balance (narrowest width that keeps the greedy line count). At 0.3 s each line rises from +1 line height inside its own line clip, 0.6 s expo.out, stagger 0.08 s per line. Card narrows 280 → 160 px 1.7–2.3 s (cubic-bezier .65,0,.35,1) with the text shown plain and dimmed; after a 150 ms debounce (2.45 s) the new balanced lines rise again the same way. Fade 4.2–4.45 s, card back 4.2–4.5 s. Loop 4.8 s. Params: bề rộng khung (280 → 160 px) · thời gian trồi (0.6 s) · lệch mỗi dòng (0.08 s). Lines are balanced (text-wrap: balance); after the box changes, the new lines rise again (a 150 ms debounce).",
+    "titleVi": "Dòng chữ cân đều, chia lại dòng"
+  }
+}

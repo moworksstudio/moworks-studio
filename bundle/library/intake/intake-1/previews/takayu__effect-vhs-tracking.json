@@ -1,0 +1,26 @@
+{
+  "uid": "in:takayu/effect-vhs-tracking",
+  "hash": "9e2e90a1a5f5e30e",
+  "at": "2026-10-17T10:38:17.212Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "JetBrains Mono"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__effect-vhs-tracking.mp4",
+    "poster": "previews/takayu__effect-vhs-tracking.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b5215bad4ad61886b488f3b10beb91b11c5b8f11de7b10b159078dc74851f716",
+    "size": 55768,
+    "seconds": 18.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

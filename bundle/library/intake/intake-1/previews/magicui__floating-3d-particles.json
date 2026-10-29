@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/floating-3d-particles",
+  "hash": "9cd5e91187bf8687",
+  "at": "2026-10-17T05:56:43.860Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__floating-3d-particles.mp4",
+    "poster": "previews/magicui__floating-3d-particles.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6214f20002bbdb47d62a77b0412f66e0a2530164a93282dfa034200282b30ecf",
+    "size": 217163,
+    "seconds": 34.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

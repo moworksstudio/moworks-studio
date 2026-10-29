@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-hopping-dot-indicator",
+  "type": "hyperframes:block",
+  "title": "Jumping Dot",
+  "description": "Chấm chỉ báo dưới tab nhún xuống lấy đà, nhảy theo đường parabol sang tab mới, bẹp xuống khi chạm đất rồi rung tắt; vệt cung nét đứt mờ dần sau mỗi cú nhảy.",
+  "tags": [
+    "indicator",
+    "hop",
+    "squash",
+    "tabs",
+    "selection-controls",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-hopping-dot-indicator.html",
+      "target": "compositions/components/ui-hopping-dot-indicator.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-hopping-dot-indicator",
+    "author": "takayu",
+    "call": "MW.uiHoppingDotIndicator(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiHoppingDotIndicator",
+    "options": {
+      "moves": "[[s, from, to], ...]",
+      "labels": "",
+      "accent": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-control-jumping-dot",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-control-jumping-dot (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-control-jumping-dot, written here): Dot r6 under 3 tabs 72 px apart. Each move: 0.1 s take-off squash (scaleY −0.35, half sine), hop 0.42 s with x linear and y on a parabola (apex 26 px + 8 px per extra tab), scaleY + 0.18 × |1 − 2u| near take-off and landing, scaleX = 1 / scaleY; landing squash 0.35 × e^(−14 t) × sin(22 t) (half wave); a dashed arc ghost fades 0.6-0.9 s after the move starts. Moves at 0.3, 1.15, 2.0 s (the last spans two tabs). Params: hop (0.42 s) · apex (26 px + 8 px / tab) · squash (0.35) · moves [[giây, từ, tới]]. Take-off squash 0.1 s, a 0.42 s parabolic hop (apex 26 + 8 per extra tab), a damped landing squash, and a dashed arc ghost that fades.",
+    "titleVi": "Chấm chỉ báo nhảy giữa các tab"
+  }
+}

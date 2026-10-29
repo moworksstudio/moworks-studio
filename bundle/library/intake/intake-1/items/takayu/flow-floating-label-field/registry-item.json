@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "flow-floating-label-field",
+  "type": "hyperframes:block",
+  "title": "Floating Label",
+  "description": "Bấm vào ô, viền sáng lên, nhãn Email bay lên góc trên và thu nhỏ, đổi màu nhấn, rồi giá trị được gõ ra từng ký tự với con trỏ nhấp nháy.",
+  "tags": [
+    "form",
+    "input",
+    "label",
+    "typing",
+    "forms-state",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "flow-floating-label-field.html",
+      "target": "compositions/components/flow-floating-label-field.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/flow-floating-label-field",
+    "author": "takayu",
+    "call": "MW.flowFloatingLabelField(q(\".gm\"), tl, 0, {});",
+    "function": "MW.flowFloatingLabelField",
+    "options": {
+      "lift": "px (13)",
+      "scale": "(0.72), from the label's left edge",
+      "duration": "s (0.3, power2.out)",
+      "type": "s a character (0.055)",
+      "label": "",
+      "value": "",
+      "title": "",
+      "loop": "s (3.4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=floating-label",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=floating-label (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio floating-label, written here): Field 180x52, radius 10. Focus at 0.5 s: accent 2 px ring fades in over 0.12 s. Label 'Email' (14 px) moves up 13 px (the recipe gives 25 px for a taller field) and scales 1 → 0.72 from its left edge, colour grey → accent, 0.3 s power2.out (0.55-0.85 s). From 0.95 s the value types one character every 55 ms; the caret blinks (0.5 s period) when idle. Value fades 2.8-2.95 s, ring 2.85-3.05 s, label returns 2.95-3.25 s power2.inOut. Params: lift (13 px) · scale (0.72) · duration (0.3 s) · type (0.055 s / ký tự) · ease (power2.out).",
+    "titleVi": "Nhãn ô nhập nổi lên khi gõ"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-converge-from-spread",
+  "hash": "2d81f309cdf7673a",
+  "at": "2026-10-17T11:41:18.663Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-converge-from-spread.mp4",
+    "poster": "previews/takayu__text-converge-from-spread.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "557d3e7d6eb3d44eacfb53746fdb4558c882e74f81938244ffef21767e5f874e",
+    "size": 11827,
+    "seconds": 27,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

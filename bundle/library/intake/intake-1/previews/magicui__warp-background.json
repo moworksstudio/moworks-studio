@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/warp-background",
+  "hash": "a114a7c8db719402",
+  "at": "2026-10-17T06:04:09.350Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__warp-background.mp4",
+    "poster": "previews/magicui__warp-background.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "46bab49f4b7d7136ec5d1fb762121a3459fa513f68dbb7befaf96831108faa93",
+    "size": 31243,
+    "seconds": 19.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

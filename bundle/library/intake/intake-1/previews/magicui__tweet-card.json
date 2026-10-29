@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/tweet-card",
+  "hash": "3fea4240bf3a8423",
+  "at": "2026-10-17T06:31:52.050Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__tweet-card.mp4",
+    "poster": "previews/magicui__tweet-card.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "e0f47ca40d754dc880a78eb6630d42584c8f39afd8a6261f4c6feda6ac3c23d1",
+    "size": 18570,
+    "seconds": 31.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/transition-shape-morph-bridge",
+  "hash": "3b9f012e8f950deb",
+  "at": "2026-10-17T07:22:00.175Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__transition-shape-morph-bridge.mp4",
+    "poster": "previews/takayu__transition-shape-morph-bridge.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "33b525b9cad11fe13ed95c181382c8f474422177c0e3f088a849e12779811da0",
+    "size": 25279,
+    "seconds": 28.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

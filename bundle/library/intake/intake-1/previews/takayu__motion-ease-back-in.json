@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-ease-back-in",
+  "hash": "71598c3518cca836",
+  "at": "2026-10-17T09:01:52.738Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-ease-back-in.mp4",
+    "poster": "previews/takayu__motion-ease-back-in.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "619ceaa12dab890b56247ecc64e8269dd301f305941bfb6294aae20791d22103",
+    "size": 8898,
+    "seconds": 26.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

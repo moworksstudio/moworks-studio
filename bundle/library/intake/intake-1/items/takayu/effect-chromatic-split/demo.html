@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Chromatic Split - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { --ink: #e8ebf3; --acc: #8b7bff; --acc2: #3dd6f5; --warm: #ffb547; --rose: #ff5d8f; --mute: #6c778b; --tk-card: #151a24; --tk-line: #262c3a; background: #0b0d12; color: var(--ink); }
+.tk-stage { position: absolute; inset: 0; display: grid; place-items: center; }
+.tk-cap { font-size: 30px; font-weight: 500; color: var(--mute); letter-spacing: 0.01em; }
+.tk-head { margin: 0; font-family: 'Inter', sans-serif; font-size: 200px; font-weight: 900; letter-spacing: -0.03em; line-height: 1.15; text-align: center; max-width: 1600px; }
+.tk-sub { margin-top: 36px; text-align: center; }
+.tk-head { color: #fff; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="1.8">
+<div class="tk-stage"><div><h1 class="tk-head ">TÁCH MÀU</h1></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.9,"offset":60,"colors":["#00e0ff","#ff3060"],"shake":8};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var clone = function () { var g = el.cloneNode(true); g.removeAttribute("id"); g.style.position = "absolute"; g.style.margin = "0"; g.style.pointerEvents = "none"; g.style.boxSizing = "border-box";
+    g.style.left = el.offsetLeft + "px"; g.style.top = el.offsetTop + "px"; var br = el.getBoundingClientRect(); g.style.width = (br.width + 0.5) + "px"; g.style.height = el.offsetHeight + "px"; host.insertBefore(g, el.nextSibling); return g; };
+  var cy = clone(), rd = clone(), io = gsap.parseEase("power2.inOut"); [cy, rd].forEach(function (g, i) { g.style.color = o.colors[i]; g.style.webkitTextFillColor = o.colors[i]; g.style.mixBlendMode = "screen"; });
+  var K = function (keys, u) { for (var i = 1; i < keys.length; i++) if (u <= keys[i][0]) { var a = keys[i - 1], b = keys[i], f = (u - a[0]) / (b[0] - a[0]); return a[1] + (b[1] - a[1]) * f; } return keys[keys.length - 1][1]; };
+  var SP = [[0, 1], [0.42, 30 / 34], [0.68, 12 / 34], [0.9, 0], [1, 0]], SA = [[0, 1], [0.42, 1], [0.68, 0.95], [0.9, 0], [1, 0]], CS = [[0, 0.82], [0.2, 1.08], [0.38, 0.98], [0.56, 1.02], [1, 1]], CX = [[0, 0], [0.2, 1], [0.38, -0.75], [0.56, 0.25], [1, 0]];
+  return MW.drive(tl, at, o.duration, function (t) {
+    var u = io(Math.max(0, Math.min(1, t / o.duration))), s = K(CS, u), f = Math.min(1, u / 0.2), on = t > 0;
+    gsap.set(el, { scale: s, x: o.shake * K(CX, u) }); el.style.opacity = String(on ? 0.35 + 0.65 * f : 0); el.style.filter = f < 1 ? "blur(" + (2 * (1 - f)).toFixed(2) + "px)" : "";
+    var d = o.offset * K(SP, u), a = on ? K(SA, u) : 0; gsap.set(cy, { x: -d, scale: s }); gsap.set(rd, { x: d, scale: s }); cy.style.opacity = rd.style.opacity = String(a);
+  });
+  };
+  MW.effectChromaticSplit = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.effectChromaticSplit(q(".tk-head"), tl, 0.3, {});
+          tl.set({}, {}, 1.8);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

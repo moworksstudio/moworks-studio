@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "particles",
+  "type": "hyperframes:component",
+  "title": "Particles",
+  "description": "Faint dots drifting very slowly across the frame and leaning toward a pointer: a quiet dust layer for dark hero frames.",
+  "tags": [
+    "particles",
+    "dust",
+    "dots",
+    "ambient",
+    "background",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "particles.html",
+      "target": "compositions/components/particles.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 7,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/particles",
+    "author": "magicui",
+    "call": "MW.particles(q(\".mw-particles\"), tl, 0, { quantity: 300, size: 1.2, vx: 0.25, vy: -0.15, staticity: 30, pointer: [[0, -600, -200], [3.5, 600, 250], [7, -300, 300]], hold: 7 });",
+    "function": "MW.particles",
+    "options": {
+      "quantity": "100",
+      "staticity": "50",
+      "ease": "50",
+      "size": "0.4",
+      "color": "#ffffff",
+      "vx": "0",
+      "vy": "0",
+      "pointer": "[[t, x, y], ...] (none)",
+      "hold": "seconds (10)",
+      "seed": "1"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/particles.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/particles.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Without a pointer it is near-static dust, as upstream. `pointer` lists [t, x, y] points (px from the centre of the box), linear between them.",
+    "titleVi": "Bụi chấm trôi rất chậm"
+  }
+}

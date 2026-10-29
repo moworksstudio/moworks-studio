@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-center-punch",
+  "hash": "fbc4b9d748093321",
+  "at": "2026-10-17T09:39:03.207Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-center-punch.mp4",
+    "poster": "previews/takayu__motion-center-punch.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "249332523ed31e4ef261de008157f90621a9a7f38b683947048b8e6a74eadbc7",
+    "size": 9151,
+    "seconds": 26.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

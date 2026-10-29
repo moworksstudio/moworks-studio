@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/scroll-progress",
+  "hash": "6caf77183e8d59d3",
+  "at": "2026-10-17T06:30:58.996Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__scroll-progress.mp4",
+    "poster": "previews/magicui__scroll-progress.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "87b2dc15bfb3338ae42153c70ea6a35388f085f89526368acc58d25d1376db11",
+    "size": 15042,
+    "seconds": 28.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

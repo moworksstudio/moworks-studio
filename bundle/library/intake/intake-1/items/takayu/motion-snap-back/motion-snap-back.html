@@ -1,0 +1,81 @@
+<!--
+  Snap Back (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=snap-back (read 12/10/2026).
+  Con trỏ kéo viên thuốc giãn ra, giữ run run, thả ra nó vụt về chỗ bằng lò xo, dây buộc mảnh dần khi căng.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionSnapBack(q(".sn"), tl, 0, { cursor: ".ui-cursor" });
+
+  Options (defaults in brackets):
+      - pullAt: s (0.3)
+      - pull: s (0.55, power2.inOut)
+      - hold: s (0.2, trembling)
+      - tremble: ± px (2.4)
+      - distance: px (490)
+      - stretch: (1.5)
+      - k: spring stiffness (420)
+      - cx: damping of the position (20)
+      - cs: damping of the stretch (12: dips to about 0.8)
+      - anchor: px from the anchor to the pill (200)
+      - cursor: an optional cursor
+
+  Notes: Idea and numbers (TakayuStudio snap-back, written here): Pulled right: x +98 px (demo) and scaleX 1 → 1.5 (scaleY = 1/scaleX) in 550 ms power2.inOut, a 200 ms hold with a ±0.6 px tremble, then release: x returns on a spring (k 420, d 20), scaleX on a looser one (k 420, d 12) dipping to ~0.8 before 1; 4 ghost copies 18 ms apart for 300 ms after release; a tether line thins as it stretches. Params: pull (98 px) · stretch (1.5) · hold (0.2 s) · spring x (k 420, d 20) · spring scale (k 420, d 12).
+-->
+
+<div class="sn-w"><div class="sn-a"></div><div class="sn"></div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"pullAt":0.3,"pull":0.55,"hold":0.2,"tremble":2.4,"distance":490,"stretch":1.5,"k":420,"cx":20,"cs":12,"anchor":200,"cursor":null};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, cur = o.cursor ? (host.querySelector(o.cursor) || document.querySelector(o.cursor)) : null, io = gsap.parseEase("power2.inOut"), sx = MW.spring(o.k, o.cx), ss = MW.spring(o.k, o.cs), ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg"), ln = document.createElementNS(ns, "line"), gh = [];
+        if (getComputedStyle(host).position === "static") host.style.position = "relative"; gsap.set(el, { transformOrigin: "0% 50%" });
+        svg.setAttribute("width", host.clientWidth); svg.setAttribute("height", host.clientHeight); svg.style.cssText = "position:absolute;left:0;top:0;overflow:visible;pointer-events:none;"; ln.setAttribute("stroke", "#6c778b"); ln.setAttribute("stroke-linecap", "round"); svg.appendChild(ln); host.insertBefore(svg, el);
+        for (var i = 0; i < 4; i++) { var g = el.cloneNode(true); g.removeAttribute("id"); g.style.position = "absolute"; g.style.margin = "0"; g.style.pointerEvents = "none"; g.style.opacity = "0"; g.style.left = el.offsetLeft + "px"; g.style.top = el.offsetTop + "px"; g.style.width = el.offsetWidth + "px"; g.style.height = el.offsetHeight + "px"; host.insertBefore(g, el); gh.push(g); }
+        var W = el.offsetWidth, ax = el.offsetLeft - o.anchor, ay = el.offsetTop + el.offsetHeight / 2, rel = o.pullAt + o.pull + o.hold;
+        var P = function (t) { if (t <= o.pullAt) return [0, 1]; if (t <= o.pullAt + o.pull) { var u = io((t - o.pullAt) / o.pull); return [o.distance * u, 1 + (o.stretch - 1) * u]; } if (t <= rel) return [o.distance + o.tremble * Math.sin(t * 90), o.stretch]; var r = t - rel; return [o.distance * (1 - sx.at(r)), o.stretch + (1 - o.stretch) * ss.at(r)]; };
+        return MW.drive(tl, at, rel + Math.max(sx.duration, ss.duration) + 0.2, function (t) {
+          var p = P(t); gsap.set(el, { x: p[0], scaleX: p[1], scaleY: 1 / p[1] });
+          gh.forEach(function (g, i) { var tt = t - 0.018 * (i + 1), q = P(tt), on = t > rel && t < rel + 0.3; gsap.set(g, { x: q[0], scaleX: q[1], scaleY: 1 / q[1], transformOrigin: "0% 50%" }); g.style.opacity = on ? String(0.25 - i * 0.05) : "0"; });
+          var ex = el.offsetLeft + p[0], d = Math.max(1, ex - ax); ln.setAttribute("x1", ax); ln.setAttribute("y1", ay); ln.setAttribute("x2", ex); ln.setAttribute("y2", ay); ln.setAttribute("stroke-width", (4 + 14 / (1 + d / 120)).toFixed(2));
+          if (cur) { var held = t > o.pullAt - 0.08 && t <= rel, cx = t <= o.pullAt ? el.offsetLeft + W + 260 * (1 - Math.min(1, t / o.pullAt)) : t <= rel ? el.offsetLeft + p[0] + W * p[1] - 30 : el.offsetLeft + o.distance + W * o.stretch + 120 * Math.min(1, (t - rel) / 0.5); gsap.set(cur, { x: cx - 12, y: ay - 6, scale: held ? 0.86 : 1, transformOrigin: "20% 10%" }); }
+        });
+      };
+  MW.motionSnapBack = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-subframe-motion-blur",
+  "hash": "c62d3441ffe68939",
+  "at": "2026-10-17T10:41:34.344Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__effect-subframe-motion-blur.mp4",
+    "poster": "previews/takayu__effect-subframe-motion-blur.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "5bce970fd8fda84cbfc7a3fe623852155c1d50f6926ee790a35154e06f21863e",
+    "size": 17914,
+    "seconds": 29.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

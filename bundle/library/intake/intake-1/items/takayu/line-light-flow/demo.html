@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>SVG Gradient Flow - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .sv { position: absolute; inset: 0; display: grid; place-items: center; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.2">
+<div class="sv"><svg width="1400" height="700" viewBox="0 0 280 140"><path class="lf" d="M20 110 C80 110 80 30 140 30 S200 110 260 110" fill="none" stroke="#3a4466" stroke-width="4"/></svg></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"segments":8,"length":0.045,"duration":2.2,"passes":1,"width":6,"tail":"#172541","head":"#ffffff"};
+  var run = function (el, tl, at, o) {
+        var segs = [], mix = gsap.utils.interpolate(o.tail, o.head); el.setAttribute("pathLength", "1"); el.setAttribute("opacity", "0.25");
+        for (var k = 0; k < o.segments; k++) { var p = el.cloneNode(true); p.setAttribute("opacity", "1"); p.setAttribute("stroke", mix(k / (o.segments - 1))); p.setAttribute("stroke-width", o.width); p.style.strokeDasharray = o.length + " 3"; p.setAttribute("stroke-linecap", k === o.segments - 1 ? "round" : "butt"); el.parentNode.appendChild(p); segs.push({ p: p, k: k }); }
+        return MW.drive(tl, at, o.duration * o.passes, function (t) {
+          var head = ((t / o.duration) % 1) * 1.24;
+          segs.forEach(function (s) { var end = head - 0.025 * (o.segments - 1 - s.k); s.p.style.strokeDashoffset = String(o.length - end); });
+        });
+      };
+  MW.lineLightFlow = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.lineLightFlow(q(".lf"), tl, 0, {});
+          tl.set({}, {}, 2.2);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

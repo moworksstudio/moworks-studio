@@ -1,0 +1,24 @@
+{
+  "id": "theo",
+  "name": "Theo",
+  "about": "A realistic adult (7.5 heads, 1.78 m) in a T-shirt, shorts and plimsolls: the author's model for the hard cases (turning, reaching, sitting, gripping, pointing).",
+  "engine": "anidoodle-human",
+  "credit": {
+    "author": "Alex Greenshpun (10x Company)",
+    "link": "https://github.com/alexgreensh/anidoodle/tree/4db69644b994ae9caf9e20936506954b2f5e4872/skills/anidoodle/engine/src/canvas-core/characters/theo",
+    "commit": "4db69644b994ae9caf9e20936506954b2f5e4872",
+    "licence": "Apache-2.0 (with NOTICE)",
+    "made": "as shipped"
+  },
+  "hands": [
+    "storybook",
+    "pencil"
+  ],
+  "module": [
+    "theo/baker.ts",
+    "theo/index.ts",
+    "theo/poses.ts",
+    "theo/wardrobe.ts"
+  ],
+  "savedAt": "2026-10-23T17:30:52.905Z"
+}

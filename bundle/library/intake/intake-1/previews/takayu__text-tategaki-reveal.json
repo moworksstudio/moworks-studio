@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-tategaki-reveal",
+  "hash": "f19eb943fcff98a5",
+  "at": "2026-10-17T10:20:41.399Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-tategaki-reveal.mp4",
+    "poster": "previews/takayu__text-tategaki-reveal.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "291d81165ed4d1d53110444f48fa08819afb66aa87c10491bbb70bee13cedfaf",
+    "size": 23204,
+    "seconds": 26.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

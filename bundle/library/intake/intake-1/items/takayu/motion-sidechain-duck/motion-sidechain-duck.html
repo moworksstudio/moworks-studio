@@ -1,0 +1,52 @@
+<!--
+  Sidechain Duck (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=sd-duck (read 12/10/2026).
+  Mỗi tiếng trống kick, chuyển động nền khựng lại một chút rồi hồi về chậm như sidechain trong nhạc.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionSidechainDuck(q(".sd-bg"), tl, 0, { subject: ".sd-d" });
+
+  Options (defaults in brackets):
+      - beat: s between kicks (0.5)
+      - attack: s (0.025, linear)
+      - release: decay rate (12: e^(−12 t))
+      - amount: the background dips (0.08)
+      - grow: the subject grows (0.5)
+      - start: s (0)
+      - subject: the foreground element (optional)
+      - duration: s (4)
+
+  Notes: Idea and numbers (TakayuStudio sd-duck, written here): On each kick the ambient motion (camera, background) dips: attack ~3 frames (100 ms), release 24-36 frames (800-1200 ms). Demo: every 0.5 s the duck rises linearly over 25 ms then decays e^(-12 t); background scale 1 - 0.08 x duck while the foreground dot grows 20 -> 30 px. Params: amount (−8 %) · attack (0.1 s) · release (0.8–1.2 s). Like a sidechain compressor: on each kick the ambient motion dips fast and recovers slowly.
+-->
+
+<div class="sd-bg"></div><div class="sd-d"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"beat":0.5,"attack":0.025,"release":12,"amount":0.08,"grow":0.5,"start":0,"subject":null,"duration":4};
+  var run = function (el, tl, at, o) {
+        var sub = o.subject ? document.querySelector(o.subject) : null, duck = function (t) { if (t < o.start) return 0; var d = (t - o.start) % o.beat; return d < o.attack ? d / o.attack : Math.exp(-o.release * (d - o.attack)); };
+        return MW.drive(tl, at, o.duration, function (t) { var k = duck(t); gsap.set(el, { scale: 1 - o.amount * k }); if (sub) gsap.set(sub, { scale: 1 + o.grow * k }); });
+      };
+  MW.motionSidechainDuck = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-vertical-word-roll",
+  "type": "hyperframes:component",
+  "title": "Vertical Word Roll",
+  "description": "Từ cũ cuộn lên khỏi khung, từ mới cuộn lên thế chỗ cùng lúc, lệch nhau từng ký tự 0.02 giây.",
+  "tags": [
+    "swap",
+    "roll",
+    "mask",
+    "letters",
+    "text-swap",
+    "smooth",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-vertical-word-roll.html",
+      "target": "compositions/components/text-vertical-word-roll.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-vertical-word-roll",
+    "author": "takayu",
+    "call": "MW.textVerticalWordRoll(q(\".vr\"), tl, 0, {});",
+    "function": "MW.textVerticalWordRoll",
+    "options": {
+      "from": "word shown first",
+      "to": "word it rolls to",
+      "duration": "s (0.5), in-out",
+      "at": "s (0.6)",
+      "backAt": "s it rolls back (2.3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-vertical-word-roll",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-vertical-word-roll (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-vertical-word-roll, written here): Two words stacked in one clip window (one line tall + 0.08 em). At the swap, old chars y 0 → −100 % and new chars +100 % → 0 at the same time, char by char 20 ms apart (capped 0.25 s), 0.5 s easeInOutCubic (labelled power3.inOut). Demo swaps at 0.6 s (A → B) and 2.3 s (B → A); loop 3.6 s. View-transition variant: whole word, 0.4 s cubic-bezier(.65,0,.35,1) with a fade. Params: to: từ mới · duration (0.5 s) · stagger (0.02 s) · ease (easeInOutCubic).",
+    "titleVi": "Từ cuộn dọc trong khung"
+  }
+}

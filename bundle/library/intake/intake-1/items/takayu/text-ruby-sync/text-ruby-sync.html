@@ -1,0 +1,59 @@
+<!--
+  Ruby Sync Reveal (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-ruby-sync (read 12/10/2026).
+  Mỗi cụm chữ cùng dòng phiên âm nhỏ phía trên nổi lên như một khối, phiên âm hiện rõ trễ hơn một nhịp rất ngắn.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textRubySync(q(".rs"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - unit: base units with data-r = the reading
+      - rise: em (0.4)
+      - duration: s (0.6, power2.out)
+      - stagger: s (0.16)
+      - cap: s (1)
+      - delay: s the reading trails (0.08)
+      - size: em of the reading (0.34)
+      - start: s (0.35)
+      - exitAt: s (2.95)
+      - accent: 
+      - loop: s (3.4)
+
+  Notes: Idea and numbers (TakayuStudio tx-ruby-sync, written here): Line height 1.75; each base word / segment and its reading (ruby above: 0.42 em for CJK, 0.34 em syllables for Latin, accent, spread evenly over the base when shorter) form one unit. From 0.35 s unit k rises y 0.4 em → 0 with opacity 0 → 1, 0.6 s power2.out, stagger 0.16 s (capped at 1 s total); the reading moves with its base but its opacity runs the same curve 80 ms later. Exit 2.95–3.25 s. Loop 3.4 s. Params: độ nổi (0.4 em) · thời gian (0.6 s) · cách nhau (0.16 s) · trễ phiên âm (80 ms). The Hán characters use the system's CJK font.
+-->
+
+<div class="st"><div class="rs"><span class="rb" data-r="phúc">福</span><span class="rb" data-r="lộc">祿</span><span class="rb" data-r="thọ">壽</span><span class="rb" data-r="an">安</span><span class="rb" data-r="khang">康</span></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"unit":".rb","rise":0.4,"duration":0.6,"stagger":0.16,"cap":1,"delay":0.08,"size":0.34,"start":0.35,"exitAt":2.95,"accent":"#ffb547","loop":3.4};
+  var run = function (el, tl, at, o) {
+        var U = Array.prototype.slice.call(el.querySelectorAll(o.unit)), n = U.length, st = Math.min(o.stagger, o.cap / Math.max(1, n - 1)), p2 = gsap.parseEase("power2.out"), pin = gsap.parseEase("power2.in"), fs = parseFloat(getComputedStyle(el).fontSize), R = [];
+        U.forEach(function (u) { u.style.display = "inline-block"; u.style.position = "relative"; var r = document.createElement("span"); r.textContent = u.getAttribute("data-r") || ""; r.style.cssText = "position:absolute;left:50%;bottom:100%;transform:translateX(-50%);white-space:nowrap;font-family:Inter,sans-serif;font-weight:700;font-size:" + o.size + "em;color:" + o.accent + ";opacity:0;"; u.appendChild(r); R.push(r); });
+        return MW.drive(tl, at, o.loop, function (t) {
+          var x = pin(Math.max(0, Math.min(1, (t - o.exitAt) / 0.3)));
+          U.forEach(function (u, i) { var s0 = o.start + i * st, a = p2(Math.max(0, Math.min(1, (t - s0) / o.duration))), b = p2(Math.max(0, Math.min(1, (t - s0 - o.delay) / o.duration))); gsap.set(u, { y: o.rise * fs * (1 - a) }); u.style.opacity = String(a * (1 - x)); R[i].style.opacity = String(b); });
+        });
+      };
+  MW.textRubySync = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

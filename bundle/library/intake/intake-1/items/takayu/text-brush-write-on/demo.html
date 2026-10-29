@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Brush Calligraphy Write-On - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .bw { position: relative; width: 1400px; height: 620px; border-radius: 20px; background: linear-gradient(160deg, #f6eedc, #eadcbf); box-shadow: 0 50px 120px rgba(0,0,0,0.5); } .bw i { position: absolute; right: 60px; bottom: 50px; width: 90px; height: 90px; border-radius: 10px; border: 6px solid #c8102e; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="5">
+<div class="st"><div class="bw"><i></i></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"strokes":[["M44 34 C46 72 44 110 40 142","stop"],["M46 36 C92 18 118 62 74 82 C64 86 54 86 46 84","sweep"],["M134 22 C136 70 134 110 130 142","stop"],["M134 98 C146 70 180 66 182 100 C183 122 182 132 188 142","hook"],["M212 84 C210 110 214 136 236 138 C256 140 268 120 270 92","sweep"],["M270 88 C270 110 272 128 278 142","stop"],["M240 46 C246 38 252 30 260 22","dot"],["M352 92 C336 78 304 86 302 112 C300 136 326 146 356 132","sweep"]],"box":[400,160],"brush":7,"gap":0.08,"fit":3.6,"start":0.35,"ease":"cubic-bezier(.65,0,.35,1)","exitAt":4.5,"ink":"#1b1410","accent":"#c8102e","loop":5};
+  var run = function (el, tl, at, o) {
+        var ns = "http://www.w3.org/2000/svg", meas = document.createElementNS(ns, "svg"), cv = document.createElement("canvas"), W = el.clientWidth, Hh = el.clientHeight, e = MW.ez(o.ease), p1o = gsap.parseEase("power1.out"), p1i = gsap.parseEase("power1.in");
+        if (getComputedStyle(el).position === "static") el.style.position = "relative"; meas.style.cssText = "position:absolute;width:0;height:0;overflow:hidden;"; el.appendChild(meas);
+        cv.width = W; cv.height = Hh; cv.style.cssText = "position:absolute;inset:0;width:100%;height:100%;"; el.appendChild(cv); var c = cv.getContext("2d"), k = Math.min(W / o.box[0], Hh / o.box[1]), ox = (W - o.box[0] * k) / 2, oy = (Hh - o.box[1] * k) / 2;
+        var S = o.strokes.map(function (s) { var p = document.createElementNS(ns, "path"); p.setAttribute("d", s[0]); meas.appendChild(p); var L = p.getTotalLength(), pts = []; for (var d = 0; d <= L; d += 0.8) { var q = p.getPointAtLength(d); pts.push([ox + q.x * k, oy + q.y * k]); } return { pts: pts, L: L, type: s[1], d: Math.max(0.18, L * 0.0032 * 140 / o.box[1]) }; });
+        var tot = S.reduce(function (a, s) { return a + s.d; }, 0) + o.gap * (S.length - 1), f = tot > o.fit ? o.fit / tot : 1, t0 = o.start; S.forEach(function (s) { s.t = t0; s.d *= f; t0 += s.d + o.gap * f; });
+        var R = o.brush * k, rad = function (u, type) { if (type === "dot") return R * (0.45 + 0.8 * u); var r = u < 0.12 ? R * (0.55 + 0.6 * p1o(u / 0.12)) : u < 0.42 ? R * (1.15 - 0.2 * (u - 0.12) / 0.3) : R * 0.95;
+          if (type === "sweep" && u > 0.42) r *= 1 - 0.95 * p1i((u - 0.42) / 0.58); if (type === "hook" && u > 0.84) r *= 1 - 0.85 * (u - 0.84) / 0.16; if (type === "stop" && u > 0.85) r *= 1 + 0.16 * Math.sin(Math.PI * (u - 0.85) / 0.3); return r; };
+        return MW.drive(tl, at, o.loop, function (t) {
+          c.clearRect(0, 0, W, Hh); var x = Math.max(0, Math.min(1, (t - o.exitAt) / 0.35)), tip = null; c.globalAlpha = 1 - x; c.fillStyle = o.ink;
+          S.forEach(function (s) { var u = e(Math.max(0, Math.min(1, (t - s.t) / s.d))), m = Math.floor((s.pts.length - 1) * u); if (u <= 0) return;
+            for (var i = 0; i <= m; i++) { var r = rad(i / (s.pts.length - 1), s.type); c.beginPath(); c.arc(s.pts[i][0], s.pts[i][1], Math.max(0.3, r), 0, 2 * Math.PI); c.fill(); } if (u < 1) tip = s.pts[m]; });
+          if (tip) { c.strokeStyle = o.accent; c.lineWidth = 3; c.beginPath(); c.arc(tip[0], tip[1], R * 1.9, 0, 2 * Math.PI); c.stroke(); } c.globalAlpha = 1;
+        });
+      };
+  MW.textBrushWriteOn = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textBrushWriteOn(q(".bw"), tl, 0, {});
+          tl.set({}, {}, 5);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

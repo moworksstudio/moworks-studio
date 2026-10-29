@@ -1,0 +1,59 @@
+<!--
+  Tategaki Reveal (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-tategaki-reveal (read 12/10/2026).
+  Chữ viết dọc kiểu Nhật: từng chữ rơi nhẹ vào ô của nó từ trên xuống trong mỗi cột, các cột nối nhau từ phải sang trái.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textTategakiReveal(q(".tg"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - drop: px (80)
+      - duration: s (0.5, expo.out)
+      - stagger: s (0.05)
+      - cap: s all units start within (1.4)
+      - gap: em between columns (1.5)
+      - start: s (0.35)
+      - exitAt: s (2.95)
+      - accent: colour while moving
+      - loop: s (3.4)
+
+  Notes: Idea and numbers (TakayuStudio tx-tategaki-reveal, written here): vertical-rl: chars top → bottom, columns right → left, column gap 1.5 em (demo ≤ 30 px fitting 126 px columns); punctuation to the upper right, long-vowel marks rotated 90°, Latin sideways. From 0.35 s each char drops y −20 px → 0 with opacity 0 → 1, 0.5 s expo.out, stagger 50 ms (recipe 40–60, ≤ 1.4 s total); chars still moving tinted accent. Exit 2.95–3.25 s power2.in. Loop 3.4 s. Recipe: text-combine-upright for 2-digit numbers. Params: độ rơi (20 px) · thời gian (0.5 s) · cách nhau (50 ms) · khoảng cột (1.5 em). Columns run right to left, top to bottom; for Vietnamese each syllable is one unit (Japanese uses writing-mode: vertical-rl).
+-->
+
+<div class="st"><div class="tg-p"><div class="tg">Thịt mỡ dưa hành câu đối đỏ | Cây nêu tràng pháo bánh chưng xanh</div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"drop":80,"duration":0.5,"stagger":0.05,"cap":1.4,"gap":1.5,"start":0.35,"exitAt":2.95,"accent":"#ffb547","loop":3.4};
+  var run = function (el, tl, at, o) {
+        var cols = el.textContent.split("|").map(function (s) { return s.trim().split(/\s+/); }), ex = gsap.parseEase("expo.out"), pin = gsap.parseEase("power2.in"), U = [];
+        el.textContent = ""; el.style.display = "flex"; el.style.flexDirection = "row-reverse"; el.style.gap = o.gap + "em"; el.style.alignItems = "flex-start";
+        cols.forEach(function (ws) { var c = document.createElement("div"); c.style.cssText = "display:flex;flex-direction:column;align-items:center;"; ws.forEach(function (w) { var s = document.createElement("span"); s.textContent = w; s.style.cssText = "display:block;line-height:1.2;white-space:nowrap;opacity:0;"; c.appendChild(s); U.push(s); }); el.appendChild(c); });
+        var col = getComputedStyle(el).color, st = Math.min(o.stagger, o.cap / Math.max(1, U.length - 1));
+        return MW.drive(tl, at, o.loop, function (t) {
+          var x = pin(Math.max(0, Math.min(1, (t - o.exitAt) / 0.3)));
+          U.forEach(function (s, i) { var u = ex(Math.max(0, Math.min(1, (t - o.start - i * st) / o.duration))); gsap.set(s, { y: -o.drop * (1 - u) }); s.style.opacity = String(u * (1 - x)); s.style.color = u > 0 && u < 0.98 ? o.accent : col; });
+        });
+      };
+  MW.textTategakiReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

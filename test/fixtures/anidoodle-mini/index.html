@@ -1,0 +1,22 @@
+<!doctype html>
+<!-- anidoodle-mini (audit 55): the smallest anidoodle film the app must bundle, finalize, check and render offline. The film is the
+     author's way (anidoodle/page.ts: a Film mounted by the engine's host on <canvas id="film">); the app bundles it into
+     compositions/anidoodle/film.js and its bridge seeks window.FILM by HyperFrames' time. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=640, height=360" />
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>
+  html, body { margin: 0; width: 640px; height: 360px; overflow: hidden; background: #efe6d2; }
+  #root { position: relative; width: 640px; height: 360px; overflow: hidden; background: #efe6d2; }
+  #film { position: absolute; inset: 0; width: 640px; height: 360px; display: block; }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="1" data-width="640" data-height="360">
+  <canvas id="film" class="clip" data-start="0" data-duration="1" data-track-index="1"></canvas>
+</div>
+<script src="compositions/anidoodle/film.js"></script>
+</body>
+</html>

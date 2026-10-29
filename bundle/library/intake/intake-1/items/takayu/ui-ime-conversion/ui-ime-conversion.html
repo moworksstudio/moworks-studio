@@ -1,0 +1,60 @@
+<!--
+  IME Kana-Kanji Conversion (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-ime-conversion (read 12/10/2026).
+  Ô nhập gõ từng chữ kana dưới gạch chấm, bấm Space thì từng cụm loé nền màu và bảng gợi ý bật ra, bấm Enter thì chốt chữ và gạch chân biến mất.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiImeConversion(q(".im"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - states: what the field shows after each key (Telex here; kana for Japanese)
+      - converted: the segments after Space
+      - per: s per key (0.09)
+      - start: s (0.35)
+      - text: 
+      - window: the candidate window (its children are the rows)
+      - caret: 
+      - accent: 
+      - exitAt: s (4.45)
+      - loop: s (5)
+
+  Notes: Idea and numbers (TakayuStudio tx-ime-conversion, written here): Field 280 px, text 26 px. From 0.35 s one kana per 90 ms (≤ 1.6 s) under a dotted 1 px underline. 0.3 s after the last, Space: text turns into the conversion; each segment flashes an accent block (text in background colour) 0.3 s, 80 ms apart; underlines solid 1 px, focused segment 2.5 px accent; a 3-candidate window (first row accent) fades in 0.1–0.25 s later. 1 s later Enter commits: underlines and window gone. Caret 2 px accent, 0.5 s blink. Exit 4.45–4.75 s. Params: nhịp gõ (90 ms / kana) · loé đổi chữ (0.3 s, lệch 80 ms) · chốt sau (1 s). Space turns the composition into segments that flash 0.3 s, 0.08 s apart, and opens three candidates; Enter, a second later, commits and clears the underlines.
+-->
+
+<div class="ui-wrap"><div class="im"><div class="ui-field im-f"><span class="im-t"></span><i class="im-c"></i></div><div class="im-w"><div>Tiếng Việt</div><div>tiếng việt</div><div>TIẾNG VIỆT</div></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"states":["t","ti","tie","tiê","tiên","tiêng","tiếng","tiếng v","tiếng vi","tiếng vie","tiếng viê","tiếng viêt","tiếng việt"],"converted":["Tiếng","Việt"],"per":0.09,"start":0.35,"text":".im-t","window":".im-w","caret":".im-c","accent":"#8b7bff","exitAt":4.45,"loop":5};
+  var run = function (el, tl, at, o) {
+        var tx = el.querySelector(o.text), win = el.querySelector(o.window), caret = el.querySelector(o.caret), n = o.states.length, typeEnd = o.start + Math.min(o.per * n, 1.6), sp = typeEnd + 0.3, en = sp + 1, rows = win ? Array.prototype.slice.call(win.children) : [];
+        return MW.drive(tl, at, o.loop, function (t) {
+          var x = Math.max(0, Math.min(1, (t - o.exitAt) / 0.3)); el.style.opacity = String(1 - x);
+          if (t < sp) { var k = Math.max(-1, Math.min(n - 1, Math.floor((t - o.start) / (Math.min(o.per * n, 1.6) / n)))); tx.innerHTML = k < 0 ? "" : '<span style="border-bottom:4px dotted #8f9ab3">' + o.states[k] + "</span>"; }
+          else { var parts = o.converted.map(function (s, i) { var f = t - sp - i * 0.08, flash = f >= 0 && f < 0.3 && t < en, ul = t < en ? (i === 0 ? "border-bottom:10px solid " + o.accent : "border-bottom:4px solid #8f9ab3") : ""; return '<span style="padding:0 6px;' + ul + ";" + (flash ? "background:" + o.accent + ";color:#0b0d12;" : "") + '">' + s + "</span>"; }); tx.innerHTML = parts.join(""); }
+          if (win) { var w = Math.max(0, Math.min(1, (t - sp - 0.1) / 0.15)) * (t < en ? 1 : 0); win.style.opacity = String(w); rows.forEach(function (r, i) { r.style.background = i === 0 ? o.accent : "transparent"; r.style.color = i === 0 ? "#0b0d12" : ""; }); }
+          if (caret) { var c = tx.getBoundingClientRect(), b = el.getBoundingClientRect(); caret.style.left = (c.right - b.left + 6) + "px"; caret.style.opacity = (Math.floor(t / 0.5) % 2 === 0 || (t > o.start && t < typeEnd)) ? "1" : "0"; }
+        });
+      };
+  MW.uiImeConversion = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

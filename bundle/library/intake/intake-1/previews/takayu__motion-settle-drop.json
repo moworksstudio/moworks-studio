@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-settle-drop",
+  "hash": "f790a5505f439a3f",
+  "at": "2026-10-17T10:13:32.373Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-settle-drop.mp4",
+    "poster": "previews/takayu__motion-settle-drop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a250215d0997836b7f6e5448406df4812cbd9d07d45f3be7a6f9655980baea87",
+    "size": 7211,
+    "seconds": 26,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-y-spin-stagger",
+  "type": "hyperframes:component",
+  "title": "Staggered Y Spin",
+  "description": "Từng chữ cái lần lượt xoay trọn một vòng quanh trục đứng, mặt sau hiện màu nhấn, tạo một làn xoay chạy qua dòng chữ rồi nghỉ.",
+  "tags": [
+    "spin",
+    "3d",
+    "letters",
+    "loop",
+    "text-loops-decoration",
+    "crisp",
+    "smooth",
+    "loops-decoration",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-y-spin-stagger.html",
+      "target": "compositions/components/text-y-spin-stagger.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-y-spin-stagger",
+    "author": "takayu",
+    "call": "MW.textYSpinStagger(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textYSpinStagger",
+    "options": {
+      "duration": "s per letter (0.8)",
+      "stagger": "s (0.08)",
+      "cap": "s all start within (1)",
+      "ease": "(power1.inOut)",
+      "start": "s (0.3)",
+      "accent": "the back side",
+      "cycle": "s (3.2)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-y-spin-stagger",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-y-spin-stagger (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-y-spin-stagger, written here): Per char rotateY 0 → 360° in 0.8 s from 0.3 s + 0.08 s × i (capped at 1 s total), demo ease power1.inOut (recipe power2.inOut). Drawn as scaleX = cos θ (no perspective) with scaleY 1 + 0.05 × |sin θ|; back side (cos < 0) accent. Cycle 3.2 s (≈1.5 s rest). Params: thời gian (0.8 s) · cách nhau (0.08 s) · nghỉ (≈ 1.5 s). Drawn flat as scaleX = cos θ (no perspective); the back side shows the accent.",
+    "titleVi": "Từng chữ xoay một vòng quanh trục đứng"
+  }
+}

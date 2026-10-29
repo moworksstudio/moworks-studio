@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "pulsating-button",
+  "type": "hyperframes:block",
+  "title": "Pulsating Button",
+  "description": "A button with a soft halo that pulses out from its edge (pulse) or a ring that expands and fades (ripple), every 1.5 s: a waiting call to action, a live dot, a map pin.",
+  "tags": [
+    "button",
+    "cta",
+    "pulse",
+    "halo",
+    "attention",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "pulsating-button.html",
+      "target": "compositions/components/pulsating-button.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/pulsating-button",
+    "author": "magicui",
+    "call": "MW.pulsatingButton(q(\".p1\"), tl, 0, { distance: 22, hold: 6 });",
+    "function": "MW.pulsatingButton",
+    "options": {
+      "pulseColor": "colour (the button's at 50 %)",
+      "duration": "s (1.5)",
+      "distance": "px (8)",
+      "variant": "pulse | ripple (pulse)",
+      "hold": "seconds (6)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/pulsating-button.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/pulsating-button.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is the button; its background colour is the pulse colour unless pulseColor is given.",
+    "titleVi": "Nút có quầng sáng đập nhịp"
+  }
+}

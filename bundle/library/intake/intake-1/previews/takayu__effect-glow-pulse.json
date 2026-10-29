@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-glow-pulse",
+  "hash": "4c09cbbcef1cddc0",
+  "at": "2026-10-17T08:34:37.527Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__effect-glow-pulse.mp4",
+    "poster": "previews/takayu__effect-glow-pulse.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c294736cfc0a510f31edc1e6f031c09e682f8451e4252ec32ab01519a7e66ef3",
+    "size": 12040,
+    "seconds": 25.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

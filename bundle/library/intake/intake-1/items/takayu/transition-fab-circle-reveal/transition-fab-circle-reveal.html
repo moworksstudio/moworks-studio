@@ -1,0 +1,61 @@
+<!--
+  Circular Reveal (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=catalog-ui-navigation-circular-reveal (read 12/10/2026).
+  Chạm nút nổi ở góc dưới, trang mới màu nhấn lan ra trong vòng tròn từ đúng nút đó tới góc xa nhất màn hình, nút tan vào trang mới.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.transitionFabCircleReveal(q(".pg-b"), tl, 0.32, { backAt: 1.63 });
+
+  Options (defaults in brackets):
+      - from: the floating button the circle grows from
+      - delay: s after the tap (0.08)
+      - duration: s (0.7)
+      - ease: (power2.inOut)
+      - backAt: s after the start to shrink back (null)
+      - back: s (0.5)
+      - ringR: px the touch ring grows (50)
+      - ringWidth: px (4)
+
+  Notes: Idea and numbers (TakayuStudio catalog-ui-navigation-circular-reveal, written here): Phone screen 100x184, list page A; floating button r11 (plus) at the bottom right. Tap at 0.32 s; page B (accent) is revealed through a circle centred on the button, radius 0 → distance to the farthest corner (≈ 174 px) over 0.4-1.1 s power2.inOut; the button fades as the radius passes 11 → 30 px. Back: the circle shrinks over 1.95-2.45 s. Params: center: điểm chạm · duration (0.7 s, power2.inOut) · back (0.5 s) · radius: tới góc xa nhất. The radius grows to the farthest corner, so the new page covers the screen exactly when it ends.
+-->
+
+<div class="st"><div class="ph"><div class="pg"><h3>Ghi chú</h3><div class="r"></div><div class="r"></div><div class="r"></div><div class="r"></div></div><div class="pg pg-b"><h3>Ghi chú mới</h3><div class="r" style="height:300px"></div></div><div class="fab"></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":".fab","delay":0.08,"duration":0.7,"ease":"power2.inOut","backAt":null,"back":0.5,"ringR":50,"ringWidth":4};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, fab = o.from ? host.querySelector(o.from) : null, e = gsap.parseEase(o.ease), ring = document.createElement("div");
+        if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        var er = el.getBoundingClientRect(), hr = host.getBoundingClientRect(), fr = fab ? fab.getBoundingClientRect() : { left: er.right - 90, top: er.bottom - 90, width: 0, height: 0 };
+        var cx = fr.left + fr.width / 2 - er.left, cy = fr.top + fr.height / 2 - er.top, R = Math.max(Math.hypot(cx, cy), Math.hypot(er.width - cx, cy), Math.hypot(cx, er.height - cy), Math.hypot(er.width - cx, er.height - cy)), r0 = fr.width / 2, hx = fr.left + fr.width / 2 - hr.left, hy = fr.top + fr.height / 2 - hr.top;
+        ring.style.cssText = "position:absolute;border-radius:50%;pointer-events:none;opacity:0;z-index:30;border:" + o.ringWidth + "px solid rgba(255,255,255,0.85);"; host.appendChild(ring);
+        return MW.drive(tl, at, o.backAt == null ? o.delay + o.duration : o.backAt + o.back, function (t) {
+          var p = e(Math.max(0, Math.min(1, (t - o.delay) / o.duration))); if (o.backAt != null && t > o.backAt) p = 1 - e(Math.min(1, (t - o.backAt) / o.back));
+          var r = R * p; el.style.clipPath = "circle(" + r.toFixed(1) + "px at " + cx.toFixed(1) + "px " + cy.toFixed(1) + "px)"; el.style.visibility = r > 0.5 ? "visible" : "hidden";
+          if (fab) fab.style.opacity = String(1 - Math.max(0, Math.min(1, (r - r0) / (r0 * 1.7 || 1))));
+          var u = t / 0.32, rr = 10 + o.ringR * u; ring.style.width = ring.style.height = 2 * rr + "px"; ring.style.left = hx - rr - o.ringWidth + "px"; ring.style.top = hy - rr - o.ringWidth + "px"; ring.style.opacity = t > 0 && u < 1 ? String(1 - u) : "0";
+        });
+      };
+  MW.transitionFabCircleReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

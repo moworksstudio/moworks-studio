@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Pull Out - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { --ink: #e8ebf3; --acc: #8b7bff; --acc2: #3dd6f5; --warm: #ffb547; --rose: #ff5d8f; --mute: #6c778b; --tk-card: #151a24; --tk-line: #262c3a; background: #0b0d12; color: var(--ink); }
+.tk-stage { position: absolute; inset: 0; display: grid; place-items: center; }
+.tk-cap { font-size: 30px; font-weight: 500; color: var(--mute); letter-spacing: 0.01em; }
+.tk-cam { position: absolute; inset: 0; overflow: hidden; background: linear-gradient(180deg, #161c3a 0%, #2a2350 55%, #4a2d5c 100%); }
+.tk-far, .tk-mid, .tk-near, .tk-fore { position: absolute; inset: -12%; }
+.tk-fore .blob { position: absolute; border-radius: 50%; background: radial-gradient(circle, #191433 0%, #0d0b1c 60%, rgba(13,11,28,0) 72%); filter: blur(10px); opacity: 0.9; }
+.tk-far .sun { position: absolute; left: 22%; top: 20%; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, #ffe2a8, #ffb547 60%, rgba(255, 181, 71, 0)); }
+.tk-far .star { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #fff; opacity: 0.7; }
+.tk-mid svg { position: absolute; left: 0; bottom: 18%; width: 100%; height: 46%; }
+.tk-near .card { position: absolute; left: 50%; top: 50%; width: 620px; height: 360px; margin: -180px 0 0 -310px; border-radius: 40px; background: rgba(21, 26, 36, 0.86); border: 2px solid rgba(255, 255, 255, 0.12);
+  display: grid; place-items: center; font-size: 84px; font-weight: 800; letter-spacing: -0.03em; box-shadow: 0 50px 120px rgba(0, 0, 0, 0.45); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.2">
+<div class="tk-cam"><div class="tk-far" data-depth="0.2"><div class="sun"></div><div class="star" style="left:12%;top:14%"></div><div class="star" style="left:24%;top:30%"></div><div class="star" style="left:36%;top:10%"></div><div class="star" style="left:70%;top:18%"></div><div class="star" style="left:82%;top:34%"></div><div class="star" style="left:90%;top:12%"></div><div class="star" style="left:46%;top:22%"></div><div class="star" style="left:16%;top:40%"></div></div>
+<div class="tk-mid" data-depth="0.55"><svg viewBox="0 0 1000 300" preserveAspectRatio="none"><path d="M0 300 L0 170 Q120 90 240 150 T480 120 T720 160 T1000 110 L1000 300 Z" fill="#3b2f6b"/><path d="M0 300 L0 220 Q160 160 320 210 T640 190 T1000 200 L1000 300 Z" fill="#2a2150"/></svg></div>
+<div class="tk-near" data-depth="1"><div class="card">Toàn cảnh</div></div>
+<div class="tk-fore" data-depth="1.6"><div class="blob" style="left:6%;top:62%;width:380px;height:380px"></div><div class="blob" style="left:80%;top:8%;width:300px;height:300px"></div><div class="blob" style="left:86%;top:70%;width:420px;height:420px"></div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":1.6,"scale":1.3,"layers":"[data-depth]","ease":"power2.inOut"};
+  var run = function (el, tl, at, o) {
+        var Ls = Array.prototype.slice.call(el.querySelectorAll(o.layers)), ease = gsap.parseEase(o.ease);
+        return MW.drive(tl, at, o.duration, function (t) {
+          var p = ease(t / o.duration);
+          Ls.forEach(function (l) { var d = parseFloat(l.getAttribute("data-depth") || "1"); gsap.set(l, { scale: 1 + (o.scale - 1) * d * (1 - p) }); });
+        });
+      };
+  MW.motionCameraPullOut = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionCameraPullOut(q(".tk-cam"), tl, 0.6, { duration: 2.2 });
+          tl.set({}, {}, 3.2);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

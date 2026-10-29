@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-sticky-shrink",
+  "type": "hyperframes:component",
+  "title": "Sticky Shrinking Headline",
+  "description": "Tiêu đề rất to chiếm cả trang thu nhỏ dần về góc trên bên trái và nằm gọn trong thanh đầu trang khi nội dung cuộn lên.",
+  "tags": [
+    "shrink",
+    "header",
+    "scale",
+    "layout",
+    "text-scroll",
+    "smooth",
+    "crisp",
+    "scroll",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-sticky-shrink.html",
+      "target": "compositions/components/text-sticky-shrink.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-sticky-shrink",
+    "author": "takayu",
+    "call": "MW.textStickyShrink(q(\".ss-h\"), tl, 0, { rows: \".ss-rows\", slot: \".ss-slot\" });",
+    "function": "MW.textStickyShrink",
+    "options": {
+      "scale": "end scale (0.15)",
+      "maxWidth": "px it may span in the header (800)",
+      "inset": "[x, y] px of its spot in the header ([60, 30])",
+      "rows": "the page rows that scroll up",
+      "scroll": "px (450)",
+      "slot": "the dashed slot outline"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-sticky-shrink-headline",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-sticky-shrink-headline (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-sticky-shrink-headline, written here): Page frame 292 × 168 px (radius 6) with a 24 px header bar (three small pills on its right). Headline 110 px, left-aligned, up to 2 lines. Over 0.4–1.8 s (cubic-bezier .65,0,.35,1) it scales 1 → the size that fits the header (≈0.15, ≤160 px wide) with origin top-left, while its top-left moves to the header's inset (12, 6 px); a dashed slot outline fades in there; placeholder rows scroll up 90 px. Return 2.9–3.5 s. Loop 3.8 s. Params: tỉ lệ cuối (0.15) · thời gian (1.4 s) · gốc (trên trái).",
+    "titleVi": "Tiêu đề thu nhỏ vào đầu trang"
+  }
+}

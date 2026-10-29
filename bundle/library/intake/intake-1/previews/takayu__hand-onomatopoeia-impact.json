@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/hand-onomatopoeia-impact",
+  "hash": "b2f9e6887ca0e8c1",
+  "at": "2026-10-17T10:21:08.819Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__hand-onomatopoeia-impact.mp4",
+    "poster": "previews/takayu__hand-onomatopoeia-impact.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "9f23f07ce76911fc24cc8c1053689a84a122222336b83a47dee8dd5a67b6afd3",
+    "size": 178101,
+    "seconds": 30.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

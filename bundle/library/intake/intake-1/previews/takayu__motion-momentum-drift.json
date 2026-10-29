@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-momentum-drift",
+  "hash": "aaf6df9167a939e5",
+  "at": "2026-10-17T11:03:26.199Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-momentum-drift.mp4",
+    "poster": "previews/takayu__motion-momentum-drift.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "9c60200a970dc097b8e6ff849b026f56e7374cfd30f8401c92c4c2b23ac404bd",
+    "size": 6587,
+    "seconds": 22.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Victory Impact Hold - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #2a1f55, #0b0d12); font-family: Inter, sans-serif; } .vh { position: absolute; inset: 0; display: grid; place-items: center; }
+.vw { font-size: 210px; font-weight: 900; color: #a99bff; letter-spacing: -0.02em; text-shadow: 0 0 50px rgba(139,123,255,0.5); } .rule { position: absolute; left: 50%; top: 50%; width: 300px; height: 10px; margin: -5px 0 0 -150px; background: #ffd23d; border-radius: 5px; opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="5.2">
+<div class="vh"><div class="rule"></div><div class="rule"></div><div class="vw">CHIẾN THẮNG</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"landAt":0.58,"from":2.6,"land":0.18,"wobble":0.14,"outAt":4.6,"rules":null,"gap":200,"reach":500};
+  var run = function (el, tl, at, o) {
+        var inq = gsap.parseEase("power1.in"), ex = gsap.parseEase("expo.out"), inn = gsap.parseEase("power2.in"), rules = o.rules ? Array.prototype.slice.call(document.querySelectorAll(o.rules)) : [];
+        return MW.drive(tl, at, o.outAt + 0.4, function (t) {
+          var L = o.landAt, d = t - L, s = t < L - o.land ? o.from : t < L ? o.from + (1 - o.from) * inq((t - L + o.land) / o.land) : 1;
+          var wob = d > 0 ? o.wobble * Math.exp(-14 * d) * Math.cos(34 * d) : 0, sh = d > 0 && d < 0.14 ? 12 * (1 - d / 0.14) : 0, out = t > o.outAt ? inn(Math.min(1, (t - o.outAt) / 0.35)) : 0;
+          gsap.set(el, { scaleX: s * (1 + wob), scaleY: s * (1 - wob), x: sh * Math.sin(t * 190), y: sh * Math.cos(t * 160) });
+          el.style.opacity = String(Math.min(1, Math.max(0, (t - L + o.land) / 0.08)) * (1 - out));
+          rules.forEach(function (r, i) { var g = d > 0 ? ex(Math.min(1, d / 0.4)) : 0, f = t < 0.78 ? 1 : Math.max(0, 1 - (t - 0.78) / 0.4); gsap.set(r, { x: (i ? 1 : -1) * (o.gap + o.reach * g), scaleX: g }); r.style.opacity = d > 0 ? String(f) : "0"; });
+        });
+      };
+  MW.textSlamLongHold = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textSlamLongHold(q(".vw"), tl, 0, { rules: ".rule" });
+          tl.set({}, {}, 5.2);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

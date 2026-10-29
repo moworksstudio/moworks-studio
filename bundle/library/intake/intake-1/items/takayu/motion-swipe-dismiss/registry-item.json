@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-swipe-dismiss",
+  "type": "hyperframes:block",
+  "title": "Swipe Dismiss",
+  "description": "Thẻ bị vuốt sang phải, nghiêng dần và nhanh dần rồi văng hẳn ra khỏi khung và mờ đi, để lộ vùng XOÁ phía sau.",
+  "tags": [
+    "swipe",
+    "dismiss",
+    "exit",
+    "gesture",
+    "gesture-mobile",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-swipe-dismiss.html",
+      "target": "compositions/components/motion-swipe-dismiss.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-swipe-dismiss",
+    "author": "takayu",
+    "call": "MW.motionSwipeDismiss(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionSwipeDismiss",
+    "options": {
+      "drag": "units of finger drag (60)",
+      "exit": "units it flies to (190)",
+      "duration": "s of the pass (0.7)",
+      "start": "s (0.4)",
+      "backAt": "s it comes back for the loop (1.9)",
+      "zone": "",
+      "title": "",
+      "sub": "",
+      "loop": "s (2.4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=swipe-dismiss",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=swipe-dismiss (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio swipe-dismiss, written here): Card (80 % x 52 %, r8) over a red DELETE zone. In a 700 ms pass: rest to 10 %; x +60 px, rotate 4°, opacity 0.85 at 55 % (finger drag); then accelerating (cubic-bezier(.55,0,1,.45)) to x +190 px (out of frame), rotate 10°, opacity 0 at 82 %; holds gone. Recipe: release past 35 % of the width flies out, otherwise it springs back to 0. Params: drag (60 px) · exit (190 px) · tilt (4° → 10°) · duration (0.7 s). Released past 35 % of the width it flies out (cubic-bezier(.55,0,1,.45)), tilting 4° → 10°; otherwise it would spring back.",
+    "titleVi": "Vuốt thẻ văng ra ngoài để xoá"
+  }
+}

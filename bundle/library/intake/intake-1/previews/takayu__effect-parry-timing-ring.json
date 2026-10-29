@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-parry-timing-ring",
+  "hash": "54bec35557d84fc7",
+  "at": "2026-10-17T11:16:13.913Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__effect-parry-timing-ring.mp4",
+    "poster": "previews/takayu__effect-parry-timing-ring.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3879a043b707cd9cef3437558b4ec3878a13c408ecb70529aac92e2816040ab9",
+    "size": 15956,
+    "seconds": 29.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

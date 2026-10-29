@@ -1,0 +1,73 @@
+<!--
+  Meteors (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/meteors.tsx.
+  Thin meteors with fading tails streak diagonally across the frame on random delays and speeds, endlessly.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.meteors(q(".mw-meteors"), tl, 0, { number: 30, hold: 8 });
+
+  Options (defaults in brackets):
+      - number: 20
+      - minDelay: s (0.2)
+      - maxDelay: s (1.2)
+      - minDuration: s (2)
+      - maxDuration: s (10)
+      - angle: deg (215)
+      - hold: seconds (10)
+      - seed: 1
+
+  Notes: el is a full-frame layer (position relative, overflow hidden). Upstream spreads lefts over the window width: here over el's width.
+-->
+
+<div class="mw-meteors"></div>
+
+<style>
+.mw-meteors { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.mw-meteors > .mw-meteor { position: absolute; width: 2px; height: 2px; border-radius: 9999px; background: #71717b; box-shadow: 0 0 0 1px #ffffff10; }
+.mw-meteors > .mw-meteor::before { content: ""; position: absolute; top: 50%; width: 50px; height: 1px; transform: translateY(-50%); background: linear-gradient(to right, #71717b, transparent); }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  var defaults = {"number":20,"minDelay":0.2,"maxDelay":1.2,"minDuration":2,"maxDuration":10,"angle":215,"hold":10,"seed":1};
+  var run = function (el, tl, at, o) {
+      var r = MW.rand(o.seed * 4099), W = el.offsetWidth, list = [];
+      for (var i = 0; i < o.number; i++) {
+        var m = document.createElement("span"); m.className = "mw-meteor";
+        var left = Math.floor(r() * W), delay = r() * (o.maxDelay - o.minDelay) + o.minDelay, dur = Math.floor(r() * (o.maxDuration - o.minDuration) + o.minDuration);
+        m.style.top = "-5%"; m.style.left = left + "px";
+        m.style.rotate = -o.angle + "deg";          // Tailwind rotate-(--angle) sets the rotate property, which adds to the keyframe's rotate()
+        el.appendChild(m); list.push({ m: m, delay: delay, dur: dur });
+      }
+      var s = { t: 0 };
+      var set = function () {
+        for (var i = 0; i < list.length; i++) {
+          var L = list[i], u = s.t - L.delay, x = 0, op = 1;
+          if (u < 0) { op = 1; x = 0; }                              // during its delay a CSS-animated span shows its own style: in place, visible
+          else { var f = (u % L.dur) / L.dur; x = -500 * f; op = f < 0.7 ? 1 : 1 - (f - 0.7) / 0.3; }
+          L.m.style.transform = "rotate(" + -o.angle + "deg) translateX(" + x + "px)";
+          L.m.style.opacity = op;
+        }
+      };
+      set();
+      tl.fromTo(s, { t: 0 }, { t: o.hold, duration: o.hold, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + o.hold;
+    };
+  MW.meteors = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

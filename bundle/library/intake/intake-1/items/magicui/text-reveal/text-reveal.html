@@ -1,0 +1,84 @@
+<!--
+  Text Reveal (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/text-reveal.tsx.
+  A sentence in faint grey whose words turn solid one after another, like a read-along, over the time you give it.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textReveal(q(".mw-text-reveal"), tl, 0.5, { duration: 4.5, ghost: 0.2 });
+
+  Options (defaults in brackets):
+      - duration: s for the whole sentence (4)
+      - ghost: opacity of the grey copy (0.3)
+
+  Notes: Each word keeps a ghost copy at opacity 0.3 under it, as upstream. Scroll progress -> film time: word i fills between at + duration x i / n and at + duration x (i + 1) / n.
+-->
+
+<p class="mw-text-reveal">Moworks Studio sẽ thay đổi cách bạn làm video.</p>
+
+<style>
+.mw-text-reveal .mw-w { position: relative; }
+.mw-text-reveal .mw-tr-ghost { position: absolute; left: 0; top: 0; opacity: var(--mw-tr-ghost, 0.3); }
+.mw-text-reveal .mw-tr-word { position: relative; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  var defaults = {"duration":4,"ghost":0.3};
+  var run = function (el, tl, at, o) {
+      var words = MW.split(el, "words").words, n = words.length;
+      el.style.setProperty("--mw-tr-ghost", o.ghost);
+      words.forEach(function (w, i) {
+        var t = w.textContent; w.textContent = "";
+        var g = document.createElement("span"); g.className = "mw-tr-ghost"; g.textContent = t;
+        var v = document.createElement("span"); v.className = "mw-tr-word"; v.textContent = t;
+        w.appendChild(g); w.appendChild(v);
+        tl.fromTo(v, { opacity: 0 }, { opacity: 1, duration: o.duration / n, ease: "none", immediateRender: true }, at + (o.duration * i) / n);
+      });
+      return at + o.duration;
+    };
+  MW.textReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

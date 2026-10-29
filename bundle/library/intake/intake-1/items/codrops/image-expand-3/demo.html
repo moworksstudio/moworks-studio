@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Image Expand: Full Line - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-image-expansion { margin: 0; line-height: 1.1; font-weight: normal; }
+.mw-image-expansion .type__expand { vertical-align: top; display: inline-grid; grid-template-columns: min-content; }
+.mw-image-expansion .type__expand--center, .mw-image-expansion .type__expand--full { display: block; }
+.mw-image-expansion .type__expand--mini { vertical-align: middle; padding: 0 0.125em; }
+.mw-image-expansion .type__expand--stack { vertical-align: bottom; grid-template-columns: 100%; justify-items: center; }
+.mw-image-expansion .type__expand-img { display: block; position: relative; aspect-ratio: 16/9; width: 0%; overflow: hidden; border-radius: 4rem; }
+.mw-image-expansion .type__expand-img-inner { display: block; width: 100%; height: 100%; background-size: cover; background-position: center; }
+.mw-image-expansion .type__expand-img--small { aspect-ratio: 1; }
+.mw-image-expansion .type__expand-img--tiny { aspect-ratio: 25/9; }
+.mw-image-expansion .type__expand--reveal .type__expand-img-inner { width: 100vw; aspect-ratio: 16/9; }
+.mw-image-expansion .anim { display: inline-block; white-space: nowrap; }
+.page { position: absolute; inset: 0; padding: 90px 160px; display: flex; flex-direction: column; justify-content: flex-start; gap: 50px; }
+.mw-image-expansion { font-family: 'Playfair Display', serif; font-size: 96px;  max-width: 1000px; }
+.para { max-width: 760px; font-size: 26px; line-height: 1.5; opacity: .7;  }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4.5">
+<div class="page"><h2 class="mw-image-expansion">Để từng dặm đường mở ra<br>như những câu chuyện<br><span class="type__expand type__expand--full"><span class="type__expand-img"><span class="type__expand-img-inner" style="background-image:url(assets/picture.svg)"></span></span></span>mỗi câu một hơi thở.</h2><p class="para">Mọi thứ đều đổi thay: ngọn núi tưởng như vững chãi cũng chỉ là một khoảnh khắc dừng chân của cát bụi; dòng sông không biết ngày mai, chỉ mải miết tìm về biển lớn.</p></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"duration":2.4,"block":null,"openWidth":7.9};
+  var run = function (el,tl,at,o
+  ) {
+  
+  var R = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16, em = parseFloat(getComputedStyle(el).fontSize);
+  var parts = [];
+  Array.prototype.forEach.call(el.querySelectorAll(".type__expand"), function (box) {
+    var stack = box.classList.contains("type__expand--stack"), first = stack && box.firstElementChild && box.firstElementChild.classList.contains("type__expand-img");
+    parts.push([box, { gap: 0 }, { gap: (stack ? 0.5 : 1.5) * R }]);
+    if (stack) parts.push([box, { paddingTop: 0, paddingBottom: 0 }, first ? { paddingTop: R, paddingBottom: 0 } : { paddingTop: 0, paddingBottom: R }]);
+  });
+  Array.prototype.forEach.call(el.querySelectorAll(".type__expand-img"), function (img) {
+    // open widths: small 3.25em, tiny 2em, a full-line picture 100 %; an inline / centred reveal measured on the source page (1920 px wide,
+    // 80 px type: 634 px, 7.9em), since its 100 % resolves against the source's own grid
+    var full = img.closest(".type__expand--full");
+    var to = img.classList.contains("type__expand-img--small") ? 3.25 * em + "px" : img.classList.contains("type__expand-img--tiny") ? 2 * em + "px" : full ? "100%" : o.openWidth * em + "px";
+    parts.push([img, { width: "0%" }, { width: to }]);
+  });
+  Array.prototype.forEach.call(el.querySelectorAll(".skewed"), function (w) { parts.push([w, { skewX: 0 }, { skewX: -20 }]); });
+  Array.prototype.forEach.call(el.querySelectorAll(".rotated"), function (w) { parts.push([w, { skewX: 0, rotation: 0 }, { skewX: -5, rotation: -10 }]); });
+  var open = function (ease) { parts.forEach(function (p) { tl.fromTo(p[0], p[1], Object.assign({}, p[2], { duration: o.duration, ease: ease, immediateRender: true }), at); }); };
+  var block = o.block ? MW.el(o.block) : el.nextElementSibling;
+  open("sine");
+  if (block) tl.fromTo(block, { lineHeight: 1.2, yPercent: 0, skewX: 0, opacity: 1 }, { yPercent: -40, skewX: -2, lineHeight: 2, opacity: 0.2, duration: o.duration, ease: "sine.inOut", immediateRender: true }, at);
+  return at + o.duration;
+  };
+  MW.imageExpand3 = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.imageExpand3(q(".mw-image-expansion"), tl, 0.5, { duration: 2.6 });
+          tl.set({}, {}, 4.5);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

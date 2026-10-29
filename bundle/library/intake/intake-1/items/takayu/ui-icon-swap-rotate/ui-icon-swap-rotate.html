@@ -1,0 +1,80 @@
+<!--
+  Icon Swap (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=catalog-ui-button-icon-swap (read 12/10/2026).
+  Bấm nút, dấu cộng thu nhỏ vừa xoay 90° biến mất, dấu tích xoay vào và bật lên đúng tâm đó, nút tô màu nhấn.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiIconSwapRotate(q(".is"), tl, 0, { cursor: ".ui-cursor" });
+
+  Options (defaults in brackets):
+      - clicks: [s on, s off] ([0.45, 1.85])
+      - plus: the plus
+      - check: the check
+      - label: a label under it
+      - on: fill when added
+      - off: fill before
+      - ink: icon colour when filled
+      - doneText: 
+      - cursor: an optional cursor that makes the clicks
+      - approach: [x, y] px the cursor comes from
+      - lead: s it arrives before a click
+
+  Notes: Idea and numbers (TakayuStudio catalog-ui-button-icon-swap, written here): Square button 56x56 r16, outlined; fill → accent over 0.6-0.8 s. Plus (22 px, 4 px stroke) scales 1 → 0 and rotates 0 → 90° over 0.55-0.75 s power2.in; the check scales 0 → 1 and rotates −90° → 0 over 0.68-0.98 s back.out, same centre. Reverse at 1.95-2.38 s (check out, plus in rotating back from −90°). Labels ADD → ADDED. Cursor clicks at 0.45 s and 1.85 s. Params: out (0.2 s, power2.in) · in (0.3 s, back.out, chồng 0.07 s) · rotate (90°) · fill (0.2 s).
+-->
+
+<div class="ui-wrap"><div class="bw"><div class="is"><i class="is-p"><b></b><b></b></i><i class="is-c"></i></div><div class="is-l">THÊM</div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  var defaults = {"clicks":[0.45,1.85],"plus":".is-p","check":".is-c","label":".is-l","on":"#8b7bff","off":"#10131d","ink":"#0b0d12","doneText":"ĐÃ THÊM","cursor":null,"approach":[260,200],"lead":0.12};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var cur = o.cursor ? (host.querySelector(o.cursor) || document.querySelector(o.cursor)) : null, curKeys = null;
+  var cursorPlan = function (clicks) { if (!cur) return; var base = (cur.offsetParent || host).getBoundingClientRect(), k = [];
+    clicks.forEach(function (c, i) { var r = (c[4] || el).getBoundingClientRect(), x = r.left - base.left + r.width * c[1], y = r.top - base.top + r.height * c[2];
+      if (!i) k.push([0, x + o.approach[0], y + o.approach[1]]); k.push([Math.max(0.01, c[0] - o.lead), x, y]); k.push([c[0] + (c[3] || 0.12) + 0.3, x, y]); });
+    var z = k[k.length - 1]; k.push([z[0] + 0.5, z[1] + o.approach[0] * 0.6, z[2] + o.approach[1] * 0.6]); curKeys = { k: k, c: clicks }; };
+  var cursorAt = function (t) { if (!cur || !curKeys) return; var p = MW.path(curKeys.k, t, "power2.inOut"), dn = 0; curKeys.c.forEach(function (c) { var u = t - c[0]; if (u >= 0 && u < (c[3] || 0.12)) dn = 1; });
+    gsap.set(cur, { x: p[0] - 12, y: p[1] - 6, scale: dn ? 0.86 : 1, transformOrigin: "20% 10%" }); };
+  var pl = el.querySelector(o.plus), ck = el.querySelector(o.check), lb = o.label ? host.querySelector(o.label) : null, pin = gsap.parseEase("power2.in"), bo = gsap.parseEase("back.out(1.7)"), t0 = lb ? lb.textContent : "", T = function (a, b, t) { return Math.max(0, Math.min(1, (t - a) / (b - a))); };
+  var c1 = o.clicks[0], c2 = o.clicks[1], mix = gsap.utils.interpolate(o.off, o.on); cursorPlan(o.clicks.map(function (c) { return [c, 0.5, 0.55, 0.12]; }));
+  return MW.drive(tl, at, c2 + 0.83, function (t) {
+    var f = T(c1 + 0.15, c1 + 0.35, t) * (1 - T(c2 + 0.15, c2 + 0.35, t)); el.style.backgroundColor = mix(f); el.style.color = f > 0.5 ? o.ink : "";
+    var po = pin(T(c1 + 0.1, c1 + 0.3, t)), ci = bo(T(c1 + 0.23, c1 + 0.53, t)), co = pin(T(c2 + 0.1, c2 + 0.3, t)), pi = bo(T(c2 + 0.23, c2 + 0.53, t)), back = t >= c2;
+    gsap.set(pl, { scale: back ? pi : 1 - po, rotation: back ? -90 * (1 - pi) : 90 * po }); gsap.set(ck, { scale: back ? 1 - co : ci, rotation: back ? 90 * co : -90 * (1 - ci) });
+    if (lb) lb.textContent = t >= c1 + 0.2 && t < c2 + 0.2 ? o.doneText : t0;
+    cursorAt(t);
+  });
+  };
+  MW.uiIconSwapRotate = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

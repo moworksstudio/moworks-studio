@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-hit-shake",
+  "type": "hyperframes:component",
+  "title": "Screen Shake on Hit",
+  "description": "Khung rung mạnh ngay lúc va rồi tắt dần theo hàm mũ trong khoảng nửa giây.",
+  "tags": [
+    "shake",
+    "impact",
+    "decay",
+    "camera",
+    "heavy",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-hit-shake.html",
+      "target": "compositions/components/motion-hit-shake.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-hit-shake",
+    "author": "takayu",
+    "call": "MW.motionHitShake(q(\".tk-cam\"), tl, 0.5, {});",
+    "function": "MW.motionHitShake",
+    "options": {
+      "amp": "px at the hit (30; 10 on the site's frame)",
+      "decay": "per second, k = amp × e^(−decay·t) (9)",
+      "duration": "s (0.45)",
+      "overscan": "scale hiding the edges (1.04)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=cam-shake",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=cam-shake (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio cam-shake, written here): On a hit: x = sin(97 d) x k, y = cos(83 d) x k with k = 10 px x e^(-9 d), d = seconds since the hit (100 % -> ~26 % at 150 ms -> ~0 at 450 ms); scale 1.04 to hide the edges. Demo: one hit every 1.5 s, at 0.5 s. Params: amp (10 px) · decay (e^−9t) · duration (0.45 s). Call once per hit.",
+    "titleVi": "Giật khung khi va chạm"
+  }
+}

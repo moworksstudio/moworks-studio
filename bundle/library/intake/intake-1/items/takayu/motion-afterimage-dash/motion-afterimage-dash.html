@@ -1,0 +1,77 @@
+<!--
+  Afterimage Dash (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=catalog-game-impact-fx-afterimage-dash (read 12/10/2026).
+  Vật lướt 200 px rất nhanh, kéo dãn theo tốc độ, để lại tám bóng mờ cách nhau 35 ms; dừng lại thì bẹp nhẹ, bụi tung ở chân và các bóng tắt từ cái cũ nhất.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionAfterimageDash(q(".gm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - at: s of the dash (0.5)
+      - backAt: s of the dash back (2.5)
+      - from: units, start x of 320 (60)
+      - distance: units (200)
+      - duration: s, expo.out (0.35)
+
+  Notes: Idea and numbers (TakayuStudio catalog-game-impact-fx-afterimage-dash, written here): px @320x200. Body 28 x 28 (r 7) dashes 60 → 260 px in 350 ms outExpo at 0.5 s (back at 2.5 s). 8 copies frozen at its positions 0, 35 … 245 ms into the dash, opacity 12 → 42 % (+ 60 % outline); cleared oldest-first: copy k fades over 200 ms from 450 + 60k ms. The body stretches scaleX 1 + 0.5·min(1, speed / 1600 px/s), scaleY = 1/scaleX; landing squash 15 % (e^(−10t) × half-sine, 250 ms from 300 ms). Two dust puffs at the stop. Params: at: lúc lướt (0.5 s) · distance: quãng lướt (200 px) · duration: thời gian lướt (0.35 s) · copies: số bóng (8, cách 0.035 s).
+-->
+
+<div class="gm"><div class="bd" style="width:140px;height:140px;border-radius:35px;background:linear-gradient(160deg,#a693ff,#6a4cf0)"></div><div class="puff" style="width:70px;height:40px;border-radius:50%;background:#8f9ab3;opacity:0"></div><div class="puff" style="width:70px;height:40px;border-radius:50%;background:#8f9ab3;opacity:0"></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"at":0.5,"backAt":2.5,"from":60,"distance":200,"duration":0.35};
+  var run = function (el, tl, at, o) {
+        var S = MW.stage320(el), body = el.querySelector(".bd"), k = S.k, ex = gsap.parseEase("expo.out"), copies = [], puffs = el.querySelectorAll(".puff");
+        S.put(body, o.from, 138);
+        var ctx = S.ctx; S.clear(); ctx.strokeStyle = "#3a4260"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(20, 152); ctx.lineTo(300, 152); ctx.stroke();
+        for (var i = 0; i < 8; i++) { var c = body.cloneNode(true); c.className = "bd-copy"; c.style.boxShadow = "inset 0 0 0 " + (1.5 * k) + "px rgba(255,255,255,0.6)"; el.insertBefore(c, body); copies.push(c); }
+        var X = function (d, dir) { var a = dir > 0 ? o.from : o.from + o.distance; return a + dir * o.distance * ex(Math.max(0, Math.min(1, d / o.duration))); };
+        return MW.drive(tl, at, o.backAt + 1.4, function (t) {
+          var back = t >= o.backAt, s0 = back ? o.backAt : o.at, dir = back ? -1 : 1, d = t - s0, x = t < o.at ? o.from : X(d, dir);
+          var v = Math.abs(X(d + 0.005, dir) - X(d - 0.005, dir)) / 0.01, st = d > 0 && d < o.duration ? 1 + 0.5 * Math.min(1, v / 1600) : 1;
+          var sq = d > 0.3 && d < 0.55 ? 0.15 * Math.exp(-10 * (d - 0.3)) * Math.sin(Math.PI * (d - 0.3) / 0.25) : 0;
+          gsap.set(body, { x: (x - o.from) * k, scaleX: st * (1 + sq), scaleY: (1 / st) * (1 - sq), transformOrigin: "50% 100%" });
+          copies.forEach(function (c, i) {
+            var ci = i * 0.035, on = d >= ci && t >= o.at, fade = Math.max(0, Math.min(1, (d - (0.45 + 0.06 * i)) / 0.2));
+            gsap.set(c, { x: (X(ci, dir) - o.from) * k }); c.style.opacity = on ? String((0.12 + 0.3 * i / 7) * (1 - fade)) : "0";
+          });
+          Array.prototype.forEach.call(puffs, function (p, i) { var u = (d - o.duration * 0.8) / 0.5; var px = x + (dir > 0 ? 14 : -14) * (i ? 1 : 0.5); S.put(p, px, 150); gsap.set(p, { scale: u > 0 && u < 1 ? 0.5 + u : 0, x: (i ? 1 : -1) * 18 * k * Math.max(0, u) }); p.style.opacity = u > 0 && u < 1 ? String(1 - u) : "0"; });
+        });
+      };
+  MW.motionAfterimageDash = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

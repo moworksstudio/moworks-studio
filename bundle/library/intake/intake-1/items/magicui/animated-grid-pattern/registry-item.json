@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "animated-grid-pattern",
+  "type": "hyperframes:component",
+  "title": "Animated Grid Pattern",
+  "description": "A line grid on which random cells softly light up and fade out, each coming back at a new spot: the familiar tech backdrop.",
+  "tags": [
+    "grid",
+    "pattern",
+    "background",
+    "cells",
+    "tech",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "animated-grid-pattern.html",
+      "target": "compositions/components/animated-grid-pattern.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/animated-grid-pattern",
+    "author": "magicui",
+    "call": "MW.animatedGridPattern(q(\".mw-animated-grid-pattern\"), tl, 0, { width: 64, height: 64, numSquares: 40, maxOpacity: 1, duration: 2, repeatDelay: 0.6, color: \"rgba(156,163,175,0.35)\", hold: 8 });",
+    "function": "MW.animatedGridPattern",
+    "options": {
+      "width": "40",
+      "height": "40",
+      "numSquares": "50",
+      "maxOpacity": "0.5",
+      "duration": "s (4)",
+      "repeatDelay": "s (0.5)",
+      "color": "rgba(156,163,175,0.3)",
+      "hold": "seconds (12)",
+      "seed": "1"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/animated-grid-pattern.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/animated-grid-pattern.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "One square's cycle: delay i x 0.1 s, fade in `duration`, hold repeatDelay, fade out `duration`, then a new cell. Upstream demo: 30 squares, maxOpacity 0.1, duration 3, repeatDelay 1, radial mask, skewY(12deg).",
+    "titleVi": "Lưới kẻ có ô sáng lên tắt dần"
+  }
+}

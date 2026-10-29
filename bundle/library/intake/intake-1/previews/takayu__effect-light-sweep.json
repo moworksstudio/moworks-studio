@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-light-sweep",
+  "hash": "435395e523a70ffa",
+  "at": "2026-10-17T08:34:35.741Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__effect-light-sweep.mp4",
+    "poster": "previews/takayu__effect-light-sweep.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "eaca4c61bf6a5dddca50022df11290747f56d036180c9895c9f4340a0698614c",
+    "size": 11464,
+    "seconds": 27.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

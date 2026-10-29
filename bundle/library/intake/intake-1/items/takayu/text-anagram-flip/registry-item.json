@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-anagram-flip",
+  "type": "hyperframes:component",
+  "title": "Anagram FLIP",
+  "description": "Các chữ cái giống nhau của hai từ được ghép cặp và bay theo đường vòng sang chỗ mới để thành từ thứ hai, chữ thừa mờ đi, chữ thiếu hiện vào.",
+  "tags": [
+    "morph",
+    "letters",
+    "flip",
+    "arc",
+    "text-layout-reflow",
+    "smooth",
+    "layout-reflow",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-anagram-flip.html",
+      "target": "compositions/components/text-anagram-flip.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-anagram-flip",
+    "author": "takayu",
+    "call": "MW.textAnagramFlip(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textAnagramFlip",
+    "options": {
+      "from": "first word(s)",
+      "to": "second word(s) sharing letters",
+      "at": "s (0.4)",
+      "duration": "s per letter (0.6), cubic-bezier(.2,.8,.2,1)",
+      "stagger": "s (0.02)",
+      "backAt": "s it goes back (2.3)",
+      "tint": "accent mid-flight"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-anagram-flip",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-anagram-flip (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-anagram-flip, written here): Map identical letters of word A to word B left to right (first unused match). From 0.4 s each pair travels to its new slot in 0.6 s cubic-bezier(.2,.8,.2,1), stagger 0.02 s, on an arc of height min(40 px, 16 px + 0.18 × |dx|): rightward movers pass above, leftward below; an accent tint peaks mid-flight (sin πp). Unmatched letters of A fade out rising 10 px, new letters of B fade in from +10 px, over 0.6 s. Reverse from 2.3 s. Loop 4.2 s. Params: thời gian (0.6 s) · cách nhau (0.02 s) · độ vồng (16 px + 18 % quãng, tối đa 40 px).",
+    "titleVi": "Chữ cái đổi chỗ thành từ mới"
+  }
+}

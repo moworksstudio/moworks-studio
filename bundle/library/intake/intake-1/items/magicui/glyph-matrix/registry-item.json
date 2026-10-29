@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "glyph-matrix",
+  "type": "hyperframes:component",
+  "title": "Glyph Matrix",
+  "description": "A grid of faint monospace glyphs that keep mutating and fade toward the bottom: a subtle code / data texture for developer-tool scenes.",
+  "tags": [
+    "glyphs",
+    "code",
+    "matrix",
+    "ascii",
+    "texture",
+    "background",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "glyph-matrix.html",
+      "target": "compositions/components/glyph-matrix.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/glyph-matrix",
+    "author": "magicui",
+    "call": "MW.glyphMatrix(q(\".mw-glyph-matrix\"), tl, 0, { cellSize: 28, color: \"#a1a1aa\", hold: 6 });",
+    "function": "MW.glyphMatrix",
+    "options": {
+      "glyphs": "'01·•+*/\\<>='",
+      "cellSize": "px (14)",
+      "mutationRate": "share of cells per tick (0.04)",
+      "interval": "ms per tick (90)",
+      "fadeBottom": "0.6",
+      "color": "#6B7280",
+      "font": "'JetBrains Mono', monospace",
+      "hold": "seconds (10)",
+      "seed": "1"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/glyph-matrix.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/glyph-matrix.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Upstream's font is ui-monospace / SFMono / Menlo (system fonts): here a monospace family the film ships (JetBrains Mono by default).",
+    "titleVi": "Lưới ký tự mã đổi liên tục"
+  }
+}

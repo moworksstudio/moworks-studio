@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-card-flip-reveal",
+  "type": "hyperframes:block",
+  "title": "Reward Card Reveal",
+  "description": "Thẻ úp nhấc lên và phóng nhẹ, lật nửa vòng để lộ mặt phần thưởng (đổi mặt đúng lúc 90°), bóng dưới sàn hẹp lại theo góc lật; thẻ hạ xuống rồi tên phần thưởng trồi lên.",
+  "tags": [
+    "flip",
+    "card",
+    "reveal",
+    "lift",
+    "rewards-loot",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-card-flip-reveal.html",
+      "target": "compositions/components/motion-card-flip-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-card-flip-reveal",
+    "author": "takayu",
+    "call": "MW.motionCardFlipReveal(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionCardFlipReveal",
+    "options": {
+      "liftAt": "s (0.3)",
+      "flip": "s (0.5, power2.inOut), drawn as scaleX = |cos θ|",
+      "label": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-reward-reward-card",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-reward-reward-card (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-reward-reward-card, written here): px @320x200. Card 68 x 92 (r 9). Lifts 12 px and scales 1.06 (300 ms outCubic from 0.3 s); flips 180° in 500 ms inOut (0.65-1.15 s) as a flat scaleX = |cos θ| (min 0.02, no perspective), back face swapped for the front at 90°, extra +4 % × sin θ scale mid-flip; floor shadow width 36·|cos θ| + 8·lift + 4. Lowers 60 % of the lift 1.2-1.5 s inOut; the name label fades in and rises 6 px (1.3-1.5 s outCubic). Loop fade 2.4-2.8 s. Params: liftAt: lúc nhấc (0.3 s) · lift: nhấc (12 px, ×1.06) · flip: thời gian lật (0.5 s) · label: tên phần thưởng. The face is swapped at 90°; the floor shadow narrows with the turn and widens with the lift.",
+    "titleVi": "Lật thẻ thưởng lộ mặt trước"
+  }
+}

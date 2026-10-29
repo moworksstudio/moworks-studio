@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "unfold-alt",
+  "type": "hyperframes:component",
+  "title": "Unfold Alternating",
+  "description": "Each word's letters unfold vertically from its centre outward, the first word from the top and the rest from the bottom. (Codrops fx26)",
+  "tags": [
+    "text",
+    "letters",
+    "entrance",
+    "codrops",
+    "on-scroll",
+    "per letter"
+  ],
+  "files": [
+    {
+      "path": "unfold-alt.html",
+      "target": "compositions/components/unfold-alt.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:codrops/unfold-alt",
+    "author": "codrops",
+    "call": "MW.unfoldAlt(document.querySelector(\".mw-unfold-alt\"), tl, 0.5, { duration: 1.6 });",
+    "function": "MW.unfoldAlt",
+    "options": {
+      "duration": "s the whole entrance takes (1.6)",
+      "seed": "for the random parts (1)",
+      "split": "chars"
+    },
+    "credit": {
+      "author": "Codrops",
+      "collection": "Codrops",
+      "link": "https://github.com/codrops/OnScrollTypographyAnimations/blob/af28d61d1f8d3d117f5d1e9b09d5209e20a1a212/src/js/index2.js#L363-L392",
+      "commit": "af28d61d1f8d3d117f5d1e9b09d5209e20a1a212",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) 2009 - 2022 / 2024 Codrops (LICENSE)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "codrops/OnScrollTypographyAnimations at af28d61, src/js/index2.js lines 363-392",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Codrops fx26: the source's GSAP values; the scroll range is now `duration`.",
+    "titleVi": "Chữ cái mở dọc xen kẽ trên dưới"
+  }
+}

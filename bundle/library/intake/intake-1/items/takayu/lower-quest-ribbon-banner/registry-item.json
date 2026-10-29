@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "lower-quest-ribbon-banner",
+  "type": "hyperframes:block",
+  "title": "Quest Banner",
+  "description": "Dải băng màu mở rộng từ giữa ra hai bên, hai đuôi ruy băng trượt ra phía sau, tên nhiệm vụ trồi lên trong băng, gạch chân có hai đầu kim cương mọc từ giữa và dòng mục tiêu hiện bên dưới.",
+  "tags": [
+    "banner",
+    "ribbon",
+    "reveal",
+    "underline",
+    "progression-quests",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "lower-quest-ribbon-banner.html",
+      "target": "compositions/components/lower-quest-ribbon-banner.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.7,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/lower-quest-ribbon-banner",
+    "author": "takayu",
+    "call": "MW.lowerQuestRibbonBanner(q(\".gm\"), tl, 0, {});",
+    "function": "MW.lowerQuestRibbonBanner",
+    "options": {
+      "kicker": "",
+      "title": "",
+      "goal": "the objective line",
+      "closeAt": "s (2.3)",
+      "loop": "s (2.7)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-progress-quest-banner",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-progress-quest-banner (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-progress-quest-banner, written here): px @320x200. Accent band 48 px high opens from the centre 0 → 240 px wide in 500 ms outExpo at 0.3 s; the kicker is static, revealed by the band; the title fades in rising 6 px (450 ms outCubic, 0.45 s). Ribbon tails slide out 22 px behind the ends (300 ms back.out, 0.55 s). Underline grows from the centre to ±112 px, diamond ends (430 ms outExpo, 0.62 s); objective row fades up 6 px (350 ms, 0.95 s). Close 2.3 s: band height → 0 in 200 ms in-cubic. Params: width: bề rộng băng (240 px) · open: thời gian mở (0.5 s) · kicker / title: nhãn và tên nhiệm vụ · closeAt: lúc đóng (2.3 s). The band opens from the centre in 0.5 s (expo.out); tails slide out behind its ends (back.out), the underline grows with diamond ends.",
+    "titleVi": "Băng rôn nhiệm vụ mở từ giữa"
+  }
+}

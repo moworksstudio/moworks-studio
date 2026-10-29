@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/flip-up",
+  "hash": "f91e89e8baad7d66",
+  "at": "2026-10-17T06:38:48.235Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Archivo"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__flip-up.mp4",
+    "poster": "previews/codrops__flip-up.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "655f7128b3262e3ff5d21cbdab0fa6c42b5c0e32bbbbe231ff70756f68330a98",
+    "size": 18152,
+    "seconds": 33.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

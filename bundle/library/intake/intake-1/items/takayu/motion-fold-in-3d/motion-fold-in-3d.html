@@ -1,0 +1,50 @@
+<!--
+  3D Fold In (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=fold-in (read 12/10/2026).
+  Thẻ có bản lề ở mép trên lật từ gần nằm ngang xuống thẳng đứng, tối khi còn nghiêng và sáng dần.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionFoldIn3d(q(".cd"), tl, 0.3, { exitAt: 1.8 });
+
+  Options (defaults in brackets):
+      - from: degrees (−82)
+      - duration: s (0.76, power2.out)
+      - perspective: px (2100)
+      - exitAt: s after the start to fold back (null, 0.4 s power2.in)
+
+  Notes: Idea and numbers (TakayuStudio fold-in, written here): Card hinged on its top edge: rotationX −82° → 0 in 760 ms power2.out, perspective 420 px; opacity 0 → 1 over the first 150 ms; a dark overlay of 0.7·(1 − cos θ) shades it while tilted. Site exit: folds back to −82° in 400 ms power2.in. (The DOM fallback adds a 7° overshoot at 82 %.) Params: duration (0.76 s) · from (−82°) · perspective (420 px) · origin (mép trên).
+-->
+
+<div class="st"><div class="cd"><b></b><i></i><i style="width:60%"></i></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":-82,"duration":0.76,"perspective":2100,"exitAt":null};
+  var run = function (el, tl, at, o) {
+        var p2 = gsap.parseEase("power2.out"), pin = gsap.parseEase("power2.in"), sh = document.createElement("div"); if (getComputedStyle(el).position === "static") el.style.position = "relative";
+        sh.style.cssText = "position:absolute;inset:0;border-radius:inherit;background:#000;pointer-events:none;opacity:0;"; el.appendChild(sh); gsap.set(el, { transformOrigin: "50% 0%" });
+        return MW.drive(tl, at, o.exitAt == null ? o.duration : o.exitAt + 0.4, function (t) { var p = p2(Math.min(1, t / o.duration)); if (o.exitAt != null && t > o.exitAt) p = 1 - pin(Math.min(1, (t - o.exitAt) / 0.4)); var a = o.from * (1 - p);
+          gsap.set(el, { rotationX: a, transformPerspective: o.perspective }); el.style.opacity = String(Math.min(1, t / 0.15)); sh.style.opacity = String((0.7 * (1 - Math.cos(a * Math.PI / 180))).toFixed(3)); });
+      };
+  MW.motionFoldIn3d = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

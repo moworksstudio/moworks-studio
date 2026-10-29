@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Noise Texture - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-noise-texture { pointer-events: none; position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; user-select: none; }
+.panel { position: relative; width: 1100px; height: 640px; border-radius: 36px; overflow: hidden; background: linear-gradient(135deg, #7c3aed, #db2777 55%, #f97316); display: grid; place-items: center; }
+.panel .h1 { position: relative; z-index: 2; color: #fff; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="5">
+<div class="center"><div class="panel"><svg class="mw-noise-texture"></svg><div class="h1">Có hạt nhiễu</div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"frequency":0.4,"octaves":6,"slope":0.15,"noiseOpacity":0.6,"layerOpacity":0.75,"animate":false,"fps":12,"hold":10};
+  var run = function (el, tl, at, o) {
+      var id = "mw-noise-" + (MW.__nt = (MW.__nt || 0) + 1);
+      el.style.opacity = o.layerOpacity;
+      el.innerHTML = '<filter id="' + id + '"><feTurbulence type="fractalNoise" baseFrequency="' + o.frequency + '" numOctaves="' + o.octaves + '" stitchTiles="stitch" seed="0"/>' +
+        '<feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="linear" slope="' + o.slope + '"/><feFuncG type="linear" slope="' + o.slope + '"/><feFuncB type="linear" slope="' + o.slope + '"/></feComponentTransfer></filter>' +
+        '<rect width="100%" height="100%" filter="url(#' + id + ')" opacity="' + o.noiseOpacity + '"/>';
+      if (!o.animate) return at;
+      var turb = el.querySelector("feTurbulence"), s = { t: 0 }, set = function () { turb.setAttribute("seed", Math.floor(s.t * o.fps)); };
+      set();
+      tl.fromTo(s, { t: 0 }, { t: o.hold, duration: o.hold, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + o.hold;
+    };
+  MW.noiseTexture = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.noiseTexture(q(".mw-noise-texture"), tl, 0, { slope: 0.6, noiseOpacity: 0.9, animate: true, hold: 5 });
+          tl.set({}, {}, 5);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

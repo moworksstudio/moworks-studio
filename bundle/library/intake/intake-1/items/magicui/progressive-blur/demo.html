@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Progressive Blur - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-progressive-blur { pointer-events: none; position: absolute; left: 0; right: 0; z-index: 10; }
+.mw-progressive-blur > div { position: absolute; inset: 0; }
+.feed { position: relative; width: 760px; height: 900px; border-radius: 40px; overflow: hidden; border: 2px solid #27272a; background: #0b0b0e; }
+.feed .list { position: absolute; left: 0; right: 0; top: 0; padding: 30px; display: flex; flex-direction: column; gap: 26px; }
+.feed img { width: 100%; height: 300px; object-fit: cover; border-radius: 26px; display: block; } .feed .row { font-size: 32px; font-weight: 600; } .feed .row small { display: block; font-size: 24px; font-weight: 400; opacity: .55; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="5">
+<div class="center"><div class="feed"><div class="list"><img src="assets/picture.svg" alt=""><div class="row">Hoàng hôn trên hồ<small>Bộ sưu tập mùa thu</small></div>
+<img src="assets/picture.svg" alt="" style="filter:hue-rotate(140deg)"><div class="row">Đồi tím buổi chiều<small>Phong cảnh</small></div><img src="assets/picture.svg" alt="" style="filter:hue-rotate(260deg)"></div>
+<div class="mw-progressive-blur"></div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"height":"30%","position":"bottom","blurLevels":[0.5,1,2,4,8,16,32,64],"reveal":0};
+  var run = function (el, tl, at, o) {
+      var P = o.position, L = o.blurLevels, n = L.length;
+      if (P === "top") el.style.top = 0; else if (P === "bottom") el.style.bottom = 0; else { el.style.top = 0; el.style.bottom = 0; }
+      el.style.height = P === "both" ? "100%" : o.height;
+      var dir = P === "bottom" ? "to bottom, " : P === "top" ? "to top, " : "", both = "linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,1) 5%, rgba(0,0,0,1) 95%, rgba(0,0,0,0) 100%)";
+      var masks = [P === "both" ? both : "linear-gradient(" + dir + "rgba(0,0,0,0) 0%, rgba(0,0,0,1) 12.5%, rgba(0,0,0,1) 25%, rgba(0,0,0,0) 37.5%)"];
+      for (var i = 1; i < n - 1; i++) masks.push(P === "both" ? both : "linear-gradient(" + dir + "rgba(0,0,0,0) " + i * 12.5 + "%, rgba(0,0,0,1) " + (i + 1) * 12.5 + "%, rgba(0,0,0,1) " + (i + 2) * 12.5 + "%, rgba(0,0,0,0) " + ((i + 2) * 12.5 + 12.5) + "%)");
+      masks.push(P === "both" ? both : "linear-gradient(" + dir + "rgba(0,0,0,0) 87.5%, rgba(0,0,0,1) 100%)");
+      var layers = masks.map(function (m, i) { var d = document.createElement("div"); d.style.zIndex = i + 1; d.style.webkitMaskImage = d.style.maskImage = m; el.appendChild(d); return d; });
+      var set = function (k) { layers.forEach(function (d, i) { d.style.backdropFilter = d.style.webkitBackdropFilter = "blur(" + L[i] * k + "px)"; }); };
+      if (!o.reveal) { set(1); return at; }
+      var s = { k: 0 }; set(0);
+      tl.fromTo(s, { k: 0 }, { k: 1, duration: o.reveal, ease: "power2.out", onUpdate: function () { set(s.k); }, immediateRender: false }, at);
+      return at + o.reveal;
+    };
+  MW.progressiveBlur = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.progressiveBlur(q(".mw-progressive-blur"), tl, 0, { height: "40%" });
+          tl.fromTo(q(".feed .list"), { y: 0 }, { y: -560, duration: 4.5, ease: "power1.inOut" }, 0.3);
+          tl.set({}, {}, 5);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

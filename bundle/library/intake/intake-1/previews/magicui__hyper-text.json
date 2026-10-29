@@ -1,0 +1,26 @@
+{
+  "uid": "in:magicui/hyper-text",
+  "hash": "b170e57bd1df3ded",
+  "at": "2026-10-17T06:00:43.158Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "JetBrains Mono"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__hyper-text.mp4",
+    "poster": "previews/magicui__hyper-text.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "eff7a765ba056bd4b292c14c6c64607a01175c69a63f299bdcd63b784a4a7077",
+    "size": 18939,
+    "seconds": 28.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

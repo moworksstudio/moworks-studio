@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-chrome-ripple",
+  "hash": "a5f69ca0bab33092",
+  "at": "2026-10-17T09:58:57.545Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__effect-chrome-ripple.mp4",
+    "poster": "previews/takayu__effect-chrome-ripple.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3e02db057d4c0b0e834fb8569128c1414ee410821bea86b6c339b80970f1c855",
+    "size": 21153,
+    "seconds": 20.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

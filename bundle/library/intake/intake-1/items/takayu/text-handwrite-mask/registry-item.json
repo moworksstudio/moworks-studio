@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-handwrite-mask",
+  "type": "hyperframes:component",
+  "title": "Handwriting Write-on",
+  "description": "Chữ hiện ra như đang được viết tay từng chữ một theo thứ tự, mỗi chữ mất thời gian theo độ dài nét, có đầu bút chạy theo.",
+  "tags": [
+    "write-on",
+    "handwriting",
+    "mask",
+    "stroke",
+    "text-path-shape",
+    "soft",
+    "smooth",
+    "path-shape",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-handwrite-mask.html",
+      "target": "compositions/components/text-handwrite-mask.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-handwrite-mask",
+    "author": "takayu",
+    "call": "MW.textHandwriteMask(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textHandwriteMask",
+    "options": {
+      "total": "s of writing, split by letter width (2.2)",
+      "step": "em between zig-zag strokes (0.17)",
+      "slant": "em (0.07)",
+      "start": "s (0.3)",
+      "fadeAt": "s (3.6)",
+      "ink": "",
+      "mute": "the faint copy under it",
+      "accent": "pen tip",
+      "loop": "s (4.2)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-handwriting",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-handwriting (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-handwriting, written here): Write time 2.2 s from 0.3 s, split across glyphs by glyph width (≈ stroke length), one after another. Each glyph is revealed by a thick zig-zag stroke (segments 0.17 em apart, top ↔ bottom with ±0.07 em slant, width 1.7 × segment + 1 px, round caps) drawn with sine.inOut, used as a mask over the filled font. Under it a 55 % mute copy and a baseline; a pen (short line + accent dot) rides the stroke head. Fade out 3.6–4.0 s. Loop 4.2 s. Params: tổng thời gian (2.2 s) · độ dày nét quét (1.7 × bước) · đầu bút (bật / tắt). Each letter is revealed by a thick zig-zag stroke drawn as a mask (sine.inOut), with a pen riding its head.",
+    "titleVi": "Chữ tự viết ra từng nét"
+  }
+}

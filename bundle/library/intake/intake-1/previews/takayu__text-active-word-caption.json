@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-active-word-caption",
+  "hash": "53656d210b1b0cc1",
+  "at": "2026-10-17T08:56:21.053Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-active-word-caption.mp4",
+    "poster": "previews/takayu__text-active-word-caption.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "1ebbae111d2e0d5ff05629507545818d41c3628d7384e30452191b92ef5fb5ea",
+    "size": 24338,
+    "seconds": 34.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

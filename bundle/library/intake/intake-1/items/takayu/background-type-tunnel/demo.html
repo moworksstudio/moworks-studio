@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Perspective Type Tunnel - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: #06070c; color: #e8ebf3; font-family: Inter, sans-serif; } .tt { position: absolute; inset: 0; overflow: hidden; } .tt-w { font-size: 170px; font-weight: 900; letter-spacing: -0.02em; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4.2">
+<div class="tt"><div class="tt-w">TƯƠNG LAI</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"word":".tt-w","copies":4,"loop":4.2,"color":"#a99bff"};
+  var run = function (el, tl, at, o) {
+        var word = el.querySelector(o.word), copies = [];
+        for (var i = 0; i < o.copies; i++) { var c = word.cloneNode(true); c.style.position = "absolute"; c.style.left = "50%"; c.style.top = "50%"; c.style.whiteSpace = "nowrap"; el.appendChild(c); copies.push(c); }
+        word.style.display = "none";
+        return MW.drive(tl, at, o.loop, function (t) {
+          copies.forEach(function (c, i) {
+            var z = (((i + 2 * t / o.loop) / o.copies) % 1 + 1) % 1, sc = 0.3 * Math.pow(22, z), a = Math.min(1, 6 * z) * Math.pow(1 - z, 1.8), fill = z < 0.4;
+            gsap.set(c, { xPercent: -50, yPercent: -50, scale: sc });
+            c.style.color = fill ? o.color : "transparent"; c.style.webkitTextStroke = fill ? "0" : (1.6 * 4 / sc) + "px " + o.color; c.style.opacity = String(Math.min(1, fill ? a : a * 1.2)); c.style.zIndex = String(Math.round(z * 100));
+          });
+        });
+      };
+  MW.backgroundTypeTunnel = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.backgroundTypeTunnel(q(".tt"), tl, 0, {});
+          tl.set({}, {}, 4.2);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

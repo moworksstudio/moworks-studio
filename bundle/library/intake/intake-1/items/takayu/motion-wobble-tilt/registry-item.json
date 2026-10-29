@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-wobble-tilt",
+  "type": "hyperframes:component",
+  "title": "Wobble Tilt",
+  "description": "Chạm vào, nút lắc nghiêng qua lại quanh điểm giữa cạnh dưới như con lật đật rồi đứng yên.",
+  "tags": [
+    "wobble",
+    "tilt",
+    "rotate",
+    "spring",
+    "ui-buttons",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-wobble-tilt.html",
+      "target": "compositions/components/motion-wobble-tilt.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-wobble-tilt",
+    "author": "takayu",
+    "call": "MW.motionWobbleTilt(q(\".wt\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.motionWobbleTilt",
+    "options": {
+      "tap": "s (0.5)",
+      "amp": "rad (0.24)",
+      "freq": "rad/s (9)",
+      "decay": "(2.4)",
+      "fadeStart": "s after the tap (1.5)",
+      "fadeEnd": "(1.9)",
+      "cursor": "an optional cursor that makes the clicks",
+      "approach": "[x, y] px the cursor comes from",
+      "lead": "s it arrives before a click"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-button-wobble-tilt",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-button-wobble-tilt (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-button-wobble-tilt, written here): From rest at the tap (0.5 s): angle = 0.24 × e^(−2.4 t) × sin(9 t) rad (first swing about 9°), pivot at the bottom centre; faded to 0 between 1.5-1.9 s after the tap. Equivalent spring k144 d5.6 (site value). Button 130x44 r14. Params: at · amp (0.24 rad) · freq (9 rad/s) · decay (2.4) · pivot (đáy giữa). angle = amp × e^(−decay t) × sin(freq t) about the bottom centre; about a spring k 144, damping 5.6.",
+    "titleVi": "Nút lắc lư quanh chân"
+  }
+}

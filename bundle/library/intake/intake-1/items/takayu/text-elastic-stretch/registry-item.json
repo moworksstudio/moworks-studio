@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-elastic-stretch",
+  "type": "hyperframes:component",
+  "title": "Elastic Type",
+  "description": "Chữ giãn ngang từ giữa ra, nét mảnh lại, rồi bật về như lò xo, chân chữ đứng yên.",
+  "tags": [
+    "emphasis",
+    "stretch",
+    "spring",
+    "squash",
+    "text-emphasis",
+    "bouncy",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-elastic-stretch.html",
+      "target": "compositions/components/text-elastic-stretch.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-elastic-stretch",
+    "author": "takayu",
+    "call": "MW.textElasticStretch(q(\".tk-head\"), tl, 0.3, {});",
+    "function": "MW.textElasticStretch",
+    "options": {
+      "duration": "s of the stretch and spring back (1.4)",
+      "spread": "letter spread at the peak (0.5)",
+      "thin": "glyph scaleX loss (0.35)",
+      "tall": "scaleY gain (0.25)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=ty-elastic",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=ty-elastic (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio ty-elastic, written here): Recipe: word scaleX 1 → 1.4 in 200 ms (baseline fixed, strokes thin), then springs back to 1 (k 200, c 10, ~0.8 s). Demo 'STRETCH' 40 px, 2.4 s loop: v = sin(π·(t − 0.3)/1.4) × (1 + 0.3·sin 9t·e^−t) for 0.3–1.7 s; letter positions spread from the centre ×(1 + 0.5v), glyph scaleX 1 − 0.35v, scaleY 1 + 0.25v, pivot on the baseline. Params: scaleX: độ giãn đỉnh (1.4) · rise: thời gian giãn (0.2 s) · spring: độ cứng / giảm chấn (200 / 10).",
+    "titleVi": "Chữ giãn ngang rồi bật về"
+  }
+}

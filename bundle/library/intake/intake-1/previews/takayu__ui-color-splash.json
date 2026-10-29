@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-color-splash",
+  "hash": "bf6bd552109e120b",
+  "at": "2026-10-17T09:52:06.622Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__ui-color-splash.mp4",
+    "poster": "previews/takayu__ui-color-splash.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "1d82b4cc0e97fc0001fee1874cc4030d38be519521dc44e474f1a461d1525780",
+    "size": 9766,
+    "seconds": 19.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

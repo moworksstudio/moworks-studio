@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "lens",
+  "type": "hyperframes:component",
+  "title": "Lens",
+  "description": "A round magnifying lens glides over a picture or UI and zooms into the detail under it (x1.3, 170 px), popping in and out.",
+  "tags": [
+    "magnifier",
+    "zoom",
+    "lens",
+    "loupe",
+    "detail",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "lens.html",
+      "target": "compositions/components/lens.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/lens",
+    "author": "magicui",
+    "call": "MW.lens(q(\".mw-lens\"), tl, 0.4, { zoomFactor: 2, lensSize: 300, path: [[0, 300, 420], [1.6, 690, 610], [3.2, 420, 760], [4.6, 600, 360]], enter: 0, leave: 4.6 });",
+    "function": "MW.lens",
+    "options": {
+      "zoomFactor": "1.3",
+      "lensSize": "px (170)",
+      "duration": "s (0.1)",
+      "lensColor": "black",
+      "path": "[[0, x, y], ...]",
+      "enter": "0",
+      "leave": "end of the path"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/lens.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/lens.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is the holder (position relative, overflow hidden); its content is cloned for the zoomed copy (ids in the clone are removed). path: [[t, x, y], ...] px in el; enter / leave in s after `at`.",
+    "titleVi": "Kính lúp tròn phóng to chi tiết"
+  }
+}

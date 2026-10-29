@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-cooldown-ring",
+  "type": "hyperframes:block",
+  "title": "Cooldown Ability",
+  "description": "Bấm kỹ năng thì biểu tượng tối lại, vòng màu chạy quanh theo chiều kim đồng hồ và số ở giữa đếm lùi 2.0 → 0.0; đúng lúc về 0 biểu tượng sáng màu, nảy lò xo và loé một vòng sáng.",
+  "tags": [
+    "ring",
+    "countdown",
+    "progress",
+    "spring",
+    "game-hud",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-cooldown-ring.html",
+      "target": "compositions/components/ui-cooldown-ring.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-cooldown-ring",
+    "author": "takayu",
+    "call": "MW.uiCooldownRing(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiCooldownRing",
+    "options": {
+      "cooldown": "s (2.0)",
+      "start": "s (0.45)",
+      "shade": "darkness of what is left (0.62)",
+      "loop": "s (3.2)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-hud-cooldown-ability",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-hud-cooldown-ability (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-hud-cooldown-ability, written here): px @320x200. Track ring r 41, stroke 4; accent arc grows clockwise from 12 o'clock linearly over 2.0 s (0.45-2.45 s). Icon disc r 30 (bolt glyph) dimmed by a pie of the dark bg colour at 62 % over the remaining part; centre number 2.0 → 0.0 (one decimal). Press scale 0.92 (in 60 ms at 0.3 s, back by 0.5 s). Ready at 2.45 s: icon fills accent, scale 0.8 → 1 spring k380 d14, full ring, flash ring r 41 → 61 (stroke 2) fading 500 ms outCubic. Params: cooldown: thời gian hồi (2.0 s) · start: lúc bắt đầu (0.45 s) · shade: độ tối phần còn lại (0.62) · readyPop: lò xo lúc sẵn sàng (k380 d14). Ready: the icon fills and springs 0.8 → 1 (k380 c14) with a flash ring.",
+    "titleVi": "Kỹ năng hồi chiêu theo vòng"
+  }
+}

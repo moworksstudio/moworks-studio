@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/data-rank-overtake",
+  "hash": "b138d7be8d4a0efb",
+  "at": "2026-10-17T08:25:35.009Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__data-rank-overtake.mp4",
+    "poster": "previews/takayu__data-rank-overtake.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4f715e29122c3b29b7b382860861016bb7cdd11e8701858154f9a1aab80ccf96",
+    "size": 17553,
+    "seconds": 31.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

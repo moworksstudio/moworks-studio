@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-scatter-reveal",
+  "type": "hyperframes:block",
+  "title": "Scatter Reveal",
+  "description": "Các chấm mọc từ trục ngang lên đúng vị trí lần lượt, sau đó đường hồi quy được kẻ qua.",
+  "tags": [
+    "scatter",
+    "chart",
+    "stagger",
+    "line",
+    "data-storytelling",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "data-scatter-reveal.html",
+      "target": "compositions/components/data-scatter-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/data-scatter-reveal",
+    "author": "takayu",
+    "call": "MW.dataScatterReveal(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataScatterReveal",
+    "options": {
+      "points": "(24)",
+      "seed": "the points"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=dv-scatter",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=dv-scatter (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio dv-scatter, written here): Axes; 24 points (r 4) rise from the x-axis to their y over 500 ms easeOutCubic, 30 ms apart (recipe 600 ms, 20 ms); then the regression line draws from its left end over 500-600 ms easeInOut in accent. Params: points (24) · stagger (30 ms) · line (0.6 s).",
+    "titleVi": "Biểu đồ chấm rồi đường hồi quy"
+  }
+}

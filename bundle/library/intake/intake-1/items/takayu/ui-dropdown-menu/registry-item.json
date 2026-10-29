@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-dropdown-menu",
+  "type": "hyperframes:block",
+  "title": "Dropdown Origin Reveal",
+  "description": "Bấm nút, mũi tên lật lên và menu mọc xuống từ mép dưới của nút, các lựa chọn hiện lần lượt từ trên xuống; chọn xong menu thu lại.",
+  "tags": [
+    "dropdown",
+    "menu",
+    "origin",
+    "stagger",
+    "layout-navigation",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-dropdown-menu.html",
+      "target": "compositions/components/ui-dropdown-menu.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-dropdown-menu",
+    "author": "takayu",
+    "call": "MW.uiDropdownMenu(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiDropdownMenu",
+    "options": {
+      "loop": "s (2.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=dropdown-origin",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=dropdown-origin (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio dropdown-origin, written here): Trigger 120x28 r8 accent with label and a chevron that rotates 0 → 180°. Menu 120 wide, r8, grows from the trigger's bottom edge: height 100 px × scaleY 0.08 → 1 with opacity 0 → 1 over 0.4-0.88 s power2.out. 4 options 22 px apart: each fades in and drops 4 px → 0 over 0.18 s, starting 0.62 s + 0.024 s each; option 1 shows an accent check. Hover row on option 2 at 1.66 s; close: options out 1.88-1.96 s, menu 1.92-2.18 s power2.in. Params: duration (0.48 s) · scaleY (0.08 → 1) · options (cách 0.024 s) · ease (power2.out).",
+    "titleVi": "Menu thả xuống mọc từ nút"
+  }
+}

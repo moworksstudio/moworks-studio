@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-takayu-error-shake",
+  "hash": "028462636643480b",
+  "at": "2026-10-17T09:50:54.892Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-takayu-error-shake.mp4",
+    "poster": "previews/takayu__motion-takayu-error-shake.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "165c7ce163e27b07fb61e60688fb1cbdd53cecb014ec9f9e0d88d052baa8f96e",
+    "size": 7281,
+    "seconds": 24.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

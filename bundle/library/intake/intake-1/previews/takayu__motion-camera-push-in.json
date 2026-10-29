@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-camera-push-in",
+  "hash": "bedcdc2a6dbbb2de",
+  "at": "2026-10-17T07:44:24.212Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-camera-push-in.mp4",
+    "poster": "previews/takayu__motion-camera-push-in.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "5e9af99e950c6ecfc40ca93f5999b5669860f518481994e5c121e741df0198fe",
+    "size": 16759,
+    "seconds": 33,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

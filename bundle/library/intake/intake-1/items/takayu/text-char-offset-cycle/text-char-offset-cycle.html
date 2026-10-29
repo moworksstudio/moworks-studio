@@ -1,0 +1,60 @@
+<!--
+  Character Offset Cycle (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-char-code-cycle (read 12/10/2026).
+  Mỗi ký tự bắt đầu lệch 10 bậc trong bảng chữ cái rồi đếm lùi từng bậc về đúng chữ, lần lượt từ trái sang.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textCharOffsetCycle(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - offset: steps it starts shifted by (10)
+      - duration: s per letter (1), ease-out quad
+      - stagger: s (0.12, ≤ 0.9 s)
+      - start: s (0.4)
+      - backAt: s it shifts away again (3.0)
+      - accent: colour while shifted
+      - loop: s (3.6)
+
+  Notes: Idea and numbers (TakayuStudio tx-char-code-cycle, written here): Per char: shown char = target shifted forward k code points inside its class, wrapping (a–z, A–Z, 0–9, hiragana, katakana, CJK ideographs, fullwidth A–Z / a–z); k = ceil(10 × (1 − p_i)) (AE Character Offset 10 → 0); p_i = easeOutQuad over 1 s per char, chars staggered min(120 ms, 0.9 s/n) left → right from 0.4 s; integer steps, no fade; accent while k > 0. Demo loop: all ease back to +10 over 3.0–3.5 s (inQuad); loop 3.6 s. Mono font keeps widths. Params: offset: số bậc lệch ban đầu (10) · duration: mỗi ký tự (1 s) · stagger (0.12 s) · ease (easeOutQuad).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">CHUYỂN ĐỘNG</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"offset":10,"duration":1,"stagger":0.12,"start":0.4,"backAt":3,"accent":"#a99bff","loop":3.6};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var cells = function (el, text) { el.textContent = ""; var word = null; return gr(text).map(function (g) { var s = document.createElement("span"); s.textContent = g; s.style.display = "inline-block"; s.style.whiteSpace = "pre";
+    if (g === " ") { word = null; el.appendChild(s); } else { if (!word) { word = document.createElement("span"); word.style.display = "inline-block"; word.style.whiteSpace = "nowrap"; el.appendChild(word); } word.appendChild(s); } return s; }); };
+  var target = gr(el.textContent), cs = cells(el, el.textContent), n = cs.length, st = Math.min(o.stagger, 0.9 / Math.max(1, n)), p1o = gsap.parseEase("power1.out"), p1i = gsap.parseEase("power1.in"), col = getComputedStyle(el).color;
+  var CL = [["a", 26], ["A", 26], ["0", 10]];
+  var shift = function (g, k) { var d = g.normalize("NFD"), base = d.charAt(0), marks = d.slice(1); for (var c = 0; c < CL.length; c++) { var s = CL[c][0].charCodeAt(0), L = CL[c][1], code = base.charCodeAt(0); if (code >= s && code < s + L) return (String.fromCharCode(s + ((code - s + k) % L + L) % L) + marks).normalize("NFC"); } return g; };
+  return MW.drive(tl, at, o.loop, function (t) {
+    cs.forEach(function (c, i) { var p = p1o(Math.max(0, Math.min(1, (t - o.start - i * st) / o.duration))), b = p1i(Math.max(0, Math.min(1, (t - o.backAt) / 0.5))), k = Math.ceil(o.offset * Math.max(1 - p, b)); c.textContent = shift(target[i], k); c.style.color = k > 0 ? o.accent : col; });
+  });
+  };
+  MW.textCharOffsetCycle = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

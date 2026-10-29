@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/kinetic-text",
+  "hash": "f57cf02bdd9c3b69",
+  "at": "2026-10-17T06:00:35.608Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__kinetic-text.mp4",
+    "poster": "previews/magicui__kinetic-text.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4583fac4cf031500b2cb6899ce3f2a391b6aa77fde3337a8d6e144148d86ac05",
+    "size": 38169,
+    "seconds": 30.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

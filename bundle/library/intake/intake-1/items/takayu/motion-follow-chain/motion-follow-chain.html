@@ -1,0 +1,64 @@
+<!--
+  Follow Through (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=follow-through (read 12/10/2026).
+  Thân di chuyển rồi dừng, chiếc ăng-ten năm đốt trên đỉnh nghiêng trễ theo, vượt qua rồi lắc nhẹ mới yên.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionFollowChain(q(".fc"), tl, 0.2, {});
+
+  Options (defaults in brackets):
+      - segments: (5)
+      - seg: px per segment (50)
+      - k: stiffness of the first segment (240), softer up the chain
+      - ratio: damping ratio (0.26)
+      - lean: degrees per px of lag (0.46)
+      - limit: ± degrees (66)
+      - distance: px (900)
+      - move: s (0.88, power2.inOut)
+      - backAt: s it comes back (2.0)
+      - color: 
+      - tip: 
+
+  Notes: Idea and numbers (TakayuStudio follow-through, written here): A 40 px body moves x 0 → 180 px in 880 ms power2.inOut and stops; a 5-segment chain (10 px each) stands up from its top centre. Each segment leans 0.04 rad per px of lag (its own spring-tracked x, stiffness 240 / (1 + 0.8 i), damping ratio 0.26, minus the body x), limited to ±66°: the tip lags ~24 px, overshoots ~11 px after the stop and settles by ~90 % of the cycle. Returns the same way. Params: segments (5 × 10 px) · stiffness (240) · damping ratio (0.26) · limit (±66°). Each segment tracks the body on its own spring; the lean follows the lag, so the tip trails, overshoots after the stop and settles.
+-->
+
+<div class="fl"></div><div class="fc"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"segments":5,"seg":50,"k":240,"ratio":0.26,"lean":0.46,"limit":66,"distance":900,"move":0.88,"backAt":2,"color":"#c9d2ea","tip":"#ff5d8f"};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, io = gsap.parseEase("power2.inOut"), ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg"), pl = document.createElementNS(ns, "polyline"), tip = document.createElementNS(ns, "circle"), dt = 1 / 240, n = o.segments;
+        if (getComputedStyle(host).position === "static") host.style.position = "relative"; svg.setAttribute("width", host.clientWidth); svg.setAttribute("height", host.clientHeight); svg.style.cssText = "position:absolute;left:0;top:0;overflow:visible;pointer-events:none;";
+        pl.setAttribute("fill", "none"); pl.setAttribute("stroke", o.color); pl.setAttribute("stroke-width", "10"); pl.setAttribute("stroke-linecap", "round"); pl.setAttribute("stroke-linejoin", "round"); tip.setAttribute("r", "18"); tip.setAttribute("fill", o.tip); svg.appendChild(pl); svg.appendChild(tip); host.appendChild(svg);
+        var bx = el.offsetLeft + el.offsetWidth / 2, by = el.offsetTop, X = function (t) { return o.distance * (io(Math.max(0, Math.min(1, t / o.move))) - io(Math.max(0, Math.min(1, (t - o.backAt) / o.move)))); };
+        return MW.drive(tl, at, o.backAt + o.move + 1, function (t) {
+          var p = [], v = [], i; for (i = 0; i < n; i++) { p.push(0); v.push(0); }
+          for (var s = 0; s <= t; s += dt) { var x = X(s); for (i = 0; i < n; i++) { var k = o.k / (1 + 0.8 * i), c = 2 * o.ratio * Math.sqrt(k); v[i] += (k * (x - p[i]) - c * v[i]) * dt; p[i] += v[i] * dt; } }
+          var bxx = X(t); gsap.set(el, { x: bxx }); var px = bx + bxx, py = by, pts = [px.toFixed(1) + "," + py.toFixed(1)], ang = 0;
+          for (i = 0; i < n; i++) { ang = Math.max(-o.limit, Math.min(o.limit, o.lean * (p[i] - bxx))) * Math.PI / 180; px += o.seg * Math.sin(ang); py -= o.seg * Math.cos(ang); pts.push(px.toFixed(1) + "," + py.toFixed(1)); }
+          pl.setAttribute("points", pts.join(" ")); tip.setAttribute("cx", px); tip.setAttribute("cy", py);
+        });
+      };
+  MW.motionFollowChain = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

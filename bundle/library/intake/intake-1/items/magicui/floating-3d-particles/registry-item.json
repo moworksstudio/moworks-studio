@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "floating-3d-particles",
+  "type": "hyperframes:component",
+  "title": "Floating 3D Particles",
+  "description": "A field of soft dots slowly swirling around a vertical axis and drifting upward, sized and layered by depth: ambient motion behind titles and products.",
+  "tags": [
+    "particles",
+    "3d",
+    "depth",
+    "ambient",
+    "swirl",
+    "background",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "floating-3d-particles.html",
+      "target": "compositions/components/floating-3d-particles.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/floating-3d-particles",
+    "author": "magicui",
+    "call": "MW.floating3dParticles(q(\".mw-floating-3d-particles\"), tl, 0, { quantity: 1000, color: \"#c4b5fd\", depth: 0.8, opacity: 0.55, size: 6, drift: 1.2, hold: 8 });",
+    "function": "MW.floating3dParticles",
+    "options": {
+      "quantity": "400",
+      "color": "#8B5CF6",
+      "size": "px (5)",
+      "opacity": "0.3",
+      "drift": "px a frame (0.8)",
+      "depth": "0..1 (0.5)",
+      "hold": "seconds (10)",
+      "seed": "1"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/floating-3d-particles.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/floating-3d-particles.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is a <canvas> filling its box. Upstream's mobile scaling (20 % below 768 px) and pausing are left out; DPR capped at 2 as upstream.",
+    "titleVi": "Hạt mềm xoay chậm có chiều sâu"
+  }
+}

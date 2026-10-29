@@ -1,0 +1,55 @@
+<!--
+  Push In / Dolly In (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=cam-pushin (read 12/10/2026).
+  Máy quay tiến chậm vào chủ thể, lớp gần phóng nhiều hơn lớp xa nên khung hình có chiều sâu.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionCameraPushIn(q(".tk-cam"), tl, 0.6, { duration: 2.2, scale: 1.2 });
+
+  Options (defaults in brackets):
+      - duration: s (1.6)
+      - scale: the subject's scale at the end (1.12); a layer scales by 0.12 × its depth
+      - flat: true: every layer the same (a lens zoom)
+      - layers: selector of the layers (with data-depth)
+      - ease: power2.inOut
+
+  Notes: Idea and numbers (TakayuStudio cam-pushin, written here): Layers listed with depth factors (background 0.2, mid 0.55, subject 1.0, foreground 1.6). Push: each layer scales about the frame centre from 1 to 1 + 0.12 x depth (subject 1.12, foreground ~1.2) over 1600 ms easeInOutCubic. Flat mode = all layers equal (a zoom). Params: duration (1.6 s) · scale chủ thể (1.12) · depth (0.2 / 0.55 / 1 / 1.6).
+-->
+
+<div class="tk-cam"><div class="tk-far" data-depth="0.2"><div class="sun"></div><div class="star" style="left:12%;top:14%"></div><div class="star" style="left:24%;top:30%"></div><div class="star" style="left:36%;top:10%"></div><div class="star" style="left:70%;top:18%"></div><div class="star" style="left:82%;top:34%"></div><div class="star" style="left:90%;top:12%"></div><div class="star" style="left:46%;top:22%"></div><div class="star" style="left:16%;top:40%"></div></div>
+<div class="tk-mid" data-depth="0.55"><svg viewBox="0 0 1000 300" preserveAspectRatio="none"><path d="M0 300 L0 170 Q120 90 240 150 T480 120 T720 160 T1000 110 L1000 300 Z" fill="#3b2f6b"/><path d="M0 300 L0 220 Q160 160 320 210 T640 190 T1000 200 L1000 300 Z" fill="#2a2150"/></svg></div>
+<div class="tk-near" data-depth="1"><div class="card">Toàn cảnh</div></div>
+<div class="tk-fore" data-depth="1.6"><div class="blob" style="left:6%;top:62%;width:380px;height:380px"></div><div class="blob" style="left:80%;top:8%;width:300px;height:300px"></div><div class="blob" style="left:86%;top:70%;width:420px;height:420px"></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":1.6,"scale":1.12,"flat":false,"layers":"[data-depth]","ease":"power2.inOut"};
+  var run = function (el, tl, at, o) {
+        var Ls = Array.prototype.slice.call(el.querySelectorAll(o.layers)), ease = gsap.parseEase(o.ease);
+        return MW.drive(tl, at, o.duration, function (t) {
+          var p = ease(t / o.duration);
+          Ls.forEach(function (l) { var d = o.flat ? 1 : parseFloat(l.getAttribute("data-depth") || "1"); gsap.set(l, { scale: 1 + (o.scale - 1) * d * p }); });
+        });
+      };
+  MW.motionCameraPushIn = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

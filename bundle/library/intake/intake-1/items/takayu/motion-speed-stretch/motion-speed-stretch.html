@@ -1,0 +1,60 @@
+<!--
+  Axis Stretch (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=axis-stretch (read 12/10/2026).
+  Quả bóng đi tới đi lui, càng nhanh càng giãn dài theo hướng đi và dẹt lại, tròn lại khi dừng.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionSpeedStretch(q(".sx"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - x: px (1000)
+      - duration: s each way (0.7, back.inOut(1.7))
+      - hold: s at the far end (0.55)
+      - stretch: scaleX = 1 + stretch × q, scaleY = 1 − stretch / 2 × q (0.7)
+      - peak: px a second that counts as full speed (3200)
+      - ghosts: (4)
+      - gap: s between ghosts (0.03)
+
+  Notes: Idea and numbers (TakayuStudio axis-stretch, written here): Ball x 0 → 200 px (demo; recipe 10 → 175) in 700 ms back.inOut(1.7), back again in 700 ms after a 550 ms hold. Its scale follows its own speed: scaleX = 1 + 0.7 q, scaleY = 1 − 0.35 q, q = speed / 640 px/s on the 320 px demo canvas (≈ speed / peak speed, clamped 0–1): about 170 / 65 % mid-travel, round at rest and at the back-ease turns. Optional 4 ghosts 30 ms apart at opacity 0.025–0.1. Params: duration (0.7 s) · x (175 px) · stretch: giãn tối đa (0.7) · ghosts: số bóng mờ (4).
+-->
+
+<div class="sx-l"></div><div class="sx"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"x":1000,"duration":0.7,"hold":0.55,"stretch":0.7,"peak":3200,"ghosts":4,"gap":0.03};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var ghost = function () { var g = el.cloneNode(true); g.removeAttribute("id"); g.style.position = "absolute"; g.style.margin = "0"; g.style.pointerEvents = "none"; g.style.opacity = "0";
+    g.style.left = el.offsetLeft + "px"; g.style.top = el.offsetTop + "px"; g.style.width = el.offsetWidth + "px"; g.style.height = el.offsetHeight + "px"; host.insertBefore(g, el); return g; };
+  var e = gsap.parseEase("back.inOut(1.7)"), gh = []; for (var i = 0; i < o.ghosts; i++) gh.push(ghost());
+  var X = function (t) { var a = Math.max(0, Math.min(1, t / o.duration)), b = Math.max(0, Math.min(1, (t - o.duration - o.hold) / o.duration)); return o.x * (e(a) - e(b)); };
+  var sc = function (t) { var q = Math.min(1, Math.abs(X(t + 0.004) - X(t - 0.004)) / 0.008 / o.peak); return [1 + o.stretch * q, 1 - o.stretch / 2 * q]; };
+  return MW.drive(tl, at, 2 * o.duration + o.hold, function (t) {
+    var s = sc(t); gsap.set(el, { x: X(t), scaleX: s[0], scaleY: s[1] });
+    gh.forEach(function (g, i) { var tt = t - o.gap * (i + 1), q = sc(tt); gsap.set(g, { x: X(tt), scaleX: q[0], scaleY: q[1] }); g.style.opacity = tt > 0 && Math.abs(X(tt) - X(t)) > 1 ? String(0.1 - 0.025 * i) : "0"; });
+  });
+  };
+  MW.motionSpeedStretch = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

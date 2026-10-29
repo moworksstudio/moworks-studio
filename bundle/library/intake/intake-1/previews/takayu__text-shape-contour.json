@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-shape-contour",
+  "hash": "de7e48871ad2b622",
+  "at": "2026-10-17T10:32:30.570Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__text-shape-contour.mp4",
+    "poster": "previews/takayu__text-shape-contour.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "fd9f5311f73d1a830603b298b3f8371017e1f6b66ed5106fb09480117e083608",
+    "size": 68109,
+    "seconds": 23.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

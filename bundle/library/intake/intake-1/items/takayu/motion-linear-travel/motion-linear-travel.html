@@ -1,0 +1,48 @@
+<!--
+  Linear Travel (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=linear-travel (read 12/10/2026).
+  Chấm tròn đi 180 px với tốc độ không đổi, khoảng cách giữa các khung đều nhau.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionLinearTravel(q(".lt"), tl, 0.2, {});
+
+  Options (defaults in brackets):
+      - x: px (1200)
+      - duration: s (0.8), ease none: equal spacing every frame
+      - fadeIn: s (0.2)
+      - hold: s (0.6)
+      - fadeOut: s (0.25)
+
+  Notes: Idea and numbers (TakayuStudio linear-travel, written here): Dot x 0 → 180 px (demo 200 px on a 320 px canvas) in 800 ms, ease none: equal spacing every frame. The 12 even ticks drawn as it passes and the speed graph are guides, not ported. Site: fade in 200 ms before, fade out 250 ms at the end of the 2200 ms loop. Use for spins, drifts, marquees. Params: duration (0.8 s) · x: quãng đi (180 px) · ease (none). For spins, drifts and marquees.
+-->
+
+<div class="lt-t"></div><div class="lt"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"x":1200,"duration":0.8,"fadeIn":0.2,"hold":0.6,"fadeOut":0.25};
+  var run = function (el, tl, at, o) {
+        return MW.drive(tl, at, o.fadeIn + o.duration + o.hold + o.fadeOut, function (t) { var u = Math.max(0, Math.min(1, (t - o.fadeIn) / o.duration)); gsap.set(el, { x: o.x * u }); el.style.opacity = String(Math.min(1, t / o.fadeIn) * (1 - Math.max(0, Math.min(1, (t - o.fadeIn - o.duration - o.hold) / o.fadeOut)))); });
+      };
+  MW.motionLinearTravel = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

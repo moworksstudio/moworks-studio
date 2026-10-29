@@ -1,0 +1,55 @@
+<!--
+  Squash & Stretch (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=squash (read 12/10/2026).
+  Quả bóng giãn dài khi rơi nhanh, bẹp ra lúc chạm đất mà vẫn giữ thể tích, rồi bật lên tròn trở lại.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionSquashStretch(q(".sq-a"), tl, 0, { ghost: ".sq-g" });
+
+  Options (defaults in brackets):
+      - height: px of the bounce (448)
+      - period: s per bounce (1.1)
+      - stretch: scaleY = 1 + stretch × speed² (0.22)
+      - squash: [scaleX, scaleY] on the floor ([1.36, 0.72])
+      - contact: s in the squash pose (0.11)
+      - bounces: (3)
+      - ghost: an undeformed copy that moves the same
+
+  Notes: Idea and numbers (TakayuStudio squash, written here): Recipe: ball falls in 300 ms power1.in (easeInQuad), stretching with speed up to scaleY 1.2 / scaleX 0.85; at contact scaleY 0.75 / scaleX 1.33 (volume kept, origin bottom) for 2–4 frames; rises 300–550 ms power1.out back to 1/1. Site demo: endless parabolic bounce 112 px high, 1100 ms per bounce, stretch scaleY 1 + 0.22·v² (v = speed 0–1, scaleX = 1/scaleY), contact pose 0.72 / 1.36 for the 110 ms around the floor; an undeformed ghost alongside. Params: fall (0.3 s) · stretch (1.2 / 0.85) · squash (0.75 / 1.33) · hold: số khung bẹp (2–4). The recipe: a 0.3 s fall power1.in stretching to 1.2 / 0.85, 2–4 frames at 0.75 / 1.33 on the floor, a 0.3–0.55 s rise power1.out.
+-->
+
+<div class="fl"></div><div class="sq sq-a"></div><div class="sq sq-g"></div><div class="sq-l" style="left:670px">Bẹp và giãn</div><div class="sq-l" style="left:950px">Không biến dạng</div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"height":448,"period":1.1,"stretch":0.22,"squash":[1.36,0.72],"contact":0.11,"bounces":3,"ghost":null};
+  var run = function (el, tl, at, o) {
+        var gh = o.ghost ? el.parentNode.querySelector(o.ghost) : null; gsap.set(el, { transformOrigin: "50% 100%" });
+        return MW.drive(tl, at, o.period * o.bounces, function (t) {
+          var m = t % o.period, s = 2 * m / o.period - 1, y = -o.height * (1 - s * s), sy = 1 + o.stretch * s * s, sx = 1 / sy, dc = Math.min(m, o.period - m);
+          if (t > 0 && dc < o.contact / 2) { sx = o.squash[0]; sy = o.squash[1]; y = 0; }
+          gsap.set(el, { y: y, scaleX: sx, scaleY: sy }); if (gh) gsap.set(gh, { y: y });
+        });
+      };
+  MW.motionSquashStretch = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

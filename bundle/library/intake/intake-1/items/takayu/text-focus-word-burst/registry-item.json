@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-focus-word-burst",
+  "type": "hyperframes:component",
+  "title": "Focus Word Explosion",
+  "description": "Từ chính giữa phóng to 2.4 lần trong khi tám từ nhỏ quanh nó bay toả ra xa và mờ đi, rồi tất cả thu về chỗ cũ.",
+  "tags": [
+    "emphasis",
+    "scale",
+    "burst",
+    "words",
+    "text-emphasis",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-focus-word-burst.html",
+      "target": "compositions/components/text-focus-word-burst.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-focus-word-burst",
+    "author": "takayu",
+    "call": "MW.textFocusWordBurst(q(\".fb\"), tl, 0, {});",
+    "function": "MW.textFocusWordBurst",
+    "options": {
+      "scale": "the main word's scale (2.4)",
+      "spread": "the satellites fly to × their distance (2.4)",
+      "at": "s (0.7)",
+      "returnAt": "s (3.3)",
+      "unit": "px per reference unit (5)",
+      "main": "the main word",
+      "satellites": "the 8 small words",
+      "loop": "s (4.2)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-kinetic-type-focus-word-explosion",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-kinetic-type-focus-word-explosion (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-kinetic-type-focus-word-explosion, written here): Centre word (20 px, accent) and 8 small mono satellite words (11 px) on an ellipse (rx 74/88, ry 44/52 px alternating; angle i/8 × 360° + 11.5°). At 0.7 s the centre scales 1 → 2.4 over 0.55 s back.out (cubic-bezier(.34,1.56,.64,1)); satellites fly out along their rays to 2.4× their distance and fade 1 → 0, ending 1.3 s, expo.out, starts 0/30/60 ms by i mod 3; faint trail lines while moving. 3.3–3.9 s: everything returns (in-out); loop 4.2 s. Params: words: các từ vệ tinh (8) · scale: phóng từ chính (2.4) · spread: nhân khoảng cách bay (2.4) · at / returnAt (0.7 s / 3.3 s).",
+    "titleVi": "Từ chính phóng to, từ quanh bay toả"
+  }
+}

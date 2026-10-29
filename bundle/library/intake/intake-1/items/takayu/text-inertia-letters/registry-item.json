@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-inertia-letters",
+  "type": "hyperframes:component",
+  "title": "Inertia Letters",
+  "description": "Từng chữ cái bay vào từ làn riêng, xen kẽ trên và dưới, chạm chỗ rồi lắc qua lại như con lắc với biên độ giảm dần tới khi đứng yên.",
+  "tags": [
+    "letters",
+    "stagger",
+    "wobble",
+    "damped",
+    "text-glyph-physics",
+    "bouncy",
+    "glyph-physics",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-inertia-letters.html",
+      "target": "compositions/components/text-inertia-letters.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-inertia-letters",
+    "author": "takayu",
+    "call": "MW.textInertiaLetters(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textInertiaLetters",
+    "options": {
+      "distance": "px it flies in from (480)",
+      "start": "s (0.3)",
+      "stagger": "s (0.08)",
+      "swing": "radians after landing (0.5)",
+      "decay": "s (0.25)",
+      "accent": "first letter colour",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=ty-inertia",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=ty-inertia (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio ty-inertia, written here): Per letter (demo INERTIA, 36 px): starts at 0.3 + i × 0.08 s, flies 120 px in from below (even i) or above (odd i) in 0.25 s power2.out. After landing it rotates θ = 0.5 rad (28.6°) × e^(−t / 0.25) × sin(30 t) about its baseline centre (period 0.21 s ≈ 12.6 frames at 60 fps; under 3° after 0.6 s). First letter accent. Loop 3 s. Params: quãng bay (120 px) · cách nhau (80 ms) · biên độ lắc (0.5 rad) · độ tắt (0.25 s).",
+    "titleVi": "Chữ bay vào rồi lắc như con lắc"
+  }
+}

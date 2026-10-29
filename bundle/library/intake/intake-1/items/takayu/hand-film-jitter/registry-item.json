@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "hand-film-jitter",
+  "type": "hyperframes:component",
+  "title": "Scratched Film Jitter",
+  "description": "Tiêu đề như in trên phim cũ: chạy giật 24 khung, từng chữ lệch rung nhẹ, độ sáng chớp tắt, có bóng chồng lệch, vết xước và bụi; đoạn đầu chập chờn vài khung.",
+  "tags": [
+    "film",
+    "jitter",
+    "flicker",
+    "grunge",
+    "text-titles-film",
+    "crisp",
+    "heavy",
+    "titles-film",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "hand-film-jitter.html",
+      "target": "compositions/components/hand-film-jitter.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/hand-film-jitter",
+    "author": "takayu",
+    "call": "MW.handFilmJitter(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.handFilmJitter",
+    "options": {
+      "jitter": "px of the block (10)",
+      "letter": "px per letter (7.5), ±1.7°",
+      "ghost": "colour of the double exposure (35 %, offset 10-25 px)",
+      "loop": "s (3.2)",
+      "seed": "the frame pattern"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-film-scratch-jitter",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-film-scratch-jitter (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-film-scratch-jitter, written here): 24 fps, seeded per frame. Visible 0.3–0.38, 0.5–0.62, 0.75–0.8, then 0.92–2.8 s. Block jitter ±2 px; per letter ±1.5 px and ±1.7°; opacity flicker 0.85–1 with a matching full-frame darkening (0–15 %). Double exposure: mute copy at 35 %, offset +2–5 px x and half that up. Thin dark scratches inside the letters; 0–2 vertical scratches, ~50 dust specks and an occasional blob per frame; optional sprocket edges shifting 3 px every other frame. Loop 3.2 s. Params: nhịp (24 fps) · rung (±2 px khối, ±1.5 px mỗi chữ) · chớp sáng (85–100 %) · chồng hình (2–5 px, 35 %).",
+    "titleVi": "Chữ phim cũ rung, chớp, chồng hình"
+  }
+}

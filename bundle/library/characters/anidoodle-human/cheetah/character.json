@@ -1,0 +1,22 @@
+{
+  "id": "cheetah",
+  "name": "Cheetah",
+  "about": "A side-view cheetah drawn in tapered tufts with solid spots and the tear line as its one big black shape, on a skeleton of angles that never stretches: stand, bow, crouch, skid and the rotary gallop.",
+  "engine": "anidoodle-human",
+  "rig": "cheetah",
+  "import": "anidoodle/canvas-core/cheetahBody",
+  "hands": [],
+  "credit": {
+    "author": "Alex Greenshpun (10x Company)",
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4db69644b994ae9caf9e20936506954b2f5e4872/skills/anidoodle/engine/src/canvas-core/cheetahRig.ts",
+    "commit": "4db69644b994ae9caf9e20936506954b2f5e4872",
+    "licence": "Apache-2.0 (with NOTICE)",
+    "made": "as shipped"
+  },
+  "module": [
+    "engine/src/canvas-core/cheetahRig.ts",
+    "engine/src/canvas-core/cheetahBody.ts",
+    "engine/src/canvas-core/cheetahScenery.ts"
+  ],
+  "savedAt": "2026-10-24T18:40:59.335Z"
+}

@@ -1,0 +1,50 @@
+<!--
+  Animated Gradient Text (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/animated-gradient-text.tsx.
+  A word filled with a from-to-from gradient (#ffaa40, #9c40ff) that flows sideways through the letters, one tile every 8 s / speed, linear, looping.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.animatedGradientText(q(".h1 .mw-animated-gradient-text"), tl, 0, { hold: 8 });
+
+  Options (defaults in brackets):
+      - speed: tile width x 300 % (1)
+      - colorFrom: #ffaa40
+      - colorTo: #9c40ff
+      - hold: seconds it runs (8)
+
+  Notes: Registry keyframe gradient: to { background-position: var(--bg-size) 0 }, 8 s linear infinite. A little padding keeps Vietnamese marks inside the clipped background.
+-->
+
+<span class="mw-animated-gradient-text">Giới thiệu Magic UI</span>
+
+<style>
+.mw-animated-gradient-text { display: inline-block; padding: 0.12em 0.02em; margin: -0.12em -0.02em; color: transparent;
+  background-image: linear-gradient(to right, var(--mw-gt-from), var(--mw-gt-to), var(--mw-gt-from)); background-size: var(--mw-gt-size, 300%) 100%;
+  -webkit-background-clip: text; background-clip: text; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"speed":1,"colorFrom":"#ffaa40","colorTo":"#9c40ff","hold":8};
+  var run = function (el, tl, at, o) {
+      var size = o.speed * 300;
+      el.style.setProperty("--mw-gt-from", o.colorFrom);
+      el.style.setProperty("--mw-gt-to", o.colorTo);
+      el.style.setProperty("--mw-gt-size", size + "%");
+      var cycles = Math.max(1, Math.ceil(o.hold / 8));
+      tl.fromTo(el, { backgroundPosition: "0% 0%" }, { backgroundPosition: size + "% 0%", duration: 8, ease: "none", repeat: cycles - 1 }, at);
+      return at + o.hold;
+    };
+  MW.animatedGradientText = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

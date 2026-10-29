@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-zigzag-travel",
+  "type": "hyperframes:component",
+  "title": "Zigzag Travel",
+  "description": "Chấm đi tới qua các góc gấp lên xuống mà không chậm lại, vệt đường đã đi hiện phía sau.",
+  "tags": [
+    "move",
+    "zigzag",
+    "path",
+    "movement",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-zigzag-travel.html",
+      "target": "compositions/components/motion-zigzag-travel.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-zigzag-travel",
+    "author": "takayu",
+    "call": "MW.motionZigzagTravel(q(\".zz\"), tl, 0.3, {});",
+    "function": "MW.motionZigzagTravel",
+    "options": {
+      "points": "[[x, y] px, ...] of the polyline",
+      "duration": "s (0.92)",
+      "ease": "(sine.inOut) on x; y follows the line",
+      "accent": ""
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=zigzag-travel",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=zigzag-travel (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio zigzag-travel, written here): Dot travels the polyline 0,0 → 55,−28 → 112,24 → 175,0 px (demo ×1.15): x eases 0 → 175 in 920 ms sine.inOut and y follows the polyline as a function of x (sharp corners; forward motion never stops); the travelled path draws behind it as a 2 px accent line and waypoint diamonds fill as they are passed. Params: duration (0.92 s) · points (0,0 → 55,−28 → 112,24 → 175,0) · ease (sine.inOut).",
+    "titleVi": "Đi zíc zắc về phía trước"
+  }
+}

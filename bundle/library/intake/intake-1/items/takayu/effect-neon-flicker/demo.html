@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Neon Flicker - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.ui-cursor { position: absolute; left: 0; top: 0; z-index: 30; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5)); }
+#demo { background: #07080d; } .nf { position: absolute; left: 50%; top: 50%; width: 1100px; height: 460px; margin: -230px 0 0 -550px; }
+.nf > div { position: absolute; inset: 0; border-radius: 60px; display: grid; place-items: center; font-size: 200px; font-weight: 800; letter-spacing: 0.08em; }
+.nf-dim { border: 10px solid rgba(255,93,143,0.18); color: transparent; -webkit-text-stroke: 6px rgba(255,93,143,0.2); }
+.nf-lit { border: 10px solid #ff7aa8; color: transparent; -webkit-text-stroke: 6px #ffd0e1; text-shadow: 0 0 20px #ff5d8f, 0 0 60px #ff5d8f; box-shadow: 0 0 40px #ff5d8f, inset 0 0 40px #ff5d8f; opacity: 0; }
+.nf-wash { inset: -300px !important; background: radial-gradient(closest-side, rgba(255,93,143,1), rgba(255,93,143,0)); opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.4">
+<div class="gm"><div class="nf"><div class="nf-wash"></div><div class="nf-dim">MỞ CỬA</div><div class="nf-lit">MỞ CỬA</div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.9,"lit":".nf-lit","wash":".nf-wash"};
+  var run = function (el, tl, at, o) {
+        var lit = el.querySelector(o.lit) || el, wash = o.wash ? el.querySelector(o.wash) : null, S = [[0, 0.2], [0.09, 1], [0.14, 0.35], [0.22, 1], [0.31, 0.55], [0.42, 1]];
+        return MW.drive(tl, at, o.duration + 0.2, function (t) {
+          var u = t / o.duration, a = 0; if (t > 0) S.forEach(function (s) { if (u >= s[0]) a = s[1]; });
+          lit.style.opacity = String(a); if (wash) wash.style.opacity = String(0.16 * a);
+        });
+      };
+  MW.effectNeonFlicker = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.effectNeonFlicker(q(".nf"), tl, 0.4, {});
+          tl.set({}, {}, 2.4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

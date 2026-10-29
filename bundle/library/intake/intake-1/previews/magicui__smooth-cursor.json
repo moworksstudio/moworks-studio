@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/smooth-cursor",
+  "hash": "410e78df1f4d826f",
+  "at": "2026-10-17T06:19:52.978Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__smooth-cursor.mp4",
+    "poster": "previews/magicui__smooth-cursor.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a2162736917514b07033fcb3109268ba33436682702cc389dd202015fc1626a2",
+    "size": 15003,
+    "seconds": 54.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

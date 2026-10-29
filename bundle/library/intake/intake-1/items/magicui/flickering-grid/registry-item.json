@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "flickering-grid",
+  "type": "hyperframes:component",
+  "title": "Flickering Grid",
+  "description": "A grid of tiny squares whose brightness flickers at random, like a dim LED panel: a quiet tech texture under titles and UI.",
+  "tags": [
+    "flicker",
+    "led",
+    "grid",
+    "pixels",
+    "texture",
+    "background",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "flickering-grid.html",
+      "target": "compositions/components/flickering-grid.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/flickering-grid",
+    "author": "magicui",
+    "call": "MW.flickeringGrid(q(\".mw-flickering-grid\"), tl, 0, { squareSize: 8, gridGap: 8, color: \"#60A5FA\", maxOpacity: 0.6, flickerChance: 1.2, hold: 6 });",
+    "function": "MW.flickeringGrid",
+    "options": {
+      "squareSize": "px (4)",
+      "gridGap": "px (6)",
+      "flickerChance": "per second (0.3)",
+      "color": "rgb(0, 0, 0)",
+      "maxOpacity": "0.3",
+      "hold": "seconds (10)",
+      "seed": "1"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/flickering-grid.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/flickering-grid.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is a <canvas> sized by its box (device pixels follow window.devicePixelRatio as upstream). Docs say maxOpacity 0.2: the code has 0.3 (the code wins).",
+    "titleVi": "Lưới ô vuông nhấp nháy như bảng LED"
+  }
+}

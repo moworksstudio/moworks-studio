@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-slice-reveal",
+  "hash": "430ff99c01779714",
+  "at": "2026-10-17T10:20:14.054Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-slice-reveal.mp4",
+    "poster": "previews/takayu__motion-slice-reveal.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4f3456fdede03c7d5e2b407da291b9a57a894c8303dac7906b497f9ed6357c34",
+    "size": 15876,
+    "seconds": 27.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

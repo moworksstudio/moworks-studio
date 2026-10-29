@@ -1,0 +1,52 @@
+<!--
+  Alternating List (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=list-alternate (read 12/10/2026).
+  Các dòng lần lượt vào từ trái rồi từ phải, xen kẽ, cùng dừng trên một trục.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionListAlternate(q(".la"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - items: 
+      - dist: px (112)
+      - first: −1 the first row from the left, 1 from the right
+      - duration: s (0.615, power2.out)
+      - stagger: s (0.055)
+      - cols: 
+
+  Notes: Idea and numbers (TakayuStudio list-alternate, written here): Four rows, alternating sides: rows 1 and 3 from x −28 px, rows 2 and 4 from +28 px, → 0 with opacity 0 → 1, each 615 ms power2.out, 55 ms apart (780 ms in all). Small side arrows hint each row's direction and fade as it arrives. Params: dist (28 px) · first: dòng đầu từ trái (−1) / phải (1) · stagger (55 ms) · each (0.615 s).
+-->
+
+<div class="st"><div class="la"><div class="rw"><i></i><b style="width:62%"></b></div><div class="rw"><i></i><b style="width:48%"></b></div><div class="rw"><i></i><b style="width:70%"></b></div><div class="rw"><i></i><b style="width:54%"></b></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"items":".rw","dist":112,"first":-1,"duration":0.615,"stagger":0.055,"cols":0};
+  var run = function (el,tl,at,o
+  ) {
+  var it = Array.prototype.slice.call(el.querySelectorAll(o.items)), n = it.length, cols = o.cols || n;
+  var p2 = gsap.parseEase("power2.out");
+  return MW.drive(tl, at, (n - 1) * o.stagger + o.duration, function (t) { it.forEach(function (r, i) { var u = p2(Math.max(0, Math.min(1, (t - i * o.stagger) / o.duration))), side = (i % 2 ? -1 : 1) * o.first; gsap.set(r, { x: side * o.dist * (1 - u) }); r.style.opacity = String(u); }); });
+  };
+  MW.motionListAlternate = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

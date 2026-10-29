@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-path-morph-ride",
+  "hash": "7ebd62d444f14bba",
+  "at": "2026-10-17T10:32:31.999Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__text-path-morph-ride.mp4",
+    "poster": "previews/takayu__text-path-morph-ride.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b480f5284c48aa2a2e3a8ae72e661bc68f6ed673af5e36def075ebbbbe09167d",
+    "size": 35693,
+    "seconds": 24.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

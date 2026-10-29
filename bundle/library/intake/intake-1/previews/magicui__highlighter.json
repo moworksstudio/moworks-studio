@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/highlighter",
+  "hash": "6d1fea0a4a9676f2",
+  "at": "2026-10-17T06:00:37.775Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__highlighter.mp4",
+    "poster": "previews/magicui__highlighter.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "04a5f67d3372017b04e62e4b184dd0f03366f0dcce298c80040314d8eeafd4bc",
+    "size": 16135,
+    "seconds": 29.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

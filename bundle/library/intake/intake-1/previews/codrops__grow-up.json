@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/grow-up",
+  "hash": "1ca6d870d940e3ff",
+  "at": "2026-10-17T06:40:56.823Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Archivo"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__grow-up.mp4",
+    "poster": "previews/codrops__grow-up.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "01838bb6b5eb94c3d20c5b16080272fd4c01bcd51d863639baa719dfadc22f1c",
+    "size": 16844,
+    "seconds": 25.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

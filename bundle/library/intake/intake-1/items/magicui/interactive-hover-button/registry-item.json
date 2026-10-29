@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "interactive-hover-button",
+  "type": "hyperframes:component",
+  "title": "Interactive Hover Button",
+  "description": "A pill button: on hover a small dot floods the whole button with colour while the label slides out and a new label with an arrow slides in.",
+  "tags": [
+    "button",
+    "cta",
+    "hover",
+    "flood",
+    "arrow",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "interactive-hover-button.html",
+      "target": "compositions/components/interactive-hover-button.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/interactive-hover-button",
+    "author": "magicui",
+    "call": "MW.interactiveHoverButton(q(\".mw-interactive-hover-button\"), tl, 0.6, { hovers: [[0, 1.6], [2.4, null]] });",
+    "function": "MW.interactiveHoverButton",
+    "options": {
+      "hovers": "[[0, null]]",
+      "accent": "#fafafa",
+      "accentText": "#09090b",
+      "background": "#09090b"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/interactive-hover-button.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/interactive-hover-button.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "hovers: [[enter, leave], ...] in s after `at` (leave null = stays). The arrow is lucide's ArrowRight (ISC) drawn inline.",
+    "titleVi": "Nút viên thuốc tràn màu, đổi nhãn"
+  }
+}

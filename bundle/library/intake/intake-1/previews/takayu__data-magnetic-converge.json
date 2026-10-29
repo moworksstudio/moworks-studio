@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/data-magnetic-converge",
+  "hash": "c793af297e23ff0d",
+  "at": "2026-10-17T08:02:07.238Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__data-magnetic-converge.mp4",
+    "poster": "previews/takayu__data-magnetic-converge.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "61bd37e0e0593b940acdbd0b4124df2d1d6225e4ec7b497138c06eaadb5bd636",
+    "size": 21948,
+    "seconds": 34.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

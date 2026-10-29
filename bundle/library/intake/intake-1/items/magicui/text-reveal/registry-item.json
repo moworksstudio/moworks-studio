@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-reveal",
+  "type": "hyperframes:component",
+  "title": "Text Reveal",
+  "description": "A sentence in faint grey whose words turn solid one after another, like a read-along, over the time you give it.",
+  "tags": [
+    "read along",
+    "words",
+    "reveal",
+    "karaoke",
+    "paragraph",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "text-reveal.html",
+      "target": "compositions/components/text-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/text-reveal",
+    "author": "magicui",
+    "call": "MW.textReveal(q(\".mw-text-reveal\"), tl, 0.5, { duration: 4.5, ghost: 0.2 });",
+    "function": "MW.textReveal",
+    "options": {
+      "duration": "s for the whole sentence (4)",
+      "ghost": "opacity of the grey copy (0.3)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/text-reveal.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/text-reveal.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Each word keeps a ghost copy at opacity 0.3 under it, as upstream. Scroll progress -> film time: word i fills between at + duration x i / n and at + duration x (i + 1) / n.",
+    "titleVi": "Câu xám đậm dần từng từ"
+  }
+}

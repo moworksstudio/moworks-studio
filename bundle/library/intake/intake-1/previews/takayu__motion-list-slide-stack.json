@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-list-slide-stack",
+  "hash": "25228d3e39aba516",
+  "at": "2026-10-17T10:56:31.071Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-list-slide-stack.mp4",
+    "poster": "previews/takayu__motion-list-slide-stack.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "728eb583fa5af02282b4b0d4935063c189e7afa6ba007a9b5739df2668f8a70a",
+    "size": 8341,
+    "seconds": 25.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

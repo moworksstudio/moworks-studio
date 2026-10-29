@@ -1,0 +1,66 @@
+<!--
+  Sparkle-Appear Telop (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-telop-kirakira (read 12/10/2026).
+  Chữ telop bật ra từ cỡ nhỏ, một chùm sao bốn cánh bung ra quanh chữ rồi tắt, một vệt sáng lướt qua trong lòng chữ, vài ngôi sao nhỏ nháy ở góc khi giữ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textTelopSparkleBurst(q(".sb"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - stars: (16)
+      - size: [min, max] px ([16, 36])
+      - colors: 
+      - sweepAt: s the light band crosses (1.05, 0.6 s)
+      - outAt: s (2.6)
+      - seed: (4)
+
+  Notes: Idea and numbers (TakayuStudio tx-telop-kirakira, written here): From 0.3 s text (38 px heavy, accent fill, dark stroke 0.24 em) scales 0.7 → 1 in 7 frames at 30 fps back.out(1.7), fades in 0.12 s. 16 four-point stars (yellow / ink / second accent), starts 0–0.12 s apart, live 0.7–1.1 s power2.out, moving out on an ellipse round the text (60 % → 115–165 %), size 4–9 px × sin(πq), rotation 0 → 2 rad. Light sweep 1.05–1.65 s: a ~7° band at 75 % inside the letters. 3 corner stars twinkle 1–2.7 s. Exit 2.6–2.85 s. Params: bật (0.7 → 1, 7 khung) · số sao (16) · đời sao (0.7–1.1 s) · vệt sáng (0.6 s).
+-->
+
+<div class="ft"></div><div class="st"><div><div class="sb">Đẹp lung linh</div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"stars":16,"size":[16,36],"colors":["#ffe14d","#ffffff","#3dd6f5"],"sweepAt":1.05,"outAt":2.6,"seed":4};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, bo = gsap.parseEase("back.out(1.7)"), p2 = gsap.parseEase("power2.out"), r = MW.rand(o.seed), S = [], cols = o.colors, W = el.offsetWidth, Hh = el.offsetHeight, cx = el.offsetLeft + W / 2, cy = el.offsetTop + Hh / 2;
+        if (getComputedStyle(host).position === "static") host.style.position = "relative"; if (getComputedStyle(el).position === "static") el.style.position = "relative";
+        var star = function () { var d = document.createElement("div"); d.style.cssText = "position:absolute;left:0;top:0;pointer-events:none;opacity:0;"; d.innerHTML = '<svg viewBox="-10 -10 20 20" width="100%" height="100%"><path d="M0 -10 L2.4 -2.4 L10 0 L2.4 2.4 L0 10 L-2.4 2.4 L-10 0 L-2.4 -2.4 Z" fill="currentColor"/></svg>'; host.appendChild(d); return d; };
+        for (var i = 0; i < o.stars; i++) S.push({ d: star(), st: r() * 0.12, life: 0.7 + r() * 0.4, a: r() * 2 * Math.PI, far: 1.15 + r() * 0.5, size: o.size[0] + r() * (o.size[1] - o.size[0]), col: cols[i % cols.length] });
+        var corner = [[-0.48, -0.6], [0.5, -0.55], [0.46, 0.62]].map(function (p, i) { return { d: star(), p: p, ph: i * 0.37 }; });
+        var sw = el.cloneNode(true); sw.removeAttribute("id"); sw.style.cssText += ";position:absolute;left:0;top:0;margin:0;pointer-events:none;-webkit-text-stroke:0;color:transparent;-webkit-text-fill-color:transparent;-webkit-background-clip:text;background-clip:text;"; sw.style.backgroundImage = "linear-gradient(97deg, transparent 40%, rgba(255,255,255,0.75) 47%, rgba(255,255,255,0.75) 53%, transparent 60%)"; sw.style.backgroundSize = "300% 100%"; el.appendChild(sw);
+        return MW.drive(tl, at, o.outAt + 0.25, function (t) {
+          var s = 0.7 + 0.3 * bo(Math.max(0, Math.min(1, t / (7 / 30)))), x = Math.max(0, Math.min(1, (t - o.outAt) / 0.25)); gsap.set(el, { scale: s }); el.style.opacity = String(Math.min(1, t / 0.12) * (1 - x));
+          S.forEach(function (q) { var u = (t - q.st) / q.life, p = p2(Math.max(0, Math.min(1, u))), f = 0.6 + (q.far - 0.6) * p, z = q.size * Math.sin(Math.PI * Math.max(0, Math.min(1, u)));
+            q.d.style.width = q.d.style.height = z + "px"; q.d.style.color = q.col; gsap.set(q.d, { x: cx + Math.cos(q.a) * W / 2 * f - z / 2, y: cy + Math.sin(q.a) * Hh / 2 * f * 1.4 - z / 2, rotation: 2 * p * 57.3 }); q.d.style.opacity = u > 0 && u < 1 ? "1" : "0"; });
+          corner.forEach(function (q) { var v = (t - 1 - q.ph) / 0.6, on = t > 1 && t < 2.7 - x * 0.1, z = 30 * Math.max(0, Math.sin(Math.PI * (v - Math.floor(v)))); q.d.style.width = q.d.style.height = z + "px"; q.d.style.color = "#ffe14d"; gsap.set(q.d, { x: cx + q.p[0] * W - z / 2, y: cy + q.p[1] * Hh - z / 2 }); q.d.style.opacity = on && t < o.outAt ? "1" : "0"; });
+          var g = Math.max(0, Math.min(1, (t - o.sweepAt) / 0.6)); sw.style.backgroundPosition = (100 - 100 * g).toFixed(1) + "% 0"; sw.style.opacity = g > 0 && g < 1 ? "1" : "0";
+        });
+      };
+  MW.textTelopSparkleBurst = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

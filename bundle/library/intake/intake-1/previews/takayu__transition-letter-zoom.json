@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/transition-letter-zoom",
+  "hash": "3fcc2f3ef10ae9b7",
+  "at": "2026-10-17T07:22:28.067Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__transition-letter-zoom.mp4",
+    "poster": "previews/takayu__transition-letter-zoom.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "2c65eb0bdf62f45a2f6e3ffc48be2974e48e4dbb4f3a186d9213010c7d2a686c",
+    "size": 19757,
+    "seconds": 27.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

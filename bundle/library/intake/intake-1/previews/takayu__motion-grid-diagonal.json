@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-grid-diagonal",
+  "hash": "a1e59dbf8bb0e40a",
+  "at": "2026-10-17T10:56:33.993Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-grid-diagonal.mp4",
+    "poster": "previews/takayu__motion-grid-diagonal.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "94fd95722dde41dcd593216a751a0571b1026e5138f324328a7062036180c44d",
+    "size": 16133,
+    "seconds": 26.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

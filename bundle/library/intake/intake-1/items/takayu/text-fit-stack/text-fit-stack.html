@@ -1,0 +1,99 @@
+<!--
+  Stacked Justified Words (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-stacked-justified (read 12/10/2026).
+  Mỗi từ một dòng, được phóng to hay thu nhỏ để cùng một bề rộng, xếp chồng thành khối chữ vuông vức; từng từ lần lượt trồi vào và đẩy khối lên.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textFitStack(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - width: px every word spans (840)
+      - height: px the stack fits in (680)
+      - cap: largest font size (550)
+      - gap: px between lines (30)
+      - start: s (0.3)
+      - each: s per word (0.45)
+      - rise: px a word rises in (130)
+      - accent: the last word's colour
+      - exitAt: s (3.75)
+
+  Notes: Idea and numbers (TakayuStudio tx-stacked-justified, written here): Words grouped into ≤ 5 lines; each scaled so its ink bounds (actualBoundingBox) span the block width (168 px in the demo, shrunk so the stack fits 136 px tall; cap 110 px), 6 px gap between lines. From 0.3 s a word enters every 0.45 s: y +26 px → 0 and opacity 0 → 1 in 0.3 s power2.out; the stack re-centres vertically as each word adds its height. Last word accent. Exit 3.75–4.1 s: fade and up 10 px, power2.in. Loop 4.4 s. Params: bề rộng khối (168 px) · nhịp (0.45 s mỗi từ) · thời gian vào (0.3 s) · khoảng dòng (6 px).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">LÀM ÍT MÀ HAY</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"width":840,"height":680,"cap":550,"gap":30,"start":0.3,"each":0.45,"rise":130,"accent":"#a99bff","exitAt":3.75};
+  var run = function (el, tl, at, o) {
+        var ws = MW.split(el, "words").words, cv = document.createElement("canvas").getContext("2d"), cs = getComputedStyle(el), fam = cs.fontFamily, wt = cs.fontWeight, p2 = gsap.parseEase("power2.out"), pi = gsap.parseEase("power2.in");
+        el.style.position = "relative"; el.style.height = o.height + "px"; el.style.width = o.width + "px";
+        var rows = ws.map(function (w, i) {
+          cv.font = wt + " 100px " + fam; var m = cv.measureText(w.textContent), ink = m.actualBoundingBoxLeft + m.actualBoundingBoxRight, size = Math.min(o.cap, 100 * o.width / ink);
+          w.style.cssText += ";position:absolute;left:50%;top:0;white-space:nowrap;line-height:1;font-size:" + size + "px;"; if (i === ws.length - 1) w.style.color = o.accent;
+          return { w: w, size: size, h: size * 0.86 };
+        });
+        var total = rows.reduce(function (s, r) { return s + r.h; }, 0) + o.gap * (rows.length - 1);
+        if (total > o.height) { var f = o.height / total; rows.forEach(function (r) { r.size *= f; r.h *= f; r.w.style.fontSize = r.size + "px"; }); }
+        return MW.drive(tl, at, o.exitAt + 0.35, function (t) {
+          var y = 0, shown = 0, ys = [];
+          rows.forEach(function (r, i) { var e = p2(Math.max(0, Math.min(1, (t - o.start - i * o.each) / 0.3))); ys.push(y); y += (r.h + (i ? o.gap : 0)) * e; shown += 0; r.e = e; });
+          var off = (o.height - y) / 2, ex = pi(Math.max(0, Math.min(1, (t - o.exitAt) / 0.35)));
+          rows.forEach(function (r, i) { gsap.set(r.w, { xPercent: -50, y: off + ys[i] + (i ? o.gap * r.e : 0) - r.h * 0.12 + (1 - r.e) * o.rise - ex * o.rise / 2.6 }); r.w.style.opacity = String(r.e * (1 - ex)); });
+        });
+      };
+  MW.textFitStack = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

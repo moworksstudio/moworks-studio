@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-hover-fill",
+  "hash": "8a29e2f9bbcb8292",
+  "at": "2026-10-17T10:20:40.308Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-hover-fill.mp4",
+    "poster": "previews/takayu__ui-hover-fill.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4244623d9e9dc1686ca656c4b5aa68c7fa05dd979aecaba21d13c5f136995acd",
+    "size": 8827,
+    "seconds": 23.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-skeleton-resolve",
+  "type": "hyperframes:block",
+  "title": "Skeleton Resolve",
+  "description": "Thẻ khung xương có vệt sáng lướt, rồi mờ dần đi đúng lúc nội dung thật (avatar, tên, ảnh, chữ) hiện lên tại chỗ và nhích lên 6 px.",
+  "tags": [
+    "skeleton",
+    "loading",
+    "crossfade",
+    "reveal",
+    "forms-state",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-skeleton-resolve.html",
+      "target": "compositions/components/ui-skeleton-resolve.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-skeleton-resolve",
+    "author": "takayu",
+    "call": "MW.uiSkeletonResolve(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiSkeletonResolve",
+    "options": {
+      "period": "s a shimmer pass (1.0)",
+      "resolveAt": "s (0.9)",
+      "duration": "s (0.86, power2.out)",
+      "rise": "px (6)",
+      "backAt": "s (2.6, 0.25 s power2.in)",
+      "name": "",
+      "time": "",
+      "lines": "",
+      "loop": "s (3.2)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=skeleton-resolve",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=skeleton-resolve (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio skeleton-resolve, written here): Card 200x132 r12. Skeleton boxes: avatar circle 32, two lines (90x9, 54x7), image 168x34 r6, two lines (150x7, 108x7), each with a faint 48 px band (12 % light) sweeping every 1.0 s. Resolve over 0.9-1.76 s (860 ms) power2.out: skeleton opacity 1 → 0 while content (avatar letter, name, '3 min ago', image, two text lines) goes opacity 0 → 1, y +6 → 0, same layout. Reverse 2.6-2.85 s power2.in. Params: resolve (0.86 s) · rise (6 px) · shimmer (1 s / lượt) · ease (power2.out).",
+    "titleVi": "Khung xương chuyển thành nội dung thật"
+  }
+}

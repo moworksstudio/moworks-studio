@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/animated-beam",
+  "hash": "38ad60947a5dd5c6",
+  "at": "2026-10-17T05:55:38.067Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/magicui__animated-beam.mp4",
+    "poster": "previews/magicui__animated-beam.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "22184e736fc6e84bbcc0ab284aeb272ff217935bc92ab4a52588bf276d7dde3e",
+    "size": 14499,
+    "seconds": 33.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

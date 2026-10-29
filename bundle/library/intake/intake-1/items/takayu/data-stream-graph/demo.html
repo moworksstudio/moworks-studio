@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Stream Graph Breathing - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4">
+<div class="gm"></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  MW.span = MW.span || function (t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); };
+  MW.yAt = MW.yAt || function (pts, x) { if (x <= pts[0][0]) return pts[0][1]; for (var i = 1; i < pts.length; i++) if (x <= pts[i][0]) { var u = (x - pts[i - 1][0]) / ((pts[i][0] - pts[i - 1][0]) || 1); return pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * u; } return pts[pts.length - 1][1]; };
+  MW.polyToX = MW.polyToX || function (c, pts, x) { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) { if (pts[i][0] <= x) c.lineTo(pts[i][0], pts[i][1]); else { c.lineTo(x, MW.yAt(pts, x)); break; } } return [Math.min(x, pts[pts.length - 1][0]), MW.yAt(pts, Math.min(x, pts[pts.length - 1][0]))]; };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {};
+  var run = function (el, tl, at, o) {
+        var S = MW.stage320(el), c = S.ctx, io = gsap.parseEase("power2.inOut");
+        var phase = function (t) { return io(MW.span(t, 0.4, 1.8)) * (1 - io(MW.span(t, 2.6, 4.0))); };
+        return MW.drive(tl, at, 4, function (t) {
+          S.clear(); var p = phase(t), n = 60, top = [], mid = [], bot = [];
+          for (var i = 0; i <= n; i++) {
+            var x = 20 + 280 * i / n, s = 0.5 + 0.5 * Math.sin(i / n * 2 * Math.PI * 1.1 + 0.6), s2 = 0.5 + 0.5 * Math.sin(i / n * 2 * Math.PI * 0.9 + 2.1), cy = 100 + 8 * (p - 0.5) * Math.sin(i / n * Math.PI * 2);
+            var A = (4 + 24 * s) * (1 - p) + (20 + 20 * s) * p, B = (18 + 20 * s2) * (1 - p) + (6 + 16 * s2) * p; top.push([x, cy - A]); mid.push([x, cy]); bot.push([x, cy + B]);
+          }
+          var band = function (a, b, col) { c.beginPath(); c.moveTo(a[0][0], a[0][1]); a.forEach(function (q) { c.lineTo(q[0], q[1]); }); for (var k = b.length - 1; k >= 0; k--) c.lineTo(b[k][0], b[k][1]); c.closePath(); c.fillStyle = col; c.fill(); };
+          band(top, mid, "rgba(139,123,255,0.85)"); band(mid, bot, "rgba(61,214,245,0.8)");
+          c.strokeStyle = "#141826"; c.lineWidth = 1.5; c.beginPath(); mid.forEach(function (q, k) { if (k) c.lineTo(q[0], q[1]); else c.moveTo(q[0], q[1]); }); c.stroke();
+          var ri = Math.round(0.71 * n), ta = mid[ri][1] - top[ri][1], tb = bot[ri][1] - mid[ri][1], pa = Math.round(100 * ta / (ta + tb)), rx = top[ri][0];
+          c.fillStyle = "#fff"; [top[ri], bot[ri]].forEach(function (q) { c.beginPath(); c.arc(q[0], q[1], 2.5, 0, 2 * Math.PI); c.fill(); });
+          MW.txt(c, "A " + pa + "%", rx, top[ri][1] - 10, 9, "#a99bff", 900); MW.txt(c, "B " + (100 - pa) + "%", rx, bot[ri][1] + 11, 9, "#3dd6f5", 900);
+        });
+      };
+  MW.dataStreamGraph = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.dataStreamGraph(q(".gm"), tl, 0, {});
+          tl.set({}, {}, 4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

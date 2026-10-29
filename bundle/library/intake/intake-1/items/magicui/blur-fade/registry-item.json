@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "blur-fade",
+  "type": "hyperframes:component",
+  "title": "Blur Fade",
+  "description": "Elements fade in from a 6 px blur while sliding 6 px into place (0.4 s, ease-out), one after another.",
+  "tags": [
+    "blur",
+    "fade",
+    "entrance",
+    "stagger",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "blur-fade.html",
+      "target": "compositions/components/blur-fade.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/blur-fade",
+    "author": "magicui",
+    "call": "MW.blurFade(document.querySelectorAll(\".mw-blur-fade\"), tl, 0.5, { each: 0.04 });",
+    "function": "MW.blurFade",
+    "options": {
+      "duration": "s (0.4)",
+      "delay": "s (0)",
+      "offset": "px (6)",
+      "direction": "down | up | left | right (down)",
+      "blur": "px (6)",
+      "each": "s between elements when given a list (0.04)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/blur-fade.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/blur-fade.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Works on any element (text, pictures, cards). direction: down / up / left / right as upstream (down starts 6 px above).",
+    "titleVi": "Hiện dần từ nhoè, nhích 6 px"
+  }
+}

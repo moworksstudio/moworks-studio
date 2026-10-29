@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-halftone-pulse",
+  "type": "hyperframes:block",
+  "title": "Halftone",
+  "description": "Độ sáng được đổi thành cỡ chấm in lưới, cỡ chấm thay đổi nên mảng chấm chuyển động như tranh báo in.",
+  "tags": [
+    "halftone",
+    "dots",
+    "print",
+    "texture",
+    "texture-look",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-halftone-pulse.html",
+      "target": "compositions/components/effect-halftone-pulse.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-halftone-pulse",
+    "author": "takayu",
+    "call": "MW.effectHalftonePulse(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectHalftonePulse",
+    "options": {
+      "pitch": "units (10)",
+      "max": "dot radius (5)",
+      "reach": "units the bright spot reaches (110)",
+      "swing": "± units (60)",
+      "period": "s (3)",
+      "color": "",
+      "title": "",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=lk-halftone",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=lk-halftone (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio lk-halftone, written here): Dot grid (10 px pitch on a 320 frame), dot radius = density x cell / 2; the density field animates on a 1500 ms sine (recipe). Demo: radius 5 x clamp(1 - d / 110), d = distance to a bright spot swinging +-60 px over 3 s. Params: pitch (10 px) · max (5 px) · period (1.5 s).",
+    "titleVi": "Chấm halftone co giãn"
+  }
+}

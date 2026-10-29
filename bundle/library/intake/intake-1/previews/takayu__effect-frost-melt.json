@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-frost-melt",
+  "hash": "c1c43ea274a7cf46",
+  "at": "2026-10-17T09:58:25.926Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__effect-frost-melt.mp4",
+    "poster": "previews/takayu__effect-frost-melt.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "366c1fb9d9896efaff70e02560824ea7ba05cea5d9d98f2dbb194942bf0ebd1a",
+    "size": 18290,
+    "seconds": 32.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

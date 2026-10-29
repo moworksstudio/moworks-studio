@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Accordion Open - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { --ink: #e8ebf3; --acc: #8b7bff; --acc2: #3dd6f5; --warm: #ffb547; --rose: #ff5d8f; --mute: #6c778b; --tk-card: #151a24; --tk-line: #262c3a; background: #0b0d12; color: var(--ink); }
+.tk-stage { position: absolute; inset: 0; display: grid; place-items: center; }
+.tk-cap { font-size: 30px; font-weight: 500; color: var(--mute); letter-spacing: 0.01em; }
+.ui-wrap { position: absolute; inset: 0; display: grid; place-items: center; }
+.ui-card { position: relative; background: var(--tk-card); border: 2px solid var(--tk-line); border-radius: 36px; padding: 48px 56px; box-shadow: 0 40px 100px rgba(0, 0, 0, 0.35); }
+.ui-h { font-size: 46px; font-weight: 700; margin: 0 0 14px; } .ui-p { font-size: 30px; color: #9aa3b8; margin: 0; }
+.ui-btn { display: inline-grid; place-items: center; height: 104px; padding: 0 64px; border-radius: 30px; background: linear-gradient(180deg, #9c88ff, #7357f5); color: #fff; font-size: 40px; font-weight: 700; box-shadow: 0 18px 40px rgba(115, 87, 245, 0.35); }
+.ui-btn.ghost { background: transparent; border: 3px solid var(--tk-line); color: #c3cadb; box-shadow: none; }
+.ui-row { display: flex; align-items: center; gap: 28px; height: 110px; padding: 0 34px; border-radius: 24px; background: #1b2130; margin: 14px 0; font-size: 34px; color: #c9d2ea; }
+.ui-dot { width: 56px; height: 56px; border-radius: 16px; background: #2a3350; flex: none; }
+.ui-field { width: 760px; height: 112px; border-radius: 26px; border: 3px solid #36405a; background: #10141d; display: flex; align-items: center; padding: 0 36px; font-size: 36px; color: #c9d2ea; }
+.ui-pill { display: inline-grid; place-items: center; height: 96px; padding: 0 52px; border-radius: 48px; font-size: 34px; font-weight: 800; letter-spacing: 0.08em; }
+.ui-avatar { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #b8a9ff, #6a4cf0); display: grid; place-items: center; font-size: 84px; font-weight: 800; color: #fff; }
+.ui-avatar.grey { background: #2a3142; color: #6c778b; }
+.ui-icon { width: 200px; height: 200px; border-radius: 48px; display: grid; place-items: center; background: linear-gradient(160deg, #ffd27a, #ff9b3d); font-size: 110px; }
+.ui-cursor { position: absolute; left: 0; top: 0; z-index: 20; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5)); }
+.ac { width: 900px; box-sizing: border-box; padding: 30px 50px; } .ac-h { display: flex; justify-content: space-between; font-size: 46px; font-weight: 800; padding: 26px 0; } .ac-h span { color: #8b7bff; } .ac-n { border-top: 3px solid #262c3a; color: #9aa3b8; }
+.ac-b { height: 0; opacity: 0; } .ac-b p { margin: 0 0 18px; font-size: 34px; color: #c9d2ea; } .ac-b > div { padding-bottom: 20px; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.2">
+<div class="ui-wrap"><div class="ui-card ac"><div class="ac-h">Cách đặt lịch quay<span>+</span></div><div class="ac-b"><div><p>Chọn ngày trống trong lịch của đội.</p><p>Gửi kịch bản trước hai ngày.</p><p>Xác nhận địa điểm với khách.</p></div></div><div class="ac-h ac-n">Câu hỏi tiếp theo<span>+</span></div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"body":".ac-b","open":[0.08,0.47],"close":[0.86,1],"period":1.6,"cycles":2,"ease":"power2.inOut"};
+  var run = function (el, tl, at, o) {
+        var body = el.querySelector(o.body), inner = body.firstElementChild, io = gsap.parseEase(o.ease), Hh = inner ? inner.offsetHeight : body.scrollHeight; body.style.overflow = "hidden";
+        return MW.drive(tl, at, o.period * o.cycles, function (t) {
+          var u = (t % o.period) / o.period, p = io(Math.max(0, Math.min(1, (u - o.open[0]) / (o.open[1] - o.open[0])))) * (1 - io(Math.max(0, Math.min(1, (u - o.close[0]) / (o.close[1] - o.close[0])))));
+          body.style.height = (Hh * p).toFixed(1) + "px"; body.style.opacity = String(p);
+        });
+      };
+  MW.uiAccordionOpen = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.uiAccordionOpen(q(".ac"), tl, 0, {});
+          tl.set({}, {}, 3.2);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

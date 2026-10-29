@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-color-band-sweep",
+  "hash": "f32063f8e00ff329",
+  "at": "2026-10-17T10:31:05.878Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-color-band-sweep.mp4",
+    "poster": "previews/takayu__text-color-band-sweep.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "9835bab36b791b3a354c66f53d2e17186fef5fbef57e18c02934489631281eb3",
+    "size": 14689,
+    "seconds": 27.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

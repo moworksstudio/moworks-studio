@@ -1,0 +1,311 @@
+{
+ "_about": "The pipeline of every anidoodle medium: the 6 stages of every style, with prompts for a film written as the author's TypeScript film module on the pinned engine, bundled and driven inside HyperFrames. Read by packages/style-catalog for the media under pins.anidoodle. Derived from config/mg-pipeline.json; the sound comes from the app (no anidoodle score).",
+ "humanHands": {
+  "_about": "the 9 media whose hand draws anidoodle's human characters their films get a Character step",
+  "anidoodle-storybook": "storybook",
+  "anidoodle-koi": "marker",
+  "anidoodle-colouredPencil": "pencil",
+  "anidoodle-sumiE": "sumi",
+  "anidoodle-woodcut": "woodcut",
+  "anidoodle-scratchboard": "scratch",
+  "anidoodle-lighthouse": "riso",
+  "anidoodle-pixelArt": "pixel",
+  "anidoodle-toyBrick": "brick"
+ },
+ "authorReads": {
+  "_about": "The author's guides every anidoodle film reads at these steps besides the app's table in packages/agent/reads.mjs: story (law 1), stated realism (law 2), one look still then the whole film (laws 4 and 7), the craft bar in the Review. Paths under .moworks/library/anidoodle/.",
+  "brief": [
+   "references/storytelling.md"
+  ],
+  "storyboard": [
+   "references/storytelling.md",
+   "references/realism-and-craft.md",
+   "references/working-method.md"
+  ],
+  "build": [
+   "references/realism-and-craft.md"
+  ],
+  "qcReview": [
+   "references/craft-bar.md"
+  ]
+ },
+ "filmKinds": {
+  "_about": "The kinds of anidoodle film the user picks in New project: the author's workflows (references/workflows/) for a film other than a story; the story film is the default (no answer). Each: its title, the film's meta.kind, the author's guides read at each step (paths under .moworks/library/anidoodle/) and the line Claude reads. The pipeline stays the same six stages.",
+  "drawing": {
+   "title": "A picture that draws itself",
+   "metaKind": "drawing",
+   "reads": {
+    "brief": [
+     "references/workflows/drawing-process.md"
+    ],
+    "storyboard": [
+     "references/workflows/drawing-process.md"
+    ],
+    "motionSpec": [
+     "references/workflows/drawing-process.md"
+    ],
+    "build": [
+     "references/workflows/drawing-process.md"
+    ],
+    "qcReview": [
+     "references/workflows/drawing-process.md"
+    ]
+   },
+   "says": "Film kind: a picture that draws itself (the author's references/workflows/drawing-process.md): one picture of the brief's own subject, made mark by mark in the order an artist in this medium works. Frame 0 is the bare ground; every stroke grows and every wash spreads from where the brush touched, nothing fades in; the last frames are the finished still. Set meta.kind: \"drawing\" in the film. The medium's own drawing film (its module and draw-film module in anidoodle/canvas-core/, e.g. a drawing score: drawingScore.ts, drawingMarks.ts) shows the order: study it, never copy its subject. The storyboard is the passes (what goes down when), not scenes. The studio's alive rule is met by the marks themselves (something new is drawn every second; a hand rests at most half a second between passes) with a slow camera push (2-4 %); the finished picture holds at the end as the end card."
+  },
+  "launch": {
+   "title": "Product launch film",
+   "metaKind": "launch",
+   "reads": {
+    "brief": [
+     "references/workflows/launch-video.md",
+     "references/workflows/facts.md"
+    ],
+    "storyboard": [
+     "references/workflows/launch-video.md",
+     "references/workflows/launch-video-kit.md"
+    ],
+    "motionSpec": [
+     "references/workflows/launch-video.md",
+     "references/motion-grammar.md"
+    ],
+    "build": [
+     "references/workflows/launch-video-kit.md",
+     "references/workflows/facts.md"
+    ],
+    "qcReview": [
+     "references/workflows/launch-video.md",
+     "references/workflows/facts.md"
+    ]
+   },
+   "says": "Film kind: a product launch film (the author's references/workflows/launch-video.md, built on launch-video-kit.md): one promise about the product, shown being kept. Build on the author's launch template (anidoodle/canvas-core/launchTemplate.ts; launchExample.ts and launchExampleClean.ts are the worked ones, productUI.ts draws the product's own screens from data): the product's name, the asks a user would make, the answers (a picture drawn in this medium, the product's screens from the owner's files, or a film), a few words for the type frames and an end card that says where to get it. Say what it is within five seconds, never put words over the art, cut on the beat, make the first frame the thumbnail. Every claim on screen or spoken goes in facts.json with the exact source sentence and its link or file (references/workflows/facts.md); a claim with no source is cut. Words in Vietnamese are HTML text layers over the canvas (the author's drawn lettering has no Vietnamese letters). Set meta.kind: \"launch\" in the film."
+  }
+ },
+ "uses": [
+  "hyperframes",
+  "hyperframes-cli"
+ ],
+ "pipeline": [
+  {
+   "id": "brief",
+   "stage": 1,
+   "title": "Prepare",
+   "what": "Brief, files read and what the style needs; Claude asks only what is missing",
+   "needs": [],
+   "done": {
+    "kind": "mark",
+    "auto": true,
+    "file": "BRIEF.md",
+    "ask": true
+   },
+   "action": {
+    "kind": "claude",
+    "label": "Prepare",
+    "prompt": "Read the brief, the answers from the New project dialog and what the app found in my files (its scan). Write BRIEF.md in a few short lines: who the film speaks to, the one thing it says (\"This film tells [audience] that [promise].\"), what must be in it (the names, facts and lines the brief gives) and the length and format New project set. Do not ask what the dialog already answered. Write ASSETS.md: each file I gave, what it is, where the film can use it, what is missing. The film is drawn in the project's anidoodle medium: its marks, edge and order are fixed; the story, subject and length are this brief's own. When I gave no files at all and the style draws everything in code, go on without asking. Every conflict (the brief against this style's own design or what it can draw, against the New project fields) and every missing thing the brief needs (a file, a link, a logo it names) goes in one message as moworks-studio §2b says (what each side says, two or three choices, your suggestion first), and then stop without writing BRIEF.md: the owner answers in the chat. Write BRIEF.md last. Change nothing in the film yet; then stop."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "doc",
+    "path": "BRIEF.md",
+    "label": "Brief"
+   }
+  },
+  {
+   "id": "character",
+   "stage": 1,
+   "title": "Character",
+   "when": "cast",
+   "what": "The film's people, built on anidoodle's human engine in this film's hand and drawn as model sheets; you approve",
+   "needs": [
+    "brief"
+   ],
+   "done": {
+    "kind": "approval",
+    "name": "characters",
+    "file": "CHARACTERS.json"
+   },
+   "gate": true,
+   "action": {
+    "kind": "claude",
+    "label": "Make",
+    "prompt": "Make the film's people as the author's recipe says (.moworks/library/anidoodle/references/workflows/character-consistency.md, anatomy.md, craft-bar.md; Mira and Theo in engine/src/canvas-core/characters as the worked examples, not to copy). People I chose from my library are already in CHARACTERS.json with their modules (anidoodle/characters/<id>/) and gates: keep them as they are; an entry with ownStyle: true came from the library in its own style: no redraw and no new sheet, only its gate (character_gate; #406); where an entry says needsPalette, add the palette for this film's hand in the film's copy. For each other person of BRIEF.md write a character module under anidoodle/characters/<id>/ (canon row, spec, rig, drawn parts where a volume cannot describe a feature, palette ROLES and the palette for this film's hand, distinguishing features with the views they must appear in, toScene(pose, camera), a pose library inside the joint limits), its gate anidoodle/check-<id>.ts like the author's, and its entry in CHARACTERS.json ({ id, name, about, engine: \"anidoodle-human\", hand, import, check: \"check-<id>.ts\" }). An animal or a thing is not a person: give it a rig of its own the way the author built the cheetah and a gate that checks that rig's own rules, never the human limits (the anidoodle pack §3e3; its entry adds rig and kind, check: \"characters/<id>/check.ts\"). A film with no people: write {\"characters\": []} and stop. Then write each person's model sheet as anidoodle/films/sheet-<id>.ts in this hand (turnaround, six expressions, the film's poses; the module exports its film as default, the app mounts it), call the app's character_gate tool, and character_sheet to draw the sheets; hold each sheet against the description and my pictures: every feature they name must show. Fix what fails and call them again, twice at most. Name in your reply, in plain words, any feature this style cannot draw (what it is on the character, never the engine's own terms). Then, only when every character's gate passes, stop and ask me to approve the characters in the Character dialog; while a gate still fails after your two fixes, never ask me to approve: say in plain words what still fails and ask me what to do (QC2 #373)."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "character",
+    "label": "Open"
+   }
+  },
+  {
+   "id": "storyboard",
+   "stage": 2,
+   "title": "Storyboard",
+   "what": "One treatment of the brief, drawn in the medium with the real engine as an image board; you approve it or ask for another",
+   "needs": [
+    "character"
+   ],
+   "done": {
+    "kind": "approval",
+    "name": "storyboard"
+   },
+   "gate": true,
+   "action": {
+    "kind": "claude",
+    "label": "Write",
+    "prompt": "Make one storyboard option as your rules say (the anidoodle way: one point per piece, the realism stated, the look proved on one still first): one treatment of this brief, boards/A, with its STORYBOARD.md (every frame one shot with its own seconds), a board film boards/<X>/page.ts drawn with the pinned engine in the project's medium (one frame per shot or beat of the film, at most 12, each posed during one second of the board, as your rules say) and its index.html with <canvas id=\"film\">, timed to the voice-over when there is one. After writing or changing the boards, call the app's board_stills tool once: it bundles and checks the boards and returns the option's sheets (3 × 3 frames). Read the sheets once; fix only a real problem, then call it again with only the frames you changed (at most once more). Then stop: I approve it in the Storyboard dialog or ask there for another option; when I choose one, write it to STORYBOARD.md and stop for my approval."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "storyboard",
+    "label": "Open"
+   }
+  },
+  {
+   "id": "motionSpec",
+   "effort": "medium",
+   "stage": 3,
+   "title": "Motion Plan",
+   "what": "How every shot moves: the medium's motion grammar and the author's camera, with numbers; you approve",
+   "needs": [
+    "storyboard"
+   ],
+   "done": {
+    "kind": "approval",
+    "name": "motionPlan"
+   },
+   "gate": true,
+   "action": {
+    "kind": "claude",
+    "label": "Write",
+    "prompt": "Write the Motion Plan for every shot of the approved plan into MOTION-PLAN.json (the motion plan format in your instructions): concrete numbers, not adjectives. The film's motion is drawn by the engine as the medium's reference says (its motion grammar) and as the author's camera and motion references say: cite those as source {\"kind\": \"style\", \"id\": \"<reference or move>\"}; a Motion Library item only for an HTML layer over the canvas, or new. Give every held element, the background, the camera and every character its always-on row with numbers (moworks-alive §2), each shot its \"says\" line in my language (what moves and how strongly, words I can judge) and the plan its \"approving\" line. A walk, run or gallop travels (the anidoodle pack §3e4): give it its stride length and frames, the ground speed in px a frame, each depth plane's speed and how the camera follows; and size every character so it reads at the film's size (the hero of a shot at least a quarter of the frame's short side, a supporting one at least an eighth, a small one with its own features showing). Write only MOTION-PLAN.json: no composition and no index.html (the Build writes the film once). Then stop for my approval in the Motion Plan dialog."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "motion-plan",
+    "label": "Open"
+   }
+  },
+  {
+   "id": "build",
+   "title": "Build",
+   "what": "The film built as the author's film module on the pinned engine, inside HyperFrames",
+   "needs": [
+    "motionSpec"
+   ],
+   "done": {
+    "kind": "built"
+   },
+   "action": {
+    "kind": "claude",
+    "label": "Build",
+    "prompt": "Build the film of the approved storyboard to the approved Motion Plan as your rules say (an anidoodle film module in anidoodle/, its host anidoodle/page.ts, index.html with <canvas id=\"film\">; the app bundles it with the pinned engine and drives it), timed to the voice-over when there is one. Write no sound effects or music: the app adds them after your Review. Keep every element on screen, the background, the camera and every character moving between the moves, as the studio's moworks-alive rule says (nothing still for more than 2 s except the final logo hold; the brief's motion words become that motion). Every gait travels through the world at the speed its feet push the ground, never on the spot, and every character reads at the film's size (the anidoodle pack §3e4). Keep every character's joints inside their limits on every frame (clamp; the anidoodle pack §3e2) and leave no console.error in the film; when the film is written, call the app's pose_check tool once and fix what it lists."
+   },
+   "stage": 4
+  },
+  {
+   "id": "qcReview",
+   "title": "Review",
+   "what": "Claude looks at stills of the film like a strict director: seven scores, fixes, until every score is 8 or more",
+   "needs": [
+    "build"
+   ],
+   "done": {
+    "kind": "review",
+    "file": "QC-REVIEW.md"
+   },
+   "skippable": true,
+   "skipLabel": "Skip the review",
+   "action": {
+    "kind": "claude",
+    "label": "Review",
+    "prompt": "Run the Review as the Moworks QC rules say (the Moworks QC file named in your rules): call the app's qc_sheets tool for each round, read the sheets, score the seven criteria (Motion against the moworks-alive rule: its numbers, MOTION-PLAN.json's always-on rows and the app's still-stretch check when there is one), fix the 3 worst problems (open only the code of the shots the sheets flag, once each; Grep, then Edit) and every layout or contrast error of HyperFrames' check; 1 to 3 rounds, stop as soon as every score is 8 or more; after 3 rounds say why. Score only what you saw after your last change: a round that ends with a fix takes the sheets once more before the final score. Write every round to QC-REVIEW.md and end the file with a line `Final score: N/10` (the lowest of the seven); write the same rounds to QC-REVIEW.json as the QC rules say (the app shows them as a score card), and end your reply with one short line."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "qc-review",
+    "label": "Open"
+   },
+   "stage": 4,
+   "firstOnly": true
+  },
+  {
+   "id": "sound",
+   "stage": 4,
+   "title": "Music and sound effects",
+   "what": "Claude picks the music; the app places it and the sound effects",
+   "needs": [
+    "build",
+    "qcReview"
+   ],
+   "done": {
+    "kind": "mark",
+    "auto": true
+   },
+   "skippable": true,
+   "skipLabel": "No music",
+   "action": {
+    "kind": "claude",
+    "label": "Find music",
+    "prompt": "Find three music tracks on mixkit.co that fit the film's mood and length and the medium's mood, and hand them to the app with the music_options tool (title, artist, its page on mixkit.co and the direct https://assets.mixkit.co/… .mp3 link). The app picks the first one for the film and places the sound effects; the owner can change both in the Final Mix. When the film already has a music track of the owner's, or the web is off for this project, say so in one line and change nothing."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "mix",
+    "label": "Open"
+   }
+  },
+  {
+   "id": "checks",
+   "title": "Tech checks",
+   "what": "Last of this stage, quiet: HyperFrames' check (layout, contrast, motion), Vietnamese letters, fonts, offline; the film is done when they pass",
+   "needs": [
+    "build",
+    "qcReview"
+   ],
+   "done": {
+    "kind": "qa"
+   },
+   "action": {
+    "kind": "job",
+    "job": "qa",
+    "label": "Run"
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "qa",
+    "label": "Open"
+   },
+   "stage": 4,
+   "quiet": true,
+   "after": [
+    "sound"
+   ]
+  },
+  {
+   "id": "finalMix",
+   "title": "Final Mix",
+   "what": "Optional: listen, then change the music or the sound effects (notes about the sound)",
+   "needs": [
+    "sound"
+   ],
+   "done": {
+    "kind": "mark",
+    "auto": false
+   },
+   "skippable": true,
+   "skipLabel": "No final mix",
+   "action": {
+    "kind": "dialog",
+    "dialog": "mix",
+    "label": "Open"
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "mix",
+    "label": "Open"
+   },
+   "stage": 5,
+   "optional": true
+  }
+ ]
+}

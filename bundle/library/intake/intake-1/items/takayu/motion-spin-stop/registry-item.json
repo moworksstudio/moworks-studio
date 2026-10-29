@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-spin-stop",
+  "type": "hyperframes:component",
+  "title": "Spin Stop",
+  "description": "Ô xoay hai vòng thật nhanh rồi chậm dần, dừng đúng một góc bội của 90°.",
+  "tags": [
+    "rotate",
+    "spin",
+    "stop",
+    "rotation",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-spin-stop.html",
+      "target": "compositions/components/motion-spin-stop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-spin-stop",
+    "author": "takayu",
+    "call": "MW.motionSpinStop(q(\".ss-t\"), tl, 0.3, { duration: 1.2, ease: \"cubic-bezier(.3,.45,.15,1)\", marker: \".ss-m\" });",
+    "function": "MW.motionSpinStop",
+    "options": {
+      "turns": "(2)",
+      "duration": "s (0.85; the site's demo 1.2)",
+      "ease": "(power3.out; the demo cubic-bezier(.3,.45,.15,1))",
+      "copies": "motion copies (5)",
+      "gap": "s between copies (0.012)",
+      "copyOpacity": "at full speed (0.16)",
+      "marker": "the stop marker (a ring pings there)",
+      "ring": "[from, to] px radius ([25, 95])",
+      "ringWidth": "px (6)",
+      "ringTime": "s (0.43)",
+      "pingAt": "share of the spin when the ring pings (0.7)",
+      "accent": "ring colour"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=spin-stop",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=spin-stop (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio spin-stop, written here): Tile spins 0 → 720° and stops on a 90° multiple: recipe 850 ms power3.out (easeOutQuart); site demo 1200 ms custom(.3,.45,.15,1). Five motion copies 12 ms apart at up to 16 % opacity scaled by speed; as it lands a small ring pings at the stop marker (radius 5 → 19 px, 430 ms power2.out). Params: duration (0.85 s) · turns: số vòng (2) · ease (power3.out).",
+    "titleVi": "Xoay nhanh rồi dừng đúng góc"
+  }
+}

@@ -1,0 +1,68 @@
+<!--
+  Path With Tracking Inertia (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-path-inertia (read 12/10/2026).
+  Dòng chữ chạy vào dọc đường cong và dừng gấp, các chữ phía sau dồn sát vào rồi giãn ra quá đà và rung tắt dần như có quán tính.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textTrackingInertia(q(".ti"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - text: 
+      - size: px (130)
+      - run: px the head runs (2040)
+      - duration: s (0.9): half linear, half power1.out
+      - start: s (0.3)
+      - amp: em of tracking swing (0.25)
+      - freq: Hz (3)
+      - decay: per second (6)
+      - curve: the U path, y = curve × (x − centre)² (0.00012)
+      - fadeAt: s (3.4)
+      - loop: s (4.2)
+
+  Notes: Idea and numbers (TakayuStudio tx-path-inertia, written here): Text on a shallow U path (y = 0.0007 × (x − centre)² px). Head runs 340 px to its stop 0.3–1.2 s with ease ½ linear + ½ power1.out (still moving at the stop). From the stop: per-gap tracking = −0.25 em × sin(2π × 3 × t) × e^(−6t), each char offset by that × its index from the end, so the trailing chars squeeze in, overshoot open and settle in ~1 s. Fade out 3.4–3.8 s. Loop 4.2 s. AE: inertia expression amp 0.05, freq 3, decay 6 on Tracking Amount. Params: quãng chạy (340 px) · thời gian chạy (0.9 s) · biên độ (0.25 em) · tần số (3) · độ tắt (6). From the stop the gap between letters swings −amp × sin(2π freq t) × e^(−decay t), more for the letters further back.
+-->
+
+<div class="ti"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"text":"Phanh gấp!","size":130,"run":2040,"duration":0.9,"start":0.3,"amp":0.25,"freq":3,"decay":6,"curve":0.00012,"fadeAt":3.4,"loop":4.2};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var rail = function (pts, closed) { var L = [0]; for (var i = 1; i < pts.length; i++) L.push(L[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])); var tot = L[L.length - 1];
+    return { len: tot, at: function (s) { s = closed ? ((s % tot) + tot) % tot : Math.max(0, Math.min(tot, s)); var lo = 0, hi = L.length - 1; while (hi - lo > 1) { var m = (lo + hi) >> 1; if (L[m] <= s) lo = m; else hi = m; } var f = (s - L[lo]) / ((L[hi] - L[lo]) || 1), a = pts[lo], b = pts[hi]; return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]; } }; };
+  var ang = function (R, s, ch) { var a = R.at(s - ch), b = R.at(s + ch); return Math.atan2(b[1] - a[1], b[0] - a[0]); };
+  var glyphs = function (host, list, fs, sepColor) { return list.map(function (g) { var s = document.createElement("span"); s.textContent = g; s.style.cssText = "position:absolute;left:0;top:0;white-space:pre;line-height:1;font-size:" + fs + "px;" + (g === "•" && sepColor ? "color:" + sepColor + ";" : ""); host.appendChild(s); return { s: s, w: s.offsetWidth, h: s.offsetHeight }; }); };
+  var place = function (q, x, y, a, op) { gsap.set(q.s, { x: x - q.w / 2, y: y - q.h * 0.8, rotation: a * 180 / Math.PI, transformOrigin: "50% 80%" }); q.s.style.opacity = op == null ? "1" : String(op); };
+  var W = el.clientWidth, Hh = el.clientHeight, cx = W / 2, pts = []; for (var i = 0; i <= 200; i++) { var x = -400 + (W + 800) * i / 200; pts.push([x, Hh * 0.42 + o.curve * (x - cx) * (x - cx)]); }
+  var R = rail(pts, false), list = gr(o.text), G = glyphs(el, list, o.size, null), s0 = 0; G.forEach(function (q) { q.o = s0 + q.w / 2; s0 += q.w; }); var TW = s0, n = G.length, p1 = gsap.parseEase("power1.out");
+  var stopS = R.len / 2 + TW / 2, startS = stopS - o.run, ease = function (u) { return 0.5 * u + 0.5 * p1(u); };
+  return MW.drive(tl, at, o.loop, function (t) {
+    var head = startS + (stopS - startS) * ease(Math.max(0, Math.min(1, (t - o.start) / o.duration))), u = t - o.start - o.duration, gap = u > 0 ? -o.amp * o.size * Math.sin(2 * Math.PI * o.freq * u) * Math.exp(-o.decay * u) : 0, f = 1 - Math.max(0, Math.min(1, (t - o.fadeAt) / 0.4));
+    G.forEach(function (q, i) { var s = head - (TW - q.o) - gap * (n - 1 - i), p = R.at(s); place(q, p[0], p[1], ang(R, s, 30), (t < o.start ? 0 : 1) * f); });
+  });
+  };
+  MW.textTrackingInertia = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

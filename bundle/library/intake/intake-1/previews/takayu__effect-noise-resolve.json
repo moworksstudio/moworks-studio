@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-noise-resolve",
+  "hash": "d2c2a4368508afce",
+  "at": "2026-10-17T10:05:21.207Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__effect-noise-resolve.mp4",
+    "poster": "previews/takayu__effect-noise-resolve.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "000bfd6dd69e0da81b2d9524bcaa837ac2467c30de0c543cb21d49018faada1d",
+    "size": 24695,
+    "seconds": 28.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

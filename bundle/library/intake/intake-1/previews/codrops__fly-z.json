@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/fly-z",
+  "hash": "434470489ce1fd3d",
+  "at": "2026-10-17T06:39:53.517Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Archivo"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__fly-z.mp4",
+    "poster": "previews/codrops__fly-z.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "efb66454a6f342c22992db45b0c0bbcfab5fd058354ff913b73c4250154ff462",
+    "size": 19518,
+    "seconds": 32.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

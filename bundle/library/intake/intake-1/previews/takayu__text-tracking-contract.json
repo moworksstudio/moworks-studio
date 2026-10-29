@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-tracking-contract",
+  "hash": "1b7fe0817c1d63f6",
+  "at": "2026-10-17T08:03:11.959Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-tracking-contract.mp4",
+    "poster": "previews/takayu__text-tracking-contract.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "e4aae78963b11e199fa44659cfdcd809944dca822f5fe90af9fc4a0dc3db19a6",
+    "size": 18458,
+    "seconds": 38.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

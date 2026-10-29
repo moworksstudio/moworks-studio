@@ -1,0 +1,66 @@
+<!--
+  Border Chase (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=border-chase (read 12/10/2026).
+  Một vệt sáng dài 26 % chu vi chạy vòng quanh viền thẻ bo góc theo chiều kim đồng hồ, lặp mãi khi thẻ đang được chọn.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.lineBorderChase(q(".sel"), tl, 0, { laps: 3 });
+
+  Options (defaults in brackets):
+      - lap: s per lap, linear (1)
+      - laps: laps (3)
+      - radius: px, the card's corner radius (36)
+      - width: px of the brightest dash (6)
+      - glow: px glow (20)
+      - color: colour
+
+  Notes: Idea and numbers (TakayuStudio border-chase, written here): A dash 26 % of the perimeter runs clockwise around a rounded card (radius 12 px), linear, one lap per 1000 ms, looping; drawn as three stacked dashes sharing the head (lengths 26 / 16 / 8 % of the perimeter, opacity 0.25 / 0.55 / 1, width 2 / 2.5 / 3 px, the brightest with a 10 px glow). Params: length: độ dài vệt (26 %) · lap: một vòng (1 s) · width (2–3 px) · glow (10 px) · radius (12 px).
+-->
+
+<div class="ui-wrap"><div style="display:flex;gap:56px"><div class="ui-card" style="width:400px;height:300px"><p class="ui-h">Cơ bản</p><p class="ui-p">5 dự án</p></div>
+<div class="ui-card sel" style="width:400px;height:300px;border-color:#3a3566"><p class="ui-h">Chuyên nghiệp</p><p class="ui-p">Không giới hạn</p></div>
+<div class="ui-card" style="width:400px;height:300px"><p class="ui-h">Studio</p><p class="ui-p">Cả nhóm</p></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"lap":1,"laps":3,"radius":36,"width":6,"glow":20,"color":"#a99bff"};
+  var run = function (el, tl, at, o) {
+        var NS = "http://www.w3.org/2000/svg", w = el.offsetWidth, h = el.offsetHeight, r = o.radius, P = 2 * (w + h) - 8 * r + 2 * Math.PI * r;
+        var svg = document.createElementNS(NS, "svg"); svg.setAttribute("width", w + 40); svg.setAttribute("height", h + 40);
+        svg.style.cssText = "position:absolute;left:-20px;top:-20px;pointer-events:none;overflow:visible;";
+        if (getComputedStyle(el).position === "static") el.style.position = "relative";
+        var dashes = [[0.26, 0.25, o.width * 0.67, 0], [0.16, 0.55, o.width * 0.83, 0], [0.08, 1, o.width, o.glow]].map(function (d) {
+          var rc = document.createElementNS(NS, "rect");
+          rc.setAttribute("x", 20); rc.setAttribute("y", 20); rc.setAttribute("width", w); rc.setAttribute("height", h); rc.setAttribute("rx", r); rc.setAttribute("fill", "none");
+          rc.setAttribute("stroke", o.color); rc.setAttribute("stroke-width", d[2]); rc.setAttribute("stroke-linecap", "round"); rc.setAttribute("opacity", d[1]);
+          if (d[3]) rc.style.filter = "drop-shadow(0 0 " + d[3] / 2 + "px " + o.color + ")";
+          rc.setAttribute("stroke-dasharray", d[0] * P + " " + (1 - d[0]) * P); svg.appendChild(rc); return { rc: rc, len: d[0] * P };
+        });
+        el.appendChild(svg);
+        return MW.drive(tl, at, o.lap * o.laps, function (t) {
+          // every dash ends at the same head, which runs clockwise from the top-left corner's end
+          var head = (t / o.lap) * P; dashes.forEach(function (d) { d.rc.setAttribute("stroke-dashoffset", String(d.len - head)); });
+        });
+      };
+  MW.lineBorderChase = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

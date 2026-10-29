@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/video-text",
+  "hash": "f4869fcbb0f00b43",
+  "at": "2026-10-17T06:03:26.196Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__video-text.mp4",
+    "poster": "previews/magicui__video-text.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c04fcc594044fc5ee34c4367bd9577fa3c327af6ba3441b726a164071352c67d",
+    "size": 29612,
+    "seconds": 34.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

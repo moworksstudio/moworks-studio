@@ -1,0 +1,39 @@
+{
+  "source": "Motion Prompt (Shohei Ohtaki, MIT), audit 79",
+  "repo": "showheyohtaki/motion-prompt",
+  "commit": "bd6bf08d8d412cc82c1bbc8f1a81638617a45cfb",
+  "hfCommit": "4719543e972548a261b8354f0a8dada479ae5d93",
+  "catalogVersion": "1.495bd9fdec",
+  "items": 168,
+  "packs": {
+    "motion": 24,
+    "camera": 24,
+    "ui": 24,
+    "lp": 24,
+    "photo": 24,
+    "motion2": 24,
+    "lp2": 24
+  },
+  "categories": {
+    "Entrances & text": 8,
+    "Motion polish": 8,
+    "Transitions & highlights": 16,
+    "Camera Movement": 8,
+    "Shooting Style & Time": 8,
+    "Transitions": 8,
+    "Opening & overlays": 8,
+    "Choosing & switching": 8,
+    "Navigation & status": 8,
+    "Scroll effects": 16,
+    "Hover & click interactions": 8,
+    "Loading, navigation & ambient loops": 8,
+    "Lighting & time of day": 8,
+    "Lens & camera effects": 8,
+    "Tones & finishing looks": 8,
+    "Motion techniques": 8,
+    "Text & shapes": 8,
+    "Mouse & input interactions": 8,
+    "Showcase effects": 8
+  },
+  "builtAt": "2026-10-29T08:29:06.595Z"
+}

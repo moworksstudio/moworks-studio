@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-flip-up-3d",
+  "hash": "780ee4c9c93e5525",
+  "at": "2026-10-17T08:43:57.038Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-flip-up-3d.mp4",
+    "poster": "previews/takayu__text-flip-up-3d.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "7ad5059da4e91afcd9a17b3fa14f9e637197c6c9de0409610ac3ff96b5f11a16",
+    "size": 11659,
+    "seconds": 30.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

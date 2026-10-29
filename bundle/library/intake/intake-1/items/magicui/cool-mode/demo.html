@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Cool Mode - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-cool-mode { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 50; }
+.mw-cool-mode > div { position: absolute; will-change: transform; left: 0; top: 0; }
+.like { position: absolute; left: 50%; top: 66%; transform: translate(-50%, -50%); padding: 30px 64px; border-radius: 999px; background: #fafafa; color: #09090b; font-size: 52px; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="6">
+<div class="like">❤️ Thích</div><div class="mw-cool-mode a"></div><div class="mw-cool-mode b"></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  var defaults = {"presses":[[0,960,700,1]],"particle":"circle","size":0,"speedHorz":0,"speedUp":0,"hold":4,"seed":1};
+  var run = function (el, tl, at, o) {
+      var NS = "http://www.w3.org/2000/svg", sizes = [15, 20, 25, 35, 45], r = MW.rand(o.seed * 6113), parts = [], H = el.clientHeight;
+      o.presses.forEach(function (pr) {
+        for (var t = 0; t < pr[3]; t += 0.03) {
+          var size = o.size || sizes[Math.floor(r() * sizes.length)], p = { t0: pr[0] + t, x: pr[1], y: pr[2], size: size, speedHorz: o.speedHorz || r() * 10, speedUp: o.speedUp || r() * 25,
+            spin: r() * 360, spinSpeed: r() * 35 * (r() <= 0.5 ? -1 : 1), dir: r() <= 0.5 ? -1 : 1, hue: r() * 360 };
+          var d = document.createElement("div");
+          if (o.particle === "circle") {
+            var s = document.createElementNS(NS, "svg"), c = document.createElementNS(NS, "circle");
+            c.setAttribute("cx", size / 2); c.setAttribute("cy", size / 2); c.setAttribute("r", size / 2); c.setAttribute("fill", "hsl(" + p.hue + ", 70%, 50%)");
+            s.appendChild(c); s.setAttribute("width", size); s.setAttribute("height", size); d.appendChild(s);
+          } else {
+            var tx = document.createElement("div"); tx.textContent = o.particle;
+            tx.style.cssText = "font-size:" + size * 3 + "px;line-height:1;text-align:center;width:" + size + "px;height:" + size + "px;display:flex;align-items:center;justify-content:center;transform:scale(3);transform-origin:center";
+            d.appendChild(tx);
+          }
+          d.style.opacity = 0; el.appendChild(d); p.el = d; parts.push(p);
+        }
+      });
+      // at most 45 alive, as upstream: a particle is spawned only if fewer than 45 are still on screen
+      var s2 = { t: 0 }, set = function () {
+        var alive = 0;
+        for (var i = 0; i < parts.length; i++) {
+          var p = parts[i], n = Math.floor((s2.t - p.t0) * 60);
+          if (n < 0) { p.el.style.opacity = 0; continue; }
+          var left = p.x - p.size / 2, top = p.y - p.size / 2, up = p.speedUp;
+          for (var k = 0; k < n; k++) { left -= p.speedHorz * p.dir; top -= up; up = Math.min(p.size, up - 1); }
+          var gone = top >= H + p.size;
+          if (!gone) alive++;
+          p.el.style.opacity = gone || alive > 45 ? 0 : 1;
+          p.el.style.transform = "translate(" + left + "px, " + top + "px) rotate(" + (p.spin + p.spinSpeed * n) + "deg)";
+        }
+      };
+      set();
+      tl.fromTo(s2, { t: 0 }, { t: o.hold, duration: o.hold, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + o.hold;
+    };
+  MW.coolMode = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.coolMode(q(".a"), tl, 0, { presses: [[0.3, 960, 713, 1.3]], hold: 3 });
+          MW.coolMode(q(".b"), tl, 2.8, { presses: [[0.2, 960, 713, 1.3]], particle: "❤️", hold: 3.2, seed: 5 });
+          tl.set({}, {}, 6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

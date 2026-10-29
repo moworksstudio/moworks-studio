@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-scroll-blur-tilt",
+  "hash": "37f5f3cfa80cd2d4",
+  "at": "2026-10-17T08:33:37.850Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-scroll-blur-tilt.mp4",
+    "poster": "previews/takayu__text-scroll-blur-tilt.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "bfc5c05f35d0b8399962a4219610fc36b67d89e1b30739d60aff96e384c2393f",
+    "size": 23399,
+    "seconds": 29.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

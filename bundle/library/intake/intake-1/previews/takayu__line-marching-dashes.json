@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/line-marching-dashes",
+  "hash": "944844328d54a513",
+  "at": "2026-10-17T08:58:28.243Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__line-marching-dashes.mp4",
+    "poster": "previews/takayu__line-marching-dashes.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6cc7768112bead6192d894e6ef005e1146f2664702377e1cddcad9eca15a8ed6",
+    "size": 16990,
+    "seconds": 19,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

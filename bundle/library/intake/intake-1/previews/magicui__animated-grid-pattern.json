@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/animated-grid-pattern",
+  "hash": "4f732341ec558d46",
+  "at": "2026-10-17T05:55:38.081Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__animated-grid-pattern.mp4",
+    "poster": "previews/magicui__animated-grid-pattern.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f2d19418d7e8173f99cfc751b6c2fdbfa40e687bcf114ea08fc62a4a7940966b",
+    "size": 19056,
+    "seconds": 34.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

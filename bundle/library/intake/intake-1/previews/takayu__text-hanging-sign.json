@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-hanging-sign",
+  "hash": "154ae63f894245fd",
+  "at": "2026-10-17T10:31:05.841Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-hanging-sign.mp4",
+    "poster": "previews/takayu__text-hanging-sign.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "0996f10362401ba054d4dc9d90e6c990d1658e6db3e5da8a8ed488959f4c2625",
+    "size": 31177,
+    "seconds": 30.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

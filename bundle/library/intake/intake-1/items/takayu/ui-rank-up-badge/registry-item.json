@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-rank-up-badge",
+  "type": "hyperframes:block",
+  "title": "Rank Up",
+  "description": "Huy hiệu co lại lấy đà rồi bật lò xo; màu nhấn dâng từ đáy lên đỉnh, chữ hạng cuộn từ B sang A cùng lúc, vạch chữ V thứ hai sáng lên, 14 tia sao bắn ra và chữ \"PROMOTED\" hiện.",
+  "tags": [
+    "badge",
+    "fill",
+    "roll",
+    "sparks",
+    "progression-quests",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-rank-up-badge.html",
+      "target": "compositions/components/ui-rank-up-badge.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-rank-up-badge",
+    "author": "takayu",
+    "call": "MW.uiRankUpBadge(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiRankUpBadge",
+    "options": {
+      "from": "",
+      "to": "",
+      "popAt": "s (1.0, spring k300 c11 after a 0.92 wind-up)",
+      "label": "",
+      "resetAt": "s (2.5)",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-progress-rank-up",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-progress-rank-up (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-progress-rank-up, written here): px @320x200. Shield badge (×1.25, grey). Wind-up 1 → 0.92 (280 ms inOut, 0.7 s), then pops from 0.92 to 1 by spring k300 d11 at 1.0 s. Accent fills bottom → top through a clip in 220 ms outCubic; the letter rolls B → A (40 px) in the same 220 ms; the second chevron lights past halfway. 14 four-point sparks (accent, every 3rd yellow) fly from radius 30 to 70-100 px over 700 ms outCubic, size 5.5 → 1, fading. 'PROMOTED' fades in 1.2-1.45 s. Reset 2.5-2.75 s. Params: from / to: hạng (B → A) · windUp: co lấy đà (0.92 trong 0.28 s) · popAt: lúc bật (1.0 s) · sparks: số tia (14).",
+    "titleVi": "Huy hiệu thăng hạng B lên A"
+  }
+}

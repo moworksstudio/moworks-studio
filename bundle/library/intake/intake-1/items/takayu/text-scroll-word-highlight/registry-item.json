@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-scroll-word-highlight",
+  "type": "hyperframes:component",
+  "title": "Scroll Word Highlight",
+  "description": "Đoạn văn hiện mờ, các từ lần lượt sáng rõ theo thứ tự đọc như khi cuộn trang, mỗi từ loé màu nhấn lúc vừa sáng.",
+  "tags": [
+    "words",
+    "reveal",
+    "scrub",
+    "highlight",
+    "text-scroll",
+    "smooth",
+    "scroll",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-scroll-word-highlight.html",
+      "target": "compositions/components/text-scroll-word-highlight.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-scroll-word-highlight",
+    "author": "takayu",
+    "call": "MW.textScrollWordHighlight(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textScrollWordHighlight",
+    "options": {
+      "dim": "opacity before (0.15)",
+      "accent": "the flash as a word lights",
+      "backAt": "s (3.15)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-scroll-word-highlight",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-scroll-word-highlight (read 12/10/2026)",
+      "upstream": "the site credits Magic UI (MIT); a faithful port is in the Magic UI collection"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-scroll-word-highlight, written here): Paragraph left-aligned (36 px, up to 3 lines), words at opacity 0.15. Progress p 0 → 1 over 0.3–2.5 s, cubic-bezier(.4,0,.6,1) (stands in for scroll), back to 0 3.15–3.55 s. Word k of n starts at p = 0.8 × k / (n − 1) and takes a window of 0.2: opacity 0.15 → 1 linear; an accent overlay peaks mid-window (0.9 × sin πq). Loop 3.8 s. Params: độ mờ đầu (0.15) · cửa sổ mỗi từ (0.2) · thời gian quét (2.2 s).",
+    "titleVi": "Đoạn chữ sáng dần từng từ theo cuộn"
+  }
+}

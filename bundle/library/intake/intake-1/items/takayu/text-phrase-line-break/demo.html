@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Phrase-Aware Line Break - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: #0b0d12; color: #fff; font-family: Inter, sans-serif; } .ft { position: absolute; inset: 0; background: url(assets/shot.svg) center / cover; filter: brightness(0.75); }
+.cap { position: absolute; left: 0; right: 0; text-align: center; font-weight: 800; paint-order: stroke fill; }
+.plw { position: absolute; left: 160px; right: 160px; bottom: 120px; height: 240px; font-weight: 800; color: #fff; -webkit-text-stroke: 10px #0b0d12; paint-order: stroke fill; } .pl { position: absolute; left: 0; right: 0; top: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4.6">
+<div class="ft"></div><div class="plw"><div class="pl">Sáng nay thành phố Hồ Chí Minh đón cơn mưa đầu mùa</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"keep":["thành phố","hồ chí minh","hà nội","việt nam"],"oneSize":58,"twoSize":84,"at":0.45,"backAt":3.85,"caption":".pl","loop":4.6};
+  var run = function (el, tl, at, o) {
+        var cap = el.querySelector(o.caption), txt = cap.textContent.trim().normalize("NFC"), words = txt.split(/\s+/), seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null, ex = gsap.parseEase("expo.out");
+        var gr = function (s) { if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+        // the break: the word boundary nearest the middle that does not split a kept compound (and prefers a comma)
+        var best = 1, bestD = 1e9, total = txt.length;
+        for (var i = 1; i < words.length; i++) { var left = words.slice(0, i).join(" "), pair = (words[i - 1] + " " + words[i]).toLowerCase(), keep = o.keep.some(function (k) { return pair.indexOf(k) >= 0 || k.indexOf(pair) >= 0; }); if (keep) continue; var d = Math.abs(left.length - total / 2) - (/,$/.test(words[i - 1]) ? 6 : 0); if (d < bestD) { bestD = d; best = i; } }
+        var lay = function (lines, fs) { var box = document.createElement("div"); box.style.cssText = "position:absolute;left:0;right:0;top:0;visibility:hidden;text-align:center;font-size:" + fs + "px;line-height:1.25;"; el.appendChild(box); var pos = [];
+          lines.forEach(function (ln, li) { var d = document.createElement("div"); gr(ln).forEach(function (g) { var s = document.createElement("span"); s.textContent = g; s.style.whiteSpace = "pre"; d.appendChild(s); }); box.appendChild(d); });
+          Array.prototype.forEach.call(box.querySelectorAll("span"), function (s) { if (s.textContent !== " ") pos.push([s.offsetLeft, s.offsetTop + s.parentNode.offsetTop]); }); el.removeChild(box); return pos; };
+        var A = lay([txt], o.oneSize), B = lay([words.slice(0, best).join(" "), words.slice(best).join(" ")], o.twoSize);
+        cap.textContent = ""; var chars = []; gr(txt).forEach(function (g) { if (g === " ") return; var s = document.createElement("span"); s.textContent = g; s.style.cssText = "position:absolute;left:0;top:0;white-space:pre;transform-origin:0 0;font-size:" + o.oneSize + "px;"; cap.appendChild(s); chars.push(s); });
+        var n = chars.length;
+        return MW.drive(tl, at, o.loop, function (t) {
+          chars.forEach(function (s, i) { var st = 0.5 * i / Math.max(1, n - 1), u = ex(Math.max(0, Math.min(1, (t - o.at - st) / 0.55))) * (1 - ex(Math.max(0, Math.min(1, (t - o.backAt - st) / 0.55)))), a = A[i], b = B[i];
+            gsap.set(s, { x: a[0] + (b[0] - a[0]) * u, y: a[1] + (b[1] - a[1]) * u, scale: 1 + (o.twoSize / o.oneSize - 1) * u }); });
+        });
+      };
+  MW.textPhraseLineBreak = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textPhraseLineBreak(q(".plw"), tl, 0, {});
+          tl.set({}, {}, 4.6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

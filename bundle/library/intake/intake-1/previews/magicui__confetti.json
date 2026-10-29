@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/confetti",
+  "hash": "4789e1a66f6c66e0",
+  "at": "2026-10-17T05:56:12.859Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__confetti.mp4",
+    "poster": "previews/magicui__confetti.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "25d935218d3f1abb0d9e1e200ca386673276531203f7e98e0b3c5164844c7df3",
+    "size": 175979,
+    "seconds": 31,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

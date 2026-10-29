@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Hormozi-Style Pop Captions - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: linear-gradient(180deg, #2a2f45, #141724); font-family: Inter, sans-serif; } .th { position: absolute; left: 50%; bottom: 0; width: 760px; height: 820px; margin-left: -380px; border-radius: 380px 380px 0 0; background: #0e1018; }
+.th::before { content: ""; position: absolute; left: 230px; top: -260px; width: 300px; height: 360px; border-radius: 50%; background: #0e1018; }
+.kp { position: absolute; left: 0; right: 0; top: 560px; text-align: center; font-size: 168px; font-weight: 900; text-transform: uppercase; color: #fff; -webkit-text-stroke: 28px #000; paint-order: stroke fill; text-shadow: 8px 12px 0 #000; visibility: hidden; }
+.kp.key { font-size: 208px; color: #ffd23d; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.8">
+<div class="th"></div><div class="kw"><div class="kp">Bí quyết</div><div class="kp">là làm</div><div class="kp key">mỗi ngày</div><div class="kp">một chút</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"start":0.25,"every":0.62,"exitAt":3.3,"pages":".kp","loop":3.8};
+  var run = function (el, tl, at, o) {
+        var pages = Array.prototype.slice.call(el.querySelectorAll(o.pages)), p1 = gsap.parseEase("power1.out"), bk = gsap.parseEase("back.out(1.7)");
+        return MW.drive(tl, at, o.loop, function (t) {
+          var ex = Math.max(0, Math.min(1, (t - o.exitAt) / 0.15));
+          pages.forEach(function (p, i) {
+            var s0 = o.start + o.every * i, d = t - s0, on = d >= 0 && (i === pages.length - 1 ? t < o.exitAt + 0.15 : d < o.every), key = p.classList.contains("key");
+            p.style.visibility = on ? "visible" : "hidden"; if (!on) return;
+            var s = d < 0.1 ? 0.8 + 0.3 * p1(d / 0.1) : d < 0.28 ? 1.1 - 0.1 * p1((d - 0.1) / 0.18) : 1; if (ex) s *= 1 - 0.3 * ex;
+            gsap.set(p, { scale: s, rotation: key ? -4 * bk(Math.min(1, d / 0.12)) : 0 }); p.style.opacity = String(Math.min(1, d / 0.05) * (1 - ex));
+          });
+        });
+      };
+  MW.textCaptionKeyPop = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textCaptionKeyPop(q(".kw"), tl, 0, {});
+          tl.set({}, {}, 3.8);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

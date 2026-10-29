@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "title-boss-warning-bands",
+  "type": "hyperframes:block",
+  "title": "Boss Warning",
+  "description": "Khung ngả màu nhẹ, dải sọc nguy hiểm phía trên trượt vào từ trái, dải dưới từ phải, sọc chạy đều ngược chiều nhau; chữ cảnh báo lộ ra từ giữa và đứng yên không nhấp nháy, rồi hai dải trượt ra.",
+  "tags": [
+    "warning",
+    "stripes",
+    "bands",
+    "reveal",
+    "game-cinematics",
+    "heavy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "title-boss-warning-bands.html",
+      "target": "compositions/components/title-boss-warning-bands.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.9,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/title-boss-warning-bands",
+    "author": "takayu",
+    "call": "MW.titleBossWarningBands(q(\".bw\"), tl, 0, {});",
+    "function": "MW.titleBossWarningBands",
+    "options": {
+      "inAt": "s (0.3)",
+      "drift": "px/s the stripes run (110)",
+      "outAt": "s (2.3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-cinematic-boss-warning",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-cinematic-boss-warning (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-cinematic-boss-warning, written here): px @320x200. Frame tints accent 10 %. Top hazard band (y 26, 20 px, dark diagonal stripes every 18 px) slides in from the left, bottom band (y 156) from the right, 400 ms outExpo at 0.3 s; stripes drift 22 px/s opposite ways. A dim silhouette fades in 0.4-1.0 s, growing 0.92 → 1 to 2.3 s. Title revealed by a clip widening from the centre 0 → 260 px (300 ms outCubic, 0.75 s), steady. Bands exit 250 ms in-expo at 2.3 s, continuing across. Params: inAt: lúc vào (0.3 s) · band: dải sọc (cao 20 px, sọc 18 px) · drift: tốc độ sọc (22 px/s) · title: chữ cảnh báo · outAt: lúc ra (2.3 s).",
+    "titleVi": "Cảnh báo trùm với dải sọc nguy hiểm"
+  }
+}

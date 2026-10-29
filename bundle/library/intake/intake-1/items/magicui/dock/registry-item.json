@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "dock",
+  "type": "hyperframes:block",
+  "title": "Dock",
+  "description": "A macOS-style dock whose icons magnify around a pointer gliding along it: the desktop-app and integrations beat.",
+  "tags": [
+    "dock",
+    "macos",
+    "icons",
+    "magnify",
+    "desktop",
+    "pointer",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "dock.html",
+      "target": "compositions/components/dock.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/dock",
+    "author": "magicui",
+    "call": "MW.dock(q(\".mw-dock\"), tl, 0.2, { path: [[0, null], [0.4, 10], [2.4, 334], [3.6, 150], [4.6, 150], [5, null]] });",
+    "function": "MW.dock",
+    "options": {
+      "iconSize": "px (40)",
+      "iconMagnification": "px (60)",
+      "iconDistance": "px (140)",
+      "path": "[[t, x], ...]"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/dock.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/dock.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is the dock; its children are the icons. path: [[t, x], ...] (x in px from the dock's left edge at rest, in its own units even when the dock is scaled; null = pointer away), linear. Upstream's demo icons are brand logos (trademarks): plain glyphs here.",
+    "titleVi": "Thanh dock phóng to biểu tượng"
+  }
+}

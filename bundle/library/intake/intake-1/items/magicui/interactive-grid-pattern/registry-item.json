@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "interactive-grid-pattern",
+  "type": "hyperframes:component",
+  "title": "Interactive Grid Pattern",
+  "description": "A grid of square cells that light up under a moving pointer and fade out behind it, leaving a soft trail.",
+  "tags": [
+    "grid",
+    "hover",
+    "trail",
+    "pointer",
+    "background",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "interactive-grid-pattern.html",
+      "target": "compositions/components/interactive-grid-pattern.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 7,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/interactive-grid-pattern",
+    "author": "magicui",
+    "call": "MW.interactiveGridPattern(q(\".mw-interactive-grid-pattern\"), tl, 0.2, { width: 80, height: 80, squares: [24, 14], fill: \"rgba(196,181,253,0.45)\", path: [[0, -60, 300], [2.6, 1980, 820], [3.2, 1980, 820], [5.8, -60, 380]] });",
+    "function": "MW.interactiveGridPattern",
+    "options": {
+      "width": "40",
+      "height": "40",
+      "squares": "[24, 24]",
+      "path": "[[t, x, y], ...] (a diagonal sweep)",
+      "line": "rgba(156,163,175,0.3)",
+      "fill": "rgba(209,213,219,0.3)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/interactive-grid-pattern.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/interactive-grid-pattern.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Upstream reacts to the mouse; here `path` lists [t, x, y] points (px in the grid's box) the pointer passes, linear between them.",
+    "titleVi": "Lưới ô sáng theo con trỏ đi qua"
+  }
+}

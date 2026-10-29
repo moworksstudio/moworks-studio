@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-squash-hop",
+  "type": "hyperframes:component",
+  "title": "Squash Landing",
+  "description": "Từng chữ cái nhún xuống lấy đà, vươn dài bật lên, rơi xuống rồi bẹp ra khi chạm đất và đàn hồi về dáng cũ, nối đuôi nhau.",
+  "tags": [
+    "letters",
+    "squash",
+    "stretch",
+    "hop",
+    "text-glyph-physics",
+    "bouncy",
+    "soft",
+    "glyph-physics",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-squash-hop.html",
+      "target": "compositions/components/text-squash-hop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.9,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-squash-hop",
+    "author": "takayu",
+    "call": "MW.textSquashHop(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textSquashHop",
+    "options": {
+      "height": "em of the hop (0.6)",
+      "start": "s (0.35)",
+      "stagger": "s (0.06, ≤ 1 s)",
+      "loop": "s (2.9)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-squash-landing",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-squash-landing (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-squash-landing, written here): Per char, origin at the baseline centre, from 0.35 s, stagger 0.06 s (capped at 1 s total). 0–80 ms crouch: sx 1 + 0.08·sin, sy 1 − 0.1·sin (peak 1.08 / 0.9). 80–340 ms rise to −0.6 em power1.out, stretch sx 0.85 → 1, sy 1.2 → 1. 340–540 ms fall power1.in, stretch back to 0.85 / 1.2. 540–620 ms squash to sx 1.25, sy 0.7 power1.out. 620–1120 ms recover to 1 × 1, elastic.out(1, 0.3). Floor shadow widens as the char falls. Loop 2.9 s. Params: độ cao nhảy (0.6 em) · độ giãn (1.2 / 0.85) · độ bẹp (0.7 / 1.25) · cách nhau (0.06 s).",
+    "titleVi": "Chữ nhún, bật lên, bẹp khi chạm đất"
+  }
+}

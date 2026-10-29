@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-sonar-locator",
+  "type": "hyperframes:block",
+  "title": "Spatial Audio Locator",
+  "description": "Một nguồn âm phát vòng sóng mỗi 0.6 s ngay tại vị trí của nó, sóng lan ra và tan; mũi chỉ hướng quanh người nghe xoay theo nguồn bằng lò xo và sáng lên khi sóng chạm tới.",
+  "tags": [
+    "sonar",
+    "rings",
+    "bearing",
+    "audio",
+    "spatial-ui-depth",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-sonar-locator.html",
+      "target": "compositions/components/effect-sonar-locator.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-sonar-locator",
+    "author": "takayu",
+    "call": "MW.effectSonarLocator(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectSonarLocator",
+    "options": {
+      "emit": "s between pings (0.6); each grows 90 units/s and fades over 1.4 s",
+      "loop": "s (4.3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-spatial-spatial-audio-locator",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-spatial-spatial-audio-locator (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-spatial-spatial-audio-locator, written here): Listener at the centre with range rings r32 / 58 / 84 and a crosshair. Source dot r7 moves (228,52) → (86,78) at 2.0-2.6 s and back by 3.6-4.2 s (power2.inOut). Every 0.6 s a 1.5 px accent ring starts at the source's position at that moment, radius grows 90 px/s, fades over 1.4 s. A bearing arc (r20, ±0.45 rad, 4 px) turns toward the source's next stop on a spring k120 d18 and thickens to 7 px / brightens when a ring reaches the listener. Params: emit (0.6 s) · speed (90 px/s) · life (1.4 s) · bearing (±0.45 rad, k120 c18) · path.",
+    "titleVi": "Định vị nguồn âm bằng sóng tròn"
+  }
+}

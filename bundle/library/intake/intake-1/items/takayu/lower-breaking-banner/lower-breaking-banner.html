@@ -1,0 +1,62 @@
+<!--
+  Breaking News Banner (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-breaking-banner (read 12/10/2026).
+  Băng tin nóng màu nhấn quét ra từ trái trong 8 khung, chớp đổi màu đỏ trắng ba lần, rồi dòng tít trượt vào nghiêng mạnh và dựng thẳng, sau đó đứng yên.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.lowerBreakingBanner(q(".bb"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - banner: the banner (its first child is the headline)
+      - line: a thin line above it
+      - start: s (0.3)
+      - frames: frames at 30 fps of the wipe (8)
+      - delay: frames before the headline (6)
+      - slide: px the headline slides from (560)
+      - skew: degrees at the start (17)
+      - outAt: s (3.05, 0.3 s power2.in off to the right)
+      - textOut: px the text travels on the way out (1200)
+      - accent: 
+      - light: 
+
+  Notes: Idea and numbers (TakayuStudio tx-breaking-banner, written here): Banner 292 × 44 px (radius 2), 2 px dark line 5 px above: scaleX 0 → 1 from the left in 8 frames at 30 fps (0.27 s) from 0.3 s, power2.out. Then colour toggles accent ↔ light every 0.125 s for 0.75 s (4 Hz × 3), text colour inverted. 6 frames after the wipe the headline (28 px heavy) slides x 140 px → 0 with skewX 17° → 0, 0.2 s expo.out, clipped to the banner (no fade); then static. Exit 3.05–3.35 s power2.in: banner off right, text +300 px. Params: quét (8 khung ở 30 fps) · chớp (4 Hz × 3) · trễ tít (6 khung) · nghiêng đầu (17°). After the wipe the banner flashes accent and light every 0.125 s for 0.75 s (4 Hz, three times), the text colour inverted.
+-->
+
+<div class="ft"></div><div class="bb"><i class="bb-l"></i><div class="bb-b"><span>TIN NÓNG: BÃO SỐ 9</span></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"banner":".bb-b","line":".bb-l","start":0.3,"frames":8,"delay":6,"slide":560,"skew":17,"outAt":3.05,"textOut":1200,"accent":"#ff3b4f","light":"#ffffff"};
+  var run = function (el, tl, at, o) {
+        var b = el.querySelector(o.banner), tx = b.firstElementChild, ln = o.line ? el.querySelector(o.line) : null, p2 = gsap.parseEase("power2.out"), ex = gsap.parseEase("expo.out"), pin = gsap.parseEase("power2.in"), W = b.offsetWidth;
+        gsap.set(b, { transformOrigin: "0% 50%" }); if (ln) gsap.set(ln, { transformOrigin: "0% 50%" });
+        var wipe = o.frames / 30, we = o.start + wipe;
+        return MW.drive(tl, at, o.outAt + 0.3 + 0.05, function (t) {
+          var s = p2(Math.max(0, Math.min(1, (t - o.start) / wipe))), x = pin(Math.max(0, Math.min(1, (t - o.outAt) / 0.3)));
+          gsap.set(b, { scaleX: s, x: W * 1.1 * x }); if (ln) gsap.set(ln, { scaleX: s, x: W * 1.1 * x });
+          var fl = t >= we && t < we + 0.75 ? Math.floor((t - we) / 0.125) % 2 : 0; b.style.background = fl ? o.light : o.accent; tx.style.color = fl ? o.accent : o.light;
+          var u = ex(Math.max(0, Math.min(1, (t - we - o.delay / 30) / 0.2))); gsap.set(tx, { x: o.slide * (1 - u) + o.textOut * x, skewX: o.skew * (1 - u) }); tx.style.visibility = t >= we + o.delay / 30 ? "visible" : "hidden";
+        });
+      };
+  MW.lowerBreakingBanner = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

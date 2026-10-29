@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Popover Enter and Exit - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.ui-cursor { position: absolute; left: 0; top: 0; z-index: 30; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5)); }
+.app { position: absolute; inset: 0; overflow: hidden; } .app.dark { background: #121624; color: #e8ebf3; } .app.light { background: #f3f4f8; color: #151a28; }
+.app-bar { height: 150px; display: flex; align-items: center; gap: 40px; padding: 0 90px; font-size: 60px; font-weight: 800; } .app-bar b { width: 70px; height: 70px; border-radius: 20px; background: currentColor; opacity: 0.2; }
+.app-body { padding: 30px 90px; } .app-hero { height: 380px; border-radius: 40px; margin-bottom: 50px; } .app-row { height: 54px; border-radius: 27px; background: currentColor; opacity: 0.14; margin-bottom: 34px; }
+.pa-btn { position: absolute; left: 860px; top: 690px; width: 130px; height: 130px; border-radius: 50%; background: #222a42; display: grid; place-items: center; font-size: 34px; font-weight: 900; color: #c9d2ea; z-index: 3; letter-spacing: 4px; }
+.pa-pop { position: absolute; left: 925px; top: 290px; width: 640px; height: 370px; border-radius: 50px; background: #222a42; border: 3px solid #3a4466; padding: 40px; box-sizing: border-box; visibility: hidden; z-index: 4; box-shadow: 0 30px 80px rgba(0,0,0,0.5); }
+.pa-pop i { display: block; height: 60px; border-radius: 30px; background: #8b7bff; margin-bottom: 36px; width: 70%; } .pa-pop b { display: block; height: 30px; border-radius: 15px; background: #3a4466; margin-bottom: 26px; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.6">
+<div class="gm"><section class="pa-app app dark"><div class="app-bar"><b></b><span>Thư viện</span></div>
+<div class="app-body"><div class="app-hero" style="background:#8b7bff"></div><div class="app-row"></div><div class="app-row" style="width:70%"></div><div class="app-row" style="width:85%"></div></div></section><div class="pa-btn">•••</div><div class="pa-pop"><i></i><b></b><b style="width:80%"></b><b style="width:60%"></b></div></div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"origin":"0% 100%","closeAt":1.4};
+  var run = function (el, tl, at, o) {
+        var out = gsap.parseEase("power2.out"), pin = gsap.parseEase("power2.in");
+        el.style.transformOrigin = o.origin;
+        return MW.drive(tl, at, o.closeAt + 0.36, function (t) {
+          var p = out(Math.max(0, Math.min(1, t / 0.52))), q = 1 - pin(Math.max(0, Math.min(1, (t - o.closeAt) / 0.36))), k = p * q;
+          gsap.set(el, { scale: 0.94 + 0.06 * k }); el.style.opacity = String(k); el.style.visibility = t > 0 && (t < o.closeAt + 0.36) ? "visible" : "hidden";
+        });
+      };
+  MW.uiPopoverAnchor = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          var c = q(".ui-cursor"); tl.fromTo(c, { x: 1400, y: 1000 }, { x: 930, y: 760, duration: 0.3, ease: "power2.inOut", immediateRender: true }, 0); MW.uiPopoverAnchor(q(".pa-pop"), tl, 0.4, {});
+          tl.set({}, {}, 2.6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

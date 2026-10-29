@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-slam-long-hold",
+  "hash": "7cdc6e2865813ba1",
+  "at": "2026-10-17T07:39:43.415Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-slam-long-hold.mp4",
+    "poster": "previews/takayu__text-slam-long-hold.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f5ba0d9083d76148515ba0f9e8eec782fa0ec5f975f073ce8cdf072dcb440425",
+    "size": 20790,
+    "seconds": 31.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

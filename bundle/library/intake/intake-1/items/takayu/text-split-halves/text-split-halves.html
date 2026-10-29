@@ -1,0 +1,59 @@
+<!--
+  Split-Halves Slide (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-split-halves (read 12/10/2026).
+  Hai bản của dòng chữ, một bản chỉ thấy nửa trên, một bản chỉ thấy nửa dưới, trượt ngược chiều vào khớp thành chữ hoàn chỉnh.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textSplitHalves(q(".tk-head"), tl, 0.3, { tint: "#8b7bff", exit: 2.5 });
+
+  Options (defaults in brackets):
+      - distance: px each half slides (600; 200 on the site's frame)
+      - duration: s (0.7), expo.out
+      - split: % of the line height where the halves meet (52)
+      - tint: colour of the lower half that fades to the text colour 0.7-1.1 s in (null: none)
+      - exit: s after the start to slide apart (0.5 s expo.in; null: stay)
+
+  Notes: Idea and numbers (TakayuStudio tx-split-halves, written here): Two stacked copies of the line: A clipped to the top half (inset(-0.4em 0 50% 0)), B to the bottom half (inset(50% 0 -0.3em 0)); A x −200 px → 0, B x +200 px → 0, 0.7 s expo.out together, locking on the split line; exit reverses (A +200, B −200, 0.5 s expo.in). Keep room for Vietnamese marks. Demo: split at glyph mid-height (baseline − 0.36 em), lower half tinted accent until 1.0–1.4 s; in at 0.3 s, out at 2.8 s; loop 3.8 s. Params: distance: quãng trượt (200 px) · duration (0.7 s, expo.out) · exit (0.5 s, expo.in).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">KHỚP NỐI HOÀN HẢO</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"distance":600,"duration":0.7,"split":52,"tint":null,"exit":null};
+  var run = function (el, tl, at, o) {
+        var html = el.innerHTML; el.innerHTML = "";
+        el.style.position = "relative";
+        var A = document.createElement("span"), B = document.createElement("span");
+        A.style.display = "block"; A.innerHTML = html; B.innerHTML = html; B.style.cssText = "display:block;position:absolute;left:0;top:0;width:100%;";
+        el.appendChild(A); el.appendChild(B);
+        A.style.clipPath = "inset(-0.4em -0.2em " + (100 - o.split) + "% -0.2em)"; B.style.clipPath = "inset(" + o.split + "% -0.2em -0.3em -0.2em)";
+        var tint = o.tint ? gsap.utils.interpolate(o.tint, getComputedStyle(el).color) : null;
+        if (tint) MW.drive(tl, at, 1.2, function (t) { B.style.color = tint(Math.max(0, Math.min(1, (t - 0.7) / 0.4))); });
+        tl.fromTo(A, { x: -o.distance }, { x: 0, duration: o.duration, ease: "expo.out", immediateRender: true }, at);
+        tl.fromTo(B, { x: o.distance }, { x: 0, duration: o.duration, ease: "expo.out", immediateRender: true }, at);
+        if (o.exit != null) { tl.to(A, { x: o.distance, duration: 0.5, ease: "expo.in" }, at + o.exit); tl.to(B, { x: -o.distance, duration: 0.5, ease: "expo.in" }, at + o.exit); }
+        return at + o.duration;
+      };
+  MW.textSplitHalves = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

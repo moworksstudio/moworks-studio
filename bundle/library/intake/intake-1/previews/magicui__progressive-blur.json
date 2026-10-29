@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/progressive-blur",
+  "hash": "6d2e095f46f6691a",
+  "at": "2026-10-17T06:02:19.782Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__progressive-blur.mp4",
+    "poster": "previews/magicui__progressive-blur.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "7bbd1a2947d2d70eda3e9566bdf7d03f7d39b03fedd70aaca08256df84418c93",
+    "size": 34340,
+    "seconds": 50.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

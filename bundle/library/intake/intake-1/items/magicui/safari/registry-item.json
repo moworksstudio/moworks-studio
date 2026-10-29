@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "safari",
+  "type": "hyperframes:block",
+  "title": "Safari",
+  "description": "A flat browser window frame (window dots, address bar with the URL) holding a website screenshot or a screen recording.",
+  "tags": [
+    "browser",
+    "safari",
+    "window",
+    "website",
+    "mockup",
+    "frame",
+    "brand look",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "safari.html",
+      "target": "compositions/components/safari.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/safari",
+    "author": "magicui",
+    "call": "MW.safari(q(\".mw-safari\"), tl, 0.3, { src: \"assets/page.svg\", url: \"moworks.studio\", dark: true, enter: \"rise\" });",
+    "function": "MW.safari",
+    "options": {
+      "url": "text in the address bar",
+      "src": "screen picture",
+      "dark": "false",
+      "font": "address-bar font (Inter)",
+      "enter": "null | rise | fade",
+      "enterDuration": "s (0.9)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/safari.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/safari.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Upstream's SF-Symbol-like toolbar glyphs are not ported (licence unclear). The URL is drawn in the film's font (upstream: Arial). For a video put a HyperFrames <video class=\"clip\"> inside .mw-safari-screen.",
+    "titleVi": "Khung cửa sổ trình duyệt Safari"
+  }
+}

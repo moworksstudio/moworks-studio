@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Rubber Band - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.rs-w { position: absolute; inset: 0; } .rs { position: absolute; left: 520px; top: 470px; width: 380px; height: 140px; border-radius: 70px; background: linear-gradient(180deg, #9c88ff, #7357f5); } .ui-cursor { position: absolute; left: 0; top: 0; z-index: 20; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.5)); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.6">
+<div class="rs-w"><div class="rs"></div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"pullAt":0.4,"pull":0.38,"stretch":1.8,"distance":525,"rest":185,"k":300,"c":11,"backAt":2,"back":0.4,"cursor":null};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, cur = o.cursor ? (host.querySelector(o.cursor) || document.querySelector(o.cursor)) : null, io = gsap.parseEase("power2.inOut"), sp = MW.spring(o.k, o.c), W = el.offsetWidth; gsap.set(el, { transformOrigin: "0% 50%" });
+        var gx = el.offsetLeft + W, gy = el.offsetTop + el.offsetHeight / 2, rel = o.pullAt + o.pull;
+        return MW.drive(tl, at, o.backAt + o.back + 0.2, function (t) {
+          var x1 = Math.max(0, o.distance - (o.stretch - 1) * W), x = 0, s = 1; if (t > o.pullAt && t <= rel) { var u = io((t - o.pullAt) / o.pull); x = x1 * u; s = 1 + (o.stretch - 1) * u; } else if (t > rel) { var v = sp.at(t - rel); x = x1 + (o.rest - x1) * v; s = o.stretch + (1 - o.stretch) * v; }
+          if (t > o.backAt) { var b = io(Math.min(1, (t - o.backAt) / o.back)); x = o.rest * (1 - b); s = 1; }
+          gsap.set(el, { x: x, scaleX: s, scaleY: 1 / Math.sqrt(s) });
+          if (cur) { var held = t > o.pullAt - 0.08 && t <= rel, cx = t <= o.pullAt ? gx + 260 * (1 - Math.min(1, t / o.pullAt)) : t <= rel ? el.offsetLeft + x + W * s : gx + (o.stretch - 1) * W + 140 * Math.min(1, (t - rel) / 0.5); gsap.set(cur, { x: cx - 30, y: gy - 6 + (t <= o.pullAt ? 160 * (1 - Math.min(1, t / o.pullAt)) : 0), scale: held ? 0.86 : 1, transformOrigin: "20% 10%" }); }
+        });
+      };
+  MW.motionRubberStretch = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionRubberStretch(q(".rs"), tl, 0, { cursor: ".ui-cursor" });
+          tl.set({}, {}, 2.6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

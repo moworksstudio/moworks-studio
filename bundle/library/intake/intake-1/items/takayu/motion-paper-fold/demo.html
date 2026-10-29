@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Paper Fold Reveal - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .pf { position: relative; width: 800px; height: 480px; } .pf > div { position: absolute; top: 0; width: 400px; height: 480px; box-sizing: border-box; padding: 50px; overflow: hidden; }
+.pf-l { left: 0; background: #e9e4ff; border-radius: 30px 0 0 30px; color: #2a2350; } .pf-r { left: 400px; background: #f4f1ff; border-radius: 0 30px 30px 0; color: #2a2350; } .pf-l b, .pf-r b { display: block; font-size: 46px; font-weight: 900; margin-bottom: 30px; } .pf i { display: block; height: 18px; border-radius: 9px; background: #c9c0ff; margin-top: 20px; }
+.pf-c { left: 400px; background: linear-gradient(150deg, #a693ff, #6a4cf0); border-radius: 0 30px 30px 0; display: grid; place-items: center; font-size: 80px; font-weight: 900; color: #fff; } .pf-k { left: 0; background: #ddd6ff; border-radius: 30px 0 0 30px; visibility: hidden; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.8">
+<div class="st"><div class="pf"><div class="pf-l"><b>Chào mừng</b><i></i><i style="width:70%"></i></div><div class="pf-r"><b>BÊN TRONG</b><i></i><i style="width:80%"></i><i style="width:60%"></i></div><div class="pf-k"><i></i><i style="width:60%"></i><i style="width:80%"></i></div><div class="pf-c">MỞ</div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":1.1,"ease":"power2.inOut","perspective":2100,"darken":0.55,"shadow":0.45,"closeAt":null,"cover":".pf-c","back":".pf-k","base":".pf-r"};
+  var run = function (el, tl, at, o) {
+        var cv = el.querySelector(o.cover), bk = el.querySelector(o.back), base = el.querySelector(o.base), e = gsap.parseEase(o.ease), dk1 = document.createElement("div"), dk2 = document.createElement("div"), sh = document.createElement("div");
+        [dk1, dk2].forEach(function (d, i) { d.style.cssText = "position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;border-radius:inherit;"; (i ? bk : cv).appendChild(d); });
+        sh.style.cssText = "position:absolute;inset:0;pointer-events:none;opacity:0;background:linear-gradient(90deg,rgba(0,0,0,0.9),rgba(0,0,0,0.2));"; if (base) base.appendChild(sh);
+        gsap.set(cv, { transformOrigin: "0% 50%" }); gsap.set(bk, { transformOrigin: "100% 50%" });
+        return MW.drive(tl, at, o.closeAt == null ? o.duration : o.closeAt + o.duration, function (t) {
+          var A = 180 * e(Math.max(0, Math.min(1, t / o.duration))); if (o.closeAt != null) A -= 180 * e(Math.max(0, Math.min(1, (t - o.closeAt) / o.duration)));
+          var s = Math.sin(A * Math.PI / 180), front = A <= 90;
+          gsap.set(cv, { rotationY: -A, transformPerspective: o.perspective }); gsap.set(bk, { rotationY: 180 - A, transformPerspective: o.perspective });
+          cv.style.visibility = front ? "visible" : "hidden"; bk.style.visibility = front ? "hidden" : "visible"; dk1.style.opacity = dk2.style.opacity = String(o.darken * s); sh.style.opacity = String(o.shadow * s);
+        });
+      };
+  MW.motionPaperFold = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionPaperFold(q(".pf"), tl, 0.4, { closeAt: 2.2 });
+          tl.set({}, {}, 3.8);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

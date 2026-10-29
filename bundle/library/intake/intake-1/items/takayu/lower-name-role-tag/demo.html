@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Lower Third - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.ft { position: absolute; inset: 0; background: url(assets/shot.svg) center / cover; } .ft::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.55)); }
+.lt { position: absolute; left: 160px; bottom: 200px; width: 1200px; height: 200px; } .lt-bar { position: absolute; left: 0; top: 0; width: 16px; height: 200px; background: #8b7bff; }
+.lt-n { position: absolute; left: 32px; top: 0; height: 120px; padding: 0 48px; background: rgba(12,14,20,0.92); border-radius: 8px; display: flex; align-items: center; font-size: 76px; font-weight: 800; white-space: nowrap; }
+.lt-r { position: absolute; left: 88px; top: 136px; height: 64px; padding: 0 32px; background: #8b7bff; display: flex; align-items: center; font-size: 40px; font-weight: 700; color: #fff; white-space: nowrap; } .lt span { display: block; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="5">
+<div class="ft"></div><div class="lt"><i class="lt-bar"></i><div class="lt-n"><span>Nguyễn Minh Anh</span></div><div class="lt-r"><span>Đạo diễn hình ảnh</span></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"bar":".lt-bar","name":".lt-n","role":".lt-r","start":0.3,"outAt":4.3,"slide":[72,56]};
+  var run = function (el, tl, at, o) {
+        var bar = el.querySelector(o.bar), np = el.querySelector(o.name), rp = el.querySelector(o.role), nt = np.firstElementChild, rt = rp.firstElementChild, ex = gsap.parseEase("expo.out"), pin = gsap.parseEase("power2.in"), d = o.start - 0.3, e = o.outAt - 4.3;
+        var S = function (t, a, b, f) { return (f || ex)(Math.max(0, Math.min(1, (t - a - d) / (b - a)))); }, O = function (t, a, b) { return pin(Math.max(0, Math.min(1, (t - a - e) / (b - a)))); };
+        gsap.set(bar, { transformOrigin: "50% 50%" });
+        return MW.drive(tl, at, 4.75 + e + 0.1, function (t) {
+          gsap.set(bar, { scaleY: S(t, 0.3, 0.55) * (1 - O(t, 4.5, 4.75)) });
+          var n1 = S(t, 0.35, 0.75), n2 = O(t, 4.42, 4.72), r1 = S(t, 0.52, 0.92); np.style.clipPath = "inset(0 " + (100 * (1 - n1)).toFixed(2) + "% 0 " + (100 * n2).toFixed(2) + "%)"; rp.style.clipPath = "inset(0 " + (100 * (1 - r1)).toFixed(2) + "% 0 " + (100 * n2).toFixed(2) + "%)";
+          var tf = 1 - Math.max(0, Math.min(1, (t - 4.3 - e) / 0.15)), a = S(t, 0.45, 0.7), b = S(t, 0.62, 0.85); nt.style.opacity = String(a * tf); gsap.set(nt, { x: -o.slide[0] * (1 - a) }); rt.style.opacity = String(b * tf); gsap.set(rt, { x: -o.slide[1] * (1 - b) });
+        });
+      };
+  MW.lowerNameRoleTag = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.lowerNameRoleTag(q(".lt"), tl, 0, {});
+          tl.set({}, {}, 5);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

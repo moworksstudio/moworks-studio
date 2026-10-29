@@ -1,0 +1,52 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-stream-graph",
+  "type": "hyperframes:block",
+  "title": "Stream Graph Breathing",
+  "description": "Hai dải màu dùng chung một đường ranh, độ dày đổi qua lại theo tỉ lệ như đang thở, số phần trăm đọc ở một vị trí cố định.",
+  "tags": [
+    "chart",
+    "stream",
+    "bands",
+    "loop",
+    "data-storytelling",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "data-stream-graph.html",
+      "target": "compositions/components/data-stream-graph.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/data-stream-graph",
+    "author": "takayu",
+    "call": "MW.dataStreamGraph(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataStreamGraph",
+    "options": {},
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-data-story-stream-breathe",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-data-story-stream-breathe (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-data-story-stream-breathe, written here): Two bands share a centre line c(x) (drifting +-8 px with the phase): A above, B below. Thickness along x is a smooth sine shape that blends by a phase: A 4-28 -> 20-40 px, B 18-38 -> 6-22 px (the shares swap). Phase: hold 0 to 400 ms, -> 1 at 1800, hold to 2600, back to 0 at 4000 ms, easeInOut. Boundary stroked 1.5 px in the background colour, never jumps. Readout at ~71 % of the width: A % / B % with dots on the edges. Params: phase (0 → 1 → 0) · duration (4 s) · colors A / B.",
+    "titleVi": "Biểu đồ dòng hai lớp co giãn"
+  }
+}

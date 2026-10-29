@@ -1,0 +1,57 @@
+<!--
+  SVG Mask Reveal (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=svg-mask-reveal (read 12/10/2026).
+  Nội dung đứng yên, một mặt nạ tròn mở rộng từ một điểm gần góc trái để lộ dần toàn bộ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectCircleMaskReveal(q(".cm"), tl, 0.4, { duration: 1.6, ease: "power2.inOut", exitAt: 2.4 });
+
+  Options (defaults in brackets):
+      - x: centre, 0-1 of the width (0.16)
+      - y: (0.58)
+      - radius: px, enough to clear the far corner (950)
+      - duration: s (0.98)
+      - ease: power2.out (the site's demo: 1.6 s in-out)
+      - guide: show the dashed guide ring
+      - exitAt: s after the start to close in 0.35 s (null)
+
+  Notes: Idea and numbers (TakayuStudio svg-mask-reveal, written here): Element stays still; a circle clip centred at about 16 % x / 58 % y of the element grows radius 0 -> 190 px (enough to clear the far corner) over 980 ms easeOutCubic (demo: 1.6 s ease-in-out); optional thin dashed guide ring. Exit: radius back to 0 over 350 ms ease-in. Params: x, y: tâm (16 % / 58 %) · radius (190 px) · duration (0.98 s) · ease (power2.out).
+-->
+
+<div class="sv"><div class="cm"><b>Hoàng hôn</b></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"x":0.16,"y":0.58,"radius":950,"duration":0.98,"ease":"power2.out","guide":true,"exitAt":null};
+  var run = function (el, tl, at, o) {
+        var ease = gsap.parseEase(o.ease), pin = gsap.parseEase("power2.in"), ring = document.createElement("div"), host = el.parentNode;
+        if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        ring.style.cssText = "position:absolute;border-radius:50%;border:3px dashed rgba(233,235,243,0.35);pointer-events:none;"; host.appendChild(ring);
+        return MW.drive(tl, at, o.exitAt == null ? o.duration : o.exitAt + 0.35, function (t) {
+          var r = o.radius * ease(Math.max(0, Math.min(1, t / o.duration))); if (o.exitAt != null && t > o.exitAt) r = o.radius * (1 - pin(Math.min(1, (t - o.exitAt) / 0.35)));
+          var cx = o.x * el.offsetWidth, cy = o.y * el.offsetHeight; el.style.clipPath = "circle(" + r + "px at " + cx + "px " + cy + "px)";
+          var R = o.radius; ring.style.left = (el.offsetLeft + cx - R) + "px"; ring.style.top = (el.offsetTop + cy - R) + "px"; ring.style.width = ring.style.height = 2 * R + "px"; ring.style.opacity = o.guide ? "1" : "0";
+        });
+      };
+  MW.effectCircleMaskReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,85 @@
+<!--
+  Wave Loop (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-wave-loop (read 12/10/2026).
+  Từng chữ cái nhô lên rồi hạ xuống nhịp nhàng, mỗi chữ trễ hơn chữ trước một chút nên một làn sóng chạy mãi qua dòng chữ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textWaveLoop(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - amp: em (0.3)
+      - period: s (1.2)
+      - delay: s per letter (0.1)
+      - tint: letters near the crest take the accent
+      - accent: 
+      - loop: s, seamless (2.4)
+
+  Notes: Idea and numbers (TakayuStudio tx-wave-loop, written here): Per char: y = −0.3 em × (0.5 − 0.5 cos(2π (t − 0.1 i) / 1.2)) (rise 0 → −0.3 em → 0 over 1.2 s, sine.inOut), delay 100 ms × i (≈0.5 rad per char; recipe 60–100 ms), repeating forever, so the crest travels left → right. Optional: chars near the crest (lift > 60 %) tint accent. Seamless loop 2.4 s. AE: amount 50 + 50 × sin(2πft + index × 0.5). Params: độ nhô (0.3 em) · chu kỳ (1.2 s) · trễ mỗi chữ (100 ms).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Sóng vỗ không ngừng</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"amp":0.3,"period":1.2,"delay":0.1,"tint":true,"accent":"#a99bff","loop":2.4};
+  var run = function (el, tl, at, o) {
+        var ch = MW.split(el, "chars").chars, fs = parseFloat(getComputedStyle(el).fontSize), col = getComputedStyle(el).color, mix = gsap.utils.interpolate(col, o.accent);
+        return MW.drive(tl, at, o.loop, function (t) {
+          ch.forEach(function (c, i) { var v = 0.5 - 0.5 * Math.cos(2 * Math.PI * (t - o.delay * i) / o.period); gsap.set(c, { y: -o.amp * fs * v }); c.style.color = o.tint && v > 0.6 ? mix((v - 0.6) / 0.4) : ""; });
+        });
+      };
+  MW.textWaveLoop = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

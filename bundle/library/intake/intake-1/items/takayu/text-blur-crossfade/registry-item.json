@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-blur-crossfade",
+  "type": "hyperframes:component",
+  "title": "Blur Crossfade",
+  "description": "Từ cũ nhoè 10 px và mờ đi trong khi từ mới rõ dần ở đúng chỗ đó, cùng lúc trong 0.6 giây.",
+  "tags": [
+    "swap",
+    "blur",
+    "crossfade",
+    "text-swap",
+    "smooth",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-blur-crossfade.html",
+      "target": "compositions/components/text-blur-crossfade.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-blur-crossfade",
+    "author": "takayu",
+    "call": "MW.textBlurCrossfade(q(\".bc\"), tl, 0, {});",
+    "function": "MW.textBlurCrossfade",
+    "options": {
+      "a": "the word shown first",
+      "b": "the word in the same spot",
+      "duration": "s (0.6)",
+      "blur": "px (30)",
+      "at": "s (0.8)",
+      "backAt": "s (2.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-blur-crossfade",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-blur-crossfade (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-blur-crossfade, written here): Two words stacked in the same spot. Swap: old opacity 1 → 0 and blur 0 → 10 px while new opacity 0 → 1 and blur 10 → 0 px, together, 0.6 s cubic-bezier(.65,0,.35,1) (recipe range 0.4–0.7 s). Demo: A → B 0.8–1.4 s, back 2.6–3.2 s; new word in accent; loop 3.6 s. Params: to: từ mới · duration (0.6 s) · blur (10 px) · ease (cubic-bezier(.65,0,.35,1)).",
+    "titleVi": "Hai từ nhoè chéo đổi chỗ"
+  }
+}

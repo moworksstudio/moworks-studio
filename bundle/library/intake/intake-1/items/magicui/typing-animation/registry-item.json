@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "typing-animation",
+  "type": "hyperframes:component",
+  "title": "Typing Animation",
+  "description": "Types text with a blinking cursor; with several words it types, pauses, deletes and types the next one (100 ms a letter, 50 ms to delete, 1 s pause).",
+  "tags": [
+    "typewriter",
+    "typing",
+    "cursor",
+    "words",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "typing-animation.html",
+      "target": "compositions/components/typing-animation.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 9,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/typing-animation",
+    "author": "magicui",
+    "call": "MW.typingAnimation(q(\".t1\"), tl, 0.3, { words: [\"Thiết kế\", \"Xây dựng\", \"Ra mắt\"], loop: true, cycles: 3, typeSpeed: 0.08, deleteSpeed: 0.05, pauseDelay: 1 });",
+    "function": "MW.typingAnimation",
+    "options": {
+      "words": "list (or the element's own text)",
+      "typeSpeed": "s a letter (0.1)",
+      "deleteSpeed": "s a letter (typeSpeed / 2)",
+      "pauseDelay": "s (1)",
+      "delay": "s (0)",
+      "loop": "false",
+      "cycles": "words typed when looping (two passes)",
+      "showCursor": "true",
+      "blinkCursor": "true",
+      "cursorStyle": "line | block | underscore (line)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/typing-animation.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/typing-animation.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Letters are graphemes (NFC), so a Vietnamese letter with its marks is typed in one step.",
+    "titleVi": "Gõ, xoá rồi gõ từ tiếp theo"
+  }
+}

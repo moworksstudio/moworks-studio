@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "title-credits-roll",
+  "type": "hyperframes:block",
+  "title": "End Credits Roll",
+  "description": "Cột danh sách cuối phim (chức danh nhỏ, tên to) cuộn từ dưới lên với số px nguyên mỗi khung nên chạy mượt không giật.",
+  "tags": [
+    "credits",
+    "roll",
+    "scroll",
+    "end-card",
+    "text-broadcast-telop",
+    "smooth",
+    "broadcast-telop",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "title-credits-roll.html",
+      "target": "compositions/components/title-credits-roll.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/title-credits-roll",
+    "author": "takayu",
+    "call": "MW.titleCreditsRoll(q(\".cr\"), tl, 0, {});",
+    "function": "MW.titleCreditsRoll",
+    "options": {
+      "column": "the moving column (its first child is one pass of the list)",
+      "loop": "s for one pass (6)",
+      "minPx": "px a frame at least (4)",
+      "loops": "(1)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-credits-roll",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-credits-roll (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-credits-roll, written here): Rows: role (mono 10 px, mute) with the name (18 px) 20 px below, centred, rows evenly spaced. The column moves up at a whole number of px per 60 fps frame (2 px = 120 px/s; 1–4 allowed), position = floor(t × 60) × px, never fractional; duration = (content height + frame height) ÷ speed; linear. Recipe colours: text #ebebeb on #101010. Demo loops the rows seamlessly in 6 s. Params: tốc độ (2 px / khung ở 60 fps) · cỡ chức danh / tên (10 / 18 px) · màu (#ebebeb trên #101010). A whole number of px per 60 fps frame, never fractional; recipe colours #ebebeb on #101010.",
+    "titleVi": "Danh sách cuối phim cuộn lên đều"
+  }
+}

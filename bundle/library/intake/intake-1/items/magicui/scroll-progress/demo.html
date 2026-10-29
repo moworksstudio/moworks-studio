@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Scroll Progress - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-scroll-progress { position: absolute; left: 0; right: 0; top: 0; z-index: 50; transform-origin: left; background: linear-gradient(to right, #A97CF8, #F38CB8, #FDCC92); }
+.article { width: 1300px; } .article h1 { margin: 0 0 30px; font-size: 80px; } .article p { font-size: 34px; line-height: 1.6; opacity: .7; margin: 0 0 24px; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="6">
+<div class="mw-scroll-progress"></div><div class="center"><div class="article"><h1>Cách làm video giải thích</h1>
+<p>Bắt đầu từ câu chuyện: một vấn đề, một giải pháp, một lời kêu gọi. Mỗi cảnh chỉ nói một ý.</p><p>Chuyển động phải phục vụ ý nghĩa: chữ vào khi giọng đọc nhắc tới, hình ảnh rời đi khi ý đã xong.</p></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"duration":5,"progress":null,"height":1};
+  var run = function (el, tl, at, o) {
+      el.style.height = o.height + "px";
+      if (!o.progress) { tl.fromTo(el, { scaleX: 0 }, { scaleX: 1, duration: o.duration, ease: "none", immediateRender: true }, at); return at + o.duration; }
+      var K = o.progress, s = { t: 0 }, set = function () {
+        var p = K[0][1];
+        for (var k = 1; k < K.length; k++) if (s.t <= K[k][0]) { var a = K[k - 1], b = K[k]; p = a[1] + (b[1] - a[1]) * (s.t - a[0]) / (b[0] - a[0]); break; } else p = K[k][1];
+        el.style.transform = "scaleX(" + p + ")";
+      };
+      set();
+      var end = K[K.length - 1][0];
+      tl.fromTo(s, { t: 0 }, { t: end, duration: end, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + end;
+    };
+  MW.scrollProgress = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.scrollProgress(q(".mw-scroll-progress"), tl, 0.3, { height: 10, progress: [[0, 0], [1.5, 0.3], [2.5, 0.35], [4.5, 0.9], [5.4, 1]] });
+          tl.set({}, {}, 6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

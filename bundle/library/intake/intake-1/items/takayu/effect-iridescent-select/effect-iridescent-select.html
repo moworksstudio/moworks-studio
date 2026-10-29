@@ -1,0 +1,109 @@
+<!--
+  Oil Slick Selection (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=catalog-ui-material-oil-slick (read 12/10/2026).
+  Chọn một dòng trong danh sách, một mảng mềm như vệt dầu loang nở ra quanh dòng đó, mép gợn chậm, bên trong là các dải màu óng ánh chảy chéo.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectIridescentSelect(q(".gm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - rows: the list rows
+      - row: index selected (1)
+      - at: s (0.55)
+      - accent: outline
+      - seed: edge noise
+      - loop: s (4.2)
+
+  Notes: Idea and numbers (TakayuStudio catalog-ui-material-oil-slick, written here): List card 144x128 r12 (rows 42 px apart). The selected row gets a superellipse blob (exponent 4) 124x32, growing from 80 % width / 60 % height on a spring k160 d14 at 0.55 s, edge noise ±5 / ±3.5 px drifting over the 4.2 s cycle, filled with diagonal bands in 5 colours (2 px lines, 8 px apart, slope 0.45, 5 px sine wobble) at 50 % flowing 40 px per 4.2 s; the same bands at 7 % over the card; 1.5 px accent outline. Out 3.55-3.95 s. Params: blob (124x32, k160 c14) · edge noise (±5 / ±3.5 px) · bands (5 màu, 2 px, cách 8 px) · flow (40 px / 4.2 s). A superellipse (exponent 4) grows on a spring k160 c14 with a slowly drifting edge; five-colour diagonal bands flow inside it at 50 % and over the card at 7 %.
+-->
+
+<div class="gm"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.noise = MW.noise || function (seed) {
+    var r = MW.rand(seed), v = []; for (var i = 0; i < 512; i++) v.push(r() * 2 - 1);
+    return function (t) { var i = Math.floor(t), f = t - i, a = v[((i % 512) + 512) % 512], b = v[(((i + 1) % 512) + 512) % 512], s = f * f * (3 - 2 * f); return a + (b - a) * s; };
+  };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  MW.span = MW.span || function (t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); };
+  MW.yAt = MW.yAt || function (pts, x) { if (x <= pts[0][0]) return pts[0][1]; for (var i = 1; i < pts.length; i++) if (x <= pts[i][0]) { var u = (x - pts[i - 1][0]) / ((pts[i][0] - pts[i - 1][0]) || 1); return pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * u; } return pts[pts.length - 1][1]; };
+  MW.polyToX = MW.polyToX || function (c, pts, x) { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) { if (pts[i][0] <= x) c.lineTo(pts[i][0], pts[i][1]); else { c.lineTo(x, MW.yAt(pts, x)); break; } } return [Math.min(x, pts[pts.length - 1][0]), MW.yAt(pts, Math.min(x, pts[pts.length - 1][0]))]; };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"rows":["Bản nháp","Đang dựng","Đã duyệt","Lưu trữ"],"row":1,"at":0.55,"accent":"#8b7bff","seed":4,"loop":4.2};
+  var run = function (el, tl, at, o) {
+        var S = MW.stage320(el), c = S.ctx, sp = MW.spring(160, 14), nx = MW.noise(o.seed), L = 88, Tp = 36, W = 144, H = 128, rowY = function (i) { return Tp + 20 + i * 30; }, cols = ["#ff8fb1", "#ffd23d", "#7af0b0", "#3dd6f5", "#a693ff"];
+        var bands = function (alpha, t) { c.globalAlpha = alpha; c.lineWidth = 2; for (var k = -30; k < 40; k++) { c.strokeStyle = cols[((k % 5) + 5) % 5]; c.beginPath(); for (var x = L - 10; x <= L + W + 10; x += 6) { var y = Tp + k * 8 + (x - L) * 0.45 - (t / 4.2) * 40 + 5 * Math.sin(x / 18 + t); if (x === L - 10) c.moveTo(x, y); else c.lineTo(x, y); } c.stroke(); } c.globalAlpha = 1; };
+        var blob = function (cx, cy, a, b, t) { c.beginPath(); for (var k = 0; k <= 72; k++) { var th = k / 72 * 2 * Math.PI, cs = Math.cos(th), sn = Math.sin(th), ra = a + 5 * nx(th * 1.3 + t * 0.5), rb = b + 3.5 * nx(th * 1.3 + t * 0.5 + 40), x = cx + ra * Math.sign(cs) * Math.pow(Math.abs(cs), 0.5), y = cy + rb * Math.sign(sn) * Math.pow(Math.abs(sn), 0.5); if (!k) c.moveTo(x, y); else c.lineTo(x, y); } c.closePath(); };
+        return MW.drive(tl, at, o.loop, function (t) {
+          S.clear(); MW.rr(c, L, Tp, W, H, 12); c.fillStyle = "#151a24"; c.fill(); c.save(); MW.rr(c, L, Tp, W, H, 12); c.clip(); bands(0.07, t);
+          var out = 1 - MW.span(t, 3.55, 3.95), g = t > o.at ? sp.at(t - o.at) : 0, cy = rowY(o.row);
+          if (g > 0 && out > 0) { var a = 62 * (0.8 + 0.2 * g), b = 16 * (0.6 + 0.4 * g); c.globalAlpha = out; blob(L + W / 2, cy, a, b, t); c.save(); c.clip(); c.fillStyle = "#1b2130"; c.fillRect(L, cy - 30, W, 60); bands(0.5 * out, t); c.restore(); c.globalAlpha = out; blob(L + W / 2, cy, a, b, t); c.strokeStyle = o.accent; c.lineWidth = 1.5; c.stroke(); c.globalAlpha = 1; }
+          o.rows.forEach(function (s, i) { var y = rowY(i); c.fillStyle = "#2a3350"; c.beginPath(); c.arc(L + 18, y, 5, 0, 2 * Math.PI); c.fill(); MW.txt(c, s, L + 30, y + 0.5, 8, i === o.row && g > 0.5 && out > 0.5 ? "#fff" : "#c9d2ea", 700, "left"); });
+          c.restore(); var cp = MW.path([[0, 290, 190], [o.at - 0.12, L + 110, rowY(o.row) + 4], [o.at + 0.4, L + 110, rowY(o.row) + 4], [o.at + 1, 292, 172]], t, "power2.inOut"); MW.cursor(c, cp[0], cp[1], Math.abs(t - o.at) < 0.06 ? 0.85 : 1);
+        });
+      };
+  MW.effectIridescentSelect = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

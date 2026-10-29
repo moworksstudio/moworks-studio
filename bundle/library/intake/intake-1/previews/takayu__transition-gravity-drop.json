@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/transition-gravity-drop",
+  "hash": "76e2004131e079ea",
+  "at": "2026-10-17T07:22:29.153Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__transition-gravity-drop.mp4",
+    "poster": "previews/takayu__transition-gravity-drop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "1e9ce6955d424479e621b37008d0450ac9c429763ce235011ca81cdfe2e78122",
+    "size": 16874,
+    "seconds": 26.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

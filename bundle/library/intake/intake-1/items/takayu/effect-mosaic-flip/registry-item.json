@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-mosaic-flip",
+  "type": "hyperframes:component",
+  "title": "Mosaic Flip",
+  "description": "Hình được chia 4 × 4 ô, từng ô lật quanh trục dọc theo làn sóng chéo từ góc trên trái, mặt sau là phần của hình kế tiếp.",
+  "tags": [
+    "tiles",
+    "flip",
+    "3d",
+    "swap",
+    "effects-transitions",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-mosaic-flip.html",
+      "target": "compositions/components/effect-mosaic-flip.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-mosaic-flip",
+    "author": "takayu",
+    "call": "MW.effectMosaicFlip(q(\".mf\"), tl, 0.3, { backAt: 1.9 });",
+    "function": "MW.effectMosaicFlip",
+    "options": {
+      "grid": "(4)",
+      "stagger": "s per diagonal step (0.114)",
+      "duration": "s per tile (0.45, ease-in-out cubic)",
+      "perspective": "px (1600)",
+      "a": "background of the first picture",
+      "b": "background of the next",
+      "backAt": "s after the start for the return wave (null)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=mosaic-flip",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=mosaic-flip (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio mosaic-flip, written here): 4 x 4 tiles, each with face A (part of the current picture) and face B (part of the next). Tile (row r, col c) starts at (r + c) x 114 ms, rotateY 0 -> 180 deg over 450 ms easeInOutCubic about its centre; swap faces at 90 deg (never show a back face), lift scaleY 1 + 0.08 x sin(angle). Diagonal wave top-left to bottom-right, ~1.15 s. Return wave reversed, 40 ms apart, 350 ms per tile. Params: grid (4 × 4) · stagger chéo (114 ms) · duration mỗi ô (0.45 s) · faceA / faceB. Faces swap at 90°, so no back face shows; the wave runs from the top left to the bottom right.",
+    "titleVi": "Lật ô vuông đổi sang hình mới"
+  }
+}

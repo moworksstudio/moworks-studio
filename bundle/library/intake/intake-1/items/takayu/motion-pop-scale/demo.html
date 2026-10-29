@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Pop Scale - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .ps-w { display: flex; align-items: flex-end; gap: 40px; } .ps-a { width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #b8a9ff, #6a4cf0); flex: none; }
+.ps { position: relative; padding: 60px 80px; border-radius: 80px; background: #f1efff; color: #1b1440; font-size: 64px; font-weight: 800; margin-bottom: 120px; opacity: 0; }
+.ps::after { content: ""; position: absolute; left: -10px; bottom: -6px; width: 80px; height: 80px; background: #f1efff; clip-path: polygon(0 100%, 100% 0, 100% 70%); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.5">
+<div class="st"><div class="ps-w"><div class="ps-a"></div><div class="ps">Chào bạn!</div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":0.05,"peak":1.16,"peakAt":0.72,"duration":0.52,"fade":0.12,"origin":"50% 50%","exitAt":null,"exit":0.22};
+  var run = function (el, tl, at, o) {
+        var p2 = gsap.parseEase("power2.out"), io = gsap.parseEase("power2.inOut"), pin = gsap.parseEase("power2.in"), tp = o.duration * o.peakAt; gsap.set(el, { transformOrigin: o.origin });
+        return MW.drive(tl, at, o.exitAt == null ? o.duration : o.exitAt + o.exit, function (t) {
+          var s = t < tp ? o.from + (o.peak - o.from) * p2(t / tp) : o.peak + (1 - o.peak) * io(Math.min(1, (t - tp) / (o.duration - tp))), a = Math.min(1, t / o.fade);
+          if (o.exitAt != null && t > o.exitAt) { var x = pin(Math.min(1, (t - o.exitAt) / o.exit)); s *= 1 - 0.4 * x; a *= 1 - x; }
+          gsap.set(el, { scale: s }); el.style.opacity = String(a);
+        });
+      };
+  MW.motionPopScale = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionPopScale(q(".ps"), tl, 0.3, { exitAt: 1.8 });
+          tl.set({}, {}, 2.5);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

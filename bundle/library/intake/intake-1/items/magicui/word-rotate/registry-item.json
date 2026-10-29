@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "word-rotate",
+  "type": "hyperframes:component",
+  "title": "Word Rotate",
+  "description": "One word from a list at a time: every 2.5 s the word drops out downward and the next drops in from above (0.25 s each, ease-out).",
+  "tags": [
+    "rotate",
+    "swap",
+    "words",
+    "headline",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "word-rotate.html",
+      "target": "compositions/components/word-rotate.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/word-rotate",
+    "author": "magicui",
+    "call": "MW.wordRotate(q(\".mw-word-rotate\"), tl, 0.2, { words: [\"thiết kế\", \"xây dựng\", \"ra mắt\"], duration: 2.5, cycles: 3, distance: 90 });",
+    "function": "MW.wordRotate",
+    "options": {
+      "words": "list",
+      "duration": "s per word (2.5)",
+      "distance": "px (50)",
+      "cycles": "words shown (one loop of the list)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/word-rotate.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/word-rotate.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "mode 'wait': exit first (0.25 s), then enter (0.25 s). The holder clips (overflow hidden, 8 px padding as upstream's py-2) with room for Vietnamese marks.",
+    "titleVi": "Từ thay phiên rơi từ trên xuống"
+  }
+}

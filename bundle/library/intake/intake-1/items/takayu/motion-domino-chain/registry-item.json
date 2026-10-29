@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-domino-chain",
+  "type": "hyperframes:component",
+  "title": "Cause-and-effect Chain",
+  "description": "Chín quân domino đổ lần lượt, mỗi quân trễ 120 ms như quân trước làm đổ quân sau.",
+  "tags": [
+    "stagger",
+    "chain",
+    "principle",
+    "principles",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-domino-chain.html",
+      "target": "compositions/components/motion-domino-chain.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-domino-chain",
+    "author": "takayu",
+    "call": "MW.motionDominoChain(q(\"#demo\"), tl, 0.3, { standAt: 2.1 });",
+    "function": "MW.motionDominoChain",
+    "options": {
+      "items": "the dominoes, in order",
+      "angle": "degrees (66)",
+      "each": "s per fall (0.25, power2.in)",
+      "stagger": "s (0.12)",
+      "standAt": "s after the start to stand back up (null)",
+      "stand": "s (0.3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=cause",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=cause (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio cause, written here): Nine dominoes (8×50 px, 30 px apart, pivot at the base): each tips 0 → 66° in 250 ms power2.in, 120 ms after the previous, so each fall seems to cause the next (recipe: element n starts at n × 100 ms, 400 ms ease-out each; 2–6 frames apart, never all at once). Site: all stand back up over 300 ms. Params: angle (66°) · each (0.25 s) · stagger (0.12 s) · pivot (đáy).",
+    "titleVi": "Chuỗi nhân quả domino"
+  }
+}

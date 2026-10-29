@@ -1,0 +1,79 @@
+<!--
+  Scroll Velocity Skew (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=velocity-skew (read 12/10/2026).
+  Danh sách thẻ cuộn nhanh thì các thẻ nghiêng theo hướng cuộn (tối đa 9°), dừng lại là thẳng ngay.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiVelocitySkewFeed(q(".gm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - factor: degrees per unit/s of scroll speed (0.012), ±9°
+      - k: spring stiffness (520)
+      - c: damping (30)
+
+  Notes: Idea and numbers (TakayuStudio velocity-skew, written here): Viewport 160x158; cards 128x50 r8 every 62 px. List scrolls 0 → 190 px (0.3-0.85 s power2.inOut), holds, returns 1.6-2.15 s. Each card skewY (around its centre) = clamp(speed px/s × 0.012, −9°, +9°), smoothed by a spring k520 c30 so it is back at 0° about 180 ms after the scroll stops. Only small surfaces lean. Params: scroll (190 px) · factor (0.012 °/(px/s)) · max (9°) · spring (k520 c30).
+-->
+
+<div class="gm"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  MW.span = MW.span || function (t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); };
+  MW.yAt = MW.yAt || function (pts, x) { if (x <= pts[0][0]) return pts[0][1]; for (var i = 1; i < pts.length; i++) if (x <= pts[i][0]) { var u = (x - pts[i - 1][0]) / ((pts[i][0] - pts[i - 1][0]) || 1); return pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * u; } return pts[pts.length - 1][1]; };
+  MW.polyToX = MW.polyToX || function (c, pts, x) { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) { if (pts[i][0] <= x) c.lineTo(pts[i][0], pts[i][1]); else { c.lineTo(x, MW.yAt(pts, x)); break; } } return [Math.min(x, pts[pts.length - 1][0]), MW.yAt(pts, Math.min(x, pts[pts.length - 1][0]))]; };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"factor":0.012,"k":520,"c":30};
+  var run = function (el, tl, at, o) {
+        var S = MW.stage320(el), c = S.ctx, io = gsap.parseEase("power2.inOut"), cols = ["#3dd6f5", "#a693ff", "#ffd23d", "#ff5d8f", "#3ddc84", "#ffb547", "#8b7bff"], dt = 1 / 240;
+        var Y = function (t) { return 190 * (io(MW.span(t, 0.3, 0.85)) - io(MW.span(t, 1.6, 2.15))); };
+        return MW.drive(tl, at, 2.8, function (t) {
+          S.clear(); var sk = 0, v = 0; for (var s = 0; s < t; s += dt) { var sp = (Y(s + dt) - Y(s)) / dt, target = Math.max(-9, Math.min(9, sp * o.factor)), a = o.k * (target - sk) - o.c * v; v += a * dt; sk += v * dt; }
+          var vx = 80, vy = 21; c.save(); MW.rr(c, vx, vy, 160, 158, 14); c.fillStyle = "#10131d"; c.fill(); c.clip();
+          for (var i = 0; i < 7; i++) { var y = vy + 10 + 62 * i - Y(t); c.save(); c.translate(vx + 80, y + 25); c.transform(1, Math.tan(sk * Math.PI / 180), 0, 1, 0, 0); MW.rr(c, -64, -25, 128, 50, 8); c.fillStyle = "#1b2130"; c.fill(); c.fillStyle = cols[i]; MW.rr(c, -56, -17, 34, 34, 6); c.fill(); c.fillStyle = "#3a4466"; c.fillRect(-14, -12, 60, 6); c.fillRect(-14, 2, 40, 6); c.restore(); }
+          c.restore(); c.strokeStyle = "#3a4466"; c.lineWidth = 2; MW.rr(c, vx, vy, 160, 158, 14); c.stroke();
+        });
+      };
+  MW.uiVelocitySkewFeed = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-loot-light-beam",
+  "type": "hyperframes:block",
+  "title": "Loot Beam Column",
+  "description": "Món đồ rơi xuống đất nảy vài nhịp, rồi một cột sáng màu mọc thẳng lên từ chỗ nó nằm, lõi sáng rực, vòng dẹt dưới chân thở nhẹ và các đốm sáng bay dọc theo cột; cuối cùng cột thu về.",
+  "tags": [
+    "beam",
+    "glow",
+    "sparkle",
+    "loot",
+    "game-impact-fx",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-loot-light-beam.html",
+      "target": "compositions/components/effect-loot-light-beam.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-loot-light-beam",
+    "author": "takayu",
+    "call": "MW.effectLootLightBeam(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectLootLightBeam",
+    "options": {
+      "dropAt": "s (0.3)",
+      "beamAt": "s (0.9)",
+      "height": "units of the beam (140 of 200)",
+      "retractAt": "s (3.55)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-impact-fx-loot-beam",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-impact-fx-loot-beam (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-impact-fx-loot-beam, written here): px @320x200. Item drops y 30 → ground with a bounce ease (500 ms from 0.3 s). Beam grows 0 → 140 px up from it in 450 ms outExpo at 0.9 s: width 16 ± 2 px (sine 8 rad/s), accent gradient 80 % → 0 upward, glowing core line (3 px, blur 12) over the lower 75 %; flat ground ring (height 0.3 × width) r 20 ± 4 px (sine 6 rad/s), stroke 4; 10 yellow sparkles rise along it on a 1.43 s loop, fading. Retracts top-down 350 ms in-cubic at 3.55 s. Params: dropAt: lúc rơi (0.3 s) · beamAt: lúc cột mọc (0.9 s) · height: cao (140 px) · width: rộng (16 ± 2 px) · sparkles: số đốm (10).",
+    "titleVi": "Cột sáng mọc từ món đồ rơi"
+  }
+}

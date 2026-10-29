@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-swing-door",
+  "hash": "23e24fa35caef69d",
+  "at": "2026-10-17T08:43:57.037Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-swing-door.mp4",
+    "poster": "previews/takayu__text-swing-door.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "249798e6344e560d89fe73af270b7d642ccac389f2f85374d13ef30cf1975cae",
+    "size": 13176,
+    "seconds": 30.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

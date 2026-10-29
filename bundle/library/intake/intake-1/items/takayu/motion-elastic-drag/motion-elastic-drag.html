@@ -1,0 +1,99 @@
+<!--
+  Elastic Drag (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=catalog-ui-button-elastic-drag (read 12/10/2026).
+  Con trỏ kéo nút ra xa theo một đường cong, một sợi dây chun nối với chỗ cũ mảnh dần khi căng; thả ra nút bật về chỗ cũ bằng lò xo, vượt qua một chút.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionElasticDrag(q(".ed"), tl, 0, { cursor: ".ui-cursor" });
+
+  Options (defaults in brackets):
+      - grab: s (0.42)
+      - dragAt: s (0.5)
+      - drag: s (0.75, power2.inOut)
+      - release: s (1.45)
+      - to: [x, y] px dragged ([690, −184])
+      - bow: px the drag bows upward (54)
+      - k: spring stiffness home (180)
+      - c: damping (11): about 24 % overshoot
+      - tether: [base, extra, falloff px]: width = base + extra / (1 + distance / falloff) ([8, 32, 160])
+      - accent: 
+      - cursor: an optional cursor that makes the clicks
+      - approach: [x, y] px the cursor comes from
+      - lead: s it arrives before a click
+
+  Notes: Idea and numbers (TakayuStudio catalog-ui-button-elastic-drag, written here): Chip 84x36 r12 at its home (dashed outline). Grabbed at 0.42 s, dragged 1:1 from (104,104) to (232,70) over 0.5-1.25 s power2.inOut with a 10 px upward bow; held; released at 1.45 s it springs home on k180 c11 (about 24 % overshoot). A tether from the home dot to the chip, width 2 + 8 / (1 + distance / 30) px, 55 % opacity. Params: from / to · drag (0.75 s, power2.inOut) · release (1.45 s) · spring (k180 c11) · tether.
+-->
+
+<div class="ui-wrap"><div class="bw"><div class="b b-acc ed" style="height:150px;padding:0 70px;border-radius:44px;font-size:48px">Kéo tôi</div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  var defaults = {"grab":0.42,"dragAt":0.5,"drag":0.75,"release":1.45,"to":[690,-184],"bow":54,"k":180,"c":11,"tether":[8,32,160],"accent":"#8b7bff","cursor":null,"approach":[260,200],"lead":0.12};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var cur = o.cursor ? (host.querySelector(o.cursor) || document.querySelector(o.cursor)) : null, curKeys = null;
+  var cursorPlan = function (clicks) { if (!cur) return; var base = (cur.offsetParent || host).getBoundingClientRect(), k = [];
+    clicks.forEach(function (c, i) { var r = (c[4] || el).getBoundingClientRect(), x = r.left - base.left + r.width * c[1], y = r.top - base.top + r.height * c[2];
+      if (!i) k.push([0, x + o.approach[0], y + o.approach[1]]); k.push([Math.max(0.01, c[0] - o.lead), x, y]); k.push([c[0] + (c[3] || 0.12) + 0.3, x, y]); });
+    var z = k[k.length - 1]; k.push([z[0] + 0.5, z[1] + o.approach[0] * 0.6, z[2] + o.approach[1] * 0.6]); curKeys = { k: k, c: clicks }; };
+  var cursorAt = function (t) { if (!cur || !curKeys) return; var p = MW.path(curKeys.k, t, "power2.inOut"), dn = 0; curKeys.c.forEach(function (c) { var u = t - c[0]; if (u >= 0 && u < (c[3] || 0.12)) dn = 1; });
+    gsap.set(cur, { x: p[0] - 12, y: p[1] - 6, scale: dn ? 0.86 : 1, transformOrigin: "20% 10%" }); };
+  var io = gsap.parseEase("power2.inOut"), sp = MW.spring(o.k, o.c), ns = "http://www.w3.org/2000/svg", svg = document.createElementNS(ns, "svg"), ln = document.createElementNS(ns, "line"), hm = document.createElement("div"), hx = el.offsetLeft + el.offsetWidth / 2, hy = el.offsetTop + el.offsetHeight / 2;
+  svg.setAttribute("width", host.clientWidth); svg.setAttribute("height", host.clientHeight); svg.style.cssText = "position:absolute;left:0;top:0;overflow:visible;pointer-events:none;"; ln.setAttribute("stroke", o.accent); ln.setAttribute("stroke-linecap", "round"); ln.setAttribute("opacity", "0.55"); svg.appendChild(ln); host.insertBefore(svg, el);
+  hm.style.cssText = "position:absolute;pointer-events:none;box-sizing:border-box;border:4px dashed #3a4466;left:" + el.offsetLeft + "px;top:" + el.offsetTop + "px;width:" + el.offsetWidth + "px;height:" + el.offsetHeight + "px;border-radius:" + getComputedStyle(el).borderRadius + ";"; host.insertBefore(hm, svg);
+  var D = function (t) { if (t > o.release) { var s = sp.at(t - o.release); return [o.to[0] * (1 - s), o.to[1] * (1 - s)]; } var u = io(Math.max(0, Math.min(1, (t - o.dragAt) / o.drag))); return [o.to[0] * u, o.to[1] * u - o.bow * Math.sin(Math.PI * u)]; };
+  var dk = [[0, hx + o.approach[0], hy + o.approach[1]], [o.grab - 0.06, hx, hy]];
+  return MW.drive(tl, at, o.release + sp.duration + 0.3, function (t) {
+    var p = D(t), d = Math.hypot(p[0], p[1]); gsap.set(el, { x: p[0], y: p[1] });
+    ln.setAttribute("x1", hx); ln.setAttribute("y1", hy); ln.setAttribute("x2", hx + p[0]); ln.setAttribute("y2", hy + p[1]); ln.setAttribute("stroke-width", (o.tether[0] + o.tether[1] / (1 + d / o.tether[2])).toFixed(2)); ln.style.opacity = d > 2 ? "1" : "0";
+    if (cur) { var c = t < o.grab ? MW.path(dk, t, "power2.out") : t <= o.release ? [hx + p[0], hy + p[1]] : [hx + o.to[0] + 120 * Math.min(1, (t - o.release) / 0.5), hy + o.to[1] + 160 * Math.min(1, (t - o.release) / 0.5)]; gsap.set(cur, { x: c[0] - 12, y: c[1] - 6, scale: t >= o.grab && t <= o.release ? 0.86 : 1, transformOrigin: "20% 10%" }); }
+  });
+  };
+  MW.motionElasticDrag = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

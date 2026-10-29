@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Directional Slash Reveal - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; }
+.gm { position: absolute; inset: 0; } .gm .w { font-weight: 900; letter-spacing: -0.02em; white-space: nowrap; } .gm .lab { font-size: 34px; font-weight: 700; color: #8f9ab3; letter-spacing: 0.08em; white-space: nowrap; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4">
+<div class="gm"><div class="w" style="font-size:260px;color:#fff">CHÉM</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"at":0.5,"duration":0.35,"tilt":24,"band":70,"outAt":3.5};
+  var run = function (el, tl, at, o) {
+        var S = MW.stage320(el), w = el.querySelector(".w"), ctx = S.ctx, io = gsap.parseEase("power2.inOut"), out = gsap.parseEase("power2.out"), tn = Math.tan(o.tilt * Math.PI / 180), k = S.k;
+        S.put(w, 160, 96);
+        return MW.drive(tl, at, o.outAt + 0.35, function (t) {
+          var u = Math.max(0, Math.min(1, (t - o.at) / o.duration)), X = -80 + 480 * io(u);
+          // the word shows only on the side the slash has passed (its edge on the line, leaning by the tilt)
+          var r = w.getBoundingClientRect(), hb = el.getBoundingClientRect(), wx = (r.left - hb.left - S.ox) / k, wy = (r.top - hb.top - S.oy) / k, wh = r.height / k;
+          var xt = X + (wy - 100) * tn, xb = X + (wy + wh - 100) * tn;
+          var cl = t >= o.outAt ? Math.min(1, (t - o.outAt) / 0.35) : 0;
+          w.style.clipPath = "polygon(" + [[-50, -20], [(xt - wx) * k, -20], [(xb - wx) * k, wh * k + 20], [-50, wh * k + 20]].map(function (p) { return p[0] + "px " + p[1] + "px"; }).join(",") + ")";
+          if (u >= 1) w.style.clipPath = "none"; w.style.opacity = String(1 - cl);
+          S.clear();
+          var line = function (x, a, wd, col) { ctx.globalAlpha = a; ctx.strokeStyle = col; ctx.lineWidth = wd; ctx.beginPath(); ctx.moveTo(x - 110 * tn, -10); ctx.lineTo(x + 110 * tn, 210); ctx.stroke(); };
+          if (u > 0 && u < 1) {
+            ctx.globalAlpha = 0.25; ctx.fillStyle = "#8b7bff"; ctx.beginPath(); ctx.moveTo(X - 110 * tn - o.band, -10); ctx.lineTo(X - 110 * tn, -10); ctx.lineTo(X + 110 * tn, 210); ctx.lineTo(X + 110 * tn - o.band, 210); ctx.fill();
+            line(X, 1, 3, "#8b7bff"); line(X, 1, 1, "#e8ebf3");
+            for (var s = 0; s < 4; s++) { var yy = 40 + s * 38, xx = X + (yy - 100) * tn; ctx.globalAlpha = 1; ctx.fillStyle = "#ffd23d"; ctx.fillRect(xx - 2 - s * 3, yy - 1, 4, 2); }
+          }
+          if (t > o.at + 0.35 && t < 1.25) { var g = Math.max(0, Math.min(1, (t - 0.85) / 0.4)); line(400 + 30 * g - 80 + 0, (1 - g) * 0.6, 2, "#8b7bff"); }
+          var ul = Math.max(0, Math.min(1, (t - 0.9) / 0.3)); if (ul > 0 && cl < 1) { ctx.globalAlpha = 1 - cl; ctx.fillStyle = "#8b7bff"; var L = 96 * out(ul); ctx.fillRect(160 - L / 2, 128, L, 3); }
+          ctx.globalAlpha = 1;
+        });
+      };
+  MW.textSlashReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textSlashReveal(q(".gm"), tl, 0, {});
+          tl.set({}, {}, 4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+#!/bin/sh
+# Back up the app's source to Google Drive after every commit (packages/backup). Runs in the background so the commit is not slowed down.
+cd "$(git rev-parse --show-toplevel)" || exit 0
+mkdir -p runtime/logs
+(node tools/backup.mjs --app >> runtime/logs/backup.log 2>&1 &) >/dev/null 2>&1
+exit 0

@@ -1,0 +1,60 @@
+<!--
+  Simple Turn (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=simple-turn (read 12/10/2026).
+  Ô mũi tên xoay 180° quanh tâm, tăng tốc rồi giảm tốc, có bóng mờ theo sau.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionSimpleTurn(q(".st-t"), tl, 0.3, { duration: 0.8 });
+
+  Options (defaults in brackets):
+      - duration: s per turn (0.7; the site's demo 0.8)
+      - rotation: degrees a turn (180)
+      - ease: (power2.inOut)
+      - ghosts: trailing copies (3)
+      - gap: s between copies (0.035)
+      - ghostOpacity: (0.12)
+      - turns: turns in a row (2)
+      - hold: s between turns (0.8)
+
+  Notes: Idea and numbers (TakayuStudio simple-turn, written here): Arrow tile rotates 0 → 180° about its centre, power2.inOut (bezier .65,0,.35,1): recipe 700 ms, demo 800 ms; after an 800 ms hold it turns another 180°. Three faint copies (opacity 0.12) trail 35 / 70 / 105 ms behind while it moves. Use a shape whose orientation reads. Params: duration (0.7 s) · rotation (180°) · ease (power2.inOut) · ghosts (3).
+-->
+
+<div class="st"><div class="st-g"></div><div class="st-t"><svg viewBox="0 0 24 24" width="170" height="170"><path d="M12 2.5 L20.5 12.5 H15 V21.5 H9 V12.5 H3.5 Z" fill="#fff"/></svg></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.7,"rotation":180,"ease":"power2.inOut","ghosts":3,"gap":0.035,"ghostOpacity":0.12,"turns":2,"hold":0.8};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var ghost = function () { var g = el.cloneNode(true); g.removeAttribute("id"); g.style.position = "absolute"; g.style.margin = "0"; g.style.pointerEvents = "none"; g.style.opacity = "0";
+    g.style.left = el.offsetLeft + "px"; g.style.top = el.offsetTop + "px"; g.style.width = el.offsetWidth + "px"; g.style.height = el.offsetHeight + "px"; host.insertBefore(g, el); return g; };
+  var e = gsap.parseEase(o.ease), gh = []; for (var i = 0; i < o.ghosts; i++) gh.push(ghost());
+  var ang = function (t) { var a = 0; for (var k = 0; k < o.turns; k++) a += o.rotation * e(Math.max(0, Math.min(1, (t - k * (o.duration + o.hold)) / o.duration))); return a; };
+  return MW.drive(tl, at, o.turns * (o.duration + o.hold), function (t) {
+    var a = ang(t); gsap.set(el, { rotation: a });
+    gh.forEach(function (g, i) { var b = ang(t - o.gap * (i + 1)); gsap.set(g, { rotation: b }); g.style.opacity = Math.abs(a - b) > 0.5 ? String(o.ghostOpacity) : "0"; });
+  });
+  };
+  MW.motionSimpleTurn = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

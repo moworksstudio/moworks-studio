@@ -1,0 +1,41 @@
+Moworks Studio Personal Use Licence
+
+Copyright (c) 2026 Moworks. All rights reserved.
+
+1. Grant
+
+   Moworks grants each person it has invited to this repository a free, non-exclusive, non-transferable and revocable
+   licence to install and use Moworks Studio (the "Software") on their own computers, for personal, non-commercial use
+   only.
+
+2. Restrictions
+
+   You may not, in whole or in part, and including any modified version of the Software:
+   - redistribute, publish or make the Software available to anyone else;
+   - sell, rent, lease or sublicense the Software;
+   - share access to this repository or to a copy of the Software;
+   - use the Software for commercial purposes.
+
+   To give someone the Software, ask Moworks to invite them.
+
+3. Third-party components
+
+   The third-party components bundled with the Software or downloaded by it are listed in THIRD-PARTY.md. They are not
+   covered by this licence. Each keeps its own licence (for example MIT, Apache-2.0 with its NOTICE, CC BY 4.0, the SIL
+   Open Font License or the GSAP Standard License), and nothing in this licence limits the rights those licences grant.
+   Their LICENSE and NOTICE files stay with them.
+
+4. No warranty
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+   WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
+
+5. No liability
+
+   IN NO EVENT SHALL MOWORKS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+   OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OF OR OTHER DEALINGS IN THE SOFTWARE.
+
+6. Termination
+
+   This licence ends automatically if you break any of its terms. When it ends, you must stop using the Software and
+   delete every copy of it.

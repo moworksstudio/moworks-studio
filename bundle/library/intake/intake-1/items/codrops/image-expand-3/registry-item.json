@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "image-expand-3",
+  "type": "hyperframes:component",
+  "title": "Image Expand: Full Line",
+  "description": "A wide picture opens across a full line of the headline (sine out); the paragraph below loosens its line height and lifts away. (Codrops Image Expansion Typography, effect 3)",
+  "tags": [
+    "text",
+    "image",
+    "headline",
+    "reveal",
+    "expand",
+    "codrops"
+  ],
+  "files": [
+    {
+      "path": "image-expand-3.html",
+      "target": "compositions/components/image-expand-3.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:codrops/image-expand-3",
+    "author": "codrops",
+    "call": "MW.imageExpand3(document.querySelector(\".mw-image-expansion\"), tl, 0.5, { duration: 2.4 });",
+    "function": "MW.imageExpand3",
+    "options": {
+      "duration": "s (2.4)",
+      "block": "the paragraph that drifts (the next element)",
+      "openWidth": "em an inline picture opens to (7.9)"
+    },
+    "credit": {
+      "author": "Codrops",
+      "collection": "Codrops",
+      "link": "https://github.com/codrops/ImageExpansionTypography/blob/0d614791f94198bcab655762b26a3cb85da851f4/js/effect-3/expandImageEffect.js",
+      "commit": "0d614791f94198bcab655762b26a3cb85da851f4",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) 2009 - 2022 / 2024 Codrops (LICENSE)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "codrops/ImageExpansionTypography at 0d61479, js/effect-3/expandImageEffect.js",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is the headline (.mw-image-expansion) holding .type__expand boxes as in the source; the paragraph that drifts is the next element (or `block`). The headline's pictures are the film's own.",
+    "titleVi": "Ảnh mở giữa dòng, chữ dưới giãn dòng"
+  }
+}

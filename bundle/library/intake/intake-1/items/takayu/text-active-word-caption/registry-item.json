@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-active-word-caption",
+  "type": "hyperframes:block",
+  "title": "Active-Word Highlight",
+  "description": "Một trang phụ đề vài từ hiện sẵn, từ đang được nói phóng nhẹ lên 1.1 lần, nhích lên và đổi màu nhấn trong tích tắc, nói xong thì trở lại.",
+  "tags": [
+    "captions",
+    "karaoke",
+    "highlight",
+    "words",
+    "text-captions-subtitles",
+    "crisp",
+    "captions-subtitles",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-active-word-caption.html",
+      "target": "compositions/components/text-active-word-caption.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-active-word-caption",
+    "author": "takayu",
+    "call": "MW.textActiveWordCaption(q(\".awr\"), tl, 0, {});",
+    "function": "MW.textActiveWordCaption",
+    "options": {
+      "from": "s the first word starts (0.4)",
+      "to": "s the last ends (3.4): split by word length, a stand-in for transcript times",
+      "lift": "px (8)",
+      "accent": "colour of the spoken word",
+      "outAt": "s (4.15)",
+      "caption": "the caption page"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-word-highlight-caption",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-word-highlight-caption (read 12/10/2026)",
+      "upstream": "the site credits Remotion"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-word-highlight-caption, written here): Page of 3–5 words, 30 px weight 800, white with a 4 px dark outline; page fades in 0.15–0.3 s and out 4.15–4.35 s. Word times split 0.4–3.4 s in proportion to word length (stand-in for transcript times). The active word scales 1 → 1.1 about its own centre and lifts 2 px in 80 ms power2.out, turns accent past half way, and returns in 80 ms after its end. Loop 4.6 s. Params: số từ mỗi trang (3–5) · độ phóng (1.1) · thời gian đổi (80 ms).",
+    "titleVi": "Từ đang đọc phóng to, đổi màu"
+  }
+}

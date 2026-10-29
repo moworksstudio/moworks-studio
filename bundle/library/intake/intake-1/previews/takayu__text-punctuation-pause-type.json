@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-punctuation-pause-type",
+  "hash": "062037504904ed03",
+  "at": "2026-10-17T10:20:43.357Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-punctuation-pause-type.mp4",
+    "poster": "previews/takayu__text-punctuation-pause-type.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "31f8c9255b5902338bb9580b5a229fecf6ac4387e525f8771faf94bfcd29d29b",
+    "size": 11280,
+    "seconds": 25.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

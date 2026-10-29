@@ -1,0 +1,102 @@
+<!--
+  Hyper Text (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/hyper-text.tsx.
+  Uppercase monospace text scrambles through random letters and settles from left to right in 0.8 s, like a decoder.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.hyperText(q(".h1"), tl, 0.3, { replays: [2.2] });
+
+  Options (defaults in brackets):
+      - duration: s (0.8)
+      - characterSet: letters to scramble with (A-Z)
+      - seed: 1
+      - replays: extra start times in s after `at` (none)
+
+  Notes: Upstream re-randomises each unsettled letter every animation frame (Math.random): here per 1/60 s from a seed. Vietnamese letters settle into their own glyphs; the scramble set stays A-Z like upstream.
+-->
+
+<div class="mw-hyper-text">Hyper Text</div>
+
+<style>
+.mw-hyper-text { font-family: 'JetBrains Mono', monospace; font-weight: 700; text-transform: uppercase; overflow: hidden; padding: 0.1em 0; }
+.mw-hyper-text .mw-ch { text-align: center; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  var defaults = {"duration":0.8,"characterSet":"ABCDEFGHIJKLMNOPQRSTUVWXYZ","seed":1,"replays":[]};
+  var run = function (el, tl, at, o) {
+      var parts = MW.split(el, "chars").chars;
+      var final = parts.map(function (c) { return c.textContent; });
+      // fixed cell widths so the line does not jump while letters change (monospace: one cell each)
+      parts.forEach(function (c) { c.style.minWidth = c.getBoundingClientRect().width + "px"; });
+      var set = o.characterSet, n = final.length;
+      var starts = [0].concat(o.replays || []);
+      var s = { t: -1 };
+      var draw = function () {
+        var t = s.t;
+        var local = -1;
+        for (var k = 0; k < starts.length; k++) if (t >= starts[k]) local = t - starts[k];
+        for (var i = 0; i < n; i++) {
+          if (local < 0 || local >= o.duration || final[i] === " ") { parts[i].textContent = final[i]; continue; }
+          var iter = (local / o.duration) * n;
+          if (i <= iter) parts[i].textContent = final[i];
+          else { var r = MW.rand(o.seed * 7919 + i * 131 + Math.floor(local * 60) * 977)(); parts[i].textContent = set.charAt(Math.floor(r * set.length)); }
+        }
+      };
+      draw();
+      var end = Math.max.apply(null, starts) + o.duration;
+      tl.fromTo(s, { t: 0 }, { t: end + 0.01, duration: end + 0.01, ease: "none", onUpdate: draw, immediateRender: false }, at);
+      return at + end;
+    };
+  MW.hyperText = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

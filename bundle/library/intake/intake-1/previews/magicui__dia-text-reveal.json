@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/dia-text-reveal",
+  "hash": "0c2f07da60ab2195",
+  "at": "2026-10-17T06:31:52.024Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__dia-text-reveal.mp4",
+    "poster": "previews/magicui__dia-text-reveal.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "aefa335be52ae12732b266dba6022239d4b99b09c65aba3aeb50dd2ab4f7bab1",
+    "size": 22750,
+    "seconds": 33.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

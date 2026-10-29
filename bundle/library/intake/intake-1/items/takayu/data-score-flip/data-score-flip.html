@@ -1,0 +1,59 @@
+<!--
+  Score Update (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-score-update (read 12/10/2026).
+  Khi ghi bàn, ô tỉ số lật sang số mới như bảng lật rồi nháy màu nhấn hai lần, tên đội đứng yên.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.dataScoreFlip(q(".sf-c.h"), tl, 0, { values: [1, 2, 1], times: [0.7, 3.8], dot: ".d1" });
+
+  Options (defaults in brackets):
+      - values: the cell's values in order
+      - times: s of each change
+      - flash: flash colour (twice, 0.15 s on / off)
+      - dot: the small dot shown above the scoring cell
+      - dots: which changes show the dot
+      - loop: s (4.2)
+
+  Notes: Idea and numbers (TakayuStudio tx-score-update, written here): On a score change the cell flips (old rotateX 0 → −90, new 90 → 0, 350 ms total ease-in-out; GSAP 0.175 s power1.in + 0.175 s power1.out) to the new number, then the cell background flashes twice (on 150 ms, off 150 ms, on 150 ms, off; text inverts while lit); names and separator stay still. Demo: card scoreboard, home scores at 0.7 s, away at 2.1 s, a small dot above the scoring cell for 1.1 s; reset 3.8 s; loop 4.2 s. Params: flip (0.35 s) · flash: hai lần nháy (0.15 s bật / 0.15 s tắt) · color: màu nháy (màu nhấn).
+-->
+
+<div class="gm sf"><div class="sf-box"><span>Hà Nội</span><div class="sf-w"><div class="sf-dot d1"></div><div class="sf-c h">1</div></div><span class="sf-sep">-</span><div class="sf-w"><div class="sf-dot d2"></div><div class="sf-c a">1</div></div><span>Sài Gòn</span></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"values":[1,2,1],"times":[0.7,3.8],"flash":"#8b7bff","dot":null,"dots":[true,false],"loop":4.2};
+  var run = function (el, tl, at, o) {
+        var pin = gsap.parseEase("power1.in"), pout = gsap.parseEase("power1.out"), dot = o.dot ? MW.el(o.dot) : null, base = getComputedStyle(el).backgroundColor, col = getComputedStyle(el).color;
+        el.parentNode.style.perspective = "1200px";
+        return MW.drive(tl, at, o.loop, function (t) {
+          var k = 0; o.times.forEach(function (tt, i) { if (t >= tt) k = i + 1; });
+          var d = k ? t - o.times[k - 1] : 9, prev = o.values[Math.max(0, k - 1)], cur = o.values[k], ang = 0, txt = cur;
+          if (k && d < 0.35) { if (d < 0.175) { ang = -90 * pin(d / 0.175); txt = prev; } else { ang = 90 * (1 - pout((d - 0.175) / 0.175)); } }
+          el.textContent = String(txt); gsap.set(el, { rotationX: ang });
+          var f = d - 0.35, lit = k && f >= 0 && ((f < 0.15) || (f >= 0.3 && f < 0.45));
+          el.style.backgroundColor = lit ? o.flash : base; el.style.color = lit ? base : col;
+          if (dot) dot.style.opacity = k && d < 1.1 && o.dots && o.dots[k - 1] ? "1" : "0";
+        });
+      };
+  MW.dataScoreFlip = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

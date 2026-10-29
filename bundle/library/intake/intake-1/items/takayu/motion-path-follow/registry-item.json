@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-path-follow",
+  "type": "hyperframes:component",
+  "title": "SVG Motion Path",
+  "description": "Một vật chạy dọc đường cong chữ S và luôn xoay mũi theo hướng đi.",
+  "tags": [
+    "path",
+    "follow",
+    "orient",
+    "svg",
+    "svg-path",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-path-follow.html",
+      "target": "compositions/components/motion-path-follow.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-path-follow",
+    "author": "takayu",
+    "call": "MW.motionPathFollow(q(\".pf-a\"), tl, 0.31, { path: \".pf-p\", duration: 1.87 });",
+    "function": "MW.motionPathFollow",
+    "options": {
+      "path": "the SVG path to follow (same SVG as the moving group)",
+      "duration": "s (1.2)",
+      "ease": "power2.inOut",
+      "rotate": "turn along the path (true)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=svg-motion-path",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=svg-motion-path (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio svg-motion-path, written here): offset-path: S curve of two tangent-continuous cubics (demo M18 84 C48 3 69 13 109 60 S176 107 202 24 in a 220 x 120 box), offset-distance 0 -> 100 %, offset-rotate auto, 1200 ms easeInOutCubic; the same d drawn as a faint guide with end dots. Demo 2.6 s: move from 12 % to 84 %. Site card (sh-follow): a sine path, arrow ping-pongs every 3 s ease-in-out. Params: path · duration (1.2 s) · ease (power2.inOut) · rotate: tự xoay (auto).",
+    "titleVi": "Chạy theo đường cong, tự xoay hướng"
+  }
+}

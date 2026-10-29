@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "sparkles-text",
+  "type": "hyperframes:component",
+  "title": "Sparkles Text",
+  "description": "Bold text with small four-point stars that keep popping, spinning and fading at random spots over it (0.8 s cycles, purple and pink).",
+  "tags": [
+    "sparkle",
+    "stars",
+    "twinkle",
+    "magic",
+    "text",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "sparkles-text.html",
+      "target": "compositions/components/sparkles-text.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/sparkles-text",
+    "author": "magicui",
+    "call": "MW.sparklesText(q(\".mw-sparkles-text\"), tl, 0, { sparklesCount: 14, size: 56, hold: 6 });",
+    "function": "MW.sparklesText",
+    "options": {
+      "sparklesCount": "10",
+      "size": "star size in px (21)",
+      "colors": "{ first: #9E7AFF, second: #FE8BBB }",
+      "hold": "seconds (10)",
+      "seed": "1"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/sparkles-text.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/sparkles-text.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Upstream uses Math.random and a 100 ms interval: here a seeded table (seed option), so every render is the same. The star path is upstream's (MIT).",
+    "titleVi": "Chữ có sao lấp lánh nhảy quanh"
+  }
+}

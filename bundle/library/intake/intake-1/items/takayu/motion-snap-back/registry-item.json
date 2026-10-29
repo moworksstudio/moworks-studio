@@ -1,0 +1,65 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-snap-back",
+  "type": "hyperframes:component",
+  "title": "Snap Back",
+  "description": "Con trỏ kéo viên thuốc giãn ra, giữ run run, thả ra nó vụt về chỗ bằng lò xo, dây buộc mảnh dần khi căng.",
+  "tags": [
+    "drag",
+    "stretch",
+    "spring",
+    "snap",
+    "bounce-reaction",
+    "crisp",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-snap-back.html",
+      "target": "compositions/components/motion-snap-back.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-snap-back",
+    "author": "takayu",
+    "call": "MW.motionSnapBack(q(\".sn\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.motionSnapBack",
+    "options": {
+      "pullAt": "s (0.3)",
+      "pull": "s (0.55, power2.inOut)",
+      "hold": "s (0.2, trembling)",
+      "tremble": "± px (2.4)",
+      "distance": "px (490)",
+      "stretch": "(1.5)",
+      "k": "spring stiffness (420)",
+      "cx": "damping of the position (20)",
+      "cs": "damping of the stretch (12: dips to about 0.8)",
+      "anchor": "px from the anchor to the pill (200)",
+      "cursor": "an optional cursor"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=snap-back",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=snap-back (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio snap-back, written here): Pulled right: x +98 px (demo) and scaleX 1 → 1.5 (scaleY = 1/scaleX) in 550 ms power2.inOut, a 200 ms hold with a ±0.6 px tremble, then release: x returns on a spring (k 420, d 20), scaleX on a looser one (k 420, d 12) dipping to ~0.8 before 1; 4 ghost copies 18 ms apart for 300 ms after release; a tether line thins as it stretches. Params: pull (98 px) · stretch (1.5) · hold (0.2 s) · spring x (k 420, d 20) · spring scale (k 420, d 12).",
+    "titleVi": "Kéo căng rồi bật về"
+  }
+}

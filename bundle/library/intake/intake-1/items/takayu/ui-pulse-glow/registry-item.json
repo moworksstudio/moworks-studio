@@ -1,0 +1,66 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-pulse-glow",
+  "type": "hyperframes:component",
+  "title": "Pulse Glow",
+  "description": "Nút đứng yên nhưng viền và bóng sáng thở lên xuống chậm, hai quầng viền mảnh toả ra ngoài rồi tan, báo nút đang sẵn sàng.",
+  "tags": [
+    "glow",
+    "pulse",
+    "loop",
+    "button",
+    "ui-buttons",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-pulse-glow.html",
+      "target": "compositions/components/ui-pulse-glow.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-pulse-glow",
+    "author": "takayu",
+    "call": "MW.uiPulseGlow(q(\".pg\"), tl, 0, {});",
+    "function": "MW.uiPulseGlow",
+    "options": {
+      "period": "s per breath (2.8)",
+      "cycles": "(2)",
+      "border": "[base, added] px of the outline ([6, 4])",
+      "glow": "px of blur at the peak (72)",
+      "halos": "s into each breath the two halos start ([1.0, 1.35])",
+      "haloTime": "s (1.2, power2.out)",
+      "grow": "[from, to] px out from the edge ([12, 108])",
+      "haloWidth": "px (6)",
+      "rgb": "accent as [r, g, b]",
+      "label": "the label (breathes 0.55–1)",
+      "cursor": "an optional cursor that makes the clicks",
+      "approach": "[x, y] px the cursor comes from",
+      "lead": "s it arrives before a click"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-button-pulse-glow",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-button-pulse-glow (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-button-pulse-glow, written here): Button 140x44, radius 14, scale fixed at 1. Glow I goes 0 → 1 → 0 on a sine over 2.8 s: border width 1.5 + I px (border opacity 0.25 + 0.75 I), accent shadow blur 18 × I, label opacity 0.55 + 0.45 × I. Two halo outlines (1.5 px) start at 1.0 s and 1.35 s, grow 3 → 27 px out from the edge over 1.2 s power2.out, opacity 0.7 → 0. Loops. Params: period (2.8 s) · glow (blur 18 px) · halos ([1.0, 1.35] s, 24 px) · loop.",
+    "titleVi": "Nút thở sáng, quầng toả ra"
+  }
+}

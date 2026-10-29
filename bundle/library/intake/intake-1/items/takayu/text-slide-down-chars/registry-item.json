@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-slide-down-chars",
+  "type": "hyperframes:component",
+  "title": "Slide Down By Character",
+  "description": "Từng ký tự rơi từ trên xuống 60 px và hiện dần, xếp hàng từ trái sang trong đúng 1 giây.",
+  "tags": [
+    "reveal",
+    "letters",
+    "drop",
+    "stagger",
+    "text-reveal",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-slide-down-chars.html",
+      "target": "compositions/components/text-slide-down-chars.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-slide-down-chars",
+    "author": "takayu",
+    "call": "MW.textSlideDownChars(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textSlideDownChars",
+    "options": {
+      "drop": "em (1.2)",
+      "duration": "s per letter (0.55)",
+      "spread": "s the starts spread over (0.45: the build takes 1 s)",
+      "start": "s (0.3)",
+      "outAt": "s (2.6)",
+      "ease": "(ease-out cubic)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-slide-down-chars",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-slide-down-chars (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-slide-down-chars, written here): Split chars; each char drops y −60 px (1.2 em) → 0, opacity full by 62 % of its move (×1.6), 0.55 s easeOutCubic. Starts spread so the whole build takes 1 s (stagger = 0.45 s/(n−1), ≈30 ms), from 0.3 s; no mask. Loop exit: fade 2.6–2.9 s inCubic; loop 3 s. Params: duration: mỗi ký tự (0.55 s) · total: cả đợt (1 s) · drop: quãng rơi (60 px) · ease (easeOutCubic).",
+    "titleVi": "Từng ký tự rơi xuống vào chỗ"
+  }
+}

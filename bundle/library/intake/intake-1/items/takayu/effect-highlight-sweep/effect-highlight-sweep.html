@@ -1,0 +1,58 @@
+<!--
+  Highlight Sweep (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=highlight-sweep (read 12/10/2026).
+  Một vệt sáng xiên lướt qua đúng dòng vừa cập nhật một lần, sáng nhất ở giữa đường.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectHighlightSweep(q(".hl"), tl, 0.6, {});
+
+  Options (defaults in brackets):
+      - duration: s (0.82)
+      - width: px of the band (96)
+      - skew: degrees (−18)
+      - opacity: peak, half-way (0.75)
+      - from: start, × the row width (−0.65)
+      - to: end (1.15)
+
+  Notes: Idea and numbers (TakayuStudio highlight-sweep, written here): On the updated row only (clipped to it): a 32 px soft white band, skewX −18°, crosses from −65 % to +115 % of the row width (the recipe's −130 % → 230 %, halved in the demo) in 820 ms power2.inOut, opacity 0.75·sin(π p), peak mid-way; once. The row itself is pre-styled as updated (light fill, accent border). Params: duration (0.82 s) · width: bề rộng vệt (32 px) · skew (−18°) · opacity đỉnh (0.75).
+-->
+
+<div class="ui-wrap"><div class="ui-card" style="width:980px"><p class="ui-h" style="margin-bottom:24px">Đơn hàng hôm nay</p>
+<div class="ui-row"><div class="ui-dot"></div>Hà Nội · 12 đơn</div><div class="ui-row hl" style="background:#262448;border:3px solid #8b7bff;color:#fff"><div class="ui-dot" style="background:#8b7bff"></div>Đà Nẵng · 9 đơn · vừa cập nhật</div><div class="ui-row"><div class="ui-dot"></div>TP. Hồ Chí Minh · 21 đơn</div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.82,"width":96,"skew":-18,"opacity":0.75,"from":-0.65,"to":1.15};
+  var run = function (el, tl, at, o) {
+        var band = document.createElement("div"), io = gsap.parseEase("power2.inOut");
+        if (getComputedStyle(el).position === "static") el.style.position = "relative";
+        el.style.overflow = "hidden";
+        band.style.cssText = "position:absolute;top:-20%;bottom:-20%;pointer-events:none;width:" + o.width + "px;background:linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.95), rgba(255,255,255,0));";
+        el.appendChild(band);
+        return MW.drive(tl, at, o.duration, function (t) {
+          var u = t / o.duration, W = el.offsetWidth, x = (o.from + (o.to - o.from) * io(u)) * W;
+          gsap.set(band, { x: x - o.width / 2, skewX: o.skew }); band.style.opacity = u > 0 && u < 1 ? String(o.opacity * Math.sin(Math.PI * u)) : "0";
+        });
+      };
+  MW.effectHighlightSweep = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

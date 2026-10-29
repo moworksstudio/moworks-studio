@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>3D Cylinder Text - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 50%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .cy { position: absolute; inset: 0; overflow: hidden; }
+.cy-p { position: absolute; left: 50%; top: 50%; width: 300px; height: 520px; margin: -260px 0 0 -150px; border-radius: 80px 80px 40px 40px; background: linear-gradient(90deg, #3a2f7a, #8b7bff 45%, #3a2f7a); z-index: 50; box-shadow: 0 40px 100px rgba(0,0,0,0.5); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="6">
+<div class="cy"><div class="cy-p"></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"text":"Chuyển động tự nhiên","sep":"  •  ","radius":600,"size":110,"tilt":0.26,"perspective":2300,"period":6,"turns":1,"accent":"#a99bff","mute":"#4a5478"};
+  var run = function (el, tl, at, o) {
+        var host = el, txt = o.text + o.sep, R = o.radius, spans = [], fs = o.size;
+        var meas = document.createElement("span"); meas.style.cssText = "position:absolute;visibility:hidden;white-space:pre;font-size:" + fs + "px;font-weight:800;"; host.appendChild(meas); meas.textContent = txt; var w = meas.offsetWidth; host.removeChild(meas);
+        var reps = Math.max(1, Math.floor(2 * Math.PI * R / w)), seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+        var gr = function (s) { if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+        var all = []; for (var k = 0; k < reps; k++) gr(txt.normalize("NFC")).forEach(function (g, j) { all.push({ g: g, sep: j >= gr(o.text.normalize("NFC")).length }); });
+        all.forEach(function (a) { var s = document.createElement("span"); s.textContent = a.g; s.style.cssText = "position:absolute;left:0;top:0;white-space:pre;font-size:" + fs + "px;font-weight:800;" + (a.sep ? "color:" + o.accent + ";" : ""); host.appendChild(s); spans.push(s); });
+        var N = all.length;
+        return MW.drive(tl, at, o.period * o.turns, function (t) {
+          var W = host.offsetWidth, Hh = host.offsetHeight, rot = -2 * Math.PI * t / o.period;
+          spans.forEach(function (s, i) {
+            var a = rot + i / N * 2 * Math.PI, x = R * Math.sin(a), z = R * Math.cos(a), y = -z * Math.sin(o.tilt), ps = o.perspective / (o.perspective - z), f = (z / R + 1) / 2;
+            gsap.set(s, { x: W / 2 + x * ps, y: Hh / 2 + y * ps, xPercent: -50, yPercent: -50, scaleX: Math.cos(a) * ps, scaleY: ps }); s.style.opacity = String(0.18 + 0.82 * f); s.style.zIndex = String(Math.round(f * 100) + 10);
+            if (!all[i].sep) s.style.color = z < 0 ? o.mute : "";
+          });
+        });
+      };
+  MW.textCylinderRing = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textCylinderRing(q(".cy"), tl, 0, {});
+          tl.set({}, {}, 6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

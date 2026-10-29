@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/cursor-raycast-select",
+  "hash": "c07b19d4898f9372",
+  "at": "2026-10-17T08:03:15.478Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__cursor-raycast-select.mp4",
+    "poster": "previews/takayu__cursor-raycast-select.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3a0b828e0443694cd1eaaf0dc463961065efe693c52e33aeeecaf517aa260725",
+    "size": 12082,
+    "seconds": 34.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

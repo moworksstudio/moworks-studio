@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-dolly-zoom",
+  "hash": "a5dbe3c49813870d",
+  "at": "2026-10-17T07:44:57.237Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-dolly-zoom.mp4",
+    "poster": "previews/takayu__motion-dolly-zoom.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "2594f1bda5320b5036312b008c84bba9cc186cd50b0bf31bf7e23c44843ef5ee",
+    "size": 14887,
+    "seconds": 32.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

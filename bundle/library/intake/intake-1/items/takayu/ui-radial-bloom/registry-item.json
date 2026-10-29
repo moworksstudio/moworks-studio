@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-radial-bloom",
+  "type": "hyperframes:block",
+  "title": "Radial Command Bloom",
+  "description": "Bấm nút giữa, dấu cộng xoay 45° và năm nút lệnh nở ra đều quanh tâm (cách 72°) bằng lò xo, có dây mảnh nối về tâm; đóng lại theo thứ tự ngược.",
+  "tags": [
+    "menu",
+    "radial",
+    "spring",
+    "bloom",
+    "spatial-ui-depth",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-radial-bloom.html",
+      "target": "compositions/components/ui-radial-bloom.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-radial-bloom",
+    "author": "takayu",
+    "call": "MW.uiRadialBloom(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiRadialBloom",
+    "options": {
+      "items": "commands (5), 72° apart, the first straight up",
+      "radius": "units (64 of 320)",
+      "openAt": "s (0.55; 0.05 s apart, spring k260 d18)",
+      "closeAt": "s (2.95; reverse order 0.03 s apart, 0.22 s ease-in)",
+      "loop": "s (3.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-spatial-radial-command-bloom",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-spatial-radial-command-bloom (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-spatial-radial-command-bloom, written here): Centre button r19. Five items r15 fly to radius 64 px at 72° steps (first straight up), 50 ms apart from 0.55 s, on a spring k260 d18 (scale follows the same spring, capped at 1.3); a thin 1.5 px line from the centre to each. The plus rotates 45° on that spring from 0.5 s; press scale 0.9 at 0.45-0.55 s. Close at 2.95 s: reverse order 30 ms apart, 220 ms power2.in. Loop 3.8 s. Params: items (5 × 72°) · radius (64 px) · spring (k260 c18) · each (0.05 s) · close (0.22 s, cách 0.03 s).",
+    "titleVi": "Năm lệnh nở tròn quanh nút"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-score-flip",
+  "type": "hyperframes:component",
+  "title": "Score Update",
+  "description": "Khi ghi bàn, ô tỉ số lật sang số mới như bảng lật rồi nháy màu nhấn hai lần, tên đội đứng yên.",
+  "tags": [
+    "counter",
+    "score",
+    "flip",
+    "flash",
+    "text-numbers-data",
+    "crisp",
+    "numbers-data",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "data-score-flip.html",
+      "target": "compositions/components/data-score-flip.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/data-score-flip",
+    "author": "takayu",
+    "call": "MW.dataScoreFlip(q(\".sf-c.h\"), tl, 0, { values: [1, 2, 1], times: [0.7, 3.8], dot: \".d1\" });",
+    "function": "MW.dataScoreFlip",
+    "options": {
+      "values": "the cell's values in order",
+      "times": "s of each change",
+      "flash": "flash colour (twice, 0.15 s on / off)",
+      "dot": "the small dot shown above the scoring cell",
+      "dots": "which changes show the dot",
+      "loop": "s (4.2)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-score-update",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-score-update (read 12/10/2026)",
+      "upstream": "the site credits jQuery Flapper"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-score-update, written here): On a score change the cell flips (old rotateX 0 → −90, new 90 → 0, 350 ms total ease-in-out; GSAP 0.175 s power1.in + 0.175 s power1.out) to the new number, then the cell background flashes twice (on 150 ms, off 150 ms, on 150 ms, off; text inverts while lit); names and separator stay still. Demo: card scoreboard, home scores at 0.7 s, away at 2.1 s, a small dot above the scoring cell for 1.1 s; reset 3.8 s; loop 4.2 s. Params: flip (0.35 s) · flash: hai lần nháy (0.15 s bật / 0.15 s tắt) · color: màu nháy (màu nhấn).",
+    "titleVi": "Tỉ số lật số và nháy ô"
+  }
+}

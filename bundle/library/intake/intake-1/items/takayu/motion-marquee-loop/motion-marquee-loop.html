@@ -1,0 +1,48 @@
+<!--
+  Marquee (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=lp-marquee (read 12/10/2026).
+  Hai bản của cùng một dải chữ nối đuôi nhau chạy ngang, hết một bản thì quay về nên không bao giờ đứt quãng.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionMarqueeLoop(q(".mq"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - period: s per copy (3), linear
+      - direction: left | right
+      - duration: s (6)
+
+  Notes: Idea and numbers (TakayuStudio lp-marquee, written here): Two copies of the row side by side; x 0 -> -(one copy's width) linear over 3000 ms, then wrap (seamless). Demo: copy width 330 px on a 320 frame, items 'MOTION' and a star alternating every 82 px. Params: speed (1 bản / 3 s) · direction (trái) · gap. Apply to a band whose first child is one copy of the row; copies are added until the band is covered, and the row moves one copy's width per period, so it never breaks.
+-->
+
+<div class="mq"><div class="mq-r"><span>CHUYỂN ĐỘNG</span><i>✦</i><span>NHỊP ĐIỆU</span><i>✦</i><span>CẢM XÚC</span><i>✦</i></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"period":3,"direction":"left","duration":6};
+  var run = function (el, tl, at, o) {
+        var row = el.firstElementChild, wrap = document.createElement("div"); wrap.style.cssText = "display:flex;width:max-content;"; el.insertBefore(wrap, row); wrap.appendChild(row); row.style.flex = "none"; el.style.overflow = "hidden";
+        var W = row.getBoundingClientRect().width, need = Math.ceil(el.clientWidth / Math.max(1, W)) + 1; for (var i = 0; i < need; i++) { var cp = row.cloneNode(true); cp.setAttribute("aria-hidden", "true"); wrap.appendChild(cp); }
+        return MW.drive(tl, at, o.duration, function (t) { var p = (t / o.period) % 1; gsap.set(wrap, { x: o.direction === "right" ? -W * (1 - p) : -W * p }); });
+      };
+  MW.motionMarqueeLoop = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

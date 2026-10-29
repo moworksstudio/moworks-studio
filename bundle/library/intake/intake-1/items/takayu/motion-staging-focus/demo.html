@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Staging - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .sf { display: flex; gap: 40px; } .sf-c { width: 280px; height: 380px; border-radius: 36px; background: #1b2130; border: 3px solid #2a3350; display: grid; place-items: center; font-size: 110px; font-weight: 900; color: #3a4466; transform: scale(0.9); }
+.sf-c.h { background: linear-gradient(150deg, #a693ff, #6a4cf0); color: #fff; border-color: transparent; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.6">
+<div class="st"><div class="sf"><div class="sf-c">1</div><div class="sf-c">2</div><div class="sf-c h">3</div><div class="sf-c">4</div><div class="sf-c">5</div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"items":".sf-c","hero":-1,"from":0.9,"dim":0.4,"duration":0.3,"ease":"expo.out","hold":1.2,"back":0.3};
+  var run = function (el, tl, at, o) {
+        var it = Array.prototype.slice.call(el.querySelectorAll(o.items)), hero = it[o.hero < 0 ? Math.floor(it.length / 2) : o.hero], e = gsap.parseEase(o.ease), r = gsap.parseEase("power2.inOut");
+        return MW.drive(tl, at, o.hold == null ? o.duration : o.duration + o.hold + o.back, function (t) {
+          var p = e(Math.min(1, t / o.duration)); if (o.hold != null && t > o.duration + o.hold) p = 1 - r(Math.min(1, (t - o.duration - o.hold) / o.back));
+          it.forEach(function (x) { if (x === hero) gsap.set(x, { scale: o.from + (1 - o.from) * p }); else { gsap.set(x, { scale: o.from }); x.style.opacity = String(1 - (1 - o.dim) * p); } });
+        });
+      };
+  MW.motionStagingFocus = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionStagingFocus(q(".sf"), tl, 0.4, {});
+          tl.set({}, {}, 2.6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

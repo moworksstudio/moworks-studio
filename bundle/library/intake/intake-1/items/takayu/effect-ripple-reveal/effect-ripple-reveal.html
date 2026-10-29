@@ -1,0 +1,58 @@
+<!--
+  Ripple Reveal (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=ripple-reveal (read 12/10/2026).
+  Từ một điểm chạm, hai vòng gợn lan ra và nội dung hiện dần trong một vòng tròn lớn dần theo vòng gợn đầu.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectRippleReveal(q(".rp"), tl, 0.4, { point: [0.42, 0.55] });
+
+  Options (defaults in brackets):
+      - duration: s (0.95, ease-out cubic)
+      - point: [x, y] share of the element
+      - start: px ring radius at the start (40)
+      - radius: px of the first ring at the end (null: to the farthest corner)
+      - delay2: s the second ring starts (0.11)
+      - stroke: [ring 1, ring 2] px ([10, 6])
+      - accent: 
+
+  Notes: Idea and numbers (TakayuStudio ripple-reveal, written here): At a tap point (default centre): ring 1 (2.5 px stroke) radius 8 -> 88 px, opacity 0.9 -> 0, 950 ms easeOutCubic; ring 2 (1.5 px, opacity 0.5 -> 0) starts 110 ms later, ends with ring 1. Target revealed by a circle clip from the tap that grows with ring 1 (x1.05) and opacity 0 -> 1 from +80 to +700 ms easeOutCubic. Optional 5 px tap dot for 140 ms. Params: duration (0.95 s) · x, y: điểm chạm (giữa) · radius (8 → 88 px) · delay vòng 2 (0.11 s).
+-->
+
+<div class="st"><div class="bx rp" style="opacity:0"></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.95,"point":[0.5,0.5],"start":40,"radius":null,"delay2":0.11,"stroke":[10,6],"accent":"#a99bff"};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, p3 = gsap.parseEase("power3.out"), W = el.offsetWidth, Hh = el.offsetHeight, x = W * o.point[0], y = Hh * o.point[1], far = Math.max(Math.hypot(x, y), Math.hypot(W - x, y), Math.hypot(x, Hh - y), Math.hypot(W - x, Hh - y)), R1 = o.radius || far / 1.05, rings = [], dot = document.createElement("div");
+        if (getComputedStyle(host).position === "static") host.style.position = "relative"; var hx = el.offsetLeft + x, hy = el.offsetTop + y;
+        [[o.stroke[0], 0.9], [o.stroke[1], 0.5]].forEach(function (s) { var r = document.createElement("div"); r.style.cssText = "position:absolute;border-radius:50%;pointer-events:none;opacity:0;z-index:3;box-sizing:border-box;border:" + s[0] + "px solid " + o.accent + ";"; r.__a = s[1]; host.appendChild(r); rings.push(r); });
+        dot.style.cssText = "position:absolute;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:#fff;pointer-events:none;opacity:0;z-index:3;left:" + hx + "px;top:" + hy + "px;"; host.appendChild(dot);
+        return MW.drive(tl, at, o.duration, function (t) {
+          rings.forEach(function (r, i) { var st = i ? o.delay2 : 0, u = Math.max(0, Math.min(1, (t - st) / (o.duration - st))), rad = o.start + (R1 - o.start) * p3(u); r.style.width = r.style.height = 2 * rad + "px"; r.style.left = hx - rad + "px"; r.style.top = hy - rad + "px"; r.style.opacity = t > st && u < 1 ? String(r.__a * (1 - u)) : "0"; });
+          var c1 = (o.start + (R1 - o.start) * p3(Math.max(0, Math.min(1, t / o.duration)))) * 1.05; el.style.clipPath = t > 0 ? "circle(" + c1.toFixed(1) + "px at " + x.toFixed(1) + "px " + y.toFixed(1) + "px)" : "circle(0px at 50% 50%)";
+          el.style.opacity = String(p3(Math.max(0, Math.min(1, (t - 0.08) / 0.62)))); dot.style.opacity = t > 0 && t < 0.14 ? "1" : "0";
+        });
+      };
+  MW.effectRippleReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

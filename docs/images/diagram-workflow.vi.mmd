@@ -1,0 +1,32 @@
+%%{init: {"themeVariables": {"fontSize": "13px"}, "flowchart": {"nodeSpacing": 16, "rankSpacing": 26, "padding": 6}}}%%
+flowchart TB
+    subgraph P1["Cài đặt, một lần"]
+        direction LR
+        S1["<b>1 · Cài app</b><br/>clone, Moworks Studio.bat"] --> S2["<b>2 · Lần đầu mở</b><br/>giao diện, thành phần, đăng nhập Claude"]
+    end
+    subgraph P2["Lên kế hoạch"]
+        direction LR
+        S3["<b>3 · New project</b><br/>brief, style, chất liệu"] --> S4["<b>4 · Prepare</b><br/>Claude đọc, hỏi, lời đọc"] --> S5["<b>5 · Storyboard</b><br/>bạn duyệt"] --> S6["<b>6 · Motion Plan</b><br/>bạn duyệt"]
+    end
+    subgraph P3["Dựng phim"]
+        direction LR
+        S7["<b>7 · Build và Review</b><br/>từng shot, chấm điểm, sửa"] --> S8["<b>8 · Final Mix</b><br/>nhạc và hiệu ứng âm thanh"]
+    end
+    subgraph P4["Thành phẩm"]
+        direction LR
+        S9["<b>9 · Render</b><br/>MP4 · Port to After Effects"]
+    end
+    P1 --> P2 -- "duyệt" --> P3 -- "ưng" --> P4
+
+    classDef setup fill:#555555,stroke:#333333,color:#ffffff
+    classDef claude fill:#d97757,stroke:#a8502f,color:#ffffff
+    classDef user fill:#1d3fd8,stroke:#122a96,color:#ffffff
+    classDef out fill:#0a8f6a,stroke:#06684d,color:#ffffff
+    class S1,S2 setup
+    class S4,S7,S8 claude
+    class S3,S5,S6 user
+    class S9 out
+    style P1 fill:#f2f2f2,stroke:#555555,color:#333333
+    style P2 fill:#fbeee8,stroke:#d97757,color:#a8502f
+    style P3 fill:#e8edfc,stroke:#1d3fd8,color:#122a96
+    style P4 fill:#e6f5f0,stroke:#0a8f6a,color:#06684d

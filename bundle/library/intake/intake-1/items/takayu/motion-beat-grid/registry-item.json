@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-beat-grid",
+  "type": "hyperframes:block",
+  "title": "Beat Grid",
+  "description": "Các chấm sáng lần lượt theo phách 120 BPM, phách mạnh đầu ô nhịp loé màu; đặt thay đổi lên phách, sự kiện lớn lên phách mạnh.",
+  "tags": [
+    "beat",
+    "rhythm",
+    "music",
+    "timing-rhythm",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-beat-grid.html",
+      "target": "compositions/components/motion-beat-grid.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-beat-grid",
+    "author": "takayu",
+    "call": "MW.motionBeatGrid(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionBeatGrid",
+    "options": {
+      "bpm": "(120)",
+      "beats": "per bar (4)",
+      "flash": "downbeat flash (0.25)",
+      "loop": "s (4: two bars)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=t-beat",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=t-beat (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio t-beat, written here): 120 BPM grid (beat 500 ms, bar 2000 ms; frames per beat = 60 / BPM × fps, 15 at 30 fps): four dots light in turn, the active one growing r 18 → 30 px and decaying as e^(−6·beat phase); the downbeat dot is accent and a 25 % accent full-frame flash decays as e^(−8·phase); a 16-step ruler playhead runs over the bar. Params: bpm (120) · beats_per_bar (4) · flash (25 %). Frames per beat = 60 / BPM × fps (15 at 30 fps): put changes on beats and big events on downbeats.",
+    "titleVi": "Lưới phách nhạc (BPM)"
+  }
+}

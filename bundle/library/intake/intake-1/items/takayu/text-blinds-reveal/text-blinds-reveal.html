@@ -1,0 +1,63 @@
+<!--
+  Venetian Blinds Reveal (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-blinds-reveal (read 12/10/2026).
+  Khối chữ chia thành mười nan ngang, từng nan mở từ mép trên xuống cách nhau 0.05 giây như rèm sáo.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textBlindsReveal(q(".tk-head"), tl, 0.3, { exit: 2.5 });
+
+  Options (defaults in brackets):
+      - slats: horizontal strips (10)
+      - duration: s each strip opens from its top edge (0.6), ease-out quad
+      - stagger: s (0.05)
+      - exit: s after the start when each strip folds to its bottom edge (0.5 s ease-in; null: stay)
+
+  Notes: Idea and numbers (TakayuStudio tx-blinds-reveal, written here): Text box (first baseline − 0.95 em to last + 0.28 em) cut into 10 equal horizontal strips (copies clipped with inset); strip i opens from its top edge (clip bottom 100 % → 0) in 0.6 s easeOutQuad (CSS cubic-bezier(.5,1,.89,1); labelled power2.out) from 0.3 + 0.05·i s; seams vanish when open. Close: each strip folds to its bottom edge, 0.5 s easeInQuad, same 50 ms stagger (demo from 2.8 s); loop 4 s. Params: slats: số nan (10) · duration (0.6 s) · stagger (0.05 s) · ease (easeOutQuad).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Mười nan rèm<br>mở lần lượt</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"slats":10,"duration":0.6,"stagger":0.05,"exit":null};
+  var run = function (el, tl, at, o) {
+        var html = el.innerHTML, n = o.slats, strips = [], fin = gsap.parseEase("power1.out"), fout = gsap.parseEase("power1.in");
+        el.style.position = "relative";
+        for (var i = 0; i < n; i++) { var s = document.createElement("div"); s.innerHTML = html; s.style.cssText = "position:absolute;left:0;top:0;width:100%;pointer-events:none;"; el.appendChild(s); strips.push(s); }
+        var orig = []; Array.prototype.slice.call(el.childNodes).forEach(function (c) { if (strips.indexOf(c) < 0) orig.push(c); });
+        var wrap = document.createElement("span"); wrap.style.visibility = "hidden"; el.insertBefore(wrap, el.firstChild); orig.forEach(function (c) { wrap.appendChild(c); });
+        var end = (n - 1) * o.stagger + o.duration + (o.exit == null ? 0 : o.exit);
+        return MW.drive(tl, at, end, function (t) {
+          var fs = parseFloat(getComputedStyle(el).fontSize), top = -0.3 * fs, bot = el.offsetHeight + 0.2 * fs, h = (bot - top) / n;
+          strips.forEach(function (s, i) {
+            var u = t - i * o.stagger, y0 = top + i * h, a, b;
+            if (o.exit != null && u >= o.exit) { var q = fout(Math.min(1, (u - o.exit) / 0.5)); a = y0 + h * q; b = y0 + h; }
+            else { var p = fin(Math.max(0, Math.min(1, u / o.duration))); a = y0; b = y0 + h * p; }
+            s.style.clipPath = "inset(" + a + "px -0.3em " + Math.max(0, el.offsetHeight - b) + "px -0.3em)";
+            if (b >= el.offsetHeight + 0.2 * fs - 0.5) s.style.clipPath = "inset(" + a + "px -0.3em -" + (0.3 * fs) + "px -0.3em)";
+            s.style.visibility = b - a > 0.2 ? "visible" : "hidden";
+          });
+        });
+      };
+  MW.textBlindsReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

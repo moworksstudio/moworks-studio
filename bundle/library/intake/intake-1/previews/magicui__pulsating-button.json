@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/pulsating-button",
+  "hash": "0af19058f7ad57eb",
+  "at": "2026-10-17T06:16:57.273Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__pulsating-button.mp4",
+    "poster": "previews/magicui__pulsating-button.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "25a4233f16957b1ae9c253b92af83488a2e8f1494f1c56be4cb1116e53441509",
+    "size": 21811,
+    "seconds": 161.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "120",
+  "uid": "vocab:120",
+  "hash": "fa6ec7b10f166d8d",
+  "at": "2026-10-26T12:21:10.766Z",
+  "check": {
+    "pass": true,
+    "failures": []
+  },
+  "preview": {
+    "video": "120.mp4",
+    "poster": "120.webp",
+    "method": "rendered here as a film: the author's Canvas sample on a HyperFrames page, the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f196005a5b75ce5d03f64f01fdb92c6d084fd67871580e36d0b2d7e88e0110b8",
+    "size": 16897,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72",
+    "seconds": 12.9
+  }
+}

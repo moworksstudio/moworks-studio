@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/image-expand-5",
+  "hash": "012803f252ec486f",
+  "at": "2026-10-17T06:49:59.873Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Playfair Display"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__image-expand-5.mp4",
+    "poster": "previews/codrops__image-expand-5.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "88d04104c01d777f1762197f2967950c9454f821b8ec51b98ed2f07a890847bb",
+    "size": 28561,
+    "seconds": 31.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

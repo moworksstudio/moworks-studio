@@ -1,0 +1,50 @@
+<!--
+  Headline Ribbon Wrap (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=catalog-kinetic-type-headline-ribbon (read 12/10/2026).
+  Một dải màu bung từ giữa ra sau tiêu đề, chữ trồi lên trong dải, rồi hai đuôi ruy băng gấp lật ra hai bên như băng rôn.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textRibbonBanner(q(".rb"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - rise: px the text rises inside the band (110)
+
+  Notes: Idea and numbers (TakayuStudio catalog-kinetic-type-headline-ribbon, written here): Band 200 × 36 px (radius 2) scaleX 0 → 1 from the centre 0.3–0.9 s expo.out. Text (18 px, paper colour) rises 22 px and fades in inside the band (clipped) 0.65–1.05 s power2.out. Tails unfold behind both band ends 1.05–1.5 s back.out(1.7): 44 px long, 9 px lower than the band, V-notch 12 px, 60 % opacity; fold triangle 14 px wide at 35 %. Exit: tails 3.25–3.5 s, text 3.4–3.6 s (power2.in), band 3.55–3.9 s expo.in. Loop 4.2 s. Params: dải (200 × 36 px) · đuôi (44 px, thấp 9 px) · thời gian bung (0.6 s). Markup: .rb-band holding .rb-text, and two .rb-tail (left, right) behind the band's ends.
+-->
+
+<div class="rb"><div class="rb-tail l"></div><div class="rb-tail r"></div><div class="rb-band"><div class="rb-text">KHAI TRƯƠNG</div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"rise":110};
+  var run = function (el, tl, at, o) {
+        var band = el.querySelector(".rb-band"), txt = el.querySelector(".rb-text"), tails = el.querySelectorAll(".rb-tail"), ex = gsap.parseEase("expo.out"), ei = gsap.parseEase("expo.in"), p2 = gsap.parseEase("power2.out"), pi = gsap.parseEase("power2.in"), bk = gsap.parseEase("back.out(1.7)");
+        var cl = function (a, b, t) { return Math.max(0, Math.min(1, (t - a) / (b - a))); };
+        return MW.drive(tl, at, 4.2, function (t) {
+          var b = ex(cl(0.3, 0.9, t)) * (1 - ei(cl(3.55, 3.9, t))), x = p2(cl(0.65, 1.05, t)) * (1 - pi(cl(3.4, 3.6, t))), tl2 = bk(cl(1.05, 1.5, t)) * (1 - pi(cl(3.25, 3.5, t)));
+          gsap.set(band, { scaleX: b }); gsap.set(txt, { y: (1 - x) * o.rise }); txt.style.opacity = String(x);
+          tails.forEach(function (tt, i) { gsap.set(tt, { scaleX: tl2, transformOrigin: i ? "0% 50%" : "100% 50%" }); tt.style.opacity = tl2 > 0.01 ? "1" : "0"; });
+        });
+      };
+  MW.textRibbonBanner = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

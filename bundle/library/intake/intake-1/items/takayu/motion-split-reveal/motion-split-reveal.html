@@ -1,0 +1,49 @@
+<!--
+  Split Reveal (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=split-reveal (read 12/10/2026).
+  Hai tấm che phẳng gặp nhau ở giữa rồi trượt sang hai bên, để lộ chủ thể đứng yên phía sau.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionSplitReveal(q(".sr"), tl, 0.4, { closeAt: 1.7 });
+
+  Options (defaults in brackets):
+      - duration: s (0.72, power2.inOut)
+      - close: s (0.45)
+      - closeAt: s after the start to close again (null)
+      - color: panel colour
+
+  Notes: Idea and numbers (TakayuStudio split-reveal, written here): Two flat panels, each half the frame wide, meet at the centre over still content and slide apart: left x 0 → −105 % of its width, right 0 → +105 %, 720 ms power2.inOut (easeInOutCubic), symmetric. A 1 px edge line and a 3×24 px grip bar (10 px in from the edge) ride each inner edge. Closing: the same move reversed in 450 ms. (Demo frame 180×120 px, radius 10 px.) Params: duration (0.72 s) · close: thời gian đóng (0.45 s) · edge: vạch mép + tay nắm (bật/tắt) · ease (power2.inOut).
+-->
+
+<div class="st"><div class="sr"><i>M</i></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.72,"close":0.45,"closeAt":null,"color":"#2a3142"};
+  var run = function (el, tl, at, o) {
+        var io = gsap.parseEase("power2.inOut"), P = []; if (getComputedStyle(el).position === "static") el.style.position = "relative"; el.style.overflow = "hidden";
+        [-1, 1].forEach(function (s) { var p = document.createElement("div"); p.style.cssText = "position:absolute;top:0;bottom:0;width:50%;pointer-events:none;background:" + o.color + ";" + (s < 0 ? "left:0;" : "right:0;"); var e = document.createElement("i"); e.style.cssText = "position:absolute;top:0;bottom:0;width:2px;background:rgba(255,255,255,0.25);" + (s < 0 ? "right:0;" : "left:0;"); var g = document.createElement("b"); g.style.cssText = "position:absolute;top:50%;width:12px;height:96px;margin-top:-48px;border-radius:6px;background:rgba(255,255,255,0.4);" + (s < 0 ? "right:40px;" : "left:40px;"); p.appendChild(e); p.appendChild(g); el.appendChild(p); P.push([p, s]); });
+        return MW.drive(tl, at, o.closeAt == null ? o.duration : o.closeAt + o.close, function (t) { var u = io(Math.max(0, Math.min(1, t / o.duration))); if (o.closeAt != null && t > o.closeAt) u = 1 - io(Math.min(1, (t - o.closeAt) / o.close)); P.forEach(function (q) { q[0].style.transform = "translateX(" + (q[1] * 105 * u).toFixed(2) + "%)"; }); });
+      };
+  MW.motionSplitReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

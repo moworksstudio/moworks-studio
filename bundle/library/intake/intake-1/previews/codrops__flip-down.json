@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/flip-down",
+  "hash": "f0f8937702274c35",
+  "at": "2026-10-17T06:40:25.607Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Archivo"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__flip-down.mp4",
+    "poster": "previews/codrops__flip-down.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "bc9ca18ea94a8c1b780dff8c1c9a6a8cad0e2cd0e3c2d2ffcc76f495ff8a2996",
+    "size": 18014,
+    "seconds": 31.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

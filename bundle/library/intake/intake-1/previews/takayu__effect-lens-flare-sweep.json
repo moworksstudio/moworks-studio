@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-lens-flare-sweep",
+  "hash": "241f8937133fc3bb",
+  "at": "2026-10-17T08:35:06.671Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__effect-lens-flare-sweep.mp4",
+    "poster": "previews/takayu__effect-lens-flare-sweep.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "461f57383d5d314276b728ef1f186959e34f420f3297b28a64be19e792a8672a",
+    "size": 7052,
+    "seconds": 24.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,47 @@
+<!--
+  On Ones / Twos / Threes (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=t-twos (read 12/10/2026).
+  Giữ mỗi hình qua nhiều khung (12 hoặc 8 hình mỗi giây) để chuyển động có chất vẽ tay thay vì mượt tuyệt đối.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionCadenceTwos(q(".c1"), tl, 0, { fps: 24 });
+
+  Options (defaults in brackets):
+      - fps: drawings a second: 24 ones, 12 twos, 8 threes (12)
+      - distance: px (1150)
+      - period: s each way, linear (1)
+      - loops: (1)
+
+  Notes: Idea and numbers (TakayuStudio t-twos, written here): Keep the motion's own ease but hold each value on a fixed drawing rate: ones = 24 drawings/s (alternate 2 and 3 frames at 60 fps), twos = 12/s (hold 5 frames), threes = 8/s (alternate 7 and 8 frames). Site demo: three dots ping-pong 230 px (1 s each way, linear) sampled at 24 / 12 / 8 fps. Param fps (or a film-level cadence) snaps the progress to that grid. Params: cadence: ones | twos | threes (24 / 12 / 8 hình mỗi giây) · ease: giữ nguyên ease gốc. The motion keeps its own ease; only its progress is held on the drawing rate.
+-->
+
+<div class="cd"><b style="top:300px">24 hình</b><i class="c1" style="top:300px"></i><b style="top:540px">12 hình</b><i class="c2" style="top:540px"></i><b style="top:780px">8 hình</b><i class="c3" style="top:780px"></i></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"fps":12,"distance":1150,"period":1,"loops":1};
+  var run = function (el, tl, at, o) {
+        return MW.drive(tl, at, o.period * 2 * o.loops, function (t) { var q = Math.floor(t * o.fps + 1e-6) / o.fps, u = (q % (2 * o.period)) / o.period, p = u <= 1 ? u : 2 - u; gsap.set(el, { x: o.distance * p }); });
+      };
+  MW.motionCadenceTwos = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

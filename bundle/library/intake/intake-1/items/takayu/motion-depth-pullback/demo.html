@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Depth Pullback - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .dp { width: 640px; height: 380px; border-radius: 44px; background: linear-gradient(150deg, #a693ff, #6a4cf0); display: grid; place-items: center; font-size: 84px; font-weight: 900; color: #fff; box-shadow: 0 50px 120px rgba(0, 0, 0, 0.45); opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.8">
+<div class="st"><div class="dp">Toàn cảnh</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":2.2,"blur":28,"bright":1.35,"duration":0.76,"ease":"power2.inOut","bracket":60,"gap":30,"stroke":6,"accent":"#e8ebf3","exitAt":null};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, e = gsap.parseEase(o.ease), br = [], z = o.bracket, g = o.gap;
+        if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        var L = el.offsetLeft, Tp = el.offsetTop, W = el.offsetWidth, Hh = el.offsetHeight;
+        [[0, 0, "top", "left"], [1, 0, "top", "right"], [0, 1, "bottom", "left"], [1, 1, "bottom", "right"]].forEach(function (c) { var b = document.createElement("div"); b.style.cssText = "position:absolute;pointer-events:none;opacity:0;width:" + z + "px;height:" + z + "px;border-" + c[2] + ":" + o.stroke + "px solid " + o.accent + ";border-" + c[3] + ":" + o.stroke + "px solid " + o.accent + ";left:" + (c[0] ? L + W + g - z : L - g) + "px;top:" + (c[1] ? Tp + Hh + g - z : Tp - g) + "px;"; host.appendChild(b); br.push(b); });
+        return MW.drive(tl, at, o.exitAt == null ? o.duration + 0.25 : o.exitAt + 0.3, function (t) {
+          var p = e(Math.min(1, t / o.duration)), a = Math.min(1, t / 0.3), x = o.exitAt != null && t > o.exitAt ? Math.min(1, (t - o.exitAt) / 0.3) : 0;
+          gsap.set(el, { scale: o.from + (1 - o.from) * p }); el.style.filter = p < 1 ? "blur(" + (o.blur * (1 - p)).toFixed(2) + "px) brightness(" + (1 + (o.bright - 1) * (1 - p)).toFixed(3) + ")" : ""; el.style.opacity = String(a * (1 - x));
+          var bq = Math.max(0, Math.min(1, (t - o.duration) / 0.25)) * (1 - x); br.forEach(function (b) { b.style.opacity = String(bq); });
+        });
+      };
+  MW.motionDepthPullback = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionDepthPullback(q(".dp"), tl, 0.3, { exitAt: 2.1 });
+          tl.set({}, {}, 2.8);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

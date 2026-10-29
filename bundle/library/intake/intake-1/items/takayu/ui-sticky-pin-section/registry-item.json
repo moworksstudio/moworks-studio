@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-sticky-pin-section",
+  "type": "hyperframes:block",
+  "title": "Sticky Pin",
+  "description": "Chủ thể đứng ghim giữa khung và phồng nhẹ trong khi các khối chữ trôi qua từ dưới lên, hiện ra rồi mờ đi.",
+  "tags": [
+    "sticky",
+    "pin",
+    "scroll",
+    "section",
+    "web-scroll",
+    "heavy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-sticky-pin-section.html",
+      "target": "compositions/components/ui-sticky-pin-section.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-sticky-pin-section",
+    "author": "takayu",
+    "call": "MW.uiStickyPinSection(q(\".sp\"), tl, 0, {});",
+    "function": "MW.uiStickyPinSection",
+    "options": {
+      "pass": "s per caption pass, linear (1.1)",
+      "unit": "px per reference unit (5)",
+      "subject": "the pinned subject",
+      "captions": "the caption blocks"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=sticky-pin",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=sticky-pin (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio sticky-pin, written here): Pinned subject centred: scale 0.96 → 1.04 at 50 % → 0.96 over the pass. Text blocks scroll past: y +62 opacity 0 → y −4 opacity 1 at 35 % → y −72 opacity 0 at 100 %. 1.1 s per pass, linear (scroll progress), loops. Params: duration (1.1 s / lượt) · pulse (0.96 → 1.04) · rise (62 → −72 px) · ease (none).",
+    "titleVi": "Chủ thể ghim giữa, chữ cuộn qua"
+  }
+}

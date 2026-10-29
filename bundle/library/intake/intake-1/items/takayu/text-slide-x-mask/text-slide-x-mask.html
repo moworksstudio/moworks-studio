@@ -1,0 +1,89 @@
+<!--
+  Masked Horizontal Slide (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-slide-x-mask (read 12/10/2026).
+  Mỗi ký tự trượt vào từ phải trong ô mặt nạ riêng của nó, nối nhau 42 ms một.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textSlideXMask(q(".tk-head"), tl, 0.3, { exit: 2.3 });
+
+  Options (defaults in brackets):
+      - duration: s per character (0.8), expo.out
+      - stagger: s (0.042, capped 0.6 s in all)
+      - exit: s after the start to slide out left (null: stay)
+
+  Notes: Idea and numbers (TakayuStudio tx-slide-x-mask, written here): Each char in its own overflow-clip box (glyph width × baseline − 0.98 em to + 0.3 em). The char slides in from the right, x +105 % of its width → 0, 0.8 s expo.out (cubic-bezier(.16,1,.3,1)), 42 ms apart (demo capped 0.6 s total) from 0.3 s. Demo exit: chars slide on out to the left (−105 %), 0.5 s expo.in, same stagger, from 2.6 s; loop 3.8 s. Params: duration (0.8 s) · stagger (0.042 s) · x: quãng trượt (105 %) · ease (expo.out).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Trượt vào từng chữ</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.mask = MW.mask || function (nodes, pad) {
+    pad = pad == null ? 0.2 : pad;
+    var out = [];
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i], box = document.createElement("span");
+      box.className = "mw-mask"; box.style.display = "inline-block"; box.style.overflow = "hidden"; box.style.verticalAlign = "top";
+      box.style.padding = pad + "em 0.04em"; box.style.margin = (-pad) + "em -0.04em";
+      n.parentNode.insertBefore(box, n); box.appendChild(n); out.push(box);
+    }
+    return out;
+  };
+  var defaults = {"duration":0.8,"stagger":0.042,"exit":null};
+  var run = function (el, tl, at, o) {
+        var ch = MW.split(el, "chars").chars, n = ch.length, st = Math.min(o.stagger, 0.6 / Math.max(1, n - 1));
+        MW.mask(ch, 0.22);
+        ch.forEach(function (c, i) { tl.fromTo(c, { xPercent: 105 }, { xPercent: 0, duration: o.duration, ease: "expo.out", immediateRender: true }, at + i * st); });
+        if (o.exit != null) ch.forEach(function (c, i) { tl.to(c, { xPercent: -105, duration: 0.5, ease: "expo.in", immediateRender: false }, at + o.exit + i * st); });
+        return at + o.duration + (n - 1) * st;
+      };
+  MW.textSlideXMask = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

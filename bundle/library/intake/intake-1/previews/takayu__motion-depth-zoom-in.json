@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-depth-zoom-in",
+  "hash": "89876958ebde9da4",
+  "at": "2026-10-17T09:23:40.240Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-depth-zoom-in.mp4",
+    "poster": "previews/takayu__motion-depth-zoom-in.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "2cda15822c5783756c2cf78989e9c21fc7d29d2c7aef25c7ee323ae866096f43",
+    "size": 21468,
+    "seconds": 28.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

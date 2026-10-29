@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-foil-sheen-tilt",
+  "hash": "f671c98e67c7c7d1",
+  "at": "2026-10-17T09:57:28.493Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__effect-foil-sheen-tilt.mp4",
+    "poster": "previews/takayu__effect-foil-sheen-tilt.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f89637e3cb77114266ce71069971516675cf15927c3be0ff272056f4a49afe6b",
+    "size": 26791,
+    "seconds": 32.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

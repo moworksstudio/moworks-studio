@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "meteors",
+  "type": "hyperframes:component",
+  "title": "Meteors",
+  "description": "Thin meteors with fading tails streak diagonally across the frame on random delays and speeds, endlessly.",
+  "tags": [
+    "meteor",
+    "shooting star",
+    "space",
+    "night",
+    "background",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "meteors.html",
+      "target": "compositions/components/meteors.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/meteors",
+    "author": "magicui",
+    "call": "MW.meteors(q(\".mw-meteors\"), tl, 0, { number: 30, hold: 8 });",
+    "function": "MW.meteors",
+    "options": {
+      "number": "20",
+      "minDelay": "s (0.2)",
+      "maxDelay": "s (1.2)",
+      "minDuration": "s (2)",
+      "maxDuration": "s (10)",
+      "angle": "deg (215)",
+      "hold": "seconds (10)",
+      "seed": "1"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/meteors.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/meteors.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is a full-frame layer (position relative, overflow hidden). Upstream spreads lefts over the window width: here over el's width.",
+    "titleVi": "Sao băng vụt chéo qua khung"
+  }
+}

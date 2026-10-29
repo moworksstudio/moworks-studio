@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Android - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-android { position: relative; aspect-ratio: 380 / 830; }
+.mw-android > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mw-android > .mw-android-screen { position: absolute; left: calc(9 / 380 * 100%); top: calc(14 / 830 * 100%); width: calc(360 / 380 * 100%); height: calc(800 / 830 * 100%);
+  border-radius: calc(33 / 360 * 100%) / calc(25 / 800 * 100%); overflow: hidden; }
+.mw-android > .mw-android-screen > img, .mw-android > .mw-android-screen > video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mw-android { width: 420px; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4">
+<div class="center"><div class="row" style="gap:120px"><div class="mw-android a1"></div><div class="mw-android a2"></div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"src":null,"dark":false,"enter":null,"enterDuration":0.9};
+  var run = function (el, tl, at, o) {
+      var body = o.dark ? "#404040" : "#E5E5E5", bezel = o.dark ? "#262626" : "#FFFFFF";
+      var screen = el.querySelector(".mw-android-screen");
+      el.insertAdjacentHTML("afterbegin", '<svg viewBox="0 0 380 830" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M376 153H378C379.105 153 380 153.895 380 155V249C380 250.105 379.105 251 378 251H376V153Z" fill="' + body + '"/>' +
+        '<path d="M376 301H378C379.105 301 380 301.895 380 303V351C380 352.105 379.105 353 378 353H376V301Z" fill="' + body + '"/>' +
+        '<path d="M0 42C0 18.8041 18.804 0 42 0H336C359.196 0 378 18.804 378 42V788C378 811.196 359.196 830 336 830H42C18.804 830 0 811.196 0 788V42Z" fill="' + body + '"/>' +
+        '<path d="M2 43C2 22.0132 19.0132 5 40 5H338C358.987 5 376 22.0132 376 43V787C376 807.987 358.987 825 338 825H40C19.0132 825 2 807.987 2 787V43Z" fill="' + bezel + '"/>' +
+        '<path d="M9.25 48C9.25 29.3604 24.3604 14.25 43 14.25H335C353.64 14.25 368.75 29.3604 368.75 48V780C368.75 798.64 353.64 813.75 335 813.75H43C24.3604 813.75 9.25 798.64 9.25 780V48Z" fill="' + body + '" stroke="' + body + '" stroke-width="0.5"/></svg>');
+      if (!screen) { screen = document.createElement("div"); screen.className = "mw-android-screen"; el.appendChild(screen); }
+      if (o.src && !screen.firstChild) { var img = document.createElement("img"); img.src = o.src; img.alt = ""; screen.appendChild(img); }
+      el.insertAdjacentHTML("beforeend", '<svg viewBox="0 0 380 830" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="189" cy="28" r="9" fill="' + bezel + '"/><circle cx="189" cy="28" r="4" fill="' + body + '"/></svg>');
+      if (!o.enter) return at;
+      var from = o.enter === "rise" ? { y: 120, opacity: 0 } : { opacity: 0 };
+      tl.fromTo(el, from, { y: 0, opacity: 1, duration: o.enterDuration, ease: "power3.out", immediateRender: true }, at);
+      return at + o.enterDuration;
+    };
+  MW.android = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.android(q(".a1"), tl, 0.3, { src: "assets/screen.svg", enter: "rise" });
+          MW.android(q(".a2"), tl, 0.6, { src: "assets/screen.svg", dark: true, enter: "rise" });
+          tl.set({}, {}, 4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

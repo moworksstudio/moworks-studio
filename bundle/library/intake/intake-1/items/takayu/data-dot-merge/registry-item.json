@@ -1,0 +1,52 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-dot-merge",
+  "type": "hyperframes:block",
+  "title": "Data Cluster Merge",
+  "description": "Chín chấm nhóm A và bảy chấm nhóm B bay theo đường cong vào giữa, xếp thành hình hoa hướng dương mà vẫn giữ màu nhóm.",
+  "tags": [
+    "dots",
+    "merge",
+    "data",
+    "stagger",
+    "data-storytelling",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "data-dot-merge.html",
+      "target": "compositions/components/data-dot-merge.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/data-dot-merge",
+    "author": "takayu",
+    "call": "MW.dataDotMerge(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataDotMerge",
+    "options": {},
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-data-story-cluster-merge",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-data-story-cluster-merge (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-data-story-cluster-merge, written here): Group A: 9 dots (r 5) in a 3 x 3 grid, 16 px pitch, left; group B: 7 dots in a hex cluster, right. Each dot flies to a sunflower spot around the centre (radius 8 sqrt(j + 0.5) px, angle j x 137.5 deg), 750 ms easeInOut, from 900 ms + 45 ms per dot, path bowed +-14 px (A up, B down). 'A 9' / 'B 7' fade out 700-1000; '9 + 7 = 16' + ring fade in 2000-2300. Dots keep group colours. Params: dots (9 + 7) · stagger (45 ms) · duration bay (0.75 s).",
+    "titleVi": "Hai cụm chấm gộp thành một"
+  }
+}

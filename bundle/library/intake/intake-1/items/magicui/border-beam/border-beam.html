@@ -1,0 +1,62 @@
+<!--
+  Border Beam (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/border-beam.tsx.
+  A short gradient beam (#ffaa40 to #9c40ff) travels around the border of a card or button, one lap every 6 s, linear, looping for as long as the shot holds.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.borderBeam(q(".login .mw-border-beam"), tl, 0, { duration: 8, size: 200, borderWidth: 3, hold: 8 });
+
+  Options (defaults in brackets):
+      - size: beam length in px (50)
+      - duration: seconds per lap (6)
+      - delay: seconds the lap is advanced (0)
+      - reverse: run the other way (false)
+      - initialOffset: start point, % of the lap (0)
+      - borderWidth: px (1)
+      - colorFrom: #ffaa40
+      - colorTo: #9c40ff
+      - hold: seconds it runs in the film (10)
+
+  Notes: Put .mw-border-beam inside any element with position: relative and a border-radius; it inherits the radius. AE: pictures (gradient on a path).
+-->
+
+<div class="card" style="position:relative;border-radius:16px"><div class="mw-border-beam"><i></i></div></div>
+
+<style>
+.mw-border-beam { position: absolute; inset: 0; border-radius: inherit; border: var(--mw-bb-width, 1px) solid transparent; pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0) border-box; -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) padding-box exclude, linear-gradient(#000 0 0) border-box; }
+.mw-border-beam > i { position: absolute; aspect-ratio: 1; width: var(--mw-bb-size, 50px); background: linear-gradient(to left, var(--mw-bb-from), var(--mw-bb-to), transparent);
+  offset-path: rect(0 auto auto 0 round var(--mw-bb-size, 50px)); offset-distance: 0%; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"size":50,"duration":6,"delay":0,"reverse":false,"initialOffset":0,"borderWidth":1,"colorFrom":"#ffaa40","colorTo":"#9c40ff","hold":10};
+  var run = function (el, tl, at, o) {
+      var beam = el.querySelector("i") || el.appendChild(document.createElement("i"));
+      el.style.setProperty("--mw-bb-width", o.borderWidth + "px");
+      el.style.setProperty("--mw-bb-size", o.size + "px");
+      el.style.setProperty("--mw-bb-from", o.colorFrom);
+      el.style.setProperty("--mw-bb-to", o.colorTo);
+      var a = o.reverse ? 100 - o.initialOffset : o.initialOffset, b = o.reverse ? -o.initialOffset : 100 + o.initialOffset;
+      // one linear lap every `duration` s; upstream's delay advances the lap (motion's delay: -delay)
+      var s = { t: 0 };
+      var set = function () { var p = ((s.t + o.delay) / o.duration) % 1; beam.style.offsetDistance = (a + (b - a) * p) + "%"; };
+      set();
+      tl.to(s, { t: o.hold, duration: o.hold, ease: "none", onUpdate: set }, at);
+      return at + o.hold;
+    };
+  MW.borderBeam = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

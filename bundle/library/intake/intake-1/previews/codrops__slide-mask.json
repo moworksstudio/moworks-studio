@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/slide-mask",
+  "hash": "0eeddf65f54ff72a",
+  "at": "2026-10-17T06:39:22.242Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Archivo"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__slide-mask.mp4",
+    "poster": "previews/codrops__slide-mask.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "39088c9e576d3fa08083dc8a70c6ba033d7382cda76971a68585226be1dd01d6",
+    "size": 13646,
+    "seconds": 31.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

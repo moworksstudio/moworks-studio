@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Theme Toggler - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-animated-theme-toggler { position: absolute; inset: 0; }
+.ui { position: absolute; inset: 0; display: grid; place-items: center; } .ui .panel { width: 1200px; padding: 70px; border-radius: 36px; }
+.ui .panel h2 { margin: 0 0 16px; font-size: 72px; } .ui .panel p { margin: 0; font-size: 34px; opacity: .65; }
+.light { background: #fafafa; color: #09090b; } .light .panel { background: #fff; border: 2px solid #e4e4e7; } .dark { background: #09090b; color: #fafafa; } .dark .panel { background: #111114; border: 2px solid #27272a; }
+.dark2 { background: #1e1b4b; color: #fafafa; } .dark2 .panel { background: #312e81; border: 2px solid #4338ca; }
+.tg { position: absolute; right: 120px; top: 90px; width: 110px; height: 110px; border-radius: 9999px; display: grid; place-items: center; border: 2px solid currentColor; }
+.tg svg { width: 56px; height: 56px; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="7">
+<div class="ui light"><div class="panel"><h2>Giao diện sáng</h2><p>Bấm nút để chuyển sang chế độ tối.</p></div><div class="tg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></div></div>
+<div class="ui dark mw-animated-theme-toggler t1"><div class="panel"><h2>Giao diện tối</h2><p>Hình tròn nở ra từ nút bấm.</p></div><div class="tg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg></div></div>
+<div class="ui dark2 mw-animated-theme-toggler t2"><div class="panel"><h2>Hình ngôi sao</h2><p>Cùng hiệu ứng, hình khác.</p></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  var defaults = {"variant":"circle","duration":0.4,"origin":null,"fromCenter":false,"reverse":false};
+  var run = function (el, tl, at, o) {
+      var W = el.offsetWidth, H = el.offsetHeight, cx = W / 2, cy = H / 2;
+      if (!o.fromCenter && o.origin) {
+        if (Array.isArray(o.origin)) { cx = o.origin[0]; cy = o.origin[1]; }
+        else { var b = MW.el(o.origin).getBoundingClientRect(), r0 = el.getBoundingClientRect(); cx = b.left - r0.left + b.width / 2; cy = b.top - r0.top + b.height / 2; }
+      }
+      var maxR = Math.hypot(Math.max(cx, W - cx), Math.max(cy, H - cy)), pt = function (x, y) { return x.toFixed(2) + "px " + y.toFixed(2) + "px"; };
+      var shape = function (k) {                          // k 0 -> 1: the collapsed shape grows to the covering one (same vertex count)
+        var v = o.variant, L = function (a, b) { return a + (b - a) * k; }, verts = [];
+        if (v === "circle") return "circle(" + (maxR * k).toFixed(2) + "px at " + pt(cx, cy) + ")";
+        if (v === "square" || v === "rectangle") {
+          var hw = Math.max(cx, W - cx), hh = Math.max(cy, H - cy), sx = v === "square" ? Math.max(hw, hh) * 1.05 : hw, sy = v === "square" ? sx : hh;
+          verts = [[cx - sx, cy - sy], [cx + sx, cy - sy], [cx + sx, cy + sy], [cx - sx, cy + sy]];
+        } else if (v === "triangle") { var sc = maxR * 2.2, dx = (Math.sqrt(3) / 2) * sc; verts = [[cx, cy - sc], [cx + dx, cy + 0.5 * sc], [cx - dx, cy + 0.5 * sc]]; }
+        else if (v === "diamond") { var R = maxR * Math.SQRT2; verts = [[cx, cy - R], [cx + R, cy], [cx, cy + R], [cx - R, cy]]; }
+        else if (v === "hexagon") { var R2 = maxR * Math.SQRT2; for (var i = 0; i < 6; i++) { var a = -Math.PI / 2 + (i * Math.PI) / 3; verts.push([cx + R2 * Math.cos(a), cy + R2 * Math.sin(a)]); } }
+        else if (v === "star") {
+          var R3 = maxR * Math.SQRT2 * 1.03, start = Math.max(2, R3 * 0.025), rad = L(start, R3);
+          for (var j = 0; j < 5; j++) { var oa = -Math.PI / 2 + (j * 2 * Math.PI) / 5, ia = oa + Math.PI / 5; verts.push([cx + rad * Math.cos(oa), cy + rad * Math.sin(oa)]); verts.push([cx + rad * 0.42 * Math.cos(ia), cy + rad * 0.42 * Math.sin(ia)]); }
+          return "polygon(" + verts.map(function (p) { return pt(p[0], p[1]); }).join(", ") + ")";
+        }
+        return "polygon(" + verts.map(function (p) { return pt(L(cx, p[0]), L(cy, p[1])); }).join(", ") + ")";
+      };
+      var e = o.variant === "star" ? function (x) { return x; } : MW.bezier.apply(null, MW.CSS_EASE.easeInOut), s = { k: o.reverse ? 1 : 0 };
+      // before its toggle the new look is not there at all (upstream's View Transition only exists while it runs)
+      var set = function () { el.style.clipPath = s.k <= 0 ? "circle(0px at 0px 0px)" : shape(e(s.k)); };
+      set();
+      tl.fromTo(s, { k: o.reverse ? 1 : 0 }, { k: o.reverse ? 0 : 1, duration: o.duration, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + o.duration;
+    };
+  MW.animatedThemeToggler = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.animatedThemeToggler(q(".t1"), tl, 1.2, { origin: [1855, 145], duration: 0.6 });
+          MW.animatedThemeToggler(q(".t2"), tl, 3.8, { variant: "star", fromCenter: true, duration: 0.8 });
+          tl.set({}, {}, 7);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-blinds",
+  "type": "hyperframes:component",
+  "title": "Slats / Blinds",
+  "description": "Bảy thanh dọc lần lượt từ trái sang mở rộng từ mép trái của mình, ghép lại thành cảnh mới.",
+  "tags": [
+    "blinds",
+    "slats",
+    "stagger",
+    "transitions",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "transition-blinds.html",
+      "target": "compositions/components/transition-blinds.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/transition-blinds",
+    "author": "takayu",
+    "call": "MW.transitionBlinds(q(\".tk-b\"), tl, 1.2, {});",
+    "function": "MW.transitionBlinds",
+    "options": {
+      "slats": "vertical slats (7)",
+      "stagger": "s between slats, left to right (0.05)",
+      "each": "s each slat takes to open from its left edge (0.4)",
+      "from": "the outgoing scene"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tr-blinds",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tr-blinds (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tr-blinds, written here): 7 vertical slats of equal width; slat i (left to right) starts at i x 50 ms and opens its width 0 -> full from its left edge over 400 ms easeOutCubic, revealing the incoming scene; ~700 ms total. HF showcase-cover ships horizontal and vertical blinds (Apache-2.0). Params: slats (7) · stagger (50 ms) · duration mỗi thanh (0.4 s).",
+    "titleVi": "Rèm sáo dọc mở lần lượt"
+  }
+}

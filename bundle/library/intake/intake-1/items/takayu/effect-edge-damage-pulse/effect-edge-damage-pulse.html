@@ -1,0 +1,70 @@
+<!--
+  Screen-edge Damage Pulse (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=catalog-game-impact-fx-edge-damage (read 12/10/2026).
+  Lúc trúng đòn, bốn mép khung đỏ lên thật nhanh rồi phai từ từ, giữa khung vẫn trong; chỉ số máu rung nhẹ và thanh máu tụt có vệt trễ đuổi theo.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectEdgeDamagePulse(q(".ed"), tl, 0, { readout: ".hpt", bar: ".hpv", lag: ".lag" });
+
+  Options (defaults in brackets):
+      - hitAt: s (0.5)
+      - peak: edge opacity (0.85)
+      - rise: s (0.08)
+      - decay: s, time constant (0.55)
+      - depth: px of the edge band (264; 44 of 320), +32 % at the peak
+      - color: edge colour
+      - readout: HP text
+      - bar: HP bar
+      - lag: the lag bar
+      - fromHp: % (56)
+      - toHp: % (24)
+      - before: readout text before
+      - after: readout text after
+      - healAt: s (3.4)
+
+  Notes: Idea and numbers (TakayuStudio catalog-game-impact-fx-edge-damage, written here): px @320x200. Accent → transparent linear gradients on the 4 edges only (centre clear): intensity a rises 0 → 1 in 80 ms outCubic at the hit (0.5 s), then decays exp(−(t − 0.58)/0.55); opacity 0.85·a, depth 44 + 14·a (58 px at the peak, 44 as it fades). HP readout shakes ±3 px 200 ms and turns accent; HP bar drops 56 → 24 at once, a 55 % lag bar follows 350-800 ms after the hit (inOut). Heal 3.4-3.9 s inOut. Params: hitAt: lúc trúng (0.5 s) · peak: độ đậm (85 %) · rise: lên (0.08 s) · decay: thời hằng phai (0.55 s) · depth: bề dày mép (58 → 44 px).
+-->
+
+<div class="ed"><div class="sun"></div><div class="hud"><div class="hpt">MÁU 56</div><div class="hpb"><div class="lag"></div><div class="hpv"></div></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"hitAt":0.5,"peak":0.85,"rise":0.08,"decay":0.55,"depth":264,"color":"#ff2d4a","readout":null,"bar":null,"lag":null,"fromHp":56,"toHp":24,"before":"MÁU 56","after":"MÁU 24","healAt":3.4};
+  var run = function (el, tl, at, o) {
+        var edges = [], out = gsap.parseEase("power2.out"), io = gsap.parseEase("power2.inOut"), hp = o.readout ? MW.el(o.readout) : null, bar = o.bar ? MW.el(o.bar) : null, lag = o.lag ? MW.el(o.lag) : null;
+        ["top", "bottom", "left", "right"].forEach(function (side) { var d = document.createElement("div"); d.style.cssText = "position:absolute;pointer-events:none;z-index:8;" + side + ":0;" + (side === "top" || side === "bottom" ? "left:0;right:0;" : "top:0;bottom:0;"); el.appendChild(d); edges.push([d, side]); });
+        return MW.drive(tl, at, o.healAt + 0.5, function (t) {
+          var d = t - o.hitAt, a = d < 0 ? 0 : d < o.rise ? out(d / o.rise) : Math.exp(-(d - o.rise) / o.decay), depth = (o.depth + 14 / 44 * o.depth * a);
+          edges.forEach(function (e) {
+            var dir = { top: "180deg", bottom: "0deg", left: "90deg", right: "270deg" }[e[1]];
+            e[0].style[e[1] === "top" || e[1] === "bottom" ? "height" : "width"] = depth + "px";
+            e[0].style.background = "linear-gradient(" + dir + ", " + o.color + ", rgba(255,40,60,0))"; e[0].style.opacity = String(o.peak * a);
+          });
+          if (hp) { var sh = d > 0 && d < 0.2 ? 9 * (1 - d / 0.2) : 0; gsap.set(hp, { x: sh * Math.sin(t * 190), y: sh * Math.cos(t * 170) }); hp.style.color = d > 0 && t < o.healAt ? o.color : ""; hp.firstChild.nodeValue = d > 0 && t < o.healAt + 0.25 ? o.after : o.before; }
+          var heal = t > o.healAt ? io(Math.min(1, (t - o.healAt) / 0.5)) : 0, lv = d > 0 ? o.toHp : o.fromHp;
+          if (bar) bar.style.width = (lv + (o.fromHp - lv) * heal) + "%";
+          if (lag) { var lg = d < 0.35 ? o.fromHp : d < 0.8 ? o.fromHp + (o.toHp - o.fromHp) * io((d - 0.35) / 0.45) : o.toHp; lag.style.width = (lg + (o.fromHp - lg) * heal) + "%"; }
+        });
+      };
+  MW.effectEdgeDamagePulse = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

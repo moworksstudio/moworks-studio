@@ -1,0 +1,1582 @@
+{
+ "about": "Each film style's After Effects badge, measured on its demo by the AE export's size check (packages/style-ae)",
+ "styles": {
+  "anidoodle-adaptAlmond": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-adaptAlmond.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 9852
+  },
+  "anidoodle-adaptAquarelle": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-adaptAquarelle.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 3130
+  },
+  "anidoodle-adaptScrapbook": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-adaptScrapbook.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 2489
+  },
+  "anidoodle-balloon": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-balloonDraw.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 10108
+  },
+  "anidoodle-blueprint": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-blueprint.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 3618
+  },
+  "anidoodle-brokenColour": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-brokenColour.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 2975
+  },
+  "anidoodle-charcoalErasure": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-charcoalErasure.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 4317
+  },
+  "anidoodle-colouredPencil": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-colouredPencil.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 5470
+  },
+  "anidoodle-dreamGlaze": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-dreamGlazeDraw.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 14850
+  },
+  "anidoodle-embroidery": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-embroidery.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 2597
+  },
+  "anidoodle-flatVector": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-flatVector.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 2025
+  },
+  "anidoodle-folkTale": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-folkTale.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 3753
+  },
+  "anidoodle-fox": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-foxDraw.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 3685
+  },
+  "anidoodle-halftone": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-halftone.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 18022
+  },
+  "anidoodle-isometric": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-isometric.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 2100
+  },
+  "anidoodle-koi": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-koiDraw.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 4014
+  },
+  "anidoodle-lighthouse": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-lighthouseDraw.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 8603
+  },
+  "anidoodle-lowPoly": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-lowPoly.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 3247
+  },
+  "anidoodle-mellan": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-mellanUnspool.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 2381
+  },
+  "anidoodle-midCentury": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-midCentury.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 2777
+  },
+  "anidoodle-moonPhases": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-moonPhasesDraw.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 7143
+  },
+  "anidoodle-paintedOil": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-paintedOil.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 6159
+  },
+  "anidoodle-paperCraft": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-paperCraft.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 4225
+  },
+  "anidoodle-pixelArt": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-pixelArt.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 1973
+  },
+  "anidoodle-pocketWatch": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-pocketWatchDraw.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 8001
+  },
+  "anidoodle-ranunculus": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-ranunculusDraw.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 4267
+  },
+  "anidoodle-rubberHose": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-rubberHose.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 2673
+  },
+  "anidoodle-scrapbook": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-scrapbook.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 2939
+  },
+  "anidoodle-scratchboard": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-scratchboard.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 5196
+  },
+  "anidoodle-stipple": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-stipple.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 3790
+  },
+  "anidoodle-storybook": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-storybookDraw.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 3399
+  },
+  "anidoodle-sumiE": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-sumiE.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 3561
+  },
+  "anidoodle-toyBrick": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-toyBrick.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 4195
+  },
+  "anidoodle-woodcut": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-woodcut.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 5384
+  },
+  "anidoodle-wren": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "anidoodle/engine/src/hosts/page-wrenDraw.ts@f746cbd",
+   "source": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+   "ms": 3404
+  },
+  "brush-cartoon": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "demo-qa-02-character-brush-r2 (the app's demo film)",
+   "source": "film:f60b4257e78784c0",
+   "ms": 41033
+  },
+  "general": {
+   "level": "editable",
+   "kind": "layers",
+   "layers": 83,
+   "canvas": {
+    "count": 0,
+    "area": 0
+   },
+   "later": 0,
+   "pictures": 4,
+   "measured": "2026-10-27",
+   "demo": "demo-qa-03-general-biennale (the app's demo film)",
+   "source": "film:dfce0bb83225e42e",
+   "ms": 2897
+  },
+  "lemo-art-deco": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/art-deco/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 6561
+  },
+  "lemo-ascii-crt": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/ascii-crt/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 8069
+  },
+  "lemo-backrooms": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 2,
+   "canvas": {
+    "count": 2,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 2,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/backrooms/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 4036
+  },
+  "lemo-blueprint": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/blueprint/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 5532
+  },
+  "lemo-brick-toy": {
+   "level": "partial",
+   "kind": "mostly-canvas",
+   "layers": 33,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "test-12-xay-ket-qua-tung-vien-gach (a film made in the app)",
+   "source": "film:9d085bd22f741b09",
+   "ms": 8217
+  },
+  "lemo-cel-anime-80s": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/cel-anime-80s/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 6882
+  },
+  "lemo-countdown": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/countdown/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 2425
+  },
+  "lemo-crayon-book": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/crayon-book/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 25493
+  },
+  "lemo-dataviz": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/dataviz/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 3330
+  },
+  "lemo-desktop-flythrough": {
+   "level": "video",
+   "kind": "empty",
+   "layers": 0,
+   "canvas": {
+    "count": 0,
+    "area": 0
+   },
+   "later": 0,
+   "pictures": 0,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/desktop-flythrough/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 9828
+  },
+  "lemo-engraving": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/engraving/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 62906
+  },
+  "lemo-game-show": {
+   "level": "partial",
+   "kind": "layers",
+   "layers": 1,
+   "canvas": {
+    "count": 0,
+    "area": 0
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/game-show/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 12838
+  },
+  "lemo-glass-product": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 2,
+   "canvas": {
+    "count": 2,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 2,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/glass-product/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 9920
+  },
+  "lemo-halftone-dossier": {
+   "level": "partial",
+   "kind": "mostly-canvas",
+   "layers": 3,
+   "canvas": {
+    "count": 2,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 3,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/halftone-dossier/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 5202
+  },
+  "lemo-hd-2d": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 2,
+   "canvas": {
+    "count": 2,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 2,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/hd-2d/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 7682
+  },
+  "lemo-hologram-hud": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/hologram-hud/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 8434
+  },
+  "lemo-impasto": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/impasto/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 7890
+  },
+  "lemo-ink-wash": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/ink-wash/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 20878
+  },
+  "lemo-iso-infographic": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/iso-infographic/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 6759
+  },
+  "lemo-isometric-picture-book": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/isometric-picture-book/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 3782
+  },
+  "lemo-lowpoly-island": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 2,
+   "canvas": {
+    "count": 2,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 2,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/lowpoly-island/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 4745
+  },
+  "lemo-memphis-diorama": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 2,
+   "canvas": {
+    "count": 2,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 2,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/memphis-diorama/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 6268
+  },
+  "lemo-microgame": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/microgame/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 5173
+  },
+  "lemo-midcentury-toon": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/midcentury-toon/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 4253
+  },
+  "lemo-one-line": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/one-line/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 9446
+  },
+  "lemo-paper-lantern": {
+   "level": "partial",
+   "kind": "mostly-canvas",
+   "layers": 3,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/paper-lantern/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 25073
+  },
+  "lemo-papercut-red": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/papercut-red/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 6477
+  },
+  "lemo-pictogram-motion": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/pictogram-motion/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 2914
+  },
+  "lemo-pixel-rpg": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/pixel-rpg/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 2896
+  },
+  "lemo-risograph": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/risograph/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 2339
+  },
+  "lemo-rubber-hose": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/rubber-hose/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 2791
+  },
+  "lemo-scifi-toon": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/scifi-toon/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 6605
+  },
+  "lemo-shadow-puppet": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/shadow-puppet/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 2583
+  },
+  "lemo-silent-film": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/silent-film/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 14211
+  },
+  "lemo-silkscreen-poster": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/silkscreen-poster/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 12219
+  },
+  "lemo-stained-glass": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/stained-glass/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 51657
+  },
+  "lemo-swiss-motion": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/swiss-motion/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 2171
+  },
+  "lemo-telestrator": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/telestrator/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 2186
+  },
+  "lemo-tilt-shift": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 2,
+   "canvas": {
+    "count": 2,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 2,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/tilt-shift/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 11254
+  },
+  "lemo-transit-map": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 2,
+   "canvas": {
+    "count": 2,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 2,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/transit-map/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 5362
+  },
+  "lemo-ukiyoe": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/ukiyoe/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 5025
+  },
+  "lemo-urban-sketch": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/urban-sketch/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 42447
+  },
+  "lemo-whiteboard": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/whiteboard/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 3473
+  },
+  "lemo-woodcut": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-29",
+   "demo": "lemo-opuscar/styles/woodcut/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "ms": 25996
+  },
+  "mg-01-flat-vector": {
+   "level": "partial",
+   "kind": "layers",
+   "layers": 1,
+   "canvas": {
+    "count": 0,
+    "area": 0
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-27",
+   "demo": "mg-styles-15/demos/01-flat-vector@49052d8",
+   "source": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
+   "ms": 2985
+  },
+  "mg-02-line-art": {
+   "level": "partial",
+   "kind": "mostly-canvas",
+   "layers": 2,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "mg-styles-15/demos/02-line-art@49052d8",
+   "source": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
+   "ms": 2473
+  },
+  "mg-06-collage": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "mg-styles-15/demos/06-collage@49052d8",
+   "source": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
+   "ms": 2941
+  },
+  "mg-07-liquid": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "mg-styles-15/demos/07-liquid@49052d8",
+   "source": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
+   "ms": 9622
+  },
+  "mg-08-morph": {
+   "level": "partial",
+   "kind": "mostly-canvas",
+   "layers": 2,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "mg-styles-15/demos/08-morph@49052d8",
+   "source": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
+   "ms": 6748
+  },
+  "mg-09-bauhaus": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "mg-styles-15/demos/09-bauhaus@49052d8",
+   "source": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
+   "ms": 3626
+  },
+  "mg-10-synthwave": {
+   "level": "partial",
+   "kind": "mostly-canvas",
+   "layers": 5,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-10-27",
+   "demo": "test-14-bang-binh-minh (a film made in the app)",
+   "source": "film:89ef4def72ca89e7",
+   "ms": 9789
+  },
+  "mg-12-aurora-glass": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "mg-styles-15/demos/12-aurora-glass@49052d8",
+   "source": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
+   "ms": 3094
+  },
+  "mg-18-hanazi": {
+   "level": "partial",
+   "kind": "mostly-canvas",
+   "layers": 26,
+   "canvas": {
+    "count": 1,
+    "area": 0.598
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "mg-styles-15/demos/18-hanazi@49052d8",
+   "source": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
+   "ms": 3871
+  },
+  "mg-19-paperclip": {
+   "level": "editable",
+   "kind": "layers",
+   "layers": 767,
+   "canvas": {
+    "count": 0,
+    "area": 0
+   },
+   "later": 0,
+   "pictures": 11,
+   "measured": "2026-10-27",
+   "demo": "mg-styles-15/demos/19-paperclip@49052d8",
+   "source": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
+   "ms": 5919
+  },
+  "mg-20-pixel": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "measured": "2026-10-27",
+   "demo": "mg-styles-15/demos/20-pixel@49052d8",
+   "source": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
+   "ms": 7481
+  },
+  "mg-22-hud": {
+   "level": "video",
+   "kind": "empty",
+   "layers": 0,
+   "canvas": {
+    "count": 0,
+    "area": 0
+   },
+   "later": 0,
+   "pictures": 0,
+   "measured": "2026-10-27",
+   "demo": "mg-styles-15/demos/22-hud@49052d8",
+   "source": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
+   "ms": 3489
+  },
+  "what-if": {
+   "level": "video",
+   "kind": "dynamic",
+   "layers": 3,
+   "canvas": {
+    "count": 0,
+    "area": 0
+   },
+   "later": 541,
+   "measured": "2026-10-27",
+   "demo": "demo-what-if-giong-doc (earth-stops, the app's demo film)",
+   "source": "film:f32fed5472b04330",
+   "ms": 3943
+  }
+ },
+ "failed": {
+  "lemo-archive-lighttable": {
+   "demo": "lemo-opuscar/styles/archive-lighttable/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['missing assets/tex/p1.jpg']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-briefing-board": {
+   "demo": "lemo-opuscar/styles/briefing-board/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['The source image cannot be decoded.']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-caption-news": {
+   "demo": "lemo-opuscar/styles/caption-news/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['missing assets/img/doc1.jpg']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-chalkboard": {
+   "demo": "lemo-opuscar/styles/chalkboard/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) [\"Cannot read properties of null (reading 'getAttribute')\"]",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-circuit-board": {
+   "demo": "lemo-opuscar/styles/circuit-board/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['A network error occurred.']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-city-symphony": {
+   "demo": "lemo-opuscar/styles/city-symphony/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): playwright._impl._errors.Error: Page.evaluate: TypeError: Cannot read properties of null (reading 'querySelectorAll')",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-dark-keynote": {
+   "demo": "lemo-opuscar/styles/dark-keynote/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) []",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-data-physical": {
+   "demo": "lemo-opuscar/styles/data-physical/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['fetch for \"the film's page\" responded with 404: Not Found']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-kino-montage": {
+   "demo": "lemo-opuscar/styles/kino-montage/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) [\"Cannot read properties of null (reading 'width')\"]",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-lidar-survey": {
+   "demo": "lemo-opuscar/styles/lidar-survey/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['Event']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-living-screencast": {
+   "demo": "lemo-opuscar/styles/living-screencast/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) []",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-microscope": {
+   "demo": "lemo-opuscar/styles/microscope/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['missing assets/plates/slide.png']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-news-package": {
+   "demo": "lemo-opuscar/styles/news-package/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['assets/plate_datacenter.jpg']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-newsreel": {
+   "demo": "lemo-opuscar/styles/newsreel/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['Unexpected token \\'N\\', \"Not found\" is not valid JSON']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-paper-popup": {
+   "demo": "lemo-opuscar/styles/paper-popup/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['fetch for \"the film's page\" responded with 404: Not Found']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-printed-long-take": {
+   "demo": "lemo-opuscar/styles/printed-long-take/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['A network error occurred.']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-satellite-briefing": {
+   "demo": "lemo-opuscar/styles/satellite-briefing/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['image assets/plates/world.jpg']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-spy-titles": {
+   "demo": "lemo-opuscar/styles/spy-titles/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['Unsupported OpenType signature Not ']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-teardown": {
+   "demo": "lemo-opuscar/styles/teardown/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['fetch for \"the film's page\" responded with 404: Not Found']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-visual-investigation": {
+   "demo": "lemo-opuscar/styles/visual-investigation/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['Unexpected token \\'N\\', \"Not found\" is not valid JSON']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-watercolor": {
+   "demo": "lemo-opuscar/styles/watercolor/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['The source image cannot be decoded.']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "lemo-white-model": {
+   "demo": "lemo-opuscar/styles/white-model/demo@ea34ff9",
+   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['Event']",
+   "sources": [
+    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+   ],
+   "at": "2026-10-29"
+  },
+  "mg-03-isometric": {
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['Unsupported OpenType signature Not ']",
+   "demo": "mg-styles-15/demos/03-isometric@49052d8",
+   "source": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
+   "at": "2026-10-27"
+  },
+  "mg-05-cel-boil": {
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) []",
+   "demo": "mg-styles-15/demos/05-cel-boil@49052d8",
+   "source": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
+   "at": "2026-10-27"
+  }
+ }
+}

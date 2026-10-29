@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "cool-mode",
+  "type": "hyperframes:component",
+  "title": "Cool Mode",
+  "description": "While a button is pressed, a fountain of coloured circles or emoji shoots up from the press point, spins and falls: a 'tap to like' beat.",
+  "tags": [
+    "particles",
+    "fountain",
+    "emoji",
+    "press",
+    "like",
+    "burst",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "cool-mode.html",
+      "target": "compositions/components/cool-mode.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/cool-mode",
+    "author": "magicui",
+    "call": "MW.coolMode(q(\".a\"), tl, 0, { presses: [[0.3, 960, 713, 1.3]], hold: 3 });",
+    "function": "MW.coolMode",
+    "options": {
+      "presses": "[[0, 960, 700, 1]]",
+      "particle": "circle | text / emoji (circle)",
+      "size": "fixed px (random of 15-45)",
+      "speedHorz": "fixed (random 0-10)",
+      "speedUp": "fixed (random 0-25)",
+      "hold": "seconds (4)",
+      "seed": "1"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/cool-mode.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/cool-mode.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is a full-frame layer (position absolute, overflow hidden) over the scene. presses: [[t, x, y, holdSeconds], ...] in px of el. particle: 'circle' or any text / emoji (remote images are not taken).",
+    "titleVi": "Vòi hạt phun lên khi bấm"
+  }
+}

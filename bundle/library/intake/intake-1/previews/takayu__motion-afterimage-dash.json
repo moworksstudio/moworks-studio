@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-afterimage-dash",
+  "hash": "9b560b2655f155dd",
+  "at": "2026-10-17T07:39:31.735Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-afterimage-dash.mp4",
+    "poster": "previews/takayu__motion-afterimage-dash.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "fa4b3ac6701f79963f1234221d32488058e53011418f0dcc1527bbc3343f0f3f",
+    "size": 10084,
+    "seconds": 29.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

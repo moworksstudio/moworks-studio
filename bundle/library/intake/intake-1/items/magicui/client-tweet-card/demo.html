@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Client Tweet Card - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-client-tweet-card { position: relative; width: 100%; max-width: 32rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); padding: 16px; background: #0a0a0a; }
+.mw-client-tweet-card .mw-ct-skel, .mw-client-tweet-card .mw-ct-post { display: flex; flex-direction: column; gap: 16px; }
+.mw-client-tweet-card .mw-ct-post { position: absolute; inset: 16px; opacity: 0; }
+.mw-client-tweet-card .mw-ct-row { display: flex; align-items: center; gap: 12px; }
+.mw-client-tweet-card .mw-ct-skel i { display: block; border-radius: 6px; background: rgba(255,255,255,0.1); }
+.mw-client-tweet-card .mw-ct-av { width: 40px; height: 40px; border-radius: 9999px; flex: none; display: grid; place-items: center; color: #fff; font-weight: 700; }
+.mw-client-tweet-card .mw-ct-name { font-weight: 500; } .mw-client-tweet-card .mw-ct-handle { font-size: 14px; opacity: .55; } .mw-client-tweet-card .mw-ct-text { font-size: 15px; line-height: 1.625; }
+.mw-client-tweet-card { max-width: none; width: 1000px; padding: 40px; border-radius: 30px; } .mw-client-tweet-card .mw-ct-post { inset: 40px; }
+.mw-ct-skel, .mw-ct-post { gap: 30px !important; } .mw-ct-av, .mw-ct-skel .mw-ct-row > i { width: 96px !important; height: 96px !important; font-size: 44px; }
+.mw-ct-skel i[style*="height:40px;width:100%"] { height: 90px !important; } .mw-ct-skel i[style*="height:80px"] { height: 160px !important; }
+.mw-ct-name { font-size: 38px; } .mw-ct-handle { font-size: 30px !important; } .mw-ct-text { font-size: 38px !important; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="5">
+<div class="center"><div class="mw-client-tweet-card"></div></div>
+<div hidden aria-hidden="true" data-mw-script-text>Quốc Bảo · Moworks Studio giúp team mình ra video tính năng mỗi tuần. Không còn chờ dựng hình nữa.</div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  var defaults = {"name":"Moworks Studio","handle":"@moworks","text":"","avatar":"linear-gradient(135deg,#22d3ee,#6366f1)","loaded":1.6};
+  var run = function (el, tl, at, o) {
+      var esc = function (s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;"); };
+      el.innerHTML = '<div class="mw-ct-skel"><div class="mw-ct-row"><i style="width:40px;height:40px;border-radius:9999px"></i><div style="flex:1;display:flex;flex-direction:column;gap:6px"><i style="height:14px;width:40%"></i><i style="height:12px;width:25%"></i></div></div>' +
+        '<i style="height:40px;width:100%"></i><i style="height:80px;width:100%"></i></div>' +
+        '<div class="mw-ct-post"><div class="mw-ct-row"><div class="mw-ct-av" style="background:' + esc(o.avatar) + '">' + esc(o.name.trim().charAt(0).toUpperCase()) + '</div>' +
+        '<div><div class="mw-ct-name">' + esc(o.name) + '</div><div class="mw-ct-handle">' + esc(o.handle) + '</div></div></div><div class="mw-ct-text">' + esc(o.text) + "</div></div>";
+      var skel = el.querySelector(".mw-ct-skel"), post = el.querySelector(".mw-ct-post"), pulse = MW.bezier(0.4, 0, 0.6, 1), s = { t: 0 };
+      var set = function () {
+        var f = (s.t % 2) / 2, op = f < 0.5 ? 1 - 0.5 * pulse(f * 2) : 0.5 + 0.5 * pulse(f * 2 - 1);
+        var k = Math.max(0, Math.min(1, (s.t - o.loaded) / 0.3));
+        skel.style.opacity = s.t < o.loaded ? op : op * (1 - k); post.style.opacity = k;
+      };
+      set();
+      var end = o.loaded + 0.3;
+      tl.fromTo(s, { t: 0 }, { t: end, duration: end, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + end;
+    };
+  MW.clientTweetCard = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.clientTweetCard(q(".mw-client-tweet-card"), tl, 0.2, { name: "Quốc Bảo", handle: "@quocbao.dev", text: "Moworks Studio giúp team mình ra video tính năng mỗi tuần. Không còn chờ dựng hình nữa.", loaded: 2.4 });
+          tl.set({}, {}, 5);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

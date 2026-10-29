@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-spring-snap",
+  "hash": "18af81ddabae30b4",
+  "at": "2026-10-17T11:46:57.794Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-spring-snap.mp4",
+    "poster": "previews/takayu__motion-spring-snap.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b95b0c90a492bc65758b7902fe83676ac860a16a353745970c9e8ba047c14478",
+    "size": 11644,
+    "seconds": 32.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

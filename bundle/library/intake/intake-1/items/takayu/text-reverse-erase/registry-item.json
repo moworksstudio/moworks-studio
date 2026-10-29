@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-reverse-erase",
+  "type": "hyperframes:component",
+  "title": "Reverse-Order Erase",
+  "description": "Chữ biến mất bằng đúng chuyển động lúc vào nhưng chạy ngược, ký tự cuối đi trước.",
+  "tags": [
+    "exit",
+    "reverse",
+    "letters",
+    "stagger",
+    "text-exit",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-reverse-erase.html",
+      "target": "compositions/components/text-reverse-erase.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-reverse-erase",
+    "author": "takayu",
+    "call": "MW.textReverseErase(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textReverseErase",
+    "options": {
+      "duration": "s per letter (0.5, ease-out cubic)",
+      "stagger": "s (0.06)",
+      "cap": "s (0.5)",
+      "dist": "em (0.5)",
+      "start": "s (0.3)",
+      "exitAt": "s the entrance plays backward (2.2)",
+      "loop": "s (3.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-reverse-erase",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-reverse-erase (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-reverse-erase, written here): Entrance: chars y +24 px (0.5 em) → 0 and fade in, 0.5 s easeOutCubic, stagger 60 ms (demo capped 0.5 s) from 0.3 s. Hold ~1 s. Exit (demo 2.2 s) = the same timeline played backward: the last char leaves first, each char retraces its path (opacity → 0, y → +0.5 em) on the time-reversed curve (ease-in shape), same 0.5 s and 60 ms stagger. AE: Range Selector Mode Subtract, stagger from end. Loop 3.6 s. Params: duration (0.5 s) · stagger (0.06 s) · y (24 px) · hold: giữ trước khi xoá (1 s). The exit is the entrance played backward: the last letter leaves first, each on the time-reversed curve.",
+    "titleVi": "Xoá chữ bằng đường vào chạy ngược"
+  }
+}

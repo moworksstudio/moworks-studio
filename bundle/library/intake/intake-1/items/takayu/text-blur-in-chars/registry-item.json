@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-blur-in-chars",
+  "type": "hyperframes:component",
+  "title": "Characters Blur In",
+  "description": "Từng ký tự thu nhỏ từ 1.2 lần về đúng cỡ và rõ dần từ vùng nhoè 12 px, nối nhau từ trái sang.",
+  "tags": [
+    "reveal",
+    "blur",
+    "letters",
+    "scale",
+    "text-blur-focus",
+    "smooth",
+    "blur-focus",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-blur-in-chars.html",
+      "target": "compositions/components/text-blur-in-chars.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-blur-in-chars",
+    "author": "takayu",
+    "call": "MW.textBlurInChars(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textBlurInChars",
+    "options": {
+      "duration": "s per letter (0.7)",
+      "stagger": "s (0.07; the recipe 0.03–0.07)",
+      "fit": "s the letters start within (1.1)",
+      "blur": "px (12–20)",
+      "scale": "start scale (1.2)",
+      "ease": "(cubic-bezier(.33,1,.68,1))",
+      "start": "s (0.35)",
+      "exitAt": "s (2.3)",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-blur-in-chars",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-blur-in-chars (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-blur-in-chars, written here): Split chars; each char opacity 0 → 1, blur 12 px (recipe range 12–20) → 0, scale 1.2 → 1, 0.7 s easeOutCubic (CSS cubic-bezier(.33,1,.68,1); labelled power3.out), stagger 30 ms (range 30–70; demo min(70 ms, 1.1 s/(n−1))) from 0.35 s. AE: Range Selector Ramp Up. Loop exit: fade 2.3–2.6 s; loop 2.8 s. Params: duration (0.7 s) · stagger (0.03 s) · blur (12 px) · scale đầu (1.2).",
+    "titleVi": "Từng ký tự thu nhỏ và lấy nét"
+  }
+}

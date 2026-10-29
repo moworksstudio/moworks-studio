@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-camera-parallax",
+  "hash": "245a786787054c94",
+  "at": "2026-10-17T07:45:29.966Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-camera-parallax.mp4",
+    "poster": "previews/takayu__motion-camera-parallax.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "9723decd1a33e9575d0fa4d1bc6216d959a9249eeb2f3a23696719c2f7c0d520",
+    "size": 17750,
+    "seconds": 19,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

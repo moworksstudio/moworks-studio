@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Seven-segment Display - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.ss { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; } .ss-box { padding: 70px 90px; border-radius: 40px; background: #0d0f16; border: 3px solid #222a42; } .ss p { margin: 40px 0 0; font-size: 46px; color: #9aa3b8; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4">
+<div class="gm ss"><div><div class="ss-box"><div class="ss-d"></div></div><p>Giờ mở bán</p></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":1234,"start":0.5,"every":0.45,"fade":0.06,"off":0.08,"width":150,"color":"#ff5d6c","format":"dd:dd","powerOffAt":3.4,"loop":4};
+  var run = function (el, tl, at, o) {
+        var NS = "http://www.w3.org/2000/svg", MASK = { "0": "abcdef", "1": "bc", "2": "abdeg", "3": "abcdg", "4": "bcfg", "5": "acdfg", "6": "acdefg", "7": "abc", "8": "abcdefg", "9": "abcdfg", "-": "g" };
+        var w = o.width, h = w * 1.8, th = w * 0.17, gap = w * 0.35, svg = document.createElementNS(NS, "svg"), digits = [], colon = [];
+        var seg = function (x, y, len, vert) { var p = document.createElementNS(NS, "polygon"), a = th / 2, pts = vert ? [[x, y], [x + a, y + a], [x + a, y + len - a], [x, y + len], [x - a, y + len - a], [x - a, y + a]] : [[x, y], [x + a, y - a], [x + len - a, y - a], [x + len, y], [x + len - a, y + a], [x + a, y + a]]; p.setAttribute("points", pts.map(function (q) { return q.join(","); }).join(" ")); p.setAttribute("fill", o.color); return p; };
+        var x = th, cnt = o.format.length;
+        svg.setAttribute("width", cnt * (w + gap) + th * 2); svg.setAttribute("height", h + th * 2); svg.style.overflow = "visible"; svg.style.transform = "skewX(" + (-4.6) + "deg)";
+        for (var i = 0; i < cnt; i++) {
+          if (o.format[i] === ":") { [h * 0.32, h * 0.68].forEach(function (yy) { var c = document.createElementNS(NS, "circle"); c.setAttribute("cx", x + th / 2); c.setAttribute("cy", yy + th); c.setAttribute("r", th * 0.55); c.setAttribute("fill", o.color); svg.appendChild(c); colon.push(c); }); x += th * 2 + gap * 0.6; continue; }
+          var y0 = th, m = h / 2, S = { a: seg(x + th / 2, y0, w - th, false), b: seg(x + w, y0 + th / 2, m - th, true), c: seg(x + w, y0 + m + th / 2, m - th, true), d: seg(x + th / 2, y0 + h, w - th, false), e: seg(x, y0 + m + th / 2, m - th, true), f: seg(x, y0 + th / 2, m - th, true), g: seg(x + th / 2, y0 + m, w - th, false) };
+          for (var k in S) svg.appendChild(S[k]); digits.push(S); x += w + gap;
+        }
+        el.appendChild(svg); svg.style.filter = "drop-shadow(0 0 8px " + o.color + ")";
+        var at0 = function (v, i) { return String(v)[i]; };
+        return MW.drive(tl, at, o.loop, function (t) {
+          var n = Math.max(0, Math.floor((t - o.start) / o.every) + 1), cur = o.from + (t >= o.start ? n : 0), prev = cur - 1, d = t >= o.start ? (t - o.start) % o.every : 9, pow = 1 - Math.max(0, Math.min(1, (t - o.powerOffAt) / 0.22));
+          var fmt = function (v) { var mm = Math.floor(v / 100) % 100, ss = v % 100; ss = ss % 60; return ("0" + Math.floor(v / 100)).slice(-2) + ("0" + (v % 100)).slice(-2); };
+          var A = fmt(prev), B = fmt(cur), k2 = Math.min(1, d / o.fade);
+          digits.forEach(function (S, i) { for (var s in S) { var on1 = MASK[A[i]].indexOf(s) >= 0, on2 = MASK[B[i]].indexOf(s) >= 0, v = on1 === on2 ? (on2 ? 1 : o.off) : (on2 ? o.off + (1 - o.off) * k2 : 1 - (1 - o.off) * k2); S[s].setAttribute("opacity", String(Math.max(o.off * pow, v * pow))); } });
+          colon.forEach(function (c) { c.setAttribute("opacity", String((Math.floor(t * 2) % 2 ? o.off : 1) * pow)); });
+        });
+      };
+  MW.dataSevenSegment = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.dataSevenSegment(q(".ss-d"), tl, 0, {});
+          tl.set({}, {}, 4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

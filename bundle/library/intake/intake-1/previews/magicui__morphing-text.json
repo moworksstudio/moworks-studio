@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/morphing-text",
+  "hash": "4c11ad9ea4ccbf93",
+  "at": "2026-10-17T06:31:52.040Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__morphing-text.mp4",
+    "poster": "previews/magicui__morphing-text.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "99d9dc5068ac8ba4ca6e0e1d2c6ec5c14e8389d17ea37618500aab3a0f33304f",
+    "size": 45813,
+    "seconds": 33.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

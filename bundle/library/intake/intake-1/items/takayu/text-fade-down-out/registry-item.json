@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-fade-down-out",
+  "type": "hyperframes:component",
+  "title": "Fade Down Out",
+  "description": "Các ký tự chìm xuống 30 px và mờ đi, bắt đầu từ ký tự cuối.",
+  "tags": [
+    "exit",
+    "letters",
+    "fade",
+    "sink",
+    "text-exit",
+    "smooth",
+    "heavy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-fade-down-out.html",
+      "target": "compositions/components/text-fade-down-out.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-fade-down-out",
+    "author": "takayu",
+    "call": "MW.textFadeDownOut(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textFadeDownOut",
+    "options": {
+      "duration": "s (0.6)",
+      "stagger": "s from the last letter (0.06)",
+      "cap": "s (0.6)",
+      "dist": "em (0.6)",
+      "ease": "(cubic-bezier(.55,.085,.68,.53): ease-in quad)",
+      "outAt": "s (0.9)",
+      "backAt": "s it fades back in place (2.4)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-fade-down-out",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-fade-down-out (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-fade-down-out, written here): Split chars; from the last char backward, each char y 0 → +30 px (0.6 em) and opacity 1 → 0, 0.6 s easeInQuad (power1.in, CSS cubic-bezier(.55,.085,.68,.53)), stagger 20 ms from the end (demo 60 ms capped 0.6 s), from 0.9 s. Demo loop: the text fades back in place 2.4–2.9 s; loop 3 s. Params: duration (0.6 s) · stagger: từ cuối (0.02 s) · y: quãng chìm (30 px) · ease (easeInQuad).",
+    "titleVi": "Ký tự chìm xuống và mờ đi"
+  }
+}

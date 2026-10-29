@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-ink-reveal",
+  "hash": "10813dcfb6b16482",
+  "at": "2026-10-17T10:05:24.309Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__effect-ink-reveal.mp4",
+    "poster": "previews/takayu__effect-ink-reveal.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b339721d997bcc3710f933ef5b63b9a36cf512a43eb3f42a86d1b2851a3128c9",
+    "size": 11959,
+    "seconds": 29.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

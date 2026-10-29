@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Headline Ribbon Wrap - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: #0b0d12; color: #e8ebf3; font-family: Inter, sans-serif; }
+.rb { position: absolute; left: 50%; top: 50%; width: 1000px; height: 180px; margin: -90px 0 0 -500px; }
+.rb-band { position: absolute; inset: 0; border-radius: 10px; background: linear-gradient(180deg, #9c88ff, #7357f5); overflow: hidden; display: grid; place-items: center; z-index: 2; padding: 30px 0; box-sizing: border-box; }
+.rb-text { font-size: 90px; font-weight: 900; color: #f6f1e4; letter-spacing: 0.02em; white-space: nowrap; }
+.rb-tail { position: absolute; top: 45px; width: 220px; height: 180px; background: #5a3fd0; opacity: 0.6; z-index: 1; }
+.rb-tail.l { left: -150px; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 27% 50%); } .rb-tail.r { right: -150px; clip-path: polygon(0 0, 100% 0, 73% 50%, 100% 100%, 0 100%); }
+.rb-tail::after { content: ""; position: absolute; top: 0; width: 70px; height: 45px; background: #241a5e; } .rb-tail.l::after { right: 0; } .rb-tail.r::after { left: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4.2">
+<div class="rb"><div class="rb-tail l"></div><div class="rb-tail r"></div><div class="rb-band"><div class="rb-text">KHAI TRƯƠNG</div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"rise":110};
+  var run = function (el, tl, at, o) {
+        var band = el.querySelector(".rb-band"), txt = el.querySelector(".rb-text"), tails = el.querySelectorAll(".rb-tail"), ex = gsap.parseEase("expo.out"), ei = gsap.parseEase("expo.in"), p2 = gsap.parseEase("power2.out"), pi = gsap.parseEase("power2.in"), bk = gsap.parseEase("back.out(1.7)");
+        var cl = function (a, b, t) { return Math.max(0, Math.min(1, (t - a) / (b - a))); };
+        return MW.drive(tl, at, 4.2, function (t) {
+          var b = ex(cl(0.3, 0.9, t)) * (1 - ei(cl(3.55, 3.9, t))), x = p2(cl(0.65, 1.05, t)) * (1 - pi(cl(3.4, 3.6, t))), tl2 = bk(cl(1.05, 1.5, t)) * (1 - pi(cl(3.25, 3.5, t)));
+          gsap.set(band, { scaleX: b }); gsap.set(txt, { y: (1 - x) * o.rise }); txt.style.opacity = String(x);
+          tails.forEach(function (tt, i) { gsap.set(tt, { scaleX: tl2, transformOrigin: i ? "0% 50%" : "100% 50%" }); tt.style.opacity = tl2 > 0.01 ? "1" : "0"; });
+        });
+      };
+  MW.textRibbonBanner = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textRibbonBanner(q(".rb"), tl, 0, {});
+          tl.set({}, {}, 4.2);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

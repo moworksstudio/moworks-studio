@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/ripple-button",
+  "hash": "2a5a8430637fc6ac",
+  "at": "2026-10-29T07:31:53.277Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__ripple-button.mp4",
+    "poster": "previews/magicui__ripple-button.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.214",
+    "sha256": "0053c6a3e7385400abe3266cb8af2cdb582dedf9c08b91a45e13ba04e9a4045a",
+    "size": 12926,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72",
+    "seconds": 17.2
+  }
+}

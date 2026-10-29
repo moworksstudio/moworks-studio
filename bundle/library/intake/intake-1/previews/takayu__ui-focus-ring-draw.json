@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-focus-ring-draw",
+  "hash": "e991009623d3d02a",
+  "at": "2026-10-17T09:51:19.207Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__ui-focus-ring-draw.mp4",
+    "poster": "previews/takayu__ui-focus-ring-draw.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a9cc385d9e58897c25532ecebc7b84ffc67ee772cc846609a7efaf6ebfb1d075",
+    "size": 7063,
+    "seconds": 23.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

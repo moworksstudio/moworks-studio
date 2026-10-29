@@ -1,0 +1,97 @@
+<!--
+  KPI Spotlight Relay (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=catalog-data-story-kpi-relay (read 12/10/2026).
+  Một đèn rọi bật lên và trượt bằng lò xo qua ba thẻ số liệu, thẻ được rọi sáng rõ có viền nhấn, các con số không hề xê dịch.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectSpotlightRelay(q(".gm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - cards: [[value, label], ...] (3)
+
+  Notes: Idea and numbers (TakayuStudio catalog-data-story-kpi-relay, written here): 3 KPI cards (74 x 58) fixed at 22 / 50 / 78 % width. Spotlight (lamp + cone at 14 % accent + floor ellipse at 30 %) turns on 200-450 ms, moves card to card by springs (stiffness 170, damping 24) at 1350 and 2450 ms, back to the first at 3600; off 3350-3600. Card lit = 1 - |cone x - card x| / 56 px: opacity 0.45 -> 1 and accent border when lit > 0.5. Values never move. Params: cards (3) · moves (1.35 / 2.45 s) · spring (170 / 24).
+-->
+
+<div class="gm"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.springTo = MW.springTo || function (k, c, keys) {
+    var sp = MW.spring(k, c);
+    return function (t) { var v = keys[0][1]; for (var i = 1; i < keys.length; i++) if (t >= keys[i][0]) v += (keys[i][1] - keys[i - 1][1]) * sp.at(t - keys[i][0]); return v; };
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  MW.span = MW.span || function (t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); };
+  MW.yAt = MW.yAt || function (pts, x) { if (x <= pts[0][0]) return pts[0][1]; for (var i = 1; i < pts.length; i++) if (x <= pts[i][0]) { var u = (x - pts[i - 1][0]) / ((pts[i][0] - pts[i - 1][0]) || 1); return pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * u; } return pts[pts.length - 1][1]; };
+  MW.polyToX = MW.polyToX || function (c, pts, x) { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) { if (pts[i][0] <= x) c.lineTo(pts[i][0], pts[i][1]); else { c.lineTo(x, MW.yAt(pts, x)); break; } } return [Math.min(x, pts[pts.length - 1][0]), MW.yAt(pts, Math.min(x, pts[pts.length - 1][0]))]; };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"cards":[["2,4 tr","Lượt xem"],["38%","Chuyển đổi"],["4,8★","Đánh giá"]]};
+  var run = function (el, tl, at, o) {
+        var S = MW.stage320(el), c = S.ctx, X = [70.4, 160, 249.6], pos = MW.springTo(170, 24, [[0, X[0]], [1.35, X[1]], [2.45, X[2]], [3.6, X[0]]]), K = o.cards;
+        return MW.drive(tl, at, 3.8, function (t) {
+          S.clear(); var on = MW.span(t, 0.2, 0.45) * (1 - MW.span(t, 3.35, 3.6)), x = pos(t);
+          K.forEach(function (k, i) { var lit = Math.max(0, 1 - Math.abs(x - X[i]) / 56) * on; c.globalAlpha = 0.45 + 0.55 * lit; MW.rr(c, X[i] - 37, 92, 74, 58, 8); c.fillStyle = "#1b2130"; c.fill(); c.strokeStyle = lit > 0.5 ? "#8b7bff" : "#2a3350"; c.lineWidth = lit > 0.5 ? 1.8 : 1; c.stroke();
+            MW.txt(c, k[0], X[i], 114, 15, "#e8ebf3", 900); MW.txt(c, k[1], X[i], 134, 7, "#8f9ab3", 700); c.globalAlpha = 1; });
+          if (on > 0) { c.globalAlpha = on; var g = c.createLinearGradient(0, 30, 0, 160); g.addColorStop(0, "rgba(139,123,255,0.14)"); g.addColorStop(1, "rgba(139,123,255,0.04)"); c.fillStyle = g; c.beginPath(); c.moveTo(x - 6, 34); c.lineTo(x + 6, 34); c.lineTo(x + 46, 160); c.lineTo(x - 46, 160); c.closePath(); c.fill();
+            c.fillStyle = "rgba(139,123,255,0.3)"; c.beginPath(); c.ellipse(x, 162, 46, 7, 0, 0, 2 * Math.PI); c.fill(); c.fillStyle = "#c9d2ea"; MW.rr(c, x - 10, 24, 20, 12, 4); c.fill(); c.globalAlpha = 1; }
+        });
+      };
+  MW.effectSpotlightRelay = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

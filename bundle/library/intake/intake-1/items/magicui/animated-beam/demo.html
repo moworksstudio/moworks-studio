@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Animated Beam - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-animated-beam { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+.hub { position: relative; width: 1300px; height: 640px; display: flex; justify-content: space-between; align-items: center; padding: 0 40px; }
+.col3 { display: flex; flex-direction: column; justify-content: space-between; height: 560px; }
+.node { position: relative; z-index: 2; width: 130px; height: 130px; border-radius: 50%; background: #fff; border: 4px solid #e4e4e7; display: grid; place-items: center; box-shadow: 0 0 40px -24px rgba(0,0,0,.8); }
+.node.big { width: 170px; height: 170px; } .node svg { width: 56%; height: 56%; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="8">
+<div class="center"><div class="hub">
+  <div class="col3"><div class="node i1"><svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div>
+    <div class="node i2"><svg viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2"><path d="M4 5h16v11H8l-4 4z"/></svg></div>
+    <div class="node i3"><svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M7 18a5 5 0 1 1 1-9.9A6 6 0 0 1 19 10a4 4 0 0 1-1 8z"/></svg></div></div>
+  <div class="node big hubc"><svg viewBox="0 0 24 24" fill="#8b5cf6"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></div>
+  <div class="col3"><div class="node o1"><svg viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></div>
+    <div class="node o2"><svg viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2"><path d="M3 12h4l3 7 4-14 3 7h4"/></svg></div>
+    <div class="node o3"><svg viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div></div>
+</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  var defaults = {"from":null,"to":null,"curvature":0,"reverse":false,"duration":5,"delay":0,"repeatDelay":0,"pathColor":"gray","pathWidth":2,"pathOpacity":0.2,"gradientStartColor":"#ffaa40","gradientStopColor":"#9c40ff","startXOffset":0,"startYOffset":0,"endXOffset":0,"endYOffset":0,"hold":10};
+  var run = function (el, tl, at, o) {
+      var NS = "http://www.w3.org/2000/svg", A = MW.el(o.from), B = MW.el(o.to);
+      var c = el.getBoundingClientRect(), ra = A.getBoundingClientRect(), rb = B.getBoundingClientRect();
+      var sx = ra.left - c.left + ra.width / 2 + o.startXOffset, sy = ra.top - c.top + ra.height / 2 + o.startYOffset;
+      var ex = rb.left - c.left + rb.width / 2 + o.endXOffset, ey = rb.top - c.top + rb.height / 2 + o.endYOffset;
+      var d = "M " + sx + "," + sy + " Q " + (sx + ex) / 2 + "," + (sy - o.curvature) + " " + ex + "," + ey;
+      var id = "mw-beam-" + (MW.__beams = (MW.__beams || 0) + 1);
+      var svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("class", "mw-animated-beam"); svg.setAttribute("fill", "none");
+      svg.setAttribute("width", c.width); svg.setAttribute("height", c.height); svg.setAttribute("viewBox", "0 0 " + c.width + " " + c.height);
+      svg.innerHTML = '<path d="' + d + '" stroke="' + o.pathColor + '" stroke-width="' + o.pathWidth + '" stroke-opacity="' + o.pathOpacity + '" stroke-linecap="round"/>' +
+        '<path d="' + d + '" stroke-width="' + o.pathWidth + '" stroke="url(#' + id + ')" stroke-opacity="1" stroke-linecap="round"/>' +
+        '<defs><linearGradient id="' + id + '" gradientUnits="userSpaceOnUse" x1="0%" x2="0%" y1="0%" y2="0%">' +
+        '<stop stop-color="' + o.gradientStartColor + '" stop-opacity="0"/><stop stop-color="' + o.gradientStartColor + '"/>' +
+        '<stop offset="32.5%" stop-color="' + o.gradientStopColor + '"/><stop offset="100%" stop-color="' + o.gradientStopColor + '" stop-opacity="0"/></linearGradient></defs>';
+      el.insertBefore(svg, el.firstChild);
+      var g = svg.querySelector("linearGradient"), e = MW.bezier(0.16, 1, 0.3, 1);
+      var X1 = o.reverse ? [90, -10] : [10, 110], X2 = o.reverse ? [100, 0] : [0, 100], P = o.duration + o.repeatDelay;
+      var s = { t: 0 };
+      var set = function () {
+        var t = s.t - o.delay;
+        if (t < 0) { g.setAttribute("x1", "0%"); g.setAttribute("x2", "0%"); return; }       // motion starts from the initial 0 %
+        var f = Math.min(1, (t % P) / o.duration), u = e(f);
+        g.setAttribute("x1", (X1[0] + (X1[1] - X1[0]) * u) + "%"); g.setAttribute("x2", (X2[0] + (X2[1] - X2[0]) * u) + "%");
+      };
+      set();
+      tl.fromTo(s, { t: 0 }, { t: o.hold, duration: o.hold, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + o.hold;
+    };
+  MW.animatedBeam = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          var H = q(".hub"), o = { duration: 3, pathWidth: 4, hold: 8, pathColor: "#a1a1aa" };
+          MW.animatedBeam(H, tl, 0, Object.assign({ from: ".i1", to: ".hubc", curvature: -75, endYOffset: -10 }, o));
+          MW.animatedBeam(H, tl, 0, Object.assign({ from: ".i2", to: ".hubc" }, o));
+          MW.animatedBeam(H, tl, 0, Object.assign({ from: ".i3", to: ".hubc", curvature: 75, endYOffset: 10 }, o));
+          MW.animatedBeam(H, tl, 0, Object.assign({ from: ".o1", to: ".hubc", curvature: -75, endYOffset: -10, reverse: true }, o));
+          MW.animatedBeam(H, tl, 0, Object.assign({ from: ".o2", to: ".hubc", reverse: true }, o));
+          MW.animatedBeam(H, tl, 0, Object.assign({ from: ".o3", to: ".hubc", curvature: 75, endYOffset: 10, reverse: true }, o));
+          tl.set({}, {}, 8);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

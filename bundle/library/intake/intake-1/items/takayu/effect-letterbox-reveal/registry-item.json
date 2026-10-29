@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-letterbox-reveal",
+  "type": "hyperframes:component",
+  "title": "Letterbox Reveal",
+  "description": "Khung hình bắt đầu đen kín, hai dải đen trên dưới tách ra và dừng ở tỉ lệ điện ảnh 2.39 : 1, tiêu đề hiện dần ngay trước khi dải đen dừng.",
+  "tags": [
+    "letterbox",
+    "cinematic",
+    "reveal",
+    "bars",
+    "text-titles-film",
+    "smooth",
+    "heavy",
+    "titles-film",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-letterbox-reveal.html",
+      "target": "compositions/components/effect-letterbox-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-letterbox-reveal",
+    "author": "takayu",
+    "call": "MW.effectLetterboxReveal(q(\".lr\"), tl, 0, { title: \".lr-t\" });",
+    "function": "MW.effectLetterboxReveal",
+    "options": {
+      "ratio": "aspect it opens to (2.39)",
+      "title": "the title (fades in 0.5 s into the open)",
+      "closeAt": "s the bars close (2.85)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-letterbox-reveal",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-letterbox-reveal (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-letterbox-reveal, written here): Frame starts closed: two black bars meet at the middle and open to 2.39 : 1 (gap = width ÷ 2.39; at 1920 × 1080: 138 px bars, inset 12.8 %) over 0.35–1.15 s, cubic-bezier(.65,0,.35,1). Title (36 px, centred) fades in 0.85–1.35 s (cubic-bezier .65,0,.35,1), 0.5 s into the open. Title out 2.6–2.9 s; bars close 2.85–3.45 s. Loop 3.6 s. Params: tỉ lệ dừng (2.39 : 1) · thời gian mở (0.8 s) · trễ chữ (0.5 s).",
+    "titleVi": "Hai dải đen mở ra khung điện ảnh"
+  }
+}

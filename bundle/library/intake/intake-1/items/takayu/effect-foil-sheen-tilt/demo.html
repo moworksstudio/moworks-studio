@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Metallic Foil Tilt - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.st { position: absolute; inset: 0; display: grid; place-items: center; } .fo { position: relative; width: 720px; height: 460px; border-radius: 40px; padding: 60px; box-sizing: border-box; color: #fff;
+  background: linear-gradient(135deg, rgba(139,123,255,0.95), rgba(90,70,220,0.8)); box-shadow: 0 60px 90px rgba(0,0,0,0.5); } .fo i { display: block; width: 110px; height: 80px; border-radius: 16px; border: 4px solid rgba(255,255,255,0.7); margin-bottom: 70px; } .fo b { font-size: 64px; letter-spacing: 0.12em; } .fo span { display: block; margin-top: 18px; font-size: 32px; letter-spacing: 0.1em; opacity: 0.8; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4.1">
+<div class="st"><div class="fo"><i></i><b>HỘI VIÊN</b><span>THẺ NHŨ BẠC</span></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"tilt":24,"perspective":1900,"band":60,"skew":12};
+  var run = function (el, tl, at, o) {
+        if (getComputedStyle(el).position === "static") el.style.position = "relative"; el.style.overflow = "hidden";
+        var io = gsap.parseEase("power2.inOut"), band = document.createElement("div"), dark = document.createElement("div");
+        band.style.cssText = "position:absolute;top:-10%;bottom:-10%;width:" + o.band + "%;pointer-events:none;mix-blend-mode:screen;transform:skewX(-" + o.skew + "deg);background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.28) 30%,rgba(255,255,255,0.1) 45%,rgba(255,255,255,0.75) 52%,rgba(255,255,255,0.1) 58%,rgba(255,255,255,0.5) 70%,rgba(255,255,255,0) 100%);";
+        dark.style.cssText = "position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;"; el.appendChild(band); el.appendChild(dark);
+        var K = [[0, 0], [0.3, 0], [1.2, -o.tilt], [1.6, -o.tilt], [2.7, o.tilt], [3.1, o.tilt], [3.9, 0]];
+        var A = function (t) { if (t <= 0) return 0; for (var i = 1; i < K.length; i++) if (t <= K[i][0]) return K[i - 1][1] + (K[i][1] - K[i - 1][1]) * io((t - K[i - 1][0]) / (K[i][0] - K[i - 1][0])); return 0; };
+        return MW.drive(tl, at, 3.9, function (t) {
+          var a = A(t); gsap.set(el, { rotationY: a, transformPerspective: o.perspective }); band.style.left = (58 - (a / o.tilt) * 34 - o.band / 2).toFixed(2) + "%"; dark.style.opacity = String((0.7 * Math.abs(a) * Math.PI / 180).toFixed(3));
+        });
+      };
+  MW.effectFoilSheenTilt = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.effectFoilSheenTilt(q(".fo"), tl, 0, {});
+          tl.set({}, {}, 4.1);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

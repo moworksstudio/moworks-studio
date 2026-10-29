@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/card-depth-breadcrumb",
+  "hash": "a7e8fee392e0bc74",
+  "at": "2026-10-17T08:01:32.390Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__card-depth-breadcrumb.mp4",
+    "poster": "previews/takayu__card-depth-breadcrumb.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "41079f84b423584883dfaf413e8348f758520b6219d201431d670833c1f3170d",
+    "size": 27181,
+    "seconds": 35.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-shape-contour",
+  "type": "hyperframes:component",
+  "title": "Shape Contour Text",
+  "description": "Dòng chữ lặp lại phủ kín viền một hình khép kín (ví dụ trái tim) và chạy vòng quanh liên tục, chữ uốn mượt qua các góc nhọn.",
+  "tags": [
+    "path",
+    "loop",
+    "contour",
+    "shape",
+    "text-path-shape",
+    "smooth",
+    "soft",
+    "path-shape",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-shape-contour.html",
+      "target": "compositions/components/text-shape-contour.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-shape-contour",
+    "author": "takayu",
+    "call": "MW.textShapeContour(q(\".sc\"), tl, 0, {});",
+    "function": "MW.textShapeContour",
+    "options": {
+      "text": "",
+      "height": "px of the heart (610)",
+      "size": "px at most (90), fitted so the text closes the outline",
+      "repeats": "repeats it moves per loop (1)",
+      "fill": "",
+      "line": "",
+      "sep": "",
+      "loop": "s (5)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-shape-contour-text",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-shape-contour-text (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-shape-contour-text, written here): Closed shape (demo heart 122 px tall, filled card colour with a 1 px outline). Text + ' • ' (separator accent) repeated m times so it exactly fills the perimeter, with size ≤ 18 px. Glyph baselines follow the outline, angle taken from a chord of ±1.1 em so cusps stay smooth. Offset moves forward linearly one repeat per 5 s (recipe: string × 2, startOffset 0 → −50 % per 10 s), seamless. Loop 5 s. Params: hình (trái tim, cao 122 px) · cỡ chữ tối đa (18 px) · tốc độ (một lượt lặp / 5 s). Each letter's angle comes from a chord of ±1.1 em, so the cusps of the outline stay smooth.",
+    "titleVi": "Chữ chạy vòng quanh viền hình"
+  }
+}

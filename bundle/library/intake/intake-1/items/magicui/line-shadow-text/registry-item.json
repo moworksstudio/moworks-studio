@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "line-shadow-text",
+  "type": "hyperframes:component",
+  "title": "Line Shadow Text",
+  "description": "A headline with a hatched drop shadow: an offset copy filled with fine diagonal stripes that crawl slowly (15 s per tile pass).",
+  "tags": [
+    "shadow",
+    "stripes",
+    "hatch",
+    "retro",
+    "text",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "line-shadow-text.html",
+      "target": "compositions/components/line-shadow-text.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/line-shadow-text",
+    "author": "magicui",
+    "call": "MW.lineShadowText(q(\".mw-line-shadow-text\"), tl, 0, { shadowColor: \"white\", offset: 0.06, tile: 0.09, hold: 6 });",
+    "function": "MW.lineShadowText",
+    "options": {
+      "shadowColor": "stripe colour (black; white on dark)",
+      "offset": "shadow offset in em (0.04)",
+      "tile": "stripe tile in em (0.06)",
+      "hold": "seconds (15)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/line-shadow-text.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/line-shadow-text.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Registry keyframe line-shadow: background-position 0 0 -> 100% -100%, 15 s linear infinite. Demo style as upstream (italic, semibold, tight tracking), with a wider offset and tile so the hatch reads in a small preview.",
+    "titleVi": "Bóng chữ sọc chéo bò chậm"
+  }
+}

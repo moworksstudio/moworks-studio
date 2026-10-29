@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-iris-open",
+  "type": "hyperframes:component",
+  "title": "Iris Open",
+  "description": "Một vòng tròn mở rộng từ tâm chủ thể để lộ nội dung, có viền màu chạy theo mép vòng.",
+  "tags": [
+    "reveal",
+    "mask",
+    "circle",
+    "entrance-exit",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-iris-open.html",
+      "target": "compositions/components/motion-iris-open.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-iris-open",
+    "author": "takayu",
+    "call": "MW.motionIrisOpen(q(\".cd\"), tl, 0.3, { exitAt: 1.8 });",
+    "function": "MW.motionIrisOpen",
+    "options": {
+      "duration": "s (0.76, ease-out quart)",
+      "pre": "s the centre dot shows first (0.25)",
+      "x": "centre share (0.5)",
+      "y": "(0.5)",
+      "rim": "px (6)",
+      "dot": "px (16)",
+      "accent": "",
+      "exitAt": "s (null)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=iris-open",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=iris-open (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio iris-open, written here): Circular clip centred on the subject: radius 0 → 1.5 × half the box diagonal (150 %) in 760 ms power3.out (easeOutQuart); a 1.5 px accent ring rides the edge until it passes the corners. Before it, a 4 px accent dot pops at the centre (250 ms back.out) and shrinks away as the iris opens (150 ms). Site exit: fade 320 ms. Params: duration (0.76 s) · x, y: tâm vòng (50 %) · rim: viền mép (1.5 px) · ease (power3.out).",
+    "titleVi": "Mở tròn từ tâm (iris)"
+  }
+}

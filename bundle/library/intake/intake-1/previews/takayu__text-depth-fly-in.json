@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-depth-fly-in",
+  "hash": "b5fcaa739d516d55",
+  "at": "2026-10-17T08:43:57.046Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-depth-fly-in.mp4",
+    "poster": "previews/takayu__text-depth-fly-in.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "be9113f485bdd3de3fb7af16963f74ae0d3ca32127c17b5bf9392d89104ea641",
+    "size": 11102,
+    "seconds": 31.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

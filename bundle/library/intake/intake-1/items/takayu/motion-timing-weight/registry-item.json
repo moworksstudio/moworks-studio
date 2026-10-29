@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-timing-weight",
+  "type": "hyperframes:block",
+  "title": "Timing = Weight",
+  "description": "Bài học: vật nhỏ nhẹ chạy nhanh, vật lớn nặng chạy chậm; huy hiệu 150 ms, bảng lớn 500 ms.",
+  "tags": [
+    "lesson",
+    "timing",
+    "weight",
+    "principles",
+    "heavy",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-timing-weight.html",
+      "target": "compositions/components/motion-timing-weight.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-timing-weight",
+    "author": "takayu",
+    "call": "MW.motionTimingWeight(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionTimingWeight",
+    "options": {
+      "small": "s for the badge (0.15)",
+      "large": "s for the panel (0.5)",
+      "start": "s (0.4)",
+      "loop": "s (2.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=timing-weight",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=timing-weight (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio timing-weight, written here): A badge (r 14) pops 0 → 1 in 150 ms back.out while a large panel (180×120) slides in 240 px in 500 ms expo.out, both starting together, labelled 150ms / 500ms; both fade out 300 ms near the end of the loop. Rule: small 100–250 ms, medium 200–400 ms, large 400–800 ms. Params: small (0.15 s) · large (0.5 s). Rule: small 0.1–0.25 s, medium 0.2–0.4 s, large 0.4–0.8 s.",
+    "titleVi": "Thời lượng thể hiện độ nặng"
+  }
+}

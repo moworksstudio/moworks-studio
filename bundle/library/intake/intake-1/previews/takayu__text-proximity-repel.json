@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-proximity-repel",
+  "hash": "fc420403a6cd6d0e",
+  "at": "2026-10-17T11:47:58.183Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-proximity-repel.mp4",
+    "poster": "previews/takayu__text-proximity-repel.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "9f6c377065a2176628291935ce4c231e28aa80b8cf6475f836d30b4446bf63ae",
+    "size": 19733,
+    "seconds": 29.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

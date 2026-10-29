@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-tumble-in",
+  "type": "hyperframes:component",
+  "title": "Tumble In",
+  "description": "Khối vuông lăn vào từ trái, góc thấp nhất luôn chạm sàn, đi tới trước rồi xoay nốt về thẳng.",
+  "tags": [
+    "entrance",
+    "roll",
+    "rotate",
+    "rotation",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-tumble-in.html",
+      "target": "compositions/components/motion-tumble-in.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-tumble-in",
+    "author": "takayu",
+    "call": "MW.motionTumbleIn(q(\".ti\"), tl, 0.3, {});",
+    "function": "MW.motionTumbleIn",
+    "options": {
+      "x": "px it rolls in from the left (875)",
+      "from": "start angle (−180°)",
+      "settle": "angle when it stops moving (−24°)",
+      "move": "s of travel (0.672), power2.out",
+      "duration": "s (0.82)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tumble-in",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tumble-in (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tumble-in, written here): Square (40 px) rolls in on a floor: x 0 → 175 px (demo 190) in 672 ms power2.out; rotation −180° → −24° over the same 672 ms (power1.out), then −24° → 0 in 148 ms power2.out (done at 820 ms). Its lowest corner stays on the floor: lift = half-size × (|cos θ| + |sin θ|). A dashed slot marks the end. Params: duration (0.82 s) · x (175 px) · rotation đầu (−180°) · move: thời gian đi (0.67 s). Its lowest corner stays on the floor: lift = half the size × (|cos θ| + |sin θ|) − half the size.",
+    "titleVi": "Lăn vào chỗ"
+  }
+}

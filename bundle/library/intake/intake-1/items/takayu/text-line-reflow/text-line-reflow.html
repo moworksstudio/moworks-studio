@@ -1,0 +1,86 @@
+<!--
+  Line Break Reflow (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=catalog-kinetic-type-line-break-reflow (read 12/10/2026).
+  Khung chữ hẹp dần, từ cuối không còn chỗ thì trượt mượt xuống dòng dưới thay vì nhảy cóc, rồi khung nới ra và từ đó quay về.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textLineReflow(q(".lrc"), tl, 0, { cursor: ".ui-cursor" });
+
+  Options (defaults in brackets):
+      - wide: px of the card at rest (1350)
+      - narrow: px narrowed (850)
+      - pad: px (60)
+      - gap: px between words (40)
+      - pitch: px line pitch (190)
+      - cursor: the cursor riding the edge
+      - loop: s (4.2)
+
+  Notes: Idea and numbers (TakayuStudio catalog-kinetic-type-line-break-reflow, written here): Card 270 → 170 px wide (0.4–1.1 s, cubic-bezier(.65,0,.35,1)), 92 px tall, radius 8, drag handle 6 × 24 px on its right edge. Words MAKE IT MOVE, 26 px, left-aligned, line pitch 38 px. When the width crosses the fit threshold, the word that wraps moves FLIP from its old slot to the new one in 480 ms power2.out (x linear in progress k, y along k^0.35 so it drops early); a 1 px outline flashes on it (0.9 × sin πk). Reverse 2.5–3.2 s; loop 4.2 s. Params: độ rộng (270 → 170 px) · thời gian co (0.7 s) · thời gian trượt từ (0.48 s).
+-->
+
+<div class="lrc"><span class="lr-w">LÀM</span><span class="lr-w">NÓ</span><span class="lr-w" style="color:#a99bff">BAY</span></div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"wide":1350,"narrow":850,"pad":60,"gap":40,"pitch":190,"cursor":null,"loop":4.2};
+  var run = function (el, tl, at, o) {
+        var card = el, words = Array.prototype.slice.call(card.querySelectorAll(".lr-w")), io = MW.ez("in-out"), p2 = gsap.parseEase("power2.out"), cur = o.cursor ? MW.el(o.cursor) : null;
+        var ws = words.map(function (w) { return w.offsetWidth; }), gap = o.gap, pad = o.pad, Wd = function (t) { return o.wide + (o.narrow - o.wide) * (io(Math.max(0, Math.min(1, (t - 0.4) / 0.7))) - io(Math.max(0, Math.min(1, (t - 2.5) / 0.7)))); };
+        var layout = function (w) { var x = pad, line = 0, out = []; ws.forEach(function (ww, i) { if (i && x + ww > w - pad) { line++; x = pad; } out.push([x, pad + line * o.pitch]); x += ww + gap; }); return out; };
+        // the times each word changes line, from the width over the whole loop (sampled), so a moved word glides FLIP from its last slot
+        var hist = words.map(function () { return []; }), prev = layout(Wd(0));
+        for (var s = 0; s <= o.loop; s += 1 / 240) { var L = layout(Wd(s)); L.forEach(function (p, i) { if (p[1] !== prev[i][1]) hist[i].push([s, prev[i], p]); }); prev = L; }
+        return MW.drive(tl, at, o.loop, function (t) {
+          var w = Wd(t), L = layout(w); card.style.width = w + "px";
+          words.forEach(function (el2, i) {
+            var p = L[i], x = p[0], y = p[1], fl = 0;
+            hist[i].forEach(function (h) { var k = (t - h[0]) / 0.48; if (k >= 0 && k < 1) { var q = p2(k); x = h[1][0] + (h[2][0] - h[1][0]) * q; y = h[1][1] + (h[2][1] - h[1][1]) * Math.pow(q, 0.35); fl = 0.9 * Math.sin(Math.PI * q); } });
+            gsap.set(el2, { x: x, y: y }); el2.style.outline = fl > 0.02 ? Math.max(1, 5 * fl) + "px solid rgba(139,123,255," + fl + ")" : "none";
+          });
+          if (cur) { cur.style.left = (card.offsetLeft + w - 14) + "px"; cur.style.top = (card.offsetTop + card.offsetHeight / 2) + "px"; }
+        });
+      };
+  MW.textLineReflow = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

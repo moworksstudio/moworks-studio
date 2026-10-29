@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Double Bounce - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.db-c { position: absolute; left: 560px; top: 160px; width: 800px; height: 760px; border-radius: 50px; background: #151a24; border: 3px solid #262c3a; } .db-f { position: absolute; left: 640px; right: 640px; top: 720px; height: 4px; background: #262c3a; }
+.db-p { position: absolute; left: 640px; top: 800px; width: 640px; height: 20px; border-radius: 10px; background: #262c3a; overflow: hidden; } .db-p i { display: block; width: 100%; height: 100%; background: #3ddc84; } .db { position: absolute; left: 860px; top: 520px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #7af0b0, #22c06e 60%, #128a4c); display: grid; place-items: center; } .db svg { width: 110px; height: 110px; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="1.8">
+<div class="db-c"></div><div class="db-f"></div><div class="db-p"><i></i></div><div class="db"><svg viewBox="0 0 100 100"><path d="M24 52 L43 70 L77 33" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"drop":400,"heights":[220,100],"durations":[0.287,0.287,0.246],"squash":[0.3,0.18,0.08],"check":"path","ping":72,"accent":"#3ddc84"};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, ck = o.check ? el.querySelector(o.check) : null, CL = ck ? ck.getTotalLength() : 0, p2 = gsap.parseEase("power2.out"), ring = document.createElement("div"), d = o.durations, h = [o.drop].concat(o.heights), C = [d[0], d[0] + d[1], d[0] + d[1] + d[2]];
+        if (getComputedStyle(host).position === "static") host.style.position = "relative"; if (ck) ck.style.strokeDasharray = String(CL); gsap.set(el, { transformOrigin: "50% 100%" });
+        ring.style.cssText = "position:absolute;border-radius:50%;pointer-events:none;opacity:0;box-sizing:border-box;border:6px solid " + o.accent + ";"; host.appendChild(ring);
+        return MW.drive(tl, at, C[2] + 0.5, function (t) {
+          var y = 0; if (t < C[0]) { var u = t / C[0]; y = -o.drop * (1 - u * u); } else if (t < C[1]) { var v = (t - C[0]) / d[1]; y = -h[1] * 4 * v * (1 - v); } else if (t < C[2]) { var w = (t - C[1]) / d[2]; y = -h[2] * 4 * w * (1 - w); }
+          var sq = 0; C.forEach(function (c, k) { var q = 1 - Math.abs(t - c) / 0.05; if (q > 0) sq = Math.max(sq, o.squash[k] * q); }); gsap.set(el, { y: y, scaleY: 1 - sq, scaleX: 1 / (1 - sq) });
+          if (ck) ck.style.strokeDashoffset = String(CL * (1 - p2(Math.max(0, Math.min(1, (t - C[2]) / 0.26)))));
+          var r = (t - C[2]) / 0.48, W = el.offsetWidth, R = W / 2 + o.ping * p2(Math.max(0, Math.min(1, r))); ring.style.width = ring.style.height = 2 * R + "px"; ring.style.left = el.offsetLeft + W / 2 - R + "px"; ring.style.top = el.offsetTop + el.offsetHeight / 2 - R + "px"; ring.style.opacity = r > 0 && r < 1 ? String(1 - r) : "0";
+        });
+      };
+  MW.motionDoubleBounce = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionDoubleBounce(q(".db"), tl, 0.3, {});
+          tl.set({}, {}, 1.8);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

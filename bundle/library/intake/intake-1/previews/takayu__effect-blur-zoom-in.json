@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-blur-zoom-in",
+  "hash": "7386d0d84a48bba8",
+  "at": "2026-10-17T10:04:54.695Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__effect-blur-zoom-in.mp4",
+    "poster": "previews/takayu__effect-blur-zoom-in.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "1a34c59c843097b1e28bd216ec14921bdbc270dd527a8aa265999e91c62647c7",
+    "size": 9858,
+    "seconds": 26.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

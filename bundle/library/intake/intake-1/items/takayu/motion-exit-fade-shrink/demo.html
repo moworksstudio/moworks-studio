@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Discrete Property Exit - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.ui-cursor { position: absolute; left: 0; top: 0; z-index: 30; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5)); }
+.ex { position: absolute; left: 50%; top: 50%; width: 760px; height: 340px; transform: translate(-50%, -50%); } .ex-slot { position: absolute; inset: 0; border-radius: 50px; border: 4px dashed #3a4466; }
+.ex-card { position: absolute; inset: 0; border-radius: 50px; background: #1b2130; border: 3px solid #2a3350; padding: 60px; box-sizing: border-box; } .ex-card b { display: block; font-size: 52px; margin-bottom: 20px; } .ex-card span { font-size: 36px; color: #9aa3b8; }
+.ex-x { position: absolute; right: 40px; top: 40px; width: 70px; height: 70px; border-radius: 50%; background: #2a3142; } .ex-x::before, .ex-x::after { content: ""; position: absolute; left: 33px; top: 17px; width: 5px; height: 36px; background: #c9d2ea; transform: rotate(45deg); } .ex-x::after { transform: rotate(-45deg); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.6">
+<div class="gm"><div class="ex"><div class="ex-slot"></div><div class="ex-card"><div class="ex-x"></div><b>Đã lưu bản nháp</b><span>Tự động lưu lúc 14:20</span></div></div></div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.48,"scale":0.96,"drop":40,"returnAt":null};
+  var run = function (el, tl, at, o) {
+        var pin = gsap.parseEase("power2.in"), out = gsap.parseEase("power2.out");
+        return MW.drive(tl, at, o.returnAt == null ? o.duration : o.returnAt + 0.4, function (t) {
+          var e = pin(Math.max(0, Math.min(1, t / o.duration))), back = o.returnAt != null && t >= o.returnAt, r = back ? out(Math.min(1, (t - o.returnAt) / 0.4)) : 0;
+          if (!back) { gsap.set(el, { scale: 1 - (1 - o.scale) * e, y: o.drop * e }); el.style.opacity = String(1 - e); el.style.display = e >= 1 ? "none" : ""; }
+          else { el.style.display = ""; gsap.set(el, { scale: o.scale + (1 - o.scale) * r, y: 0 }); el.style.opacity = String(r); }
+        });
+      };
+  MW.motionExitFadeShrink = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          var c = q(".ui-cursor"); tl.fromTo(c, { x: 1500, y: 900 }, { x: 1278, y: 395, duration: 0.35, ease: "power2.inOut", immediateRender: true }, 0); MW.motionExitFadeShrink(q(".ex-card"), tl, 0.5, { returnAt: 1.5 });
+          tl.set({}, {}, 2.6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

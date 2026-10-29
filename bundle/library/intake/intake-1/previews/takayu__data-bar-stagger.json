@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/data-bar-stagger",
+  "hash": "7d8a036d249cf5b5",
+  "at": "2026-10-17T11:27:45.747Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__data-bar-stagger.mp4",
+    "poster": "previews/takayu__data-bar-stagger.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "179f4269de41cfc496399b8e64f04576b7fbb825fb0de3e0aca96067e146ceef",
+    "size": 8094,
+    "seconds": 26.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

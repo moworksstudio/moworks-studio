@@ -1,0 +1,51 @@
+<!--
+  Grid Diagonal Wave (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=grid-diagonal (read 12/10/2026).
+  Lưới 4×4 ô trượt chéo từ dưới trái vào, các ô cùng đường chéo tới cùng lúc.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionGridDiagonal(q(".gd"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - items: 
+      - cols: (4)
+      - offset: [x, y] px it comes from ([−72, 72]): from the lower left
+      - step: s per diagonal (0.078)
+      - duration: s (0.472, power3.out)
+
+  Notes: Idea and numbers (TakayuStudio grid-diagonal, written here): 4×4 tiles (28 px, 34 px pitch) slide in from the lower-left: x −18 → 0, y +18 → 0 px, opacity in over the first half, each 472 ms power3.out, delay (row + col) × 78 ms (940 ms in all); tiles on one diagonal arrive together (alternate diagonals in two colours, delay labels in the demo). Params: offset (−18, +18 px) · step (78 ms) · each (0.472 s) · ease (power3.out). Tiles on one diagonal arrive together.
+-->
+
+<div class="st"><div class="gd" style="grid-template-columns:repeat(4,1fr)"><i style="background:#8b7bff">1</i><i style="background:#3dd6f5">2</i><i style="background:#8b7bff">3</i><i style="background:#3dd6f5">4</i><i style="background:#3dd6f5">5</i><i style="background:#8b7bff">6</i><i style="background:#3dd6f5">7</i><i style="background:#8b7bff">8</i><i style="background:#8b7bff">9</i><i style="background:#3dd6f5">10</i><i style="background:#8b7bff">11</i><i style="background:#3dd6f5">12</i><i style="background:#3dd6f5">13</i><i style="background:#8b7bff">14</i><i style="background:#3dd6f5">15</i><i style="background:#8b7bff">16</i></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"items":"i","cols":4,"offset":[-72,72],"step":0.078,"duration":0.472};
+  var run = function (el,tl,at,o
+  ) {
+  var it = Array.prototype.slice.call(el.querySelectorAll(o.items)), n = it.length, cols = o.cols || n;
+  var p3 = gsap.parseEase("power3.out");
+  return MW.drive(tl, at, (2 * cols - 2) * o.step + o.duration, function (t) { it.forEach(function (x, i) { var d = (Math.floor(i / cols) + i % cols) * o.step, u = Math.max(0, Math.min(1, (t - d) / o.duration)), e = p3(u); gsap.set(x, { x: o.offset[0] * (1 - e), y: o.offset[1] * (1 - e) }); x.style.opacity = String(Math.min(1, u * 2)); }); });
+  };
+  MW.motionGridDiagonal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

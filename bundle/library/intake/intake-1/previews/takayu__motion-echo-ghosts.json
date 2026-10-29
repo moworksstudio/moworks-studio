@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-echo-ghosts",
+  "hash": "cc5a7fabdfd0b613",
+  "at": "2026-10-17T08:56:21.020Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-echo-ghosts.mp4",
+    "poster": "previews/takayu__motion-echo-ghosts.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "50f5f78c4912b607d18004e4514636e2872b5321924124b9c98932480f0160b4",
+    "size": 22052,
+    "seconds": 35,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

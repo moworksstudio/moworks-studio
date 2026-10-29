@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/data-digit-roll-ticker",
+  "hash": "809be06a31b866d9",
+  "at": "2026-10-17T10:41:05.921Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__data-digit-roll-ticker.mp4",
+    "poster": "previews/takayu__data-digit-roll-ticker.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a4c6df76e8a00fbda1601bb129db5cdaeed78bc0215817b9a726392ef47461e0",
+    "size": 13384,
+    "seconds": 28.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

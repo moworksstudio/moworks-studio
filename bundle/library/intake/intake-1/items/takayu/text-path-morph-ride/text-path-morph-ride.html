@@ -1,0 +1,89 @@
+<!--
+  Morphing Path Ride (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-morphing-path-ride (read 12/10/2026).
+  Dòng chữ nằm giữa một đường dẫn, đường biến từ thẳng sang sóng rồi thành vòm và về lại thẳng, chữ uốn theo đường suốt lúc biến hình.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textPathMorphRide(q(".pm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - text: 
+      - fit: px of text (1200)
+      - rail: px long (1440)
+      - amp: px of the wave (120)
+      - radius: px of the arch (744)
+      - arc: radians cut from each end of the arch (0.62)
+      - keys: s: line → wave, wave → arch, arch → line ([0.4, 1.9, 2.6, 4.1, 4.9, 6.2])
+      - ease: (cubic-bezier(.65,0,.35,1))
+      - loop: s (6.4)
+
+  Notes: Idea and numbers (TakayuStudio tx-morphing-path-ride, written here): Text centred by arc length on a rail (size fits ~200 px). Shapes, same point count: line 240 px; wave = same line with y − 20 px × sin(2πu); arch = arc of radius 124 px from angle π + 0.62 to 2π − 0.62 (200 px wide, ends level with the line, top 54 px up). Morph line → wave 0.4–1.9 s, wave → arch 2.6–4.1 s, arch → line 4.9–6.2 s, each cubic-bezier(.65,0,.35,1), point-by-point lerp; glyphs re-laid on the path every frame. Loop 6.4 s. Params: các hình (thẳng · sóng · vòm) · thời gian biến (1.5 s) · biên độ sóng (20 px). The shapes share one point count, so the rail morphs point by point and the letters are laid on it again every frame.
+-->
+
+<div class="pm"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"text":"Đường cong đổi dáng","fit":1200,"rail":1440,"amp":120,"radius":744,"arc":0.62,"keys":[0.4,1.9,2.6,4.1,4.9,6.2],"ease":"cubic-bezier(.65,0,.35,1)","loop":6.4};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var rail = function (pts, closed) { var L = [0]; for (var i = 1; i < pts.length; i++) L.push(L[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])); var tot = L[L.length - 1];
+    return { len: tot, at: function (s) { s = closed ? ((s % tot) + tot) % tot : Math.max(0, Math.min(tot, s)); var lo = 0, hi = L.length - 1; while (hi - lo > 1) { var m = (lo + hi) >> 1; if (L[m] <= s) lo = m; else hi = m; } var f = (s - L[lo]) / ((L[hi] - L[lo]) || 1), a = pts[lo], b = pts[hi]; return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]; } }; };
+  var ang = function (R, s, ch) { var a = R.at(s - ch), b = R.at(s + ch); return Math.atan2(b[1] - a[1], b[0] - a[0]); };
+  var glyphs = function (host, list, fs, sepColor) { return list.map(function (g) { var s = document.createElement("span"); s.textContent = g; s.style.cssText = "position:absolute;left:0;top:0;white-space:pre;line-height:1;font-size:" + fs + "px;" + (g === "•" && sepColor ? "color:" + sepColor + ";" : ""); host.appendChild(s); return { s: s, w: s.offsetWidth, h: s.offsetHeight }; }); };
+  var place = function (q, x, y, a, op) { gsap.set(q.s, { x: x - q.w / 2, y: y - q.h * 0.8, rotation: a * 180 / Math.PI, transformOrigin: "50% 80%" }); q.s.style.opacity = op == null ? "1" : String(op); };
+  var W = el.clientWidth, Hh = el.clientHeight, cx = W / 2, cy = Hh * 0.55, N = 120, e = MW.ez(o.ease), Lr = o.rail;
+  var line = [], wave = [], arch = []; for (var i = 0; i <= N; i++) { var u = i / N, x = cx - Lr / 2 + Lr * u; line.push([x, cy]); wave.push([x, cy - o.amp * Math.sin(2 * Math.PI * u)]); var a = Math.PI + o.arc + (Math.PI - 2 * o.arc) * u; arch.push([cx + o.radius * Math.cos(a), cy + o.radius * Math.sin(a) + o.radius * Math.sin(o.arc)]); }
+  var list = gr(o.text), probe = glyphs(el, list, 100, null), tw = probe.reduce(function (a, q) { return a + q.w; }, 0); probe.forEach(function (q) { q.s.remove(); }); var G = glyphs(el, list, 100 * o.fit / tw, null), s0 = 0; G.forEach(function (q) { q.o = s0 + q.w / 2; s0 += q.w; }); var TW = s0;
+  var mix = function (A, B, f) { return A.map(function (p, i) { return [p[0] + (B[i][0] - p[0]) * f, p[1] + (B[i][1] - p[1]) * f]; }); };
+  return MW.drive(tl, at, o.loop, function (t) {
+    var k = o.keys, P = line; if (t < k[1]) P = mix(line, wave, e(Math.max(0, Math.min(1, (t - k[0]) / (k[1] - k[0]))))); else if (t < k[2]) P = wave; else if (t < k[3]) P = mix(wave, arch, e((t - k[2]) / (k[3] - k[2]))); else if (t < k[4]) P = arch; else P = mix(arch, line, e(Math.min(1, (t - k[4]) / (k[5] - k[4]))));
+    var R = rail(P, false), c = R.len / 2; G.forEach(function (q) { var s = c - TW / 2 + q.o, p = R.at(s); place(q, p[0], p[1], ang(R, s, 24), 1); });
+  });
+  };
+  MW.textPathMorphRide = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

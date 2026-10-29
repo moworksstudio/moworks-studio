@@ -1,0 +1,52 @@
+<!--
+  Counter Rotation (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=counter-rotate (read 12/10/2026).
+  Vòng ngoài xoay thuận một vòng trong khi khối bên trong xoay ngược, cùng một tâm cố định.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionCounterRotate(q(".cr"), tl, 0.2, {});
+
+  Options (defaults in brackets):
+      - duration: s (1)
+      - outerTurn: degrees (360)
+      - innerTurn: degrees (−360)
+      - ease: (sine.inOut)
+      - loop: s per cycle (2)
+      - loops: (2)
+      - outer: the outer ring
+      - inner: the inner shape
+
+  Notes: Idea and numbers (TakayuStudio counter-rotate, written here): Outer ring (8 dots on r 62 px, one larger marker) rotates 0 → +360° while the inner square (50 px) rotates 0 → −360°, both 1000 ms sine.inOut about one fixed centre; site loop 2000 ms (1 s rest). Params: duration (1 s) · outer (+360°) · inner (−360°) · ease (sine.inOut).
+-->
+
+<div class="st"><div class="cr"><div class="cr-o"><i class="big" style="left:340.0px;top:30.0px"></i><i style="left:559.2px;top:120.8px"></i><i style="left:650.0px;top:340.0px"></i><i style="left:559.2px;top:559.2px"></i><i style="left:340.0px;top:650.0px"></i><i style="left:120.8px;top:559.2px"></i><i style="left:30.0px;top:340.0px"></i><i style="left:120.8px;top:120.8px"></i></div><div class="cr-i"></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":1,"outerTurn":360,"innerTurn":-360,"ease":"sine.inOut","loop":2,"loops":2,"outer":".cr-o","inner":".cr-i"};
+  var run = function (el, tl, at, o) {
+        var a = el.querySelector(o.outer), b = el.querySelector(o.inner), e = gsap.parseEase(o.ease);
+        return MW.drive(tl, at, o.loop * o.loops, function (t) { var k = Math.floor(t / o.loop), u = e(Math.min(1, (t - k * o.loop) / o.duration)); gsap.set(a, { rotation: o.outerTurn * u }); gsap.set(b, { rotation: o.innerTurn * u }); });
+      };
+  MW.motionCounterRotate = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

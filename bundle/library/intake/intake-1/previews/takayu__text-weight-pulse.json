@@ -1,0 +1,26 @@
+{
+  "uid": "in:takayu/text-weight-pulse",
+  "hash": "1385b548cc1c4dac",
+  "at": "2026-10-17T11:30:56.968Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Roboto Flex"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-weight-pulse.mp4",
+    "poster": "previews/takayu__text-weight-pulse.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "759e8ffc85c07bdd171a1e0e26db23ac5d4b9265b6593d3648c3744842f7d707",
+    "size": 24276,
+    "seconds": 29.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

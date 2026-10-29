@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-overlap-levels",
+  "type": "hyperframes:block",
+  "title": "Overlap Levels",
+  "description": "Bài học: bước sau bắt đầu trước khi bước trước xong bao nhiêu thì đổi cảm giác: 0 % ngăn nắp, 25 % gọn gàng, 50 % trôi chảy.",
+  "tags": [
+    "lesson",
+    "timing",
+    "overlap",
+    "timing-rhythm",
+    "smooth",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-overlap-levels.html",
+      "target": "compositions/components/motion-overlap-levels.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-overlap-levels",
+    "author": "takayu",
+    "call": "MW.motionOverlapLevels(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionOverlapLevels",
+    "options": {
+      "levels": "overlaps per row ([0, 0.25, 0.5])",
+      "each": "s per square (0.35, power2.out)",
+      "start": "s (0.3)",
+      "outAt": "s (2.1)",
+      "loop": "s (2.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=t-overlap",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=t-overlap (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio t-overlap, written here): Three rows of 4 squares pop scale 0 → 1, 350 ms power2.out each; in each row the next starts at the previous start + 350 ms × (1 − overlap), for 0 / 25 / 50 % overlap. Rule: 0 % tidy, 25 % crisp (standard), 50 % flowing; kit rule: the next starts when the previous is 30–50 % done. Params: each (0.35 s) · overlap (0 / 25 / 50 %). Kit rule: the next starts when the previous is 30–50 % done.",
+    "titleVi": "Mức chồng lấn giữa các bước"
+  }
+}

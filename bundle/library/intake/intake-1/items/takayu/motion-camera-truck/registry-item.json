@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-camera-truck",
+  "type": "hyperframes:component",
+  "title": "Truck",
+  "description": "Máy quay trượt ngang, lớp gần chạy nhanh, lớp xa chạy chậm nên có thị sai.",
+  "tags": [
+    "camera",
+    "truck",
+    "parallax",
+    "depth",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-camera-truck.html",
+      "target": "compositions/components/motion-camera-truck.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-camera-truck",
+    "author": "takayu",
+    "call": "MW.motionCameraTruck(q(\".tk-cam\"), tl, 0.5, { duration: 2.4 });",
+    "function": "MW.motionCameraTruck",
+    "options": {
+      "duration": "s (2)",
+      "distance": "px at the subject's depth (360; 120 on the site's frame); a layer moves distance × its depth",
+      "layers": "selector of the layers",
+      "ease": "sine.inOut"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=cam-truck",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=cam-truck (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio cam-truck, written here): Truck: layer x 0 -> -120 px x depth (near -120, far -24 at depth 0.2) over 2000 ms easeInOutSine. Params: duration (2 s) · distance (120 px ở lớp chủ thể) · depth.",
+    "titleVi": "Máy quay trượt ngang (truck)"
+  }
+}

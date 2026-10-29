@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-hover-lift",
+  "type": "hyperframes:component",
+  "title": "Hover Lift",
+  "description": "Khi con trỏ chạm vào, thẻ nhích lên 7 px, phóng nhẹ 1.02 và bóng đổ sâu hơn; con trỏ rời đi thì thẻ hạ về.",
+  "tags": [
+    "hover",
+    "lift",
+    "shadow",
+    "cursor",
+    "web-interaction",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-hover-lift.html",
+      "target": "compositions/components/ui-hover-lift.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-hover-lift",
+    "author": "takayu",
+    "call": "MW.uiHoverLift(q(\".hl\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.uiHoverLift",
+    "options": {
+      "lift": "px (28)",
+      "scale": "(1.02)",
+      "duration": "s (0.18, power2.out)",
+      "ease": "",
+      "shadow": "[rest, lifted] shadows",
+      "hovers": "[[s in, s out], ...]",
+      "cursor": "an optional cursor",
+      "approach": "[x, y] px the cursor comes from",
+      "lead": "s it arrives before a click"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=hover-lift",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=hover-lift (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio hover-lift, written here): Card (about half the frame) at rest; when the cursor lands (20 % of a 1.6 s loop) it lifts y −7 px, scale 1 → 1.02, shadow 0 8 18 α .28 → 0 20 34 α .46 in 180 ms power2.out; holds to 70 %; returns the same way by 81 %. Cursor fades in 58 px right / 40 px below centre, reaches the card centre at 19 %, leaves at 70-80 %. Params: lift (7 px) · scale (1.02) · duration (0.18 s) · hold (0.6 s) · ease (power2.out).",
+    "titleVi": "Thẻ nhấc lên khi con trỏ tới"
+  }
+}

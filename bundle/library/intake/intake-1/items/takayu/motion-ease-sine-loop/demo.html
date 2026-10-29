@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Sine In-out - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; }
+.ez-g { position: absolute; left: 120px; top: 190px; width: 700px; height: 700px; } .ez-t { position: absolute; left: 920px; top: 490px; width: 880px; height: 100px; }
+.ez-t::before { content: ""; position: absolute; left: 0; right: 0; top: 46px; height: 8px; border-radius: 4px; background: #222a42; } .ez-b { position: absolute; left: 0; top: 0; width: 100px; height: 100px; border-radius: 26px; background: linear-gradient(160deg, #a693ff, #6a4cf0); }
+.ez-n { position: absolute; left: 920px; top: 330px; font-size: 64px; font-weight: 800; } .ez-n span { display: block; font-size: 34px; font-weight: 600; color: #8f9ab3; margin-top: 10px; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3">
+<canvas class="ez-g" width="700" height="700"></canvas><div class="ez-n">Sine in-out<span>nhịp thở, trôi nổi</span></div><div class="ez-t"><div class="ez-b"></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"half":2,"cycles":1,"prop":"y","from":0,"to":-120};
+  var run = function (el, tl, at, o) {
+        var si = gsap.parseEase("sine.inOut");
+        return MW.drive(tl, at, o.half * 2 * o.cycles, function (t) { var u = (t / o.half) % 2, v = si(u < 1 ? u : 2 - u), s = {}; s[o.prop] = o.from + (o.to - o.from) * v; gsap.set(el, s); });
+      };
+  MW.motionEaseSineLoop = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionEaseSineLoop(q(".ez-b"), tl, 0, { prop: "x", to: 780, half: 1.5 });
+          tl.set({}, {}, 3);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

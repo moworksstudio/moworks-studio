@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-glass-lens-window",
+  "type": "hyperframes:component",
+  "title": "Glass Refraction Hover",
+  "description": "Một ô kính bo góc trượt qua nội dung, bên trong ô nội dung bị phóng to 1.4 lần nên các đường gãy ở mép kính, có vệt sáng chéo và viền màu nhấn.",
+  "tags": [
+    "glass",
+    "lens",
+    "magnify",
+    "refraction",
+    "material-surface-motion",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-glass-lens-window.html",
+      "target": "compositions/components/effect-glass-lens-window.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-glass-lens-window",
+    "author": "takayu",
+    "call": "MW.effectGlassLensWindow(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectGlassLensWindow",
+    "options": {
+      "zoom": "(1.4)",
+      "ease": "(power2.inOut)",
+      "title": "the card's heading",
+      "accent": "rim colour",
+      "loop": "s (4.2)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-material-glass-refraction",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-material-glass-refraction (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-material-glass-refraction, written here): Rounded window 100x70 (radius 16) slides x 96 → 224 (0.4-1.8 s, power2.inOut) and back (2.6-3.8 s). Inside it the content is scaled 1.4× about the window centre, so lines break at the window edge; a 7 % light tint, a 22 % light diagonal streak (20 px wide band near the left edge), a 55 % light hairline 4 px under the top edge and a 1.5 px accent rim. The cursor rides on the window. Params: zoom (1.4×) · window (100x70, r16) · path [[giây, x]] · move (1.4 s, power2.inOut).",
+    "titleVi": "Ô kính phóng to nội dung bên dưới"
+  }
+}

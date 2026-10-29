@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-orbit-turntable",
+  "type": "hyperframes:component",
+  "title": "Orbit / Turntable",
+  "description": "Các thẻ chạy vòng quanh một tâm, thẻ phía sau nhỏ và tối hơn, thứ tự trước sau đổi đúng theo chiều sâu.",
+  "tags": [
+    "orbit",
+    "carousel",
+    "depth",
+    "loop",
+    "camera",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-orbit-turntable.html",
+      "target": "compositions/components/motion-orbit-turntable.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-orbit-turntable",
+    "author": "takayu",
+    "call": "MW.motionOrbitTurntable(q(\".orbit\"), tl, 0, {});",
+    "function": "MW.motionOrbitTurntable",
+    "options": {
+      "radius": "px (550; 110 on the site's frame)",
+      "tilt": "the circle's flattening, y radius ÷ x radius (0.2)",
+      "period": "s per turn (4), linear",
+      "turns": "turns (1)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=cam-orbit",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=cam-orbit (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio cam-orbit, written here): 6 cards (44 x 60, one accent) on a circle: x = centre + 110 cos(a), y = centre + 22 sin(a), depth z = sin(a); scale 0.6 -> 1 and opacity 0.45 -> 1 from back to front; drawing order sorted by z every frame; angle 0 -> 360 deg over 4000 ms linear, seamless loop. Params: count (6) · radius (110 px) · period (4 s).",
+    "titleVi": "Quay vòng quanh chủ thể"
+  }
+}

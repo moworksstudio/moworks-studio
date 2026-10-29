@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/transition-shape-mask-cut",
+  "hash": "02d2e2c3b4b23f52",
+  "at": "2026-10-17T07:40:25.264Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__transition-shape-mask-cut.mp4",
+    "poster": "previews/takayu__transition-shape-mask-cut.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "d4fe798f0d6c64513c58524052748afc657e7f12bcc953ef35c2d5396c620303",
+    "size": 22268,
+    "seconds": 31.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

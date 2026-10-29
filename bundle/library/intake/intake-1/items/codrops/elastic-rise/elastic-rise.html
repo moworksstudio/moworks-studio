@@ -1,0 +1,104 @@
+<!--
+  Elastic Rise (Codrops, MIT, adapted).
+  Source: codrops/OnScrollTypographyAnimations at af28d61, src/js/index2.js lines 311-338.
+  Letters spring up from far below with an elastic bounce, the middle ones first. (Codrops fx24)
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.elasticRise(document.querySelector(".mw-elastic-rise"), tl, 0.5, { duration: 1.6 });
+
+  Options (defaults in brackets):
+      - duration: s the whole entrance takes (1.6)
+      - seed: for the random parts (1)
+      - split: chars
+
+  Notes: Codrops fx24: the source's GSAP values; the scroll range is now `duration`.
+-->
+
+<h1 class="mw-elastic-rise">Chuyển động</h1>
+
+<style>
+.mw-elastic-rise { display: inline-block; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.mask = MW.mask || function (nodes, pad) {
+    pad = pad == null ? 0.2 : pad;
+    var out = [];
+    for (var i = 0; i < nodes.length; i++) {
+      var n = nodes[i], box = document.createElement("span");
+      box.className = "mw-mask"; box.style.display = "inline-block"; box.style.overflow = "hidden"; box.style.verticalAlign = "top";
+      box.style.padding = pad + "em 0.04em"; box.style.margin = (-pad) + "em -0.04em";
+      n.parentNode.insertBefore(box, n); box.appendChild(n); out.push(box);
+    }
+    return out;
+  };
+  var defaults = {"duration":1.6,"seed":1,"split":"chars"};
+  var run = function (el,tl,at,o
+  ) {
+  
+  var D = o.duration, R = MW.rand(o.seed * 7907 + 1);
+  var rnd = function (a, b) { return a + (b - a) * R(); };
+  var sp = MW.split(el, o.split === "words" ? "words" : "chars"), chars = sp.chars, words = sp.words;
+  var charsOf = function (w) { return Array.prototype.slice.call(w.querySelectorAll(".mw-ch")); };
+  // a scrubbed tween: the source's fromTo, scaled so its whole run fills d (the scroll range became time)
+  var scrub = function (targets, from, to, t0, d) { var tw = gsap.fromTo(targets, from, to); tw.timeScale(tw.totalDuration() / (d || D)); tl.add(tw, t0 == null ? at : t0); return tw; };
+  var timed = function (targets, from, to, t0) { var tw = gsap.fromTo(targets, from, to); tl.add(tw, t0 == null ? at : t0); return tw; };
+  var randomStagger = function (each, n) { var a = [], i; for (i = 0; i < n; i++) a.push(i); for (i = n - 1; i > 0; i--) { var k = Math.floor(R() * (i + 1)), t = a[i]; a[i] = a[k]; a[k] = t; } var pos = []; a.forEach(function (v, j) { pos[v] = j; }); return function (j) { return pos[j] * each; }; };
+  var factorOf = function (p, n) { return p < Math.ceil(n / 2) ? p : Math.ceil(n / 2) - Math.abs(Math.floor(n / 2) - p) - 1; };
+  var mapRange = function (a, b, c, d, v) { return c + ((v - a) * (d - c)) / (b - a); };
+  var perspective = function (list, v) { list.forEach(function (c) { c.parentNode.style.perspective = v + "px"; }); };
+  var n = chars.length; scrub(chars, { y: function (p) { return (n / 2 - factorOf(p, n) + 6) * 130; } }, { ease: "elastic.out(.4)", y: 0, stagger: { amount: 0.1, from: "center" } });
+  return at + D;
+  };
+  MW.elasticRise = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

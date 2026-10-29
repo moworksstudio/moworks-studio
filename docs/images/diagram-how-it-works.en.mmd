@@ -1,0 +1,28 @@
+%%{init: {"themeVariables": {"fontSize": "13px"}, "flowchart": {"nodeSpacing": 16, "rankSpacing": 26, "padding": 6}}}%%
+flowchart TB
+    subgraph CLAUDE["Claude, on your own Claude Code account"]
+        direction LR
+        T1["<b>1 · Rules</b><br/>the film style, your brand,<br/>stop and ask"] --> T2["<b>2 · Directing</b><br/>brief, storyboard, Motion Plan"]
+    end
+    subgraph APP["Moworks Studio"]
+        direction LR
+        T3["<b>3 · Steps and Editor</b><br/>approvals, player, chat"] --> T4["<b>4 · Build</b><br/>libraries, style bridges"] --> T5["<b>5 · Review and QA</b><br/>score out of 10, tech checks"] --> T6["<b>6 · Mix and render</b><br/>music, sound, encoding"]
+        T6 -.- HF["renders with the<br/>HyperFrames engine,<br/>unmodified"]
+    end
+    subgraph OUT["Output"]
+        direction LR
+        T7["<b>7 · Film</b><br/>MP4 · After Effects project"] --> T8["<b>8 · Checks</b><br/>not passed: back to step 4"]
+    end
+    CLAUDE --> APP --> OUT
+
+    classDef claude fill:#d97757,stroke:#a8502f,color:#ffffff
+    classDef app fill:#1d3fd8,stroke:#122a96,color:#ffffff
+    classDef out fill:#0a8f6a,stroke:#06684d,color:#ffffff
+    classDef engine fill:#ececec,stroke:#888888,color:#444444,font-size:11px
+    class T1,T2 claude
+    class T3,T4,T5,T6 app
+    class T7,T8 out
+    class HF engine
+    style CLAUDE fill:#fbeee8,stroke:#d97757,color:#a8502f
+    style APP fill:#e8edfc,stroke:#1d3fd8,color:#122a96
+    style OUT fill:#e6f5f0,stroke:#0a8f6a,color:#06684d

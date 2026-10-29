@@ -1,0 +1,230 @@
+{
+ "_about": "The pipeline of the Brush cartoon style: ClaudeAnimationBase's hand-painted cartoon on the app's character layer, as a renderAt(t) page inside HyperFrames. The 6 stages of every style, with a Character step (gate) before the storyboard: the project's characters as definitions in CHARACTERS.json, approved on their model sheets. Derived from config/mg-pipeline.json; the sound comes from the app.",
+ "fps": { "allowed": [24, 25, 30], "default": 24, "why": "owner 23/10/2026 (#259): a hand-painted cartoon plays at 24, 25 or 30 fps, never 50 or 60 (each frame is painted, and double the frames only doubles the paint time). The New project dialog offers only these; the server keeps a film of this style on one of them." },
+ "uses": [
+  "hyperframes",
+  "hyperframes-cli"
+ ],
+ "pipeline": [
+  {
+   "id": "brief",
+   "stage": 1,
+   "title": "Prepare",
+   "what": "Brief, files read and what the style needs; Claude asks only what is missing",
+   "needs": [],
+   "done": {
+    "kind": "mark",
+    "auto": true,
+    "file": "BRIEF.md",
+    "ask": true
+   },
+   "action": {
+    "kind": "claude",
+    "label": "Prepare",
+    "prompt": "Read the brief, the answers from the New project dialog and what the app found in my files (its scan). Write BRIEF.md in a few short lines: who the film speaks to, the one thing it says (\"This film tells [audience] that [promise].\"), what must be in it (the names, facts and lines the brief gives) and the length and format New project set. Do not ask what the dialog already answered. Name the film's characters in BRIEF.md (who they are, what they want, how they look, from the brief and my pictures); never Clawd. Write ASSETS.md: each file I gave, what it is, where the film can use it (a picture of a character is a reference for its definition), what is missing. The look and the acting come from the style's guide (hand-painted with the kit, flat 2D, boil, no text, alive): keep all of it; the story, the characters, the copy and the length are this brief's own. When I gave no files at all, go on without asking. Every conflict (the brief against this style's own design or what it can draw, against the New project fields) and every missing thing the brief needs (a file, a link, a logo it names) goes in one message as moworks-studio §2b says (what each side says, two or three choices, your suggestion first), and then stop without writing BRIEF.md: the owner answers in the chat. Write BRIEF.md last. Change nothing in the film yet; then stop."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "doc",
+    "path": "BRIEF.md",
+    "label": "Brief"
+   }
+  },
+  {
+   "id": "character",
+   "stage": 1,
+   "title": "Character",
+   "what": "The film's characters as definitions, drawn as model sheets (five views, 31 emotions); you approve",
+   "needs": [
+    "brief"
+   ],
+   "done": {
+    "kind": "approval",
+    "name": "characters",
+    "file": "CHARACTERS.json"
+   },
+   "gate": true,
+   "action": {
+    "kind": "claude",
+    "label": "Make",
+    "prompt": "Make the film's characters as your rules say (brush-cartoon-app §3): write CHARACTERS.json with one definition per character of BRIEF.md (the schema of .moworks/library/character-kit/examples/definition.json; characters I chose from my library are already in it: keep them), from the brief and my pictures, simple enough to act and readable at phone size; never Clawd. Then call the app's character_sheet tool once: it draws every character's model sheets and returns them. Read them once and hold each sheet against the character's description and its reference picture, if it has one: every feature they name (hair, clothes, a prop or something held, its colours) must show; add what is missing to the definition and fix a real problem, then call it again once at most. Then call the app's character_gate tool: it checks every character automatically (the schema, never Clawd, colours that separate and read on a light and a dark ground, the face on the body, legs that stand and reach the ground, arms at the sides, the key views, the sheets drawn); fix in the definition what it names and call it again until it passes. A character I chose from my library for this style (ownStyle in CHARACTERS.json) is done: no new sheet, only the gate. Name in your reply, one line per character in plain words, any feature this style cannot draw (what it is on the character, never the kit's own terms). Then stop and ask me to approve the characters in the Character dialog, only when the gate passes."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "character",
+    "label": "Open"
+   }
+  },
+  {
+   "id": "storyboard",
+   "stage": 2,
+   "title": "Storyboard",
+   "what": "One treatment of the brief, posed frames painted with the kit and the approved characters; you approve it or ask for another",
+   "needs": [
+    "character"
+   ],
+   "done": {
+    "kind": "approval",
+    "name": "storyboard"
+   },
+   "gate": true,
+   "action": {
+    "kind": "claude",
+    "label": "Write",
+    "prompt": "Make one storyboard option as your rules say (the guide's workflow: plan the reads of every shot, one event per shot, timing for the viewer, a transition at every seam): one treatment of this brief with the approved characters, boards/A, with its STORYBOARD.md (every frame one shot with its own seconds) and a posed board page (boards/<X>/index.html and boards/<X>/board.js, as your rules say: the frames painted with the real kit and character(CAST.<id>, …)), timed to the voice-over when there is one. After writing or changing the boards, call the app's board_stills tool once: it checks the boards and returns the option's sheets (3 × 3 frames). Read the sheets once; fix only a real problem, then call it again with only the frames you changed (at most once more). Then stop: I approve it in the Storyboard dialog or ask there for another option; when I choose one, write it to STORYBOARD.md and stop for my approval."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "storyboard",
+    "label": "Open"
+   }
+  },
+  {
+   "id": "motionSpec",
+   "effort": "medium",
+   "stage": 3,
+   "title": "Motion Plan",
+   "what": "How every shot acts and moves: emotions, takes, turns, camera, with numbers; you approve",
+   "needs": [
+    "storyboard"
+   ],
+   "done": {
+    "kind": "approval",
+    "name": "motionPlan"
+   },
+   "gate": true,
+   "action": {
+    "kind": "claude",
+    "label": "Write",
+    "prompt": "Write the Motion Plan for every shot of the approved plan into MOTION-PLAN.json (the motion plan format in your instructions): concrete numbers, not adjectives. The acting is drawn in code with the kit as the style's guide says (emotion keys with their times, takes, anticipation, turns through the key views, jumps, walks, camera moves, the beat): cite the guide's principles and the kit's helpers as source {\"kind\": \"style\", \"id\": \"<principle or helper, e.g. emotions() or anticipation>\"}; a Motion Library item only for an HTML layer on top of the painting, or new. Give every held element, the background, the camera and every character its always-on row with numbers (moworks-alive §2), each shot its \"says\" line in my language (what moves and how strongly, words I can judge) and the plan its \"approving\" line. Write only MOTION-PLAN.json: no composition and no index.html (the Build writes the film once). Then stop for my approval in the Motion Plan dialog."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "motion-plan",
+    "label": "Open"
+   }
+  },
+  {
+   "id": "build",
+   "title": "Build",
+   "what": "The film painted as one renderAt(t) page with the kit and the approved characters, inside HyperFrames",
+   "needs": [
+    "motionSpec"
+   ],
+   "done": {
+    "kind": "built"
+   },
+   "action": {
+    "kind": "claude",
+    "label": "Build",
+    "prompt": "Build the film of the approved storyboard to the approved Motion Plan as your rules say (brush-cartoon-app §4: index.html as given, compositions/film.js with the shots, the approved characters drawn with character(CAST.<id>, …); the app writes compositions/kit/ and the libraries; never Clawd), timed to the voice-over when there is one. Write no sound effects or music: the app adds them after your Review. Keep every element on screen, the background, the camera and every character moving between the moves, as the studio's moworks-alive rule says (nothing still for more than 2 s except the final logo hold; the brief's motion words become that motion)."
+   },
+   "stage": 4
+  },
+  {
+   "id": "qcReview",
+   "title": "Review",
+   "what": "Claude looks at stills of the film like a strict director: seven scores, fixes, until every score is 8 or more",
+   "needs": [
+    "build"
+   ],
+   "done": {
+    "kind": "review",
+    "file": "QC-REVIEW.md"
+   },
+   "skippable": true,
+   "skipLabel": "Skip the review",
+   "action": {
+    "kind": "claude",
+    "label": "Review",
+    "prompt": "Run the Review as the Moworks QC rules say (the Moworks QC file named in your rules): call the app's qc_sheets tool for each round, read the sheets, score the seven criteria (Motion against the moworks-alive rule: its numbers, MOTION-PLAN.json's always-on rows and the app's still-stretch check when there is one), fix the 3 worst problems (open only the code of the shots the sheets flag, once each; Grep, then Edit) and every layout or contrast error of HyperFrames' check; 1 to 3 rounds, stop as soon as every score is 8 or more; after 3 rounds say why. Score only what you saw after your last change: a round that ends with a fix takes the sheets once more before the final score. Write every round to QC-REVIEW.md and end the file with a line `Final score: N/10` (the lowest of the seven); write the same rounds to QC-REVIEW.json as the QC rules say (the app shows them as a score card), and end your reply with one short line."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "qc-review",
+    "label": "Open"
+   },
+   "stage": 4,
+   "firstOnly": true
+  },
+  {
+   "id": "sound",
+   "stage": 4,
+   "title": "Music and sound effects",
+   "what": "Claude picks the music; the app places it and the sound effects",
+   "needs": [
+    "build",
+    "qcReview"
+   ],
+   "done": {
+    "kind": "mark",
+    "auto": true
+   },
+   "skippable": true,
+   "skipLabel": "No music",
+   "action": {
+    "kind": "claude",
+    "label": "Find music",
+    "prompt": "Find three music tracks on mixkit.co that fit the film's mood and length and the film's characters and story (a playful cartoon score unless the brief says otherwise; its tempo becomes PROJECT.bpm), and hand them to the app with the music_options tool (title, artist, its page on mixkit.co and the direct https://assets.mixkit.co/… .mp3 link). The app picks the first one for the film and places the sound effects; the owner can change both in the Final Mix. When the film already has a music track of the owner's, or the web is off for this project, say so in one line and change nothing."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "mix",
+    "label": "Open"
+   }
+  },
+  {
+   "id": "checks",
+   "title": "Tech checks",
+   "what": "Last of this stage, quiet: HyperFrames' check (layout, contrast, motion), Vietnamese letters, fonts, offline; the film is done when they pass",
+   "needs": [
+    "build",
+    "qcReview"
+   ],
+   "done": {
+    "kind": "qa"
+   },
+   "action": {
+    "kind": "job",
+    "job": "qa",
+    "label": "Run"
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "qa",
+    "label": "Open"
+   },
+   "stage": 4,
+   "quiet": true,
+   "after": [
+    "sound"
+   ]
+  },
+  {
+   "id": "finalMix",
+   "title": "Final Mix",
+   "what": "Optional: listen, then change the music or the sound effects (notes about the sound)",
+   "needs": [
+    "sound"
+   ],
+   "done": {
+    "kind": "mark",
+    "auto": false
+   },
+   "skippable": true,
+   "skipLabel": "No final mix",
+   "action": {
+    "kind": "dialog",
+    "dialog": "mix",
+    "label": "Open"
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "mix",
+    "label": "Open"
+   },
+   "stage": 5,
+   "optional": true
+  }
+ ]
+}

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Magic Card - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-magic-card { position: relative; isolation: isolate; overflow: hidden; border: 1px solid transparent; }
+.mw-magic-card > .mw-mc-face { position: absolute; inset: 1px; z-index: 20; border-radius: inherit; }
+.mw-magic-card > .mw-mc-glow { pointer-events: none; position: absolute; inset: 1px; z-index: 30; border-radius: inherit; }
+.mw-magic-card > .mw-mc-orb { pointer-events: none; position: absolute; z-index: 30; left: 0; top: 0; border-radius: 9999px; will-change: transform, opacity; }
+.mw-magic-card > .mw-mc-body { position: relative; z-index: 40; }
+.cards { display: flex; gap: 60px; } .mw-magic-card { width: 640px; height: 420px; border-radius: 24px; }
+.mw-mc-body { padding: 56px; } .mw-mc-body h3 { margin: 0 0 16px; font-size: 52px; } .mw-mc-body p { margin: 0; font-size: 28px; opacity: .6; line-height: 1.4; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="6">
+<div class="center"><div class="cards"><div class="mw-magic-card c1"><h3>Đèn rọi</h3><p>Viền thẻ sáng lên ở nơi ánh đèn đi qua.</p></div>
+<div class="mw-magic-card c2"><h3>Quả cầu màu</h3><p>Một quầng màu lớn đi theo con trỏ.</p></div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"mode":"gradient","gradientSize":200,"gradientColor":"#262626","gradientOpacity":0.8,"gradientFrom":"#9E7AFF","gradientTo":"#FE8BBB","border":"rgba(255,255,255,0.1)","background":"#0a0a0a","glowFrom":"#ee4f27","glowTo":"#6b21ef","glowAngle":90,"glowSize":420,"glowBlur":60,"glowOpacity":0.9,"path":null,"enter":null,"leave":null};
+  var run = function (el, tl, at, o) {
+      var W = el.clientWidth, H = el.clientHeight, body = document.createElement("div"); body.className = "mw-mc-body";
+      while (el.firstChild) body.appendChild(el.firstChild);
+      var face = document.createElement("div"); face.className = "mw-mc-face"; face.style.background = o.background; el.appendChild(face);
+      var glow = null, orb = null;
+      if (o.mode === "orb") { orb = document.createElement("div"); orb.className = "mw-mc-orb"; orb.style.width = orb.style.height = o.glowSize + "px"; orb.style.filter = "blur(" + o.glowBlur + "px)";
+        orb.style.background = "linear-gradient(" + o.glowAngle + "deg, " + o.glowFrom + ", " + o.glowTo + ")"; orb.style.mixBlendMode = "screen"; el.appendChild(orb); }
+      else { glow = document.createElement("div"); glow.className = "mw-mc-glow"; glow.style.opacity = o.gradientOpacity; el.appendChild(glow); }
+      el.appendChild(body);
+      var path = o.path || [[0, -o.gradientSize, H * 0.3], [2, W + o.gradientSize, H * 0.7]], enter = o.enter == null ? path[0][0] : o.enter, leave = o.leave == null ? path[path.length - 1][0] : o.leave;
+      var ptr = function (t) {
+        if (t < enter || t > leave) return null;
+        if (t <= path[0][0]) return [path[0][1], path[0][2]];
+        for (var k = 1; k < path.length; k++) if (t <= path[k][0]) { var a = path[k - 1], b = path[k], f = (t - a[0]) / (b[0] - a[0]); return [a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f]; }
+        return [path[path.length - 1][1], path[path.length - 1][2]];
+      };
+      var off = -o.gradientSize, end = leave + 1.5, dt = 1 / 240, N = Math.ceil(end / dt) + 1, SX = new Float64Array(N), SY = new Float64Array(N), SV = new Float64Array(N);
+      if (orb) {                                          // orb springs: x / y 250 / 30 / 0.6, visibility 300 / 35 (mass 1)
+        var x = off, y = off, vx = 0, vy = 0, v = 0, vv = 0, tx = off, ty = off;
+        for (var i = 0; i < N; i++) {
+          var p = ptr(i * dt); if (p) { tx = p[0]; ty = p[1]; }
+          var tv = p ? o.glowOpacity : 0;
+          vx += ((250 * (tx - x) - 30 * vx) / 0.6) * dt; x += vx * dt; vy += ((250 * (ty - y) - 30 * vy) / 0.6) * dt; y += vy * dt;
+          vv += (300 * (tv - v) - 35 * vv) * dt; v += vv * dt;
+          SX[i] = x; SY[i] = y; SV[i] = v;
+        }
+      }
+      var s = { t: 0 }, set = function () {
+        if (orb) { var i = Math.max(0, Math.min(N - 1, Math.round(s.t / dt))); orb.style.transform = "translate(" + SX[i] + "px, " + SY[i] + "px) translate(-50%, -50%)"; orb.style.opacity = Math.max(0, SV[i]); }
+        var q = ptr(s.t), mx = q ? q[0] : off, my = q ? q[1] : off, g = o.gradientSize;
+        el.style.background = "linear-gradient(" + o.background + " 0 0) padding-box, radial-gradient(" + g + "px circle at " + mx + "px " + my + "px, " + o.gradientFrom + ", " + o.gradientTo + ", " + o.border + " 100%) border-box";
+        if (glow) glow.style.background = "radial-gradient(" + g + "px circle at " + mx + "px " + my + "px, " + o.gradientColor + ", transparent 100%)";
+      };
+      set();
+      tl.fromTo(s, { t: 0 }, { t: end, duration: end, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + end;
+    };
+  MW.magicCard = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.magicCard(q(".c1"), tl, 0.2, { gradientSize: 320, gradientColor: "#3f3f46", path: [[0, -100, 80], [1.8, 560, 300], [3.6, 120, 380], [4.6, 700, 60]] });
+          MW.magicCard(q(".c2"), tl, 0.2, { mode: "orb", path: [[0.4, 80, 80], [2.2, 560, 340], [4, 200, 200]], leave: 4.2 });
+          tl.set({}, {}, 6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

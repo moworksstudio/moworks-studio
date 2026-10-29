@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-orbit-context-menu",
+  "type": "hyperframes:block",
+  "title": "Orbiting Context Menu",
+  "description": "Bấm SỬA, ba nút thao tác trượt vòng theo quỹ đạo quanh nút giữa vào đúng chỗ, để lại vệt cung sáng mờ dần, biểu tượng luôn đứng thẳng; khi đóng chúng trượt tiếp và tan.",
+  "tags": [
+    "menu",
+    "orbit",
+    "radial",
+    "spring",
+    "spatial-ui-depth",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-orbit-context-menu.html",
+      "target": "compositions/components/ui-orbit-context-menu.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-orbit-context-menu",
+    "author": "takayu",
+    "call": "MW.uiOrbitContextMenu(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiOrbitContextMenu",
+    "options": {
+      "openAt": "s (0.55; 0.08 s apart, spring k150 d17)",
+      "closeAt": "s (2.95)",
+      "loop": "s (3.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-spatial-orbit-context",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-spatial-orbit-context (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-spatial-orbit-context, written here): Centre button r22 ('EDIT'). Three items r15 end on a radius-62 orbit at −150, −90, −30°; each starts 130° back along the orbit and slides to its slot on a spring k150 d17, 80 ms apart from 0.55 s; icons stay upright; scale 0.6 → 1; a fading accent arc trail (2 px, gone by 2.0 s). Exit at 2.95 s (+50 ms each): continue 78° along the orbit and fade, 350 ms power2.in. Params: orbit (r62) · slots ([−150, −90, −30]°) · sweep (130°) · spring (k150 c17) · each (0.08 s).",
+    "titleVi": "Menu ngữ cảnh trượt theo quỹ đạo"
+  }
+}

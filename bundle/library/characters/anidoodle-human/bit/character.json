@@ -1,0 +1,23 @@
+{
+  "id": "bit",
+  "name": "Bit",
+  "about": "A little wind-up tin robot with an antenna bulb and a key in his back, drawn in storybook pencil and watercolour: the author's mascot (rigged for the web: eyes, brows, mouth, arms, a bob and a cheer).",
+  "engine": "anidoodle-human",
+  "rig": "bit",
+  "import": "anidoodle/canvas-core/bitRig",
+  "hands": [
+    "storybook"
+  ],
+  "credit": {
+    "author": "Alex Greenshpun (10x Company)",
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4db69644b994ae9caf9e20936506954b2f5e4872/skills/anidoodle/engine/src/canvas-core/bitRig.ts",
+    "commit": "4db69644b994ae9caf9e20936506954b2f5e4872",
+    "licence": "Apache-2.0 (with NOTICE)",
+    "made": "as shipped"
+  },
+  "module": [
+    "engine/src/canvas-core/bitRig.ts",
+    "engine/src/canvas-core/storybook.ts"
+  ],
+  "savedAt": "2026-10-24T18:40:59.333Z"
+}

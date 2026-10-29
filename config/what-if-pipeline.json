@@ -1,0 +1,237 @@
+{
+ "_about": "The What If animation style: FreshStack's What If animation (MIT) at the pinned commit (config/pins.json whatIf), the sixth author. The same five rows as every style; no Character step (the cast is the engine's own: Pip, Mo and the rig's looks, checked on the cast sheet). A film is the author's episode module (whatif/) on the staged engine; the app's Voice-over, music and sound effects replace the author's ElevenLabs steps. authorReads: the author's references read at each step (paths under the staged rule .moworks/rules/what-if-animation/).",
+ "fps": {
+  "allowed": [
+   24,
+   25,
+   30,
+   60
+  ],
+  "default": 30,
+  "why": "the author's episodes are 30 fps (timeline.json fps); 24, 25 and 60 as every style (audit 77 B1)"
+ },
+ "authorReads": {
+  "brief": [
+   "references/formula.md"
+  ],
+  "storyboard": [
+   "references/look.md",
+   "references/kit.md"
+  ],
+  "motionSpec": [
+   "references/look.md",
+   "references/kit.md"
+  ],
+  "build": [
+   "references/kit.md",
+   "references/traps.md"
+  ],
+  "qcReview": [
+   "references/look.md"
+  ],
+  "sound": [
+   "references/sound.md"
+  ]
+ },
+ "uses": [
+  "hyperframes",
+  "hyperframes-cli"
+ ],
+ "pipeline": [
+  {
+   "id": "brief",
+   "stage": 1,
+   "title": "Prepare",
+   "what": "The episode's script on the seven beats, the facts checked, the files read; Claude asks what is missing or in conflict",
+   "needs": [],
+   "done": {
+    "kind": "mark",
+    "auto": true,
+    "file": "BRIEF.md",
+    "ask": true
+   },
+   "action": {
+    "kind": "claude",
+    "label": "Prepare",
+    "prompt": "Read the brief, the answers from the New project dialog and what the app found in my files (its scan). Write BRIEF.md in a few short lines: who the film speaks to, the one thing it says (\"This film tells [audience] that [promise].\"), what must be in it (the names, facts and lines the brief gives) and the length and format New project set. Do not ask what the dialog already answered. Write ASSETS.md: each file I gave, what it is, where the film can use it, what is missing. The film is a What If episode in the author's look (the what-if-style pack and the author's references/formula.md): write whatif/episode.json with id, slug, topic, title (two lines), script (one entry per beat, 45-65 words for 15-25 s unless New project's length says otherwise, every line a picture) and science (each fact: the claim, the working, the source; a fact you cannot source has no number). The narration: when the project has no voice-over yet and no voice service key is set (the app says which below), that is a missing thing: offer the two ways on, a voice-over I upload or a film with no narration (the pack §4), with the other conflicts and missing things in one message as moworks-studio §2b says, and then stop without writing BRIEF.md: I answer in the chat. Write BRIEF.md last. Change nothing in the film yet; then stop."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "doc",
+    "path": "BRIEF.md",
+    "label": "Brief"
+   }
+  },
+  {
+   "id": "storyboard",
+   "stage": 2,
+   "title": "Storyboard",
+   "what": "The shot list on the voice and every shot at its key frame, drawn by the engine as the episode's board; you approve it or ask for another",
+   "needs": [
+    "brief"
+   ],
+   "done": {
+    "kind": "approval",
+    "name": "storyboard"
+   },
+   "gate": true,
+   "action": {
+    "kind": "claude",
+    "label": "Write",
+    "prompt": "Make the storyboard as the what-if-style pack says (the author's steps 3 to 5): add shots (one per picture of the script, 9 to 14, the size and angle varied every cut, each with its key frame), edit (one cut per shot cued on its word, or s:/f:/+N cues in a film with no narration) and fx to whatif/episode.json; call the app's whatif_plan tool: it resolves them into whatif/timeline.json (the author's plan.py in the app) and returns the pace report; fix what it flags (27+ cuts a minute in the opening, no static shot over about 3 s) and call it again; write whatif/shots.tsx (one component per shot, right at its key frame; the author's references/kit.md for the pieces, its worked episodes to study, never to copy) and whatif/episode.tsx (export default defineEpisode). The board is option A: boards/A/STORYBOARD.md (its heading `# Option A · \"<a short name for its idea>\"` in the language of the chat; one frame per shot, every frame one shot with its own seconds: its line, size, set and what we see) and boards/A/index.html, the board page the what-if-style pack §2 shows (data-whatif=\"board\" on its root, <script src=\"film.js\"> beside it: the app builds the episode there; each shot at its key frame for one second). After writing or changing them, call the app's board_stills tool once: it bundles the episode, checks the board and returns its sheets (3 × 3 frames). Run the author's storyboard checklist (references/look.md) on them honestly, shot by shot; fix only a real problem, then call it again with only the frames you changed (at most once more). Then stop: I approve it in the Storyboard dialog or ask there for another option; when I choose one, write it to STORYBOARD.md and stop for my approval."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "storyboard",
+    "label": "Open"
+   }
+  },
+  {
+   "id": "motionSpec",
+   "effort": "medium",
+   "stage": 3,
+   "title": "Motion Plan",
+   "what": "How every shot moves from its key pose: poses, faces, camera and the power's look, with numbers; you approve",
+   "needs": [
+    "storyboard"
+   ],
+   "done": {
+    "kind": "approval",
+    "name": "motionPlan"
+   },
+   "gate": true,
+   "action": {
+    "kind": "claude",
+    "label": "Write",
+    "prompt": "Write the Motion Plan for every shot of the approved storyboard into MOTION-PLAN.json (the motion plan format in your instructions): concrete numbers, not adjectives. The motion is the author's (references/look.md, its motion checklist; references/kit.md): each shot's key poses with anticipation, holds and overshoot (poseAt), the faces (faceAt), the camera (kf), the power's look and the fx; cite them as source {\"kind\": \"style\", \"id\": \"<piece or move>\"}. Give every held element, the background, the camera and every character its always-on row with numbers (moworks-alive §2), each shot its \"says\" line in my language and the plan its \"approving\" line. Write only MOTION-PLAN.json: no shots.tsx changes yet (the Build animates them once). Then stop for my approval in the Motion Plan dialog."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "motion-plan",
+    "label": "Open"
+   }
+  },
+  {
+   "id": "build",
+   "title": "Build",
+   "what": "Every shot brought to life from its key pose in whatif/shots.tsx, bundled with the pinned engine and driven inside HyperFrames",
+   "needs": [
+    "motionSpec"
+   ],
+   "done": {
+    "kind": "built"
+   },
+   "action": {
+    "kind": "claude",
+    "label": "Build",
+    "prompt": "Build the film of the approved storyboard to the approved Motion Plan as the what-if-style pack says (the author's step 6): bring each shot of whatif/shots.tsx to life from its key pose, keep whatif/episode.tsx in step with the plan (a changed edit or fx: call whatif_plan again, never edit timeline.json by hand), and write index.html as the pack §2 says (the app bundles the episode with the pinned engine and drives it), timed to the voice-over when there is one. Write no sound effects or music: the app adds them after your Review. Keep every element on screen, the background, the camera and every character moving between the moves, as the studio's moworks-alive rule says (nothing still for more than 2 s except the final end card). Check references/traps.md before inventing a fix, and leave no console.error in the film."
+   },
+   "stage": 4
+  },
+  {
+   "id": "qcReview",
+   "title": "Review",
+   "what": "Claude looks at stills of the film like a strict director: seven scores, fixes, until every score is 8 or more",
+   "needs": [
+    "build"
+   ],
+   "done": {
+    "kind": "review",
+    "file": "QC-REVIEW.md"
+   },
+   "skippable": true,
+   "skipLabel": "Skip the review",
+   "action": {
+    "kind": "claude",
+    "label": "Review",
+    "prompt": "Run the Review as the Moworks QC rules say (the Moworks QC file named in your rules): call the app's qc_sheets tool for each round, read the sheets, score the seven criteria (Motion against the moworks-alive rule: its numbers, MOTION-PLAN.json's always-on rows and the app's still-stretch check when there is one), fix the 3 worst problems (open only the code of the shots the sheets flag, once each; Grep, then Edit) and every layout or contrast error of HyperFrames' check; 1 to 3 rounds, stop as soon as every score is 8 or more; after 3 rounds say why. Score only what you saw after your last change: a round that ends with a fix takes the sheets once more before the final score. Write every round to QC-REVIEW.md and end the file with a line `Final score: N/10` (the lowest of the seven); write the same rounds to QC-REVIEW.json as the QC rules say (the app shows them as a score card), and end your reply with one short line."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "qc-review",
+    "label": "Open"
+   },
+   "stage": 4,
+   "firstOnly": true
+  },
+  {
+   "id": "sound",
+   "stage": 4,
+   "title": "Music and sound effects",
+   "what": "Claude picks the music; the app places it and the sound effects",
+   "needs": [
+    "build",
+    "qcReview"
+   ],
+   "done": {
+    "kind": "mark",
+    "auto": true
+   },
+   "skippable": true,
+   "skipLabel": "No music",
+   "action": {
+    "kind": "claude",
+    "label": "Find music",
+    "prompt": "Find three music tracks on mixkit.co that fit the episode's mood and length (the genre's: references/sound.md, its music bed; none of the author's sounds), and hand them to the app with the music_options tool (title, artist, its page on mixkit.co and the direct https://assets.mixkit.co/… .mp3 link). When your turn ends, the app places the first track and the sound effects, one per visible action; the owner can change both in the Final Mix. When the film already has a music track of the owner's, or the web is off for this project, say so in one line and change nothing."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "mix",
+    "label": "Open"
+   }
+  },
+  {
+   "id": "checks",
+   "title": "Tech checks",
+   "what": "Last of this stage, quiet: HyperFrames' check (layout, contrast, motion), Vietnamese letters, fonts, offline; the film is done when they pass",
+   "needs": [
+    "build",
+    "qcReview"
+   ],
+   "done": {
+    "kind": "qa"
+   },
+   "action": {
+    "kind": "job",
+    "job": "qa",
+    "label": "Run"
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "qa",
+    "label": "Open"
+   },
+   "stage": 4,
+   "quiet": true,
+   "after": [
+    "sound"
+   ]
+  },
+  {
+   "id": "finalMix",
+   "title": "Final Mix",
+   "what": "Optional: listen, then change the music or the sound effects (notes about the sound)",
+   "needs": [
+    "sound"
+   ],
+   "done": {
+    "kind": "mark",
+    "auto": false
+   },
+   "skippable": true,
+   "skipLabel": "No final mix",
+   "action": {
+    "kind": "dialog",
+    "dialog": "mix",
+    "label": "Open"
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "mix",
+    "label": "Open"
+   },
+   "stage": 5,
+   "optional": true
+  }
+ ]
+}

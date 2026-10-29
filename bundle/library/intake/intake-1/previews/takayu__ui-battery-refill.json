@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-battery-refill",
+  "hash": "a9aa08fca02ca38b",
+  "at": "2026-10-17T10:45:18.700Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-battery-refill.mp4",
+    "poster": "previews/takayu__ui-battery-refill.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "88ddaa4f3a9b58a109023e91170c2c38c852f2c97e1f917fb5defbafeb719229",
+    "size": 17128,
+    "seconds": 29.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

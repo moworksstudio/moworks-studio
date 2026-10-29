@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-walk-cycle",
+  "type": "hyperframes:component",
+  "title": "Walk Cycle",
+  "description": "Nhân vật bước đều: thân nhún hai lần mỗi chu kỳ, tay chân đánh ngược pha nhau.",
+  "tags": [
+    "walk",
+    "character",
+    "loop",
+    "rig",
+    "smooth",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-walk-cycle.html",
+      "target": "compositions/components/motion-walk-cycle.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-walk-cycle",
+    "author": "takayu",
+    "call": "MW.motionWalkCycle(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionWalkCycle",
+    "options": {
+      "cycle": "s for two steps (1)",
+      "bob": "units (5): low at contact, high at passing",
+      "leg": "radians (0.5)",
+      "arm": "radians, opposite phase (0.6)",
+      "loops": "(3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=ch-walk",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=ch-walk (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio ch-walk, written here): 1000 ms cycle = 2 steps (0.5 s each): body bobs |cos(phase)| x 5 px (low at contact, high at passing, twice per cycle); legs swing +-0.5 rad and arms -+0.6 rad on opposite-phase sines; loops. Params: step (0.5 s) · bob (5 px) · swing chân / tay (0.5 / 0.6 rad).",
+    "titleVi": "Chu kỳ bước đi"
+  }
+}

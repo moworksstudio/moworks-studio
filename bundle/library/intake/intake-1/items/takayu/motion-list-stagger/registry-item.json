@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-list-stagger",
+  "type": "hyperframes:component",
+  "title": "Staggered List",
+  "description": "Bốn dòng trượt từ trái vào và hiện dần, mỗi dòng trễ 70 ms.",
+  "tags": [
+    "list",
+    "stagger",
+    "slide",
+    "list-grid",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-list-stagger.html",
+      "target": "compositions/components/motion-list-stagger.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-list-stagger",
+    "author": "takayu",
+    "call": "MW.motionListStagger(q(\".ls\"), tl, 0.3, { exitAt: 1.7 });",
+    "function": "MW.motionListStagger",
+    "options": {
+      "items": "",
+      "from": "px (−96)",
+      "duration": "s per row (0.55, power2.out)",
+      "stagger": "s (0.07)",
+      "exitAt": "s after the start to fade all (null)",
+      "cols": ""
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=list-stagger",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=list-stagger (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio list-stagger, written here): Four rows (172×24, 30 px pitch): x −24 → 0 px and opacity 0 → 1, each 550 ms power2.out, 70 ms apart (760 ms in all — the recipe's 760 ms is the total). Site exit: all fade 200 ms power2.in. Params: from (−24 px) · each: thời gian mỗi dòng (0.55 s) · stagger (70 ms) · ease (power2.out).",
+    "titleVi": "Danh sách trượt vào lần lượt"
+  }
+}

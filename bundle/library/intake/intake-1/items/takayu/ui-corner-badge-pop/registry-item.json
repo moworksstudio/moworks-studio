@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-corner-badge-pop",
+  "type": "hyperframes:component",
+  "title": "Badge Pop",
+  "description": "Chỉ huy hiệu ở góc thẻ bật từ 0 lên 120 %, xoay lắc nhẹ rồi về chỗ; thẻ đứng yên.",
+  "tags": [
+    "attention",
+    "badge",
+    "pop",
+    "attention-emphasis",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-corner-badge-pop.html",
+      "target": "compositions/components/ui-corner-badge-pop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-corner-badge-pop",
+    "author": "takayu",
+    "call": "MW.uiCornerBadgePop(q(\".bdg\"), tl, 0.6, {});",
+    "function": "MW.uiCornerBadgePop",
+    "options": {
+      "duration": "s (0.56)",
+      "peak": "overshoot scale (1.2)",
+      "rotation": "starting angle (−18°)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=badge-pop",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=badge-pop (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio badge-pop, written here): Badge on the corner of a still 'Inbox' card: scale 0 → 1.2 → 0.95 → 1, rotation −18° → +5° → −2° → 0, opacity 0 → 1 in the first segment. Site DOM demo keys at 0 / 638 / 968 / 1254 ms of a 2200 ms loop (starting at 330 ms), each segment eased in-out; motion_ms 560 → scale the keys to 0 / 285 / 430 / 560 ms. The parent never moves. Params: duration (0.56 s) · peak (1.2) · rot đầu (−18°) · origin (giữa huy hiệu).",
+    "titleVi": "Huy hiệu góc bật ra xoay nhẹ"
+  }
+}

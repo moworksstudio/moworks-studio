@@ -1,0 +1,77 @@
+<!--
+  Page Wipe (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=page-wipe (read 12/10/2026).
+  Một tấm màu quét kín khung từ trái sang, đổi trang khi đã che kín, rồi tấm màu rút tiếp sang phải để lộ trang mới.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.transitionCoverWipe(q(".tk-b"), tl, 1.1, {});
+
+  Options (defaults in brackets):
+      - duration: s (0.78): covers left to right, the scenes swap while covered, then it leaves to the right
+      - color: panel colour
+      - ease: house, cubic-bezier(.83,0,.17,1) (ease-in-out quint)
+      - from: the outgoing scene
+
+  Notes: Idea and numbers (TakayuStudio page-wipe, written here): One accent panel over both scenes, 780 ms total, ease easeInOutQuint (CSS cubic-bezier(.83,0,.17,1), about power4.inOut). Leading edge sweeps left to right over 0-374 ms (panel scaleX 0 → 1, origin left); the scenes swap at 390 ms while fully covered; the trailing edge follows over 406-780 ms (scaleX 1 → 0, origin right) so the panel exits right. Params: duration (0.78 s) · color · swap (0.39 s) · ease (power4.inOut) · direction.
+-->
+
+<section class="tk-scene tk-a"><div class="tk-mark circle"></div><div class="tk-sc-text"><div class="tk-sc-letter">A</div><div class="tk-sc-cap">Cảnh mở đầu</div></div></section>
+<section class="tk-scene tk-b"><div class="tk-mark square"></div><div class="tk-sc-text"><div class="tk-sc-letter">B</div><div class="tk-sc-cap">Cảnh tiếp theo</div></div></section>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.78,"color":"#8b7bff","ease":"house","from":null};
+  var run = function (el, tl, at, o) {
+        var out = o.from ? MW.el(o.from) : el.previousElementSibling, ease = MW.ez(o.ease), panel = document.createElement("div"), T = o.duration;
+        panel.style.cssText = "position:absolute;inset:0;pointer-events:none;z-index:8;background:" + o.color + ";transform:scaleX(0);"; el.parentNode.appendChild(panel);
+        return MW.drive(tl, at, T, function (t) {
+          var a = 0.48 * T, sw = 0.5 * T, b = 0.52 * T, s, org;
+          if (t < a) { s = ease(t / a); org = "0% 50%"; } else if (t < b) { s = 1; org = "100% 50%"; } else { s = 1 - ease((t - b) / (T - b)); org = "100% 50%"; }
+          panel.style.transformOrigin = org; panel.style.transform = "scaleX(" + (t <= 0 || t >= T ? 0 : s) + ")";
+          el.style.visibility = t >= sw ? "visible" : "hidden"; if (out) out.style.visibility = t >= sw ? "hidden" : "visible";
+        });
+      };
+  MW.transitionCoverWipe = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

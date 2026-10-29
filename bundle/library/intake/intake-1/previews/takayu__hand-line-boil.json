@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/hand-line-boil",
+  "hash": "8716b4d15c73c007",
+  "at": "2026-10-17T11:40:14.217Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__hand-line-boil.mp4",
+    "poster": "previews/takayu__hand-line-boil.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "1cbde1f67d158955e959d57ee14754a231c07ca5033ddc297afd1ab68215ea78",
+    "size": 13365,
+    "seconds": 32.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

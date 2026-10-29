@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-verb-cue-lines",
+  "type": "hyperframes:component",
+  "title": "Kinetic Lines on Verbs",
+  "description": "Mỗi dòng trồi lên 28 px và hiện ra đúng lúc giọng đọc nói động từ của dòng đó.",
+  "tags": [
+    "reveal",
+    "lines",
+    "narration",
+    "cue",
+    "text-reveal",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-verb-cue-lines.html",
+      "target": "compositions/components/text-verb-cue-lines.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-verb-cue-lines",
+    "author": "takayu",
+    "call": "MW.textVerbCueLines(q(\".vc\"), tl, 0, {});",
+    "function": "MW.textVerbCueLines",
+    "options": {
+      "lines": "",
+      "cues": "s each line's verb is spoken ([0.3, 0.75, 1.2, 1.65])",
+      "y": "em (1.17)",
+      "duration": "s (0.3, power3.out)",
+      "ease": "",
+      "outAt": "s (3)",
+      "loop": "s (3.4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=ty-kinetic",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=ty-kinetic (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio ty-kinetic, written here): Recipe: 3–5 lines; at its verb's timestamp each line rises y +28 px → 0 with opacity 0 → 1 over 0.3 s power3.out. Demo: 4 lines (24 px, 34 px pitch, left aligned), cues every 0.45 s from 0.3 s, ease easeOutCubic, last line accent; exit fade 3.0–3.3 s; loop 3.4 s. Params: cues: thời điểm từng dòng (theo kit.py transcribe / align) · y: quãng trồi (28 px) · duration (0.3 s) · ease (power3.out). Take the cue times from the voice-over's word timestamps, one line per verb.",
+    "titleVi": "Từng dòng trồi lên theo động từ"
+  }
+}

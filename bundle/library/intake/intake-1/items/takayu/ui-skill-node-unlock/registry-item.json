@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-skill-node-unlock",
+  "type": "hyperframes:block",
+  "title": "Skill Unlock",
+  "description": "Một chấm năng lượng chạy dọc đường nối từ nút đã có sang nút kế và tô màu đường đi; tới nơi ổ khoá phồng rồi biến mất, nút bật lên bằng lò xo thành màu nhấn có ngôi sao, vòng sáng toả ra; nút sau vẫn khoá.",
+  "tags": [
+    "node",
+    "unlock",
+    "connector",
+    "spring",
+    "progression-quests",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-skill-node-unlock.html",
+      "target": "compositions/components/ui-skill-node-unlock.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-skill-node-unlock",
+    "author": "takayu",
+    "call": "MW.uiSkillNodeUnlock(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiSkillNodeUnlock",
+    "options": {
+      "travel": "s (0.65)",
+      "arriveAt": "s (1.0, spring k320 c14)",
+      "label": "",
+      "resetAt": "s (2.4)",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-progress-skill-unlock",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-progress-skill-unlock (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-progress-skill-unlock, written here): px @320x200. 3 nodes r 20, 90 px apart, grey links 4 px. Energy dot (core r 3.5, glow r 7 at 35 %) travels node 1 → 2 in 650 ms inOut (0.35-1.0 s), painting the link accent behind it. The lock on node 2 swells 1 → 1.2 over 0.85-1.0 s, then fades in 80 ms; node 2 pops 0 → 1 by spring k320 d14 at 1.0 s (accent disc + star); ring r 20 → 42 over 600 ms outCubic, fading. Node 3 stays locked. Label fades in 1.2-1.45 s; reset 2.4-2.7 s inOut. Params: travel: thời gian chạy (0.65 s) · arriveAt: lúc tới (1.0 s) · spring: lò xo (k320 d14) · label: nhãn mở khoá.",
+    "titleVi": "Mở khoá nút kỹ năng kế tiếp"
+  }
+}

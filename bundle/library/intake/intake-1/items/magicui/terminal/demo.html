@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Terminal - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-terminal { position: relative; z-index: 0; width: 100%; max-width: 32rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: #09090b; overflow: hidden; }
+.mw-terminal > .mw-tm-bar { display: flex; gap: 8px; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+.mw-terminal > .mw-tm-bar i { width: 8px; height: 8px; border-radius: 9999px; display: block; }
+.mw-terminal > pre { margin: 0; padding: 16px; } .mw-terminal > pre > code { display: grid; row-gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 14px; letter-spacing: -0.025em; white-space: pre-wrap; }
+.mw-terminal { max-width: none; width: 1200px; border-radius: 26px; } .mw-tm-bar { padding: 28px !important; gap: 14px !important; } .mw-tm-bar i { width: 18px !important; height: 18px !important; }
+.mw-terminal > pre { padding: 34px; } .mw-terminal > pre > code { font-size: 32px; row-gap: 10px; } .g { color: #22c55e; } .b { color: #3b82f6; } .m { color: #a1a1aa; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="8">
+<div class="center"><div class="mw-terminal">
+<span class="mw-type">&gt; npx moworks-studio init</span>
+<span class="g">✔ Kiểm tra môi trường.</span><span class="g">✔ Tìm thấy HyperFrames 0.8.163.</span><span class="g">✔ Tải font tiếng Việt.</span>
+<span class="g">✔ Tạo dự án mẫu.</span><span class="b">ℹ Đã tạo 3 tệp: index.html, storyboard.md, film.json</span>
+<span class="mw-type m">Xong! Dự án đã sẵn sàng.</span></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  var defaults = {"duration":0.06,"delay":0};
+  var run = function (el, tl, at, o) {
+      var lines = Array.prototype.slice.call(el.children);
+      var bar = document.createElement("div"); bar.className = "mw-tm-bar"; bar.innerHTML = '<i style="background:#ef4444"></i><i style="background:#eab308"></i><i style="background:#22c55e"></i>';
+      var pre = document.createElement("pre"), code = document.createElement("code"); pre.appendChild(code);
+      lines.forEach(function (l) { code.appendChild(l); });
+      el.appendChild(bar); el.appendChild(pre);
+      var seg = new Intl.Segmenter("vi", { granularity: "grapheme" }), e = MW.bezier(0.25, 0.1, 0.35, 1), t = at + o.delay;
+      lines.forEach(function (l) {
+        if (l.classList.contains("mw-type")) {
+          var full = l.textContent.normalize("NFC"), g = [], it = seg.segment(full)[Symbol.iterator](), r;
+          while (!(r = it.next()).done) g.push(r.value.segment);
+          l.textContent = "";
+          var s = { n: 0 }, t0 = t;
+          tl.fromTo(s, { n: 0 }, { n: g.length, duration: g.length * o.duration, ease: "none", immediateRender: false, onUpdate: function () { l.textContent = g.slice(0, Math.floor(s.n + 1e-6)).join(""); } }, t0);
+          t += g.length * o.duration;
+        } else {
+          tl.fromTo(l, { opacity: 0, y: -5 }, { opacity: 1, y: 0, duration: 0.3, ease: e, immediateRender: true }, t);
+          t += 0.3;
+        }
+      });
+      return t;
+    };
+  MW.terminal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.terminal(q(".mw-terminal"), tl, 0.3, {});
+          tl.set({}, {}, 8);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

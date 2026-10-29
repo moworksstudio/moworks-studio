@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-phrase-line-break",
+  "hash": "9f802b0437d65768",
+  "at": "2026-10-17T08:57:28.031Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-phrase-line-break.mp4",
+    "poster": "previews/takayu__text-phrase-line-break.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4478d8b55c7f4db7d9e0da725906c011e1f9d168a2c91e238cf8b4f3111f0e96",
+    "size": 35792,
+    "seconds": 31.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

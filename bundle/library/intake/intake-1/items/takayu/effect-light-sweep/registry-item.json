@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-light-sweep",
+  "type": "hyperframes:component",
+  "title": "Light Sweep",
+  "description": "Một vệt sáng xiên, mờ mép quét qua bề mặt, sáng nhất khi đi qua giữa.",
+  "tags": [
+    "light",
+    "sweep",
+    "shine",
+    "light-glow",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-light-sweep.html",
+      "target": "compositions/components/effect-light-sweep.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-light-sweep",
+    "author": "takayu",
+    "call": "MW.effectLightSweep(q(\".ls-p\"), tl, 0.5, {});",
+    "function": "MW.effectLightSweep",
+    "options": {
+      "duration": "s (0.95)",
+      "width": "px of the band (400)",
+      "angle": "degrees (20)",
+      "strength": "at the middle (0.9)",
+      "pad": "px before and past the element (250)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=light-sweep",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=light-sweep (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio light-sweep, written here): On a gold pill (200×72, vertical gradient): an 80 px soft white band, skewed ~20°, sweeps from 50 px before to 50 px past the pill in 950 ms power2.inOut, additive; strength 0.9 × (0.3 + 0.7·exp(−(d / 60 px)²)), d = distance from the centre, so it is brightest mid-way (recipe: x −150 % → 250 %, blur 8, add). Params: duration (0.95 s) · width (80 px) · angle (≈20°) · strength đỉnh (0.9) · blend (add).",
+    "titleVi": "Vệt sáng quét qua mặt bóng"
+  }
+}

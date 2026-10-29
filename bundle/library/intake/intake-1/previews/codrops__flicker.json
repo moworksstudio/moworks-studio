@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/flicker",
+  "hash": "6b1b68e2650c8887",
+  "at": "2026-10-17T06:39:22.211Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Archivo"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__flicker.mp4",
+    "poster": "previews/codrops__flicker.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3f196d321a10802a4eea1f2b5a718dbddd040c8a54ead10242aa2474658e7933",
+    "size": 11724,
+    "seconds": 32.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

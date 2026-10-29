@@ -1,0 +1,65 @@
+<!--
+  Diff Text Replace (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-diff-retype (read 12/10/2026).
+  Phần chữ giống nhau đứng yên, chỉ những ký tự khác (giá, số phiên bản) lần lượt được thay từ trái sang, ký tự mới màu nhấn có gạch chân.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textDiffRetype(q(".dr"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - from: text before
+      - to: text after (the shared start and end stay still)
+      - perChar: s per changed character (0.14, ≤ 1.2 s)
+      - at: s (0.6)
+      - backAt: s it changes back (2.8)
+      - underline: px (4)
+      - accent: colour of new characters
+
+  Notes: Idea and numbers (TakayuStudio tx-diff-retype, written here): Common prefix / suffix stay still; the changed span is replaced in place left → right, one char per step (new char k replaces old char k; extras appear / vanish at the end), linear: demo 140 ms per changed char (max 1.2 s) from 0.6 s, GSAP TextPlugin 2 s. New chars pop 1.25 → 1 in 120 ms, accent, 1.5 px underline (offset 0.2 em); old chars waiting to change are muted (CSS 50 %); a 2 px accent caret marks the edit point. Demo reverses at 2.8 s; loop 4 s. Params: to: chuỗi mới · perChar: thời gian mỗi ký tự đổi (0.14 s, tối đa 1.2 s) · color: màu ký tự mới (màu nhấn) · underline (1.5 px).
+-->
+
+<div class="sw"><div class="dr" style="font-size:150px;font-weight:800;font-variant-numeric:tabular-nums">Giá 980.000₫</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":"Giá 980.000₫","to":"Giá 1.250.000₫","perChar":0.14,"at":0.6,"backAt":2.8,"underline":4,"accent":"#ffd23d"};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var A = gr(o.from), B = gr(o.to), pre = 0, suf = 0; while (pre < A.length && pre < B.length && A[pre] === B[pre]) pre++; while (suf < A.length - pre && suf < B.length - pre && A[A.length - 1 - suf] === B[B.length - 1 - suf]) suf++;
+  var mid = Math.max(A.length, B.length) - pre - suf, oldMid = A.slice(pre, A.length - suf), newMid = B.slice(pre, B.length - suf), per = Math.min(o.perChar, 1.2 / Math.max(1, Math.max(oldMid.length, newMid.length)));
+  el.textContent = ""; var head = document.createElement("span"), body = document.createElement("span"), tail = document.createElement("span"), caret = document.createElement("span");
+  head.textContent = A.slice(0, pre).join(""); tail.textContent = A.slice(A.length - suf).join(""); [head, body, tail].forEach(function (s) { s.style.whiteSpace = "pre"; el.appendChild(s); }); el.insertBefore(caret, tail);
+  caret.style.cssText = "display:inline-block;width:6px;height:1em;vertical-align:-0.1em;background:" + o.accent + ";margin:0 1px;";
+  var col = getComputedStyle(el).color, render = function (from, to, k, dt) { body.innerHTML = ""; var L = Math.max(from.length, to.length);
+    for (var i = 0; i < L; i++) { var s = document.createElement("span"); s.style.cssText = "display:inline-block;white-space:pre;"; if (i < k) { if (i >= to.length) continue; s.textContent = to[i]; s.style.color = o.accent; s.style.textDecoration = "underline " + o.underline + "px"; s.style.textUnderlineOffset = "0.2em"; if (i === k - 1) { var u = Math.min(1, dt / 0.12); s.style.transform = "scale(" + (1.25 - 0.25 * u) + ")"; } } else { if (i >= from.length) continue; s.textContent = from[i]; s.style.opacity = "0.5"; } body.appendChild(s); }
+    body.appendChild(caret); };
+  return MW.drive(tl, at, o.backAt + per * mid + 0.6, function (t) {
+    var fwd = t < o.backAt, t0 = fwd ? o.at : o.backAt, from = fwd ? oldMid : newMid, to = fwd ? newMid : oldMid, steps = Math.max(from.length, to.length), d = t - t0, k = Math.max(0, Math.min(steps, Math.floor(d / per) + (d >= 0 ? 1 : 0)));
+    if (!fwd && d < 0) { render(oldMid, newMid, newMid.length + 9, 1); } else render(from, to, d < 0 ? 0 : k, d - (k - 1) * per);
+    caret.style.visibility = (d >= 0 && k < steps) ? "visible" : "hidden"; void col;
+  });
+  };
+  MW.textDiffRetype = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/data-heatmap-ripple",
+  "hash": "b6c8ccda7dbe49c6",
+  "at": "2026-10-17T08:25:34.986Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__data-heatmap-ripple.mp4",
+    "poster": "previews/takayu__data-heatmap-ripple.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b4ca5bc9a2977755a224f0fa975e42e49e5c75d71f3faff5a7c0dcc9df83a854",
+    "size": 39811,
+    "seconds": 31.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

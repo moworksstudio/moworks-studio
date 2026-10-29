@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Punctuation-Aware Pause - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { --ink: #e8ebf3; --acc: #8b7bff; --acc2: #3dd6f5; --warm: #ffb547; --rose: #ff5d8f; --mute: #6c778b; --tk-card: #151a24; --tk-line: #262c3a; background: #0b0d12; color: var(--ink); }
+.tk-stage { position: absolute; inset: 0; display: grid; place-items: center; }
+.tk-cap { font-size: 30px; font-weight: 500; color: var(--mute); letter-spacing: 0.01em; }
+.tk-head { margin: 0; font-family: 'Inter', sans-serif; font-size: 100px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; text-align: center; max-width: 1600px; }
+.tk-sub { margin-top: 36px; text-align: center; }
+.tk-head { text-align: left; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3.6">
+<div class="tk-stage"><div><h1 class="tk-head ">Khoan đã, nghe mình nói. Được chứ?</h1></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"per":0.06,"comma":0.2,"stop":0.4,"fit":1.9,"rise":12,"caret":10,"start":0.35,"exitAt":3.1,"accent":"#8b7bff","loop":3.6};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var cells = function (el, text) { el.textContent = ""; var word = null; return gr(text).map(function (g) { var s = document.createElement("span"); s.textContent = g; s.style.display = "inline-block"; s.style.whiteSpace = "pre";
+    if (g === " ") { word = null; el.appendChild(s); } else { if (!word) { word = document.createElement("span"); word.style.display = "inline-block"; word.style.whiteSpace = "nowrap"; el.appendChild(word); } word.appendChild(s); } return s; }); };
+  var g = gr(el.textContent), cs = cells(el, el.textContent), T0 = [], t0 = 0, caret = document.createElement("span");
+  if (getComputedStyle(el).position === "static") el.style.position = "relative";
+  for (var i = 0; i < g.length; i++) { var close = /^[”’)\]»」』"]$/.test(g[i]); if (close && i) { T0.push(T0[i - 1]); } else { T0.push(t0); t0 += o.per; }
+    if (/^[、,，]$/.test(g[i])) t0 += o.comma; else if (/^[。.！!？?]$/.test(g[i])) t0 += o.stop; else if (close && i && /^[。.！!？?、,，]$/.test(g[i - 1])) {} }
+  var k = T0[T0.length - 1] > o.fit ? o.fit / T0[T0.length - 1] : 1;
+  caret.style.cssText = "position:absolute;width:" + o.caret + "px;background:" + o.accent + ";"; el.appendChild(caret);
+  return MW.drive(tl, at, o.loop, function (t) {
+    var last = null, end = o.start + T0[T0.length - 1] * k, x = Math.max(0, Math.min(1, (t - o.exitAt) / 0.3));
+    cs.forEach(function (c, i) { var u = Math.max(0, Math.min(1, (t - o.start - T0[i] * k) / 0.06)); c.style.opacity = String(u * (1 - x)); gsap.set(c, { y: o.rise * (1 - u) }); if (u > 0) last = c; });
+    var ref = last || cs[0]; caret.style.left = (last ? ref.offsetLeft + ref.offsetWidth + 6 : ref.offsetLeft) + "px"; caret.style.top = ref.offsetTop + ref.offsetHeight * 0.12 + "px"; caret.style.height = ref.offsetHeight * 0.76 + "px";
+    var typing = t < end + 0.06, blink = ((t - end) % 0.5) / 0.5 < 0.55; caret.style.opacity = String((t < o.start ? 0 : typing || blink ? 1 : 0) * (1 - x));
+  });
+  };
+  MW.textPunctuationPauseType = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textPunctuationPauseType(q(".tk-head"), tl, 0, {});
+          tl.set({}, {}, 3.6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

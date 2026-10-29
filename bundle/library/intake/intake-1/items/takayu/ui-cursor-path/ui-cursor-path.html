@@ -1,0 +1,67 @@
+<!--
+  Human Cursor Path (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=ui-cursorarc (read 12/10/2026).
+  Con trỏ trong phim không đi thẳng: mỗi lần di chuyển hơi cong, nhanh dần rồi chậm dần khi tới mục tiêu, dừng một nhịp rồi bấm, mục tiêu đổi màu.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiCursorPath(q(".cp"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - items: the targets in order
+      - cycle: s per target (1)
+      - move: s (0.7, smoothstep)
+      - arc: sideways bow as a share of the move (0.12)
+      - pause: s before the press (0.05)
+      - press: s (0.1)
+      - accent: fill of a pressed target
+      - cursor: the cursor
+
+  Notes: Idea and numbers (TakayuStudio ui-cursorarc, written here): Targets 52x28 r8. Recipe: each move 900 ms power2.inOut along a slight arc (perpendicular offset = sin(π q) × 0.06 × segment length), pause 100 ms, click. Demo: 1 s cycles visiting (60,60) → (250,80) → (120,150): move over 0.7 s with smoothstep, arc 0.12 × length, pause 50 ms, press 100 ms (cursor scale 0.85, the target fills accent). Params: keys [[giây, x, y, bấm]] · move (0.9 s, power2.inOut) · arc (0.06 × quãng) · pause (0.1 s) · press (0.1 s). The recipe: 0.9 s moves (power2.inOut) on an arc of 0.06 × the distance, a 0.1 s pause, then the click.
+-->
+
+<div class="ui-wrap"><div class="cp"><div class="cp-t" style="left:170px;top:230px">Mục 1</div><div class="cp-t" style="left:1120px;top:330px">Mục 2</div><div class="cp-t" style="left:470px;top:680px">Mục 3</div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  var defaults = {"items":".cp-t","cycle":1,"move":0.7,"arc":0.12,"pause":0.05,"press":0.1,"accent":"#8b7bff","cursor":".ui-cursor"};
+  var run = function (el, tl, at, o) {
+        var items = Array.prototype.slice.call(el.querySelectorAll(o.items)), cur = o.cursor ? (el.querySelector(o.cursor) || document.querySelector(o.cursor)) : null, base = el.getBoundingClientRect();
+        var pts = items.map(function (it) { var r = it.getBoundingClientRect(); return [r.left - base.left + r.width / 2, r.top - base.top + r.height / 2]; }), start = [pts[0][0] + 520, pts[0][1] + 360], sm = function (x) { return x * x * (3 - 2 * x); };
+        return MW.drive(tl, at, items.length * o.cycle + 0.3, function (t) {
+          var k = Math.min(items.length - 1, Math.floor(t / o.cycle)), u = t - k * o.cycle, a = k ? pts[k - 1] : start, b = pts[k], q = sm(Math.min(1, u / o.move)), dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, off = Math.sin(Math.PI * q) * o.arc * L;
+          var x = a[0] + dx * q - dy / L * off, y = a[1] + dy * q + dx / L * off, pr = u > o.move + o.pause && u < o.move + o.pause + o.press;
+          items.forEach(function (it, i) { var done = t >= i * o.cycle + o.move + o.pause; it.style.background = done ? o.accent : ""; it.style.color = done ? "#fff" : ""; });
+          if (cur) gsap.set(cur, { x: x - 12, y: y - 6, scale: pr ? 0.85 : 1, transformOrigin: "20% 10%" });
+        });
+      };
+  MW.uiCursorPath = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

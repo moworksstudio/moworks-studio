@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-rim-glow",
+  "type": "hyperframes:component",
+  "title": "Rim Glow",
+  "description": "Viền của một hình tối sáng lên dày rồi mỏng theo nhịp 1 giây, bên trong vẫn tối.",
+  "tags": [
+    "glow",
+    "rim",
+    "loop",
+    "light-glow",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-rim-glow.html",
+      "target": "compositions/components/effect-rim-glow.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-rim-glow",
+    "author": "takayu",
+    "call": "MW.effectRimGlow(q(\".rg-d\"), tl, 0, {});",
+    "function": "MW.effectRimGlow",
+    "options": {
+      "stroke": "px, rest to peak ([8, 16])",
+      "glow": "px ([40, 88]), drawn at 0.8 ×",
+      "period": "s (1)",
+      "cycles": "(3)",
+      "color": "rim colour"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=rim-glow",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=rim-glow (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio rim-glow, written here): Looping rim light on a dark silhouette (r 50 disc): stroke 2 → 4 → 2 px and outer glow 10 → 22 → 10 (drawn as a shadow blur of 0.8× that: 8 → 17.6 px), 1000 ms per cycle (sine ping-pong, 500 ms each way); a 1 px outer ring at radius + stroke and up to 50 % opacity follows the peak; the inside stays dark. Params: stroke (2 → 4 px) · glow (10 → 22) · period (1 s) · color.",
+    "titleVi": "Viền sáng phập phồng quanh bóng tối"
+  }
+}

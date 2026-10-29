@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-proximity-repel",
+  "type": "hyperframes:component",
+  "title": "Pointer Proximity Repel",
+  "description": "Con trỏ lướt ngang qua dòng chữ, các chữ cái gần nó bị đẩy dạt ra ngoài và hơi nghiêng, càng gần càng xa, rồi êm ái trở về chỗ.",
+  "tags": [
+    "cursor",
+    "repel",
+    "letters",
+    "push",
+    "text-pointer",
+    "soft",
+    "pointer",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-proximity-repel.html",
+      "target": "compositions/components/text-proximity-repel.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-proximity-repel",
+    "author": "takayu",
+    "call": "MW.textProximityRepel(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textProximityRepel",
+    "options": {
+      "radius": "em (1.3)",
+      "push": "em at most (0.5)",
+      "follow": "share of the gap closed each 1/60 s (0.15)",
+      "tilt": "degrees per em of sideways push (18)",
+      "tintAt": "em at full accent (0.3)",
+      "accent": "",
+      "ghost": "opacity of the resting copy while displaced (0.15)",
+      "cursor": "",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-proximity-repel",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-proximity-repel (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-proximity-repel, written here): Scripted cursor: bottom-left off-frame (0.4 s) → just left of the text (0.9 s) → straight across the line, linear, to just past its end (2.3 s) → out bottom-right (2.85 s). Char target = push away from the cursor of 24 px × (1 − d / 64 px) inside 64 px (recipe R 120, max 30); it closes 15 % of the gap per 60 fps frame. Tilt 0.012 rad per px of x push; tint to accent (full at 14 px); faint ghost at rest while displaced. Loop 4 s. Params: bán kính (64 px) · độ đẩy tối đa (24 px) · độ bám (0.15 / khung). The pointer comes in from the lower left, crosses the line at a steady speed and leaves to the lower right; the smoothing is stepped on the film clock.",
+    "titleVi": "Chữ dạt ra khi con trỏ lướt qua"
+  }
+}

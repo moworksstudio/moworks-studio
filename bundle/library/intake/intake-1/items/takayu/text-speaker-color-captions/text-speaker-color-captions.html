@@ -1,0 +1,52 @@
+<!--
+  Comment-Follow Telop (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-telop-comment-follow (read 12/10/2026).
+  Mỗi câu thoại hiện bằng một cú bật nhẹ ở cùng vị trí, viền chữ mang màu riêng của người nói và có huy hiệu tên nhỏ bên trái, giữ đủ lâu để đọc.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textSpeakerColorCaptions(q(".sc"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - lines: the caption lines, in order (each with data-color)
+      - badge: the speaker badge in a line
+      - turn: s per line (2.2; hold at least chars ÷ 4 s)
+      - colors: fallback outline colours
+
+  Notes: Idea and numbers (TakayuStudio tx-telop-comment-follow, written here): One line at a time (24 px heavy, ≤ 2 lines, same place for all): ink fill, 0.3 em outer stroke in the speaker's colour, dark (2, 2) px shadow, a small badge (8 px circle, speaker letter) at its left. Each line pops 0.1 s after its turn starts: scale 0.85 → 1 in 5 frames at 30 fps back.out(1.7), opaque at a third of it; holds ≥ chars ÷ 4 s; fades out over 0.15 s ending 0.13 s before the next. Demo 3 lines × 2.2 s. Params: màu viền mỗi người · bật (0.85 → 1, 5 khung) · giữ (≥ số chữ ÷ 4 s) · ra (0.15 s). Each line pops 0.1 s after its turn starts (0.85 → 1 in 5 frames, back.out), all in the same place, and fades over 0.15 s ending 0.13 s before the next.
+-->
+
+<div class="ft"></div><div class="sc"><div class="sc-l" data-color="#3d9bff"><span class="sc-b">H</span>Hôm nay mình đi chợ sớm</div><div class="sc-l" data-color="#ff5d8f"><span class="sc-b">M</span>Mua được gì ngon không?</div><div class="sc-l" data-color="#3d9bff"><span class="sc-b">H</span>Cá tươi lắm, về kho liền</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"lines":".sc-l","badge":".sc-b","turn":2.2,"colors":["#3d9bff"]};
+  var run = function (el, tl, at, o) {
+        var L = Array.prototype.slice.call(el.querySelectorAll(o.lines)), bo = gsap.parseEase("back.out(1.7)"), n = L.length;
+        L.forEach(function (l) { l.style.webkitTextStrokeColor = l.getAttribute("data-color") || o.colors[0]; var b = l.querySelector(o.badge); if (b) b.style.background = l.getAttribute("data-color") || o.colors[0]; });
+        return MW.drive(tl, at, n * o.turn, function (t) {
+          L.forEach(function (l, i) { var st = i * o.turn + 0.1, u = (t - st) / (5 / 30), nx = (i + 1) * o.turn, out = i < n - 1 ? Math.max(0, Math.min(1, (t - (nx - 0.28)) / 0.15)) : 0;
+            gsap.set(l, { scale: 0.85 + 0.15 * bo(Math.max(0, Math.min(1, u))) }); l.style.opacity = String(Math.max(0, Math.min(1, u * 3)) * (1 - out)); });
+        });
+      };
+  MW.textSpeakerColorCaptions = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

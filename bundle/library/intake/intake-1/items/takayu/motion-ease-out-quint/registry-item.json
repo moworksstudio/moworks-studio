@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-out-quint",
+  "type": "hyperframes:component",
+  "title": "Ease-out Quint",
+  "description": "Đường cong vào cảnh hay dùng của Motion (motion.dev), hợp cú vào dài 0.6–0.8 giây.out).",
+  "tags": [
+    "ease",
+    "entrance",
+    "quint",
+    "easing",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-out-quint.html",
+      "target": "compositions/components/motion-ease-out-quint.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-ease-out-quint",
+    "author": "takayu",
+    "call": "MW.motionEaseOutQuint(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseOutQuint",
+    "options": {
+      "duration": "s (0.7)",
+      "ease": "the curve (cubic-bezier(.22,1,.36,1))",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=e-quint",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=e-quint (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio e-quint, written here): Target moves 0 → 100 % on cubic-bezier(.22,1,.36,1) (≈ power4.out), 700 ms (0.6–0.8 s). Site rule: the common entrance curve of Motion (motion.dev). Site demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: duration (0.7 s; 0.6–0.8) · ease (custom .22,1,.36,1).",
+    "titleVi": "Ease-out quint (vào cảnh mượt)"
+  }
+}

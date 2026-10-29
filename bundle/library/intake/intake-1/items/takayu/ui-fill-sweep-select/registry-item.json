@@ -1,0 +1,65 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-fill-sweep-select",
+  "type": "hyperframes:component",
+  "title": "Fill Sweep",
+  "description": "Bấm nút viền, màu nhấn quét từ trái sang phải phủ kín nút với chữ đổi màu trong vùng màu, tới mép thì chữ thành ĐÃ CHỌN và dấu tích bật ra.",
+  "tags": [
+    "fill",
+    "sweep",
+    "select",
+    "button",
+    "ui-buttons",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-fill-sweep-select.html",
+      "target": "compositions/components/ui-fill-sweep-select.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.9,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-fill-sweep-select",
+    "author": "takayu",
+    "call": "MW.uiFillSweepSelect(q(\".fs\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.uiFillSweepSelect",
+    "options": {
+      "press": "s (0.55)",
+      "sweep": "s (0.5, power2.inOut)",
+      "backAt": "s it fades back (2.3)",
+      "accent": "",
+      "ink": "label colour inside the fill",
+      "line": "px of the moving front (6)",
+      "slide": "px the new label slides in (32)",
+      "label": "the label",
+      "doneText": "",
+      "cursor": "an optional cursor that makes the clicks",
+      "approach": "[x, y] px the cursor comes from",
+      "lead": "s it arrives before a click"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-button-fill-sweep",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-button-fill-sweep (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-button-fill-sweep, written here): Outlined button 140x46, radius 14. At 0.55 s the accent fill wipes from the left edge to the right in 500 ms power2.inOut (clip rect), with a dark copy of the label inside the fill and a 2 px light line on the moving front. At 1.05 s the label changes to 'SELECTED' (slides 8 px right, 0.2 s power2.out) and a check left of it pops (back.out 0.25 s). Fade back 2.3-2.55 s. Params: at · sweep (0.5 s, power2.inOut) · label (SELECT → SELECTED) · check (back.out 0.25 s).",
+    "titleVi": "Nút tô màu quét ngang khi chọn"
+  }
+}

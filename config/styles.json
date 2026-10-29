@@ -1,0 +1,601 @@
+{
+  "_about": "Style Gallery catalog. A style sets a project's overall direction and which rules Claude loads: HyperFrames' skills of the pinned HF version (a film type's references/types file, or Slideshow), or for General Style the Moworks Motion kit's rules (no HF genre skill). Only styles with a real rule source are listed; no invented styles. preview: a placeholder picture (poster of a related HyperFrames registry block) until it is replaced; files in ui/public/styles/, sources in ui/public/styles/_sources.json. look: whether the New project dialog offers a Look (a Brand Kit: one of HF's frame presets or the owner's own). pipeline: the same 6 stages for every style: needs (done or skipped first), after (order only), when (shown only for the film's flags or way of working: assets, way:<id>|<id>), done (what counts as done; a file a step must leave), skippable, action (a Claude task, a dialog or a job), review (the dialog that shows its result). Every style starts with the brief, the assets analysis and HF's own steps, one storyboard option as a board (another on request), a Motion Plan, the build and the checks. rules.readFirst: the rule files Claude reads before anything else (the others when those route to them). qc: the Moworks quality review every style carries, read only in the QC step. hidden: kept for existing projects, not offered for new ones.",
+  "categories": [
+    "Explainer",
+    "Motion graphics",
+    "Music / Lyrics",
+    "Brand / Product",
+    "Presentation",
+    "Video overlays",
+    "Social",
+    "Story",
+    "Custom"
+  ],
+  "styles": [
+    {
+      "id": "general",
+      "title": "General Style",
+      "description": "Moworks Motion's own way of making a film: designed from scratch or from your artwork, one storyboard option (another on request), a Motion Plan in numbers.",
+      "category": "Custom",
+      "tags": [
+        "custom",
+        "from scratch",
+        "Moworks Motion"
+      ],
+      "aspects": [
+        "16:9",
+        "9:16",
+        "1:1",
+        "4:5"
+      ],
+      "rules": {
+        "kind": "moworks",
+        "files": [
+          "config/rules/general-style/SKILL.md"
+        ],
+        "derivedFrom": [
+          "engine/skill/moworks-motion/SKILL.md",
+          "engine/skill/moworks-motion/workflow/story.md",
+          "engine/skill/moworks-motion/workflow/free-design.md",
+          "engine/skill/moworks-motion/workflow/keep-design.md",
+          "engine/skill/moworks-motion/workflow/remake.md",
+          "engine/skill/moworks-motion/workflow/reframe.md",
+          "engine/skill/moworks-motion/workflow/film.md",
+          "engine/skill/moworks-motion/workflow/recipes.md",
+          "engine/skill/moworks-motion/workflow/review.md",
+          "engine/skill/moworks-motion/brands/other.md"
+        ],
+        "uses": [
+          "hyperframes",
+          "hyperframes-cli",
+          "hyperframes-registry",
+          "media-use"
+        ],
+        "readFirst": [
+          "general-style"
+        ]
+      },
+      "intendedUse": "Ad films and motion graphics designed from scratch or from the client's artwork: HyperFrames' skills for building, the Moworks Motion layer on top (one storyboard option, another on request, a Motion Plan in numbers, brand and guideline rules, the studio's taste and lessons).",
+      "preview": {
+        "image": "/styles/general.jpg",
+        "placeholder": true,
+        "credit": "Placeholder: poster of the HyperFrames registry block \"glass-shard-title\" (HyperFrames, Apache-2.0)",
+        "source": "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/blocks/glass-shard-title.png"
+      },
+      "look": true,
+      "pipeline": [
+        {
+          "id": "brief",
+          "stage": 1,
+          "title": "Prepare",
+          "what": "Brief, files read, design and what the style needs; Claude asks only what is missing",
+          "needs": [],
+          "done": {
+            "kind": "mark",
+            "auto": true,
+            "file": "BRIEF.md",
+            "ask": true
+          },
+          "action": {
+            "kind": "claude",
+            "label": "Prepare",
+            "prompt": "Read the brief, the answers from the New project dialog and what the app found in my files (its scan). Write BRIEF.md as your rules say (references/story.md: the story first, in six true lines: the audience, their pain or gap, the promise or thesis, the product's role or the spine, the proof, the call to action or landing; and \"This film tells [audience] that [promise].\"). Of HyperFrames' references/story.md take §1 (\"The one thing\": the one idea, facts kept apart from creative choices, every claim traced to the source, nothing the source does not say); write none of its three storylines (§2): in this style the Storyboard step's options take their place. Do not ask what the dialog already answered. Write ASSETS.md: each file I gave, what it is, where the film can use it, what is missing; for a brand guideline, its design rules. Then the way of working (references/inputs.md): when my files are a finished design (PSD, PPTX, finished frames), ask me in one short message whether to redesign the film from this content or keep the design and only animate it, then stop without writing BRIEF.md. A brand without a guideline in my files: do not ask about one; design it from the brief and the brand's own material (logo, colours). Otherwise take free (redesign) or, when the brief asks to follow a reference, reference. End ASSETS.md with a line `Way: free`, `Way: keep` or `Way: reference` once it is known. The design is set part by part in your instructions: what I chose in New project (a Brand Kit, written by the app to frame.md, which you never write or change) wins for its part (a brief that asks otherwise is a conflict: moworks-studio §2b); the rest follows the design my brief describes, and what it leaves open is yours (leave it to the storyboard options). A brand guideline in my files that differs from a chosen Brand Kit is a conflict (moworks-studio §2b); with no Brand Kit, follow the guideline (its design rules in ASSETS.md) and suggest in your reply that I save it as a Brand Kit in the app. When I gave no files at all and the brief is enough, go on without asking: this style draws the film in code, so never stop only to ask whether I have files. Ask me once, in one short line, only when the brief names material it needs and I did not give it (our logo, the product's photos, footage, our own fonts or brand guideline: added with the Assets button), then stop without writing BRIEF.md; when I answer that there are none, go on without asking again. Every conflict and every missing thing (a link, the lyrics, a file, a logo the brief names; moworks-studio §2b: what each side says, two or three choices, your suggestion first) goes in one message, and then stop without writing BRIEF.md: the owner answers in the chat. Write BRIEF.md last. Change nothing in the film yet; then stop."
+          },
+          "review": {
+            "kind": "dialog",
+            "dialog": "doc",
+            "path": "BRIEF.md",
+            "label": "Brief"
+          }
+        },
+        {
+          "id": "storyboard",
+          "stage": 2,
+          "title": "Storyboard",
+          "what": "One option as an image board (or your own frames when you keep the design); you approve it or ask for another",
+          "needs": [
+            "brief"
+          ],
+          "done": {
+            "kind": "approval",
+            "name": "storyboard"
+          },
+          "gate": true,
+          "action": {
+            "kind": "claude",
+            "label": "Write",
+            "prompt": "Make one storyboard option as your rules say (references/storyboard.md): boards/A, with its STORYBOARD.md and its posed index.html, timed to the voice-over when there is one. After writing or changing the boards, call the app's board_stills tool once: it checks the boards and returns the option's sheets (3 × 3 frames). Read the sheets once; fix only a real problem, then call it again with only the frames you changed (at most once more). Then stop: I approve it in the Storyboard dialog or ask there for another option; when I choose one, write it to STORYBOARD.md and stop for my approval. A Brand Kit I chose in New project (in frame.md) binds the option for its part, and so does the design my brief describes. For what is left open, choose the option's palette and type; when I pick, write the picked option's design to design.md (frame.md is only the app's copy of a chosen Brand Kit).",
+            "prompts": {
+              "keep": "Rebuild my frames as still compositions as your rules say (references/inputs.md, Keep design or Re-layout): every element, size, colour and font kept (re-laid out for this format only when the way is re-layout), one STORYBOARD.md frame per shot. Then stop for my approval.",
+              "reference": "Write STYLE-GUIDE.md from the reference as your rules say (references/inputs.md, Style reference), then make the storyboard option as your rules say (references/storyboard.md): boards/A, with its STORYBOARD.md and its posed index.html, timed to the voice-over when there is one. After writing or changing the boards, call the app's board_stills tool once: it checks the boards and returns the option's sheets (3 × 3 frames). Read the sheets once; fix only a real problem, then call it again with only the frames you changed (at most once more). Then stop: I approve it in the Storyboard dialog or ask there for another option; when I choose one, write it to STORYBOARD.md and stop for my approval. A Brand Kit I chose in New project (in frame.md) binds the option for its part, and so does the design my brief describes. For what is left open, choose the option's palette and type; when I pick, write the picked option's design to design.md (frame.md is only the app's copy of a chosen Brand Kit)."
+            }
+          },
+          "review": {
+            "kind": "dialog",
+            "dialog": "storyboard",
+            "label": "Open"
+          }
+        },
+        {
+          "id": "motionSpec",
+          "effort": "medium",
+          "stage": 3,
+          "title": "Motion Plan",
+          "what": "How every element moves, with numbers, each from the library or written new; you approve",
+          "needs": [
+            "storyboard"
+          ],
+          "done": {
+            "kind": "approval",
+            "name": "motionPlan"
+          },
+          "gate": true,
+          "action": {
+            "kind": "claude",
+            "label": "Write",
+            "prompt": "Write the Motion Plan for every shot of the approved plan into MOTION-PLAN.json (the motion plan format in your instructions): concrete numbers, not adjectives, and a source for every row: a Motion Library item, a move HyperFrames' motion.md describes (source kind \"hf\", id \"motion.md#<section>\"), or new. Before you write a new move for a shot, call library_search once for that shot. Give every held element, the background, the camera and every character its always-on row with numbers (moworks-alive §2), each shot its \"says\" line in my language (what moves and how strongly, words I can judge) and the plan its \"approving\" line. Write only MOTION-PLAN.json: no composition and no index.html (the Build writes the film once). Then stop for my approval in the Motion Plan dialog."
+          },
+          "review": {
+            "kind": "dialog",
+            "dialog": "motion-plan",
+            "label": "Open"
+          }
+        },
+        {
+          "id": "build",
+          "title": "Build",
+          "what": "Every shot built as a composition, dressing the approved layouts",
+          "needs": [
+            "motionSpec"
+          ],
+          "done": {
+            "kind": "built"
+          },
+          "action": {
+            "kind": "claude",
+            "label": "Build",
+            "prompt": "Build every shot of the approved storyboard to the approved Motion Plan, posing and dressing the approved board's layouts (boards/<option>/, never redrawing them), timed to the voice-over when there is one. Write no sound effects or music: the app adds them after your Review. Keep every element on screen, the background, the camera and every character moving between the moves, as the studio's moworks-alive rule says (nothing still for more than 2 s except the final logo hold; the brief's motion words become that motion)."
+          },
+          "stage": 4
+        },
+        {
+          "id": "qcReview",
+          "title": "Review",
+          "what": "Claude looks at stills of the film like a strict director: seven scores, fixes, until every score is 8 or more",
+          "needs": [
+            "build"
+          ],
+          "done": {
+            "kind": "review",
+            "file": "QC-REVIEW.md"
+          },
+          "skippable": true,
+          "skipLabel": "Skip the review",
+          "action": {
+            "kind": "claude",
+            "label": "Review",
+            "prompt": "Run the Review as the Moworks QC rules say (the Moworks QC file named in your rules): call the app's qc_sheets tool for each round, read the sheets, score the seven criteria (Motion against the moworks-alive rule: its numbers, MOTION-PLAN.json's always-on rows and the app's still-stretch check when there is one), fix the 3 worst problems (open only the code of the shots the sheets flag, once each; Grep, then Edit) and every layout or contrast error of HyperFrames' check; 1 to 3 rounds, stop as soon as every score is 8 or more; after 3 rounds say why. Score only what you saw after your last change: a round that ends with a fix takes the sheets once more before the final score. Write every round to QC-REVIEW.md and end the file with a line `Final score: N/10` (the lowest of the seven); write the same rounds to QC-REVIEW.json as the QC rules say (the app shows them as a score card), and end your reply with one short line."
+          },
+          "review": {
+            "kind": "dialog",
+            "dialog": "qc-review",
+            "label": "Open"
+          },
+          "stage": 4,
+          "firstOnly": true
+        },
+        {
+          "id": "sound",
+          "stage": 4,
+          "title": "Music and sound effects",
+          "what": "Claude picks the music; the app places it and the sound effects",
+          "needs": [
+            "build",
+            "qcReview"
+          ],
+          "done": {
+            "kind": "mark",
+            "auto": true
+          },
+          "skippable": true,
+          "skipLabel": "No music",
+          "action": {
+            "kind": "claude",
+            "label": "Find music",
+            "prompt": "Find three music tracks on mixkit.co that fit the film's mood and length and hand them to the app with the music_options tool (title, artist, its page on mixkit.co and the direct https://assets.mixkit.co/… .mp3 link). The app picks the first one for the film and places the sound effects; the owner can change both in the Final Mix. When the film already has a music track of the owner's, or the web is off for this project, say so in one line and change nothing."
+          },
+          "review": {
+            "kind": "dialog",
+            "dialog": "mix",
+            "label": "Open"
+          }
+        },
+        {
+          "id": "checks",
+          "title": "Tech checks",
+          "what": "Last of this stage, quiet: HyperFrames' check (layout, contrast, motion), Vietnamese letters, fonts, offline; the film is done when they pass",
+          "needs": [
+            "build",
+            "qcReview"
+          ],
+          "done": {
+            "kind": "qa"
+          },
+          "action": {
+            "kind": "job",
+            "job": "qa",
+            "label": "Run"
+          },
+          "review": {
+            "kind": "dialog",
+            "dialog": "qa",
+            "label": "Open"
+          },
+          "stage": 4,
+          "quiet": true,
+          "after": [
+            "sound"
+          ]
+        },
+        {
+          "id": "finalMix",
+          "title": "Final Mix",
+          "what": "Optional: listen, then change the music or the sound effects (notes about the sound)",
+          "needs": [
+            "sound"
+          ],
+          "done": {
+            "kind": "mark",
+            "auto": false
+          },
+          "skippable": true,
+          "skipLabel": "No final mix",
+          "action": {
+            "kind": "dialog",
+            "dialog": "mix",
+            "label": "Open"
+          },
+          "review": {
+            "kind": "dialog",
+            "dialog": "mix",
+            "label": "Open"
+          },
+          "stage": 5,
+          "optional": true
+        }
+      ]
+    },
+    {
+      "id": "hf-explainer",
+      "title": "Explainers, tutorials and \"how it works\"",
+      "description": "One idea the viewer understands by the end. The spine is one concrete example worked through, start to finish, not a tour of facts. Usually 30–90 s.",
+      "category": "Explainer",
+      "tags": [
+        "explainer",
+        "tutorial"
+      ],
+      "aspects": [
+        "16:9",
+        "9:16",
+        "1:1",
+        "4:5"
+      ],
+      "rules": {
+        "kind": "hf-skill",
+        "skill": "hyperframes",
+        "type": "explainer",
+        "uses": [
+          "hyperframes-cli",
+          "hyperframes-registry",
+          "media-use"
+        ],
+        "readFirst": [
+          "hyperframes"
+        ],
+        "pipeline": "hf-pipeline.json"
+      },
+      "intendedUse": "Explainer, tutorial",
+      "preview": {
+        "image": "/styles/hf-explainer.jpg",
+        "placeholder": true,
+        "credit": "Placeholder: poster of the HyperFrames registry block \"code-slice-hero\" (HyperFrames, Apache-2.0)",
+        "source": "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/blocks/code-slice-hero.png"
+      },
+      "look": true
+    },
+    {
+      "id": "hf-launch",
+      "title": "Launch, promo and feature films",
+      "description": "Hook, tension, reveal, proof, payoff, claim, end card, usually 20–45 s. What a viewer shares is real people and real output.",
+      "category": "Brand / Product",
+      "tags": [
+        "launch",
+        "promo",
+        "feature"
+      ],
+      "aspects": [
+        "16:9",
+        "9:16",
+        "1:1",
+        "4:5"
+      ],
+      "rules": {
+        "kind": "hf-skill",
+        "skill": "hyperframes",
+        "type": "launch",
+        "uses": [
+          "hyperframes-cli",
+          "hyperframes-registry",
+          "media-use"
+        ],
+        "readFirst": [
+          "hyperframes"
+        ],
+        "pipeline": "hf-pipeline.json"
+      },
+      "intendedUse": "Launch, promo, feature",
+      "preview": {
+        "image": "/styles/hf-launch.jpg",
+        "placeholder": true,
+        "credit": "Placeholder: poster of the HyperFrames registry block \"app-showcase\" (HyperFrames, Apache-2.0)",
+        "source": "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/blocks/app-showcase.png"
+      },
+      "look": true
+    },
+    {
+      "id": "hf-music",
+      "title": "Music videos and films cut to a track",
+      "description": "The song is the structure: song structure becomes edit structure.",
+      "category": "Music / Lyrics",
+      "tags": [
+        "music video"
+      ],
+      "aspects": [
+        "16:9",
+        "9:16",
+        "1:1"
+      ],
+      "rules": {
+        "kind": "hf-skill",
+        "skill": "hyperframes",
+        "type": "music",
+        "uses": [
+          "hyperframes-cli",
+          "hyperframes-registry",
+          "media-use"
+        ],
+        "readFirst": [
+          "hyperframes"
+        ],
+        "pipeline": "hf-pipeline.json"
+      },
+      "intendedUse": "Music video",
+      "preview": {
+        "image": "/styles/hf-music.jpg",
+        "placeholder": true,
+        "credit": "Placeholder: poster of the HyperFrames registry block \"spotify-card\" (HyperFrames, Apache-2.0)",
+        "source": "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/blocks/spotify-card.png"
+      },
+      "look": true
+    },
+    {
+      "id": "hf-data",
+      "title": "Numbers, charts and data stories",
+      "description": "One number at a time: a number is earned by the scene before it, then made physical.",
+      "category": "Explainer",
+      "tags": [
+        "chart",
+        "numbers"
+      ],
+      "aspects": [
+        "16:9",
+        "9:16",
+        "1:1",
+        "4:5"
+      ],
+      "rules": {
+        "kind": "hf-skill",
+        "skill": "hyperframes",
+        "type": "data",
+        "uses": [
+          "hyperframes-cli",
+          "hyperframes-registry",
+          "media-use"
+        ],
+        "readFirst": [
+          "hyperframes"
+        ],
+        "pipeline": "hf-pipeline.json"
+      },
+      "intendedUse": "Chart, numbers",
+      "preview": {
+        "image": "/styles/hf-data.jpg",
+        "placeholder": true,
+        "credit": "Placeholder: poster of the HyperFrames registry block \"data-chart\" (HyperFrames, Apache-2.0)",
+        "source": "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/blocks/data-chart.png"
+      },
+      "look": true
+    },
+    {
+      "id": "hf-vertical",
+      "title": "Vertical and social clips (9:16)",
+      "description": "Made at 1080×1920 when the request or the platform says vertical; a landscape film is not squeezed into it but recomposed.",
+      "category": "Social",
+      "tags": [
+        "vertical or social clip"
+      ],
+      "aspects": [
+        "9:16"
+      ],
+      "rules": {
+        "kind": "hf-skill",
+        "skill": "hyperframes",
+        "type": "vertical",
+        "uses": [
+          "hyperframes-cli",
+          "hyperframes-registry",
+          "media-use"
+        ],
+        "readFirst": [
+          "hyperframes"
+        ],
+        "pipeline": "hf-pipeline.json"
+      },
+      "intendedUse": "Vertical or social clip",
+      "preview": {
+        "image": "/styles/hf-vertical.jpg",
+        "placeholder": true,
+        "credit": "Placeholder: poster of the HyperFrames registry block \"tiktok-follow\" (HyperFrames, Apache-2.0)",
+        "source": "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/blocks/tiktok-follow.png"
+      },
+      "look": true
+    },
+    {
+      "id": "hf-3d",
+      "title": "3D, simulations and generative pieces",
+      "description": "Use 3D when the film earns it: an object or a set as the payoff, a product, a simulation that explains.",
+      "category": "Motion graphics",
+      "tags": [
+        "3d",
+        "simulation",
+        "generative"
+      ],
+      "aspects": [
+        "16:9",
+        "9:16",
+        "1:1"
+      ],
+      "rules": {
+        "kind": "hf-skill",
+        "skill": "hyperframes",
+        "type": "3d",
+        "uses": [
+          "hyperframes-cli",
+          "hyperframes-registry",
+          "media-use"
+        ],
+        "readFirst": [
+          "hyperframes"
+        ],
+        "pipeline": "hf-pipeline.json"
+      },
+      "intendedUse": "3D, simulation, generative",
+      "preview": {
+        "image": "/styles/hf-3d.jpg",
+        "placeholder": true,
+        "credit": "Placeholder: poster of the HyperFrames registry block \"orbit-card\" (HyperFrames, Apache-2.0)",
+        "source": "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/blocks/orbit-card.png"
+      },
+      "look": true
+    },
+    {
+      "id": "hf-character",
+      "title": "Characters, mascots and story shorts",
+      "description": "A character gives every transition a cause and gives the film its jokes: it carries the result into the player, rejects its own first try, reads the manual.",
+      "category": "Story",
+      "tags": [
+        "character",
+        "mascot",
+        "story short"
+      ],
+      "aspects": [
+        "16:9",
+        "9:16",
+        "1:1"
+      ],
+      "rules": {
+        "kind": "hf-skill",
+        "skill": "hyperframes",
+        "type": "character",
+        "uses": [
+          "hyperframes-cli",
+          "hyperframes-registry",
+          "media-use"
+        ],
+        "readFirst": [
+          "hyperframes"
+        ],
+        "pipeline": "hf-pipeline.json"
+      },
+      "intendedUse": "Character, mascot, story short",
+      "preview": {
+        "image": "/styles/hf-character.jpg",
+        "placeholder": true,
+        "credit": "Placeholder: a frame of the HyperFrames registry block \"lottie-character-walk\" as the app renders its preview (HyperFrames, Apache-2.0)",
+        "source": "https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/registry/blocks/lottie-character-walk"
+      },
+      "look": true
+    },
+    {
+      "id": "slideshow",
+      "title": "Slideshow",
+      "description": "A paced slideshow of images and short text, built as an HF composition.",
+      "category": "Presentation",
+      "tags": [
+        "slides",
+        "photos"
+      ],
+      "aspects": [
+        "16:9",
+        "9:16",
+        "1:1"
+      ],
+      "rules": {
+        "kind": "hf-skill",
+        "skill": "slideshow",
+        "uses": [
+          "hyperframes",
+          "hyperframes-cli",
+          "hyperframes-registry",
+          "media-use"
+        ],
+        "readFirst": [
+          "slideshow",
+          "hyperframes"
+        ],
+        "pipeline": "hf-pipeline.json"
+      },
+      "intendedUse": "Photo stories, decks turned into video.",
+      "preview": {
+        "image": "/styles/slideshow.jpg",
+        "placeholder": true,
+        "credit": "Placeholder: poster of the HyperFrames registry block \"cuboid-carousel\" (HyperFrames, Apache-2.0)",
+        "source": "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/blocks/cuboid-carousel.png"
+      },
+      "look": false
+    }
+  ],
+  "studio": {
+    "file": "config/rules/moworks-studio/SKILL.md",
+    "derivedFrom": [
+      "engine/skill/moworks-motion/SKILL.md",
+      "engine/skill/moworks-motion/workflow/characters.md",
+      "engine/skill/moworks-motion/brands/other.md"
+    ]
+  },
+  "kinds": [
+    {
+      "id": "whatIf",
+      "file": "config/rules/what-if/SKILL.md",
+      "source": "Moworks Studio, written from What If animation's references (FreshStack, MIT; kelano86/what-if-animation at 3725a22)"
+    }
+  ],
+  "alive": {
+    "file": "config/rules/moworks-alive/SKILL.md",
+    "derivedFrom": [
+      "engine/skill/moworks-motion/workflow/film.md",
+      "engine/skill/moworks-motion/workflow/recipes.md",
+      "engine/skill/moworks-motion/workflow/review.md"
+    ]
+  },
+  "vocab": {
+    "file": "config/rules/motion-vocab/SKILL.md",
+    "source": "Motion Prompt (Shohei Ohtaki, MIT; showheyohtaki/motion-prompt at bd6bf08): the names of the film packs, generated from the Library's Vocabulary (audit 79)"
+  },
+  "qc": {
+    "file": "config/rules/moworks-qc/SKILL.md",
+    "derivedFrom": [
+      "engine/skill/moworks-motion/workflow/review.md"
+    ]
+  }
+}

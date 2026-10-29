@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/icon-cloud",
+  "hash": "6b32f17adb83e882",
+  "at": "2026-10-17T06:30:25.002Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/magicui__icon-cloud.mp4",
+    "poster": "previews/magicui__icon-cloud.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4ddb792aef31a0a1ba3e57cbedd36ae63724e5830fe8a240c33363c033744b44",
+    "size": 62623,
+    "seconds": 36.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

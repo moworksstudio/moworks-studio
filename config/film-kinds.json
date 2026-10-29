@@ -1,0 +1,16 @@
+{
+ "_about": "Film kinds every style offers in New project: a kind adds its rule to the steps' reads and one line for Claude; the style keeps its own look and pace. An anidoodle medium also offers its author's kinds (config/anidoodle-pipeline.json filmKinds). The rule is staged with every style's rules (config/styles.json kinds) and read only when the kind is chosen.",
+ "whatIf": {
+  "title": "What If episode",
+  "reads": {
+   "brief": [".moworks/rules/what-if/SKILL.md"],
+   "storyboard": [".moworks/rules/what-if/SKILL.md"],
+   "motionSpec": [".moworks/rules/what-if/SKILL.md"],
+   "build": [".moworks/rules/what-if/SKILL.md"],
+   "qcReview": [".moworks/rules/what-if/SKILL.md"],
+   "sound": [".moworks/rules/what-if/SKILL.md"],
+   "chat": [".moworks/rules/what-if/SKILL.md"]
+  },
+  "says": "Film kind: a What If episode (.moworks/rules/what-if/SKILL.md): one premise, \"What if you could ...?\", told in the seven beats (a cold open of three quick demos, the premise on a title card, the fun, the turn on one true fact with a number and its source, then the cliffhanger), in second person with lines of 3 to 8 words, each line one picture; 15 to 30 s unless the New project length says otherwise. The twist's fact is searched and cited, never invented: with no source, the twist has no number. The fast cut of the cold open never overrides a slow film style's own pace. Our own characters and story only, no channel's name or episode."
+ }
+}

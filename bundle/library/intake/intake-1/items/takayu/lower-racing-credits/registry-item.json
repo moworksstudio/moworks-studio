@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "lower-racing-credits",
+  "type": "hyperframes:block",
+  "title": "Bass-style Racing Credits",
+  "description": "Trên một lưới nghiêng, vạch màu lao ngang qua khung, chức danh và tên trượt vào ngay sau vạch theo hai chiều ngược nhau, đi đều không êm dần, rồi lao ra ngược hướng.",
+  "tags": [
+    "credits",
+    "bars",
+    "linear",
+    "skew",
+    "text-titles-film",
+    "crisp",
+    "titles-film",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "lower-racing-credits.html",
+      "target": "compositions/components/lower-racing-credits.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/lower-racing-credits",
+    "author": "takayu",
+    "call": "MW.lowerRacingCredits(q(\".rc\"), tl, 0, {});",
+    "function": "MW.lowerRacingCredits",
+    "options": {
+      "unit": "px per reference unit (5)",
+      "exitAt": "s (3.2): out at the same speed, opposite ways"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-racing-credits",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-racing-credits (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-racing-credits, written here): Stage skewY −11.3° over a grid (verticals every 26 px grow down 0.05–0.45 s, +0.03 s per line from centre, power2.out; horizontals every 24 px). Accent bar 110 × 4 px races 200 → −420 px in 0.4 s linear from 0.5 s; role (15 px accent) slides 260 → 0 in 0.27 s linear from 0.6 s. Second bar −200 → 420 px from 0.85 s; name (32 px) −300 → 0 from 0.95 s. Role underline 0.87–1.1 s power2.out. Exit at the same speed, opposite ways, 3.2–3.36 s. Params: độ nghiêng (−11°) · thời gian trượt (0.27 s, đều) · vạch (110 × 4 px).",
+    "titleVi": "Tên đề phim lao theo vạch xiên"
+  }
+}

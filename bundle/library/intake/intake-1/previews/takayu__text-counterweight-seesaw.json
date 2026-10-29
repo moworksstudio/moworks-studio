@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-counterweight-seesaw",
+  "hash": "f6737c0f3081cd16",
+  "at": "2026-10-17T08:04:20.069Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-counterweight-seesaw.mp4",
+    "poster": "previews/takayu__text-counterweight-seesaw.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b9920dddf5b0d727fc2dab380bc5da4b322a380bed29f5f792bb52c48fbaae9d",
+    "size": 16210,
+    "seconds": 29.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

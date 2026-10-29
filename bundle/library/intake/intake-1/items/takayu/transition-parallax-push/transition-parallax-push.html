@@ -1,0 +1,63 @@
+<!--
+  Parallax Push (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=catalog-ui-navigation-parallax-push (read 12/10/2026).
+  Trang mới trượt vào đủ bề ngang trong khi trang cũ chỉ lùi 30 % và tối đi, có một dải bóng ở mép trang mới, tạo cảm giác chiều sâu kiểu iOS.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.transitionParallaxPush(q(".pp-b"), tl, 0.4, { tap: [0.5, 0.37], backAt: 1.6 });
+
+  Options (defaults in brackets):
+      - from: the outgoing page
+      - delay: s after the tap (0.08)
+      - duration: s (0.7)
+      - ease: (power2.inOut)
+      - under: share the old page moves back (0.3)
+      - dim: (0.4)
+      - shadow: px of edge shadow (30)
+      - edge: its opacity at the end (0.5)
+      - backAt: s after the start to go back, the exact reverse (null)
+      - tap: [x, y] share of the screen where a touch ring shows at the start (null)
+      - ringWidth: px (4)
+
+  Notes: Idea and numbers (TakayuStudio catalog-ui-navigation-parallax-push, written here): Incoming page slides from x 100 % to 0 (full travel) while the outgoing page moves only to −30 % and darkens 0 → 40 %; a 6 px dark strip on the incoming page's left edge (opacity 0.5 × progress). 700 ms power2.inOut (easeInOutCubic). Back: the exact reverse. Params: duration (0.7 s, power2.inOut) · under (30 %) · dim (40 %) · shadow (6 px).
+-->
+
+<div class="st"><div class="ph"><div class="pg pp-a"><h3>Dự án</h3><div class="r"></div><div class="r on"></div><div class="r"></div><div class="r"></div></div><div class="pg pp-b"><h3>Phim mùa hè</h3><div class="hero"></div><div class="r"></div></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":".pp-a","delay":0.08,"duration":0.7,"ease":"power2.inOut","under":0.3,"dim":0.4,"shadow":30,"edge":0.5,"backAt":null,"tap":null,"ringWidth":4};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, out = o.from ? host.querySelector(o.from) : null, e = gsap.parseEase(o.ease), dim = document.createElement("div"), edge = document.createElement("div"), ring = document.createElement("div"), W = el.offsetWidth;
+        if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        dim.style.cssText = "position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;"; if (out) { if (getComputedStyle(out).position === "static") out.style.position = "relative"; out.appendChild(dim); }
+        edge.style.cssText = "position:absolute;top:0;bottom:0;pointer-events:none;opacity:0;left:-" + o.shadow + "px;width:" + o.shadow + "px;background:linear-gradient(90deg,rgba(0,0,0,0),rgba(0,0,0,1));"; el.appendChild(edge);
+        ring.style.cssText = "position:absolute;border-radius:50%;pointer-events:none;opacity:0;z-index:30;border:" + o.ringWidth + "px solid rgba(255,255,255,0.85);"; host.appendChild(ring);
+        return MW.drive(tl, at, o.backAt == null ? o.delay + o.duration : o.backAt + o.duration, function (t) {
+          var p = e(Math.max(0, Math.min(1, (t - o.delay) / o.duration))); if (o.backAt != null && t > o.backAt) p = 1 - e(Math.min(1, (t - o.backAt) / o.duration));
+          gsap.set(el, { x: W * (1 - p) }); if (out) gsap.set(out, { x: -o.under * W * p }); dim.style.opacity = String(o.dim * p); edge.style.opacity = String(o.edge * p);
+          if (o.tap) { var u = t / 0.32, rr = 10 + 50 * u; ring.style.width = ring.style.height = 2 * rr + "px"; ring.style.left = host.clientWidth * o.tap[0] - rr - o.ringWidth + "px"; ring.style.top = host.clientHeight * o.tap[1] - rr - o.ringWidth + "px"; ring.style.opacity = t > 0 && u < 1 ? String(1 - u) : "0"; }
+        });
+      };
+  MW.transitionParallaxPush = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

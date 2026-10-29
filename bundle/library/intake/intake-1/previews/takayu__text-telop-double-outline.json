@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-telop-double-outline",
+  "hash": "9ec0afa1ee7bde73",
+  "at": "2026-10-17T10:12:06.058Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-telop-double-outline.mp4",
+    "poster": "previews/takayu__text-telop-double-outline.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "52f0fe48ad981845fc7ef8cae229867717625c60e753c21a719d74521824461d",
+    "size": 15252,
+    "seconds": 30.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

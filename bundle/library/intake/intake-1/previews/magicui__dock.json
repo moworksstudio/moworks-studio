@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/dock",
+  "hash": "1f94ad230413848f",
+  "at": "2026-10-17T06:16:57.238Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/magicui__dock.mp4",
+    "poster": "previews/magicui__dock.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "8c71b8e61204a0a30ea6a2a91fb5916ee90da88510930674545aa715f3efd2c0",
+    "size": 26347,
+    "seconds": 185,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

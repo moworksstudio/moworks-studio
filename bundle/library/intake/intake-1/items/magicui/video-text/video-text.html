@@ -1,0 +1,50 @@
+<!--
+  Video Text (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/video-text.tsx.
+  Big text used as a window onto a video: the footage plays only inside the letters (bold, centred, fitted to the box).
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.videoText(q(".mw-video-text"), tl, 0, { fontSize: 300, fontWeight: 900 });
+
+  Options (defaults in brackets):
+      - text: the word (the holder's data-text)
+      - fontSize: px (fits the box: 0.8 x height)
+      - fontWeight: bold
+      - font: sans-serif family (Inter)
+
+  Notes: The <video> is a normal HyperFrames clip (class clip, data-start, data-duration, muted) inside an untimed holder. The mask is drawn with the font named in `font`, so give the film a font with Vietnamese letters.
+-->
+
+<div class="mw-video-text" data-text="BIỂN" style="width:1600px;height:400px"><video id="vt-clip" class="clip" src="assets/clip.mp4" muted playsinline data-start="0" data-duration="6" data-track-index="1"></video></div>
+
+<style>
+.mw-video-text { position: relative; overflow: hidden; -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center; mask-position: center; }
+.mw-video-text > video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"text":null,"fontSize":null,"fontWeight":"bold","font":"Inter, sans-serif"};
+  var run = function (el, tl, at, o) {
+      var W = el.offsetWidth, H = el.offsetHeight, text = o.text || el.getAttribute("data-text") || "VIDEO", fs = o.fontSize || Math.round(H * 0.8);
+      var esc = function (s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); };
+      var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '"><text x="50%" y="50%" font-size="' + fs + 'px" font-weight="' + o.fontWeight +
+        '" text-anchor="middle" dominant-baseline="middle" font-family="' + esc(o.font) + '">' + esc(text) + "</text></svg>";
+      var url = 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")';
+      el.style.webkitMaskImage = url; el.style.maskImage = url;
+      return at;
+    };
+  MW.videoText = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

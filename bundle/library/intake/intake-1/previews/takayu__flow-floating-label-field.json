@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/flow-floating-label-field",
+  "hash": "443df162f1e4a169",
+  "at": "2026-10-17T11:16:43.582Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__flow-floating-label-field.mp4",
+    "poster": "previews/takayu__flow-floating-label-field.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ba2e23a2c58ccd5b55fd15c9fcf2285219acb2147e32b6bf3d275ae12bfca560",
+    "size": 13360,
+    "seconds": 29.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

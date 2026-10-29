@@ -1,0 +1,60 @@
+<!--
+  Paper Cut / Stop-motion (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=lk-papercut (read 12/10/2026).
+  Các lớp giấy cắt bật lên có độ nảy, chuyển động giật bậc 12 hình mỗi giây và có bóng đổ cứng.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.handPaperCutLayers(q(".pc"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - layers: 
+      - fps: time stepped to (12: on twos)
+      - duration: s per layer (0.3)
+      - stagger: s (0.3)
+      - back: back.out strength (2.2)
+      - rise: px (160)
+      - jitter: ± px per step (4)
+      - shadow: [x, y] px hard shadow ([16, 24])
+      - start: s (0.2)
+      - seed: (2)
+      - loop: s (2.4)
+
+  Notes: Idea and numbers (TakayuStudio lk-papercut, written here): Layers pop in on twos (12 fps): each 400 ms back.out(2.2), 80 ms apart (recipe). Demo: 3 paper strips (220 x 40, r 14) rise 40 px into place at 0.2 / 0.5 / 0.8 s over 300 ms back.out(2.2), time stepped to 12 fps, x jitter +-1 px per step, hard black shadow at 25 % offset +4 / +6 px. Params: fps (12) · duration mỗi lớp (0.4 s) · stagger (80 ms) · back (2.2).
+-->
+
+<div class="st"><div class="pc"><div style="background:#e76f51">Cắt giấy</div><div style="background:#2a9d8f">Dán từng lớp</div><div style="background:#264653">Quay từng khung</div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"layers":".pc > div","fps":12,"duration":0.3,"stagger":0.3,"back":2.2,"rise":160,"jitter":4,"shadow":[16,24],"start":0.2,"seed":2,"loop":2.4};
+  var run = function (el, tl, at, o) {
+        var Ls = Array.prototype.slice.call(el.querySelectorAll(o.layers)), bk = gsap.parseEase("back.out(" + o.back + ")"); Ls.forEach(function (l) { l.style.boxShadow = o.shadow[0] + "px " + o.shadow[1] + "px 0 rgba(0,0,0,0.25)"; });
+        return MW.drive(tl, at, o.loop, function (t) { var q = Math.floor(t * o.fps) / o.fps, r = MW.rand(o.seed + Math.floor(t * o.fps)); Ls.forEach(function (l, i) { var u = bk(Math.max(0, Math.min(1, (q - o.start - i * o.stagger) / o.duration))); gsap.set(l, { y: o.rise * (1 - u), x: (r() * 2 - 1) * o.jitter }); l.style.opacity = q >= o.start + i * o.stagger ? "1" : "0"; }); });
+      };
+  MW.handPaperCutLayers = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

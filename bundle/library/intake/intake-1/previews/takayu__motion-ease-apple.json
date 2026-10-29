@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-ease-apple",
+  "hash": "eca4ad225f6a9b26",
+  "at": "2026-10-17T09:01:27.144Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-ease-apple.mp4",
+    "poster": "previews/takayu__motion-ease-apple.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a9faaf85d4ca8465dd764859160a8c71e9a26a1b6bbc709b07a2046769fb6046",
+    "size": 9348,
+    "seconds": 25.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,6 @@
+/* The drawn "AI" (AiMark.jsx): one em high-ish, on the text baseline; strokes in the text colour, spark and tittle in the accent. */
+/* cap height of the line's text, bottom on the baseline (AI and "motion studio" share one baseline) */
+.ai-mark { display: inline-block; height: 0.78em; width: auto; aspect-ratio: 30 / 24; vertical-align: baseline; overflow: visible; margin-right: 0.18em; }
+.ai-a, .ai-i { fill: none; stroke: currentColor; stroke-width: 3.1; stroke-linecap: square; stroke-linejoin: miter; stroke-dasharray: 1; }
+.ai-spark { fill: var(--accent); }
+.ai-dot { fill: var(--accent); }

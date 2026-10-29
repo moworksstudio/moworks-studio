@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-loading-dots",
+  "type": "hyperframes:component",
+  "title": "Loading Dots",
+  "description": "Chữ đứng yên, ba chấm phía sau lần lượt sáng lên và nhô nhẹ rồi mờ xuống, nối nhau như đang chờ tải.",
+  "tags": [
+    "dots",
+    "loading",
+    "loop",
+    "wait",
+    "text-loops-decoration",
+    "soft",
+    "loops-decoration",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-loading-dots.html",
+      "target": "compositions/components/text-loading-dots.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-loading-dots",
+    "author": "takayu",
+    "call": "MW.textLoadingDots(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textLoadingDots",
+    "options": {
+      "radius": "em (0.09)",
+      "gap": "em between dots (0.3)",
+      "cycle": "s (1.2)",
+      "delay": "s between dots (0.2)",
+      "lift": "em (0.22)",
+      "accent": "the middle dot",
+      "loop": "s, seamless (2.4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-loading-dots",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-loading-dots (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-loading-dots, written here): Word still (trailing dots in the text removed). Three round dots (radius 0.09 em, 0.3 em apart, starting 0.7 gap after the last char, middle one accent). Dot k: v = sin(π ph / 0.6) for ph < 0.6 of a 1.2 s cycle, else 0, with delay 0.2 k s; opacity 0.2 + 0.8 v, lift v × 0.22 em (recipe −25 %). Seamless loop 2.4 s. Params: chu kỳ (1.2 s) · trễ (0 / 0.2 / 0.4 s) · độ trong (0.2 ↔ 1) · độ nhô (0.22 em).",
+    "titleVi": "Ba chấm chờ nhấp nháy sau chữ"
+  }
+}

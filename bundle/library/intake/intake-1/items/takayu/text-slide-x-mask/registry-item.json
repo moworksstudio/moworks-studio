@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-slide-x-mask",
+  "type": "hyperframes:component",
+  "title": "Masked Horizontal Slide",
+  "description": "Mỗi ký tự trượt vào từ phải trong ô mặt nạ riêng của nó, nối nhau 42 ms một.",
+  "tags": [
+    "reveal",
+    "mask",
+    "letters",
+    "slide",
+    "text-mask-clip",
+    "crisp",
+    "mask-clip",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-slide-x-mask.html",
+      "target": "compositions/components/text-slide-x-mask.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-slide-x-mask",
+    "author": "takayu",
+    "call": "MW.textSlideXMask(q(\".tk-head\"), tl, 0.3, { exit: 2.3 });",
+    "function": "MW.textSlideXMask",
+    "options": {
+      "duration": "s per character (0.8), expo.out",
+      "stagger": "s (0.042, capped 0.6 s in all)",
+      "exit": "s after the start to slide out left (null: stay)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-slide-x-mask",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-slide-x-mask (read 12/10/2026)",
+      "upstream": "the site credits Codrops (MIT); a faithful port of Codrops' effects is in the Codrops collection"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-slide-x-mask, written here): Each char in its own overflow-clip box (glyph width × baseline − 0.98 em to + 0.3 em). The char slides in from the right, x +105 % of its width → 0, 0.8 s expo.out (cubic-bezier(.16,1,.3,1)), 42 ms apart (demo capped 0.6 s total) from 0.3 s. Demo exit: chars slide on out to the left (−105 %), 0.5 s expo.in, same stagger, from 2.6 s; loop 3.8 s. Params: duration (0.8 s) · stagger (0.042 s) · x: quãng trượt (105 %) · ease (expo.out).",
+    "titleVi": "Ký tự trượt ngang trong ô mặt nạ"
+  }
+}

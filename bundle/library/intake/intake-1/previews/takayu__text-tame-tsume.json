@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-tame-tsume",
+  "hash": "84764688866b9f99",
+  "at": "2026-10-17T10:21:07.983Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-tame-tsume.mp4",
+    "poster": "previews/takayu__text-tame-tsume.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "d573ba9b5879d473d0db113a77048ceb01b870ad1b0a3109b2937b2720bf23c3",
+    "size": 17023,
+    "seconds": 28.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

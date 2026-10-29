@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/effect-crack",
+  "hash": "c6b382f00f7cc59f",
+  "at": "2026-10-17T09:58:29.199Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__effect-crack.mp4",
+    "poster": "previews/takayu__effect-crack.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a8cbb0cb74d7036c8c447fb373496790269a03da81e39267140b617882cd3dd8",
+    "size": 14689,
+    "seconds": 31.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

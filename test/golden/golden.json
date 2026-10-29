@@ -1,0 +1,96 @@
+{
+  "_about": "Moworks golden set (audit 14 S4). Each case renders one film; compare.mjs compares two runs. png cases are compared frame by frame (RGBA); media cases by stream facts, decoded frames and loudness.",
+  "cases": [
+    {
+      "id": "bench-60",
+      "film": "bench",
+      "fps": {
+        "num": 60,
+        "den": 1
+      },
+      "format": "png-sequence",
+      "why": "kit-built film: transitions, Vietnamese text 14-120 px, background-layer LCD rule"
+    },
+    {
+      "id": "bench-25",
+      "film": "bench",
+      "fps": {
+        "num": 25,
+        "den": 1
+      },
+      "format": "png-sequence",
+      "why": "same film at a non-60 rate (D3)"
+    },
+    {
+      "id": "hf-native-30",
+      "film": "hf-native",
+      "fps": {
+        "num": 30,
+        "den": 1
+      },
+      "format": "png-sequence",
+      "why": "RAW HF reference: two registry blocks exactly as installed (GSAP vendored only) + a templated Vietnamese scene; fails G-FONT by design (system font stack HF would fetch)"
+    },
+    {
+      "id": "hf-native-final-30",
+      "film": "hf-native-final",
+      "fps": {
+        "num": 30,
+        "den": 1
+      },
+      "format": "png-sequence",
+      "why": "the same film after finalize (kit Inter for the aliased system fonts, embedded runtime): passes every gate; what the app actually renders"
+    },
+    {
+      "id": "video-30",
+      "film": "m-video",
+      "fps": {
+        "num": 30,
+        "den": 1
+      },
+      "format": "mp4",
+      "why": "<video> clip with trim and clip window"
+    },
+    {
+      "id": "audio-2997",
+      "film": "m-audio",
+      "fps": {
+        "num": 30000,
+        "den": 1001
+      },
+      "format": "mp4",
+      "why": "music + voice + fades at 29.97 fps"
+    },
+    {
+      "id": "alpha-mov",
+      "film": "m-alpha",
+      "fps": {
+        "num": 30,
+        "den": 1
+      },
+      "format": "mov",
+      "why": "ProRes 4444 alpha"
+    },
+    {
+      "id": "alpha-png",
+      "film": "m-alpha",
+      "fps": {
+        "num": 30,
+        "den": 1
+      },
+      "format": "png-sequence",
+      "why": "alpha frames compared with the alpha channel"
+    },
+    {
+      "id": "long-150s",
+      "film": "m-long",
+      "fps": {
+        "num": 30,
+        "den": 1
+      },
+      "format": "mp4",
+      "optional": true,
+      "why": "150 s film: frame count, duration, memory headroom"
+    }
+  ]
+}

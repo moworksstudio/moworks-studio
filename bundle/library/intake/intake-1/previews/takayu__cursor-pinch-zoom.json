@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/cursor-pinch-zoom",
+  "hash": "f7468d6b3880dc77",
+  "at": "2026-10-17T10:46:16.129Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__cursor-pinch-zoom.mp4",
+    "poster": "previews/takayu__cursor-pinch-zoom.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "41b61c2800881c43f036dc67685417053fba26085d8e0339e476322c69ee17b5",
+    "size": 12624,
+    "seconds": 25.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,93 @@
+<!--
+  Sequential Hop (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tx-jump-sequence (read 12/10/2026).
+  Các chữ cái lần lượt từ trái sang nhún, nhảy lên một cú rồi bẹp nhẹ khi chạm đất, chữ đang nhảy đổi màu nhấn, lặp theo chu kỳ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textHopSequence(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - height: em (0.4)
+      - hop: s (0.4)
+      - each: s between letters (0.1)
+      - cap: s all hops start within (1.5)
+      - start: s (0.2)
+      - accent: the hopping letter
+      - cycle: s (2.4)
+
+  Notes: Idea and numbers (TakayuStudio tx-jump-sequence, written here): Cycle 2.4 s. Char i hops at 0.2 s + 0.1 s × i (capped at 1.5 s total): 0.1 s crouch before (sx 1.05, sy 0.93 at peak), then a 0.4 s parabolic hop y = −0.4 em × 4u(1 − u) (power1.out up, power1.in down), then a 0.12 s landing squash peaking sx 1.1 / sy 0.86; origin at the baseline. The hopping char is accent; a floor shadow shrinks and fades with height. Params: độ cao (0.4 em) · thời gian nhảy (0.4 s) · trễ mỗi chữ (0.1 s) · chu kỳ (2.4 s).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Nhảy lên nào</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"height":0.4,"hop":0.4,"each":0.1,"cap":1.5,"start":0.2,"accent":"#ffd23d","cycle":2.4};
+  var run = function (el, tl, at, o) {
+        var ch = MW.split(el, "chars").chars, n = ch.length, st = Math.min(o.each, o.cap / Math.max(1, n - 1)), fs = parseFloat(getComputedStyle(el).fontSize), col = getComputedStyle(el).color, p1o = gsap.parseEase("power1.out"), p1i = gsap.parseEase("power1.in"), sh = [];
+        if (getComputedStyle(el).position === "static") el.style.position = "relative";
+        ch.forEach(function (c) { gsap.set(c, { transformOrigin: "50% 100%" }); var s = document.createElement("i"); s.style.cssText = "position:absolute;height:0.07em;border-radius:50%;background:rgba(0,0,0,0.5);pointer-events:none;"; el.appendChild(s); sh.push(s); });
+        return MW.drive(tl, at, o.cycle, function (t) {
+          ch.forEach(function (c, i) { var h0 = o.start + i * st, u = t - h0, y = 0, sx = 1, sy = 1, hop = false;
+            if (u > -0.1 && u < 0) { var k = Math.sin(Math.PI * (u + 0.1) / 0.1); sx = 1 + 0.05 * k; sy = 1 - 0.07 * k; }
+            else if (u >= 0 && u < o.hop) { var v = u / o.hop; y = -o.height * fs * (v < 0.5 ? p1o(v / 0.5) : 1 - p1i((v - 0.5) / 0.5)); hop = true; }
+            else if (u >= o.hop && u < o.hop + 0.12) { var w = Math.sin(Math.PI * (u - o.hop) / 0.12); sx = 1 + 0.1 * w; sy = 1 - 0.14 * w; }
+            gsap.set(c, { y: y, scaleX: sx, scaleY: sy }); c.style.color = hop ? o.accent : col;
+            var f = 1 + y / (o.height * fs), s = sh[i]; s.style.left = c.offsetLeft + c.offsetWidth * (0.5 - 0.35 * f) + "px"; s.style.width = c.offsetWidth * 0.7 * f + "px"; s.style.top = c.offsetTop + c.offsetHeight * 0.9 + "px"; s.style.opacity = String(0.2 + 0.8 * f); });
+        });
+      };
+  MW.textHopSequence = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

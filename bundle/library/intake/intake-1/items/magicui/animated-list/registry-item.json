@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "animated-list",
+  "type": "hyperframes:block",
+  "title": "Animated List",
+  "description": "A live activity feed: every second a new notification pops in at the top and pushes the older ones down (payments, sign-ups, messages).",
+  "tags": [
+    "list",
+    "feed",
+    "notifications",
+    "activity",
+    "stack",
+    "saas",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "animated-list.html",
+      "target": "compositions/components/animated-list.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/animated-list",
+    "author": "magicui",
+    "call": "MW.animatedList(q(\".mw-animated-list\"), tl, 0.3, { delay: 1 });",
+    "function": "MW.animatedList",
+    "options": {
+      "delay": "s between items (1)",
+      "gap": "px (16)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/animated-list.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/animated-list.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el holds the items in the order they arrive (first child first). Upstream's demo row (40 px icon tile, name · time, a line) is the demo here, with Vietnamese text and emoji.",
+    "titleVi": "Danh sách sự kiện đổ về liên tục"
+  }
+}

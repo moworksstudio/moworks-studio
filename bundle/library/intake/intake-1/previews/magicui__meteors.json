@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/meteors",
+  "hash": "40dbb232d23c2641",
+  "at": "2026-10-17T06:01:10.908Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__meteors.mp4",
+    "poster": "previews/magicui__meteors.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "9939d813272ab5b0ecca22eae6b03f027985f55779d163642ec9b2dbd94faa76",
+    "size": 41139,
+    "seconds": 33.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

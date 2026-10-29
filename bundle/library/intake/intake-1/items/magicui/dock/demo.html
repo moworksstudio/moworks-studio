@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Dock - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-dock { display: flex; width: max-content; align-items: center; justify-content: center; gap: 8px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); padding: 8px; backdrop-filter: blur(12px); background: rgba(255,255,255,0.1); }
+.mw-dock > * { display: flex; aspect-ratio: 1; align-items: center; justify-content: center; border-radius: 9999px; flex: none; }
+.mw-dock > * > svg { width: 100%; height: 100%; }
+.desk { position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 20%, #4c1d95, #0f172a 70%); }
+.wrap { position: absolute; left: 0; right: 0; bottom: 120px; display: flex; justify-content: center; transform: scale(2.4); transform-origin: 50% 100%; }
+.mw-dock > div { background: rgba(255,255,255,0.12); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="6">
+<div class="desk"></div><div class="wrap"><div class="mw-dock">
+<div><svg viewBox="0 0 24 24" fill="none" stroke="#fafafa" stroke-width="2"><path d="M3 10.5 12 3l9 7.5V21H3z"/></svg></div>
+<div><svg viewBox="0 0 24 24" fill="none" stroke="#fafafa" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></div>
+<div><svg viewBox="0 0 24 24" fill="none" stroke="#fafafa" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div>
+<div><svg viewBox="0 0 24 24" fill="none" stroke="#fafafa" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div>
+<div><svg viewBox="0 0 24 24" fill="none" stroke="#fafafa" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4z" fill="#fafafa"/></svg></div>
+<div><svg viewBox="0 0 24 24" fill="none" stroke="#fafafa" stroke-width="2"><path d="M12 3v12M6 9l6-6 6 6M5 21h14"/></svg></div>
+<div><svg viewBox="0 0 24 24" fill="none" stroke="#fafafa" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/></svg></div>
+</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"iconSize":40,"iconMagnification":60,"iconDistance":140,"path":null};
+  var run = function (el, tl, at, o) {
+      var icons = Array.prototype.slice.call(el.children), n = icons.length, S = o.iconSize, M = o.iconMagnification, D = o.iconDistance, pad = Math.max(6, S * 0.2);
+      icons.forEach(function (ic) { ic.style.width = ic.style.height = S + "px"; ic.style.padding = pad + "px"; });
+      var W0 = el.offsetWidth, cx = W0 / 2, path = o.path || [[0, null], [0.5, -20], [2.5, W0 + 20], [3, null]];       // x in the dock's own px (0 = its left edge at rest)
+      var px = function (t) {
+        if (t <= path[0][0]) return path[0][1];
+        for (var k = 1; k < path.length; k++) if (t <= path[k][0]) { var a = path[k - 1], b = path[k]; if (a[1] == null || b[1] == null) return t - a[0] < b[0] - t ? a[1] : b[1]; return a[1] + (b[1] - a[1]) * (t - a[0]) / (b[0] - a[0]); }
+        return path[path.length - 1][1];
+      };
+      var end = path[path.length - 1][0] + 1, dt = 1 / 240, N = Math.ceil(end / dt) + 1, sizes = new Float32Array(N * n), size = [], vel = [];
+      for (var i = 0; i < n; i++) { size.push(S); vel.push(0); }
+      for (var f = 0; f < N; f++) {
+        var x = px(f * dt), total = 16 + 8 * (n - 1);                // dock padding 8 + 8 and the gaps
+        for (var i2 = 0; i2 < n; i2++) total += size[i2];
+        var left = cx - total / 2 + 8;                                 // the row is centred on the dock's resting centre
+        for (var i3 = 0; i3 < n; i3++) {
+          var c = left + size[i3] / 2, d = x == null ? Infinity : x - c, target = !isFinite(d) || Math.abs(d) >= D ? S : S + (M - S) * (1 - Math.abs(d) / D);
+          vel[i3] += ((150 * (target - size[i3]) - 12 * vel[i3]) / 0.1) * dt; size[i3] += vel[i3] * dt;
+          left += size[i3] + 8; sizes[f * n + i3] = size[i3];
+        }
+      }
+      var s = { t: 0 }, set = function () { var f = Math.max(0, Math.min(N - 1, Math.round(s.t / dt))); for (var i = 0; i < n; i++) icons[i].style.width = icons[i].style.height = sizes[f * n + i] + "px"; };
+      set();
+      tl.fromTo(s, { t: 0 }, { t: end, duration: end, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + end;
+    };
+  MW.dock = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.dock(q(".mw-dock"), tl, 0.2, { path: [[0, null], [0.4, 10], [2.4, 334], [3.6, 150], [4.6, 150], [5, null]] });
+          tl.set({}, {}, 6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

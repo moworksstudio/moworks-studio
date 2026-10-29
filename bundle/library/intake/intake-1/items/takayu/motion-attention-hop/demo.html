@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Attention Bounce - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { --ink: #e8ebf3; --acc: #8b7bff; --acc2: #3dd6f5; --warm: #ffb547; --rose: #ff5d8f; --mute: #6c778b; --tk-card: #151a24; --tk-line: #262c3a; background: #0b0d12; color: var(--ink); }
+.tk-stage { position: absolute; inset: 0; display: grid; place-items: center; }
+.tk-cap { font-size: 30px; font-weight: 500; color: var(--mute); letter-spacing: 0.01em; }
+.ui-wrap { position: absolute; inset: 0; display: grid; place-items: center; }
+.ui-card { position: relative; background: var(--tk-card); border: 2px solid var(--tk-line); border-radius: 36px; padding: 48px 56px; box-shadow: 0 40px 100px rgba(0, 0, 0, 0.35); }
+.ui-h { font-size: 46px; font-weight: 700; margin: 0 0 14px; } .ui-p { font-size: 30px; color: #9aa3b8; margin: 0; }
+.ui-btn { display: inline-grid; place-items: center; height: 104px; padding: 0 64px; border-radius: 30px; background: linear-gradient(180deg, #9c88ff, #7357f5); color: #fff; font-size: 40px; font-weight: 700; box-shadow: 0 18px 40px rgba(115, 87, 245, 0.35); }
+.ui-btn.ghost { background: transparent; border: 3px solid var(--tk-line); color: #c3cadb; box-shadow: none; }
+.ui-row { display: flex; align-items: center; gap: 28px; height: 110px; padding: 0 34px; border-radius: 24px; background: #1b2130; margin: 14px 0; font-size: 34px; color: #c9d2ea; }
+.ui-dot { width: 56px; height: 56px; border-radius: 16px; background: #2a3350; flex: none; }
+.ui-field { width: 760px; height: 112px; border-radius: 26px; border: 3px solid #36405a; background: #10141d; display: flex; align-items: center; padding: 0 36px; font-size: 36px; color: #c9d2ea; }
+.ui-pill { display: inline-grid; place-items: center; height: 96px; padding: 0 52px; border-radius: 48px; font-size: 34px; font-weight: 800; letter-spacing: 0.08em; }
+.ui-avatar { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #b8a9ff, #6a4cf0); display: grid; place-items: center; font-size: 84px; font-weight: 800; color: #fff; }
+.ui-avatar.grey { background: #2a3142; color: #6c778b; }
+.ui-icon { width: 200px; height: 200px; border-radius: 48px; display: grid; place-items: center; background: linear-gradient(160deg, #ffd27a, #ff9b3d); font-size: 110px; }
+.ui-cursor { position: absolute; left: 0; top: 0; z-index: 20; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5)); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="3">
+<div class="ui-wrap"><div class="ui-card" style="display:flex;gap:70px;align-items:flex-end;padding:56px 80px">
+<div style="width:120px;height:20px;border-radius:10px;background:#2a3142"></div><div style="width:120px;height:20px;border-radius:10px;background:#2a3142"></div>
+<div style="position:relative;display:grid;justify-items:center"><div class="bell"><svg viewBox="0 0 48 48" width="150" height="150"><path d="M24 6c-7 0-12 5.5-12 12.5V27l-4 6h32l-4-6v-8.5C36 11.5 31 6 24 6z" fill="#ffd27a"/><circle cx="24" cy="38" r="4.5" fill="#ffb547"/></svg></div><div class="bsh" style="width:120px;height:18px;border-radius:50%;background:rgba(0,0,0,0.45);margin-top:6px"></div></div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.keys = MW.keys || function (tl, target, at, track, ease) {
+    var e = MW.ez(ease || "sine.inOut"), end = 0, p;
+    for (p in track) end = Math.max(end, track[p][track[p].length - 1][0]);
+    var val = function (k, t) { if (t <= k[0][0]) return k[0][1]; for (var i = 1; i < k.length; i++) if (t <= k[i][0]) { var a = k[i - 1], b = k[i], u = (t - a[0]) / ((b[0] - a[0]) || 1); return a[1] + (b[1] - a[1]) * e(u); } return k[k.length - 1][1]; };
+    return MW.drive(tl, at, end, function (t) { var s = {}; for (var q in track) s[q] = val(track[q], t); gsap.set(target, s); });
+  };
+  var defaults = {"height":48,"squash":0.92,"shadow":null};
+  var run = function (el, tl, at, o) {
+        var sh = o.shadow ? MW.el(o.shadow) : null, sine = gsap.parseEase("sine.inOut"), H = o.height;
+        var Y = [[0, 0], [0.26, -H], [0.43, H / 8], [0.62, 0]];
+        gsap.set(el, { transformOrigin: "50% 100%" });
+        return MW.drive(tl, at - 0.08, 0.7, function (s) {
+          var t = s - 0.08, y = 0;
+          for (var i = 1; i < Y.length; i++) if (t >= Y[i - 1][0] && t <= Y[i][0]) { y = Y[i - 1][1] + (Y[i][1] - Y[i - 1][1]) * sine((t - Y[i - 1][0]) / (Y[i][0] - Y[i - 1][0])); break; }
+          // a small crouch around take-off (-80 .. +20 ms), a landing squash (360 .. 560 ms), volume kept: scaleX = 1 / scaleY
+          var sy = 1;
+          if (t >= -0.08 && t <= 0.02) sy -= 0.04 * Math.sin(Math.PI * (t + 0.08) / 0.1);
+          if (t >= 0.36 && t <= 0.56) sy -= (1 - o.squash) * Math.sin(Math.PI * (t - 0.36) / 0.2);
+          gsap.set(el, { y: y, scaleY: sy, scaleX: 1 / sy });
+          if (sh) { var h = Math.max(0, -y) / H; gsap.set(sh, { scaleX: 1 - 0.35 * h, opacity: 1 - 0.5 * h }); }
+        });
+      };
+  MW.motionAttentionHop = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionAttentionHop(q(".bell"), tl, 0.7, { shadow: ".bsh" }); MW.motionAttentionHop(q(".bell"), tl, 2.0, { shadow: ".bsh" });
+          tl.set({}, {}, 3);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

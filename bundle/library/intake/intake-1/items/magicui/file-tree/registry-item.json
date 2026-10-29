@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "file-tree",
+  "type": "hyperframes:block",
+  "title": "File Tree",
+  "description": "A file and folder tree whose folders open one level after another, with indentation guides and a highlighted selection: for developer-tool scenes.",
+  "tags": [
+    "files",
+    "folders",
+    "tree",
+    "explorer",
+    "code",
+    "developer",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "file-tree.html",
+      "target": "compositions/components/file-tree.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/file-tree",
+    "author": "magicui",
+    "call": "MW.fileTree(q(\".mw-file-tree\"), tl, 0.3, { elements: [{ id: \"src\", name: \"src\", children: [{ id: \"lib\", name: \"lib\", children: [{ id: \"utils\", name: \"utils.ts\" }] },\n  { id: \"app\", name: \"app\", children: [{ id: \"page\", name: \"page.tsx\" }, { id: \"layout\", name: \"layout.tsx\" }] }, { id: \"comps\", name: \"components\", children: [{ id: \"btn\", name: \"button.tsx\" }, { id: \"hdr\", name: \"header.tsx\" }] }] }],\n  open: [\"src\"], opens: [[0.6, \"lib\"], [1.4, \"app\"], [2.2, \"comps\"]], selects: [[1.0, \"utils\"], [1.8, \"page\"], [2.8, \"btn\"]] });",
+    "function": "MW.fileTree",
+    "options": {
+      "elements": "tree data",
+      "open": "[ids] open at the start",
+      "opens": "[[t, id], ...]",
+      "selects": "[[t, id], ...]"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/file-tree.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/file-tree.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "elements: [{ id, name, children? }]; opens: [[t, id], ...]; selects: [[t, id], ...]. Folders listed in `open` start open (upstream's initialExpandedItems).",
+    "titleVi": "Cây thư mục mở dần từng cấp"
+  }
+}

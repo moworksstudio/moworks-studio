@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "spinning-text",
+  "type": "hyperframes:component",
+  "title": "Spinning Text",
+  "description": "Text laid out around a circle that turns continuously (one turn every 10 s), like a badge around a logo or a button.",
+  "tags": [
+    "circle",
+    "badge",
+    "rotate",
+    "seal",
+    "text",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "spinning-text.html",
+      "target": "compositions/components/spinning-text.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/spinning-text",
+    "author": "magicui",
+    "call": "MW.spinningText(q(\".mw-spinning-text\"), tl, 0, { radius: 4.6, duration: 10, hold: 6 });",
+    "function": "MW.spinningText",
+    "options": {
+      "duration": "s per turn (10)",
+      "reverse": "false",
+      "radius": "ch (5)",
+      "hold": "seconds (10)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/spinning-text.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/spinning-text.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Radius in ch as upstream (5). Letters stay live text; graphemes (NFC) so Vietnamese marks stay on their letter.",
+    "titleVi": "Chữ xếp vòng tròn xoay đều"
+  }
+}

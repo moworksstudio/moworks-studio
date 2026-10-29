@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-hit-stop-hold",
+  "hash": "f831c2076b4c7533",
+  "at": "2026-10-17T07:38:54.166Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-hit-stop-hold.mp4",
+    "poster": "previews/takayu__motion-hit-stop-hold.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4ce61e112ae6779625e4832263202dc474810eb00e94623c7849d374793ed4c0",
+    "size": 8448,
+    "seconds": 23.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

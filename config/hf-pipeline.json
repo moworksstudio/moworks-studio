@@ -1,0 +1,399 @@
+{
+  "_about": "The pipeline of HyperFrames' styles (Slideshow and one style per film type of skills/hyperframes/references/types, HF 0.8.214 at 4719543): the app's eight steps over HyperFrames' work loop (the type's file, story.md, spec.md, storyboard.md, motion.md, format.md, review.md). Read by packages/style-catalog for the styles of config/styles.json whose rules say \"pipeline\": \"hf-pipeline.json\"; \"styles\" holds a style's own steps.",
+  "pipeline": [
+    {
+      "id": "brief",
+      "stage": 1,
+      "title": "Prepare",
+      "what": "Three storylines in words and you pick one, then the brief, files read, design and what the style needs; Claude asks only what is missing",
+      "needs": [],
+      "done": {
+        "kind": "mark",
+        "auto": true,
+        "file": "BRIEF.md",
+        "ask": true
+      },
+      "action": {
+        "kind": "claude",
+        "label": "Prepare",
+        "prompt": "Read the brief, the answers from the New project dialog and what the app found in my files (its scan). HyperFrames' work loop comes first: your type's file (when the style names one), then references/story.md, as it ships. When story.md applies (its opening says when to skip it; a script, storyboard or reference film of mine is followed as I gave it), write its three storylines (§2: three different films in words only, each with what §2 lists; your recommendation first, with its reason in one clause) to STORYLINES.md, show them to me in a few lines and stop once until I pick one in the chat (a mix, \"A's opening with C's middle\", is one storyline); in that message ask nothing else unless only I can answer it, and state the rest in one assumption line as §2 says. When I asked for no stops (the brief or the chat says to go on without asking), take your recommendation and name the other two in one line each in your reply. Once a storyline is picked (or story.md does not apply), write BRIEF.md from it: the one thing (story.md §1) and the picked storyline as STORYLINES.md has it. Do not ask what the dialog already answered. Write ASSETS.md: each file I gave, what it is, where the film can use it, what is missing; for a brand guideline, its design rules. The design is set part by part in your instructions: what I chose in New project (a Brand Kit, written by the app to frame.md, which you never write or change) wins for its part (a brief that asks otherwise is a conflict: moworks-studio §2b); the rest follows the design my brief describes, and what it leaves open is yours (leave it to the storyboard options). A brand guideline in my files that differs from a chosen Brand Kit is a conflict (moworks-studio §2b); with no Brand Kit, follow the guideline (its design rules in ASSETS.md) and suggest in your reply that I save it as a Brand Kit in the app. When I gave no files at all and the brief is enough, go on without asking: this style draws the film in code, so never stop only to ask whether I have files. Ask me once, in one short line, only when the brief names material it needs and I did not give it (our logo, the product's photos, footage, our own fonts or brand guideline: added with the Assets button), then stop without writing BRIEF.md; when I answer that there are none, go on without asking again. Every conflict and every missing thing (a link, the lyrics, a file, a logo the brief names; moworks-studio §2b: what each side says, two or three choices, your suggestion first) goes in one message, and then stop without writing BRIEF.md: the owner answers in the chat. Write BRIEF.md last. Change nothing in the film yet; then stop."
+      },
+      "review": {
+        "kind": "dialog",
+        "dialog": "doc",
+        "path": "BRIEF.md",
+        "label": "Brief"
+      }
+    },
+    {
+      "id": "storyboard",
+      "stage": 2,
+      "title": "Storyboard",
+      "what": "Frame by frame plan and narration; one option, you approve it or ask for another",
+      "needs": [
+        "brief"
+      ],
+      "done": {
+        "kind": "approval",
+        "name": "storyboard"
+      },
+      "gate": true,
+      "action": {
+        "kind": "claude",
+        "label": "Write",
+        "prompt": "Write SPEC.md as HyperFrames' references/spec.md says (every adjective a number, the defaults banned by name, the shots by frame) for the storyline I picked, with the look references/look.md sets out; then the storyboard frame by frame as references/storyboard.md says (STORYBOARD.md in references/storyboard-format.md's format, and SCRIPT.md when there is narration). Show it as one option as an image board (boards/A, with its STORYBOARD.md and a posed index.html of still frames). After writing or changing the boards, call the app's board_stills tool once: it checks the boards and returns the option's sheets (3 × 3 frames). Read the sheets once; fix only a real problem, then call it again with only the frames you changed (at most once more). Then stop: I approve it in the Storyboard dialog or ask there for another option; when I choose one, write it to STORYBOARD.md and stop for my approval. A Brand Kit I chose in New project (in frame.md) binds the option for its part, and so does the design my brief describes. For what is left open, choose the option's palette and type; when I pick, write the picked option's design to design.md (frame.md is only the app's copy of a chosen Brand Kit)."
+      },
+      "review": {
+        "kind": "dialog",
+        "dialog": "storyboard",
+        "label": "Open"
+      }
+    },
+    {
+      "id": "motionSpec",
+      "effort": "medium",
+      "stage": 3,
+      "title": "Motion Plan",
+      "what": "How every element moves, with numbers, each from the library or written new; you approve",
+      "needs": [
+        "storyboard"
+      ],
+      "done": {
+        "kind": "approval",
+        "name": "motionPlan"
+      },
+      "gate": true,
+      "action": {
+        "kind": "claude",
+        "label": "Write",
+        "prompt": "Write the Motion Plan for every shot of the approved plan into MOTION-PLAN.json (the motion plan format in your instructions), with HyperFrames' references/motion.md for the craft: concrete numbers, not adjectives, and a source for every row: a Motion Library item, a move motion.md describes (source kind \"hf\", id \"motion.md#<section>\"), or new. Before you write a new move for a shot, call library_search once for that shot. Give every held element, the background, the camera and every character its always-on row with numbers (moworks-alive §2), each shot its \"says\" line in my language (what moves and how strongly, words I can judge) and the plan its \"approving\" line. Write only MOTION-PLAN.json, SPEC.md and STORYBOARD.md: no composition and no index.html (the Build writes the film once). Then stop for my approval in the Motion Plan dialog."
+      },
+      "review": {
+        "kind": "dialog",
+        "dialog": "motion-plan",
+        "label": "Open"
+      }
+    },
+    {
+      "id": "build",
+      "title": "Build",
+      "what": "Every shot built as a composition, dressing the approved layouts",
+      "needs": [
+        "motionSpec"
+      ],
+      "done": {
+        "kind": "built"
+      },
+      "action": {
+        "kind": "claude",
+        "label": "Build",
+        "prompt": "Build the film to the approved Motion Plan, dressing the approved layouts, as HyperFrames' contract (the entry SKILL.md) and references/format.md say: one scene per sub-composition mounted in index.html, the editable-project rules; references/runtimes.md for GSAP, Lottie, three.js or canvas. Captions built or skipped as the brief says (references/captions.md). Write no sound effects or music: the app adds them after your Review. Keep every element on screen, the background, the camera and every character moving between the moves, as the studio's moworks-alive rule says (nothing still for more than 2 s except the final logo hold; the brief's motion words become that motion)."
+      },
+      "stage": 4
+    },
+    {
+      "id": "qcReview",
+      "title": "Review",
+      "what": "Claude looks at stills of the film like a strict director: seven scores, fixes, until every score is 8 or more",
+      "needs": [
+        "build"
+      ],
+      "done": {
+        "kind": "review",
+        "file": "QC-REVIEW.md"
+      },
+      "skippable": true,
+      "skipLabel": "Skip the review",
+      "action": {
+        "kind": "claude",
+        "label": "Review",
+        "prompt": "Run the Review as the Moworks QC rules say (the Moworks QC file named in your rules), looking the way HyperFrames' references/review.md says (as a harsh motion director, not a proud author): call the app's qc_sheets tool for each round, read the sheets, score the seven criteria (Motion against the moworks-alive rule: its numbers, MOTION-PLAN.json's always-on rows and the app's still-stretch check when there is one), fix the 3 worst problems (open only the code of the shots the sheets flag, once each; Grep, then Edit) and every layout or contrast error of HyperFrames' check; 1 to 3 rounds, stop as soon as every score is 8 or more; after 3 rounds say why. Score only what you saw after your last change: a round that ends with a fix takes the sheets once more before the final score. Write every round to QC-REVIEW.md and end the file with a line `Final score: N/10` (the lowest of the seven); write the same rounds to QC-REVIEW.json as the QC rules say (the app shows them as a score card), and end your reply with one short line."
+      },
+      "review": {
+        "kind": "dialog",
+        "dialog": "qc-review",
+        "label": "Open"
+      },
+      "stage": 4,
+      "firstOnly": true
+    },
+    {
+      "id": "sound",
+      "stage": 4,
+      "title": "Music and sound effects",
+      "what": "Claude picks the music; the app places it and the sound effects",
+      "needs": [
+        "build",
+        "qcReview"
+      ],
+      "done": {
+        "kind": "mark",
+        "auto": true
+      },
+      "skippable": true,
+      "skipLabel": "No music",
+      "action": {
+        "kind": "claude",
+        "label": "Find music",
+        "prompt": "Find three music tracks on mixkit.co that fit the film's mood and length and hand them to the app with the music_options tool (title, artist, its page on mixkit.co and the direct https://assets.mixkit.co/… .mp3 link). The app picks the first one for the film and places the sound effects; the owner can change both in the Final Mix. When the film already has a music track of the owner's, or the web is off for this project, say so in one line and change nothing."
+      },
+      "review": {
+        "kind": "dialog",
+        "dialog": "mix",
+        "label": "Open"
+      }
+    },
+    {
+      "id": "checks",
+      "title": "Tech checks",
+      "what": "Last of this stage, quiet: HyperFrames' check (layout, contrast, motion), Vietnamese letters, fonts, offline; the film is done when they pass",
+      "needs": [
+        "build",
+        "qcReview"
+      ],
+      "done": {
+        "kind": "qa"
+      },
+      "action": {
+        "kind": "job",
+        "job": "qa",
+        "label": "Run"
+      },
+      "review": {
+        "kind": "dialog",
+        "dialog": "qa",
+        "label": "Open"
+      },
+      "stage": 4,
+      "quiet": true,
+      "after": [
+        "sound"
+      ]
+    },
+    {
+      "id": "finalMix",
+      "title": "Final Mix",
+      "what": "Optional: listen, then change the music or the sound effects (notes about the sound)",
+      "needs": [
+        "sound"
+      ],
+      "done": {
+        "kind": "mark",
+        "auto": false
+      },
+      "skippable": true,
+      "skipLabel": "No final mix",
+      "action": {
+        "kind": "dialog",
+        "dialog": "mix",
+        "label": "Open"
+      },
+      "review": {
+        "kind": "dialog",
+        "dialog": "mix",
+        "label": "Open"
+      },
+      "stage": 5,
+      "optional": true
+    }
+  ],
+  "styles": {
+    "slideshow": [
+      {
+        "id": "brief",
+        "stage": 1,
+        "title": "Prepare",
+        "what": "Three storylines in words and you pick one, then the brief, files read, design and what the style needs; Claude asks only what is missing",
+        "needs": [],
+        "done": {
+          "kind": "mark",
+          "auto": true,
+          "file": "BRIEF.md",
+          "ask": true
+        },
+        "action": {
+          "kind": "claude",
+          "label": "Prepare",
+          "prompt": "Read the brief, the answers from the New project dialog and what the app found in my files (its scan). HyperFrames' work loop comes first: references/story.md, as it ships. When story.md applies (its opening says when to skip it; a script, storyboard or reference film of mine is followed as I gave it), write its three storylines (§2: three different films in words only, each with what §2 lists; your recommendation first, with its reason in one clause) to STORYLINES.md, show them to me in a few lines and stop once until I pick one in the chat (a mix, \"A's opening with C's middle\", is one storyline); in that message ask nothing else unless only I can answer it, and state the rest in one assumption line as §2 says. When I asked for no stops (the brief or the chat says to go on without asking), take your recommendation and name the other two in one line each in your reply. Once a storyline is picked (or story.md does not apply), write BRIEF.md from it: the one thing (story.md §1) and the picked storyline as STORYLINES.md has it. Do not ask what the dialog already answered. Write ASSETS.md: each file I gave, what it is, where the film can use it, what is missing; for a brand guideline, its design rules. This app always makes a timed MP4 video, never a navigable deck: do not ask which. The design is set part by part in your instructions: what I chose in New project (a Brand Kit, written by the app to frame.md, which you never write or change) wins for its part (a brief that asks otherwise is a conflict: moworks-studio §2b); the rest follows the design my brief describes, and what it leaves open is yours (leave it to the storyboard options). A brand guideline in my files that differs from a chosen Brand Kit is a conflict (moworks-studio §2b); with no Brand Kit, follow the guideline (its design rules in ASSETS.md) and suggest in your reply that I save it as a Brand Kit in the app. When I gave no files at all and the brief is enough, go on without asking: this style draws the film in code, so never stop only to ask whether I have files. Ask me once, in one short line, only when the brief names material it needs and I did not give it (our logo, the product's photos, footage, our own fonts or brand guideline: added with the Assets button), then stop without writing BRIEF.md; when I answer that there are none, go on without asking again. Every conflict and every missing thing (a link, the lyrics, a file, a logo the brief names; moworks-studio §2b: what each side says, two or three choices, your suggestion first) goes in one message, and then stop without writing BRIEF.md: the owner answers in the chat. Write BRIEF.md last. Change nothing in the film yet; then stop."
+        },
+        "review": {
+          "kind": "dialog",
+          "dialog": "doc",
+          "path": "BRIEF.md",
+          "label": "Brief"
+        }
+      },
+      {
+        "id": "storyboard",
+        "stage": 2,
+        "title": "Storyboard",
+        "what": "Frame by frame plan and narration; one option, you approve it or ask for another",
+        "needs": [
+          "brief"
+        ],
+        "done": {
+          "kind": "approval",
+          "name": "storyboard"
+        },
+        "gate": true,
+        "action": {
+          "kind": "claude",
+          "label": "Write",
+          "prompt": "Plan the slides in STORYBOARD.md, one frame per slide (title, text, picture, fragments). This app makes a timed video, not a navigable deck: give every slide a duration. Show it as one option as an image board (boards/A, with its STORYBOARD.md in HyperFrames' references/storyboard-format.md format and a posed index.html of still frames, as references/storyboard.md says). After writing or changing the boards, call the app's board_stills tool once: it checks the boards and returns the option's sheets (3 × 3 frames). Read the sheets once; fix only a real problem, then call it again with only the frames you changed (at most once more). Then stop: I approve it in the Storyboard dialog or ask there for another option; when I choose one, write it to STORYBOARD.md and stop for my approval. A Brand Kit I chose in New project (in frame.md) binds the option for its part, and so does the design my brief describes. For what is left open, choose the option's palette and type; when I pick, write the picked option's design to design.md (frame.md is only the app's copy of a chosen Brand Kit)."
+        },
+        "review": {
+          "kind": "dialog",
+          "dialog": "storyboard",
+          "label": "Open"
+        }
+      },
+      {
+        "id": "motionSpec",
+        "effort": "medium",
+        "stage": 3,
+        "title": "Motion Plan",
+        "what": "How every element moves, with numbers, each from the library or written new; you approve",
+        "needs": [
+          "storyboard"
+        ],
+        "done": {
+          "kind": "approval",
+          "name": "motionPlan"
+        },
+        "gate": true,
+        "action": {
+          "kind": "claude",
+          "label": "Write",
+          "prompt": "Write the Motion Plan for every shot of the approved plan into MOTION-PLAN.json (the motion plan format in your instructions), with HyperFrames' references/motion.md for the craft: concrete numbers, not adjectives, and a source for every row: a Motion Library item, a move motion.md describes (source kind \"hf\", id \"motion.md#<section>\"), or new. Before you write a new move for a shot, call library_search once for that shot. Give every held element, the background, the camera and every character its always-on row with numbers (moworks-alive §2), each shot its \"says\" line in my language (what moves and how strongly, words I can judge) and the plan its \"approving\" line. Write only MOTION-PLAN.json, SPEC.md and STORYBOARD.md: no composition and no index.html (the Build writes the film once). Then stop for my approval in the Motion Plan dialog."
+        },
+        "review": {
+          "kind": "dialog",
+          "dialog": "motion-plan",
+          "label": "Open"
+        }
+      },
+      {
+        "id": "build",
+        "title": "Build",
+        "what": "Every shot built as a composition, dressing the approved layouts",
+        "needs": [
+          "motionSpec"
+        ],
+        "done": {
+          "kind": "built"
+        },
+        "action": {
+          "kind": "claude",
+          "label": "Build",
+          "prompt": "Build the slideshow as a timed video: each slide a scene with its own start and duration, written as your slideshow skill writes a slide, mounted in index.html, to the approved Motion Plan. This app renders an MP4, not a running deck: leave out the slideshow island and presenter mode (`hyperframes present`). Keep every element on screen, the background, the camera and every character moving between the moves, as the studio's moworks-alive rule says (nothing still for more than 2 s except the final logo hold; the brief's motion words become that motion)."
+        },
+        "stage": 4
+      },
+      {
+        "id": "qcReview",
+        "title": "Review",
+        "what": "Claude looks at stills of the film like a strict director: seven scores, fixes, until every score is 8 or more",
+        "needs": [
+          "build"
+        ],
+        "done": {
+          "kind": "review",
+          "file": "QC-REVIEW.md"
+        },
+        "skippable": true,
+        "skipLabel": "Skip the review",
+        "action": {
+          "kind": "claude",
+          "label": "Review",
+          "prompt": "Run the Review as the Moworks QC rules say (the Moworks QC file named in your rules), looking the way HyperFrames' references/review.md says (as a harsh motion director, not a proud author): call the app's qc_sheets tool for each round, read the sheets, score the seven criteria (Motion against the moworks-alive rule: its numbers, MOTION-PLAN.json's always-on rows and the app's still-stretch check when there is one), fix the 3 worst problems (open only the code of the shots the sheets flag, once each; Grep, then Edit) and every layout or contrast error of HyperFrames' check; 1 to 3 rounds, stop as soon as every score is 8 or more; after 3 rounds say why. Score only what you saw after your last change: a round that ends with a fix takes the sheets once more before the final score. Write every round to QC-REVIEW.md and end the file with a line `Final score: N/10` (the lowest of the seven); write the same rounds to QC-REVIEW.json as the QC rules say (the app shows them as a score card), and end your reply with one short line."
+        },
+        "review": {
+          "kind": "dialog",
+          "dialog": "qc-review",
+          "label": "Open"
+        },
+        "stage": 4,
+        "firstOnly": true
+      },
+      {
+        "id": "sound",
+        "stage": 4,
+        "title": "Music and sound effects",
+        "what": "Claude picks the music; the app places it and the sound effects",
+        "needs": [
+          "build",
+          "qcReview"
+        ],
+        "done": {
+          "kind": "mark",
+          "auto": true
+        },
+        "skippable": true,
+        "skipLabel": "No music",
+        "action": {
+          "kind": "claude",
+          "label": "Find music",
+          "prompt": "Find three music tracks on mixkit.co that fit the film's mood and length and hand them to the app with the music_options tool (title, artist, its page on mixkit.co and the direct https://assets.mixkit.co/… .mp3 link). The app picks the first one for the film and places the sound effects; the owner can change both in the Final Mix. When the film already has a music track of the owner's, or the web is off for this project, say so in one line and change nothing."
+        },
+        "review": {
+          "kind": "dialog",
+          "dialog": "mix",
+          "label": "Open"
+        }
+      },
+      {
+        "id": "checks",
+        "title": "Tech checks",
+        "what": "Last of this stage, quiet: HyperFrames' check (layout, contrast, motion), Vietnamese letters, fonts, offline; the film is done when they pass",
+        "needs": [
+          "build",
+          "qcReview"
+        ],
+        "done": {
+          "kind": "qa"
+        },
+        "action": {
+          "kind": "job",
+          "job": "qa",
+          "label": "Run"
+        },
+        "review": {
+          "kind": "dialog",
+          "dialog": "qa",
+          "label": "Open"
+        },
+        "stage": 4,
+        "quiet": true,
+        "after": [
+          "sound"
+        ]
+      },
+      {
+        "id": "finalMix",
+        "title": "Final Mix",
+        "what": "Optional: listen, then change the music or the sound effects (notes about the sound)",
+        "needs": [
+          "sound"
+        ],
+        "done": {
+          "kind": "mark",
+          "auto": false
+        },
+        "skippable": true,
+        "skipLabel": "No final mix",
+        "action": {
+          "kind": "dialog",
+          "dialog": "mix",
+          "label": "Open"
+        },
+        "review": {
+          "kind": "dialog",
+          "dialog": "mix",
+          "label": "Open"
+        },
+        "stage": 5,
+        "optional": true
+      }
+    ]
+  }
+}

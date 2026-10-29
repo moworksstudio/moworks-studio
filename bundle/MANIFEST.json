@@ -1,0 +1,151 @@
+{
+  "about": "What Moworks Studio ships with the repository instead of downloading (audit 60 §6). Made by tools/make-bundle.mjs.",
+  "made": "2026-10-29T08:30:14.931Z",
+  "bytes": 359191240,
+  "parts": [
+    {
+      "name": "fonts",
+      "path": "runtime/fonts",
+      "files": 143,
+      "bytes": 20324699,
+      "source": "Google Fonts and the bundled families (config/pins.json fonts)",
+      "commit": null,
+      "licence": "SIL OFL 1.1 / Apache-2.0 (each family's licence in its folder)"
+    },
+    {
+      "name": "libraries",
+      "path": "runtime/vendor",
+      "files": 111,
+      "bytes": 8674875,
+      "source": "jsDelivr npm copies at pinned versions (config/pins.json gsap, three, clipperLib, codeLibs)",
+      "commit": null,
+      "licence": "GSAP Standard License; three.js MIT; clipper-lib Boost; opentype.js, simplex-noise, p5.brush MIT; d3, topojson-client ISC; p5.js LGPL-2.1 (each LICENSE kept)"
+    },
+    {
+      "name": "hf-skills",
+      "path": "hf/skills",
+      "files": 302,
+      "bytes": 3484260,
+      "source": "https://github.com/heygen-com/hyperframes.git",
+      "commit": null,
+      "licence": "Apache-2.0"
+    },
+    {
+      "name": "hf-registry",
+      "path": "hf/registry",
+      "files": 1669,
+      "bytes": 107048376,
+      "source": "https://github.com/heygen-com/hyperframes.git",
+      "commit": null,
+      "licence": "Apache-2.0"
+    },
+    {
+      "name": "lemo-opuscar",
+      "path": "styles/lemo-opuscar",
+      "files": 2419,
+      "bytes": 64688144,
+      "source": "https://github.com/lemomo-ai/lemo-opuscar",
+      "commit": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+      "licence": "MIT; demo stills CC BY 4.0; Poly Haven assets CC0; OPUSCAR 98 frames as shipped in the repo"
+    },
+    {
+      "name": "mg-styles-15",
+      "path": "styles/mg-styles-15",
+      "files": 220,
+      "bytes": 59336058,
+      "source": "https://github.com/Vincentwei1021/mg-styles-15",
+      "commit": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
+      "licence": "MIT; a few images CC0 / public domain; no audio"
+    },
+    {
+      "name": "anidoodle",
+      "path": "styles/anidoodle",
+      "files": 592,
+      "bytes": 8196188,
+      "source": "https://github.com/alexgreensh/anidoodle",
+      "commit": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+      "licence": "Apache-2.0 with NOTICE"
+    },
+    {
+      "name": "claude-animation-base",
+      "path": "styles/ClaudeAnimationBase",
+      "files": 8,
+      "bytes": 138844,
+      "source": "https://github.com/JohnHeibel/ClaudeAnimationBase",
+      "commit": "0ac8bf2b31942376cb6b8c4074715595d512acd2",
+      "licence": "MIT"
+    },
+    {
+      "name": "library-blocks",
+      "path": "library/blocks/hf-0.8.214-4719543",
+      "files": 898,
+      "bytes": 25585593,
+      "source": "built by Moworks Studio (blocks)",
+      "commit": null,
+      "licence": "as each item's source (credit in its catalog)"
+    },
+    {
+      "name": "library-intake",
+      "path": "library/intake/intake-1",
+      "files": 5456,
+      "bytes": 39070032,
+      "source": "built by Moworks Studio (intake)",
+      "commit": null,
+      "licence": "as each item's source (credit in its catalog)"
+    },
+    {
+      "name": "library-looks",
+      "path": "library/looks/hf-0.8.214-4719543",
+      "files": 28,
+      "bytes": 568461,
+      "source": "built by Moworks Studio (looks)",
+      "commit": null,
+      "licence": "as each item's source (credit in its catalog)"
+    },
+    {
+      "name": "library-thumbs",
+      "path": "library/thumbs",
+      "files": 90,
+      "bytes": 1540862,
+      "source": "the Style Gallery's tiles (#202)",
+      "commit": null,
+      "licence": "as each style's still"
+    },
+    {
+      "name": "library-anidoodle",
+      "path": "library/anidoodle",
+      "files": 100,
+      "bytes": 7296283,
+      "source": "anidoodle cards cut from the author's style sheet, and previews rendered from the author's drawing films",
+      "commit": null,
+      "licence": "Apache-2.0"
+    },
+    {
+      "name": "library-characters",
+      "path": "library/characters",
+      "files": 27,
+      "bytes": 1790971,
+      "source": "the Character page's demo media (Clawd: the kit's demo, a demo of the layer only, never in a film)",
+      "commit": null,
+      "licence": "ClaudeAnimationBase MIT (Clawd is Anthropic's mascot); anidoodle Apache-2.0"
+    },
+    {
+      "name": "motion-prompt",
+      "path": "styles/motion-prompt",
+      "files": 684,
+      "bytes": 2235765,
+      "source": "https://github.com/showheyohtaki/motion-prompt",
+      "commit": "bd6bf08d8d412cc82c1bbc8f1a81638617a45cfb",
+      "licence": "MIT (Copyright (c) 2026 Shohei Ohtaki)"
+    },
+    {
+      "name": "library-vocab",
+      "path": "library/vocab",
+      "files": 851,
+      "bytes": 9211829,
+      "source": "built by Moworks Studio from Motion Prompt (Vocabulary, audit 79)",
+      "commit": null,
+      "licence": "MIT (Copyright (c) 2026 Shohei Ohtaki)"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-pixel-dissolve",
+  "type": "hyperframes:component",
+  "title": "Pixel Dissolve",
+  "description": "Khung chia thành các ô vuông nhỏ, mỗi ô đổi sang cảnh mới ở một thời điểm ngẫu nhiên cố định, không mờ dần.",
+  "tags": [
+    "pixel",
+    "dissolve",
+    "digital",
+    "transitions",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "transition-pixel-dissolve.html",
+      "target": "compositions/components/transition-pixel-dissolve.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/transition-pixel-dissolve",
+    "author": "takayu",
+    "call": "MW.transitionPixelDissolve(q(\".tk-b\"), tl, 1.2, {});",
+    "function": "MW.transitionPixelDissolve",
+    "options": {
+      "cell": "cell size, 0-1 of the width (0.05)",
+      "duration": "s (0.6), linear",
+      "seed": "the cells' order"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tr-pixel",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tr-pixel (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tr-pixel, written here): Frame divided into square cells (16 px on a 320 px frame = 5 % of width); each cell gets a fixed seeded threshold 0..1; progress 0 -> 1 linear over 600 ms; a cell switches from old to new scene on the frame progress passes its threshold (hard per-cell cut, no fade). Params: cell (5 % chiều ngang) · duration (0.6 s) · seed.",
+    "titleVi": "Đổi cảnh từng ô pixel"
+  }
+}

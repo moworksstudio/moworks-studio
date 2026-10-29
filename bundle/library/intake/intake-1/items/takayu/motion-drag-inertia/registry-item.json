@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-drag-inertia",
+  "type": "hyperframes:component",
+  "title": "Drag Inertia",
+  "description": "Con trỏ kéo núm một đoạn rồi thả, núm giữ tốc độ lúc thả và trôi chậm dần tới khi dừng trong giới hạn, giãn ngang theo tốc độ.",
+  "tags": [
+    "drag",
+    "inertia",
+    "throw",
+    "decay",
+    "web-interaction",
+    "heavy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-drag-inertia.html",
+      "target": "compositions/components/motion-drag-inertia.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-drag-inertia",
+    "author": "takayu",
+    "call": "MW.motionDragInertia(q(\".di\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.motionDragInertia",
+    "options": {
+      "grab": "s (0.35)",
+      "dragAt": "s (0.45)",
+      "drag": "s (0.2, power2.in)",
+      "pull": "px dragged (240)",
+      "glide": "px it glides on (468)",
+      "decay": "per second (7.67: speed × 0.88 per 60 fps frame)",
+      "backAt": "s the mirror throw starts (1.85)",
+      "end": "s it lands back on the start (3.3)",
+      "speedFull": "px a second for the full stretch (24000)",
+      "accent": "speed ticks",
+      "cursor": "an optional cursor"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=drag-inertia",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=drag-inertia (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio drag-inertia, written here): Knob 36x36 r8 in a 264x52 pill track (stops at both ends). Cursor grabs 0.35 s (knob scale 1.06 while held); 0.45-0.65 s dragged 60 px right (power2.in); released, it glides x = 117 × (1 − e^(−7.67 t)) (= speed × 0.88 per 60 fps frame), at rest by about 1.85 s. While moving scaleX = 1 + min(0.14, speed / 6000 px/s), scaleY inverse; velocity ticks trail below. Mirror throw back 1.85-3.3 s landing exactly on the start. Params: drag (60 px, 0.2 s) · glide (117 px) · decay (0.88 / khung 60 fps) · stretch (tối đa 1.14) · held (1.06).",
+    "titleVi": "Kéo rồi thả, trượt tiếp theo quán tính"
+  }
+}

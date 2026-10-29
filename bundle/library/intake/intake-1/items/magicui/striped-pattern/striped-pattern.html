@@ -1,0 +1,56 @@
+<!--
+  Striped Pattern (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/striped-pattern.tsx.
+  A background of thin diagonal hatch lines for placeholders, caution or editorial panels; static or sliding slowly.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.stripedPattern(q(".mw-striped-pattern"), tl, 0, { width: 28, height: 28, strokeWidth: 2, drift: [14, 0], hold: 6 });
+
+  Options (defaults in brackets):
+      - direction: left | right (left)
+      - width: 10
+      - height: 10
+      - strokeWidth: 0.5
+      - dasharray: none
+      - color: currentColor
+      - drift: [x, y] px/s ([0, 0])
+      - hold: seconds (10)
+
+  Notes: Static upstream; drift is this port's option. The docs say 40 px and an offset: the code has 10 px and none (the code wins).
+-->
+
+<svg class="mw-striped-pattern" aria-hidden="true"></svg>
+
+<style>
+.mw-striped-pattern { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"direction":"left","width":10,"height":10,"strokeWidth":0.5,"dasharray":"","color":"currentColor","drift":[0,0],"hold":10};
+  var run = function (el, tl, at, o) {
+      var id = "mw-stripe-" + (MW.__sp = (MW.__sp || 0) + 1), w = o.width, h = o.height, st = ' stroke="' + o.color + '" stroke-width="' + o.strokeWidth + '"' + (o.dasharray ? ' stroke-dasharray="' + o.dasharray + '"' : "");
+      var lines = o.direction === "left"
+        ? '<line x1="0" y1="' + h + '" x2="' + w + '" y2="0"' + st + '/><line x1="' + -w + '" y1="' + h + '" x2="0" y2="0"' + st + '/><line x1="' + w + '" y1="' + h + '" x2="' + w * 2 + '" y2="0"' + st + "/>"
+        : '<line x1="0" y1="0" x2="' + w + '" y2="' + h + '"' + st + '/><line x1="' + -w + '" y1="0" x2="0" y2="' + h + '"' + st + '/><line x1="' + w + '" y1="0" x2="' + w * 2 + '" y2="' + h + '"' + st + "/>";
+      el.innerHTML = '<defs><pattern id="' + id + '" width="' + w + '" height="' + h + '" patternUnits="userSpaceOnUse">' + lines + '</pattern></defs><rect width="100%" height="100%" fill="url(#' + id + ')"/>';
+      if (!o.drift[0] && !o.drift[1]) return at;
+      var pat = el.querySelector("pattern"), s = { t: 0 };
+      var set = function () { pat.setAttribute("x", o.drift[0] * s.t); pat.setAttribute("y", o.drift[1] * s.t); };
+      set();
+      tl.fromTo(s, { t: 0 }, { t: o.hold, duration: o.hold, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + o.hold;
+    };
+  MW.stripedPattern = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

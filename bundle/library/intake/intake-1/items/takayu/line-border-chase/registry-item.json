@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "line-border-chase",
+  "type": "hyperframes:component",
+  "title": "Border Chase",
+  "description": "Một vệt sáng dài 26 % chu vi chạy vòng quanh viền thẻ bo góc theo chiều kim đồng hồ, lặp mãi khi thẻ đang được chọn.",
+  "tags": [
+    "border",
+    "loop",
+    "glow",
+    "selected",
+    "attention-emphasis",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "line-border-chase.html",
+      "target": "compositions/components/line-border-chase.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/line-border-chase",
+    "author": "takayu",
+    "call": "MW.lineBorderChase(q(\".sel\"), tl, 0, { laps: 3 });",
+    "function": "MW.lineBorderChase",
+    "options": {
+      "lap": "s per lap, linear (1)",
+      "laps": "laps (3)",
+      "radius": "px, the card's corner radius (36)",
+      "width": "px of the brightest dash (6)",
+      "glow": "px glow (20)",
+      "color": "colour"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=border-chase",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=border-chase (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio border-chase, written here): A dash 26 % of the perimeter runs clockwise around a rounded card (radius 12 px), linear, one lap per 1000 ms, looping; drawn as three stacked dashes sharing the head (lengths 26 / 16 / 8 % of the perimeter, opacity 0.25 / 0.55 / 1, width 2 / 2.5 / 3 px, the brightest with a 10 px glow). Params: length: độ dài vệt (26 %) · lap: một vòng (1 s) · width (2–3 px) · glow (10 px) · radius (12 px).",
+    "titleVi": "Vệt sáng chạy quanh viền thẻ"
+  }
+}

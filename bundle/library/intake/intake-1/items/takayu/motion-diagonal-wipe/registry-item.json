@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-diagonal-wipe",
+  "type": "hyperframes:component",
+  "title": "Diagonal Wipe",
+  "description": "Nội dung đứng yên, một mép chéo 45° quét từ góc dưới trái lên góc trên phải để lộ ra.",
+  "tags": [
+    "reveal",
+    "wipe",
+    "diagonal",
+    "entrance-exit",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-diagonal-wipe.html",
+      "target": "compositions/components/motion-diagonal-wipe.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-diagonal-wipe",
+    "author": "takayu",
+    "call": "MW.motionDiagonalWipe(q(\".dw\"), tl, 0.3, { exitAt: 1.7 });",
+    "function": "MW.motionDiagonalWipe",
+    "options": {
+      "duration": "s (0.68, power4.inOut)",
+      "angle": "degrees of the gradient (45: from the lower left to the upper right)",
+      "exitAt": "s (null)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=diagonal-wipe",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=diagonal-wipe (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio diagonal-wipe, written here): Still content revealed by a 45° edge travelling from the lower-left corner to the upper-right: edge offset 0 → 145 % (of ~232 px on a 200×120 box; clip-path polygon) in 680 ms power4.inOut (easeInOutQuint); a 2 px light line rides the edge while it crosses. Site exit: fade 320 ms power2.in. Params: duration (0.68 s) · angle (45°) · from: góc bắt đầu (dưới trái) · ease (power4.inOut).",
+    "titleVi": "Quét lộ theo đường chéo"
+  }
+}

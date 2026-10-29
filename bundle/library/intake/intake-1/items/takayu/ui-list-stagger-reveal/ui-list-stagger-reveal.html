@@ -1,0 +1,53 @@
+<!--
+  Staggered Reveal (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=catalog-ui-navigation-staggered-reveal (read 12/10/2026).
+  Các dòng của trang mới lần lượt nhích lên 12 px và hiện dần theo thứ tự đọc, cách nhau 60 ms, xong cả danh sách trong khoảng nửa giây.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiListStaggerReveal(q(".ls"), tl, 0.4, { exitAt: 1.9 });
+
+  Options (defaults in brackets):
+      - items: rows in reading order
+      - rise: px (48)
+      - duration: s per row (0.35, power2.out)
+      - each: s between rows (0.06)
+      - exitAt: s after the start to fade all out (null)
+      - out: s (0.2)
+
+  Notes: Idea and numbers (TakayuStudio catalog-ui-navigation-staggered-reveal, written here): 4 list rows 126x26 r6 (32 px pitch) in a 150x150 card. Each row: y +12 → 0 px and opacity 0 → 1 over 350 ms power2.out, starting 0.4 s + 0.06 s × i (reading order); the last finishes 530 ms after the first starts. Out together 2.3-2.5 s power2.in. Params: rise (12 px) · duration (0.35 s, power2.out) · each (0.06 s) · out (0.2 s).
+-->
+
+<div class="ui-wrap"><div class="ui-card ls"><p class="ui-h">Thực đơn</p><div class="ui-row"><div class="ui-dot"></div>Dự án gần đây</div><div class="ui-row"><div class="ui-dot"></div>Thư viện chuyển động</div><div class="ui-row"><div class="ui-dot"></div>Âm thanh</div><div class="ui-row"><div class="ui-dot"></div>Cài đặt</div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"items":".ui-row","rise":48,"duration":0.35,"each":0.06,"exitAt":null,"out":0.2};
+  var run = function (el, tl, at, o) {
+        var it = Array.prototype.slice.call(el.querySelectorAll(o.items)), p2 = gsap.parseEase("power2.out"), pin = gsap.parseEase("power2.in");
+        return MW.drive(tl, at, o.exitAt == null ? (it.length - 1) * o.each + o.duration : o.exitAt + o.out, function (t) {
+          var x = o.exitAt != null && t > o.exitAt ? pin(Math.min(1, (t - o.exitAt) / o.out)) : 0;
+          it.forEach(function (r, i) { var u = p2(Math.max(0, Math.min(1, (t - i * o.each) / o.duration))); gsap.set(r, { y: o.rise * (1 - u) }); r.style.opacity = String(u * (1 - x)); });
+        });
+      };
+  MW.uiListStaggerReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

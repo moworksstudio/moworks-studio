@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "elastic-rise",
+  "type": "hyperframes:component",
+  "title": "Elastic Rise",
+  "description": "Letters spring up from far below with an elastic bounce, the middle ones first. (Codrops fx24)",
+  "tags": [
+    "text",
+    "letters",
+    "entrance",
+    "codrops",
+    "on-scroll",
+    "per letter"
+  ],
+  "files": [
+    {
+      "path": "elastic-rise.html",
+      "target": "compositions/components/elastic-rise.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:codrops/elastic-rise",
+    "author": "codrops",
+    "call": "MW.elasticRise(document.querySelector(\".mw-elastic-rise\"), tl, 0.5, { duration: 1.6 });",
+    "function": "MW.elasticRise",
+    "options": {
+      "duration": "s the whole entrance takes (1.6)",
+      "seed": "for the random parts (1)",
+      "split": "chars"
+    },
+    "credit": {
+      "author": "Codrops",
+      "collection": "Codrops",
+      "link": "https://github.com/codrops/OnScrollTypographyAnimations/blob/af28d61d1f8d3d117f5d1e9b09d5209e20a1a212/src/js/index2.js#L311-L338",
+      "commit": "af28d61d1f8d3d117f5d1e9b09d5209e20a1a212",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) 2009 - 2022 / 2024 Codrops (LICENSE)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "codrops/OnScrollTypographyAnimations at af28d61, src/js/index2.js lines 311-338",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Codrops fx24: the source's GSAP values; the scroll range is now `duration`.",
+    "titleVi": "Chữ cái bật lên đàn hồi từ dưới"
+  }
+}

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Raid Start - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 40%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.rs { position: absolute; inset: 0; } .rs-row { position: absolute; left: 50%; top: 200px; display: flex; gap: 80px; transform: translateX(-50%); }
+.rs-card { width: 240px; height: 320px; border-radius: 40px; background: #1b2130; border: 3px solid #2a3350; overflow: hidden; position: relative; opacity: 0; } .rs-card i { display: block; height: 40px; }
+.rs-card b { display: block; text-align: center; margin-top: 60px; font-size: 44px; } .rs-ready { position: absolute; bottom: 30px; left: 0; right: 0; text-align: center; font-size: 28px; font-weight: 800; color: #3ddc84; letter-spacing: 0.1em; opacity: 0; }
+.rs-title { position: absolute; left: 0; right: 0; top: 640px; text-align: center; font-size: 120px; font-weight: 900; opacity: 0; } .rs-rule { position: absolute; top: 710px; width: 300px; height: 8px; background: #8b7bff; transform: scaleX(0); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.9">
+<div class="gm rs"><div class="rs-row"><div class="rs-card"><i style="background:#ff5d6c"></i><b>Tank</b><div class="rs-ready">SẴN SÀNG</div></div><div class="rs-card"><i style="background:#3dd6f5"></i><b>Phép</b><div class="rs-ready">SẴN SÀNG</div></div><div class="rs-card"><i style="background:#3ddc84"></i><b>Hồi máu</b><div class="rs-ready">SẴN SÀNG</div></div><div class="rs-card"><i style="background:#ffd23d"></i><b>Cung</b><div class="rs-ready">SẴN SÀNG</div></div></div>
+<div class="rs-rule" style="left:120px;transform-origin:100% 50%"></div><div class="rs-rule" style="right:120px;transform-origin:0 50%"></div><div class="rs-title">BẮT ĐẦU ĐỘT KÍCH</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"start":0.3,"stagger":0.14,"goAt":1.25,"outAt":2.4};
+  var run = function (el, tl, at, o) {
+        var cards = Array.prototype.slice.call(el.querySelectorAll(".rs-card")), title = el.querySelector(".rs-title"), rules = el.querySelectorAll(".rs-rule"), sp = MW.spring(260, 20), ex = gsap.parseEase("expo.out"), pi = gsap.parseEase("power2.in");
+        return MW.drive(tl, at, o.outAt + 0.3, function (t) {
+          var f = 1 - pi(Math.max(0, Math.min(1, (t - o.outAt) / 0.3))), hop = t > 1.2 && t < 1.45 ? 30 * Math.sin(Math.PI * (t - 1.2) / 0.25) : 0;
+          cards.forEach(function (c, i) { var s0 = o.start + i * o.stagger, v = t >= s0 ? sp.at(t - s0) : 0, dir = i % 2 ? 1 : -1; gsap.set(c, { y: dir * 800 * (1 - v) - hop }); c.style.opacity = String((t >= s0 ? 1 : 0) * f);
+            var rd = c.querySelector(".rs-ready"); if (rd) rd.style.opacity = String(Math.max(0, Math.min(1, (t - s0 - 0.3) / 0.15))); });
+          var u = Math.max(0, Math.min(1, (t - o.goAt) / 0.22)); gsap.set(title, { scale: 1.6 - 0.6 * ex(u) }); title.style.opacity = String(Math.min(1, (t - o.goAt) / 0.11) * f * (t >= o.goAt ? 1 : 0));
+          rules.forEach(function (r, i) { var g = ex(Math.max(0, Math.min(1, (t - o.goAt - 0.05) / 0.4))); gsap.set(r, { scaleX: g }); r.style.opacity = String(f); });
+        });
+      };
+  MW.titleRaidStartLineup = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.titleRaidStartLineup(q(".rs"), tl, 0, {});
+          tl.set({}, {}, 2.9);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

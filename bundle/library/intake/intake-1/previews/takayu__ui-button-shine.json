@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-button-shine",
+  "hash": "e8d71e9d13b53a07",
+  "at": "2026-10-17T09:51:19.193Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__ui-button-shine.mp4",
+    "poster": "previews/takayu__ui-button-shine.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "fd22c576090906550c528794b5945e7e32e2dd98ac229ca98a0705c3a180cae9",
+    "size": 7309,
+    "seconds": 24.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

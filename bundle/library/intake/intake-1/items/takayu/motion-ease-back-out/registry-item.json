@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-back-out",
+  "type": "hyperframes:component",
+  "title": "Back Out",
+  "description": "Vượt quá đích một chút rồi lùi về; cho sự vui tươi, thành công, dùng hạn chế trong giao diện.out(1.7)).",
+  "tags": [
+    "ease",
+    "overshoot",
+    "back",
+    "easing",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-back-out.html",
+      "target": "compositions/components/motion-ease-back-out.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-ease-back-out",
+    "author": "takayu",
+    "call": "MW.motionEaseBackOut(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseBackOut",
+    "options": {
+      "duration": "s (0.5)",
+      "ease": "the curve (back.out(1.7))",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=e-outback",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=e-outback (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio e-outback, written here): Target moves 0 → 100 % with overshoot: recipe ~110 % at 350 ms, 100 % at 500 ms; site curve cubic-bezier(.34,1.56,.64,1) (peaks 1.10 at ~57 % of the time), 400–600 ms. GSAP back.out(1.7) is the native form. Site rule: playful / success, use sparingly in UI. Site demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: duration (0.5 s; 0.4–0.6) · ease (back.out(1.7) | custom .34,1.56,.64,1).",
+    "titleVi": "Back out (vượt quá rồi về)"
+  }
+}

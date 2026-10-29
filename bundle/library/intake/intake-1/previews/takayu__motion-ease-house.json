@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-ease-house",
+  "hash": "0d19af08bfd8139e",
+  "at": "2026-10-17T09:01:00.930Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-ease-house.mp4",
+    "poster": "previews/takayu__motion-ease-house.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "53325373df3d1e70729e71722147b32430f4f2a98f0808e60a6e971b80f673c0",
+    "size": 9357,
+    "seconds": 26.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

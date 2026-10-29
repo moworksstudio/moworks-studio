@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-camera-follow",
+  "type": "hyperframes:component",
+  "title": "Follow with Lookahead",
+  "description": "Máy quay bám theo vật đang chạy, hơi đi trước theo hướng chạy và có quán tính như lò xo.",
+  "tags": [
+    "camera",
+    "follow",
+    "spring",
+    "lookahead",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-camera-follow.html",
+      "target": "compositions/components/motion-camera-follow.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-camera-follow",
+    "author": "takayu",
+    "call": "MW.motionCameraFollow(q(\".fw\"), tl, 0, {});",
+    "function": "MW.motionCameraFollow",
+    "options": {
+      "subject": "selector of the subject inside the world (.ball)",
+      "swing": "px the subject swings (660)",
+      "period": "s per swing (3)",
+      "lookahead": "s of velocity the camera looks ahead (0.47)",
+      "cap": "px max lead (138; 46 on the site's frame)",
+      "k": "spring stiffness (120)",
+      "c": "damping (20)",
+      "duration": "s",
+      "layers": "selector of the layers"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=cam-follow",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=cam-follow (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio cam-follow, written here): Camera x target = subject x + subject velocity x 0.47 s (look-ahead ~14 frames, capped +-46 px), followed by a spring (stiffness 120, damping 20); background layers move at their depth factor (far 0.4). The demo approximates the spring with an 80 ms lag + a 46 tanh(v / 120) lead on a subject swinging +-220 px every 3 s. Params: lookahead (0.47 s, tối đa 46 px) · spring (120 / 20) · depth nền (0.4).",
+    "titleVi": "Máy quay bám theo, nhìn trước"
+  }
+}

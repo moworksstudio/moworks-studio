@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-focus-halo",
+  "type": "hyperframes:component",
+  "title": "Focus Halo",
+  "description": "Một vòng sáng loang ra từ viền chủ thể rồi tắt, chủ thể phồng nhẹ 4 %, xung quanh đứng yên.",
+  "tags": [
+    "attention",
+    "halo",
+    "ring",
+    "attention-emphasis",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-focus-halo.html",
+      "target": "compositions/components/effect-focus-halo.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-focus-halo",
+    "author": "takayu",
+    "call": "MW.effectFocusHalo(q(\".av\"), tl, 0.5, {});",
+    "function": "MW.effectFocusHalo",
+    "options": {
+      "duration": "s (0.9), ease-out cubic",
+      "from": "ring start scale (0.75)",
+      "to": "ring end scale (1.9)",
+      "opacity": "ring start opacity (0.7)",
+      "stroke": "px (7.5)",
+      "soft": "px of the soft copy (30)",
+      "bump": "the subject's scale bump (1.04)",
+      "color": "ring colour"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=focus-halo",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=focus-halo (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio focus-halo, written here): Ring on the target's outline (radius R): scale 0.75 → 1.9, opacity 0.7 → 0, 2.5 px stroke plus a 10 px wide soft copy at 35 % of that opacity, 900 ms power2.out (easeOutCubic); the target bumps 1 → 1.04 → 1 (sine) over the first 450 ms. Centre still; neighbours untouched. Params: scale (0.75 → 1.9) · opacity đầu (0.7) · stroke (2.5 px) · bump (1.04) · duration (0.9 s).",
+    "titleVi": "Quầng sáng loang quanh chủ thể"
+  }
+}

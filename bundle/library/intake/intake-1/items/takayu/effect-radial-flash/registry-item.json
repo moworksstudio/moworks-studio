@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-radial-flash",
+  "type": "hyperframes:component",
+  "title": "Radial Flash",
+  "description": "Ngôi sao loé sáng và nảy nhẹ, một vòng sóng toả ra cùng mười hai tia hai màu bắn ra rồi tắt.",
+  "tags": [
+    "flash",
+    "burst",
+    "ring",
+    "impact",
+    "light-glow",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-radial-flash.html",
+      "target": "compositions/components/effect-radial-flash.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-radial-flash",
+    "author": "takayu",
+    "call": "MW.effectRadialFlash(q(\".rf-s\"), tl, 0.5, {});",
+    "function": "MW.effectRadialFlash",
+    "options": {
+      "unit": "px per reference unit (5)",
+      "color": "flash colour",
+      "color2": "second ray colour"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=radial-flash",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=radial-flash (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio radial-flash, written here): Hit at t0: core brightness 100 → 220 % → 100 (sine bump^0.7 over 320 ms) with an additive soft glow; the star pops: scale 1 + 0.14·e^(−7 t)·sin(22 t), first half-wave only. From 60 ms a ring: radius 0.2 → 2.3 × 40 px, opacity 0.9 → 0, stroke 4 → 1 px, 500 ms expo.out. 12 rays in two colours move out (30→60 to 36→88 px) and fade over 350 ms expo.out. Params: core (100 → 220 %) · ring (0.2 → 2.3 × 40 px) · rays (12) · duration (0.56 s). Call once per hit.",
+    "titleVi": "Loé sáng toả tròn"
+  }
+}

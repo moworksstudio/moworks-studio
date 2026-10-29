@@ -1,0 +1,25 @@
+{
+  "uid": "in:magicui/pixel-image",
+  "hash": "90d89388790f1e2f",
+  "at": "2026-10-17T06:02:17.494Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/magicui__pixel-image.mp4",
+    "poster": "previews/magicui__pixel-image.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "213e4677c35c7a67ec06183d490262a5202d78a04bd0ec0bc528f6597aeedc57",
+    "size": 22533,
+    "seconds": 46.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

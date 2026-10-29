@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-skeleton-shimmer-resolve",
+  "hash": "602e72c7b77015e2",
+  "at": "2026-10-17T11:15:14.520Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__ui-skeleton-shimmer-resolve.mp4",
+    "poster": "previews/takayu__ui-skeleton-shimmer-resolve.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "bac70bcc659a50694c3790a61e04e6f732aade5ac8fba1ad99766f290f4021b1",
+    "size": 15013,
+    "seconds": 30.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "confetti",
+  "type": "hyperframes:component",
+  "title": "Confetti",
+  "description": "Bursts of tumbling paper confetti with real physics (gravity, drag, wobble): a basic pop, fireworks, side cannons, stars or emoji, fired at chosen times.",
+  "tags": [
+    "confetti",
+    "celebration",
+    "burst",
+    "fireworks",
+    "particles",
+    "canvas",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "confetti.html",
+      "target": "compositions/components/confetti.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/confetti",
+    "author": "magicui",
+    "call": "MW.confetti(q(\".mw-confetti\"), tl, 0, { bursts: [{ at: 0.3, options: { particleCount: 160, spread: 90, startVelocity: 55, origin: { x: 0.5, y: 0.65 }, scalar: 1.6 } }, { at: 2.6, recipe: \"stars\" }, { at: 4.2, recipe: \"side-cannons\" }], hold: 8 });",
+    "function": "MW.confetti",
+    "options": {
+      "bursts": "[{ at: 0, recipe: 'basic' }]",
+      "recipes": "basic | fireworks | side-cannons | stars | emoji",
+      "emoji": "for the emoji recipe ('🎉')",
+      "seed": "1",
+      "hold": "seconds drawn (5)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/confetti.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/confetti.tsx",
+      "upstream": "canvas-confetti 1.9.3 (Kiril Vatev, ISC): its particle physics re-written with a seeded generator"
+    },
+    "thirdParty": [
+      {
+        "name": "canvas-confetti 1.9.3",
+        "author": "Kiril Vatev",
+        "licence": "ISC",
+        "link": "https://github.com/catdad/canvas-confetti",
+        "npm": "https://www.npmjs.com/package/canvas-confetti/v/1.9.3",
+        "made": "adapted (physics re-written, seeded)"
+      }
+    ],
+    "notes": "el is a full-frame <canvas>. bursts: [{ at, recipe | options }] in s after `at`; options are canvas-confetti's (particleCount, angle, spread, startVelocity, decay, gravity, drift, ticks, origin {x, y}, colors, shapes, scalar, flat). canvas-confetti's random size jitter per tick is seeded too.",
+    "titleVi": "Pháo giấy bắn tung (canvas-confetti)"
+  }
+}

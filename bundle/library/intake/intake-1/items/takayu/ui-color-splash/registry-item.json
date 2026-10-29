@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-color-splash",
+  "type": "hyperframes:component",
+  "title": "Color Splash",
+  "description": "Chạm vào nút, trạng thái mới (nền màu nhấn, chữ đổi màu) loang tròn ra từ đúng điểm chạm với mép sắc, phủ kín nút; chạm lần nữa thì trạng thái cũ loang về.",
+  "tags": [
+    "splash",
+    "state",
+    "wipe",
+    "button",
+    "ui-buttons",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-color-splash.html",
+      "target": "compositions/components/ui-color-splash.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-color-splash",
+    "author": "takayu",
+    "call": "MW.uiColorSplash(q(\".cs\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.uiColorSplash",
+    "options": {
+      "taps": "[[s, x share, y share], ...]: the first brings the new state, the second the old one back",
+      "grow": "s to the farthest corner (0.5, power2.out), hard edge",
+      "rim": "px light rim while it grows (6)",
+      "on": "new background",
+      "onInk": "new label colour",
+      "label": "the label",
+      "cursor": "an optional cursor that makes the clicks",
+      "approach": "[x, y] px the cursor comes from",
+      "lead": "s it arrives before a click"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-button-color-splash",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-button-color-splash (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-button-color-splash, written here): Button 172x52, radius 14. Tap 1 (0.5 s, left-low point (116,104)): a circle carrying the new state (accent background, dark label) grows from the tap point to the farthest corner in 500 ms power2.out, hard edge (no fade), a 1.5 px light (ink) rim on the edge while it grows. Tap 2 (1.7 s, right-high point (214,80)) brings the old state (dark card, light label) back the same way. A small dot marks each tap for 0.3 s. Params: taps [[giây, x, y]] · grow (0.5 s, power2.out) · rim (1.5 px) · states (cũ / mới).",
+    "titleVi": "Màu mới loang từ điểm chạm"
+  }
+}

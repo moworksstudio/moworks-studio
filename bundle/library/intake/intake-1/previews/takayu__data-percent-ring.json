@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/data-percent-ring",
+  "hash": "c8e8bbf0f9ca92cf",
+  "at": "2026-10-17T08:12:03.488Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__data-percent-ring.mp4",
+    "poster": "previews/takayu__data-percent-ring.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f680ba4cda9c6a0b93056e74ef4692785e85a68771a4877e52f08c4c087ceb62",
+    "size": 15586,
+    "seconds": 26.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

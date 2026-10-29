@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-scale-pop-in",
+  "type": "hyperframes:component",
+  "title": "Elastic Scale Pop",
+  "description": "Từng ký tự bung ra từ một điểm bằng lò xo, vượt lên 1.15 lần rồi về đúng cỡ.",
+  "tags": [
+    "reveal",
+    "letters",
+    "spring",
+    "pop",
+    "text-reveal",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-scale-pop-in.html",
+      "target": "compositions/components/text-scale-pop-in.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-scale-pop-in",
+    "author": "takayu",
+    "call": "MW.textScalePopIn(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textScalePopIn",
+    "options": {
+      "stiffness": "(300)",
+      "damping": "(18)",
+      "mass": "(1): ζ ≈ 0.52, peak ≈ 1.15 at 0.21 s",
+      "stagger": "s (0.05)",
+      "cap": "s (0.6)",
+      "origin": "(50% 60%)",
+      "start": "s (0.3)",
+      "outAt": "s (2.65)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-scale-pop-in",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-scale-pop-in (read 12/10/2026)",
+      "upstream": "the site credits Codrops (MIT); a faithful port of Codrops' effects is in the Codrops collection"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-scale-pop-in, written here): Split chars, pivot 50 % 60 %. Each char scale 0 → 1 on a spring k 300, c 18, m 1 (ζ ≈ 0.52: peak ≈1.15 at 0.21 s, settles ~0.45 s); stagger 50 ms (recipe 30–50 ms; demo capped 0.6 s total) from 0.3 s. CSS fallback: 0.35 s with 70 % = 1.15; GSAP: elastic.out(1, 0.4) 0.9 s. Loop exit: fade 2.65–2.95 s; loop 3 s. Params: spring: độ cứng / giảm chấn (300 / 18) · stagger (0.05 s) · origin (50 % 60 %).",
+    "titleVi": "Ký tự bung ra bằng lò xo"
+  }
+}

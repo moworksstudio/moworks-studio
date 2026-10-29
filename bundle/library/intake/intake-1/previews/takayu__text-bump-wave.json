@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-bump-wave",
+  "hash": "fa91ad2b5f997e90",
+  "at": "2026-10-17T09:12:33.168Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-bump-wave.mp4",
+    "poster": "previews/takayu__text-bump-wave.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "460ade110682a91c8ad3b501cf260eda4ab4d1993389fd02277b99cf2a2ab808",
+    "size": 24868,
+    "seconds": 29.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

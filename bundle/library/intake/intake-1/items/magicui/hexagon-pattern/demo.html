@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Hexagon Pattern - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+.mw-hexagon-pattern { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.holder { position: absolute; left: 0; right: 0; top: -15%; height: 130%; transform: skewY(6deg); -webkit-mask-image: radial-gradient(820px circle at center, white, transparent); mask-image: radial-gradient(820px circle at center, white, transparent); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="6">
+<div class="holder"><svg class="mw-hexagon-pattern" aria-hidden="true"></svg></div><div class="center"><div class="h1">Tổ ong số</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  var defaults = {"radius":40,"gap":0,"x":-1,"y":-1,"direction":"horizontal","strokeDasharray":"0","hexagons":[],"color":"rgba(156,163,175,0.3)","drift":[0,0],"hold":10};
+  var run = function (el, tl, at, o) {
+      var NS = "http://www.w3.org/2000/svg", id = "mw-hex-" + (MW.__hp = (MW.__hp || 0) + 1), r = o.radius, dir = o.direction, gap = o.gap, s3 = Math.sqrt(3);
+      var verts = function (cx, cy, rr) { var a0 = dir === "horizontal" ? 0 : 30, out = []; for (var i = 0; i < 6; i++) { var a = ((a0 + i * 60) * Math.PI) / 180; out.push([cx + rr * Math.cos(a), cy + rr * Math.sin(a)]); } return out; };
+      var pts = function (cx, cy, rr) { return verts(cx, cy, rr).map(function (p) { return p[0] + "," + p[1]; }).join(" "); };
+      var sp = dir === "horizontal" ? (function () { var c = (3 * r) / 2 + (s3 * gap) / 2, w = s3 * r + gap; return { col: c, row: w, tw: c * 2, th: w }; })()
+        : (function () { var c = s3 * r + gap, w = (3 * r) / 2 + (s3 * gap) / 2; return { col: c, row: w, tw: c, th: w * 2 }; })();
+      var canon = dir === "horizontal" ? [[sp.col / 2, sp.row / 2], [(sp.col * 3) / 2, sp.row]] : [[sp.col / 2, sp.row / 2], [sp.col, (sp.row * 3) / 2]];
+      var centers = [];
+      canon.forEach(function (p) {
+        var cx = p[0], cy = p[1], W = sp.tw, H = sp.th;
+        centers.push([cx, cy]);
+        if (cy - r < 0) centers.push([cx, cy + H]); if (cy + r > H) centers.push([cx, cy - H]);
+        if (cx - r < 0) centers.push([cx + W, cy]); if (cx + r > W) centers.push([cx - W, cy]);
+        if (cy - r < 0 && cx - r < 0) centers.push([cx + W, cy + H]); if (cy - r < 0 && cx + r > W) centers.push([cx - W, cy + H]);
+        if (cy + r > H && cx - r < 0) centers.push([cx + W, cy - H]); if (cy + r > H && cx + r > W) centers.push([cx - W, cy - H]);
+      });
+      var solid = !o.strokeDasharray || o.strokeDasharray === "0" || o.strokeDasharray === "none", body = "";
+      if (solid) centers.forEach(function (c) { body += '<polygon fill="none" stroke="' + o.color + '" points="' + pts(c[0], c[1], r) + '"/>'; });
+      else {
+        var seen = {};
+        centers.forEach(function (c) { var v = verts(c[0], c[1], r); for (var i = 0; i < 6; i++) { var a = v[i], b = v[(i + 1) % 6], pq = a[0] < b[0] || (a[0] === b[0] && a[1] <= b[1]) ? [a, b] : [b, a];
+          var key = pq[0][0].toFixed(6) + "," + pq[0][1].toFixed(6) + "|" + pq[1][0].toFixed(6) + "," + pq[1][1].toFixed(6); if (seen[key]) continue; seen[key] = 1;
+          body += '<line fill="none" stroke="' + o.color + '" x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '" stroke-dasharray="' + o.strokeDasharray + '"/>'; } });
+      }
+      el.innerHTML = '<defs><pattern id="' + id + '" width="' + sp.tw + '" height="' + sp.th + '" patternUnits="userSpaceOnUse" x="' + o.x + '" y="' + o.y + '">' + body + '</pattern></defs>' +
+        '<rect width="100%" height="100%" fill="url(#' + id + ')" stroke="none"/>';
+      var cells = document.createElementNS(NS, "svg"); cells.setAttribute("x", o.x); cells.setAttribute("y", o.y); cells.style.overflow = "visible";
+      o.hexagons.forEach(function (h) {
+        var cx = dir === "horizontal" ? h[0] * sp.col + sp.col / 2 : h[0] * sp.col + sp.col / 2 + (h[1] % 2 !== 0 ? sp.col / 2 : 0);
+        var cy = dir === "horizontal" ? h[1] * sp.row + sp.row / 2 + (h[0] % 2 !== 0 ? sp.row / 2 : 0) : h[1] * sp.row + sp.row / 2;
+        var p = document.createElementNS(NS, "polygon"); p.setAttribute("points", pts(cx, cy, r - 1)); p.setAttribute("fill", o.color); p.setAttribute("stroke", "none"); cells.appendChild(p);
+      });
+      el.appendChild(cells);
+      if (!o.drift[0] && !o.drift[1]) return at;
+      var pat = el.querySelector("pattern"), st = { t: 0 };
+      var set = function () { var dx = o.drift[0] * st.t, dy = o.drift[1] * st.t; pat.setAttribute("x", o.x + dx); pat.setAttribute("y", o.y + dy); cells.setAttribute("x", o.x + dx); cells.setAttribute("y", o.y + dy); };
+      set();
+      tl.fromTo(st, { t: 0 }, { t: o.hold, duration: o.hold, ease: "none", onUpdate: set, immediateRender: false }, at);
+      return at + o.hold;
+    };
+  MW.hexagonPattern = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.hexagonPattern(q(".mw-hexagon-pattern"), tl, 0, { radius: 64, color: "rgba(156,163,175,0.35)", hexagons: [[10,4],[11,5],[12,4],[8,6],[13,6],[9,3],[14,3],[10,7],[12,7]], drift: [12, 6], hold: 6 });
+          tl.set({}, {}, 6);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

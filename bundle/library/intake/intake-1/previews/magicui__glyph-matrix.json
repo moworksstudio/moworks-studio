@@ -1,0 +1,26 @@
+{
+  "uid": "in:magicui/glyph-matrix",
+  "hash": "feb8fee0d7a6d39d",
+  "at": "2026-10-17T05:57:21.291Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "JetBrains Mono"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__glyph-matrix.mp4",
+    "poster": "previews/magicui__glyph-matrix.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4453b83a2f83b1243a361f8b2a91cd828bd9b508d29ef82a46cb239f7c210a21",
+    "size": 76625,
+    "seconds": 202.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

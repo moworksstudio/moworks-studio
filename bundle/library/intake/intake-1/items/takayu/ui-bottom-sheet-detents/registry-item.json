@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-bottom-sheet-detents",
+  "type": "hyperframes:block",
+  "title": "Bottom Sheet Drag",
+  "description": "Ngón tay kéo bảng dưới từ nấc 25 % lên, thả ra bảng bám vào nấc 60 % và nền tối theo; kéo xuống một chút thì bảng về lại nấc 25 %.",
+  "tags": [
+    "sheet",
+    "drag",
+    "snap",
+    "detents",
+    "gesture-mobile",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-bottom-sheet-detents.html",
+      "target": "compositions/components/ui-bottom-sheet-detents.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-bottom-sheet-detents",
+    "author": "takayu",
+    "call": "MW.uiBottomSheetDetents(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiBottomSheetDetents",
+    "options": {
+      "detents": "shares of the screen ([0.25, 0.6, 1])",
+      "title": "",
+      "loop": "s (3.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=bottom-sheet-drag",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=bottom-sheet-drag (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio bottom-sheet-drag, written here): Phone 112x184 with a sheet at the 25 % detent. 0.4-1.0 s a finger drags the sheet up 44 px (power1.in); on release it snaps to the 60 % detent in 0.76 s power2.out. 2.3-2.7 s the finger drags it down 28 px; release snaps back to 25 % in 0.76 s. Backdrop opacity = 0.6 × clamp((openness − 0.25) / 0.75). Detent ticks at the side. Params: detents ([25, 60, 100] %) · snap (0.76 s, power2.out) · backdrop (0.6 tối đa) · drags [[giây, px]]. Released after the drag it snaps to the nearest detent in 0.76 s (power2.out); the backdrop is 0.6 × (openness − 0.25) / 0.75.",
+    "titleVi": "Kéo bảng dưới lên xuống các nấc"
+  }
+}

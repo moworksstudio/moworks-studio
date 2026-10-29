@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-liquid-stretch-switch",
+  "type": "hyperframes:block",
+  "title": "Liquid Stretch",
+  "description": "Núm công tắc kéo dài ra như chất lỏng: mép trước lao đi, mép sau đuổi theo, núm dẹt lại khi giãn rồi rung nhẹ khi tới nơi.",
+  "tags": [
+    "toggle",
+    "stretch",
+    "liquid",
+    "indicator",
+    "selection-controls",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-liquid-stretch-switch.html",
+      "target": "compositions/components/ui-liquid-stretch-switch.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-liquid-stretch-switch",
+    "author": "takayu",
+    "call": "MW.uiLiquidStretchSwitch(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiLiquidStretchSwitch",
+    "options": {
+      "onAt": "s (0.3)",
+      "offAt": "s (1.6)",
+      "accent": "",
+      "loop": "s (2.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-control-liquid-stretch",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-control-liquid-stretch (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-control-liquid-stretch, written here): Track 160x56 r28. Knob pill 44x44. Each move (0.3 s on, 1.6 s off): the leading edge travels 104 px over 0.26 s power2.out, the trailing edge over 0.36 s power2.inOut starting 0.1 s later, so the pill stretches to ≈ 110 px; height shrinks by 12 px × stretch. On arrival (0.46 s after start) wobble w = 0.12 e^(−9 t) sin(34 t): height × (1 + w), width × (1 − 0.6 w). Track crossfades to accent with the knob centre. Params: travel (104 px) · lead (0.26 s) · trail (0.36 s, trễ 0.1 s) · wobble (0.12, 34 rad/s). The leading edge moves in 0.26 s (power2.out), the trailing edge 0.1 s later over 0.36 s, so the knob stretches; a wobble 0.12 e^(−9 t) sin 34 t on arrival.",
+    "titleVi": "Núm công tắc giãn như giọt nước"
+  }
+}

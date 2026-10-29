@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/data-delta-compare",
+  "hash": "e800d46e36481b14",
+  "at": "2026-10-17T08:25:03.174Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__data-delta-compare.mp4",
+    "poster": "previews/takayu__data-delta-compare.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "7e65af28d3b54e102662513eadcb5bfec4764e78d25f460c53c9fe55f8cf67ea",
+    "size": 13146,
+    "seconds": 31.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

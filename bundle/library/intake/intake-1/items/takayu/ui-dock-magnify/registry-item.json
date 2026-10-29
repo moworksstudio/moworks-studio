@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-dock-magnify",
+  "type": "hyperframes:block",
+  "title": "Perspective Dock",
+  "description": "Con trỏ lướt dọc thanh dock, các biểu tượng gần con trỏ phóng to tới 1.7 lần và nhô lên, thanh dock giãn rộng ra để khoảng cách luôn đều.",
+  "tags": [
+    "dock",
+    "magnify",
+    "hover",
+    "cursor",
+    "spatial-ui-depth",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-dock-magnify.html",
+      "target": "compositions/components/ui-dock-magnify.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.9,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-dock-magnify",
+    "author": "takayu",
+    "call": "MW.uiDockMagnify(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiDockMagnify",
+    "options": {
+      "max": "largest scale (1.7)",
+      "loop": "s (3.9)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-spatial-perspective-dock",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-spatial-perspective-dock (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-spatial-perspective-dock, written here): Dock of 7 icons 26 px (r 0.26 × size), gaps 7 px, centre icon accent. Cursor x travels 26 → 160 (0.35-1.4 s), then to 296 (2.7-3.6 s), power2.inOut. Icon scale = 1 + 0.7 × on × exp(−((slot x − cursor x) / 40)²) (slot x = 160 + 33 × (i − 3)); lift = 10 px × k² with k = (scale − 1) / 0.7; the dock widens so gaps stay 7 px. 'on' rises on a spring k220 d24 at 0.55 s and falls at 3.35 s. Params: icons (7 × 26 px, cách 7) · max (×1.7) · width (40 px gauss) · lift (10 px) · on (k220 c24).",
+    "titleVi": "Dock phóng to biểu tượng theo con trỏ"
+  }
+}

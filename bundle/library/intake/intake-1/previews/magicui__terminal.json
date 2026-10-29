@@ -1,0 +1,26 @@
+{
+  "uid": "in:magicui/terminal",
+  "hash": "0afd2f80d0baaf9b",
+  "at": "2026-10-17T06:30:56.947Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "JetBrains Mono"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__terminal.mp4",
+    "poster": "previews/magicui__terminal.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "027cadbd60f9b3ac3a6697c9d94483770c913aaf900d7c92ff49b5eebffc6fca",
+    "size": 18936,
+    "seconds": 32.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

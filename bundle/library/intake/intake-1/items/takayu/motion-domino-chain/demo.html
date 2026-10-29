@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Cause-and-effect Chain - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .gm { position: absolute; inset: 0; }
+.fl { position: absolute; left: 260px; right: 260px; top: 860px; height: 4px; border-radius: 2px; background: #262c3a; } .dm { position: absolute; top: 610px; width: 40px; height: 250px; border-radius: 8px; background: linear-gradient(180deg, #c4b8ff, #8b7bff); }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="2.8">
+<div class="fl"></div><div class="dm" style="left:340px"></div><div class="dm" style="left:490px"></div><div class="dm" style="left:640px"></div><div class="dm" style="left:790px"></div><div class="dm" style="left:940px"></div><div class="dm" style="left:1090px"></div><div class="dm" style="left:1240px"></div><div class="dm" style="left:1390px"></div><div class="dm" style="left:1540px"></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"items":".dm","angle":66,"each":0.25,"stagger":0.12,"standAt":null,"stand":0.3};
+  var run = function (el, tl, at, o) {
+        var ds = Array.prototype.slice.call(el.querySelectorAll(o.items)), pin = gsap.parseEase("power2.in"), io = gsap.parseEase("power2.inOut"); ds.forEach(function (d) { gsap.set(d, { transformOrigin: "100% 100%" }); });
+        var fall = (ds.length - 1) * o.stagger + o.each;
+        return MW.drive(tl, at, o.standAt == null ? fall : o.standAt + o.stand, function (t) {
+          var up = o.standAt != null && t > o.standAt ? io(Math.min(1, (t - o.standAt) / o.stand)) : 0;
+          ds.forEach(function (d, i) { gsap.set(d, { rotation: o.angle * pin(Math.max(0, Math.min(1, (t - i * o.stagger) / o.each))) * (1 - up) }); });
+        });
+      };
+  MW.motionDominoChain = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.motionDominoChain(q("#demo"), tl, 0.3, { standAt: 2.1 });
+          tl.set({}, {}, 2.8);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

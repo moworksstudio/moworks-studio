@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Diff Text Replace - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { background: radial-gradient(100% 100% at 50% 45%, #1a1f33, #0b0d12); color: #e8ebf3; font-family: Inter, sans-serif; } .sw { position: absolute; inset: 0; display: grid; place-items: center; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="4">
+<div class="sw"><div class="dr" style="font-size:150px;font-weight:800;font-variant-numeric:tabular-nums">Giá 980.000₫</div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":"Giá 980.000₫","to":"Giá 1.250.000₫","perChar":0.14,"at":0.6,"backAt":2.8,"underline":4,"accent":"#ffd23d"};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var A = gr(o.from), B = gr(o.to), pre = 0, suf = 0; while (pre < A.length && pre < B.length && A[pre] === B[pre]) pre++; while (suf < A.length - pre && suf < B.length - pre && A[A.length - 1 - suf] === B[B.length - 1 - suf]) suf++;
+  var mid = Math.max(A.length, B.length) - pre - suf, oldMid = A.slice(pre, A.length - suf), newMid = B.slice(pre, B.length - suf), per = Math.min(o.perChar, 1.2 / Math.max(1, Math.max(oldMid.length, newMid.length)));
+  el.textContent = ""; var head = document.createElement("span"), body = document.createElement("span"), tail = document.createElement("span"), caret = document.createElement("span");
+  head.textContent = A.slice(0, pre).join(""); tail.textContent = A.slice(A.length - suf).join(""); [head, body, tail].forEach(function (s) { s.style.whiteSpace = "pre"; el.appendChild(s); }); el.insertBefore(caret, tail);
+  caret.style.cssText = "display:inline-block;width:6px;height:1em;vertical-align:-0.1em;background:" + o.accent + ";margin:0 1px;";
+  var col = getComputedStyle(el).color, render = function (from, to, k, dt) { body.innerHTML = ""; var L = Math.max(from.length, to.length);
+    for (var i = 0; i < L; i++) { var s = document.createElement("span"); s.style.cssText = "display:inline-block;white-space:pre;"; if (i < k) { if (i >= to.length) continue; s.textContent = to[i]; s.style.color = o.accent; s.style.textDecoration = "underline " + o.underline + "px"; s.style.textUnderlineOffset = "0.2em"; if (i === k - 1) { var u = Math.min(1, dt / 0.12); s.style.transform = "scale(" + (1.25 - 0.25 * u) + ")"; } } else { if (i >= from.length) continue; s.textContent = from[i]; s.style.opacity = "0.5"; } body.appendChild(s); }
+    body.appendChild(caret); };
+  return MW.drive(tl, at, o.backAt + per * mid + 0.6, function (t) {
+    var fwd = t < o.backAt, t0 = fwd ? o.at : o.backAt, from = fwd ? oldMid : newMid, to = fwd ? newMid : oldMid, steps = Math.max(from.length, to.length), d = t - t0, k = Math.max(0, Math.min(steps, Math.floor(d / per) + (d >= 0 ? 1 : 0)));
+    if (!fwd && d < 0) { render(oldMid, newMid, newMid.length + 9, 1); } else render(from, to, d < 0 ? 0 : k, d - (k - 1) * per);
+    caret.style.visibility = (d >= 0 && k < steps) ? "visible" : "hidden"; void col;
+  });
+  };
+  MW.textDiffRetype = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.textDiffRetype(q(".dr"), tl, 0, {});
+          tl.set({}, {}, 4);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

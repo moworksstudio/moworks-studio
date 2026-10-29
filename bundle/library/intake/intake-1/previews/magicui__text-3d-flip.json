@@ -1,0 +1,26 @@
+{
+  "uid": "in:magicui/text-3d-flip",
+  "hash": "a5201aa35ac6876f",
+  "at": "2026-10-17T06:03:37.294Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Playfair Display"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/magicui__text-3d-flip.mp4",
+    "poster": "previews/magicui__text-3d-flip.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "38a15ac48899ba612fda88d5ceb64209f6f9c36683acda69028317b7db7f1f48",
+    "size": 30094,
+    "seconds": 32,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

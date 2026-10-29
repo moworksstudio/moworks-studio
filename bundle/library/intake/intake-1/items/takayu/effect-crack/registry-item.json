@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-crack",
+  "type": "hyperframes:component",
+  "title": "Glass Crack Recover",
+  "description": "Một cú va giữa tấm kính: các vết nứt răng cưa toả ra từ tâm kèm vòng va chạm và rung, rồi các vết nứt rút về tâm như tự liền lại và một vệt sáng lướt qua.",
+  "tags": [
+    "crack",
+    "impact",
+    "glass",
+    "repair",
+    "material-surface-motion",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-crack.html",
+      "target": "compositions/components/effect-crack.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-crack",
+    "author": "takayu",
+    "call": "MW.effectCrack(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectCrack",
+    "options": {
+      "impact": "s (0.55)",
+      "title": "",
+      "accent": "crack colour",
+      "seed": "the cracks (5)",
+      "loop": "s (3.6)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-material-glass-crack-recover",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-material-glass-crack-recover (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-material-glass-crack-recover, written here): Impact at 0.55 s: 7 crack rays (4 jagged segments each, seeded: angle i/7 turn ± 0.25 rad, segments ± 0.27 rad, length to the panel edge × 0.72-0.92) draw from the centre outward in 0.4 s power2.out, 30 ms apart, 1.6 px accent; a 14-24 px branch on every second ray; impact ring 4 → 30 px fading over 0.4 s; panel shake 3 px × e^(−10 t) × sin(70 t). Repair 2.1-2.7 s: rays retract to the centre (reverse stagger, power2.inOut); light sweep 2.85-3.35 s. Params: rays (7 × 4 đoạn, seed) · draw (0.4 s, cách 0.03 s) · shake (3 px) · repair (0.6 s) · sweep. Seven jagged rays of four segments draw out in 0.4 s, 0.03 s apart, with a branch on every second one; they retract in reverse order 2.1–2.7 s, then a light sweep.",
+    "titleVi": "Kính nứt rồi tự liền"
+  }
+}

@@ -1,0 +1,135 @@
+<!--
+  Kinetic Text (Magic UI (magicuidesign), MIT, adapted).
+  Source: magicuidesign/magicui at efe76fc, apps/www/registry/magicui/kinetic-text.tsx.
+  Letters swell in weight around a pointer that glides along the headline: the touched letter goes black-heavy with an outline, its neighbours less, each change easing over 0.4 s.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.kineticText(q(".mw-kinetic-text"), tl, 0.3, { path: [[0, -1], [0.3, 0], [2.0, 10], [2.4, 10], [4.1, 0], [4.4, -1]] });
+
+  Options (defaults in brackets):
+      - path: [[t, letter], ...] relative to `at` (sweep left to right and back over 3 s)
+      - base: weight (300)
+      - peak: weight (900)
+
+  Notes: Needs a variable font (Inter, Roboto Flex...). Upstream reacts to the mouse; here `path` lists [time s, letter index] points the pointer passes (linear between them, -1 = off the word).
+-->
+
+<h1 class="mw-kinetic-text">Kinetic</h1>
+
+<style>
+.mw-kinetic-text { display: flex; flex-wrap: wrap; font-weight: 300; }
+.mw-kinetic-text .mw-ch { -webkit-text-stroke-color: transparent; }
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  var defaults = {"path":null,"base":300};
+  var run = function (el, tl, at, o) {
+      var chars = MW.split(el, "chars").chars, n = chars.length;
+      var fs = parseFloat(getComputedStyle(el).fontSize), sw = fs * 125 / 6000, pad = fs / 12;
+      var path = o.path || [[0, -1], [0.2, 0], [1.4, n - 1], [1.7, n - 1], [2.9, 0], [3.1, -1]];
+      var css = MW.bezier.apply(null, MW.CSS_EASE.ease);
+      // the letter under the pointer at time t (or -1)
+      var hoverAt = function (t) {
+        if (t <= path[0][0]) return Math.round(path[0][1]);
+        for (var i = 1; i < path.length; i++) if (t <= path[i][0]) { var a = path[i - 1], b = path[i], f = (t - a[0]) / Math.max(1e-6, b[0] - a[0]); if (a[1] < 0 || b[1] < 0) return f < 0.5 ? Math.round(a[1]) : Math.round(b[1]); return Math.round(a[1] + (b[1] - a[1]) * f); }
+        return Math.round(path[path.length - 1][1]);
+      };
+      // target state of letter i when letter h is hovered: [weight, stroke colour on (0/1), stroke x, padding]
+      var target = function (i, h) {
+        if (h < 0) return [o.base, 0, 1, 0];
+        var d = i - h;
+        if (d === 0) return [900, 1, 2, pad];
+        if (d === -1 || d === 1) return [600, 0, 1, pad];
+        if (d === -2 || d === 2) return [400, 0, 1, 0];
+        return [o.base, 0, 1, 0];
+      };
+      // hover changes, sampled on a 60 fps grid
+      var end = path[path.length - 1][0], events = [[0, hoverAt(0)]];
+      for (var f = 1; f <= Math.ceil(end * 60) + 1; f++) { var h = hoverAt(f / 60); if (h !== events[events.length - 1][1]) events.push([f / 60, h]); }
+      var stateAt = function (i, t) {
+        var cur = target(i, events[0][1]), from = cur, t0 = -1;
+        for (var k = 1; k < events.length && events[k][0] <= t; k++) {
+          var next = target(i, events[k][1]);
+          if (next.join() === from.join() && t0 < 0) continue;
+          // the value at this event time is where the running transition had got to
+          var p = t0 < 0 ? 1 : css(Math.min(1, (events[k][0] - t0) / 0.4));
+          var now = cur.map(function (v, j) { return from[j] + (v - from[j]) * p; });
+          from = now; cur = next; t0 = events[k][0];
+        }
+        var q = t0 < 0 ? 1 : css(Math.min(1, (t - t0) / 0.4));
+        return cur.map(function (v, j) { return from[j] + (v - from[j]) * q; });
+      };
+      var s = { t: 0 };
+      var draw = function () {
+        for (var i = 0; i < n; i++) {
+          var v = stateAt(i, s.t), c = chars[i].style;
+          c.fontWeight = Math.round(v[0]);
+          c.webkitTextStrokeWidth = (sw * v[2]) + "px";
+          c.webkitTextStrokeColor = v[1] > 0.5 ? "currentColor" : "transparent";
+          c.paddingLeft = c.paddingRight = v[3] + "px";
+        }
+      };
+      draw();
+      tl.fromTo(s, { t: 0 }, { t: end + 0.4, duration: end + 0.4, ease: "none", onUpdate: draw, immediateRender: false }, at);
+      return at + end + 0.4;
+    };
+  MW.kineticText = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-mask-wipe",
+  "hash": "0736b371bcee6e62",
+  "at": "2026-10-17T11:02:08.611Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__motion-mask-wipe.mp4",
+    "poster": "previews/takayu__motion-mask-wipe.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "70300717b112f877bc53fb3028d1afeaa18a8eaf8114904d54cffe42e51fd469",
+    "size": 8357,
+    "seconds": 26.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

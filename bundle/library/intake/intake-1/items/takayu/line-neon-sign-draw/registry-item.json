@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "line-neon-sign-draw",
+  "type": "hyperframes:component",
+  "title": "Neon Tube Draw",
+  "description": "Chữ NEON hiện như ống neon được bật: nét sáng chạy đều từ đầu tới cuối trên ống tối, có đầu sáng dẫn đường, xong thì nhấp nháy hai lần rồi sáng đều.",
+  "tags": [
+    "neon",
+    "draw",
+    "glow",
+    "sign",
+    "material-surface-motion",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "line-neon-sign-draw.html",
+      "target": "compositions/components/line-neon-sign-draw.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/line-neon-sign-draw",
+    "author": "takayu",
+    "call": "MW.lineNeonSignDraw(q(\".gm\"), tl, 0, {});",
+    "function": "MW.lineNeonSignDraw",
+    "options": {
+      "draw": "s at a constant speed (2)",
+      "start": "s (0.35)",
+      "accent": "neon colour",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-material-neon-tube-draw",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-material-neon-tube-draw (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-material-neon-tube-draw, written here): Neon word path ('NEON': N, E with a bar, O ellipse, N; several strokes) drawn at constant speed over 2 s (linear) from 0.35 s: lit stroke 4.5 px accent with a 14 px glow plus a 1.2 px bright core (70 %), glowing head dot r3.5; the unlit tube shown dim underneath (6 px grey + 2 px line). On completion two flickers: opacity 1, 0.35, 1, 0.5, 1 in 50 ms steps (2.4-2.65 s). Lights off 3.55-3.8 s. Params: draw (2 s, none) · width (4.5 px + glow 14 px) · flicker ([1, 0.35, 1, 0.5, 1] / 0.05 s) · off. Two flickers on completion (opacity 1, 0.35, 1, 0.5, 1 in 0.05 s steps), lights off 3.55–3.8 s.",
+    "titleVi": "Chữ neon tự sáng từng nét"
+  }
+}

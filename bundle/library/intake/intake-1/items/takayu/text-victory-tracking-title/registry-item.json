@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-victory-tracking-title",
+  "type": "hyperframes:component",
+  "title": "Victory Title",
+  "description": "Chữ chiến thắng hiện ra với khoảng cách chữ rất rộng rồi khép về giữa, gạch chân mọc từ giữa, dòng phụ hiện bên dưới và vài tia sao bay lên; giữ yên khá lâu rồi mờ ra.",
+  "tags": [
+    "tracking",
+    "title",
+    "rule",
+    "sparkle",
+    "game-cinematics",
+    "heavy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-victory-tracking-title.html",
+      "target": "compositions/components/text-victory-tracking-title.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-victory-tracking-title",
+    "author": "takayu",
+    "call": "MW.textVictoryTrackingTitle(q(\".vt h1\"), tl, 0, { sub: \".vt p\" });",
+    "function": "MW.textVictoryTrackingTitle",
+    "options": {
+      "from": "letter spacing at the start, × (2.6), closing in 0.7 s expo.out",
+      "rule": "px each side (550)",
+      "color": "rule colour",
+      "sub": "the subtitle (fades in 1.1-1.4 s)",
+      "outAt": "s (2.45)",
+      "seed": "sparkles"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-game-cinematic-victory-title",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-game-cinematic-victory-title (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-game-cinematic-victory-title, written here): px @320x200. Letters (42 px, accent) start at 2.6× their spacing from the centre and close to 1× in 700 ms outExpo (0.25-0.95 s), opacity = min(1, 1.6p). Rule grows from the centre to ±110 px (400 ms outExpo at 0.85 s). Subtitle fades in 1.1-1.4 s. 16 seeded four-point sparkles rise 40-90 px from the rule (start 0.95-1.2 s, life 0.9-1.3 s, outCubic), fading. Holds ~1.4 s; out 2.45-2.7 s in-cubic. Params: from: giãn đầu (×2.6) · duration: thời gian khép (0.7 s) · rule: gạch chân (±110 px) · sparkles: số tia sao (16) · outAt: lúc ra (2.45 s).",
+    "titleVi": "Chữ chiến thắng khép giãn chữ"
+  }
+}

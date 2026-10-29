@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-scale-through",
+  "type": "hyperframes:component",
+  "title": "Scale-through / Zoom Through",
+  "description": "Cảnh cũ phóng to và mờ đi như máy quay lao qua, cảnh mới bên dưới phóng từ 80 % về đúng cỡ.",
+  "tags": [
+    "zoom",
+    "scale",
+    "depth",
+    "transitions",
+    "smooth",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "transition-scale-through.html",
+      "target": "compositions/components/transition-scale-through.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/transition-scale-through",
+    "author": "takayu",
+    "call": "MW.transitionScaleThrough(q(\".tk-b\"), tl, 1.2, {});",
+    "function": "MW.transitionScaleThrough",
+    "options": {
+      "duration": "s (0.6)",
+      "scaleOut": "the outgoing scene grows to (1.3) while fading over 0-0.35 s",
+      "scaleIn": "the incoming starts at (0.8), 0.25-0.6 s",
+      "from": "the outgoing scene"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tr-zoomthrough",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tr-zoomthrough (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tr-zoomthrough, written here): Outgoing scene on top: scale 1 -> 1.3 and opacity 1 -> 0 over 0-350 ms; the incoming scene sits underneath at full opacity, scale 0.8 -> 1 over 250-600 ms; easeInOutCubic, centre origin; 600 ms total. (The demo runs both over the whole transition, ease-in-out.) Params: duration (0.6 s) · scaleOut (1.3) · scaleIn (0.8).",
+    "titleVi": "Lao xuyên qua cảnh"
+  }
+}

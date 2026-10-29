@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-takayu-error-shake",
+  "type": "hyperframes:component",
+  "title": "Error Shake",
+  "description": "Bấm OK với mật khẩu sai, ô nhập rung ngang ±9 px tắt dần trong khoảng nửa giây, viền chuyển màu lỗi và dòng báo lỗi hiện bên dưới.",
+  "tags": [
+    "shake",
+    "error",
+    "form",
+    "feedback",
+    "ui-buttons",
+    "crisp",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-takayu-error-shake.html",
+      "target": "compositions/components/motion-takayu-error-shake.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-takayu-error-shake",
+    "author": "takayu",
+    "call": "MW.motionTakayuErrorShake(q(\".es-f\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.motionTakayuErrorShake",
+    "options": {
+      "press": "s the OK is clicked (0.55)",
+      "amp": "px (36)",
+      "freq": "rad/s (44)",
+      "decay": "(6)",
+      "clearAt": "s the error clears (2.25)",
+      "accent": "error colour",
+      "error": "the error line",
+      "button": "the button clicked",
+      "cursor": "an optional cursor that makes the clicks",
+      "approach": "[x, y] px the cursor comes from",
+      "lead": "s it arrives before a click"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-button-error-shake",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-button-error-shake (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-button-error-shake, written here): Password field 140x40 r10 (six dots) with an OK pill. Click at 0.55 s; from 0.65 s x = 9 × e^(−6 t) × sin(44 t) px, faded to 0 between 0.45-0.6 s (always lands at 0). Error border (accent 2 px) and an error line below fade in over 0.63-0.7 s, out at 2.25-2.5 s. Params: at · amp (9 px) · freq (44 rad/s) · decay (6) · duration (0.6 s). x = amp × e^(−decay t) × sin(freq t) from 0.1 s after the click, faded to 0 between 0.45 and 0.6 s, so it always lands at 0.",
+    "titleVi": "Ô nhập rung ngang báo lỗi"
+  }
+}

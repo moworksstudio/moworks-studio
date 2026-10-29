@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>IME Kana-Kanji Conversion - Demo</title>
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+:root { --bg: #09090b; --fg: #fafafa; --card: #111114; --line: #27272a; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+#demo { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); color: var(--fg); font-family: Inter, sans-serif; }
+.center { position: absolute; inset: 0; display: grid; place-items: center; }
+.row { display: flex; align-items: center; justify-content: center; gap: 48px; }
+.col { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.h1 { font-size: 132px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; text-align: center; }
+.h2 { font-size: 84px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; text-align: center; }
+.p { font-size: 40px; line-height: 1.4; opacity: 0.72; text-align: center; }
+.card { position: relative; border-radius: 28px; background: var(--card); border: 2px solid var(--line); overflow: hidden; }
+.muted { opacity: 0.6; }
+
+#demo { --ink: #e8ebf3; --acc: #8b7bff; --acc2: #3dd6f5; --warm: #ffb547; --rose: #ff5d8f; --mute: #6c778b; --tk-card: #151a24; --tk-line: #262c3a; background: #0b0d12; color: var(--ink); }
+.tk-stage { position: absolute; inset: 0; display: grid; place-items: center; }
+.tk-cap { font-size: 30px; font-weight: 500; color: var(--mute); letter-spacing: 0.01em; }
+.ui-wrap { position: absolute; inset: 0; display: grid; place-items: center; }
+.ui-card { position: relative; background: var(--tk-card); border: 2px solid var(--tk-line); border-radius: 36px; padding: 48px 56px; box-shadow: 0 40px 100px rgba(0, 0, 0, 0.35); }
+.ui-h { font-size: 46px; font-weight: 700; margin: 0 0 14px; } .ui-p { font-size: 30px; color: #9aa3b8; margin: 0; }
+.ui-btn { display: inline-grid; place-items: center; height: 104px; padding: 0 64px; border-radius: 30px; background: linear-gradient(180deg, #9c88ff, #7357f5); color: #fff; font-size: 40px; font-weight: 700; box-shadow: 0 18px 40px rgba(115, 87, 245, 0.35); }
+.ui-btn.ghost { background: transparent; border: 3px solid var(--tk-line); color: #c3cadb; box-shadow: none; }
+.ui-row { display: flex; align-items: center; gap: 28px; height: 110px; padding: 0 34px; border-radius: 24px; background: #1b2130; margin: 14px 0; font-size: 34px; color: #c9d2ea; }
+.ui-dot { width: 56px; height: 56px; border-radius: 16px; background: #2a3350; flex: none; }
+.ui-field { width: 760px; height: 112px; border-radius: 26px; border: 3px solid #36405a; background: #10141d; display: flex; align-items: center; padding: 0 36px; font-size: 36px; color: #c9d2ea; }
+.ui-pill { display: inline-grid; place-items: center; height: 96px; padding: 0 52px; border-radius: 48px; font-size: 34px; font-weight: 800; letter-spacing: 0.08em; }
+.ui-avatar { width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #b8a9ff, #6a4cf0); display: grid; place-items: center; font-size: 84px; font-weight: 800; color: #fff; }
+.ui-avatar.grey { background: #2a3142; color: #6c778b; }
+.ui-icon { width: 200px; height: 200px; border-radius: 48px; display: grid; place-items: center; background: linear-gradient(160deg, #ffd27a, #ff9b3d); font-size: 110px; }
+.ui-cursor { position: absolute; left: 0; top: 0; z-index: 20; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5)); }
+.im { position: relative; width: 1120px; height: 640px; } .im-f { position: absolute; left: 0; top: 140px; width: 1120px; height: 150px; font-size: 70px; box-sizing: border-box; } .im-c { position: absolute; top: 34px; width: 8px; height: 82px; background: #8b7bff; }
+.im-w { position: absolute; left: 30px; top: 320px; width: 520px; border-radius: 26px; background: #1b2130; border: 3px solid #2a3350; padding: 14px; opacity: 0; } .im-w div { padding: 18px 26px; border-radius: 16px; font-size: 46px; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <div id="demo" data-composition-id="mw-demo" data-start="0" data-width="1920" data-height="1080" data-duration="5">
+<div class="ui-wrap"><div class="im"><div class="ui-field im-f"><span class="im-t"></span><i class="im-c"></i></div><div class="im-w"><div>Tiếng Việt</div><div>tiếng việt</div><div>TIẾNG VIỆT</div></div></div></div>
+      <script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"states":["t","ti","tie","tiê","tiên","tiêng","tiếng","tiếng v","tiếng vi","tiếng vie","tiếng viê","tiếng viêt","tiếng việt"],"converted":["Tiếng","Việt"],"per":0.09,"start":0.35,"text":".im-t","window":".im-w","caret":".im-c","accent":"#8b7bff","exitAt":4.45,"loop":5};
+  var run = function (el, tl, at, o) {
+        var tx = el.querySelector(o.text), win = el.querySelector(o.window), caret = el.querySelector(o.caret), n = o.states.length, typeEnd = o.start + Math.min(o.per * n, 1.6), sp = typeEnd + 0.3, en = sp + 1, rows = win ? Array.prototype.slice.call(win.children) : [];
+        return MW.drive(tl, at, o.loop, function (t) {
+          var x = Math.max(0, Math.min(1, (t - o.exitAt) / 0.3)); el.style.opacity = String(1 - x);
+          if (t < sp) { var k = Math.max(-1, Math.min(n - 1, Math.floor((t - o.start) / (Math.min(o.per * n, 1.6) / n)))); tx.innerHTML = k < 0 ? "" : '<span style="border-bottom:4px dotted #8f9ab3">' + o.states[k] + "</span>"; }
+          else { var parts = o.converted.map(function (s, i) { var f = t - sp - i * 0.08, flash = f >= 0 && f < 0.3 && t < en, ul = t < en ? (i === 0 ? "border-bottom:10px solid " + o.accent : "border-bottom:4px solid #8f9ab3") : ""; return '<span style="padding:0 6px;' + ul + ";" + (flash ? "background:" + o.accent + ";color:#0b0d12;" : "") + '">' + s + "</span>"; }); tx.innerHTML = parts.join(""); }
+          if (win) { var w = Math.max(0, Math.min(1, (t - sp - 0.1) / 0.15)) * (t < en ? 1 : 0); win.style.opacity = String(w); rows.forEach(function (r, i) { r.style.background = i === 0 ? o.accent : "transparent"; r.style.color = i === 0 ? "#0b0d12" : ""; }); }
+          if (caret) { var c = tx.getBoundingClientRect(), b = el.getBoundingClientRect(); caret.style.left = (c.right - b.left + 6) + "px"; caret.style.opacity = (Math.floor(t / 0.5) % 2 === 0 || (t > o.start && t < typeEnd)) ? "1" : "0"; }
+        });
+      };
+  MW.uiImeConversion = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+      </script>
+      <script>
+        (function () {
+          var tl = gsap.timeline({ paused: true });
+          var q = function (s) { return document.querySelector(s); }, qa = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+          MW.uiImeConversion(q(".im"), tl, 0, {});
+          tl.set({}, {}, 5);
+          // register only when every motion is ready (MW.pending: e.g. a WebGL texture still decoding), as HyperFrames asks of async builds
+          var go = function () { window.__timelines = window.__timelines || {}; window.__timelines["mw-demo"] = tl; };
+          if (window.MW && MW.pending && MW.pending.length) Promise.all(MW.pending).then(go, go); else go();
+        })();
+      </script>
+    </div>
+  </body>
+</html>

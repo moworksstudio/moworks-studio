@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-scale-pop-in",
+  "hash": "7eb09ec22da6d287",
+  "at": "2026-10-17T11:41:42.904Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-scale-pop-in.mp4",
+    "poster": "previews/takayu__text-scale-pop-in.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "1df18803db1182cd6824bf545c1c2e54b117da7a13a8df0b207145968620ef7c",
+    "size": 10235,
+    "seconds": 25.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

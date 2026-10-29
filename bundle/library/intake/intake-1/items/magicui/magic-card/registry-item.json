@@ -1,0 +1,70 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "magic-card",
+  "type": "hyperframes:component",
+  "title": "Magic Card",
+  "description": "A spotlight glides over a card and lights its border near the light (gradient mode), or a large blurred colour orb trails the pointer (orb mode).",
+  "tags": [
+    "spotlight",
+    "card",
+    "border",
+    "glow",
+    "orb",
+    "hover",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "magic-card.html",
+      "target": "compositions/components/magic-card.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/magic-card",
+    "author": "magicui",
+    "call": "MW.magicCard(q(\".c1\"), tl, 0.2, { gradientSize: 320, gradientColor: \"#3f3f46\", path: [[0, -100, 80], [1.8, 560, 300], [3.6, 120, 380], [4.6, 700, 60]] });",
+    "function": "MW.magicCard",
+    "options": {
+      "mode": "gradient | orb (gradient)",
+      "gradientSize": "px (200)",
+      "gradientColor": "#262626",
+      "gradientOpacity": "0.8",
+      "gradientFrom": "#9E7AFF",
+      "gradientTo": "#FE8BBB",
+      "border": "rgba(255,255,255,0.1)",
+      "background": "#0a0a0a",
+      "glowFrom": "#ee4f27",
+      "glowTo": "#6b21ef",
+      "glowAngle": "90",
+      "glowSize": "420",
+      "glowBlur": "60",
+      "glowOpacity": "0.9",
+      "path": "[[t, x, y], ...]",
+      "enter": "s (path start)",
+      "leave": "s (path end)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/magic-card.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/magic-card.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is the card (its content stays on top). path: [[t, x, y], ...] px in the card; outside the card or before the path starts the light rests off it (-size). Upstream's inline opacity 0.8 keeps the inner glow always on (kept).",
+    "titleVi": "Đèn rọi lướt trên thẻ, viền sáng theo"
+  }
+}

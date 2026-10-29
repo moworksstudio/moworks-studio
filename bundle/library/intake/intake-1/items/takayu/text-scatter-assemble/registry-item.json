@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-scatter-assemble",
+  "type": "hyperframes:component",
+  "title": "Scatter Assemble",
+  "description": "Các ký tự nằm rải rác khắp khung rồi bay về đúng chỗ theo thứ tự ngẫu nhiên.",
+  "tags": [
+    "reveal",
+    "letters",
+    "scatter",
+    "random",
+    "text-reveal",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "text-scatter-assemble.html",
+      "target": "compositions/components/text-scatter-assemble.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/text-scatter-assemble",
+    "author": "takayu",
+    "call": "MW.textScatterAssemble(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textScatterAssemble",
+    "options": {
+      "spread": "± em [x, y] of the start ([2.6, 1.6])",
+      "duration": "s (1, power1.inOut)",
+      "stagger": "s in a seeded order (0.07)",
+      "cap": "s (0.7)",
+      "ease": "",
+      "dim": "opacity when scattered (0.3)",
+      "seed": "(9)",
+      "start": "s (0.3)",
+      "outAt": "s they scatter back (2.55, 0.55 s, 30 ms apart)",
+      "loop": "s (3.4)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=tx-scatter-assemble",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=tx-scatter-assemble (read 12/10/2026)",
+      "upstream": "the site credits Codrops (MIT); a faithful port of Codrops' effects is in the Codrops collection"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio tx-scatter-assemble, written here): Split chars; each starts at a seeded random offset x ±200 %, y ±150 % of its glyph box (demo ±2.6 em / ±1.6 em, kept inside the frame) and moves home over 1 s power1.inOut; random order, 50 ms apart (demo 70 ms capped 0.7 s), from 0.3 s; demo opacity 0.3 → 1. Loop exit: scatter back, 0.55 s, random order 30 ms apart, from 2.55 s; loop 3.4 s. Params: spreadX / spreadY: độ tản (200 % / 150 %) · duration (1 s) · stagger: ngẫu nhiên (0.05 s) · seed.",
+    "titleVi": "Ký tự rải rác bay về đúng chỗ"
+  }
+}

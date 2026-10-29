@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/text-hover-word-lift",
+  "hash": "1b1af50128e3cd6a",
+  "at": "2026-10-17T11:48:30.993Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__text-hover-word-lift.mp4",
+    "poster": "previews/takayu__text-hover-word-lift.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "41c4922ae29ff8494796e41db3dce7835a5e466e198b35a9c52f04614b6fbfe1",
+    "size": 22597,
+    "seconds": 32.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

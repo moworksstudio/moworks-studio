@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ripple",
+  "type": "hyperframes:component",
+  "title": "Ripple",
+  "description": "Concentric soft circles behind a logo or button gently breathe in and out, one after another (2 s, eight rings).",
+  "tags": [
+    "ripple",
+    "rings",
+    "pulse",
+    "halo",
+    "logo",
+    "loop",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "ripple.html",
+      "target": "compositions/components/ripple.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/ripple",
+    "author": "magicui",
+    "call": "MW.ripple(q(\".mw-ripple\"), tl, 0, { mainCircleSize: 300, mainCircleOpacity: 0.4, hold: 6 });",
+    "function": "MW.ripple",
+    "options": {
+      "mainCircleSize": "px (210)",
+      "mainCircleOpacity": "0.24",
+      "numCircles": "8",
+      "color": "ring colour (#fafafa)",
+      "hold": "seconds (10)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/ripple.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/ripple.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "el is a full-size layer behind the subject (the rings centre in it). The inline delay i x 0.06 s overrides the registry class's i x 0.2 s, as upstream.",
+    "titleVi": "Các vòng tròn đồng tâm thở nhẹ"
+  }
+}

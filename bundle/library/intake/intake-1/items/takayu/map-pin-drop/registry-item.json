@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "map-pin-drop",
+  "type": "hyperframes:block",
+  "title": "Map Pins Drop",
+  "description": "Các ghim lần lượt rơi xuống bản đồ và nảy nhẹ khi chạm đất.",
+  "tags": [
+    "map",
+    "pins",
+    "bounce",
+    "stagger",
+    "data-storytelling",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "map-pin-drop.html",
+      "target": "compositions/components/map-pin-drop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/map-pin-drop",
+    "author": "takayu",
+    "call": "MW.mapPinDrop(q(\".gm\"), tl, 0, {});",
+    "function": "MW.mapPinDrop",
+    "options": {
+      "pins": "(9)",
+      "stagger": "s (0.1; 0.06 in the recipe)",
+      "seed": "pin spots"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=dv-pins",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=dv-pins (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio dv-pins, written here): Pins at seeded spots on a map panel; pin i drops 40 px with easeOutBounce over 400 ms, starting 60 ms apart (recipe; the demo 100 ms, 9 pins), opacity 0 -> 1 in the first third; 1 in 3 accent. Params: pins · stagger (60 ms) · drop (40 px, 0.4 s) · seed.",
+    "titleVi": "Ghim rơi xuống bản đồ"
+  }
+}

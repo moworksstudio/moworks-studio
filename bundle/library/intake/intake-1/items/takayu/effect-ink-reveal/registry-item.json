@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-ink-reveal",
+  "type": "hyperframes:component",
+  "title": "Ink Reveal",
+  "description": "Bốn vết mực mềm loang ra từ bốn điểm lệch giờ nhau, viền gợn rồi nhập lại thành một, lộ trọn hình bên dưới.",
+  "tags": [
+    "ink",
+    "mask",
+    "reveal",
+    "organic",
+    "effects-transitions",
+    "soft",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "effect-ink-reveal.html",
+      "target": "compositions/components/effect-ink-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.9,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/effect-ink-reveal",
+    "author": "takayu",
+    "call": "MW.effectInkReveal(q(\".ir\"), tl, 0.3, { exitAt: 2.2 });",
+    "function": "MW.effectInkReveal",
+    "options": {
+      "duration": "s per blot (1.2, ease-out cubic)",
+      "starts": "s each blot starts",
+      "points": "[[x, y] shares]",
+      "size": "end radius as a share of the width (0.55)",
+      "wobble": "± share of the radius, fading as it grows (0.14)",
+      "seed": "(2)",
+      "exitAt": "s after the start to fade (null)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=ink-reveal",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=ink-reveal (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio ink-reveal, written here): Four soft blobs mask the target (demo box 200 x 110), centres at (24 %, 60 %), (55 %, 29 %), (78 %, 60 %), (44 %, 83 %) of the box, starting 0 / 250 / 150 / 500 ms; each radius 0 -> 110 px (0.55 x box width) over 1200 ms easeOutCubic; 2.5 px feather, edge wobble +-14 % of radius fading as it grows; blobs merge into a full reveal. Exit: fade 300 ms ease-in cubic. Recipe: 980 ms, r 0 -> 105 px. Params: duration mỗi vết (1.2 s) · points (4) · wobble (14 %) · feather (2.5 px).",
+    "titleVi": "Mực loang lộ hình từ bốn điểm"
+  }
+}

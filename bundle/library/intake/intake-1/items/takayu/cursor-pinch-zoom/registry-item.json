@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "cursor-pinch-zoom",
+  "type": "hyperframes:block",
+  "title": "Pinch Zoom",
+  "description": "Hai điểm chạm tách xa nhau, thẻ nội dung phóng to quanh tâm hai ngón, vượt quá một chút rồi lắng lại và thẳng ra.",
+  "tags": [
+    "pinch",
+    "zoom",
+    "gesture",
+    "touch",
+    "gesture-mobile",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "cursor-pinch-zoom.html",
+      "target": "compositions/components/cursor-pinch-zoom.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/cursor-pinch-zoom",
+    "author": "takayu",
+    "call": "MW.cursorPinchZoom(q(\".gm\"), tl, 0, {});",
+    "function": "MW.cursorPinchZoom",
+    "options": {
+      "start": "s (0.4)",
+      "duration": "s (0.82)",
+      "resetAt": "s (2.2)",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=pinch-zoom",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=pinch-zoom (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio pinch-zoom, written here): Card 62 % x 58 % r10 (gradient), two touch points 14 px (white ring) at 27 % from each side. Over 820 ms (each segment eased in-out): card scale 0.72 → 1.32 at 72 % → 1.18 at 100 %, rotate −3° → 2° → 0; the touch points move outward ±45 px by 72 % then ease back to ±34.5 px (scale follows the finger gap). Recipe: scale = current gap / start gap, clamped 1-3, origin at the pinch centre. Params: scale (0.72 → 1.32 → 1.18) · fingers (±45 → ±34.5 px) · duration (0.82 s) · ease (power2.inOut từng đoạn). Scale 0.72 → 1.32 at 72 % → 1.18 and a small turn; the fingers move apart ±45 then ease back (in a product: scale = current gap / start gap).",
+    "titleVi": "Hai ngón tay chụm mở phóng to"
+  }
+}

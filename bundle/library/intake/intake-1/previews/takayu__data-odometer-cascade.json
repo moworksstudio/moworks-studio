@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/data-odometer-cascade",
+  "hash": "a09873695f9f8d21",
+  "at": "2026-10-17T08:25:03.139Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__data-odometer-cascade.mp4",
+    "poster": "previews/takayu__data-odometer-cascade.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "e608d2918d56fa46b35d61405fc0634827fd0a98040a96e0bca62d5d6bb3dc58",
+    "size": 22734,
+    "seconds": 31,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

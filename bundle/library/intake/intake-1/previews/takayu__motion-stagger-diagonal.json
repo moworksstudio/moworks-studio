@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/motion-stagger-diagonal",
+  "hash": "19925408cbb1a071",
+  "at": "2026-10-17T10:49:47.309Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__motion-stagger-diagonal.mp4",
+    "poster": "previews/takayu__motion-stagger-diagonal.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6b321cba831703334587b8e65646574ff6bd455d0562dfa36a0d7982b22dc1e1",
+    "size": 13257,
+    "seconds": 26.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

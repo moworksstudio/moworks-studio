@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-animate",
+  "type": "hyperframes:component",
+  "title": "Text Animate",
+  "description": "Ten ready text entrances (fade, blur, blur up/down, slide four ways, scale up/down) staggered across words, letters or lines.",
+  "tags": [
+    "entrance",
+    "stagger",
+    "words",
+    "letters",
+    "blur",
+    "slide",
+    "scale",
+    "magicui"
+  ],
+  "files": [
+    {
+      "path": "text-animate.html",
+      "target": "compositions/components/text-animate.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 7,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:magicui/text-animate",
+    "author": "magicui",
+    "call": "MW.textAnimate(q(\".a1\"), tl, 0.3, { animation: \"blurInUp\", by: \"character\", duration: 0.9, exit: true, hold: HOLD });",
+    "function": "MW.textAnimate",
+    "options": {
+      "animation": "fadeIn",
+      "by": "word",
+      "duration": "s spread over all pieces (0.3)",
+      "delay": "s (0)",
+      "exit": "false",
+      "hold": "s between the entrance and the exit (0.6)"
+    },
+    "credit": {
+      "author": "Magic UI (magicuidesign)",
+      "collection": "Magic UI",
+      "link": "https://github.com/magicuidesign/magicui/blob/efe76fc5755eca1142dd4f74c1d6f0ace2887e3c/apps/www/registry/magicui/text-animate.tsx",
+      "commit": "efe76fc5755eca1142dd4f74c1d6f0ace2887e3c",
+      "read": "2026-10-12",
+      "licence": "MIT",
+      "notice": "MIT License, Copyright (c) Magic UI (LICENSE.md)",
+      "made": "adapted",
+      "madeNote": "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
+      "sourceText": "magicuidesign/magicui at efe76fc, apps/www/registry/magicui/text-animate.tsx",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "animation: fadeIn | blurIn | blurInUp | blurInDown | slideUp | slideDown | slideLeft | slideRight | scaleUp | scaleDown. by: text | word | character | line. exit: true plays the matching exit (reverse order).",
+    "titleVi": "Mười kiểu vào chữ, tách từng mảnh"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-takayu-card-flip",
+  "type": "hyperframes:component",
+  "title": "Card Flip",
+  "description": "Thẻ lật quanh trục dọc 180° để lộ mặt sau, phồng nhẹ giữa chừng; mặt quay đi được ẩn nên không bao giờ thấy chữ bị lật ngược, rồi lật về.",
+  "tags": [
+    "flip",
+    "card",
+    "3d",
+    "two-sided",
+    "navigation-overlays",
+    "heavy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-takayu-card-flip.html",
+      "target": "compositions/components/motion-takayu-card-flip.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.9,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-takayu-card-flip",
+    "author": "takayu",
+    "call": "MW.motionTakayuCardFlip(q(\".kf\"), tl, 0.4, {});",
+    "function": "MW.motionTakayuCardFlip",
+    "options": {
+      "duration": "s per flip (0.7)",
+      "hold": "s on the back (0.65)",
+      "bulge": "scaleY added mid-flip (0.06)",
+      "ease": "(power2.inOut)",
+      "perspective": "px (1600)",
+      "returns": "flip back after the hold",
+      "front": "",
+      "back": ""
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=catalog-ui-navigation-card-flip",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=catalog-ui-navigation-card-flip (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio catalog-ui-navigation-card-flip, written here): Card 110x70 r8 with front (accent, 'FRONT', chip, number) and back (dark, stripe, 'BACK', 'DETAILS') faces. rotationY 0 → 180° over 0.7 s power2.inOut (0.4-1.1 s), back over 1.75-2.45 s after a hold; scaleY 1 + 0.06 × sin(angle) mid-flip; the face turned away is hidden (backface hidden, no mirrored text). AE: a 3D layer with two faces. (The demo also shows a wrong mirrored copy for comparison.) Params: duration (0.7 s, power2.inOut) · hold (0.65 s) · bulge (6 %) · faces: trước / sau. The face turned away is hidden, so the text is never seen mirrored.",
+    "titleVi": "Lật thẻ hai mặt"
+  }
+}

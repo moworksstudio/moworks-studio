@@ -1,0 +1,55 @@
+<!--
+  Iris (TakayuStudio (motion-reference), No licence stated: idea and numbers only, written from the idea (site read 12/10/2026)).
+  Source: motion-reference.takayustudio.jp/#motion=tr-iris (read 12/10/2026).
+  Một vòng tròn từ giữa khung mở rộng tới góc xa nhất, lộ cảnh mới.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.transitionIrisOpen(q(".tk-b"), tl, 1.2, {});
+
+  Options (defaults in brackets):
+      - duration: s (0.6; a 2-4 frame iris also works)
+      - x: centre, 0-1 of the width (0.5)
+      - y: centre, 0-1 of the height (0.5)
+      - ease: power2.in (cubic); the site's demo eases in-out
+      - from: the outgoing scene
+
+  Notes: Idea and numbers (TakayuStudio tr-iris, written here): Incoming scene inside a circle centred on the frame, radius 0 -> the centre-to-corner distance (hypot(W, H) / 2; the recipe writes hypot(W, H)), 600 ms easeInCubic (the demo eases in-out); outgoing scene still; no rim, no dimming. A fast 2-4 frame iris also works. Params: duration (0.6 s) · x, y: tâm (giữa khung) · ease (power2.in).
+-->
+
+<section class="tk-scene tk-a"><div class="tk-mark circle"></div><div class="tk-sc-text"><div class="tk-sc-letter">A</div><div class="tk-sc-cap">Cảnh mở đầu</div></div></section>
+<section class="tk-scene tk-b"><div class="tk-mark square"></div><div class="tk-sc-text"><div class="tk-sc-letter">B</div><div class="tk-sc-cap">Cảnh tiếp theo</div></div></section>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.6,"x":0.5,"y":0.5,"ease":"power2.in","from":null};
+  var run = function (el, tl, at, o) {
+        var out = o.from ? MW.el(o.from) : el.previousElementSibling, ease = gsap.parseEase(o.ease), W = el.offsetWidth, H = el.offsetHeight;
+        var cx = o.x * W, cy = o.y * H, R = Math.max(Math.hypot(cx, cy), Math.hypot(W - cx, cy), Math.hypot(cx, H - cy), Math.hypot(W - cx, H - cy));
+        return MW.drive(tl, at, o.duration, function (t) {
+          var p = ease(t / o.duration);
+          el.style.clipPath = p >= 1 ? "none" : "circle(" + (R * p) + "px at " + cx + "px " + cy + "px)"; el.style.visibility = t > 0 ? "visible" : "hidden";
+          if (out) out.style.visibility = p >= 1 ? "hidden" : "visible";
+        });
+      };
+  MW.transitionIrisOpen = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

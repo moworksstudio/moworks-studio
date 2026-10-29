@@ -1,0 +1,20 @@
+{
+  "id": "007",
+  "uid": "vocab:007",
+  "hash": "94382b89c8f311f5",
+  "at": "2026-10-26T12:22:45.726Z",
+  "check": {
+    "pass": true,
+    "failures": []
+  },
+  "preview": {
+    "video": "007.mp4",
+    "poster": "007.webp",
+    "method": "rendered here as a film: the author's Canvas sample on a HyperFrames page, the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "8d133d91543c49f522141a29d1d33a47f2a9fffe459a74bb38117c970e7096d5",
+    "size": 33256,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72",
+    "seconds": 18
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-menu-to-close",
+  "type": "hyperframes:component",
+  "title": "Icon Morph",
+  "description": "Bấm nút, gạch giữa thu ngắn biến mất, hai gạch ngoài chụm vào giữa rồi xoay chéo ±45° thành dấu X; bấm lại thì về ba gạch.",
+  "tags": [
+    "menu",
+    "icon",
+    "morph",
+    "close",
+    "web-interaction",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "ui-menu-to-close.html",
+      "target": "compositions/components/ui-menu-to-close.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/ui-menu-to-close",
+    "author": "takayu",
+    "call": "MW.uiMenuToClose(q(\".mc\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.uiMenuToClose",
+    "options": {
+      "bars": "the three bars, top to bottom",
+      "gap": "px between bars (42)",
+      "angle": "degrees (45)",
+      "duration": "s (0.56, power2.inOut)",
+      "ease": "",
+      "clicks": "[s open, s close]",
+      "cursor": "an optional cursor",
+      "approach": "[x, y] px the cursor comes from",
+      "lead": "s it arrives before a click"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=icon-morph",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=icon-morph (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio icon-morph, written here): Round button r44; three bars 44 px long, 5 px, round caps. Over 560 ms power2.inOut (0.5-1.06 s): middle bar scaleX and opacity 1 → 0 in the first 40 %; outer bars move from ±14 px to the centre in the first 50 %, then rotate 0 → ±45° in the second 50 %. Reverse 1.6-2.16 s. Cursor presses at 0.45 and 1.55 s. Recipe at UI size: bars ±7 px. Params: duration (0.56 s) · gap (14 px) · angle (45°) · ease (power2.inOut). The middle bar shrinks away in the first 40 %; the outer bars meet in the first half and turn ±45° in the second.",
+    "titleVi": "Biểu tượng menu biến thành dấu X"
+  }
+}

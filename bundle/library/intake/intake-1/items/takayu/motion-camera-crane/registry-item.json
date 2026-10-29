@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-camera-crane",
+  "type": "hyperframes:component",
+  "title": "Crane / Jib",
+  "description": "Máy quay được nâng lên cao và hơi chúc xuống nhìn cảnh, kiểu khép lại một cảnh.",
+  "tags": [
+    "camera",
+    "crane",
+    "tilt",
+    "depth",
+    "smooth",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-camera-crane.html",
+      "target": "compositions/components/motion-camera-crane.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-camera-crane",
+    "author": "takayu",
+    "call": "MW.motionCameraCrane(q(\".tk-cam\"), tl, 0.5, { duration: 2.4 });",
+    "function": "MW.motionCameraCrane",
+    "options": {
+      "duration": "s (2)",
+      "rise": "px the camera rises (300; 100 on the site's frame): layers move down by rise × depth",
+      "tilt": "degrees it tilts to look down (8)",
+      "push": "push while rising (0.1)",
+      "layers": "selector of the layers",
+      "ease": "power2.inOut"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=cam-crane",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=cam-crane (read 12/10/2026)",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio cam-crane, written here): Crane up: the camera rises 100 px, so layers move down by 100 px x depth, while the stage tilts 8 deg to look down (rotateX on a perspective parent) with a 10 % push, 2000 ms easeInOutCubic. Demo: camera y +30 -> -40 with a push 1 -> 1.1 over 2.4 s ease-in-out, no tilt drawn. Params: duration (2 s) · rise (100 px) · tilt (8°) · push (10 %).",
+    "titleVi": "Máy quay cẩu lên, nhìn xuống"
+  }
+}

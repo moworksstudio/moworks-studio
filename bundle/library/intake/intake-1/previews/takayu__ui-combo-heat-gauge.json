@@ -1,0 +1,25 @@
+{
+  "uid": "in:takayu/ui-combo-heat-gauge",
+  "hash": "fa363412f329351f",
+  "at": "2026-10-17T07:43:00.717Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/takayu__ui-combo-heat-gauge.mp4",
+    "poster": "previews/takayu__ui-combo-heat-gauge.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "0dbe0e0e77c0e1871e77c7c0528d60cd95c34f8991090a23e43d5f3aa04883ff",
+    "size": 16565,
+    "seconds": 31.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

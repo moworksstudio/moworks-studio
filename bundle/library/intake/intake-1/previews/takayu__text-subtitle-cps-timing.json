@@ -1,0 +1,26 @@
+{
+  "uid": "in:takayu/text-subtitle-cps-timing",
+  "hash": "27c3e4f86343dd8e",
+  "at": "2026-10-17T10:21:37.268Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "JetBrains Mono"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/takayu__text-subtitle-cps-timing.mp4",
+    "poster": "previews/takayu__text-subtitle-cps-timing.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b027cb619585d5c8db8c1adc64b2ce2ed265a16f64aebe442ff23ce8f85f1884",
+    "size": 13832,
+    "seconds": 22.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

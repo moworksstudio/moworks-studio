@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-bounce-squash",
+  "type": "hyperframes:component",
+  "title": "CustomBounce with Squash",
+  "description": "Quả bóng rơi nảy nhiều lần, chỉ bẹp đúng khung chạm đất và bẹp yếu dần qua mỗi lần nảy.",
+  "tags": [
+    "bounce",
+    "squash",
+    "drop",
+    "easing",
+    "bouncy",
+    "takayustudio"
+  ],
+  "files": [
+    {
+      "path": "motion-bounce-squash.html",
+      "target": "compositions/components/motion-bounce-squash.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:takayu/motion-bounce-squash",
+    "author": "takayu",
+    "call": "MW.motionBounceSquash(q(\".bs\"), tl, 0.3, {});",
+    "function": "MW.motionBounceSquash",
+    "options": {
+      "drop": "px (560)",
+      "duration": "s (1.6), bounce.out (contacts at 36 / 73 / 91 %)",
+      "squash": "at the first contact (0.32 here; 0.5 × (1 − p))"
+    },
+    "credit": {
+      "author": "TakayuStudio (motion-reference)",
+      "collection": "TakayuStudio",
+      "link": "https://motion-reference.takayustudio.jp/#motion=e-custombounce",
+      "commit": null,
+      "read": "2026-10-12",
+      "licence": "No licence stated: idea and numbers only",
+      "notice": null,
+      "made": "written from the idea (site read 12/10/2026)",
+      "madeNote": "written here from the idea and its numbers; none of the source's code",
+      "sourceText": "motion-reference.takayustudio.jp/#motion=e-custombounce (read 12/10/2026)",
+      "upstream": "the site credits GSAP"
+    },
+    "thirdParty": [],
+    "notes": "Idea and numbers (TakayuStudio e-custombounce, written here): Recipe: first contact at 400 ms; each bounce keeps 70 % of the previous height (strength 0.7) and lasts √0.7 of the previous, ~1200 ms in all; squash only on the 1–2 contact frames, weaker each bounce, origin bottom; slight stretch in the fast fall. Site demo: bounce.out over 1600 ms, 112 px drop (contacts at 36 / 73 / 91 %), squash = 0.5·(1 − p) within 4 % of the floor: scaleY 0.68 / 0.86 / 0.95, scaleX 1 + the same amount. Params: strength (0.7) · squash đầu (0.32) · duration (1.2 s) · origin (đáy).",
+    "titleVi": "Nảy có bẹp mỗi lần chạm"
+  }
+}

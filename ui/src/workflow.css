@@ -1,0 +1,855 @@
+/* New project dialog, Import assets, the Pipeline column, sheets in the Editor, the Claude chip, the loading overlay,
+   the app's lines in the chat. Tokens and shared components live in tokens.css and app.css; status colours: green ok, yellow pending,
+   red stop, grey not needed yet. */
+
+/* ---- Claude chip and popover */
+.claude-chip { position: relative; }
+.chip-status.stop { border-color: color-mix(in srgb, var(--status-stop) 50%, transparent); color: var(--status-stop); }
+.claude-pop { position: absolute; right: 0; top: calc(100% + 0.5rem); width: 22rem; z-index: 70; background: var(--surface-2); border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-pop); padding: var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-3); }
+.claude-pop-head { display: flex; align-items: center; gap: 0.5rem; }
+.claude-pop-head b { flex: 1; font-weight: var(--strong-weight, 600); }
+.claude-kv { grid-template-columns: 6rem minmax(0, 1fr); }
+.claude-pop-confirm { display: flex; flex-direction: column; gap: var(--sp-2); font-size: var(--fs-control); color: var(--text-secondary); }
+.claude-pop-confirm .row { justify-content: flex-end; }
+.signin-flow { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-start; min-width: 0; }
+.signin-wait { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--status-pending); font-size: var(--fs-control); }
+.signin-code { display: flex; gap: 0.375rem; width: 100%; }
+.signin-code .input { height: var(--ctl-compact); flex: 1; min-width: 0; font-size: var(--fs-control); }
+.needs-claude { display: flex; align-items: center; gap: 0.5rem 0.75rem; flex-wrap: wrap; padding: 0.5rem 0.75rem; border: 1px solid color-mix(in srgb, var(--status-stop) 45%, transparent);
+  background: var(--status-stop-soft); border-radius: var(--r-md); color: var(--text-primary); font-size: var(--fs-control); min-width: 0; }
+.needs-claude .t { flex: 1 1 12rem; color: var(--status-stop); }
+.needs-claude .signin-flow { flex-direction: row; flex-wrap: wrap; align-items: center; }
+.needs-claude .signin-code { width: auto; flex: 1 1 14rem; }
+
+/* ---- New project dialog (screenshot/88-90) */
+.np-dialog { width: min(48rem, 100%); max-height: calc(100vh - 2 * var(--sp-4)); display: flex; flex-direction: column; }
+.np-title { font: var(--display-weight, 500) calc(var(--fs-title) * 1.05) / 1.25 var(--font-body); background: transparent; border: 0; border-bottom: 1px solid var(--border-strong);
+  color: var(--text-primary); padding: 0.375rem 0; outline: none; width: 100%; }
+.np-title:focus { border-bottom-color: var(--accent); }
+.np-title.invalid { border-bottom-color: var(--status-stop); }
+.np-modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2); }
+.np-modes .radio-card { text-align: left; color: inherit; }
+.np-modes .radio-card .d { font-size: var(--fs-meta); color: var(--text-muted); }
+.np-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+.np-grid .field > span { color: var(--text-secondary); font-size: var(--fs-control); }
+.np-foot { flex-wrap: wrap; }
+.np-foot .needs-claude { flex: 1 1 100%; }
+.kbd-hint kbd, kbd { font-family: var(--font-mono); font-size: var(--fs-dense); border: 1px solid var(--border-strong); border-bottom-width: 2px; border-radius: var(--r-sm); padding: 0 0.3rem; margin-right: 0.2rem; color: var(--text-secondary); }
+label.check { display: inline-flex; align-items: center; gap: 0.5rem; font-size: var(--fs-control); color: var(--text-secondary); cursor: pointer; }
+label.check input { accent-color: var(--accent); width: 1rem; height: 1rem; }
+@media (max-width: 760px) { .np-grid, .np-modes { grid-template-columns: 1fr; } }
+
+/* pickers (style list, lengths) */
+.pick { position: relative; min-width: 0; }
+.pick-btn { display: flex; align-items: center; gap: 0.625rem; width: 100%; height: var(--ctl-lg); padding: 0 0.625rem; border: 1px solid var(--border-strong); border-radius: var(--r-ctl);
+  background: var(--input-bg); color: var(--text-primary); cursor: pointer; text-align: left; min-width: 0; font: inherit; }
+.pick-btn:focus-within, .pick-btn:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); outline: none; }
+.pick-btn img { width: 2.6rem; height: 1.5rem; object-fit: cover; border-radius: var(--r-sm); flex: none; }
+.pick-btn .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pick-btn.length input { flex: 1; min-width: 0; background: transparent; border: 0; color: inherit; font: inherit; outline: none; }
+.pick-btn.invalid { border-color: var(--status-stop); }
+.pick-list { position: absolute; z-index: 80; left: 0; top: calc(100% + 0.375rem); min-width: 100%; max-height: 22rem; overflow: auto; background: var(--surface-2);
+  border: 1px solid var(--border-strong); border-radius: var(--r-lg); box-shadow: var(--shadow-pop); padding: 0.375rem; list-style: none; margin: 0; }
+ul.pick-list { width: min(30rem, 80vw); }
+.pick-list button { display: flex; align-items: center; gap: 0.625rem; width: 100%; padding: 0.5rem; border: 0; border-radius: var(--r-md); background: transparent; color: var(--text-primary);
+  cursor: pointer; text-align: left; font: inherit; }
+.pick-list button:disabled { opacity: 0.45; cursor: not-allowed; }
+@media (hover: hover) and (pointer: fine) { .pick-list button:not(:disabled):hover { background: var(--surface-3); } }
+.pick-list li[aria-selected="true"] > button, .pick-list button[aria-selected="true"] { background: var(--select-soft); }
+.pick-list img, .pick-list .ph { width: 4rem; height: 2.25rem; object-fit: cover; border-radius: var(--r-sm); flex: none; background: var(--surface-3); }
+.pick-list .tx { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.pick-list .tx span { font-size: var(--fs-meta); color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pick-list .grp { font: var(--label-weight) var(--fs-dense) / 1.4 var(--font-label); letter-spacing: var(--label-track); text-transform: uppercase; color: var(--text-muted); padding: 0.5rem 0.625rem 0.25rem; }
+
+/* ---- Import assets */
+.asset-import { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.asset-drop { flex-wrap: wrap; transition: border-color 140ms var(--ease-out), background 140ms var(--ease-out); }
+.asset-drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.asset-drop .drop-t { color: var(--text-primary); font-weight: var(--strong-weight, 600); }
+.asset-list { display: flex; flex-direction: column; gap: 2px; max-height: 15rem; overflow: auto; border: 1px solid var(--border); border-radius: var(--r-md); padding: 0.25rem; }
+.asset-list li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto; align-items: center; gap: 0.625rem; padding: 0.25rem 0.375rem; border-radius: var(--r-sm); font-size: var(--fs-control); min-height: 2rem; }
+.asset-list li .k { color: var(--text-secondary); }
+.asset-list li .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.asset-list li .d { font-size: var(--fs-dense); color: var(--text-muted); }
+.asset-list li .s { font-size: var(--fs-meta); }
+.asset-list li .select.sm { height: var(--ctl-compact); font-size: var(--fs-meta); padding: 0 1.75rem 0 0.5rem; }
+.asset-list li .ok-t { color: var(--status-ok); font-size: var(--fs-meta); }
+.asset-list li.error .n { color: var(--status-stop); }
+.asset-list .prog { width: 5rem; height: 0.3rem; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+.asset-list .prog span { display: block; height: 100%; background: var(--status-pending); transition: width 200ms linear; }
+.asset-actions { align-items: center; gap: var(--sp-2); }
+
+/* ---- sheets in the Editor (screenshot/8-17) */
+.sheet-overlay { z-index: 65; }
+.sheet { width: min(84rem, 100%); height: min(54rem, calc(100vh - 2 * var(--sp-4))); display: flex; flex-direction: column; background: var(--surface-1) var(--grain);
+  border: 1px solid var(--border-strong); border-radius: var(--r-xl); box-shadow: var(--shadow-pop); overflow: hidden; outline: none; }
+.sheet.narrow { width: min(52rem, 100%); height: auto; max-height: calc(100vh - 2 * var(--sp-4)); }
+.sheet-body { flex: 1; min-height: 0; overflow: auto; padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-4); }
+.sheet-body > .page { padding: 0; max-width: none; margin: 0; width: 100%; }
+.sheet-body > .page > .page-head { margin-bottom: var(--sp-4); }
+.sheet-body > .page > .page-head h1 { display: none; }
+.sheet-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-4); align-items: start; }
+.sheet-cols .panel { gap: var(--sp-3); }
+.sheet-cols h3.sub { font: var(--label-weight) var(--fs-label) / 1.4 var(--font-label); letter-spacing: var(--label-track); text-transform: uppercase; color: var(--text-secondary); margin-top: var(--sp-2); }
+.doc-sheet { display: flex; flex-direction: column; gap: var(--sp-3); }
+.doc-sheet .row { align-items: center; gap: var(--sp-2); }
+.doc-sheet .row .mono { display: inline-flex; align-items: center; gap: 0.375rem; }
+.doc-edit { min-height: 22rem; font-size: var(--fs-body); }
+.doc-read { border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--sp-4); background: var(--well); max-height: 30rem; overflow: auto; }
+.render-sheet, .import-sheet { display: flex; flex-direction: column; gap: var(--sp-4); }
+.render-sheet .row { align-items: center; gap: var(--sp-2); }
+.render-sheet .checklist.blocking li { display: flex; gap: 0.5rem; align-items: flex-start; }
+.warn-list summary { cursor: pointer; display: inline-flex; align-items: center; gap: 0.375rem; color: var(--status-pending); font-size: var(--fs-control); }
+.warn-list ul { padding: 0.5rem 0 0 1.25rem; display: flex; flex-direction: column; gap: 0.25rem; font-size: var(--fs-control); }
+.spacer { flex: 1; }
+@media (max-width: 900px) { .sheet-cols { grid-template-columns: 1fr; } .sheet { height: calc(100vh - 2 * var(--sp-4)); } }
+
+/* ---- top bar: Render */
+
+/* ---- the Pipeline column (screenshot/85) */
+
+/* ---- the app's lines in the chat */
+.cnote { display: flex; align-items: center; flex-wrap: wrap; gap: 0.375rem 0.5rem; align-self: center; max-width: 100%; padding: 0.25rem 0.75rem; border: 1px solid var(--border);
+  border-radius: var(--r-pill); font-size: var(--fs-meta); color: var(--text-secondary); background: var(--surface-1); }
+.cnote > svg { color: var(--text-muted); flex: none; }
+.cnote.ok > svg { color: var(--status-ok); }
+.cnote.stop { border-color: color-mix(in srgb, var(--status-stop) 40%, transparent); color: var(--status-stop); }
+.cnote.stop > svg { color: var(--status-stop); }
+.cnote .t { min-width: 0; overflow-wrap: anywhere; }
+.cnote time { color: var(--text-muted); font-size: var(--fs-dense); }
+.cnote .clink { display: inline-flex; align-items: center; gap: 0.2rem; }
+.cnote-files { flex-basis: 100%; display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-dense); color: var(--text-muted); padding: 0.25rem 0 0.25rem 1.25rem; }
+.composer > .needs-claude { margin-bottom: 0.125rem; }
+.signin-flow a.btn { white-space: normal; height: auto; min-height: var(--ctl-compact); padding: 0.25rem 0.5rem; text-align: left; justify-content: flex-start; max-width: 100%; }
+.asset-drop > div { flex: 1 1 14rem; }
+/* stills of a task, taken when asked */
+
+/* ---- polish */
+.claude-pop { transform-origin: top right; transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out); }
+@starting-style { .claude-pop { opacity: 0; transform: scale(0.96); } }
+@media (prefers-reduced-motion: reduce) { .claude-pop { transition: none; } }
+
+/* the sidebar is hidden in the Editor unless shown with the top-left toggle (phones keep the bottom bar) */
+/* what Exit stops, per project */
+.exit-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.exit-list li { display: flex; flex-direction: column; gap: 0.125rem; padding: 0.5rem 0.75rem; border: 1px solid color-mix(in srgb, var(--status-pending) 45%, transparent); background: var(--status-pending-soft); border-radius: var(--r-md); }
+.exit-list li span { color: var(--text-secondary); font-size: var(--fs-control); }
+/* the project card's picture, one-line title, tags and actions row (functional rules only; the look is in app.css) */
+.card-thumb > .card-img, .list-thumb > .card-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.list-thumb { position: relative; overflow: hidden; }
+.card-title.one-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.card-tags { display: flex; gap: 0.375rem; flex-wrap: wrap; min-width: 0; }
+.card-tags .chip { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* folder fields with Choose… and the Google Drive note */
+.folder-field { display: flex; flex-direction: column; gap: 0.375rem; min-width: 0; }
+.folder-field .row { display: flex; gap: var(--sp-2); align-items: center; min-width: 0; }
+.folder-field .path { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-control); color: var(--text-secondary); }
+.folder-field .input { flex: 1; min-width: 0; }
+.drive-note { display: inline-flex; align-items: center; gap: 0.375rem; color: var(--text-secondary); }
+
+/* the style's questions under the brief; the Assets analysis ways */
+.np-questions { margin-top: var(--sp-2); }
+.ways { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ways .radio-card .tag { font-size: var(--fs-meta); font-weight: 500; padding: 0 0.5rem; border-radius: 999px; color: var(--accent-ink); background: var(--accent-soft); }
+.ways .radio-card .tag.ok { color: var(--ok, var(--accent-ink)); background: color-mix(in srgb, var(--ok, var(--accent)) 14%, transparent); }
+.analysis .doc-read { max-height: 60vh; overflow: auto; }
+@media (max-width: 760px) { .ways { grid-template-columns: 1fr; } }
+
+/* storyboard boards, review sheets */
+.boards { margin-bottom: var(--sp-4); }
+.boards .panel-head { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+.bd-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+.bd-col { border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--sp-2); background: var(--surface-1); display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.bd-col.picked { border-color: var(--select); box-shadow: 0 0 0 1px var(--select) inset; }
+.bd-col header { display: flex; align-items: center; gap: var(--sp-2); }
+.bd-col .tag, .qc-review .tag { font-size: var(--fs-meta); padding: 0 0.5rem; border-radius: 999px; color: var(--accent-ink); background: var(--accent-soft); }
+.bd-col .tag.ok, .qc-review .tag.ok { background: color-mix(in srgb, var(--ok, var(--accent)) 16%, transparent); }
+.bd-title { font-weight: var(--strong-weight); margin: 0; }
+.bd-stills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.375rem; }
+.bd-still { position: relative; padding: 0; border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; background: var(--media-bg); cursor: zoom-in; aspect-ratio: 16 / 9; }
+.bd-still img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.bd-still .num { position: absolute; left: 0.25rem; top: 0.25rem; font-size: var(--fs-meta); background: var(--media-label); color: var(--on-media); padding: 0 0.3rem; border-radius: 3px; }
+.bd-light { z-index: 80; }
+.bd-light-box .row { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }          /* as in the sheet, now that it sits on <body> */
+.bd-light-box { background: var(--surface-1); border-radius: var(--r-md); padding: var(--sp-3); width: min(92vw, 1400px); display: flex; flex-direction: column; gap: var(--sp-2); }
+.bd-light-box img { width: 100%; height: auto; max-height: min(76vh, calc(100vh - 2 * var(--sp-4) - 7rem)); object-fit: contain; background: var(--media-bg); border-radius: var(--r-sm); }
+/* the Review: the score line, then only what is still off */
+.qc-review { display: flex; flex-direction: column; gap: var(--sp-3); }
+.qc-off { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--r-md); }
+.qc-off > li { display: flex; gap: 0.75rem; align-items: baseline; padding: 0.625rem 0.875rem; line-height: 1.5; color: var(--text-secondary); }
+.qc-off > li + li { border-top: 1px solid var(--border); }
+.qc-off .qc-n { flex: none; min-width: 2.75rem; color: var(--state-stop); font-weight: var(--strong-weight); }
+@media (max-width: 900px) { .bd-cols { grid-template-columns: 1fr; } }
+
+/* the library item a motion-plan row cites */
+.mp-src { display: flex; align-items: center; gap: 0.5rem; min-width: 14rem; }
+.mp-src-thumb { width: 72px; aspect-ratio: 16 / 9; border-radius: var(--r-sm); overflow: hidden; background: var(--media-bg); flex: none; display: grid; place-items: center; }
+.mp-src-thumb img, .mp-src-thumb video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mp-src-t { display: flex; flex-direction: column; min-width: 0; font-size: var(--fs-meta); }
+.mp-src-t b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Final Mix */
+.mix { display: grid; gap: var(--sp-3); }
+.mix .panel-head h2 { display: flex; align-items: center; gap: 0.5rem; }
+.mix audio { width: 100%; max-width: 28rem; height: 2rem; }
+.mix-sfx { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; font-size: var(--fs-meta); }
+.mix .tag { font-size: var(--fs-meta); padding: 0 0.5rem; border-radius: 999px; background: color-mix(in srgb, var(--ok, var(--accent)) 16%, transparent); }
+/* New project, wide: two columns and two rows. Top: the video and its style
+   (left), the brief with the big area (right). Bottom: the assets (left) level with the project settings (right). Fixed column widths so
+   nothing reflows when a value changes; hairlines between the cells, not boxes. One column under 900px. */
+.np-dialog { width: min(84rem, calc(100vw - 2 * var(--sp-5))); }
+/* the brief: the heading row carries the sample button; the box takes all the height the left column sets */
+.np-ask { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); border: 1px solid var(--border-strong); border-radius: var(--r-md);
+  font-size: var(--fs-control); background: var(--surface-2); }
+.np-ask > span { flex: 1 1 14rem; }
+/* the assets: the drop zone reads as one wide row (words, then the two buttons) */
+/* the size: the kind and its place matter more here */
+/* the settings: always open, three fixed columns; the label row has a fixed height so "as in Settings: <value>" never moves the field */
+.np-set-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); align-items: start; }
+.np-set-l { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-2); min-width: 0; height: var(--lh-label); color: var(--text-secondary); font-size: var(--fs-control); line-height: var(--lh-label); }
+.np-set-l > span { flex: none; }
+.np-set-l > em { font-style: normal; font-size: var(--fs-meta); color: var(--text-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
+/* the footer: why Create is not available yet (one line), or what went wrong at create */
+.np-foot { flex-wrap: wrap; }
+.np-foot .needs-claude, .np-foot .np-err { flex: 1 1 100%; }
+.np-why { display: inline-flex; align-items: center; gap: 0.375rem; color: var(--status-pending); font-size: var(--fs-control); min-width: 0; }
+.np-err { display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.5rem 0.75rem; border: 1px solid color-mix(in srgb, var(--status-stop) 45%, transparent);
+  background: var(--status-stop-soft); border-radius: var(--r-md); color: var(--text-primary); font-size: var(--fs-control); }
+.np-err > svg { color: var(--status-stop); margin-top: 0.125rem; flex: none; }
+@media (max-width: 1280px) { .np-set-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* lyrics: the user's lyrics, timed to the song */
+.lyrics .lyrics-text { width: 100%; min-height: 20rem; }
+.lyrics .lyrics-times { font-variant-numeric: tabular-nums; }
+.lyrics .lyrics-times td:first-child, .lyrics .lyrics-times td:nth-child(2) { white-space: nowrap; }
+.lyrics .panel > .mp-table { display: block; max-height: 60vh; overflow: auto; }
+.lyrics .hint .spin { vertical-align: -2px; }
+
+/* a note line never shrinks below its text (it used to be squeezed onto Claude's reply); a long one wraps inside soft corners, not a pill */
+.cnote { flex: none; border-radius: var(--r-lg); }
+.cnote:not(:has(.t:nth-of-type(2))) { border-radius: var(--r-lg); }
+/* the action rows inside sheets keep a gap and wrap; a file's size never breaks onto two lines */
+.sheet-body .row { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+.sheet-body .row > .hint, .sheet-body .row > .muted { min-width: 0; }
+.doc-sheet .row .mono { margin-right: var(--sp-2); }
+/* the Motion plan sat in two columns inside the sheet and its table scrolled sideways even at 2560 px. In a sheet the shots become a row
+   above the table (full width), and the table's minimum widths are lower. */
+.sheet-body .mp-table .select { min-width: 6.5rem; }
+.sheet-body .mp-src { min-width: 10rem; }
+.sheet-body .mp-src-thumb { width: 3.75rem; }
+/* the notes in the assets box, the saved-draft line, and the "more below" hint on a short window */
+.asset-note { display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.375rem 0.5rem 0.375rem 0.75rem; border: 1px solid color-mix(in srgb, var(--status-pending) 45%, transparent);
+  background: var(--status-pending-soft); border-radius: var(--r-md); font-size: var(--fs-meta); color: var(--text-primary); }
+.asset-note > svg { color: var(--status-pending); margin-top: 0.125rem; flex: none; }
+.asset-note > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.np-fold-wrap { position: relative; height: 0; z-index: 2; pointer-events: none; }
+.np-fold-wrap::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3rem; background: linear-gradient(transparent, var(--surface-1)); opacity: 0; transition: opacity 160ms var(--ease-out); }
+.np-fold-wrap:has(.np-fold)::before { opacity: 1; }
+.np-fold { position: absolute; left: 50%; bottom: 0.5rem; transform: translateX(-50%); pointer-events: auto; display: inline-flex; align-items: center; gap: 0.375rem; height: var(--ctl-compact);
+  padding: 0 0.75rem; border: 1px solid var(--border-strong); border-radius: var(--r-pill); background: var(--surface-2); color: var(--text-secondary); font: inherit; font-size: var(--fs-meta); cursor: pointer;
+  box-shadow: var(--shadow-pop); animation: fade-in 160ms var(--ease-out) both; }
+@media (hover: hover) and (pointer: fine) { .np-fold:hover { color: var(--text-primary); border-color: var(--accent-line); } }
+@media (prefers-reduced-motion: reduce) { .np-fold { animation: none; } }
+.np-taken { color: var(--status-pending); }
+/* the drop box inside a sheet (a narrow column): the words take the whole row, the two buttons sit under them */
+.sheet-body .asset-drop > div { flex: 1 1 100% !important; }
+.sheet-body .asset-drop > .btn { flex: 1 1 auto; justify-content: center; }
+
+/* ---------- Storyboard dialog, pipeline v2: rounds of options, the way of working, a bar with Approve ---------- */
+.ways3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 900px) { .ways3 { grid-template-columns: 1fr; } }
+.bd-round + .bd-round { margin-top: var(--sp-4); }
+.bd-round > .sub { display: flex; align-items: center; gap: var(--sp-2); margin: 0 0 var(--sp-2); }
+.bd-round > .sub .btn { margin-left: auto; }
+.sb2 .sb-bar, .mo2 .sb-bar { position: sticky; bottom: calc(-1 * var(--sp-5)); z-index: 3; display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap;
+  margin: var(--sp-5) calc(-1 * var(--sp-5)) calc(-1 * var(--sp-5)); padding: var(--sp-3) var(--sp-5); border-top: 1px solid var(--border-strong); background: var(--surface-2); }
+.sb-bar-t { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: var(--fs-control); }
+/* in the Storyboard and Motion dialogs the bar is the dialog's own foot, outside the part that scrolls, so the scrollbar stops above
+   it and the bar fills the rounded bottom corners; the dialog keeps room for it under the options */
+.sheet-overlay > .sheet:has(> .sheet-body > :is(.sb2, .mo2) > .sb-bar) { position: relative; }
+.sheet-overlay > .sheet > .sheet-body:has(> :is(.sb2, .mo2) > .sb-bar) { --sb-bar-h: 3.75rem; margin-bottom: var(--sb-bar-h); }
+.sheet-overlay > .sheet > .sheet-body > :is(.sb2, .mo2) > .sb-bar { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; min-height: var(--sb-bar-h); flex-wrap: nowrap; }
+.sheet-overlay > .sheet > .sheet-body > :is(.sb2, .mo2) > .sb-bar > .sb-bar-t, .sheet-overlay > .sheet > .sheet-body > :is(.sb2, .mo2) > .sb-bar > .state-line { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- Motion dialog, pipeline v2: a frame and its motion rows ---------- */
+.mo2 .mo-shot { display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: var(--sp-4); align-items: start; }
+.mo-still { position: relative; aspect-ratio: 16 / 9; background: var(--media-bg); border-radius: var(--r-sm); overflow: hidden; display: grid; place-items: center; color: var(--text-muted); }
+.mo-still img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mo-rows { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
+.mo-row { border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--sp-2) var(--sp-3); background: var(--surface-1); }
+.mo-row.changed { border-color: var(--status-pending); background: color-mix(in srgb, var(--status-pending) 8%, var(--surface-1)); }
+.mo-line { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+.mo-line .mp-src { min-width: 0; }
+.mo-what { margin: 0.375rem 0 0; color: var(--text-secondary); font-size: var(--fs-control); }
+.mo-edit { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: var(--sp-2); margin-top: var(--sp-2); }
+.mo-edit .mo-wide, .mo-edit .row { grid-column: 1 / -1; }
+@media (max-width: 900px) { .mo2 .mo-shot { grid-template-columns: 1fr; } }
+
+/* ---------- Words dialog: the project's audio files, and the ways to get a voice folded away ---------- */
+.vo-files { display: flex; flex-direction: column; gap: var(--sp-2); margin: 0; padding: 0; }
+.vo-files li { display: flex; align-items: center; gap: var(--sp-3); flex-wrap: wrap; padding: var(--sp-2) var(--sp-3); border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-1); }
+.vo-files li.current { border-color: var(--select); }
+.vo-name { flex: 1 1 12rem; min-width: 0; display: flex; flex-direction: column; }
+.vo-name .muted { font-size: var(--fs-meta); }
+
+/* a markdown table inside a dialog (the assets analysis, a document) wraps its cells instead of running off the right edge */
+.sheet-body .md table { width: 100%; table-layout: auto; }
+.sheet-body .md td, .sheet-body .md th { overflow-wrap: anywhere; vertical-align: top; }
+.vo-files li.focus { box-shadow: 0 0 0 1px var(--select); }
+
+/* ---------- New project ---------- */
+/* a darker, blurred ground so the app behind does not pull the eye; the dialog itself is scaled as one piece by NewProjectDialog (zoom) */
+.np-overlay { background: var(--media-overlay); -webkit-backdrop-filter: blur(6px) saturate(0.8); backdrop-filter: blur(6px) saturate(0.8); }
+.np-overlay .np-dialog { max-height: calc((100vh - 2 * var(--sp-4)) / var(--np-zoom, 1)); }
+/* three settings left, one row of three at every width above a phone */
+/* ---------- Storyboard options: compact cards, small pictures that open large ---------- */
+.bd-cols { grid-template-columns: repeat(auto-fill, minmax(min(22rem, 100%), 1fr)); gap: var(--sp-3); }
+.bd-col { gap: 0.5rem; padding: var(--sp-3); }
+.bd-col header { flex-wrap: wrap; gap: 0.25rem 0.5rem; }
+.bd-col header .bd-title { font-weight: 400; color: var(--text-secondary); }
+.bd-idea { margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.bd-stills { grid-template-columns: repeat(auto-fill, minmax(5.25rem, 1fr)); gap: 0.3125rem; }
+.bd-still { transition: transform 160ms var(--ease-out), border-color var(--t-hover) var(--ease-out); }
+.bd-still .num { font-size: var(--fs-dense); }
+@media (hover: hover) and (pointer: fine) { .bd-still:hover { border-color: var(--accent-line); transform: scale(1.05); z-index: 1; } }
+@media (prefers-reduced-motion: reduce) { .bd-still:hover { transform: none; } }
+/* Length, Aspect ratio and Frame rate share one row */
+/* ---------- Final Mix: one list of tracks, one line each, one player ---------- */
+.mix { display: flex; flex-direction: column; gap: var(--sp-4); }
+.mix .panel-head { display: flex; align-items: center; gap: var(--sp-2); }
+.mix .panel-head .end { margin-left: auto; }
+.mix-list { display: flex; flex-direction: column; gap: 0.375rem; margin: 0 0 var(--sp-2); padding: 0; }
+.mix-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: var(--sp-3); padding: 0.5rem var(--sp-3);
+  border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-1); transition: border-color var(--t-hover) var(--ease-out); }
+.mix-row.current { border-color: var(--state-done-line); background: color-mix(in srgb, var(--state-done) 6%, var(--surface-1)); }
+.mix-row.loaded:not(.current) { border-color: var(--accent-line); }
+.mix-play { width: 2.25rem; height: 2.25rem; padding: 0; border-radius: 50%; }
+.mix-t { display: flex; flex-direction: column; gap: 0.375rem; min-width: 0; }
+.mix-line { display: flex; align-items: center; gap: 0.25rem 0.5rem; flex-wrap: wrap; min-width: 0; font-size: var(--fs-control); }
+.mix-line b { font-weight: var(--strong-weight); }
+.mix-line .tag { display: inline-flex; align-items: center; gap: 0.25rem; font-size: var(--fs-meta); padding: 0 0.5rem; border-radius: 999px; color: var(--accent-ink); background: var(--accent-soft); }
+.mix-line .tag.ok { color: var(--state-done); background: var(--state-done-soft); }
+.mix-bar { height: 0.25rem; border-radius: 999px; background: var(--surface-3); overflow: hidden; cursor: pointer; }
+.mix-bar > span { display: block; height: 100%; background: var(--text-secondary); transition: width 120ms linear; }
+.mix-row.loaded .mix-bar > span { background: var(--accent); }
+.mix-time { font-size: var(--fs-meta); min-width: 2.5rem; text-align: right; }
+.mix-act { min-width: 6.5rem; justify-content: center; }
+.mix-sfx-acts { display: inline-flex; gap: 0.25rem; }
+.mix-sfx-list > summary { cursor: pointer; color: var(--text-secondary); font-size: var(--fs-meta); }
+.mix-sfx-list[open] > summary { margin-bottom: var(--sp-2); }
+.mix-duck { margin-top: var(--sp-2); }
+@media (max-width: 760px) { .mix-row { grid-template-columns: auto minmax(0, 1fr); } .mix-time { display: none; } .mix-act { grid-column: 1 / -1; } }
+.mix .tag.ok { color: var(--state-done); background: var(--state-done-soft); }
+
+/* ---------- Storyboard dialog: two options fill the width with bigger pictures; earlier rounds folded; Keep the design shows the frames ---------- */
+/* two options per row (one round = one row), each option's frames 3 across like a 3 × 3 sheet; the card is the choice */
+.sb2 .bd-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 640px) { .sb2 .bd-cols { grid-template-columns: 1fr; } }
+.sb2 .bd-stills { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.4rem; }
+.bd-col { cursor: pointer; transition: border-color var(--t-hover) var(--ease-out), background-color var(--t-hover) var(--ease-out); }
+.bd-col.locked { cursor: default; }
+@media (hover: hover) and (pointer: fine) { .bd-col:not(.locked):not(.picked):hover { border-color: var(--border-strong); background: var(--surface-2); } }
+.bd-col.picked { background: var(--select-soft); }
+.bd-pickbtn { all: unset; display: inline-flex; align-items: center; gap: 0.5rem; min-width: 0; flex: 1; cursor: inherit; border-radius: var(--r-sm); }
+.bd-pickbtn:focus-visible { outline: 2px solid var(--select); outline-offset: 2px; }
+.bd-pickbtn .bd-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bd-radio { flex: none; width: 1rem; height: 1rem; border-radius: 50%; border: 1.5px solid var(--border-strong); display: inline-grid; place-items: center; color: var(--surface-1); }
+.bd-col.picked .bd-radio { border-color: var(--select); background: var(--select); color: var(--select-ink); }
+.bd-pager { padding: 0.25rem 0 0; }          /* a card with more than nine frames: its pages */
+.sb-frames .panel-head { display: flex; align-items: center; gap: var(--sp-2); }
+.sb-frame-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr)); gap: var(--sp-3); margin: var(--sp-3) 0 0; padding: 0; }
+.sb-frame { display: flex; flex-direction: column; gap: 0.375rem; min-width: 0; }
+.sb-frame-pic { position: relative; aspect-ratio: 16 / 9; border-radius: var(--r-sm); overflow: hidden; background: var(--media-bg); border: 1px solid var(--border); display: grid; place-items: center; color: var(--text-muted); }
+.sb-frame-pic img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.sb-frame-pic .num { position: absolute; left: 0.375rem; top: 0.375rem; font-size: var(--fs-meta); background: var(--media-label); color: var(--on-media); padding: 0 0.375rem; border-radius: 3px; }
+.sb-frame-t { font-size: var(--fs-control); color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- New project: the chosen style as a card, its chooser, and Writing ideas ---------- */
+.np-style { display: grid; grid-template-columns: 10.5rem minmax(0, 1fr); gap: 0.875rem; padding: 0.625rem; border: 1px solid var(--border-strong); border-radius: var(--r-lg); background: var(--surface-2); }
+.np-style .sf { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--r-md); display: block; background: var(--surface-1); overflow: hidden; }
+.np-style-main { min-width: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.np-style p { margin: 0; }
+.np-style .nm { font-weight: var(--strong-weight); color: var(--text-primary); font-size: var(--fs-body); line-height: 1.3; }
+.np-style .nm span { margin-left: 0.4rem; color: var(--text-muted); font-weight: 400; font-size: var(--fs-control); }
+.np-style .sub { display: flex; align-items: center; gap: 0.5rem; font-size: var(--fs-dense); color: var(--text-muted); }
+.np-style .row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-top: auto; }
+.np-style .row .btn { margin-left: auto; }
+.np-link { display: inline-flex; align-items: center; gap: 0.25rem; border: 0; background: none; padding: 0; color: var(--accent-ink); font: inherit; font-size: var(--fs-meta); text-decoration: none; cursor: pointer; }
+@media (hover: hover) and (pointer: fine) { .np-link:hover { text-decoration: underline; text-underline-offset: 2px; } }
+.np-choose { width: 100%; justify-content: center; height: 3rem; }
+
+.scx-scrim { position: fixed; inset: 0; z-index: 90; background: var(--scrim); }
+.scx { position: fixed; z-index: 91; top: 3.5vh; left: 50%; transform: translateX(-50%); width: min(78rem, 95vw); height: 93vh; display: flex; flex-direction: column;
+  background: var(--surface-1); border: 1px solid var(--border-strong); border-radius: var(--r-xl); box-shadow: var(--shadow-pop); overflow: hidden; animation: scx-in var(--t-dialog) var(--ease-out); }
+@keyframes scx-in { from { opacity: 0; transform: translateX(-50%) scale(0.98); } }
+.scx .dialog-head { flex: none; }
+.scx-tabs { flex: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 0.5rem; padding: 0.875rem 1rem 0; }
+.scx-tab { display: flex; align-items: center; gap: 0.75rem; min-width: 0; padding: 0.625rem 0.75rem; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface-2);
+  color: var(--text-secondary); font: inherit; text-align: left; cursor: pointer; }
+.scx-tab .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.1rem; }
+.scx-tab b { color: var(--text-primary); font-weight: var(--strong-weight); font-size: var(--fs-control); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scx-tab small { font-size: var(--fs-dense); color: var(--text-muted); }
+.scx-tab .n { font-size: var(--fs-meta); color: var(--text-muted); }
+.scx-tab.on { border-color: var(--select); box-shadow: 0 0 0 1px var(--select) inset; background: var(--select-soft); }
+@media (hover: hover) and (pointer: fine) { .scx-tab:not(.on):hover { border-color: var(--border-strong); color: var(--text-primary); } }
+.scx-tab:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.scx-tools { flex: none; display: flex; gap: 0.6rem var(--sp-3); align-items: center; flex-wrap: wrap; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+.scx-tools .search { flex: 0 1 18rem; }
+.scx-tools .segmented { margin-left: auto; }
+.scx-cats { order: 3; flex: 1 1 100%; display: flex; gap: 0.3rem; flex-wrap: wrap; }
+.scx-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 23rem; }
+.scx-grid { overflow-y: auto; padding: 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr)); gap: 1.25rem 0.875rem; align-content: start; scrollbar-width: thin; }
+.scx-preview { border-left: 1px solid var(--border); background: var(--surface-2); padding: 1rem; display: flex; flex-direction: column; gap: 0.875rem; overflow-y: auto; scrollbar-width: thin; }
+.scx-foot { flex: none; display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; border-top: 1px solid var(--border); }
+
+/* Writing ideas: the prompt library over New project, laid out like the Style Gallery (filters, grid, details); tiles and
+   details share the gallery's classes, so the type levels and the quiet credit match. */
+.plx { position: fixed; z-index: 91; top: 3.5vh; left: 50%; transform: translateX(-50%); width: min(84rem, 96vw); height: 93vh; display: flex; flex-direction: column;
+  background: var(--surface-1); border: 1px solid var(--border-strong); border-radius: var(--r-xl); box-shadow: var(--shadow-pop); overflow: hidden; animation: scx-in var(--t-dialog) var(--ease-out); }
+.plx .dialog-head { flex: none; gap: 0.75rem; }
+.plx .dialog-head .count { margin-left: auto; font-size: var(--fs-meta); color: var(--text-muted); }
+.plx .dialog-head .x { margin-left: 0.25rem; }
+.plx-pad { padding: 1rem; }
+.plx-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 15rem minmax(0, 1fr) 24rem; }
+.plx-facets { border-right: 1px solid var(--border); padding: 0.875rem 0.75rem; display: flex; flex-direction: column; gap: 1.125rem; overflow-y: auto; scrollbar-width: thin; }
+.plx-sub { display: block; font-size: var(--fs-dense); color: var(--text-muted); }
+.plx-grid { overflow-y: auto; padding: 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 1.25rem 0.875rem; align-content: start; scrollbar-width: thin; }
+.plx-detail { border-left: 1px solid var(--border); background: var(--surface-2); padding: 1rem; display: flex; flex-direction: column; gap: 0.875rem; overflow-y: auto; scrollbar-width: thin; }
+.plx-tags { margin: 0; display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.plx-tags span { display: inline-flex; align-items: center; min-height: 1.375rem; padding: 0.15rem 0.5rem; line-height: 1.3; border-radius: var(--r-pill); border: 1px solid var(--border); font-size: var(--fs-dense); color: var(--text-secondary); }
+.plx-prompt { flex: none; font: var(--fs-control) / 1.6 var(--font-body); color: var(--text-primary); background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-md);
+  padding: 0.75rem 0.875rem; white-space: pre-wrap; }
+.plx-detail .credit-line { margin-top: auto; padding-top: 0.5rem; border-top: 1px solid var(--border); }
+/* the actions stay in view under a long prompt */
+.plx-detail .sgb-acts { position: sticky; bottom: -1rem; margin: 0 -1rem -1rem; padding: 0.75rem 1rem; background: var(--surface-2); border-top: 1px solid var(--border); }
+@media (max-width: 1100px) {
+  .scx-body { grid-template-columns: minmax(0, 1fr) 18rem; }
+  .plx-body { grid-template-columns: 12rem minmax(0, 1fr) 19rem; }
+  .plx-grid { grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); }
+}
+@media (max-width: 800px) {
+  .scx-body, .plx-body { grid-template-columns: 1fr; }
+  .scx-preview, .plx-facets { display: none; }
+  .plx-detail { border-left: 0; border-top: 1px solid var(--border); }
+}
+@media (prefers-reduced-motion: reduce) { .scx, .plx { animation-duration: 1ms; } }
+
+/* the design step under the style card: the Brand Kit, a short list with swatches */
+.ds { display: flex; flex-direction: column; gap: 0.35rem; }
+.ds-field { min-width: 0; }
+.ds-btn { gap: 0.5rem; }
+.ds-btn .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ds-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.ds-sw { flex: none; display: inline-flex; height: 0.875rem; border-radius: var(--r-pill); overflow: hidden; border: 1px solid var(--border); }
+.ds-sw i { width: 0.6rem; }
+.pick-list.ds-list { width: min(26rem, 80vw); }
+.ds-list .ds-sw { width: 3.75rem; height: 1rem; } .ds-list .ds-sw i { width: auto; flex: 1; }
+.ds-list .pick-head { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.55rem 0.5rem 0.25rem; font-size: var(--fs-dense); text-transform: uppercase;
+  letter-spacing: var(--label-track); color: var(--text-muted); font-weight: var(--strong-weight); }
+.ds-list .pick-head .num { font-weight: 400; }
+.ds-foot { padding: 0.5rem 0.5rem 0.25rem; border-top: 1px solid var(--border); margin-top: 0.25rem; }
+/* Claude popover: short, small type, nothing said twice; the account lines only once signed in */
+.claude-pop { width: 19rem; gap: 0.625rem; padding: 0.875rem 1rem; font-size: var(--fs-meta); }
+.claude-pop-head b { font-size: var(--fs-control); }
+.claude-pop-head b span { font-weight: 400; color: var(--text-muted); }
+.claude-pop .claude-kv { font-size: var(--fs-meta); row-gap: 0.2rem; grid-template-columns: max-content minmax(0, 1fr); column-gap: 0.875rem; }
+.signin-flow.busy { gap: 0.4rem; width: 100%; }
+.signin-wait { display: flex; align-items: center; gap: 0.4rem; width: 100%; font-size: var(--fs-meta); color: var(--text-secondary); }
+.signin-wait > svg { color: var(--status-pending); flex: none; }
+.signin-wait > span { flex: 1; min-width: 0; }
+.signin-wait .clink, .signin-help, .signin-more .clink { font-size: var(--fs-meta); }
+.signin-help { color: var(--text-muted); }
+.signin-more { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; }
+.signin-more a.clink { display: inline-flex; align-items: center; gap: 0.3rem; }
+.signin-code .input { font-size: var(--fs-meta); }
+.needs-claude .signin-flow.busy { width: auto; flex: 1 1 18rem; }
+/* ---- New project, redesigned: eight numbered boxes, two columns read top to bottom: the set-up (1-6) | the Brief and Assets (7-8).
+   Five type levels: box title (h3), field label (.np2-l), value (controls), short description (.np2-desc), fine print (.np2-fine). */
+.np2 { --np2-gap: 0.75rem; }
+.np2-head .np2-draft { margin-left: auto; display: inline-flex; align-items: center; gap: 0.4rem; font-size: var(--fs-meta); color: var(--text-muted); }
+.np2-head .np2-draft + .x { margin-left: 0; }
+.np2-body { padding: 1rem 1.25rem 1.25rem; gap: 0; }
+.np2-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--np2-gap); align-items: stretch; }
+.np2-col { display: flex; flex-direction: column; gap: var(--np2-gap); min-width: 0; }
+.np2-step { display: flex; flex-direction: column; gap: 0.625rem; min-width: 0; padding: 0.75rem 1rem 0.875rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-lg); }
+.np2-step.grow { flex: 1; min-height: 0; }
+.np2-step-h { display: flex; align-items: center; gap: 0.5rem; min-height: 1.75rem; }
+.np2-step-h h3 { margin: 0; font: var(--strong-weight) 0.9375rem / 1.3 var(--font-body); letter-spacing: var(--body-track); text-transform: none; color: var(--text-primary); }
+.np2-n { flex: none; display: grid; place-items: center; width: 1.375rem; height: 1.375rem; border-radius: 50%; border: 1px solid var(--accent-line); color: var(--accent-ink);
+  font: var(--strong-weight) 0.6875rem / 1 var(--font-body); }
+.np2-note { font-size: var(--fs-meta); color: var(--text-muted); }
+.np2-step-h > .btn { margin-left: auto; }
+.np2-l { font: 400 var(--fs-meta) / 1.3 var(--font-body); color: var(--text-secondary); letter-spacing: 0; text-transform: none; }
+.np2-desc { font-size: max(0.75rem, 12px); line-height: 1.4; color: var(--text-muted); }
+.np2-fine { font-size: var(--fs-dense); line-height: 1.4; color: var(--text-muted); }
+.np2-err { font-size: max(0.75rem, 12px); line-height: 1.4; color: var(--status-stop); }
+.np2-field { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+.np2-row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.625rem; align-items: end; }
+.np2 .input, .np2 .select, .np2 .pick-btn { height: 2.375rem; font-size: var(--fs-control); }
+.np2 .select { width: 100%; }
+.np2-title { width: 100%; }
+.np2-title.invalid { border-color: var(--status-stop); }
+.np2-saved { display: flex; align-items: center; gap: 0.625rem; min-width: 0; }
+.np2-saved > .np2-l { flex: none; }
+.np2-saved .folder-field { flex: 1; min-width: 0; }
+.np2-saved .folder-field .row { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.np2-saved .path { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: max(0.75rem, 12px); color: var(--text-muted); }
+/* inside the boxes, buttons speak in the body face, in sentence case; the footer keeps the theme's buttons */
+.np2-body .btn { font-family: var(--font-body); text-transform: none; letter-spacing: 0; font-weight: var(--strong-weight); font-size: var(--fs-meta); }
+.np2-body .btn.sm { height: 1.875rem; }
+/* 2 Style: the card, compact */
+.np2 .np-style { grid-template-columns: 8.5rem minmax(0, 1fr); gap: 0.75rem; padding: 0.5rem; background: var(--surface-1); border-color: var(--border); }
+.np2 .np-style .nm { font-size: var(--fs-control); }
+.np2 .np-style .tech-tags { margin: 0; }
+/* 3 Design */
+.np2 .ds { display: flex; flex-direction: column; gap: 0.5rem; }
+/* box 3 holds one field: the Brand Kit picker spans the box (its title is the field's name) */
+.np2 .ds-field { display: flex; flex-direction: column; min-width: 0; }
+.ds-btn:disabled { opacity: 1; cursor: default; background: transparent; border-style: dashed; }
+.ds-btn.locked .t { color: var(--text-muted); }
+.ds-lock { flex: none; color: var(--text-muted); }
+.ds-from { margin: 0; display: flex; align-items: center; gap: 0.5rem; min-width: 0; font-size: max(0.75rem, 12px); color: var(--text-muted); }
+.ds-from > svg { flex: none; }
+.ds-from b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--strong-weight); font-size: var(--fs-meta); color: var(--text-primary); }
+.ds-from .ds-sw { width: 3rem; } .ds-from .ds-sw i { flex: 1; width: auto; }
+/* 4 Format */
+.np2 .pick-btn.length input { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+/* 5 Brief */
+/* a long brief showed 3 lines in a box shorter than its column: the box takes the room the screen has (the dialog grows to it) */
+.np2-brief { flex: 1; min-height: 9rem; height: auto; resize: none; padding: 0.75rem 0.875rem; font-size: var(--fs-control); line-height: 1.55; }
+/* both columns end on one line: the left column's boxes set the height, the Brief stretches to it (no dead space under either);
+   a box that grows on the left (an error line, a locked note, picked characters) gives the Brief more room, never a gap */
+.np2-body { flex: 1 1 auto; min-height: 0; }
+.np2-cols { flex: 1 0 auto; }
+.np2 .np-questions { margin-top: 0; }
+.np2 .np-questions .field > span { font: 400 var(--fs-meta) / 1.3 var(--font-body); color: var(--text-secondary); letter-spacing: 0; text-transform: none; }
+.np2 .np-ask { padding: 0.5rem 0.75rem; font-size: var(--fs-meta); }
+/* 6 Assets: one row */
+.np2 .asset-drop { display: flex; align-items: center; gap: 0.625rem; padding: 0.625rem 0.75rem; }
+.np2 .asset-drop > svg { flex: none; }
+.np2 .asset-drop .drop-t { font-size: var(--fs-control); font-weight: var(--strong-weight); }
+.np2 .drop-fine { flex-basis: 100%; margin: 0; font-size: var(--fs-dense); line-height: 1.4; color: var(--text-muted); }
+@media (hover: hover) and (pointer: fine) { :root:not([data-theme="studio"]) .np2 .asset-drop:not(.over):hover { border-color: var(--accent-line); } }
+:root:not([data-theme="studio"]) .np2 .asset-drop.over > svg { color: var(--accent); }
+.np2 .asset-list { max-height: 6.5rem; }
+.np2-foot { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+@media (max-width: 760px) {
+  .np2-brief { min-height: clamp(9rem, calc(100vh - 34rem), 28rem); }
+  .np2-cols { grid-template-columns: minmax(0, 1fr); }
+  .np2 .np-style { grid-template-columns: 6rem minmax(0, 1fr); }
+}
+/* Wide windows, both themes (owner 29/10): the two columns become one grid of six rows, so Assets (8) starts level with Format
+   (5) and spans Format and System settings, and the Brief (7) spans boxes 1-4. The left boxes set every row; Assets takes no height of
+   its own (contain: size), so added files scroll inside it and never grow the box. Empty, the dashed drop zone fills the box with
+   its row and line in the middle. Narrow windows keep the two plain columns. */
+@media (min-width: 761px) {
+  .np2-col { display: contents; }
+  .np2-col:first-child > .np2-step { grid-column: 1; }
+  .np2-col:first-child > .np2-step:nth-child(1) { grid-row: 1; }
+  .np2-col:first-child > .np2-step:nth-child(2) { grid-row: 2; }
+  .np2-col:first-child > .np2-step:nth-child(3) { grid-row: 3; }
+  .np2-col:first-child > .np2-step:nth-child(4) { grid-row: 4; }
+  .np2-col:first-child > .np2-step:nth-child(5) { grid-row: 5; }
+  .np2-col:first-child > .np2-step:nth-child(6) { grid-row: 6; }
+  .np2-col:last-child > .np2-step.grow { grid-column: 2; grid-row: 1 / 5; }
+  .np2-assets { grid-column: 2; grid-row: 5 / 7; contain: size; min-height: 0; }
+  /* empty: the dashed drop zone fills the box (the whole frame takes a drop), its row and line centred in it */
+  .np2-assets > .asset-import { flex: 1; min-height: 0; }
+  .np2-assets .asset-drop { flex: 1; min-height: 0; align-content: center; justify-content: center; row-gap: 0.75rem; }
+  .np2-assets .asset-drop > div { flex: 0 1 auto !important; }          /* over the text block's inline flex: 1 */
+  .np2-assets .drop-fine { text-align: center; }
+  /* with files: a compact drop row on top (still a drop target), the list fills the rest and scrolls inside the box */
+  .np2-assets:has(.asset-list) .asset-drop { flex: none; }
+  .np2-assets:has(.asset-list) .drop-fine { display: none; }
+  .np2-assets .asset-list { flex: 1; min-height: 0; max-height: none; }
+}
+.np2-step .np2-row3:has(#np-len) { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 0.85fr); }
+/* boxes opened from New project take its frame exactly: position and size come from the dialog, inline */
+.scx.framed, .plx.framed { transform: none; animation-name: framed-in; }
+@keyframes framed-in { from { opacity: 0; transform: scale(0.99); } }
+/* ---- Characters dialog (character layer step D, Brush cartoon): the film's characters, two sheets each, Approve */
+.chs { display: flex; flex-direction: column; gap: 1rem; }
+.chs-bar { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 0.625rem; flex-wrap: wrap; padding: 0.5rem 0; background: var(--surface-1); border-bottom: 1px solid var(--border); }
+.chs-state { display: inline-flex; align-items: center; gap: 0.4rem; font-size: var(--fs-meta); color: var(--text-secondary); }
+.chs-state.ok { color: var(--state-done); } .chs-state.redo { color: var(--state-run); }
+.chs-problems { display: flex; flex-direction: column; gap: 0.4rem; }
+.chs-char { display: flex; flex-direction: column; gap: 0.625rem; padding: 0.875rem 1rem 1rem; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface-2); }
+.chs-head { display: flex; align-items: center; gap: 0.625rem; flex-wrap: wrap; }
+.chs-head h3 { margin: 0; font: var(--strong-weight) var(--fs-heading) / 1.3 var(--font-body); }
+.chs-about { margin: 0; font-size: var(--fs-control); line-height: 1.5; color: var(--text-secondary); max-width: 72ch; }
+.chs-sheets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+.chs-sheet { margin: 0; display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; }
+.chs-sheet figcaption { font-size: var(--fs-meta); color: var(--text-secondary); }
+.chs-sheet a { display: block; border-radius: var(--r-md); overflow: hidden; cursor: zoom-in; border: 1px solid var(--border); }
+.chs-sheet a:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.chs-sheet img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: contain; background: var(--surface-1); }
+.chs-none { display: flex; align-items: center; justify-content: center; gap: 0.4rem; aspect-ratio: 16 / 9; border: 1px dashed var(--border-strong); border-radius: var(--r-md); font-size: var(--fs-meta); color: var(--text-muted); }
+@media (max-width: 900px) { .chs-sheets { grid-template-columns: minmax(0, 1fr); } }
+/* ---- First run: the list of what the app needs, on first start and in Settings › System */
+.fr-overlay { z-index: 95; background: var(--media-overlay); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.fr-dialog { width: min(52rem, calc(100vw - 2rem)); max-height: calc(100vh - 2rem); display: flex; flex-direction: column; }
+.fr-lead { margin: 0; font-size: var(--fs-control); line-height: 1.5; color: var(--text-secondary); }
+.fr { display: flex; flex-direction: column; gap: 0.75rem; }
+.fr-sum { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; min-height: var(--ctl); font-size: var(--fs-control); color: var(--text-secondary); }
+.fr-ok { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--state-done); }
+.fr-list { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; }
+.fr-item { display: flex; gap: 0.75rem; padding: 0.75rem 0.875rem; background: var(--surface-2); }
+.fr-item + .fr-item { border-top: 1px solid var(--border); }
+.fr-item.busy { background: var(--state-run-soft); }
+.fr-ic { flex: none; width: 1.5rem; height: 1.5rem; display: grid; place-items: center; border-radius: 50%; color: var(--text-muted); border: 1px solid var(--border-strong); margin-top: 0.05rem; }
+.fr-item.ready .fr-ic { color: var(--state-done); border-color: var(--state-done-line, var(--state-done)); }
+.fr-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+.fr-top { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.fr-top b { font-weight: var(--strong-weight); font-size: var(--fs-control); color: var(--text-primary); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fr-from { flex: none; display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.05rem 0.45rem; border-radius: var(--r-pill); background: var(--surface-3); color: var(--text-secondary); font-size: var(--fs-dense); }
+.fr-from.k-yours { background: var(--accent-soft); color: var(--accent-ink); }
+.fr-mb { margin-left: auto; flex: none; font-size: var(--fs-meta); color: var(--text-muted); }
+.fr-item.ready .fr-mb { color: var(--state-done); }
+.fr-what { margin: 0; font-size: max(0.75rem, 12px); line-height: 1.45; color: var(--text-muted); }
+.fr-cmd { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.fr-cmd code { flex: 1; min-width: 0; padding: 0.35rem 0.6rem; border-radius: var(--r-sm); background: var(--surface-1); border: 1px solid var(--border); font-size: var(--fs-code); overflow-x: auto; white-space: nowrap; }
+.fr-one { align-self: flex-start; }
+.fr-bundle summary { cursor: pointer; font-size: var(--fs-meta); color: var(--text-secondary); }
+.fr-bundle ul { display: flex; flex-direction: column; gap: 0.2rem; margin: 0.4rem 0 0; font-size: var(--fs-meta); }
+.fr-bundle b { font-weight: var(--strong-weight); }
+.fr-ver { flex: none; font-size: var(--fs-dense); color: var(--text-muted); }
+/* Storyboard dialog: the round's row carries PDF and "Make two more options"; the round being made shows at once */
+.bd-round-h { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.bd-round-h h3.sub { margin: 0; }
+.bd-round > .state-line { margin: 0.25rem 0 0.5rem; }
+.bd-round.pending .bd-cols { opacity: 0.9; }
+.bd-col.ph { cursor: default; border-style: dashed; }
+.bd-col.ph header { display: flex; align-items: center; gap: 0.5rem; }
+.bd-col.ph .sk, .bd-still.sk { display: block; border-radius: var(--r-sm); background: linear-gradient(90deg, var(--surface-2) 0%, var(--surface-3) 50%, var(--surface-2) 100%); background-size: 200% 100%; animation: sk-sheen 1.4s linear infinite; }
+.bd-still.sk { aspect-ratio: 16 / 9; }
+@media (prefers-reduced-motion: reduce) { .bd-col.ph .sk, .bd-still.sk { animation: none; } }
+.bd-col .state-badge { margin-left: auto; }
+.sb-bar .state-line { margin-right: 0.5rem; }
+/* ---- Motion dialog: frames in rows like the Storyboard dialog; the open frame's table right under its row, one green
+   outline around both; each motion one line */
+/* one row of frames, six in view, more scroll sideways (the wheel too, wheel.js); the bottom padding holds the open frame's tab */
+.mo2 .mo-strip { display: grid; grid-auto-flow: column; grid-auto-columns: max(11rem, calc((100% - 5 * 0.75rem) / 6)); gap: 0.75rem; align-items: start;
+  overflow-x: auto; overflow-y: hidden; padding-bottom: 0.8rem; scrollbar-width: thin; }
+.mo2 .mo-strip + .mo-open { margin-top: 0; }
+.mo-tile { display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; padding: 0.4rem; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface-1);
+  color: inherit; font: inherit; text-align: left; cursor: pointer; position: relative; }
+.mo-tile .mo-still { border-radius: var(--r-md); }
+.mo-tile-t { display: flex; align-items: baseline; gap: 0.5rem; min-width: 0; font-size: var(--fs-control); }
+.mo-tile-t b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: var(--strong-weight); }
+.mo-tile-m { display: flex; align-items: center; gap: 0.4rem; font-size: var(--fs-meta); color: var(--text-muted); }
+.mo-chev { margin-left: auto; transition: transform 180ms var(--ease-out); }
+.mo-tile.open { border-color: var(--select); box-shadow: 0 0 0 1px var(--select) inset, 0 0 1.25rem -0.5rem var(--state-done-line); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.mo-tile.open::after { content: ""; position: absolute; left: -1px; right: -1px; bottom: -0.8rem; height: 0.8rem; border-left: 2px solid var(--select); border-right: 2px solid var(--select); background: var(--select-soft); }
+.mo-tile.open .mo-chev { transform: rotate(180deg); }
+@media (hover: hover) and (pointer: fine) { .mo-tile:not(.open):hover { border-color: var(--accent-line); } }
+.mo-tile:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.mo-open { grid-column: 1 / -1; border: 2px solid var(--select); border-radius: var(--r-lg); background: var(--surface-2); padding: 0.75rem; box-shadow: 0 0 1.5rem -0.75rem var(--state-done-line); }
+.mo2 .mo-open .mo-shot { display: block; }
+.mo2 .mo-rows { gap: 0.3rem; }
+.mo2 .mo-row { padding: 0.3rem 0.5rem; }
+.mo2 .mo-line { flex-wrap: nowrap; gap: 0.5rem; min-width: 0; }
+.mo2 .mo-target { flex: 0 1 11rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-control); }
+.mo2 .mo-when { flex: none; font-size: var(--fs-meta); }
+.mo2 .mo-line .mo-what { flex: 1 1 auto; min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-meta); color: var(--text-secondary); }
+.mo2 .mo-line .chip, .mo2 .mo-line .src-tag { flex: none; }
+.mo2 .mo-line .mp-src { flex: 0 0 auto; min-width: 0; max-width: 12rem; }
+.mo2 .mo-line .mp-src-thumb { width: 3rem; }
+@media (max-width: 900px) { .mo2 .mo-line { flex-wrap: wrap; } .mo2 .mo-line .mo-what { flex-basis: 100%; white-space: normal; } }
+.chs-note { margin: 0; font-size: max(0.75rem, 12px); line-height: 1.45; color: var(--text-muted); max-width: 80ch; }
+.mix-sel { justify-content: center; text-transform: uppercase; letter-spacing: 0.06em; font-size: var(--fs-meta); }
+/* Storyboard dialog dressed like Final Mix: each round a section box with a caps accent heading; the
+   chosen option tinted green like the track in use */
+.boards { display: flex; flex-direction: column; gap: 0.875rem; }
+.bd-round { padding: 0.875rem 1rem 1rem; border: 1px solid var(--border); border-radius: var(--r-lg); background: var(--surface-2); }
+.bd-round-h h3.sub { font: var(--label-weight) calc(var(--fs-label) * var(--label-scale)) / 1.2 var(--font-label); letter-spacing: var(--label-track); text-transform: uppercase; color: var(--accent-ink); }
+.bd-round-h h3.sub .muted { font: 400 var(--fs-meta) / 1.2 var(--font-body); letter-spacing: 0; text-transform: none; }
+.bd-col { background: var(--surface-1); }
+.bd-col.picked { border-color: var(--state-done-line); background: color-mix(in srgb, var(--state-done) 6%, var(--surface-1)); box-shadow: 0 0 0 1px var(--state-done-line) inset; }
+/* ---- Settings › Update: the version in use, what changed, the update's stages */
+.upd { display: flex; flex-direction: column; gap: var(--sp-4); }
+.upd .panel > .state-line { margin-top: 0.25rem; }
+.upd-kv { grid-template-columns: 7rem minmax(0, 1fr); font-size: var(--fs-meta); row-gap: 0.3rem; }
+.upd-kv dd { display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap; min-width: 0; overflow-wrap: anywhere; }
+.upd-commits { display: flex; flex-direction: column; max-height: 18rem; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--r-md); }
+.upd-commits li { display: grid; grid-template-columns: 5.5rem 6.5rem minmax(0, 1fr); gap: 0.75rem; padding: 0.35rem 0.75rem; font-size: var(--fs-meta); }
+.upd-commits li + li { border-top: 1px solid var(--border); }
+.upd-commits li > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.upd-log summary { cursor: pointer; font-size: var(--fs-meta); color: var(--text-secondary); }
+.upd-log pre, .upd-cmd { margin: 0.5rem 0 0; padding: 0.75rem; max-height: 20rem; overflow: auto; border-radius: var(--r-md); background: var(--surface-1); border: 1px solid var(--border); font-size: var(--fs-code); white-space: pre-wrap; }
+.ds-vi { margin: 0; font-size: max(0.75rem, 12px); line-height: 1.4; color: var(--text-muted); }
+.pick-list.ds-float { z-index: 120; overflow: auto; min-width: 0; }          /* on <body>, fixed to its button, never inside the dialog's scroll */
+/* New project's characters: saved characters as small picture cards; several can be picked */
+.cp { display: flex; flex-direction: column; gap: 0.5rem; }
+.cp-row { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.15rem; scrollbar-width: thin; }
+.cp-card { flex: none; width: 6.5rem; display: flex; flex-direction: column; gap: 0.3rem; padding: 0.3rem; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-1); color: inherit; font: inherit; cursor: pointer; text-align: left; }
+.cp-card.on { border-color: var(--select); box-shadow: 0 0 0 1px var(--select) inset; background: var(--select-soft); }
+.cp-pic { position: relative; display: grid; place-items: center; aspect-ratio: 16 / 10; border-radius: var(--r-sm); overflow: hidden; background: var(--surface-2); color: var(--text-muted); }
+.cp-pic img { width: 100%; height: 100%; object-fit: cover; }
+.cp-chk { position: absolute; right: 0.25rem; bottom: 0.25rem; width: 1.1rem; height: 1.1rem; border-radius: 50%; display: grid; place-items: center; background: var(--select); color: var(--select-ink); }
+.cp-nm { font-size: var(--fs-meta); font-weight: var(--strong-weight); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cp-new { border-style: dashed; }
+@media (hover: hover) and (pointer: fine) { .cp-card:not(.on):hover { border-color: var(--accent-line); } }
+.chs-pic { position: relative; }
+.chs-load { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 0.4rem; background: var(--surface-1); color: var(--text-muted); font-size: var(--fs-meta); }
+.chs-load.err { color: var(--state-stop); }
+/* New project's saved characters for any style: one compact row under Assets */
+.cp-compact { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+.cp-chip { display: inline-flex; align-items: center; gap: 0.3rem; height: 1.75rem; padding: 0 0.1rem 0 0.25rem; border: 1px solid var(--select); border-radius: var(--r-pill); background: var(--select-soft); font-size: var(--fs-meta); }
+.cp-chip img { width: 1.25rem; height: 1.25rem; border-radius: 50%; object-fit: cover; }
+.cp-list { width: 16rem; max-height: 16rem; bottom: calc(100% + 0.375rem); top: auto; }
+.cp-list img, .cp-list .ph { width: 2.5rem; height: 1.6rem; object-fit: cover; border-radius: var(--r-sm); }
+.cp-how { font-size: var(--fs-dense); color: var(--text-muted); line-height: 1.25; }          /* how the character lives in this film */
+.chs-sheets.one { grid-template-columns: minmax(0, 1fr); }          /* an anidoodle person's one model sheet, full width */
+/* Export to AE: one checklist coloured by state, the size check as a sentence with bold numbers, the two buttons on the right */
+.ae-checks li { align-items: flex-start; line-height: 1.45; }
+.ae-checks li > svg { margin-top: 0.15rem; flex: none; }
+.ae-checks b, .ae-size b { font-weight: var(--strong-weight); color: var(--text-primary); }
+.ae-checks li.run b { color: var(--state-run); } .ae-checks li.stop b { color: var(--state-stop); }
+.ae-size.state-line { color: var(--text-secondary); }
+.ae-size { align-items: flex-start; padding: 0.625rem 0.75rem; border-radius: var(--r-md); border: 1px solid var(--state-done-line); background: var(--state-done-soft); color: var(--text-secondary); font-size: var(--fs-control); line-height: 1.5; }
+.ae-size.run { border-color: var(--state-run-line); background: var(--state-run-soft); } .ae-size.stop { border-color: var(--state-stop-line); background: var(--state-stop-soft); }
+.ae-size > svg { margin-top: 0.2rem; flex: none; }
+.ae-acts { display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center; flex-wrap: wrap; }
+/* New project: a sample brief says typing replaces it; what the sample was written for sits under Format with one button */
+.np-sample-note { align-self: flex-start; font-size: var(--fs-dense); color: var(--text-muted); }
+.np2-brief.is-sample { color: var(--text-secondary); }
+.np-sample-fields { margin: 0.25rem 0 0; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; font-size: var(--fs-meta); color: var(--state-run); }
+.np-sample-fields .btn { color: var(--text-primary); }
+/* the length in words next to its time code; a storyboard tile in the film's own shape; the source counts' lead */
+.pick-btn.length .np-len-s { flex: none; font-size: var(--fs-dense); color: var(--text-muted); white-space: nowrap; }
+.bd-col[style] .bd-still { aspect-ratio: var(--bd-ar, 16 / 9); }
+.mp-src-l { font-size: var(--fs-meta); }
+/* what an approval will cost, in the confirm dialog; it is the dialog's sentence, at body size */
+.usage-hint { display: flex; gap: 0.5rem; align-items: flex-start; margin: 0; color: var(--text-secondary); line-height: 1.5; }
+/* the render's loudness in words; the numbers open under it */
+.loud-line > summary { display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer; }
+.loud-line > summary .ok { color: var(--status-ok); }
+.loud-line > .hint { display: block; margin-top: 0.15rem; }
+.mix-loud { gap: 0.5rem; align-items: baseline; }
+.usage-hint > svg { flex: none; margin-top: 0.3rem; color: var(--state-run); }
+
+/* New project's Size typed as in After Effects with its ratio beside it, the locked boxes, What If "Coming soon" */
+.np-size-wrap { position: relative; display: block; }
+.pick-btn.np-size { gap: 0.25rem; padding-right: 0.25rem; }
+.pick-btn.np-size input { width: 3.25rem; min-width: 0; background: transparent; border: 0; color: inherit; font: inherit; outline: none; text-align: center; }
+.pick-btn.np-size input:disabled { color: var(--text-secondary); }
+.np-size-r { margin-left: auto; padding: 0 0.375rem; color: var(--text-muted); font-size: var(--fs-meta); }
+.pick-btn.np-size.locked { color: var(--text-secondary); }
+.np-size-list { position: absolute; z-index: 30; top: calc(100% + 0.375rem); left: 0; min-width: 100%; }
+.np-size-list.up { top: auto; bottom: calc(100% + 0.375rem); }
+.np-locked { width: 100%; cursor: default; }
+.np2-desc > svg { vertical-align: -1px; }
+.scx-tab.soon { opacity: 0.55; cursor: default; }
+.scx-tab .au-name small { font-size: var(--fs-dense); }
+
+.np-sample-list { position: absolute; z-index: 30; right: 0; top: calc(100% + 0.375rem); min-width: 15rem; }          /* Anidoodle's samples on the Sample brief button (same list as the pickers) */
+.np2-act-wrap { margin-left: auto; position: relative; }
+
+
+/* the Brief dialog in one column; its saved time sits above the text */
+.brief-one { width: 100%; max-width: 52rem; margin: 0 auto; display: flex; flex-direction: column; gap: 0.75rem; }
+.brief-one > .panel { width: 100%; }
+.brief-saved { align-self: flex-end; font-size: var(--fs-meta); }
+/* the Brief dialog is compact and the brief takes the room: the word count and saved time share a line, Length and
+   the film style, design and colours share the next, then Save */
+.brief-one > .panel { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--sp-2) var(--sp-4); }
+.brief-one > .panel > * { grid-column: 1 / -1; order: 3; }
+.brief-one > .panel > .textarea { order: 0; min-height: clamp(14rem, calc(100vh - 23rem), 40rem); resize: vertical; }
+.brief-one > .panel > span.hint { order: 1; grid-column: 1 / 3; }
+.brief-one > .panel > .brief-saved { order: 1; grid-column: 3; justify-self: end; }
+.brief-one > .panel > .field { order: 2; grid-column: 1; flex-direction: row; align-items: center; gap: var(--sp-2); }
+.brief-one > .panel > .kv { order: 2; grid-column: 2 / -1; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.25rem 0.5rem; }
+.brief-one > .panel > .kv dd + dt { margin-left: var(--sp-3); }
+.brief-one > .panel > .row { order: 4; }
+
+/* Storyboard feedback: a panel is its picture plus a note button on hover and the count of
+   its notes; the feedback box is a card beside the option's card (the dialog's own textarea, pick-list and buttons) */
+.bd-cell { position: relative; display: block; min-width: 0; }
+.bd-cell .bd-still { display: block; width: 100%; }
+.bd-count { position: absolute; top: 0.25rem; right: 0.25rem; min-width: 1.125rem; height: 1.125rem; padding: 0 0.3rem; border-radius: 999px; display: inline-grid; place-items: center;
+  font-size: var(--fs-dense); font-weight: var(--strong-weight); background: var(--select); color: var(--select-ink); pointer-events: none; z-index: 2; }
+.bd-note-btn { position: absolute; right: 0.25rem; bottom: 0.25rem; z-index: 2; width: 1.625rem; height: 1.625rem; display: grid; place-items: center; padding: 0;
+  border: 1px solid var(--border-strong); border-radius: var(--r-sm); background: var(--surface-2); color: var(--text-primary); cursor: pointer; opacity: 0;
+  transition: opacity var(--t-hover) var(--ease-out); }
+@media (hover: hover) and (pointer: fine) { .bd-cell:hover .bd-note-btn { opacity: 1; } }
+.bd-note-btn:focus-visible { opacity: 1; }
+@media (hover: none) { .bd-note-btn { opacity: 1; } }
+.bd-note-btn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+.bd-revised { position: absolute; left: 0.25rem; bottom: 0.25rem; font-size: var(--fs-dense); padding: 0 0.3rem; border-radius: var(--r-xs); background: var(--state-run); color: var(--surface-1); text-transform: lowercase; }
+.bd-fb { cursor: default; }
+.bd-fb-h { display: flex; align-items: center; gap: 0.5rem; }
+.bd-fb-h .muted { font-size: var(--fs-meta); }
+.bd-fb-field { position: relative; }
+.bd-fb .textarea { width: 100%; min-height: 9rem; resize: vertical; }
+.bd-fb .row { display: flex; align-items: center; gap: var(--sp-2); }
+.bd-fb .bd-fb-warn { color: var(--warning); min-width: 0; }          /* a panel number the board does not have */
+.bd-at { width: 100%; max-height: 16rem; }
+.bd-at b { flex: none; }
+.bd-at .muted { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-meta); }
+.bd-light-box .bd-note { flex: 1; min-width: 12rem; height: var(--ctl-compact, 2rem); }
+.bd-cell.bd-empty { visibility: hidden; aspect-ratio: var(--bd-ar, 16 / 9); }          /* a short last page keeps the 3 x 3 sheet's size */
+.bd-saved { display: inline-flex; align-items: center; gap: 0.25rem; font-size: var(--fs-meta); }          /* "PDF saved" beside Show in folder */
+
+/* Notes pinned on the film: over the picture, the pins at this moment in the selection's colour; while pinning, a click is
+   a point and a drag a box. A pin is a line of the chat's message; the sent message's card shows each frame with its place drawn on it */
+.fn-layer { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 2; container-type: size; }
+.fn-pic { position: relative; width: min(100cqw, calc(100cqh * var(--fn-ar, 1.7778))); aspect-ratio: var(--fn-ar, 1.7778); }
+.fn-layer.pinning .fn-pic { pointer-events: auto; cursor: crosshair; outline: 1px dashed var(--select); outline-offset: -1px; }
+.fn-mark { position: absolute; pointer-events: none; border: 2px solid var(--select); }
+.fn-mark.box { background: var(--select-soft); border-radius: var(--r-sm); }
+.fn-mark.pt { width: 0.875rem; height: 0.875rem; margin: -0.4375rem 0 0 -0.4375rem; border-radius: 50%; background: var(--select); }
+.fn-mark b { position: absolute; left: -2px; bottom: calc(100% + 2px); padding: 0 0.3rem; border-radius: var(--r-sm); background: var(--select); color: var(--select-ink); font-size: var(--fs-dense); line-height: 1.4; }
+.fn-mark.pt b { left: calc(100% + 2px); bottom: calc(100% + 2px); }
+.fn-media { display: grid; grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: 0.5rem; margin-top: 0.5rem; }
+.fn-media li { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+.fn-media-pic { position: relative; display: block; }
+.fn-media-pic img { display: block; width: 100%; border-radius: var(--r-sm); }
+.fn-media-pic .fn-mark { border-width: 1.5px; }
+.fn-media-pic .fn-mark.pt { width: 0.5rem; height: 0.5rem; margin: -0.25rem 0 0 -0.25rem; }
+.fn-media .msg-meta { margin: 0; }
+.fn-media .msg-meta .chip { cursor: pointer; }
+.fn-media-t { font-size: var(--fs-meta); line-height: 1.4; overflow-wrap: anywhere; }
+
+/* The Desk shows two options to a row, newest on the left, older ones on the next row; the feedback
+   box drops under its card. A lone option keeps its card-and-feedback pair. The Studio's .lt-sheet keeps its own layout */
+.sheet-overlay .boards.paired { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+.sheet-overlay .boards.paired > :not(.bd-round) { grid-column: 1 / -1; }
+.sheet-overlay .boards.paired .bd-cols { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 900px) { .sheet-overlay .boards.paired { grid-template-columns: minmax(0, 1fr); } }
+.sheet-overlay .boards.paired > .bd-round + .bd-round { margin-top: 0; }
+/* every Desk sheet takes its content's height, up to the window less its margin, so a short sheet
+   (Final Mix, Tech checks, Motion Plan) leaves no empty band under its content; long ones scroll inside .sheet-body as before */
+.sheet-overlay > .sheet { height: auto; max-height: calc(100vh - 2 * var(--sp-4)); }
+/* the Selected chip in sentence case like every chip; the Mixkit ⓘ by the Music heading */
+:root:not([data-theme="studio"]) .mix-sel { text-transform: none; letter-spacing: 0; }
+.mix-info { color: var(--text-muted); margin-left: 0.375rem; vertical-align: -1px; cursor: help; flex: none; }
+/* AE Export's check lines are plain text; only their icon carries the state colour (bold yellow read as a link) */
+:root:not([data-theme="studio"]) .ae-checks li.run b, :root:not([data-theme="studio"]) .ae-checks li.stop b { font-weight: 400; color: var(--text-primary); }
+/* a Motion Plan tile's shot number sits in its title row, never over the still's own text */
+.mo-tile-n { flex: none; min-width: 1.25rem; height: 1.25rem; padding: 0 0.3rem; display: inline-grid; place-items: center; border-radius: var(--r-pill); background: var(--surface-3); color: var(--text-secondary); font-size: var(--fs-meta); align-self: center; }
+/* the Brief sheet shows its one panel without a second frame inside the sheet's own (no nested cards) */
+:root:not([data-theme="studio"]) .sheet-overlay .brief-one > .panel { border: 0; background: none; box-shadow: none; padding: 0; }
+/* Whisper on the graphics card: where Whisper runs, under its item in the first-run list */
+.fr-gpu { font-size: var(--fs-meta); color: var(--text-secondary); }
+.fr-gpu > svg { flex: none; color: var(--text-muted); }
+/* a pin on the picture can be chosen (a ring) and removed with its small × or Delete */
+.fn-mark.live { pointer-events: auto; cursor: pointer; }
+.fn-mark.on { box-shadow: 0 0 0 2px var(--surface-1), 0 0 0 4px var(--select); }
+.fn-x { position: absolute; right: -0.55rem; top: -0.55rem; width: 1.1rem; height: 1.1rem; display: none; place-items: center; padding: 0; border: 0; border-radius: 50%;
+  background: var(--surface-1); color: var(--text-primary); box-shadow: 0 0 0 1px var(--border-strong); cursor: pointer; pointer-events: auto; }
+.fn-mark.pt .fn-x { right: -1.1rem; top: -1.1rem; }
+.fn-mark.on .fn-x, .fn-mark.live:focus-within .fn-x { display: grid; }
+@media (hover: hover) and (pointer: fine) { .fn-mark.live:hover .fn-x { display: grid; } .fn-x:hover { background: var(--state-stop); color: var(--on-media); } }
+/* on The Studio's light table a storyboard still keeps the film's own shape (1:1, 9:16, 4:5…, --bd-ar
+   from the option), never a 16:9 crop; an empty cell of a short last page takes the same paper frame as a still (its padding round a
+   picture of the film's shape), so page 2 is as tall as page 1. Kept here, beside the Desk's rule, so both themes read one --bd-ar */
+[data-theme="studio"] .lt-sheet .bd-col .bd-still img { aspect-ratio: var(--bd-ar, 16 / 9); object-fit: cover; }
+[data-theme="studio"] .lt-sheet .bd-col .bd-cell.bd-empty { aspect-ratio: auto; padding: 0.3rem 0.3rem 0.45rem; }
+[data-theme="studio"] .lt-sheet .bd-col .bd-cell.bd-empty::before { content: ""; display: block; aspect-ratio: var(--bd-ar, 16 / 9); }
+/* a film taller than 16:9 (1:1, 4:5, 9:16) keeps the 3 x 3 sheet within the light table's height: the stills' column narrows with the
+   frame's shape, as The Desk's sheet does, so the option shows whole with no scroll inside the sheet */
+[data-theme="studio"] .lt-sheet .bd-col[style] .bd-stills { width: min(100%, calc((100cqh - 14rem) * var(--bd-ar, 1.7778) * 3 / 3.4)); margin-inline: auto; }
+[data-theme="studio"] .lt-sheet > .sheet-body { container-type: size; }
+/* a Motion Plan shot's still takes the film's shape (--mo-ar from the project), a tall film's tile narrower, so nothing is cut */
+.mo2 .mo-still { aspect-ratio: var(--mo-ar, 16 / 9); width: min(100%, calc(9rem * var(--mo-ar, 1.7778))); align-self: center; }          /* at most 9rem tall */
+.mo2 .mo-tile .mo-still img { object-fit: contain; }

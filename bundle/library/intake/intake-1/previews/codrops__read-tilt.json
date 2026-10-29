@@ -1,0 +1,26 @@
+{
+  "uid": "in:codrops/read-tilt",
+  "hash": "f2b7013e5faa6051",
+  "at": "2026-10-17T06:39:54.433Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Archivo"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/codrops__read-tilt.mp4",
+    "poster": "previews/codrops__read-tilt.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "66ad5f6a9ab813fd726a2bd043a8fce664cc81ebdeea05e64bcba0ca9048c522",
+    "size": 25284,
+    "seconds": 31.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}
