@@ -11,6 +11,7 @@ import { pipeline as streamPipeline } from "node:stream/promises";
 import { extname, join, normalize, resolve, sep } from "node:path";
 import { APP_ROOT, GPU_CHOICES, renderSettings, saveRenderSettings } from "../version-manager/index.mjs";
 import * as projects from "../project-service/index.mjs";
+import { docPath } from "../project-service/docs.mjs";
 import { styleTraits } from "../style-catalog/traits.mjs";
 import { filmLength } from "../hf-edit/ending.mjs";
 import { getStyle, listStyles, selection, styleDesign, styleList, stylePipeline, warmCatalog } from "../style-catalog/index.mjs";
@@ -134,7 +135,8 @@ export function pipelineSteps(styleId, root = APP_ROOT) { return stylePipeline(s
 /** The settings plus the lists the UI offers (Bypass only while the experiment is on). */
 const agentChoices = (s) => ({ ...s, models: MODELS.map(([k, label]) => [k, label]), efforts: EFFORTS, web: s.web, webChoices: WEB,
   modes: MODES.filter(([k]) => k !== "bypassPermissions" || s.allowBypass) });
-/** Text files at the project root the Editor may show and edit (Story, Script, Brief, design notes). */
+/** Text files of the project the Editor may show and edit (Story, Script, Brief, design notes), by name: the app's own documents are
+ *  in docs/ (docPath finds them there, or at the root of a film not moved yet). */
 const DOCS = ["STORY.md", "SCRIPT.md", "BRIEF.md", "frame.md", "design.md", "DESIGN.md", "CHARACTERS.md",
   // what the steps of the new pipelines leave: every result has a dialog that shows it
   "NOTES.md", "ASSETS.md", "STYLE-GUIDE.md", "SHOTS.md", "QC-REVIEW.md"];
@@ -165,6 +167,9 @@ async function relayout(ctx, id, root) {
   const p = projects.getProject(id, root);
   // recorded beside the server's thread, in the project's git queue (T22-5)
   if (r.moved.length) { try { await rev.saveAsync(p.path, `Assets moved into the new folders (${r.moved.length} file(s))`); } catch { /* revisions optional */ } }
+  if (r.docs?.length) { try { await rev.saveAsync(p.path, `Documents moved into docs/ (${r.docs.length} file(s))`); } catch { /* revisions optional */ } }
+  // its history packed once (revisions.packOp: one pack, not hundreds of small files), then after every commit
+  try { await rev.packAsync(p.path); } catch { /* housekeeping */ }
   if (r.failed.length) {
     try { projects.addNote(p.path, { kind: "assets", status: "warning", text: "{n} file(s) could not be moved into the new folders and stay where they are: {list}", vars: { n: r.failed.length, list: r.failed.slice(0, 5).map((f) => f.path).join(", ") } }); } catch { /* notes are best effort */ }
   }
@@ -730,7 +735,7 @@ export function routes(ctx) {
         // what the Motion dialog's confirm says before the approval: the same estimate for the plan's shots as it is now
         estimateIfApproved: facts.motionShots ? estimateMinutes(facts.motionShots, root, { seconds: p.meta?.targetDurationSec, styleId: p.meta?.style?.id }) : null,
         question: p.meta?.pipeline?.briefChanged ? { kind: "brief-changed", at: p.meta.pipeline.briefChanged.at }
-          : asking ? { kind: p.meta?.style?.id === "general" && existsSync(join(p.path, "ASSETS.md")) && !pipe.chosenWay(p.path) ? "way" : "missing" }
+          : asking ? { kind: p.meta?.style?.id === "general" && existsSync(docPath(p.path, "ASSETS.md")) && !pipe.chosenWay(p.path) ? "way" : "missing" }
           // Claude's question in the chat is open (a font to choose, a revision's notes): the user answers there
           : facts.chatAsked || facts.revisionAsked ? { kind: "chat" } : null,
         // the sound effects as last placed: the Editor reads the Final Mix and the timeline again when `at` changes (the dialog showed
@@ -805,7 +810,7 @@ export function routes(ctx) {
     r("GET", `/projects/${P}/inputs`, ([id]) => { const p = mustProject(id, root); return { brief: p.meta?.brief ?? null, inputMode: p.meta?.inputMode ?? null, look: p.meta?.look ?? null,
       way: p.meta?.way ?? null, flags: p.meta?.flags ?? {}, inventory: projects.inventory(p.path) }; }),
     // the Assets analysis Claude's ASSETS.md, the way it proposes, the way the user chose
-    r("GET", `/projects/${P}/analysis`, ([id]) => { const p = mustProject(id, root); const f = join(p.path, "ASSETS.md");
+    r("GET", `/projects/${P}/analysis`, ([id]) => { const p = mustProject(id, root); const f = docPath(p.path, "ASSETS.md");
       return { text: existsSync(f) ? readFileSync(f, "utf8") : "", proposed: pipe.proposedWay(p.path), way: p.meta?.way ?? null, ways: pipe.WAYS,
         general: p.meta?.style?.id === "general", inventory: projects.inventory(p.path) }; }),
     r("PATCH", `/projects/${P}/way`, ([id], b) => {
@@ -815,7 +820,7 @@ export function routes(ctx) {
       return { way: out.meta.way };
     }),
     // approve a document a step wrote (the style guide, the shot list): the file as it is now
-    r("POST", `/projects/${P}/approve/(styleGuide|shots|characters)`, async ([id, name]) => { const p = mustProject(id, root); const f = join(p.path, APPROVE_DOCS[name]);
+    r("POST", `/projects/${P}/approve/(styleGuide|shots|characters)`, async ([id, name]) => { const p = mustProject(id, root); const f = docPath(p.path, APPROVE_DOCS[name]);
       if (!existsSync(f)) throw new HttpError(400, "INVALID", `${APPROVE_DOCS[name]} is not written yet`);
       // the cast is approved only once every member passes its checks (the approval was asked while the turtle failed); every cast
       // has a gate now, Brush's too
@@ -847,15 +852,15 @@ export function routes(ctx) {
       const p = mustProject(id, root);
       const names = (q.get("path") ?? "").split(",");          // "frame.md,design.md": the first that exists
       if (!names.every((n) => DOCS.includes(n))) throw new HttpError(400, "INVALID", "Not a document of this project");
-      const name = names.find((n) => existsSync(join(p.path, ...n.split("/")))) ?? names[0];
-      const f = join(p.path, ...name.split("/"));
+      const name = names.find((n) => existsSync(docPath(p.path, n))) ?? names[0];
+      const f = docPath(p.path, name);
       return { path: name, exists: existsSync(f), text: existsSync(f) ? readFileSync(f, "utf8") : "", at: existsSync(f) ? statSync(f).mtime.toISOString() : null };
     }),
     r("PUT", `/projects/${P}/doc`, async ([id], b) => {
       const p = mustProject(id, root); const name = String(b.path ?? "");
       if (!DOCS.includes(name)) throw new HttpError(400, "INVALID", "Not a document of this project");
       if (ctx.agent.running.has(id)) throw new HttpError(409, "BUSY", "Wait until Claude has finished");
-      const f = join(p.path, ...name.split("/"));
+      const f = docPath(p.path, name);
       mkdirSync(join(f, ".."), { recursive: true });
       writeFileSync(f + ".tmp", String(b.text ?? "").normalize("NFC")); renameSync(f + ".tmp", f);
       try { await rev.saveAsync(p.path, `${name} edited by hand`); } catch { /* revisions optional */ }
@@ -909,7 +914,8 @@ export function routes(ctx) {
 export async function startServer({ port = 0, root = APP_ROOT, token = randomBytes(24).toString("hex"), uiDir = join(root, "ui", "dist"),
   autoBackup = process.env.MW_NO_BACKUP !== "1", autoLibrary = process.env.MW_NO_LIBRARY_IMPORT !== "1", autoAssets = process.env.MW_NO_ASSET_INSTALL !== "1",
   onExit = null, onRestart = null, onWindowGone = null, windowGraceMs = Number(process.env.MW_WINDOW_GRACE_MS ?? 10000), thumbnails = false,
-  updateCheck = false } = {}) {          // updateCheck: the app checks for its own new version by itself (the launcher; never in tests)
+  updateCheck = false, housekeeping = false } = {}) {          // updateCheck: the app checks for its own new version by itself (the launcher; never in tests)
+  // housekeeping: old logs, old work folders and unused HyperFrames versions cleaned once at start (the launcher; never in tests)
   const ctx = { root, preview: null, onExit, onRestart, lastSeen: Date.now() };
   const agentToken = randomBytes(24).toString("hex");          // Claude Code's (AGENT_API only)
   const server = createServer(async (req, res) => {
@@ -1121,6 +1127,7 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
   ctx.useVoice = prod.useVoice;
   ctx.autopilot = createAutopilot(ctx);          // the pipeline runs itself between the user's gates
   if (autoBackup) setTimeout(() => ctx.backups.all(), 5000).unref();
+  if (housekeeping) setTimeout(() => { import("./housekeeping.mjs").then((h) => h.housekeep(root, { log: console.log })).catch((e) => console.error(`[housekeeping] ${e.message}`)); }, 20000).unref();
   if (autoLibrary) { try { firstRun.libraryFromBundle(root); } catch (e) { console.error(`[library] from the bundle: ${e.message}`); } }          // a new computer's library
   // the style catalog is built once in the background, so the Style Gallery's first load reads it from memory
   // and its tiles' thumbnails after it, one at a time (with the other background imports: not in tests)

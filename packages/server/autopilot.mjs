@@ -8,6 +8,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import * as projects from "../project-service/index.mjs";
+import { docPath } from "../project-service/docs.mjs";
 import { filmLength } from "../hf-edit/ending.mjs";
 import * as pipe from "../pipeline/index.mjs";
 import * as plan from "../motion-plan/index.mjs";
@@ -120,7 +121,7 @@ export const stepPrompt = (s, facts, vars) => pipe.fill(s.action?.prompts?.[fact
  *  board until the Build, which starts from them. */
 export function optionLead(stepId, option) {
   if (!isOption(option)) return "";
-  if (stepId === "motionSpec") return `The owner approved storyboard option ${option}: STORYBOARD.md is now boards/${option}/STORYBOARD.md. Its posed frames stay in boards/${option}/index.html, where the Build starts from them: do not copy them into the project in this step (no composition, no index.html). When the project names no design, write option ${option}'s palette and type to frame.md, the one file this step writes besides MOTION-PLAN.json. Then: `;
+  if (stepId === "motionSpec") return `The owner approved storyboard option ${option}: STORYBOARD.md is now boards/${option}/STORYBOARD.md. Its posed frames stay in boards/${option}/index.html, where the Build starts from them: do not copy them into the project in this step (no composition, no index.html). When the project names no design, write option ${option}'s palette and type to frame.md, the one file this step writes besides docs/MOTION-PLAN.json. Then: `;
   if (stepId === "build") return `The approved storyboard is option ${option}: its posed frames in boards/${option}/index.html are the film's starting layouts (their layout, type and colours); build the film from them. `;
   return "";
 }
@@ -225,10 +226,10 @@ export function createAutopilot(ctx) {
     const tasks = fit ? ctx.agent.list?.(id) ?? [] : [], askedAt = tasks.findLastIndex((t) => t.asks === fitKey && t.status === "done");
     const answered = askedAt >= 0 && askedAt < tasks.length - 1;
     const fitFirst = !fit ? "" : answered
-      ? "The owner answered your question on the voice-over's length in the chat (NOTES.md has it): follow that answer and draw the storyboard timed to the voice; do not ask it again.\n\n"
+      ? "The owner answered your question on the voice-over's length in the chat (docs/NOTES.md has it): follow that answer and draw the storyboard timed to the voice; do not ask it again.\n\n"
       : `Before you draw anything: ${voiceFitText(p.meta)} Ask it now, in one message, and stop without drawing a frame; once the owner answered, draw the storyboard timed to the voice as they chose.\n\n`;
     const prompt = text ?? fitFirst + (motionAgain
-      ? "The approved storyboard changed after the motion was approved. Rewrite the Motion Plan in MOTION-PLAN.json only for the shots whose frame changed (compare STORYBOARD.md with the plan; frame design and timing too for those shots), keep every other shot's rows as they are, then stop for my approval in the Motion dialog. Do not build."
+      ? "The approved storyboard changed after the motion was approved. Rewrite the Motion Plan in docs/MOTION-PLAN.json only for the shots whose frame changed (compare STORYBOARD.md with the plan; frame design and timing too for those shots), keep every other shot's rows as they are, then stop for my approval in the Motion dialog. Do not build."
       : (fromOption || optionLead(s.id, option)) + stepPrompt(s, facts, pipe.promptVars(p.meta)));
     // what Claude cannot open itself, before the brief, as a job the top bar names (2 min 17 s of "Idle" otherwise)
     if (s.id === "brief") {
@@ -383,7 +384,7 @@ export function createAutopilot(ctx) {
     const lines = gap.left.map((l) => `"${l.length > 90 ? `${l.slice(0, 90)}…` : l}"`).join("; ");
     if (!fix) {
       const t = await ctx.agent.start(id, { scope: { kind: "project" }, step: "brief",
-        text: `The app's check: the owner wrote the voice-over's script in the brief (${gap.total} lines), and VOICEOVER.md leaves out or changes ${gap.left.length} of them: ${lines}. The owner's script is read word for word (moworks-studio §2b). Write the whole script into VOICEOVER.md as the owner wrote it, every line in its order, and correct what BRIEF.md and NOTES.md say about it. If the film needs the script changed, do not change it: ask the owner in one message with the choices (the whole script as written first), and stop.` }).catch(() => null);
+        text: `The app's check: the owner wrote the voice-over's script in the brief (${gap.total} lines), and docs/VOICEOVER.md leaves out or changes ${gap.left.length} of them: ${lines}. The owner's script is read word for word (moworks-studio §2b). Write the whole script into docs/VOICEOVER.md as the owner wrote it, every line in its order, and correct what BRIEF.md and docs/NOTES.md say about it. If the film needs the script changed, do not change it: ask the owner in one message with the choices (the whole script as written first), and stop.` }).catch(() => null);
       if (t?.id) { meta(id, (m) => { (m.pipeline ??= {}).scriptFix = { at: now(), brief: briefAt, taskId: t.id, left: gap.left.length }; }); return t; }
       return null;
     }
@@ -449,7 +450,7 @@ export function createAutopilot(ctx) {
       const prev = ctx.agent.list?.(id)?.filter((t) => t.id !== task.id).at(-1);
       return advance(id, { afterChat: !(prev?.step && prev.status === "done" && pipe.asksOwner(prev.resultText)) });
     }
-    if (step === "brief") {          // General: the way of working settled in ASSETS.md ("Way: keep"), unless the user chose one
+    if (step === "brief") {          // General: the way of working settled in docs/ASSETS.md ("Way: keep"), unless the user chose one
       const w = pipe.chosenWay(p.path);
       if (w && p.meta?.style?.id === "general" && p.meta?.way?.by !== "owner") meta(id, (m) => { m.way = { id: w, at: now(), by: "claude" }; });
     }
@@ -481,7 +482,7 @@ export function createAutopilot(ctx) {
       const cast = castOf(p.path);
       // every member came from the library in its own style and passed its gate: used as it is, never asked again
       if (g?.pass && cast.length && cast.every((c) => characterNeedsWork(c) === "gate")) {
-        meta(id, (m) => { (m.approvals ??= {}).characters = { at: now(), by: "app", ownStyle: true, hash: createHash("sha256").update(readFileSync(join(p.path, "CHARACTERS.json"))).digest("hex") }; });
+        meta(id, (m) => { (m.approvals ??= {}).characters = { at: now(), by: "app", ownStyle: true, hash: createHash("sha256").update(readFileSync(docPath(p.path, "CHARACTERS.json"))).digest("hex") }; });
         note(p, "Your characters come from your library in their own style and passed their checks: they are used as they are, with nothing to approve.");
         return advance(id);
       }
@@ -506,7 +507,7 @@ export function createAutopilot(ctx) {
       const mp = plan.read(p.path), miss = mp.error ? [] : plan.missingCamera(mp.plan);
       if (miss.length && p.meta?.pipeline?.cameraFix?.taskId !== task.id) {
         const t = await ctx.agent.start(id, { scope: { kind: "project" }, step: "motionSpec",
-          text: `The app's check: shot(s) ${miss.join(", ")} of MOTION-PLAN.json have no camera row. Add one row of type "camera" to each (a push, a drift, an orbit or a dolly, with its numbers, as moworks-alive says: the camera moves on every hold), with its name and plain words; change nothing else in the plan, then stop for my approval in the Motion dialog.` }).catch(() => null);
+          text: `The app's check: shot(s) ${miss.join(", ")} of docs/MOTION-PLAN.json have no camera row. Add one row of type "camera" to each (a push, a drift, an orbit or a dolly, with its numbers, as moworks-alive says: the camera moves on every hold), with its name and plain words; change nothing else in the plan, then stop for my approval in the Motion dialog.` }).catch(() => null);
         if (t?.id) { meta(id, (m) => { (m.pipeline ??= {}).cameraFix = { at: now(), taskId: t.id, shots: miss }; }); return null; }
       }
       waitCard(p, "motion-plan", "The Motion Plan is ready for you: under each frame, the motion Claude proposes. Change what you like, then press Approve and build at the end of the Motion Plan dialog: the film is then built, reviewed, given music and checked without another click.");
@@ -669,7 +670,7 @@ export const storyboardChanged = (changed) => (changed ?? []).some((c) => String
 
 /** The film's cast (CHARACTERS.json), [] when it has none. */
 export function castOf(dir) {
-  try { const j = JSON.parse(readFileSync(join(dir, "CHARACTERS.json"), "utf8")); return Array.isArray(j) ? j : j.characters ?? []; } catch { return []; }
+  try { const j = JSON.parse(readFileSync(docPath(dir, "CHARACTERS.json"), "utf8")); return Array.isArray(j) ? j : j.characters ?? []; } catch { return []; }
 }
 /** Does the film have a cast? Every cast is checked before the build and before its approval: anidoodle's (people, rigs) and Brush's
  *  (maker.filmGate checks Brush members too). */

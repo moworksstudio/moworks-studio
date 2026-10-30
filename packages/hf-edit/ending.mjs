@@ -7,6 +7,7 @@
 // (resolveEnding); one the plan only claims is the house fade (T24-12: the picture stayed lit to its last frame and cut, the music faded).
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { docPath } from "../project-service/docs.mjs";
 import { styleTraits } from "../style-catalog/traits.mjs";
 
 /** The ending kinds of a Motion Plan's `ending`: a fade of the last shot, an end card (logo) then a short fade, the style author's own ending. */
@@ -67,7 +68,7 @@ export function resolveEnding(plan, { ownEnding = false } = {}) {
 /** The plan's ending as the app applies it (resolveEnding), {} when there is none. */
 export function planEnding(dir, { ownEnding = false } = {}) {
   let plan = null;
-  try { plan = JSON.parse(readFileSync(join(dir, "MOTION-PLAN.json"), "utf8")); } catch { return {}; }
+  try { plan = JSON.parse(readFileSync(docPath(dir, "MOTION-PLAN.json"), "utf8")); } catch { return {}; }
   return resolveEnding(plan, { ownEnding });
 }
 

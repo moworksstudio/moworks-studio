@@ -24,7 +24,7 @@ film that draws Clawd.
 | Layer | Wins on |
 |---|---|
 | The guide (`brush-cartoon`) | the medium (p5.brush through `paint()` / `inkLine()`, boil, flat 2D, drawn key views, soft palette, `glow()` for light), no text, an event in every shot, timing for the viewer, alive, transitions, one piece; the animation principles |
-| The project's characters (`CHARACTERS.json`, approved) | who is on screen: their shapes, colours, faces |
+| The project's characters (`docs/CHARACTERS.json`, approved) | who is on screen: their shapes, colours, faces |
 | This file | the files, the Character step, the layer's API, the bridge, what is never used here |
 | HyperFrames (the files the app names for the step) | the composition: the root's timing attributes, determinism |
 
@@ -32,26 +32,26 @@ film that draws Clawd.
 
 | Step | Here |
 |---|---|
-| Prepare | BRIEF.md and ASSETS.md as the step says; the brief names who the characters are |
-| Character ✋ | §3: `CHARACTERS.json`, the app's `character_sheet` tool, the owner approves the model sheets |
+| Prepare | BRIEF.md and docs/ASSETS.md as the step says; the brief names who the characters are |
+| Character ✋ | §3: `docs/CHARACTERS.json`, the app's `character_sheet` tool, the owner approves the model sheets |
 | Storyboard ✋ | one option (another when the owner asks): a short treatment and posed frames painted with the real kit and the approved characters (§4, boards) |
-| Motion ✋ | `MOTION-PLAN.json`: per shot the acting (emotion keys, takes, turns, jumps, walks) and camera with numbers; cite the guide's principles and the kit's helpers as source `{"kind": "style", "id": "<principle or helper>"}` |
+| Motion ✋ | `docs/MOTION-PLAN.json`: per shot the acting (emotion keys, takes, turns, jumps, walks) and camera with numbers; cite the guide's principles and the kit's helpers as source `{"kind": "style", "id": "<principle or helper>"}` |
 | Build | §4 |
 | QC | the Moworks Review (moworks-qc), plus the guide's self-check workflow (contact sheets of the reads) |
 | Sound / Final Mix | **the app's** music and sound effects; `PROJECT.bpm` matches the music the app picks |
 
 ## 3. The characters: definitions, model sheets, approval
 
-- A character is **data**, never new drawing code: write `CHARACTERS.json` at the project root, `{ "characters": [ <definition>, … ] }`,
+- A character is **data**, never new drawing code: write `docs/CHARACTERS.json` (the project's docs/ folder), `{ "characters": [ <definition>, … ] }`,
   each definition in the schema of `examples/definition.json` and `src/character.js` (units of u, the body unit; (x, y) is the ground point between
   the feet; negative y is up):
   `id` (lowercase, dashes), `name`, `about`, `colors { col, dk, lt }` (body, shade, light, #RRGGBB), `body { shape: box | round | egg | pill,
   w, h, bottom }`, `face { y, dx, mouth, bx }` (eye line, half the eye spacing, mouth below the eyes in face units, cheeks), `head { top,
   width }` (where hats and over-head emotes sit), `legs { xs: [front-view x of each leg], w, h }`, `arms { x, y, len, th }`; `views` only
   to correct one of the five key views the layer makes from the body.
-- From the brief's description and the owner's pictures (ASSETS.md): pick the shape, proportions and colours that read as that character at
+- From the brief's description and the owner's pictures (docs/ASSETS.md): pick the shape, proportions and colours that read as that character at
   phone size, keep it simple enough to act (big readable face area, a silhouette that reads in every view). Characters the owner chose from
-  their library are already in `CHARACTERS.json`: keep them as they are unless the brief asks for a change.
+  their library are already in `docs/CHARACTERS.json`: keep them as they are unless the brief asks for a change.
 - Then call the app's **`character_sheet`** tool: it draws every character's model sheets (the five views, the moves and hats; all 31
   emotions) through HyperFrames and returns their paths. Read them once; fix a real problem in the definition (a face off the body, a part
   that does not read, colours that do not separate), call it again once.
@@ -59,9 +59,9 @@ film that draws Clawd.
   that separate and read on a light and a dark ground, the face on the body, legs that stand under it and reach the ground, arms at its
   sides, the key views, the sheets drawn and not blank) and says why a check fails. Fix the definition and call it again until it passes;
   only then stop: the owner approves the sheets in the Character dialog (a new character is approved only after a pass).
-- A character the owner chose from the library for this style (`ownStyle` in `CHARACTERS.json`) is done: its sheets came with it; it
+- A character the owner chose from the library for this style (`ownStyle` in `docs/CHARACTERS.json`) is done: its sheets came with it; it
   needs no redraw, only the gate.
-- Change an approved `CHARACTERS.json` only when the owner asks (the approval is of the file as it was).
+- Change an approved `docs/CHARACTERS.json` only when the owner asks (the approval is of the file as it was).
 
 ## 4. The film: one page painted by the kit, driven by HyperFrames
 
@@ -91,7 +91,7 @@ film that draws Clawd.
 </body></html>
 ```
 
-- **The app writes `compositions/kit/`** (the engine, the parts, the layer, `cast.js` = `window.CAST` from `CHARACTERS.json`) and the p5
+- **The app writes `compositions/kit/`** (the engine, the parts, the layer, `cast.js` = `window.CAST` from `docs/CHARACTERS.json`) and the p5
   libraries after your task and before stills: never write or edit them. Write only `index.html` and **`compositions/film.js`**: the shots,
   `shots([[t0, (t, lt, dur) => { … }], …])`, each a pure function of t painting the whole frame (the guide's rules).
 - Draw a character with **`character(CAST.<id>, x, y, u, { …charEmotions(CAST.<id>, t, keys), view, flip, …jump(…), …move(…) })`**: the

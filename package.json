@@ -6,6 +6,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "pretest": "node tools/clean-test-temp.mjs",
     "test": "node --test --test-concurrency=1 \"test/*.test.mjs\"",
     "lint:boundary": "node tools/check-boundary.mjs",
     "hf": "node packages/version-manager/cli.mjs",

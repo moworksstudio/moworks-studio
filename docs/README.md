@@ -281,10 +281,10 @@ As a reference, a 34-second film in a Lemo-Opuscar style took 1 h 17 min from Cr
 |---|---|---|
 | `app\` | This repository: the app's source, config, rule packs and the bundled third-party sources | yes |
 | `app\runtime\` | Settings, encrypted keys, installed HyperFrames versions, logs | no |
-| `projects\` (next to `app\`, in the work folder) | Your films: one folder each, with `BRIEF.md`, boards, compositions, audio, `CREDITS.md` and `renders\` | no |
+| `projects\` (next to `app\`, in the work folder) | Your films: one folder each, with HyperFrames' own files at its top (`index.html`, `BRIEF.md`, `STORYBOARD.md`, compositions, assets), the app's documents in `docs\` (notes, credits, the Review, the cast, the Motion Plan), boards and `renders\` | no |
 | `library\`, `models\` (next to `app\`, in the work folder) | The library, Brand Kits and your characters; Whisper, when installed | no |
 
-Settings › General › Projects folder changes where new projects are saved. Every film writes a `CREDITS.md` that credits the music and sound effects it uses (title, author, source, licence); downloaded fonts travel with their licence files.
+Settings › General › Projects folder changes where new projects are saved. Every film writes a `docs\CREDITS.md` that credits the music and sound effects it uses (title, author, source, licence); downloaded fonts travel with their licence files.
 
 ## Updates
 

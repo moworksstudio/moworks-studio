@@ -19,6 +19,7 @@ import { remixAudio, render } from "../hf-render-worker/client.mjs";
 import { isCodeFilm } from "../pipeline/index.mjs";
 import { expandEnv, loadPins, renderSettings } from "../version-manager/index.mjs";
 import * as projects from "../project-service/index.mjs";
+import { docPath } from "../project-service/docs.mjs";
 import { refreshBridge } from "../hf-edit/lemoPage.mjs";
 import { fitMusicToFilm } from "../hf-edit/tracks.mjs";
 import { capWebBitrate, smoothCopy } from "../hf-qa/webBitrate.mjs";
@@ -58,7 +59,7 @@ export function filmParts(dir, fps, { stamps = false } = {}) {
     }
   };
   if (existsSync(join(dir, "index.html"))) { both("index.html"); page(text(join(dir, "index.html"))); }
-  if (existsSync(join(dir, "CHARACTERS.json"))) { both("CHARACTERS.json"); both(readFileSync(join(dir, "CHARACTERS.json"))); }
+  if (existsSync(docPath(dir, "CHARACTERS.json"))) { both("CHARACTERS.json"); both(readFileSync(docPath(dir, "CHARACTERS.json"))); }
   walk(join(dir, "compositions"), true);
   walk(join(dir, "assets"), false);
   walk(join(dir, "audio"), false, "sound");

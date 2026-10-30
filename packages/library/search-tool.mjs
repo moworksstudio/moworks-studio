@@ -60,6 +60,6 @@ export function vocabLines(v) {
 export function searchText(query, items) {
   if (!items.length) return `Nothing in the Motion Library matches "${query}". Use a move HyperFrames' motion reference describes (source kind "hf", id "motion.md#<section>") or write it new (kind "claude").`;
   const vi = (x) => x.vi === "missing" ? "; its font lacks Vietnamese letters" : x.vi === "mixed" ? "; some fonts lack Vietnamese letters" : "";
-  return [`Library results for "${query}", best first. Cite one in MOTION-PLAN.json as "source": {"kind": "library", "id": "<id>"}: the app copies its code into .moworks/library/ when the owner approves.`,
+  return [`Library results for "${query}", best first. Cite one in docs/MOTION-PLAN.json as "source": {"kind": "library", "id": "<id>"}: the app copies its code into .moworks/library/ when the owner approves.`,
     ...items.map((x, i) => `${i + 1}. ${x.uid} "${x.title}" (${x.kind}${vi(x)}): ${short(x.desc)}${x.vocab ? vocabLines(x.vocab) : ""}`)].join("\n");
 }

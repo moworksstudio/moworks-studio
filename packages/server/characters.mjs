@@ -7,6 +7,7 @@ import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import * as projects from "../project-service/index.mjs";
+import { docPath } from "../project-service/docs.mjs";
 import * as kit from "../character-kit/index.mjs";
 import { REF_DIR, stageReference } from "../character-kit/reference.mjs";
 import { useHumans } from "../character-kit/humans.mjs";
@@ -35,7 +36,7 @@ export function characterRoutes(ctx, { r, P, mustProject, HttpError }) {
   };
   /** The Character dialog's view: the cast, what is wrong with it, each character's sheets, the approval. */
   const view = (p) => {
-    const cast = kit.readCast(p.path), f = join(p.path, kit.CAST_FILE), a = p.meta?.approvals?.characters ?? null;
+    const cast = kit.readCast(p.path), f = docPath(p.path, kit.CAST_FILE), a = p.meta?.approvals?.characters ?? null;
     // the full PNG Claude's character_sheet draws, else the library's WebP a reused character brought along
     const sheet = (cid, scene) => {
       const rel = [`characters/sheets/${cid}-${scene}.png`, `characters/sheets/${cid}-${scene}.webp`].find((x) => existsSync(join(p.path, ...x.split("/"))));
@@ -141,7 +142,7 @@ export function characterRoutes(ctx, { r, P, mustProject, HttpError }) {
     // the Character dialog's "Draw again" (after the user or Claude changed CHARACTERS.json)
     r("POST", `/projects/${P}/characters/sheets`, async ([id], b) => {
       const p = mustProject(id, root);
-      if (!existsSync(join(p.path, kit.CAST_FILE))) throw new HttpError(400, "INVALID", `${kit.CAST_FILE} is not written yet: Claude writes it in the Character step`);
+      if (!existsSync(docPath(p.path, kit.CAST_FILE))) throw new HttpError(400, "INVALID", `${kit.CAST_FILE} is not written yet: Claude writes it in the Character step`);
       const only = Array.isArray(b.ids) ? b.ids.map(String) : null;
       const job = ctx.jobs.start("character-sheets", { title: "Drawing the characters", projectId: id }, async (j) => {
         j.update({ stage: "Drawing the model sheets" });

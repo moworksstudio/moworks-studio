@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { docPath } from "../packages/project-service/docs.mjs";
 
 const T = mkdtempSync(join(tmpdir(), "mw-t26-sfx-"));
 process.env.MW_WORK_ROOT = join(T, "work");
@@ -167,7 +168,7 @@ test("a film placed: no file more than three times, the cues of Test 26 all soun
   assert.ok(Number(attr(box, "data-start")) + Number(attr(box, "data-duration")) <= 18 + 1e-6);
   // G-SFX: a repeat left out counts as placed
   assert.deepEqual(sfxCover(d, shots, plan).findings, []);
-  assert.ok(existsSync(join(d, "CREDITS.md")));
+  assert.ok(existsSync(docPath(d, "CREDITS.md")));
 });
 
 test("Claude is told to name a sound by its thing, and that one sound plays at most three times", async () => {

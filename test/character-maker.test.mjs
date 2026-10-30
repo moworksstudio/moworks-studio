@@ -8,6 +8,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { docPath } from "../packages/project-service/docs.mjs";
 
 const T = mkdtempSync(join(tmpdir(), "mw-maker-"));
 process.env.MW_CHARACTERS_ROOT = T;
@@ -170,14 +171,14 @@ test("the kind of character: Human, Animal, Thing per engine; each kind its own 
   const film = join(T, "film-tortoise"); mkdirSync(film, { recursive: true });
   const { useHumans } = kitHumans;
   useHumans(film, ["tortoise"]);
-  const member = JSON.parse(readFileSync(join(film, "CHARACTERS.json"), "utf8")).characters.find((c) => c.id === "tortoise");
+  const member = JSON.parse(readFileSync(docPath(film, "CHARACTERS.json"), "utf8")).characters.find((c) => c.id === "tortoise");
   assert.deepEqual([member.kind, member.check, maker.kindOf(member)], ["animal", "check-tortoise.ts", "rig"]);
   assert.ok(existsSync(join(film, "anidoodle", "check-tortoise.ts")));
   // in a style of its own hand it needs only its gate; in another hand it needs work (its palette for that hand)
   assert.equal(member.ownStyle, true);
   const pencil = join(T, "film-pencil"), koi = join(T, "film-koi"); mkdirSync(pencil, { recursive: true }); mkdirSync(koi, { recursive: true });
   useHumans(pencil, ["tortoise"], { styleId: "anidoodle-colouredPencil" }); useHumans(koi, ["tortoise"], { styleId: "anidoodle-koi" });
-  const of = (f) => JSON.parse(readFileSync(join(f, "CHARACTERS.json"), "utf8")).characters[0];
+  const of = (f) => JSON.parse(readFileSync(docPath(f, "CHARACTERS.json"), "utf8")).characters[0];
   assert.deepEqual([of(pencil).ownStyle, kit.characterNeedsWork(of(pencil)), of(koi).ownStyle, of(koi).needsPalette, kit.characterNeedsWork(of(koi))], [true, "gate", false, true, "sheet"]);
 });
 

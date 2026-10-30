@@ -49,7 +49,7 @@ test("a Brand Kit chosen for an author's style is kept for Prepare to ask about,
   const lines = designLines({ designLocked: true, brandKitAsk: kit }, d).join("\n");
   assert.match(lines, /the style's author's own[^\n]*no Brand Kit is applied to it/);
   assert.match(lines, new RegExp(`chose the Brand Kit "${fr.title}"[^\\n]*did not apply it \\(its design spec, a reference only: \\.moworks/brand-kit/FRAME\\.md; never copy it to frame\\.md\\)`));
-  assert.match(lines, /In Prepare, ask how to use it, as one numbered point[^\n]*moworks-studio §2b[^\n]*write it in ASSETS\.md/);
+  assert.match(lines, /In Prepare, ask how to use it, as one numbered point[^\n]*moworks-studio §2b[^\n]*write it in docs\/ASSETS\.md/);
   assert.doesNotMatch(designLines({ designLocked: true }, d).join("\n"), /chose the Brand Kit/, "none chosen: no question");
   assert.doesNotMatch(designLines({ brandKitAsk: kit }, d).join("\n"), /chose the Brand Kit "/, "a style that takes a design: not asked");
 });

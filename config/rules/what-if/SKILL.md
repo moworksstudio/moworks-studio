@@ -45,7 +45,7 @@ several minutes plays all seven in full. The New project length wins.
 ## 3. The twist: one true fact, with a number and its source
 
 Beat 4 rests on one real fact with a number ("One cookie made from pure energy needs every power plant on Earth running for over ten
-minutes."). Search the web for it (when the project's web setting allows it), work the arithmetic, and write it into NOTES.md before it
+minutes."). Search the web for it (when the project's web setting allows it), work the arithmetic, and write it into docs/NOTES.md before it
 goes into the script: the claim, the working, the source (title and link). The source is named to the owner in your reply.
 **No real source, or the web is off: write the twist without a number** (the cost as a story, not a statistic). Never invent a number,
 never round one into a different claim (moworks-studio §1, rule 4).

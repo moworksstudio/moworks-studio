@@ -15,7 +15,7 @@ You cannot hear: measure every step (the app gives you beat maps, levels and cue
 1. Licensed music only: the owner's track, or free Mixkit tracks (Mixkit Stock Music Free Licence). Never music or sound effects synthesised
    in code.
 2. No music given and the owner asks for some: find **3 tracks on mixkit.co** that fit the brief (mood, tempo, length) when the project
-   allows the web; give their pages to the app, which downloads all three into `audio/music-options/` so the owner can listen and pick (or
+   allows the web; give their pages to the app, which downloads all three into the project's cache so the owner can listen and pick (or
    ask for three others). Your table: A / B / C · title · artist · length · mood · why it fits · its Mixkit page.
 3. The pick: the app places it, maps its beats and writes its credit. A track cut to the film's length (sections joined on bar starts) is a
    new file; the original stays.

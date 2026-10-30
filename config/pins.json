@@ -11,9 +11,6 @@
     "versions": {
       "0.8.214": {
         "chromium": "152.0.7977.30"
-      },
-      "0.8.163": {
-        "chromium": "152.0.7977.30"
       }
     },
     "repo": "heygen-com/hyperframes",

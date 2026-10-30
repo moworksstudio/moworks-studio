@@ -29,7 +29,7 @@ whole conversation again.
 2. **Readable on a phone:** every word at phone size; contrast 4.5:1 (3:1 for large text); each text held its reading time.
 3. **Motion:** real acceleration or springs, no dead frames, nothing sliding at constant speed, things alive between the moves at the
    dynamic level the owner chose, scored against `.moworks/rules/moworks-alive/SKILL.md`: stills cannot show it, so
-   read MOTION-PLAN.json's hold, loop and idle rows and the app's still-stretch check when it gives one. A still stretch over 2 s other than
+   read docs/MOTION-PLAN.json's hold, loop and idle rows and the app's still-stretch check when it gives one. A still stretch over 2 s other than
    the end logo hold, a held object or character with no idle motion, a camera frozen behind text, a motion word of the brief not done:
    6 at most; a film that reads as a slideshow: 5 at most.
 4. **Variety:** something new every 2-4 s.
@@ -47,13 +47,13 @@ whole conversation again.
   a shot where nothing happens; anything still for more than 2 s (moworks-alive); a logo that is not the given file whole and clear
   (redrawn, recoloured, stretched, cropped, given an effect, put in a card or badge, text added around it, or breathing so much it distorts:
   moworks-studio §3); a piece of text off the film's design (moworks-studio §2); a jump at a loop or a cut; a shot that looks like its library demo; an out move that starts before its in
-  move ends; anything the owner complained about earlier (in `NOTES.md`).
+  move ends; anything the owner complained about earlier (in `docs/NOTES.md`).
 - In a Vietnamese film: every mark of every Vietnamese word on every sheet, read letter by letter, the small texts too (status strips,
   inverted bars, labels, pills, captions): a word written without its marks, or marks cut off by a band, a mask or a line-height, breaks
   moworks-studio §4 → write it with its marks, give the band room for them. The app's check names on-screen text written without marks
   ("Vietnamese written without its marks") in the qc_sheets answer; fix each one.
 - In a film drawn on a canvas (moworks-studio §8): a plain text (a title, a caption, a data label or number, a lower third, an end card)
-  still drawn on the canvas with no reason in `NOTES.md` → move it to HTML over the canvas, looking the same; a performed text (a pen
+  still drawn on the canvas with no reason in `docs/NOTES.md` → move it to HTML over the canvas, looking the same; a performed text (a pen
   writing, painted letters, ASCII / CRT characters) moved to HTML or redrawn → back to the author's drawing.
 - The storyboard and cut checks of moworks-studio §6 (one read in a second, size or angle changes at every cut, the face reads,
   continuity, on the word) and, with a voice-over, the app's voice check (moworks-studio §7).
@@ -94,15 +94,15 @@ against the music's data-mw-stop or the cut's second; voice_check for the levels
 into the nearest pause by itself), or name it in the review as unchecked, with its seconds, for the owner. Never "I will check it later",
 "listen again in the Final Mix" or "the next step will".
 
-Write every round to `QC-REVIEW.md`: round · the seven scores · the three worst problems (seconds) · what you changed. End the file with
+Write every round to `docs/QC-REVIEW.md`: round · the seven scores · the three worst problems (seconds) · what you changed. End the file with
 one line `Final score: N/10`, N the lowest of the last seven scores (the app reads it: 8 or more passes the step). Write the same rounds
-to `QC-REVIEW.json` for the app's score card, every round kept:
+to `docs/QC-REVIEW.json` for the app's score card, every round kept:
 `{"final": N, "rounds": [{"round": 1, "scores": {"hook": 7, "phone": 8, "motion": 7, "variety": 8, "composition": 8, "brand": 9, "sync": 7},
 "worst": [{"at": 3.2, "text": "…"}], "changed": "…"}]}` (`at` in seconds, the seven keys in this order: hook, phone, motion, variety,
 composition, brand, sync). The app shows the scores as a card, so your reply ends with one short line (the final score and what you
 fixed), not a table.
 A warning of HyperFrames' check that you looked at and keep on purpose (a painting wider than the frame so the camera can pan, a basket
-that swings from its knot) goes into `QC-REVIEW.json` too, as `"kept": [{"code": "container_overflow", "why": "the painting is wider than
+that swings from its knot) goes into `docs/QC-REVIEW.json` too, as `"kept": [{"code": "container_overflow", "why": "the painting is wider than
 the frame so the camera can pan"}]`: the check's code, and `at` (its seconds) or `shots` when only some of its places are meant; leave both
 out when every place of that code is. The Tech checks then show it as meant this way, not as a warning (Test 23 read 26 red warnings for a
 film scored 8/10). Only what you saw and meant: a real fault is fixed, never kept.

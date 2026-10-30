@@ -1,7 +1,7 @@
 # Motion Plan: the second approval gate (numbers, not adjectives)
 
 From the Moworks Motion kit 2.0.4 (`workflow/free-design.md` gate 2, `workflow/film.md` "The numbers"). The Motion Plan is a **file**,
-`MOTION-PLAN.json` in the project root, that the owner reads as a table in the app's Motion plan dialog and approves there. Never paste it
+`docs/MOTION-PLAN.json` in the project root, that the owner reads as a table in the app's Motion plan dialog and approves there. Never paste it
 as a chat table instead; in your reply give only a short summary and the questions.
 
 ## 1. The file
@@ -38,7 +38,7 @@ as a chat table instead; in your reply give only a short summary and the questio
   element in 1-3 words ("Tiêu đề", "Tấm kính"; the `target` selector is never shown to the owner), and `plain`: a few words in the
   owner's language with no numbers or code words ("trồi lên nhẹ rồi đứng yên", "trôi chậm, xoay nhẹ"); the numbers stay in `behavior`,
   which the dialog shows behind "Show timing".
-- The Motion Plan step writes only `MOTION-PLAN.json` (and `STORYBOARD.md` when the step asks): no composition, no `index.html`. The
+- The Motion Plan step writes only `docs/MOTION-PLAN.json` (and `STORYBOARD.md` when the step asks): no composition, no `index.html`. The
   Build writes the film once, from the approved board's layouts.
 
 Check it before you hand it over: logos as rule 5 (whole, never distorted, never in the groove); rule 2 (text readable while read); an out

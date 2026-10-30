@@ -7,7 +7,7 @@ guideline is a file the owner gives (in `sources/`, read through the pages the a
 
 A guideline governs the DESIGN of **every piece of text and graphic** in the film, not only the main layout: fonts, type sizes, colours,
 logo use and clear space, grid and margins, imagery, do / don't. In motion it binds only its logo and end-card rules; all other motion is
-free, text effects included (glitch, stretch, blur, split…) while the text stays readable. Write its design rules in `NOTES.md` (fonts,
+free, text effects included (glitch, stretch, blur, split…) while the text stays readable. Write its design rules in `docs/NOTES.md` (fonts,
 sizes, palette with hex, grid and margins, logo use, do / don't) and follow them on every frame.
 
 **The design is set part by part**. New project's Brand Kit field (one of HyperFrames' frame presets or the owner's own Brand Kit) is
@@ -23,13 +23,13 @@ only when the owner names it, never the fallback for a film without a brand).
 
 | Case | Do |
 |---|---|
-| A guideline in the assets or a link to one | read ALL of it (every page, not only its text), write its rules in `NOTES.md`; with no Brand Kit chosen, follow them; with a Brand Kit that differs: a conflict, stop and ask which wins for each point (moworks-studio §2b) |
+| A guideline in the assets or a link to one | read ALL of it (every page, not only its text), write its rules in `docs/NOTES.md`; with no Brand Kit chosen, follow them; with a Brand Kit that differs: a conflict, stop and ask which wins for each point (moworks-studio §2b) |
 | A client's brand, no guideline in the assets | no question (the owner prefers none): free design with the client's logo and colours from their material; a guideline added later is followed from then on |
 | A personal idea, no brand | no question; design at maximum creative effort |
 | The brief asks for something the guideline does not allow (colours above all, then fonts, sizes, capitals, logo use) | before the storyboard, list every point and ask the owner, one list, brief or guideline for each |
 | Guideline and artwork disagree | a conflict: stop and ask (moworks-studio §2b), keep design suggesting the artwork first |
 
-Free design without a guideline: say in `NOTES.md` which colours are the client's and which are yours ("own choice"); never present your
+Free design without a guideline: say in `docs/NOTES.md` which colours are the client's and which are yours ("own choice"); never present your
 own colours as the brand's.
 
 ## 3. Fonts

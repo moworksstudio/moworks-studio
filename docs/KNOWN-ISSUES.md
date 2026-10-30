@@ -63,7 +63,7 @@ letters. The Desk is not affected.
 
 **Limitation.** Tracks offered by Final Mix come from Mixkit under the Mixkit Stock Music Free License: web, social media, YouTube,
 podcasts and online ads are allowed; TV / radio broadcast, CD / DVD and games are not. The Final Mix dialog says so, and the film's
-`CREDITS.md` records it.
+`docs/CREDITS.md` records it.
 **Workaround:** for broadcast work, use your own licensed music (Final Mix accepts your own file).
 
 ## KI-09: Two tests need a golden render first

@@ -8,6 +8,7 @@
 // Every sound is credited (title, author, page, licence, Openverse's attribution line) in .moworks/sfx.json and CREDITS.md.
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { docPath } from "../project-service/docs.mjs";
 import { APP_ROOT, expandEnv, loadPins, sourceHead } from "../version-manager/index.mjs";
 import { MAX_GAIN, levelOf } from "./actions.mjs";
 import { matchLocal, plainName } from "./library.mjs";
@@ -450,7 +451,7 @@ export function creditLine(s) {
 /** CREDITS.md: a "Sound effects" section for the sounds in use, one line a file (a sound's variants each), the ambience beds too (other
  *  content of the file is kept). */
 export function writeCredits(dir) {
-  const st = readState(dir), f = join(dir, "CREDITS.md");
+  const st = readState(dir), f = docPath(dir, "CREDITS.md");
   const rows = new Map();
   const add = (name, file) => {
     const s = st.sounds[name];
@@ -465,6 +466,7 @@ export function writeCredits(dir) {
   const old = existsSync(f) ? readFileSync(f, "utf8") : "# Credits\n";
   const next = /<!-- mw:sfx-credits -->[\s\S]*?<!-- \/mw:sfx-credits -->/.test(old)
     ? old.replace(/<!-- mw:sfx-credits -->[\s\S]*?<!-- \/mw:sfx-credits -->/, section) : `${old.trimEnd()}\n\n${section}\n`;
+  mkdirSync(dirname(f), { recursive: true });          // docs/ in a film that has none yet
   writeFileSync(f, next);
   return rows.size;
 }

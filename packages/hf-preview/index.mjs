@@ -86,7 +86,7 @@ export function startPreviewServer({ resolveProject, uiOrigin, version = null, p
       }
       const rel = normalize(parts.slice(3).join("/"));
       const top = rel.split(/[\\/]/)[0];
-      const postersOnly = top === ".moworks" && /^\.moworks\/(cache\/(posters|proxy)|qc)\//.test(rel.replace(/\\/g, "/"));          // posters, a code film's preview proxy, the QC sheets
+      const postersOnly = top === ".moworks" && /^\.moworks\/(cache\/(posters|proxy|music-options)|qc)\//.test(rel.replace(/\\/g, "/"));          // posters, a code film's preview proxy, the QC sheets, the music to listen to
       if (!rel || [".git", ".claude"].includes(top) || (top === ".moworks" && !postersOnly)) return deny(403, "Forbidden");
       const file = resolve(proj.dir, rel);
       if (!file.startsWith(resolve(proj.dir) + sep)) return deny(403, "Forbidden");

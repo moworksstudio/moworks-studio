@@ -8,6 +8,7 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileS
 import { basename, join } from "node:path";
 import { startServer } from "./index.mjs";
 import { APP_ROOT } from "../version-manager/index.mjs";
+import { trimWindowProfile } from "./housekeeping.mjs";
 
 const argv = process.argv.slice(2);
 const opt = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
@@ -46,7 +47,7 @@ try {
   s = await startServer({ port: Number(opt("--port", process.env.MW_PORT ?? 0)), token: process.env.MW_TOKEN || undefined, onExit: () => quit("exit"),
     onRestart: () => { spawn(process.execPath, [join(APP_ROOT, "tools", "restart-app.mjs"), String(process.pid)], { cwd: APP_ROOT, detached: true, stdio: "ignore", windowsHide: true }).unref(); quit("exit"); },
     onWindowGone: () => quit("window closed"), thumbnails: true,
-    updateCheck: process.env.MW_NO_UPDATE_CHECK !== "1" });          // MW_NO_UPDATE_CHECK=1: a test run of the app never asks GitHub
+    updateCheck: process.env.MW_NO_UPDATE_CHECK !== "1", housekeeping: process.env.MW_NO_HOUSEKEEPING !== "1" });          // MW_NO_UPDATE_CHECK=1: a test run of the app never asks GitHub
 } catch (e) {
   console.error(e?.stack ?? e);
   if (background) messageBox(`Moworks Studio could not start:\n\n${e?.message ?? e}\n\nDetails: ${logFile}`);
@@ -71,6 +72,8 @@ async function quit(reason) {
   const windows = reason === "exit" ? closeAppWindows() : null;
   try { await s.shutdown(); } catch (e) { console.error(e?.stack ?? e); }
   await windows;
+  // the window's browser profile without the web components it never uses, now that no window holds it (housekeeping.mjs)
+  try { await trimWindowProfile(profile); } catch { /* the next time */ }
   try { if (JSON.parse(readFileSync(stateFile, "utf8")).pid === process.pid) rmSync(stateFile, { force: true }); } catch { /* gone */ }
   process.exit(0);
 }
@@ -101,7 +104,9 @@ function openWindow(url) {
   } catch { /* no size: --start-maximized alone */ }
   if (exe) {
     const b = spawn(exe, [`--app=${url}`, `--user-data-dir=${profile}`, ...(place.length ? place : ["--start-maximized"]), "--no-first-run",
-      "--no-default-browser-check", "--disable-sync", "--disable-features=msImplicitSignin", ...(process.env.MW_APP_ARGS ?? "").split(" ").filter(Boolean)],
+      "--no-default-browser-check", "--disable-sync", "--disable-features=msImplicitSignin",
+      // no downloads of the browser's web components (shopping, wallet, models: 600 MB once) and a 64 MB page cache for this computer's own pages
+      "--disable-component-update", "--disk-cache-size=67108864", ...(process.env.MW_APP_ARGS ?? "").split(" ").filter(Boolean)],
       // windowsHide stays off for this one: the browser is a GUI program (it has no console to hide), and windowsHide starts a GUI
       // program with SW_HIDE, which Windows applies to its first window: the app window itself
       { detached: true, stdio: "ignore", windowsHide: false });

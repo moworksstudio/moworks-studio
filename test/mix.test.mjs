@@ -12,6 +12,7 @@ import { HF_SKILL, SCRIPTS, listScripts, needsWeb, runScript } from "../packages
 import { creditMusic, optionsText, readOptions, saveOptions } from "../packages/sfx/music.mjs";
 import { TYPING, autoCues, mixCues } from "../packages/sfx/auto.mjs";
 import { ffmpegExe } from "../packages/library/preview-media.mjs";
+import { docPath } from "../packages/project-service/docs.mjs";
 
 const T = mkdtempSync(join(tmpdir(), "mw-mix-"));
 after(() => rmSync(T, { recursive: true, force: true }));
@@ -94,13 +95,13 @@ test("Final Mix music: only Mixkit audio links are downloaded, each round kept, 
   assert.equal(r1.id, "R1");
   assert.deepEqual(seen, ["https://assets.mixkit.co/music/preview/mixkit-morning-tea-1.mp3"], "nothing else is downloaded");
   assert.equal(r1.tracks.length, 1); assert.equal(r1.failed.length, 2);
-  assert.match(r1.tracks[0].file, /^audio\/music-options\/R1\/1-morning-tea\.mp3$/);
+  assert.match(r1.tracks[0].file, /^\.moworks\/cache\/music-options\/R1\/1-morning-tea\.mp3$/);
   assert.ok(Math.abs(r1.tracks[0].duration - 3) < 0.2);
   const r2 = await saveOptions(d, [{ title: "Rain", url: "https://assets.mixkit.co/music/preview/mixkit-rain-2.mp3" }], { fetchImpl });
   assert.equal(r2.id, "R2"); assert.equal(readOptions(d).rounds.length, 2, "R1 kept");
   creditMusic(d, r1.tracks[0]);
   creditMusic(d, r2.tracks[0]);
-  const credits = readFileSync(join(d, "CREDITS.md"), "utf8");
+  const credits = readFileSync(docPath(d, "CREDITS.md"), "utf8");
   assert.equal(credits.match(/## Music/g).length, 1, "one music section, replaced");
   assert.match(credits, /Rain.*Mixkit Stock Music Free License.*not for TV or radio broadcast/);
 });
@@ -225,7 +226,7 @@ test("Final Mix uses the user's own sound when the brief names it as the tick; t
   assert.ok(existsSync(join(d, st.sounds.pop.file)), "copied into assets/sfx");
   assert.ok(st.sounds.pop.durationS > 0.3 && st.sounds.pop.durationS < 0.5, String(st.sounds.pop.durationS));
   assert.equal(st.sounds.whoosh.source, "library", "a cue the brief does not name gets the app's offline library sound, before the search");
-  const credits = readFileSync(join(d, "CREDITS.md"), "utf8");
+  const credits = readFileSync(docPath(d, "CREDITS.md"), "utf8");
   assert.match(credits, /"qc-tone.wav" provided by the owner \(assets\/audio\/qc-tone.wav\)/);
   // a library sound credited from its catalog: its pack, author, licence and page, the original file (CC0 needs none; listed all the same)
   assert.match(credits, /\*\*whoosh\*\* \(`assets\/3_audio\/sfx\/whoosh-[a-z0-9-]+\.ogg`\): "whoosh-[a-z0-9-]+", from .+ by .+, (CC0 1\.0|Public domain).* Source: https:\/\/(kenney\.nl|opengameart\.org|commons\.wikimedia\.org)\//);

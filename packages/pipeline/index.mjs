@@ -17,6 +17,7 @@ import { join, relative, sep } from "node:path";
 import { lookAt } from "../hf-qa/look.mjs";
 import * as plan from "../motion-plan/index.mjs";
 import { appSounds } from "../project-service/layout.mjs";
+import { docPath } from "../project-service/docs.mjs";
 import { humanHandOf } from "../style-catalog/hands.mjs";
 import { scriptDraft } from "../voice/script.mjs";
 
@@ -134,14 +135,15 @@ function qaLook(lastQa, dir) {
 /** The film's cast as CHARACTERS.json lists it: { "characters": [...] }, or a bare list (Prepare once wrote one, and the Character step
  *  never showed: three people drawn from words alone, a grandmother read as an old man, Test 21); null with no file or no list in it. */
 export function castList(dir) {
-  try { const j = JSON.parse(readFileSync(join(dir, "CHARACTERS.json"), "utf8")); return Array.isArray(j) ? j : Array.isArray(j?.characters) ? j.characters : null; }
+  try { const j = JSON.parse(readFileSync(docPath(dir, "CHARACTERS.json"), "utf8")); return Array.isArray(j) ? j : Array.isArray(j?.characters) ? j.characters : null; }
   catch { return null; }
 }
 
 /** Everything the steps are judged on, read from the project folder and its metadata. */
 export function gatherFacts(project, { shots = [], head = null, jobs = [], runningTask = null, workAt = undefined, qaStale = undefined, lastTasks = {}, extra = {} } = {}) {
   const dir = project.path, m = project.meta ?? {};
-  const file = (rel) => { const f = join(dir, ...rel.split("/")); const t = mtime(f); return t != null && statSync(f).size > 0 ? { at: t } : null; };
+  // the app's documents in docs/ (a film not moved yet: at the root)
+  const file = (rel) => { const f = docPath(dir, rel); const t = mtime(f); return t != null && statSync(f).size > 0 ? { at: t } : null; };
   const sbFile = join(dir, "STORYBOARD.md");
   const sbText = existsSync(sbFile) ? readFileSync(sbFile, "utf8") : null;
   const mp = plan.read(dir);
@@ -188,7 +190,7 @@ export function gatherFacts(project, { shots = [], head = null, jobs = [], runni
     music: m.music?.file ?? null,
     review: reviewScore(dir),
     boards: existsSync(join(dir, "boards", "rounds")),
-    approvalFile: (name, rel) => { const t = file(rel); return t ? { at: t.at, hash: sha(readFileSync(join(dir, ...rel.split("/")))) } : null; },
+    approvalFile: (name, rel) => { const t = file(rel); return t ? { at: t.at, hash: sha(readFileSync(docPath(dir, rel))) } : null; },
     // a chat turn answering a step's question is that step at work
     runningStep: runningTask?.step ?? runningTask?.continues ?? null, claudeBusy: !!runningTask, claudeStarting: !!runningTask?.starting,
     // what the stage lines name
@@ -199,7 +201,7 @@ export function gatherFacts(project, { shots = [], head = null, jobs = [], runni
 
 /** The QC review's last "Final score: N/10" line in QC-REVIEW.md: { score, at } or null. */
 export function reviewScore(dir) {
-  const f = join(dir, "QC-REVIEW.md");
+  const f = docPath(dir, "QC-REVIEW.md");
   try {
     const xs = [...readFileSync(f, "utf8").matchAll(/Final score:\s*\**\s*(\d+(?:[.,]\d+)?)\s*\/\s*10/gi)];
     return { score: xs.length ? Number(xs.at(-1)[1].replace(",", ".")) : null, at: mtime(f) };
@@ -215,7 +217,7 @@ const num = (x) => { if (x == null || x === "") return null; const n = Number(St
 export function reviewCard(dir) {
   const md = reviewScore(dir);
   let j = null;
-  try { j = JSON.parse(readFileSync(join(dir, "QC-REVIEW.json"), "utf8")); } catch { /* none, or not JSON: the final score alone */ }
+  try { j = JSON.parse(readFileSync(docPath(dir, "QC-REVIEW.json"), "utf8")); } catch { /* none, or not JSON: the final score alone */ }
   const rounds = (Array.isArray(j?.rounds) ? j.rounds : []).slice(0, 10).map((r, i) => {
     const scores = Object.fromEntries(QC_CRITERIA.map((k) => [k, num(r?.scores?.[k])]));
     const xs = Object.values(scores).filter((x) => x != null);
@@ -234,14 +236,14 @@ export const WAYS = ["free", "keep", "reference"];
 const LEGACY_WAYS = { relayout: "free", remake: "reference" };
 export const normalWay = (w) => (WAYS.includes(w) ? w : LEGACY_WAYS[w] ?? "free");
 const wayLine = (dir, rx) => {
-  try { const m = rx.exec(readFileSync(join(dir, "ASSETS.md"), "utf8")); const w = m?.[1]?.toLowerCase(); return w && (WAYS.includes(w) || LEGACY_WAYS[w]) ? normalWay(w) : null; }
+  try { const m = rx.exec(readFileSync(docPath(dir, "ASSETS.md"), "utf8")); const w = m?.[1]?.toLowerCase(); return w && (WAYS.includes(w) || LEGACY_WAYS[w]) ? normalWay(w) : null; }
   catch { return null; }
 };
 /** The way Claude proposed in ASSETS.md (a line "Proposed way: <id>"), or null. */
 export const proposedWay = (dir) => wayLine(dir, /Proposed way:\s*`?([a-z]+)/i);
 /** The way settled in the Prepare step: ASSETS.md's last "Way: <id>" line (Claude writes it once the user answered, or when no question was needed). */
 export function chosenWay(dir) {
-  try { const xs = [...readFileSync(join(dir, "ASSETS.md"), "utf8").matchAll(/^\s*`?Way:\s*`?([a-z]+)/gim)]; const w = xs.at(-1)?.[1]?.toLowerCase(); return w && (WAYS.includes(w) || LEGACY_WAYS[w]) ? normalWay(w) : null; }
+  try { const xs = [...readFileSync(docPath(dir, "ASSETS.md"), "utf8").matchAll(/^\s*`?Way:\s*`?([a-z]+)/gim)]; const w = xs.at(-1)?.[1]?.toLowerCase(); return w && (WAYS.includes(w) || LEGACY_WAYS[w]) ? normalWay(w) : null; }
   catch { return null; }
 }
 /** Is a step shown for this film? */

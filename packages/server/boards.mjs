@@ -5,6 +5,7 @@
 import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, statSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { basename, extname, join, resolve, sep } from "node:path";
 import * as projects from "../project-service/index.mjs";
+import { docPath } from "../project-service/docs.mjs";
 import { rememberAssets } from "../project-service/assets.mjs";
 import { currentOptions, firstRoundOf, isOption, listRounds, makeRevision, optionLabel, optionName, ownerRounds, parseFeedback, recordPick, roundPdf, takeStills } from "../hf-edit/boards.mjs";
 import { CHECK_ARGS_PLAIN, checkFindings, qcRound, qcText } from "../hf-qa/qc.mjs";
@@ -218,7 +219,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     }
     // what the style's author forbids is checked on every still (Brick Toy's minifigure head passed unseen)
     const nevers = (() => { try { return styleNevers(p.meta?.style?.id, root); } catch { return []; } })();
-    if (nevers.length) lines.push(`The film style's own file forbids (check every panel against it, and against the limits Prepare noted in ASSETS.md or NOTES.md; one breach is a real problem): ${nevers.map((x) => `"${x}"`).join(" ")}`);
+    if (nevers.length) lines.push(`The film style's own file forbids (check every panel against it, and against the limits Prepare noted in docs/ASSETS.md or docs/NOTES.md; one breach is a real problem): ${nevers.map((x) => `"${x}"`).join(" ")}`);
     lines.push("Look at each option's sheets once. Fix only a real problem (a check issue, text cut or unreadable at phone size, overlapping, not the brief, what the style forbids); then call board_stills with { option, frames: [the frame numbers you changed] } once to see them. No other round: then hand the options to the owner.");
     return lines.join("\n");
   };
@@ -428,7 +429,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       // score is given from nothing; the Review's end says it in the chat with a Retry (autopilot taskEnded)
       if (res.busy) {
         task.stillsBusy = true;
-        return `${STILLS_BUSY}\nThe app tried twice and HyperFrames did not finish the stills in time: nothing is wrong with the film. This is no review round: do not score, do not write QC-REVIEW.md and do not change the film from it. Stop now and say in one short line that the pictures could not be taken because the computer is busy; the owner presses Retry.`;
+        return `${STILLS_BUSY}\nThe app tried twice and HyperFrames did not finish the stills in time: nothing is wrong with the film. This is no review round: do not score, do not write docs/QC-REVIEW.md and do not change the film from it. Stop now and say in one short line that the pictures could not be taken because the computer is busy; the owner presses Retry.`;
       }
       task.qcSheetsOk = true;
       let fresh = null;
@@ -509,7 +510,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     // the Review dialog: QC-REVIEW.md, the last round's sheets and the fresh-eyes answer
     r("GET", `/projects/${P}/qc`, ([id]) => {
       const p = mustProject(id, root);
-      const f = join(p.path, "QC-REVIEW.md");
+      const f = docPath(p.path, "QC-REVIEW.md");
       const last = p.meta?.lastQc ?? null;
       return { text: existsSync(f) ? readFileSync(f, "utf8") : "", at: existsSync(f) ? statSync(f).mtime.toISOString() : null, last,
         sheetUrls: last?.sheets ? Object.fromEntries(Object.entries(last.sheets).map(([k, v]) => [k, url(id, v)])) : {} };

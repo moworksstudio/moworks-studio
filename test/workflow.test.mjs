@@ -352,7 +352,7 @@ test("an older project is moved into the new folders when opened: files moved ne
   const o = await api("POST", "/api/projects/open", { path: d });
   assert.equal(o.status, 200, JSON.stringify(o.json));
   const p = getProject(o.json.id);
-  assert.equal(p.meta.layout, 2); assert.deepEqual(p.meta.layoutMove.failed, []);
+  assert.equal(p.meta.layout, 3); assert.deepEqual(p.meta.layoutMove.failed, []);
   const has = (rel) => existsSync(join(d, ...rel.split("/")));
   for (const rel of ["assets/_app/vendor/gsap.min.js", "assets/_app/fonts/kit/Inter.woff2", "assets/_app/fonts/google/be-vietnam-pro/vi.woff2", "assets/_app/psd/key/layout.json",
     "assets/1_design/fonts/brand/Brand.ttf", "assets/1_design/fonts/Client.otf", "assets/1_design/guide.pdf", "assets/1_design/deck.pptx",
@@ -371,7 +371,9 @@ test("an older project is moved into the new folders when opened: files moved ne
   assert.match(f1, /"assets\/2_footage\/intro\/intro_"/, "a sequence loaded by name: its folder's path follows");
   assert.match(f1, /url\("assets\/_app\/fonts\/kit\/Inter\.woff2"\)/);
   assert.equal(p.meta.music.file, "assets/3_audio/music/nhac nền.mp3"); assert.equal(p.meta.music.beats, "beats/assets/3_audio/music/nhac nền.mp3.json");
-  assert.match(readFileSync(join(d, "ASSETS.md"), "utf8"), /assets\/1_design\/deck\.pptx/);
+  // the app's documents into docs/ (layout 3), their paths followed first
+  assert.ok(!has("ASSETS.md"));
+  assert.match(readFileSync(join(d, "docs", "ASSETS.md"), "utf8"), /assets\/1_design\/deck\.pptx/);
   // committed once; the design files stay out of git, the pictures and fonts are in
   const tracked = execFileSync("git", ["-C", d, "ls-files"], { encoding: "utf8", windowsHide: true });
   assert.match(tracked, /assets\/1_design\/images\/loose\.svg/); assert.match(tracked, /assets\/1_design\/fonts\/Client\.otf/);
@@ -1150,7 +1152,7 @@ test("a cast Prepare wrote (the user chose that Claude makes them) gets the Char
   assert.equal(st.find((x) => x.id === "character").hidden, undefined, "the cast Prepare wrote: the Character step shows");
   assert.equal(st.find((x) => x.id === "storyboard").status, "blocked", "the Storyboard waits for the cast's approval");
   const A = await import("../packages/agent/index.mjs");
-  assert.match(A.actorsLine({ style: { id: "anidoodle-balloon" } }), /end Prepare by writing CHARACTERS\.json[^]*Never make a character in the Storyboard or the Build/);
+  assert.match(A.actorsLine({ style: { id: "anidoodle-balloon" } }), /end Prepare by writing docs\/CHARACTERS\.json[^]*Never make a character in the Storyboard or the Build/);
   rmSync(d, { recursive: true, force: true });
 });
 
@@ -1227,7 +1229,7 @@ test("what the Storyboard waits for, read from the project (the words to read, t
   assert.equal(pipe.voiceWaitOf(d, v({ status: "saved" }), none), null, "timed");
   // Prepare writes the words to read for any narrated film, and never asks to be told when the voice is made
   const { voiceLine } = await import("../packages/agent/index.mjs");
-  assert.match(voiceLine({}), /gets its words to read in VOICEOVER\.md[^]*holds the Storyboard until the voice is made and its words are timed[^]*no narration gets no VOICEOVER\.md/);
+  assert.match(voiceLine({}), /gets its words to read in docs\/VOICEOVER\.md[^]*holds the Storyboard until the voice is made and its words are timed[^]*no narration gets no docs\/VOICEOVER\.md/);
 });
 
 test("the words landed: a Storyboard that waited starts in one pass (the length asked before any frame); one drawn before is timed again", { timeout: 60000 }, async () => {

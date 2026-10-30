@@ -1,10 +1,10 @@
 // The words to read for a voice-over that Claude wrote, for the Voice screen's Script box.
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { docPath } from "../project-service/docs.mjs";
 
 export const SCRIPT_FILE = "VOICEOVER.md";
 export function scriptDraft(dir) {
-  const read = (f) => { try { return readFileSync(join(dir, f), "utf8").replace(/^﻿/, ""); } catch { return ""; } };
+  const read = (f) => { try { return readFileSync(docPath(dir, f), "utf8").replace(/^﻿/, ""); } catch { return ""; } };
   const own = read(SCRIPT_FILE).split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !/^#/.test(l)).map((l) => l.replace(/^(\d+[.)]|[-*•])\s+/, ""));
   if (own.length) return { text: own.join("\n"), from: SCRIPT_FILE };
   const lines = read("BRIEF.md").split(/\r?\n/);
@@ -53,7 +53,7 @@ export function scriptGap(dir, briefText) {
   const script = briefScript(briefText);
   if (script.length < 2) return null;
   let vo = "";
-  try { vo = readFileSync(join(dir, SCRIPT_FILE), "utf8"); } catch { return null; }
+  try { vo = readFileSync(docPath(dir, SCRIPT_FILE), "utf8"); } catch { return null; }
   const words = plain(vo.split(/\r?\n/).filter((l) => !/^\s*#/.test(l)).join(" "));
   if (!words.trim()) return null;
   const left = script.filter((line) => line.split(/(?<=[.!?…])\s+/).map(plain).filter((s) => s.trim()).some((s) => !words.includes(s)));

@@ -1,8 +1,8 @@
 ---
 name: moworks-studio
 description: Moworks Studio's house rules for every film style, read first in every step - the five rules of every film (collisions, readable text, determinism, truth, logos), the guideline or Brand Kit on every piece of text, the client's logo used as given, Vietnamese text, hand-drawn styles under a Brand Kit, character acting, a sound on every action, text over a canvas film, and how every film ends. Adds only what HyperFrames and the style leave open.
-version: 1.3.7
-derived-from: Moworks Motion kit 2.0.4 (Moworks; commit 30b7dcb65808b2a5299ad6a3357280a12773395f) - engine/skill/moworks-motion/SKILL.md step 3 ("Brand") and "Rules in every film" 1-5, workflow/characters.md sections 2, 3 ("Faces", "Hands") and 6 ("Collisions and physics"), brands/other.md; written from the idea for Moworks Studio. HyperFrames (Apache-2.0, 0.8.214 at 4719543) read as shipped where cited. Owner rules 24/10/2026 (#345, #346); the ending, owner 29/10/2026.
+version: 1.3.8
+derived-from: Moworks Motion kit 2.0.4 (Moworks; commit 30b7dcb65808b2a5299ad6a3357280a12773395f) - engine/skill/moworks-motion/SKILL.md step 3 ("Brand") and "Rules in every film" 1-5, workflow/characters.md sections 2, 3 ("Faces", "Hands") and 6 ("Collisions and physics"), brands/other.md; written from the idea for Moworks Studio. HyperFrames (Apache-2.0, 0.8.214 at 4719543) read as shipped where cited. Owner rules 24/10/2026 (#345, #346); the ending, owner 29/10/2026; the docs/ folder, owner 30/10/2026.
 source: https://github.com/moworksstudio/moworks-motion-dev/blob/30b7dcb65808b2a5299ad6a3357280a12773395f/engine/skill/moworks-motion/SKILL.md
 ---
 
@@ -11,6 +11,12 @@ source: https://github.com/moworksstudio/moworks-motion-dev/blob/30b7dcb65808b2a
 Read this first, in every step, in every film style. **What wins:** where HyperFrames already has a rule (how a composition is built,
 timing, determinism, captions, design files, its checks), HyperFrames' rule holds as it ships; the film style's own rules decide its look,
 its drawing and its motion. This file adds only what they leave open, and the owner's own words in the chat win over it for their film.
+
+**Where the files go:** HyperFrames' files stay where it reads them, at the project root (`index.html`, `compositions/`, `assets/`,
+`frame.md`, `BRIEF.md`, `STORYBOARD.md`, `SPEC.md`, `SCRIPT.md`, `transcript.json`). The app's documents are in `docs/`: `docs/NOTES.md`,
+`docs/ASSETS.md`, `docs/CREDITS.md`, `docs/QC-REVIEW.md` and `.json`, `docs/VOICEOVER.md`, `docs/CHARACTERS.json`,
+`docs/MOTION-PLAN.json`. A source file that names one of these bare (an author's "record it in CREDITS.md") means the one in `docs/`;
+never write a second copy at the root.
 
 ## 1. Rules in every film
 
@@ -69,7 +75,7 @@ This is the one rule for every conflict and every gap, in every step and every s
   the author's mark and what it gives the film, and offer keep it · keep it lighter · take it out only in the frames the note names · take it
   out everywhere; never take it out on your own, and never in frames the note did not name (a rubber-hose film's sprocket
   scratches, named rightly, were taken out of every scene for a note on four frames). The Build and the Review keep every such mark in
-  every frame unless the owner chose otherwise among these choices; a removal written in frame.md, NOTES.md or the code without the owner's
+  every frame unless the owner chose otherwise among these choices; a removal written in frame.md, docs/NOTES.md or the code without the owner's
   choice (an earlier step's own reading of a note) is not a choice: ask with these choices before you build, and keep the mark until the
   owner answers.
 - **What to do:** write nothing that depends on it. In one message, list every point (what each side says, in plain words), and for each
@@ -77,7 +83,7 @@ This is the one rule for every conflict and every gap, in every step and every s
   nền, xanh ngọc cho chữ"); for something missing, say what it is and the ways on (add it with the Assets button, a stand-in, go on
   without it). Group every question of the step in that one message, then stop: the app shows "Waiting for you" and a card. Never pick
   for the owner, never "follow X and say so in one line".
-- **After the answer:** follow what the owner chose for each point (write it in ASSETS.md or NOTES.md so later steps keep it), then go
+- **After the answer:** follow what the owner chose for each point (write it in docs/ASSETS.md or docs/NOTES.md so later steps keep it), then go
   on. No answer yet: nothing moves; New project's fields stand only until they choose.
 
 ## 3. The client's logo
@@ -144,7 +150,7 @@ applied to motion graphics, line art, ink or paper styles. With the board stills
 The Review scores these under its own criteria (moworks-qc: Composition, Motion, Sync); moworks-alive keeps the still-stretch numbers.
 
 The approved storyboard is the owner's: once STORYBOARD.md is approved, the Motion Plan, the Build, the Review and the sound
-never edit its frames (their times, words or scenes). A timing the voice or the build needs goes in MOTION-PLAN.json or the film's own
+never edit its frames (their times, words or scenes). A timing the voice or the build needs goes in docs/MOTION-PLAN.json or the film's own
 code; a change of what a frame says or shows is the owner's to approve (§2b). The app puts the frames back as approved after such a
 step; only the owner's own requests in the chat change them.
 
@@ -206,7 +212,7 @@ reaches After Effects as one rendered picture, so its text splits in two kinds:
      (the composition's timeline, never requestAnimationFrame or a clock), and the canvas no longer draws that text (never both).
    - A grain, paper, light or any texture the style lays over the whole frame goes over that text too: a CSS overlay on top of it
      (the same texture, blend and strength), so the text does not sit clean on a textured picture.
-   - Text that cannot be made to look the same in HTML stays on the canvas; write why in `NOTES.md` (one dated line).
+   - Text that cannot be made to look the same in HTML stays on the canvas; write why in `docs/NOTES.md` (one dated line).
 2. **Performed text stays on the canvas exactly as the author ships it**: text whose look or reveal is the style's own drawing (the
    Whiteboard pen writing each stroke on the board, Brush's painted letters, ASCII or CRT characters). That is the author's touch
    (sources as shipped): never move it to HTML, redraw it or change it.

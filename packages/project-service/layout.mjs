@@ -7,11 +7,14 @@
 // Projects made before keep older folders (audio/, sfx/, fonts/, images/, logos/, video/, voiceover/, 1_images/, 4_fonts/, 5_design/,
 // sources/, vendor/…); migrateLayout() moves their files into this layout when the project is opened and points the film, its documents
 // and the app's records to the new paths. It never deletes a file: one it cannot move stays where it is and is reported. Idempotent.
+// Version 3: the app's documents (NOTES.md, ASSETS.md, CREDITS.md, QC-REVIEW.*, VOICEOVER.md, CHARACTERS.json, MOTION-PLAN.json) in docs/
+// (docs.mjs), HyperFrames' files staying at the root; the music options to listen to in .moworks/cache/; .moworks and .hyperframes hidden.
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, rmdirSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, join, relative, sep } from "node:path";
+import { moveDocs } from "./docs.mjs";
 
-export const LAYOUT_VERSION = 2;
+export const LAYOUT_VERSION = 3;
 export const A = {
   design: "assets/1_design", images: "assets/1_design/images", fonts: "assets/1_design/fonts",
   footage: "assets/2_footage", voiceover: "assets/3_audio/voiceover", sfx: "assets/3_audio/sfx", music: "assets/3_audio/music",
@@ -79,13 +82,16 @@ const textFiles = (dir) => {
     if (!existsSync(d)) return;
     for (const n of readdirSync(d)) {
       const r = `${rel}/${n}`, f = join(d, n);
-      let s; try { s = statSync(f); } catch { continue; }
+      // lstat: a link (.moworks/rules, an engine) is the shared stage of every film, never rewritten from one
+      let s; try { s = lstatSync(f); } catch { continue; }
+      if (s.isSymbolicLink()) continue;
       if (s.isDirectory()) { if (!/^(cache|\.git|node_modules)$/.test(n)) walk(r, rx); } else if (rx.test(n)) out.push(r);
     }
   };
   walk("compositions", /\.(html|css|js|json|md)$/i);
   walk("boards", /\.(html|css|js|json|md)$/i);
   walk(".moworks", /\.(json|md)$/i);
+  walk("docs", /\.(json|md)$/i);
   for (const n of readdirSync(dir)) if (/\.(md|json)$/i.test(n) && statSync(join(dir, n)).isFile()) out.push(n);
   return [...new Set(out)];
 };
@@ -108,10 +114,46 @@ export function rewritePaths(dir, pairs) {
   return changed;
 }
 
-/** Hide the app's own folder in Explorer (Windows' hidden attribute; HyperFrames still reads it). */
+/** Hide the app's own folders in Explorer (Windows' hidden attribute; HyperFrames still reads them): assets/_app, the app's .moworks and
+ *  HyperFrames' own .hyperframes at the root (git hides .git itself). Folders only: a hidden file cannot be rewritten in place on Windows
+ *  (EPERM), and .gitignore is rewritten. */
 export function hideAppFolder(dir) {
-  const d = join(dir, ...A.app.split("/"));
-  if (process.platform === "win32" && existsSync(d)) spawnSync("attrib", ["+h", d], { windowsHide: true });
+  if (process.platform !== "win32") return;
+  for (const rel of [A.app, ".moworks", ".hyperframes"]) {
+    const d = join(dir, ...rel.split("/"));
+    if (existsSync(d)) spawnSync("attrib", ["+h", d], { windowsHide: true });
+  }
+}
+
+/** The raw stills of the QC rounds (.moworks/qc/R<n>/raw: HyperFrames' frames the three sheets are tiled from, about 60 MB a round)
+ *  of every round but the newest `keep`: nobody reads them once the sheets are made (Claude and the Review dialog read the sheets; the
+ *  newest round keeps its stills for a close look). The sheets stay. Returns the rounds pruned. */
+export function pruneQcRaw(dir, { keep = 1 } = {}) {
+  const base = join(dir, ".moworks", "qc");
+  let rounds = [];
+  try { rounds = readdirSync(base).filter((x) => /^R\d+$/.test(x)).sort((a, b) => Number(a.slice(1)) - Number(b.slice(1))); } catch { return []; }
+  const old = rounds.slice(0, Math.max(0, rounds.length - keep)).filter((r) => existsSync(join(base, r, "raw")));
+  for (const r of old) { try { rmSync(join(base, r, "raw"), { recursive: true, force: true }); } catch { /* in use: the next time */ } }
+  return old;
+}
+
+/** The music options to listen to (made again on demand, out of git) from audio/music-options/ into .moworks/cache/music-options/, with
+ *  the records that name them: [[from, to]] of the folders moved. */
+export function moveMusicOptions(dir) {
+  const from = join(dir, "audio", "music-options");
+  if (!existsSync(from)) return { moved: [], failed: [], changed: [] };
+  const to = join(dir, ".moworks", "cache", "music-options");
+  const moved = [], failed = [];
+  mkdirSync(to, { recursive: true });
+  for (const n of readdirSync(from)) {
+    const t = join(to, n);
+    if (existsSync(t)) { failed.push({ path: `audio/music-options/${n}`, error: "EEXIST" }); continue; }
+    try { renameSync(join(from, n), t); moved.push([`audio/music-options/${n}/`, `.moworks/cache/music-options/${n}/`]); }
+    catch (e) { failed.push({ path: `audio/music-options/${n}`, error: e.code ?? e.message }); }
+  }
+  const changed = moved.length ? rewritePaths(dir, moved) : [];
+  for (const d of [from, join(dir, "audio")]) { try { if (!readdirSync(d).length) rmdirSync(d); } catch { /* in use or not empty */ } }
+  return { moved, failed, changed };
 }
 
 const filesUnder = (dir, top) => {
@@ -123,7 +165,8 @@ const filesUnder = (dir, top) => {
 };
 
 /**
- * Move a project's files into the layout above: { moved: [[from, to]], failed: [{ path, error }], changed: [text files rewritten] }.
+ * Move a project's files into the layout above: { moved: [[from, to]], failed: [{ path, error }], changed: [text files rewritten],
+ * docs: [[from, to]] (the app's documents moved into docs/, docs.mjs) }.
  * Files are renamed (never copied and deleted); a name already taken at the destination gets " (2)". Then the paths are rewritten
  * (index.html, compositions/, boards/, the documents and the app's records, file by file and folder by folder, for a sequence loaded
  * by name), HyperFrames' beat files follow their music, the emptied old folders go, and _app/ is hidden.
@@ -166,8 +209,11 @@ export function migrateLayout(dir, { classify, sequenceOf } = {}) {
   }
   const keep = (d) => [A.design, A.images, A.fonts, A.footage, "assets/3_audio", A.voiceover, A.sfx, A.music, A.app, "assets"].some((x) => join(dir, ...x.split("/")) === d);
   for (const top of ["assets", "sources", "beats"]) pruneEmpty(join(dir, top), keep);
+  const music = moveMusicOptions(dir);
+  pruneQcRaw(dir);
   hideAppFolder(dir);
-  return { moved, failed, changed };
+  const d = moveDocs(dir);
+  return { moved, failed: [...failed, ...music.failed, ...d.failed], changed: [...changed, ...music.changed], docs: d.moved };
 }
 function pruneEmpty(d, keep) {
   if (!existsSync(d) || !statSync(d).isDirectory()) return;

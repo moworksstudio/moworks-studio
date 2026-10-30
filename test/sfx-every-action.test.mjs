@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { docPath } from "../packages/project-service/docs.mjs";
 
 const T = mkdtempSync(join(tmpdir(), "mw-sfx-every-"));
 process.env.MW_WORK_ROOT = join(T, "work");
@@ -203,7 +204,7 @@ test("ambience: a loop per place, crossfaded at a change of place, faded in at t
   assert.equal(attr(amb.at(-1), "data-fade-out"), "3.6", "the ending's fade, from the plan");
   assert.equal(Number(attr(amb.at(-1), "data-start")) + Number(attr(amb.at(-1), "data-duration")), 30, "it ends with the film");
   assert.equal(attr(amb.at(-1), "data-volume"), "0.48", "a quiet bed: a -28 LUFS loop at the ambience level");
-  assert.match(readFileSync(join(d, "CREDITS.md"), "utf8"), /\*\*ambience: steady rain\*\* \(`assets\/3_audio\/sfx\/rain-loop-1\.ogg`\): "rain-loop-1", from /);
+  assert.match(readFileSync(docPath(d, "CREDITS.md"), "utf8"), /\*\*ambience: steady rain\*\* \(`assets\/3_audio\/sfx\/rain-loop-1\.ogg`\): "rain-loop-1", from /);
   // under a voice-over: the bed ducks (HF's volume lane, written with &quot;)
   const dv = project(ROOT.replace("\n", '\n<audio id="el-voice" src="vo.wav" data-start="0"></audio>\n'));
   writeFileSync(join(dv, "transcript.json"), JSON.stringify([{ text: "hello", start: 2, end: 2.5 }, { text: "rain", start: 18, end: 18.6 }]));
@@ -263,7 +264,7 @@ test("credits: the library's sounds from its catalog source, one line a file (it
   const d = project();
   searches.length = 0;
   await autoSfx(d, SHOTS, PLAN, { fetchImpl: offline, timeoutMs: 50 });
-  const credits = readFileSync(join(d, "CREDITS.md"), "utf8"), st = sfx.readState(d);
+  const credits = readFileSync(docPath(d, "CREDITS.md"), "utf8"), st = sfx.readState(d);
   const files = new Set([...st.mounted.map((m) => m.file), ...st.ambience.placed.map((a) => a.file)]);
   for (const f of files) assert.ok(credits.includes(`\`${f}\``), `${f} credited`);
   assert.match(credits, /CC0 1\.0 \(https:\/\/creativecommons\.org\/publicdomain\/zero\/1\.0\/\)\. Source: https:\/\/(kenney\.nl|opengameart\.org)/);

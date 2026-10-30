@@ -65,7 +65,7 @@ test("T21-2: Prepare is told the cast's exact shape, and never promised a Charac
   const { getStyle, stylePipeline } = await import("../packages/style-catalog/index.mjs");
   if (stylePipeline("anidoodle-midCentury").some((x) => x.id === "character")) {
     const line = A.actorsLine({ style: { id: "anidoodle-midCentury" } });
-    assert.match(line, /end Prepare by writing CHARACTERS\.json as \{"characters": \[ … \]\} \(that object, never a bare list/);
+    assert.match(line, /end Prepare by writing docs\/CHARACTERS\.json as \{"characters": \[ … \]\} \(that object, never a bare list/);
     assert.match(line, /the app's Character step then makes them and the owner approves them once, before the Storyboard/);
   }
   // What If draws its cast on its own rig and has no Character step: no promise of one
@@ -87,7 +87,7 @@ test("T21-3: a voice well short of the film's set length is measured, and the ch
   assert.match(t, /80 s, 20 s shorter than the film's 100 s set in New project/);
   assert.match(t, /1\. make the film shorter.*2\. write a longer script.*3\. keep the 100 s with wordless stretches planned now/);
   assert.match(t, /Never fill the gap with a wordless shot, a longer shot or a longer end hold on your own/);
-  assert.match(t, /Write the answer in NOTES\.md/);
+  assert.match(t, /Write the answer in docs\/NOTES\.md/);
   // a small margin is the film's opening and end hold (5 s) and its breaths (a tenth of the film)
   assert.equal(shortSlack(30), 8); assert.equal(shortSlack(100), 15);
   assert.equal(voiceFit(film(86)), null, "14 s short of 100 s: inside the margin");

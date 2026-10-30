@@ -5,7 +5,7 @@
 // Every operation comes in two forms: the sync one (`commitAll`), for the CLI tools and the tests, and the one the server uses
 // (`commitAllAsync`), which runs git beside the server's thread and one call at a time per project (below).
 import { execFile, execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { gitStoreFor, isDrivePath } from "./drive.mjs";
 
@@ -15,7 +15,7 @@ const IGNORE = [".moworks/cache/", ".moworks/rules/", ".moworks/library/", ".mow
   ".thumbnails/", ".waveform-cache/", "*.tmp", "*.part", "Thumbs.db", "desktop.ini", "sources/", "assets/5_design/",
   // the design files at 1_design's top level stay out of git; its images/ and fonts/ are the film's own files
   "assets/1_design/*", "!assets/1_design/images/", "!assets/1_design/fonts/",
-  ".moworks/qc/", ".moworks/scan/", "audio/music-options/"];          // made again on demand: QC sheets, the files scan, the music options to listen to
+  ".moworks/qc/", ".moworks/scan/", "audio/music-options/"];          // made again on demand: QC sheets, the files scan, the music options to listen to (now in .moworks/cache/)
 export const LARGE_BYTES = 20 * 1024 * 1024;
 const LARGE_HEAD = "# over 20 MB: kept in the project folder, not in the history";
 const escapeIgnore = (p) => "/" + p.replace(/([\\*?[\]!#])/g, "\\$1").replace(/ $/, "\\ ");
@@ -105,13 +105,41 @@ function* commitAllOp(dir, message) {
   yield ["add", "-A"];
   if (!(yield ["status", "--porcelain"]).length) return yield* headOp(dir);
   yield ["commit", "-q", "-m", message];
+  yield* packOp(dir);
   return yield* headOp(dir);
+}
+// git keeps every new object as its own file and packs them only past 6,700 (gc.auto): a film never gets there, so its history was
+// hundreds of small files (Test 27: 485 objects, 508 files in .git). Past PACK_AT loose objects they go into one pack (repack + prune-packed,
+// git's own gc steps, nothing dropped). The template's sample hooks (14 inactive *.sample files) are not made, and dropped from older ones.
+export const PACK_AT = 200;
+/** The repository's folder: .git, or where a Drive project's `.git` file points (gitdir: …). */
+export function gitDirOf(dir) {
+  const g = join(dir, ".git");
+  try {
+    if (statSync(g).isDirectory()) return g;
+    const m = /^gitdir:\s*(.+)$/m.exec(readFileSync(g, "utf8"));
+    return m ? resolve(dir, m[1].trim()) : null;
+  } catch { return null; }
+}
+function dropSampleHooks(dir) {
+  const h = gitDirOf(dir) && join(gitDirOf(dir), "hooks");
+  try { for (const n of readdirSync(h)) if (n.endsWith(".sample")) rmSync(join(h, n), { force: true }); } catch { /* no hooks folder */ }
+}
+function* packOp(dir) {
+  dropSampleHooks(dir);
+  try {
+    const loose = Number(/^count:\s*(\d+)/m.exec(yield ["count-objects", "-v"])?.[1] ?? 0);
+    if (loose < PACK_AT) return false;
+    yield ["repack", "-d", "-q"];
+    yield ["prune-packed", "-q"];
+    return true;
+  } catch { return false; }          // packing is housekeeping: the commit stands either way
 }
 function* ensureRepoOp(dir) {
   if (!existsSync(join(dir, ".git"))) {
     // a project on Google Drive keeps its history on this PC (drive.mjs); the folder gets a `.git` file pointing there
-    if (isDrivePath(dir)) { const store = gitStoreFor(dir); mkdirSync(join(store, ".."), { recursive: true }); yield ["init", "-q", "-b", "main", `--separate-git-dir=${store}`]; }
-    else yield ["init", "-q", "-b", "main"];
+    if (isDrivePath(dir)) { const store = gitStoreFor(dir); mkdirSync(join(store, ".."), { recursive: true }); yield ["init", "-q", "-b", "main", "--template=", `--separate-git-dir=${store}`]; }
+    else yield ["init", "-q", "-b", "main", "--template="];
   }
   const gi = join(dir, ".gitignore");
   const have = existsSync(gi) ? readFileSync(gi, "utf8") : "";
@@ -159,14 +187,17 @@ function* changedSinceOp(dir, from) {
     const h = yield* headOp(dir);
     if (!from || !h) return true;
     if (from === h) return false;
-    // Claude's notes and the step documents are not the film either (a NOTES.md line would make the checks stale)
+    // Claude's notes and the step documents are not the film either (a NOTES.md line would make the checks stale); docs/ since layout 3,
+    // the root before
     return (yield ["log", "--format=%H", "--invert-grep", "-F", `--grep=${STUDIO_IDS}`, `--grep=${SOUND_MIX}`, `${from}..${h}`, "--", ".", ":(exclude).moworks",
-      ":(exclude)NOTES.md", ":(exclude)QC-REVIEW.md", ":(exclude)QC-REVIEW.json", ":(exclude)ASSETS.md", ":(exclude)BRIEF.md"]).length > 0;
+      ":(exclude)NOTES.md", ":(exclude)QC-REVIEW.md", ":(exclude)QC-REVIEW.json", ":(exclude)ASSETS.md", ":(exclude)BRIEF.md",
+      ":(exclude)docs/NOTES.md", ":(exclude)docs/QC-REVIEW.md", ":(exclude)docs/QC-REVIEW.json", ":(exclude)docs/ASSETS.md", ":(exclude)docs/*.old"]).length > 0;
   } catch { return true; }
 }
 function* restoreTreeOp(dir, rev, message) {
   if (yield* dirtyOp(dir)) yield* commitAllOp(dir, "Changes before opening a version");
-  const added = (yield ["diff", "--name-only", "--diff-filter=A", rev, "HEAD", "--", ".", ":(exclude).moworks"]).split(/\r?\n/).filter(Boolean);
+  // a file moved since (a document into docs/) counts as added here, not renamed, so the version's own place for it wins
+  const added = (yield ["diff", "--name-only", "--no-renames", "--diff-filter=A", rev, "HEAD", "--", ".", ":(exclude).moworks"]).split(/\r?\n/).filter(Boolean);
   for (const f of added) yield ["rm", "-q", "--", f];
   yield ["checkout", rev, "--", ".", ":(exclude).moworks"];
   return yield* commitAllOp(dir, message);
@@ -185,6 +216,8 @@ export const [ensureRepo, ensureRepoAsync] = forms(ensureRepoOp);
 export const [head, headAsync] = forms(headOp, { read: true });
 export const [isDirty, isDirtyAsync] = forms(dirtyOp, { read: true });
 /** Commit everything that changed; returns the new revision, or the current one when nothing changed. */
+/** Pack the history's loose objects when there are PACK_AT or more (done after every commit; also once when an older film opens). */
+export const [pack, packAsync] = forms(packOp);
 export const [commitAll, commitAllAsync] = forms(commitAllOp);
 /** ensureRepo, then commitAll, in one turn of the project's queue: the server's usual "record this change". Returns the revision. */
 export const [save, saveAsync] = forms(saveOp);

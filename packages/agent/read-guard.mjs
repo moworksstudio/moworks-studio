@@ -33,7 +33,7 @@ export function decide({ required, read, warned }) {
   const missing = required.filter((r) => !read.has(norm(r)));
   if (!missing.length || warned) return { block: false, missing };
   return { block: true, missing,
-    message: `Not written yet: this step's rule files come first, read before the first edit (the app checks it once per task): ${missing.join(", ")}. Read them all in one turn, then make this same edit again: it goes through, and so does every edit after it (NOTES.md and this step's own files included). Never leave a file unwritten because of this check.` };
+    message: `Not written yet: this step's rule files come first, read before the first edit (the app checks it once per task): ${missing.join(", ")}. Read them all in one turn, then make this same edit again: it goes through, and so does every edit after it (docs/NOTES.md and this step's own files included). Never leave a file unwritten because of this check.` };
 }
 
 async function main() {

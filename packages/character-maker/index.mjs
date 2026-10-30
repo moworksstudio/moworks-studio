@@ -13,6 +13,8 @@ import { execFile, spawn, spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, extname, isAbsolute, join, relative, resolve } from "node:path";
+import { docPath } from "../project-service/docs.mjs";
+import { rulePath, stageRoot } from "../project-service/shared-stage.mjs";
 import { APP_ROOT } from "../version-manager/index.mjs";
 import * as kit from "../character-kit/index.mjs";
 import { brushGate } from "../character-kit/brushgate.mjs";
@@ -134,16 +136,18 @@ export function prepareLab(job, root = APP_ROOT) {
 
 /** The Claude Code arguments of a lab run. The brief is not among them: it goes on stdin (the description and the change are the
  *  owner's own words, of any length; on the command line they could pass Windows' 32,767 characters, T27-14). */
-export function labArgs({ allowed, model, effort }) {
+export function labArgs({ allowed, model, effort, stage = null }) {
+  // the anidoodle engine is linked from the shared stage (runtime/stage): Claude reads it there and never edits it
+  const shared = stage ? ["--add-dir", stage, "--settings", JSON.stringify({ permissions: { deny: [`Edit(${rulePath(stage)}/**)`] } })] : [];
   return ["-p", "--output-format", "stream-json", "--verbose", "--model", model, "--effort", effort, "--permission-mode", "acceptEdits",
-    "--tools", "Read,Edit,Write,Glob,Grep,Bash", "--allowedTools", ...allowed, "--strict-mcp-config", "--disable-slash-commands", "--no-session-persistence"];
+    "--tools", "Read,Edit,Write,Glob,Grep,Bash", "--allowedTools", ...allowed, ...shared, "--strict-mcp-config", "--disable-slash-commands", "--no-session-persistence"];
 }
 
 /** One Claude Code run in the lab (stream-json): onEvent({ kind: "tool"|"text", ... }) as it works. { ok, result, turns, costUsd, usage, ms }. */
 export function runClaude({ lab, brief, allowed, root = APP_ROOT, model, effort, env = {}, signal = null, onEvent = () => {} }) {
   const exe = findClaude(root);
   if (!exe) return Promise.resolve({ ok: false, error: "Claude Code is not installed" });
-  const args = labArgs({ allowed, model, effort });
+  const args = labArgs({ allowed, model, effort, stage: stageRoot(root) });
   try { checkArgv(exe, args); } catch (e) { return Promise.resolve({ ok: false, error: e.message }); }
   const t0 = Date.now();
   return new Promise((ok) => {
@@ -425,7 +429,11 @@ export async function filmStill(projectDir, film, out, { root = APP_ROOT, env = 
   const work = mkdtempSync(join(tmpdir(), "mw-sheet-"));
   try {
     const take = (rel) => { const from = join(projectDir, ...rel.split("/")); if (existsSync(from)) cpSync(from, join(work, ...rel.split("/")), { recursive: true }); };
-    ["anidoodle", "CHARACTERS.json", ".moworks/library/anidoodle", "assets/1_design/images"].forEach(take);
+    ["anidoodle", "assets/1_design/images"].forEach(take);
+    stageEngine(work, root);          // the engine linked as in the film (a copy of the film's link would be a symlink: EPERM)
+    // the cast where the lab tools read it, at the copy's root (the film keeps it in docs/)
+    const cast = docPath(projectDir, kit.CAST_FILE);
+    if (existsSync(cast)) cpSync(cast, join(work, kit.CAST_FILE));
     const r = await tool(work, [join(TOOLS, "still.mjs"), film, resolve(out)], { root, env, signal, timeout: 600000 });
     if (r.code !== 0) return { ok: false, error: sheetError(r.out) };
     // the words the sheet drew, read in the page the still tool left (labels on each other or on the drawing)

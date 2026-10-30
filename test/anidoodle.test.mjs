@@ -3,7 +3,7 @@
 // with the pinned engine and driven through finalize's bridge (window.FILM), HyperFrames' check and an offline render.
 import { test, after } from "node:test";
 import assert from "node:assert/strict";
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { getStyle, listStyles, stylePipeline } from "../packages/style-catalog/index.mjs";
@@ -18,6 +18,7 @@ import { useHumans } from "../packages/character-kit/humans.mjs";
 import { writeFileSync } from "node:fs";
 import { buildAnidoodle } from "../packages/hf-edit/anidoodleBuild.mjs";
 import { guessSource, isLemoPage } from "../packages/hf-edit/lemoPage.mjs";
+import { docPath } from "../packages/project-service/docs.mjs";
 import { prepareRules } from "../packages/agent/index.mjs";
 import { requiredReads } from "../packages/agent/reads.mjs";
 import { finalize } from "../packages/hf-edit/finalize.mjs";
@@ -94,9 +95,16 @@ test("a project in an anidoodle medium: the reference as its rule file, the app'
     "example/butterfly-film-spec.md", "styles/house/almond-blossom.json", "engine/facts/launchExample.json"])
     assert.ok(existsSync(join(d, ".moworks", "library", "anidoodle", ...f.split("/"))), f);
   assert.ok(!existsSync(join(d, ".moworks", "library", "anidoodle", "engine", "tools")), "never the author's tools");
-  // a project staged at this pin before the example was added gets only the missing part
-  rmSync(join(d, ".moworks", "library", "anidoodle", "example"), { recursive: true });
-  assert.deepEqual(stageEngine(d).files, [".moworks/library/anidoodle/example"]);
+  // a project staged before the shared stage (its own copy of the engine, without the example) gets the link: the whole engine, nothing
+  // new to read; a file deleted through a link is the stage's own, and the stage is made whole again on its next use
+  const lib = join(d, ".moworks", "library", "anidoodle"), shared = realpathSync(lib);
+  rmSync(lib, { recursive: true, force: true });
+  cpSync(shared, lib, { recursive: true, filter: (s) => !/[\\/]example([\\/]|$)/.test(s) });
+  assert.deepEqual(stageEngine(d).files, []);
+  assert.ok(lstatSync(lib).isSymbolicLink() && existsSync(join(lib, "example", "butterfly-film-spec.md")));
+  rmSync(join(lib, "example"), { recursive: true, force: true });
+  stageEngine(d);
+  assert.ok(existsSync(join(shared, "example", "butterfly-film-spec.md")), "the stage made whole again");
   assert.ok(existsSync(join(d, ".moworks", "library", "anidoodle", "engine", "src", "canvas-core", "film.ts")), "nothing else removed");
   const reads = (step) => requiredReads(d, { styleId: "anidoodle-sumiE", first: r.first, step });
   assert.ok(reads("storyboard").includes(".moworks/library/anidoodle/SKILL.md"), "the seven laws from the storyboard");
@@ -168,7 +176,7 @@ test("Bit and the cheetah: the author's rigged characters, as shipped, in the Ch
     const d = join(T, "rigfilm");
     mkdirSync(d, { recursive: true });
     assert.deepEqual(useHumans(d, ["bit"], { styleId: "anidoodle-storybook" }), ["bit"]);
-    const cast = JSON.parse(readFileSync(join(d, "CHARACTERS.json"), "utf8")).characters;
+    const cast = JSON.parse(readFileSync(docPath(d, "CHARACTERS.json"), "utf8")).characters;
     assert.deepEqual([cast[0].import, cast[0].rig, cast[0].check, cast[0].needsPalette], ["anidoodle/canvas-core/bitRig", "bit", null, false]);
     assert.ok(!existsSync(join(d, "anidoodle", "check-anidoodle-cast.ts")), "no human gate for a rig");
   } finally { if (was === undefined) delete process.env.MW_CHARACTERS_ROOT; else process.env.MW_CHARACTERS_ROOT = was; }

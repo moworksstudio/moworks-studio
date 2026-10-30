@@ -6,6 +6,7 @@ import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { docPath } from "../packages/project-service/docs.mjs";
 
 const T = mkdtempSync(join(tmpdir(), "mw-lib-"));
 process.env.MW_WORK_ROOT = join(T, "work");
@@ -58,7 +59,8 @@ test("motion plan file: one shot replaced at a time, empty shots dropped, bad JS
   assert.deepEqual(r.plan.shots[0].motions[0].source, { kind: "library", id: "data/conic-progress-ring", version: "kit 9.9.9" });
   r = plan.setShot(d, 2, []);
   assert.deepEqual(r.plan.shots.map((x) => x.shot), [1]);
-  writeFileSync(join(d, plan.FILE), "{ not json");
+  assert.ok(existsSync(join(d, "docs", plan.FILE)), "a new plan is written in docs/");
+  writeFileSync(docPath(d, plan.FILE), "{ not json");
   assert.match(plan.read(d).error, /not valid JSON/);
   assert.throws(() => plan.setShot(d, 1, []), { code: "INVALID" });
 });

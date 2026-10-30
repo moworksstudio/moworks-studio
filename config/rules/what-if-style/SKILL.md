@@ -49,7 +49,7 @@ footage go on HyperFrames' timeline. Any other `@remotion/...` package is refuse
 
 | Author's step | In the app |
 |---|---|
-| 1 Script | Prepare: `whatif/episode.json` (`topic`, `title`, `script`, `science`), 45-65 words for 15-25 s (the New project length wins), every line a picture; BRIEF.md and ASSETS.md as every style |
+| 1 Script | Prepare: `whatif/episode.json` (`topic`, `title`, `script`, `science`), 45-65 words for 15-25 s (the New project length wins), every line a picture; BRIEF.md and docs/ASSETS.md as every style |
 | 2 Voice | No ElevenLabs. The narration is the app's Voice-over (the owner uploads one, or the app reads the script with a voice service when its key is set). With no voice-over yet and no voice service key, it is a missing thing (moworks-studio §2b): stop in Prepare and offer the two ways on, a voice-over the owner uploads (then the app transcribes it and writes `words.json`) or a film with no narration (§4) |
 | 3 Shot list | Storyboard: `shots` (one per picture, 9-14, the size and angle varied every cut, each with its `key` frame), `edit` and `fx` in `episode.json`, then `timeline.json` as §2 says. Aim for 27+ cuts a minute in the opening and no static shot over about 3 s |
 | 4-5 Storyboard and self-check | Storyboard: `shots.tsx` right at each shot's `key` frame and `episode.tsx`; the boards are the episode's own Board (each shot at its key frame), whose stills the app takes; run the author's storyboard checklist (`references/look.md`) on them, fix and look again |

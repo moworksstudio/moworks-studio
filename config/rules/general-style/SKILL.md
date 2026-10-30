@@ -22,7 +22,7 @@ skill tells you to run `npx hyperframes …` or a script, skip that line; the ap
 Three places where this layer overrides HyperFrames' work loop:
 1. **Storyboard:** always **two** options as image boards (the owner may ask for more) (`references/storyboard.md`), never one plan and never skipped;
    they take the place of the three storylines of HyperFrames' `story.md` §2 (no `STORYLINES.md` in this style).
-2. **Motion:** an approved **Motion Plan with numbers** in `MOTION-PLAN.json` (`references/motion-spec.md`). A move HyperFrames' `motion.md`
+2. **Motion:** an approved **Motion Plan with numbers** in `docs/MOTION-PLAN.json` (`references/motion-spec.md`). A move HyperFrames' `motion.md`
    describes is one possible *source* for a row, not the spec itself.
 3. **Taste:** maximum creative effort, no default look (`references/motion-craft.md`). HyperFrames' `look.md` and `spec.md` are references you
    may use, never a constraint; the banned list in `motion-craft.md` applies.
@@ -32,10 +32,10 @@ Three places where this layer overrides HyperFrames' work loop:
 | Step | You do | Read first |
 |---|---|---|
 | Brief | Read the merged brief and what the app found in the assets. Ask only what is truly missing, all of it in **one** message. Write `BRIEF.md` (the story as `references/story.md` asks) with the six true lines and "This film tells [audience] that [promise]."; of HyperFrames' `story.md` only §1 ("The one thing") applies here: its three storylines (§2) give way to this layer's storyboard options | `references/story.md` |
-| Assets | Read every asset the app prepared (pictures, PDF pages, contact sheets of video, transcripts, beat maps). List them in `ASSETS.md`: what each is, where it can be used, what is missing. Propose ONE way of working (below) with a one-line reason | `references/inputs.md`; a guideline or a client brand: `references/brand.md` |
+| Assets | Read every asset the app prepared (pictures, PDF pages, contact sheets of video, transcripts, beat maps). List them in `docs/ASSETS.md`: what each is, where it can be used, what is missing. Propose ONE way of working (below) with a one-line reason | `references/inputs.md`; a guideline or a client brand: `references/brand.md` |
 | Design | Part by part: a Brand Kit the owner chose in New project wins for its part (a brief that asks otherwise is a conflict: stop and ask, moworks-studio §2b); the rest follows the design the brief describes, and is yours where it says nothing. A chosen Brand Kit: the app wrote it to `frame.md` (never write or change it); a guideline that differs: a conflict, stop and ask (moworks-studio §2b). No Brand Kit: a guideline in the assets is followed (suggest the owner save it as a Brand Kit); else write `design.md` as HyperFrames' `look.md` says (its LOOK line), with Vietnamese-complete fonts | `references/brand.md` when there is a guideline |
 | Storyboard | Two real options as boards; stop for the owner's pick | `references/storyboard.md` |
-| Motion Plan | One row per move, numbers not adjectives, a source per row, the always-alive rows of `moworks-alive`, each shot's plain words; only `MOTION-PLAN.json`, no composition; stop for approval | `references/motion-spec.md`, `references/motion-craft.md`; ideas: `references/recipes.md` |
+| Motion Plan | One row per move, numbers not adjectives, a source per row, the always-alive rows of `moworks-alive`, each shot's plain words; only `docs/MOTION-PLAN.json`, no composition; stop for approval | `references/motion-spec.md`, `references/motion-craft.md`; ideas: `references/recipes.md` |
 | Build | Pose and dress the approved board's layouts (`boards/<option>/`, never redrawn) with the approved motion, every hold alive | `hyperframes/SKILL.md` (the contract), its `format.md`, `runtimes.md` and `motion.md`, `references/motion-craft.md` |
 | QC | Follow `moworks-qc` | `.moworks/rules/moworks-qc/SKILL.md` |
 | Final Mix | Music and sound effects only when the owner asks, after the picture is locked | `references/sound.md` |
@@ -48,7 +48,7 @@ reference** (a style guide first) · **remake** (a shot list instead of a storyb
 
 No motion is built before the owner approves the storyboard (or, for keep design, the rebuilt frames; for remake, the shot list) **and**
 the Motion Plan. A brief asking for "a complete first cut" does not waive a gate; only the owner's explicit words do, and then you say
-which gate is skipped and write it in `NOTES.md`. A gate is approved in the app (the Storyboard and Motion plan dialogs), not by you.
+which gate is skipped and write it in `docs/NOTES.md`. A gate is approved in the app (the Storyboard and Motion plan dialogs), not by you.
 
 ## 4. Rules in every film (non-negotiable)
 
@@ -70,10 +70,10 @@ which gate is skipped and write it in `NOTES.md`. A gate is approved in the app 
 
 ## 5. Files you keep
 
-- `NOTES.md`: every decision as you make it (the brief's answers, the way of working, the guideline's rules, palette and type with their
+- `docs/NOTES.md`: every decision as you make it (the brief's answers, the way of working, the guideline's rules, palette and type with their
   source, which gate the owner skipped, what the owner's words changed). Each pipeline step may start a fresh conversation: anything not
   in a file is forgotten.
-- `BRIEF.md`, `ASSETS.md`, `design.md` or `frame.md`, `STORYBOARD.md` (and `boards/`), `MOTION-PLAN.json`, `QC-REVIEW.md`: the step outputs.
+- `BRIEF.md`, `docs/ASSETS.md`, `design.md` or `frame.md`, `STORYBOARD.md` (and `boards/`), `docs/MOTION-PLAN.json`, `docs/QC-REVIEW.md`: the step outputs.
 - Never edit `.moworks/` or `.git/`; read `.moworks/rules/` and `.moworks/library/`.
 
 ## 6. Talking to the owner

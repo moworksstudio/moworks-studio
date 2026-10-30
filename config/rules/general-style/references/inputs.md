@@ -6,7 +6,7 @@ for what the film uses, `sources/` for PSD, PPTX, PDF, AI and documents) and pre
 lists it all: PSD / PSB layer trees, text layers (words, font, size, colour) and a picture of each artboard or top-level group; PowerPoint
 slides as pictures with their texts and notes; PDF and AI pages as pictures with their text; video contact sheets, cut times and speech;
 music tempo, bar starts and loudest passages (sung words only when Whisper heard enough of them: the app transcribes speech, not
-singing; a song's lyrics come from the owner, timed by the app into `LYRICS-TIMED.md`); numbered pictures as one sequence; archive contents. Read all of it, write `ASSETS.md`,
+singing; a song's lyrics come from the owner, timed by the app into `LYRICS-TIMED.md`); numbered pictures as one sequence; archive contents. Read all of it, write `docs/ASSETS.md`,
 propose ONE way of working with a one-line reason, and stop for the owner's choice.
 
 ## 1. Choosing

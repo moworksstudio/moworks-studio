@@ -6,6 +6,7 @@
 // a reference to draw in its own design (reference.mjs).
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { docPath, writeDoc } from "../project-service/docs.mjs";
 import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
 import { HUMAN_ENGINE, humanCharacters, humanDir, ownRig } from "./index.mjs";
 import { humanHandOf } from "../style-catalog/hands.mjs";
@@ -15,7 +16,7 @@ export const handOfStyle = (styleId, root = APP_ROOT) => humanHandOf(styleId, ro
 export const HUMANS_FILE = "CHARACTERS.json";          // an anidoodle film's cast, as a Brush film's (the Brush pipeline reads it); entries carry engine "anidoodle-human"
 const readJson = (f, d = null) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
 /** The film's humans: [{ id, name, about, hand, import, check, made, credit, from }]; a bare list in the file is read as the cast too. */
-export const readHumans = (projectDir) => { const j = readJson(join(projectDir, HUMANS_FILE), { characters: [] }); return Array.isArray(j) ? j : j?.characters ?? []; };
+export const readHumans = (projectDir) => { const j = readJson(docPath(projectDir, HUMANS_FILE), { characters: [] }); return Array.isArray(j) ? j : j?.characters ?? []; };
 
 /** Put saved humans into an anidoodle film (one that draws people). Returns the ids added. */
 export function useHumans(projectDir, ids, { styleId = null, root = APP_ROOT } = {}) {
@@ -53,6 +54,6 @@ export function useHumans(projectDir, ids, { styleId = null, root = APP_ROOT } =
       ...entry, made: shipped ? "as shipped" : "written from the idea", credit: c.credit ?? null, from: { library: "anidoodle", at: new Date().toISOString() } });
     added.push(c.id);
   }
-  writeFileSync(join(projectDir, HUMANS_FILE), JSON.stringify({ characters: out }, null, 2) + "\n");
+  writeDoc(projectDir, HUMANS_FILE, JSON.stringify({ characters: out }, null, 2) + "\n");
   return added;
 }

@@ -9,6 +9,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } fr
 import { join, resolve } from "node:path";
 import { APP_ROOT, expandEnv, loadPins, sourceHead } from "../version-manager/index.mjs";
 import { codeLibDir } from "../offline-assets/index.mjs";
+import { ensureShared, linkOrCopy, sharedDir } from "../project-service/shared-stage.mjs";
 
 export const AUTHOR = { id: "freshstack", name: "FreshStack (kelano86)", source: "what-if-animation" };
 export const SHIMS = join(import.meta.dirname, "shims");
@@ -39,22 +40,28 @@ export function reactDirs(root = APP_ROOT) {
 // what a project gets: the engine, the studio's settings it imports, the two worked episodes (code and timing data; their sound is not
 // shipped), the cast sheet (the rig at a glance)
 const STAGED = ["engine", "studio.config.ts", "episodes", "CastSheet.tsx"];
-/** Stage the pinned engine in the project (.moworks/library/what-if/), once per pin. Episodes import it as "what-if" (the build's alias);
- *  the worked examples keep their own relative imports ('../../engine'). Returns { files } (what was written). */
+/** The pinned engine in the project (.moworks/library/what-if/): a link to the pin's copy made once in the shared stage
+ *  (project-service/shared-stage.mjs: runtime/stage/library/what-if@<commit>), a copy of it on a drive that takes no link. Episodes import
+ *  it as "what-if" (the build's alias); the worked examples keep their own relative imports ('../../engine'). Returns { files } (what is
+ *  new to the film). */
 export function stageEngine(projectDir, root = APP_ROOT) {
   const src = whatIfSource(root);
   if (!src) throw Object.assign(new Error("What If is not pinned"), { code: "NOT_FOUND" });
-  const dest = join(projectDir, ".moworks", "library", "what-if"), mark = join(dest, "PINNED");
-  if (readText(mark).trim() === src.commit && STAGED.every((rel) => existsSync(join(dest, rel)) || !existsSync(join(src.studio, rel)))) return { files: [] };
-  rmSync(dest, { recursive: true, force: true }); mkdirSync(dest, { recursive: true });
+  const dest = join(projectDir, ".moworks", "library", "what-if");
+  const whole = (d) => readText(join(d, "PINNED")).trim() === src.commit && STAGED.every((rel) => existsSync(join(d, rel)) || !existsSync(join(src.studio, rel)));
+  const shared = ensureShared(sharedDir(root, "library", `what-if@${src.commit}`), (to) => fillEngine(to, src), whole);
+  const was = existsSync(join(dest, "PINNED"));
+  if (linkOrCopy(dest, shared) === "same") return { files: [] };
+  return { files: was ? [] : [".moworks/library/what-if/CREDIT.md", ".moworks/library/what-if/engine/index.ts"] };          // a copy of the same engine made a link: nothing new
+}
+function fillEngine(dest, src) {
   for (const rel of STAGED) if (existsSync(join(src.studio, rel))) cpSync(join(src.studio, rel), join(dest, rel), { recursive: true });
   if (existsSync(join(src.root, "LICENSE"))) cpSync(join(src.root, "LICENSE"), join(dest, "LICENSE"));
   writeFileSync(join(dest, "CREDIT.md"), `# What If animation, staged for this project\n\nBy ${AUTHOR.name}. ${treeLink(src, "studio/src")} (commit ${src.commit}), MIT.\n`
     + "The engine (engine/: anim, rig, props, kit, light, room, furnish, ui, sets, episode), the studio's settings it reads, the two worked\n"
     + "episodes (episodes/: study them, never copy them; their sound is not here) and the cast sheet. Import the engine as `what-if`\n"
     + "(the app bundles it with the author's React and its own stand-in for Remotion); never edit these files.\n");
-  writeFileSync(mark, `${src.commit}\n`);
-  return { files: [".moworks/library/what-if/CREDIT.md", ".moworks/library/what-if/engine/index.ts"] };
+  writeFileSync(join(dest, "PINNED"), `${src.commit}\n`);
 }
 
 // ---- the style's demo film: "Nếu Trái Đất bỗng đứng yên?", made by the app in this style (demo-what-if-giong-doc,

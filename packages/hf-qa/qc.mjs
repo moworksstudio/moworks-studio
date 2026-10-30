@@ -6,6 +6,8 @@
 import { copyFileSync, mkdirSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { execFile } from "node:child_process";
 import { isAbsolute, join, relative, sep } from "node:path";
+import { docPath } from "../project-service/docs.mjs";
+import { pruneQcRaw } from "../project-service/layout.mjs";
 import { promisify } from "node:util";
 import { againIfBusy, runHfJsonAsync, snapOnceMore, snapshotAtAsync, STILL_IDLE_MS, STILLS_BUSY } from "./cli.mjs";
 import { ffmpegExe } from "../library/preview-media.mjs";
@@ -131,7 +133,7 @@ export function stillsFailure(r, got, asked) {
 
 /** The film's dynamic level from MOTION-PLAN.json ("strong", "light"…), null without one. */
 export function dynamicOf(dir) {
-  try { return JSON.parse(readFileSync(join(dir, "MOTION-PLAN.json"), "utf8")).dynamic ?? null; } catch { return null; }
+  try { return JSON.parse(readFileSync(docPath(dir, "MOTION-PLAN.json"), "utf8")).dynamic ?? null; } catch { return null; }
 }
 
 /** The pictures stopped twice (STILLS_BUSY): the round is said as busy, with no sheet and no check, never as a round that worked; its
@@ -146,6 +148,7 @@ const busyRound = (res, out) => { rmSync(out, { recursive: true, force: true });
 export async function qcRound(dir, { shots, total, signal = null, parallel = false, snap = snapshotAtAsync, hf = runHfJsonAsync, decor = dropDecorationContrast, pauseMs = 3000, onRetry = () => {} } = {}) {
   const base = join(dir, ".moworks", "qc");
   mkdirSync(base, { recursive: true });
+  pruneQcRaw(dir, { keep: 0 });          // the earlier rounds' raw stills: this round is the newest now (their sheets stay)
   const n = readdirSync(base).filter((x) => /^R\d+$/.test(x)).map((x) => Number(x.slice(1))).reduce((a, b) => Math.max(a, b), 0) + 1;
   const id = `R${n}`, out = join(base, id), raw = join(out, "raw");
   mkdirSync(raw, { recursive: true });
@@ -236,7 +239,7 @@ export function qcText(r, freshEyes = null) {
   if (r.still) lines.push("", ...stillLines(r.still));
   if (freshEyes) lines.push("", "Fresh eyes (a second look that saw only the beats and cuts sheets, nothing else about the film):", freshEyes);
   if (r.failed.length) lines.push("", `Could not make everything: ${r.failed.join("; ")}`);
-  lines.push("", "Open the sheets with Read (each is one picture), score the seven criteria, write the round to QC-REVIEW.md, fix, and call qc_sheets again for the next round.");
+  lines.push("", "Open the sheets with Read (each is one picture), score the seven criteria, write the round to docs/QC-REVIEW.md, fix, and call qc_sheets again for the next round.");
   return lines.join("\n");
 }
 

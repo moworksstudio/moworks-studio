@@ -8,6 +8,7 @@
 // edit that the required files were read.
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { docRelIn } from "../project-service/docs.mjs";
 import { APP_ROOT } from "../version-manager/index.mjs";
 import { HF_SKILL } from "../hf-edit/hf-scripts.mjs";
 
@@ -90,10 +91,10 @@ const ANIDOODLE = (id) => {
   return {
     brief: [own, pack, laws],
     // a human hand's Character step: the author's recipe for a new character; the film's cast from the storyboard on
-    character: [own, pack, laws, `${lib}/references/workflows/character-consistency.md`, `${lib}/references/anatomy.md`, `${lib}/references/craft-bar.md`, "CHARACTERS.json"],
-    storyboard: [own, pack, laws, contract, HF.boardFormat, "CHARACTERS.json"],
-    motionSpec: [own, pack, `${lib}/references/motion-grammar.md`, `${lib}/references/camera.md`, HF.motion, "CHARACTERS.json"],
-    build: [own, pack, laws, contract, HF.entry, HF.runtimes, "CHARACTERS.json"],
+    character: [own, pack, laws, `${lib}/references/workflows/character-consistency.md`, `${lib}/references/anatomy.md`, `${lib}/references/craft-bar.md`, "docs/CHARACTERS.json"],
+    storyboard: [own, pack, laws, contract, HF.boardFormat, "docs/CHARACTERS.json"],
+    motionSpec: [own, pack, `${lib}/references/motion-grammar.md`, `${lib}/references/camera.md`, HF.motion, "docs/CHARACTERS.json"],
+    build: [own, pack, laws, contract, HF.entry, HF.runtimes, "docs/CHARACTERS.json"],
     // the pack too: the Review once read the turtle as a second cheetah, and the pack names every character in every still
     qcReview: [R("moworks-qc", "SKILL.md"), own, pack, `${lib}/references/workflows/review.md`],
     checks: [HF.entry],
@@ -110,7 +111,7 @@ const ANIDOODLE_MORE = (dir) => {
 // The Brush cartoon style: ClaudeAnimationBase's guide (.moworks/rules/brush-cartoon) and the app's pack in every step; the
 // Character step the layer's code and an example definition; from the storyboard on the project's approved CHARACTERS.json
 const BRUSH = () => {
-  const own = R("brush-cartoon", "SKILL.md"), pack = R("brush-cartoon-app", "SKILL.md"), lib = ".moworks/library/character-kit", cast = "CHARACTERS.json";
+  const own = R("brush-cartoon", "SKILL.md"), pack = R("brush-cartoon-app", "SKILL.md"), lib = ".moworks/library/character-kit", cast = "docs/CHARACTERS.json";
   return {
     brief: [own, pack],
     character: [pack, `${lib}/src/character.js`, `${lib}/examples/definition.json`],
@@ -182,5 +183,5 @@ export function requiredReads(dir, { styleId, first = [], step = null } = {}) {
   const kind = filmKind(dir);
   if (kind?.scope === "all") list = [...list, ...(kind.reads?.[key] ?? [])];
   list = [R("moworks-studio", "SKILL.md"), ...list];
-  return [...new Set(list)].filter((p) => existsSync(join(dir, ...p.split("/"))));
+  return [...new Set(list.map((p) => (p.startsWith("docs/") ? docRelIn(dir, p.slice(5)) : p)))].filter((p) => existsSync(join(dir, ...p.split("/"))));
 }

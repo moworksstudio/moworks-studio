@@ -167,7 +167,7 @@ test("T27-14: the chat after the Final Mix works again: its system prompt, built
   assert.equal(task.resultText, "Tôi đã đổi tiếng ủng.");
   const seen = JSON.parse(readFileSync(out, "utf8"));
   // the app's own prompt for this film: the house rules, the style, the sounds, the cast, the shots, the chat's own rule after a build
-  for (const part of ["You are the production brain of Moworks Studio", `Style: ${style.title}`, "Sound effects (the house rules, \"A sound on every action\")", "Characters already in this film (CHARACTERS.json): Mận",
+  for (const part of ["You are the production brain of Moworks Studio", `Style: ${style.title}`, "Sound effects (the house rules, \"A sound on every action\")", "Characters already in this film (docs/CHARACTERS.json): Mận",
     "12. Câu kết", "Call qc_sheets once", "mcp__mw__sfx_prefs"]) assert.ok(seen.system.includes(part), part);
   assert.ok(seen.system.length > 25000, `a late step's prompt: ${seen.system.length} characters`);
   assert.match(seen.stdin, /Thay tiếng bíp điện tử/);

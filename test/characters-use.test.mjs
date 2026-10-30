@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { docPath } from "../packages/project-service/docs.mjs";
 
 const T = mkdtempSync(join(tmpdir(), "mw-chars-use-"));
 process.env.MW_WORK_ROOT = join(T, "work");
@@ -33,12 +34,12 @@ test("Use in a project: only films with characters; another film is refused and 
     const ref = await call("POST", `/projects/${launch.id}/characters/use`, { ids: ["bao"] });
     assert.equal(ref.status, 200, JSON.stringify(ref.json)); assert.deepEqual(ref.json.reference, ["bao"]);
     const lp = projects.getProject(launch.id).path;
-    assert.ok(!existsSync(join(lp, "CHARACTERS.json")));
+    assert.ok(!existsSync(docPath(lp, "CHARACTERS.json")));
     assert.ok(existsSync(join(lp, "assets", "_app", "characters", "bao", "CHARACTER.md")));
     assert.match(readFileSync(join(lp, "assets", "_app", "characters", "bao", "CHARACTER.md"), "utf8"), /Never ask the owner to add it from the library/);
     assert.equal(projects.getProject(launch.id).meta.characters.as, "reference");
     assert.equal((await call("POST", `/projects/${brush.id}/characters/use`, { ids: ["bao"] })).status, 200);
-    assert.ok(existsSync(join(projects.getProject(brush.id).path, "CHARACTERS.json")));
+    assert.ok(existsSync(docPath(projects.getProject(brush.id).path, "CHARACTERS.json")));
   } finally { await s.close(); }
 });
 
@@ -50,9 +51,9 @@ test("characters picked in New project are in the film from the start; with them
   const brush = await projects.createProject({ title: "demo-brush-cast", aspect: "16:9", durationSec: 10, brief: "Bao and a new robot", characters: ["bao", "clawd", "nobody"],
     style: { id: "brush-cartoon", title: "Brush cartoon" } }, {});
   assert.deepEqual(brush.meta.characters?.ids, ["bao"], "only a selectable library character (never the Clawd demo)");
-  assert.ok(existsSync(join(brush.path, "CHARACTERS.json")));
+  assert.ok(existsSync(join(brush.path, "docs", "CHARACTERS.json")), "in docs/");
   const other = await projects.createProject({ title: "demo-launch-cast", aspect: "16:9", durationSec: 10, brief: "x", characters: ["bao"], style: { id: "general", title: "General" } }, {});
-  assert.ok(!existsSync(join(other.path, "CHARACTERS.json")), "a style without characters takes no cast file");
+  assert.ok(!existsSync(docPath(other.path, "CHARACTERS.json")), "a style without characters takes no cast file");
   assert.ok(existsSync(join(other.path, "assets", "_app", "characters", "bao", "CHARACTER.md")), "QC #286: it takes the character as a reference");
   assert.equal(other.meta.characters.as, "reference");
   // the brief answered, BRIEF.md written: the Character step is next for Claude, not "waiting for your approval"

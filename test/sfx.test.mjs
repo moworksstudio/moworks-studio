@@ -7,6 +7,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { docPath } from "../packages/project-service/docs.mjs";
 
 const T = mkdtempSync(join(tmpdir(), "mw-sfx-"));
 process.env.MW_WORK_ROOT = join(T, "work");
@@ -94,7 +95,7 @@ test("apply: sounds found (short ones first), placed at the shot's start under t
   const shot3 = shots.find((x) => x.number === 3);
   assert.match(html, /<audio id="el-sfx-1" src="assets\/3_audio\/sfx\/pop\.mp3" data-start="0\.5" data-duration="0\.9" data-track-index="21" data-volume="0\.35"><\/audio>/);
   assert.match(html, new RegExp(`id="el-sfx-2" src="assets/3_audio/sfx/chime.mp3" data-start="${shot3.start}"`));
-  assert.match(readFileSync(join(dir, "CREDITS.md"), "utf8"), /## Sound effects[\s\S]*\*\*whoosh\*\* \(`assets\/3_audio\/sfx\/whoosh\.mp3`\): "sound a3" by Someone/);
+  assert.match(readFileSync(docPath(dir, "CREDITS.md"), "utf8"), /## Sound effects[\s\S]*\*\*whoosh\*\* \(`assets\/3_audio\/sfx\/whoosh\.mp3`\): "sound a3" by Someone/);
   await sfx.apply(dir, shots, { fetchImpl: offline });
   const again = readFileSync(join(dir, "index.html"), "utf8");
   assert.equal(again.match(/mw:sfx \(/g).length, 1, "one block, rewritten");
@@ -128,7 +129,7 @@ test("offline: Pixabay's sound of that name; a name it does not have is skipped,
   assert.deepEqual([r.placed, r.missing, r.offline], [1, ["laser zap"], true]);
   const st = sfx.readState(d);
   assert.deepEqual([st.sounds.riser.source, st.sounds.riser.licence], ["pixabay", "Pixabay Content License"]);
-  assert.match(readFileSync(join(d, "CREDITS.md"), "utf8"), /\*\*riser\*\*.*Pixabay Content License/);
+  assert.match(readFileSync(docPath(d, "CREDITS.md"), "utf8"), /\*\*riser\*\*.*Pixabay Content License/);
 });
 
 test("the film with its sounds passes the checks (HF lint included) and renders with an audio track", { timeout: 300000 }, async () => {

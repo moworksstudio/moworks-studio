@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { docPath, docRelIn } from "../packages/project-service/docs.mjs";
 
 const T = mkdtempSync(join(tmpdir(), "mw-brush-"));
 Object.assign(process.env, { MW_CHARACTERS_ROOT: join(T, "characters"), MW_WORK_ROOT: join(T, "work"), MW_STATE_DIR: join(T, "state"), MW_BACKUP_ROOT: join(T, "backup"),
@@ -68,7 +69,7 @@ test("a project's characters: checked, taken from the library (never the demo), 
   const e = fixture("again");
   rmSync(join(e, "CHARACTERS.json"));
   assert.deepEqual(K.useCharacters(e, ["bao"]).characters.map((x) => x.id), ["bao"]);
-  writeFileSync(join(e, "CHARACTERS.json"), "{ nope");
+  writeFileSync(docPath(e, "CHARACTERS.json"), "{ nope");
   assert.match(K.readCast(e).problems[0], /not JSON/);
   K.deleteUserCharacter("bao");
   assert.equal(K.getCharacter("bao"), null);
@@ -139,7 +140,8 @@ test("the reads of each step: the guide and the app's pack, the layer's code at 
   }
   const reads = (step) => requiredReads(d, { styleId: "brush-cartoon", step });
   assert.deepEqual(reads("character"), [".moworks/rules/brush-cartoon-app/SKILL.md", ".moworks/library/character-kit/src/character.js", ".moworks/library/character-kit/examples/definition.json"]);
-  assert.ok(reads("storyboard").includes("CHARACTERS.json") && reads("build").includes("CHARACTERS.json"));
+  // the cast where the film has it (docs/, or the root of a film not moved yet, as this fixture)
+  assert.ok(reads("storyboard").includes(docRelIn(d, "CHARACTERS.json")) && reads("build").includes(docRelIn(d, "CHARACTERS.json")));
   rmSync(join(d, ".moworks", "library", "character-kit"), { recursive: true, force: true });
   K.stageGuide(d);
   assert.ok(existsSync(join(d, ".moworks", "library", "character-kit", "ANIMATION_GUIDE.md")) && !existsSync(join(d, ".moworks", "library", "character-kit", "src", "clawd.js")));
@@ -174,7 +176,7 @@ test("the routes: the Character dialog's view, approving CHARACTERS.json, a char
     assert.equal((await call("POST", `/projects/${id}/approve/characters`)).status, 200);
     assert.ok((await (await call("GET", `/projects/${id}/characters`)).json()).approval?.hash);
     const p = projects.getProject(id);
-    writeFileSync(join(p.path, "CHARACTERS.json"), readFileSync(join(APP_ROOT, "test", "fixtures", "brush-mini", "CHARACTERS.json")));
+    writeFileSync(docPath(p.path, "CHARACTERS.json"), readFileSync(join(APP_ROOT, "test", "fixtures", "brush-mini", "CHARACTERS.json")));
     assert.equal((await call("POST", `/projects/${id}/characters/bao/save`)).status, 200);
     const list = await (await call("GET", "/characters")).json();
     assert.equal(list.characters.find((c) => c.id === "bao").group, "yours");

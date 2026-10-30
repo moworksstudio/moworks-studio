@@ -61,7 +61,7 @@ never pulses as one; a loop that repeats visibly inside one shot is a fault.
   is not finished. The shot's plain words (`says`) say how alive it is ("kính trôi rõ và xoay chậm quanh bà; máy quay lượn 15°").
 - **Build:** build every hold row; the always-on motion runs from the element's entrance to its exit on the shot's own timeline, as a
   function of time (deterministic: no random numbers at play time). Scrub the shot: in any 2 s window something on screen moves.
-- **Review** (moworks-qc criterion 3, Motion): score it against the dynamic level and these numbers, from MOTION-PLAN.json's hold rows,
+- **Review** (moworks-qc criterion 3, Motion): score it against the dynamic level and these numbers, from docs/MOTION-PLAN.json's hold rows,
   the sheets and the app's still-stretch check when the app gives it. A still stretch over 2 s other than the end logo hold, a held object
   or a character with no idle motion, a camera frozen behind text, or a motion word of the brief not done: Motion 6 at most; a film that
   reads as a slideshow: 5 at most. Fix it in the round.

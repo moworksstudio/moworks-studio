@@ -282,10 +282,10 @@ Một phim 30 giây, từ brief tới MP4:
 |---|---|---|
 | `app\` | Repo này: mã nguồn của app, cấu hình, bộ luật và các nguồn bên thứ ba đóng gói kèm | có |
 | `app\runtime\` | Cài đặt, key đã mã hoá, các bản HyperFrames đã cài, nhật ký | không |
-| `projects\` (cạnh `app\`, trong thư mục làm việc) | Phim của bạn: mỗi phim một thư mục, có `BRIEF.md`, storyboard, composition, âm thanh, `CREDITS.md` và `renders\` | không |
+| `projects\` (cạnh `app\`, trong thư mục làm việc) | Phim của bạn: mỗi phim một thư mục; file của HyperFrames ở ngoài cùng (`index.html`, `BRIEF.md`, `STORYBOARD.md`, composition, assets), tài liệu của app trong `docs\` (ghi chú, ghi công, Review, nhân vật, Motion Plan), storyboard và `renders\` | không |
 | `library\`, `models\` (cạnh `app\`, trong thư mục làm việc) | Thư viện, Brand Kits và nhân vật của bạn; Whisper, khi đã cài | không |
 
-Settings › General › Projects folder đổi nơi lưu dự án mới. Mỗi phim có một `CREDITS.md` ghi công nhạc và hiệu ứng âm thanh phim dùng
+Settings › General › Projects folder đổi nơi lưu dự án mới. Mỗi phim có một `docs\CREDITS.md` ghi công nhạc và hiệu ứng âm thanh phim dùng
 (tên, tác giả, nguồn, giấy phép); font tải về đi kèm file giấy phép của nó.
 
 ## Cập nhật

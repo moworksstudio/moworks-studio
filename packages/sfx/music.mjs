@@ -1,11 +1,13 @@
 // Music for the Final Mix: Claude looks on mixkit.co for tracks that fit the brief (the web, asked first per
-// project) and hands the app three; the app downloads them into the project (audio/music-options/R<n>/), measures them, and the user
+// project) and hands the app three; the app downloads them into the project's cache (.moworks/cache/music-options/R<n>/: made again on
+// demand, out of the history and out of sight; audio/music-options/ before layout 3), measures them, and the user
 // listens in the Final Mix dialog, picks one (the app puts it on the timeline, measures its beats, credits it) or asks for three others.
 // Only Mixkit's own hosts are downloaded from. Mixkit's free music (mixkit.co/free-stock-music, read 18/10/2026): royalty free, online use
 // (YouTube, social, websites, podcasts, online ads), attribution appreciated not required; NOT in CDs, DVDs, video games or TV & radio
 // broadcasts. The app says so wherever a track is chosen and in the credit.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { docPath } from "../project-service/docs.mjs";
 import { probe } from "../voice/audio.mjs";
 import { slug } from "./index.mjs";
 
@@ -14,6 +16,7 @@ export const LICENCE = { name: "Mixkit Stock Music Free License", url: "https://
 const HOST = /^https:\/\/([a-z0-9-]+\.)*mixkit\.co\//i;
 const MAX = 40 * 1024 * 1024;
 const file = (dir) => join(dir, ".moworks", "music-options.json");
+export const OPTIONS_DIR = ".moworks/cache/music-options";
 export const readOptions = (dir) => { try { return JSON.parse(readFileSync(file(dir), "utf8")); } catch { return { rounds: [] }; } };
 
 /** Download up to 3 tracks: [{ title, artist?, page?, url }] → the new round { id, at, tracks: [{ …, file, duration }], failed }. */
@@ -21,7 +24,7 @@ export async function saveOptions(dir, tracks, { fetchImpl = fetch, signal = nul
   const st = readOptions(dir);
   const id = `R${st.rounds.length + 1}`;
   const out = { id, at: new Date().toISOString(), tracks: [], failed: [] };
-  const rel = `audio/music-options/${id}`;
+  const rel = `${OPTIONS_DIR}/${id}`;
   mkdirSync(join(dir, ...rel.split("/")), { recursive: true });
   for (const [i, t] of (tracks ?? []).slice(0, 3).entries()) {
     const url = String(t?.url ?? "");
@@ -47,7 +50,8 @@ export async function saveOptions(dir, tracks, { fetchImpl = fetch, signal = nul
 
 /** CREDITS.md: a "Music" section for the track on the timeline (other sections kept). */
 export function creditMusic(dir, track) {
-  const f = join(dir, "CREDITS.md");
+  const f = docPath(dir, "CREDITS.md");
+  mkdirSync(join(f, ".."), { recursive: true });
   const body = track ? `- **${track.title}**${track.artist ? ` by ${track.artist}` : ""} (\`${track.file}\`), ${track.licence ?? LICENCE.name} (${track.licenceUrl ?? LICENCE.url}; ${LICENCE.limits}).${track.page ? ` Source: ${track.page}` : ""}` : "None.";
   const section = `<!-- mw:music-credits -->\n## Music\n\n${body}\n<!-- /mw:music-credits -->`;
   const old = existsSync(f) ? readFileSync(f, "utf8") : "# Credits\n";

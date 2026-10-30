@@ -8,6 +8,7 @@ import { copyFileSync, createReadStream, createWriteStream, existsSync, mkdirSyn
 import { basename, extname, join, resolve, sep } from "node:path";
 import { pipeline } from "node:stream/promises";
 import * as projects from "../project-service/index.mjs";
+import { docPath } from "../project-service/docs.mjs";
 import { musicSrc, readBeats } from "../hf-edit/beats.mjs";
 import { showInExplorer } from "../project-service/explorer.mjs";
 import { rememberAssets } from "../project-service/assets.mjs";
@@ -91,8 +92,8 @@ export function reusableChecks(projectDir, key, { blank = false } = {}) {
 
 /** The Review's own files as look.mjs's keptOnPurpose reads them: { json: QC-REVIEW.json, md: QC-REVIEW.md } (each null / "" when absent). */
 export function reviewFiles(projectDir) {
-  let md = ""; try { md = readFileSync(join(projectDir, "QC-REVIEW.md"), "utf8"); } catch { /* no review */ }
-  return { json: readJson(join(projectDir, "QC-REVIEW.json"), null), md };
+  let md = ""; try { md = readFileSync(docPath(projectDir, "QC-REVIEW.md"), "utf8"); } catch { /* no review */ }
+  return { json: readJson(docPath(projectDir, "QC-REVIEW.json"), null), md };
 }
 
 /** Whether Tech checks run from their dialog carry the pipeline on (qaEnded): they passed (warnings only, a timed-out script check

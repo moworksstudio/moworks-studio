@@ -29,9 +29,9 @@ staged. **Moworks Studio runs every command** (stills, checks, render): where th
 
 | Step | The author's own | Here |
 |---|---|---|
-| Prepare | start-here intake | BRIEF.md and ASSETS.md as the step says; the author's intake questions only where the brief leaves them open |
+| Prepare | start-here intake | BRIEF.md and docs/ASSETS.md as the step says; the author's intake questions only where the brief leaves them open |
 | Storyboard ✋ | prove the look on one still, then the story | one option (another when the owner asks): a short treatment and frames drawn with the real engine in the medium (§3, boards) |
-| Motion ✋ | motion grammar, camera | `MOTION-PLAN.json`: per shot the moves with numbers; cite the medium's motion grammar and the author's camera / motion references as source `{"kind": "style", "id": "<reference or move>"}` |
+| Motion ✋ | motion grammar, camera | `docs/MOTION-PLAN.json`: per shot the moves with numbers; cite the medium's motion grammar and the author's camera / motion references as source `{"kind": "style", "id": "<reference or move>"}` |
 | Build | build end to end | §3 |
 | QC | review (a fresh critic, a fix ledger) | the Moworks Review (moworks-qc), plus the author's `references/workflows/review.md` |
 | Sound / Final Mix | the score in code | **the app's** music and sound effects only (no `music.mjs`, no sound pack); pick by the medium's mood |
@@ -62,7 +62,7 @@ staged. **Moworks Studio runs every command** (stills, checks, render): where th
 
 ## 3b. Characters (a medium whose hand draws people: storybook, marker comic, coloured pencil, sumi-e, woodcut, scratchboard, risograph, pixel art, toy brick)
 
-- The film's cast is `CHARACTERS.json`: each member with `engine: "anidoodle-human"` is a character of the author's human engine, kept as a
+- The film's cast is `docs/CHARACTERS.json`: each member with `engine: "anidoodle-human"` is a character of the author's human engine, kept as a
   module. The owner's are copied into the film's own modules, `anidoodle/characters/<id>/` (import them from `anidoodle/film.ts` as
   `"./characters/<id>"`); Mira and Theo are the author's, in the engine (`"anidoodle/canvas-core/characters/<id>"`). Its `check` is its gate.
 - **Never redraw a character.** Every frame of it is `<character>.toScene(pose, camera)` drawn by this medium's hand
@@ -112,7 +112,7 @@ The app's five stages stay the same for every kind.
 
 ## 3e. Bit and the cheetah (the author's own, from the owner's library)
 
-When `CHARACTERS.json` lists Bit (`rig: "bit"`) or the cheetah (`rig: "cheetah"`), they are the author's characters as shipped, each with
+When `docs/CHARACTERS.json` lists Bit (`rig: "bit"`) or the cheetah (`rig: "cheetah"`), they are the author's characters as shipped, each with
 its own rig, not the human engine. They can come into a film in any anidoodle medium.
 
 - **The cheetah: the rig is the character, the marks are the medium's.** `cheetahRig.ts` is a skeleton of angles that never stretches:
@@ -136,7 +136,7 @@ its own rig, not the human engine. They can come into a film in any anidoodle me
 The human engine is for people. A turtle, a dog or a talking kettle made for the film gets a rig of its own, the way the author built the
 cheetah (`cheetahRig.ts`: bones of fixed lengths, angles, `fk`, a few named poses and a gait; `cheetahBody.ts` draws it from the pose):
 
-- In `CHARACTERS.json`: `"rig": "<id>"` (its own), `"kind": "animal"` or `"thing"`, `"import": "./characters/<id>"`, and its gate
+- In `docs/CHARACTERS.json`: `"rig": "<id>"` (its own), `"kind": "animal"` or `"thing"`, `"import": "./characters/<id>"`, and its gate
   `"check": "characters/<id>/check.ts"` (a path under `anidoodle/`). Never borrow the human canon, `checkPose` or `LIMITS` for it.
 - Its gate checks **its own** rules: every named pose keeps the bone lengths, every joint stays in the range its rig declares, planted
   feet never slide in its gait, the features the brief names show. Export `run()` returning `[{ section, results: [{ id, ok, detail }] }]`

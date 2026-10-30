@@ -13,6 +13,7 @@ import { join, resolve } from "node:path";
 import { APP_ROOT, expandEnv, loadPins, sourceHead } from "../version-manager/index.mjs";
 import { workRoot } from "../project-service/index.mjs";
 import { ffmpegExe } from "../library/preview-media.mjs";
+import { ensureShared, linkOrCopy, sharedDir } from "../project-service/shared-stage.mjs";
 
 export const AUTHOR = { id: "alexgreensh", name: "Alex Greenshpun (10x Company)", source: "anidoodle" };
 export const LICENCE = "Apache-2.0 (with NOTICE)";
@@ -145,27 +146,27 @@ function houseText(s, src) {
 // also the worked example (Mechanical Lepidoptera: to study, never to copy), the house styles and the launch kit's facts
 const STAGED = ["engine/src", "references", "SKILL.md", "example", "styles/house", "engine/facts"];
 
-/** Copy the engine's source, the author's SKILL.md, references, worked example, house styles and LICENSE/NOTICE into
- *  .moworks/library/anidoodle/ (from the first step: the engine is the drawing tool, not a demo to copy). A project staged at this pin
- *  before a part was added gets only that part (nothing is removed under a film being made). Returns { files }. */
+/** The engine's source, the author's SKILL.md, references, worked example, house styles and LICENSE/NOTICE in .moworks/library/anidoodle/
+ *  (from the first step: the engine is the drawing tool, not a demo to copy): a link to the pin's copy made once in the shared stage
+ *  (project-service/shared-stage.mjs: runtime/stage/library/anidoodle@<commit>), a copy of it on a drive that takes no link. Returns
+ *  { files } (what is new to the film: nothing when it was there already). */
 export function stageEngine(projectDir, root = APP_ROOT) {
   const src = anidoodleSource(root);
   if (!src) throw Object.assign(new Error("anidoodle is not pinned"), { code: "NOT_FOUND" });
-  const dest = join(projectDir, ".moworks", "library", "anidoodle"), mark = join(dest, "PINNED");
-  const there = (base, rel) => existsSync(join(base, ...rel.split("/")));
-  const copy = (rel) => { if (there(src.skillDir, rel)) cpSync(join(src.skillDir, ...rel.split("/")), join(dest, ...rel.split("/")), { recursive: true }); };
-  if (readText(mark).trim() === src.commit) {
-    const missing = STAGED.filter((rel) => !there(dest, rel) && there(src.skillDir, rel));
-    missing.forEach(copy);
-    return { files: missing.map((rel) => `.moworks/library/anidoodle/${rel}`) };
-  }
-  rmSync(dest, { recursive: true, force: true }); mkdirSync(dest, { recursive: true });
+  const dest = join(projectDir, ".moworks", "library", "anidoodle");
+  const whole = (d) => readText(join(d, "PINNED")).trim() === src.commit && STAGED.every((rel) => existsSync(join(d, ...rel.split("/"))) || !existsSync(join(src.skillDir, ...rel.split("/"))));
+  const shared = ensureShared(sharedDir(root, "library", `anidoodle@${src.commit}`), (to) => fillEngine(to, src), whole);
+  const was = existsSync(join(dest, "PINNED"));
+  if (linkOrCopy(dest, shared) === "same") return { files: [] };
+  return { files: was ? [] : [".moworks/library/anidoodle/SKILL.md", ".moworks/library/anidoodle/CREDIT.md"] };          // a copy of the same engine made a link: nothing new to read
+}
+function fillEngine(dest, src) {
+  const copy = (rel) => { if (existsSync(join(src.skillDir, ...rel.split("/")))) cpSync(join(src.skillDir, ...rel.split("/")), join(dest, ...rel.split("/")), { recursive: true }); };
   STAGED.forEach(copy);
   for (const f of ["LICENSE", "NOTICE"]) if (existsSync(join(src.root, f))) cpSync(join(src.root, f), join(dest, f));
   writeFileSync(join(dest, "CREDIT.md"), `# anidoodle, staged for this project\n\nBy ${AUTHOR.name}. ${treeLink(src, src.skill ?? "skills/anidoodle")} (commit ${src.commit}), Apache-2.0 with NOTICE.\n`
     + "The engine's source (engine/src), the author's SKILL.md and references, the worked example (example/: study it, never copy it), the house\n"
     + "styles (styles/house/) and the launch kit's example facts (engine/facts/). The author's tools (engine/tools) are not here: Moworks Studio runs\n"
     + "every command. Import the engine as `anidoodle/...` (the app bundles it); never edit these files.\n");
-  writeFileSync(mark, `${src.commit}\n`);
-  return { files: [".moworks/library/anidoodle/SKILL.md", ".moworks/library/anidoodle/CREDIT.md"] };
+  writeFileSync(join(dest, "PINNED"), `${src.commit}\n`);
 }

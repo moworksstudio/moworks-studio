@@ -31,7 +31,7 @@ test("T24-1: the whole brief reaches Claude; one past the app's limit says where
 
 test("T24-1: Prepare is told the owner's script is read word for word, and changing it is asked", () => {
   const line = voiceLine({}, T);
-  assert.match(line, /read word for word: VOICEOVER\.md holds every line of it as the owner wrote it/);
+  assert.match(line, /read word for word: docs\/VOICEOVER\.md holds every line of it as the owner wrote it/);
   assert.match(line, /moving lines to the screen is a conflict \(moworks-studio §2b\)/);
   assert.match(line, /Never call a script you changed "verbatim"/);
   const house = readFileSync(join(import.meta.dirname, "..", "config", "rules", "moworks-studio", "SKILL.md"), "utf8");

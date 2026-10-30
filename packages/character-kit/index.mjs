@@ -11,6 +11,7 @@ import { join, resolve, sep } from "node:path";
 import { APP_ROOT, expandEnv, loadPins, sourceHead } from "../version-manager/index.mjs";
 import { codeLibDir } from "../offline-assets/index.mjs";
 import { workRoot } from "../project-service/index.mjs";
+import { docPath, writeDoc } from "../project-service/docs.mjs";
 import { encodePoster } from "../library/preview-media.mjs";
 import { fillFrontBoxes, frontBoxes } from "./frontBox.mjs";
 
@@ -176,7 +177,7 @@ export function checkCharacter(c) {
 export const CAST_FILE = "CHARACTERS.json";
 /** The project's characters: { characters: [definition], problems: ["<id>: what is wrong"] }. */
 export function readCast(projectDir) {
-  const f = join(projectDir, CAST_FILE);
+  const f = docPath(projectDir, CAST_FILE);
   if (!existsSync(f)) return { characters: [], problems: [] };
   let j;
   try { j = JSON.parse(readFileSync(f, "utf8")); } catch (e) { return { characters: [], problems: [`${CAST_FILE} is not JSON: ${e.message}`] }; }
@@ -210,7 +211,7 @@ export function useCharacters(projectDir, ids, root = APP_ROOT) {
       else if (existsSync(small)) { mkdirSync(sheets, { recursive: true }); cpSync(small, webp); }
     }
   }
-  writeFileSync(join(projectDir, CAST_FILE), JSON.stringify({ characters: out }, null, 2) + "\n");
+  writeDoc(projectDir, CAST_FILE, JSON.stringify({ characters: out }, null, 2) + "\n");
   return readCast(projectDir);
 }
 /** What a cast member still needs: "gate" when it came from the library in its own style (ownStyle: no redraw, no new sheet,

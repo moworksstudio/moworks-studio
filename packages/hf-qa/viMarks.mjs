@@ -9,6 +9,7 @@
 // CONTINUED", "THE END") is not taken for one.
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
+import { docPath } from "../project-service/docs.mjs";
 import { htmlFiles } from "../hf-edit/finalize.mjs";
 import { scriptFiles } from "../hf-edit/vendorLibs.mjs";
 
@@ -99,7 +100,7 @@ export function viMarks(projectDir, { boards = false } = {}) {
   const texts = files.map(({ r, kind }) => { const src = read(join(projectDir, ...r.split("/"))); return { r, src, items: kind === "html" ? htmlTexts(src) : codeTexts(src) }; });
   let transcript = ""; try { transcript = JSON.parse(read(join(projectDir, "transcript.json"))).map((w) => w.text).join(" "); } catch { /* none */ }
   let brief = ""; try { brief = JSON.parse(read(join(projectDir, ".moworks", "project.json")))?.brief?.text ?? ""; } catch { /* none */ }
-  const vocab = vocabulary([brief, read(join(projectDir, "STORYBOARD.md")), read(join(projectDir, "VOICEOVER.md")), read(join(projectDir, "BRIEF.md")), transcript,
+  const vocab = vocabulary([brief, read(join(projectDir, "STORYBOARD.md")), read(docPath(projectDir, "VOICEOVER.md")), read(join(projectDir, "BRIEF.md")), transcript,
     ...texts.flatMap((x) => x.items.map((i) => i.text))]);
   const findings = [], seen = new Set();
   for (const { r, src, items } of texts) {
