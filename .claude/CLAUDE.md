@@ -15,13 +15,21 @@ Check each one and install what is missing, all of them before `Moworks Studio.b
 | Node.js 22 or newer | `node --version` | `winget install -e --id OpenJS.NodeJS.LTS` | the app itself |
 | FFmpeg 9.0 | `ffmpeg -version`, or a folder `Gyan.FFmpeg_*` under `%LOCALAPPDATA%\Microsoft\WinGet\Packages` | `winget install -e --id Gyan.FFmpeg --version 9.0` | sound, previews and the final MP4 |
 | Python 3.12 | `py -3.12 --version` | `winget install -e --id Python.Python.3.12 --scope user` | After Effects export, PSD / PPTX / PDF reading, music beats, lyric timing |
-| Claude Code, signed in | `claude --version` | see below | every Claude step in the app runs through it |
+| Claude Code | the PowerShell line below | see below | every Claude step in the app runs through it |
 
 - After installing Git or Node, open a new terminal (or tell the user to) so PATH picks them up. The app finds FFmpeg and Python in their
   winget folders by itself.
-- Claude Code: the app needs `claude.exe` (the native install, `%USERPROFILE%\.local\bin\claude.exe`, or the Claude desktop app's copy).
-  An npm install (`claude.cmd`) is not enough. If `where claude` shows only a `.cmd`, install the native build with PowerShell:
-  `irm https://claude.ai/install.ps1 | iex`. The user signs in later, inside the app.
+- Claude Code: the app needs a `claude.exe`. The Claude desktop app already has one, which the app finds by itself, so with Claude
+  desktop installed there is nothing to install. `where claude` and `claude --version` do not see that copy (it is not on PATH): check
+  with this PowerShell line instead, which looks in the desktop app's folders (a version folder, then a build folder, holds the exe) and
+  in the native install's `%USERPROFILE%\.local\bin`:
+
+  ```powershell
+  Get-ChildItem "$env:LOCALAPPDATA\Claude-Data\claude_*\claude-code", "$env:LOCALAPPDATA\Packages\Claude_*\LocalCache\Roaming\Claude\claude-code", "$env:APPDATA\Claude\claude-code", "$env:USERPROFILE\.local\bin" -Recurse -Filter claude.exe -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName
+  ```
+
+  A path printed: Claude Code is there, go on. Nothing printed: install the native build with PowerShell,
+  `irm https://claude.ai/install.ps1 | iex` (an npm install, `claude.cmd`, is not enough). The user signs in later, inside the app.
 
 ## 2. Access to the repository
 

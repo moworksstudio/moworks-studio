@@ -552,6 +552,9 @@ ul.pick-list { width: min(30rem, 80vw); }
    its own (contain: size), so added files scroll inside it and never grow the box. Empty, the dashed drop zone fills the box with
    its row and line in the middle. Narrow windows keep the two plain columns. */
 @media (min-width: 761px) {
+  /* the set-up column is as wide as its widest row needs (Format's Size fields: 38.5rem in The Desk, 35.5rem in The Studio) plus a
+     little air, at every window size (rem follows the window); the Brief takes the rest (owner 30/10: it was half the dialog) */
+  .np2-cols { grid-template-columns: min(41rem, calc(50% - var(--np2-gap) / 2)) minmax(0, 1fr); }
   .np2-col { display: contents; }
   .np2-col:first-child > .np2-step { grid-column: 1; }
   .np2-col:first-child > .np2-step:nth-child(1) { grid-row: 1; }

@@ -110,8 +110,8 @@ export default function AppUpdate() {
       {!d.git ? <p className="state-line stop"><AlertTriangle size={14} />{t("This copy of the app cannot update itself; install the new version instead.")}</p>
         : !d.configured ? <p className="state-line run"><AlertTriangle size={14} />{t("Update address not set yet.")}</p> : null}
       <dl className="kv upd-kv">
-        <dt>{t("In use")}</dt><dd>{day(d.current?.date)}{d.current?.subject && <span className="muted"> · {d.current.subject}</span>}</dd>
-        {d.lastCheck?.at && <><dt>{t("Last check")}</dt><dd>{ago(d.lastCheck.at)} · {d.lastCheck.available ? t("{n} new change(s)", { n: d.lastCheck.ahead ?? 0 }) : t("up to date")}</dd></>}
+        <dt>{t("In use")}</dt><dd>{day(d.current?.date)}{d.source ? <span className="muted"> · {t("source copy")}</span> : d.current?.subject && <span className="muted"> · {d.current.subject}</span>}</dd>
+        {d.lastCheck?.at && <><dt>{t("Last check")}</dt><dd>{ago(d.lastCheck.at)} · {d.lastCheck.source ? t("source copy") : d.lastCheck.available ? t("{n} new change(s)", { n: d.lastCheck.ahead ?? 0 }) : t("up to date")}</dd></>}
       </dl>
       <LastResult last={d.last} />
     </div>
@@ -120,7 +120,8 @@ export default function AppUpdate() {
       {err.command && <><p className="hint">{t("Run this in the app folder to go back by hand:")}</p><pre className="mono upd-cmd">{err.command}</pre></>}
       {err.tail && <details className="upd-log"><summary>{t("What the step printed")}</summary><pre>{Array.isArray(err.tail) ? err.tail.join("\n") : String(err.tail)}</pre></details>}</div>}
 
-    {check && !check.available && !running && !done && <p className="state-line ok"><Check size={14} />{t("You have the latest version.")}</p>}
+    {check && !check.available && !running && !done && <p className="state-line ok"><Check size={14} />{check.source
+      ? t("This is the source copy: releases are made from it, so it does not update itself.") : t("You have the latest version.")}</p>}
 
     {check?.available && <div className="panel">
       <div className="panel-head"><h2>{t("What changed")}</h2><span className="muted num">{t("{n} change(s)", { n: check.ahead ?? check.commits?.length ?? 0 })}</span>
@@ -131,7 +132,7 @@ export default function AppUpdate() {
         ? t("{n} app file(s) were changed on this computer.", { n: b.files?.length ?? 0 }) : t(b.message)}</p>)}
       <ol className="plain upd-commits">{(check.commits ?? []).map((c) => <li key={c.short}><span className="muted">{day(c.date)}</span><span>{c.subject}</span></li>)}</ol>
       {(check.files != null || check.packages) && <p className="hint">{t("{n} file(s) change", { n: check.files ?? 0 })}{check.packages ? ` · ${t("the app's packages change too")}` : ""}</p>}
-      {check.changelog && <details className="upd-log"><summary>CHANGELOG.md</summary><pre>{check.changelog}</pre></details>}
+      {check.changelog && <details className="upd-log"><summary>{t("What's new")}</summary><pre>{check.changelog}</pre></details>}
     </div>}
 
     {(running || done) && <div className="panel">

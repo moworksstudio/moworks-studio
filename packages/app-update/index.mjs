@@ -11,6 +11,10 @@ import { dirname, join } from "node:path";
 import { APP_ROOT } from "../version-manager/index.mjs";
 
 const REF = "refs/mw-update/latest";          // the fetched tip of the repo's branch, kept apart from the clone's own remotes
+// The studio's source copy: each release is made from its tree as a commit of its own on this line (`git commit-tree main^{tree} -p
+// public`), so the source copy shares no history with the repo and never updates from it. A user's clone has no such branch.
+const RELEASES = "refs/heads/public";
+const yes = (p) => p.then(() => true, () => false);
 const configFile = (root) => join(root, "config", "update.json");
 const stateFile = (root) => process.env.MW_UPDATE_STATE ?? join(root, "runtime", "state", "update.json");          // MW_UPDATE_STATE: tests
 const readJson = (f, d) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
@@ -48,9 +52,12 @@ const commitInfo = async (root, rev) => {
 export async function status(root = APP_ROOT) {
   const cfg = updateConfig(root), st = readJson(stateFile(root), {});
   const isGit = existsSync(join(root, ".git"));
-  let current = null;
-  if (isGit) { try { current = await commitInfo(root, "HEAD"); } catch { /* an empty clone */ } }
-  return { git: isGit, repo: cfg.repo, branch: cfg.branch, configured: !!cfg.repo, current, lastCheck: st.check ?? null, last: st.update ?? null };
+  let current = null, source = false;
+  if (isGit) {
+    try { current = await commitInfo(root, "HEAD"); } catch { /* an empty clone */ }
+    source = !!current && await yes(git(root, ["rev-parse", "--verify", "--quiet", RELEASES])) && !(await yes(git(root, ["merge-base", "--is-ancestor", "HEAD", RELEASES])));
+  }
+  return { git: isGit, repo: cfg.repo, branch: cfg.branch, configured: !!cfg.repo, current, source, lastCheck: st.check ?? null, last: st.update ?? null };
 }
 
 /** Files git tracks that differ from the commit (an update would overwrite them): none on a user's computer. */
@@ -79,6 +86,15 @@ export async function check(root = APP_ROOT, { quiet = false } = {}) {
       : `The repo could not be reached: ${e.message}`, e.detail);
   }
   const current = await commitInfo(root, "HEAD"), latest = await commitInfo(root, REF);
+  // no history in common: the source copy (the repo's newest version is one of its releases) has nothing to update; any other copy
+  // was not cloned from the repo it would update from (git's own "no merge base" is never shown)
+  if (!(await yes(git(root, ["merge-base", REF, "HEAD"])))) {
+    if (!(await yes(git(root, ["merge-base", "--is-ancestor", REF, RELEASES]))))
+      throw fail("UNRELATED", "This copy of the app was not installed from its update address: install it again from GitHub");
+    const at = new Date().toISOString();
+    writeState(root, { check: { at, available: false, latest: latest.short, ahead: 0, source: true } });
+    return { available: false, source: true, current, latest, ahead: 0, behind: 0, commits: [], files: 0, packages: false, changelog: null, blocked: [], at };
+  }
   const [ahead, behind] = (await git(root, ["rev-list", "--left-right", "--count", `${REF}...HEAD`])).split(/\s+/).map(Number);
   const commits = ahead ? (await git(root, ["log", "--format=%h%x00%cI%x00%s", "--max-count=100", `HEAD..${REF}`])).split(/\r?\n/).filter(Boolean)
     .map((l) => { const [short, date, subject] = l.split("\0"); return { short, date, subject }; }) : [];
