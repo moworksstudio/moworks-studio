@@ -28,7 +28,7 @@ const SECTIONS = [["general", "General", SlidersHorizontal], ["director", "Direc
 // old addresses still land in their new place
 const ALIAS = { ai: "director", workspace: "general", ae: "general", voice: "general", models: "runtime", styles: "general" };
 
-/** A check's text without the computer's addresses: "C:\…\python.exe" reads as "python.exe", "D:\Moworks Studio" as "Moworks Studio". */
+/** A check's text without the computer's addresses: "C:\…\python.exe" reads as "python.exe", "E:\Films" as "Films". */
 const noPaths = (s) => String(s ?? "").replace(/[A-Za-z]:[\\/][^,;()\n]*?(?=\s*(?:$|[,;()]|\.(?:\s|$)))/g, (m) => m.replace(/[\\/]+$/, "").split(/[\\/]/).pop());
 function Check({ c, children }) {
   const t = useT();

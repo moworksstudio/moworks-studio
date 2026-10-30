@@ -1,4 +1,4 @@
-// Settings › Update: the app updates itself from the project's private GitHub repo. The version
+// Settings › Update: the app updates itself from the project's GitHub repo. The version
 // in use, "Check for updates", and when there is one: what changed (the commits, newest first, and CHANGELOG.md), what blocks it (local
 // changes, a branch that went its own way), then "Update and restart". While it runs, its stage; the app restarts itself when it is done,
 // and goes back to the version before if a step fails. The last update's result stays as one line.

@@ -42,7 +42,7 @@ Every step waits for you where it matters: you approve the storyboard and the Mo
 for changes in plain words. The app runs on your computer and drives Claude Code under your own Claude account; your projects, keys and
 client material stay on the machine.
 
-> **Status: private preview.** This repository is shared with invited users only. Please do not redistribute it.
+> **Status: preview.** Moworks Studio is still changing quickly, so expect rough edges.
 
 ## How it works
 
@@ -199,21 +199,15 @@ named under each still.
 | **System** | Windows 10 or 11, 64-bit; several GB of free disk for the app and its components, plus room for your projects |
 | **Node.js** | 22 or newer ([nodejs.org](https://nodejs.org)) |
 | **Git** | [Git for Windows](https://git-scm.com/download/win) |
-| **Claude Code** | Installed and signed in with a Claude account that includes Claude Code ([claude.com/claude-code](https://claude.com/claude-code)) |
-| **Python** | 3.12, `winget install -e --id Python.Python.3.12 --scope user` (or [python.org](https://www.python.org/downloads/)): reading PSD / PowerPoint / PDF, music beats, lyric timing, the After Effects port |
-| **FFmpeg** | 9.0, installed once with `winget install Gyan.FFmpeg --version 9.0` (the first-run screen shows the command) |
+| **Claude Code** | The Claude desktop app includes it, or the [native install](https://claude.com/claude-code); you need a Claude account that includes Claude Code, and you sign in inside the app |
+| **Python and FFmpeg** | Python 3.12 and FFmpeg 9.0. The app installs them for you when they are missing (with winget, for your user only) |
 | *Optional* | An ElevenLabs or Fish Audio API key for voice-overs · After Effects for the AE port · an NVIDIA graphics card (4 GB or more) to transcribe voice-overs faster |
 
 ## Quick start
 
 1. **Prerequisites** (details under [Requirements](#requirements)): Windows 10 or 11, [Git](https://git-scm.com/download/win),
-   [Node.js](https://nodejs.org) 22 or later, Python 3.12, FFmpeg 9.0 and Claude Code signed in with your Claude account. Python and
-   FFmpeg install with winget, and the first-run screen shows the same lines if either is missing:
-   ```bash
-   winget install -e --id Python.Python.3.12 --scope user
-   winget install Gyan.FFmpeg --version 9.0
-   ```
-2. **Accept the GitHub invitation** to this repository, then clone it into an `app` folder inside a folder of its own:
+   [Node.js](https://nodejs.org) 22 or later, and Claude Code (the Claude desktop app includes it). The app installs the rest.
+2. **Clone this repository** into an `app` folder inside a folder of its own:
    ```bash
    git clone https://github.com/moworksstudio/moworks-studio "Moworks Studio\app"
    ```
@@ -250,8 +244,8 @@ Paste this into Claude Code:
 
 > Install Moworks Studio from https://github.com/moworksstudio/moworks-studio: clone it and follow its .claude/CLAUDE.md.
 
-Claude follows the repository's `.claude/CLAUDE.md`: it checks Git, Node.js 22, Python 3.12 and FFmpeg 9.0 (and asks before installing what is
-missing), clones into `Moworks Studio\app` and runs `Moworks Studio.bat`; the app's first-run screen does the rest.
+Claude follows the repository's `.claude/CLAUDE.md`: it checks Git, Node.js 22 and Claude Code (and asks before installing what is missing),
+clones into `Moworks Studio\app` and runs `Moworks Studio.bat`; the app's first-run screen does the rest.
 
 ## Walkthrough
 

@@ -6,19 +6,18 @@ everything else. Your job is only the steps before that. Windows 10 or 11 only. 
 
 ## 1. What must be on the computer first
 
-Check each one and install what is missing, all of them before `Moworks Studio.bat` (add `--accept-package-agreements
+Check each one and install what is missing, before `Moworks Studio.bat` (add `--accept-package-agreements
 --accept-source-agreements` to each winget line):
 
 | Needed | Check | Install | Why |
 |---|---|---|---|
 | Git | `git --version` | `winget install -e --id Git.Git` | cloning; the app keeps each film's history with git |
 | Node.js 22 or newer | `node --version` | `winget install -e --id OpenJS.NodeJS.LTS` | the app itself |
-| FFmpeg 9.0 | `ffmpeg -version`, or a folder `Gyan.FFmpeg_*` under `%LOCALAPPDATA%\Microsoft\WinGet\Packages` | `winget install -e --id Gyan.FFmpeg --version 9.0` | sound, previews and the final MP4 |
-| Python 3.12 | `py -3.12 --version` | `winget install -e --id Python.Python.3.12 --scope user` | After Effects export, PSD / PPTX / PDF reading, music beats, lyric timing |
 | Claude Code | the PowerShell line below | see below | every Claude step in the app runs through it |
 
-- After installing Git or Node, open a new terminal (or tell the user to) so PATH picks them up. The app finds FFmpeg and Python in their
-  winget folders by itself.
+- After installing Git or Node, open a new terminal (or tell the user to) so PATH picks them up.
+- FFmpeg 9.0 and Python 3.12: do not install them. The app's **Install** gets them with winget when they are missing, for this user only
+  (on a computer without winget, its screen shows the lines to run).
 - Claude Code: the app needs a `claude.exe`. The Claude desktop app already has one, which the app finds by itself, so with Claude
   desktop installed there is nothing to install. `where claude` and `claude --version` do not see that copy (it is not on PATH): check
   with this PowerShell line instead, which looks in the desktop app's folders (a version folder, then a build folder, holds the exe) and
@@ -31,13 +30,7 @@ Check each one and install what is missing, all of them before `Moworks Studio.b
   A path printed: Claude Code is there, go on. Nothing printed: install the native build with PowerShell,
   `irm https://claude.ai/install.ps1 | iex` (an npm install, `claude.cmd`, is not enough). The user signs in later, inside the app.
 
-## 2. Access to the repository
-
-The repository is private. The user must have accepted the GitHub invitation (the email from GitHub, or
-https://github.com/moworksstudio/moworks-studio/invitations). Signing in: Git Credential Manager (part of Git for Windows) opens a browser
-window at the first clone; or, with GitHub CLI, `gh auth login`.
-
-## 3. Clone and start
+## 2. Clone and start
 
 Clone into a folder of its own, on a local disk (not Google Drive, OneDrive or Dropbox: their sync locks files while films render).
 The folder that holds `app` becomes the app's work folder (projects, library, downloads), unless the user picks another at first start.
@@ -51,7 +44,7 @@ git clone https://github.com/moworksstudio/moworks-studio.git "%USERPROFILE%\Mow
 The first start runs `npm install` (about 80 MB) and builds the interface (under a minute), then opens the app window. Later starts open
 it directly. To open it again, the user double-clicks `Moworks Studio.bat`.
 
-## 4. Then the app takes over
+## 3. Then the app takes over
 
 Tell the user what the first start shows; they do it in the app, not you:
 

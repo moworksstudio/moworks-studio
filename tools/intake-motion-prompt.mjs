@@ -1,6 +1,6 @@
 // Intake of Motion Prompt: build the Vocabulary store from the pinned clone and write the Motion Plan's names table.
 // Usage: node tools/intake-motion-prompt.mjs [--check] [--no-glossary]
-//   (default) read the clone named by config/pins.json motionPrompt (a local pin points at D:/Moworks Studio/vendor/motion-prompt), refuse a clone
+//   (default) read the clone named by config/pins.json motionPrompt (a local pin points at the clone), refuse a clone
 //             that is not at the pinned commit, replace every item by its number in <work>/library/vocab/mp-<commit>-hf-<HF commit>/ (its HyperFrames-first names cite HF's registry at its pin), write
 //             config/rules/motion-vocab/SKILL.md from the store (the film packs only: motion, motion2, camera).
 //   --check   read-only: say what a run would change.

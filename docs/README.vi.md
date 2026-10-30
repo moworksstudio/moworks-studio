@@ -41,7 +41,7 @@ Mỗi bước dừng lại chờ bạn ở chỗ cần thiết: bạn duyệt st
 lời. App chạy trên máy của bạn và điều khiển Claude Code bằng tài khoản Claude của chính bạn; dự án, key và tài liệu của khách hàng nằm lại
 trên máy.
 
-> **Trạng thái: bản xem trước riêng tư.** Repo này chỉ chia sẻ với người được mời. Vui lòng không phát tán lại.
+> **Trạng thái: bản xem trước.** Moworks Studio vẫn đang thay đổi nhanh, nên có thể còn vài chỗ chưa mượt.
 
 ## Cách app hoạt động
 
@@ -199,21 +199,15 @@ Mọi style còn theo hai bộ luật chung của app: **phim luôn sống độ
 | **Hệ thống** | Windows 10 hoặc 11, 64-bit; vài GB đĩa trống cho app và các thành phần, cộng chỗ cho dự án |
 | **Node.js** | 22 trở lên ([nodejs.org](https://nodejs.org)) |
 | **Git** | [Git for Windows](https://git-scm.com/download/win) |
-| **Claude Code** | Đã cài và đăng nhập bằng tài khoản Claude có Claude Code ([claude.com/claude-code](https://claude.com/claude-code)) |
-| **Python** | 3.12, `winget install -e --id Python.Python.3.12 --scope user` (hoặc [python.org](https://www.python.org/downloads/)): đọc PSD / PowerPoint / PDF, phân tích nhịp nhạc, canh thời gian lời bài hát, port After Effects |
-| **FFmpeg** | 9.0, cài một lần bằng `winget install Gyan.FFmpeg --version 9.0` (màn hình lần đầu có sẵn lệnh) |
+| **Claude Code** | App Claude desktop đã có sẵn, hoặc [bản native](https://claude.com/claude-code); cần tài khoản Claude có Claude Code, đăng nhập ngay trong app |
+| **Python và FFmpeg** | Python 3.12 và FFmpeg 9.0. App tự cài khi còn thiếu (qua winget, chỉ cho tài khoản của bạn) |
 | *Tuỳ chọn* | API key ElevenLabs hoặc Fish Audio để làm lời đọc · After Effects để port AE · card đồ hoạ NVIDIA (từ 4 GB) để chép lời nhanh hơn |
 
 ## Bắt đầu nhanh
 
 1. **Chuẩn bị** (chi tiết ở [Yêu cầu](#yêu-cầu)): Windows 10 hoặc 11, [Git](https://git-scm.com/download/win),
-   [Node.js](https://nodejs.org) 22 trở lên, Python 3.12, FFmpeg 9.0 và Claude Code đã đăng nhập bằng tài khoản Claude của bạn. Python và
-   FFmpeg cài bằng winget, và màn hình lần đầu cũng hiện đúng các dòng này nếu còn thiếu:
-   ```bash
-   winget install -e --id Python.Python.3.12 --scope user
-   winget install Gyan.FFmpeg --version 9.0
-   ```
-2. **Chấp nhận lời mời** vào repo này trên GitHub, rồi clone về thư mục `app` nằm trong một thư mục riêng:
+   [Node.js](https://nodejs.org) 22 trở lên và Claude Code (app Claude desktop đã có sẵn). App tự cài phần còn lại.
+2. **Clone repo này** về thư mục `app` nằm trong một thư mục riêng:
    ```bash
    git clone https://github.com/moworksstudio/moworks-studio "Moworks Studio\app"
    ```
@@ -250,7 +244,7 @@ Dán câu này vào Claude Code (giữ nguyên tiếng Anh):
 
 > Install Moworks Studio from https://github.com/moworksstudio/moworks-studio: clone it and follow its .claude/CLAUDE.md.
 
-Claude làm theo `.claude/CLAUDE.md` của repo: kiểm tra Git, Node.js 22, Python 3.12 và FFmpeg 9.0 (và hỏi trước khi cài những gì còn thiếu),
+Claude làm theo `.claude/CLAUDE.md` của repo: kiểm tra Git, Node.js 22 và Claude Code (và hỏi trước khi cài những gì còn thiếu),
 clone vào `Moworks Studio\app` rồi chạy `Moworks Studio.bat`; màn hình lần đầu của app làm nốt phần còn lại.
 
 ## Làm thử một phim

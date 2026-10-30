@@ -1,4 +1,4 @@
-// The app's own update: Settings › Update brings this app folder to the newest version on the maintainer's private GitHub
+// The app's own update: Settings › Update brings this app folder to the newest version on the project's GitHub
 // repo. The app folder is a git clone of that repo; an update is a fast-forward to the repo's branch, then the app's npm packages (when
 // package.json / package-lock.json changed), the interface build and a start check, then a restart. A step that fails puts the folder back
 // on the commit it came from (packages and interface rebuilt for it). Only files git tracks change: the user's work (the work folder:

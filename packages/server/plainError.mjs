@@ -1,6 +1,6 @@
 // Errors as the UI reads them: never an address of this computer (the owner's rule for the whole app). A Node system error (ENOENT,
 // EACCES…) becomes a plain sentence, and any absolute Windows or POSIX path in a message is cut to its last name, by the rule of
-// Settings' noPaths (ui/src/screens/Settings.jsx): "C:\…\python.exe" reads "python.exe", "D:\Moworks Studio" reads "Moworks Studio".
+// Settings' noPaths (ui/src/screens/Settings.jsx): "C:\…\python.exe" reads "python.exe", "E:\Films" reads "Films".
 
 const lastName = (p) => p.replace(/[\\/]+$/, "").split(/[\\/]/).pop();
 // a drive or network path runs to the next , ; ( ) or a sentence's full stop (folder names hold spaces); a POSIX one to the next space.
