@@ -40,7 +40,8 @@ export function videoHandlers(setState, frame = (f) => requestAnimationFrame(f),
 
 export function usePreview(projectId) {
   const [info, setInfo] = useState(null);           // { url, origin }
-  const [state, setState] = useState({ ready: false, time: 0, duration: 0, paused: true, error: null });
+  // ready: HF's runtime runs the film; assets: its pictures, video and fonts are in (HF's assetsready, host.js): the film shows only then
+  const [state, setState] = useState({ ready: false, assets: false, time: 0, duration: 0, paused: true, error: null });
   // a film that cannot play live (Brush cartoon; the server decides: GET /preview-proxy's mode "prerendered") is shown as the
   // app's render of it, a plain video: the live page is not loaded, the commands drive the video (a step is one frame of the film's rate)
   const proxy = useProxy(projectId);
@@ -72,7 +73,7 @@ export function usePreview(projectId) {
     }
     if (info && frame.current?.contentWindow) frame.current.contentWindow.postMessage({ source: "mw-ui", type, ...data }, info.origin);
   }, [info, videoOnly, proxy?.fps]);
-  useEffect(() => { if (videoOnly) setState((s) => ({ ...s, ready: true, error: null, fps: proxy?.fps ?? s.fps ?? null, duration: proxy?.duration ?? s.duration })); },
+  useEffect(() => { if (videoOnly) setState((s) => ({ ...s, ready: true, assets: true, error: null, fps: proxy?.fps ?? s.fps ?? null, duration: proxy?.duration ?? s.duration })); },
     [videoOnly, proxy?.fps, proxy?.duration]);
   // the video's own events are the player's state (its time read on every frame while it plays, so the playhead moves smoothly)
   const videoEvents = useMemo(() => videoHandlers(setState), []);
@@ -82,6 +83,8 @@ export function usePreview(projectId) {
       if (e.origin !== info.origin || e.source !== frame.current?.contentWindow || e.data?.source !== "mw-preview") return;
       const d = e.data;
       if (d.type === "ready") setState((s) => ({ ...s, ready: true, duration: d.duration ?? s.duration, fps: d.fps ?? s.fps ?? null, error: null }));
+      else if (d.type === "assets") setState((s) => ({ ...s, assets: !!d.ready }));
+      else if (d.type === "transitions") setState((s) => ({ ...s, transitions: !!d.loading }));
       else if (d.type === "duration") setState((s) => ({ ...s, duration: d.duration }));
       else if (d.type === "time") setState((s) => ({ ...s, time: d.time, paused: d.paused }));
       else if (d.type === "ended") setState((s) => ({ ...s, paused: true }));
@@ -356,9 +359,16 @@ export default function Player({ projectId, pv, shots, shot, onShot, locked, ran
   const seek = (s) => send("seek", { time: Math.max(0, Math.min(state.duration || 0, s)) });
   const shotIdx = shots.findIndex((s) => state.time >= s.start - 1e-3 && state.time < s.start + (s.duration ?? 0) - 1e-3);
   const cur = shots[shotIdx] ?? null;
-  const step = (frames) => send("step", { frames });          // one frame at the film's own rate, counted in the preview
+  // The film loads (HF's runtime, then its pictures, video and fonts) under the app's own cover, never HF's "Loading assets" card (owner
+  // 30/10: The Studio showed it): the frame and its controls wait until both are in. A film still loading after 30 s (a missing file) can
+  // be shown as it is.
+  const [skipWait, setSkipWait] = useState(false), [slow, setSlow] = useState(false);
+  const loading = planned === null && !state.error && !skipWait && (!state.ready || !state.assets || !!state.transitions);
+  useEffect(() => { if (state.assets) setSkipWait(false); }, [state.assets]);          // a later reload waits again
+  useEffect(() => { setSlow(false); if (!loading) return undefined; const h = setTimeout(() => setSlow(true), 30000); return () => clearTimeout(h); }, [loading]);
+  const step = (frames) => { if (!loading) send("step", { frames }); };          // one frame at the film's own rate, counted in the preview
   const go = (d) => { const n = shots[Math.max(0, Math.min(shots.length - 1, (shotIdx < 0 ? 0 : shotIdx) + d))]; if (n) { seek(n.start); onShot?.(n); } };
-  const toggle = () => send(state.paused ? "play" : "pause");
+  const toggle = () => { if (!loading) send(state.paused ? "play" : "pause"); };
   const still = async () => {
     try { const r = await post(`/api/projects/${projectId}/edit/still`, { time: state.time }); toast(t("Still saved: {f}", { f: String(r.file ?? "").split(/[\\/]/).pop() })); }
     catch (e) { toast(e.message, "error"); }
@@ -409,7 +419,10 @@ export default function Player({ projectId, pv, shots, shot, onShot, locked, ran
         {planned > 0 ? ` · ${Math.floor(planned / 60)}:${String(Math.round(planned % 60)).padStart(2, "0")}` : ""}</span></div>
         : videoOnly ? <VideoStage pv={pv} />
         : info && <iframe ref={frame} className="pv-frame" aria-label={t("Film")} src={info.url} allow="autoplay; fullscreen" />}
-      {planned === null && !state.ready && !state.error && <div className="pv-wait"><Loader2 size={18} className="spin" />{t("Loading the film…")}</div>}
+      {loading && <div className="pv-wait pv-loading" role="status" aria-live="polite"><Loader2 size={18} className="spin" />
+        <span>{t("The film is loading. Please wait.")}</span>
+        {slow && <><span className="pv-wait-sub">{t("This is taking longer than usual: a file may be missing.")}</span>
+          <button type="button" className="btn sm" onClick={() => setSkipWait(true)}>{t("Show the film")}</button></>}</div>}
       {state.error && <div className="pv-wait err">{state.error}</div>}
       {one && card && <EditCard projectId={projectId} item={one} box={boxes.boxes.at(-1)} frameBox={boxes.frame} locked={locked} send={send}
         onSaved={(label, reload) => { toast(label); onFilesChanged?.(reload); }} onClose={() => setCard(false)} onPin={onPin && !pinning ? onPin : null} shotNumber={cur?.number ?? null} />}
@@ -418,9 +431,9 @@ export default function Player({ projectId, pv, shots, shot, onShot, locked, ran
       {children}
     </div>
     <div className="pv-bar" role="toolbar" aria-label={t("Playback")}>
-      <button className="btn ghost icon sm" disabled={videoOnly && !proxy?.url} onClick={() => step(-1)} aria-label={t("One frame back")} title={t("One frame back (←) · previous shot: PageUp")}><StepBack size={15} /></button>
-      <button className="btn icon sm pv-play" onClick={toggle} disabled={videoOnly && !proxy?.url} aria-label={state.paused ? t("Play") : t("Pause")} title={t("Play / pause (Space)")}>{state.paused ? <Play size={15} /> : <Pause size={15} />}</button>
-      <button className="btn ghost icon sm" disabled={videoOnly && !proxy?.url} onClick={() => step(1)} aria-label={t("One frame on")} title={t("One frame on (→) · next shot: PageDown")}><StepForward size={15} /></button>
+      <button className="btn ghost icon sm" disabled={loading || (videoOnly && !proxy?.url)} onClick={() => step(-1)} aria-label={t("One frame back")} title={t("One frame back (←) · previous shot: PageUp")}><StepBack size={15} /></button>
+      <button className="btn icon sm pv-play" onClick={toggle} disabled={loading || (videoOnly && !proxy?.url)} aria-label={state.paused ? t("Play") : t("Pause")} title={t("Play / pause (Space)")}>{state.paused ? <Play size={15} /> : <Pause size={15} />}</button>
+      <button className="btn ghost icon sm" disabled={loading || (videoOnly && !proxy?.url)} onClick={() => step(1)} aria-label={t("One frame on")} title={t("One frame on (→) · next shot: PageDown")}><StepForward size={15} /></button>
       <span className="pv-time num" title={t("Minutes:seconds:frames at {n} fps", { n: state.fps || 30 })}><span className="pv-now">{fmtTime(state.time, state.fps || 30)}</span><span className="muted"> / {fmtTime(state.duration, state.fps || 30)}</span></span>
       {cur && <span className="pv-shot" title={cur.title || undefined}>{t("Shot {n}", { n: cur.number })}{cur.title ? ` · ${cur.title}` : ""}</span>}
       <span className="pv-gap" />

@@ -128,6 +128,11 @@
     if (resumeAt != null) { p.seek(resumeAt); settle(resumeAt); resumeAt = null; }
     reselect();
   });
+  // the film's pictures, video and fonts loaded, its scene transitions prepared: the app's own loading state ends. HF's own cards (its
+  // logo, "Loading assets", "Preparing scene transitions") are off on this page: assets-loading-ui="none" and shader-loading="none", the
+  // host options HF's player README documents; assetsready and shadertransitionstate fire either way
+  p.addEventListener("assetsready", () => send("assets", { ready: true }));
+  p.addEventListener("shadertransitionstate", (e) => { const s = e.detail?.state ?? {}; send("transitions", { loading: !!(s.loading && !s.ready) }); });
   p.addEventListener("durationchange", () => send("duration", { duration: p.duration }));
   // while the smooth preview plays or a scrub waits, the video's time is the film's time: the live player sits paused where it was and HF
   // still reports that time (the clock, the shot and the Play button flashed back to it between the video's times)
@@ -330,6 +335,7 @@
     }
     else if (m.type === "reload") {          // the files changed: load the film again where it was
       resumeAt = p.currentTime || 0;
+      send("assets", { ready: false });          // its pictures and fonts load again
       srcN += 1;
       p.setAttribute("src", cfg.src + "?v=" + srcN);
     }

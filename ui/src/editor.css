@@ -83,8 +83,16 @@ ol.plain.conversation, .conversation { flex: 1; overflow-y: auto; overflow-x: hi
    The Editor: the project strip, SHOTS above the PIPELINE, the player and its bar, the edit card, the timeline, the motion
    drawer, the Claude column kept short. Every colour and size comes from tokens.css; nothing here changes the theme.
    --------------------------------------------------------------------------------------------------------------------------------- */
-.ed { height: 100%; display: flex; flex-direction: column; min-height: 0; }
+.ed { height: 100%; display: flex; flex-direction: column; min-height: 0; position: relative; }
 .ed-body { flex: 1; min-height: 0; }
+/* opening a film: one card over the Editor until everything it shows is in; the strip (the way back) stays above it, usable */
+.ed > .ed-strip { position: relative; z-index: 31; }
+.ed-opening { position: absolute; inset: 0; z-index: 30; display: grid; place-items: center; cursor: progress;
+  background: color-mix(in srgb, var(--surface-1, #111) 92%, transparent); backdrop-filter: blur(4px); animation: fade-in 200ms var(--ease-out) both; }
+/* the page under the card waits quietly: no second loading line shows through it */
+.ed:has(> .ed-opening) .pv-wait { visibility: hidden; }
+.ed-opening-card { width: min(20rem, calc(100% - 2rem)); padding: 1.25rem 1.5rem; display: grid; justify-items: center; gap: 0.6rem; text-align: center; cursor: default; }
+.ed-opening-card .hint { margin: 0; }
 .ed-narrow { flex: 1; min-height: 0; flex-direction: column; }
 .ed-tabs { background: var(--surface-1); }
 /* the project strip */
@@ -133,6 +141,11 @@ ol.plain.conversation, .conversation { flex: 1; overflow-y: auto; overflow-x: hi
 .pv-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
 .pv-wait { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 0.5rem; color: var(--text-muted); font-size: var(--fs-control); }
 .pv-wait.err { color: var(--status-stop); padding: var(--sp-5); text-align: center; }
+/* the film loading: the stage's own colour over the frame (nothing half-drawn shows, no click reaches it) until its pictures, video
+   and fonts are in */
+.pv-wait.pv-loading { z-index: 3; background: inherit; padding: var(--sp-5); text-align: center; cursor: progress; }
+.pv-wait-sub { font-size: var(--fs-meta); opacity: 0.8; max-width: 28rem; }
+.pv-wait.pv-loading .btn { cursor: pointer; margin-top: 0.25rem; }
 .pv-bar { overflow: hidden; flex: none; display: flex; align-items: center; gap: 0.25rem; min-width: 0; height: 2.75rem; padding: 0 var(--sp-3); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface-1); }
 .pv-bar .btn.icon.sm.on { color: var(--accent-ink); background: var(--accent-soft); }
 .pv-play.btn { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }

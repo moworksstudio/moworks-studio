@@ -297,6 +297,16 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   // a title appears once per screen: before the Build the one starter shot is named after the film, which the page head says
   const shots = useMemo(() => tl?.shots?.map((s) => (p?.built === false && s.title?.trim() === p?.title?.trim() ? { ...s, title: "" } : s)) ?? null, [tl, p?.built, p?.title]);
   useEffect(() => { if (!shot || !shots) return; const s = shots.find((x) => x.number === shot.number); setShot(s ?? null); }, [shots]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Opening a film: the Editor waits under one short card ("The project is loading. Please wait.") until the film's facts, its steps,
+  // its shots and the picture (HF's runtime, the pictures, video and fonts it loads, its scene transitions prepared) are in (owner 30/10:
+  // half a page answered clicks while they came in, and The Studio showed HF's own loading card); the strip above, the way back, stays usable. Once open, the picture loaded again after a change waits under the
+  // player's own cover only. A film still opening after 30 s can be opened as it is.
+  const [opened, setOpened] = useState(false), [openSlow, setOpenSlow] = useState(false);
+  useEffect(() => { setOpened(false); setOpenSlow(false); }, [id]);
+  const pictureIn = p?.built === false || !!pv.state.error || pv.videoOnly || (pv.state.ready && pv.state.assets && !pv.state.transitions);
+  const opening = !opened && !project.error && !p?.missing && !(p && pipeline != null && shots != null && filmShown && pictureIn);
+  useEffect(() => { if (!opening && !opened && p) setOpened(true); }, [opening, opened, p]);
+  useEffect(() => { if (!opening) return undefined; const h = setTimeout(() => setOpenSlow(true), 30000); return () => clearTimeout(h); }, [opening]);
 
   // the picked element(s) -> Claude's Selection target, and their shot
   const picked = pv.picked;
@@ -449,7 +459,10 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     if (!studio || w < 900 || !body || ar < 1.5) { setFit(null); return undefined; }
     const measure = () => {
       const lt = body.querySelector(":scope > .lt"), stage = lt?.querySelector(".lt-film .pv-stage");
-      if (!lt || !stage) return;
+      // a minimised window (hidden, or measured at no size while it shrinks or comes back) gave a negative table and a conversation wider
+      // than the window, kept when the window came back (owner 30/10: the film ran off the right edge, the chat gone): measure only a
+      // window on screen; it is measured again when it shows
+      if (!lt || !stage || document.hidden || body.clientWidth < 600 || body.clientHeight < 200) return;
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16, vw = innerWidth / 100, vh = innerHeight / 100;
       const clamp = (lo, v, hi) => Math.min(hi, Math.max(lo, v));
       const tl = tlH || clamp(11 * rem, 24 * vh, 15 * rem);          // studio-editor.css --ed-tl-def
@@ -458,14 +471,18 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
       const tableW = Math.ceil(stageH * ar + (L.width - S.width));
       const side0 = clamp(16 * rem, 18 * vw, 20 * rem), chat0 = clamp(18 * rem, 21 * vw, 22 * rem);          // studio-editor.css --st-side, --st-chat
       const extra = body.clientWidth - tableW - side0 - chat0;
-      if (extra <= 0) { setFit(null); return; }
+      if (!(tableW > 0) || extra <= 0) { setFit(null); return; }
       const side = Math.round(Math.min(side0 + extra * 0.25, 26 * rem)), chat = Math.floor(body.clientWidth - tableW - side);
+      if (!(chat >= chat0) || side + chat >= body.clientWidth) { setFit(null); return; }          // never wider than the window
       setFit((f) => (f && f.side === side && f.chat === chat ? f : { side, chat }));
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(body);
-    return () => ro.disconnect();
+    const shown = () => { if (!document.hidden) requestAnimationFrame(measure); };
+    document.addEventListener("visibilitychange", shown);
+    addEventListener("resize", shown);
+    return () => { ro.disconnect(); document.removeEventListener("visibilitychange", shown); removeEventListener("resize", shown); };
   }, [studio, w, tlH, aspectStr, filmShown]); // eslint-disable-line react-hooks/exhaustive-deps
   if (project.error) return <div className="page"><Banner kind="error">{project.error.message}</Banner></div>;
   if (p?.missing) return <div className="page"><Banner kind="warning">{t("The project folder was not found. Locate it in Projects.")}</Banner></div>;
@@ -516,6 +533,10 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     range={range} onFilesChanged={(reload) => filesChanged(!!reload)} pinning={pinning} onPin={notesOn ? () => { pv.send("pause"); pv.send("clear"); pv.setPicked([]); setPinning((x) => !x); } : null}>
     {notesOn && <NotesLayer notes={pins} time={pv.state.time} pinning={pinning} aspect={aw && ah ? aw / ah : 16 / 9} onPlace={placeNote} onRemove={removePin} />}</Player>
     : <div className="pv"><div className="pv-stage"><div className="pv-wait"><Loader2 size={18} className="spin" />{t("Opening the project…")}</div></div></div>;
+  const openingEl = opening ? <div className="ed-opening" role="status" aria-live="polite">
+    <div className="dialog ed-opening-card"><Loader2 size={20} className="spin" /><b>{t("The project is loading. Please wait.")}</b>
+      {openSlow && <><p className="hint">{t("This is taking longer than usual.")}</p>
+        <button type="button" className="btn sm" onClick={() => setOpened(true)}>{t("Open it as it is")}</button></>}</div></div> : null;
   const hsplit = <div className={"ed-hsplit" + (tlDrag ? " dragging" : "")} role="separator" aria-orientation="horizontal" aria-label={t("Resize the timeline")} title={t("Drag to make the timeline taller or shorter · double-click: as before")}
     onPointerDown={(e) => { e.preventDefault(); setTlDrag(true); }} onDoubleClick={() => setTlH(0)} />;
   const drawerEl = <MotionDrawer projectId={id} shot={shot} target={selection?.label ?? shotTarget} targetText={selection ? picked.map((x) => x.textContent || x.label).join(" ") : null} onPick={pickMotion} onClose={() => setDrawer(false)} />;
@@ -644,14 +665,14 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
       steps={pipeline?.steps} rendering={rendering} actions={[]} onWaiting={setAsking} stage={currentStage(pipeline?.stages)} interrupted={pipeline?.interrupted ?? null} onPlay={(path) => setViewer(path)} onOpenSheet={openSheet} checks={pipeline?.checks ?? null}
       waiting={pipeline?.stages?.find((s) => s.status === "waiting" && s.id !== "feedback") ?? null}
       pins={notesOn ? pins : null} onPinsSent={(ids) => setPins((x) => x.filter((p) => !ids.includes(p.id)))} onSeek={(s) => pv.send("seek", { time: s })} />;
-    if (w < 900) return <div className="ed st-ed narrow" data-zone="editor" data-shape={shape} style={stStyle}>{strip}{line}
+    if (w < 900) return <div className="ed st-ed narrow" data-zone="editor" data-shape={shape} style={stStyle}>{strip}{openingEl}{line}
       <div className="pane-head ed-tabs"><div className="tabs" role="tablist">{[["left", "Shots, assets and this film"], ["film", "Film"], ["claude", "Claude"]].map(([k, l]) =>
         <button key={k} role="tab" aria-selected={narrowTab === k} onClick={() => setNarrowTab(k)}>{t(l)}</button>)}</div></div>
       <div className="ed-narrow" style={{ display: narrowTab === "left" ? "flex" : "none" }}>{sidePane}</div>
       <div className="ed-narrow" style={{ display: narrowTab === "film" ? "flex" : "none" }}>{table}{timelineEl}</div>
       <div className="ed-narrow" style={{ display: narrowTab === "claude" ? "flex" : "none" }}>{chat}</div>
       {narrowTab !== "claude" && askBar}{leaveDialog}{viewerEl}</div>;
-    return <div className="ed st-ed" data-zone="editor" data-shape={shape} style={stStyle}>{strip}{line}
+    return <div className="ed st-ed" data-zone="editor" data-shape={shape} style={stStyle}>{strip}{openingEl}{line}
       {/* with a sheet on the table a short window folds the timeline to its Shots row (CSS) */}
       <div className={"ed-body st-body" + (sheet ? " sheet-on" : "")} ref={centerRef} style={fit ? { "--st-side": `${fit.side}px`, "--st-chat": `${fit.chat}px` } : undefined}>
         <ErrorBoundary name={t("Shots, assets and this film")}>{sidePane}</ErrorBoundary>
@@ -661,13 +682,13 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
         <aside className="st-chat" aria-label={t("Conversation")}><ErrorBoundary name="Claude">{chat}</ErrorBoundary></aside>
       </div>{leaveDialog}{viewerEl}</div>;
   }
-  if (w < 900) return <div className="ed" data-zone="editor" data-shape={shape} style={deskStyle}>{strip}
+  if (w < 900) return <div className="ed" data-zone="editor" data-shape={shape} style={deskStyle}>{strip}{openingEl}
     <div className="pane-head ed-tabs"><div className="tabs" role="tablist">{[["left", "Shots & pipeline"], ["film", "Film"], ["claude", "Claude"]].map(([k, l]) =>
       <button key={k} role="tab" aria-selected={narrowTab === k} onClick={() => setNarrowTab(k)}>{t(l)}</button>)}</div></div>
     <div className="ed-narrow" style={{ display: narrowTab === "left" ? "flex" : "none" }}>{leftPane}</div>
     <div className="ed-narrow" style={{ display: narrowTab === "film" ? "flex" : "none" }}>{centerPane}</div>
     <div className="ed-narrow" style={{ display: narrowTab === "claude" ? "flex" : "none" }}>{rightPane}</div>
     {sheetEl}{askBar}{leaveDialog}{viewerEl}</div>;
-  return <div className="ed" data-zone="editor" data-shape={shape} style={deskStyle}>{strip}<div className="ed-body"><Panes id="editor4" defaults={PANES} left={<ErrorBoundary name={t("Shots & pipeline")}>{leftPane}</ErrorBoundary>} center={<ErrorBoundary name={t("Film")}>{centerPane}</ErrorBoundary>}
+  return <div className="ed" data-zone="editor" data-shape={shape} style={deskStyle}>{strip}{openingEl}<div className="ed-body"><Panes id="editor4" defaults={PANES} left={<ErrorBoundary name={t("Shots & pipeline")}>{leftPane}</ErrorBoundary>} center={<ErrorBoundary name={t("Film")}>{centerPane}</ErrorBoundary>}
     right={<ErrorBoundary name="Claude">{rightPane}</ErrorBoundary>} /></div>{sheetEl}{askBar}{leaveDialog}{viewerEl}</div>;
 }

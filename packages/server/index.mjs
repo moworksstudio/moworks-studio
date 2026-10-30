@@ -72,7 +72,7 @@ import * as appUpdate from "../app-update/index.mjs";
 import { createUpdateChecker } from "../app-update/schedule.mjs";
 import * as characterMaker from "../character-maker/index.mjs";
 
-/** Backups to Drive run as child processes (tools/backup.mjs), so the server never waits on git or Drive: the app once at start and
+/** Backups to Drive run as child processes (tools/backup.mjs), so the server never waits on git or Drive: the app and the user's characters once at start and
  *  from Settings (the git hook backs it up after each commit too). Projects and models are never backed up. */
 function backupJobs(root, enabled) {
   let running = 0, last = null;
@@ -84,7 +84,7 @@ function backupJobs(root, enabled) {
     c.on("close", (code) => { running--; last = { at: new Date().toISOString(), ok: code === 0, output: out.trim().split(/\r?\n/).slice(-6) }; });
   };
   return {
-    all() { run([]); },          // the app only: projects and models are never backed up
+    all() { run([]); },          // the app and the characters: projects and models are never backed up
     info() { return { ...backupStatus(root), running: running > 0, last, automatic: enabled }; },
   };
 }

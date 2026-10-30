@@ -37,7 +37,7 @@ function hostPage({ key, id, uiOrigin, width, height }) {
 #marks .grid{background:rgba(255,255,255,.6);mix-blend-mode:difference}</style>
 <script src="/${key}/player.js"></script></head>
 <body data-ui="${uiOrigin}" data-w="${width}" data-h="${height}" data-src="${src}">
-<hyperframes-player id="p" src="${src}" runtime-src="/${key}/runtime.js" width="${width}" height="${height}" disable-click-to-play></hyperframes-player>
+<hyperframes-player id="p" src="${src}" runtime-src="/${key}/runtime.js" width="${width}" height="${height}" disable-click-to-play assets-loading-ui="none" shader-loading="none"></hyperframes-player>
 <div id="ov" tabindex="0" aria-label="Film"></div><div id="marks"></div>
 <script src="/${key}/host.js"></script></body></html>`;
 }
