@@ -3,6 +3,37 @@
 One entry per version, newest first. The version is the HyperFrames version the app runs (0.8.214 runs HyperFrames 0.8.214); fixes to the
 app alone on the same engine are 0.8.214.1, 0.8.214.2…
 
+## 0.8.214.2 (2026-10-30)
+
+Still on HyperFrames 0.8.214: a simpler setup, a clearer sound mix, and an easy way to remove the app.
+
+### Setup
+- **Two steps:** choose the folder that stores your projects, then one Install for everything the app needs, with one progress bar.
+- **Nothing to install by hand:** Install also gets the speech-to-text model, and FFmpeg and Python 3.12 when they are missing (with
+  winget, for your user only). On a computer without winget, the screen shows the line to run.
+- **Optional extras apart:** Whisper on an NVIDIA graphics card is offered in Settings › System.
+- **Settings › System:** the components are one line; the licences of outside parts are in "Open-source licences".
+
+### Sound
+- **A clearer mix:** the voice-over stays on top, the music sits under it and dips while words are spoken, and sound effects can be heard.
+
+### Projects and Editor
+- **Back arrow:** beside the film's name, back to the same Projects page (page 1 if that page is gone).
+- **Opening a film:** one short loading message until it is ready; minimising the window no longer breaks the layout.
+- **New project:** the Brief gets more room; the set-up column is as wide as it needs at every window size.
+- **Create a character:** a more compact dialog.
+- **The Studio:** the Projects intro lies directly on the page, as in The Desk.
+- **Conversation:** the usage line stays visible in a narrow column.
+
+### Motion Library
+- **The studio's own library:** items are shown without author groups; licences stay in Open-source licences.
+
+### App
+- **Uninstall:** Settings › Update removes the app to install it clean again; everything goes to the Recycle Bin.
+- **Update:** several updates in a row read as one line.
+- **Tidier film folders:** the app's documents sit in one folder, shared rules are linked instead of copied, and old logs are cleaned.
+- **Backups:** when a backup folder is set, your characters are saved with the app.
+
 ## 0.8.214.1 (2026-10-30)
 
 The first update after the release, still on HyperFrames 0.8.214: a sound on every action from an offline library, and the fixes

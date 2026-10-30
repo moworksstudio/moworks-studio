@@ -5,7 +5,7 @@
 <p align="center"><b>A desktop studio for motion films: Claude directs, Moworks Studio builds and checks every frame, you approve each step.</b></p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.8.214.1-1d3fd8" alt="version 0.8.214.1">
+  <img src="https://img.shields.io/badge/version-0.8.214.2-1d3fd8" alt="version 0.8.214.2">
   <img src="https://img.shields.io/badge/Claude-Opus_5.5_·_Sonnet_5.5-d97757" alt="Claude Opus 5.5 and Sonnet 5.5">
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-555" alt="Windows 10 | 11">
   <img src="https://img.shields.io/badge/film_styles-126_from_7_authors-0a7" alt="126 film styles from 7 authors">
