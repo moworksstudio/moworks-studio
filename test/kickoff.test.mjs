@@ -14,7 +14,8 @@ process.env.MW_NO_BACKUP = "1";
 process.env.MW_NO_LIBRARY_IMPORT = "1";
 process.env.MW_CLAUDE_CONFIG_DIR = join(T, "claude-empty");          // signed out: a kickoff that got through would answer 412
 mkdirSync(process.env.MW_CLAUDE_CONFIG_DIR, { recursive: true });
-after(() => rmSync(T, { recursive: true, force: true }));
+// a film's git runs queued off the server's thread (revisions): let it finish before the folder goes, or Windows refuses the rm (EPERM)
+after(async () => { await (await import("../packages/revisions/index.mjs")).settled(); rmSync(T, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 }); });
 
 test("a kickoff after the film's first task (or with none pending) starts nothing", async () => {
   const projects = await import("../packages/project-service/index.mjs");

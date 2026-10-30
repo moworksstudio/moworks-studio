@@ -3,5 +3,5 @@
 import { parentPort, workerData } from "node:worker_threads";
 import { firstRunItems } from "./first-run.mjs";
 
-try { parentPort.postMessage({ ok: true, value: firstRunItems(workerData.root, { sizes: true }) }); }
+try { parentPort.postMessage({ ok: true, value: firstRunItems(workerData.root, { sizes: workerData.sizes !== false }) }); }
 catch (e) { parentPort.postMessage({ ok: false, message: String(e?.message ?? e) }); }

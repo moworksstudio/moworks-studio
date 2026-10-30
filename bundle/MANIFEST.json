@@ -1,7 +1,7 @@
 {
   "about": "What Moworks Studio ships with the repository instead of downloading (audit 60 §6). Made by tools/make-bundle.mjs.",
-  "made": "2026-10-29T15:38:10.858Z",
-  "bytes": 362856617,
+  "made": "2026-10-29T20:23:20.228Z",
+  "bytes": 370261698,
   "parts": [
     {
       "name": "fonts",
@@ -51,8 +51,8 @@
     {
       "name": "mg-styles-15",
       "path": "styles/mg-styles-15",
-      "files": 220,
-      "bytes": 59336058,
+      "files": 222,
+      "bytes": 59341766,
       "source": "https://github.com/Vincentwei1021/mg-styles-15",
       "commit": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
       "licence": "MIT; a few images CC0 / public domain; no audio"
@@ -173,6 +173,15 @@
       "source": "the Vietnamese check of the fonts each Lemo-Opuscar style names, made by Moworks Studio (packages/lemo-styles importLemo)",
       "commit": null,
       "licence": "Moworks (a check; no font files)"
+    },
+    {
+      "name": "sfx",
+      "path": "sfx",
+      "files": 252,
+      "bytes": 7399373,
+      "source": "Kenney audio packs (kenney.nl), OpenGameArt.org CC0 sets and Wikimedia Commons, cut and re-encoded by tools/make-sfx-library.mjs (tools/sfx-library-packs.json)",
+      "commit": null,
+      "licence": "CC0 1.0 and public domain (each sound's source in sfx/catalog.json and sfx/CREDITS.md)"
     }
   ]
 }

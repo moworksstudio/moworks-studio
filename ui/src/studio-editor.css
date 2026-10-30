@@ -25,8 +25,10 @@
 [data-theme="studio"] .st-clap { flex: none; width: 2.4rem; height: 1.8rem; border-radius: 0.2rem;
   background: repeating-linear-gradient(-45deg, var(--room-ink) 0 0.35rem, var(--room) 0.35rem 0.7rem); box-shadow: inset 0 -0.95rem 0 var(--room); }
 [data-theme="studio"] .st-name { min-width: 0; display: flex; flex-direction: column; gap: 0.1rem; }
-[data-theme="studio"] .st-slate .ed-title { font: 500 1.35rem / 1.1 var(--font-studio-display); letter-spacing: -0.005em; text-transform: none; color: var(--room-ink); background: none;
-  border: 1px solid transparent; border-radius: 0.3rem; padding: 0.1rem 0.3rem; margin-left: -0.3rem; max-width: min(60ch, 46vw); }          /* the film's name takes the slate's free room */
+/* the film's name takes the slate's free room; its line leaves room for a capital's stacked marks (Fraunces "Ễ" is 1.07em above the
+   baseline: at 1.1 the input cut them, T25), and the margins give back what the line grows, so the slate keeps its height */
+[data-theme="studio"] .st-slate .ed-title { font: 500 1.35rem / 1.5 var(--font-studio-display); letter-spacing: -0.005em; text-transform: none; color: var(--room-ink); background: none;
+  border: 1px solid transparent; border-radius: 0.3rem; padding: 0 0.3rem; margin: calc(0.1rem - 0.2em) 0 calc(0.1rem - 0.2em) -0.3rem; max-width: min(60ch, 46vw); }
 [data-theme="studio"] .st-slate .ed-title:hover { border-color: var(--room-line); }
 [data-theme="studio"] .st-slate .ed-title:focus { border-color: var(--lamp); background: transparent; }
 [data-theme="studio"] .st-slate .ed-meta { font: 400 var(--st-fs-meta) var(--font-mono); letter-spacing: 0.02em; color: var(--room-ink-3); }
@@ -52,6 +54,7 @@
 [data-theme="studio"] .sp-st.skeleton { background: var(--room-2); }
 [data-theme="studio"] .sp-head { display: flex; align-items: center; gap: 0.4rem; min-width: 0; padding: 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; font: inherit; }
 [data-theme="studio"] .sp-head:disabled { cursor: default; }
+[data-theme="studio"] .sp-st.go { cursor: pointer; }          /* the whole station opens what its head opens */
 [data-theme="studio"] .sp-mark { flex: none; width: 0.85rem; height: 0.85rem; border-radius: 50%; display: grid; place-items: center; }
 [data-theme="studio"] .sp-no { flex: none; font: 500 var(--st-fs-meta) var(--font-mono); letter-spacing: 0.04em; opacity: 0.8; }
 [data-theme="studio"] .sp-no::after { content: " ·"; }
@@ -281,6 +284,10 @@
 [data-theme="studio"] .st-ed .tl-head-line { background: var(--registration); box-shadow: 0 0 6px rgba(210, 60, 34, 0.5); }
 [data-theme="studio"] .st-ed .tl-head-line::before { border-top-color: var(--registration); }
 [data-theme="studio"] .st-ed .tl-range { background: rgba(255, 200, 114, 0.22); border-color: #E9B44C; }
+/* a sound from Assets over a lane: the lane lit like the table (lamp paper, a solid pencil edge, a warm glow), a blue-pencil line with its time */
+[data-theme="studio"] .st-ed .tl-row.drop-on { background: var(--lamp-paper); box-shadow: inset 0 0 0 1.5px var(--pencil), inset 0 0 1.5rem rgba(255, 200, 114, 0.22); }
+[data-theme="studio"] .st-ed .tl-drop { background: var(--pencil); }
+[data-theme="studio"] .st-ed .tl-drop b { background: var(--pencil-ink); color: var(--paper-white); font-family: var(--font-mono); }
 
 /* ---- a narrow window: the stations wrap, the tabs as on the Desk ------------------------------------------------------------------- */
 [data-theme="studio"] .st-ed.narrow .sp-line { grid-template-columns: repeat(2, minmax(0, 1fr)); }

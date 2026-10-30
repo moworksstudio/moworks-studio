@@ -89,21 +89,21 @@ test("T20-2: the cues Claude changes in the chat are placed again by themselves,
     assert.deepEqual(first.mounted.map((m) => m.name), ["whoosh"]);
     assert.ok(first.placedAt && first.cueKey, "when, and from which cues");
     assert.equal(await ctx.mix.cuesAgain(p), null, "the cues did not change: nothing to do");
-    // Claude writes the frame's `- sfx:` line in the chat
-    await updateFrame(dir, 2, { sfx: "lamp ting, river water@0.5" });
+    // Claude writes the frame's `- sfx:` line in the chat ("lamp ting" is in the app's offline library; "heartbeat" nowhere while the
+    // search is down)
+    await updateFrame(dir, 2, { sfx: "lamp ting, heartbeat@0.5" });
     const res = await ctx.mix.cuesAgain(p);
     assert.ok(res, "placed again");
     assert.deepEqual(res.names.sort(), ["lamp ting", "whoosh"]);
     assert.ok(ctx.jobs.list({ kind: "mix-sfx" }).some((j) => j.projectId === p.id && j.status === "done"), "as a job the Editor shows (appBusy)");
     const html = readFileSync(join(dir, "index.html"), "utf8");
-    assert.match(html, /src="assets\/3_audio\/sfx\/lamp-ting\.mp3" data-start="2"/, "the stand-in at the frame's start");
+    assert.match(html, /src="assets\/3_audio\/sfx\/bell-[td]ing-\d\.ogg" data-start="2"/, "the library's ting at the frame's start, no search needed");
     const st = sfx.readState(dir);
     assert.notEqual(st.placedAt, first.placedAt, "the Final Mix and the timeline read it again");
-    assert.deepEqual(st.left, { missing: ["river water"], near: [{ name: "lamp ting", as: "chime" }] });
+    assert.deepEqual(st.left, { missing: ["heartbeat"], near: [] });
     const note = projects.readNotes(dir).filter((x) => x.kind === "sfx").at(-1);
     assert.equal(note.status, "warning", "the chat shows it");
-    assert.match(note.vars.failed, /"river water"/);
-    assert.match(note.vars.near, /"lamp ting" \(chime\)/);
+    assert.match(note.vars.failed, /"heartbeat"/);
     assert.equal(await ctx.mix.cuesAgain(p), null, "placed once per change");
   } finally { globalThis.fetch = was; }
 });

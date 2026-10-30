@@ -11,7 +11,7 @@ import { isStarterPage } from "../hf-edit/shots.mjs";
 import { filmLength } from "../hf-edit/ending.mjs";
 import { APP_OWN, LAYOUT_VERSION, appSounds, migrateLayout } from "./layout.mjs";
 import { showInExplorer } from "./explorer.mjs";
-import { designChoice, writeDesign } from "./design.mjs";
+import { designChoice, keepAskedKit, writeDesign } from "./design.mjs";
 import { styleFpsRule } from "../style-catalog/fps.mjs";
 export { A as LAYOUT, APP_OWN, LAYOUT_VERSION } from "./layout.mjs";
 
@@ -70,6 +70,9 @@ export function cleanAnswers(a, styleId = null) {
 }
 
 export const countWords = (text) => (String(text ?? "").trim().match(/\S+/g) ?? []).length;
+/** The longest brief the app keeps (PATCH /brief); Claude and the chat get all of it (Test 24: a 4,369-character brief was cut at 4,000,
+ *  inside its voice-over script). */
+export const BRIEF_MAX = 20000;
 
 function isHfProject(dir) {
   const f = join(dir, "index.html");
@@ -336,7 +339,12 @@ export async function createProject(input, { root = APP_ROOT, scaffoldFn = scaff
   // off (designLocked) takes none
   const { look } = await writeDesign(dir, designChoice(input, { locked: input.designLocked === true }), { root, now });
   if (look) m.look = look; else delete m.look;
-  if (input.designLocked === true) m.designLocked = true;          // the style's own design: the prompt says so
+  if (input.designLocked === true) {
+    m.designLocked = true;          // the style's own design: the prompt says so
+    // a Brand Kit chosen there all the same is kept, not applied: Prepare asks how to use it (T25: it was dropped without a word)
+    const kit = await keepAskedKit(dir, input.look, { root, now });
+    if (kit) m.brandKitAsk = kit; else delete m.brandKitAsk;
+  }
   // the film's language (the voice-over and the words on screen) from the brief when it says it; else Prepare asks
   { const lang = briefLanguage(input.brief); if (lang) m.language = { id: lang, by: "brief", at: now }; }
   // the user's saved characters, for a film whose style has characters: those picked in New project (`characters: [ids]`) and those

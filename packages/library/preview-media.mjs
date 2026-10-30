@@ -3,27 +3,34 @@
 // as the kit's gallery does); posters WebP at most 640 px wide, quality 72. Never scaled up: a source narrower than 640 px keeps its width.
 // One place, so the Blocks, Looks, Motion and intake tools encode alike, and recodePreview() brings an existing store to the same size with
 // its original files kept in <store>/previews-original/ until the user has looked.
-import { execFileSync } from "node:child_process";
+// The *Async encoders are for the app's server (its library jobs run in its own process: a 10 s encode at preset slow held every request
+// for seconds, T27-3); the sync ones for the CLI tools and their child processes.
+import { execFile, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { promisify } from "node:util";
 import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
 
 export const PREVIEW = { width: 640, fps: 24, crf: 30, seconds: 10, posterQuality: 72, label: "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72" };
 export const ffmpegExe = (root = APP_ROOT) => join(expandEnv(loadPins(root).ffmpeg.dir), "ffmpeg.exe");
 const run = (root, args) => execFileSync(ffmpegExe(root), ["-v", "error", "-y", ...args], { windowsHide: true, stdio: "ignore" });
+const execFileP = promisify(execFile);
+const runAsync = async (root, args) => { await execFileP(ffmpegExe(root), ["-v", "error", "-y", ...args], { windowsHide: true }); };
 const scale = `scale='min(${PREVIEW.width},iw)':-2`;
+const videoArgs = (src, dst) => ["-i", src, "-t", String(PREVIEW.seconds), "-vf", `${scale},fps=${PREVIEW.fps}`, "-c:v", "libx264", "-profile:v", "high", "-crf", String(PREVIEW.crf), "-preset", "slow",
+  "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-an", dst];
+const posterArgs = (src, dst, at) => [...(at == null ? [] : ["-ss", String(at)]), "-i", src, "-frames:v", "1", "-vf", scale, "-c:v", "libwebp", "-quality", String(PREVIEW.posterQuality), dst];
 
 /** Encode a video (a render master or a bigger preview) for the cards. */
-export function encodeVideo(src, dst, { root = APP_ROOT } = {}) {
-  run(root, ["-i", src, "-t", String(PREVIEW.seconds), "-vf", `${scale},fps=${PREVIEW.fps}`, "-c:v", "libx264", "-profile:v", "high", "-crf", String(PREVIEW.crf), "-preset", "slow",
-    "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-an", dst]);
-}
+export function encodeVideo(src, dst, { root = APP_ROOT } = {}) { run(root, videoArgs(src, dst)); }
+/** encodeVideo without holding the caller's event loop; rejects as encodeVideo throws. */
+export const encodeVideoAsync = (src, dst, { root = APP_ROOT } = {}) => runAsync(root, videoArgs(src, dst));
 
 /** A WebP poster from a picture, or from a video at `at` seconds. */
-export function encodePoster(src, dst, { root = APP_ROOT, at = null } = {}) {
-  run(root, [...(at == null ? [] : ["-ss", String(at)]), "-i", src, "-frames:v", "1", "-vf", scale, "-c:v", "libwebp", "-quality", String(PREVIEW.posterQuality), dst]);
-}
+export function encodePoster(src, dst, { root = APP_ROOT, at = null } = {}) { run(root, posterArgs(src, dst, at)); }
+/** encodePoster without holding the caller's event loop; rejects as encodePoster throws. */
+export const encodePosterAsync = (src, dst, { root = APP_ROOT, at = null } = {}) => runAsync(root, posterArgs(src, dst, at));
 
 /** The poster time the stores use: min(3 s, 60 % of the length). */
 export const posterAt = (seconds) => Math.max(0, Math.min(3, (seconds || 5) * 0.6));
@@ -33,9 +40,10 @@ export const sha256Of = (file) => createHash("sha256").update(readFileSync(file)
 /** Bring one preview { video, poster } of a store to the preview size. The originals are copied to previews-original/ first (once; a second run
  *  encodes from them again, so the loss never compounds); the video is replaced in place and the poster written beside the old one as .webp,
  *  so a running app keeps serving the old paths until it reloads the catalog (tidyStore() then removes the old posters). `keepOriginals:
- *  false` (a fresh download) keeps no copy and removes the old poster. A failed encode leaves the preview as it was and throws. Returns
- *  { preview, before, after } (bytes) or null if there is nothing to do. */
-export function recodePreview(storeDir, preview, { root = APP_ROOT, seconds = null, keepOriginals = true } = {}) {
+ *  false` (a fresh download) keeps no copy and removes the old poster. A failed encode leaves the preview as it was and rejects. Resolves
+ *  { preview, before, after } (bytes) or null if there is nothing to do; the encodes run off the event loop (the Blocks import, a job of the
+ *  server's, recodes every item). */
+export async function recodePreview(storeDir, preview, { root = APP_ROOT, seconds = null, keepOriginals = true } = {}) {
   if (!preview?.video && !preview?.poster) return null;
   const keep = join(storeDir, "previews-original"), base = (rel) => rel.split("/").pop();
   const kept = (rel) => { const b = base(rel).replace(/\.[^.]+$/, ""); return [base(rel), `${b}.png`, `${b}.jpg`, `${b}.jpeg`].map((n) => join(keep, n)).find((p) => existsSync(p) && !p.endsWith(".webp")) ?? null; };
@@ -49,7 +57,7 @@ export function recodePreview(storeDir, preview, { root = APP_ROOT, seconds = nu
       const o = original(preview.video);
       if (o) {
         const dst = join(storeDir, preview.video), part = dst + ".part.mp4"; parts.push(part);
-        before += statSync(o).size; encodeVideo(o, part, { root }); renameSync(part, dst);
+        before += statSync(o).size; await encodeVideoAsync(o, part, { root }); renameSync(part, dst);
         out.size = statSync(dst).size; after += out.size;
         if (preview.source !== "hf") out.sha256 = sha256Of(dst);              // an official HF video keeps the hash of the file HF publishes
       }
@@ -57,8 +65,8 @@ export function recodePreview(storeDir, preview, { root = APP_ROOT, seconds = nu
     const pSrc = preview.poster ? original(preview.poster) : null, rel = webpName(preview.poster ?? preview.video.replace(/\.mp4$/i, ".png")), dst = join(storeDir, rel);
     if (pSrc || (!existsSync(dst) && preview.video)) {
       const part = dst + ".part.webp"; parts.push(part);
-      if (pSrc) { before += statSync(pSrc).size; encodePoster(pSrc, part, { root }); }
-      else encodePoster(join(storeDir, preview.video), part, { root, at: posterAt(seconds) });
+      if (pSrc) { before += statSync(pSrc).size; await encodePosterAsync(pSrc, part, { root }); }
+      else await encodePosterAsync(join(storeDir, preview.video), part, { root, at: posterAt(seconds) });
       rmSync(dst, { force: true }); renameSync(part, dst);
       if (!keepOriginals && preview.poster && preview.poster !== rel) rmSync(join(storeDir, preview.poster), { force: true });
     }

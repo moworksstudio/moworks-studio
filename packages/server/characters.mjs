@@ -15,7 +15,8 @@ import * as maker from "../character-maker/index.mjs";
 import { labelLines } from "../character-maker/sheetLabels.mjs";
 import { bgWorkers } from "./proxy.mjs";
 import { finalize } from "../hf-edit/finalize.mjs";
-import { snapshotAt } from "../hf-qa/cli.mjs";
+// the sheets' stills off the server's thread: the sync snapshotAt held every request 20-60 s while a film's sheets were drawn (T27-3)
+import { snapshotAtForeground as snapshotAt } from "../hf-qa/cli.mjs";
 import { stylePipeline } from "../style-catalog/index.mjs";
 import { poseCheck, poseText } from "../anidoodle-styles/posecheck.mjs";
 

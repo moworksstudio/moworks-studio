@@ -188,7 +188,19 @@ export default function MotionPlan({ id, setCrumbs = () => {} }) {
   const approval = mp.data?.approval;
   const anyDirty = Object.values(dirtyShots).some(Boolean);
   useCloseGuard(anyDirty);
-  useClaudeDone(id, () => { mp.reload(); sb.reload(); posters.reload(); pipe.reload(); });       // Claude finished writing: show it without closing the dialog
+  // Claude finished writing, or the Motion Plan step changed (written, approved, asked again): show it without closing the dialog. Test 24:
+  // the dialog sat on "Not approved · 0 planned motions" with no frame and no Approve while the server held all 100 motions
+  const reloadAll = () => { mp.reload(); sb.reload(); posters.reload(); pipe.reload(); };
+  useClaudeDone(id, reloadAll, (p) => { const s = p.steps?.find((x) => x.id === "motionSpec"); return s ? `${s.status}|${s.asking ? 1 : 0}|${s.reason?.key ?? ""}` : ""; });
+  // a read the server did not answer (a busy computer) is asked again by itself, a few times, and said with a Retry meanwhile
+  const loadError = mp.error ?? sb.error ?? null;
+  const tries = useRef(0);
+  useEffect(() => {
+    if (!loadError || tries.current >= 5) return undefined;
+    const h = setTimeout(() => { tries.current++; if (mp.error) mp.reload(); if (sb.error) sb.reload(); }, 3000);
+    return () => clearTimeout(h);
+  }, [loadError]); // eslint-disable-line react-hooks/exhaustive-deps
+  const loading = (!mp.data || !sb.data) && !loadError;
   const canApprove = total > 0 && !anyDirty && !mp.data?.error && !(approval && !mp.data?.changedSinceApproval);
   // the server's estimate (measured rates per style, { minutes, high, covers }); none is invented here
   const est = pipe.data?.estimateIfApproved?.minutes ? pipe.data.estimateIfApproved : pipe.data?.estimate?.minutes ? pipe.data.estimate : null;
@@ -228,8 +240,9 @@ export default function MotionPlan({ id, setCrumbs = () => {} }) {
   const [aw, ah] = String(project.data?.meta?.format?.aspect ?? "16:9").split(":").map(Number);
   return <div className="page mo2" style={aw && ah ? { "--mo-ar": String(aw / ah) } : undefined}>
     <div className="page-head">
-      <div><div style={{ display: "flex", gap: "0.5333rem", alignItems: "center", flexWrap: "wrap" }}>{chip}
-        <span className="muted" style={{ fontSize: "var(--fs-meta)" }}>{t("{n} planned motions", { n: total })}</span>
+      <div><div style={{ display: "flex", gap: "0.5333rem", alignItems: "center", flexWrap: "wrap" }}>{/* nothing said about the plan before it is read */}
+        {mp.data ? chip : null}
+        {mp.data ? <span className="muted" style={{ fontSize: "var(--fs-meta)" }}>{t("{n} planned motions", { n: total })}</span> : loading ? <span className="muted"><Loader2 size={12} className="spin" /> {t("Loading the Motion Plan…")}</span> : null}
         {Object.keys(SRC).some((k) => counts[k]) && <span className="muted mp-src-l">{t("Where they come from:")}</span>}
         {Object.keys(SRC).filter((k) => counts[k]).map((k) => <span key={k} className={"src-tag k-" + k} title={t(SRC_HINT[k])} aria-label={`${t(SRC_HINT[k])}: ${counts[k]}`}>{t(SRC[k])} <span className="num">{counts[k]}</span></span>)}
         {changedCount > 0 && <span className="chip amber">{changedCount === 1 ? t("1 changed by you") : t("{n} changed by you", { n: changedCount })}</span>}
@@ -239,6 +252,8 @@ export default function MotionPlan({ id, setCrumbs = () => {} }) {
         <p className="mo-intro">{String(mp.data?.plan?.approving ?? "").trim() || t("Approve how each shot moves: what comes in, how it moves and how strongly. Open a frame to read or change its motions; nothing is built until you approve.")}</p></div>
     </div>
     {mp.data?.error && <Banner kind="error">{mp.data.error}</Banner>}
+    {loadError && <Banner kind="error" action={<button className="btn sm" onClick={() => { tries.current = 0; reloadAll(); }}>{t("Retry")}</button>}>{t("The Motion Plan could not be loaded: {why}", { why: loadError.message })}</Banner>}
+    {loading && <div className="mo-strip" aria-busy="true">{[0, 1, 2, 3].map((i) => <span key={i} className="mo-tile skeleton" aria-hidden="true" />)}</div>}
     {sb.data && !shots.length && <div className="empty"><Film size={26} /><h2>{t("No shots yet")}</h2><p>{t("Write and approve the storyboard first; the plan is made per shot.")}</p>
       <div className="row"><button className="btn primary" onClick={() => stage.open("storyboard")}>{t("Open storyboard")}</button></div></div>}
     {/* the frames in one row, six in view; more shots scroll sideways and the open one is kept in view; its table right under the row */}

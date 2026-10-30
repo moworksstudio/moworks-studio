@@ -7,7 +7,8 @@ import { join } from "node:path";
 import { loadHf } from "./load.mjs";
 import { resolveRuntime } from "../version-manager/index.mjs";
 
-const attr = (tag, a) => { const m = new RegExp(`\\b${a}="([^"]*)"`).exec(tag); return m ? m[1] : null; };
+// the attribute itself, never the end of a longer name (the id of `<audio data-hf-id="hf-k4k5" id="el-music">` is el-music, Test 22)
+const attr = (tag, a) => { const m = new RegExp(`(?<![\\w-])${a}="([^"]*)"`).exec(tag); return m ? m[1] : null; };
 
 /** A one-page code film's own cut table: the first `SHOTS = [ { a, b }, … ]` of its scripts (compositions/**), every entry with seconds a
  *  < b, as [[a, b], …] in order; null when it has none. Read with Babel's parser (HyperFrames' runtime has it). */
@@ -46,6 +47,15 @@ export function isStarterPage(html) {
   return srcs.length === 1 && /^(\.\/)?compositions\/f1\.html$/.test(srcs[0]);
 }
 
+/** A mounted scene's track kind, by HyperFrames' own rule (parsers trackKindOf): its data-track-kind, else "captions" for the legacy
+ *  captions host (composition id "captions" or a caption-* class), else "graphics". */
+const TRACK_KINDS = ["video", "audio", "captions", "graphics"];
+function trackKind(tag) {
+  const k = attr(tag, "data-track-kind")?.trim().toLowerCase();
+  if (k && TRACK_KINDS.includes(k)) return k;
+  return attr(tag, "data-composition-id") === "captions" || /(?:^|\s)caption[-_]/.test(attr(tag, "class") ?? "") ? "captions" : "graphics";
+}
+
 /** Scenes mounted at the root of index.html (in order) and the film's audio clips. */
 export function readMounts(dir) {
   const html = readFileSync(join(dir, "index.html"), "utf8");
@@ -59,10 +69,12 @@ export function readMounts(dir) {
     const tag = m[0];
     if (tag === rootTag || !/data-composition-(src|id)=/.test(tag)) continue;
     mounts.push({ id: attr(tag, "id") ?? attr(tag, "data-composition-id"), compositionId: attr(tag, "data-composition-id"), src: attr(tag, "data-composition-src"),
-      start: num(attr(tag, "data-start")) ?? 0, duration: num(attr(tag, "data-duration")), track: num(attr(tag, "data-track-index")) });
+      start: num(attr(tag, "data-start")) ?? 0, duration: num(attr(tag, "data-duration")), track: num(attr(tag, "data-track-index")), kind: trackKind(tag) });
   }
+  // each sound with its part of the file (a voice cut into one clip a line plays from its data-media-start), its lane and its edge fades
   const audio = [...html.matchAll(/<audio\b[^>]*>/g)].map((m) => ({ id: attr(m[0], "id"), src: attr(m[0], "src"), start: num(attr(m[0], "data-start")) ?? 0,
-    duration: num(attr(m[0], "data-duration")), volume: num(attr(m[0], "data-volume")) ?? 1 }));
+    duration: num(attr(m[0], "data-duration")), volume: num(attr(m[0], "data-volume")) ?? 1, mediaStart: num(attr(m[0], "data-media-start")) ?? 0,
+    role: attr(m[0], "data-timeline-role"), fadeIn: num(attr(m[0], "data-fade-in")) ?? 0, fadeOut: num(attr(m[0], "data-fade-out")) ?? 0 }));
   return { root, mounts, audio };
 }
 
@@ -73,7 +85,10 @@ export function untimedTitle(title) {
   return String(title ?? "").replace(new RegExp(`\\s*[([]\\s*${t}\\s*[-–—]\\s*${t}\\s*[)\\]]\\s*$`, "u"), "").trim();
 }
 
-/** Shots: one per storyboard frame (its `src` names the mounted scene), else one per mounted scene. */
+/** Shots: one per storyboard frame (its `src` names the mounted scene), else one per mounted scene. A layer over the film is no shot
+ *  (Test 23: its captions, 0-62.7 s, and a closing card over the last three shots were listed as shots 2 and 25 of 23): HyperFrames'
+ *  captions track, and, once the storyboard's frames are mounted, a scene on a track none of them is on that lies over them. Those
+ *  come apart as `layers` (the Assets tab names the shots a layer's files lie over). */
 export async function readShots(dir, { version = null } = {}) {
   const { root, mounts, audio } = readMounts(dir);
   const sbFile = join(dir, "STORYBOARD.md");
@@ -84,11 +99,12 @@ export async function readShots(dir, { version = null } = {}) {
     frames = sb.frames; globals = sb.globals; warnings = sb.warnings ?? [];
   }
   const used = new Set();
+  const scenes = mounts.filter((m) => m.kind !== "captions");          // the captions are never a frame's scene
   const shots = frames.map((f, i) => {
     const src = f.extra?.src ?? f.src ?? null;
     // by place only when there is a mounted scene for every frame (a code film's one text overlay, words.html at 16.5 s, was
     // once taken for frame 1, so the film showed one shot and the Review took its stills there only)
-    const byPlace = mounts.length >= frames.length && mounts[i] && !used.has(mounts[i]) ? mounts[i] : null;
+    const byPlace = scenes.length >= frames.length && scenes[i] && !used.has(scenes[i]) ? scenes[i] : null;
     let m = mounts.find((x) => src && x.src === src && !used.has(x)) ?? byPlace;
     if (m) used.add(m);
     return { index: f.index, number: f.number ?? i + 1, title: untimedTitle(f.title) || `Shot ${i + 1}`, status: f.status ?? "outline", scene: f.scene ?? "",
@@ -96,7 +112,8 @@ export async function readShots(dir, { version = null } = {}) {
       start: m?.start ?? null, duration: m?.duration ?? f.durationSeconds ?? null, src: m?.src ?? src, mountId: m?.id ?? null, block: f.extra?.block ?? null,
       sfx: f.extra?.sfx ?? null,          // the app's per-frame sound-effect cues ("whoosh, pop"), resolved and mounted by packages/sfx
       // what the sound effects also read: a `- sound:` line (cues when it is a list of names), HF's `transition_in`, a `- location:`
-      sound: f.extra?.sound ?? null, transitionIn: f.transitionIn ?? null, location: f.extra?.location ?? null };
+      sound: f.extra?.sound ?? null, transitionIn: f.transitionIn ?? null, location: f.extra?.location ?? null,
+      ambience: f.extra?.ambience ?? null };          // the scene's ambience bed (`- ambience: rain`, `none`), placed by packages/sfx
   });
   // a What If film is one page whose cuts the engine reads from whatif/timeline.json (the app's whatif_plan): frame N is the timeline's
   // shot N (the storyboard is one frame per shot in the edit's order), placed where it is first cut in, not by the frames' planned seconds
@@ -113,11 +130,18 @@ export async function readShots(dir, { version = null } = {}) {
     const cuts = codeCuts(dir);
     if (cuts?.length === shots.length) shots.forEach((s, i) => Object.assign(s, { start: cuts[i][0], duration: Math.round((cuts[i][1] - cuts[i][0]) * 1000) / 1000 }));
   }
+  // a layer over the film: the captions, or a scene on a track no mounted frame is on that lies over them (a closing card on track 3)
+  const framed = mounts.filter((m) => used.has(m)), tracks = new Set(framed.map((m) => m.track));
+  const over = (m) => framed.some((x) => x.start < m.start + (Number(m.duration) || 0) - 0.01 && x.start + (Number(x.duration) || 0) > m.start + 0.01);
+  const isLayer = (m) => m.kind === "captions" || (framed.length > 0 && !tracks.has(m.track) && over(m));
+  const extra = (m) => ({ index: null, title: m.compositionId ?? m.id, status: "built", scene: "", narrative: "", voiceover: "", plannedDuration: null,
+    start: m.start, duration: m.duration, src: m.src, mountId: m.id, block: null, notInStoryboard: true });
   // the starter's 3 s title card is no shot of a film whose storyboard is written ("f1 · 3 s · 0 motions", 7 shots of 6)
-  mounts.filter((m) => !used.has(m) && !(root.starter && frames.length)).forEach((m) => shots.push({ index: null, number: shots.length + 1, title: m.compositionId ?? m.id, status: "built", scene: "",
-    narrative: "", voiceover: "", plannedDuration: null, start: m.start, duration: m.duration, src: m.src, mountId: m.id, block: null, notInStoryboard: true }));
+  const left = mounts.filter((m) => !used.has(m) && !(root.starter && frames.length));
+  left.filter((m) => !isLayer(m)).forEach((m) => shots.push({ ...extra(m), number: shots.length + 1 }));
+  const layers = left.filter(isLayer).map((m) => ({ ...extra(m), number: null, layer: true, kind: m.kind, track: m.track }));
   shots.sort((a, b) => (a.start ?? 1e9) - (b.start ?? 1e9) || a.number - b.number);
-  return { root, shots, audio, storyboard: { exists: existsSync(sbFile), globals, warnings } };
+  return { root, shots, layers, audio, storyboard: { exists: existsSync(sbFile), globals, warnings } };
 }
 
 /** Frames of a STORYBOARD.md with no length in seconds ("duration: (the same shot goes on)" once made shot 2 "? s" in the Motion

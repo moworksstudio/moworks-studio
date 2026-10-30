@@ -7,7 +7,8 @@
 // pinned Chromium and joined into a short slideshow). Only the store named for the pinned commit is read: one built at another pin is never
 // used (its folders may be gone from the skill), the looks then come straight from the skill until the store is built or copied.
 // Each look carries its credit: HeyGen (HyperFrames), the permalink at the pinned commit, Apache-2.0, as shipped.
-import { execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, resolve, sep } from "node:path";
@@ -17,7 +18,7 @@ import { workRoot } from "../project-service/index.mjs";
 import { HF_SKILL } from "../hf-edit/hf-scripts.mjs";
 import { fontMap } from "../hf-edit/finalize.mjs";
 import { googleHasVietnamese, WINDOWS_VI } from "../blocks-library/index.mjs";
-import { encodePoster, PREVIEW } from "../library/preview-media.mjs";
+import { encodePosterAsync, PREVIEW } from "../library/preview-media.mjs";
 import { customMedia, customSlug, frameText, getCustom } from "./custom.mjs";
 
 const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
@@ -110,10 +111,11 @@ async function makePreviews(looks, dir, src, root, onProgress) {
         let n = 0;
         for (const el of frames) { await el.scrollIntoView(); await el.screenshot({ path: join(tmp, `f${++n}.png`) }); }
         if (!n) throw new Error("no .frame in frame-showcase.html");
-        // preview sizes (../library/preview-media.mjs): a 640 px WebP poster, a 640 × 360 slideshow at 24 fps, CRF 30
-        encodePoster(join(tmp, "f1.png"), join(dir, "previews", `${slug}.webp`), { root });
+        // preview sizes (../library/preview-media.mjs): a 640 px WebP poster, a 640 × 360 slideshow at 24 fps, CRF 30; encoded off the
+        // event loop (the import is a job of the app's server)
+        await encodePosterAsync(join(tmp, "f1.png"), join(dir, "previews", `${slug}.webp`), { root });
         const W = PREVIEW.width, Hh = Math.round(W * 9 / 16);
-        execFileSync(ffmpegExe(root), ["-v", "error", "-y", "-framerate", "1/1.2", "-i", join(tmp, "f%d.png"), "-vf", `scale=${W}:${Hh}:force_original_aspect_ratio=decrease,pad=${W}:${Hh}:(ow-iw)/2:(oh-ih)/2,format=yuv420p`,
+        await promisify(execFile)(ffmpegExe(root), ["-v", "error", "-y", "-framerate", "1/1.2", "-i", join(tmp, "f%d.png"), "-vf", `scale=${W}:${Hh}:force_original_aspect_ratio=decrease,pad=${W}:${Hh}:(ow-iw)/2:(oh-ih)/2,format=yuv420p`,
           "-r", String(PREVIEW.fps), "-c:v", "libx264", "-crf", String(PREVIEW.crf), "-movflags", "+faststart", join(dir, "previews", `${slug}.mp4`)], { windowsHide: true });
         rmSync(tmp, { recursive: true, force: true });
         out[look.id] = { poster: `previews/${slug}.webp`, video: `previews/${slug}.mp4`, frames: n, method: "screenshots of HyperFrames' frame-showcase.html, joined here", encode: PREVIEW.label };

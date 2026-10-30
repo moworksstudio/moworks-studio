@@ -5,26 +5,29 @@
 import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, statSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { basename, extname, join, resolve, sep } from "node:path";
 import * as projects from "../project-service/index.mjs";
+import { rememberAssets } from "../project-service/assets.mjs";
 import { currentOptions, firstRoundOf, isOption, listRounds, makeRevision, optionLabel, optionName, ownerRounds, parseFeedback, recordPick, roundPdf, takeStills } from "../hf-edit/boards.mjs";
 import { CHECK_ARGS_PLAIN, checkFindings, qcRound, qcText } from "../hf-qa/qc.mjs";
-import { runHfJsonAsync } from "../hf-qa/cli.mjs";
+import { runHfJsonAsync, STILLS_BUSY } from "../hf-qa/cli.mjs";
 import { placedShots, readShots, untimedFrames } from "../hf-edit/shots.mjs";
-import { effectiveSettings, freshEyes } from "../agent/index.mjs";
+import { effectiveSettings, freshEyes, styleSound } from "../agent/index.mjs";
 import { filmKind } from "../agent/reads.mjs";
 import { librarySearch, searchText } from "../library/search-tool.mjs";
 import { HF_SKILL, needsWeb, runScript, scriptText } from "../hf-edit/hf-scripts.mjs";
 import { runPy } from "../setup/python.mjs";
 import { creditMusic, optionsText, readOptions, saveOptions } from "../sfx/music.mjs";
 import { planEpisode, planText } from "../what-if-plan/index.mjs";
-import { autoSfx } from "../sfx/auto.mjs";
-import { cuesChanged, mount, placedNote, readState, unmuteAll, writeCredits } from "../sfx/index.mjs";
+import { autoSfx, whooshAllowed } from "../sfx/auto.mjs";
+import { cuesChanged, mount, mountAmbience, placedNote, readState, unmuteAll, writeCredits } from "../sfx/index.mjs";
+import { DEFAULT_DENSITY, DENSITIES, prefsText, readPrefs, updatePrefs } from "../sfx/prefs.mjs";
 import * as plan from "../motion-plan/index.mjs";
 import { snapStop, stopContext } from "../sfx/stop-snap.mjs";
 import * as pipe from "../pipeline/index.mjs";
 import * as rev from "../revisions/index.mjs";
 import { poseCheck, poseText } from "../anidoodle-styles/posecheck.mjs";
 import { codeGlyphs, glyphText } from "../hf-qa/codeGlyphs.mjs";
-import { stopMusic } from "../hf-edit/tracks.mjs";
+import { viMarks, viMarksText } from "../hf-qa/viMarks.mjs";
+import { musicRepeats, stopMusic, trackClips } from "../hf-edit/tracks.mjs";
 import { voiceCheck, voiceText } from "../sfx/voicecheck.mjs";
 import { gpuShort } from "./proxy.mjs";
 import { styleNevers } from "../style-catalog/index.mjs";
@@ -33,8 +36,8 @@ import { styleTraits } from "../style-catalog/traits.mjs";
 const TYPES = { ".png": "image/png", ".jpg": "image/jpeg", ".pdf": "application/pdf" };
 
 /** What Make another option and Feedback take ("a few minutes" was shown, really 10-13): the median of this film's own storyboard tasks,
- *  else the usual (measured over Tests 09-11: an option 8-13 min, about $2.5, anidoodle 10-13 min, $3; a revision with its redraw 4-5 min,
- *  about $1). A revision is the feedback task and the chat turns that drew it ("Storyboard · revision"). */
+ *  else the usual (Tests 17-24, below; a revision with its redraw 4-5 min, about $1). A revision is the feedback task and the chat turns
+ *  that drew it ("Storyboard · revision"). Each a range: { minutes, high, costUsd, costHigh }. */
 const OPTION_TASK = /^Make one (more )?storyboard option/, FEEDBACK_TASK = /^The owner's feedback on storyboard/;
 // the storyboard timed again to a voice that came while it was drawn (autopilot's transcriptLanded) is a revision's work, not an option's
 const VOICE_TASK = /^The voice-over came while you drew the storyboard/;
@@ -55,14 +58,18 @@ export function boardEstimates(tasks, styleId = null) {
   const one = (list, usual) => {
     const own = list.filter((x) => x.ms > 60000);
     // one run of this film is a thin basis (B said about 15 min and took 26): the answer is a range, up to the slowest seen
-    // and at least half again the middle
+    // and at least half again the middle; the cost a range too, up to the dearest seen and at least a quarter over the middle
     const range = (m, slowest = 0) => ({ minutes: m, high: Math.max(Math.round(m * 1.5), slowest) });
+    const cost = (c, dearest = 0) => ({ costUsd: c, costHigh: Math.max(Math.round(c * 1.25 * 10) / 10, Math.round(dearest * 100) / 100) });
     return own.length ? { ...range(Math.max(1, Math.round(median(own.map((x) => x.ms)) / 60000)), Math.round(Math.max(...own.map((x) => x.ms)) / 60000)),
-      costUsd: Math.round(median(own.map((x) => x.usd)) * 100) / 100, basis: "this film", runs: own.length }
-      : { ...range(usual.minutes), costUsd: usual.costUsd, basis: "usual", runs: 0 };
+      ...cost(Math.round(median(own.map((x) => x.usd)) * 100) / 100, Math.max(...own.map((x) => x.usd))), basis: "this film", runs: own.length }
+      : { ...range(usual.minutes), ...cost(usual.costUsd, usual.costHigh), basis: "usual", runs: 0 };
   };
-  return { option: one(options, ani ? { minutes: 12, costUsd: 3 } : { minutes: 10, costUsd: 2.5 }), feedback: one(revisions, { minutes: 5, costUsd: 1 }),
-    motion: one(motions, { minutes: 5, costUsd: 1.2 }) };          // measured on demo films, What If included: 3.7-5 min, about $1-1.25
+  // the usual, from the films of Tests 17-24 (their tasks.json: a first option 15.6-39.6 min, 23 in the middle, $3.11-4.73; anidoodle's one
+  // film 25.1 min, $6.47; the Motion Plan 3.3-11.5 min, 4.7 in the middle, $0.90-1.76, $1.28 on average): "about 10 min" and "about
+  // $1.20" were given for a 39.6 min storyboard and a $1.70 Motion Plan (T23-11)
+  return { option: one(options, ani ? { minutes: 25, costUsd: 6.5 } : { minutes: 22, costUsd: 4.4 }), feedback: one(revisions, { minutes: 5, costUsd: 1 }),
+    motion: one(motions, { minutes: 5, costUsd: 1.3, costHigh: 1.8 }) };
 }
 
 /** the running Storyboard or Motion Plan task's time (12 min of "Drawing the storyboard" with no time said, while the Build said
@@ -75,14 +82,14 @@ export function runningEstimate(task, tasks, styleId = null) {
   return { stage: step === "motionSpec" ? "motion" : "storyboard", minutes: est.minutes, high: est.high, startedAt: task.createdAt ?? null };
 }
 
-/** The words after a running stage's line: "about 6 min left", past the middle the time to the slowest seen, past that "longer than usual". */
+/** The words after a running stage's line: "about 6 min left" down to its estimate, then "taking longer than usual · 34 min so far"; the
+ *  time left never grows (T26-4: past the middle it jumped up to the time to the slowest seen). The Editor's Pipeline says the same (etaLeft). */
 export function etaWords(est, now = Date.now()) {
   if (!est?.minutes) return "";
-  const gone = est.startedAt ? (now - Date.parse(est.startedAt)) / 60000 : 0;
+  const gone = est.startedAt ? (now - Date.parse(est.startedAt)) / 60000 : NaN;
   if (!(gone >= 0)) return `about ${est.minutes} min`;
   if (gone < est.minutes) return `about ${Math.max(1, Math.round(est.minutes - gone))} min left`;
-  if (gone < (est.high ?? est.minutes)) return `about ${Math.max(1, Math.round(est.high - gone))} min left`;
-  return "taking longer than usual";
+  return `taking longer than usual · ${Math.round(gone)} min so far`;
 }
 
 /** Claude said the pictures did not show its last two edits yet, and the user approved the old pictures. An option is approved
@@ -130,6 +137,8 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       // the way of working settled in Prepare: with "keep" the storyboard is the user's own frames, in order, without options
       way: pipe.normalWay(p.meta?.way?.id ?? pipe.chosenWay(p.path) ?? "free"), frames: pipe.normalWay(p.meta?.way?.id ?? pipe.chosenWay(p.path) ?? "free") === "keep",
       taking: takingOf(p.id),          // with frames: { done, total } while the stills are taken
+      // the last take was stopped twice (the computer is busy): { message, at }, said with a Retry, until a take works
+      stillsBusy: takingOf(p.id) ? null : stillsBusy.get(p.id) ?? null,
       // what the confirm of Make another option and of Feedback says: { option, feedback }: { minutes, costUsd, basis, runs }
       estimates: boardEstimates(ctx.agent?.list?.(p.id) ?? [], p.meta?.style?.id) };
   };
@@ -148,6 +157,13 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
   const readDrafts = (dir) => { try { return JSON.parse(readFileSync(draftsFile(dir), "utf8")); } catch { return {}; } };
   const writeDrafts = (dir, d) => { mkdirSync(join(dir, ".moworks", "boards"), { recursive: true }); writeFileSync(draftsFile(dir), JSON.stringify(d, null, 2)); };
   const takingOf = (id) => ctx.jobs.list({ kind: "board-stills" }).find((j) => j.projectId === id && j.status === "running") ?? null;
+  /** The storyboard's pictures were stopped twice on a busy computer (T25, T26-5): the dialog says STILLS_BUSY with a Retry until a take
+   *  works; `note`: the chat says it too, with Open Storyboard (the app's own take; Claude's call is answered in its tool reply). */
+  const stillsBusy = new Map();          // project id -> { message, at }
+  const busyStills = (p, { note = false } = {}) => {
+    stillsBusy.set(p.id, { message: STILLS_BUSY, at: new Date().toISOString() });
+    if (note) { try { projects.addNote(p.path, { kind: "boards", status: "warning", text: STILLS_BUSY, open: "storyboard" }); } catch { /* notes are best effort */ } }
+  };
   /** Take the stills of the boards as they are now, as a job the dialog follows (frames done / all). The app starts it when the
    *  storyboard step ends, so the dialog opens with pictures; the dialog starts it too when a board changed by hand. Null: no board yet,
    *  or a capture already running. */
@@ -156,9 +172,12 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     try {
       return ctx.jobs.start("board-stills", { projectId: p.id, title: "Storyboard stills" }, async (job) => {
         job.update({ stage: "taking stills" });
-        const res = await takeStills(p.path, { signal: job.signal, force, by, filmTimes: styleTraits(p.meta?.style?.id, root).filmBoards,          // force: a new round even if nothing changed
-          onProgress: ({ done, total }) => job.update({ frames: { done, total }, progress: total ? Math.round((done / total) * 100) : null }) });
-        return { round: res.round.id, fresh: res.fresh, failed: res.failed };
+        try {
+          const res = await takeStills(p.path, { signal: job.signal, force, by, filmTimes: styleTraits(p.meta?.style?.id, root).filmBoards,          // force: a new round even if nothing changed
+            onProgress: ({ done, total }) => job.update({ frames: { done, total }, progress: total ? Math.round((done / total) * 100) : null }) });
+          stillsBusy.delete(p.id);
+          return { round: res.round.id, fresh: res.fresh, failed: res.failed };
+        } catch (e) { if (e.code === "STILLS_BUSY") busyStills(p, { note: true }); throw e; }
       });
     } catch (e) { if (e.code === "BUSY") return null; throw e; }
   };
@@ -206,9 +225,9 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
 
   // a Final Mix change: the work before it is committed on its own, the change as a sound-only revision (the picture's checks hold)
   const mixChange = async (p, what, fn) => {
-    try { rev.ensureRepo(p.path); rev.commitAll(p.path, "Changes before the Final Mix"); } catch { /* revisions optional */ }
+    try { await rev.saveAsync(p.path, "Changes before the Final Mix"); } catch { /* revisions optional */ }
     const out = await fn();
-    try { rev.commitAll(p.path, `${rev.SOUND_MIX}: ${what}`); } catch { /* revisions optional */ }
+    try { await rev.commitAllAsync(p.path, `${rev.SOUND_MIX}: ${what}`); } catch { /* revisions optional */ }
     // a finished film whose sound changed: the preview service is asked once (it decides by the film's
     // picture and sound whether anything is made); while stage 4 places the sound, not yet
     const now0 = projects.getProject(p.id, root);
@@ -237,9 +256,10 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     // the chosen track is copied to assets/3_audio/music/ (kept in the history like the user's files; the options are not)
     const rel = `assets/3_audio/music/${basename(track.file)}`;
     mkdirSync(join(p.path, "assets", "3_audio", "music"), { recursive: true });
+    rememberAssets(p.path, [rel]);          // the app's own copy: never a file "the user added" (T22-2)
     copyFileSync(join(p.path, ...track.file.split("/")), join(p.path, ...rel.split("/")));
     const { root: comp } = await readShots(p.path);          // a track longer than the film plays to the film's end
-    const placed = ctx.placeMusic(p, rel, { duration: comp?.duration && track.duration ? Math.min(track.duration, comp.duration) : track.duration });
+    const placed = await ctx.placeMusic(p, rel, { duration: comp?.duration && track.duration ? Math.min(track.duration, comp.duration) : track.duration });
     creditMusic(p.path, { ...track, file: rel });
     projects.updateMeta(p.id, (m) => { m.music = { ...m.music, title: track.title, artist: track.artist, page: track.page, licence: track.licence, option: track.file }; }, root);
     return placed;
@@ -249,7 +269,12 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
   const placeSfx = (p, signal = null) => mixChange(p, "sound effects", async () => {
     const { shots, root: comp } = await readShots(p.path);          // a one-page code film: the storyboard's planned times
     const mp = plan.read(p.path);
-    const res = await autoSfx(p.path, placedShots(shots, comp?.duration), mp.exists && !mp.error ? mp.plan : null, { signal, root });
+    // no whoosh of the app's own in a style whose author's sound palette has none (Test 24's CRT film got four)
+    const whoosh = whooshAllowed(styleSound(p.meta, root) ?? "");
+    // the style's sound section also says when it wants silence or fewer sounds, and its material (paper, synth, organic, cartoon)
+    const palette = styleSound(p.meta, root) ?? "";
+    const res = await autoSfx(p.path, placedShots(shots, comp?.duration), mp.exists && !mp.error ? mp.plan : null,
+      { signal, root, whoosh, palette, styleId: p.meta?.style?.id ?? null, styleTitle: p.meta?.style?.title ?? null });
     projects.addNote(p.path, { kind: "sfx", ...placedNote(res) });
     return res;
   });
@@ -345,17 +370,46 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     board_stills: async ({ task, project, args = {} }) => {
       // { option, frames }: only the frames Claude changed after the first look
       const retake = isOption(String(args.option ?? "").toUpperCase()) && Array.isArray(args.frames) && args.frames.length ? { option: String(args.option).toUpperCase(), frames: args.frames } : null;
-      const res = await takeStills(project.path, { signal: ctx.stopping.signal, by: "claude", taskId: task?.id ?? null, retake, filmTimes: styleTraits(project.meta?.style?.id, root).filmBoards });
+      let res;
+      try { res = await takeStills(project.path, { signal: ctx.stopping.signal, by: "claude", taskId: task?.id ?? null, retake, filmTimes: styleTraits(project.meta?.style?.id, root).filmBoards }); }
+      catch (e) {
+        if (e.code !== "STILLS_BUSY") throw e;
+        // stopped twice on a busy computer (T25: two calls of 11.5 min each, every round empty): said once, no second try in this task; the
+        // app takes the pictures when the step ends, and the Storyboard dialog says it with a Retry if that fails too
+        busyStills(project);
+        return `${STILLS_BUSY}\nThe app tried twice and HyperFrames did not finish the stills in time: nothing is wrong with the board. Do not call board_stills again in this task and do not judge panels you have not seen; finish the board as your rules say, then stop. The app takes the pictures itself when this step ends, and the owner sees them in the Storyboard dialog.`;
+      }
+      stillsBusy.delete(project.id);
       const checks = res.fresh ? await boardChecks(project.path, res.round) : null;
       // a draft: never numbered as a round in the chat
       projects.addNote(project.path, { kind: "boards", text: "Claude checked its storyboard draft" });
       const timing = {};          // a frame with no seconds
       for (const o of res.round?.options ?? []) { try { timing[o.option] = await untimedFrames(join(project.path, "boards", o.option, "STORYBOARD.md")); } catch { /* HF's parser missing: the stills stand */ } }
       // Vietnamese letters the film's code draws in a face that lacks them (G-GLYPH reads only the HTML)
-      return [stillsText(project, res, checks, timing), glyphText(codeGlyphs(project.path))].filter(Boolean).join("\n\n");
+      return [stillsText(project, res, checks, timing), glyphText(codeGlyphs(project.path)), viMarksText(viMarks(project.path, { boards: true }))].filter(Boolean).join("\n\n");
     },
     // the voice kept clear: every spoken word against the effects and the music
     voice_check: async ({ project }) => voiceText(await voiceCheck(project.path, { root })),
+    // the owner's sound choices (no whoosh, fewer sounds, no ambience…), kept for every placement and the sounds placed again with them now
+    // (Test 24: the owner said "no whoosh", Claude said done, and the next placement put the whooshes back)
+    sfx_prefs: async ({ project, args = {} }) => {
+      const patch = {};
+      for (const k of ["off", "on"]) if (Array.isArray(args[k])) patch[k] = args[k].map(String);
+      if (typeof args.ambience === "boolean") patch.ambience = args.ambience;
+      if (DENSITIES.includes(args.density)) patch.density = args.density;
+      if (args.restore === true) patch.unskip = true;
+      if (!Object.keys(patch).length) return `Nothing changed. The film's sound choices: ${prefsText(readPrefs(project.path))}.`;
+      const prefs = updatePrefs(project.path, patch);
+      if (!readState(project.path).placedAt) return `Saved: ${prefsText(prefs)}. The app follows them when it places the sound effects (the Final Mix).`;
+      let end;
+      const ended = new Promise((r) => { end = r; });
+      try { ctx.jobs.start("mix-sfx", { projectId: project.id, title: "Sound effects", onEnd: (j) => end(j) }, async (job) => { job.update({ stage: "placing sound effects" }); return placeSfx(project, job.signal); }); }
+      catch (e) { if (e.code === "BUSY") return `Saved: ${prefsText(prefs)}. The sounds are being placed right now: tell the owner to press Place them again in the Final Mix once it ends.`; throw e; }
+      const job = await ended;
+      if (job.status !== "done") return `Saved: ${prefsText(prefs)}, but placing the sounds again did not finish (${job.error?.message ?? job.status}): tell the owner to press Place them again in the Final Mix.`;
+      const n = placedNote(job.result);
+      return `Saved: ${prefsText(prefs)}. The sounds are placed again with them. ${n.text.replace(/\{(\w+)\}/g, (m, k) => n.vars?.[k] ?? m)}`;
+    },
     // the twist: Claude stops the music at the second the story turns
     music_stop: async ({ project, args = {} }) => {
       if (!project.meta?.music?.file) return "No music is on the timeline yet: the app places it in the Final Mix; stop it there afterwards.";
@@ -368,7 +422,15 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       // qcRound bundles a code film from its source first and says when it does not compile
       // a one-page film (no frame mounted) is sampled over its whole length by the storyboard's planned shots, not its first 1.1 s
       // the round's three parts at once, unless the graphics card is short of memory
-      const res = await qcRound(project.path, { shots: placedShots(shots, comp?.duration), total: comp?.duration ?? null, signal: ctx.stopping.signal, parallel: !gpuShort() });
+      const res = await qcRound(project.path, { shots: placedShots(shots, comp?.duration), total: comp?.duration ?? null, signal: ctx.stopping.signal, parallel: !gpuShort(),
+        onRetry: () => { try { ctx.agent?.event?.(task, { kind: "status", text: "App: Taking the review pictures once more (the computer is busy)" }); } catch { /* the chat's line only */ } } });
+      // the pictures stopped twice on a busy computer (T26-5: 11.5 min and no picture, and the round went on): no round is kept and no
+      // score is given from nothing; the Review's end says it in the chat with a Retry (autopilot taskEnded)
+      if (res.busy) {
+        task.stillsBusy = true;
+        return `${STILLS_BUSY}\nThe app tried twice and HyperFrames did not finish the stills in time: nothing is wrong with the film. This is no review round: do not score, do not write QC-REVIEW.md and do not change the film from it. Stop now and say in one short line that the pictures could not be taken because the computer is busy; the owner presses Retry.`;
+      }
+      task.qcSheetsOk = true;
       let fresh = null;
       if (!task.freshEyesDone && res.sheets.beats) {          // the first round of this task: a second look that knows nothing else
         task.freshEyesDone = true;
@@ -378,7 +440,8 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       // an anidoodle film: every frame drawn, every pose inside its joint limits (a run pose once left them and
       // HyperFrames' check, which samples, stopped the render at the end); the Review fixes what it names
       const pose = poseText(await poseCheck(project.path));
-      return [qcText(res, fresh), pose, glyphText(codeGlyphs(project.path))].filter(Boolean).join("\n\n");
+      // a Vietnamese film's words on screen written without their marks (Test 24: the Review never saw "NHAT KY · TRAM HON GIO")
+      return [qcText(res, fresh), pose, glyphText(codeGlyphs(project.path)), viMarksText(viMarks(project.path))].filter(Boolean).join("\n\n");
     },
   };
 
@@ -455,10 +518,15 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     r("GET", `/projects/${P}/mix`, ([id]) => {
       const p = mustProject(id, root), m = p.meta ?? {};
       const rounds = readOptions(p.path).rounds;
-      const sfx = readState(p.path);
-      return { music: m.music ? { ...m.music, url: url(id, m.music.file) } : null, voice: m.voice?.file ? { file: m.voice.file, saved: m.voice.transcript?.status === "saved", used: !m.voice.offTimeline } : null,          // used: false once the user chose not to use it
+      const sfx = readState(p.path), prefs = readPrefs(p.path);
+      // repeat: a song shorter than the film plays again after itself (tracks.mjs musicLoop); `short` when far shorter, said to the owner
+      return { music: m.music ? { ...m.music, url: url(id, m.music.file), repeat: musicRepeats(p.path) } : null, voice: m.voice?.file ? { file: m.voice.file, saved: m.voice.transcript?.status === "saved", used: !m.voice.offTimeline } : null,          // used: false once the user chose not to use it
         options: rounds.map((r0) => ({ ...r0, tracks: r0.tracks.map((t) => ({ ...t, url: url(id, t.file), current: m.music?.option === t.file || m.music?.file === t.file })) })),
-        sfx: (sfx.mounted ?? []).map((x) => ({ name: x.name, start: x.start, file: x.file, auto: !!x.auto })), loudness: m.lastExport?.loudness ?? null, carved: m.carve ?? null,
+        sfx: (sfx.mounted ?? []).map((x) => ({ name: x.name, start: x.start, file: x.file, auto: !!x.auto, id: x.id ?? null })), loudness: m.lastExport?.loudness ?? null, carved: m.carve ?? null,
+        // the scenes' ambience beds (one row a bed, however many clips its loop takes), and the owner's sound choices
+        ambience: [...new Map((sfx.ambience?.placed ?? []).map((x) => [x.key, x])).values()].map((x) => ({ id: x.key, name: String(x.name ?? "").replace(/^ambience:\s*/, ""),
+          start: Math.min(...sfx.ambience.placed.filter((y) => y.key === x.key).map((y) => y.start)) })),
+        sfxPrefs: { density: prefs.density ?? sfx.policy?.density ?? DEFAULT_DENSITY, ambience: prefs.ambience !== false, off: prefs.off ?? [], skipped: (prefs.skip ?? []).length },
         // the last placement: when (the dialog follows it), the named sounds it left out and those on a stand-in ({ name, as })
         sfxAt: sfx.placedAt ?? null, sfxMissing: sfx.left?.missing ?? [], sfxNear: sfx.left?.near ?? [],
         sfxPlacing: ctx.jobs.list({ kind: "mix-sfx" }).some((j) => j.projectId === id && j.status === "running") };
@@ -484,22 +552,46 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
         return placeSfx(p, job.signal);
       }) };
     }),
-    r("POST", `/projects/${P}/mix/sfx/clear`, ([id]) => { const p = mustProject(id, root); return mixChange(p, "sound effects removed", () => { mount(p.path, [], { left: { missing: [], near: [] } }); writeCredits(p.path); return { placed: 0 }; }); }),
+    // the owner's sound choices from the Final Mix: one sound taken out (skip: its id), all of them back (unskip: true), the density, the
+    // ambience on or off; kept in .moworks/sfx-prefs.json, and the sounds placed again at once with them
+    r("POST", `/projects/${P}/mix/sfx/prefs`, ([id], b) => {
+      const p = mustProject(id, root);
+      const patch = {};
+      if (typeof b.skip === "string" && b.skip.trim()) patch.skip = [b.skip.trim()];
+      if (b.unskip === true) patch.unskip = true;
+      if (b.density != null) { if (!DENSITIES.includes(b.density)) throw new HttpError(400, "INVALID", "The density is low, normal or lively"); patch.density = b.density; }
+      if (typeof b.ambience === "boolean") patch.ambience = b.ambience;
+      if (!Object.keys(patch).length) throw new HttpError(400, "INVALID", "Nothing to change");
+      const prefs = updatePrefs(p.path, patch);
+      return { prefs, job: ctx.jobs.start("mix-sfx", { projectId: id, title: "Sound effects" }, async (job) => {
+        job.update({ stage: "placing sound effects" });
+        return placeSfx(p, job.signal);
+      }) };
+    }),
+    r("POST", `/projects/${P}/mix/sfx/clear`, ([id]) => { const p = mustProject(id, root); return mixChange(p, "sound effects removed", () => { mount(p.path, [], { left: { missing: [], near: [] } }); mountAmbience(p.path, []); writeCredits(p.path); return { placed: 0 }; }); }),
     r("POST", `/projects/${P}/mix/carve`, async ([id]) => {
       const p = mustProject(id, root);
       if (!p.meta?.music?.file || !p.meta?.voice?.file) throw new HttpError(400, "INVALID", "The carve needs a voice-over and a music track on the timeline");
       return mixChange(p, "music under the voice (carve)", async () => {
-        const r0 = await runScript(p.path, { name: "carve", args: ["--comp", "index.html", "--bed", "el-music", "--voice", "el-voice"], skills: ["media-use"], root });
-        if (!r0.ok) throw new HttpError(500, "CARVE_FAILED", `HyperFrames' carve failed: ${(r0.stderr || r0.stdout).trim().split("\n").slice(-2).join(" ").slice(0, 300)}`);
+        // every clip of the voice (a voice cut into one clip a line, T22-11: el-voice-01…13) and each clip of the music (a song played
+        // again after itself) carved in turn; HF's carve takes --voice again and again, and one bed a run
+        let html = ""; try { html = readFileSync(join(p.path, "index.html"), "utf8"); } catch { /* no film page yet */ }
+        const voices = trackClips(html, "voice").map((c) => c.id).filter(Boolean), beds = trackClips(html, "music").map((c) => c.id).filter(Boolean);
+        const out = [];
+        for (const bed of beds.length ? beds : ["el-music"]) {
+          const r0 = await runScript(p.path, { name: "carve", args: ["--comp", "index.html", "--bed", bed, ...(voices.length ? voices : ["el-voice"]).flatMap((v) => ["--voice", v])], skills: ["media-use"], root });
+          if (!r0.ok) throw new HttpError(500, "CARVE_FAILED", `HyperFrames' carve failed: ${(r0.stderr || r0.stdout).trim().split("\n").slice(-2).join(" ").slice(0, 300)}`);
+          out.push(r0.stdout.trim());
+        }
         projects.updateMeta(id, (m) => { m.carve = { at: new Date().toISOString() }; }, root);
-        return { ok: true, output: r0.stdout.trim().slice(-600) };
+        return { ok: true, output: out.join("\n").slice(-600) };
       });
     }),
-    r("POST", `/projects/${P}/boards/pdf`, ([id], b) => {
+    r("POST", `/projects/${P}/boards/pdf`, async ([id], b) => {
       const p = mustProject(id, root);
       // one user round: its letters, named by its number
       const letters = Array.isArray(b.options) ? b.options.map(String).filter(isOption) : null;
-      const rel = roundPdf(p.path, String(b.round ?? ""), letters?.length ? letters : b.option ? String(b.option) : null, { root, no: Number(b.no) > 0 ? Math.floor(Number(b.no)) : null });
+      const rel = await roundPdf(p.path, String(b.round ?? ""), letters?.length ? letters : b.option ? String(b.option) : null, { root, no: Number(b.no) > 0 ? Math.floor(Number(b.no)) : null });
       return { path: rel, name: basename(rel) };
     }),
   ];

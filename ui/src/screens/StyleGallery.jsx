@@ -43,11 +43,23 @@ export const authorTag = (a) => TAGS[a?.id] ?? String(a?.name ?? a?.id ?? "?").r
 export const usesOf = (s) => s.uses ?? s.tags ?? [];
 /** A category as shown: translated, without the source in brackets ("Motion design (mg-styles-15)" → "Motion design"; the author tag says whose). */
 export const catLabel = (t, c) => t(c ?? "").replace(/\s*\([^)]*\)$/, "");
-/** A style's category under its name, unless the name already says it ("Explainer · Explainer", "Motion Graphics · Motion graphics"). */
+/** A style's category under its name, unless the name is the category ("Explainer · Explainer", "Motion Graphics · Motion graphics").
+ *  A name that only holds the word keeps it (T23-9: "Vertical and social clips" and "Characters, mascots and story shorts" lost their
+ *  "Social" and "Story" while every other HyperFrames card had its type). */
 const plain = (x) => String(x ?? "").toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
-export const catOf = (t, s) => { const c = catLabel(t, s.category); return c && plain(t(s.title)).includes(plain(c)) ? "" : c; };
+export const catOf = (t, s) => { const c = catLabel(t, s.category); return c && plain(t(s.title)) === plain(c) ? "" : c; };
 /** The still for a tile: the server's small thumbnail when it has one, else the full still. */
 export const thumbOf = (s) => s.preview?.thumb ?? s.preview?.image ?? null;
+/** A sample taller than wide (a vertical demo) is marked `tall` once it has loaded: its frame shows it whole on a bed, never a landscape
+ *  crop of it (T23-9: the 9:16 style's card cut a strip out of its vertical demo). A square one (1:1, 4:3: too narrow for a 16:9 frame)
+ *  is marked `square` and shown whole the same way (T26-1: Hand embroidery's 640 × 640 hoop lost its top and bottom). Toggled, so a frame
+ *  that shows another style follows. */
+export const isTall = (w, h) => w > 0 && h > w * 1.1;
+export const isSquare = (w, h) => w > 0 && !isTall(w, h) && w < h * 1.5;
+export const markTall = (el) => {
+  const w = el?.naturalWidth || el?.videoWidth, hh = el?.naturalHeight || el?.videoHeight;
+  if (w) { el.classList.toggle("tall", isTall(w, hh)); el.classList.toggle("square", isSquare(w, hh)); }
+};
 const host = (u) => { try { return new URL(u).host; } catch { return ""; } };
 const byName = (a, b) => a.title.localeCompare(b.title);
 
@@ -101,8 +113,10 @@ export function TechTags({ s }) {
 export function StyleDetails({ s, author, actions }) {
   const t = useT();
   return <>
-    <div className="sgb-big">{s.preview?.video ? <video key={s.preview.video} src={s.preview.video} poster={s.preview.image ?? undefined} controls muted loop playsInline preload="metadata" aria-label={t("{title}, sample film", { title: s.title })} />
-      : s.preview?.image ? <img src={s.preview.image} alt={t("{title}, sample picture", { title: s.title })} /> : <NoPreview text={t("No sample yet")} />}</div>
+    <div className="sgb-big">{s.preview?.video ? <video key={s.preview.video} src={s.preview.video} poster={s.preview.image ?? undefined} controls muted loop playsInline preload="metadata" aria-label={t("{title}, sample film", { title: s.title })}
+      onLoadedMetadata={(e) => markTall(e.currentTarget)} />
+      : s.preview?.image ? <img src={s.preview.image} alt={t("{title}, sample picture", { title: s.title })} onLoad={(e) => markTall(e.currentTarget)} ref={(el) => { if (el?.complete) markTall(el); }} />
+      : <NoPreview text={t("No sample yet")} />}</div>
     {s.preview?.label && <p className="hint">{t(s.preview.label)}{s.preview.credit && <><br /><span className="credit-line">{s.preview.credit}</span></>}</p>}
     <div className="sgb-head">
       {/* the author's own title (Chinese) stays in the data, the search and the credits, not on screen */}
@@ -170,8 +184,8 @@ export function StyleTile({ s, author, on, onPick, className = "sgb-card", role,
   const t = useT();
   return <button type="button" className={className + (on ? " on" : "")} role={role} aria-pressed={role ? undefined : on} aria-checked={role ? on : undefined} onClick={() => onPick(s)}
     title={s.preview?.label ? t(s.preview.label) : undefined}>
-    <span className="shot">{thumbOf(s) ? <img className="fade" src={thumbOf(s)} alt="" loading="lazy" decoding="async" onLoad={(e) => e.currentTarget.classList.add("in")}
-      ref={(el) => { if (el?.complete && el.naturalWidth) el.classList.add("in"); }} /> : <NoPreview />}
+    <span className="shot">{thumbOf(s) ? <img className="fade" src={thumbOf(s)} alt="" loading="lazy" decoding="async" onLoad={(e) => { e.currentTarget.classList.add("in"); markTall(e.currentTarget); }}
+      ref={(el) => { if (el?.complete && el.naturalWidth) { el.classList.add("in"); markTall(el); } }} /> : <NoPreview />}
       {s.dim && <span className="mark">{s.dim}</span>}{s.warnings?.some((w) => !NOTE_KINDS.has(w.kind)) && <span className="mark warn" title={t("Read before use")}><AlertTriangle size={11} /></span>}
       <AeBadge s={s} compact />{on && <span className="chk"><Check size={13} /></span>}</span>
     <span className="nm">{t(s.title)}</span>

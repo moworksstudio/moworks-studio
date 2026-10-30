@@ -5,10 +5,11 @@
 // the user can send to a client. A round is new when any option's files changed since the last one; an option that did not change keeps
 // its stills (copied, not taken again).
 import { createHash } from "node:crypto";
-import { execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { snapshotAtAsync } from "../hf-qa/cli.mjs";
+import { snapOnceMore, snapshotAtAsync, STILL_IDLE_MS, STILLS_BUSY } from "../hf-qa/cli.mjs";
 import { tile } from "../hf-qa/qc.mjs";
 import { boardFonts } from "./finalize.mjs";
 import { stillsProblem } from "./boardCheck.mjs";
@@ -214,6 +215,7 @@ export async function writeSheets(stillsDir) {
 }
 
 /** Take the stills of the options as they are now. Returns { round, fresh, failed: [{ option, message }], notes: [{ option, message }] }; fresh = a new round was made.
+ *  The stills stopped twice on a busy computer: the new round is removed and it throws STILLS_BUSY (code "STILLS_BUSY").
  *  retake: { option, frames: [n…] } takes again only those frames of that option (after a fix, only what changed); the option's
  *  other frames and the other options keep the last round's stills. onProgress({ done, total }): the frames taken so far. */
 // filmTimes: each still at its frame's own seconds in STORYBOARD.md (HF's storyboard.md); otherwise, or when a frame has no length,
@@ -272,8 +274,15 @@ export async function takeStills(dir, { signal = null, force = false, by = "owne
     // the frames HF has written so far count as taken (the snapshot is one call per option)
     const shot = () => { try { return Math.min(count, readdirSync(shotDir).filter((f) => /\.png$/i.test(f)).length); } catch { return 0; } };
     const tick = onProgress ? setInterval(() => onProgress({ done: done + shot(), total }), 700) : null;
-    try { r = await snap(join(dir, BOARDS, x.option), times, shotDir, { signal }); }
+    // a time limit sized to the frames, a run that stalls ends after 2 min with no new still, and a stopped run takes the frames it lacks
+    // once more by itself (T25: each call hung about 11.5 min and the round came back empty)
+    try { r = await snapOnceMore(snap, join(dir, BOARDS, x.option), times, shotDir, { signal, idleMs: STILL_IDLE_MS }); }
     finally { if (tick) clearInterval(tick); if (linked) unlinkSync(link); }
+    // stopped twice: no round of empty pictures (the dialog showed one, and Approve was on); the caller says STILLS_BUSY with a Retry
+    if (r.busy) {
+      rmSync(join(dir, ROUNDS, id), { recursive: true, force: true });
+      throw Object.assign(new Error(STILLS_BUSY), { code: "STILLS_BUSY" });
+    }
     done += count;
     onProgress?.({ done, total });
     if (only?.length) {
@@ -333,9 +342,11 @@ export function recordPick(dir, roundId, pick) {
 
 // ---- one PDF of a round (or of one option): every still as a page, as JPEG (DCTDecode), at half the pixel size in points
 const pngSize = (f) => { const b = readFileSync(f); return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) }; };
-/** Write the PDF; returns its path (project-relative). option: one letter, a list of letters (one round of the user's) or all; no: the
- *  user's round number for the file name. */
-export function roundPdf(dir, roundId, option = null, { root, no = null } = {}) {
+const run = promisify(execFile);
+/** Write the PDF; resolves its path (project-relative). option: one letter, a list of letters (one round of the user's) or all; no: the
+ *  user's round number for the file name. Each still's JPEG is made by FFmpeg off the event loop (a round of 20 stills took seconds of the
+ *  server's thread). */
+export async function roundPdf(dir, roundId, option = null, { root, no = null } = {}) {
   const round = listRounds(dir).find((r) => r.id === roundId);
   if (!round) throw Object.assign(new Error("No such round"), { code: "NOT_FOUND" });
   const only = option == null ? null : [option].flat().map(String);
@@ -343,11 +354,12 @@ export function roundPdf(dir, roundId, option = null, { root, no = null } = {}) 
   if (!stills.length) throw Object.assign(new Error("This round has no stills"), { code: "INVALID" });
   const tmp = join(dir, ROUNDS, roundId, ".pdf-tmp");
   mkdirSync(tmp, { recursive: true });
-  const pages = stills.map((s, i) => {
+  const pages = [];
+  for (const [i, s] of stills.entries()) {
     const png = join(dir, ...s.split("/")), jpg = join(tmp, `p${i}.jpg`);
-    if (!existsSync(jpg) || statSync(jpg).mtimeMs < statSync(png).mtimeMs) execFileSync(ffmpegExe(root), ["-v", "error", "-y", "-i", png, "-q:v", "3", jpg], { windowsHide: true });
-    return { ...pngSize(png), data: readFileSync(jpg) };
-  });
+    if (!existsSync(jpg) || statSync(jpg).mtimeMs < statSync(png).mtimeMs) await run(ffmpegExe(root), ["-v", "error", "-y", "-i", png, "-q:v", "3", jpg], { windowsHide: true });
+    pages.push({ ...pngSize(png), data: readFileSync(jpg) });
+  }
   const name = `storyboard-${only?.length ? `option-${only.join("-")}` : `options-${round.options.map((o) => o.option).join("-")}`}.pdf`;          // no "round" in the file name
   const out = join(dir, ROUNDS, roundId, name);
   writeFileSync(out, pdfOf(pages));

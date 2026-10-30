@@ -11,28 +11,31 @@ import * as projects from "../project-service/index.mjs";
 import { musicSrc, readBeats } from "../hf-edit/beats.mjs";
 import { showInExplorer } from "../project-service/explorer.mjs";
 import { rememberAssets } from "../project-service/assets.mjs";
+import { ARCHIVE, archiveMessage, unpackArchive } from "../project-service/archive.mjs";
 import * as rev from "../revisions/index.mjs";
 import { placedShots, readShots } from "../hf-edit/shots.mjs";
 import { qaFacts } from "../pipeline/index.mjs";
 import { snapshotAtAsync } from "../hf-qa/cli.mjs";
 import { dynamicOf } from "../hf-qa/qc.mjs";
-import { findingShot, plainFinding } from "../hf-qa/plain.mjs";
+import { findingShot, measuringSlip, plainFinding } from "../hf-qa/plain.mjs";
+import { keptFor, keptOnPurpose } from "../hf-qa/look.mjs";
 import { measureStills, stillGate } from "../hf-qa/stillness.mjs";
 import { endingGate, measureEnding } from "../hf-qa/ending.mjs";
-import { styleTraits } from "../style-catalog/traits.mjs";
+import { filmEnding } from "../hf-edit/ending.mjs";
 import { render } from "../hf-render-worker/client.mjs";
 import { chooseGpu } from "../hf-render-worker/gpu.mjs";
-import { aeRunning, aeRunningAsync, canvasCount, plainLog } from "../ae-export/index.mjs";
+import { aeRunningAsync, canvasCount, plainLog } from "../ae-export/index.mjs";
 import * as secrets from "../secrets/index.mjs";
-import { PROVIDERS, SETTINGS, pickModel, voiceSettings } from "../voice/tts.mjs";
+import { PROVIDERS, clearVoiceLists, pickModel, retryOnce, ttsFailedText, voiceList, voiceSettings } from "../voice/tts.mjs";
+import { plainMessage } from "./plainError.mjs";
 import { AUDIO_TYPES, MAX_BYTES, extractAudio, peaks, probe } from "../voice/audio.mjs";
 import * as asr from "../voice/asr.mjs";
 import * as transcript from "../voice/transcript.mjs";
 import * as lyrics from "../voice/lyrics.mjs";
-import { scriptDraft } from "../voice/script.mjs";
+import { briefScript, scriptDraft, scriptGap } from "../voice/script.mjs";
 import { MASTER, loudness, masterLoudness } from "../hf-qa/loudness.mjs";
 import { capWebBitrate } from "../hf-qa/webBitrate.mjs";
-import { analyseBeats, fitMusicToFilm, musicUsed, placeTrack } from "../hf-edit/tracks.mjs";
+import { analyseBeats, fitMusicToFilm, musicRepeats, musicUsed, placeTrack } from "../hf-edit/tracks.mjs";
 import { refreshBridge } from "../hf-edit/lemoPage.mjs";
 import { resolveRuntime } from "../version-manager/index.mjs";
 import { filmHash } from "./proxy.mjs";
@@ -83,6 +86,12 @@ export function reusableChecks(projectDir, key, { blank = false } = {}) {
   if (!c || c.key !== key || (blank && !c.blank) || !c.gates) return null;
   if ((c.gates.gates ?? []).some((g) => g.timedOut)) return null;
   return c;
+}
+
+/** The Review's own files as look.mjs's keptOnPurpose reads them: { json: QC-REVIEW.json, md: QC-REVIEW.md } (each null / "" when absent). */
+export function reviewFiles(projectDir) {
+  let md = ""; try { md = readFileSync(join(projectDir, "QC-REVIEW.md"), "utf8"); } catch { /* no review */ }
+  return { json: readJson(join(projectDir, "QC-REVIEW.json"), null), md };
 }
 
 /** Whether Tech checks run from their dialog carry the pipeline on (qaEnded): they passed (warnings only, a timed-out script check
@@ -181,15 +190,17 @@ export const CHECKS = {
   "G-FONT": { title: "Fonts available", explain: "Every font the film uses is on this computer.", kind: "deterministic" },
   "G-GLYPH": { title: "Vietnamese characters", explain: "Each font has every character the film writes, Vietnamese tone marks included.", kind: "deterministic" },
   "G-GLYPH-CODE": { title: "Vietnamese characters in the film's code", explain: "Words a film drawn by code writes (What If, anidoodle) in a face that lacks some Vietnamese letters: they would show in another face, or as a dash in anidoodle's drawn capitals. Read from the code: a warning, never a block.", kind: "heuristic" },
+  "G-VI-MARKS": { title: "Vietnamese written without its marks", explain: "Words on screen in a Vietnamese film that are Vietnamese with their tone marks left off (NHAT KY for NHẬT KÝ), whatever the style's look. Read from the film's pages and code: a warning, never a block.", kind: "heuristic" },
   "G-BUILD": { title: "The film's code compiles", explain: "A film drawn by code is built from its source first; a source that does not build would leave an older film to render.", kind: "deterministic" },
   "G-VOICE": { title: "The voice stays clear", explain: "Under a voice-over, the effects and the music stay at least 3 dB under the voice on every spoken word. A warning, never a block.", kind: "deterministic" },
+  "G-SFX": { title: "A sound on every action", explain: "Once the sound effects are placed, every visible action of the Motion Plan (an entrance, an exit, a landing, a step, a door…) has a sound within about 0.3 s, unless you, the brief or the film style asked for silence or keep that kind of sound out. A warning, never a block.", kind: "deterministic" },
   "G-POSE": { title: "Poses inside their limits", explain: "Draws every frame of an anidoodle film and checks each character's pose against its joint limits, and that nothing throws or logs an error.", kind: "deterministic" },
   "G-CONTRACT": { title: "Same film every time", explain: "An anidoodle film draws each frame the same way every time, so the render matches what you saw.", kind: "deterministic" },
   "G-HF-LAYOUT": { title: "Layout", explain: "At every cut: text that overlaps, hides, is cut off or runs out of the frame or its box.", kind: "deterministic" },
   "G-HF-CONTRAST": { title: "Contrast", explain: "Every text stands out enough from what is behind it to read easily.", kind: "deterministic" },
   "G-HF-MOTION": { title: "Motion", explain: "The moves the Motion Plan asks for are in the film.", kind: "deterministic" },
   "G-BLANK": { title: "Empty-looking scenes", explain: "Takes a few stills of each scene and flags a scene whose stills are all flat. A heuristic: it can miss or misjudge.", kind: "heuristic" },
-  "G-END": { title: "The ending", explain: "Compares a still half a second before the end with the last frame: a film whose picture is still full on its last frame stops dead. The picture should fade out with the music (or after the end card). Not measured in a style with its author's own ending.", kind: "deterministic" },
+  "G-END": { title: "The ending", explain: "Compares a still half a second before the end with the last frame: a film whose picture is still full and lit on its last frame stops dead. The picture should fade out with the music (or after the end card). In a style whose author's ending the Motion Plan names and plays, a dark screen, a dot or a held end card ends the film too.", kind: "deterministic" },
   "G-STILL": { title: "Still stretches", explain: "Takes a still every 0.25 s and flags where the film's objects hold still for more than 2 s (the final hold excepted): the film should never look like a slideshow. A drift of a few pixels or a slight tilt counts as still. A heuristic: it can misjudge.", kind: "heuristic" },
 };
 
@@ -197,7 +208,8 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   const { root, jobs } = ctx;
   const J = "([a-z-]+-[0-9a-z]+)";
   const meta = (id, fn) => projects.updateMeta(id, fn, root);
-  const commit = (p, msg) => { try { rev.ensureRepo(p.path); rev.commitAll(p.path, msg); } catch { /* revisions optional */ } ctx.backupProject(p.id); };
+  // recorded beside the server's thread, in the project's git queue (T22-5); never rejects. Awaited where what follows reads the revision
+  const commit = async (p, msg) => { try { await rev.saveAsync(p.path, msg); } catch { /* revisions optional */ } ctx.backupProject(p.id); };
   const workDir = (p, ...xs) => join(p.path, ".moworks", "cache", ...xs);
   const voiceOf = (p) => projects.getProject(p.id, root)?.meta?.voice ?? null;
   const audioPath = (p) => { const v = voiceOf(p); return v?.file ? join(p.path, ...v.file.split("/")) : null; };
@@ -263,7 +275,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       const t = transcript.fromEngine(p.path, { audio: voiceOf(p).file, result });
       meta(p.id, (m) => { m.voice.transcript = { status: "review", model: id, language: result.language, at: t.createdAt, segments: t.segments.length };
         (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "voice", text: `Transcript ready (${card.short}, ${result.segments.length} segments)` }); });
-      commit(p, "Voice-over transcribed");
+      await commit(p, "Voice-over transcribed");
       // a voice-over the app read from a script (ElevenLabs, Fish Audio) says that script word for word: its words are the
       // script's, at Whisper's times; when what was heard is far from the script (another take, an edited file) the user checks them
       const v0 = voiceOf(p), read = ["elevenlabs", "fishaudio"].includes(v0?.source) && v0?.script && v0.file === t.audio ? transcript.fromScript(t.segments, v0.script) : null;
@@ -274,7 +286,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       }
       // the app uses Whisper's words at once: saved and on the timeline; the user corrects them in the
       // transcript dialog and sends them again when needed
-      const words = saveTranscript(projects.getProject(p.id, root), read ? read.segments : t.segments);
+      const words = await saveTranscript(projects.getProject(p.id, root), read ? read.segments : t.segments);
       note(p, { kind: "voice", text: read && read.changed + read.missed ? "Transcript ready: {n} words, the film is timed to them; {k} word(s) taken from the script the voice was read from"
         : "Transcript ready: {n} words, the film is timed to them; open Transcript to correct them", vars: { n: words, k: read ? read.changed + read.missed : 0 } });
       return { segments: result.segments.length, language: result.language, device: result.device, words, ...(read ? { script: { match: read.match, changed: read.changed, missed: read.missed } } : {}) };
@@ -308,6 +320,9 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       job.signal.removeEventListener("abort", kill);
       let out;
       try { out = JSON.parse(o); } catch { return no(err(job.signal.aborted ? "CANCELLED" : "CHECKS", `Tech checks could not run (exit ${code}) ${e.split(/\r?\n/).slice(-2).join(" ")}`)); }
+      // HF's check was stopped twice (the computer is busy, T22): said in plain words, a wait for the user with a Retry; never kept as the
+      // film's checks, never their time
+      if (out.busy) return no(Object.assign(err("CHECK_BUSY", out.message), { detail: { waitsOnUser: true, retry: true } }));
       try { mkdirSync(join(p.path, ".moworks", "cache", "qa"), { recursive: true }); writeFileSync(checkTimeFile(p), JSON.stringify({ sec: Math.round((Date.now() - t0) / 1000), at: new Date().toISOString(), blank })); } catch { /* the next bar guesses less */ }
       ok(out);
     });
@@ -327,14 +342,25 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   };
 
   const note = (p, n) => { try { projects.addNote(p.path, n); } catch { /* notes are best effort */ } };
-  /** The user's music track on the timeline, its beats measured by HyperFrames, recorded as the film's music. */
-  const placeMusic = (p, rel, info, { start = null } = {}) => {
+  /** The user's music track on the timeline, its beats measured by HyperFrames (off the server's thread), recorded as the film's music. */
+  const placeMusic = async (p, rel, info, { start = null } = {}) => {
     placeTrack(p.path, { kind: "music", src: rel, duration: Number(info?.duration) || 1, start });
-    const beats = analyseBeats(p.path, rel);
+    const beats = await analyseBeats(p.path, rel);
+    if (beats.ok) { try { fitMusicToFilm(p.path); } catch { /* fitted again before the checks */ } }          // a song shorter than the film repeats on its beats
     meta(p.id, (m) => { m.music = { file: rel, duration: info?.duration ?? null, beats: beats.ok ? beats.file : null, at: new Date().toISOString() };
       (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "music", text: `Music on the timeline: ${basename(rel)}` }); });
     note(p, { kind: "voice", text: beats.ok ? "Music on the timeline, beats measured: {file}" : "Music on the timeline: {file}", vars: { file: basename(rel) } });
+    repeatNote(p);
     return { file: rel, beats: beats.ok ? beats.file : null, beatsError: beats.ok ? null : beats.message };
+  };
+  /** A song far shorter than the film plays again after itself to the film's end (tracks.mjs musicLoop, T22-9): said once in the chat, its
+   *  Final Mix button there to pick a longer one (the Final Mix says it too). */
+  const repeatNote = (p) => {
+    const r = musicRepeats(p.path);
+    const cur = projects.getProject(p.id, root)?.meta?.music;
+    if (!r?.short || !cur || cur.repeatNoted === r.from) return;
+    meta(p.id, (m) => { if (m.music) m.music.repeatNoted = r.from; });
+    note(p, { kind: "music", status: "warning", open: "mix", text: "The song is shorter than the film; it repeats from {at}. Pick a longer track in the Final Mix if you hear the repeat.", vars: { at: r.at } });
   };
 
   // ---- Render (top bar): a quick check first (render-breaking issues only), then the HF render worker
@@ -359,10 +385,15 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     async function renderNow(job) {
       projects.keepRootFps(projects.getProject(p.id, root) ?? p);          // the film's data-fps back on the root before HF reads it
       fitMusicToFilm(p.path);          // the music ends with the film, fading down with the picture (ending.mjs)
+      repeatNote(p);
       refreshBridge(p.path);          // a code film built before a bridge change gets today's bridge
-      commit(p, "Changes before render");
-      job.update({ stage: "checks", revision: rev.head(p.path) });
-      const gates = await gatesFor(p, job, { blank: false });          // Tech checks' results when the film is unchanged
+      await commit(p, "Changes before render");
+      job.update({ stage: "checks", revision: await rev.headAsync(p.path) });
+      const gates = await gatesFor(p, job, { blank: false }).catch((e) => {          // Tech checks' results when the film is unchanged
+        // the quick check did not finish on a busy machine: said in the chat too (a render left blocked went unseen for 70 min, T22)
+        if (e.code === "CHECK_BUSY") note(p, { kind: "render", status: "warning", text: e.message, open: "render" });
+        throw e;
+      });
       const verdict = renderVerdict(gates);
       writeJson(gatesFile(p.path, out), { ...gates, verdict });          // never in renders/
       job.update({ gates: { pass: verdict.pass, blockingFailures: verdict.blocking.map((g) => g.id), ...(gates.reused ? { reused: gates.reused } : {}) }, warnings: verdict.warnings });
@@ -412,7 +443,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       meta(p.id, (m) => { (m.stages ??= {}).export = { status: "done" }; m.lastExport = { file: relativeTo(p.path, out), at: new Date().toISOString(), size, format, fps, quality, loudness: loud, ...(web?.capped ? { web } : {}) };
         (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "export", text: `Exported ${basename(out)}` }); });
       note(p, { kind: "render", text: "Render finished: {file}", vars: { file: basename(out) }, file: relativeTo(p.path, out), warnings: verdict.warnings.length });
-      try { ctx.autopilot?.saveVersion(p.id, "render"); } catch { /* a version is best effort */ }          // each render is a version
+      try { await ctx.autopilot?.saveVersion(p.id, "render"); } catch { /* a version is best effort */ }          // each render is a version
       if (loud?.notes?.length) note(p, { kind: "render", status: "warning", text: "Sound: {lufs} LUFS, peak {peak} dBTP ({notes}); the mix target is -16 LUFS, peak at most -1", vars: { lufs: loud.lufs, peak: loud.truePeak, notes: loud.notes.join(", ") } });
       // "Took" is the whole wait from pressing Render (the checks, the GPU test, the frames, the sound), not the frames alone
       const whole = job.startedAt ? Date.now() - Date.parse(job.startedAt) : res.wallMs;
@@ -439,10 +470,11 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     return jobs.start("qa", { projectId: p.id, title: "Running checks", onEnd, ...(background ? { background: true } : {}) }, async (job) => {
       projects.keepRootFps(projects.getProject(p.id, root) ?? p);          // `hyperframes check` and the stills read the root's data-fps
       fitMusicToFilm(p.path);
+      repeatNote(p);
       refreshBridge(p.path);
       await freshFilm(p.path);          // the film as it is now, before the commit (G-BUILD would bundle it after)
-      commit(p, "Changes before checks");
-      const revision = rev.head(p.path) ?? "none";
+      await commit(p, "Changes before checks");
+      const revision = (await rev.headAsync(p.path)) ?? "none";
       job.update({ stage: "checks", progress: 10 });
       // Tech checks run every time they are asked for, and keep their results for a Render of the same film
       const key = gateHash(p.path, projects.projectFps(projects.getProject(p.id, root) ?? p), root);
@@ -470,19 +502,27 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
         catch (e) { if (job.signal.aborted) throw e; stillErr = String(e.message).split(/\r?\n/)[0]; }
       } else stillErr = "the film has no length yet";
       gates.gates.push(stillGate(still, stillErr));
-      // the ending: a hard cut on the last half second (house rules §9); a style with its author's own ending keeps it
+      // the ending: a hard cut on the last half second (house rules §9), in every style (T24-12); where the plan's author's ending
+      // stands (named, played in the last shot), a held end card ends the film too
       job.update({ stage: "the ending", progress: 90 });
-      const own = styleTraits(projects.getProject(p.id, root)?.meta?.style?.id, root).ownEnding;
+      const ending = filmEnding(projects.getProject(p.id, root)?.meta, { dir: p.path, root });
       let end = null, endErr = null;
-      if (!own && comp?.duration > 0) {
+      if (comp?.duration > 0) {
         try { end = await measureEnding(p.path, { total: comp.duration, signal: job.signal, workDir: workDir(p, "end") }); }
         catch (e) { if (job.signal.aborted) throw e; endErr = String(e.message).split(/\r?\n/)[0]; }
-      } else if (!own) endErr = "the film has no length yet";
-      gates.gates.push(endingGate(end, { own, error: endErr, shot: placed.at(-1)?.number ?? null }));
+      } else endErr = "the film has no length yet";
+      gates.gates.push(endingGate(end, { own: ending.own, author: ending.author ?? null, error: endErr, shot: placed.at(-1)?.number ?? null }));
       const shotOf = (file) => placed.find((s) => s.src && file && file.replace(/\\/g, "/").endsWith(s.src))?.number ?? null;
       // HF's findings found in their shot by the element's id (HF names index.html for the elements it tracks: the kite of shot 6
-      // read as "shot: null"), each with one plain line for the user (`plain`)
-      const hfFinding = (f, title) => { const at = findingShot(f, placed, p.path); return { ...f, file: at.file ?? f.file, shot: at.shot?.number ?? null, plain: plainFinding(f, { shot: at.shot, check: title }) }; };
+      // read as "shot: null"), each with one plain line for the user (`plain`). What the Review kept on purpose (QC-REVIEW.json's `kept`,
+      // else its QC-REVIEW.md lines) is `intended`, a turning point measured far outside the frame an `artefact`: neither is a warning (T23-3)
+      const frame = projects.getProject(p.id, root)?.meta?.format ?? null;
+      const kept = keptOnPurpose(reviewFiles(p.path));
+      const hfFinding = (f, title) => {
+        const at = findingShot(f, placed, p.path), shot = at.shot?.number ?? null, k = keptFor({ ...f, shot }, kept);
+        return { ...f, file: at.file ?? f.file, shot, plain: plainFinding(f, { shot: at.shot, check: title, frame }),
+          ...(measuringSlip(f, frame) ? { artefact: true } : {}), ...(k ? { intended: true, ...(k.why ? { why: k.why } : {}) } : {}) };
+      };
       const report = { at: new Date().toISOString(), revision, pass: gates.pass, blockingFailures: gates.blockingFailures,
         checks: gates.gates.map((g) => { const c = CHECKS[g.id] ?? { title: g.id, explain: "", kind: "deterministic" };
           return { ...g, ...c, findings: (g.findings ?? []).map((f) => g.id.startsWith("G-HF-") ? hfFinding(f, c.title)
@@ -502,18 +542,19 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   }
 
   // ---- Export to AE: the existing aeExport() in a child process (packages/ae-export/cli.mjs --events)
-  function startAe(p, b) {
+  async function startAe(p, b) {
     // always the film's own rate, like the render: b.fps is ignored; PortAE shows the rate from GET /ae
     const fps = String(projects.projectFps(projects.getProject(p.id, root) ?? p));
     const estimate = b.estimate === true;
-    if (!estimate && !aeRunning()) throw err("AE_NOT_RUNNING", "Open After Effects first (with no dialog showing), then try again");
+    // tasklist off the server's thread (about 1 s while the computer renders)
+    if (!estimate && !(await aeRunningAsync())) throw err("AE_NOT_RUNNING", "Open After Effects first (with no dialog showing), then try again");
     // each export in its own folder named like a render (<YYMMDD>_<film>_<HHMM>), never over the one before; a size check writes nothing
     const aeRoot = join(p.path, "renders", "ae");
     const outDir = estimate ? join(p.path, ".moworks", "cache", "ae-estimate") : join(aeRoot, stampedName(aeRoot, basename(p.path)));
     return jobs.start(estimate ? "ae-estimate" : "ae", { projectId: p.id, title: estimate ? "Checking the AE export size" : "Export to After Effects", outDir }, async (job) => {
       projects.keepRootFps(projects.getProject(p.id, root) ?? p);
       fitMusicToFilm(p.path);
-      commit(p, "Changes before Export to AE");
+      await commit(p, "Changes before Export to AE");
       // the Log the user reads has no addresses (plainLog); the whole log as written stays in the film's cache (port.log)
       const raw = [], log = (line) => { raw.push(line); job.log(plainLog(line)); };
       // Stop is the user's, not a failure: no exit code, said plainly
@@ -561,26 +602,62 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   }
 
   /** The transcript saved as HyperFrames' transcript.json and the voice-over put on the timeline (a talking-head clip's own sound stays in
-   *  its video); byOwner: the user's corrected words (the transcript dialog's resend). Returns the number of words. */
-  function saveTranscript(p, segments, { byOwner = false } = {}) {
-    const out = transcript.save(p.path, segments, { workDir: workDir(p, "asr") });
+   *  its video); byOwner: the user's corrected words (the transcript dialog's resend). Resolves the number of words. */
+  async function saveTranscript(p, segments, { byOwner = false } = {}) {
+    const out = await transcript.save(p.path, segments, { workDir: workDir(p, "asr") });
     meta(p.id, (m) => { m.voice = { ...(m.voice ?? {}), transcript: { ...(m.voice?.transcript ?? {}), status: "saved", savedAt: out.transcript.savedAt, segments: out.transcript.segments.length, by: byOwner ? "owner" : "app" } };
       (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "voice", text: `Transcript saved (${out.hf.words} words in transcript.json${byOwner ? ", corrected by the owner" : ""})` }); });
     const v = projects.getProject(p.id, root)?.meta?.voice;
     if (v?.file && !v.from && !v.offTimeline) { try { placeTrack(p.path, { kind: "voice", src: v.file, duration: Number(v.info?.duration) || 1 }); } catch { /* an index.html Studio cannot read stays as it is */ } }
-    commit(p, "Transcript saved");
+    await commit(p, "Transcript saved");
     return out.hf.words;
   }
 
-  /** The project's voice-over is now this file: recorded in the project, committed, and transcribed at once. */
-  function useVoice(p, dest, info, { source = "upload", size = 0, from = null } = {}) {
+  /** The project's voice-over is now this file: recorded in the project, committed, and transcribed at once. Resolves once committed
+   *  (the transcription's files go in a later revision of their own). */
+  async function useVoice(p, dest, info, { source = "upload", size = 0, from = null } = {}) {
     const rel = relativeTo(p.path, dest);
     meta(p.id, (m) => { m.voice = { source, file: rel, name: basename(dest), size, info, addedAt: new Date().toISOString(), transcript: { status: "pending" }, ...(from ? { from } : {}) };
       (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "voice", text: `Voice-over added: ${basename(dest)}` }); });
-    commit(p, `Voice-over added: ${basename(dest)}`);
+    await commit(p, `Voice-over added: ${basename(dest)}`);
     let job = null, needsModel = null;
     try { job = startTranscribe(projects.getProject(p.id, root)); } catch (e) { needsModel = e.message; }
     return { voice: voiceOf(p), job, needsModel };
+  }
+
+  /** Copy one file into the project by kind, as an upload is (a short sound goes to sfx once it is measured): its import entry. */
+  async function placeFile(p, from, name, size) {
+    let d = projects.assetDestination(p.path, name);
+    copyFileSync(from, d.path + ".part"); renameSync(d.path + ".part", d.path);
+    if (d.kind === "audio" && d.folder !== "3_audio/sfx") {
+      let info = null; try { info = await probe(d.path, root); } catch { /* not readable as audio: stays where it is */ }
+      if (info?.duration > 0 && info.duration < 3) { const to = projects.assetDestination(p.path, basename(d.path), "sfx"); renameSync(d.path, to.path); d = to; }
+    }
+    return { name: basename(d.path), path: d.rel, area: d.area, folder: d.folder, kind: d.kind, size };
+  }
+
+  /** An imported archive (already copied to d): unpacked with Windows' tar, its files copied in by kind with the same naming rules, the
+   *  archive's own copy removed (the user's original stays where it was). One that cannot be unpacked stays as it came, and the
+   *  result says so in plain words. Its files wait in the Assets tab for the user's choice of voice-over or music, as later uploads do.
+   *  Returns the upload's answer with archive: { name, unpacked, files?, skipped?, error? }. */
+  async function importArchive(p, d, size) {
+    const name = basename(d.path);
+    const u = await unpackArchive(d.path);
+    const placed = [];
+    if (u.ok && u.files.length) {
+      try { for (const f of u.files) placed.push(await placeFile(p, f.abs, f.name, f.size)); }
+      finally { u.cleanup(); }
+      rmSync(d.path, { force: true });
+    } else if (u.ok) u.cleanup();
+    const ok = placed.length > 0;
+    const rels = ok ? placed.map((x) => x.path) : [d.rel];
+    rememberAssets(p.path, rels);
+    note(p, { kind: "assets", text: "Added {n} file(s)", files: rels });
+    try { ctx.autopilot?.filesAdded?.(p.id, rels); } catch { /* the note stands */ }
+    await commit(p, ok ? `Assets added from ${name} (${placed.length} file(s))` : `Asset added: ${d.rel}`);
+    return ok ? { file: null, voice: null, archive: { name, unpacked: true, files: placed, skipped: u.skipped ?? [] } }
+      : { file: { name, path: d.rel, area: d.area, folder: d.folder, kind: d.kind, size }, voice: null,
+        archive: { name, unpacked: false, skipped: u.skipped ?? [], error: archiveMessage(name, u.ok ? "empty" : u.reason) } };
   }
 
   const raw = [
@@ -598,6 +675,8 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       const limit = async function* (src) { for await (const c of src) { n += c.length; if (n > projects.MAX_ASSET_BYTES) throw new HttpError(413, "TOO_LARGE", "The file is over 4 GB"); yield c; } };
       try { await pipeline(req, limit, createWriteStream(d.path + ".part")); } catch (e) { rmSync(d.path + ".part", { force: true }); throw e; }
       renameSync(d.path + ".part", d.path);
+      // an archive (.zip, .rar, .7z) is unpacked and its files go in as any import (T25: they stayed archives)
+      if (ARCHIVE.test(d.path)) return importArchive(p, d, n);
       let info = null;
       if (d.kind === "audio") {
         try { info = await probe(d.path, root); } catch { /* not readable as audio: stays where it is */ }
@@ -621,14 +700,14 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
             audio = projects.assetDestination(p.path, basename(d.path, extname(d.path)) + ".m4a", "voiceover").path;
             await extractAudio(d.path, audio, root);
           }
-          voice = useVoice(p, audio, await probe(audio, root), { source: "upload", size: statSync(audio).size, from: d.kind === "video" ? d.rel : null });
+          voice = await useVoice(p, audio, await probe(audio, root), { source: "upload", size: statSync(audio).size, from: d.kind === "video" ? d.rel : null });
         } catch (e) { voice = { error: e.code === "INVALID" ? e.message : "This file could not be read as audio" }; }
       } else if (role === "music" && d.kind === "audio" && (asked || !m0.music?.file)) {         // the user's track: on the timeline at once, its beats measured
         let music = null;
-        try { music = placeMusic(p, d.rel, info ?? await probe(d.path, root)); } catch (e) { music = { error: e.message }; }
-        commit(p, `Music added: ${d.rel}`);
+        try { music = await placeMusic(p, d.rel, info ?? await probe(d.path, root)); } catch (e) { music = { error: e.message }; }
+        await commit(p, `Music added: ${d.rel}`);
         return { file, voice, music };
-      } else commit(p, `Asset added: ${d.rel}`);
+      } else await commit(p, `Asset added: ${d.rel}`);
       return { file, voice };
     }],
     // upload: the body is the file itself (X-File-Name header); always followed by transcription when a model is ready
@@ -667,8 +746,8 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     r("GET", "/voice/settings", () => ({ settings: asr.voiceSettings(root), models: asr.models(root), modelsRoot: asr.modelsRoot(root), keys: secrets.status(root),
       providers: Object.entries(PROVIDERS).map(([id, x]) => ({ id, title: x.title })), jobs: jobs.list({ kind: "model-install" }).slice(0, 5) })),
     r("PATCH", "/voice/settings", (_p, b) => ({ settings: asr.saveVoiceSettings(b, root) })),
-    r("PUT", "/voice/keys/(elevenlabs|fishaudio)", ([name], b) => secrets.setSecret(name, b.value, root)),
-    r("POST", "/voice/keys/(elevenlabs|fishaudio)/clear", ([name]) => secrets.clearSecret(name, root)),
+    r("PUT", "/voice/keys/(elevenlabs|fishaudio)", ([name], b) => { clearVoiceLists(name); return secrets.setSecret(name, b.value, root); }),
+    r("POST", "/voice/keys/(elevenlabs|fishaudio)/clear", ([name]) => { clearVoiceLists(name); return secrets.clearSecret(name, root); }),
     r("POST", "/voice/keys/(elevenlabs|fishaudio)/test", async ([name]) => {
       const key = secrets.getSecret(name, root);
       if (!key) throw err("INVALID", "Save the key first");
@@ -677,13 +756,9 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     r("GET", "/voice/providers/(elevenlabs|fishaudio)/voices", async ([name], _b, q) => {
       const key = secrets.getSecret(name, root);
       if (!key) throw err("INVALID", `Add the ${PROVIDERS[name].title} key in Settings first`);
-      const models = await PROVIDERS[name].models(key);
-      // the picker's first choice reads Vietnamese (the app's films are Vietnamese unless the brief says otherwise)
-      // the settings the screen shows and the service's own defaults for each voice (its saved ones, else the service's)
-      let defaults = {}; try { defaults = await PROVIDERS[name].defaultSettings(key); } catch { /* shown empty: the service still uses its own */ }
-      const voices = (await PROVIDERS[name].voices(key, { q: q.get("q") ?? "" })).map(({ settings, ...v }) => ({ ...v, defaultSettings: { ...defaults, ...(settings ?? {}) } }));
-      return { voices, models, settings: SETTINGS[name].map(({ default: _d, ...f }) => f), defaultSettings: defaults,
-        defaultModel: name === "elevenlabs" ? pickModel(models, { lang: q.get("lang") === "en" ? "en" : "vi" }) : models[0]?.id ?? null };          // ?lang= the film's language
+      // read at once with 45 s a call and kept 10 min per service and language (T25: a busy computer's 25 s failure); ?lang= the film's
+      // language, ?fresh=1 reads it again
+      return voiceList(name, key, { q: q.get("q") ?? "", lang: q.get("lang") === "en" ? "en" : "vi", fresh: q.get("fresh") === "1" });
     }),
     r("POST", "/voice/models/([a-z0-9-]+)/install", ([mid]) => {
       const card = asr.models(root).find((m) => m.id === mid);
@@ -706,7 +781,9 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       return { voice: p.meta?.voice ?? null, hints: hintsFor(p), transcript: t, hfTranscript: existsSync(join(p.path, "transcript.json")), settings: asr.voiceSettings(root),
         models: asr.models(root).map(({ id: mid, short, installed, runtime, isDefault, languages }) => ({ id: mid, short, installed, ready: installed && runtime.ok, isDefault, languages })),
         keys: secrets.status(root), jobs: jobs.list({ projectId: id }).filter((j) => ["transcribe", "tts"].includes(j.kind)).slice(0, 3),
-        scriptDraft: scriptDraft(p.path) };          // the words Claude wrote to read, for the Script box ({ text, from } or null)
+        scriptDraft: scriptDraft(p.path),          // the words Claude wrote to read, for the Script box ({ text, from } or null)
+        // the owner's own script in the brief and the lines of it the words to read leave out (Test 24: 9 of 12 went in)
+        ownScript: (() => { const lines = briefScript(p.meta?.brief?.text); return lines.length >= 2 ? { text: lines.join("\n"), leftOut: scriptGap(p.path, p.meta?.brief?.text)?.left.length ?? 0 } : null; })() };
     }),
     r("PATCH", `/projects/${P}/voice`, ([id], b) => {
       mustProject(id, root);
@@ -733,12 +810,12 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     r("PUT", `/projects/${P}/voice/transcript`, async ([id], b) => {
       const p = mustProject(id, root);
       if (ctx.renders?.isRendering(id)) throw err("RENDERING", "The film is being rendered: wait until the render finishes");
-      const words = saveTranscript(p, b.segments, { byOwner: true });
+      const words = await saveTranscript(p, b.segments, { byOwner: true });
       note(p, { kind: "voice", text: "Transcript saved: {n} words, the film can be timed to it", vars: { n: words } });
       // the film is built already: Claude reads the corrected words and moves what was timed to them
       let retime = null;
       if (p.meta?.pipeline?.ran?.build && !ctx.agent?.running?.has(id)) {
-        retime = await ctx.agent.start(id, { scope: { kind: "project" }, text: "The owner corrected the voice-over's words (transcript.json). Read them and move what is timed to them (shot starts, captions, kinetic text) to the new times; change nothing else. Say in one line what moved." })
+        retime = await ctx.agent.start(id, { scope: { kind: "project" }, by: "app", text: "The owner corrected the voice-over's words (transcript.json). Read them and move what is timed to them (shot starts, captions, kinetic text) to the new times; change nothing else. Say in one line what moved." })
           .then((t) => t.id).catch(() => null);
       } else if (!p.meta?.pipeline?.ran?.build) { try { ctx.autopilot?.transcriptLanded?.(id)?.catch?.(() => {}); } catch { /* the user can go on */ } }
       return { transcript: transcript.read(p.path), words, retime };
@@ -765,10 +842,10 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       // gpu: Whisper runs on the graphics card here (the CUDA pack is in), so the sheet says the right wait
       return { ...lyrics.read(p.path), track: musicTrack(p), job: job?.id ?? null, gpu: asr.whisperDevice(root).gpu };
     }),
-    r("PUT", `/projects/${P}/lyrics`, ([id], b) => {
+    r("PUT", `/projects/${P}/lyrics`, async ([id], b) => {
       const p = mustProject(id, root);
       const out = lyrics.save(p.path, b.text);
-      commit(p, "Lyrics saved");
+      await commit(p, "Lyrics saved");
       return { ...out, track: musicTrack(p) };
     }),
     r("POST", `/projects/${P}/lyrics/time`, ([id]) => {
@@ -785,7 +862,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
         const window = musicUsed(p.path, { trackDuration: await trackLength(p, track) });
         const r = await lyrics.align(p.path, { track, window, workDir: workDir(p, "lyrics"), signal: job.signal, root, onEvent: (e) => { if (e.type === "info") job.update({ stage: "matching" }); } });
         meta(id, (m) => { (m.activity ??= []).unshift({ at: r.at, kind: "music", text: `Lyrics timed: ${r.heard} of ${r.heard + r.placed} words heard` }); });
-        commit(p, "Lyrics timed");
+        await commit(p, "Lyrics timed");
         note(p, { kind: "voice", text: "Lyrics timed: {h} of {n} words heard, the rest placed on the beats", vars: { h: r.heard, n: r.heard + r.placed } });
         return r;
       });
@@ -801,23 +878,42 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       if (!key) throw err("INVALID", `Add the ${PROVIDERS[provider].title} key in Settings first`);
       // only what the user set on the Voice screen (none: the service's defaults); `speed` alone is the older shape
       const settings = voiceSettings(provider, b.settings ?? (b.speed != null ? { speed: b.speed } : null));
-      return jobs.start("tts", { projectId: id, title: `Voice-over from ${PROVIDERS[provider].title}` }, async (job) => {
+      // Test 24: the first voice-over failed while the computer was loaded (the server did not answer for about 30 s) and the step went
+      // quietly back to "make the voice-over", with nothing in the Voice box or the chat. A failure that may pass is tried once more; one
+      // that stays is said in both, kept on the voice (ttsFailed: the Voice box and the Pipeline say it), and the step says so too
+      const title = PROVIDERS[provider].title;
+      meta(id, (m) => { if (m.voice?.ttsFailed) delete m.voice.ttsFailed; });
+      return jobs.start("tts", { projectId: id, title: `Voice-over from ${title}` }, async (job) => {
         job.update({ stage: "generating" });
         const out = join(p.path, "assets", "3_audio", "voiceover", `${provider}-${new Date().toISOString().replace(/[:.]/g, "-")}.mp3`);
-        // Vietnamese text is read by a model that reads Vietnamese, never eleven_multilingual_v2 by default
+        rememberAssets(p.path, [relativeTo(p.path, out)]);          // the app's own file, before it is written: never one "the user added" (T22-2)
+        const again =(what) => (e) => job.log(`${what} failed, trying once more: ${plainMessage(e)}`);
         let model = b.model ?? null;
-        if (provider === "elevenlabs") {
-          model = pickModel(await PROVIDERS.elevenlabs.models(key), { text, asked: model, lang: p.meta?.language?.id ?? null });
-          if (!model) throw err("INVALID", "This ElevenLabs account has no model that reads Vietnamese");
-          job.update({ model });
+        try {
+          // Vietnamese text is read by a model that reads Vietnamese, never eleven_multilingual_v2 by default
+          if (provider === "elevenlabs") {
+            model = pickModel(await retryOnce(() => PROVIDERS.elevenlabs.models(key), { signal: job.signal, onRetry: again("the model list") }), { text, asked: model, lang: p.meta?.language?.id ?? null });
+            if (!model) throw err("INVALID", "This ElevenLabs account has no model that reads Vietnamese");
+            job.update({ model });
+          }
+          await retryOnce(() => PROVIDERS[provider].generate(key, { voiceId: b.voiceId, model: model ?? undefined, text, out, signal: job.signal, settings, lang: p.meta?.language?.id ?? null }),
+            { signal: job.signal, onRetry: again("reading the script") });
+        } catch (e) {
+          rmSync(out, { force: true });          // no half-written file left behind
+          if (!job.signal.aborted) {
+            const said = ttsFailedText({ message: plainMessage(e) }, title);
+            meta(id, (m) => { m.voice = { ...(m.voice ?? {}), ttsFailed: { at: new Date().toISOString(), message: said } }; });
+            note(p, { kind: "voice", status: "error", text: said });
+            try { ctx.autopilot?.advance?.(id)?.catch?.(() => {}); } catch { /* the Pipeline says it on its next read */ }
+          }
+          throw e;
         }
-        await PROVIDERS[provider].generate(key, { voiceId: b.voiceId, model: model ?? undefined, text, out, signal: job.signal, settings, lang: p.meta?.language?.id ?? null });
         const info = await probe(out, root);
         const rel = relativeTo(p.path, out);
         meta(id, (m) => { m.voice = { source: provider, file: rel, name: basename(out), size: statSync(out).size, info, voiceId: b.voiceId ?? null, voiceName: b.voiceName ?? null,
           model: model ?? null, settings, script: text, addedAt: new Date().toISOString(), transcript: { status: "pending" } };
           (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "voice", text: `Voice-over generated with ${PROVIDERS[provider].title}` }); });
-        commit(p, `Voice-over generated (${PROVIDERS[provider].title})`);
+        await commit(p, `Voice-over generated (${PROVIDERS[provider].title})`);
         let next = null; try { next = startTranscribe(projects.getProject(id, root)).id; } catch (e) { job.log(`transcription not started: ${e.message}`); }
         return { file: rel, duration: info.duration, transcribeJob: next };
       });
@@ -849,13 +945,13 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     }),
 
     // ---- QA
-    r("GET", `/projects/${P}/qa`, ([id]) => {
+    r("GET", `/projects/${P}/qa`, async ([id]) => {
       const p = mustProject(id, root);
       const last = readJson(workDir(p, "qa", "last.json"), null);
-      const head = existsSync(join(p.path, ".git")) ? rev.head(p.path) : null;
+      const head = existsSync(join(p.path, ".git")) ? await rev.headAsync(p.path) : null;
       return { report: last ? { ...last, stills: last.stills.map((s) => ({ ...s, url: `${ctx.preview.base}/p/${id}/${s.path}` })) } : null,
         // the film changed, not the app's own records (a version, the pre-render, the Editor's opening write .moworks/ only)
-        changedSince: !!last && !!head && last.revision !== head && rev.changedSince(p.path, last.revision), job: jobs.list({ kind: "qa", projectId: id })[0] ?? null };
+        changedSince: !!last && !!head && last.revision !== head && await rev.changedSinceAsync(p.path, last.revision), job: jobs.list({ kind: "qa", projectId: id })[0] ?? null };
     }),
     r("POST", `/projects/${P}/qa`, ([id]) => startQa(mustProject(id, root), { onEnd: () => qaEnded(id) })),
 
@@ -892,7 +988,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     meta(p.id, (m) => { m.links[link.url].file = d.rel; });
     rememberAssets(p.path, [d.rel]);
     note(p, { kind: "assets", text: "Added {n} file(s)", files: [d.rel] });
-    commit(p, `Asset added: ${d.rel} (Google Slides)`);
+    await commit(p, `Asset added: ${d.rel} (Google Slides)`);
     try { ctx.autopilot?.filesAdded?.(p.id, [d.rel]); } catch { /* the note stands */ }
     return { ok: true, file: { name: d.rel.split("/").pop(), path: d.rel, area: d.area, folder: d.folder, kind: d.kind, size: got.bytes.length } };
   }

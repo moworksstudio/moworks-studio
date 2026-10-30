@@ -16,7 +16,7 @@ import Player, { usePreview } from "../editor/Player.jsx";
 import Timeline from "../editor/Timeline.jsx";
 import MotionDrawer from "../editor/MotionDrawer.jsx";
 import ShotList from "../editor/ShotList.jsx";
-import AssetsPanel, { useAssets } from "../editor/AssetsPanel.jsx";
+import AssetsPanel, { placedSay, putOnTimeline, useAssets } from "../editor/AssetsPanel.jsx";
 import Versions from "../editor/Versions.jsx";
 import FilmCard from "../editor/FilmCard.jsx";
 import { useT } from "../i18n.jsx";
@@ -257,8 +257,20 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const myRender = useMyRender(id, pipeline?.render);
   const locked = busy || rendering;          // hand edits wait while Claude changes the film or the film renders
 
-  // HF's element ids are pinned into the files before the film loads (the picker and the hand edits address elements by them)
-  useEffect(() => { let alive = true; setPrepared(false); post(`/api/projects/${id}/edit/prepare`).catch(() => {}).finally(() => alive && setPrepared(true)); return () => { alive = false; }; }, [id]);
+  // HF's element ids are pinned into the files as the film opens (the picker and the hand edits address elements by them). The film
+  // waits for that a few seconds at most (T26-3: on a busy server it took minutes, and the page said "Opening the project…" all that
+  // time): then it plays, and it is loaded once more if the ids changed its files
+  const [prepareSlow, setPrepareSlow] = useState(false);
+  const [filmKey, setFilmKey] = useState(0);
+  useEffect(() => {
+    let alive = true, shown = false;
+    setPrepared(false); setPrepareSlow(false);
+    const slow = setTimeout(() => { shown = true; if (alive) setPrepareSlow(true); }, 3000);
+    post(`/api/projects/${id}/edit/prepare`).then((r) => { if (alive && shown && r?.changed) setFilmKey((k) => k + 1); }).catch(() => {})
+      .finally(() => { clearTimeout(slow); if (alive) setPrepared(true); });
+    return () => { alive = false; clearTimeout(slow); };
+  }, [id]);
+  const filmShown = prepared || prepareSlow;
   const loadTimeline = useCallback(() => get(`/api/projects/${id}/timeline`).then(setTl).catch(() => {}), [id]);
   useEffect(() => { loadTimeline(); }, [loadTimeline]);
   // shot pictures: HF stills of each shot, made again after a change (only when Claude is not working)
@@ -271,6 +283,13 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     } catch { /* no pictures yet */ }
   }, [id, locked]);
   useEffect(() => { loadPosters(); }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+  // the storyboard approved: its stills are the shots' pictures until the Build (they waited for a reload of the page)
+  const sbOption = p ? p.meta?.approvals?.storyboard?.option ?? "" : null, lastSb = useRef(null);
+  useEffect(() => {
+    if (sbOption == null) return;
+    if (lastSb.current != null && sbOption && sbOption !== lastSb.current) loadPosters();
+    lastSb.current = sbOption;
+  }, [sbOption]); // eslint-disable-line react-hooks/exhaustive-deps
   // a title appears once per screen: before the Build the one starter shot is named after the film, which the page head says
   const shots = useMemo(() => tl?.shots?.map((s) => (p?.built === false && s.title?.trim() === p?.title?.trim() ? { ...s, title: "" } : s)) ?? null, [tl, p?.built, p?.title]);
   useEffect(() => { if (!shot || !shots) return; const s = shots.find((x) => x.number === shot.number); setShot(s ?? null); }, [shots]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -295,12 +314,24 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
       filesChanged(true);
     } catch (e) { toast(e.message, "error"); loadTimeline(); }
   };
+  // a sound dragged from the Assets tab onto a lane: there, at the drop's time, then read again as "Put on the timeline" does
+  const soundDrop = async (path, to) => {
+    const name = assets?.find((x) => x.path === path)?.name ?? path.split("/").pop();
+    try { const r = await putOnTimeline(id, path, to); toast(placedSay(t, name, r.at)); reloadAssets(); loadTimeline(); pv.send("reload"); }
+    catch (e) { toast(e.message, "error"); }
+  };
   const filesChanged = (structure = false) => {
     loadTimeline(); reloadPipeline(); setVersion((v) => v + 1);
     if (structure) pv.send("reload");
     setTimeout(loadPosters, 1500);
   };
-  const reloadFilm = async () => { await post(`/api/projects/${id}/edit/prepare`).catch(() => {}); pv.send("reload"); refreshAll(); setVersion((v) => v + 1); setTimeout(loadPosters, 1500); };
+  // the film, its shots and the timeline are read at once; the ids pinned after (minutes on a busy server, T26-3) load the film once
+  // more only when they changed its files
+  const reloadFilm = async () => {
+    pv.send("reload"); refreshAll(); setVersion((v) => v + 1); setTimeout(loadPosters, 1500);
+    const r = await post(`/api/projects/${id}/edit/prepare`).catch(() => null);
+    if (r?.changed) pv.send("reload");
+  };
   const appWork = pipeline?.appBusy?.jobId ?? pipeline?.appBusy?.key ?? null;
   const lastAppWork = useRef(null);
   useEffect(() => {          // the SFX lane stayed empty until a reload: read the timeline and the film again when the app's work ends
@@ -314,6 +345,19 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   useEffect(() => {          // the film plays the new sounds too (not on the first read of the pipeline)
     if (lastSfx.current !== sfxAt) { const was = lastSfx.current; lastSfx.current = sfxAt; loadTimeline(); if (was) pv.send("reload"); }
   }, [sfxAt]); // eslint-disable-line react-hooks/exhaustive-deps
+  // The Build done (the first time, or again): the film, its shots and the timeline are read again from the pipeline the Editor reads
+  // anyway, not only when the chat sees its task end (T26-3: the chat's reads failed on a busy server, and the player said "Not built
+  // yet" and the shots "Not built" while the Review already ran, until a reload)
+  const buildDone = pipeline ? !!pipeline.steps?.some((x) => x.id === "build" && x.status === "done") : null;
+  const lastBuild = useRef(null);
+  useEffect(() => {
+    if (buildDone == null) return;
+    const was = lastBuild.current; lastBuild.current = buildDone;
+    if (was === false && buildDone) reloadFilm();
+  }, [buildDone]); // eslint-disable-line react-hooks/exhaustive-deps
+  // the film read just before its Build ended (the page opened as it finished): read once more
+  const builtStale = buildDone === true && p?.built === false;
+  useEffect(() => { if (builtStale) { project.reload(); loadTimeline(); } }, [builtStale]); // eslint-disable-line react-hooks/exhaustive-deps
   // The voice-over's words saved (by the app, or by the user in the Voice screen) put them on the timeline at
   // once, however the Editor heard of it (the transcription can end between two pipeline reads)
   const voiceStamp = `${p?.meta?.voice?.file ?? ""}|${p?.meta?.voice?.transcript?.status ?? ""}|${p?.meta?.voice?.transcript?.savedAt ?? ""}`;
@@ -350,7 +394,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const voiceWait = pipeline?.voiceWait ?? null;
   const waitOpened = useRef(new Set());
   useEffect(() => {
-    const kind = ["make", "check", "failed"].includes(voiceWait) ? "voice" : voiceWait === "lyrics" ? "lyrics" : null;
+    const kind = ["make", "check", "failed", "ttsFailed"].includes(voiceWait) ? "voice" : voiceWait === "lyrics" ? "lyrics" : null;
     const key = `mw-voice-wait:${id}:${voiceWait}`;
     if (!kind || sheet || waitOpened.current.has(key)) return;
     waitOpened.current.add(key);
@@ -418,7 +462,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     const ro = new ResizeObserver(measure);
     ro.observe(body);
     return () => ro.disconnect();
-  }, [studio, w, tlH, aspectStr, prepared]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [studio, w, tlH, aspectStr, filmShown]); // eslint-disable-line react-hooks/exhaustive-deps
   if (project.error) return <div className="page"><Banner kind="error">{project.error.message}</Banner></div>;
   if (p?.missing) return <div className="page"><Banner kind="warning">{t("The project folder was not found. Locate it in Projects.")}</Banner></div>;
 
@@ -449,6 +493,9 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const showAssets = () => { setLeftTab("assets"); setNarrowTab("left"); reloadAssets(); };
   // Until the Build the page is the 3 s starter: no white film, no 3 s timeline, shots "Not built"
   const unbuilt = p?.built === false;
+  // before the Build a shot's picture is its approved storyboard still or none: a still of the starter's title card is no shot's
+  // (T23-9: shot 1 was a white box until the Build)
+  const shotPosters = unbuilt ? posters?.filter((x) => x.board) ?? null : posters;
   // a note pinned on the picture lands in the Notes tab with its words field ready (The Desk)
   const [aw, ah] = String(p?.meta?.format?.aspect ?? "16:9").split(":").map(Number);
   const placeNote = (place) => {
@@ -461,7 +508,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const removePin = (pid) => { const p = pins.find((x) => x.id === pid); setPins((x) => x.filter((y) => y.id !== pid)); if (p) setInject({ removeTag: p.tag ?? pinTag(p), n: Date.now() }); };
   // every style and both themes: what the edit card cannot change by hand is pinned as a note, in The Studio too
   const notesOn = !unbuilt;
-  const playerEl = prepared ? <Player projectId={id} pv={pv} shots={shots ?? []} shot={shot} onShot={setShot} locked={locked} planned={unbuilt ? p.plannedDuration ?? 0 : null}
+  const playerEl = filmShown ? <Player key={filmKey} projectId={id} pv={pv} shots={shots ?? []} shot={shot} onShot={setShot} locked={locked} planned={unbuilt ? p.plannedDuration ?? 0 : null}
     range={range} onFilesChanged={(reload) => filesChanged(!!reload)} pinning={pinning} onPin={notesOn ? () => { pv.send("pause"); pv.send("clear"); pv.setPicked([]); setPinning((x) => !x); } : null}>
     {notesOn && <NotesLayer notes={pins} time={pv.state.time} pinning={pinning} aspect={aw && ah ? aw / ah : 16 / 9} onPlace={placeNote} onRemove={removePin} />}</Player>
     : <div className="pv"><div className="pv-stage"><div className="pv-wait"><Loader2 size={18} className="spin" />{t("Opening the project…")}</div></div></div>;
@@ -478,10 +525,12 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   // the starter row says what the shots wait for: the storyboard being drawn, or the user's approval of it
   const sbStage = pipeline?.stages?.find((x) => x.id === "storyboard");
   const blankShot = sbStage?.status === "waiting" ? t("Waits for you to approve the storyboard") : sbStage?.status === "running" ? t("The storyboard is being drawn") : null;
-  const timelineEl = <Timeline data={unbuilt ? voiceOnly : tl} posters={posters} fps={p?.meta?.format?.fps || pv.state.fps || 30} time={unbuilt ? 0 : pv.state.time} duration={unbuilt ? p.plannedDuration ?? 0 : pv.state.duration} shot={shot} range={range} onRange={setRange}
+  const timelineEl = <Timeline data={unbuilt ? voiceOnly : tl} posters={shotPosters} fps={p?.meta?.format?.fps || pv.state.fps || 30} time={unbuilt ? 0 : pv.state.time} duration={unbuilt ? p.plannedDuration ?? 0 : pv.state.duration} shot={shot} range={range} onRange={setRange}
     readOnly={pv.videoOnly}
     onSeek={(s) => pv.send("seek", { time: s })} onShot={(s) => { setShot(s); setDismissed(null); }}
-    locked={locked || pv.videoOnly} onAudioMove={(c, to) => audioEdit("", c, to)} onAudioRemove={(c) => audioEdit("/remove", c, {})} />;
+    locked={locked || pv.videoOnly} onAudioMove={(c, to) => audioEdit("", c, to)} onAudioRemove={(c) => audioEdit("/remove", c, {})} onSoundDrop={soundDrop} />;
+  // the playhead and the film's length as the timeline has them: "Put on the timeline" starts a sound there
+  const tlTime = unbuilt ? 0 : pv.state.time, tlLength = Math.max((unbuilt ? p.plannedDuration : pv.state.duration) || 0, (unbuilt ? voiceOnly : tl)?.duration || 0);
   const centerPane = <div className="ed-center" ref={centerRef}>
     {playerEl}
     {hsplit}
@@ -497,10 +546,10 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
         aria-label={t("Add files")} title={rendering ? t("Wait until the render finishes") : t("Add files: pictures, video, audio, fonts, logos, PDF")}><Plus size={14} /><span className="lbl">{t("Add files")}</span></button>
     </div>
     <section className="ed-tabbody" role="tabpanel">
-      {leftTab === "assets" ? <AssetsPanel projectId={id} items={assets} reload={reloadAssets} fileUrl={fileUrl} locked={rendering}
+      {leftTab === "assets" ? <AssetsPanel projectId={id} items={assets} reload={reloadAssets} fileUrl={fileUrl} locked={rendering} time={tlTime} length={tlLength}
         onTranscript={(path) => openSheet("voice", { path })} onTimelineChanged={() => { loadTimeline(); pv.send("reload"); }}
         onShot={(n) => { const s = shots?.find((x) => x.number === n); if (s) { setShot(s); pv.send("seek", { time: s.start }); setLeftTab("shots"); } }} />
-        : <ShotList projectId={id} shots={unbuilt ? shots?.map((s) => ({ ...s, start: null })) : shots} blank={blankShot} posters={posters} shot={shot} locked={locked} send={pv.send} version={version}
+        : <ShotList projectId={id} shots={unbuilt ? shots?.map((s) => ({ ...s, start: null })) : shots} blank={blankShot} posters={shotPosters} shot={shot} locked={locked} send={pv.send} version={version}
           onShot={(s) => { setShot(s); if (s) pv.send("seek", { time: s.start }); }} onChanged={(structure) => filesChanged(!!structure)} />}
     </section></div>
     <section className="ed-box ed-pipe">
@@ -544,10 +593,12 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const strip = <ProjectStrip p={p} id={id} pipeline={pipeline} myRender={myRender} busy={busy} rendering={rendering} onSheet={openSheet}
     onRenamed={() => project.reload()} onRestored={reloadFilm} />;
   const edStyle = tlH ? { "--ed-tl-h": `${tlH}px` } : undefined;
+  // A tall or square film (9:16, 4:5, 1:1) keeps its own shape in the Shots' pictures, before the Build too (editor.css; T23-9: a 9:16
+  // film's were 16:9 boxes), and in The Studio on the table and on the Storyboard's wall (studio-editor.css, data-shape)
+  const filmAr = aw && ah ? aw / ah : 16 / 9, shape = filmShape(filmAr);
+  const deskStyle = shape ? { ...edStyle, "--film-ar": String(filmAr) } : edStyle;
   if (studio) {
-    // A tall or square film (9:16, 4:5, 1:1) keeps its own shape on the table (before the Build too), in the Shots and on the
-    // Storyboard's wall (studio-editor.css, data-shape); a wide one keeps the table as it is
-    const filmAr = aw && ah ? aw / ah : 16 / 9, shape = filmShape(filmAr);
+    // a wide film keeps the table as it is
     const stStyle = { ...edStyle, "--film-ar": String(filmAr) };
     // The Studio (chat on the right, the timeline across the bottom, no vertical X-sheet): the slate, the five
     // stations on their rail, then Shots / Assets / This film · the light table · the conversation, and the timeline under the first two.
@@ -566,11 +617,11 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
           <div className="st-addfiles"><button className="btn sm" onClick={() => openSheet("assets")} disabled={rendering}
             title={rendering ? t("Wait until the render finishes") : t("Add files: pictures, video, audio, fonts, logos, PDF")}><Plus size={14} />{t("Add files")}</button>
             <span className="hint">{t("Files copied into the project's folder show up here too.")}</span></div>
-          <AssetsPanel projectId={id} items={assets} reload={reloadAssets} fileUrl={fileUrl} locked={rendering}
+          <AssetsPanel projectId={id} items={assets} reload={reloadAssets} fileUrl={fileUrl} locked={rendering} time={tlTime} length={tlLength}
             onTranscript={(path) => openSheet("voice", { path })} onTimelineChanged={() => { loadTimeline(); pv.send("reload"); }}
             onShot={(n) => { const s = shots?.find((x) => x.number === n); if (s) { setShot(s); pv.send("seek", { time: s.start }); setLeftTab("shots"); } }} /></>
           : tab === "film" ? <FilmCard id={id} project={p} locked={locked} onRestored={reloadFilm} />
-            : <ShotList projectId={id} shots={unbuilt ? shots?.map((s) => ({ ...s, start: null })) : shots} blank={blankShot} posters={posters} shot={shot} locked={locked} send={pv.send} version={version}
+            : <ShotList projectId={id} shots={unbuilt ? shots?.map((s) => ({ ...s, start: null })) : shots} blank={blankShot} posters={shotPosters} shot={shot} locked={locked} send={pv.send} version={version}
               onShot={(s) => { setShot(s); if (s) pv.send("seek", { time: s.start }); }} onChanged={(structure) => filesChanged(!!structure)} />}
       </section>
     </aside>;
@@ -606,13 +657,13 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
         <aside className="st-chat" aria-label={t("Conversation")}><ErrorBoundary name="Claude">{chat}</ErrorBoundary></aside>
       </div>{leaveDialog}{viewerEl}</div>;
   }
-  if (w < 900) return <div className="ed" data-zone="editor" style={edStyle}>{strip}
+  if (w < 900) return <div className="ed" data-zone="editor" data-shape={shape} style={deskStyle}>{strip}
     <div className="pane-head ed-tabs"><div className="tabs" role="tablist">{[["left", "Shots & pipeline"], ["film", "Film"], ["claude", "Claude"]].map(([k, l]) =>
       <button key={k} role="tab" aria-selected={narrowTab === k} onClick={() => setNarrowTab(k)}>{t(l)}</button>)}</div></div>
     <div className="ed-narrow" style={{ display: narrowTab === "left" ? "flex" : "none" }}>{leftPane}</div>
     <div className="ed-narrow" style={{ display: narrowTab === "film" ? "flex" : "none" }}>{centerPane}</div>
     <div className="ed-narrow" style={{ display: narrowTab === "claude" ? "flex" : "none" }}>{rightPane}</div>
     {sheetEl}{askBar}{leaveDialog}{viewerEl}</div>;
-  return <div className="ed" data-zone="editor" style={edStyle}>{strip}<div className="ed-body"><Panes id="editor4" defaults={PANES} left={<ErrorBoundary name={t("Shots & pipeline")}>{leftPane}</ErrorBoundary>} center={<ErrorBoundary name={t("Film")}>{centerPane}</ErrorBoundary>}
+  return <div className="ed" data-zone="editor" data-shape={shape} style={deskStyle}>{strip}<div className="ed-body"><Panes id="editor4" defaults={PANES} left={<ErrorBoundary name={t("Shots & pipeline")}>{leftPane}</ErrorBoundary>} center={<ErrorBoundary name={t("Film")}>{centerPane}</ErrorBoundary>}
     right={<ErrorBoundary name="Claude">{rightPane}</ErrorBoundary>} /></div>{sheetEl}{askBar}{leaveDialog}{viewerEl}</div>;
 }

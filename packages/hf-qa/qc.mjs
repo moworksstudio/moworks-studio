@@ -7,7 +7,7 @@ import { copyFileSync, mkdirSync, readFileSync, readdirSync, rmSync } from "node
 import { execFile } from "node:child_process";
 import { isAbsolute, join, relative, sep } from "node:path";
 import { promisify } from "node:util";
-import { againIfBusy, runHfJsonAsync, snapshotAtAsync, STILL_IDLE_MS } from "./cli.mjs";
+import { againIfBusy, runHfJsonAsync, snapOnceMore, snapshotAtAsync, STILL_IDLE_MS, STILLS_BUSY } from "./cli.mjs";
 import { ffmpegExe } from "../library/preview-media.mjs";
 import { measureStills, stillLines } from "./stillness.mjs";
 import { freshFilm } from "../hf-edit/codeFilm.mjs";
@@ -91,9 +91,34 @@ export function withSeamsFallback(runner, { samples = null } = {}) {
 /** HF's layout pass reads 9 points over the whole film by default (one every 5.6 s in a 50 s film): a lyric pushed out of the frame
  *  in the last 0.7 s of a shot fell between two. Two a second, 9 to 120 (100 points: 36 s against 15 s). */
 export function checkSamples(dir) {
+  const d = filmSeconds(dir);
+  return d > 0 ? Math.min(120, Math.max(9, Math.ceil(d * 2))) : null;
+}
+/** The film's length in seconds (the root composition's data-duration), 0 when the page says none. */
+export function filmSeconds(dir) {
   let d = 0;
   try { d = Number(/<[^>]*\bdata-composition-id="[^"]*"[^>]*\bdata-duration="([\d.]+)"/.exec(readFileSync(join(dir, "index.html"), "utf8"))?.[1]); } catch { /* no page */ }
-  return d > 0 ? Math.min(120, Math.max(9, Math.ceil(d * 2))) : null;
+  return d > 0 ? d : 0;
+}
+
+// ---- the quick check on a busy machine (T22: a render was blocked as "hyperframes check gave no JSON (exit null)": the CLI was stopped at
+// its 5 min while the computer sat at 100 % CPU, and nobody saw it for 70 min)
+/** How long a quick check's `hyperframes check` may run before it is stopped: 10 min, and 5 s more for each second of film (two layout
+ *  points a second, each a seek and a measure), at most 25 min. HF's own budget is 120 s of check time; on a loaded machine the CLI's
+ *  start, its browser and its seeks take several times that. */
+export const checkTimeoutMs = (seconds) => Math.min(25 * 60000, 10 * 60000 + Math.max(0, Number(seconds) || 0) * 5000);
+/** What the user reads when the check was stopped twice: the film is not at fault, the computer was too busy. */
+export const CHECK_BUSY = "The quick check did not finish in time (the computer is busy). Try again.";
+/** A check that was stopped before it answered: its time ran out (`timedOut`), or it was killed (no exit code), with no JSON. */
+export const checkStopped = (r) => !r?.json && (r?.timedOut === true || r?.exitCode == null);
+/** Run the check (`check()`, the seams fallback included); a run that was stopped runs once more by itself (onRetry() first). The second
+ *  stopped too: the result says `busy`. A check that answered, or failed with an exit code, is kept as it is. */
+export async function checkOnceMore(check, { onRetry = () => {} } = {}) {
+  const r = await check();
+  if (!checkStopped(r)) return r;
+  onRetry();
+  const again = await check();
+  return { ...again, retried: true, ...(checkStopped(again) ? { busy: true } : {}) };
 }
 
 /** Why a still run gave less than asked, in words for Claude (HF's "Snapshots were not recorded: … history is open in another
@@ -109,11 +134,16 @@ export function dynamicOf(dir) {
   try { return JSON.parse(readFileSync(join(dir, "MOTION-PLAN.json"), "utf8")).dynamic ?? null; } catch { return null; }
 }
 
+/** The pictures stopped twice (STILLS_BUSY): the round is said as busy, with no sheet and no check, never as a round that worked; its
+ *  folder goes (the next round takes its number). */
+const busyRound = (res, out) => { rmSync(out, { recursive: true, force: true }); return { ...res, sheets: {}, busy: true, failed: [...res.failed, STILLS_BUSY] }; };
 /** One QC round: { round, dir, sheets: { beats, cuts, phone }, beats, cuts, check: { ok, findings, counts }, still, failed }.
  *  Its three parts (the stills and sheets, the still-stretch measure, HyperFrames' check) read the film and write only their own folders,
  *  so they run at once when `parallel` (a 30-shot film went from 5.4 to 2.3 min a round, the same result); one after the other
- *  when the graphics card is short of memory (each part is a Chrome). The result is assembled in the serial order either way. */
-export async function qcRound(dir, { shots, total, signal = null, parallel = false, snap = snapshotAtAsync, hf = runHfJsonAsync, decor = dropDecorationContrast, pauseMs = 3000 } = {}) {
+ *  when the graphics card is short of memory (each part is a Chrome). The result is assembled in the serial order either way.
+ *  The pictures stopped twice on a busy computer: { …, busy: true, sheets: {} } at once, the other parts ended (onRetry() before the
+ *  second try). */
+export async function qcRound(dir, { shots, total, signal = null, parallel = false, snap = snapshotAtAsync, hf = runHfJsonAsync, decor = dropDecorationContrast, pauseMs = 3000, onRetry = () => {} } = {}) {
   const base = join(dir, ".moworks", "qc");
   mkdirSync(base, { recursive: true });
   const n = readdirSync(base).filter((x) => /^R\d+$/.test(x)).map((x) => Number(x.slice(1))).reduce((a, b) => Math.max(a, b), 0) + 1;
@@ -127,13 +157,19 @@ export async function qcRound(dir, { shots, total, signal = null, parallel = fal
   //; a source that does not compile is said, and the round shows the last bundle
   const film = await freshFilm(dir);
   if (film?.error) res.failed.push(`the film's code does not compile, so these pictures show the film before your last change: ${film.error}`);
-  // each part returns what it adds to the round: { sheets, still, check, failed }
+  // the pictures stopped twice (a busy computer): the other parts end at once, the round is no round (T26-5: the check ran on to its
+  // 10 min and the round came back with no picture as if it had worked)
+  const off = new AbortController();
+  const partSignal = signal ? AbortSignal.any([signal, off.signal]) : off.signal;
+  // each part returns what it adds to the round: { sheets, still, check, failed, busy }
   const pictures = async () => {
     const part = { sheets: {}, failed: [] };
     if (!times.length) return part;
-    // a run that ends for no new still keeps what it took; one that gave nothing while HF's history was held runs once more
+    // a run that ends for no new still keeps what it took; one that gave nothing while HF's history was held runs once more; one that
+    // was stopped (its limit, sized to the stills, or no new still) takes the stills it lacks once more by itself
     const stills = () => readdirSync(raw).filter((f) => /^frame-.*\.png$/.test(f));
-    const r = await againIfBusy(() => snap(dir, times, raw, { signal, idleMs: STILL_IDLE_MS }), () => !stills().length, { pauseMs });
+    const r = await againIfBusy(() => snapOnceMore(snap, dir, times, raw, { signal, idleMs: STILL_IDLE_MS, onRetry }), () => !stills().length, { pauseMs });
+    if (r.busy) { off.abort(); return { ...part, busy: true }; }
     const files = stills().sort();
     const byT = new Map(files.map((f) => [Number(/-at-([\d.]+)s\.png$/.exec(f)?.[1]), f]));          // HF names each still by its time
     const at = (t) => { const f = byT.get(t) ?? [...byT].find(([k]) => Math.abs(k - t) < 0.006)?.[1]; return f ? join(raw, f) : null; };
@@ -149,11 +185,13 @@ export async function qcRound(dir, { shots, total, signal = null, parallel = fal
   };
   const stretches = async () => {
     if (!(total > 0)) return { failed: [] };
-    try { return { still: await measureStills(dir, { shots, total, dynamic: dynamicOf(dir), signal, workDir: join(out, "still"), snap, pauseMs }), failed: [] }; }
+    try { return { still: await measureStills(dir, { shots, total, dynamic: dynamicOf(dir), signal: partSignal, workDir: join(out, "still"), snap, pauseMs }), failed: [] }; }
     catch (e) { if (signal?.aborted) throw e; return { failed: [`still stretches: ${String(e.message).split(/\r?\n/)[0]}`] }; }
   };
   const checked = async () => {
-    const c = await withSeamsFallback((args) => againIfBusy(() => hf("check", dir, args, { signal }), (x) => !x?.json, { pauseMs }), { samples: checkSamples(dir) });
+    if (off.signal.aborted) return { failed: [] };
+    const c = await withSeamsFallback((args) => (off.signal.aborted ? { json: null, exitCode: null, stderrTail: [] }
+      : againIfBusy(() => hf("check", dir, args, { signal: partSignal }), (x) => !x?.json, { pauseMs })), { samples: checkSamples(dir) });
     if (c.json) await decor(c.json, dir);          // HF's contrast findings on aria-hidden decoration (a sticker's outline copy) dropped
     const findings = checkFindings(c.json, dir);
     return { check: { ok: !!c.json?.ok, findings, counts: Object.fromEntries(Object.entries(findings).map(([k, v]) => [k, { errors: v.filter((x) => x.severity === "error").length, warnings: v.filter((x) => x.severity === "warning").length }])) },
@@ -164,12 +202,13 @@ export async function qcRound(dir, { shots, total, signal = null, parallel = fal
   if (parallel) {
     // every part runs to its end; a part that threw rejects the round as the serial run would (the first in serial order)
     const settled = await Promise.allSettled(parts.map((f) => f()));
+    if (settled[0].status === "fulfilled" && settled[0].value?.busy && !signal?.aborted) return busyRound(res, out);
     const bad = settled.find((x) => x.status === "rejected");
     if (bad) throw bad.reason;
     done = settled.map((x) => x.value);
   } else {
     done = [];
-    for (const f of parts) done.push(await f());
+    for (const f of parts) { done.push(await f()); if (done[0]?.busy) return busyRound(res, out); }
   }
   for (const part of done) {
     Object.assign(res.sheets, part.sheets ?? {});

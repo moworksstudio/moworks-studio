@@ -9,6 +9,8 @@ export async function gatedRender(job, { onEvent, signal, version, workDir, blan
   const reportPath = `${job.outputPath}.gates.json`;
   mkdirSync(dirname(reportPath), { recursive: true });
   writeFileSync(reportPath, JSON.stringify(gates, null, 2));
+  // HF's check stopped twice on a busy machine: nothing in the film is blamed, the caller may try again
+  if (gates.busy) return { type: "blocked", code: "CHECK_BUSY", message: gates.message, retryable: true, blockingFailures: [], gates, gatesReport: reportPath };
   if (!gates.pass) return { type: "blocked", code: "GATES_FAILED", blockingFailures: gates.blockingFailures, gates, gatesReport: reportPath };
   const result = await render(job, { onEvent, signal, version });
   return { ...result, gates, gatesReport: reportPath };

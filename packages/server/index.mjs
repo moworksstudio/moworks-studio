@@ -21,7 +21,8 @@ import { showInExplorer } from "../project-service/explorer.mjs";
 import { placedShots, readShots } from "../hf-edit/shots.mjs";
 import { finalize } from "../hf-edit/finalize.mjs";
 import { viCatalog } from "../hf-edit/googleFontsVi.mjs";
-import { snapshotAt, snapshotAtAsync } from "../hf-qa/cli.mjs";
+// a character demo's stills off the server's thread, at the priority the sync snapshotAt had (T27-3)
+import { snapshotAtAsync, snapshotAtForeground as snapshotAt } from "../hf-qa/cli.mjs";
 import { render as renderFilm } from "../hf-render-worker/client.mjs";
 import { encodePoster, tidyStore } from "../library/preview-media.mjs";
 import * as characterKit from "../character-kit/index.mjs";
@@ -49,7 +50,7 @@ import { isOption, listRounds, nextLetter, ownerRoundOf, ownerRounds, pendingRev
 import { spawn } from "node:child_process";
 import { createJobs } from "./jobs.mjs";
 import { plainMessage } from "./plainError.mjs";
-import { RESUME, createAutopilot, createRenderQueue, estimateMinutes, estimateNow, hasCast, isFinished } from "./autopilot.mjs";
+import { RESUME, createAutopilot, createRenderQueue, estimateMinutes, estimateNow, hasCast, isFinished, reviewRounds } from "./autopilot.mjs";
 import { productionRoutes } from "./production.mjs";
 import { boardRoutes, etaWords, runningEstimate, stillsBehind } from "./boards.mjs";
 import { readState as readSfxState } from "../sfx/index.mjs";
@@ -66,8 +67,9 @@ import * as firstRun from "../setup/first-run.mjs";
 import * as cuda from "../voice/cuda.mjs";
 import { claudeService } from "./claude.mjs";
 import { pickFolder } from "./folder-picker.mjs";
-import { gitKind, isDrivePath, moveGitOut } from "../revisions/drive.mjs";
+import { gitKind, isDrivePath, moveGitOutAsync } from "../revisions/drive.mjs";
 import * as appUpdate from "../app-update/index.mjs";
+import { createUpdateChecker } from "../app-update/schedule.mjs";
 import * as characterMaker from "../character-maker/index.mjs";
 
 /** Backups to Drive run as child processes (tools/backup.mjs), so the server never waits on git or Drive: the app once at start and
@@ -119,6 +121,9 @@ const AGENT_API = /^\/api\/agent\/(?:permit|permit\/wait|tool)$/;
 /** the status button says only Idle, Working, Downloading or Updating. The app's own update wins, then a download
  *  (first run, models, the offline files, a style source, Python's components), then any Claude task or other job. */
 const DOWNLOADS = new Set(["first-run", "offline-assets", "style-source", "setup-python", "setup-hf-skills", "model-install"]);
+/** The app's own update check waits while one of these runs: the update itself, an export, the film's pre-render. */
+const UPDATE_WAITS_FOR = new Set(["app-update", "export", "preview-proxy"]);
+export const updateCheckWaits = (jobs, renders) => jobs.running().some((j) => UPDATE_WAITS_FOR.has(j.kind)) || !!renders?.status().running;
 export function appState(r) {
   const jobs = r.jobs ?? [], up = jobs.find((j) => j.kind === "app-update"), dl = jobs.find((j) => DOWNLOADS.has(j.kind));
   const state = up ? "updating" : dl ? "downloading" : r.tasks.length || jobs.length ? "working" : "idle";
@@ -151,13 +156,14 @@ const mustProject = (id, root) => {
 
 /** A project of an older folder layout, moved into the user's folders when it is opened: not while Claude changes it or it
  *  renders; committed as one revision; a file that could not be moved is said in the chat (it stays where it was). */
-function relayout(ctx, id, root) {
+async function relayout(ctx, id, root) {
   if (ctx.agent?.running?.has(id) || ctx.renders?.isRendering(id)) return null;
   let r = null;
   try { r = projects.ensureLayout(id, root); } catch (e) { console.error(`[layout] ${id}: ${e.message}`); return null; }
   if (!r) return null;
   const p = projects.getProject(id, root);
-  if (r.moved.length) { try { rev.ensureRepo(p.path); rev.commitAll(p.path, `Assets moved into the new folders (${r.moved.length} file(s))`); } catch { /* revisions optional */ } }
+  // recorded beside the server's thread, in the project's git queue (T22-5)
+  if (r.moved.length) { try { await rev.saveAsync(p.path, `Assets moved into the new folders (${r.moved.length} file(s))`); } catch { /* revisions optional */ } }
   if (r.failed.length) {
     try { projects.addNote(p.path, { kind: "assets", status: "warning", text: "{n} file(s) could not be moved into the new folders and stay where they are: {list}", vars: { n: r.failed.length, list: r.failed.slice(0, 5).map((f) => f.path).join(", ") } }); } catch { /* notes are best effort */ }
   }
@@ -189,7 +195,7 @@ function posterJobs(root, previewBase, stopSignal = null) {
     async get(id) {
       const p = mustProject(id, root);
       const { shots } = await readShots(p.path);
-      const r = rev.head(p.path) ?? "none";
+      const r = (await rev.headAsync(p.path)) ?? "none";
       // a code film (one page, which a snapshot here cannot draw for each shot): its approved storyboard stills
       if (pipe.isCodeFilm(p.meta?.style?.id)) { const b = boardPosters(p); return { revision: r, posters: b, status: b.length ? "ready" : "missing", error: null, from: "boards" }; }
       const placed = posterShots(p, shots);
@@ -205,8 +211,8 @@ function posterJobs(root, previewBase, stopSignal = null) {
       const p = mustProject(id, root);
       if (pipe.isCodeFilm(p.meta?.style?.id)) return { status: "ready", posters: boardPosters(p), from: "boards" };
       if (jobs.get(id)?.status === "running") return { status: "running" };
-      try { rev.ensureRepo(p.path); rev.commitAll(p.path, "Changes before posters"); } catch { /* not a git folder yet */ }
-      const r = rev.head(p.path) ?? "none";
+      try { await rev.saveAsync(p.path, "Changes before posters"); } catch { /* not a git folder yet */ }
+      const r = (await rev.headAsync(p.path)) ?? "none";
       const { shots } = await readShots(p.path);
       const placed = posterShots(p, shots);
       if (!placed.length) return { status: "ready", posters: boardPosters(p) };
@@ -231,7 +237,7 @@ function thumbnailJobs(root, enabled, stopSignal = null) {
   const work = async (id) => {
     const p = projects.getProject(id, root);
     if (!p || p.missing || !existsSync(join(p.path, ".git"))) return;
-    const workRev = rev.lastWorkRev(p.path);
+    const workRev = await rev.lastWorkRevAsync(p.path);
     if (!workRev || p.meta?.thumbnail?.rev === workRev) return;
     const { shots, root: comp } = await readShots(p.path).catch(() => ({ shots: [] }));
     if (pipe.isStarter(shots)) return;
@@ -274,7 +280,9 @@ export function routes(ctx) {
     const steps = pipelineSteps(p.meta?.style?.id, root);
     const { shots } = await readShots(p.path).catch(() => ({ shots: [] }));
     const git = existsSync(join(p.path, ".git"));
-    const head = git ? rev.head(p.path) : null;
+    // git's answers beside the server's thread, in the project's queue (T22-5: each read held every request on a busy computer)
+    const [head, workAt, qaStale] = git ? await Promise.all([rev.headAsync(p.path), rev.lastWorkChangeAsync(p.path, "compositions"),
+      p.meta?.lastQa ? rev.changedSinceAsync(p.path, p.meta.lastQa.revision) : undefined]) : [null, undefined, undefined];
     const tid = ctx.agent.running.get(id);
     // a message being sent (its task starts after the sign-in check) answers the question and keeps Claude busy already
     const answering = !tid && !!ctx.agent.starting?.has(id);
@@ -286,7 +294,7 @@ export function routes(ctx) {
     // the film's last task is a chat turn that ended with a question to the user (e.g. which font): nobody answered yet
     const lastAll = all.at(-1), chatAsked = !answering && !!lastAll && !lastAll.step && lastAll.status === "done" && pipe.asksOwner(lastAll.resultText);
     const facts = pipe.gatherFacts(p, { shots, head, jobs: ctx.jobs.list({ projectId: id }), runningTask: tid ? ctx.agent.get(tid) : answering ? { id: "starting", step: null, status: "running", starting: true } : null, lastTasks,
-      workAt: git ? rev.lastWorkChange(p.path, "compositions") : undefined, qaStale: git && p.meta?.lastQa ? rev.changedSince(p.path, p.meta.lastQa.revision) : undefined,
+      workAt, qaStale,
       extra: { chatAsked, revisionAsked: !tid && !!pendingRevision(p.path) } });
     const state = pipe.computePipeline(steps, facts);
     return { p, steps, state, facts };
@@ -318,9 +326,10 @@ export function routes(ctx) {
       setTimeout(() => ctx.onExit(), 300);                 // answer first, then stop
       return { ok: true, stopping: ctx.running() };
     }),
-    // Settings › Update: the app's own version from the user's GitHub repo; an update ends with a restart
-    r("GET", "/app/update", () => appUpdate.status(root)),
-    r("POST", "/app/update/check", () => appUpdate.check(root)),
+    // Settings › Update: the app's own version from the user's GitHub repo; an update ends with a restart. The read answers from the
+    // last check (the app's own, every six hours, or "Check for updates"): the top bar's notice and the panel never wait on GitHub
+    r("GET", "/app/update", async () => ({ ...(await appUpdate.status(root)), ...(ctx.updates?.notice() ?? {}), check: ctx.updates?.answer() ?? null })),
+    r("POST", "/app/update/check", () => (ctx.updates ? ctx.updates.run() : appUpdate.check(root))),
     r("POST", "/app/update/apply", () => {
       const busy = ctx.running().filter((x) => !x.idle);
       if (busy.length) throw new HttpError(409, "BUSY", `Update when nothing is running: ${busy.map((x) => x.title).join(", ")}`);
@@ -356,7 +365,7 @@ export function routes(ctx) {
     r("POST", "/setup/assets", () => ctx.installAssets()),
     // HyperFrames' skills and registry at the pinned commit (thin git fetch), and the app's Python components (pip, pinned)
     r("POST", "/setup/hf-skills", () => ctx.jobs.start("setup-hf-skills", { title: "HyperFrames skills" }, async (job) => {
-      const r0 = hfSkills.fetchSkills(root, { onLine: (l) => job.update({ stage: l }) });
+      const r0 = await hfSkills.fetchSkills(root, { onLine: (l) => job.update({ stage: l }) });
       const v = hfSkills.verifySkills(root, { fresh: true });
       if (!v.ok) throw Object.assign(new Error("The fetched skills do not match HyperFrames' manifest"), { code: "INTEGRITY" });
       return { ...r0, skills: Object.keys(v.skills).length };
@@ -384,7 +393,7 @@ export function routes(ctx) {
       firstRun.fetchStyleSource(key, { root, onLine: (l) => job.update({ stage: l }) }))),
     r("POST", "/setup/python", () => ctx.jobs.start("setup-python", { title: "Python components" }, async (job) => {
       const r0 = await pySetup.install(root, { onLine: (l) => job.update({ stage: l.slice(0, 120) }), signal: job.signal });
-      return { installed: r0.installed, ready: pySetup.status(root).ready };
+      return { installed: r0.installed, ready: (await pySetup.statusAsync(root)).ready };
     })),
     // The whole library as the user arranges it: author, then kind (Motions / Blocks / Looks), then category
     r("GET", "/library", (_p, _b, q) => ({ ...library.search({ q: q.get("q") ?? "", author: q.get("author") ?? "all", kind: q.get("kind") ?? "all",
@@ -486,21 +495,21 @@ export function routes(ctx) {
       if (b.kickoff) await ctx.claude.requireSignedIn();      // the first message (brief + the style's skill) only goes to a Claude that is ready
       // a style whose catalog turns design off (look: false) takes no Look, whatever the dialog sent
       const p = await projects.createProject({ ...b, style: selection(style), designLocked: style.look === false || styleDesign(style) === "author" }, { root });          // only General and the seven HyperFrames type styles take a design (DESIGN_OPEN)
-      try { rev.ensureRepo(p.path); } catch { /* git missing: revisions unavailable, the project still works */ }
+      try { await rev.ensureRepoAsync(p.path); } catch { /* git missing: revisions unavailable, the project still works */ }
       return p;
     }),
     // Import project the folder stays where it is, the app only remembers its path. A project on Google Drive with its own
     // .git folder is offered to move that history to this PC (moveGit), never silently.
-    r("POST", "/projects/open", (_p, b) => {
+    r("POST", "/projects/open", async (_p, b) => {
       const p0 = projects.openProject(b.path, root);
-      relayout(ctx, p0.id, root);
+      await relayout(ctx, p0.id, root);
       const p = projects.getProject(p0.id, root) ?? p0;
       return { ...p, drive: isDrivePath(p.path), gitOnDrive: isDrivePath(p.path) && gitKind(p.path).kind === "folder" };
     }),
-    r("POST", `/projects/${P}/move-git`, ([id]) => {
+    r("POST", `/projects/${P}/move-git`, async ([id]) => {
       const p = mustProject(id, root);
       if (ctx.agent.running.has(id)) throw new HttpError(409, "BUSY", "Wait until Claude has finished");
-      return { gitdir: moveGitOut(p.path, root) };
+      return { gitdir: await rev.inRepo(p.path, () => moveGitOutAsync(p.path, root)) };          // no other git of the film while its history moves
     }),
     // where New project saves (Settings and the dialog); a Drive folder is allowed, its history is kept on this PC
     r("GET", "/storage/location", () => { const l = projects.defaultLocation(root); return { location: l, standard: projects.projectsRoot(root), drive: isDrivePath(l) }; }),
@@ -516,7 +525,7 @@ export function routes(ctx) {
     r("GET", `/projects/${P}`, async ([id]) => {
       const p0 = projects.getProject(id, root);
       if (!p0) throw new HttpError(404, "NOT_FOUND", "Project not found");
-      if (!p0.missing && (p0.meta?.layout ?? 0) < projects.LAYOUT_VERSION) relayout(ctx, id, root);
+      if (!p0.missing && (p0.meta?.layout ?? 0) < projects.LAYOUT_VERSION) await relayout(ctx, id, root);
       const p = { ...projects.getProject(id, root) };
       // a style the catalog does not have: the project is answered with no style (and no "follows the film style" design)
       if (p.meta?.style) { await catalogReady(); if (!knownStyle(p.meta.style)) { const { designLocked, ...m } = p.meta; p.meta = { ...m, style: null }; if (p.style) p.style = null; } }
@@ -594,7 +603,7 @@ export function routes(ctx) {
         writeFileSync(sbFile, readFileSync(src));
       }
       if (!existsSync(sbFile)) throw new HttpError(400, "INVALID", "There is no storyboard to approve");
-      rev.ensureRepo(p.path); const at = rev.commitAll(p.path, "Storyboard approved");
+      const at = await rev.saveAsync(p.path, "Storyboard approved");
       ctx.backupProject(id);
       const option = picked ?? listRounds(p.path).filter((x) => x.picked?.option).at(-1)?.picked.option ?? null;          // the option the user picked ("B", "mix")
       setTimeout(() => ctx.autopilot.storyboardApproved(id, option && option !== "mix" ? option : null), 0);          // on to the motion
@@ -614,10 +623,10 @@ export function routes(ctx) {
       return { ...mp, approval, changedSinceApproval: (!!approval && approval.hash !== mp.hash) || !!moved, movedBy: moved, types: plan.TYPES,
         noCamera: mp.error ? [] : plan.missingCamera(mp.plan) };          // the shots with no camera row, flagged
     }),
-    r("PUT", `/projects/${P}/motion-plan/shots/(\\d+)`, ([id, n], b) => {
+    r("PUT", `/projects/${P}/motion-plan/shots/(\\d+)`, async ([id, n], b) => {
       const p = mustProject(id, root);
       const out = plan.setShot(p.path, Number(n), b.motions, typeof b.says === "string" ? b.says : undefined);          // the shot's plain words, kept unless sent
-      try { rev.ensureRepo(p.path); rev.commitAll(p.path, `Motion plan: shot ${n}`); } catch { /* revisions optional */ }
+      try { await rev.saveAsync(p.path, `Motion plan: shot ${n}`); } catch { /* revisions optional */ }
       ctx.backupProject(id);
       return out;
     }),
@@ -626,7 +635,7 @@ export function routes(ctx) {
       const p = mustProject(id, root);
       const mp = plan.read(p.path);
       if (!mp.exists || mp.error || !mp.plan.shots.length) throw new HttpError(400, "INVALID", mp.error ?? "There is no motion plan to approve");
-      rev.ensureRepo(p.path); const at = rev.commitAll(p.path, "Motion plan approved");
+      const at = await rev.saveAsync(p.path, "Motion plan approved");
       ctx.backupProject(id);
       const out = projects.updateMeta(id, (m) => {
         (m.approvals ??= {}).motionPlan = { at: new Date().toISOString(), by: "owner", revision: at, hash: mp.hash };
@@ -648,7 +657,7 @@ export function routes(ctx) {
     r("GET", `/projects/${P}/posters`, ([id]) => ctx.posters.get(id)),
     r("POST", `/projects/${P}/posters`, ([id]) => ctx.posters.start(id)),
     r("GET", `/projects/${P}/preview`, ([id]) => { mustProject(id, root); return { url: `${ctx.preview.base}/p/${id}/__preview`, origin: ctx.preview.origin }; }),
-    r("GET", `/projects/${P}/revisions`, ([id]) => { const p = mustProject(id, root); return { revisions: existsSync(join(p.path, ".git")) ? rev.log(p.path, 100) : [] }; }),
+    r("GET", `/projects/${P}/revisions`, async ([id]) => { const p = mustProject(id, root); return { revisions: existsSync(join(p.path, ".git")) ? await rev.logAsync(p.path, 100) : [] }; }),
 
     // ---- the pipeline in the Editor state from the server, the Editor only shows it
     r("GET", `/projects/${P}/pipeline`, async ([id]) => {
@@ -682,8 +691,11 @@ export function routes(ctx) {
         // what the Storyboard waits for before it draws (the Editor opens the Voice or Lyrics dialog by itself on make / check / failed / lyrics)
         voiceWait: state.find((x) => x.id === "storyboard" && x.voiceWait)?.voiceWait ?? null,
         // with the build's start, for "about N min left"
+        // worked out again from the steps left once the Build is done, the Review by its rounds (T23-11), and past the plan
         estimate: building && building.status !== "done" && p.meta?.pipeline?.build?.estimate
-          ? { ...estimateNow(p.meta.pipeline.build.estimate, state, { startedAt: p.meta.pipeline.build.startedAt }), startedAt: p.meta.pipeline.build.startedAt ?? null } : null,          // worked out again past the plan
+          ? { ...estimateNow(p.meta.pipeline.build.estimate, state, { startedAt: p.meta.pipeline.build.startedAt,
+            review: (() => { const t = tasks.find((x) => x.id === runId); return (t?.step ?? t?.continues) === "qcReview" ? reviewRounds(t) : null; })() }),
+          startedAt: p.meta.pipeline.build.startedAt ?? null } : null,
         // the app's own work between two steps (the music and sound effects after Claude's music task, ~3 min that looked idle)
         // the last task was stopped by Exit and nothing ran since: the Editor offers to run it again (POST …/tasks/<id>/again)
         interrupted: ctx.agent.interrupted(id),
@@ -731,7 +743,13 @@ export function routes(ctx) {
         setTimeout(() => ctx.autopilot.advance(id).catch(() => {}), 0);
         return { alreadyDone: true, step: stepId, next: pipe.nextAuto(state)?.id ?? null };
       }
-      return ctx.autopilot.startStep(id, s, { text: String(b.text ?? "").trim() || null, kickoff: !!b.kickoff });
+      // the Final Mix asks Claude for music on mixkit.co: with the web off for this project Claude could only say it cannot
+      if (stepId === "finalMix" && effectiveSettings(p.meta ?? {}, root).web === "off")
+        throw new HttpError(409, "WEB_OFF", "The web is off for this project, so Claude cannot look for music on Mixkit. Turn the web on for this project, then ask again.");
+      const out = await ctx.autopilot.startStep(id, s, { text: String(b.text ?? "").trim() || null, kickoff: !!b.kickoff });
+      // never an empty answer the Editor reads as started (T25-2: 200 null, and the Final Mix said "Claude is looking on Mixkit")
+      if (!out) throw new HttpError(409, "NOT_STARTED", `Nothing could start for “${s.title ?? stepId}”. Try again, or ask Claude in the chat.`);
+      return out;
     }),
     // carry on a step the user stopped (the chat's "continue" does the same)
     r("POST", `/projects/${P}/pipeline/resume`, async ([id], b) => (await ctx.autopilot.resume(id, String(b.text ?? ""))) ?? { idle: true }),
@@ -801,7 +819,7 @@ export function routes(ctx) {
       return { approval: out.meta.approvals[name] }; }),
     r("PATCH", `/projects/${P}/brief`, ([id], b) => projects.updateMeta(id, (m) => {
       const old = m.brief ?? {};
-      m.brief = { ...old, ...(typeof b.text === "string" ? { text: b.text.slice(0, 20000), words: projects.countWords(b.text) } : {}),
+      m.brief = { ...old, ...(typeof b.text === "string" ? { text: b.text.slice(0, projects.BRIEF_MAX), words: projects.countWords(b.text) } : {}),
         ...(b.mode === "script" || b.mode === "idea" ? { mode: b.mode } : {}), ...(typeof b.direction === "string" ? { direction: b.direction.slice(0, 4000) } : {}),
         ...(b.answers && typeof b.answers === "object" ? { answers: projects.cleanAnswers(b.answers, m.style?.id) } : {}) };
       if (m.brief.text !== old.text || m.brief.mode !== old.mode || m.brief.direction !== old.direction || JSON.stringify(m.brief.answers ?? {}) !== JSON.stringify(old.answers ?? {})) {
@@ -821,14 +839,14 @@ export function routes(ctx) {
       const f = join(p.path, ...name.split("/"));
       return { path: name, exists: existsSync(f), text: existsSync(f) ? readFileSync(f, "utf8") : "", at: existsSync(f) ? statSync(f).mtime.toISOString() : null };
     }),
-    r("PUT", `/projects/${P}/doc`, ([id], b) => {
+    r("PUT", `/projects/${P}/doc`, async ([id], b) => {
       const p = mustProject(id, root); const name = String(b.path ?? "");
       if (!DOCS.includes(name)) throw new HttpError(400, "INVALID", "Not a document of this project");
       if (ctx.agent.running.has(id)) throw new HttpError(409, "BUSY", "Wait until Claude has finished");
       const f = join(p.path, ...name.split("/"));
       mkdirSync(join(f, ".."), { recursive: true });
       writeFileSync(f + ".tmp", String(b.text ?? "").normalize("NFC")); renameSync(f + ".tmp", f);
-      try { rev.ensureRepo(p.path); rev.commitAll(p.path, `${name} edited by hand`); } catch { /* revisions optional */ }
+      try { await rev.saveAsync(p.path, `${name} edited by hand`); } catch { /* revisions optional */ }
       if (name === "BRIEF.md" && p.meta?.pipeline?.delivered) projects.updateMeta(id, (m) => { m.pipeline.briefChanged = { at: new Date().toISOString() }; }, root);
       return { path: name, exists: true, at: statSync(f).mtime.toISOString() };
     }),
@@ -878,7 +896,8 @@ export function routes(ctx) {
 
 export async function startServer({ port = 0, root = APP_ROOT, token = randomBytes(24).toString("hex"), uiDir = join(root, "ui", "dist"),
   autoBackup = process.env.MW_NO_BACKUP !== "1", autoLibrary = process.env.MW_NO_LIBRARY_IMPORT !== "1", autoAssets = process.env.MW_NO_ASSET_INSTALL !== "1",
-  onExit = null, onRestart = null, onWindowGone = null, windowGraceMs = Number(process.env.MW_WINDOW_GRACE_MS ?? 10000), thumbnails = false } = {}) {
+  onExit = null, onRestart = null, onWindowGone = null, windowGraceMs = Number(process.env.MW_WINDOW_GRACE_MS ?? 10000), thumbnails = false,
+  updateCheck = false } = {}) {          // updateCheck: the app checks for its own new version by itself (the launcher; never in tests)
   const ctx = { root, preview: null, onExit, onRestart, lastSeen: Date.now() };
   const agentToken = randomBytes(24).toString("hex");          // Claude Code's (AGENT_API only)
   const server = createServer(async (req, res) => {
@@ -1019,6 +1038,9 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
     permitUrl: `http://127.0.0.1:${p}/api/agent/permit`, permitToken: agentToken });
   // a setup or download job that ends changes what Settings › System finds: its checks run again on the next read
   ctx.jobs = createJobs({ ended: (job) => { if (DOWNLOADS.has(job.kind) || job.kind === "app-update") { ctx.checks?.system.clear(); ctx.checks?.firstRun.clear(); } } });
+  // the app's own check for a new version: a minute after start, then every six hours; never while it updates itself or renders
+  ctx.updates = createUpdateChecker({ root, log: (line) => console.log(line), busy: () => updateCheckWaits(ctx.jobs, ctx.renders) });
+  if (updateCheck) ctx.updates.start();
   // the bundled fonts, GSAP and three.js (24 MB, pinned upstream files): downloaded at the first start, or from Settings > Health
   ctx.installAssets = () => ctx.jobs.start("offline-assets", { title: "Downloading fonts, GSAP and three.js" }, async (job) => {
     const r = await offlineAssets.install({ root, signal: job.signal, onProgress: ({ done, total }) => job.update({ progress: Math.floor((done / total) * 100), stage: `${done} of ${total} files` }) });
@@ -1110,9 +1132,11 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
   const within = (p, ms) => Promise.race([Promise.resolve(p).catch(() => {}), new Promise((r) => setTimeout(r, ms).unref?.())]);
   const close = async () => {
     ctx.claude.stop();
+    ctx.updates.stop();
     // the preview and the server stop side by side (one after the other, Exit took 17-27 s)
     await Promise.all([within(ctx.preview.close(), 3000),
-      within(new Promise((r) => { server.close(() => r()); server.closeAllConnections?.(); }), 3000)]);
+      within(new Promise((r) => { server.close(() => r()); server.closeAllConnections?.(); }), 3000),
+      within(rev.settled(), 5000)]);          // a film's commit asked for before is let finish (git runs beside the server's thread: T22-5)
   };
   /** What Exit (or closing the window) stops, per project: Claude tasks, background jobs (render, transcription with its Whisper model,
    *  checks, Export to AE, downloads). */

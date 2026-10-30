@@ -60,6 +60,8 @@ export function BriefSheet({ projectId, project, onChanged, briefChanged = false
         <dt>{t("Film style")}</dt><dd>{t(project?.meta?.style?.title ?? "–")}</dd>
         {/* the Brand Kit as New project names it: the kit chosen, the film style's own, or the brief's (no kit) */}
         <dt>{t("Design")}</dt><dd>{project?.meta?.designLocked ? t("Follows film style") : q.data.look ? q.data.look.title : t("From the brief")}</dd>
+        {/* a Brand Kit chosen for an author's style is kept, not applied: Claude asks how to use it (T25) */}
+        {project?.meta?.designLocked && project.meta.brandKitAsk?.title && <><dt>{t("Brand Kit")}</dt><dd>{t("{kit}: Claude asks how to use it", { kit: project.meta.brandKitAsk.title })}</dd></>}
         {way && <><dt>{t("Way of working")}</dt><dd>{t(way[0])}</dd></>}
       </dl>
       <div className="row"><button className="btn primary sm" onClick={save} disabled={!dirty || busy}>{busy ? <Loader2 size={14} className="spin" /> : <Save size={14} />}{t("Save")}</button>
@@ -115,7 +117,8 @@ export function ImportSheet({ projectId, project, onChanged }) {
   return <div className="import-sheet">
     <p className="secondary">{t("Files are copied into the project and sorted by kind. Claude is told in the chat what was added.")}</p>
     <ImportNow projectId={projectId}
-      onDone={(r) => { onChanged?.(); if (r.ok) toast(t("{n} file(s) copied into the project; Claude is told", { n: r.ok })); if (r.voice?.job) toast(t("Transcribing the voice-over…")); }} />
+      onDone={(r) => { onChanged?.(); if (r.ok) toast(t("{n} file(s) copied into the project; Claude is told", { n: r.ok })); if (r.voice?.job) toast(t("Transcribing the voice-over…"));
+        for (const a of r.archives ?? []) if (!a.unpacked) toast(a.error, "error"); }} />
   </div>;
 }
 

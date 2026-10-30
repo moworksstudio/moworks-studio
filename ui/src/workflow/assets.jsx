@@ -1,7 +1,8 @@
 // Import assets: one shared button for every style. Files, a whole folder, or drag and drop; every file is
 // COPIED into the project and sorted by kind (assets/1_images, 2_footage, 3_audio, 4_fonts, 5_design); the original stays untouched. Nobody
 // says what an audio file is: the app sorts it (a voice, music or a sound effect) and the user can move it later in the Assets tab. In New
-// project the files wait until the project exists; in the Editor they go in at once. Claude is told.
+// project the files wait until the project exists; in the Editor they go in at once. Claude is told. An archive (.zip, .rar, .7z) is
+// unpacked and its files go in the same way; one that cannot be opened says so in plain words.
 import { useRef, useState } from "react";
 import { AlertCircle, AudioLines, File as FileIcon, FileImage, FileText, FileVideo, FolderOpen, Loader2, Type, Upload, X } from "lucide-react";
 import { uploadAsset } from "../api.js";
@@ -72,10 +73,16 @@ export function AssetPicker({ items, onAdd, onRemove, busy = false, compact = fa
         <span className="n" title={x.file.webkitRelativePath || x.file.name}>{x.file.name}</span>
         <span className="muted num s">{size(x.file.size)}</span>
         {x.status === "uploading" ? <span className="prog"><span style={{ width: `${Math.round((x.progress ?? 0) * 100)}%` }} /></span>
-          : x.status === "done" ? <span className="ok-t">{t("Copied")}</span> : x.status === "error" ? <span className="error-text" title={x.error}>{t("Failed")}</span>
+          : x.status === "done" ? <span className="ok-t">{x.unpacked != null ? t("Unpacked: {n} file(s)", { n: x.unpacked }) : t("Copied")}</span>
+          : x.status === "warn" ? <span className="warn-t" title={x.error}>{t("Not unpacked")}</span>
+          : x.status === "error" ? <span className="error-text" title={x.error}>{t("Failed")}</span>
           : !busy && <button type="button" className="btn ghost icon sm" onClick={() => onRemove?.(x.id)} aria-label={t("Remove {name}", { name: x.file.name })}><X size={13} /></button>}
       </li>;
     })}</ul>}
+    {/* an archive that could not be unpacked says so in plain words, and what was left out of one */}
+    {items.some((x) => x.status === "warn" || x.skipped?.length) && <div className="asset-note asset-warn" role="alert"><AlertCircle size={14} /><span>
+      {items.filter((x) => x.status === "warn").map((x) => <span key={x.id} className="asset-warn-l">{x.error}</span>)}
+      {items.filter((x) => x.skipped?.length).map((x) => <span key={"s" + x.id} className="asset-warn-l">{t("Left out {n} program file(s) from {name}.", { n: x.skipped.length, name: x.file.name })}</span>)}</span></div>}
     {note && <div className="asset-note" role="status"><AlertCircle size={14} /><span>
       {note.bad.length > 0 && <>{t("Skipped {n} program file(s), which are not film material: {names}.", { n: note.bad.length, names: note.bad.slice(0, 3).join(", ") + (note.bad.length > 3 ? "…" : "") })} </>}
       {note.dup.length > 0 && t("Same name twice: {names}. The second one gets a number.", { names: note.dup.slice(0, 3).join(", ") + (note.dup.length > 3 ? "…" : "") })}</span>
@@ -83,19 +90,28 @@ export function AssetPicker({ items, onAdd, onRemove, busy = false, compact = fa
   </div>;
 }
 
-/** Copy the files into a project, one after another; onItem(id, patch) follows each. Resolves with the counts; cancel stops what is left. */
+/** Copy the files into a project, one after another; onItem(id, patch) follows each. Resolves with the counts; cancel stops what is left.
+ *  An archive (.zip, .rar, .7z) is unpacked by the server: its files count, and `archives` says what became of each one ({ name,
+ *  unpacked, count, skipped, error }), so the result can say an archive that could not be opened in plain words. */
 export function uploadAll(projectId, items, onItem) {
   let current = null, stopped = false;
   const run = (async () => {
     let ok = 0, failed = 0, voice = null;
+    const archives = [];
     for (const x of items) {
       if (stopped) break;
       onItem(x.id, { status: "uploading", progress: 0 });
       current = uploadAsset(projectId, x.file, { onProgress: (p) => onItem(x.id, { progress: p }) });
-      try { const r = await current.done; ok++; if (r.voice) voice = r.voice; onItem(x.id, { status: "done", progress: 1 }); }
+      try {
+        const r = await current.done; if (r.voice) voice = r.voice;
+        const a = r.archive;
+        if (a) archives.push({ name: a.name, unpacked: !!a.unpacked, count: a.files?.length ?? 0, skipped: a.skipped ?? [], error: a.error ?? null });
+        ok += a?.unpacked ? a.files.length : 1;
+        onItem(x.id, { ...(a && !a.unpacked ? { status: "warn", error: a.error } : { status: "done", ...(a?.unpacked ? { unpacked: a.files.length } : {}) }), progress: 1, ...(a?.skipped?.length ? { skipped: a.skipped } : {}) });
+      }
       catch (e) { if (e.code === "CANCELLED") { onItem(x.id, { status: null }); break; } failed++; onItem(x.id, { status: "error", error: e.message }); }
     }
-    return { ok, failed, voice, cancelled: stopped };
+    return { ok, failed, voice, archives, cancelled: stopped };
   })();
   return { done: run, cancel: () => { stopped = true; current?.abort(); } };
 }

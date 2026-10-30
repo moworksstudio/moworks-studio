@@ -26,7 +26,8 @@ const posix = (p) => p.split(sep).join("/");
 export function appSounds(dir) {
   try {
     const st = JSON.parse(readFileSync(join(dir, ".moworks", "sfx.json"), "utf8"));
-    return new Set(Object.values(st.sounds ?? {}).filter((s) => s?.file && s.source !== "owner").map((s) => s.file));
+    // a library sound's variants and the ambience loops are the app's copies too
+    return new Set(Object.values(st.sounds ?? {}).filter((s) => s?.file && s.source !== "owner").flatMap((s) => [s.file, ...(s.variants ?? []).map((v) => v.file)]));
   } catch { return new Set(); }
 }
 const MEDIA = /\.(png|jpe?g|webp|gif|avif|bmp|tiff?|heic|svg|exr|mp4|mov|webm|m4v|mkv|avi|mp3|wav|m4a|flac|ogg|aac|opus|ttf|otf|woff2?|psd|psb|pptx?|key|pdf|ai|eps|sketch|fig|xd|indd|docx?)$/i;

@@ -1,7 +1,7 @@
 ---
 name: moworks-general-style
 description: Moworks Studio General Style - motion graphic films designed from scratch (or from the client's artwork) with the Moworks Motion studio's process and taste, on top of HyperFrames' skills, built as HyperFrames compositions in this project folder.
-version: 2.0.1
+version: 2.0.3
 derived-from: Moworks Motion kit 2.0.4 (commit 30b7dcb, MIT, Moworks) - engine/skill/moworks-motion/SKILL.md and workflow/{story,free-design,keep-design,remake,film,recipes,review}.md, brands/other.md, rewritten for Moworks Studio. Some kit text was itself rewritten from HyperFrames (Apache-2.0); those parts say so.
 ---
 

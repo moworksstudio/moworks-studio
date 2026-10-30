@@ -64,12 +64,12 @@ test("boards: stills per round at the board's size; an unchanged board keeps its
   assert.ok(existsSync(join(d, "boards", "rounds", "R1", "B", "index.html")), "each round keeps a copy of the board");
   assert.equal(recordPick(d, "R2", { option: "B", note: "chữ to hơn" }).option, "B");
   assert.equal(listRounds(d)[1].picked.note, "chữ to hơn");
-  const pdf = readFileSync(join(d, ...roundPdf(d, "R2", null, {}).split("/")), "latin1");
+  const pdf = readFileSync(join(d, ...(await roundPdf(d, "R2", null, {})).split("/")), "latin1");
   assert.ok(pdf.startsWith("%PDF-1.4")); assert.ok(pdf.trimEnd().endsWith("%%EOF"));
   assert.equal(pdf.match(/\/Type \/Page /g).length, 4, "one page per still");
   assert.match(pdf, /\/MediaBox \[0 0 320 180\]/);
-  assert.equal(readFileSync(join(d, ...roundPdf(d, "R2", "A", {}).split("/")), "latin1").match(/\/Type \/Page /g).length, 2);
-  assert.equal(roundPdf(d, "R2", ["B"], { no: 2 }), "boards/rounds/R2/storyboard-option-B.pdf", "named by its option, never a round (owner 26/10, spec §1)");
+  assert.equal(readFileSync(join(d, ...(await roundPdf(d, "R2", "A", {})).split("/")), "latin1").match(/\/Type \/Page /g).length, 2);
+  assert.equal(await roundPdf(d, "R2", ["B"], { no: 2 }), "boards/rounds/R2/storyboard-option-B.pdf", "named by its option, never a round (owner 26/10, spec §1)");
   // Each option has the app's sheet (3 × 3 frames, long edge at most about 1500 px), and a retake of only the frames that changed
   const jpgSize = (f) => { const b = readFileSync(f); for (let i = 2; i < b.length;) { if (b[i] !== 0xff) { i++; continue; } const m = b[i + 1]; if (m >= 0xc0 && m <= 0xc3) return [b.readUInt16BE(i + 7), b.readUInt16BE(i + 5)]; i += 2 + b.readUInt16BE(i + 2); } return null; };
   const sh = listRounds(d)[1].options[0];
@@ -173,7 +173,7 @@ test("the app's tools on Claude's MCP channel: listed with the permission tool, 
   assert.equal(r.result.content[0].text, "Round R1 (new).");
   assert.deepEqual(calls.map((x) => [x.url, x.token, x.body.task, x.body.name]), [["/api/agent/tool", "tk", "task1", "board_stills"]]);
   c.kill(); srv.close();
-  const args = claudeArgs({ settings: { mode: "auto", web: "off", model: "opus", effort: "medium" }, systemPrompt: "x", sessionArgs: [], mcpConfig: "{}", appTools: ["board_stills", "qc_sheets"] });
+  const args = claudeArgs({ settings: { mode: "auto", web: "off", model: "opus", effort: "medium" }, systemPromptFile: "x.md", sessionArgs: [], mcpConfig: "{}", appTools: ["board_stills", "qc_sheets"] });
   assert.equal(args[args.indexOf("--allowedTools") + 1], "mcp__mw__board_stills,mcp__mw__qc_sheets");
   // the Agent runs the handler only for a running task, with its project
   const agent = new Agent({ root: T, getProject: (id) => ({ id, path: T, meta: {} }), appTools: { board_stills: async ({ project }) => `stills of ${project.id}` } });

@@ -16,7 +16,10 @@ import * as rev from "../revisions/index.mjs";
 import { readOptions } from "../sfx/music.mjs";
 import { characterNeedsWork } from "../character-kit/index.mjs";
 import { voiceFit, voiceFitText } from "../agent/voice-fit.mjs";
+import { scriptGap } from "../voice/script.mjs";
+import { appMade, rememberAssets } from "../project-service/assets.mjs";
 import { createHash } from "node:crypto";
+import { STILLS_BUSY } from "../hf-qa/cli.mjs";
 
 const readJson = (f, fallback) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return fallback; } };
 
@@ -39,7 +42,10 @@ function buildTimesFile(root) { return join(process.env.MW_STATE_DIR ?? join(roo
 // time, "Approve and build" to the finished film: Lemo / mg 34 s 44 min, 43 s 36, 72.8 s 54, 105 s 65 (Tests 17-20); anidoodle 30 s 37
 // and 49, 100 s 82 (Test 21): the build, the Review and the checks grow much less than the film. The range's top is half again the middle
 // for a slower computer, and past the plan the Pipeline works the time out again from what is done (estimateNow)
-const RATES = [[/^anidoodle-/, [26, 0.56]], [/^brush-cartoon$/, [15, 0.9]], [/^(lemo-|mg-)/, [18, 0.45]], [/^what-if$/, [10, 0.6]]];
+// Test 24's 110 s Lemo canvas film (ASCII / CRT) took 35.6 min (Build 11.5, Review 14.2), against "about 68-102" from 18 + 0.45 a second
+// and "110 min left" on the page: a Lemo or mg film's time hardly grows with its length (34 s 44 min, 105 s 65, 110 s 36), so its rate is
+// flatter, 24 + 0.2 a second (110 s: 46-69), and each film above still falls in its range
+const RATES = [[/^anidoodle-/, [26, 0.56]], [/^brush-cartoon$/, [15, 0.9]], [/^(lemo-|mg-)/, [24, 0.2]], [/^what-if$/, [10, 0.6]]];
 const HIGH = 1.5;
 export function estimateMinutes(shots, root, { seconds = null, styleId = null } = {}) {
   const sec = Number(seconds) > 0 ? Number(seconds) : Math.max(1, Number(shots) || 1) * 4;
@@ -52,9 +58,41 @@ export function estimateMinutes(shots, root, { seconds = null, styleId = null } 
  *  hour (a Review took 1 h 40 min). Once the elapsed time reaches the plan, the whole is worked out again from what is done: the
  *  stage's steps weigh as measured (build 11.6, Review 6.7, music 2, checks 1.5 min), a running step counts half done. */
 const SHARES = { build: 0.53, qcReview: 0.31, sound: 0.09, checks: 0.07 };
-export function estimateNow(est, steps, { startedAt = null, now = Date.now() } = {}) {
+// The Review's time per round and the steps after it, from the films of Tests 17-24 (tasks.json, the run reports): the Review took
+// 6.9-56.8 min in 2-4 rounds, 6.7 min a round in the middle (3.5-14.2), 2 rounds in the middle (3 of 8 films had 3 or 4); the music task
+// 2-4.8 min and its mix about 3; the checks 2-13 min. Test 23's countdown said "5 min left" and then "39 min" at its Review's third round
+// (the plan ran out and the rest was worked out from shares, T23-11)
+export const REVIEW_ROUND = 7, LIKELY_ROUNDS = 2, AFTER_REVIEW = { sound: 6, checks: 4 };
+/** The running Review's time left from its rounds (each qc_sheets call starts one; review: { startedAt, rounds, roundAt }): the rest of
+ *  the round under way and a likely second round, and as the range's top one round more. A round that starts moves it by a round at most. */
+export function reviewLeft(review, now = Date.now()) {
+  const k = Math.max(0, Number(review?.rounds) || 0);
+  const from = Date.parse((k && review?.roundAt) || review?.startedAt || "");
+  const rest = Math.max(1, REVIEW_ROUND - (Number.isFinite(from) ? (now - from) / 60000 : 0));
+  const ahead = Math.max(0, LIKELY_ROUNDS - Math.max(k, 1));
+  return { low: rest + ahead * REVIEW_ROUND, high: rest + (ahead + 1) * REVIEW_ROUND };
+}
+/** The Review's rounds so far, from its task's events (the app's "App: qc_sheets…" line at each call). */
+export function reviewRounds(task) {
+  const xs = (task?.events ?? []).filter((e) => e.kind === "status" && /^App: qc_sheets/.test(e.text ?? ""));
+  return { startedAt: task?.createdAt ?? null, rounds: xs.length, roundAt: xs.at(-1)?.at ?? null };
+}
+/** review: the running Review's rounds (reviewRounds). Once the Build is done the stage's time left is worked out from the steps left
+ *  (the Review by its rounds, the music and the checks as measured), a range that holds a likely second round, never from the plan. */
+export function estimateNow(est, steps, { startedAt = null, now = Date.now(), review = null } = {}) {
   if (!est?.minutes || !startedAt) return est;
   const elapsed = (now - Date.parse(startedAt)) / 60000;
+  const st = Object.fromEntries((steps ?? []).map((s) => [s.id, s.status]));
+  const over = (id) => st[id] == null || st[id] === "done" || st[id] === "skipped";
+  if (st.build === "done" && ["qcReview", "sound", "checks"].some((id) => st[id] != null)) {
+    let low = 0, high = 0;
+    if (!over("qcReview")) {
+      const r = st.qcReview === "running" ? reviewLeft(review, now) : { low: REVIEW_ROUND * LIKELY_ROUNDS, high: REVIEW_ROUND * (LIKELY_ROUNDS + 1) };
+      low += r.low; high += r.high;
+    }
+    for (const id of ["sound", "checks"]) if (!over(id)) { const m = AFTER_REVIEW[id] / (st[id] === "running" ? 2 : 1); low += m; high += m * HIGH; }
+    if (low > 0) return { ...est, minutes: Math.max(1, Math.round(elapsed + low)), high: Math.round(elapsed + high), planned: est.minutes, recomputed: true, basis: "steps" };
+  }
   if (!(elapsed >= est.minutes - 1)) return est;
   let done = 0;
   for (const s of steps ?? []) {
@@ -98,38 +136,42 @@ export function createAutopilot(ctx) {
   const waitCard = (p, open, text, vars = {}) => { try { projects.addNote(p.path, { kind: "waiting", open, text, vars }); } catch { /* notes are best effort */ } };
   const meta = (id, fn) => projects.updateMeta(id, fn, root);
 
-  /** A named version: the files as they are now, committed; kept in the project's metadata to open again. */
-  function saveVersion(id, kind) {
-    const p = projects.getProject(id, root);
-    if (!p || p.missing) return null;
-    let at = null;
-    try { rev.ensureRepo(p.path); at = rev.commitAll(p.path, `Version: ${kind}`); } catch { return null; }
-    if (!at) return null;
-    let v = null;
-    const last = (p.meta?.versions ?? []).at(-1);
-    if (last?.kind === kind && !rev.changedSince(p.path, last.rev)) return last;          // the film did not change since the same kind of version
-    meta(id, (m) => {
-      const list = (m.versions ??= []);
-      const n = list.filter((x) => x.kind === kind).length + 1;
-      v = { id: `${kind}-${n}-${at.slice(0, 7)}`, kind, n, key: VERSION_KEYS[kind] ?? kind, name: (VERSION_KEYS[kind] ?? kind).replace("{n}", n), rev: at, at: now() };
-      list.push(v);
-      if (list.length > 200) list.splice(0, list.length - 200);
-    });
-    return v;
+  /** A named version: the files as they are now, committed; kept in the project's metadata to open again. Resolves it, or null; never
+   *  rejects (best effort: a caller that does not wait for it is kept in order by the project's git queue, revisions inRepo). */
+  async function saveVersion(id, kind) {
+    try {
+      const p = projects.getProject(id, root);
+      if (!p || p.missing) return null;
+      let at = null;
+      try { at = await rev.saveAsync(p.path, `Version: ${kind}`); } catch { return null; }
+      if (!at) return null;
+      let v = null;
+      const last = (projects.getProject(id, root)?.meta?.versions ?? []).at(-1);
+      if (last?.kind === kind && !(await rev.changedSinceAsync(p.path, last.rev))) return last;          // the film did not change since the same kind of version
+      meta(id, (m) => {
+        const list = (m.versions ??= []);
+        const n = list.filter((x) => x.kind === kind).length + 1;
+        v = { id: `${kind}-${n}-${at.slice(0, 7)}`, kind, n, key: VERSION_KEYS[kind] ?? kind, name: (VERSION_KEYS[kind] ?? kind).replace("{n}", n), rev: at, at: now() };
+        list.push(v);
+        if (list.length > 200) list.splice(0, list.length - 200);
+      });
+      return v;
+    } catch { return null; }
   }
   /** Open a version again: the one in use is saved first ("before-redo"), then the files go back as they were. */
-  function openVersion(id, vid) {
+  async function openVersion(id, vid) {
     const p = projects.getProject(id, root);
     const v = (p?.meta?.versions ?? []).find((x) => x.id === vid);
     if (!v) throw Object.assign(new Error("No such version"), { code: "NOT_FOUND" });
     if (ctx.agent.running.has(id)) throw Object.assign(new Error("Claude is changing the film: wait until it finishes"), { code: "BUSY" });
     if (ctx.renders.isRendering(id)) throw Object.assign(new Error("The film is being rendered: wait until the render finishes"), { code: "RENDERING" });
-    saveVersion(id, "before-redo");
-    const at = rev.restoreTree(p.path, v.rev, `Opened version: ${v.name}`);
+    await saveVersion(id, "before-redo");
+    const at = await rev.restoreTreeAsync(p.path, v.rev, `Opened version: ${v.name}`);
     return { opened: v, revision: at };
   }
 
-  /** Start a step's own work: a job (the checks) or a Claude task with the step's prompt (the way's own prompt for General). */
+  /** Start a step's own work: a job (the checks) or a Claude task with the step's prompt (the way's own prompt for General), or with
+   *  the user's own words (`text`), a dialog's step too (the Final Mix's music request). */
   async function startStep(id, s, { text = null, kickoff = false, fromAuto = false } = {}) {
     // a step the user starts (the pipeline's Run, Continue) is counted afresh by the autopilot's repeat limit
     // and the user's go is kept: what the autopilot may go on with after a restart, even if the step was refused just now
@@ -154,7 +196,7 @@ export function createAutopilot(ctx) {
         if (p.meta?.pipeline?.gateFix?.sig !== sig) {          // Claude fixes it now, once per failure; the build goes on when the gate passes
           meta(id, (m) => { (m.pipeline ??= {}).gateFix = { at: now(), sig }; });
           note(p, "Build waits: the characters' gate failed{why}. Claude is fixing them now, then the build goes on.", { why: bad ? `: ${bad}` : "" });
-          ctx.agent.start(id, { text: `Before the build, the characters' gate failed:\n${detail}\nFix the film's copy of each character it names (anidoodle/characters/<id>/: keep every joint inside its limits, the canon and the features), never by redrawing it, and run the app's character_gate tool until every character passes. Change nothing else, then stop.` })
+          ctx.agent.start(id, { by: "app", text: `Before the build, the characters' gate failed:\n${detail}\nFix the film's copy of each character it names (anidoodle/characters/<id>/: keep every joint inside its limits, the canon and the features), never by redrawing it, and run the app's character_gate tool until every character passes. Change nothing else, then stop.` })
             .catch(() => null);
         } else if (!p.meta.pipeline.gateFix.told) {
           meta(id, (m) => { m.pipeline.gateFix.told = now(); });
@@ -164,9 +206,11 @@ export function createAutopilot(ctx) {
       }
       if (p.meta?.pipeline?.gateFix) meta(id, (m) => { delete m.pipeline.gateFix; });
     }
-    if (s.action?.kind !== "claude") return null;
+    // a step that opens in a dialog runs Claude only with the user's own words: the Final Mix's "Ask Claude for 3 new tracks" sent its
+    // request and nothing started, the answer null while the dialog said Claude was looking (T25-2)
+    if (s.action?.kind !== "claude" && !text) return null;
     // a step that comes back after the film was delivered: the film as it is is kept as a version first
-    if (["brief", "storyboard", "motionSpec"].includes(s.id) && p.meta?.pipeline?.delivered) saveVersion(id, "before-redo");
+    if (["brief", "storyboard", "motionSpec"].includes(s.id) && p.meta?.pipeline?.delivered) await saveVersion(id, "before-redo");
     const motionAgain = s.id === "motionSpec" && s.status === "redo";
     if (motionAgain) meta(id, (m) => { (m.pipeline ??= {}).motionRedoFor = m.approvals?.storyboard?.at ?? null; });
     // the user approved an option straight from the Storyboard dialog: the app copied its STORYBOARD.md; Claude poses its frames and
@@ -196,7 +240,7 @@ export function createAutopilot(ctx) {
     }
     if (s.id === "brief" && kickoff) {          // the brief is the chat's first message, then the app's line
       const brief = String(p.meta?.brief?.text ?? "").trim();
-      if (brief) { try { projects.addNote(p.path, { kind: "brief", text: brief.slice(0, 4000) }); } catch { /* notes are best effort */ } }
+      if (brief) { try { projects.addNote(p.path, { kind: "brief", text: brief.slice(0, projects.BRIEF_MAX) }); } catch { /* notes are best effort */ } }          // whole, as Claude reads it
       note(p, "Claude is reading your brief and files to prepare the film. Please wait a moment.");
     }
     return { task: await ctx.agent.start(id, { text: prompt, scope: { kind: "project" }, step: s.id, kickoff, ...(fit && !answered ? { asks: fitKey } : {}) }) };
@@ -211,6 +255,8 @@ export function createAutopilot(ctx) {
     const text = { make: "The storyboard is timed to the real voice-over: make it on the Voice screen (Claude's script is in the Script box), or choose No voice-over. The storyboard starts by itself once its words are in.",
       check: "Check and save the voice-over's words on the Voice screen: the storyboard is timed to them and starts by itself once they are saved.",
       failed: "The voice-over's words could not be timed: open the Voice screen and transcribe it again. The storyboard starts by itself once its words are in.",
+      // the reason is the job's own red line in the chat, just before this card
+      ttsFailed: "The voice-over could not be made: open the Voice screen and create it again. The storyboard starts by itself once its words are in.",
       lyrics: "Time the lyrics in the Lyrics dialog: the storyboard places each line at its time and starts by itself once they are timed." }[w];
     waitCard(p, /^lyrics/.test(w) ? "lyrics" : "voice", text);
   }
@@ -261,7 +307,7 @@ export function createAutopilot(ctx) {
       const at = state.findIndex((s) => s.id === "checks");
       // (a step still to run or running; a step waiting for the user, e.g. a Review under 8, does not hold it, as in the autopilot's own run)
       if (state.slice(0, Math.max(0, at)).some((s) => !s.hidden && ["ready", "running", "redo", "blocked"].includes(s.status))) return advance(id);
-      finished(id); return advance(id);
+      await finished(id); return advance(id);
     }
     if (!qa) return;
     // said in plain words, with no "Tech checks" to open (the checks run in the background)
@@ -295,14 +341,16 @@ export function createAutopilot(ctx) {
 
   /** Stage 4 is over (built, self-checked, music and sound effects placed, checks passed): the film is done. Said once per build, as one
    *  chat event the Editor shows green with a tick (a note of kind "pipeline", event "film-done", the self-check's score card in `qc`). */
-  function finished(id) {
+  async function finished(id) {
     const p = projects.getProject(id, root);
     if (!p || p.missing || p.meta?.pipeline?.finished) return null;
     const qc = pipe.reviewCard(p.path);
     const score = qc?.final ?? null;
-    const v = saveVersion(id, "build");
+    // marked at once: checks that pass again while the version is committed (off the server's thread) hand the film over only once
+    meta(id, (x) => { const pl = (x.pipeline ??= {}); pl.delivered ??= { at: now(), score }; pl.finished = { at: now(), score, version: null }; });
+    const v = await saveVersion(id, "build");
     const m = p.meta ?? {};
-    meta(id, (x) => { const pl = (x.pipeline ??= {}); pl.delivered ??= { at: now(), score }; pl.finished = { at: now(), score, version: v?.id ?? null }; });
+    if (v) meta(id, (x) => { if (x.pipeline?.finished) x.pipeline.finished.version = v.id; });
     const n = v?.n ?? ((m.versions ?? []).filter((x) => x.kind === "build").length || 1);
     const say = () => {
       try {
@@ -325,10 +373,34 @@ export function createAutopilot(ctx) {
     }
   }
 
+  /** The owner's own voice-over script against Prepare's words to read (Test 24: 9 of its 12 lines went in, "the rest told by typing",
+   *  written down as "verbatim", and nobody was asked). Claude puts the missing lines back or asks the owner, once per brief; still short
+   *  after that, the owner is told in plain words. Resolves with the task it started, else null. */
+  async function scriptCheck(id, p, task) {
+    const gap = scriptGap(p.path, p.meta?.brief?.text);
+    if (!gap) return null;
+    const briefAt = p.meta?.brief?.editedAt ?? null, fix = p.meta?.pipeline?.scriptFix?.brief === briefAt ? p.meta.pipeline.scriptFix : null;
+    const lines = gap.left.map((l) => `"${l.length > 90 ? `${l.slice(0, 90)}…` : l}"`).join("; ");
+    if (!fix) {
+      const t = await ctx.agent.start(id, { scope: { kind: "project" }, step: "brief",
+        text: `The app's check: the owner wrote the voice-over's script in the brief (${gap.total} lines), and VOICEOVER.md leaves out or changes ${gap.left.length} of them: ${lines}. The owner's script is read word for word (moworks-studio §2b). Write the whole script into VOICEOVER.md as the owner wrote it, every line in its order, and correct what BRIEF.md and NOTES.md say about it. If the film needs the script changed, do not change it: ask the owner in one message with the choices (the whole script as written first), and stop.` }).catch(() => null);
+      if (t?.id) { meta(id, (m) => { (m.pipeline ??= {}).scriptFix = { at: now(), brief: briefAt, taskId: t.id, left: gap.left.length }; }); return t; }
+      return null;
+    }
+    if (fix.taskId === task?.id && !fix.told) {
+      meta(id, (m) => { m.pipeline.scriptFix.told = now(); });
+      try { projects.addNote(p.path, { kind: "voice", status: "warning", text: "Claude's words for the voice-over still leave out {n} of the {total} lines of the script in your brief: {lines}. Check the Script box on the Voice screen before you make the voice-over, or tell Claude in the chat.", vars: { n: gap.left.length, total: gap.total, lines } }); } catch { /* notes are best effort */ }
+    }
+    return null;
+  }
+
   /** Every Claude task ends here (Agent onFinished). */
   async function taskEnded(id, task) {
     const p = projects.getProject(id, root);
     if (!p || p.missing || !task) return;
+    // the files Claude wrote into assets/ are the app's own, never files "the user added" (T22-2)
+    const wrote = (task.changed ?? []).map((c) => String(c?.path ?? c).replace(/\\/g, "/")).filter((x) => /^(assets|sources)\//.test(x));
+    if (wrote.length) { try { rememberAssets(p.path, wrote); } catch { /* the Assets tab shows them as new once */ } }
     if (task.status === "cancelled") { if (task.step) note(p, "Stopped. What was done is saved. Change what you need, then write “continue” in the chat."); return; }
     if (task.status !== "done") return;
     const step = task.step;
@@ -339,7 +411,7 @@ export function createAutopilot(ctx) {
       const pl = p.meta.pipeline;
       if (pl.buildFix?.error !== be.error) {
         meta(id, (m) => { m.pipeline.buildFix = { at: now(), error: be.error }; });
-        return ctx.agent.start(id, { text: `The film's code does not compile, so the film cannot be drawn or rendered (the app keeps the older film until it does). The compiler says: ${be.error}\nFix only what it names, with the smallest change, and change nothing else.` })
+        return ctx.agent.start(id, { by: "app", text: `The film's code does not compile, so the film cannot be drawn or rendered (the app keeps the older film until it does). The compiler says: ${be.error}\nFix only what it names, with the smallest change, and change nothing else.` })
           .catch(() => null);
       }
       if (!pl.buildFix?.told) {
@@ -353,7 +425,7 @@ export function createAutopilot(ctx) {
       // Claude changed a frame's `- sfx:` cues in the chat: the sounds are placed again now, as its rules promise ("after your turn the
       // app finds each sound"), before the version, the preview and the checks take the film (Test 20 waited for "Place them again")
       if (storyboardChanged(task.changed)) { try { await ctx.mix?.cuesAgain?.(p); } catch { /* the Final Mix's Place them again */ } }
-      if (p.meta?.pipeline?.delivered && task.changed?.length) saveVersion(id, "edit");
+      if (p.meta?.pipeline?.delivered && task.changed?.length) await saveVersion(id, "edit");
       // a finished code film changed by the chat: its preview is made again, once, now (never on open)
       if (isFinished(p.meta) && task.changed?.length) { try { ctx.previewProxy?.(id); } catch { /* next change */ } }
       // a chat turn changed a storyboard option before its approval: its pictures are taken again now, as after a storyboard step
@@ -386,6 +458,12 @@ export function createAutopilot(ctx) {
     // a code film's preview starts as soon as it is built (a heavy film should play smoothly before it is handed
     // over): the background job waits while Claude's Review changes the film and then renders it as it is; finished() asks again (fresh: no-op)
     if (step === "build") { try { ctx.previewProxy?.(id); } catch { /* the Editor plays the page live */ } }
+    // the Review's pictures were stopped twice on a busy computer and no round of this task had them (T26-5): the Review is not done (no
+    // score from nothing, the film does not go on as reviewed); the chat says it with a Retry that runs the Review again
+    if (step === "qcReview" && task.stillsBusy && !task.qcSheetsOk) {
+      try { projects.addNote(p.path, { kind: "review", status: "warning", text: STILLS_BUSY, retry: "qcReview" }); } catch { /* notes are best effort */ }
+      return null;
+    }
     if (step === "qcReview") meta(id, (m) => { (m.pipeline ??= {}).reviewed = { at: now(), taskId: task.id }; });
     if (step === "checks") { const fresh = projects.getProject(id, root); ctx.startQa(fresh, { onEnd: () => afterQa(id).catch(() => {}) }); return; }
     if (step === "sound") await afterSound(id);
@@ -396,6 +474,8 @@ export function createAutopilot(ctx) {
     // every wait for the user gets a reminder card in the chat, the same wait the Pipeline row says ("Waiting for you: …");
     // Claude stopped on a conflict or a missing thing: its message holds the choices
     if (s?.asking) waitCard(p, "chat", "Claude needs your choice before it goes on: read its message and answer in the chat.");
+    // Prepare's words to read leave out lines of the owner's own script and it did not ask (Test 24): put back or asked, once
+    if (step === "brief" && !s?.asking && await scriptCheck(id, projects.getProject(id, root) ?? p, task)) return null;
     if (step === "character" && s?.status === "needs-you" && !s.asking) {          // a new cast is asked for only once its checks pass
       const g = ctx.characterGate && hasCast(p.path) ? await Promise.resolve(ctx.characterGate(id)).catch(() => null) : { pass: true };
       const cast = castOf(p.path);
@@ -481,9 +561,9 @@ export function createAutopilot(ctx) {
     meta(id, (m) => { if (m.pipeline) delete m.pipeline.briefChanged; });
     if (choice === "keep") return { choice };
     if (ctx.agent.running.has(id)) throw Object.assign(new Error("Claude is still working on this project. Stop it or wait for it to finish."), { code: "BUSY" });
-    saveVersion(id, "before-redo");
+    await saveVersion(id, "before-redo");
     if (choice === "inplace") {
-      const task = await ctx.agent.start(id, { scope: { kind: "project" }, text: "The owner changed the brief. Update BRIEF.md to it, then change the film's text and content to match, keeping the approved storyboard layouts and motion; say in one line what changed." });
+      const task = await ctx.agent.start(id, { scope: { kind: "project" }, by: "app", text: "The owner changed the brief. Update BRIEF.md to it, then change the film's text and content to match, keeping the approved storyboard layouts and motion; say in one line what changed." });
       return { choice, task: task.id };
     }
     meta(id, (m) => {          // made again from the preparation: the approvals and the first-build marks go, the files stay until replaced
@@ -496,9 +576,11 @@ export function createAutopilot(ctx) {
     return { choice, ...(await advance(id) ?? {}) };
   }
 
-  /** Files came into the project (uploaded, imported or copied in Explorer). The app used to say "Claude is told" and Claude stayed
-   *  idle while Prepare waited for those very files. When a step is asking the user and Claude is free, the files are the answer: Claude
-   *  goes on with them (one turn for a batch: the files of one drop come one by one). */
+  /** Files came into the project (uploaded, imported or copied in Explorer). The app used to send Claude "I added N file(s)… Use them and
+   *  go on" in the user's name while a step asked the user: in Test 22 the file was the app's own voice-over, and Claude took the message
+   *  for the user's answer and chose one of its own three options itself (21 min, $4.13). Now the app's own files never count (appMade,
+   *  and what it remembers as it writes), and while a step waits for the user's answer the app sends nothing in the user's name: it says
+   *  in the chat, once for a batch, that the files came and the answer is the user's. */
   const filesWait = new Map();
   function filesAdded(id, files = []) {
     const t = filesWait.get(id);
@@ -508,10 +590,11 @@ export function createAutopilot(ctx) {
       filesWait.delete(id);
       try {
         if (ctx.agent.running.has(id)) return;          // the running task's next turn reads them in its news
-        const { state } = await ctx.pipelineOf(id);
-        if (!state.some((s) => s.asking && !s.hidden)) return;
-        const names = all.map((f) => String(f).split("/").pop()).slice(0, 12).join(", ");
-        await ctx.agent.start(id, { text: `I added ${all.length} file(s) to the project: ${names}. Use them and go on.` });
+        const { p, state } = await ctx.pipelineOf(id);
+        const made = appMade(p.path, p.meta ?? {}), mine = all.filter((f) => !made.has(String(f)));
+        if (!mine.length || !state.some((s) => s.asking && !s.hidden)) return;
+        const names = mine.map((f) => `"${String(f).split("/").pop()}"`).slice(0, 12).join(", ");
+        note(p, "You added {names} while Claude waits for your answer. Tell Claude in the chat what they are for: it goes on with your answer, not before.", { names });
       } catch { /* the user can still write in the chat */ }
     }, ctx.filesDelayMs ?? 3000) });
   }
@@ -560,7 +643,7 @@ export function createAutopilot(ctx) {
           : `The voice-over came while you drew the storyboard: it is ${len} (its words with their times: transcript.json). Time every frame of the storyboard option(s) waiting for the owner to the real voice: each frame's seconds where its words are spoken, the film's length staying ${set ? (whole.total !== set ? `${whole.total} s (${set} s of content, the ending's ${whole.fade} s fade after it)` : `${set} s`) : "the one set in New project"} (the hold the brief asks for comes out of what the voice leaves). Keep the frames' pictures and order; change only their times and what the timing needs, then stop for my approval in the Storyboard dialog. If the voice does not fit the brief or the frames (another language or topic, far too short), stop and ask as moworks-studio §2b says.` }).catch(() => null);
     }
     if (sb?.status === "done") {
-      return ctx.agent.start(id, { scope: { kind: "project" },
+      return ctx.agent.start(id, { scope: { kind: "project" }, by: "app",
         text: `The voice-over came after the storyboard was approved: it is ${len} (transcript.json has its words and times). Compare it with the approved STORYBOARD.md's frame times and length${set ? ` (the film is set to ${set} s in New project)` : ""}. If they fit, say so in one line and change nothing.${long ? ` ${voiceFitText(p.meta)}` : ""} If they do not, stop and ask as moworks-studio §2b says, with the choices (keep the voice and time the storyboard to it, make the voice again on the Voice screen, or keep both as they are), and change nothing yet.` }).catch(() => null);
     }
     return ctx.agent.start(id, { scope: { kind: "project" }, step: "brief",

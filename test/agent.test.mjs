@@ -30,7 +30,7 @@ test("settings: 5.5 models only, auto by default, a project's own choices on top
 });
 
 test("Claude Code arguments: restricted with file tools; web as the project says; the app's permission tool; bypass unrestricted", () => {
-  const base = { systemPrompt: "SP", sessionArgs: ["--session-id", "x"] };
+  const base = { systemPromptFile: "sp.md", sessionArgs: ["--session-id", "x"] };
   const off = A.claudeArgs({ ...base, settings: { mode: "auto", web: "off", model: "opus", effort: "medium" } });
   assert.ok(off.includes("--restricted") && !off.includes("--safe-mode"));
   assert.equal(off[off.indexOf("--tools") + 1], "Read,Edit,Write,Glob,Grep");
@@ -180,7 +180,7 @@ test("each step names the rule files it must read (with HyperFrames' references 
   assert.equal(decide({ required: req, read, warned: true }).block, false, "told once; the work is never stopped twice");
   read.add(".moworks/rules/general-style/references/inputs.md"); read.add(".moworks/rules/hyperframes/references/story.md");
   assert.equal(decide({ required: req, read, warned: false }).block, false);
-  const args = A.claudeArgs({ settings: { mode: "auto", web: "ask" }, systemPrompt: "SP", sessionArgs: [], guard: "\"node\" \"g.mjs\"" });
+  const args = A.claudeArgs({ settings: { mode: "auto", web: "ask" }, systemPromptFile: "sp.md", sessionArgs: [], guard: "\"node\" \"g.mjs\"" });
   const st = JSON.parse(args[args.indexOf("--settings") + 1]);
   assert.deepEqual(st.permissions, { ask: ["WebFetch", "WebSearch"] });
   assert.equal(st.hooks.PreToolUse[0].matcher, "Write|Edit|MultiEdit|NotebookEdit");

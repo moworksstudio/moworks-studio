@@ -2,7 +2,7 @@
 // check runs first and only what would break the render stops it (script errors, missing files, remote URLs, fonts that are missing or
 // lack Vietnamese letters), with "Ask Claude to fix"; quality findings are warnings next to the result. Then HyperFrames' render worker.
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, Bot, Check, CheckCircle2, Film, FolderOpen, Loader2, Play, RefreshCw, Square, XCircle } from "lucide-react";
+import { AlertTriangle, Bot, Check, CheckCircle2, Film, FolderOpen, Hand, Loader2, Play, RefreshCw, Square, XCircle } from "lucide-react";
 import { get, post, watchJob } from "../api.js";
 import { Banner } from "../components.jsx";
 import { ago, useData, useToast } from "../lib.jsx";
@@ -14,9 +14,9 @@ import { useStage } from "./stage.jsx";
 // plain words for each check, English keys for t
 export const CHECK_WORDS = { "G-HF-LINT": "Composition files", "G-HF-SCRIPT": "Script errors in the preview", "G-REMOTE": "Loads something from the internet",
   "G-FONT": "A font that is not on this computer", "G-GLYPH": "A font without Vietnamese letters",
-  "G-GLYPH-CODE": "A font without Vietnamese letters in the film's code", "G-BLANK": "Scenes that look empty",
+  "G-GLYPH-CODE": "A font without Vietnamese letters in the film's code", "G-VI-MARKS": "Vietnamese written without its marks", "G-BLANK": "Scenes that look empty",
   "G-HF-LAYOUT": "Layout: text overlapping, hidden or cut", "G-HF-CONTRAST": "Contrast too low to read", "G-HF-MOTION": "Motion",
-  "G-VOICE": "Effects or music over the voice" };          // a warning, never a block
+  "G-VOICE": "Effects or music over the voice", "G-SFX": "Actions with no sound" };          // warnings, never a block
 /** A check that did not run says so instead of reporting the film. G-HF-SCRIPT's skippedReason: "deadline" (ran
  *  out of time, no error found before it stopped), "lint" (HF skipped its browser stages after a lint error), "failed" (HF's browser
  *  check did not run); G-HF-LAYOUT / -CONTRAST / -MOTION carry notChecked when HF never ran them: "Not checked", not a pass or a problem. */
@@ -137,6 +137,8 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
   if (ex.error) return <Banner kind="error" action={<button className="btn sm" onClick={ex.reload}>{t("Retry")}</button>}>{ex.error.message}</Banner>;
   if (!form) return <div className="skeleton" style={{ height: "16rem" }} />;
   const running = job?.status === "running";
+  // the quick check did not finish on a busy machine (T22): nothing in the film is at fault; a wait for the user, with a Retry
+  const busy = job?.status === "failed" && job.error?.code === "CHECK_BUSY";
   const verdict = job?.error?.detail?.verdict;
   const warnings = job?.warnings ?? verdict?.warnings ?? [];
   const d = ex.data.defaults;
@@ -165,8 +167,10 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
 
     {job && <section className="panel" aria-live="polite">
       <div className="panel-head">
-        {running ? <Loader2 size={16} className="spin" /> : job.status === "done" ? <CheckCircle2 size={16} color="var(--status-ok)" className="icon-pop" /> : job.status === "cancelled" ? <Square size={16} /> : <XCircle size={16} color="var(--status-stop)" />}
-        <h2>{running ? (job.stage === "checks" ? t("Quick check…") : t("Rendering")) : job.status === "done" ? t("Render finished") : job.status === "cancelled" ? t("Render stopped") : job.error?.code === "RENDER_BLOCKED" ? t("The render is blocked") : t("Render failed")}</h2>
+        {running ? <Loader2 size={16} className="spin" /> : job.status === "done" ? <CheckCircle2 size={16} color="var(--status-ok)" className="icon-pop" /> : job.status === "cancelled" ? <Square size={16} />
+          : busy ? <Hand size={16} color="var(--status-pending)" /> : <XCircle size={16} color="var(--status-stop)" />}
+        <h2>{running ? (job.stage === "checks" ? t("Quick check…") : t("Rendering")) : job.status === "done" ? t("Render finished") : job.status === "cancelled" ? t("Render stopped") : busy ? t("Waiting for you")
+          : job.error?.code === "RENDER_BLOCKED" ? t("The render is blocked") : t("Render failed")}</h2>
         <span className="muted end">{ago(job.endedAt ?? job.startedAt)}</span></div>
       {running && (() => { const pr = renderProgress(job, framesSince.current);
         return <div className="progress-line big"><div style={{ flex: 1 }}><div className="bar" role="progressbar" aria-valuenow={pr.pct ?? undefined} aria-valuemin={0} aria-valuemax={100}><span style={{ transform: `scaleX(${(pr.pct ?? pr.bar) / 100})` }} /></div>
@@ -193,7 +197,9 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
           <span className="hint"> {(g.findings ?? []).slice(0, 4).map(findingText).join("; ")}</span></div></li>)}</ul>
         <div className="row"><button className="btn primary sm" onClick={() => stage.askClaude(fixText(t, verdict.blocking), { send: true })}><Bot size={14} />{t("Ask Claude to fix")}</button>
           <button className="btn sm" onClick={start}><RefreshCw size={14} />{t("Check again")}</button></div></>}
-      {job.status === "failed" && !verdict && <><Banner kind="error" action={<button className="btn sm" onClick={start}>{t("Retry")}</button>}>{job.error?.message}</Banner>
+      {busy && <div className="row"><p className="secondary" role="status" style={{ flex: 1, margin: 0 }}>{t(job.error.message)}</p>
+        <button className="btn primary sm" onClick={start}><RefreshCw size={14} />{t("Retry")}</button></div>}
+      {job.status === "failed" && !verdict && !busy && <><Banner kind="error" action={<button className="btn sm" onClick={start}>{t("Retry")}</button>}>{job.error?.message}</Banner>
         <details className="diag"><summary>{t("Diagnostics")}</summary><pre className="mono">{JSON.stringify({ code: job.error?.code, detail: job.error?.detail, log: job.log?.slice(-20) }, null, 2)}</pre></details></>}
       {job.status === "cancelled" && <p className="secondary">{t("Stopped before it finished. Nothing was kept.")}</p>}
       {/* the tech checks' own dialog, for whoever wants the detail (it is no step or button in the Editor) */}

@@ -13,7 +13,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { servePage } from "../hf-page/index.mjs";
-import { snapshotAt } from "../hf-qa/cli.mjs";
+import { snapshotAtForeground } from "../hf-qa/cli.mjs";
 import { normalizeFps } from "../hf-render-worker/client.mjs";
 import { fontsDir } from "../offline-assets/index.mjs";
 import { APP_ROOT, expandEnv, loadPins, runtimeEnv } from "../version-manager/index.mjs";
@@ -115,7 +115,8 @@ export async function aeExport(projectDir, { fps = 30, outDir = null, runAe = tr
   const emit = (e) => { if (e.type === "log") log?.write(e.line + "\n"); onEvent(e); };
   const result = { status: "failed", outDir: out, checks: [], notes: [] };
   if (signal?.aborted) return { ...result, status: "cancelled", code: "CANCELLED" };
-  if (runAe && !estimateOnly && !aeRunning()) return { ...result, code: "AE_NOT_RUNNING", message: "Open After Effects (no dialog showing), then export again" };
+  // its child processes (tasklist, HF's stills) off the event loop: the server and the CLI's event stream keep going meanwhile
+  if (runAe && !estimateOnly && !(await aeRunningAsync())) return { ...result, code: "AE_NOT_RUNNING", message: "Open After Effects (no dialog showing), then export again" };
 
   const pins = loadPins(root);
   const rec = recordRate(rate);
@@ -129,7 +130,7 @@ export async function aeExport(projectDir, { fps = 30, outDir = null, runAe = tr
     if (times.length) {
       emit({ type: "stage", stage: "reference" });
       rmSync(refDir, { recursive: true, force: true });
-      const s = snapshotAt(dir, times, refDir, { version });
+      const s = await snapshotAtForeground(dir, times, refDir, { version });
       if (s.exitCode !== 0) emit({ type: "log", line: `reference stills failed (exit ${s.exitCode}): ${s.stderrTail.join(" | ")}` });
     }
     const args = [PORT_PY, dir, "--url", page.url, "--fps", `${rate.num}/${rate.den}`, "--rate", `${rec.num}/${rec.den}`, "--out", out];

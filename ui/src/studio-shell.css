@@ -34,7 +34,7 @@
   --lamp: #FFC872; --tape: #F2D88A;
   /* the literals the rooms used again and again, named once */
   --lamp-paper: #FFFBF2; --paper-edge: #CDBFA5; --paper-chip: #E9DFC9; --rule-tint: #EAF1F8;
-  --label-tape: #121010; --label-ink: #F4EBD8; --label-ink-2: #6B6253; --stop-on-room: #F08A73; --room-hover: rgba(255, 240, 210, 0.05);
+  --label-tape: #121010; --label-ink: #F4EBD8; --label-ink-2: #6B6253; --stop-on-room: #F08A73; --done-on-room: #8FD3A6; --room-hover: rgba(255, 240, 210, 0.05);
   --plank-ink: #E8E2D6; --plank-ink-2: #BFB4A0;          /* words printed on the wooden plank (10:1 and 6:1 where they sit) */
   --st-r-xs: 0.2rem; --st-r-sm: 0.3rem; --st-r-md: 0.4rem; --st-r-lg: 0.6rem; --st-r-xl: 0.9rem;
   --colour: linear-gradient(135deg, #E9B44C, #D9603A);
@@ -212,6 +212,7 @@
 [data-theme="studio"] .st-sleeve:first-child { margin-left: 0; }
 [data-theme="studio"] .st-sleeve img, [data-theme="studio"] .st-sleeve .st-noimg { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 0.3rem 0.3rem 0 0; background: var(--paper-3); }
 [data-theme="studio"] .st-sleeve .st-noimg { display: grid; place-items: center; overflow: hidden; }
+[data-theme="studio"] .st-sleeve img:is(.tall, .square) { object-fit: contain; }          /* a vertical or square demo whole on the sleeve's paper, never a strip of it (T23-9, T26-1) */
 [data-theme="studio"] .st-cap { display: block; padding: 0.45rem 0.55rem 0.6rem; font: 500 max(0.82rem, 12px) / 1.2 var(--font-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 [data-theme="studio"] .st-cap small { display: block; color: var(--ink-3); font-weight: 400; font-size: max(0.72rem, 12px); margin-top: 0.15rem; overflow: hidden; text-overflow: ellipsis; }
 [data-theme="studio"] .st-sleeve:focus-visible { transform: rotate(0deg) translateY(-1.6rem); z-index: 3; }
@@ -341,8 +342,10 @@
 [data-theme="studio"] .np2-l { font: max(0.72rem, 11px) var(--font-label); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
 [data-theme="studio"] .np2 .input, [data-theme="studio"] .np2 .select, [data-theme="studio"] .np2 .pick-btn { background-color: #fff; border-color: var(--paper-3); border-radius: var(--st-r-sm); color: var(--ink); }
 /* the title on a dashed pencil line, in the display face */
-[data-theme="studio"] .np2 .np2-title { height: auto; padding: 0.1rem 0.2rem 0.25rem; border: 0; border-bottom: 2px dashed var(--pencil); border-radius: 0; background: none;
-  font: 400 clamp(1.4rem, 1rem + 0.9vw, 2rem) / 1.2 var(--font-studio-display); box-shadow: none; }
+/* (its line is 1.5, room for a capital's stacked marks, which an input cuts at 1.2: T25; the words keep their place over the line, the
+   margin above gives back the rest, so the box keeps its height) */
+[data-theme="studio"] .np2 .np2-title { height: auto; padding: 0 0.2rem max(0px, 0.25rem - 0.15em); margin-top: calc(0.1rem - 0.3em + min(0.15em, 0.25rem)); border: 0; border-bottom: 2px dashed var(--pencil); border-radius: 0; background: none;
+  font: 400 clamp(1.4rem, 1rem + 0.9vw, 2rem) / 1.5 var(--font-studio-display); box-shadow: none; }
 [data-theme="studio"] .np2 .np2-title::placeholder { color: var(--pencil-hint); font-style: italic; }
 [data-theme="studio"] .np2 .np2-title:focus { border-bottom-color: var(--registration); box-shadow: none; }
 [data-theme="studio"] .np2 .np2-title.invalid { border-bottom-color: var(--registration); }
@@ -541,6 +544,20 @@
 [data-theme="studio"] .peg-gear { color: var(--room-ink-2); border: 1px solid transparent; border-radius: var(--st-r-lg); }
 [data-theme="studio"] .peg-gear.on { color: var(--room-ink); border-color: var(--room-line); }
 [data-theme="studio"] .peg-gear.on svg { color: var(--lamp); }
+/* a new version of the app: a small green dot on the gear, and a slip of paper pinned to the peg bar, written by hand,
+   "A new version is ready · Update" (Update, its one action, in registration ink); it drops onto the bar like a sheet onto the pegs */
+[data-theme="studio"] .peg-gear .upd-dot { background: var(--done-on-room); box-shadow: 0 0 0 2px #1E1A15, 0 0 0.4rem rgba(143, 211, 166, 0.55); }
+[data-theme="studio"] .upd-notice { height: auto; gap: 0.4rem; padding: 0.15rem 0.2rem 0.2rem 0.65rem; color: var(--ink-2); background: var(--paper);
+  border-radius: var(--st-r-xs); font: 1.1rem / 1.25 var(--font-studio-hand); transform: rotate(-1.2deg);
+  box-shadow: 0 0.15rem 0.45rem rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6); animation: st-slip 300ms var(--settle) both; }
+[data-theme="studio"] .upd-notice .dot.ok { background: var(--state-done); box-shadow: none; }
+[data-theme="studio"] .upd-notice .upd-sep { color: var(--ink-3); }
+[data-theme="studio"] .upd-notice .upd-go { color: var(--registration-ink); font-weight: inherit; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--registration-ink) 45%, transparent); text-underline-offset: 3px; }
+[data-theme="studio"] .upd-notice .upd-later { color: var(--ink-3); padding: 0 0.4rem; }
+[data-theme="studio"] .upd-notice.done > svg { color: var(--state-done); }
+[data-theme="studio"] .settings-nav .upd-dot { background: var(--done-on-room); }          /* the Update section's dot: on the room, light green; on its paper tab, the paper's */
+[data-theme="studio"] .settings-nav .rail-item.active .upd-dot { background: var(--state-done); }
+@keyframes st-slip { from { opacity: 0; transform: translateY(-0.5rem) rotate(-1.2deg); } }
 @media (max-width: 1100px) { [data-theme="studio"] .pegbar .brand-sub { display: none; } [data-theme="studio"] .peg.slot { width: 1.2rem; } }
 [data-theme="studio"] .chip-status { border-color: var(--room-line); color: var(--room-ink-2); }
 /* the lamp: Claude's chip glows warm when Claude is ready */
@@ -591,6 +608,8 @@
   [data-theme="studio"] .st-film:hover { transform: rotate(0deg) translateY(-1.2rem); }
   [data-theme="studio"] .peg-tab:hover { color: var(--room-ink); background: var(--room-hover); }
   [data-theme="studio"] .peg-gear:hover { color: var(--room-ink); border-color: var(--room-line); }
+  [data-theme="studio"] .upd-notice .upd-go:hover { text-decoration-color: currentColor; }
+  [data-theme="studio"] .upd-notice .upd-later:hover { color: var(--ink); }
   [data-theme="studio"] .chip-status:hover { border-color: #5B5141; color: var(--room-ink); }
   [data-theme="studio"] .page-settings .settings-nav .rail-item:hover { background: var(--room-hover); color: var(--room-ink); }
   [data-theme="studio"] .st-linkish:hover { color: var(--room-ink); }

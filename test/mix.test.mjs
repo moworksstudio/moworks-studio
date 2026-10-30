@@ -105,16 +105,21 @@ test("Final Mix music: only Mixkit audio links are downloaded, each round kept, 
   assert.match(credits, /Rain.*Mixkit Stock Music Free License.*not for TV or radio broadcast/);
 });
 
-test("Final Mix sound effects: a whoosh into a cut that changes the picture, a pop when something enters, typing for typed text, spaced; the storyboard's own cues first", () => {
+test("Final Mix sound effects: a whoosh into a cut that changes the picture, a pop when something enters, typing for typed text, a sound on every action (no cap of 2 a shot); the storyboard's own cues first", () => {
   const shots = [{ number: 1, index: 0, start: 0, duration: 3 }, { number: 2, index: 1, start: 3, duration: 3, sfx: "chime@0.5", transitionIn: "whip pan" },
     { number: 3, index: 2, start: 6, duration: 4 }];
   const plan = { shots: [
     { shot: 1, motions: [{ type: "entrance", start: 0.3, target: "Title" }, { type: "entrance", start: 0.5, target: "Sub" }, { type: "entrance", start: 1, target: "Third" }] },
     { shot: 3, motions: [{ type: "transition", start: 0, target: "#wipe" }, { type: "text", start: 1.2, target: "Caption", behavior: "typed out letter by letter, typewriter caret" }] }] };
   const auto = autoCues(shots, plan);
-  assert.deepEqual(auto.map((c) => [c.name, c.start]), [["pop", 0.3], ["pop", 0.5], ["whoosh", 2.8], ["whoosh", 5.8], ["typing", 7.2]]);
+  // the third entrance gets its pop too (owner 30/10: every action); the plan's transition at shot 3's start is the cut's own whoosh
+  assert.deepEqual(auto.map((c) => [c.name, c.start]), [["pop", 0.3], ["pop", 0.5], ["pop", 1], ["whoosh", 2.8], ["whoosh", 5.8], ["typing", 7.2]]);
   const all = mixCues(shots, plan);
-  assert.deepEqual(all.map((c) => [c.name, c.start]), [["pop", 0.3], ["whoosh", 2.8], ["chime", 3.5], ["whoosh", 5.8], ["typing", 7.2]], "0.6 s apart; the named cue kept");
+  assert.deepEqual(all.map((c) => [c.name, c.start]), [["pop", 0.3], ["pop", 0.5], ["pop", 1], ["whoosh", 2.8], ["chime", 3.5], ["whoosh", 5.8], ["typing", 7.2]],
+    "two pops 0.2 s apart are two actions; the named cue kept");
+  // the same moment is one action: an automatic sound within 0.25 s of the storyboard's own gives way to it
+  const named = [{ number: 1, index: 0, start: 0, duration: 3, sfx: "chime@0.4" }];
+  assert.deepEqual(mixCues(named, { shots: [{ shot: 1, motions: [{ type: "entrance", start: 0.5, target: "Title" }] }] }).map((c) => c.name), ["chime"]);
 });
 
 test("typing only for text being typed: the noun \"type\" (a type block, a typeface) is no keyboard (Test 20: 13 typing sounds)", () => {
@@ -122,12 +127,13 @@ test("typing only for text being typed: the noun \"type\" (a type block, a typef
   for (const t of ["typing the headline", "the caption types out", "the name is typed out letter by letter", "type-on reveal", "a typewriter", "keyboard clicks", "the caret blinks", "gõ chữ từng chữ"]) assert.match(t, TYPING, t);
   const shots = [{ number: 1, index: 0, start: 0, duration: 4 }];
   const plan = { shots: [{ shot: 1, motions: [{ type: "entrance", start: 0.5, target: ".type-block", behavior: "the type block slides in from the left" }] }] };
-  assert.deepEqual(autoCues(shots, plan).map((c) => c.name), ["pop"]);
+  assert.deepEqual(autoCues(shots, plan).map((c) => c.name), ["light swish"], "a slide in, never typing");
 });
 
 test("a whoosh only where the picture really changes: one continuous scene, a dissolve or a cut nothing describes gets none (Test 20: 10 whooshes)", () => {
   const at = (extra) => [{ number: 1, index: 0, start: 0, duration: 3, ...extra[0] }, { number: 2, index: 1, start: 3, duration: 3, ...extra[1] }];
-  const whooshes = (shots, plan = null) => autoCues(shots, plan).filter((c) => c.name === "whoosh").length;
+  // the cut's own whoosh (a transition row later in a shot is an action of its own, with its own sound)
+  const whooshes = (shots, plan = null) => autoCues(shots, plan).filter((c) => c.cut).length;
   assert.equal(whooshes(at([{}, {}])), 0, "nothing tells: no whoosh");
   assert.equal(whooshes(at([{}, { transitionIn: "cùng một cảnh, máy bay lên và trượt dọc phố" }])), 0, "the same scene, a camera move");
   assert.equal(whooshes(at([{}, { transitionIn: "match cut on the lamp" }])), 0);
@@ -155,25 +161,42 @@ test("a Final Mix revision is sound only: the picture's check stays valid; a pic
   assert.equal(rev.changedSince(d, checked), true);
 });
 
-test("Final Mix levels (the kit's rule): an effect about 4 dB over the music bed, at least 2 dB under the voice; the master to -16 LUFS", { timeout: 120000 }, async () => {
+test("Final Mix levels by family (one-shots under the music bed and the voice, the set moved with the measured mix); the master to -16 LUFS", { timeout: 120000 }, async () => {
   const { levels } = await import("../packages/sfx/auto.mjs");
+  const { LEVELS, REF_BED, REF_LUFS, volumeFor } = await import("../packages/sfx/actions.mjs");
   const { masterLoudness, loudness } = await import("../packages/hf-qa/loudness.mjs");
   const d = join(T, "levels"); mkdirSync(join(d, "assets", "audio"), { recursive: true }); mkdirSync(join(d, "assets", "sfx"), { recursive: true }); mkdirSync(join(d, ".moworks"), { recursive: true });
   const gen = (args, out) => execFileSync(ffmpegExe(), ["-v", "error", "-y", "-f", "lavfi", ...args, out], { windowsHide: true });
   gen(["-i", "sine=frequency=220:duration=6"], join(d, "assets", "audio", "bed.wav"));
   gen(["-i", "sine=frequency=880:duration=0.5", "-af", "volume=-12dB"], join(d, "assets", "sfx", "pop.wav"));
   gen(["-i", "sine=frequency=440:duration=6", "-af", "volume=-2dB"], join(d, "assets", "audio", "vo.wav"));
-  writeFileSync(join(d, ".moworks", "sfx.json"), JSON.stringify({ sounds: { pop: { file: "assets/sfx/pop.wav", durationS: 0.5 } } }));
+  // a library one-shot (its catalog loudness) and a sound from the search (measured)
+  writeFileSync(join(d, ".moworks", "sfx.json"), JSON.stringify({ sounds: { pop: { file: "assets/sfx/pop.wav", durationS: 0.5, family: "pop" },
+    thud: { file: "assets/sfx/pop.wav", durationS: 0.5, family: "impact", source: "library", lufs: -24 } } }));
   const html = (voice) => `<div data-composition-id="r"><audio id="el-music" src="assets/audio/bed.wav" data-volume="0.6"></audio>${voice ? '<audio id="el-voice" src="assets/audio/vo.wav" data-volume="1"></audio>' : ""}</div>`;
   writeFileSync(join(d, "index.html"), html(false));
-  const a = await levels(d, ["pop"]);
-  assert.ok(Math.abs(a.target - (a.bed + 4)) < 0.01);
-  const popLoud = 20 * Math.log10(a.volumes.pop);
-  assert.ok(a.volumes.pop > 0.05 && a.volumes.pop <= 1, String(a.volumes.pop));
+  const a = await levels(d, ["pop", "thud"]);
+  assert.ok(Math.abs(a.shift - Math.max(-6, Math.min(6, a.bed - REF_BED))) < 0.01, "the set follows the measured bed");
+  // the library's hit is never boosted by its low integrated loudness: its family's level, moved with the mix
+  assert.equal(a.volumes.thud, volumeFor("impact", -24, { shift: a.shift }));
+  // a sound from the search, measured quiet (the test tone is about -33 LUFS), is brought up, at most 6 dB
+  const ref = volumeFor("pop", REF_LUFS, { shift: a.shift });
+  assert.ok(a.volumes.pop > ref && a.volumes.pop <= Math.round(ref * 2 * 100) / 100 + 0.01, `${a.volumes.pop} against ${ref}`);
+  assert.ok(a.volumes.pop > 0.02 && a.volumes.pop <= 1, String(a.volumes.pop));
   writeFileSync(join(d, "index.html"), html(true));
-  const b = await levels(d, ["pop"]);
-  assert.ok(b.target <= b.voice - 2 + 0.01, "under the voice");
-  assert.ok(20 * Math.log10(b.volumes.pop) <= popLoud + 0.01);
+  const b = await levels(d, ["pop", "thud"]);
+  assert.ok(Number.isFinite(b.voice));
+  // with a voice-over the levels never rise, and a sound at the reference loudness sits at least 4 dB under the voice
+  assert.equal(b.volumes.thud, volumeFor("impact", -24, { shift: b.shift, voice: b.voice }));
+  assert.ok(b.volumes.thud <= a.volumes.thud && b.volumes.pop <= a.volumes.pop);
+  assert.ok(REF_LUFS + 20 * Math.log10(volumeFor("impact", REF_LUFS, { shift: b.shift, voice: b.voice })) <= b.voice - 4 + 0.1, "under the voice");
+  // the levels by family: clicks quietest, impacts loudest of the one-shots, ambience a quiet bed
+  assert.ok(LEVELS.click < LEVELS.pop && LEVELS.pop < LEVELS.whoosh && LEVELS.whoosh < LEVELS.impact && LEVELS.ambience < LEVELS.click);
+  assert.equal(volumeFor("pop", -16), 0.25);
+  assert.equal(volumeFor("pop", -28), 0.25, "a library one-shot under -16 LUFS stays at its family's level");
+  assert.equal(volumeFor("ambience", -28, { maxBoost: 18 }), 0.48, "a -28 LUFS loop brought up to the bed's level");
+  assert.ok(volumeFor("impact", -10) < LEVELS.impact, "a loud sound is brought down");
+  assert.ok(volumeFor("impact", -16, { voice: -24 }) < LEVELS.impact, "4 dB under a quiet voice");
   // the master: a quiet render brought to the rule
   const mp4 = join(T, "quiet.mp4");
   execFileSync(ffmpegExe(), ["-v", "error", "-y", "-f", "lavfi", "-i", "color=c=black:s=64x36:d=5", "-f", "lavfi", "-i", "sine=frequency=330:duration=5", "-af", "volume=-12dB", "-shortest", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", mp4], { windowsHide: true });
@@ -184,7 +207,7 @@ test("Final Mix levels (the kit's rule): an effect about 4 dB over the music bed
   assert.ok(after.truePeak <= -3.9, String(after.truePeak));
 });
 
-test("Final Mix uses the user's own sound when the brief names it as the tick; Pixabay credits say they are HF's bundled set", { timeout: 120000 }, async () => {
+test("Final Mix uses the user's own sound when the brief names it as the tick; the rest from the app's library, credited from its catalog", { timeout: 120000 }, async () => {
   const { autoSfx } = await import("../packages/sfx/auto.mjs");
   const d = join(T, "own-sfx"); mkdirSync(join(d, "assets", "audio"), { recursive: true });
   execFileSync(ffmpegExe(), ["-v", "error", "-y", "-f", "lavfi", "-i", "sine=frequency=880:duration=0.4", join(d, "assets", "audio", "qc-tone.wav")], { windowsHide: true });
@@ -199,12 +222,12 @@ test("Final Mix uses the user's own sound when the brief names it as the tick; P
   assert.equal(st.sounds.pop.source, "owner");
   assert.ok(existsSync(join(d, st.sounds.pop.file)), "copied into assets/sfx");
   assert.ok(st.sounds.pop.durationS > 0.3 && st.sounds.pop.durationS < 0.5, String(st.sounds.pop.durationS));
-  assert.equal(st.sounds.whoosh.source, "pixabay", "a cue the brief does not name still gets the library sound");
+  assert.equal(st.sounds.whoosh.source, "library", "a cue the brief does not name gets the app's offline library sound, before the search");
   const credits = readFileSync(join(d, "CREDITS.md"), "utf8");
   assert.match(credits, /"qc-tone.wav" provided by the owner \(assets\/audio\/qc-tone.wav\)/);
-  assert.match(credits, /bundles in its media-use skill/);
-  assert.match(credits, /File: https:\/\/github\.com\/.*\/skills\/media-use\/audio\/assets\/sfx\/whoosh/);
-  assert.ok(!/Source: https:\/\/pixabay\.com\/sound-effects\/\s*$/m.test(credits), "no generic Pixabay link as the source");
+  // a library sound credited from its catalog: its pack, author, licence and page, the original file (CC0 needs none; listed all the same)
+  assert.match(credits, /\*\*whoosh\*\* \(`assets\/3_audio\/sfx\/whoosh-[a-z0-9-]+\.ogg`\): "whoosh-[a-z0-9-]+", from .+ by .+, (CC0 1\.0|Public domain).* Source: https:\/\/(kenney\.nl|opengameart\.org|commons\.wikimedia\.org)\//);
+  assert.match(credits, /original file: /);
 });
 
 test("the master meets -16 LUFS with true peaks at most -1 dBTP on a mix with hits over a bed, not -17 (loudnorm's 192 kHz re-encoded to AAC raised the peak; the old -4 ceiling left a peaky mix at -17.2)", { timeout: 180000 }, async () => {

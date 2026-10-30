@@ -112,6 +112,7 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
   const [lang, setLang] = useState(null);
   const [hints, setHints] = useState(null);       // words to expect (brand, script): helps Whisper spell them
   const [saving, setSaving] = useState(false);
+  const [nudge, setNudge] = useState(0);          // the chosen source card clicked again
   const player = useRef(null);
   const fileInput = useRef(null);
   const [drag, setDrag] = useState(false);
@@ -133,10 +134,16 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
     return () => { alive = false; if (url) URL.revokeObjectURL(url); };
   }, [voice?.file]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  function follow(j) {
+  // a read the server did not answer (a busy computer: Test 24's server was silent ~30 s) no longer ends the watch with the job shown
+  // running: it looks again a little later, and reads the voice-over again once the job is gone
+  function follow(j, tries = 0) {
     setJob(j);
-    watchJob(j.id, (x) => {
-      if (!x) return;
+    watchJob(j.id, (x, e) => {
+      if (!x) {
+        if (e?.status === 404 || tries >= 20) { setJob(null); v.reload(); project.reload(); }
+        else setTimeout(() => follow(j, tries + 1), 3000);
+        return;
+      }
       setJob(x);
       if (x.status !== "running") { v.reload(); project.reload(); if (x.status === "failed") toast(x.error?.message ?? t("Failed"), "error"); }
     }, 1200);
@@ -177,7 +184,8 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
       {/* Until the film's voice is read, the cards wait as skeletons (none looked chosen while the sheet loaded) */}
       {!d && !project.data ? <div className="radio-cards four" aria-busy="true">{SOURCES.map(([k]) => <span key={k} className="radio-card skeleton" aria-hidden="true" />)}</div>
       : <div className="radio-cards four">{SOURCES.map(([k, l, Icon, desc]) => (
-        <button key={k} className="radio-card" aria-pressed={source === k} aria-label={`${t(l)}: ${t(desc)}`} onClick={() => setSource(k)}>
+        // the chosen card clicked again reads its voice list again when that failed (T23-5)
+        <button key={k} className="radio-card" aria-pressed={source === k} aria-label={`${t(l)}: ${t(desc)}`} onClick={() => { if (k === source) setNudge((n) => n + 1); setSource(k); }}>
           {/* the cards as designed, their one-line description in small print */}
           {/* the key's chip in the card's top-right corner, on the name's line */}
           <span className="t"><Icon size={15} />{t(l)}{(k === "elevenlabs" || k === "fishaudio") && d && <span className={"chip" + (d.keys[k].saved ? " teal" : "")}>{d.keys[k].saved ? t("Key saved") : t("No key yet")}</span>}</span>
@@ -197,7 +205,7 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
     </section>}
 
     {(source === "elevenlabs" || source === "fishaudio") && d && <TtsPanel id={id} provider={source} keySaved={d.keys[source].saved} brief={project.data?.meta?.brief} draft={d.scriptDraft?.text ?? ""} language={d.settings.language} onJob={follow} running={running}
-      current={voice ?? project.data?.meta?.voice} />}
+      current={voice ?? project.data?.meta?.voice} ownScript={d.ownScript} nudge={nudge} />}
     <AudioFiles id={id} voiceFile={voice?.file} voiceName={voice?.voiceName} onJob={follow} running={running} focus={path}
       stamp={`${voice?.transcript?.status ?? ""}|${voice?.transcript?.at ?? ""}|${voice?.transcript?.savedAt ?? ""}|${running?.id ?? ""}`} />
 
@@ -335,22 +343,43 @@ export function settingsChanged(fields, values, defaults) {
   return out;
 }
 
-/** The voice the box opens on: the one the film's voice-over was read with, when it came from this service and the service still
- *  lists it; else the first usable voice. */
-export function pickVoice(voices, provider, current) {
-  const own = current?.source === provider && current.voiceId ? voices.find((v) => v.id === current.voiceId) : null;
-  return (own ?? voices.find((v) => v.usable !== false) ?? voices[0])?.id ?? "";
+/** The voice the box opens on: the voice the user chose last on this screen, when this service lists it; else the one they chose last
+ *  for this service; else the one the film's voice-over was read with, when it came from this service and the service still lists it;
+ *  else the first usable voice. chosen: { last, [provider]: { voiceId } } (chosenOf). */
+export function pickVoice(voices, provider, current, chosen = null) {
+  const has = (vid) => (vid ? voices.find((v) => v.id === vid) ?? null : null);
+  const own = current?.source === provider ? has(current.voiceId) : null;
+  return (has(chosen?.last) ?? has(chosen?.[provider]?.voiceId) ?? own ?? voices.find((v) => v.usable !== false) ?? voices[0])?.id ?? "";
 }
+// T22-3: switching the source card (ElevenLabs, then another card, then ElevenLabs again) built the panel afresh and the chosen voice went
+// back to the first one, "Minh Trung". What the user chose for this film is kept for the app session: the voice they picked last, and per
+// service its voice, model and the script in the box.
+const CHOSEN = new Map();
+export const chosenOf = (projectId) => { if (!CHOSEN.has(projectId)) CHOSEN.set(projectId, {}); return CHOSEN.get(projectId); };
 
-function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", onJob, running, current = null }) {
+// T23-5: the first read of the voices failed on a busy computer ("Could not reach the service: fetch failed", a 502) and nothing read
+// them again. A failed read is tried once more by itself after a few seconds, and Retry or a click on the chosen card reads them again.
+const VOICES_RETRY_MS = 4000;
+
+function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", onJob, running, current = null, ownScript = null, nudge = 0 }) {
   const t = useT();
   const toast = useToast();
   const name = provider === "elevenlabs" ? "ElevenLabs" : "Fish Audio";
+  const kept = chosenOf(id);
   const [list, setList] = useState(null);
   const [err, setErr] = useState(null);
+  const [attempt, setAttempt] = useState(0);
+  const triedAgain = useRef(false);          // the one try of its own after a failed read
+  const retry = () => setAttempt((n) => n + 1);
+  useEffect(() => { if (nudge && err) retry(); }, [nudge]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { triedAgain.current = false; }, [provider]);          // each service gets its own try
   const [voiceId, setVoiceId] = useState("");
   const [model, setModel] = useState("");
-  const [text, setText] = useState(brief?.mode === "script" ? brief.text ?? "" : "");
+  const [text, setText] = useState(kept[provider]?.text ?? (brief?.mode === "script" ? brief.text ?? "" : ""));
+  // what is chosen here outlives a switch of the source card
+  useEffect(() => { if (list && voiceId) kept[provider] = { ...kept[provider], voiceId, model }; }, [voiceId, model, list]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { kept[provider] = { ...kept[provider], text }; }, [text]); // eslint-disable-line react-hooks/exhaustive-deps
+  const chooseVoice = (v) => { kept.last = v; setVoiceId(v); };
   // An empty Script box takes the words Claude wrote for the voice-over, one line per sentence
   useEffect(() => { if (draft) setText((x) => (x.trim() ? x : draft)); }, [draft]);
   // A script brief is the user's own words, not Claude's draft; so is a draft whose every line is in the brief as written
@@ -361,17 +390,25 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
   const defaultsOf = (id_) => { const v = list?.voices.find((x) => x.id === id_); return { ...(list?.defaultSettings ?? {}), ...(v?.defaultSettings ?? {}) }; };
   useEffect(() => { setVs(defaultsOf(voiceId)); }, [voiceId, list]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (!keySaved) return;
+    if (!keySaved) return undefined;
+    let alive = true, again = null;
     setList(null); setErr(null);
     get(`/api/voice/providers/${provider}/voices?lang=${projectLanguage(brief, language)}`).then((r) => {
+      if (!alive) return;
       // A provider's names can carry stray spaces (" Minh Trung - Narration"); the menu, the confirm and the saved name use them trimmed
       const voices = voiceOrder((r.voices ?? []).map((v) => ({ ...v, name: String(v.name ?? "").trim() })), projectLanguage(brief, language));
-      setList({ ...r, voices }); setVoiceId(pickVoice(voices, provider, current));
-      // The model the film's voice-over was made with, then the server's pick
+      setList({ ...r, voices }); setVoiceId(pickVoice(voices, provider, current, kept));
+      // The model chosen here before, then the one the film's voice-over was made with, then the server's pick
+      const before = r.models.find((m) => m.id === kept[provider]?.model)?.id ?? null;
       const same = current?.source === provider ? r.models.find((m) => m.id === current.model)?.id : null;
-      setModel(same ?? r.models.find((m) => m.id === r.defaultModel)?.id ?? r.models.find((m) => m.vietnamese)?.id ?? r.models[0]?.id ?? "");          // the server's pick first
-    }).catch(setErr);
-  }, [provider, keySaved]); // eslint-disable-line react-hooks/exhaustive-deps
+      setModel(before ?? same ?? r.models.find((m) => m.id === r.defaultModel)?.id ?? r.models.find((m) => m.vietnamese)?.id ?? r.models[0]?.id ?? "");          // the server's pick first
+    }).catch((e) => {
+      if (!alive) return;
+      setErr(e);
+      if (!triedAgain.current) { triedAgain.current = true; again = setTimeout(retry, VOICES_RETRY_MS); }
+    });
+    return () => { alive = false; clearTimeout(again); };
+  }, [provider, keySaved, attempt]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!keySaved) return <section className="panel"><Banner kind="warning" action={<button className="btn sm" onClick={() => go("/settings/general")}>{t("Add key")}</button>}>{t("Add your {name} key in Settings › General › Voice-over to choose a voice.", { name })}</Banner></section>;
   const voice = list?.voices.find((x) => x.id === voiceId);
   // the voice settings are left at the service's defaults: only what the user changed is sent
@@ -385,12 +422,14 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
   };
   // no "{name} voice" heading: the source card picked above already says it
   return <section className="panel vo-tts-panel" aria-label={t("{name} voice", { name })}>
-    {err && <Banner kind="error">{err.message}</Banner>}
+    {err && <Banner kind="error" action={<button className="btn sm" onClick={retry}><RefreshCw size={13} />{t("Retry")}</button>}>{err.message}</Banner>}
+    {/* the last try could not make the voice-over (the server's plain reason); gone once a try runs or works */}
+    {current?.ttsFailed && !running && <Banner kind="error">{t(current.ttsFailed.message)}</Banner>}
     {!list && !err && <div className="skeleton" style={{ height: "5.3333rem" }} />}
     {/* two columns, the voice and its settings on the left, the script with the room it needs on the right */}
     <div className="vo-tts">
       <div className="vo-tts-l">
-        {list && <><div className="field"><span id="vo-voice-l">{t("Voice")}</span><VoicePick voices={list.voices} value={voiceId} onChange={setVoiceId} /></div>
+        {list && <><div className="field"><span id="vo-voice-l">{t("Voice")}</span><VoicePick voices={list.voices} value={voiceId} onChange={chooseVoice} /></div>
           <label className="field"><span>{t("Model")}</span><select className="select" value={model} onChange={(e) => setModel(e.target.value)}>
             {list.models.map((m) => <option key={m.id} value={m.id}>{m.name}{m.vietnamese ? " · " + t("Vietnamese") : ""}</option>)}</select></label></>}
         {voice?.preview && <audio controls src={voice.preview} preload="none" style={{ width: "100%" }} aria-label={t("Voice sample")} />}
@@ -408,7 +447,10 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
       </div>
       <div className="vo-tts-r">
         <label className="field vo-script"><span>{t("Script")}</span><textarea className="textarea" rows={5} value={text} onChange={(e) => setText(e.target.value)} placeholder={t("The words to read, exactly as they should sound.")} /></label>
-        {draft && !ownWords && text === draft && <p className="hint"><Bot size={12} /> {t("Claude's draft: edit it before you make the voice-over")}</p>}
+        {/* Claude's words leave out lines of the script the owner wrote in the brief (Test 24: 9 of 12): said, with the way back */}
+        {ownScript?.leftOut > 0 && text === draft ? <p className="hint warn"><AlertTriangle size={12} /> {ownScript.leftOut === 1 ? t("Claude's words leave out 1 line of the script in your brief.") : t("Claude's words leave out {n} lines of the script in your brief.", { n: ownScript.leftOut })}
+          {" "}<button type="button" className="clink" onClick={() => setText(ownScript.text)}>{t("Use your script")}</button></p>
+          : draft && !ownWords && text === draft && <p className="hint"><Bot size={12} /> {t("Claude's draft: edit it before you make the voice-over")}</p>}
         <div className="vo-go"><span className="muted num">{t("{n} characters", { n: text.length.toLocaleString(locale()) })}</span><span className="spacer" />
           <button className="btn primary" onClick={() => setAsk(true)} disabled={!text.trim() || !voiceId || !!running}>{running?.kind === "tts" ? <Loader2 size={15} className="spin" /> : <Sparkles size={15} />}{t("Create voice-over")}</button></div>
         {running?.kind === "tts" && <p className="hint">{t("{name} is reading the script. Transcription starts when the audio arrives.", { name })}</p>}

@@ -2,10 +2,12 @@
 // sound effects. Music: the three tracks as one list, each on one line (title · author · length), Claude's pick and the one in use marked on
 // the list itself (no separate block for the current track), one player for the whole dialog so two tracks never play at once; "Use this"
 // switches the track on the timeline (from 0 s, beats measured, credited), "Three other tracks" asks for more. Sound effects: placed by the app
-// from the cuts and the motion plan; their count, the list folded, place again or remove. Levels: only the action that applies (the music
-// ducked under the voice with HyperFrames' carve) and the last render's loudness, without the studio-rule notice.
-import { useEffect, useRef, useState } from "react";
-import { AudioLines, Check, Info, Loader2, Music, Pause, Play, RefreshCw, ShieldCheck, Sparkles, Trash2 } from "lucide-react";
+// from the cuts and the motion plan, a sound on every action; their count, the list folded (one sound or one ambience bed taken out with
+// its ×, kept out on every placement), how many (every action, most, only the big ones) and the ambience on or off, place again or remove.
+// Levels: only the action that applies (the music ducked under the voice with HyperFrames' carve) and the last render's loudness, without
+// the studio-rule notice. The last placement's result is said under the count: the sounds left out and those on a close sound for now.
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { AlertTriangle, AudioLines, Check, Info, Loader2, Music, Pause, Play, RefreshCw, RotateCcw, ShieldCheck, Sparkles, Trash2, X } from "lucide-react";
 import { get, post } from "../api.js";
 import { Banner } from "../components.jsx";
 import { useData, useToast } from "../lib.jsx";
@@ -65,6 +67,15 @@ function Track({ x, pick, player, busy, onUse }) {
   </li>;
 }
 
+// The Editor opens the dialog anew each time the sounds are placed (its key): where it was scrolled to and whether "Where they are" was
+// open come back with it (Test 26: after "Place them again" it jumped back to the top with the list closed). Only right after such a
+// change, never when the dialog is opened again later.
+const kept = new Map();          // project id -> { top, list, gone }
+const scrollerOf = (el) => { for (let p = el?.parentElement; p; p = p.parentElement) { const o = getComputedStyle(p).overflowY; if (o === "auto" || o === "scroll") return p; } return null; };
+const quoted = (xs) => xs.map((x) => `“${x}”`).join(", ");
+// a stand-in's name in plain words ("chime", "cloth rustle"), never a file's
+const plain = (s) => String(s ?? "").replace(/[-_]+/g, " ").replace(/\s*\d+$/, "").trim();
+
 const MIXKIT = "Mixkit music is for online use only (YouTube, social, websites, online ads). For TV, radio, cinema, DVD or games, use broadcast-licensed music.";
 
 export default function MixSheet({ projectId, project, onChanged }) {
@@ -76,6 +87,18 @@ export default function MixSheet({ projectId, project, onChanged }) {
   const [waitSfx, setWaitSfx] = useState(false);
   const [stopAt, setStopAt] = useState("");          // "Stop the music at" (the twist)
   const player = usePlayer();
+  const root = useRef(null);
+  const [back] = useState(() => { const k = kept.get(projectId); return k?.gone && Date.now() - k.gone < 8000 ? k : null; });
+  const [listOpen, setListOpen] = useState(!!back?.list);
+  useEffect(() => () => { kept.set(projectId, { ...kept.get(projectId), gone: Date.now() }); }, [projectId]);
+  useLayoutEffect(() => {
+    const el = q.data ? scrollerOf(root.current) : null;
+    if (!el) return undefined;
+    if (back?.top) el.scrollTop = back.top;
+    const on = () => kept.set(projectId, { ...kept.get(projectId), top: el.scrollTop });
+    el.addEventListener("scroll", on, { passive: true });
+    return () => el.removeEventListener("scroll", on);
+  }, [!!q.data]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (waitSfx) { const h = setTimeout(() => { q.reload(); setWaitSfx(false); }, 4000); return () => clearTimeout(h); } }, [waitSfx]); // eslint-disable-line react-hooks/exhaustive-deps
   if (q.error) return <Banner kind="error">{q.error.message}</Banner>;
   if (!q.data) return <div className="skeleton" style={{ height: "16rem" }} />;
@@ -86,13 +109,19 @@ export default function MixSheet({ projectId, project, onChanged }) {
   const length = sec >= 60 ? `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}` : `${sec} s`;
   const act = async (key, fn, done) => { setBusy(key); try { const r = await fn(); done?.(r); q.reload(); onChanged?.(); } catch (e) { toast(e.message, "error"); } finally { setBusy(null); } };
   const ask = (text) => act("find", () => post(`/api/projects/${projectId}/pipeline/finalMix/run`, { text }), () => toast(t("Claude is looking on Mixkit; the tracks appear here")));
+  // the owner's sound choices: kept for the film, and the sounds placed again with them
+  const prefs = d.sfxPrefs ?? { density: "lively", ambience: true, skipped: 0 };
+  const setPref = (body) => act("prefs", () => post(`/api/projects/${projectId}/mix/sfx/prefs`, body), () => setWaitSfx(true));
+  const placing = !!busy || waitSfx;
+  const sounds = [...(d.ambience ?? []).map((x) => ({ ...x, bed: true })), ...d.sfx].sort((a, b) => a.start - b.start);
   const ownSong = !!project?.styleInfo?.music && !!d.music && !round;          // the film is built on the song the user gave: no stock tracks offered
   // The Mixkit licence only for a Mixkit track (or while Mixkit tracks are offered and none is placed), never the user's own file
   const mixkit = !ownSong && (d.music ? /mixkit/i.test(`${d.music.licence ?? ""} ${d.music.page ?? ""}`) : !!round);
   const heard = d.options.flatMap((r) => r.tracks.map((x) => x.title)).join(", ");
   // the list: the latest round's three tracks; with no round (the user's own song) the track on the timeline alone
   const tracks = round ? round.tracks : d.music ? [{ ...d.music, title: d.music.title ?? d.music.file.split("/").pop(), current: true }] : [];
-  return <div className="mix">
+  const left = d.sfxPlacing ? [] : d.sfxMissing ?? [], near = d.sfxPlacing ? [] : d.sfxNear ?? [];
+  return <div className="mix" ref={root}>
     {/* Final Mix hands the film over: no score, no Tech checks; a change asked in the chat is rebuilt and rendered by itself */}
     {/* Not "ready" while something stops the render or Claude waits for an answer */}
     {/* the same rule as the Pipeline: ready only when nothing blocks and the Final Mix row is done ("Ready to render") */}
@@ -114,6 +143,8 @@ export default function MixSheet({ projectId, project, onChanged }) {
         onUse={round ? () => act("use" + x.file, () => post(`/api/projects/${projectId}/mix/music`, { file: x.file }), () => toast(t("“{title}” is on the timeline", { title: x.title }))) : null} />)}</ul>
         : <p className="muted">{t("No music on the timeline yet.")}</p>}
       {round?.failed?.length > 0 && <p className="hint">{t("{n} track(s) could not be saved", { n: round.failed.length })}</p>}
+      {/* a song far shorter than the film plays again after itself to the film's end (T22-9): said, so the owner can pick a longer one */}
+      {d.music?.repeat?.short && d.music.stopAt == null && <p className="hint warn"><AlertTriangle size={12} /> {t("The song is shorter than the film; it repeats from {at}. Pick a longer track if you hear the repeat.", { at: d.music.repeat.at })}</p>}
       {d.music && <div className="row mix-stop">
         <label className="hint" htmlFor="mix-stop-at">{d.music.stopAt != null ? t("The music stops at {s} s", { s: d.music.stopAt }) : t("Stop the music at")}</label>
         <input id="mix-stop-at" className="input num" style={{ width: "6rem" }} inputMode="decimal" value={stopAt} placeholder={t("e.g. 18")}
@@ -133,8 +164,24 @@ export default function MixSheet({ projectId, project, onChanged }) {
             {busy === "sfx" || waitSfx ? <Loader2 size={14} className="spin" /> : <Sparkles size={14} />}{d.sfx.length ? t("Place them again") : t("Place sound effects")}</button>
           {d.sfx.length > 0 && <button className="btn ghost sm" disabled={!!busy} onClick={() => act("clear", () => post(`/api/projects/${projectId}/mix/sfx/clear`))}><Trash2 size={14} />{t("Remove them")}</button>}</span></div>
       <p className="secondary">{d.sfx.length ? t("Placed from the cuts and the Motion Plan.") : t("None placed yet.")}</p>
-      {d.sfx.length > 0 && <details className="mix-sfx-list"><summary>{t("Where they are")}</summary>
-        <ul className="plain mix-sfx">{d.sfx.map((x, i) => <li key={i}><span className="num">{x.start.toFixed(2)} s</span> {x.name}</li>)}</ul></details>}
+      {/* what the last placement could not do, said here too (Test 26: "Place them again" changed nothing and said nothing) */}
+      {(d.sfxPlacing || waitSfx) && <p className="hint"><Loader2 size={12} className="spin" /> {t("Placing the sound effects…")}</p>}
+      {left.length > 0 && <p className="hint warn"><AlertTriangle size={12} /> {t("Not placed: {names}. Press Place them again later, or ask Claude for other names.", { names: quoted(left) })}</p>}
+      {near.length > 0 && <p className="hint">{t("On a close sound for now: {names}.", { names: near.map((x) => (plain(x.as) ? `“${x.name}” (${plain(x.as)})` : `“${x.name}”`)).join(", ") })}</p>}
+      <div className="row mix-density">
+        <label className="hint" htmlFor="mix-density">{t("Sounds on")}</label>
+        <select id="mix-density" className="select sm" value={prefs.density} disabled={placing} onChange={(e) => setPref({ density: e.target.value })}>
+          <option value="lively">{t("Every action")}</option>
+          <option value="normal">{t("Most actions")}</option>
+          <option value="low">{t("Only the big actions")}</option>
+        </select>
+        <label className="mix-amb"><input type="checkbox" checked={prefs.ambience !== false} disabled={placing} onChange={(e) => setPref({ ambience: e.target.checked })} />{t("Ambience under each place")}</label>
+        {prefs.skipped > 0 && <button className="btn ghost sm end" disabled={placing} onClick={() => setPref({ unskip: true })}><RotateCcw size={14} />{t("Bring back {n} removed", { n: prefs.skipped })}</button>}
+      </div>
+      {sounds.length > 0 && <details className="mix-sfx-list" open={listOpen} onToggle={(e) => { const o = e.currentTarget.open; setListOpen(o); kept.set(projectId, { ...kept.get(projectId), list: o }); }}><summary>{t("Where they are")}</summary>
+        <ul className="plain mix-sfx">{sounds.map((x, i) => <li key={i}><span className="num">{x.start.toFixed(2)} s</span> {x.bed ? t("{name} (ambience)", { name: x.name }) : x.name}
+          {x.id && <button type="button" className="btn icon ghost mix-sfx-x" disabled={placing} onClick={() => setPref({ skip: x.id })}
+            aria-label={t("Take out {name} at {s} s", { name: x.name, s: x.start.toFixed(2) })} title={t("Take this sound out")}><X size={12} /></button>}</li>)}</ul></details>}
       {/* only a film whose voice is on the timeline (meta.voice.offTimeline once the user chose not to use it) */}
       {d.voice && !d.voice.offTimeline && !project?.meta?.voice?.offTimeline && d.music && <div className="row mix-duck"><button className="btn ghost sm" disabled={!!busy} onClick={() => act("carve", () => post(`/api/projects/${projectId}/mix/carve`), () => toast(t("The music now dips under the voice")))}>
         {busy === "carve" ? <Loader2 size={14} className="spin" /> : <AudioLines size={14} />}{d.carved ? t("Duck the music again") : t("Duck the music under the voice")}</button></div>}

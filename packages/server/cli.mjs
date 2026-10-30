@@ -45,7 +45,8 @@ let s;
 try {
   s = await startServer({ port: Number(opt("--port", process.env.MW_PORT ?? 0)), token: process.env.MW_TOKEN || undefined, onExit: () => quit("exit"),
     onRestart: () => { spawn(process.execPath, [join(APP_ROOT, "tools", "restart-app.mjs"), String(process.pid)], { cwd: APP_ROOT, detached: true, stdio: "ignore", windowsHide: true }).unref(); quit("exit"); },
-    onWindowGone: () => quit("window closed"), thumbnails: true });
+    onWindowGone: () => quit("window closed"), thumbnails: true,
+    updateCheck: process.env.MW_NO_UPDATE_CHECK !== "1" });          // MW_NO_UPDATE_CHECK=1: a test run of the app never asks GitHub
 } catch (e) {
   console.error(e?.stack ?? e);
   if (background) messageBox(`Moworks Studio could not start:\n\n${e?.message ?? e}\n\nDetails: ${logFile}`);

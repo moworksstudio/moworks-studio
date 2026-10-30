@@ -4,7 +4,7 @@
 // place) and the built library stores (copied into the work folder's library, one folder per pin, checked at every start). The rest is downloaded at the pinned versions:
 // HyperFrames' runtime and its Chrome, the Python components, Whisper (only when wanted), and any style source that is not bundled (a thin
 // git checkout at the pinned commit: no history, no demo films, no audio).
-import { spawnSync } from "node:child_process";
+import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
@@ -30,7 +30,7 @@ const inBundle = (p, root) => resolve(String(p ?? "")).toLowerCase().startsWith(
 export const STYLE_SOURCES = {
   lemo: { title: "Lemo-Opuscar (Lemomo)", folder: "lemo-opuscar", mb: 100, patterns: ["/styles/", "/core/", "/styleboard/", "/*.md", "/LICENSE"] },
   mgStyles: { title: "mg-styles-15 (Vincentwei1021)", folder: "mg-styles-15", mb: 55,
-    patterns: ["/prompts/", "/lib/", "/demos/", "/assets/", "/docs/readme/films/", "/LICENSE", "/README.md", "!/lib/audio/samples/", "!*.wav", "!*.flac", "!*.mp3", "!*.mp4", "!*.mov", "!*.ply", "!*.hdr"] },
+    patterns: ["/prompts/", "/lib/", "/demos/", "/assets/", "/docs/readme/films/", "/LICENSE", "/README.md", "/rubric.md", "/template.md", "!/lib/audio/samples/", "!*.wav", "!*.flac", "!*.mp3", "!*.mp4", "!*.mov", "!*.ply", "!*.hdr"] },
   anidoodle: { title: "anidoodle (Alex Greenshpun)", folder: "anidoodle", mb: 8, patterns: ["/skills/anidoodle/", "/LICENSE", "/NOTICE", "/README.md"] },
   characterKit: { title: "ClaudeAnimationBase (John Heibel)", folder: "ClaudeAnimationBase", mb: 0.2,
     patterns: ["/src/core.js", "/src/timeline.js", "/src/clawd.js", "/ANIMATION_GUIDE.md", "/LICENSE", "/README.md", "/package.json", "/package-lock.json"] },
@@ -55,22 +55,20 @@ function useBundled(key, root) {
   if (s.from === "bundle" && resolve(String(pinOf(key, root).root ?? "")) !== resolve(s.root)) setLocalPins({ [`${key}.root`]: s.root }, root);
 }
 /** Fetch one style source at its pinned commit into <work>/vendor/<folder> (thin: blobs on demand, sparse, no history), then point the
- *  local pins at it. */
-export function fetchStyleSource(key, { root = APP_ROOT, onLine = () => {} } = {}) {
+ *  local pins at it. Asynchronous: the clone takes minutes in the server's own process (a job), which keeps answering meanwhile (T27-3). */
+export async function fetchStyleSource(key, { root = APP_ROOT, onLine = () => {} } = {}) {
   const p = pinOf(key, root), s = STYLE_SOURCES[key];
   if (!p || !s) throw Object.assign(new Error(`No style source "${key}"`), { code: "NOT_FOUND" });
-  const dir = join(workRoot(root), "vendor", s.folder), git = (args, cwd = dir) => {
-    const r = spawnSync("git", ["-c", "core.autocrlf=false", "-c", "core.longpaths=true", ...args], { cwd, encoding: "utf8", windowsHide: true, timeout: 30 * 60 * 1000 });
-    if (r.status !== 0) throw new Error(`git ${args[0]}: ${(r.stderr || r.stdout || "").trim().slice(-300)}`);
-    return r.stdout;
-  };
+  const dir = join(workRoot(root), "vendor", s.folder), git = (args, cwd = dir) => new Promise((ok, no) =>
+    execFile("git", ["-c", "core.autocrlf=false", "-c", "core.longpaths=true", ...args], { cwd, encoding: "utf8", windowsHide: true, timeout: 30 * 60 * 1000, maxBuffer: 64 << 20 },
+      (e, stdout, stderr) => (e ? no(new Error(`git ${args[0]}: ${(stderr || stdout || "").trim().slice(-300)}`)) : ok(stdout))));
   if (!existsSync(join(dir, ".git"))) {
     mkdirSync(join(dir, ".."), { recursive: true });
     onLine(`Fetching ${s.title} at ${p.commit.slice(0, 7)}`);
-    git(["clone", "--filter=blob:none", "--no-checkout", `https://github.com/${p.repo}.git`, dir], join(dir, ".."));
-  } else git(["fetch", "--filter=blob:none", "origin", p.commit]);
-  git(["sparse-checkout", "set", "--no-cone", ...s.patterns]);
-  git(["checkout", "--detach", p.commit]);
+    await git(["clone", "--filter=blob:none", "--no-checkout", `https://github.com/${p.repo}.git`, dir], join(dir, ".."));
+  } else await git(["fetch", "--filter=blob:none", "origin", p.commit]);
+  await git(["sparse-checkout", "set", "--no-cone", ...s.patterns]);
+  await git(["checkout", "--detach", p.commit]);
   if (sourceHead(dir) !== p.commit) throw new Error(`${s.title}: the checkout is not at ${p.commit}`);
   setLocalPins({ [`${key}.root`]: dir }, root);
   return styleSource(key, root);
@@ -203,11 +201,13 @@ export function firstRunItems(root = APP_ROOT, { sizes = false } = {}) {
   if (sizes) for (const i of items) i.diskMb = i.ready ? diskMb(itemDirs(i.id, root), root) : null;
   return { items, mb: items.filter((i) => !i.ready && i.from !== "yours" && !i.optional).reduce((s, i) => s + i.mb, 0), ready: items.every((i) => i.ready || i.optional) };
 }
-/** firstRunItems off the server's thread (worker.mjs). */
-export async function firstRunItemsAsync(root = APP_ROOT) {
+/** firstRunItems off the server's thread (worker.mjs); with each ready item's diskMb unless `sizes: false`. */
+export async function firstRunItemsAsync(root = APP_ROOT, { sizes = true } = {}) {
   const { Worker } = await import("node:worker_threads");
   return new Promise((ok, no) => {
-    const w = new Worker(new URL("./worker.mjs", import.meta.url), { workerData: { root }, env: process.env });
+    // no inherited flags: `--input-type` (a `node --input-type=module -e` script) is refused for its file, and a test runner's own
+    // process flags (--use-largepages, --node-snapshot…) are refused for any worker (ERR_WORKER_INVALID_EXEC_ARGV)
+    const w = new Worker(new URL("./worker.mjs", import.meta.url), { workerData: { root, sizes }, env: process.env, execArgv: [] });
     w.once("message", (m) => (m.ok ? ok(m.value) : no(new Error(m.message))));
     w.once("error", no);
     w.once("exit", (code) => { if (code !== 0) no(new Error(`The first-run checks stopped (${code})`)); });
@@ -223,16 +223,17 @@ export async function firstRunAll({ root = APP_ROOT, ids = null, onProgress = ()
   await step("library", async () => libraryFromBundle(root));
   for (const key of Object.keys(STYLE_SOURCES)) await step(`style-${key}`, async () => {
     useBundled(key, root);
-    if (!styleSource(key, root).intact) fetchStyleSource(key, { root, onLine: (l) => onProgress({ id: `style-${key}`, stage: l }) });
+    if (!styleSource(key, root).intact) await fetchStyleSource(key, { root, onLine: (l) => onProgress({ id: `style-${key}`, stage: l }) });
   });
   await step("assets", async () => { if (!assets.status(root).ready) await assets.install({ root, signal, onProgress: (x) => onProgress({ id: "assets", stage: `${x.done} of ${x.total}` }) }); });
-  await step("hf-skills", async () => { if (!verifySkills(root, { fresh: true }).ok) fetchSkills(root, { onLine: (l) => onProgress({ id: "hf-skills", stage: l }) }); });
+  await step("hf-skills", async () => { if (!verifySkills(root, { fresh: true }).ok) await fetchSkills(root, { onLine: (l) => onProgress({ id: "hf-skills", stage: l }) }); });
   await step("hf-runtime", async () => installRuntime({ root, signal, onLine: (l) => onProgress({ id: "hf-runtime", stage: l }) }));
   // no Python yet: the item shows its winget line (the user's step), and the rest of Download all still counts as done
-  await step("python", async () => { const s = py.status(root); if (s.python && !s.ready) await py.install(root, { signal, onLine: (l) => onProgress({ id: "python", stage: l.slice(0, 120) }) }); });
+  await step("python", async () => { const s = await py.statusAsync(root); if (s.python && !s.ready) await py.install(root, { signal, onLine: (l) => onProgress({ id: "python", stage: l.slice(0, 120) }) }); });
   if (ids?.includes(cuda.PACK.id) && cuda.eligible(cuda.detectGpu()))
     await step(cuda.PACK.id, async () => { if (!cuda.packStatus(root).installed) await cuda.install(root, { signal, onLine: (l) => onProgress({ id: cuda.PACK.id, stage: l }) }); });
-  return { done, ...firstRunItems(root) };
+  // the list again off the server's thread (its checks, Python's imports among them, took seconds there)
+  return { done, ...(await firstRunItemsAsync(root, { sizes: false })) };
 }
 /** The work folder picked at first start (this computer's local pins; the default is the folder that holds the app). */
 export function setWorkFolder(path, root = APP_ROOT) {

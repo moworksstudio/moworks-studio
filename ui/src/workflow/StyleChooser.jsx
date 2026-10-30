@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import { Check, LayoutGrid, Replace, Search, X } from "lucide-react";
 import { BackButton, NoPreview } from "../components.jsx";
 import { useT } from "../i18n.jsx";
-import { authorOf, byLine, catLabel, catOf, DemoLink, StyleDetails, StyleTile, TechTags, thumbOf, usesOf } from "../screens/StyleGallery.jsx";
+import { authorOf, byLine, catLabel, catOf, DemoLink, markTall, StyleDetails, StyleTile, TechTags, thumbOf, usesOf } from "../screens/StyleGallery.jsx";
 import { AuthorBadge, AuthorName, authorView } from "../authors.jsx";
 
 /** The New project dialog's frame on screen, so a box opened from it (the style chooser, Writing ideas) takes exactly that frame and
@@ -33,7 +33,8 @@ export function StyleCard({ style, styles, authors, onChange }) {
   if (!style) return <><button type="button" className="btn np-choose" onClick={() => setOpen(true)}>{t("Choose a film style")}</button>{chooser}</>;
   return <>
     <div className="np-style">
-      {thumbOf(style) ? <img className="sf" src={thumbOf(style)} alt="" decoding="async" /> : <span className="sf"><NoPreview /></span>}
+      {thumbOf(style) ? <img className="sf" src={thumbOf(style)} alt="" decoding="async" onLoad={(e) => markTall(e.currentTarget)} ref={(el) => { if (el?.complete) markTall(el); }} />
+        : <span className="sf"><NoPreview /></span>}
       <div className="np-style-main">
         <p className="nm">{t(style.title)}</p>          {/* English only on screen; the original title stays searchable */}
         <p className="sub"><span className="sgb-by">{t("by {who}", { who: byLine(style, authorView(a ?? authorOf(style)).by) })} <AuthorBadge a={a ?? authorOf(style)} /></span>{catOf(t, style) && <span>{catOf(t, style)}</span>}</p>

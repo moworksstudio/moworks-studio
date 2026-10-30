@@ -43,15 +43,20 @@ test("an effect lines up by its attack: its onset is measured and the clip start
 
 test("the music stops at a second and stays stopped when its track is placed again; null plays it to its end", () => {
   const d = project("stop");
-  writeFileSync(join(d, "index.html"), ROOT().replace('data-duration="3"', 'data-duration="60"'));          // a film longer than the song: the song keeps its length (5f9bc918 fits a longer one to the film)
+  writeFileSync(join(d, "index.html"), ROOT().replace('data-duration="3"', 'data-duration="60"'));          // a film longer than the song: the song plays again after itself to the end (T22-9)
   placeTrack(d, { kind: "music", src: "assets/music.mp3", duration: 30 });
+  const page = () => readFileSync(join(d, "index.html"), "utf8");
+  const tag = () => /<audio [^>]*id="el-music"[^>]*>/.exec(page())[0];
+  const played = Number(/data-duration="([\d.]+)"/.exec(tag())[1]);
+  assert.match(page(), /id="el-music-loop-1"/);
   const r = stopMusic(d, 12.5);
   assert.deepEqual([r.at, r.duration], [12.5, 12.5]);
-  const tag = () => /<audio [^>]*id="el-music"[^>]*>/.exec(readFileSync(join(d, "index.html"), "utf8"))[0];
   assert.match(tag(), /data-duration="12\.5"/);
+  assert.doesNotMatch(page(), /el-music-loop/, "a stop before the song ends: no repeat");
   placeTrack(d, { kind: "music", src: "assets/music.mp3", duration: 30 });          // the same track again (the picture changed)
   assert.match(tag(), /data-duration="12\.5"/, "still stopped");
-  assert.equal(stopMusic(d, null).duration, 30);
+  assert.equal(stopMusic(d, null).duration, played, "to the end again: the song and its repeat");
+  assert.match(page(), /id="el-music-loop-1"/);
   assert.doesNotMatch(tag(), /data-mw-stop/);
   assert.throws(() => stopMusic(project("nomusic"), 3), /no music track/);
 });

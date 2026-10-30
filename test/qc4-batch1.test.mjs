@@ -83,10 +83,11 @@ test("the running Storyboard and Motion Plan say their time left, as the Build d
   const at = "2026-10-27T02:00:00.000Z", t0 = Date.parse(at);
   const draw = { id: "a", step: "storyboard", status: "running", text: "Make the storyboard", createdAt: at };
   const e = runningEstimate(draw, [draw]);
-  assert.deepEqual(e, { stage: "storyboard", minutes: 10, high: 15, startedAt: at }, "a first option: the usual 10 min");
-  assert.equal(etaWords(e, t0 + 3 * 60000), "about 7 min left");
-  assert.equal(etaWords(e, t0 + 12 * 60000), "about 3 min left", "past the middle: to the slowest");
-  assert.equal(etaWords(e, t0 + 16 * 60000), "taking longer than usual");
+  assert.deepEqual(e, { stage: "storyboard", minutes: 22, high: 33, startedAt: at }, "a first option: the usual 22 min of Tests 17-24 (T23-11)");
+  assert.equal(etaWords(e, t0 + 3 * 60000), "about 19 min left");
+  // past the estimate the time left never grows again (T26-4: it jumped to the time to the slowest seen)
+  assert.equal(etaWords(e, t0 + 25 * 60000), "taking longer than usual · 25 min so far");
+  assert.equal(etaWords(e, t0 + 34 * 60000), "taking longer than usual · 34 min so far");
   // the turn that times the storyboard to a voice that came meanwhile is a revision's time, and never counted as an option
   const fit = { id: "b", step: "storyboard", status: "running", text: "The voice-over came while you drew the storyboard: it is 45.6 s", createdAt: at };
   assert.equal(runningEstimate(fit, [fit]).minutes, 5);

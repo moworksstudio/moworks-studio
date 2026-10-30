@@ -1,0 +1,1460 @@
+{
+ "about": "Sources of the bundled sound-effect library (bundle/sfx): one row per pack, as downloaded on 2026-10-30 (bytes and SHA-256 of each downloaded file). Read by tools/make-sfx-library.mjs.",
+ "read": "2026-10-30",
+ "packs": {
+  "kenney-impact-sounds": {
+   "name": "Kenney Impact Sounds",
+   "page": "https://kenney.nl/assets/impact-sounds",
+   "download": "https://kenney.nl/assets/impact-sounds (Download, \"Continue without donating\"; signed link)",
+   "author": "Kenney (kenney.nl)",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page: \"License: Creative Commons CC0\"; License.txt in the zip: \"License: (Creative Commons Zero, CC0)\"",
+   "files": [
+    {
+     "name": "kenney_impact-sounds.zip",
+     "bytes": 800850,
+     "sha256": "029d734af1582474edf3a694d1b0cebc97c1c152f2f39fa34d4c2bafc5de77f8"
+    }
+   ]
+  },
+  "kenney-interface-sounds": {
+   "name": "Kenney Interface Sounds",
+   "page": "https://kenney.nl/assets/interface-sounds",
+   "download": "https://kenney.nl/assets/interface-sounds (Download, \"Continue without donating\"; signed link)",
+   "author": "Kenney (kenney.nl)",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page: \"License: Creative Commons CC0\"; License.txt in the zip: \"License: (Creative Commons Zero, CC0)\"",
+   "files": [
+    {
+     "name": "kenney_interface-sounds.zip",
+     "bytes": 834536,
+     "sha256": "f2193d072726d6758a5f7871b2dcc54dcce0d5c35c6f0a62f92549b327c81232"
+    }
+   ]
+  },
+  "kenney-ui-audio": {
+   "name": "Kenney UI Audio",
+   "page": "https://kenney.nl/assets/ui-audio",
+   "download": "https://kenney.nl/assets/ui-audio (Download, \"Continue without donating\"; signed link)",
+   "author": "Kenney (kenney.nl)",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page: \"License: Creative Commons CC0\"; License.txt in the zip: \"License: (Creative Commons Zero, CC0)\"",
+   "files": [
+    {
+     "name": "kenney_ui-audio.zip",
+     "bytes": 411949,
+     "sha256": "946fc23a63d535d693eb31b2eabb80c8c28d6351e2186b344ceb71b2cb1d5eb6"
+    }
+   ]
+  },
+  "kenney-rpg-audio": {
+   "name": "Kenney RPG Audio",
+   "page": "https://kenney.nl/assets/rpg-audio",
+   "download": "https://kenney.nl/assets/rpg-audio (Download, \"Continue without donating\"; signed link)",
+   "author": "Kenney (kenney.nl)",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page: \"License: Creative Commons CC0\"; License.txt in the zip: \"License: (Creative Commons Zero, CC0)\"",
+   "files": [
+    {
+     "name": "kenney_rpg-audio.zip",
+     "bytes": 964837,
+     "sha256": "6dbeaf8544da958d8f2adcb4a4a4b76c1ade34a05f8ab9edccd327da7375f38b"
+    }
+   ]
+  },
+  "kenney-digital-audio": {
+   "name": "Kenney Digital Audio",
+   "page": "https://kenney.nl/assets/digital-audio",
+   "download": "https://kenney.nl/assets/digital-audio (Download, \"Continue without donating\"; signed link)",
+   "author": "Kenney (kenney.nl)",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page: \"License: Creative Commons CC0\"; License.txt in the zip: \"License: (Creative Commons Zero, CC0)\"",
+   "files": [
+    {
+     "name": "kenney_digital-audio.zip",
+     "bytes": 990367,
+     "sha256": "24e6ce28b76a6d8c89cff4d331e0965ff5c3de8a73c612028e9d363cc64e4f06"
+    }
+   ]
+  },
+  "kenney-casino-audio": {
+   "name": "Kenney Casino Audio",
+   "page": "https://kenney.nl/assets/casino-audio",
+   "download": "https://kenney.nl/assets/casino-audio (Download, \"Continue without donating\"; signed link)",
+   "author": "Kenney (kenney.nl)",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page: \"License: Creative Commons CC0\"; License.txt in the zip: \"License: (Creative Commons Zero, CC0)\"",
+   "files": [
+    {
+     "name": "kenney_casino-audio.zip",
+     "bytes": 876839,
+     "sha256": "f36250766ac5bc378c13708ddf12a23a8e54a3251f8d482c7536e51b5dbafa18"
+    }
+   ]
+  },
+  "kenney-sci-fi-sounds": {
+   "name": "Kenney Sci-fi Sounds",
+   "page": "https://kenney.nl/assets/sci-fi-sounds",
+   "download": "https://kenney.nl/assets/sci-fi-sounds (Download, \"Continue without donating\"; signed link)",
+   "author": "Kenney (kenney.nl)",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page: \"License: Creative Commons CC0\"; License.txt in the zip: \"License: (Creative Commons Zero, CC0)\"",
+   "files": [
+    {
+     "name": "kenney_sci-fi-sounds.zip",
+     "bytes": 5875104,
+     "sha256": "119340f351a5098ad814f78719438c0da355a9ce8a4c8a3af6a8d48aa3d49e04"
+    }
+   ]
+  },
+  "oga-30-cc0-sfx-loops": {
+   "name": "OpenGameArt: 30 CC0 SFX loops",
+   "page": "https://opengameart.org/content/30-cc0-sfx-loops",
+   "download": "https://opengameart.org/sites/default/files/sfx_loops.zip",
+   "author": "rubberduck",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "sfx_loops.zip",
+     "bytes": 3526706,
+     "sha256": "9c013474c7e56192a0d1b2840535a1e1d8b93166948d4a9f7136bb6c3d5421cd"
+    }
+   ]
+  },
+  "oga-40-cc0-water-splash-slime-sfx": {
+   "name": "OpenGameArt: 40 CC0 water / splash / slime SFX",
+   "page": "https://opengameart.org/content/40-cc0-water-splash-slime-sfx",
+   "download": "https://opengameart.org/sites/default/files/water-splash-slime-sfx.zip",
+   "author": "rubberduck",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "water-splash-slime-sfx.zip",
+     "bytes": 2259262,
+     "sha256": "7cd39abb49d4362a37ba18dc0e454c7dc1d08029d4e5b683149046bc237b2eba"
+    }
+   ]
+  },
+  "oga-100-cc0-sfx": {
+   "name": "OpenGameArt: 100 CC0 SFX",
+   "page": "https://opengameart.org/content/100-cc0-sfx",
+   "download": "https://opengameart.org/sites/default/files/100-CC0-SFX_0.zip",
+   "author": "rubberduck",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "100-CC0-SFX_0.zip",
+     "bytes": 2921904,
+     "sha256": "a5c135878c132f1c59cca54e60061c296cd0ac27ad031ca2c41b8cd5cab3c706"
+    }
+   ]
+  },
+  "oga-100-cc0-sfx-2": {
+   "name": "OpenGameArt: 100 CC0 SFX #2",
+   "page": "https://opengameart.org/content/100-cc0-sfx-2",
+   "download": "https://opengameart.org/sites/default/files/sfx_100_v2.zip",
+   "author": "rubberduck",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "sfx_100_v2.zip",
+     "bytes": 2367871,
+     "sha256": "0fc61b4494e2e893c0c015ced4877b3f689c7d84a48cb61daecd7ddb52db797b"
+    }
+   ]
+  },
+  "oga-100-cc0-metal-and-wood-sfx": {
+   "name": "OpenGameArt: 100 CC0 metal and wood SFX",
+   "page": "https://opengameart.org/content/100-cc0-metal-and-wood-sfx",
+   "download": "https://opengameart.org/sites/default/files/100-CC0-wood-metal-SFX.zip",
+   "author": "rubberduck",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "100-CC0-wood-metal-SFX.zip",
+     "bytes": 1990361,
+     "sha256": "be6eba63b03409ac0c77787a956b1503a7c186403d04aef9725c52644a4b7878"
+    }
+   ]
+  },
+  "oga-80-cc0-rpg-sfx": {
+   "name": "OpenGameArt: 80 CC0 RPG SFX",
+   "page": "https://opengameart.org/content/80-cc0-rpg-sfx",
+   "download": "https://opengameart.org/sites/default/files/80-CC0-RPG-SFX_0.zip",
+   "author": "rubberduck",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "80-CC0-RPG-SFX_0.zip",
+     "bytes": 1845114,
+     "sha256": "1c2f06ff4e8563b5b8b745b23cf213c1474142a69bb82bd8f5e10d9b3f7a7bbd"
+    }
+   ]
+  },
+  "oga-80-cc0-creature-sfx": {
+   "name": "OpenGameArt: 80 CC0 creature SFX",
+   "page": "https://opengameart.org/content/80-cc0-creature-sfx",
+   "download": "https://opengameart.org/sites/default/files/80-CC0-creature-SFX_0.zip",
+   "author": "rubberduck",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "80-CC0-creature-SFX_0.zip",
+     "bytes": 1885648,
+     "sha256": "5d4002eea42f278e76543bb36e8ddd2cb978588a13271984191d8228f5d26768"
+    }
+   ]
+  },
+  "oga-rain-loopable": {
+   "name": "OpenGameArt: Rain (loopable)",
+   "page": "https://opengameart.org/content/rain-loopable",
+   "download": "https://opengameart.org/sites/default/files/Rain%20OGG.zip",
+   "author": "Ylmir",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "Rain OGG.zip",
+     "bytes": 2736596,
+     "sha256": "e68f3e1c77493cf43bec84cebff5043bff6be9ce16d59b24caa988cd460aa75b"
+    }
+   ]
+  },
+  "oga-rain-long-thunder": {
+   "name": "OpenGameArt: Rain + Long Thunder",
+   "page": "https://opengameart.org/content/rain-long-thunder",
+   "download": "https://opengameart.org/sites/default/files/rain-thunder.ogg",
+   "author": "WuxiaScrub",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "rain-thunder.ogg",
+     "bytes": 875624,
+     "sha256": "9499fd1aefa3b5d8ba3764ea46d15c00ab449be7e19c029290a1f52228f1434c"
+    }
+   ]
+  },
+  "oga-amb-rain-loop-1": {
+   "name": "OpenGameArt: AMB Rain Loop 1",
+   "page": "https://opengameart.org/content/amb-rain-loop-1",
+   "download": "https://opengameart.org/sites/default/files/amb_rain_loop_1.ogg",
+   "author": "Kresiek The Furry",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "amb_rain_loop_1.ogg",
+     "bytes": 1593741,
+     "sha256": "ae578791d46218d180a0e3aebefb5d621dbdd3f1627899c25210379f57d480b0"
+    }
+   ]
+  },
+  "oga-amb-morning-sounds-perfect-loop": {
+   "name": "OpenGameArt: AMB Morning Sounds (Perfect Loop)",
+   "page": "https://opengameart.org/content/amb-morning-sounds-perfect-loop",
+   "download": "https://opengameart.org/sites/default/files/amb_morning_0.ogg",
+   "author": "Kresiek The Furry",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "amb_morning_0.ogg",
+     "bytes": 3229148,
+     "sha256": "f49f9470038fcbd75742ca88a9914de0e7fe515340cfddaf3a7614e42678b4a7"
+    }
+   ]
+  },
+  "oga-wind-whoosh-loop": {
+   "name": "OpenGameArt: wind whoosh loop",
+   "page": "https://opengameart.org/content/wind-whoosh-loop",
+   "download": "https://opengameart.org/sites/default/files/wind%20woosh%20loop.ogg",
+   "author": "SketchMan3",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "wind woosh loop.ogg",
+     "bytes": 251584,
+     "sha256": "0cfdbd3f21ed449689a9024264edf267d0037a6495813a7010827672ec191dac"
+    }
+   ]
+  },
+  "oga-mild-wind-background-noise": {
+   "name": "OpenGameArt: Mild Wind Background Noise",
+   "page": "https://opengameart.org/content/mild-wind-background-noise",
+   "download": "https://opengameart.org/sites/default/files/wind%20background%20noise%202.wav",
+   "author": "Bashar3A",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "wind background noise 2.wav",
+     "bytes": 15708766,
+     "sha256": "9f1fd5c8b37949e6889a7f6acbd822f66e0ab4e918d72bda58d8d8c2c7e85a80"
+    }
+   ]
+  },
+  "oga-dripping-water-loop": {
+   "name": "OpenGameArt: Dripping water loop",
+   "page": "https://opengameart.org/content/dripping-water-loop",
+   "download": "https://opengameart.org/sites/default/files/atmosbasement.mp3_.flac",
+   "author": "Independent.nu (submitted by qubodup)",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "atmosbasement.mp3_.flac",
+     "bytes": 1309638,
+     "sha256": "247c0ef181c8ba8d190a6194f6ea02d9defb23b70194c52c7f9187b5b7b1cc61"
+    }
+   ]
+  },
+  "oga-6-short-water-splashes": {
+   "name": "OpenGameArt: 6 Short water splashes",
+   "page": "https://opengameart.org/content/6-short-water-splashes",
+   "download": "https://opengameart.org/sites/default/files/ezwa-water_splash.7z",
+   "author": "ezwa (submitted by qubodup)",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "ezwa-water_splash.7z",
+     "bytes": 426627,
+     "sha256": "6187fa510cb7b5e8c3ac7c79f294ddc0e44d07472758bf6ecf2628a372ae9a26"
+    }
+   ]
+  },
+  "oga-beach-ocean-waves": {
+   "name": "OpenGameArt: Beach Ocean Waves",
+   "page": "https://opengameart.org/content/beach-ocean-waves",
+   "download": [
+    "https://opengameart.org/sites/default/files/wave_01_cc0-18363__jasinski__alkaibeach.flac",
+    "https://opengameart.org/sites/default/files/wave_02_cc0-18363__jasinski__alkaibeach.flac",
+    "https://opengameart.org/sites/default/files/wave_03_cc0-18363__jasinski__alkaibeach.flac",
+    "https://opengameart.org/sites/default/files/wave_04_cc0-18363__jasinski__alkaibeach.flac"
+   ],
+   "author": "jasinski (submitted by qubodup)",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "wave_01_cc0-18363__jasinski__alkaibeach.flac",
+     "bytes": 626248,
+     "sha256": "fcfca178eca2eac536e8c2a4ed5cf8096e44c921acd587047b3d9f1d7845435c"
+    },
+    {
+     "name": "wave_02_cc0-18363__jasinski__alkaibeach.flac",
+     "bytes": 404529,
+     "sha256": "53b5c28c0edc36f049e77e65f2cf8a86135103328c44c1507c416e6469d18096"
+    },
+    {
+     "name": "wave_03_cc0-18363__jasinski__alkaibeach.flac",
+     "bytes": 367584,
+     "sha256": "fc795f95f352b354867d69a587daecb8815334e28e3b56a7798c5f3005349054"
+    },
+    {
+     "name": "wave_04_cc0-18363__jasinski__alkaibeach.flac",
+     "bytes": 591767,
+     "sha256": "3c490e736365fdd617ce8405470d8878fc6146d9a8dba448d622addb01cfff3b"
+    }
+   ]
+  },
+  "oga-bubble-sound-effects": {
+   "name": "OpenGameArt: Bubble Sound Effects",
+   "page": "https://opengameart.org/content/bubble-sound-effects",
+   "download": [
+    "https://opengameart.org/sites/default/files/bubbles-single2.wav",
+    "https://opengameart.org/sites/default/files/bubbles-single1.wav",
+    "https://opengameart.org/sites/default/files/bubbles-single3.wav"
+   ],
+   "author": "BMacZero",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "bubbles-single2.wav",
+     "bytes": 38468,
+     "sha256": "c6c7b9f3e7415e1fee6d5ca0c9556fa03443c4cbeaa623f7a70476fc5b5a11e8"
+    },
+    {
+     "name": "bubbles-single1.wav",
+     "bytes": 28386,
+     "sha256": "014228835d2b255cf300f94c60db8ec661ec15b5b5c097d5f47b148d6a81fdc5"
+    },
+    {
+     "name": "bubbles-single3.wav",
+     "bytes": 35884,
+     "sha256": "496bc47723f77352a1f26db4bfacbf1c1ff8fa75cd0ef5a267423c382f7b073b"
+    }
+   ]
+  },
+  "oga-boiling-water-loops": {
+   "name": "OpenGameArt: boiling water loops",
+   "page": "https://opengameart.org/content/boiling-water-loops",
+   "download": [
+    "https://opengameart.org/sites/default/files/cooking_with_cover_01.ogg",
+    "https://opengameart.org/sites/default/files/cooking_without_cover_01_0.ogg"
+   ],
+   "author": "TinyWorlds",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "cooking_with_cover_01.ogg",
+     "bytes": 86105,
+     "sha256": "ac5c065ae8f7b8dd660d9705c688dd1eff6ebc4b58dc81f6ca3c6912d8be81a8"
+    },
+    {
+     "name": "cooking_without_cover_01_0.ogg",
+     "bytes": 188171,
+     "sha256": "fea883de35adef8fefa8840f9460a5a01e43bfc8f61c70dd43d1fcfb8f468bc2"
+    }
+   ]
+  },
+  "oga-fire-crackling": {
+   "name": "OpenGameArt: Fire Crackling",
+   "page": "https://opengameart.org/content/fire-crackling",
+   "download": "https://opengameart.org/sites/default/files/fire-1.wav",
+   "author": "AntumDeluge",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "fire-1.wav",
+     "bytes": 253232,
+     "sha256": "26702de8a195bcbafeae72034861d875a1b7917168a25106f4e1957ecdddf7e5"
+    }
+   ]
+  },
+  "oga-forest-bird-sounds": {
+   "name": "OpenGameArt: Forest bird sounds",
+   "page": "https://opengameart.org/content/forest-bird-sounds",
+   "download": "https://opengameart.org/sites/default/files/forest_birds.7z",
+   "author": "pauliuw",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "forest_birds.7z",
+     "bytes": 2720502,
+     "sha256": "bf657b75efb920136408860b110142748bd2f84bea009e778d916227bc032460"
+    }
+   ]
+  },
+  "oga-crickets-ambient-noise-loopable": {
+   "name": "OpenGameArt: Crickets Ambient Noise - loopable",
+   "page": "https://opengameart.org/content/crickets-ambient-noise-loopable",
+   "download": "https://opengameart.org/sites/default/files/crickets_1.mp3",
+   "author": "Wolfgang_",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "crickets_1.mp3",
+     "bytes": 184393,
+     "sha256": "5b5bd1f744087888c5623543c3ff80be9c2ce106093993e7c8a8492b0280b2c0"
+    }
+   ]
+  },
+  "oga-applause-in-a-large-hall-or-church": {
+   "name": "OpenGameArt: Applause in a large hall or church",
+   "page": "https://opengameart.org/content/applause-in-a-large-hall-or-church",
+   "download": "https://opengameart.org/sites/default/files/applause-clapping-church-crowd-immersive.wav",
+   "author": "eXpl0it3r",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "applause-clapping-church-crowd-immersive.wav",
+     "bytes": 6905324,
+     "sha256": "0d3bfde5a050f3c5e6685bd7f1efc7ab1d289fbad65c88c1ce9b4691228c69c9"
+    }
+   ]
+  },
+  "oga-keyboard-soundpack-1-typing-and-single-keystrokes": {
+   "name": "OpenGameArt: Keyboard Soundpack #1 [Typing and Single Keystrokes]",
+   "page": "https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes",
+   "download": "https://opengameart.org/sites/default/files/unicae_games_keyboard_soundpack_1_0.zip",
+   "author": "unicaegames",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "unicae_games_keyboard_soundpack_1_0.zip",
+     "bytes": 8515609,
+     "sha256": "935eae2fa5c3742eacdd38c4ea0e9047f3887faa0701996498492c256db1b351"
+    }
+   ]
+  },
+  "oga-typewriter-sounds": {
+   "name": "OpenGameArt: Typewriter sounds",
+   "page": "https://opengameart.org/content/typewriter-sounds",
+   "download": [
+    "https://opengameart.org/sites/default/files/typewriter1.wav",
+    "https://opengameart.org/sites/default/files/typewriter2.wav",
+    "https://opengameart.org/sites/default/files/typewriter3.wav",
+    "https://opengameart.org/sites/default/files/typewriter4.wav",
+    "https://opengameart.org/sites/default/files/typewriter5.wav",
+    "https://opengameart.org/sites/default/files/typewriter6.wav",
+    "https://opengameart.org/sites/default/files/typewriter7.wav",
+    "https://opengameart.org/sites/default/files/typewriter8.wav"
+   ],
+   "author": "Cassie-OrbitGames",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "typewriter1.wav",
+     "bytes": 29106,
+     "sha256": "f860766aa7922afbf1523ea1a41504c64f3f6362fa03a60b6497c75c1d0d0344"
+    },
+    {
+     "name": "typewriter2.wav",
+     "bytes": 58168,
+     "sha256": "b40c17fe45c9e3a6ad8a617f7831da5ccb3c8baab1fa0eb368f8ba3ade52c8a4"
+    },
+    {
+     "name": "typewriter3.wav",
+     "bytes": 50228,
+     "sha256": "c9bb2c6245bdd60b996fe39f2fb74c810309ee03bbe2d8ae1ee6715888df9c69"
+    },
+    {
+     "name": "typewriter4.wav",
+     "bytes": 47584,
+     "sha256": "28d4c07732fbd6f324f257c27a92d8a3c14ea5c26517972295b288bb75d5a2c3"
+    },
+    {
+     "name": "typewriter5.wav",
+     "bytes": 60816,
+     "sha256": "f52a889a483985d40ca31ed97ddd86227a776650f4666f5899c86dfec6de2edf"
+    },
+    {
+     "name": "typewriter6.wav",
+     "bytes": 27828,
+     "sha256": "825b668508448212edbf8ddcff2801b0a6251528aaccdf8ab85427023cf0797f"
+    },
+    {
+     "name": "typewriter7.wav",
+     "bytes": 24476,
+     "sha256": "113210a80c394cb3ad0d8b7d773ff752b81cb42bb193efb4d11eb8379f736144"
+    },
+    {
+     "name": "typewriter8.wav",
+     "bytes": 41148,
+     "sha256": "c29966383e602df84db68577758e34f830deb01aff6a208579ee943511217118"
+    }
+   ]
+  },
+  "oga-10-book-page-flips": {
+   "name": "OpenGameArt: 10 Book Page Flips",
+   "page": "https://opengameart.org/content/10-book-page-flips",
+   "download": "https://opengameart.org/sites/default/files/book_flips_-_starninjas.zip",
+   "author": "StarNinjas",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "book_flips_-_starninjas.zip",
+     "bytes": 136291,
+     "sha256": "0ff49c3677ea0e64544aeda3a0aa2ce71ee5d42b266da9e54421252a5ca5f20f"
+    }
+   ]
+  },
+  "oga-opening-and-closing-a-map-sounds": {
+   "name": "OpenGameArt: Opening and Closing a Map Sounds",
+   "page": "https://opengameart.org/content/opening-and-closing-a-map-sounds",
+   "download": [
+    "https://opengameart.org/sites/default/files/snd_use_map.wav",
+    "https://opengameart.org/sites/default/files/snd_close_map.wav"
+   ],
+   "author": "Spring Spring",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "snd_use_map.wav",
+     "bytes": 584198,
+     "sha256": "7813465b02f279cb268c80b64ad15ec3749edf7e080c2c219e6fcd971580af10"
+    },
+    {
+     "name": "snd_close_map.wav",
+     "bytes": 623978,
+     "sha256": "cf0f53aa3ce6ff522527bbdffa610f56bbcdc91d1b93dc7541ff3c279d34c4d1"
+    }
+   ]
+  },
+  "oga-swishes-sound-pack": {
+   "name": "OpenGameArt: Swishes Sound Pack",
+   "page": "https://opengameart.org/content/swishes-sound-pack",
+   "download": "https://opengameart.org/sites/default/files/swishes.zip",
+   "author": "artisticdude",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "swishes.zip",
+     "bytes": 385150,
+     "sha256": "7980215241b739a787dcf26f660ce510bb237900968789395a86911619795693"
+    }
+   ]
+  },
+  "oga-bell-dingschimes": {
+   "name": "OpenGameArt: Bell dings/chimes",
+   "page": "https://opengameart.org/content/bell-dingschimes",
+   "download": [
+    "https://opengameart.org/sites/default/files/bell_ding1.wav",
+    "https://opengameart.org/sites/default/files/bell_ding2.wav",
+    "https://opengameart.org/sites/default/files/bell_ding3.wav",
+    "https://opengameart.org/sites/default/files/bell_ding4.wav"
+   ],
+   "author": "PWL",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "bell_ding1.wav",
+     "bytes": 366660,
+     "sha256": "8ce40f49cd211125303df59db0da4fe911e8b2f34d3847011b15137c6b5850de"
+    },
+    {
+     "name": "bell_ding2.wav",
+     "bytes": 254020,
+     "sha256": "e4a764a1e0a6284f5a5ec80caf3d44c76d3ff8db17ddab8b42abb6b143e83529"
+    },
+    {
+     "name": "bell_ding3.wav",
+     "bytes": 327748,
+     "sha256": "99b9cdb7b9536c97c6738f1e0762cc40a3e7ef81bc774b0b6e0322aa70c96434"
+    },
+    {
+     "name": "bell_ding4.wav",
+     "bytes": 408644,
+     "sha256": "b06e837aa5e5b626eba32ad87264b577164e2eab3b9180a955345d06197b6876"
+    }
+   ]
+  },
+  "oga-correct-bell": {
+   "name": "OpenGameArt: Correct Bell",
+   "page": "https://opengameart.org/content/correct-bell",
+   "download": "https://opengameart.org/sites/default/files/bell.wav",
+   "author": "Fupi",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "bell.wav",
+     "bytes": 281900,
+     "sha256": "7b21371d23bcc5c56866b9bb32791b21bfce467edae05eef4bbc9d547da417a9"
+    }
+   ]
+  },
+  "oga-clock-wind-sounds": {
+   "name": "OpenGameArt: Clock Wind Sounds",
+   "page": "https://opengameart.org/content/clock-wind-sounds",
+   "download": [
+    "https://opengameart.org/sites/default/files/singlewind3.wav",
+    "https://opengameart.org/sites/default/files/singlewind2.wav",
+    "https://opengameart.org/sites/default/files/singlewind1.wav",
+    "https://opengameart.org/sites/default/files/multiwind2.wav",
+    "https://opengameart.org/sites/default/files/multiwind1.wav",
+    "https://opengameart.org/sites/default/files/tickloop-amp.wav"
+   ],
+   "author": "BMacZero",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "singlewind3.wav",
+     "bytes": 13356,
+     "sha256": "dbe2be55d7778b9b2e57b010a8be10dd081f02941e20bdfb518f1ff341ac4f3b"
+    },
+    {
+     "name": "singlewind2.wav",
+     "bytes": 14380,
+     "sha256": "86a7731f216c682b178a51032d8e5f290816fe4f3f0adb0b75bd205c087f1542"
+    },
+    {
+     "name": "singlewind1.wav",
+     "bytes": 14380,
+     "sha256": "05216ac924a8616cb7e7862ab1a8b621c86e201b945eebdc5cdd5130c76c8984"
+    },
+    {
+     "name": "multiwind2.wav",
+     "bytes": 81964,
+     "sha256": "85a4b2fdc7e31a8d429969de4936bc34829a1f18e8d9de33ad58843dba55fbb7"
+    },
+    {
+     "name": "multiwind1.wav",
+     "bytes": 88108,
+     "sha256": "c3a60aa4c0da900956b2756dc558b068425d42062869ba6ea11c471f6fa1a585"
+    },
+    {
+     "name": "tickloop-amp.wav",
+     "bytes": 107948,
+     "sha256": "925e871fbd271fa4a1bdedd363773ac209e6336fbc4efe410f37a260e5e88b91"
+    }
+   ]
+  },
+  "oga-ticking-clock": {
+   "name": "OpenGameArt: Ticking clock.",
+   "page": "https://opengameart.org/content/ticking-clock",
+   "download": "https://opengameart.org/sites/default/files/ticks.zip",
+   "author": "bart",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "ticks.zip",
+     "bytes": 234982,
+     "sha256": "7a5f8820848b21ebc665c9b2d90e41b4c98d953585558b00aa44bebcea56e414"
+    }
+   ]
+  },
+  "oga-cat-purr-meow": {
+   "name": "OpenGameArt: Cat Purr & Meow",
+   "page": "https://opengameart.org/content/cat-purr-meow",
+   "download": [
+    "https://opengameart.org/sites/default/files/cat_mewfood.wav",
+    "https://opengameart.org/sites/default/files/cat_mewpurr.wav",
+    "https://opengameart.org/sites/default/files/cat_mewpurr2.wav",
+    "https://opengameart.org/sites/default/files/cat_softmew.wav"
+   ],
+   "author": "Kerzoven",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "cat_mewfood.wav",
+     "bytes": 99450,
+     "sha256": "3550f080882b52e236c8810a353756b2e0395fb7dadf0aeface0a06893cd181f"
+    },
+    {
+     "name": "cat_mewpurr.wav",
+     "bytes": 124464,
+     "sha256": "a58487959ee00c812f9f02ca822a668173bcf04a98c6dd98a902514a1d3994ea"
+    },
+    {
+     "name": "cat_mewpurr2.wav",
+     "bytes": 213444,
+     "sha256": "918a896111936f3f6316d1cc7fd64aa1ef0a31a4162dfcbe02c058758b0f2458"
+    },
+    {
+     "name": "cat_softmew.wav",
+     "bytes": 218620,
+     "sha256": "7de9fed4401b677ccbf072781182857d875093a8e9b5727fc21b38028cfd5a90"
+    }
+   ]
+  },
+  "oga-sheep-baa": {
+   "name": "OpenGameArt: Sheep Baa",
+   "page": "https://opengameart.org/content/sheep-baa",
+   "download": "https://opengameart.org/sites/default/files/sheep_baa.flac",
+   "author": "AntumDeluge",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "sheep_baa.flac",
+     "bytes": 45776,
+     "sha256": "b2687077a29c044e57220b660c616f9336a0b454519f67bbc59954e0574acc70"
+    }
+   ]
+  },
+  "oga-horse-trotting": {
+   "name": "OpenGameArt: Horse Trotting",
+   "page": "https://opengameart.org/content/horse-trotting",
+   "download": "https://opengameart.org/sites/default/files/Trot.ogg",
+   "author": "EZduzziteh",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "Trot.ogg",
+     "bytes": 138357,
+     "sha256": "0fd1a787f3ebb2c0213de8a807566a4879b659bdf2643c8720d6e1720bb436b9"
+    }
+   ]
+  },
+  "oga-high-traffic-road-sounds": {
+   "name": "OpenGameArt: High traffic road sounds",
+   "page": "https://opengameart.org/content/high-traffic-road-sounds",
+   "download": "https://opengameart.org/sites/default/files/gatve%20Varniu_2.ogg",
+   "author": "IgnasD",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "gatve Varniu_2.ogg",
+     "bytes": 558092,
+     "sha256": "1c7ce49677ade7ebc4c7f3bd58657a730b892713382d197ea96a2c0f4ead0c51"
+    }
+   ]
+  },
+  "oga-electronic-device-loop": {
+   "name": "OpenGameArt: Electronic device loop",
+   "page": "https://opengameart.org/content/electronic-device-loop",
+   "download": "https://opengameart.org/sites/default/files/qubodup-edev.flac",
+   "author": "qubodup",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "qubodup-edev.flac",
+     "bytes": 357155,
+     "sha256": "d361ad8b7762bde722c5c941cc754c9bb1a07e6b6f02029a499d23713100f9f0"
+    }
+   ]
+  },
+  "oga-machine-shutting-down": {
+   "name": "OpenGameArt: Machine shutting down",
+   "page": "https://opengameart.org/content/machine-shutting-down",
+   "download": "https://opengameart.org/sites/default/files/MachinePowerOff.ogg",
+   "author": "Cough-E",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "MachinePowerOff.ogg",
+     "bytes": 127692,
+     "sha256": "95850bb053f906ab086c49f57f81bc861a2d9dc478fd7b5056a3997ce7359c3d"
+    }
+   ]
+  },
+  "oga-tape-recorder-opening-and-closing-sound-effects": {
+   "name": "OpenGameArt: Tape Recorder Opening and Closing Sound Effects",
+   "page": "https://opengameart.org/content/tape-recorder-opening-and-closing-sound-effects",
+   "download": [
+    "https://opengameart.org/sites/default/files/tape_recorder_opening.wav",
+    "https://opengameart.org/sites/default/files/tape_recorder_closing.wav"
+   ],
+   "author": "Spring Spring",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "tape_recorder_opening.wav",
+     "bytes": 365410,
+     "sha256": "56a1b1138a8a7dbd5ea59c298a7b711e6dab817d851c06a1130d208b1d8c40f2"
+    },
+    {
+     "name": "tape_recorder_closing.wav",
+     "bytes": 448586,
+     "sha256": "325ade1092dd5f95aaa594ebd94766aa1db9703604709dfc10d93bcc9c0e6bc2"
+    }
+   ]
+  },
+  "oga-20-rustles-dry-leaves": {
+   "name": "OpenGameArt: 20 Rustles of dry leaves",
+   "page": "https://opengameart.org/content/20-rustles-dry-leaves",
+   "download": "https://opengameart.org/sites/default/files/qubodup-rustle.7z",
+   "author": "qubodup",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "qubodup-rustle.7z",
+     "bytes": 10565232,
+     "sha256": "c5d7458085e9b208009388b832184bddc0045482f6fa67a1eb6ea09335bb7a43"
+    }
+   ]
+  },
+  "oga-42-snow-and-gravel-footsteps": {
+   "name": "OpenGameArt: 42 Snow and Gravel Footsteps",
+   "page": "https://opengameart.org/content/42-snow-and-gravel-footsteps",
+   "download": "https://opengameart.org/sites/default/files/corsica_s-walking_in_snow.7z",
+   "author": "Corsica_S (submitted by qubodup)",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "corsica_s-walking_in_snow.7z",
+     "bytes": 4041779,
+     "sha256": "206306b51f8eeedf82043d6628174ec8ff9b16230dffb5192a5c74688e62abd4"
+    }
+   ]
+  },
+  "oga-door-open-door-close-set": {
+   "name": "OpenGameArt: Door Open, Door Close Set",
+   "page": "https://opengameart.org/content/door-open-door-close-set",
+   "download": "https://opengameart.org/sites/default/files/qubodup-DoorSet.7z",
+   "author": "qubodup",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "qubodup-DoorSet.7z",
+     "bytes": 3340803,
+     "sha256": "88502c82451a646fa4bc1b9021a26bbd3441b2850a613784a05336067b11a25d"
+    }
+   ]
+  },
+  "oga-various-sound-effects": {
+   "name": "OpenGameArt: Various Sound Effects",
+   "page": "https://opengameart.org/content/various-sound-effects",
+   "download": "https://opengameart.org/sites/default/files/sounds_8.zip",
+   "author": "laleksic",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "sounds_8.zip",
+     "bytes": 2537204,
+     "sha256": "82c945e5f3c97e4d38dbf18fa27bcea78dbed73b4078c5bbafc04ad89b4096db"
+    }
+   ]
+  },
+  "oga-202-more-sound-effects": {
+   "name": "OpenGameArt: 202 More Sound Effects",
+   "page": "https://opengameart.org/content/202-more-sound-effects",
+   "download": "https://opengameart.org/sites/default/files/MoreSounds.zip",
+   "author": "OwlishMedia",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "MoreSounds.zip",
+     "bytes": 14937403,
+     "sha256": "9428c1437137d9ea06ba94e13da12488d4c57990a1c32d83db9e7707e69fb3af"
+    }
+   ]
+  },
+  "oga-magic-words-healing-sound-effect": {
+   "name": "OpenGameArt: Magic Words + Healing Sound Effect",
+   "page": "https://opengameart.org/content/magic-words-healing-sound-effect",
+   "download": "https://opengameart.org/sites/default/files/health_restore.wav",
+   "author": "Spring Spring",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "health_restore.wav",
+     "bytes": 1167294,
+     "sha256": "c254c71a4e09af6cfe0825f16ac466c745e694cbaf30487f0a1ec7186598f3dd"
+    }
+   ]
+  },
+  "oga-cure-magic": {
+   "name": "OpenGameArt: Cure Magic",
+   "page": "https://opengameart.org/content/cure-magic",
+   "download": "https://opengameart.org/sites/default/files/curemagic.zip",
+   "author": "Someoneman",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "curemagic.zip",
+     "bytes": 1611435,
+     "sha256": "5a0d60a13444d719d05bb496aceac3d749a925259297f1828a51563ee2e465d8"
+    }
+   ]
+  },
+  "oga-crowd-shoutingspeaking-ambience": {
+   "name": "OpenGameArt: Crowd Shouting/Speaking Ambience",
+   "page": "https://opengameart.org/content/crowd-shoutingspeaking-ambience",
+   "download": "https://opengameart.org/sites/default/files/crowd_shouting_0.ogg",
+   "author": "StarNinjas",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "crowd_shouting_0.ogg",
+     "bytes": 335526,
+     "sha256": "a2c23a64c127c77717cbe4abb21f138bac9d9aa6cb3cc89d62bab5d0d96dd7ca"
+    }
+   ]
+  },
+  "oga-fireplace-sound-loop": {
+   "name": "OpenGameArt: Fireplace Sound loop",
+   "page": "https://opengameart.org/content/fireplace-sound-loop",
+   "download": "https://opengameart.org/sites/default/files/fire.wav",
+   "author": "PagDev",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "fire.wav",
+     "bytes": 10324410,
+     "sha256": "85ca0cc60d0c037fff8b185e31ad1fcdbda6ce45eee17c3ee1318d1b8f59e330"
+    }
+   ]
+  },
+  "oga-cicada-sounds": {
+   "name": "OpenGameArt: cicada sounds",
+   "page": "https://opengameart.org/content/cicada-sounds",
+   "download": [
+    "https://opengameart.org/sites/default/files/082526-cicadasounds_0.ogg",
+    "https://opengameart.org/sites/default/files/082526-cicadasounds2_0.ogg"
+   ],
+   "author": "syncopika",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "082526-cicadasounds_0.ogg",
+     "bytes": 1480703,
+     "sha256": "ea98710a72f4b8107ab121e55986c25d849e4a7165384ab91d907de4bbce940f"
+    },
+    {
+     "name": "082526-cicadasounds2_0.ogg",
+     "bytes": 2003460,
+     "sha256": "b06aab991ccfba815c4b06bbb9c43504e2c2007d10deeb287807c62ca4b2b3e6"
+    }
+   ]
+  },
+  "oga-static": {
+   "name": "OpenGameArt: Static",
+   "page": "https://opengameart.org/content/static",
+   "download": "https://opengameart.org/sites/default/files/ScatterNoise1.mp3",
+   "author": "xhunterko",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "ScatterNoise1.mp3",
+     "bytes": 481070,
+     "sha256": "712bc6b549d189e112433f609dc0d3a6f07f2d7458f73a08a915c50a1903f124"
+    }
+   ]
+  },
+  "oga-sfx-plug-in-plug-out": {
+   "name": "OpenGameArt: SFX - Plug In, Plug Out",
+   "page": "https://opengameart.org/content/sfx-plug-in-plug-out",
+   "download": "https://opengameart.org/sites/default/files/Plug%20In%2C%20Plug%20Out.zip",
+   "author": "CleytonKauffman",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "Plug In, Plug Out.zip",
+     "bytes": 173128,
+     "sha256": "e2d42f4745482b983bcff815f06682e5f9551a5f0f5782c35e33122911eebc91"
+    }
+   ]
+  },
+  "oga-50-cc0-retro-synth-sfx": {
+   "name": "OpenGameArt: 50 CC0 retro / synth SFX",
+   "page": "https://opengameart.org/content/50-cc0-retro-synth-sfx",
+   "download": "https://opengameart.org/sites/default/files/50-CC0-retro-synth-SFX.zip",
+   "author": "rubberduck",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "50-CC0-retro-synth-SFX.zip",
+     "bytes": 1938142,
+     "sha256": "db9370bfbe228d1fc3912ec455ad358129eeec593169fc02701ff48d888db9cb"
+    }
+   ]
+  },
+  "oga-power-up-sound-effects": {
+   "name": "OpenGameArt: Power-Up Sound Effects",
+   "page": "https://opengameart.org/content/power-up-sound-effects",
+   "download": [
+    "https://opengameart.org/sites/default/files/power_up_sound_v1_0.ogg",
+    "https://opengameart.org/sites/default/files/power_up_sound_v2_0.ogg",
+    "https://opengameart.org/sites/default/files/power_up_sound_v3_0.ogg"
+   ],
+   "author": "Spring Spring",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "page \"License(s)\": CC0",
+   "files": [
+    {
+     "name": "power_up_sound_v1_0.ogg",
+     "bytes": 123120,
+     "sha256": "111ce73c362601bd04002cf1f00003016019dcacc03bf5f7175aa960756cb44a"
+    },
+    {
+     "name": "power_up_sound_v2_0.ogg",
+     "bytes": 98738,
+     "sha256": "6b273ecea00aed36ccd5c6d246042903e5ae9ee01f6b19690a3ff15c6bac63e9"
+    },
+    {
+     "name": "power_up_sound_v3_0.ogg",
+     "bytes": 71844,
+     "sha256": "bb75dcb6ca5edcd84dbf8358fbfb242443c554714f86cff6c8475754589cfddb"
+    }
+   ]
+  },
+  "commons-restaurant-ambience": {
+   "name": "Wikimedia Commons: Restaurant ambience.ogg",
+   "page": "https://commons.wikimedia.org/wiki/File%3ARestaurant_ambience.ogg",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/b/b5/Restaurant_ambience.ogg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "stephan",
+   "licence": "Public domain (dedicated by the author on pdsounds.org)",
+   "licenceUrl": "https://commons.wikimedia.org/wiki/Template:PD-pdsounds.org",
+   "licenceSeen": "file page licence: Public domain (PD-pdsounds.org, PD-author)",
+   "origin": "http://www.pdsounds.org/audio/download/274/restaurant_walla.mp3",
+   "files": [
+    {
+     "name": "Restaurant_ambience.ogg",
+     "bytes": 1970215,
+     "sha256": "0aeb1fa7a3d9647d3284e97d9880b6375b54db2eda6a517c64e3bb02ac8a51cc"
+    }
+   ]
+  },
+  "commons-shopping-mall-less-crowded": {
+   "name": "Wikimedia Commons: Shopping mall less crowded.ogg",
+   "page": "https://commons.wikimedia.org/wiki/File%3AShopping_mall_less_crowded.ogg",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/d/d5/Shopping_mall_less_crowded.ogg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "natalie",
+   "licence": "Public domain (dedicated by the author on pdsounds.org)",
+   "licenceUrl": "https://commons.wikimedia.org/wiki/Template:PD-pdsounds.org",
+   "licenceSeen": "file page licence: Public domain (PD-pdsounds.org, PD-author)",
+   "origin": "http://www.pdsounds.org/audio/download/211/STE-008.mp3",
+   "files": [
+    {
+     "name": "Shopping_mall_less_crowded.ogg",
+     "bytes": 830894,
+     "sha256": "d0e381f5e798e29a1385a5f53b25cc15a016a47ff6a072bac060a53284bd71d4"
+    }
+   ]
+  },
+  "commons-ambient-classroom-mono": {
+   "name": "Wikimedia Commons: Ambient classroom mono.ogg",
+   "page": "https://commons.wikimedia.org/wiki/File%3AAmbient_classroom_mono.ogg",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/1/10/Ambient_classroom_mono.ogg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "rcrossley",
+   "licence": "Public domain (dedicated by the author on pdsounds.org)",
+   "licenceUrl": "https://commons.wikimedia.org/wiki/Template:PD-pdsounds.org",
+   "licenceSeen": "file page licence: Public domain (PD-pdsounds.org, PD-author)",
+   "origin": "http://www.pdsounds.org/audio/download/580/Ambient+Classroom-Mono.mp3",
+   "files": [
+    {
+     "name": "Ambient_classroom_mono.ogg",
+     "bytes": 884672,
+     "sha256": "0eeb19b20d2b2f2e4590258378cef41943649315a0a1f4b5f1092a3476112594"
+    }
+   ]
+  },
+  "commons-star-lc-10-printer-01": {
+   "name": "Wikimedia Commons: Star-LC-10-printer-01.ogg",
+   "page": "https://commons.wikimedia.org/wiki/File%3AStar-LC-10-printer-01.ogg",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/1/17/Star-LC-10-printer-01.ogg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "Priwo",
+   "licence": "Public domain (released by the author, PD-self)",
+   "licenceUrl": "https://commons.wikimedia.org/wiki/Template:PD-self",
+   "licenceSeen": "file page licence: Public domain (PD-self)",
+   "files": [
+    {
+     "name": "Star-LC-10-printer-01.ogg",
+     "bytes": 792286,
+     "sha256": "e67f4e2c0e5d24428f0960554097da1cb6793da99cafbf33ccb44369274cd73a"
+    }
+   ]
+  },
+  "commons-medium-rooster-crowing": {
+   "name": "Wikimedia Commons: Medium rooster crowing.ogg",
+   "page": "https://commons.wikimedia.org/wiki/File%3AMedium_rooster_crowing.ogg",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Medium_rooster_crowing.ogg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "alys",
+   "licence": "Public domain (dedicated by the author on pdsounds.org)",
+   "licenceUrl": "https://commons.wikimedia.org/wiki/Template:PD-pdsounds.org",
+   "licenceSeen": "file page licence: Public domain (PD-pdsounds.org, PD-author)",
+   "origin": "http://www.pdsounds.org/audio/download/539/medium+rooster+crowing.mp3",
+   "files": [
+    {
+     "name": "Medium_rooster_crowing.ogg",
+     "bytes": 120711,
+     "sha256": "318baa8a707dec66af08b6b7a4ed6b1a418cd792d1b4f52e7bf2cd502ee5befb"
+    }
+   ]
+  },
+  "commons-gull-1": {
+   "name": "Wikimedia Commons: Gull 1.ogg",
+   "page": "https://commons.wikimedia.org/wiki/File%3AGull_1.ogg",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/4/43/Gull_1.ogg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "avphillips",
+   "licence": "Public domain (dedicated by the author on pdsounds.org)",
+   "licenceUrl": "https://commons.wikimedia.org/wiki/Template:PD-pdsounds.org",
+   "licenceSeen": "file page licence: Public domain (PD-pdsounds.org, PD-author)",
+   "origin": "http://www.pdsounds.org/audio/download/241/herringgull.au",
+   "files": [
+    {
+     "name": "Gull_1.ogg",
+     "bytes": 167299,
+     "sha256": "a1fb43d87b82defea6d4ccc70380431ac65f3ae98b4acbffc01478b81539b140"
+    }
+   ]
+  },
+  "commons-food-wrapper-crumpling": {
+   "name": "Wikimedia Commons: Food wrapper crumpling.ogg",
+   "page": "https://commons.wikimedia.org/wiki/File%3AFood_wrapper_crumpling.ogg",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Food_wrapper_crumpling.ogg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "stilgar",
+   "licence": "Public domain (dedicated by the author on pdsounds.org)",
+   "licenceUrl": "https://commons.wikimedia.org/wiki/Template:PD-pdsounds.org",
+   "licenceSeen": "file page licence: Public domain (PD-pdsounds.org, PD-author)",
+   "origin": "http://www.pdsounds.org/audio/download/631/foilwrap.flac",
+   "files": [
+    {
+     "name": "Food_wrapper_crumpling.ogg",
+     "bytes": 614116,
+     "sha256": "7febdafdad353360112b5dec739dc32a1a0fd6ac6095d34964d6d2701ba30930"
+    }
+   ]
+  },
+  "commons-pouring-water-in-mug-in-sink": {
+   "name": "Wikimedia Commons: Pouring water in mug in sink.ogg",
+   "page": "https://commons.wikimedia.org/wiki/File%3APouring_water_in_mug_in_sink.ogg",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/1/15/Pouring_water_in_mug_in_sink.ogg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "earthcalling",
+   "licence": "Public domain (dedicated by the author on pdsounds.org)",
+   "licenceUrl": "https://commons.wikimedia.org/wiki/Template:PD-pdsounds.org",
+   "licenceSeen": "file page licence: Public domain (PD-pdsounds.org, PD-author)",
+   "origin": "http://www.pdsounds.org/audio/download/73/waterinmuginsink.mp3",
+   "files": [
+    {
+     "name": "Pouring_water_in_mug_in_sink.ogg",
+     "bytes": 620191,
+     "sha256": "2003f548384de6cde78373c6686b573993c8f025657e332bd9a50d4f577dc945"
+    }
+   ]
+  },
+  "commons-pouring-water-bottles": {
+   "name": "Wikimedia Commons: Pouring water bottles.ogg",
+   "page": "https://commons.wikimedia.org/wiki/File%3APouring_water_bottles.ogg",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/3/30/Pouring_water_bottles.ogg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "stephan",
+   "licence": "Public domain (dedicated by the author on pdsounds.org)",
+   "licenceUrl": "https://commons.wikimedia.org/wiki/Template:PD-pdsounds.org",
+   "licenceSeen": "file page licence: Public domain (PD-pdsounds.org, PD-author)",
+   "origin": "http://www.pdsounds.org/audio/download/398/pour_out_water.mp3",
+   "files": [
+    {
+     "name": "Pouring_water_bottles.ogg",
+     "bytes": 744457,
+     "sha256": "a452360082ffe339cc28ebe5bb771956111c81479230993e1711616dc1689629"
+    }
+   ]
+  },
+  "commons-bell-ring": {
+   "name": "Wikimedia Commons: Bell-ring.flac",
+   "page": "https://commons.wikimedia.org/wiki/File%3ABell-ring.flac",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Bell-ring.flac?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "qubodup",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "file page licence: CC0 (Cc-zero)",
+   "files": [
+    {
+     "name": "Bell-ring.flac",
+     "bytes": 827359,
+     "sha256": "f1a3a5aaa3dfc62e1bbe1045b1078e23a7ff65933493fd6d6a8ec01830f00b5a"
+    }
+   ]
+  },
+  "commons-bicycle-bell-1": {
+   "name": "Wikimedia Commons: Bicycle-bell-1.wav",
+   "page": "https://commons.wikimedia.org/wiki/File%3ABicycle-bell-1.wav",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/6/68/Bicycle-bell-1.wav?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "Soundscape_Leuphana",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "file page licence: CC0 (Cc-zero)",
+   "files": [
+    {
+     "name": "Bicycle-bell-1.wav",
+     "bytes": 392384,
+     "sha256": "7b39220fc9ff22ed24d180628ec96575abbabd7e197d24e7de7bb86c83416101"
+    }
+   ]
+  },
+  "commons-406243-stubb-typewriter-ding-near-mono": {
+   "name": "Wikimedia Commons: 406243 stubb typewriter-ding-near-mono.wav",
+   "page": "https://commons.wikimedia.org/wiki/File%3A406243_stubb_typewriter-ding-near-mono.wav",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/9/9f/406243_stubb_typewriter-ding-near-mono.wav?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "_stubb",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "file page licence: CC0 (cc-zero)",
+   "files": [
+    {
+     "name": "406243_stubb_typewriter-ding-near-mono.wav",
+     "bytes": 154464,
+     "sha256": "7e86d269c13cff5d8651718b39da728e612f22e58187780d6b098f9329d713eb"
+    }
+   ]
+  },
+  "commons-ocean-waves-on-a-tropical-beach": {
+   "name": "Wikimedia Commons: Ocean Waves on a Tropical Beach.ogg",
+   "page": "https://commons.wikimedia.org/wiki/File%3AOcean_Waves_on_a_Tropical_Beach.ogg",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/6/64/Ocean_Waves_on_a_Tropical_Beach.ogg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "Jarrod stanley",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "file page licence: CC0 (self)",
+   "files": [
+    {
+     "name": "Ocean_Waves_on_a_Tropical_Beach.ogg",
+     "bytes": 17647690,
+     "sha256": "bae2fc0a0c1d36f43494883d9455ad151fc747a0770876b25436422ea8736e55"
+    }
+   ]
+  },
+  "commons-james-river-rapids-2": {
+   "name": "Wikimedia Commons: James River Rapids 2.ogg",
+   "page": "https://commons.wikimedia.org/wiki/File%3AJames_River_Rapids_2.ogg",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/7/7e/James_River_Rapids_2.ogg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "Jarrod stanley",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "file page licence: CC0 (self)",
+   "files": [
+    {
+     "name": "James_River_Rapids_2.ogg",
+     "bytes": 17025822,
+     "sha256": "daad9a9b17a5bdc3cdae11f9857ce32c8f6189fd06249ee898f65df68947040c"
+    }
+   ]
+  },
+  "commons-howling-wind": {
+   "name": "Wikimedia Commons: Howling wind.ogg",
+   "page": "https://commons.wikimedia.org/wiki/File%3AHowling_wind.ogg",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/2/2d/Howling_wind.ogg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "Tvabutzku1234",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "file page licence: CC0 (self)",
+   "files": [
+    {
+     "name": "Howling_wind.ogg",
+     "bytes": 1112243,
+     "sha256": "cc585200603027ca808ab68ab4b381d1a828c55d58f010222f5ff687929d084d"
+    }
+   ]
+  },
+  "commons-church-bells-leverkusen-2007": {
+   "name": "Wikimedia Commons: Church bells - Leverkusen, 2007.oga",
+   "page": "https://commons.wikimedia.org/wiki/File%3AChurch_bells_-_Leverkusen%2C_2007.oga",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/3/36/Church_bells_-_Leverkusen%2C_2007.oga?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "natalie",
+   "licence": "Public domain (dedicated by the author on pdsounds.org)",
+   "licenceUrl": "https://commons.wikimedia.org/wiki/Template:PD-pdsounds.org",
+   "licenceSeen": "file page licence: Public domain (PD-pdsounds.org, PD-author)",
+   "origin": "http://www.pdsounds.org/audio/download/210/STE-003.mp3",
+   "files": [
+    {
+     "name": "Church_bells_-_Leverkusen,_2007.oga",
+     "bytes": 1187871,
+     "sha256": "40e87d6b283fa4ea42438717db94a93f8aff4187ac5968166e7189b441b70a13"
+    }
+   ]
+  },
+  "commons-cow-in-antefasy": {
+   "name": "Wikimedia Commons: Cow in Antefasy.wav",
+   "page": "https://commons.wikimedia.org/wiki/File%3ACow_in_Antefasy.wav",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Cow_in_Antefasy.wav?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "Gasybeaugosse2020",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "file page licence: CC0 (self)",
+   "files": [
+    {
+     "name": "Cow_in_Antefasy.wav",
+     "bytes": 304688,
+     "sha256": "b8e7140fa9c6e3a6907d12cfd1efd3623cf749eada636d57e7d588460b5636d0"
+    }
+   ]
+  },
+  "commons-sunday-in-the-city-street-noise1": {
+   "name": "Wikimedia Commons: Sunday in the city street noise1.ogg",
+   "page": "https://commons.wikimedia.org/wiki/File%3ASunday_in_the_city_street_noise1.ogg",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Sunday_in_the_city_street_noise1.ogg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "cori",
+   "licence": "Public domain (dedicated by the author on pdsounds.org)",
+   "licenceUrl": "https://commons.wikimedia.org/wiki/Template:PD-pdsounds.org",
+   "licenceSeen": "file page licence: Public domain (PD-pdsounds.org, PD-author)",
+   "origin": "http://www.pdsounds.org/audio/download/530/sunday-afternoon1.mp3",
+   "files": [
+    {
+     "name": "Sunday_in_the_city_street_noise1.ogg",
+     "bytes": 3419087,
+     "sha256": "50e5eb59b296580340898f16e737f826a9fd7fef6fc45b07bb3e0318a9e58495"
+    }
+   ]
+  },
+  "commons-spring-peeper-frogs-pseudacris-crucifer-": {
+   "name": "Wikimedia Commons: Spring Peeper Frogs (Pseudacris crucifer) singing on night of April 21 of 2019 in North Pittston PA.ogg",
+   "page": "https://commons.wikimedia.org/wiki/File%3ASpring_Peeper_Frogs_(Pseudacris_crucifer)_singing_on_night_of_April_21_of_2019_in_North_Pittston_PA.ogg",
+   "download": "https://upload.wikimedia.org/wikipedia/commons/0/07/Spring_Peeper_Frogs_%28Pseudacris_crucifer%29_singing_on_night_of_April_21_of_2019_in_North_Pittston_PA.ogg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+   "author": "JohnDziak",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "licenceSeen": "file page licence: CC0 (self)",
+   "files": [
+    {
+     "name": "Spring_Peeper_Frogs_(Pseudacris_crucifer)_singing_on_night_of_April_21_of_2019_in_North_Pittston_PA.ogg",
+     "bytes": 752368,
+     "sha256": "9580b1eb15f953ff3746c1849e2c731217461a1249d6e1e2ac91231a3bb37eaf"
+    }
+   ]
+  }
+ }
+}

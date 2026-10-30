@@ -38,8 +38,9 @@ export default function FilmCard({ id, project, locked, onRestored }) {
       {au && <p className="fc-by">{t("by {name}", { name: m.style?.contributor ? `${m.style.contributor} · ${AUTHORS[au].by}` : AUTHORS[au].by })} <AuthorBadge a={au} /></p>}
       <button type="button" className="clink" disabled={locked} onClick={() => go(`/styles?project=${id}`)}>{t("Change the film style")}</button></section>
     <section><h4>{t("Design")}</h4>
-      {m.designLocked ? <><dl><dt>{t("Brand Kit")}</dt><dd>{t("Follows film style")}</dd></dl>
-        <p className="fc-line">{t("Design follows the film style. You can describe the Brand Kit in the Brief.")}</p></>
+      {m.designLocked ? <><dl><dt>{t("Brand Kit")}</dt><dd>{m.brandKitAsk?.title ?? t("Follows film style")}</dd></dl>
+        {/* a Brand Kit chosen in New project for an author's style: kept, not applied; Claude asks how to use it (T25) */}
+        <p className="fc-line">{m.brandKitAsk ? t("This style keeps its author's design. Claude asks how to use your Brand Kit.") : t("Design follows the film style. You can describe the Brand Kit in the Brief.")}</p></>
         : parts.length ? <ul className="plain fc-list">{parts.map((x) => <li key={x}>{x}</li>)}</ul>
           : <p className="fc-line">{t("Design follows the Brief.")}</p>}</section>
     {format && <section><h4>{t("Format")}</h4><p className="num">{format}</p></section>}

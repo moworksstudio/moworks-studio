@@ -50,7 +50,7 @@ test("the pinned HF checkout on this computer is intact", { skip: !pins.hyperfra
 
 test("the thin fetch: skills/ and registry/ at the pinned commit, intact, and the pins follow it", { timeout: 600000, skip: process.env.MW_TEST_HF_FETCH !== "1" && "opt-in (MW_TEST_HF_FETCH=1): copies about 195 MB" }, async () => {
   const root = fakeRoot("r2", "X:/nowhere/skills");
-  const r = fetchSkills(root, { remote: join(APP, "..", "vendor", basename(pins.hyperframes.source.url, ".git")) });   // the read-only HF clone, named after the repo (skillsRoot is the app's bundle now, no git)
+  const r = await fetchSkills(root, { remote: join(APP, "..", "vendor", basename(pins.hyperframes.source.url, ".git")) });   // the read-only HF clone, named after the repo (skillsRoot is the app's bundle now, no git)
   assert.equal(r.ok, true);
   const { loadPins } = await import("../packages/version-manager/index.mjs");
   assert.match(loadPins(root).hyperframes.skillsRoot, /runtime[\\/]hf-src[\\/]skills$/);

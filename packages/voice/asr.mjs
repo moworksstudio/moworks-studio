@@ -1,7 +1,7 @@
 // Speech-to-text engines: model cards, install after the user confirms (a download from Hugging Face pinned to
 // one commit; every file checked by size and SHA-256; the Moworks Motion kit is not used), remove, and transcription jobs. Engines are
 // pluggable: config/asr-models.json lists them; a script in tools/asr/ runs each. Models live in <work folder>/models, outside projects.
-import { spawn, spawnSync } from "node:child_process";
+import { execFile, spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createReadStream, createWriteStream, existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -137,12 +137,14 @@ export function readyModel(id, root = APP_ROOT) {
 }
 
 /** 16 kHz mono 16-bit WAV from the pinned FFmpeg (what the engines work on; no decoder of their own is involved). `song`: a band filter
- *  keeps the voice's range (200 Hz to 4.5 kHz) over the music. */
-export function toWav(audioFile, out, { song = false, from = null, to = null, root = APP_ROOT } = {}) {          // from/to: only that part
+ *  keeps the voice's range (200 Hz to 4.5 kHz) over the music. Resolves `out`; FFmpeg runs off the caller's event loop (a long
+ *  voice-over or song takes seconds, inside the server's jobs). */
+export async function toWav(audioFile, out, { song = false, from = null, to = null, root = APP_ROOT } = {}) {          // from/to: only that part
   const ff = join(expandEnv(loadPins(root).ffmpeg.dir), "ffmpeg.exe");
   const part = [...(from > 0 ? ["-ss", String(from)] : []), ...(to > 0 ? ["-to", String(to)] : [])];
-  const conv = spawnSync(ff, ["-y", "-v", "error", ...part, "-i", audioFile, ...(song ? ["-af", "highpass=f=200,lowpass=f=4500,dynaudnorm"] : []), "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", out], { windowsHide: true });
-  if (conv.status !== 0) throw Object.assign(new Error("Could not read this audio file"), { code: "AUDIO" });
+  const ok = await new Promise((done) => execFile(ff, ["-y", "-v", "error", ...part, "-i", audioFile, ...(song ? ["-af", "highpass=f=200,lowpass=f=4500,dynaudnorm"] : []), "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", out],
+    { windowsHide: true }, (e) => done(!e)));
+  if (!ok) throw Object.assign(new Error("Could not read this audio file"), { code: "AUDIO" });
   return out;
 }
 
@@ -165,7 +167,7 @@ export async function transcribe(audioFile, { model: id, language = "vi", prompt
   const card = readyModel(id, root);
   const m = catalog(root).find((x) => x.id === id);
   mkdirSync(workDir, { recursive: true });
-  const input = toWav(audioFile, join(workDir, "asr-input.wav"), { song, root });
+  const input = await toWav(audioFile, join(workDir, "asr-input.wav"), { song, root });
   if (m.engine !== "faster-whisper") throw Object.assign(new Error(`No runner for the ${m.engine} engine`), { code: "INVALID" });
   const script = join(root, "tools", "asr", "whisper_transcribe.py"), target = card.path;
   const hint = String(prompt ?? "").normalize("NFC").replace(/\s+/g, " ").trim().slice(0, 600);

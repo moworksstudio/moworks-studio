@@ -232,7 +232,7 @@ export async function importFromRegistry({ root = APP_ROOT, onProgress = () => {
         const p = it.preview.poster ? await download(it.preview.poster, join(tmp, "previews", `${slug}${/\.png$/i.test(it.preview.poster) ? ".png" : ".jpg"}`), signal, fetchImpl).catch(() => null) : null;
         preview = { source: "hf", video: `previews/${slug}.mp4`, poster: p ? `previews/${slug}${/\.png$/i.test(it.preview.poster) ? ".png" : ".jpg"}` : null, url: it.preview.video, sha256: v.sha256 };
         // the cards get a 640 px copy (sha256 stays the published file's, the URL says where it came from)
-        try { preview = recodePreview(tmp, preview, { root, seconds: it.duration ?? null, keepOriginals: false })?.preview ?? preview; } catch { /* keep the file as published */ }
+        try { preview = (await recodePreview(tmp, preview, { root, seconds: it.duration ?? null, keepOriginals: false }))?.preview ?? preview; } catch { /* keep the file as published */ }
       } catch { preview = null; }
     }
     if (!preview && old?.preview?.source === "rendered" && old.sourceHash === hash && existsSync(join(prev.dir, old.preview.video))) {

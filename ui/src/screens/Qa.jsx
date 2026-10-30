@@ -13,9 +13,16 @@ import { useStage } from "../workflow/stage.jsx";
 import { checkLabel, notCheckedWhy, scriptTimedOut } from "../workflow/RenderSheet.jsx";
 import { lookAt } from "../../../packages/hf-qa/look.mjs";
 
-// What a finding says on screen: the server's `plain` sentence; a font or a loaded address in the app's own words; else a short line
-// (the checker's wording stays in "Fix with Claude", for Claude)
-const say = (f) => f.plain || (f.family || f.url ? describe(f) : tr("Something here may look wrong. Fix with Claude, or look at the shot."));
+// What a finding says on screen: the server's `plain` sentence; a font or a loaded address in the app's own words; a check of the app's
+// own (not HyperFrames') in the words the Render panel gives it, its shot said once (T26-8: three "A sound on every action" rows read
+// "Something here may look wrong…" while Render named the second, the motion and its sound); else a short line (HyperFrames' own
+// wording stays in "Fix with Claude", for Claude)
+const ownWords = (c, f) => {
+  const m = !/^G-HF-/.test(c?.id ?? "") ? f.message ?? f.reason : null;
+  if (!m || /[\w-]+[\\/][\w./\\-]+\.(?:html?|m?js|tsx?|json|css)\b/i.test(m)) return null;          // never a file path on screen
+  return f.shot != null ? String(m).replace(new RegExp(`^Shot ${f.shot} at `), "At ") : String(m);
+};
+export const say = (f, c = null) => f.plain || (f.family || f.url ? describe(f) : ownWords(c, f) ?? tr("Something here may look wrong. Fix with Claude, or look at the shot."));
 const describe = (f) => f.message ?? f.reason ?? (f.family ? (f.missing ? tr("Font “{family}” is missing {chars}", { family: f.family, chars: f.missing }) : tr("Font “{family}” is not available offline", { family: f.family })) : null) ?? (f.url ? tr("Loads {url}", { url: f.url }) : JSON.stringify(f));
 
 export default function Qa({ id, setCrumbs = () => {} }) {
@@ -46,7 +53,7 @@ export default function Qa({ id, setCrumbs = () => {} }) {
 
   const Finding = ({ c, f }) => <li className="finding">
     <span className="where num">{f.shot ? t("Shot {n}", { n: f.shot }) : t("Film")}</span>
-    <span className="what">{f.from != null && f.to != null && <span className="num muted">{f.from.toFixed(1)}–{f.to.toFixed(1)} s · </span>}{say(f)}
+    <span className="what">{f.from != null && f.to != null && <span className="num muted">{f.from.toFixed(1)}–{f.to.toFixed(1)} s · </span>}{say(f, c)}
       {f.count > 1 && <span className="num muted"> · {t("{n} places", { n: f.count })}</span>}</span>
     <span className="acts">{f.shot && <button className="btn ghost sm" onClick={() => stage.close()}><Film size={13} />{t("Open shot")}</button>}
       <button className="btn ghost sm" onClick={() => fix(c, f)}><Bot size={13} />{t("Fix with Claude")}</button></span></li>;

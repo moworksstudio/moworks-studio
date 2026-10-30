@@ -16,6 +16,7 @@ import { SignInFlow, useClaude } from "../workflow/claude.jsx";
 import { DriveNote, folderName } from "../workflow/folder.jsx";
 import { FirstRunList, SourcesFold, mb as mbOf } from "../workflow/FirstRun.jsx";
 import AppUpdate from "../workflow/AppUpdate.jsx";          // the app updates itself from the user's repo
+import { UpdateDot } from "../workflow/UpdateNotice.jsx";          // a new version is ready: the Update section's dot
 import { KEEP_ON_RESET, SIZES, THEMES_SHOWN, useAppearance } from "../theme.jsx";
 import { flushPrefs } from "../prefs-sync.js";
 import Models, { useVoiceSettings } from "../voice/Models.jsx";
@@ -271,7 +272,7 @@ function Runtime({ sys, reload, loading }) {
   </section>;
 }
 
-export default function Settings({ section, claude, onRecheckClaude }) {
+export default function Settings({ section, claude, onRecheckClaude, updateReady = false }) {
   const t = useT();
   const sys = useChecks("/api/system");          // the last checks at once, the fresh ones when ready
   const cur = SECTIONS.find((s) => s[0] === (ALIAS[section] ?? section)) ?? SECTIONS[0];
@@ -284,7 +285,8 @@ export default function Settings({ section, claude, onRecheckClaude }) {
         <nav className="settings-nav" aria-label={t("Settings sections")}>{SECTIONS.map(([k, label, Icon]) => {
           const flag = k === "runtime" ? Object.entries(sys.data?.checks ?? {}).filter(([n, c]) => n !== "afterEffects" && c.status !== "ok").length : k === "general" ? (claude.loggedIn ? 0 : 1) : 0;
           return <button key={k} className={"rail-item" + (k === cur[0] ? " active" : "")} aria-current={k === cur[0] ? "page" : undefined} onClick={() => go(`/settings/${k}`)}>
-            <Icon size={16} /><span>{t(label)}</span>{flag ? <span className="count"><span className="dot error" /></span> : null}</button>;
+            <Icon size={16} /><span>{t(label)}</span>{flag ? <span className="count"><span className="dot error" /></span> : null}
+            {k === "update" && <UpdateDot on={updateReady} />}</button>;
         })}</nav>
         <div style={{ minWidth: 0 }}>
           {cur[0] === "general" && <section className="section set-general">

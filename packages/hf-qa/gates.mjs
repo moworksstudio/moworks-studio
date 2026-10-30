@@ -14,6 +14,9 @@
 //   G-VOICE      under a voice-over, effects or music within 3 dB of the voice on a spoken word        warning
 //   G-GLYPH-CODE Vietnamese letters a code film's own code (whatif/*.tsx, anidoodle/*.ts) draws in a face that lacks them
 //                (G-GLYPH reads only the HTML; codeGlyphs.mjs)                                                warning
+//   G-VI-MARKS   a Vietnamese film's on-screen text written without its marks ("NHAT KY" for "NHẬT KÝ"; viMarks.mjs)    warning
+//   G-SFX        a visible motion of the Motion Plan with no sound within 0.3 s once the sound effects are placed, unless the
+//                owner, the brief or the style asks for silence (house rules §7b; sfxCover.mjs)                        warning
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -22,14 +25,16 @@ import { declaredFamilies, familyStacks, fontMap, htmlFiles } from "../hf-edit/f
 import { scriptFiles } from "../hf-edit/vendorLibs.mjs";
 import { loadHf } from "../hf-edit/load.mjs";
 import { expandEnv, loadPins, resolveRuntime } from "../version-manager/index.mjs";
-import { check, snapshot, runHfJson } from "./cli.mjs";
-import { checkFindings, checkSamples, withSeamsFallback } from "./qc.mjs";
+import { check, snapshot, runHfJsonAsync } from "./cli.mjs";
+import { CHECK_BUSY, checkFindings, checkOnceMore, checkSamples, checkTimeoutMs, filmSeconds, withSeamsFallback } from "./qc.mjs";
 import { dropDecorationContrast } from "./contrastDecor.mjs";
 import { gateContract } from "../anidoodle-styles/contract.mjs";
 import { gatePose } from "../anidoodle-styles/posecheck.mjs";
 import { gateVoice } from "../sfx/voicecheck.mjs";
 import { freshFilm } from "../hf-edit/codeFilm.mjs";
 import { gateCodeGlyphs } from "./codeGlyphs.mjs";
+import { gateViMarks } from "./viMarks.mjs";
+import { gateSfx } from "./sfxCover.mjs";
 
 const BASES = "aăâeêioôơuưyAĂÂEÊIOÔƠUƯY";
 const TONES = ["", "̀", "́", "̉", "̃", "̣"];
@@ -160,9 +165,17 @@ async function gateFonts(projectDir) {
   ];
 }
 
-async function gatesFromHfCheck(projectDir) {
+/** `hyperframes check` as the gates run it: asynchronously, at normal priority (a render waits for it), its time limit scaled by the
+ *  film's length (checkTimeoutMs). MW_FAKE_CHECK=stopped (tests): every run is stopped before it answers, as on a machine at 100 % CPU. */
+const hfCheck = (projectDir, timeoutMs) => (args) => (process.env.MW_FAKE_CHECK === "stopped" ? Promise.resolve({ command: "check", exitCode: null, json: null, timedOut: true, stderrTail: [] })
+  : runHfJsonAsync("check", projectDir, args, { timeoutMs, belowNormal: false }));
+/** The HF gates of the film. A check that was stopped (its time ran out, or it was killed: exit null) runs once more by itself (onRetry);
+ *  stopped again, it throws CHECK_BUSY in plain words, never a blocked render. `runner(timeoutMs)`: the check's runner (tests). */
+export async function gatesFromHfCheck(projectDir, { onRetry = () => {}, runner = (timeoutMs) => hfCheck(projectDir, timeoutMs) } = {}) {
   // HF's 120 s budget at the seams: once more without them; two layout points a second
-  const r = withSeamsFallback((args) => runHfJson("check", projectDir, args), { samples: checkSamples(projectDir) });
+  const run = runner(checkTimeoutMs(filmSeconds(projectDir))), samples = checkSamples(projectDir);
+  const r = await checkOnceMore(() => withSeamsFallback(run, { samples }), { onRetry });
+  if (r.busy) throw Object.assign(new Error(CHECK_BUSY), { code: "CHECK_BUSY" });
   const j = r.json;
   if (j) await dropDecorationContrast(j, projectDir);          // contrast measured on a sticker's aria-hidden outline copy is not the words
   if (!j) return [{ id: "G-HF-LINT", blocking: true, pass: false, findings: [{ reason: `hyperframes check gave no JSON (exit ${r.exitCode})`, stderr: r.stderrTail }] }];
@@ -235,18 +248,25 @@ export async function gateBuild(projectDir) {
 }
 
 /** Run every gate. Returns { pass, blockingFailures, gates }. `blank: false` skips the (slower) blank-scene snapshots. onStep(done, total,
- *  what) before each part, so a render's "quick check" moves (it stood at 3 % for 4 min). */
-export async function runGates(projectDir, { workDir, blank = true, onStep = () => {} } = {}) {
+ *  what) before each part, so a render's "quick check" moves (it stood at 3 % for 4 min), and again when HF's check runs once more. HF's
+ *  check stopped twice (a busy machine): { pass: false, busy: true, message: CHECK_BUSY, blockingFailures: [] } at once, no gate blamed.
+ *  `hfCheck`: the HF part (tests). */
+export async function runGates(projectDir, { workDir, blank = true, onStep = () => {}, hfCheck = gatesFromHfCheck } = {}) {
   const parts = [
     ["Building the film's code", async () => [await gateBuild(projectDir)]],          // first: the checks below look at the film as its source is now
-    ["HyperFrames' check of the film", () => gatesFromHfCheck(projectDir)],
-    ["Files and fonts", async () => [gateRemote(projectDir), ...(await gateFonts(projectDir)), gateCodeGlyphs(projectDir)]],
+    ["HyperFrames' check of the film", (again) => hfCheck(projectDir, { onRetry: () => again("HyperFrames' check of the film, once more (the computer is busy)") })],
+    ["Files and fonts", async () => [gateRemote(projectDir), ...(await gateFonts(projectDir)), gateCodeGlyphs(projectDir), gateViMarks(projectDir)]],
     ["The film's drawing rules", async () => [gateContract(projectDir), await gatePose(projectDir)]],
     ["The voice against the sound", async () => [await gateVoice(projectDir)]],          // a warning; nothing without a voice-over
+    ["A sound on every action", async () => [await gateSfx(projectDir)]],          // a warning; nothing before the sound effects are placed
     ...(blank && workDir ? [["Blank scenes", () => [gateBlank(projectDir, workDir)]]] : []),
   ];
   const gates = [];
-  for (const [i, [what, run]] of parts.entries()) { onStep(i, parts.length, what); gates.push(...(await run())); }
+  for (const [i, [what, run]] of parts.entries()) {
+    onStep(i, parts.length, what);
+    try { gates.push(...(await run((again) => onStep(i, parts.length, again)))); }
+    catch (e) { if (e?.code === "CHECK_BUSY") return { pass: false, busy: true, message: e.message, blockingFailures: [], gates: gates.filter(Boolean) }; throw e; }
+  }
   onStep(parts.length, parts.length, null);
   for (let i = gates.length - 1; i >= 0; i--) if (!gates[i]) gates.splice(i, 1);
   const blockingFailures = gates.filter((g) => g.blocking && !g.pass).map((g) => g.id);

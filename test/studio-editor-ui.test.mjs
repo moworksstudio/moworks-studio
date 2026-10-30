@@ -94,6 +94,26 @@ test("This film: the style with its author, the design that follows the film sty
   assert.match(html, /1080 × 1080 · 1:1 · 24 fps/);
   assert.match(html, /Change the film style/);
   assert.doesNotMatch(html, /anidoodle-fox|p1/);          // no ids on screen
+  // a Brand Kit chosen in New project for an author's style is named, and the line says Claude asks how to use it (T25)
+  const asked = await render(h(FilmCard, { id: "p1", project: { meta: { ...p.meta, brandKitAsk: { id: "custom/dot-crumb", title: "Dot & Crumb" } } }, locked: false, onRestored: noop }));
+  assert.match(asked, /Dot &amp; Crumb/);
+  assert.match(asked, /This style keeps its author&#x27;s design\. Claude asks how to use your Brand Kit\./);
+  assert.doesNotMatch(asked, /custom\/dot-crumb|You can describe the Brand Kit/);
+});
+
+test("New project's Brand Kit box: an author's style locks it, and a Brand Kit chosen stays chosen with one line that says so (T25), in both themes", async () => {
+  const DesignSteps = (await load("/src/workflow/DesignSteps.jsx")).default;
+  const author = { id: "mg-01-flat-vector", design: "author" }, open = { id: "general", design: "open", look: true };
+  for (const theme of ["studio", null]) {
+    const kept = await render(h(DesignSteps, { style: author, value: { look: "custom/dot-crumb" }, onChange: noop }), theme);
+    assert.match(kept, /This style keeps its author&#x27;s design\. Claude will ask how to use your Brand Kit\./);
+    assert.match(kept, />Remove</);
+    assert.doesNotMatch(kept, /You can describe the Brand Kit|custom\/dot-crumb/);
+    const none = await render(h(DesignSteps, { style: author, value: { look: "" }, onChange: noop }), theme);
+    assert.match(none, /Follows film style/); assert.match(none, /You can describe the Brand Kit in the Brief/);
+    assert.doesNotMatch(none, /Claude will ask how to use/);
+    assert.doesNotMatch(await render(h(DesignSteps, { style: open, value: { look: "custom/dot-crumb" }, onChange: noop }), theme), /Claude will ask how to use|Follows film style/);
+  }
 });
 
 test("the edit card's font list names a family once, even when one group's own list repeats it (Oswald twice in In this project)", async () => {
@@ -172,4 +192,36 @@ test("a tall or square film keeps its own shape in The Studio (the table, the Sh
   for (const rule of [/\.st-ed\[data-shape\] \.lt-film \.pv-stage \{[^}]*aspect-ratio: var\(--film-ar\)/, /\.st-ed\[data-shape\] \.st-side \.sl-thumb \{[^}]*aspect-ratio: var\(--film-ar\)/,
     /\.st-ed\[data-shape="tall"\] \.lt-sheet \.bd-col\[style\] \.bd-stills \{[^}]*repeat\(9,/, /\.st-ed\[data-shape="square"\] \.lt-sheet \.bd-col\[style\] \.bd-stills \{[^}]*repeat\(5,/])
     assert.match(css, rule);
+});
+
+test("Import assets: an archive that could not be unpacked says so in plain words, an unpacked one its count and the programs left out (T25), in both themes", async () => {
+  const { AssetPicker } = await load("/src/workflow/assets.jsx");
+  const items = [{ id: 1, file: { name: "Font Bebas Nue.rar", size: 151009 }, status: "warn", error: "Could not open Font Bebas Nue.rar; unpack it and add the files." },
+    { id: 2, file: { name: "Brand pack.zip", size: 1326499 }, status: "done", unpacked: 3, skipped: ["setup.exe"] }, { id: 3, file: { name: "logo.png", size: 900 }, status: "done" }];
+  for (const theme of ["studio", null]) {
+    const html = await render(h(AssetPicker, { items, onAdd: noop, onRemove: noop }), theme);
+    assert.match(html, /Not unpacked/);
+    assert.match(html, /Could not open Font Bebas Nue\.rar; unpack it and add the files\./);
+    assert.match(html, /Unpacked: 3 file\(s\)/);
+    assert.match(html, /Left out 1 program file\(s\) from Brand pack\.zip\./);
+    assert.equal((html.match(/>Copied</g) ?? []).length, 1, "a loose file is copied as before");
+  }
+});
+
+test("T26-4: the Build's time left counts down to the estimate its confirm gave and, past it, says how long so far, in both themes", async () => {
+  const { default: Pipeline } = await load("/src/workflow/Pipeline.jsx");
+  const ago = (m) => new Date(Date.now() - m * 60000).toISOString();
+  const props = (minutes, planned, gone) => ({ projectId: "p1", onOpen: noop, onAssets: noop, onChanged: noop, actions: [], data: { stages: FIVE({ build: { status: "running", line: "Review" } }),
+    autopilot: { running: "qcReview" }, steps: [{ id: "build", status: "done" }, { id: "qcReview", status: "running" }],
+    // the server worked the whole out again past the plan (103 min against the confirm's 51-77): the line keeps the confirm's 51
+    estimate: { minutes, high: Math.round(minutes * 1.5), ...(planned ? { planned, recomputed: true } : {}), startedAt: ago(gone) } } });
+  for (const theme of ["studio", null]) {
+    const early = await render(h(Pipeline, props(51, null, 10)), theme);
+    assert.match(early, /Review · about 41 min left/, `${theme ?? "desk"}: counting down`);
+    const grown = await render(h(Pipeline, props(103, 51, 40)), theme);
+    assert.match(grown, /Review · about 11 min left/, `${theme ?? "desk"}: never the server's grown 63`);
+    const over = await render(h(Pipeline, props(103, 51, 60)), theme);
+    assert.match(over, /Review · taking longer than usual · 60 min so far/, `${theme ?? "desk"}: past the estimate`);
+    assert.doesNotMatch(over, /min left/);
+  }
 });

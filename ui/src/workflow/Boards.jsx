@@ -183,7 +183,7 @@ export function nameOf(heading) {
 }
 
 /** One option: a card with its name, idea and panels (a 3 × 3 sheet a page). Clicking the card chooses it; a panel opens large. */
-function Option({ o, chosen, approved, onChoose, onLight, counts, onNote }) {
+function Option({ o, chosen, approved, onChoose, onLight, counts, onNote, busy = false }) {
   const t = useT();
   // the option's own name (`name`: the server names old options too), else read off its heading
   const name = o.name ?? nameOf(o.heading);
@@ -213,7 +213,7 @@ function Option({ o, chosen, approved, onChoose, onLight, counts, onNote }) {
       {/* a short last page keeps the sheet's size, so the dialog neither shrinks nor jumps */}
       {o.stillUrls.length > SHEET && Array.from({ length: SHEET - Math.min(SHEET, o.stillUrls.length - pg * SHEET) }, (_, k) => <span key={"e" + k} className="bd-cell bd-empty" aria-hidden="true" />)}</div>
     {o.stillUrls.length > SHEET && <div onClick={(e) => e.stopPropagation()}><Pager className="bd-pager" page={pg} size={SHEET} total={o.stillUrls.length} onPage={setPg} /></div>}
-    {!o.stillUrls.length && <p className="muted">{t("The pictures of this option are being made.")}</p>}
+    {!o.stillUrls.length && !busy && <p className="muted">{t("The pictures of this option are being made.")}</p>}
   </article>;
 }
 
@@ -256,10 +256,15 @@ export default function Boards({ projectId, sel, onSel, onData, locked = false, 
   const lacking = (o) => o.stillUrls.length < Math.max(1, o.frames?.length ?? 1);          // only while a picture is missing
   const noteOn = (o, n) => { onSel(o.key); fb.add(o, n); };
   const retry = () => { asked.current = ""; setStillsErr(null); q.reload(); };
+  // the last take was stopped twice on a busy computer (T25, T26-5): said in plain words with a Retry, never an empty board to approve;
+  // while Claude works the app takes them itself when it finishes
+  const busyLine = data.stillsBusy && !data.taking && !locked ? data.stillsBusy.message : null;
+  const retake = () => { setStillsErr(null); post(`/api/projects/${projectId}/boards/stills`, {}).then(() => setTimeout(q.reload, 800)).catch((e) => setStillsErr(e.message)); };
   // On The Desk two options share a row, newest on the left (workflow.css .sheet-overlay .boards.paired)
   return <section className={"boards" + (options.length > 1 ? " paired" : "")} aria-label={t("Storyboard options")} role="radiogroup">
-    {!options.length && (data.taking || stale) && !stillsErr && <p className="state-line run" role="status"><Loader2 size={13} className="spin" />{taking}</p>}
+    {!options.length && (data.taking || stale) && !stillsErr && !busyLine && <p className="state-line run" role="status"><Loader2 size={13} className="spin" />{taking}</p>}
     {stillsErr && <p className="state-line stop">{t("The pictures could not be made: {why}", { why: stillsErr })} <button className="clink" onClick={retry}>{t("Try again")}</button></p>}
+    {busyLine && !stillsErr && <p className="state-line stop" role="status">{t(busyLine)} <button className="clink" onClick={retake}>{t("Retry")}</button></p>}
     {locked && options.length > 0 && <p className="state-line run" role="status"><Loader2 size={13} className="spin" />{t("Claude is working on the storyboard; a new option appears here on top.")}</p>}
     {options.map((o) => <div key={o.key} className="bd-round">
       <div className="bd-round-h"><h3 className="sub">{t("Option {o}", { o: o.label })} <span className="muted">{o.revisedFrom ? `· ${t("revised from Option {o}", { o: o.revisedFrom })} ` : ""}· {ago(o.at)}</span></h3><span className="spacer" />
@@ -267,9 +272,9 @@ export default function Boards({ projectId, sel, onSel, onData, locked = false, 
         {saved[o.key] ? <><span className="muted bd-saved"><Check size={13} />{t("PDF saved")}</span>
           <button className="btn ghost sm" onClick={() => reveal(saved[o.key])}><FolderOpen size={13} />{t("Show in folder")}</button></>
           : <button className="btn ghost sm" onClick={() => pdf(o)} disabled={!!busy} title={t("Save this option as a PDF in the project")}>{busy === "pdf" + o.key ? <Loader2 size={13} className="spin" /> : <Download size={13} />}PDF</button>}</div>
-      {(data.taking || stale) && !stillsErr && lacking(o) && <p className="state-line run" role="status"><Loader2 size={13} className="spin" />{taking}</p>}
+      {(data.taking || stale) && !stillsErr && !busyLine && lacking(o) && <p className="state-line run" role="status"><Loader2 size={13} className="spin" />{taking}</p>}
       {/* the card on the left, its feedback box beside it on the right while open (the board's empty half) */}
-      <div className="bd-cols"><Option o={o} approved={approved} chosen={sel === o.key} onChoose={onSel} onLight={setLight} counts={noteCounts(fb.textOf(o.label))} onNote={noteOn} />
+      <div className="bd-cols"><Option o={o} approved={approved} chosen={sel === o.key} onChoose={onSel} onLight={setLight} counts={noteCounts(fb.textOf(o.label))} onNote={noteOn} busy={!!busyLine} />
         {fb.open && sel === o.key && <FeedbackBox option={o} text={fb.textOf(o.label)} onText={(v) => fb.set(o.label, v)} onSubmit={() => fb.submit(o)} onClose={fb.close} locked={locked} focusKey={fb.focus} />}</div>
     </div>)}
     {light && <Lightbox projectId={projectId} option={light.option} start={light.i} onClose={() => setLight(null)} onNote={(n, note) => { onSel(light.option.key); fb.add(light.option, n, note); }} />}

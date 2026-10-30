@@ -10,7 +10,7 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve, sep } from "node:path";
 import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
 import { render } from "../hf-render-worker/client.mjs";
-import { encodePoster, encodeVideo, posterAt } from "../library/preview-media.mjs";
+import { encodePosterAsync, encodeVideoAsync, posterAt } from "../library/preview-media.mjs";
 import { currentStore, ensureHosted, placeHosted, registryItems, reloadItems } from "./index.mjs";
 
 const METHOD = "rendered here from the HF original with HyperFrames' own catalog preview method (24 fps draft, web encode)";
@@ -97,10 +97,10 @@ export async function prepareProject(e, { root = APP_ROOT, registryDir, fetchImp
   } catch (err) { rmSync(dir, { recursive: true, force: true }); throw err; }
 }
 
-/** The cards' encode, then a poster frame. */
-function encode(root, master, mp4, poster, seconds) {
-  encodeVideo(master, mp4, { root });
-  encodePoster(mp4, poster, { root, at: posterAt(seconds) });
+/** The cards' encode, then a poster frame; off the event loop (this runs in a job of the app's server). */
+async function encode(root, master, mp4, poster, seconds) {
+  await encodeVideoAsync(master, mp4, { root });
+  await encodePosterAsync(mp4, poster, { root, at: posterAt(seconds) });
 }
 
 function saveCatalog(dir, items) {
@@ -126,7 +126,7 @@ export async function renderMissing({ root = APP_ROOT, only = null, force = fals
   // official videos without a poster: one frame from the video
   for (const it of items) if (it.preview?.source === "hf" && !it.preview.poster && existsSync(join(st.dir, it.preview.video))) {
     const rel = `previews/${it.id.replace("/", "__")}.webp`;
-    try { encodePoster(join(st.dir, it.preview.video), join(st.dir, rel), { root, at: posterAt(it.duration) }); it.preview.poster = rel; it.preview.posterMadeHere = true; } catch { /* keep none */ }
+    try { await encodePosterAsync(join(st.dir, it.preview.video), join(st.dir, rel), { root, at: posterAt(it.duration) }); it.preview.poster = rel; it.preview.posterMadeHere = true; } catch { /* keep none */ }
   }
   saveCatalog(st.dir, items);
   const todo = items.filter((it) => (only ? only.includes(it.id) : retryFailed ? !!it.previewError
@@ -146,7 +146,7 @@ export async function renderMissing({ root = APP_ROOT, only = null, force = fals
         { signal: sig, root, logFile: join(proj.dir, "_render.log") });
       if (r.type !== "done" || !existsSync(master)) throw new Error(`${r.code ?? r.type}: ${String(r.message ?? "").slice(0, 300)}`);
       const mp4 = `previews/${slug}.mp4`, png = `previews/${slug}.webp`;
-      encode(root, master, join(st.dir, mp4 + ".part.mp4"), join(st.dir, png), r.duration ?? it.duration);
+      await encode(root, master, join(st.dir, mp4 + ".part.mp4"), join(st.dir, png), r.duration ?? it.duration);
       renameSync(join(st.dir, mp4 + ".part.mp4"), join(st.dir, mp4));
       const buf = readFileSync(join(st.dir, mp4));
       it.preview = { source: "rendered", video: mp4, poster: png, mode: proj.mode, entry: proj.entryFile, method: METHOD, hfVersion: r.hfVersion,

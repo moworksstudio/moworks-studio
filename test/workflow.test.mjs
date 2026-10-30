@@ -27,7 +27,9 @@ let s;
 const api = (method, path, body, headers = {}) => fetch(`http://127.0.0.1:${s.port}${path}`, {
   method, headers: { "X-MW-Token": "t0k", ...(body ? { "Content-Type": "application/json" } : {}), ...headers }, body: body && JSON.stringify(body),
 }).then(async (r) => ({ status: r.status, json: await r.json().catch(() => null) }));
-const upload = (id, name, bytes, role) => fetch(`http://127.0.0.1:${s.port}/api/projects/${id}/assets/upload`, {
+/** fn()'s first truthy answer within `ms`, else its last (what the server does beside its thread, waited for). */
+const settle = async (fn, ms = 10000) => { const t0 = Date.now(); let v = fn(); while (!v && Date.now() - t0 < ms) { await new Promise((r) => setTimeout(r, 100)); v = fn(); } return v; };
+const upload =(id, name, bytes, role) => fetch(`http://127.0.0.1:${s.port}/api/projects/${id}/assets/upload`, {
   method: "POST", headers: { "X-MW-Token": "t0k", "X-File-Name": encodeURIComponent(name), "Content-Type": "application/octet-stream", ...(role ? { "X-Asset-Role": role } : {}) }, body: bytes,
 }).then(async (r) => ({ status: r.status, json: await r.json().catch(() => null) }));
 
@@ -573,6 +575,41 @@ test("Import assets: copied by kind, names kept (a taken name gets a number), de
   assert.equal(inp.json.inventory.assets["1_design/images"].length, 2);
 });
 
+test("Import assets: a zip is unpacked and its files go in by kind; one that cannot be opened stays and says so (T25)", { timeout: 120000, skip: !existsSync(join(process.env.SystemRoot ?? "C:\\Windows", "System32", "tar.exe")) && "no tar.exe" }, async () => {
+  const { storedZip } = await import("./support/zip.mjs");
+  // a project of its own: the archive's font would join the next test's list of fonts
+  const own = await api("POST", "/api/projects", { title: "Lưu trữ", brief: "Thử", aspect: "16:9", durationSec: 20, styleId: "general" });
+  assert.equal(own.status, 200, JSON.stringify(own.json));
+  const proj = own.json;
+  const png = Buffer.from("89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d4944415478da63f8ffff3f0005fe02fea7d6a3ee0000000049454e44ae426082", "hex");
+  const z = storedZip([{ name: "Brand pack/logo dot.png", data: png }, { name: "Brand pack/fonts/Bebas Neue.ttf", data: "ttf" }, { name: "Brand pack/Minimal logo.psd", data: "8BPS" },
+    { name: "Brand pack/setup.exe", data: "MZ" }, { name: "__MACOSX/Brand pack/._logo dot.png", data: "x" }]);
+  const a = await upload(proj.id, "elements-minimal-logo.zip", z);
+  assert.equal(a.status, 200, JSON.stringify(a.json));
+  assert.equal(a.json.archive.unpacked, true);
+  assert.deepEqual(a.json.archive.files.map((f) => f.path).sort(), ["assets/1_design/Minimal logo.psd", "assets/1_design/fonts/Bebas Neue.ttf", "assets/1_design/images/logo dot.png"]);
+  assert.deepEqual(a.json.archive.skipped, ["setup.exe"], "a program is left out, and said");
+  assert.ok(!existsSync(join(proj.path, "assets", "1_design", "elements-minimal-logo.zip")), "the archive's own copy goes once its files are in");
+  assert.equal(readFileSync(join(proj.path, "assets", "1_design", "images", "logo dot.png")).length, png.length);
+  const tracked = execFileSync("git", ["ls-files"], { cwd: proj.path, encoding: "utf8", windowsHide: true });
+  assert.match(tracked, /assets\/1_design\/images\/logo dot\.png/);
+  assert.doesNotMatch(tracked, /Minimal logo\.psd/, "a design file from the archive stays out of git, as any import");
+  const note = (await api("GET", `/api/projects/${proj.id}/tasks`)).json.notes.at(-1);
+  assert.ok(["assets/1_design/images/logo dot.png", "assets/1_design/Minimal logo.psd"].every((f) => note.files.includes(f)), "Claude is told the archive's files");
+  // the same name again: the same naming rules (a number)
+  assert.ok((await upload(proj.id, "again.zip", storedZip([{ name: "logo dot.png", data: png }]))).json.archive.files[0].path.endsWith("logo dot (2).png"));
+  // an archive tar cannot read stays as it came, and the result says so in plain words (no path)
+  const bad = await upload(proj.id, "Font Bebas Nue.rar", Buffer.from("no archive here"));
+  assert.equal(bad.status, 200);
+  assert.deepEqual([bad.json.archive.unpacked, bad.json.archive.error], [false, "Could not open Font Bebas Nue.rar; unpack it and add the files."]);
+  assert.equal(bad.json.file.path, "assets/1_design/Font Bebas Nue.rar");
+  assert.ok(existsSync(join(proj.path, "assets", "1_design", "Font Bebas Nue.rar")));
+  // zip-slip: refused, nothing outside the project
+  const slip = await upload(proj.id, "slip.zip", storedZip([{ name: "../../evil.txt", data: "evil" }]));
+  assert.match(slip.json.archive.error, /^Did not open slip\.zip: it has files that point outside it/);
+  assert.ok(!existsSync(join(proj.path, "..", "evil.txt")) && !existsSync(join(proj.path, "evil.txt")));
+});
+
 /** A short silent WAV (16-bit mono, 8 kHz) that ffprobe reads. */
 const silentWav = (sec) => {
   const n = Math.round(8000 * sec) * 2, b = Buffer.alloc(44 + n);
@@ -729,6 +766,9 @@ test("the Assets tab: list, missing and new files from Explorer, relink, move, d
   const ssp = (await api("GET", `/api/projects/${ss.json.id}`)).json;
   assert.equal(ssp.meta.look ?? null, null);
   assert.equal(ssp.meta.designLocked, true); assert.ok(!existsSync(join(ssp.path, "frame.md")));
+  // ... but the Brand Kit chosen there is kept, not dropped: Prepare asks how to use it (T25)
+  assert.deepEqual([ssp.meta.brandKitAsk?.id, ssp.meta.brandKitAsk?.title, ssp.meta.brandKitAsk?.file], ["frame/coral", want.title, ".moworks/brand-kit/FRAME.md"]);
+  assert.equal(readFileSync(join(ssp.path, ".moworks", "brand-kit", "FRAME.md"), "utf8"), want.text.replace(/\s*$/, "\n"));
   const { rootFps, setRootFps, keepRootFps, getProject, projectFps } = await import("../packages/project-service/index.mjs");
   // a style's own rates: a Brush cartoon film is 24, 25 or 30 fps (24 by default), never 50 / 60, here and whenever the root is written again
   const brushAt = async (fps) => (await api("GET", `/api/projects/${(await api("POST", "/api/projects", { title: `Brush ${fps}`, brief: "Thử", aspect: "16:9", durationSec: 10, styleId: "brush-cartoon", ...(fps ? { fps } : {}) })).json.id}`)).json;
@@ -782,12 +822,12 @@ test("named versions, opened again; the brief changed after the film was built a
   const ap = createAutopilot({ root: undefined, agent: { running: new Map() }, renders: createRenderQueue() });
   const dir = proj.path;
   writeFileSync(join(dir, "index.html"), "<div data-composition-id=\"root\">bản 1</div>");
-  const v1 = ap.saveVersion(proj.id, "build");
+  const v1 = await ap.saveVersion(proj.id, "build");          // git beside the server's thread (T22-5)
   assert.equal(v1.name, "Build 1"); assert.equal(v1.key, "Build {n}");
-  assert.equal(ap.saveVersion(proj.id, "build").id, v1.id, "nothing changed: the same version");
+  assert.equal((await ap.saveVersion(proj.id, "build")).id, v1.id, "nothing changed: the same version");
   writeFileSync(join(dir, "index.html"), "<div data-composition-id=\"root\">bản 2</div>");
   writeFileSync(join(dir, "added-later.md"), "x");
-  const v2 = ap.saveVersion(proj.id, "edit");
+  const v2 = await ap.saveVersion(proj.id, "edit");
   assert.equal(v2.name, "Edit 1");
   let list = (await api("GET", `/api/projects/${proj.id}/versions`)).json.versions;
   assert.deepEqual(list.slice(0, 2).map((x) => x.name), ["Edit 1", "Build 1"], "newest first");
@@ -1010,11 +1050,11 @@ test("the first time a film's pipeline is read after the app started, the autopi
   const { updateMeta, getProject } = await import("../packages/project-service/index.mjs");
   updateMeta(c.id, (m) => { delete m.pipeline?.autoRun; });
   await api("GET", `/api/projects/${c.id}/pipeline`);
-  await new Promise((r) => setTimeout(r, 300));
-  const run = getProject(c.id).meta.pipeline?.autoRun;
+  // the autopilot reads the pipeline again beside the server's thread (its git reads no longer hold the timer: T22-5): waited for
+  const run = await settle(() => getProject(c.id).meta.pipeline?.autoRun);
   assert.equal(run?.step, "brief", "the next step was started (Claude is signed out in this test, so it goes no further)");
   await api("GET", `/api/projects/${c.id}/pipeline`);
-  await new Promise((r) => setTimeout(r, 300));
+  await new Promise((r) => setTimeout(r, 1500));
   assert.equal(getProject(c.id).meta.pipeline.autoRun.n, run.n, "once per app start, not on every read");
 });
 
@@ -1023,14 +1063,14 @@ test("on opening, a Claude step goes on only when the user set it going after th
   const later = (ms) => new Date(Date.now() + ms).toISOString();
   const film = async (title, go) => {
     const c = (await api("POST", "/api/projects", { title, brief: "Thử", aspect: "16:9", durationSec: 10, styleId: "general" })).json;
-    await new Promise((r) => setTimeout(r, 300));          // the new film's own kickoff has come and gone
+    await new Promise((r) => setTimeout(r, 1000));          // the new film's own kickoff has come and gone
     // the film came to rest after a chat turn: Claude offered the next step and nobody answered
     writeFileSync(join(getProject(c.id).path, ".moworks", "tasks.json"), JSON.stringify({ tasks: [{ id: `t${title.length}`, projectId: c.id, createdAt: later(1000),
       updatedAt: later(1000), status: "done", text: "Review in the chat", resultText: "Next is the music, if you want it.", events: [], changed: [] }] }));
     updateMeta(c.id, (m) => { delete m.pipeline?.autoRun; if (go) m.pipeline.ownerGo = { at: later(2000), step: "brief" }; else delete m.pipeline?.ownerGo; });
     await api("GET", `/api/projects/${c.id}/pipeline`);
-    await new Promise((r) => setTimeout(r, 300));
-    return getProject(c.id).meta.pipeline?.autoRun ?? null;
+    // the autopilot's own reads run beside the server's thread (T22-5): a go is waited for, a wait is given the same time
+    return (await settle(() => getProject(c.id).meta.pipeline?.autoRun, go ? 10000 : 2000)) ?? null;
   };
   assert.equal(await film("Không ai bấm", false), null, "nothing the owner did since the last task: the step waits");
   assert.equal((await film("Chủ phim đã bấm", true))?.step, "brief", "the owner's go after the last task: it goes on");

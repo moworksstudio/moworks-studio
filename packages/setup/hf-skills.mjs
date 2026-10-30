@@ -4,14 +4,19 @@
 // 120 MB, not the whole 884 MB clone) with git, thin (sparse, no history, blobs on demand), into runtime/hf-src. Nothing is ever edited. Integrity: the checkout must be the pinned commit,
 // with no file changed, and every skill's fingerprint must equal HF's own skills-manifest.json (the same hash HF computes:
 // packages/cli/src/utils/skillsManifest.ts hashSkillBundle, Apache-2.0, ported here). A skill that does not match locks the styles using it.
-import { spawnSync } from "node:child_process";
+import { execFile, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
 import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
 
 export const hfSrc = (root = APP_ROOT) => join(root, "runtime", "hf-src");
-const git = (cwd, args, timeout = 30 * 60 * 1000) => spawnSync("git", ["-c", "core.autocrlf=false", "-c", "core.longpaths=true", ...args], { cwd, encoding: "utf8", windowsHide: true, timeout, maxBuffer: 64 << 20 });
+const GIT = ["-c", "core.autocrlf=false", "-c", "core.longpaths=true"];
+// git's short reads (rev-parse, status) stay sync; the fetch, minutes long, runs in the server's own process (Settings, first run): it
+// is asynchronous, answered as spawnSync answers ({ status, stdout, stderr }), so the server keeps answering meanwhile (T27-3)
+const git = (cwd, args, timeout = 30 * 60 * 1000) => spawnSync("git", [...GIT, ...args], { cwd, encoding: "utf8", windowsHide: true, timeout, maxBuffer: 64 << 20 });
+const gitAsync = (cwd, args, timeout = 30 * 60 * 1000) => new Promise((ok) => execFile("git", [...GIT, ...args], { cwd, encoding: "utf8", windowsHide: true, timeout, maxBuffer: 64 << 20 },
+  (e, stdout, stderr) => ok({ status: e ? (Number.isInteger(e.code) ? e.code : null) : 0, stdout: stdout ?? "", stderr: stderr || (e && !Number.isInteger(e.code) ? String(e.message) : "") })));
 
 // ---- HF's fingerprint of a skill folder (ported as is) ----
 const TEXT_EXT = new Set([".md", ".txt", ".mjs", ".js", ".ts", ".jsx", ".tsx", ".html", ".css", ".json", ".svg", ".csv", ".yml", ".yaml"]);
@@ -72,18 +77,18 @@ export function verifySkills(root = APP_ROOT, { fresh = false } = {}) {
 /** Is this one skill as HF ships it? (true when nothing could be checked: a missing tree is reported by the rule's own availability) */
 export const skillIntact = (name, root = APP_ROOT) => { const v = verifySkills(root); return v.skills[name] ? v.skills[name].ok : true; };
 
-/** Fetch skills/ and registry/ at the pinned commit into runtime/hf-src (a download: the user starts it). { dir, commit, ok }. */
-export function fetchSkills(root = APP_ROOT, { remote = null, onLine = () => {} } = {}) {
+/** Fetch skills/ and registry/ at the pinned commit into runtime/hf-src (a download: the user starts it). Resolves { dir, commit, ok }. */
+export async function fetchSkills(root = APP_ROOT, { remote = null, onLine = () => {} } = {}) {
   const h = loadPins(root).hyperframes;
   const commit = h.source?.commit, url = remote ?? h.source?.url;
   if (!commit || !url) throw Object.assign(new Error("No pinned HyperFrames commit in config/pins.json"), { code: "INVALID" });
   const dir = hfSrc(root);
   mkdirSync(dir, { recursive: true });
-  const step = (args, what) => { onLine(what); const r = git(dir, args); if (r.status !== 0) throw Object.assign(new Error(`${what} failed: ${(r.stderr || r.stdout).trim().split(/\r?\n/).pop()}`), { code: "GIT_FAILED" }); return r; };
-  if (!existsSync(join(dir, ".git"))) { step(["init", "-q"], "git init"); step(["remote", "add", "origin", url], "remote"); }
-  step(["sparse-checkout", "set", "--cone", "skills", "registry"], "sparse checkout: skills/ and registry/");
-  step(["fetch", "--depth", "1", "--filter=blob:none", "origin", commit], `fetch ${commit.slice(0, 7)}`);
-  step(["-c", "advice.detachedHead=false", "checkout", "-q", "--force", "FETCH_HEAD"], "checkout");
+  const step = async (args, what) => { onLine(what); const r = await gitAsync(dir, args); if (r.status !== 0) throw Object.assign(new Error(`${what} failed: ${(r.stderr || r.stdout).trim().split(/\r?\n/).pop()}`), { code: "GIT_FAILED" }); return r; };
+  if (!existsSync(join(dir, ".git"))) { await step(["init", "-q"], "git init"); await step(["remote", "add", "origin", url], "remote"); }
+  await step(["sparse-checkout", "set", "--cone", "skills", "registry"], "sparse checkout: skills/ and registry/");
+  await step(["fetch", "--depth", "1", "--filter=blob:none", "origin", commit], `fetch ${commit.slice(0, 7)}`);
+  await step(["-c", "advice.detachedHead=false", "checkout", "-q", "--force", "FETCH_HEAD"], "checkout");
   cache = null;
   const head = git(dir, ["rev-parse", "HEAD"]).stdout.trim();
   return { dir, commit: head, ok: head === commit };

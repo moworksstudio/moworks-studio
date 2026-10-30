@@ -1,4 +1,4 @@
-// App shell: top bar (with the Claude chip), left navigation rail, routed screens. A project
+// App shell: top bar (with the Claude chip and the quiet "A new version is ready" line), left navigation rail, routed screens. A project
 // opens in the Editor; its stages are sheets there, so their old addresses open the Editor with that sheet.
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, LayoutGrid, Library as LibraryIcon, PanelLeftClose, PanelLeftOpen, Settings as Gear, Palette, Smile, Sparkles,
@@ -21,13 +21,14 @@ import FirstRun from "./workflow/FirstRun.jsx";          // the first-start dial
 import ExitButton from "./ExitButton.jsx";
 import AiMark from "./intro/AiMark.jsx";   // "AI motion studio" beside the name
 import { useThemeId } from "./theme.jsx";
+import { UpdateDot, UpdateLine, useUpdateNotice } from "./workflow/UpdateNotice.jsx";          // "A new version is ready"
 
 function Toasts({ items }) {
   return <div className="toasts" aria-live="polite">{items.map((t) => (
     <div key={t.id} className={"toast " + t.kind + (t.leaving ? " leaving" : "")}>{t.kind === "error" ? <XCircle size={16} /> : <CheckCircle2 size={16} />}{t.text}</div>))}</div>;
 }
 
-function Rail({ path, count }) {
+function Rail({ path, count, updateReady = false }) {
   const t = useT();
   const item = (to, icon, label, extra) => {
     const active = to === "/projects" ? path === "/projects" || path.startsWith("/projects/") || path === "/new" : path.startsWith(to);
@@ -40,7 +41,7 @@ function Rail({ path, count }) {
       {item("/styles", <Sparkles size={18} />, t("Film Styles"))}
       {item("/library", <LibraryIcon size={18} />, t("Motion Library"))}
       {item("/characters", <Smile size={18} />, t("Characters"))}
-      <div className="rail-bottom">{item("/settings", <Gear size={18} />, t("Settings"))}</div>
+      <div className="rail-bottom">{item("/settings", <Gear size={18} />, t("Settings"), <UpdateDot on={updateReady} />)}</div>
     </nav>
   );
 }
@@ -72,7 +73,7 @@ const busyTip = (tasks, jobs, st, t) => {
   return [pick.project ? `${pick.project}: ${name}` : name, pick.progress != null ? `${pick.progress}%` : "", more > 0 ? t("{n} more running", { n: more }) : ""].filter(Boolean).join(" · ");
 };
 
-function TopBar({ crumbs, collapsed, setCollapsed, studio = false, path = "" }) {
+function TopBar({ crumbs, collapsed, setCollapsed, studio = false, path = "", update = null }) {
   const t = useT();
   const [running, setRunning] = useState([]);
   const [bg, setBg] = useState([]);
@@ -92,6 +93,7 @@ function TopBar({ crumbs, collapsed, setCollapsed, studio = false, path = "" }) 
       {studio ? <Pegs path={path} /> : crumbs && <div className="crumbs" aria-label={t("Breadcrumb")}><span aria-hidden="true">/</span>{crumbs.map((c, i) => <span key={i}>{c}</span>)}</div>}
       <div className="topbar-spacer" />
       <div className="topbar-slot" id="topbar-slot" />
+      <UpdateLine notice={update} />
       <span className="sr-only" role="status" aria-live="polite">{running?.length ? t("Claude is working on {title}", { title: running[0].title }) : bg.length ? `${(bg[0].label ?? bg[0].title)}${bg[0].progress != null ? ` · ${bg[0].progress}%` : ""}` : t("Nothing is running")}</span>
       {/* one chip, four words (Idle, Working, Downloading, Updating); what runs and how far only on hover, one short line */}
       {(() => { const st = srv ?? busyState(running ?? [], bg); const tip = busyTip(running ?? [], bg, st, t);
@@ -99,8 +101,9 @@ function TopBar({ crumbs, collapsed, setCollapsed, studio = false, path = "" }) 
           : <a className="chip-status" href={st === "working" && (running?.[0]?.projectId ?? bg.find((j) => j.projectId)?.projectId) ? `#/projects/${running?.[0]?.projectId ?? bg.find((j) => j.projectId).projectId}` : "#/settings/runtime"}
             title={tip} aria-label={tip}><span className="dot busy" aria-hidden="true" />{t(BUSY_WORD[st])}</a>; })()}
       <ClaudeChip />
-      {studio && <a className={"btn ghost icon peg-gear" + (path.startsWith("/settings") ? " on" : "")} href="#/settings" aria-label={t("Settings")} title={t("Settings")}
-        aria-current={path.startsWith("/settings") ? "page" : undefined}><Gear size={18} /></a>}
+      {studio && <a className={"btn ghost icon peg-gear" + (path.startsWith("/settings") ? " on" : "")} href="#/settings"
+        aria-label={update?.ready ? `${t("Settings")} · ${t("A new version is ready")}` : t("Settings")} title={t("Settings")}
+        aria-current={path.startsWith("/settings") ? "page" : undefined}><Gear size={18} /><UpdateDot on={!!update?.ready} /></a>}
       <ExitButton />
     </header>
   );
@@ -115,11 +118,13 @@ export default function App() {
   return <ClaudeProvider><Shell /></ClaudeProvider>;
 }
 
-/** The shell without App's presence stream (test/studio-ui.test.mjs renders it on its own). */
-export function Shell() {
+/** The shell without App's presence stream (test/studio-ui.test.mjs renders it on its own). `update`: an answer of GET /api/app/update
+ *  to start from (the render tests; the app reads it itself). */
+export function Shell({ update: firstUpdate = null } = {}) {
   const path = useRoute();
   const claude = useClaude();
   const studio = useThemeId() === "studio";
+  const update = useUpdateNotice(firstUpdate);          // the app's own check: a dot on Settings and a slim line in the top bar
   const [railCollapsed, setRailCollapsed] = usePref("rail-collapsed", false);
   // In the Editor the sidebar folds to its icon strip for more room, every time a project opens; the
   // top-left toggle opens it with its words. It is never hidden (its own setting, apart from the other screens').
@@ -142,14 +147,14 @@ export function Shell() {
   else if (seg[0] === "looks") screen = <Looks />;
   else if (seg[0] === "characters") screen = <Characters />;
   else if (seg[0] === "library") screen = <Library />;
-  else if (seg[0] === "settings") screen = <Settings section={seg[1] ?? "general"} claude={claude?.status ?? { loggedIn: false }} onRecheckClaude={() => claude?.refresh(true)} />;
+  else if (seg[0] === "settings") screen = <Settings section={seg[1] ?? "general"} claude={claude?.status ?? { loggedIn: false }} onRecheckClaude={() => claude?.refresh(true)} updateReady={update.ready} />;
   else screen = <Projects />;
 
   return (
     <ToastProvider render={(items) => <Toasts items={items} />}>
       <div className={"shell" + (collapsed ? " rail-collapsed" : "")}>
-        <TopBar crumbs={crumbs} collapsed={collapsed} setCollapsed={setCollapsed} studio={studio} path={path} />
-        {!studio && <Rail path={path} count={count} />}
+        <TopBar crumbs={crumbs} collapsed={collapsed} setCollapsed={setCollapsed} studio={studio} path={path} update={update} />
+        {!studio && <Rail path={path} count={count} updateReady={update.ready} />}
         <main className="main" id="main"><ErrorBoundary key={seg.join("/")} name={tr("this screen")}>{screen}</ErrorBoundary></main>
         <FirstRun />
       </div>

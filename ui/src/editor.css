@@ -51,6 +51,7 @@ ol.plain.conversation, .conversation { flex: 1; overflow-y: auto; overflow-x: hi
 .md code { font-family: var(--font-mono); font-size: var(--fs-meta); background: var(--surface-2); color: var(--accent-ink); border-radius: var(--r-sm); padding: 1px 0.3333rem; overflow-wrap: anywhere; }
 .md pre { background: var(--well); border: 1px solid var(--border); border-radius: var(--r-md); padding: 0.6667rem 0.8rem; white-space: pre-wrap; overflow-wrap: anywhere; }
 .md pre code { background: none; padding: 0; color: var(--text-primary); }
+.md .msg-plain { white-space: pre-wrap; overflow-wrap: anywhere; }          /* the user's own words, their line breaks kept (T23-10) */
 .md a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
 .md-table { overflow-x: auto; }
 .md table { border-collapse: collapse; font-size: var(--fs-control); }
@@ -88,8 +89,11 @@ ol.plain.conversation, .conversation { flex: 1; overflow-y: auto; overflow-x: hi
 .ed-tabs { background: var(--surface-1); }
 /* the project strip */
 .ed-strip { container: eds / inline-size; flex: none; display: flex; align-items: center; gap: 0.625rem; min-width: 0; height: 3.25rem; padding: 0 var(--sp-3); border-bottom: 1px solid var(--border); background: var(--surface-1); }
-.ed-title { flex: 0 1 auto; field-sizing: content; min-width: 6rem; max-width: 30rem; font: var(--display-weight) calc(var(--fs-title) * var(--display-scale)) / 1.1 var(--font-display); letter-spacing: var(--display-track);
-  text-transform: uppercase; color: var(--text-primary); background: transparent; border: 1px solid transparent; border-radius: var(--r-sm); padding: 0.125rem 0.375rem; text-overflow: ellipsis; }
+/* The title is an input, and an input clips its words to the line: at 1.1 the stacked marks of a capital ("Ấ" in "CHẤM", 1.05em above
+   the baseline in Saira Condensed) were cut to "Â" (T25). The line is 1.5 (room up to 1.1em) with no padding above and below, and the
+   margins give back what it grows, so the strip lays out as before. */
+.ed-title { flex: 0 1 auto; field-sizing: content; min-width: 6rem; max-width: 30rem; font: var(--display-weight) calc(var(--fs-title) * var(--display-scale)) / 1.5 var(--font-display); letter-spacing: var(--display-track);
+  text-transform: uppercase; color: var(--text-primary); background: transparent; border: 1px solid transparent; border-radius: var(--r-sm); padding: 0 0.375rem; margin-block: calc(0.125rem - 0.2em); text-overflow: ellipsis; }
 @media (hover: hover) and (pointer: fine) { .ed-title:hover { border-color: var(--border); } }
 .ed-title:focus { outline: none; border-color: var(--accent-line); background: var(--surface-2); }
 .ed-gap { flex: 1; }
@@ -106,6 +110,8 @@ ol.plain.conversation, .conversation { flex: 1; overflow-y: auto; overflow-x: hi
 .sl-n { font-size: var(--fs-meta); color: var(--text-muted); text-align: right; }
 .sl-thumb { width: 4.5rem; aspect-ratio: 16 / 9; border-radius: var(--r-sm); background: var(--app-bg); border: 1px solid var(--border); display: grid; place-items: center; overflow: hidden; color: var(--text-muted); }
 .sl-thumb img { width: 100%; height: 100%; object-fit: cover; }
+/* a tall or square film's shots in its own shape, as high as a wide film's and centred in the same column (T23-9: 16:9 boxes of a 9:16 film) */
+:root:not([data-theme="studio"]) .ed[data-shape] .sl-thumb { width: auto; max-width: 100%; height: calc(4.5rem * 9 / 16); aspect-ratio: var(--film-ar); justify-self: center; }
 .sl-t { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .sl-title { font-size: var(--fs-control); color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sl-meta { font-size: var(--fs-dense); color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -638,6 +644,16 @@ ol.plain.conversation, .conversation { padding: var(--sp-3); gap: 0.875rem; }
 .tl-aclip path { fill: var(--tl-wave-voice); }
 .tl-music { background: var(--tl-music); border-color: var(--tl-music-line); }
 .tl-row.voice .tl-word { z-index: 1; pointer-events: none; }
+/* a sound from the Assets tab over a lane: the lane lights as a drop zone does (accent edge, accent-soft fill) and a thin line with its
+   time says where the sound would start; an audio row of Assets is picked up by hand and fades while it is carried */
+.tl-row.drop-on { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); }
+.tl-drop { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--accent); pointer-events: none; z-index: 4; }
+.tl-drop b { position: absolute; top: 0.125rem; left: 0.25rem; padding: 0 0.25rem; border-radius: var(--r-xs); background: var(--accent); color: var(--on-accent);
+  font-size: var(--fs-dense); font-weight: 500; line-height: 1.4; white-space: nowrap; }
+.tl-drop.end b { left: auto; right: 0.25rem; }
+.as-row[draggable="true"] { cursor: grab; }
+.as-row[draggable="true"]:active { cursor: grabbing; }
+.as-row.dragging { opacity: 0.5; }
 .as-fold { display: inline-flex; align-items: center; gap: 0.25rem; border: 0; background: none; padding: 0; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
 /* Assets tab: Add files on the tabs' row; folder and type icons; a sound's icon in its lane's colour; text as
    bright as the Pipeline's. The lane colours live on the Editor so the tab and the timeline share them. */

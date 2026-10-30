@@ -81,7 +81,10 @@ pre.log { max-height: 17.3333rem; overflow: auto; white-space: pre-wrap; font-si
 .model-card:last-child { border-bottom: 0; }
 /* The Voice sheet as wide as New project with room above and below; the
    sources compact (what each is on hover); the voice and its settings left, the script right; each setting a narrow field, its hint on hover */
-.sheet-overlay > .sheet.narrow:has(> .sheet-body > .vo-page) { width: min(84rem, calc(100vw - 2 * var(--sp-5))); max-height: calc(100vh - 2 * var(--sp-7)); }
+/* one height whatever it holds, as the large sheets: the words of a transcript scroll inside it and its × stays where it was (T23-6:
+   the sheet grew with the transcript and its × jumped from y 305 to 69) */
+.sheet-overlay > .sheet.narrow:has(> .sheet-body > .vo-page) { width: min(84rem, calc(100vw - 2 * var(--sp-5))); height: min(54rem, calc(100vh - 2 * var(--sp-7)));
+  max-height: calc(100vh - 2 * var(--sp-7)); }
 /* the source cards as designed (name, a one-line description in small print, the key's chip) */
 .vo-src .radio-card .d { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .vo-src .radio-card { min-height: 6.5rem; }          /* as large as with the chip on its own line */

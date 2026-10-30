@@ -429,7 +429,7 @@ export async function renderDemo(id, { root = APP_ROOT, finalize, snapshotAt, re
     writePage(d, id, { scene, duration: 4, root });
     const rep = await finalize(d, { googleFonts: false, characterDemo: true });
     if (rep.lemo?.missing?.length) throw new Error(`Files missing for the ${scene} page: ${rep.lemo.missing.join(", ")}`);
-    const snap = snapshotAt(d, [at], join(work, `${scene}-snap`), { timeout: 30000 });
+    const snap = await snapshotAt(d, [at], join(work, `${scene}-snap`), { timeout: 30000 });
     const png = readdirSync(join(work, `${scene}-snap`)).find((f) => f.endsWith(".png"));
     if (snap.exitCode !== 0 || !png) throw new Error(`The ${scene} still failed: ${snap.stderrTail.join(" ")}`);
     encodePoster(join(work, `${scene}-snap`, png), join(out, `${scene}.webp`), { root });
@@ -441,7 +441,7 @@ export async function renderDemo(id, { root = APP_ROOT, finalize, snapshotAt, re
   const r = await render({ projectDir: d, outputPath: join(out, "showreel.mp4"), fps: { num: 24, den: 1 }, format: "mp4", workers: 2 }, { signal });
   if (r.type !== "done") throw new Error(`The showreel render failed: ${r.code ?? r.message ?? r.type}`);
   step("Poster", 95);
-  const ps = snapshotAt(d, [3], join(work, "poster-snap"), { timeout: 30000 });
+  const ps = await snapshotAt(d, [3], join(work, "poster-snap"), { timeout: 30000 });
   const pp = existsSync(join(work, "poster-snap")) ? readdirSync(join(work, "poster-snap")).find((f) => f.endsWith(".png")) : null;
   if (ps.exitCode === 0 && pp) encodePoster(join(work, "poster-snap", pp), join(out, "poster.webp"), { root });
   writeFileSync(join(out, "demo.json"), JSON.stringify({ id, at: new Date().toISOString(), commit: src?.commit ?? null }, null, 2) + "\n");
@@ -508,8 +508,8 @@ export function ruleText(root = APP_ROOT) {
   return `${header}\n${readText(join(src.root, "ANIMATION_GUIDE.md"))}`;
 }
 /** The model sheets of the project's characters (views and emotions, one still each through HyperFrames) in characters/sheets/, for
- *  Claude to check and the user to approve. The hf calls are passed in (the server's). Returns { characters: [{ id, name, views,
- *  emotions }], problems }. */
+ *  Claude to check and the user to approve. The hf calls are passed in (the server's: snapshotAtForeground, so its event loop stays
+ *  free; a CLI's sync snapshotAt works too). Returns { characters: [{ id, name, views, emotions }], problems }. */
 export async function characterSheets(projectDir, { root = APP_ROOT, finalize, snapshotAt, encodePoster = null, only = null } = {}) {
   const cast = readCast(projectDir);
   if (cast.problems.length || !cast.characters.length) return { characters: [], problems: cast.problems.length ? cast.problems : [`Write ${CAST_FILE} first`] };
@@ -525,7 +525,7 @@ export async function characterSheets(projectDir, { root = APP_ROOT, finalize, s
         await finalize(d, { googleFonts: false });
         const snapDir = join(work, c.id, `${scene}-snap`);
         rmSync(snapDir, { recursive: true, force: true });
-        const s = snapshotAt(d, [1.2], snapDir, { timeout: 60000 });
+        const s = await snapshotAt(d, [1.2], snapDir, { timeout: 60000 });
         const png = existsSync(snapDir) ? readdirSync(snapDir).find((f) => /^frame-.*\.png$/.test(f)) : null;
         if (s.exitCode !== 0 || !png) throw new Error(s.stderrTail.join(" ").slice(0, 300) || "no still");
         const name = `${c.id}-${scene}.png`;

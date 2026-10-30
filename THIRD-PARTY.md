@@ -80,9 +80,102 @@ film that uses them so it plays and renders offline. Each keeps its `LICENSE` fi
 | [Mixkit](https://mixkit.co/free-stock-music/) free stock music | [Mixkit Stock Music Free License](https://mixkit.co/license/#musicFree): royalty-free, attribution not required; online use only (web, social media, YouTube, podcasts, online ads); **not** for TV / radio broadcast, CD / DVD or games | Final Mix offers three tracks; downloaded only from `*.mixkit.co` into the project; credit and limits written to the film's `CREDITS.md` |
 | Freesound sounds through [Openverse](https://api.openverse.org/v1/audio/) | CC0 and CC BY only | Sound effects; each sound credited (title, author, page, licence, attribution line) in `.moworks/sfx.json` and `CREDITS.md` |
 | Sound effects bundled with HyperFrames' `media-use` skill | Pixabay Content License | Offline sound effects, credited to Pixabay |
+| Sound effects bundled with the app (`bundle/sfx`): Kenney, OpenGameArt.org CC0 sets, Wikimedia Commons | CC0 1.0 and public domain | Offline sound effects for every cue (`packages/sfx/library.mjs`); every source in "Sound effects (bundled)" below |
 | ElevenLabs, Fish Audio | each service's own terms | Voice-overs, with the user's own API key |
 
 No music library is bundled.
+
+## Sound effects (bundled)
+
+The offline sound-effect library in `bundle/sfx`: 250 sounds (231 one-shots and 19 ambience loops in 21 families), 7.1 MB, read by
+`packages/sfx/library.mjs`. **Adapted:** each sound was cut from its pack, silence trimmed, loudness-normalised (one-shots -16 LUFS mono, loops
+-28 LUFS stereo, true peak at most -1 dBTP) and re-encoded as Ogg Vorbis by `tools/make-sfx-library.mjs`. Only CC0 1.0 and public-domain sources:
+Kenney (7 packs, 92 sounds), OpenGameArt.org CC0 sets (52 pages, 136 sounds) and Wikimedia Commons (19 files, 22 sounds; public-domain
+recordings first published on pdsounds.org, and CC0 uploads). No credit is required; every sound carries one anyway (author, page, licence,
+original file, how it was made) in `bundle/sfx/catalog.json` and `bundle/sfx/CREDITS.md`. Each download is pinned by size and SHA-256 in
+`tools/sfx-library-packs.json` (read 30/10/2026). Not used: Pixabay (its own licence), Sonniss / GDC bundles (no redistribution), any CC BY-NC
+or ND sound; Freesound originals need a login (its CC0 / CC BY sounds stay the online search, through Openverse).
+
+| Source | Author | Page | Licence | Sounds: families |
+|---|---|---|---|---|
+| Kenney Casino Audio | Kenney (kenney.nl) | [kenney.nl/assets/casino-audio](https://kenney.nl/assets/casino-audio) | CC0 1.0 | 4: whoosh, paper |
+| Kenney Digital Audio | Kenney (kenney.nl) | [kenney.nl/assets/digital-audio](https://kenney.nl/assets/digital-audio) | CC0 1.0 | 10: pop, whoosh, electronic |
+| Kenney Impact Sounds | Kenney (kenney.nl) | [kenney.nl/assets/impact-sounds](https://kenney.nl/assets/impact-sounds) | CC0 1.0 | 26: impact, footstep, bell |
+| Kenney Interface Sounds | Kenney (kenney.nl) | [kenney.nl/assets/interface-sounds](https://kenney.nl/assets/interface-sounds) | CC0 1.0 | 23: pop, whoosh, switch, bell, click, electronic |
+| Kenney RPG Audio | Kenney (kenney.nl) | [kenney.nl/assets/rpg-audio](https://kenney.nl/assets/rpg-audio) | CC0 1.0 | 18: whoosh, footstep, cloth, paper, door, click |
+| Kenney Sci-fi Sounds | Kenney (kenney.nl) | [kenney.nl/assets/sci-fi-sounds](https://kenney.nl/assets/sci-fi-sounds) | CC0 1.0 | 9: whoosh, impact, door, mechanical, electronic |
+| Kenney UI Audio | Kenney (kenney.nl) | [kenney.nl/assets/ui-audio](https://kenney.nl/assets/ui-audio) | CC0 1.0 | 2: switch, click |
+| 10 Book Page Flips | StarNinjas | [opengameart.org/content/10-book-page-flips](https://opengameart.org/content/10-book-page-flips) | CC0 1.0 | 1: paper |
+| 100 CC0 metal and wood SFX | rubberduck | [opengameart.org/content/100-cc0-metal-and-wood-sfx](https://opengameart.org/content/100-cc0-metal-and-wood-sfx) | CC0 1.0 | 2: mechanical |
+| 100 CC0 SFX | rubberduck | [opengameart.org/content/100-cc0-sfx](https://opengameart.org/content/100-cc0-sfx) | CC0 1.0 | 10: pop, impact, paper, switch, bell |
+| 100 CC0 SFX #2 | rubberduck | [opengameart.org/content/100-cc0-sfx-2](https://opengameart.org/content/100-cc0-sfx-2) | CC0 1.0 | 9 (1 loop): whoosh, footstep, water, rain, mechanical, ambience |
+| 20 Rustles of dry leaves | qubodup | [opengameart.org/content/20-rustles-dry-leaves](https://opengameart.org/content/20-rustles-dry-leaves) | CC0 1.0 | 2: cloth |
+| 202 More Sound Effects | OwlishMedia | [opengameart.org/content/202-more-sound-effects](https://opengameart.org/content/202-more-sound-effects) | CC0 1.0 | 5: cloth, water, click |
+| 30 CC0 SFX loops | rubberduck | [opengameart.org/content/30-cc0-sfx-loops](https://opengameart.org/content/30-cc0-sfx-loops) | CC0 1.0 | 2: mechanical |
+| 40 CC0 water / splash / slime SFX | rubberduck | [opengameart.org/content/40-cc0-water-splash-slime-sfx](https://opengameart.org/content/40-cc0-water-splash-slime-sfx) | CC0 1.0 | 6: pop, water |
+| 42 Snow and Gravel Footsteps | Corsica_S (submitted by qubodup) | [opengameart.org/content/42-snow-and-gravel-footsteps](https://opengameart.org/content/42-snow-and-gravel-footsteps) | CC0 1.0 | 1: footstep |
+| 50 CC0 retro / synth SFX | rubberduck | [opengameart.org/content/50-cc0-retro-synth-sfx](https://opengameart.org/content/50-cc0-retro-synth-sfx) | CC0 1.0 | 4: electronic, magic |
+| 6 Short water splashes | ezwa (submitted by qubodup) | [opengameart.org/content/6-short-water-splashes](https://opengameart.org/content/6-short-water-splashes) | CC0 1.0 | 1: water |
+| 80 CC0 creature SFX | rubberduck | [opengameart.org/content/80-cc0-creature-sfx](https://opengameart.org/content/80-cc0-creature-sfx) | CC0 1.0 | 5: animal |
+| 80 CC0 RPG SFX | rubberduck | [opengameart.org/content/80-cc0-rpg-sfx](https://opengameart.org/content/80-cc0-rpg-sfx) | CC0 1.0 | 8: whoosh, impact, fire, magic |
+| AMB Morning Sounds (Perfect Loop) | Kresiek The Furry | [opengameart.org/content/amb-morning-sounds-perfect-loop](https://opengameart.org/content/amb-morning-sounds-perfect-loop) | CC0 1.0 | 1 (1 loop): ambience |
+| AMB Rain Loop 1 | Kresiek The Furry | [opengameart.org/content/amb-rain-loop-1](https://opengameart.org/content/amb-rain-loop-1) | CC0 1.0 | 1 (1 loop): rain |
+| Applause in a large hall or church | eXpl0it3r | [opengameart.org/content/applause-in-a-large-hall-or-church](https://opengameart.org/content/applause-in-a-large-hall-or-church) | CC0 1.0 | 1: crowd |
+| Beach Ocean Waves | jasinski (submitted by qubodup) | [opengameart.org/content/beach-ocean-waves](https://opengameart.org/content/beach-ocean-waves) | CC0 1.0 | 2: water |
+| Bell dings/chimes | PWL | [opengameart.org/content/bell-dingschimes](https://opengameart.org/content/bell-dingschimes) | CC0 1.0 | 2: bell |
+| boiling water loops | TinyWorlds | [opengameart.org/content/boiling-water-loops](https://opengameart.org/content/boiling-water-loops) | CC0 1.0 | 1: water |
+| Bubble Sound Effects | BMacZero | [opengameart.org/content/bubble-sound-effects](https://opengameart.org/content/bubble-sound-effects) | CC0 1.0 | 2: pop |
+| Cat Purr & Meow | Kerzoven | [opengameart.org/content/cat-purr-meow](https://opengameart.org/content/cat-purr-meow) | CC0 1.0 | 2: animal |
+| cicada sounds | syncopika | [opengameart.org/content/cicada-sounds](https://opengameart.org/content/cicada-sounds) | CC0 1.0 | 1 (1 loop): ambience |
+| Clock Wind Sounds | BMacZero | [opengameart.org/content/clock-wind-sounds](https://opengameart.org/content/clock-wind-sounds) | CC0 1.0 | 4: mechanical |
+| Correct Bell | Fupi | [opengameart.org/content/correct-bell](https://opengameart.org/content/correct-bell) | CC0 1.0 | 1: bell |
+| Crickets Ambient Noise - loopable | Wolfgang_ | [opengameart.org/content/crickets-ambient-noise-loopable](https://opengameart.org/content/crickets-ambient-noise-loopable) | CC0 1.0 | 1 (1 loop): ambience |
+| Crowd Shouting/Speaking Ambience | StarNinjas | [opengameart.org/content/crowd-shoutingspeaking-ambience](https://opengameart.org/content/crowd-shoutingspeaking-ambience) | CC0 1.0 | 1: crowd |
+| Cure Magic | Someoneman | [opengameart.org/content/cure-magic](https://opengameart.org/content/cure-magic) | CC0 1.0 | 3: magic |
+| Door Open, Door Close Set | qubodup | [opengameart.org/content/door-open-door-close-set](https://opengameart.org/content/door-open-door-close-set) | CC0 1.0 | 2: door |
+| Dripping water loop | Independent.nu (submitted by qubodup) | [opengameart.org/content/dripping-water-loop](https://opengameart.org/content/dripping-water-loop) | CC0 1.0 | 4 (1 loop): water, ambience |
+| Electronic device loop | qubodup | [opengameart.org/content/electronic-device-loop](https://opengameart.org/content/electronic-device-loop) | CC0 1.0 | 1: electronic |
+| Fire Crackling | AntumDeluge | [opengameart.org/content/fire-crackling](https://opengameart.org/content/fire-crackling) | CC0 1.0 | 1: fire |
+| Fireplace Sound loop | PagDev | [opengameart.org/content/fireplace-sound-loop](https://opengameart.org/content/fireplace-sound-loop) | CC0 1.0 | 1 (1 loop): fire |
+| Forest bird sounds | pauliuw | [opengameart.org/content/forest-bird-sounds](https://opengameart.org/content/forest-bird-sounds) | CC0 1.0 | 4 (1 loop): animal, ambience |
+| High traffic road sounds | IgnasD | [opengameart.org/content/high-traffic-road-sounds](https://opengameart.org/content/high-traffic-road-sounds) | CC0 1.0 | 1 (1 loop): ambience |
+| Horse Trotting | EZduzziteh | [opengameart.org/content/horse-trotting](https://opengameart.org/content/horse-trotting) | CC0 1.0 | 1: animal |
+| Keyboard Soundpack #1 [Typing and Single Keystrokes] | unicaegames | [opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes](https://opengameart.org/content/keyboard-soundpack-1-typing-and-single-keystrokes) | CC0 1.0 | 8: typing |
+| Machine shutting down | Cough-E | [opengameart.org/content/machine-shutting-down](https://opengameart.org/content/machine-shutting-down) | CC0 1.0 | 1: mechanical |
+| Magic Words + Healing Sound Effect | Spring Spring | [opengameart.org/content/magic-words-healing-sound-effect](https://opengameart.org/content/magic-words-healing-sound-effect) | CC0 1.0 | 1: magic |
+| Mild Wind Background Noise | Bashar3A | [opengameart.org/content/mild-wind-background-noise](https://opengameart.org/content/mild-wind-background-noise) | CC0 1.0 | 2 (1 loop): wind |
+| Opening and Closing a Map Sounds | Spring Spring | [opengameart.org/content/opening-and-closing-a-map-sounds](https://opengameart.org/content/opening-and-closing-a-map-sounds) | CC0 1.0 | 2: paper |
+| Power-Up Sound Effects | Spring Spring | [opengameart.org/content/power-up-sound-effects](https://opengameart.org/content/power-up-sound-effects) | CC0 1.0 | 1: electronic |
+| Rain (loopable) | Ylmir | [opengameart.org/content/rain-loopable](https://opengameart.org/content/rain-loopable) | CC0 1.0 | 1 (1 loop): rain |
+| Rain + Long Thunder | WuxiaScrub | [opengameart.org/content/rain-long-thunder](https://opengameart.org/content/rain-long-thunder) | CC0 1.0 | 1: rain |
+| SFX - Plug In, Plug Out | CleytonKauffman | [opengameart.org/content/sfx-plug-in-plug-out](https://opengameart.org/content/sfx-plug-in-plug-out) | CC0 1.0 | 2: switch |
+| Sheep Baa | AntumDeluge | [opengameart.org/content/sheep-baa](https://opengameart.org/content/sheep-baa) | CC0 1.0 | 1: animal |
+| Static | xhunterko | [opengameart.org/content/static](https://opengameart.org/content/static) | CC0 1.0 | 2: electronic |
+| Swishes Sound Pack | artisticdude | [opengameart.org/content/swishes-sound-pack](https://opengameart.org/content/swishes-sound-pack) | CC0 1.0 | 3: whoosh |
+| Tape Recorder Opening and Closing Sound Effects | Spring Spring | [opengameart.org/content/tape-recorder-opening-and-closing-sound-effects](https://opengameart.org/content/tape-recorder-opening-and-closing-sound-effects) | CC0 1.0 | 2: mechanical |
+| Ticking clock. | bart | [opengameart.org/content/ticking-clock](https://opengameart.org/content/ticking-clock) | CC0 1.0 | 1: click |
+| Typewriter sounds | Cassie-OrbitGames | [opengameart.org/content/typewriter-sounds](https://opengameart.org/content/typewriter-sounds) | CC0 1.0 | 3: typing |
+| Various Sound Effects | laleksic | [opengameart.org/content/various-sound-effects](https://opengameart.org/content/various-sound-effects) | CC0 1.0 | 10: paper, door, switch, water, fire, bell |
+| wind whoosh loop | SketchMan3 | [opengameart.org/content/wind-whoosh-loop](https://opengameart.org/content/wind-whoosh-loop) | CC0 1.0 | 1: wind |
+| 406243 stubb typewriter-ding-near-mono.wav | _stubb | [commons.wikimedia.org/wiki/File%3A406243_stubb_typewriter-ding-near-mono.wav](https://commons.wikimedia.org/wiki/File%3A406243_stubb_typewriter-ding-near-mono.wav) | CC0 1.0 | 1: typing |
+| Ambient classroom mono.ogg | rcrossley | [commons.wikimedia.org/wiki/File%3AAmbient_classroom_mono.ogg](https://commons.wikimedia.org/wiki/File%3AAmbient_classroom_mono.ogg) | Public domain (pdsounds.org) | 1 (1 loop): crowd |
+| Bell-ring.flac | qubodup | [commons.wikimedia.org/wiki/File%3ABell-ring.flac](https://commons.wikimedia.org/wiki/File%3ABell-ring.flac) | CC0 1.0 | 1: bell |
+| Bicycle-bell-1.wav | Soundscape_Leuphana | [commons.wikimedia.org/wiki/File%3ABicycle-bell-1.wav](https://commons.wikimedia.org/wiki/File%3ABicycle-bell-1.wav) | CC0 1.0 | 1: bell |
+| Church bells - Leverkusen, 2007.oga | natalie | [commons.wikimedia.org/wiki/File%3AChurch_bells_-_Leverkusen%2C_2007.oga](https://commons.wikimedia.org/wiki/File%3AChurch_bells_-_Leverkusen%2C_2007.oga) | Public domain (pdsounds.org) | 1: bell |
+| Cow in Antefasy.wav | Gasybeaugosse2020 | [commons.wikimedia.org/wiki/File%3ACow_in_Antefasy.wav](https://commons.wikimedia.org/wiki/File%3ACow_in_Antefasy.wav) | CC0 1.0 | 1: animal |
+| Food wrapper crumpling.ogg | stilgar | [commons.wikimedia.org/wiki/File%3AFood_wrapper_crumpling.ogg](https://commons.wikimedia.org/wiki/File%3AFood_wrapper_crumpling.ogg) | Public domain (pdsounds.org) | 2: paper |
+| Gull 1.ogg | avphillips | [commons.wikimedia.org/wiki/File%3AGull_1.ogg](https://commons.wikimedia.org/wiki/File%3AGull_1.ogg) | Public domain (pdsounds.org) | 1: animal |
+| Howling wind.ogg | Tvabutzku1234 | [commons.wikimedia.org/wiki/File%3AHowling_wind.ogg](https://commons.wikimedia.org/wiki/File%3AHowling_wind.ogg) | CC0 1.0 | 2 (1 loop): wind |
+| James River Rapids 2.ogg | Jarrod stanley | [commons.wikimedia.org/wiki/File%3AJames_River_Rapids_2.ogg](https://commons.wikimedia.org/wiki/File%3AJames_River_Rapids_2.ogg) | CC0 1.0 | 1 (1 loop): ambience |
+| Medium rooster crowing.ogg | alys | [commons.wikimedia.org/wiki/File%3AMedium_rooster_crowing.ogg](https://commons.wikimedia.org/wiki/File%3AMedium_rooster_crowing.ogg) | Public domain (pdsounds.org) | 1: animal |
+| Ocean Waves on a Tropical Beach.ogg | Jarrod stanley | [commons.wikimedia.org/wiki/File%3AOcean_Waves_on_a_Tropical_Beach.ogg](https://commons.wikimedia.org/wiki/File%3AOcean_Waves_on_a_Tropical_Beach.ogg) | CC0 1.0 | 1 (1 loop): ambience |
+| Pouring water bottles.ogg | stephan | [commons.wikimedia.org/wiki/File%3APouring_water_bottles.ogg](https://commons.wikimedia.org/wiki/File%3APouring_water_bottles.ogg) | Public domain (pdsounds.org) | 1: water |
+| Pouring water in mug in sink.ogg | earthcalling | [commons.wikimedia.org/wiki/File%3APouring_water_in_mug_in_sink.ogg](https://commons.wikimedia.org/wiki/File%3APouring_water_in_mug_in_sink.ogg) | Public domain (pdsounds.org) | 1: water |
+| Restaurant ambience.ogg | stephan | [commons.wikimedia.org/wiki/File%3ARestaurant_ambience.ogg](https://commons.wikimedia.org/wiki/File%3ARestaurant_ambience.ogg) | Public domain (pdsounds.org) | 1 (1 loop): crowd |
+| Shopping mall less crowded.ogg | natalie | [commons.wikimedia.org/wiki/File%3AShopping_mall_less_crowded.ogg](https://commons.wikimedia.org/wiki/File%3AShopping_mall_less_crowded.ogg) | Public domain (pdsounds.org) | 1 (1 loop): crowd |
+| Spring Peeper Frogs (Pseudacris crucifer) singing on night of April 21 of 2019 in North Pittston PA.ogg | JohnDziak | [commons.wikimedia.org/wiki/File%3ASpring_Peeper_Frogs_(Pseudacris_crucifer)_sing](https://commons.wikimedia.org/wiki/File%3ASpring_Peeper_Frogs_(Pseudacris_crucifer)_singing_on_night_of_April_21_of_2019_in_North_Pittston_PA.ogg) | CC0 1.0 | 1 (1 loop): ambience |
+| Star-LC-10-printer-01.ogg | Priwo | [commons.wikimedia.org/wiki/File%3AStar-LC-10-printer-01.ogg](https://commons.wikimedia.org/wiki/File%3AStar-LC-10-printer-01.ogg) | Public domain (author, PD-self) | 2: mechanical |
+| Sunday in the city street noise1.ogg | cori | [commons.wikimedia.org/wiki/File%3ASunday_in_the_city_street_noise1.ogg](https://commons.wikimedia.org/wiki/File%3ASunday_in_the_city_street_noise1.ogg) | Public domain (pdsounds.org) | 1 (1 loop): ambience |
 
 ## Speech and Python components
 

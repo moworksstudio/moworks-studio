@@ -1,7 +1,7 @@
 ---
 name: moworks-studio
-description: Moworks Studio's house rules for every film style, read first in every step - the five rules of every film (collisions, readable text, determinism, truth, logos), the guideline or Brand Kit on every piece of text, the client's logo used as given, Vietnamese text, hand-drawn styles under a Brand Kit, character acting, text over a canvas film, and how every film ends. Adds only what HyperFrames and the style leave open.
-version: 1.3.2
+description: Moworks Studio's house rules for every film style, read first in every step - the five rules of every film (collisions, readable text, determinism, truth, logos), the guideline or Brand Kit on every piece of text, the client's logo used as given, Vietnamese text, hand-drawn styles under a Brand Kit, character acting, a sound on every action, text over a canvas film, and how every film ends. Adds only what HyperFrames and the style leave open.
+version: 1.3.7
 derived-from: Moworks Motion kit 2.0.4 (Moworks; commit 30b7dcb65808b2a5299ad6a3357280a12773395f) - engine/skill/moworks-motion/SKILL.md step 3 ("Brand") and "Rules in every film" 1-5, workflow/characters.md sections 2, 3 ("Faces", "Hands") and 6 ("Collisions and physics"), brands/other.md; written from the idea for Moworks Studio. HyperFrames (Apache-2.0, 0.8.214 at 4719543) read as shipped where cited. Owner rules 24/10/2026 (#345, #346); the ending, owner 29/10/2026.
 source: https://github.com/moworksstudio/moworks-motion-dev/blob/30b7dcb65808b2a5299ad6a3357280a12773395f/engine/skill/moworks-motion/SKILL.md
 ---
@@ -50,7 +50,11 @@ This is the one rule for every conflict and every gap, in every step and every s
 - **What counts:** the brief against the film style's own design (colours, fonts, look: an author's style) or its limits (what the style
   cannot draw, a size or rate it does not make); the brief against a New project field (format, rate, length, the Brand Kit chosen
   there); a brand guideline in the files against the chosen Brand Kit; the brief or the chat against the
-  guideline; a file, link, logo, voice or text the film needs and nobody gave; a voice-over longer than the film's length set in New
+  guideline; a file, link, logo, voice or text the film needs and nobody gave; a script the owner wrote for the voice-over (the brief's
+  "lời đọc" or "kịch bản", or a brief that is the script) that you would shorten, split, reword, cut lines from or move lines of to the
+  words on screen: it is read word for word unless the owner chooses otherwise, so ask with the whole script as one choice and your
+  version (its changed lines named) as another; never call a changed script "verbatim" (a 12-line script went to the voice as its first
+  9 lines, "the rest told by typing", written down as "the brief's script verbatim"); a voice-over longer than the film's length set in New
   project (a 45.6 s voice made a 40 s film 47.5 s, said only after): offer a longer film (the voice plus the end hold), a shorter
   script with the voice made again, a faster voice (the Voice screen's speed), and tighter pauses only when they add up to the difference;
   never lengthen the film, drop the end hold or cut the voice on your own; a voice-over well short of that length (an 80 s voice on a
@@ -97,6 +101,11 @@ This is the one rule for every conflict and every gap, in every step and every s
 
 - Every diacritic visible on every frame: leave room above and below in masks, clips and line-heights; a font that draws every
   Vietnamese letter (the app checks the glyphs).
+- Vietnamese is always written with its marks, in every style: an ASCII, CRT, monospace, pixel, all-caps or "machine" look is never a
+  reason to drop them (a CRT film's status strips read "NHAT KY · TRAM HON GIO" for "NHẬT KÝ · TRẠM HÒN GIÓ"). A band, strip, highlight,
+  pill or inverted cell behind Vietnamese text is tall enough for the marks above and below the letters (about 1.4 × the font size for
+  capitals with stacked marks): the marks of dark text on a light band that fall outside it are drawn in the ground's own colour and
+  vanish. When the style's face or grid cannot hold them, that is a conflict (§2b), never a reason to strip them.
 - On-screen text and voice in the brief's language; the chat in the owner's.
 
 ## 5. Characters: acting (any character engine: anidoodle's human engine, the Brush cartoon kit, drawn HTML people)
@@ -129,7 +138,8 @@ applied to motion graphics, line art, ink or paper styles. With the board stills
 5. **On the word:** an action that illustrates a word lands within about 3 frames of it; a realisation holds about 2 frames before the
    reaction; a landing overshoots and settles (§5); nothing jumps between two frames unless it is meant to (a cut, a flash, a "paste").
 6. **Sounds named:** HyperFrames' `- sound:` line describes a frame's sound in words; the app places effects only from short names. A
-   frame whose sound has effects (a bell, water, a click) also gets `- sfx:` with short English names (`- sfx: bell, water drip`).
+   frame whose sound has effects (a bell, water, a click) also gets `- sfx:` with short English names (`- sfx: bell, water drip`), and
+   a frame with a place gets `- ambience:` (§7b: a sound on every action).
 
 The Review scores these under its own criteria (moworks-qc: Composition, Motion, Sync); moworks-alive keeps the still-stretch numbers.
 
@@ -153,6 +163,35 @@ Only when the film has a voice-over with its reviewed transcript (transcript.jso
   `SKILL.md`); never stop the music at a twist on your own.
 - **The voice stays on top:** the app's voice check lists every spoken word where the effects or the music come within 3 dB of the voice
   (a warning, never a block); fix each by moving the effect into the pause after the word or lowering it. The whole mix stays at -16 LUFS.
+
+### 7b. A sound on every action (owner 30/10)
+
+In every style, every film (the owner: "every film in every style must have full sound effects on every action in the film, for a lively
+mood"):
+
+- **Every visible action gets a sound:** an entrance, an exit, a landing or an impact, a step, an open or a close, a pour, a page, a press,
+  a glow or an appearance, a transition. **Every scene that has a place gets a quiet ambience bed:** a room, a street, rain, the sea, a
+  forest, the night.
+- **The only exceptions:** the brief or the owner asks for silence or for fewer sounds; the film style's own sound section says otherwise
+  (it wins: an ASCII / CRT style's relays, keys and printer, never a whoosh); or the action is too small to hear (a blink, a breath, a sway).
+- **In the style's material:** paper and wood for crafted styles (paper, cut-out, clay, stop-motion), synth and electronic for CRT, terminal
+  and tech, soft and organic for gouache and watercolour, cartoon for rubber-hose. Name the sounds that way ("paper slide", "wood thud",
+  "synth blip", "soft pop", "boing").
+- **Name what is heard: the thing and its sound** ("thread rustle", "needle through cloth", "wooden box lid", "spool rattle"), never a
+  motion verb alone ("pull", "park", "roll", "close"): the app matches the thing first, and a bare verb can match another thing's sound
+  (Test 26: "thread pull" was a plug pulled out). A cue is one sound at its moment; a place's sound is its `- ambience:` line, never a cue.
+- **One sound at most three times a film:** past that it sounds like a loop. Give repeated actions different names of the same thing
+  ("thread pull", "thread tug", "thread knot"); the app varies the repeats over its files and leaves the extra ones out.
+- **Storyboard:** each frame names the sound of each of its actions in `- sfx:` (short English names, comma-separated, each at its moment:
+  `- sfx: pop, door open@1.2, footstep wood@2`) and its place in `- ambience:` (`- ambience: rain`, `city street`, `room tone`, `forest
+  night`; `none` for a shot with no place). Under a voice-over §7 holds: an effect goes just after the word, never on it.
+- **Motion Plan:** every motion row carries `"sound"`: a short name for what the row does on screen, or `"none"`.
+- **The app does the rest at the Final Mix:** it gives every action the names leave out a sound of its own, varies the repeats, keeps the mix
+  lively and never cluttered (about three sounds a second at most, never two of one kind closer than 0.2 s), sets each kind of sound under
+  the music and the voice, crossfades the ambience between places and fades it out with the film's ending (§9). Tech checks warn (G-SFX)
+  where a visible motion of the plan has no sound.
+- **The owner's word holds:** when the owner asks for no whoosh, fewer or more sounds, no ambience or silence, call the app's `sfx_prefs`
+  tool; the app keeps the choice on every placement. Never only edit the `- sfx:` lines for that: the app would put its own sounds back.
 
 ## 8. Text over a canvas film (owner 27/10)
 
@@ -193,9 +232,16 @@ ends with a short fade under the end card); this adds the fade:
   limit) is the fade inside the set length: the Motion Plan's `ending.inside` is `true` (`false` otherwise, the default), and the whole
   film is the set length.
 - **A style whose author gives its own ending** (Lemo's end cards, What If's last beat, a drawing that holds as its own end card): keep
-  that ending as shipped and add nothing after it; the app fades the music within that ending.
+  that ending as shipped and add nothing after it; the app fades the music within that ending. **Name it and play it:** the Motion Plan's
+  `ending.author` says what the author's ending is, concrete (the screen powers down to a dot, the cursor stops and the screen holds, the
+  end card lands and holds 2-3 s), and the last shot plays it (its row marked `"ending": true`). A plan that says `author` but names no
+  ending or does not play it in the last shot, or a style whose author has no ending of its own (General, HyperFrames' own styles), gets
+  the house fade: the picture and the music fade together, after the set length. A picture kept lit and moving to its last frame, then
+  cut, is no author's ending (T24-12).
 - **The fade's length** (the app's one rule, `hf-edit/ending.mjs`), from the content: 12 % of it, at least 1.5 s, and 3-5 s for 30 s or
   more (10 s: 1.5 s, 20 s: 2.4 s, 30 s: 3.6 s, 60 s and longer: 5 s); after an end card half of that, at least 1 s.
-- The Motion Plan says it: its `ending` (`fade`, `endCard` or `author`, the fade's seconds, `inside`) and the last shot's fade row. The app
-  fits the music to the whole length, sets its fade to the same seconds, and Tech checks flag a film whose last half second is a hard cut
-  (the picture still full on its last frame), except in a style with its author's own ending.
+- The Motion Plan says it: its `ending` (`fade`, `endCard` or `author`, the fade's seconds, `inside`, and for `author` the ending's
+  words in `author`) and the last shot's ending row (`"ending": true`: the fade, or the author's ending). The app fits the music to the
+  whole length, sets its fade to the same seconds, and Tech checks flag a film whose last half second is a hard cut (the picture still
+  full and lit on its last frame), in every style, naming the time; with the author's own ending named and played, a dark screen, a dot
+  or a held end card ends the film too.

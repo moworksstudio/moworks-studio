@@ -3,7 +3,8 @@
 // with its own ending keeps it as shipped and the app only fades the music. One length for the plan, the picture and the music.
 // The fade comes AFTER the length the owner set (the content: 60 s → a 65 s file, 10 s → 11.5 s; owner 29/10: "the film would be squeezed"),
 // and inside it only when the brief asks for exactly or at most that length (MOTION-PLAN.json's ending.inside) or the style's author gives
-// its own ending (inside that ending, nothing added).
+// its own ending (inside that ending, nothing added). An author's ending stands only when the plan names it and its last shot plays it
+// (resolveEnding); one the plan only claims is the house fade (T24-12: the picture stayed lit to its last frame and cut, the music faded).
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { styleTraits } from "../style-catalog/traits.mjs";
@@ -32,18 +33,60 @@ export function fadeOfTotal(total, { inside = false, endCard = false } = {}) {
   return endFade(hi, { endCard });
 }
 
-/** The plan's ending (MOTION-PLAN.json), {} when there is none. */
-export function planEnding(dir) {
-  try { return JSON.parse(readFileSync(join(dir, "MOTION-PLAN.json"), "utf8"))?.ending ?? {}; } catch { return {}; }
+// what is no ending of the author's: nothing, a placeholder ("none", "n/a", "<the author's ending…>"), or words that deny one ("no fade",
+// "không mờ dần": the T24-12 plan kept the picture lit and alive to the end)
+const NO_ENDING = /^(?:none|no|nothing|n\/?a|null|undefined|tbd|todo|-+|—|…|\.{3}|không(?: có)?|<[^>]*>)$/i;
+const DENIES = /\b(?:no|not|without|never)\s+(?:a\s+|any\s+)?(?:fade|fading|ending)\b|(?:^|\s)không\s+(?:có\s+)?(?:mờ|fade|tắt|kết)/i;
+
+/** The author's ending the plan names (ending.author: the screen powering down to a dot, the cursor stopping, the end card landing and
+ *  holding), or null when it names none. */
+export function authorEnding(text) {
+  const s = typeof text === "string" ? text.trim() : "";
+  return s.length >= 3 && !NO_ENDING.test(s) && !DENIES.test(s) ? s.slice(0, 300) : null;
 }
 
-/** The film's lengths from New project's length (meta.targetDurationSec, the content) and the plan's ending: { content, fade, total, inside,
- *  own }. total = content + fade, or the content itself when the fade is inside it (ending.inside) or the style's author ends the film
- *  (own). Every step that times or shows the film's whole length (the plan, the storyboard, the music, the render, Tech checks) uses total. */
+/** Does the plan's last shot play the ending: one of its rows marked "ending": true. */
+export function lastShotEnds(shots) {
+  const last = (Array.isArray(shots) ? shots : []).filter((s) => Number.isFinite(Number(s?.shot))).sort((a, b) => Number(a.shot) - Number(b.shot)).at(-1);
+  return (last?.motions ?? []).some((m) => m?.ending === true);
+}
+
+/** The ending the film gets, from its plan (MOTION-PLAN.json as written) and whether the style's author has an ending of its own
+ *  (style-catalog traits: ownEnding): the plan's `ending`, {} with none. "author" stands only when the style has its own ending, the plan
+ *  names it (ending.author) and the last shot plays it (a row with "ending": true); otherwise it is the house "fade" (the picture and the
+ *  music fade together after the set length, over endFade), with `asked: "author"` and `why` ("style" | "unnamed" | "lastShot"). */
+export function resolveEnding(plan, { ownEnding = false } = {}) {
+  const e = plan?.ending;
+  if (!e || !ENDINGS.includes(e.kind)) return {};
+  if (e.kind !== "author") return e;
+  const author = authorEnding(e.author);
+  if (ownEnding && author && lastShotEnds(plan.shots)) return { ...e, author };
+  return { kind: "fade", inside: false, asked: "author", why: !ownEnding ? "style" : !author ? "unnamed" : "lastShot" };
+}
+
+/** The plan's ending as the app applies it (resolveEnding), {} when there is none. */
+export function planEnding(dir, { ownEnding = false } = {}) {
+  let plan = null;
+  try { plan = JSON.parse(readFileSync(join(dir, "MOTION-PLAN.json"), "utf8")); } catch { return {}; }
+  return resolveEnding(plan, { ownEnding });
+}
+
+/** How the film ends: the plan's ending as the app applies it, with { own, inside }: own when the author's ending stands (before the plan
+ *  says how the film ends, when the style's author has one), inside when nothing is added after the set length. */
+export function filmEnding(meta, { dir = null, root } = {}) {
+  const ownEnding = styleTraits(meta?.style?.id, root).ownEnding;
+  const e = dir ? planEnding(dir, { ownEnding }) : {};
+  const own = e.kind ? e.kind === "author" : ownEnding;
+  return { ...e, own, inside: own || e.inside === true };
+}
+
+/** The film's lengths from New project's length (meta.targetDurationSec, the content) and how it ends (filmEnding): { content, fade, total,
+ *  inside, own } (and `asked`, `why` when the plan's author's ending did not stand). total = content + fade, or the content itself when the
+ *  fade is inside it (ending.inside) or the style's author ends the film (own). Every step that times or shows the film's whole length (the
+ *  plan, the storyboard, the music, the render, Tech checks) uses total. */
 export function filmLength(meta, { dir = null, root } = {}) {
   const content = Number(meta?.targetDurationSec) || null;
-  const e = dir ? planEnding(dir) : {};
-  const own = styleTraits(meta?.style?.id, root).ownEnding || e.kind === "author", inside = own || e.inside === true;
+  const e = filmEnding(meta, { dir, root });
   const fade = content ? endFade(content, { endCard: e.kind === "endCard" }) : 0;
-  return { content, fade, total: content ? r3(inside ? content : content + fade) : null, inside, own };
+  return { content, fade, total: content ? r3(e.inside ? content : content + fade) : null, inside: e.inside, own: e.own, ...(e.asked ? { asked: e.asked, why: e.why } : {}) };
 }

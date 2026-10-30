@@ -264,7 +264,8 @@ function toHex(c) {
 }
 
 /** A code film's smooth preview (GET /preview-proxy): the app makes it by itself once the film is done and again when it goes
- *  stale (no button); read again every 3 s while it is made, else every 20 s. null for a film that is not a code film. */
+ *  stale; read again every 3 s while it is made, else every 20 s. `update()`: the user's Update when it is out of date and nothing makes
+ *  it (POST /preview-proxy). null for a film that is not a code film. */
 function useProxy(projectId) {
   const [view, setView] = useState(null);
   const [n, setN] = useState(0);
@@ -273,11 +274,38 @@ function useProxy(projectId) {
     get(`/api/projects/${projectId}/preview-proxy`).then((v) => alive && setView(v)).catch(() => {});
     return () => { alive = false; };
   }, [projectId, n]);
-  const making = view?.status === "rendering";
+  const making = view?.status === "rendering" || !!view?.job;
   useEffect(() => { if (!view?.mode) return undefined; const h = setTimeout(() => setN((x) => x + 1), making ? 3000 : 20000); return () => clearTimeout(h); }, [view, making]);
+  const update = useCallback(() => post(`/api/projects/${projectId}/preview-proxy`).then(setView), [projectId]);
   // every film that has a page: its full-quality MP4 plays when it is fresh (the server's status: picture and sound as the
   // film is now); a stale one is never played
-  return view?.mode ? view : null;
+  return useMemo(() => (view?.mode ? { ...view, update } : null), [view, update]);
+}
+
+/** The smooth preview out of date with nothing making it (a change while it rendered, a render that failed, the app started again):
+ *  said with its Update, never "Updating…" with no job behind it (T25-3: stale, no job, "Updating…" until the Render). */
+export function UpdateProxy({ proxy, className = "btn ghost sm pv-lb pv-smooth", label = "Out of date · Update" }) {
+  const t = useT();
+  const toast = useToast();
+  const [busy, setBusy] = useState(false);
+  const go = async () => { setBusy(true); try { await proxy.update(); } catch (e) { toast(e.message, "error"); } finally { setBusy(false); } };
+  return <button type="button" className={className} disabled={busy} onClick={go} title={t("The film changed since its smooth preview: it plays live. Make the smooth preview again.")}>
+    {busy ? <Loader2 size={14} className="spin" /> : <RotateCcw size={14} />}<span className="lbl">{t(label)}</span></button>;
+}
+
+/** The toolbar's word on the smooth preview: Smooth when it is the film's now; Updating while a job makes the new one; Out of date ·
+ *  Update when nothing does. */
+export function SmoothLabel({ proxy }) {
+  const t = useT();
+  if (proxy.status === "fresh") return <span className="pv-lb pv-smooth on" title={t("While the film plays you see its smooth preview; paused, the film itself")}><Sparkles size={14} /><span className="lbl">{t("Smooth")}</span></span>;
+  if (proxy.job && (proxy.status === "stale" || proxy.url))
+    return <span className="pv-lb pv-smooth" role="status" title={t("The film changed since its smooth preview: it plays live until the new one is ready")}><Loader2 size={14} className="spin" />
+      <span className="lbl">{proxy.job.stage === "waiting" ? t("Smooth preview waits for {title}", { title: proxy.job.waitingFor ?? "" })
+        : proxy.job.progress != null ? t("Updating {n}%", { n: proxy.job.progress }) : t("Updating…")}</span></span>;
+  if (proxy.job) return <span className="pv-lb pv-smooth" role="status" title={t("The app is making a smooth preview of this film: it plays live meanwhile")}><Loader2 size={14} className="spin" /><span className="lbl">{proxy.job.stage === "waiting" ? t("Smooth preview waits for {title}", { title: proxy.job.waitingFor ?? "" })
+    : proxy.job.progress != null ? t("Smooth preview {n}%", { n: proxy.job.progress }) : t("Smooth preview…")}</span></span>;
+  if (proxy.status === "stale" && proxy.update) return <UpdateProxy proxy={proxy} />;
+  return null;
 }
 
 /** The stage of a film that cannot play live: the app's render of it, or, until it exists, what the app is doing about it. */
@@ -294,7 +322,7 @@ export function VideoStage({ pv }) {
     {!proxy?.url && <div className="pv-wait pv-render" role="status">{job ? <Loader2 size={18} className="spin" /> : null}<span>{line}</span>
       {job?.progress != null && <span className="pv-prog" aria-hidden="true"><i style={{ transform: `scaleX(${job.progress / 100})` }} /></span>}</div>}
     {proxy?.url && job && <div className="pv-update" role="status"><Loader2 size={12} className="spin" />{t("Updating the preview")}{job.progress != null ? ` · ${job.progress}%` : ""}</div>}
-    {proxy?.url && !job && proxy.status === "stale" && <div className="pv-update old" role="status">{t("Older version: the new one renders once Claude's change is done")}</div>}
+    {proxy?.url && !job && proxy.status === "stale" && <div className="pv-update old" role="status">{t("Older version")}{proxy.update && <UpdateProxy proxy={proxy} className="btn ghost sm" label="Update" />}</div>}
   </>;
 }
 
@@ -409,15 +437,7 @@ export default function Player({ projectId, pv, shots, shot, onShot, locked, ran
         { label: t("Full screen"), icon: <Maximize size={14} />, onSelect: full },
       ]} />}
       <button className={"btn ghost sm pv-lb" + (loop ? " on" : "")} aria-pressed={loop} onClick={() => setLoop(!loop)} title={range ? t("Loop the chosen part") : t("Loop the film")}><Repeat size={14} /><span className="lbl">{t("Loop")}</span></button>
-      {proxy && !videoOnly && (proxy.status === "fresh"
-        ? <span className="pv-lb pv-smooth on" title={t("While the film plays you see its smooth preview; paused, the film itself")}><Sparkles size={14} /><span className="lbl">{t("Smooth")}</span></span>
-        : proxy.status === "stale" || (proxy.status === "rendering" && proxy.url)
-          ? <span className="pv-lb pv-smooth" role="status" title={t("The film changed since its smooth preview: it plays live until the new one is ready")}>{proxy.job ? <Loader2 size={14} className="spin" /> : <Sparkles size={14} />}
-            <span className="lbl">{proxy.job?.progress != null ? t("Updating {n}%", { n: proxy.job.progress }) : t("Updating…")}</span></span>
-        : proxy.status === "rendering"
-          ? <span className="pv-lb pv-smooth" role="status" title={t("The app is making a smooth preview of this film: it plays live meanwhile")}><Loader2 size={14} className="spin" /><span className="lbl">{proxy.job?.stage === "waiting" ? t("Smooth preview waits for {title}", { title: proxy.job.waitingFor ?? "" })
-              : proxy.job?.progress != null ? t("Smooth preview {n}%", { n: proxy.job.progress }) : t("Smooth preview…")}</span></span>
-          : null)}
+      {proxy && !videoOnly && <SmoothLabel proxy={proxy} />}
       {!videoOnly && <Menu label={t("Preview quality")} trigger={<span className="pv-lb" title={t("Preview quality: the film itself always renders at full quality")}>
         <span className="lbl">{t(QUALITY[quality] ?? "Full")}{quality === "auto" && state.quality?.level === "auto" && state.quality.scale < 1 ? ` · ${t(QUALITY[SCALE_LEVEL[state.quality.scale]])}` : ""}</span><ChevronDown size={12} /></span>}
         items={Object.entries(QUALITY).map(([k, l]) => ({ label: `${quality === k ? "✓ " : ""}${t(l)}`, title: k === "auto" ? t("Lowers the preview only while the film plays and cannot keep its rate; Full again on pause") : undefined, onSelect: () => setQuality(k) }))} />}

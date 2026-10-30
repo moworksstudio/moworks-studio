@@ -89,8 +89,9 @@ export function fromEngine(dir, { audio, result }) {
   return data;
 }
 
-/** Save the user's reviewed segments; writes HF's transcript.json through HF. Returns { transcript, hf }. */
-export function save(dir, segments, { workDir }) {
+/** Save the user's reviewed segments; writes HF's transcript.json through HF (asynchronously: the server's event loop stays free).
+ *  Resolves { transcript, hf }. */
+export async function save(dir, segments, { workDir }) {
   const cur = read(dir);
   if (!cur) throw Object.assign(new Error("There is no transcript to save yet"), { code: "INVALID" });
   if (!Array.isArray(segments) || !segments.length) throw Object.assign(new Error("The transcript is empty"), { code: "INVALID" });
@@ -105,7 +106,7 @@ export function save(dir, segments, { workDir }) {
   mkdirSync(workDir, { recursive: true });
   const wf = join(workDir, "transcript-words.json");
   writeFileSync(wf, JSON.stringify(words));
-  const hf = importTranscript(dir, wf);
+  const hf = await importTranscript(dir, wf);
   if (!hf.ok) throw Object.assign(new Error(`HyperFrames could not import the transcript (exit ${hf.exitCode})${hf.stderrTail.length ? `: ${hf.stderrTail.slice(-1)[0]}` : ""}`), { code: "HF_IMPORT" });
   const data = { ...cur, status: "saved", segments: clean, savedAt: new Date().toISOString(), hfTranscript: { file: "transcript.json", words: hf.words, hfVersion: hf.hfVersion } };
   write(dir, data);

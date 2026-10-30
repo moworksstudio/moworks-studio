@@ -1,7 +1,9 @@
 // Runs the pinned HyperFrames CLI's QA commands (check / inspect / validate) with --json and returns the parsed result.
 // The CLI is called as `node <cli entry>` with the opt-out environment (no shell, no telemetry, no update check).
-import { spawn, spawnSync } from "node:child_process";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+// The sync forms (runHfJson, snapshot, snapshotAt) are for the CLI tools and the gates' own child process: the app's server uses the
+// *Async ones, since a sync call holds its event loop (T27-3: every request took 20-60 s while a film's character sheets were drawn).
+import { execFile, spawn, spawnSync } from "node:child_process";
+import { copyFileSync, existsSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { constants, setPriority } from "node:os";
 import { resolveRuntime } from "../version-manager/index.mjs";
@@ -16,6 +18,14 @@ export function cliEntry(dir) {
   const entry = join(dir, "node_modules", "hyperframes", bin);
   if (!existsSync(entry)) throw new Error(`hyperframes CLI entry not found: ${entry}`);
   return entry;
+}
+
+/** `hyperframes <args>` without holding the caller's event loop, answered as spawnSync answers: { status, stdout, stderr, hfVersion }
+ *  (status null when it was stopped at `timeoutMs`; the CLI alone is stopped then, as spawnSync's timeout did). */
+export function runHf(args, { version = null, timeoutMs = 300000, maxBuffer = 1024 * 1024 } = {}) {
+  const rt = resolveRuntime(version);
+  return new Promise((ok) => execFile(process.execPath, [cliEntry(rt.dir), ...args], { env: { ...rt.env, NO_COLOR: "1" }, encoding: "utf8", timeout: timeoutMs, windowsHide: true, maxBuffer },
+    (e, stdout, stderr) => ok({ status: e ? (Number.isInteger(e.code) ? e.code : null) : 0, stdout: stdout ?? "", stderr: stderr ?? "", hfVersion: rt.version })));
 }
 
 export function runHfJson(command, projectDir, extraArgs = [], { version = null, timeoutMs = 300000 } = {}) {
@@ -72,18 +82,22 @@ export async function againIfBusy(run, empty, { pauseMs = 3000, quickMs = STILL_
 /** snapshotAt without blocking the caller's event loop (the app's server stays responsive while HF takes its stills). `env` adds to the
  *  runtime's (e.g. PRODUCER_BROWSER_GPU_MODE for the GPU test frame); the result's `stderr` is the last 20000 characters. `idleMs`: the
  *  run ends when no new still came into outDir for that long (stuck runs held a QC round 15 min, each to the 5 min limit); the
- *  stills taken so far stay, and the result says `idle`. */
-export function snapshotAtAsync(projectDir, times, outDir, { version = null, signal = null, env = null, timeout = READY_TIMEOUT_MS, idleMs = null } = {}) {
+ *  stills taken so far stay, and the result says `idle`. `belowNormal: false`: at normal priority, as snapshotAt ran (stills someone waits
+ *  for, such as a character's model sheets). */
+export function snapshotAtAsync(projectDir, times, outDir, { version = null, signal = null, env = null, timeout = READY_TIMEOUT_MS, idleMs = null, belowNormal = true, timeoutMs = 300000 } = {}) {
   const rt = resolveRuntime(version);
   return new Promise((ok) => {
-    const c = low(spawn(process.execPath, [cliEntry(rt.dir), "snapshot", resolve(projectDir), "--at", times.join(","), "--no-end", "--describe", "false",
-      "--output", resolve(outDir), ...(timeout ? ["--timeout", String(timeout)] : [])], { env: { ...rt.env, ...env, NO_COLOR: "1" }, windowsHide: true }));
+    const c = spawn(process.execPath, [cliEntry(rt.dir), "snapshot", resolve(projectDir), "--at", times.join(","), "--no-end", "--describe", "false",
+      "--output", resolve(outDir), ...(timeout ? ["--timeout", String(timeout)] : [])], { env: { ...rt.env, ...env, NO_COLOR: "1" }, windowsHide: true });
+    if (belowNormal) low(c);
     let err = "";
     c.stderr.on("data", (d) => { err = (err + d).slice(-20000); });
     c.stdout.resume();
     // the whole tree (the CLI and its headless Chrome) ends on a timeout or when the app stops (nothing is left running)
     const kill = () => spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true });
-    const t = setTimeout(kill, 300000);
+    // the result says `timedOut` when the run was stopped at its limit (a killed tree exits 1 on Windows, not null)
+    let timedOut = false;
+    const t = setTimeout(() => { timedOut = true; kill(); }, timeoutMs);
     let seen = -1, since = Date.now(), idle = false;
     const watch = idleMs ? setInterval(() => {
       let n = 0;
@@ -93,28 +107,71 @@ export function snapshotAtAsync(projectDir, times, outDir, { version = null, sig
     signal?.addEventListener("abort", kill, { once: true });
     c.on("close", (code) => {
       clearTimeout(t); if (watch) clearInterval(watch); signal?.removeEventListener("abort", kill);
-      ok({ exitCode: code, stderrTail: err.split(/\r?\n/).slice(-5), stderr: err, ...(idle ? { idle: true } : {}) });
+      ok({ exitCode: code, stderrTail: err.split(/\r?\n/).slice(-5), stderr: err, ...(idle ? { idle: true } : {}), ...(timedOut ? { timedOut: true } : {}) });
     });
   });
 }
 
-/** runHfJson without blocking the caller's event loop (a long `check` while the server keeps answering). */
-export function runHfJsonAsync(command, projectDir, extraArgs = [], { version = null, timeoutMs = 600000, signal = null } = {}) {
+// ---- stills on a busy computer (T25: the Storyboard's board_stills hung about 11.5 min, twice, and came back empty; T26-5: the Review's
+// first qc_sheets ran 11.5 min and gave no picture, and the round went on as if it had)
+/** How long one still run may take before it is stopped: 2 min for HF to start its browser and load the film, and 10 s for each
+ *  still asked, at most 15 min (it was 5 min for any number of stills). */
+export const stillsTimeoutMs = (count) => Math.min(15 * 60000, 2 * 60000 + Math.max(1, Number(count) || 1) * 10000);
+/** What the user and Claude read when the stills were stopped twice: the film is not at fault, the computer was too busy. */
+export const STILLS_BUSY = "The pictures could not be taken (the computer is busy). Try again.";
+/** A still run that was stopped before it finished: its time limit ran out (`timedOut`), no new still came for a while (`idle`), or
+ *  HF's own wait for its browser or the page ran out. */
+export const stillsStopped = (r) => !!r && (r.timedOut === true || r.idle === true
+  || (r.exitCode !== 0 && /\btimed?[\s-]?out\b|TimeoutError/i.test(r.stderr ?? (r.stderrTail ?? []).join("\n"))));
+const STILL_NAME = /^frame-(\d+)-at-([\d.]+)s\.png$/i;
+/** The stills HF wrote into `dir` (frame-NN-at-<t>s.png): [{ file, t }]. */
+const stillsIn = (dir) => { try { return readdirSync(dir).map((f) => STILL_NAME.exec(f)).filter(Boolean).map((m) => ({ file: m[0], t: Number(m[2]) })); } catch { return []; } };
+const sameTime = (a, b) => Math.abs(a - b) < 0.006;
+/** snap(projectDir, times, outDir, opts) with a time limit sized to the stills asked (stillsTimeoutMs). A run that was stopped
+ *  (stillsStopped) takes the stills it did not take once more, by itself (onRetry() first), into outDir/.again (HF clears its output
+ *  folder), each then named as the first run would have named it (its place in `times`). Stopped again with stills missing: the result says
+ *  `busy`. Every still there: exit 0, whatever stopped the run. The app stopping (`signal`) is never retried. */
+export async function snapOnceMore(snap, projectDir, times, outDir, { onRetry = () => {}, ...opts } = {}) {
+  const missing = () => { const have = stillsIn(outDir); return times.filter((t) => !have.some((x) => sameTime(x.t, t))); };
+  const first = await snap(projectDir, times, outDir, { ...opts, timeoutMs: stillsTimeoutMs(times.length) });
+  if (!stillsStopped(first) || opts.signal?.aborted) return first;
+  const left = missing();
+  if (!left.length) return { ...first, exitCode: 0 };
+  onRetry();
+  const again = join(outDir, ".again");
+  rmSync(again, { recursive: true, force: true });
+  const r = await snap(projectDir, left, again, { ...opts, timeoutMs: stillsTimeoutMs(left.length) });
+  for (const x of stillsIn(again)) {
+    const i = times.findIndex((t) => sameTime(t, x.t));
+    if (i >= 0) copyFileSync(join(again, x.file), join(outDir, x.file.replace(/^frame-\d+-/i, `frame-${String(i).padStart(2, "0")}-`)));
+  }
+  rmSync(again, { recursive: true, force: true });
+  if (!missing().length) return { ...r, exitCode: 0, retried: true };
+  return { ...r, retried: true, ...(stillsStopped(r) && !opts.signal?.aborted ? { busy: true } : {}) };
+}
+/** snapshotAt as the server calls it where it once passed the sync one (character sheets, a character's demo, AE's reference stills):
+ *  the same priority and answer, without holding its event loop. */
+export const snapshotAtForeground = (projectDir, times, outDir, opts = {}) => snapshotAtAsync(projectDir, times, outDir, { ...opts, belowNormal: false });
+
+/** runHfJson without blocking the caller's event loop (a long `check` while the server keeps answering). The result says `timedOut`
+ *  when it was stopped at `timeoutMs`; `belowNormal: false` runs it at normal priority (a check someone waits for: a render's). */
+export function runHfJsonAsync(command, projectDir, extraArgs = [], { version = null, timeoutMs = 600000, signal = null, belowNormal = true } = {}) {
   const rt = resolveRuntime(version);
   return new Promise((ok) => {
-    const c = low(spawn(process.execPath, [cliEntry(rt.dir), command, resolve(projectDir), "--json", ...extraArgs], { env: { ...rt.env, NO_COLOR: "1" }, windowsHide: true }));
-    let out = "", err = "";
+    const c = spawn(process.execPath, [cliEntry(rt.dir), command, resolve(projectDir), "--json", ...extraArgs], { env: { ...rt.env, NO_COLOR: "1" }, windowsHide: true });
+    if (belowNormal) low(c);
+    let out = "", err = "", timedOut = false;
     c.stdout.on("data", (d) => { out += d; });
     c.stderr.on("data", (d) => { err = (err + d).slice(-4000); });
     const kill = () => spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true });
-    const t = setTimeout(kill, timeoutMs);
+    const t = setTimeout(() => { timedOut = true; kill(); }, timeoutMs);
     signal?.addEventListener("abort", kill, { once: true });
     c.on("close", (code) => {
       clearTimeout(t); signal?.removeEventListener("abort", kill);
       const start = out.indexOf("{");
       let json = null;
       try { json = start >= 0 ? JSON.parse(out.slice(start)) : null; } catch { /* not JSON */ }
-      ok({ command, exitCode: code, json, stderrTail: err.split(/\r?\n/).slice(-5), stderr: err, hfVersion: rt.version });
+      ok({ command, exitCode: code, json, stderrTail: err.split(/\r?\n/).slice(-5), stderr: err, hfVersion: rt.version, ...(timedOut ? { timedOut: true } : {}) });
     });
   });
 }

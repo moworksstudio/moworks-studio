@@ -8,17 +8,17 @@ import { claudeArgs } from "../packages/agent/index.mjs";
 
 test("a ping is the task's own arguments on a fork that is not saved, one turn, every tool refused by a hook", () => {
   const settings = { mode: "acceptEdits", web: "off", model: "opus", effort: "high" };
-  const args = claudeArgs({ settings, systemPrompt: "SP", sessionArgs: ["--session-id", "abc"], guard: "\"node\" guard.mjs" });
+  const args = claudeArgs({ settings, systemPromptFile: "sp.md", sessionArgs: ["--session-id", "abc"], guard: "\"node\" guard.mjs" });
   const p = pingArgs(args, "abc", "node");
   assert.ok(!p.includes("--session-id"));
   assert.deepEqual(p.slice(-6), ["--resume", "abc", "--fork-session", "--no-session-persistence", "--max-turns", "1"]);
   // what reaches the model is the same: system prompt, tools, model, effort, permission mode
-  for (const flag of ["--append-system-prompt", "--tools", "--model", "--effort", "--permission-mode"]) assert.equal(p[p.indexOf(flag) + 1], args[args.indexOf(flag) + 1], flag);
+  for (const flag of ["--append-system-prompt-file", "--tools", "--model", "--effort", "--permission-mode"]) assert.equal(p[p.indexOf(flag) + 1], args[args.indexOf(flag) + 1], flag);
   const hooks = JSON.parse(p[p.indexOf("--settings") + 1]).hooks.PreToolUse;
   assert.deepEqual(hooks.map((h) => h.matcher), ["*"]);
   assert.match(hooks[0].hooks[0].command, /process\.exit\(2\)/);
   // a resumed chat pings its own conversation
-  const r = pingArgs(claudeArgs({ settings, systemPrompt: "SP", sessionArgs: ["--resume", "chat-1"] }), "chat-1", "node");
+  const r = pingArgs(claudeArgs({ settings, systemPromptFile: "sp.md", sessionArgs: ["--resume", "chat-1"] }), "chat-1", "node");
   assert.equal(r.filter((x) => x === "--resume").length, 1);
   assert.ok(r.includes("--settings"));
 });

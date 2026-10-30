@@ -2,7 +2,8 @@
 // project holds, by folder (images, footage, audio as voice-over / music / sound effects, fonts, design files), each with its size,
 // length or frame count, where the film uses it, and Claude's note. The list is read again on every visit and when the window comes
 // back to the app (the server compares the film's paths with the disk): a file the film uses that is gone shows as "Missing" with
-// "Relink"; a file copied in from Explorer shows as "New". Audio and footage can be transcribed and put on the timeline.
+// "Relink"; a file copied in from Explorer shows as "New". Audio and footage can be transcribed and put on the timeline: at the
+// playhead from the menu, or dragged onto a lane of the timeline.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AudioLines, ChevronDown, ChevronRight, Clapperboard, FileText, Film, Folder, FolderOpen, Image as ImageIcon, Images, Loader2, MoreHorizontal, Trash2, Type } from "lucide-react";
 import { get, post } from "../api.js";
@@ -10,6 +11,7 @@ import { Dialog, Menu } from "../components.jsx";
 import { usePref, useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 import { useThemeId } from "../theme.jsx";
+import { SOUND_MIME, clockTenths } from "./Timeline.jsx";
 
 const ICON = { image: ImageIcon, footage: Film, sequence: Images, audio: AudioLines, font: Type, design: FileText, other: FileText };
 const KIND = { image: "Image", footage: "Footage", sequence: "Image sequence", audio: "Audio", font: "Font", design: "Design file", other: "File" };
@@ -45,6 +47,24 @@ export function fontRows(xs) {
   }
   return out;
 }
+
+/** Where "Put on the timeline" starts a sound: at the playhead; one that would run past the film's end is moved back to end with it,
+ *  never before 0. `length` the sound's, `film` the film's (seconds; unknown: the playhead as it is). */
+export function fitStart(at, length, film) {
+  const f = Math.max(0, Number(film) || 0), l = Math.max(0, Number(length) || 0);
+  const s = Math.max(0, Number(at) || 0);
+  return Math.round((f > 0 && s + l > f ? Math.max(0, f - l) : s) * 1000) / 1000;
+}
+
+/** A sound onto the timeline, from the menu or a drop on a lane: `start` in seconds; `lane` ("voiceover" | "sfx" | "music") only for a
+ *  drop, else the file's folder picks it. `at`: where it went, or null when it waits (a voice-over whose words are transcribed first). */
+export async function putOnTimeline(projectId, path, { start = null, lane = null } = {}) {
+  const r = await post(`/api/projects/${projectId}/assets/timeline`, { path, ...(start != null ? { start } : {}), ...(lane ? { lane } : {}) });
+  const at = r.clip ? Number(r.clip["data-start"]) : r.lane === "voiceover" && !r.voice?.file ? null : start ?? 0;
+  return { ...r, at };
+}
+/** The toast after it: "On the timeline at 1:05: bell.wav". */
+export const placedSay = (t, name, at) => (at == null ? t("On the timeline: {name}", { name }) : t("On the timeline at {time}: {name}", { time: clockTenths(at), name }));
 
 /** The server's list: { items } (pipeline v2), or the older { assets } read the same way. */
 function normalise(r) {
@@ -87,10 +107,11 @@ function Relink({ item, items, projectId, onDone, onClose }) {
   </Dialog>;
 }
 
-function Row({ a, items, projectId, fileUrl, locked, onChanged, onTranscript, onShot }) {
+function Row({ a, items, projectId, fileUrl, locked, time, length, onChanged, onTranscript, onShot }) {
   const t = useT();
   const toast = useToast();
   const [busy, setBusy] = useState(null);
+  const [dragging, setDragging] = useState(false);
   const [relink, setRelink] = useState(false);
   const [del, setDel] = useState(null);          // { inUse } while the delete question is open
   const I = ICON[a.kind] ?? FileText;
@@ -101,11 +122,22 @@ function Row({ a, items, projectId, fileUrl, locked, onChanged, onTranscript, on
     finally { setBusy(null); }
   };
   const reveal = () => post(`/api/projects/${projectId}/files/reveal`, { path: a.path }).catch((e) => toast(e.message, "error"));
+  // at the playhead, on the lane its folder gives
+  const place = async () => {
+    setBusy("timeline");
+    try { const r = await putOnTimeline(projectId, a.path, { start: fitStart(time, a.duration, length) }); toast(placedSay(t, a.name, r.at)); onChanged(true); }
+    catch (e) { toast(e.message, "error"); }
+    finally { setBusy(null); }
+  };
+  // a sound drags onto a lane of the timeline (the menu item stays for the keyboard); the drag carries the path, never shown
+  const drags = a.kind === "audio" && a.status !== "missing" && !locked && !busy;
+  const dragProps = drags ? { draggable: true, onDragStart: (e) => { e.dataTransfer.setData(SOUND_MIME, a.path); e.dataTransfer.effectAllowed = "copy"; setDragging(true); },
+    onDragEnd: () => setDragging(false) } : null;
   const sound = a.kind === "audio" || a.kind === "footage";
   const folder = kidOf(a);
   const showIt = { label: t("Show in Explorer"), icon: <FolderOpen size={14} />, onSelect: reveal };
   const menu = [
-    a.kind === "audio" && !a.onTimeline && { label: t("Put on the timeline"), icon: <Clapperboard size={14} />, onSelect: () => call("timeline", {}, t("On the timeline: {name}", { name: a.name })) },
+    a.kind === "audio" && !a.onTimeline && { label: t("Put on the timeline"), icon: <Clapperboard size={14} />, onSelect: place },
     sound && { label: a.transcript === "saved" || a.transcript === "review" ? t("Open the words") : t("Transcribe"), icon: <AudioLines size={14} />,
       onSelect: async () => { if (a.transcript !== "saved" && a.transcript !== "review") { if (!(await call("transcribe", {}))) return; } onTranscript(a.path); } },
     ...(a.kind === "audio" && !a.app ? AUDIO_FOLDERS.filter(([k]) => k !== folder).map(([k, l]) => ({ label: t("Move to: {where}", { where: t(l) }), onSelect: () => call("move", { folder: k }, t("Moved to {where}", { where: t(l) })) })) : []),
@@ -118,7 +150,7 @@ function Row({ a, items, projectId, fileUrl, locked, onChanged, onTranscript, on
   const sub = [t(KIND[a.kind] ?? "File"), a.files > 1 ? t("{n} styles", { n: a.files }) : null, a.duration ? fmtDur(a.duration) : null, a.frames ? t("{n} frames", { n: a.frames }) : null, fmtSize(a.size)].filter(Boolean).join(" · ");
   const shotsIn = (a.usedIn ?? []).filter((n) => Number.isFinite(Number(n)) && typeof n !== "boolean");
   // no paths on screen: the name, and the app's note when there is one
-  return <li className={"as-row" + (a.status === "missing" ? " missing" : "")} title={a.note ? `${a.name}\n${a.note}` : a.name}>
+  return <li className={"as-row" + (a.status === "missing" ? " missing" : "") + (dragging ? " dragging" : "")} title={a.note ? `${a.name}\n${a.note}` : a.name} {...dragProps}>
     <span className={"as-thumb " + a.kind + (a.kind === "audio" ? " " + (folder ?? "audio") : "")} aria-hidden="true">
       {a.kind === "image" && a.status !== "missing" && fileUrl ? <img src={fileUrl(a.path)} alt="" loading="lazy" /> : <I size={14} />}</span>
     <span className="as-t">
@@ -139,7 +171,7 @@ function Row({ a, items, projectId, fileUrl, locked, onChanged, onTranscript, on
   </li>;
 }
 
-export default function AssetsPanel({ projectId, items, reload, fileUrl, locked, onTranscript, onTimelineChanged, onShot }) {
+export default function AssetsPanel({ projectId, items, reload, fileUrl, locked, time = 0, length = 0, onTranscript, onTimelineChanged, onShot }) {
   const t = useT();
   const studio = useThemeId() === "studio";
   const [folded, setFolded] = usePref("editor:assets-folded", {});
@@ -150,7 +182,7 @@ export default function AssetsPanel({ projectId, items, reload, fileUrl, locked,
     return GROUPS.filter(([k]) => by.has(k)).map(([k, l]) => [k, studio ? STUDIO_NAMES[k] ?? l : l, order(by.get(k))]);
   }, [items, studio]);
   const changed = (timeline) => { reload(); if (timeline) onTimelineChanged?.(); };
-  const row = (a) => <Row key={a.path} a={a} items={items} projectId={projectId} fileUrl={fileUrl} locked={locked} onChanged={changed} onTranscript={onTranscript} onShot={onShot} />;
+  const row = (a) => <Row key={a.path} a={a} items={items} projectId={projectId} fileUrl={fileUrl} locked={locked} time={time} length={length} onChanged={changed} onTranscript={onTranscript} onShot={onShot} />;
   /** A folder that opens and closes like one of After Effects' Project panel. */
   const folder = (k, label, count, body, depth = 0) => <section key={k} className={"as-grp " + k + (depth ? " sub" : "")}>
     <h3><button className="as-fold" aria-expanded={!folded[k]} onClick={() => setFolded((f) => ({ ...f, [k]: !f[k] }))}>

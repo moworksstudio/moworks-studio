@@ -32,7 +32,7 @@ test("the build estimate: from the film's length and kind, never from builds run
   try {
     assert.deepEqual(estimateMinutes(5, T, { seconds: 10, styleId: "hf-launch" }), { minutes: 24, high: 36, covers: "build, review, music and checks", basis: "length" }, "a 10 s HF film: 24 (QA run 05), not 38");
     assert.equal(estimateMinutes(10, T, { seconds: 10, styleId: "brush-cartoon" }).minutes, 24, "a 10 s Brush film: 24 (23-25 measured), not 64");
-    assert.equal(estimateMinutes(10, T, { seconds: 30, styleId: "lemo-brick-toy" }).minutes, 32, "#483: Test 12's 30 s Lemo film took 32, not about 14");
+    assert.equal(estimateMinutes(10, T, { seconds: 30, styleId: "lemo-brick-toy" }).minutes, 30, "#483: Test 12's 30 s Lemo film took 32 (30-45), not about 14");
     assert.equal(estimateMinutes(10, T, { seconds: 30, styleId: "what-if" }).minutes, 28, "the What If demo: 27");
     assert.equal(estimateMinutes(30, T, { seconds: 30, styleId: "anidoodle-storybook" }).minutes, 43, "#357, Test 11: 30 s anidoodle films took 37 and 49, not 14");
     assert.equal(estimateMinutes(10, T, { seconds: 60, styleId: "general" }).minutes, 64);
@@ -40,13 +40,16 @@ test("the build estimate: from the film's length and kind, never from builds run
     // T20-7: "Approve and build" to the finished film in Tests 17-21 (one or two films on the computer), each inside its range and
     // near its middle; the popup said "120-168" for Tests 20 and 21 (64.7 and 82 min)
     for (const [style, seconds, real, run] of [["lemo-whiteboard", 43, 36.4, 17], ["mg-19-paperclip", 72.8, 53.7, 18], ["lemo-silent-film", 34, 44.3, 19],
-      ["lemo-memphis-diorama", 105, 64.7, 20], ["anidoodle-midcentury-gouache", 100, 82, 21]]) {
+      ["lemo-memphis-diorama", 105, 64.7, 20], ["anidoodle-midcentury-gouache", 100, 82, 21], ["lemo-ascii-crt", 110, 35.6, 24]]) {
       const e = estimateMinutes(10, T, { seconds, styleId: style });
       assert.ok(real >= e.minutes * 0.75 && real <= e.high, `Test ${run}: ${real} min against ${e.minutes}-${e.high}`);
       assert.ok(e.high <= e.minutes * 1.5 + 1, "a range, not twice the time");
     }
     const t20 = estimateMinutes(12, T, { seconds: 105, styleId: "lemo-memphis-diorama" });
-    assert.deepEqual([t20.minutes, t20.high], [65, 98], "Test 20: about 65-98, not 120-168");
+    assert.deepEqual([t20.minutes, t20.high], [45, 68], "Test 20: about 45-68 (64.7), not 120-168");
+    // T24-7: the 110 s Lemo canvas film took 35.6 min; the page counted down from "about 110 min left"
+    const t24 = estimateMinutes(12, T, { seconds: 110, styleId: "lemo-ascii-crt" });
+    assert.deepEqual([t24.minutes, t24.high], [46, 69], "Test 24: about 46-69, not 120-168 or 68-102");
     assert.ok(estimateMinutes(12, T, { seconds: 600, styleId: "lemo-memphis-diorama" }).minutes > 120, "a long film is not held to 2 hours");
     mkdirSync(process.env.MW_STATE_DIR, { recursive: true });
     writeFileSync(join(process.env.MW_STATE_DIR, "build-times.json"), JSON.stringify({ builds: Array.from({ length: 6 }, () => ({ shots: 5, minutes: 60 })) }));

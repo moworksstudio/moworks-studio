@@ -29,15 +29,25 @@ export function useCloseGuard(dirty) {
 }
 
 /** Calls onDone when Claude (or the autopilot) was working on the project a moment ago and has stopped: the dialog then reloads what Claude wrote.
+ *  `watch(pipeline)` (optional) names what the dialog shows, e.g. its step's status: when it changes between two reads, onDone runs too
+ *  (Test 24: the Motion Plan dialog sat on "0 planned motions" while the plan was written, as no stop of Claude's was seen).
  *  Returns whether Claude is working now, so a dialog can hold its own actions meanwhile. */
-export function useClaudeDone(projectId, onDone) {
+export function useClaudeDone(projectId, onDone, watch = null) {
   const cb = useRef(onDone);
   cb.current = onDone;
+  const seen = useRef(watch);
+  seen.current = watch;
   const [working, setWorking] = useState(false);
   useEffect(() => {
-    let prev = null, alive = true;
+    let prev = null, prevKey = null, alive = true;
     const tick = async () => {
-      try { const p = await get(`/api/projects/${projectId}/pipeline`); if (!alive) return; const busy = !!p.claudeBusy || !!p.autopilot?.running; setWorking(busy); if (prev === true && !busy) cb.current(); prev = busy; } catch { /* the next tick tries again */ }
+      try {
+        const p = await get(`/api/projects/${projectId}/pipeline`); if (!alive) return;
+        const busy = !!p.claudeBusy || !!p.autopilot?.running; setWorking(busy);
+        const key = seen.current ? String(seen.current(p) ?? "") : null;
+        if ((prev === true && !busy) || (key != null && prevKey != null && key !== prevKey)) cb.current();
+        prev = busy; prevKey = key;
+      } catch { /* the next tick tries again */ }
     };
     tick();
     const h = setInterval(tick, 4000);

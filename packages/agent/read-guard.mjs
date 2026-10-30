@@ -26,12 +26,14 @@ export function readsIn(transcriptText, projectDir) {
   return out;
 }
 
-/** The decision for one edit: { block: false } or { block: true, missing, message }. warned: this task was already told once. */
+/** The decision for one edit: { block: false } or { block: true, missing, message }. warned: this task was already told once.
+ *  The message says that it stops an edit once and what to do next: Test 23's music step read it as a lock ("the app blocks writing
+ *  before I have read enough of this step's rules"), never tried again and left NOTES.md without the film's music (T23-7). */
 export function decide({ required, read, warned }) {
   const missing = required.filter((r) => !read.has(norm(r)));
   if (!missing.length || warned) return { block: false, missing };
   return { block: true, missing,
-    message: `Before you write or edit any file in this step, read the rule files this step requires (the app checks them): ${missing.join(", ")}. Read them all in one turn, then continue.` };
+    message: `Not written yet: this step's rule files come first, read before the first edit (the app checks it once per task): ${missing.join(", ")}. Read them all in one turn, then make this same edit again: it goes through, and so does every edit after it (NOTES.md and this step's own files included). Never leave a file unwritten because of this check.` };
 }
 
 async function main() {

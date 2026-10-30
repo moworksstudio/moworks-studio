@@ -10,27 +10,31 @@ const token = () => { try { return sessionStorage.getItem(KEY) ?? ""; } catch { 
 
 export class ApiError extends Error { constructor(status, code, message) { super(message); this.status = status; this.code = code; } }
 
-/** `keepalive`: the request outlives the page (a write sent as the window closes or reloads). */
+/** `keepalive`: the request outlives the page (a write sent as the window closes or reloads). `signal`: the caller gives the request up
+ *  (a read a busy server does not answer in time): it is not asked again and never read as an answer. */
 // One read the browser could not send (net::ERR_NO_BUFFER_SPACE, the service running) said the service was down; a
 // read is asked twice more first (a write is never sent twice), and only a service that does not answer any of them is called down
 const pause = (ms) => new Promise((ok) => setTimeout(ok, ms));
-export async function api(method, path, body, { keepalive = false } = {}) {
+const aborted = () => new ApiError(0, "ABORTED", "The app stopped waiting for this answer.");
+export async function api(method, path, body, { keepalive = false, signal = undefined } = {}) {
   let r;
   for (let i = 0; ; i++) {
     try {
-      r = await fetch(path, { method, keepalive, headers: { "X-MW-Token": token(), ...(body ? { "Content-Type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined });
+      r = await fetch(path, { method, keepalive, signal, headers: { "X-MW-Token": token(), ...(body ? { "Content-Type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined });
       break;
     } catch {
+      if (signal?.aborted) throw aborted();
       if (method === "GET" && i < 2) { await pause(i ? 1500 : 400); continue; }
       throw new ApiError(0, "OFFLINE", "Moworks Studio's local service is not running. Start the app again from its shortcut.");
     }
   }
   const j = await r.json().catch(() => ({}));
+  if (signal?.aborted) throw aborted();          // a body the caller cut is no answer (it read as an empty one)
   if (!r.ok) throw new ApiError(r.status, j.error?.code ?? "ERROR", j.error?.message ?? `Request failed (${r.status})`);
   return j;
 }
 
-export const get = (p) => api("GET", p);
+export const get = (p, opts) => api("GET", p, undefined, opts);
 export const post = (p, b) => api("POST", p, b ?? {});
 export const patch = (p, b) => api("PATCH", p, b);
 export const put = (p, b) => api("PUT", p, b);

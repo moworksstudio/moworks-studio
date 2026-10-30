@@ -6,7 +6,8 @@
 // sound effects in blue, the music as a clip with a white waveform; the lanes grow with the timeline's height (the user drags it).
 // Sounds are clips as in HF Studio (HF 490ecaf packages/studio/src/player/components/timelineClipDragCommit.ts):
 // drag one along its lane or onto another lane (Narration, SFX, Music), click to select it, Delete takes it off the timeline (the file
-// stays in Assets). + and - zoom, not while typing.
+// stays in Assets). + and - zoom, not while typing. A sound dragged from the Assets tab drops on the lane under the pointer, at the
+// pointer's time: the lane lights and a thin line shows the time while it is over it (not on a locked film or one shown as its render).
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp, Film, Mic2, Music, Sparkles, Trash2, ZoomIn, ZoomOut } from "lucide-react";
 import { usePref } from "../lib.jsx";
@@ -17,8 +18,23 @@ const LABEL = 116;          // the label column, wide enough for "NARRATION"
 
 const keyOf = (c) => c.hfId || c.id || `${c.src}@${c.start}`;
 
+/** A sound dragged from the Assets tab: this type carries its project-relative path, which never shows on screen. */
+export const SOUND_MIME = "application/x-moworks-sound";
+/** The sound lanes by the names the Assets route gives them. */
+export const DROP_LANE = { voice: "voiceover", sfx: "sfx", music: "music" };
+/** A pointer's x as a time on the lanes: from their left edge on screen (it moves with the scroll), at their pixels per second (the zoom),
+ *  on a frame of the film, within the film. A click, a scrub and a drop from the Assets tab read the time the same way. */
+export const timeAtX = (clientX, left, scale, fps, max) => Math.max(0, Math.min(max, Math.round(((clientX - left) / scale) * fps) / fps));
+/** A time as minutes and seconds, tenths when it has them: "1:05", "0:02.5". */
+export const clockTenths = (s) => {
+  const d = Math.round(Math.max(0, Number(s) || 0) * 10), m = Math.floor(d / 600), r = d - m * 600;
+  return `${m}:${String(Math.floor(r / 10)).padStart(2, "0")}${r % 10 ? `.${r % 10}` : ""}`;
+};
+/** The drop line on a lane while a sound from the Assets tab is over it, with the time it would start at (its chip turns left at the end). */
+export const DropLine = ({ x, time, end = false }) => <div className={"tl-drop" + (end ? " end" : "")} style={{ left: x }} aria-hidden="true"><b className="num">{time}</b></div>;
+
 export default function Timeline({ data, time, duration, shot, onSeek, onShot, range, onRange, posters = null, fps = 30, locked = false, onAudioMove = null, onAudioRemove = null,
-  readOnly = false }) {
+  readOnly = false, onSoundDrop = null }) {
   const t = useT();
   const [pps, setPps] = usePref("editor:tl-pps", 0);          // pixels per second; 0 = fit
   const [folded, setFolded] = usePref("editor:tl-folded", false);
@@ -35,7 +51,7 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
   const lane = useRef(null);
   // a click or a scrub lands on a frame of the film (its own rate: 24, 30 or 60 fps); a click on a shot selects it and lands
   // where it was clicked, not on the shot's first frame, where its words have not come in yet
-  const at = (clientX) => { const r = lane.current.getBoundingClientRect(); return Math.max(0, Math.min(D, Math.round(((clientX - r.left) / scale) * fps) / fps)); };
+  const at = (clientX) => timeAtX(clientX, lane.current.getBoundingClientRect().left, scale, fps, D);
   const down = (e) => {
     if (e.button !== 0 || readOnly) return;          // a film shown as its render: no drag, scrub or loop on the lanes; a shot jumps to its start
     const s = at(e.clientX);
@@ -76,6 +92,36 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
     return () => removeEventListener("keydown", k);
   }, [scale, selClip, sel, locked, onAudioRemove]); // eslint-disable-line react-hooks/exhaustive-deps
   const laneAt = (y) => { for (const [ln, el] of Object.entries(rowsRef.current)) { const r = el?.getBoundingClientRect(); if (r && y >= r.top && y <= r.bottom) return ln; } return null; };
+  // a sound from the Assets tab over a sound lane: { lane, start } (the drag carries only SOUND_MIME, so a picture or a file from Explorer
+  // finds no drop target); on a locked film or one shown as its render nothing takes a drop
+  const canDrop = !!onSoundDrop && !locked && !readOnly;
+  const [over, setOver] = useState(null);
+  const overAt = (e) => {
+    if (!canDrop || ![...(e.dataTransfer?.types ?? [])].includes(SOUND_MIME)) return null;
+    const ln = laneAt(e.clientY);
+    return ln && DROP_LANE[ln] ? { lane: ln, start: at(e.clientX) } : null;
+  };
+  const dragOver = (e) => {
+    const o = overAt(e);
+    setOver((x) => (x?.lane === o?.lane && x?.start === o?.start ? x : o));
+    if (o) { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }
+  };
+  const dragLeave = (e) => { const r = lane.current.getBoundingClientRect(); if (e.clientX <= r.left || e.clientX >= r.right || e.clientY <= r.top || e.clientY >= r.bottom) setOver(null); };
+  const drop = (e) => {
+    const o = overAt(e), path = e.dataTransfer.getData(SOUND_MIME);
+    setOver(null);
+    if (!o || !path) return;
+    e.preventDefault();
+    onSoundDrop(path, { start: o.start, lane: DROP_LANE[o.lane] });
+  };
+  useEffect(() => {          // a drag that ends anywhere else (Esc, outside the window) leaves no lit lane behind
+    if (!over) return;
+    const end = () => setOver(null);
+    addEventListener("dragend", end); addEventListener("drop", end);
+    return () => { removeEventListener("dragend", end); removeEventListener("drop", end); };
+  }, [!!over]); // eslint-disable-line react-hooks/exhaustive-deps
+  const dropLine = (ln) => over?.lane === ln && <DropLine x={px(over.start)} time={clockTenths(over.start)} end={px(over.start) > width - 56} />;
+  const dropRow = (ln) => (canDrop ? { "data-drop": DROP_LANE[ln] } : null);
   const grab = (c) => (e) => {
     if (e.button !== 0) return;
     e.stopPropagation();
@@ -150,6 +196,7 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
     <div className="tl-body" ref={scroller} onWheel={wheel}>
       <div className="tl-labels">{["ruler", ...rows].map((k) => { const I = ICON[k]; return <div key={k} className={"tl-label " + k}>{I && <I size={12} />}{NAME[k] ? t(NAME[k]) : ""}</div>; })}</div>
       <div className={"tl-lanes" + (readOnly ? " ro" : "")} ref={lane} style={{ width }} onPointerDown={down}
+        onDragOver={canDrop ? dragOver : undefined} onDragLeave={canDrop ? dragLeave : undefined} onDrop={canDrop ? drop : undefined}
         title={readOnly ? t("Click a shot to jump to its start") : t("Click to jump · drag to scrub · Shift + drag to loop a part · Ctrl + wheel to zoom")}>
         <div className="tl-ruler num">{ticks.map((s) => <i key={s} style={{ left: px(s) }}>{s % 1 ? s.toFixed(1) : `${s}s`}</i>)}
           {(data?.qc ?? []).map((q, i) => <button key={i} className={"tl-qc" + (q.blocking ? " stop" : "")} style={{ left: px(q.time) }} title={qcSay(t, q)}
@@ -158,17 +205,17 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
           style={{ left: px(s.start) + 2, width: Math.max(2, px(s.duration ?? 0) - 4), ...(pic ? { backgroundImage: `url("${pic}")` } : null) }} title={`${t("Shot {n}", { n: s.number })} · ${s.title} · ${(s.duration ?? 0).toFixed(1)} s${s.rate !== 1 ? ` · ${s.rate}×` : ""}`}
           onPointerDown={(e) => { if (!e.shiftKey && e.button === 0) { onShot(s); if (readOnly) onSeek(s.start); } }}><span className="tl-chip"><b className="num">{s.number}</b> {s.title}</span></button>; })}</div>
         {!folded && <>
-          <div className="tl-row voice" ref={(el) => { rowsRef.current.voice = el; }}>{hasAudio && clipsIn("voice").map((c) => clip(c, "voice"))}
+          <div className={"tl-row voice" + (over?.lane === "voice" ? " drop-on" : "")} {...dropRow("voice")} ref={(el) => { rowsRef.current.voice = el; }}>{hasAudio && clipsIn("voice").map((c) => clip(c, "voice"))}
             {(data?.voice ?? []).map((v, i) => <span key={i} className="tl-word" style={{ left: px(v.start), width: Math.max(2, px(v.end - v.start) - 1) }} title={v.text}>{v.text}</span>)}
-            {!data?.voice?.length && !(hasAudio && clipsIn("voice").length) && <span className="tl-empty">{t("No voice-over")}</span>}</div>
-          <div className="tl-row sfx" ref={(el) => { rowsRef.current.sfx = el; }}>{hasAudio ? clipsIn("sfx").map((c) => clip(c, "sfx"))
+            {!data?.voice?.length && !(hasAudio && clipsIn("voice").length) && <span className="tl-empty">{t("No voice-over")}</span>}{dropLine("voice")}</div>
+          <div className={"tl-row sfx" + (over?.lane === "sfx" ? " drop-on" : "")} {...dropRow("sfx")} ref={(el) => { rowsRef.current.sfx = el; }}>{hasAudio ? clipsIn("sfx").map((c) => clip(c, "sfx"))
             : (data?.sfx ?? []).map((x, i) => <span key={i} className="tl-tick" style={{ left: px(x.start), width: Math.max(6, px(x.duration ?? 0.3)) }} title={`${x.name} · ${x.start.toFixed(2)} s`} />)}
-            {!(hasAudio ? clipsIn("sfx").length : data?.sfx?.length) && <span className="tl-empty">{t("No sound effects")}</span>}</div>
-          <div className="tl-row music" ref={(el) => { rowsRef.current.music = el; }}>{hasAudio ? clipsIn("music").map((c) => clip(c, "music",
+            {!(hasAudio ? clipsIn("sfx").length : data?.sfx?.length) && <span className="tl-empty">{t("No sound effects")}</span>}{dropLine("sfx")}</div>
+          <div className={"tl-row music" + (over?.lane === "music" ? " drop-on" : "")} {...dropRow("music")} ref={(el) => { rowsRef.current.music = el; }}>{hasAudio ? clipsIn("music").map((c) => clip(c, "music",
             music?.peaks?.length && c.name === music.name ? <svg viewBox={`0 0 ${music.peaks.length} 100`} preserveAspectRatio="none" aria-hidden="true"><path d={wave(music.peaks)} /></svg> : null))
             : music ? <span className="tl-music" style={{ left: px(music.start), width: px(music.duration ?? D) }} title={music.name}>
               {music.peaks?.length ? <svg viewBox={`0 0 ${music.peaks.length} 100`} preserveAspectRatio="none" aria-hidden="true"><path d={wave(music.peaks)} /></svg> : null}</span> : null}
-            {!(hasAudio ? clipsIn("music").length : music) && <span className="tl-empty">{t("No music")}</span>}</div>
+            {!(hasAudio ? clipsIn("music").length : music) && <span className="tl-empty">{t("No music")}</span>}{dropLine("music")}</div>
         </>}
         {range && <div className="tl-range" style={{ left: px(range[0]), width: Math.max(2, px(range[1] - range[0])) }} />}
         <div className="tl-head-line" style={{ left: px(time) }} />

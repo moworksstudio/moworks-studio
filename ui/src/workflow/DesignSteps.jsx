@@ -1,6 +1,7 @@
 // New project's Brand Kit box (HF's frame presets and the user's own Looks). Empty is "From brief": Claude follows
 // the design the brief describes; a chosen Brand Kit wins over the brief for colours, fonts and layout. The line under the field
-// names where the film's design comes from. A style that brings its own design (Slideshow, every author style) locks it.
+// names where the film's design comes from. A style that brings its own design (Slideshow, every author style) locks it; a Brand Kit
+// chosen all the same stays chosen and is sent, and Claude asks in Prepare how to use it (house rules §2b): the line says so.
 // The box's title names the one field, so the field's label is for screen readers only and the picker spans the box.
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -92,11 +93,16 @@ export default function DesignSteps({ style, value, onChange, brief = "" }) {
   const look = lookGroups.flatMap((g) => g.items).find((x) => x.id === value.look);
   // one sentence says where colours, fonts and layout come from
   const summary = look ? t("Colours, fonts and layout from {kit}.", { kit: look.title }) : t("Design follows the Brief.");
+  // a Brand Kit chosen before an author's style was picked stays chosen: the field names it (locked) and the line says that Claude
+  // asks how to use it in Prepare, with a way to leave it out (T25: it was dropped without a word)
+  const asked = locked && !!value.look;
   return <div className="ds">
     <Picker id="np-look-l" label={t("Brand Kit")} value={value.look} none={t("From the brief")} noneSub={t("Claude follows the design the brief describes")} groups={lookGroups}
-      disabled={locked} locked={locked ? t("Follows film style") : null} onChange={(v) => onChange({ look: v })}
+      disabled={locked} locked={locked ? (asked && look ? look.title : t("Follows film style")) : null} onChange={(v) => onChange({ look: v })}
       footer={<button type="button" className="sgb-link" onClick={() => go("/looks")}><Upload size={13} />{t("Create a Brand Kit from a guideline")}</button>} />
-    <p className="ds-from" aria-live="polite">{locked ? <><Lock size={12} />{t("Design follows the film style. You can describe the Brand Kit in the Brief.")}</>
+    <p className="ds-from" aria-live="polite">{asked ? <><Lock size={12} /><span>{t("This style keeps its author's design. Claude will ask how to use your Brand Kit.")}</span>
+        <button type="button" className="clink ds-drop" onClick={() => onChange({ look: "" })} title={t("Do not use this Brand Kit")}>{t("Remove")}</button></>
+      : locked ? <><Lock size={12} />{t("Design follows the film style. You can describe the Brand Kit in the Brief.")}</>
       : <>{look && <Swatches colors={look.swatches} />}<span>{summary}</span></>}</p>
     {/* a Vietnamese film (its brief) whose Brand Kit has a font without Vietnamese letters: one quiet line. A Brand Kit font is never
         swapped: Claude stops in Prepare and offers fonts that have them */}

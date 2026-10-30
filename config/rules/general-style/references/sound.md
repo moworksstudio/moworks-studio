@@ -24,9 +24,10 @@ You cannot hear: measure every step (the app gives you beat maps, levels and cue
 
 ## 3. Sound effects
 
-- One ready-made sound for every cut and big move: a whoosh for movement, pop for things appearing, click for clicks, typing for typing,
-  riser into a reveal, impact on a slam. The app picks them from its sound library (HyperFrames' bundled set and Freesound through
-  Openverse, CC0 / CC BY, credited) by what happens on screen; you may name cues in the storyboard frames (`- sfx: whoosh, pop`).
+- A sound on every action (the house rules §7b, owner 30/10): a whoosh for movement, pop for things appearing, click for clicks, typing
+  for typing, riser into a reveal, impact on a slam, footsteps, doors, pages; and a quiet ambience bed under every scene with a place. The
+  app picks them by what happens on screen, from its own offline library of CC0 sounds first, then Freesound through Openverse (CC0 /
+  CC BY) and HyperFrames' bundled set, every one credited; name them in the storyboard frames (`- sfx: whoosh, pop`, `- ambience: rain`).
 - **The light comes before the sound:** a sound's attack (the top of a whoosh's swell) lands one frame after its picture. The picture must
   work muted first: social feeds play without sound.
 - Nothing plays on or after the end card unless the design says so.
@@ -34,7 +35,8 @@ You cannot hear: measure every step (the app gives you beat maps, levels and cue
 ## 4. Levels
 
 - The voice is the loudest thing; the music drops under it (HyperFrames' voiceover carve on the bed when a voice plays over music; a plain
-  duck to about 25 % otherwise); the effects sit above the music (about 4 dB over the bed, at least 2 dB under a voice).
+  duck to about 25 % otherwise); with a sound on every action the effects sit under the music and the voice, each kind at its own level
+  (an impact over a click), a small move quieter, the ambience lowest (the app sets them).
 - The master: **-16 LUFS, true peak at most -1 dBTP** (the app's render masters and measures it); louder (-14 LUFS)
   only when the client asks.
 - The app applies these: at the Final Mix it measures the music, the voice and each effect and sets every effect's level (EBU R128); when

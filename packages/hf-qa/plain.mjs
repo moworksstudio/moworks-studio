@@ -34,9 +34,19 @@ export function findingShot(f, placed, dir) {
 
 const TAG_WORDS = { svg: "a drawing", path: "a drawing", g: "a drawing", canvas: "a drawing", img: "a picture", image: "a picture", picture: "a picture", video: "a video" };
 const POINTER = /needle|hand|pointer|arrow|dial|gauge|sweep|clock|kim/i;
+const pxOf = (f) => Number(/(\d+(?:\.\d+)?)\s*px/.exec(String(f?.message ?? ""))?.[1]);
 
-/** One line for the user: where, what is wrong, what to do. `shot`: { number, start, duration } or null; `check`: the check's title. */
-export function plainFinding(f, { shot = null, check = "" } = {}) {
+/** A turning point HyperFrames measured far outside the frame (Test 23: "a point 35200 px from the centre of its dial" in a
+ *  1080 × 1920 film): more than twice the frame's longer side away is a slip of its measurement, not a fault the user can see. */
+export function measuringSlip(f, frame = null) {
+  if (f?.code !== "off_pivot_rotation" && f?.code !== "rotation_pivot_drift") return false;
+  const px = pxOf(f), side = Math.max(Number(frame?.width) || 1920, Number(frame?.height) || 1080);
+  return Number.isFinite(px) && px > 2 * side;
+}
+
+/** One line for the user: where, what is wrong, what to do. `shot`: { number, start, duration } or null; `check`: the check's title;
+ *  `frame`: the film's { width, height }. */
+export function plainFinding(f, { shot = null, check = "", frame = null } = {}) {
   const t = f?.time == null ? NaN : Number(f.time);
   const where = shot ? `Shot ${shot.number} (${clock(shot.start)}–${clock(shot.start + (shot.duration ?? 0))})`
     : Number.isFinite(t) ? `At ${clock(t)}` : "In the film";
@@ -47,8 +57,9 @@ export function plainFinding(f, { shot = null, check = "" } = {}) {
   const words = tag ?? (String(f?.text ?? "").trim() ? `the words "${String(f.text).trim().slice(0, 60)}"` : null);
   const is = words && !tag ? "are" : "is";
   const said = tag ? null : words;          // the checks of words name only words
-  const px = /(\d+)\s*px/.exec(String(f?.message ?? ""))?.[1];
-  const far = px ? `${px} px` : "far";
+  const px = pxOf(f);
+  const far = Number.isFinite(px) ? `${Math.round(px).toLocaleString("en")} px` : "far";
+  if (measuringSlip(f, frame)) return `${where}: HyperFrames measured ${it} turning around a point ${far} away, far outside the frame. That is a slip of the measurement, not a fault in the film: ignore it unless the shot looks wrong when you play it.`;
   switch (f?.code) {
     case "rotation_pivot_drift":
       return `${where}: ${it} spins around a point ${far} away from its own centre, so it slides across the frame as it turns. If it should turn in place, ask Claude to make it turn around its centre; if it swings from one end on purpose (a kite on its string, a needle on its dial), ignore this.`;

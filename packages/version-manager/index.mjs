@@ -2,7 +2,7 @@
 // HyperFrames is never a dependency of this repo: each version lives in runtime/hf/<version>/node_modules and is loaded by the
 // hf-* adapters from there. This module installs files and records state; it does not import or run HyperFrames itself.
 import { execFileSync, spawnSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 export const APP_ROOT = join(import.meta.dirname, "..", "..");
@@ -177,6 +177,9 @@ export function install(version, root = APP_ROOT, log = console.log) {
   return got;
 }
 
+// the exes whose version was checked, by path, size and time: resolveRuntime runs before every HF call, and `--version` took 0.1-0.2 s of
+// the caller's thread each time (the server's); the same file is not asked again
+const checkedChromium = new Map();
 /** Copy the pinned Chromium build into runtime/chromium/<ver> (from the configured source path) and verify its version. */
 export function ensureChromium(chromiumVersion, root = APP_ROOT) {
   const pins = loadPins(root);
@@ -189,8 +192,11 @@ export function ensureChromium(chromiumVersion, root = APP_ROOT) {
     if (!existsSync(join(from, "chrome-headless-shell.exe"))) throw new Error(`pinned Chromium not found at ${from}`);
     cpSync(from, dst, { recursive: true });
   }
+  const st = statSync(exe), stamp = `${chromiumVersion} ${st.size} ${st.mtimeMs}`;
+  if (checkedChromium.get(exe) === stamp) return exe;
   const v = execFileSync(exe, ["--version"], { encoding: "utf8", windowsHide: true }).trim();
   if (!v.includes(chromiumVersion)) throw new Error(`Chromium version mismatch: ${v}`);
+  checkedChromium.set(exe, stamp);
   return exe;
 }
 

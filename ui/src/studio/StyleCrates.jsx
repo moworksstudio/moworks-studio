@@ -12,7 +12,7 @@ import { useT } from "../i18n.jsx";
 import { AuthorName } from "../authors.jsx";
 import { styleRank, STYLE_ROWS } from "../styleRows.js";
 import AeBadge from "../workflow/AeBadge.jsx";
-import { ApplyStyleDialog, DemoLink, StyleDetails, WHAT_IF, authorOf, authorsOf, catLabel, catOf, thumbOf, usesOf, useStyles } from "../screens/StyleGallery.jsx";
+import { ApplyStyleDialog, DemoLink, StyleDetails, WHAT_IF, authorOf, authorsOf, catLabel, catOf, markTall, thumbOf, usesOf, useStyles } from "../screens/StyleGallery.jsx";
 
 const CAT_ORDER = STYLE_ROWS.map(([c]) => c);
 
@@ -45,7 +45,8 @@ function Sleeve({ s, on, onPick }) {
   const t = useT();
   return <button type="button" className="st-sleeve" aria-pressed={on} onClick={() => onPick(s)} title={t(s.title)}>
     {s.comingSoon ? <span className="st-wi" aria-hidden="true">What If</span>
-      : thumbOf(s) ? <img src={thumbOf(s)} alt="" loading="lazy" decoding="async" /> : <span className="st-noimg"><NoPreview /></span>}
+      : thumbOf(s) ? <img src={thumbOf(s)} alt="" loading="lazy" decoding="async" onLoad={(e) => markTall(e.currentTarget)} ref={(el) => { if (el?.complete) markTall(el); }} />
+      : <span className="st-noimg"><NoPreview /></span>}
     <span className="st-cap">{t(s.title)}{(s.comingSoon || catOf(t, s)) && <small>{s.comingSoon ? t("Coming soon") : catOf(t, s)}</small>}</span>
     {s.warnings?.length > 0 && <span className="st-warn" title={t("Read before use")}>!</span>}
     <AeBadge s={s} compact />

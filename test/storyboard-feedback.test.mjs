@@ -174,14 +174,15 @@ test("Make another option and Feedback say what they take, from this film's own 
     { step: "storyboard", status: "cancelled", text: "Make one more storyboard option, Option C", durationMs: min(1) },
   ];
   const e = boardEstimates(tasks, "anidoodle-fox");
-  assert.deepEqual(e.option, { minutes: 12, high: 18, costUsd: 3.04, basis: "this film", runs: 2 });
-  assert.deepEqual(e.feedback, { minutes: 4, high: 6, costUsd: 1.11, basis: "this film", runs: 1 });
-  assert.deepEqual(boardEstimates([], "anidoodle-fox").option, { minutes: 12, high: 18, costUsd: 3, basis: "usual", runs: 0 });
-  assert.deepEqual(boardEstimates([], "general"), { option: { minutes: 10, high: 15, costUsd: 2.5, basis: "usual", runs: 0 }, feedback: { minutes: 5, high: 8, costUsd: 1, basis: "usual", runs: 0 },
-    motion: { minutes: 5, high: 8, costUsd: 1.2, basis: "usual", runs: 0 } });
+  assert.deepEqual(e.option, { minutes: 12, high: 18, costUsd: 3.04, costHigh: 3.8, basis: "this film", runs: 2 });
+  assert.deepEqual(e.feedback, { minutes: 4, high: 6, costUsd: 1.11, costHigh: 1.4, basis: "this film", runs: 1 });
+  // the usual, from the films of Tests 17-24 (T23-11)
+  assert.deepEqual(boardEstimates([], "anidoodle-fox").option, { minutes: 25, high: 38, costUsd: 6.5, costHigh: 8.1, basis: "usual", runs: 0 });
+  assert.deepEqual(boardEstimates([], "general"), { option: { minutes: 22, high: 33, costUsd: 4.4, costHigh: 5.5, basis: "usual", runs: 0 }, feedback: { minutes: 5, high: 8, costUsd: 1, costHigh: 1.3, basis: "usual", runs: 0 },
+    motion: { minutes: 5, high: 8, costUsd: 1.3, costHigh: 1.8, basis: "usual", runs: 0 } });
   // Approve storyboard says what the Motion Plan takes, from this film's own when it wrote one before
   assert.deepEqual(boardEstimates([{ step: "motionSpec", status: "done", text: "Write the Motion Plan", durationMs: 4.6 * 60000, usage: { costUsd: 1.25 } }]).motion,
-    { minutes: 5, high: 8, costUsd: 1.25, basis: "this film", runs: 1 });
+    { minutes: 5, high: 8, costUsd: 1.25, costHigh: 1.6, basis: "this film", runs: 1 });
   // the dialog's view carries them
   const d = join(T, "estimates"); board(d, "A", 3);
   await B.takeStills(d, { by: "claude", snap });
@@ -196,7 +197,7 @@ test("Make another option and Feedback say what they take, from this film's own 
 test("What If demo: its storyboard step's own words count as an option in the estimates, and its prompt names option A", async () => {
   const { boardEstimates } = await import("../packages/server/boards.mjs");
   const e = boardEstimates([{ step: "storyboard", status: "done", text: "Make the storyboard as the what-if-style pack says (the author's steps 3 to 5)", durationMs: 16 * 60000, usage: { costUsd: 4.12 } }], "what-if");
-  assert.deepEqual(e.option, { minutes: 16, high: 24, costUsd: 4.12, basis: "this film", runs: 1 });
+  assert.deepEqual(e.option, { minutes: 16, high: 24, costUsd: 4.12, costHigh: 5.2, basis: "this film", runs: 1 });
   const wi = JSON.parse(readFileSync(new URL("../config/what-if-pipeline.json", import.meta.url), "utf8")).pipeline.find((s) => s.id === "storyboard").action.prompt;
   assert.match(wi, /its heading `# Option A · "<a short name for its idea>"` in the language of the chat/);
   assert.match(wi, /every frame one shot with its own seconds/);

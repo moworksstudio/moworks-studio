@@ -1,6 +1,7 @@
 // Text-to-speech providers (voice-over is uploaded audio, ElevenLabs or Fish Audio; no local voice). The key comes from the
 // secret store and is sent only to the provider's own API; errors never echo it. Generation costs the user credits: it runs only on an
 // explicit request from the Voice screen.
+import { createHash } from "node:crypto";
 import { createWriteStream, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { Readable } from "node:stream";
@@ -27,8 +28,35 @@ async function call(url, init = {}, timeout = TIMEOUT) {
     return r;
   } catch (e) {
     if (e.code === "PROVIDER") throw e;
-    throw Object.assign(new Error(e.name === "AbortError" ? "The service did not answer in time" : `Could not reach the service: ${e.message}`), { code: "PROVIDER_OFFLINE" });
+    throw Object.assign(new Error(e.name === "AbortError" ? "The service did not answer in time" : `Could not reach the service (${netWhy(e)})`), { code: "PROVIDER_OFFLINE" });
   } finally { clearTimeout(t); }
+}
+/** Node's "fetch failed" in plain words, from its cause. */
+function netWhy(e) {
+  const c = String(e?.cause?.code ?? e?.code ?? "");
+  return /ENOTFOUND|EAI_AGAIN/.test(c) ? "check the internet connection" : /ECONNRESET|UND_ERR_SOCKET|EPIPE/.test(c) ? "the connection was cut"
+    : /TIMEOUT|ETIMEDOUT/.test(c) ? "the connection timed out" : /ECONNREFUSED/.test(c) ? "the connection was refused" : "the connection failed";
+}
+
+/** A failure that may pass by itself (the service not reached or slow, its own server error), never a refusal (the key, the credit, the
+ *  plan, too many requests). Test 24: the first voice-over failed while the computer was loaded, the second went through 3 min later. */
+export const transient = (e) => e?.code === "PROVIDER_OFFLINE" || (e?.code === "PROVIDER" && e.status >= 500);
+/** fn(), tried once more after a short wait when it failed in a way that may pass; never after the user stopped it. */
+export async function retryOnce(fn, { signal = null, waitMs = 3000, onRetry = () => {} } = {}) {
+  try { return await fn(); }
+  catch (e) {
+    if (signal?.aborted || !transient(e)) throw e;
+    onRetry(e);
+    await new Promise((ok) => setTimeout(ok, waitMs));
+    if (signal?.aborted) throw e;
+    return fn();
+  }
+}
+/** A voice-over that could not be made, in the owner's words: "The voice-over could not be made: <reason>. Try again." */
+export function ttsFailedText(e, title = "the service") {
+  const raw = String(e?.message ?? e ?? "").replace(/[.\s]+$/, "") || "something went wrong";
+  const why = (/^[A-Z][a-z]/.test(raw) ? raw.charAt(0).toLowerCase() + raw.slice(1) : raw).replace(/\bthe service\b/i, title);
+  return `The voice-over could not be made: ${why}.${/try again/i.test(why) ? "" : " Try again."}`;
 }
 
 /** Can the account's plan read with this ElevenLabs voice (an instantly cloned voice, chosen first, was refused by
@@ -121,21 +149,22 @@ export const PROVIDERS = {
       const s = u.subscription ?? {};
       return { ok: true, account: s.tier ?? null, credits: s.character_limit != null ? { used: s.character_count, limit: s.character_limit, unit: "characters" } : null };
     },
-    async voices(key) {
-      const j = await (await call(`${EL}/v1/voices`, { headers: { "xi-api-key": key } })).json();
-      // which cloned voices the plan lets the account use (its subscription's can_use_*_voice_cloning); unknown without user_read
-      let sub = null; try { sub = (await (await call(`${EL}/v1/user/subscription`, { headers: { "xi-api-key": key } })).json()) ?? null; } catch { /* no user_read */ }
+    async voices(key, { timeout = TIMEOUT } = {}) {
+      // the voices, and which cloned voices the plan lets the account use (its subscription's can_use_*_voice_cloning; unknown without
+      // user_read), asked at once
+      const [j, sub] = await Promise.all([call(`${EL}/v1/voices`, { headers: { "xi-api-key": key } }, timeout).then((r) => r.json()),
+        call(`${EL}/v1/user/subscription`, { headers: { "xi-api-key": key } }, timeout).then((r) => r.json()).then((x) => x ?? null).catch(() => null)]);
       return (j.voices ?? []).map((v) => ({ id: v.voice_id, name: v.name, labels: Object.values(v.labels ?? {}).filter(Boolean).join(", "), preview: v.preview_url ?? null, own: v.category !== "premade",
         ...usableOn(v, sub), settings: v.settings ? pickSettings("elevenlabs", v.settings) : null }));          // the voice's own saved settings, when it has them
     },
-    async models(key) {
-      const j = await (await call(`${EL}/v1/models`, { headers: { "xi-api-key": key } })).json();
+    async models(key, { timeout = TIMEOUT } = {}) {
+      const j = await (await call(`${EL}/v1/models`, { headers: { "xi-api-key": key } }, timeout)).json();
       return (j ?? []).filter((m) => m.can_do_text_to_speech !== false)
         .map((m) => ({ id: m.model_id, name: m.name, vietnamese: (m.languages ?? []).some((l) => /^vi/i.test(l.language_id ?? "")) }));
     },
     /** ElevenLabs' own default settings (GET /v1/voices/settings/default): what the Voice screen shows before the user changes anything. */
-    async defaultSettings(key) {
-      return pickSettings("elevenlabs", await (await call(`${EL}/v1/voices/settings/default`, { headers: { "xi-api-key": key } })).json());
+    async defaultSettings(key, { timeout = TIMEOUT } = {}) {
+      return pickSettings("elevenlabs", await (await call(`${EL}/v1/voices/settings/default`, { headers: { "xi-api-key": key } }, timeout)).json());
     },
     async generate(key, { voiceId, text, model = "eleven_multilingual_v2", out, signal, settings = null }) {
       // only the settings the user set on the Voice screen go; none sent, ElevenLabs uses its own
@@ -153,10 +182,10 @@ export const PROVIDERS = {
       await call(`${FISH}/model?self=true&page_size=1`, { headers: { Authorization: `Bearer ${key}` } });
       return { ok: true, account: null, credits: null };
     },
-    async voices(key, { q = "" } = {}) {
+    async voices(key, { q = "", timeout = TIMEOUT } = {}) {
       const h = { headers: { Authorization: `Bearer ${key}` } };
-      const own = await (await call(`${FISH}/model?self=true&page_size=50`, h)).json();
-      const pub = await (await call(`${FISH}/model?language=vi&sort_by=score&page_size=40${q ? `&title=${encodeURIComponent(q)}` : ""}`, h)).json();
+      const [own, pub] = await Promise.all([call(`${FISH}/model?self=true&page_size=50`, h, timeout).then((r) => r.json()),
+        call(`${FISH}/model?language=vi&sort_by=score&page_size=40${q ? `&title=${encodeURIComponent(q)}` : ""}`, h, timeout).then((r) => r.json())]);
       const map = (v, mine) => ({ id: v._id, name: v.title, labels: [(v.languages ?? []).join("/"), v.author?.nickname].filter(Boolean).join(" · "), preview: v.samples?.[0]?.audio ?? null, own: mine });
       return [...(own.items ?? []).map((v) => map(v, true)), ...(pub.items ?? []).map((v) => map(v, false))];
     },
@@ -175,3 +204,44 @@ export const PROVIDERS = {
     },
   },
 };
+
+// ---- the Voice screen's list of a service's voices. T25: ElevenLabs answered in 2-24 s while the computer was busy, the list failed
+// after 25 s (a 502), and Retry worked on the 2nd or 3rd try. Each call now waits up to LIST_TIMEOUT, the calls go at once, and a list
+// read is kept LIST_TTL_MS per service, key, language and search, so opening the dialog again is instant and a slow service costs the
+// wait once; two reads at the same time share one. A read that fails is not kept, and its error names the service in plain words.
+export const LIST_TIMEOUT = 45000;
+export const LIST_TTL_MS = 10 * 60 * 1000;
+const lists = new Map();
+const keyTag = (key) => createHash("sha256").update(String(key ?? "")).digest("hex").slice(0, 12);          // the key itself is never kept here
+/** Forget the kept lists (a service's, or all): a key saved or cleared. */
+export function clearVoiceLists(provider = null) { for (const k of [...lists.keys()]) if (!provider || k.startsWith(`${provider}|`)) lists.delete(k); }
+/** "Could not read the ElevenLabs voices: ElevenLabs did not answer in time. Try again in a moment." */
+export function voiceListError(e, title) {
+  const raw = String(e?.message ?? e ?? "").replace(/[.\s]+$/, "") || "something went wrong";
+  const why = (/^[A-Z][a-z]/.test(raw) ? raw.charAt(0).toLowerCase() + raw.slice(1) : raw).replace(/\bthe service\b/gi, title);
+  return Object.assign(new Error(`Could not read the ${title} voices: ${why}.${transient(e) ? " Try again in a moment." : ""}`), { code: e?.code ?? "PROVIDER_OFFLINE", ...(e?.status ? { status: e.status } : {}) });
+}
+/** The Voice screen's list for a service: { voices, models, settings, defaultSettings, defaultModel } (lang: the film's language, which picks
+ *  the default model). Kept LIST_TTL_MS; fresh: read it again. */
+export async function voiceList(provider, key, { q = "", lang = "vi", timeout = LIST_TIMEOUT, fresh = false, now = Date.now } = {}) {
+  const P = PROVIDERS[provider];
+  if (!P) throw Object.assign(new Error("Unknown voice service"), { code: "INVALID" });
+  const id = `${provider}|${keyTag(key)}|${lang === "en" ? "en" : "vi"}|${q}`;
+  const hit = lists.get(id);
+  if (!fresh && hit && (hit.pending || now() - hit.at < LIST_TTL_MS)) return hit.pending ?? hit.value;
+  const pending = (async () => {
+    try {
+      const [models, defaults, voices] = await Promise.all([P.models(key, { timeout }),
+        // the settings the screen shows and the service's own defaults for each voice (its saved ones, else the service's)
+        P.defaultSettings(key, { timeout }).catch(() => ({})),          // shown empty: the service still uses its own
+        P.voices(key, { q, timeout })]);
+      return { voices: voices.map(({ settings, ...v }) => ({ ...v, defaultSettings: { ...defaults, ...(settings ?? {}) } })), models,
+        settings: SETTINGS[provider].map(({ default: _d, ...f }) => f), defaultSettings: defaults,
+        // the picker's first choice reads the film's language (Vietnamese unless the brief says otherwise)
+        defaultModel: provider === "elevenlabs" ? pickModel(models, { lang: lang === "en" ? "en" : "vi" }) : models[0]?.id ?? null };
+    } catch (e) { throw voiceListError(e, P.title); }
+  })();
+  lists.set(id, { pending });
+  try { const value = await pending; lists.set(id, { at: now(), value }); return value; }
+  catch (e) { if (lists.get(id)?.pending === pending) lists.delete(id); throw e; }
+}

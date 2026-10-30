@@ -1,7 +1,7 @@
 ---
 name: moworks-qc
 description: Moworks Studio quality review, for every video style - after the build, look at stills of the film like a strict director, score it on seven criteria, fix until every score is 8 or more, with HyperFrames' check folded in.
-version: 1.1.0
+version: 1.1.2
 derived-from: Moworks Motion kit 2.0.4 (commit 30b7dcb, MIT, Moworks) - engine/skill/moworks-motion/workflow/review.md, rewritten for Moworks Studio. Folds in the layout and contrast findings of HyperFrames' check (Apache-2.0, 0.8.214 at 4719543), read as shipped. Criterion 6 (Brand / design) keeps the checklist of HyperFrames' design adherence at 0.8.163 (Apache-2.0, as shipped: https://github.com/heygen-com/hyperframes/blob/490ecafbc4d1fba3dd9246d516390d4a1a188089/skills/hyperframes-creative/references/design-adherence.md); HF retired that file in 0.8.185, so the studio keeps it as its own rule.
 ---
 
@@ -48,6 +48,10 @@ whole conversation again.
   (redrawn, recoloured, stretched, cropped, given an effect, put in a card or badge, text added around it, or breathing so much it distorts:
   moworks-studio §3); a piece of text off the film's design (moworks-studio §2); a jump at a loop or a cut; a shot that looks like its library demo; an out move that starts before its in
   move ends; anything the owner complained about earlier (in `NOTES.md`).
+- In a Vietnamese film: every mark of every Vietnamese word on every sheet, read letter by letter, the small texts too (status strips,
+  inverted bars, labels, pills, captions): a word written without its marks, or marks cut off by a band, a mask or a line-height, breaks
+  moworks-studio §4 → write it with its marks, give the band room for them. The app's check names on-screen text written without marks
+  ("Vietnamese written without its marks") in the qc_sheets answer; fix each one.
 - In a film drawn on a canvas (moworks-studio §8): a plain text (a title, a caption, a data label or number, a lower third, an end card)
   still drawn on the canvas with no reason in `NOTES.md` → move it to HTML over the canvas, looking the same; a performed text (a pen
   writing, painted letters, ASCII / CRT characters) moved to HTML or redrawn → back to the author's drawing.
@@ -97,6 +101,11 @@ to `QC-REVIEW.json` for the app's score card, every round kept:
 "worst": [{"at": 3.2, "text": "…"}], "changed": "…"}]}` (`at` in seconds, the seven keys in this order: hook, phone, motion, variety,
 composition, brand, sync). The app shows the scores as a card, so your reply ends with one short line (the final score and what you
 fixed), not a table.
+A warning of HyperFrames' check that you looked at and keep on purpose (a painting wider than the frame so the camera can pan, a basket
+that swings from its knot) goes into `QC-REVIEW.json` too, as `"kept": [{"code": "container_overflow", "why": "the painting is wider than
+the frame so the camera can pan"}]`: the check's code, and `at` (its seconds) or `shots` when only some of its places are meant; leave both
+out when every place of that code is. The Tech checks then show it as meant this way, not as a warning (Test 23 read 26 red warnings for a
+film scored 8/10). Only what you saw and meant: a real fault is fixed, never kept.
 
 ## 5. Fresh eyes
 

@@ -652,8 +652,12 @@ test("one count for the Tech checks, plain words for an element HF names by its 
   const t = (k, v = {}) => k.replace(/\{(\w+)\}/g, (_, x) => v[x]);
   const at = Date.parse("2026-10-27T23:51:00Z"), est = { minutes: 10, high: 15, startedAt: "2026-10-27T23:51:00Z" };
   assert.equal(etaLeft(t, est, at + 2 * 60000), "about 8 min left");
-  assert.equal(etaLeft(t, est, at + 11 * 60000), "about 4 min left");
-  assert.equal(etaLeft(t, est, at + 16 * 60000), "taking longer than usual");
+  // past the estimate the time left never grows (T26-4: it jumped to the time to the slowest, and the Build's past the confirm's range)
+  assert.equal(etaLeft(t, est, at + 11 * 60000), "taking longer than usual · 11 min so far");
+  assert.equal(etaLeft(t, est, at + 16 * 60000), "taking longer than usual · 16 min so far");
+  let last = Infinity;
+  for (let m = 0; m < 10; m += 0.5) { const n = Number(/about (\d+) min left/.exec(etaLeft(t, est, at + m * 60000))?.[1]); assert.ok(n <= last, `${m} min: ${n} after ${last}`); last = n; }
+  assert.equal(etaLeft(t, { minutes: 10 }, at), "about 10 min", "no start yet");
   const { audioLabel } = await load("/src/screens/Voice.jsx");
   assert.match(audioLabel("elevenlabs-2026-10-27T16-49-46-139Z.mp3", "Viên - Narrative, Warm and Clear"), /^ElevenLabs voice-over · Viên · /);
   assert.match(audioLabel("elevenlabs-2026-10-27T16-49-46-139Z.mp3"), /^ElevenLabs voice-over · \d/);
@@ -673,4 +677,126 @@ test("the voice labels in plain words; a chat turn answering the Storyboard's qu
   assert.deepEqual(placedShots(frames, null).map((s) => s.start), [0, 2.4, 6], "T19-1: before the build, no 3 s starter to scale to");
   const editor = (await import("node:fs")).readFileSync(new URL("../packages/server/editor.mjs", import.meta.url), "utf8");
   assert.match(editor, /const total = s\.root\?\.starter \? null : s\.root\?\.duration;/);
+});
+
+test("T26-3: the Editor reads the film again when the Build is done, from the pipeline it polls; the film does not wait for the ids; the chat keeps reading", async () => {
+  const { readFileSync } = await import("node:fs");
+  const src = (p) => readFileSync(new URL(`../ui/src/${p}`, import.meta.url), "utf8");
+  const ed = src("screens/Editor.jsx");
+  assert.match(ed, /const buildDone = pipeline \? !!pipeline\.steps\?\.some\(\(x\) => x\.id === "build" && x\.status === "done"\) : null;/);
+  assert.match(ed, /if \(was === false && buildDone\) reloadFilm\(\);/, "done after not done: the film, its shots and the timeline again");
+  assert.match(ed, /const reloadFilm = async \(\) => \{\s*pv\.send\("reload"\); refreshAll\(\);/, "read at once, not after the ids");
+  assert.match(ed, /const slow = setTimeout\(\(\) => \{ shown = true; if \(alive\) setPrepareSlow\(true\); \}, 3000\);/, "the film waits 3 s at most for edit/prepare");
+  assert.match(ed, /const playerEl = filmShown \? <Player key=\{filmKey\}/);
+  // a failed read does not end the reading (watchTask, its own behaviour in t25.test.mjs)
+  assert.match(src("editor/ClaudePanel.jsx"), /useEffect\(\(\) => \(running \? watchTask\(load\) : undefined\), \[running\]\);/, "a failed read does not end the reading");
+});
+
+test("T25-7: the chat's watch hands its time limit to the read: a read given up is no answer and no red line", async () => {
+  const { readFileSync } = await import("node:fs");
+  const panel = readFileSync(new URL("../ui/src/editor/ClaudePanel.jsx", import.meta.url), "utf8");
+  assert.match(panel, /const load = async \(signal\) => \{ try \{ const r = await get\(`\/api\/projects\/\$\{projectId\}\/tasks`, signal \? \{ signal \} : undefined\); if \(signal\?\.aborted\) return undefined;/);
+  assert.match(panel, /catch \(e\) \{ if \(signal\?\.aborted\) return undefined; loadErr\.current = e\.message; setErr\(e\.message\); \}/);
+  const api = readFileSync(new URL("../ui/src/api.js", import.meta.url), "utf8");
+  assert.match(api, /r = await fetch\(path, \{ method, keepalive, signal,/, "the read is aborted, which frees the browser's connection");
+  assert.match(api, /catch \{\s*if \(signal\?\.aborted\) throw aborted\(\);/, "never asked again once given up");
+  assert.match(api, /if \(signal\?\.aborted\) throw aborted\(\);\s*\/\/ a body the caller cut/);
+});
+
+test("T25-3: the smooth preview out of date with nothing making it says so with its Update, never Updating… with no job", async () => {
+  const { SmoothLabel, VideoStage } = await load("/src/editor/Player.jsx");
+  const update = () => Promise.resolve();
+  const stale = await render(h(SmoothLabel, { proxy: { mode: "preview", status: "stale", url: "http://x/p.mp4", job: null, update } }));
+  assert.match(stale, /Out of date · Update/);
+  assert.match(stale, /<button[^>]*type="button"/);
+  assert.doesNotMatch(stale, /Updating/);
+  const making = await render(h(SmoothLabel, { proxy: { mode: "preview", status: "rendering", url: "http://x/p.mp4", job: { stage: "rendering", progress: 40 }, update } }));
+  assert.match(making, /Updating 40%/);
+  const waits = await render(h(SmoothLabel, { proxy: { mode: "preview", status: "rendering", url: "http://x/p.mp4", job: { stage: "waiting", waitingFor: "Claude" }, update } }));
+  assert.match(waits, /Smooth preview waits for Claude/);
+  const fresh = await render(h(SmoothLabel, { proxy: { mode: "preview", status: "fresh", url: "http://x/p.mp4", job: null, update } }));
+  assert.match(fresh, />Smooth</);
+  const first = await render(h(SmoothLabel, { proxy: { mode: "preview", status: "rendering", url: null, job: { stage: "rendering", progress: null }, update } }));
+  assert.match(first, /Smooth preview…/);
+  const pv = (proxy) => ({ proxy, video: { current: null }, videoEvents: {} });
+  const old = await render(h(VideoStage, { pv: pv({ mode: "prerendered", status: "stale", url: "http://x/p.mp4", job: null, update }) }));
+  assert.match(old, /Older version/);
+  assert.match(old, />Update</);
+  assert.doesNotMatch(old, /once Claude's change is done/, "nothing renders it by itself: no promise that it will");
+});
+
+// ---- a sound from the Assets tab onto the timeline: at the playhead from the menu, or dropped on a lane at the drop's time
+test("Put on the timeline starts a sound at the playhead; one that would run past the end ends with the film, never before 0", async () => {
+  const { fitStart } = await load("/src/editor/AssetsPanel.jsx");
+  assert.equal(fitStart(65, 2, 120), 65, "at the playhead");
+  assert.equal(fitStart(119, 2, 120), 118, "moved back to end with the film");
+  assert.equal(fitStart(120, 0.4, 120), 119.6, "the playhead at the very end");
+  assert.equal(fitStart(10, 300, 120), 0, "longer than the film: from 0, not before");
+  assert.equal(fitStart(-3, 1, 120), 0);
+  assert.equal(fitStart(5, undefined, 120), 5, "a sound of unknown length stays at the playhead");
+  assert.equal(fitStart(5, 2, 0), 5, "a film of unknown length: the playhead as it is");
+});
+
+test("a drop's x is a time at the lanes' zoom and scroll, on a frame, within the film; the lane under it names the route's lane", async () => {
+  const { timeAtX, clockTenths, DROP_LANE } = await load("/src/editor/Timeline.jsx");
+  // the lanes' left edge at 220 px on screen, 50 px a second, 30 fps: 125 px in is 2.5 s
+  assert.equal(timeAtX(345, 220, 50, 30, 60), 2.5);
+  assert.equal(timeAtX(340, 220, 100, 30, 60), 1.2, "zoomed in: 100 px a second");
+  assert.equal(timeAtX(345, 220, 100, 30, 60), 38 / 30, "1.25 s lands on its nearest frame");
+  assert.equal(timeAtX(345, 220 - 400, 50, 30, 60), 10.5, "scrolled 400 px: the lanes' left edge moved with it");
+  assert.equal(timeAtX(222, 220, 50, 24, 60), 1 / 24, "on a frame of a 24 fps film");
+  assert.equal(timeAtX(100, 220, 50, 30, 60), 0, "never before 0");
+  assert.equal(timeAtX(99999, 220, 50, 30, 60), 60, "never after the film");
+  assert.deepEqual(DROP_LANE, { voice: "voiceover", sfx: "sfx", music: "music" });
+  assert.deepEqual([65, 2.5, 59.97, 0, 600].map(clockTenths), ["1:05", "0:02.5", "1:00", "0:00", "10:00"]);
+});
+
+test("the timeline route gets start and lane: the menu sends the playhead's time (the folder picks the lane), a drop its time and lane", async () => {
+  const { putOnTimeline, placedSay } = await load("/src/editor/AssetsPanel.jsx");
+  const sent = [], was = globalThis.fetch, answers = [{ lane: "sfx", clip: { id: "el-clip-1", "data-start": "65" } }, { lane: "music", music: { file: "x" } },
+    { lane: "voiceover", voice: { voice: { file: "x" }, job: { id: "j1" } } }];
+  globalThis.fetch = async (url, o) => { sent.push({ url, method: o.method, body: JSON.parse(o.body) }); return new Response(JSON.stringify(answers.shift()), { status: 200 }); };
+  try {
+    const drop = await putOnTimeline("p1", "assets/3_audio/sfx/bell.wav", { start: 65, lane: "sfx" });
+    assert.deepEqual(sent[0], { url: "/api/projects/p1/assets/timeline", method: "POST", body: { path: "assets/3_audio/sfx/bell.wav", start: 65, lane: "sfx" } });
+    assert.equal(drop.at, 65, "the clip's own start");
+    const menu = await putOnTimeline("p1", "assets/3_audio/music/song.wav", { start: 12 });
+    assert.deepEqual(sent[1].body, { path: "assets/3_audio/music/song.wav", start: 12 }, "no lane: the file's folder picks it");
+    assert.equal(menu.at, 12);
+    const voice = await putOnTimeline("p1", "assets/3_audio/voiceover/vo.mp3", { start: 3, lane: "voiceover" });
+    assert.equal(voice.at, null, "a voice-over transcribed first has no time yet");
+  } finally { globalThis.fetch = was; }
+  const t = (s, v) => s.replace(/\{(\w+)\}/g, (m, k) => v?.[k] ?? m);
+  assert.equal(placedSay(t, "bell.wav", 65), "On the timeline at 1:05: bell.wav");
+  assert.equal(placedSay(t, "vo.mp3", null), "On the timeline: vo.mp3");
+});
+
+test("a sound drags from Assets onto the timeline's sound lanes only: audio rows, the three sound lanes, none locked or shown as the render", async () => {
+  const AssetsPanel = (await load("/src/editor/AssetsPanel.jsx")).default;
+  const items = [
+    { path: "assets/3_audio/sfx/bell.wav", name: "bell.wav", folder: "assets/3_audio/sfx", kind: "audio", size: 9000, duration: 1.2, status: "ok", usedIn: [] },
+    { path: "assets/3_audio/sfx/gone.wav", name: "gone.wav", folder: "assets/3_audio/sfx", kind: "audio", size: 0, status: "missing", usedIn: [] },
+    { path: "assets/1_images/logo.png", name: "logo.png", folder: "assets/1_images", kind: "image", size: 2048, status: "ok", usedIn: [] },
+  ];
+  const panel = (locked) => render(h(AssetsPanel, { projectId: "p1", items, reload: noop, fileUrl: (p) => `/f/${p}`, locked, time: 65, length: 120, onTranscript: noop, onShot: noop }));
+  const rowOf = (html, name) => html.match(new RegExp(`<li class="as-row[^"]*"[^>]*title="${name}"[^>]*>`))?.[0] ?? "";
+  const html = await panel(false);
+  assert.match(rowOf(html, "bell.wav"), /draggable="true"/, "an audio row is picked up");
+  assert.doesNotMatch(rowOf(html, "logo.png"), /draggable/, "a picture is not: it finds no drop target");
+  assert.doesNotMatch(rowOf(html, "gone.wav"), /draggable/, "nor a missing file");
+  assert.doesNotMatch(rowOf(html, "bell.wav"), /assets\//, "the path only travels with the drag, never in the row");
+  assert.doesNotMatch(rowOf(await panel(true), "bell.wav"), /draggable/, "nothing is picked up while the film renders");
+
+  const { default: Timeline, DropLine } = await load("/src/editor/Timeline.jsx");
+  const data = { duration: 120, shots: [{ number: 1, title: "Open", start: 0, duration: 120, rate: 1 }], audio: [], voice: [] };
+  const tl = (over) => render(h(Timeline, { data, time: 0, duration: 120, shot: null, onSeek: noop, onShot: noop, range: null, onRange: noop, onSoundDrop: noop, ...over }));
+  const lanes = (html) => [...html.matchAll(/class="tl-row (\w+)[^"]*" data-drop="(\w+)"/g)].map((m) => `${m[1]}:${m[2]}`);
+  assert.deepEqual(lanes(await tl({})), ["voice:voiceover", "sfx:sfx", "music:music"], "Narration, SFX and Music take a drop; Shots does not");
+  assert.deepEqual(lanes(await tl({ locked: true })), [], "a locked film takes no drop");
+  assert.deepEqual(lanes(await tl({ readOnly: true })), [], "nor a film shown as its render");
+  assert.deepEqual(lanes(await tl({ onSoundDrop: null })), []);
+  // the line while a sound is over a lane: where it would start, with its time; out of the way of a screen reader (the menu item is theirs)
+  const line = await render(h(DropLine, { x: 650, time: "1:05" }));
+  assert.match(line, /<div class="tl-drop" style="left:650px" aria-hidden="true"><b class="num">1:05<\/b><\/div>/);
+  assert.match(await render(h(DropLine, { x: 990, time: "1:39", end: true })), /class="tl-drop end"/, "its time turns left at the end of the lanes");
 });

@@ -50,7 +50,8 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
     if (status) throw new HttpError(status, e.code, e.message);
     throw e;
   };
-  const commit = (p, id, message) => { try { rev.ensureRepo(p.path); rev.commitAll(p.path, message); } catch { /* revisions optional */ } ctx.backupProject?.(id); };
+  // recorded beside the server's thread, in the project's git queue (T22-5); never rejects
+  const commit = async (p, id, message) => { try { await rev.saveAsync(p.path, message); } catch { /* revisions optional */ } ctx.backupProject?.(id); };
   const short = (s) => String(s ?? "").replace(/\s+/g, " ").trim().slice(0, 40);
 
   return { routes: [
@@ -59,11 +60,14 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
     r("POST", `/projects/${P}/edit/prepare`, async ([id]) => {
       const p = mustProject(id, root);
       if (ctx.agent?.running?.has(id)) return { ok: true, skipped: "claude" };
-      // what was already changed is committed as itself first, so only the ids go under the "not a change of the film" message
-      try { rev.ensureRepo(p.path); if (rev.isDirty(p.path)) rev.commitAll(p.path, "Changes found when the Editor opened"); } catch { /* revisions optional */ }
+      // what was already changed is committed as itself first, so only the ids go under the "not a change of the film" message. The git
+      // calls run beside the server (T26-3: this took 138 s on a busy computer, and every request of the page waited behind it)
+      try { await rev.ensureRepoAsync(p.path); if (await rev.isDirtyAsync(p.path)) await rev.commitAllAsync(p.path, "Changes found when the Editor opened"); } catch { /* revisions optional */ }
       try { await hand.stampIds(p.path); } catch (e) { return { ok: false, error: e.message }; }
-      try { if (rev.isDirty(p.path)) rev.commitAll(p.path, rev.STUDIO_IDS); } catch { /* revisions optional */ }
-      return { ok: true };
+      // changed: the ids changed the film's files (the Editor, which did not wait for this, loads the film once more)
+      let changed = false;
+      try { changed = await rev.isDirtyAsync(p.path); if (changed) await rev.commitAllAsync(p.path, rev.STUDIO_IDS); } catch { /* revisions optional */ }
+      return { ok: true, changed };
     }),
     r("GET", `/projects/${P}/edit/parts`, async ([id], _b, q) => {
       const p = mustProject(id, root);
@@ -77,7 +81,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
       const p = mustProject(id, root); busy(id);
       try {
         const out = await hand.setText(p.path, b.file, b.hfId, b.text);
-        if (out.changed) commit(p, id, `Hand edit: text "${short(b.text)}" (${out.file})`);
+        if (out.changed) await commit(p, id, `Hand edit: text "${short(b.text)}" (${out.file})`);
         return out;
       } catch (e) { fail(e); }
     }),
@@ -110,7 +114,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
       }
       // Vietnamese letters the film's face lacks, said at once
       const glyphs = codeGlyphs(p.path).findings.filter((f) => f.file === out.file && f.line === out.item.line).map((f) => `"${f.text}" is set in ${f.face}, which has no ${f.missing}: ${f.why}`);
-      commit(p, id, `Hand edit: text "${short(out.item.text)}" (${out.file})`);
+      await commit(p, id, `Hand edit: text "${short(out.item.text)}" (${out.file})`);
       try { ctx.previewProxy?.(id); } catch { /* the next change asks again */ }
       return { ...out, warnings: [...out.warnings, ...glyphs], built: film ? { kind: film.kind, ms: Date.now() - t0 } : null };
     }),
@@ -141,7 +145,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
       }
       let fonts = null;
       if (font) { const rep = await finalize(p.path); fonts = { added: rep.fontsAdded.map((f) => f.family), unresolved: rep.unresolvedFonts }; }          // R-WHATIF names the face, R-FONTS installs it
-      commit(p, id, `Hand edit: ${[font ? `font ${font}` : null, size != null ? `size ${Math.round(size)}` : null].filter(Boolean).join(", ")} of "${short(item.text)}" (${out.file})`);
+      await commit(p, id, `Hand edit: ${[font ? `font ${font}` : null, size != null ? `size ${Math.round(size)}` : null].filter(Boolean).join(", ")} of "${short(item.text)}" (${out.file})`);
       try { ctx.previewProxy?.(id); } catch { /* the next change asks again */ }
       return { ...out, fonts, built: film ? { kind: film.kind, ms: Date.now() - t0 } : null };
     }),
@@ -162,7 +166,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
           const rep = await finalize(p.path);
           fonts = { added: [...(local ? [local.family] : []), ...rep.fontsAdded.map((f) => f.family)], unresolved: rep.unresolvedFonts, local };
         }
-        if (out.changed) commit(p, id, `Hand edit: ${Object.keys(b.style ?? {}).join(", ")} (${out.file})`);
+        if (out.changed) await commit(p, id, `Hand edit: ${Object.keys(b.style ?? {}).join(", ")} (${out.file})`);
         return { ...out, fonts };
       } catch (e) { fail(e); }
     }),
@@ -170,7 +174,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
       const p = mustProject(id, root); busy(id);
       try {
         const out = await hand.reset(p.path, b.file, b.hfId);
-        if (out.changed) commit(p, id, `Hand edit reset (${out.file})`);
+        if (out.changed) await commit(p, id, `Hand edit reset (${out.file})`);
         return out;
       } catch (e) { fail(e); }
     }),
@@ -180,7 +184,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
       const p = mustProject(id, root); busy(id);
       try {
         const out = await hand.setShotTiming(p.path, b.mountId, { duration: b.duration ?? null, rate: b.rate ?? null });
-        commit(p, id, `Hand edit: shot ${b.number ?? ""} ${b.duration != null ? `${r3(b.duration)} s` : ""}${b.rate != null ? ` speed ${b.rate}x` : ""}`.replace(/\s+/g, " ").trim());
+        await commit(p, id, `Hand edit: shot ${b.number ?? ""} ${b.duration != null ? `${r3(b.duration)} s` : ""}${b.rate != null ? ` speed ${b.rate}x` : ""}`.replace(/\s+/g, " ").trim());
         return out;
       } catch (e) { fail(e); }
     }),
@@ -232,7 +236,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
       try {
         // the sound is named by its HF id or id, else by its src and its present start (`at`); `start` is where it goes
         const out = await hand.setAudio(p.path, { hfId: b.hfId, id: b.id, src: b.src, start: b.at }, { start: b.start ?? null, lane: b.lane ?? null });
-        if (out.changed) commit(p, id, `Hand edit: sound ${b.name ?? b.id ?? b.hfId ?? ""}${b.start != null ? ` at ${r3(b.start)} s` : ""}${b.lane ? ` on ${b.lane}` : ""}`.replace(/\s+/g, " ").trim());
+        if (out.changed) await commit(p, id, `Hand edit: sound ${b.name ?? b.id ?? b.hfId ?? ""}${b.start != null ? ` at ${r3(b.start)} s` : ""}${b.lane ? ` on ${b.lane}` : ""}`.replace(/\s+/g, " ").trim());
         return out;
       } catch (e) { fail(e); }
     }),
@@ -242,7 +246,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
         const out = await hand.removeAudio(p.path, { hfId: b.hfId, id: b.id, src: b.src, start: b.at });
         // assets.mjs keeps the record: the music forgotten, the voice kept off when its words are saved again, an app cue muted
         try { (await import("./assets.mjs")).soundTakenOff?.(p, { id: b.id, src: b.src }, root); } catch { /* the edit stands */ }
-        commit(p, id, `Hand edit: sound ${b.name ?? b.id ?? b.hfId ?? ""} taken off the timeline`.replace(/\s+/g, " ").trim());
+        await commit(p, id, `Hand edit: sound ${b.name ?? b.id ?? b.hfId ?? ""} taken off the timeline`.replace(/\s+/g, " ").trim());
         return out;
       } catch (e) { fail(e); }
     }),

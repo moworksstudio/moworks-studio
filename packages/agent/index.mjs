@@ -34,13 +34,14 @@ import { anidoodleId, ruleText as anidoodleRuleText, stageEngine as stageAnidood
 import { readCast, ruleText as brushRuleText, stageGuide as stageBrushGuide } from "../character-kit/index.mjs";
 import { stageEngine as stageWhatIf, whatIfSource } from "../what-if-styles/index.mjs";
 import { status as secretsStatus } from "../secrets/index.mjs";
-import { PROMPT as MOTION_PLAN_PROMPT } from "../motion-plan/index.mjs";
+import { PROMPT as MOTION_PLAN_PROMPT, SOUND_PROMPT as MOTION_PLAN_SOUND } from "../motion-plan/index.mjs";
 import * as sfx from "../sfx/index.mjs";
 import { SIGNED_OUT_TEXT } from "../server/claude.mjs";
 /** Claude Code's own message when another of its processes is refreshing the sign-in at the same moment: passing, worth one retry. */
 export const OAUTH_RACE = /another Claude Code process is refreshing|Failed to refresh OAuth token/i;
 const RETRY_MS = Number(process.env.MW_CLAUDE_RETRY_MS ?? 5000);
-import { classifyAsset, inventory, readNotes, keepRootFps, sequenceOf } from "../project-service/index.mjs";
+import { BRIEF_MAX, addNote, classifyAsset, inventory, readNotes, keepRootFps, sequenceOf } from "../project-service/index.mjs";
+import { cutNote, cutOf, followCut, limitLine, outputCap, readTranscriptCuts, resumeText } from "./output-limit.mjs";
 import { migrateLayout } from "../project-service/layout.mjs";
 import { filmKind, requiredReads } from "./reads.mjs";
 import { followApprovals, keepApprovedStoryboard, storyboardHash } from "../pipeline/index.mjs";
@@ -48,6 +49,7 @@ import { read as readMotionPlan } from "../motion-plan/index.mjs";
 import { voiceFitText } from "./voice-fit.mjs";
 import { canvasTextLine } from "./canvas-text.mjs";
 import { keepAlive } from "./keepalive.mjs";
+import { checkArgv, promptFile } from "./argv.mjs";
 
 /** The deterministic gates (packages/hf-qa) in a child process, so the server keeps answering while HF's check runs. `signal` ends the
  *  whole tree (the gates and the HyperFrames processes they started): the promise then rejects with code DROPPED. */
@@ -151,8 +153,9 @@ export function stepEffort(effort, stepDef = null) {
   return { effort, rule: null };
 }
 
-/** The Claude Code arguments for a task (exported for the tests): tools, mode, web, the app's MCP permission tool when there is one. */
-export function claudeArgs({ settings, systemPrompt, sessionArgs, mcpConfig = null, appTools = [], guard = null }) {
+/** The Claude Code arguments for a task (exported for the tests): tools, mode, web, the app's MCP permission tool when there is one.
+ *  systemPromptFile: the system prompt's file (argv.mjs promptFile); the text itself never goes on the command line (T27-14). */
+export function claudeArgs({ settings, systemPromptFile, sessionArgs, mcpConfig = null, appTools = [], guard = null }) {
   const bypass = settings.mode === "bypassPermissions";
   const web = settings.web !== "off";
   const args = ["-p", "--output-format", "stream-json", "--verbose", "--strict-mcp-config", "--disable-slash-commands"];
@@ -169,7 +172,9 @@ export function claudeArgs({ settings, systemPrompt, sessionArgs, mcpConfig = nu
   if (guard) extra.hooks = { PreToolUse: [{ matcher: "Write|Edit|MultiEdit|NotebookEdit", hooks: [{ type: "command", command: guard, timeout: 30 }] }] };
   if (Object.keys(extra).length) args.push("--settings", JSON.stringify(extra));
   if (mcpConfig) args.push("--mcp-config", mcpConfig);
-  args.push("--append-system-prompt", systemPrompt, ...sessionArgs);
+  // read from a file: passed as text, a film past its Final Mix (33K of rules and steps) went over Windows' 32,767-character command
+  // line and every chat message failed with "spawn ENAMETOOLONG" (T27-14)
+  args.push("--append-system-prompt-file", systemPromptFile, ...sessionArgs);
   const model = MODELS.find(([k]) => k === settings.model)?.[2];
   if (model) args.push("--model", model);
   if (settings.effort) args.push("--effort", settings.effort);
@@ -194,6 +199,12 @@ export const APP_TOOLS = {
     inputSchema: { type: "object", properties: { ids: { type: "array", items: { type: "string" }, description: "Only these characters, e.g. [\"mira\"]; leave out for the whole cast" } } } },
   voice_check: { description: "Measures the film's mix under its voice-over: lists every spoken word (from the reviewed transcript) where the sound effects or the music come within 3 dB of the voice, with its second. A warning to fix (move the effect into the pause after its word, lower it, or lower or stop the music), never a block. Call it after the sound is placed and after a sound fix.",
     inputSchema: { type: "object", properties: {} } },
+  sfx_prefs: { description: "Sets the owner's sound-effect choices for this film, which the app keeps on every placement: a family or a sound turned off (\"whoosh\", \"footstep\", \"door creak\"; \"all\" for no sound effects at all) or on again, the ambience beds on or off, the density (low, normal or lively: lively is the default, a sound on every action). Call it whenever the owner asks for no whoosh, fewer or more sounds, no ambience, or silence: never only edit the storyboard's `- sfx:` lines for that, the app would put its own sounds back. When the sounds are placed already, the app places them again at once with the choices and answers what it placed.",
+    inputSchema: { type: "object", properties: { off: { type: "array", items: { type: "string" }, description: "Families or sound names to turn off, e.g. [\"whoosh\"]; [\"all\"] for no sound effects" },
+      on: { type: "array", items: { type: "string" }, description: "Families or names to turn on again; [\"all\"] turns every one on" },
+      ambience: { type: "boolean", description: "false: no ambience beds under the scenes" },
+      density: { type: "string", enum: ["low", "normal", "lively"], description: "How many sounds: low (only the big actions), normal, lively (every action, the default)" },
+      restore: { type: "boolean", description: "true: bring back every single sound the owner took out in the Final Mix" } } } },
   music_stop: { description: "Stops the film's music track at a second of the film, or plays it to its end again (with its fade out) with at: null. The music plays to the film's end by default: stop it only in a What If film (at the turn) or when the owner or the brief asks for it. Only when the film has music on the timeline; the owner can change it in the Final Mix.",
     inputSchema: { type: "object", properties: { at: { type: ["number", "null"], description: "The second of the film where the music stops; null to let it play to its end" } }, required: ["at"] } },
   font_check: { description: "Checks fonts before you name them anywhere (BRIEF.md, ASSETS.md, design.md, frame.md, a board, the film): for each family, whether the app can serve it in this project (bundled, on Google Fonts, or a font file in assets/) and whether it draws Vietnamese letters, with Vietnamese fonts the app bundles to choose from. Call it in Prepare and whenever you choose a font (Test 10 #435).",
@@ -440,7 +451,12 @@ export async function checkFonts(dir, fams, { google } = {}) {
  *  is written by the app into frame.md. */
 export function designLines(meta, dir, brandFonts = null) {
   const has = (f) => !!dir && existsSync(join(dir, f));
-  if (meta.designLocked) return ["Design: the style's author's own (its rules set the colours, type and layout); no Brand Kit is chosen for it. Brand colours, fonts or a look the brief or the chat asks for that differ from the author's are a conflict: stop, list each point with its choices and wait for the owner (moworks-studio §2b), then follow what they chose; apply a Brand Kit only when the owner asks, saying first what it changes."];
+  if (meta.designLocked) {
+    const kit = meta.brandKitAsk?.id ? meta.brandKitAsk : null;
+    return [`Design: the style's author's own (its rules set the colours, type and layout); ${kit ? "no Brand Kit is applied to it" : "no Brand Kit is chosen for it"}. Brand colours, fonts or a look the brief or the chat asks for that differ from the author's are a conflict: stop, list each point with its choices and wait for the owner (moworks-studio §2b), then follow what they chose; apply a Brand Kit only when the owner asks, saying first what it changes.`,
+      // T25: the Brand Kit picked in New project was dropped without a word; it is kept for Prepare to ask about
+      ...(kit ? [`In New project the owner also chose the Brand Kit ${kit.title ? `"${kit.title}"` : kit.id}; this film style keeps its author's design, so the app did not apply it${kit.file && has(kit.file) ? ` (its design spec, a reference only: ${kit.file}; never copy it to frame.md)` : ""}. In Prepare, ask how to use it, as one numbered point with the step's other conflicts and gaps (moworks-studio §2b): name what in it differs from the author's design (colours, fonts, logo), then offer keep the author's design and leave the Brand Kit aside · its colours and fonts in the author's hand · only its logo (and end card), your suggestion first; wait, then follow what the owner chose and write it in ASSETS.md.`] : [])];
+  }
   const look = meta.look?.id ? meta.look : null;
   const hint = "HyperFrames' frame presets are there as hints, as its references/look.md says (\"Presets\")";
   if (!look) return [`Design: from the brief (no Brand Kit chosen): follow the design the brief describes (colours, type, look and feel, motion); what it leaves open is yours to design (${hint}). A brand guideline in the assets is followed (suggest the owner save it as a Brand Kit in the app).`];
@@ -520,13 +536,39 @@ export function ownerLanguage(texts) {
   return "vi";
 }
 
+/** A task's reply language: the user's chat message, else their last chat message, else their brief. The words they typed (`shown`,
+ *  not the notes the app wraps them in), never a step's prompt or a task the app itself sent in English (`by` "app": a fix after the
+ *  characters' gate or the compiler, the brief changed, the voice's words corrected), which once turned the next steps English. */
+export function taskLanguage({ step = null, by = null, text = "", shown = null, earlier = [], brief = null }) {
+  return ownerLanguage([(step || by === "app") ? null : (shown ?? text), ...earlier.filter((x) => !x.step && x.by !== "app").map((x) => x.shown ?? x.text).reverse(), brief]);
+}
+/** The language of Claude's words to the owner, said again where Claude writes them: at the end of every request and after each of the
+ *  app's tools. The system prompt says it too, but after a long run of English (the rules, the code, the app's tools' answers) a step's
+ *  notes and report came in English: the Build of Test 27 wrote "I've built the full 75 s film…" in a Vietnamese film whose every earlier
+ *  step had answered in Vietnamese, its notes English from the first pose check on (T27-8). */
+export function replyLanguage(lang) {
+  return lang === "en"
+    ? "Write to the owner in English: every note between your tool calls and your report at the end."
+    : "Write to the owner in Vietnamese: every note between your tool calls and your report at the end, every sentence (the app's words, the rules and the tools' answers are in English; yours to the owner are not).";
+}
+/** The reminder after an app tool's answer (Vietnamese only: an English answer pulls the words that follow it into English). */
+export const toolReminder = (lang) => (lang === "en" ? "" : "(Your words to the owner stay in Vietnamese, the report at the end too.)");
+/** A task's request: the target, the Motion Library item, the pipeline, what is new, what came just before, the request itself, and
+ *  the language of the replies last. */
+export function taskRequest({ target = "", motion = "", pipeline = "", news = "", before = "", msg, lang = "vi" }) {
+  return `${target}${motion}${pipeline ? `\n\n${pipeline}` : ""}${news ? `\n${news}` : ""}${before ? `\n\n${before}` : ""}\n\nRequest:\n${msg}\n\n${replyLanguage(lang)}`;
+}
+
 /** The film's length as Claude is told it (house rules §9): the content New project set, and the ending's fade after it or inside it. */
 export function lengthLine(meta, dir = null) {
   const L = filmLength(meta, { dir });
   if (!L.content) return "? s";
-  if (L.own) return `${L.content} s, the style author's own ending inside it (house rules §9: nothing added after it; the root's data-duration is ${L.total} s)`;
+  if (L.own) return `${L.content} s, the style author's own ending inside it (house rules §9: MOTION-PLAN.json names it in ending.author and the last shot plays it, its row marked "ending": true; nothing added after it; the root's data-duration is ${L.total} s)`;
   if (L.inside) return `${L.content} s exactly, the ending's ${L.fade} s fade inside it (the brief asks for no more: MOTION-PLAN.json's ending.inside; the root's data-duration is ${L.total} s)`;
-  return `${L.content} s of content, then the ending's ${L.fade} s fade after it (house rules §9): the whole film, the root's data-duration, the storyboard's frames and the plan's shots add up to ${L.total} s. Only a brief that asks for exactly or at most ${L.content} s puts the fade inside it (MOTION-PLAN.json's ending.inside: true)`;
+  // an author's ending the plan only claims (T24-12: the picture stayed lit to its last frame and cut) is the house fade
+  const why = { style: "the film's style has no ending of its own", unnamed: "it names no ending of the author's (ending.author)", lastShot: "no row of its last shot plays it (\"ending\": true)" }[L.why];
+  const claimed = L.asked === "author" ? `MOTION-PLAN.json's ending says "author" but ${why}, so the film ends with the house fade: the picture fades out with the music. ` : "";
+  return `${claimed}${L.content} s of content, then the ending's ${L.fade} s fade after it (house rules §9): the whole film, the root's data-duration, the storyboard's frames and the plan's shots add up to ${L.total} s. Only a brief that asks for exactly or at most ${L.content} s puts the fade inside it (MOTION-PLAN.json's ending.inside: true)`;
 }
 
 export function systemPrompt({ meta, style, rules, first = [], qc = [], shots, dir, step = null, lang = "vi", motionSpec = true, settings = { mode: "auto", web: "off" }, tools = [], required = [], brandFonts = null }) {
@@ -556,8 +598,8 @@ export function systemPrompt({ meta, style, rules, first = [], qc = [], shots, d
     // already bundled the change and made the film's render again
     !step && (meta.pipeline?.finished || meta.pipeline?.ran?.build) ? "A change you make to the built film in the chat: look at it before you reply. Call qc_sheets once (the app bundles the film as you left it first) and read the shots you changed; say what you saw, and fix what does not hold. After your turn the app makes the film ready to render again by itself (its preview and its checks): never tell the owner to render again or that the render is old; say the change is in the film and Render takes it." : "",
     canvasTextLine(meta, dir, step),          // a canvas film's plain text in HTML over it, its performed text as the author ships it
-    meta.brief?.text ? `${meta.brief.mode === "script" ? "Brief (narration script)" : "Brief from the owner (one box: topic, idea, narration if any, notes, links, direction)"}: ${meta.brief.text.slice(0, 4000)}` : "No brief yet.",
-    meta.brief?.direction ? `Direction from the owner: ${meta.brief.direction.slice(0, 2000)}` : "",
+    meta.brief?.text ? `${meta.brief.mode === "script" ? "Brief (narration script)" : "Brief from the owner (one box: topic, idea, narration if any, notes, links, direction)"}: ${briefText(meta.brief.text)}` : "No brief yet.",
+    meta.brief?.direction ? `Direction from the owner: ${briefText(meta.brief.direction, 4000)}` : "",
     // the film's kind (the brief's only kept answer): an anidoodle medium's own (config/anidoodle-pipeline.json) or one every style offers
     // (What If, config/film-kinds.json)
     (dir && ((k) => (k?.scope === "anidoodle" && !anidoodleId(meta.style?.id) ? "" : k?.says))(filmKind(dir))) || "",
@@ -574,6 +616,7 @@ export function systemPrompt({ meta, style, rules, first = [], qc = [], shots, d
     rulesLine(rules, first, qc, dir, required),
     // fewer turns: each turn re-reads the whole conversation
     "Work in few turns: each turn re-reads the whole conversation. Put independent reads in one turn (several Read calls at once) and independent edits in one turn; never read a file again that you already read in this task unless it changed; never Glob or Grep for a rule file whose path you were given.",
+    limitLine(step),          // a reply that reaches its limit is lost whole (T23-2)
     "Each pipeline step runs in its own conversation, so what an earlier step decided lives only in the project's files: read NOTES.md and the",
     "files of the earlier steps before you start, and write every decision a later step needs into NOTES.md (one short dated line each) as you make it.",
     `Project files now: ${projectFiles(dir).join(", ") || "none yet"}. The pipeline, what is new and the request come in the message.`,
@@ -594,9 +637,12 @@ export function systemPrompt({ meta, style, rules, first = [], qc = [], shots, d
     "Files under .moworks/ are the app's: read .moworks/rules/ and .moworks/library/ but never edit anything under .moworks/ or .git/.",
     "When the request is a question or needs the user's choice (an approval gate, missing information), answer or ask in text and change no file.",
     motionSpec ? MOTION_PLAN_PROMPT : "",          // only styles whose pipeline has a motion spec
-    "Sound effects (the app's sfx cues): to add one, write an `- sfx:` line on the shot's frame in STORYBOARD.md with short sound names, comma-separated",
-    "(e.g. `- sfx: whoosh, pop`; `pop@0.8` = 0.8 s into the shot; `none` = silent). Do not write <audio> elements for sound effects and do not edit assets/3_audio/sfx/",
-    "or CREDITS.md: after your turn the app finds each sound (free Freesound sounds, CC0 / CC BY, credited), places it at the shot's start at volume 0.35 and lists its credit.",
+    motionSpec ? MOTION_PLAN_SOUND : "",          // each motion row's own sound (house rules, "A sound on every action")
+    // a sound on every action (owner 30/10): the storyboard names them, the app places one for every action the names leave out
+    "Sound effects (the house rules, \"A sound on every action\"): every visible action of the film gets a sound and every scene that has a place a quiet ambience bed. Name them on each frame of STORYBOARD.md:",
+    "an `- sfx:` line with a short English name per action, comma-separated, at its moment (e.g. `- sfx: pop, door open@1.2, footstep wood@2`; `name@0.8` = 0.8 s into the shot; `none` = silent), and an `- ambience:` line with the place (`- ambience: rain`, `city street`, `room tone`, `forest night`; `none` for a shot with no place). Name what is heard, the thing and its sound (`thread rustle`, `wooden box lid`), never a motion verb alone (`pull`, `park`); one sound plays at most three times a film, so vary the names of a repeated action.",
+    "Do not write <audio> elements for sound effects and do not edit assets/3_audio/sfx/ or CREDITS.md: at the Final Mix the app finds each sound (its offline library of CC0 sounds first, then free Freesound sounds, CC0 / CC BY), adds its own for every action the names leave out, places each at its moment at its family's level under the music and the voice, and credits it.",
+    "When the owner asks for no whoosh, fewer or more sounds, no ambience or silence, call the app's sfx_prefs tool (the app keeps the choice on every placement); editing `- sfx:` lines alone never stops the app's own sounds.",
     // Answer in the language the user writes in, never from the UI's language or the app's own step messages (English).
     // The app decides the language (Claude once chose per step and mixed them): one language in every reply
     `Reply to the owner in ${lang === "en" ? "English" : "Vietnamese"} only (the language the owner writes in), every sentence of every reply; never mix languages in one reply. The app's own step messages are in English and do not change it.`,
@@ -665,7 +711,9 @@ export class Agent {
     try {
       const text = await h({ task, project: p, args, root: this.root });
       this.event(task, { kind: "tool", tool: `app:${name}`, path: "" });
-      return { text };
+      // the owner's language after the tool's English (T27-8: the Build's notes turned English after the first pose check)
+      const remind = task.lang ? toolReminder(task.lang) : "";
+      return { text: remind && typeof text === "string" ? `${text}\n\n${remind}` : text };
     } catch (e) { return { text: `The app could not do it: ${e.message}`, error: true }; }
   }
 
@@ -744,7 +792,7 @@ export class Agent {
   async again(projectId, taskId) {
     const old = this.list(projectId).find((t) => t.id === taskId);
     if (!old?.interrupted) throw Object.assign(new Error("This task was not interrupted"), { code: "INVALID" });
-    const task = await this.start(projectId, { text: old.text, scope: old.scope ?? { kind: "project" }, step: old.step ?? null });
+    const task = await this.start(projectId, { text: old.text, scope: old.scope ?? { kind: "project" }, step: old.step ?? null, by: old.by ?? null });
     this.persist({ ...old, interrupted: { ...old.interrupted, handled: { at: new Date().toISOString(), by: task.id } } });
     return task;
   }
@@ -764,14 +812,16 @@ export class Agent {
   // feedback)
   // label: what the chat calls the task when it is not a step's own (the turn answering a revision's question is "Storyboard · revision")
   // continues: the step whose question this chat turn answers: the Pipeline shows that step at work; the turn stays a chat turn
-  async start(projectId, { text, scope = { kind: "project" }, step = null, kickoff = false, retryOf = null, shown = null, label = null, media = null, asks = null, continues = null }) {
+  // resumeOf: the task whose reply was cut at the output limit before it was done (T23-2): this one goes on in its conversation
+  async start(projectId, { text, scope = { kind: "project" }, step = null, kickoff = false, retryOf = null, shown = null, label = null, media = null, asks = null, continues = null, resumeOf = null, by = null }) {
     const msg = String(text ?? "").trim();
     if (!msg) throw Object.assign(new Error("Write what you want Claude to do"), { code: "INVALID" });
     if (this.running.has(projectId)) throw Object.assign(new Error("Claude is still working on this project. Stop it or wait for it to finish."), { code: "BUSY" });
     this.guard?.(projectId);
     const p = this.getProject(projectId);
     if (!p || p.missing) throw Object.assign(new Error("Project not found"), { code: "NOT_FOUND" });
-    const exe = findClaude(this.root);
+    // (claudeExe and spawnClaude: a test's stand-in for Claude Code, as gates is for the checks)
+    const exe = this.claudeExe ?? findClaude(this.root);
     if (!exe) throw Object.assign(new Error("Claude Code was not found on this computer"), { code: "NO_CLAUDE" });
     // refused before anything starts, so no task runs half-way without a sign-in. The check takes seconds; meanwhile the
     // Pipeline counts the message as sent (no "Waiting for you: answer Claude" on a question just answered)
@@ -792,17 +842,18 @@ export class Agent {
     const task = { id: randomBytes(6).toString("hex"), projectId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), status: "running",
       stage: "preparing", text: msg, scope, events: [], resultText: "", error: null, changed: [], qa: null, model: null, modelSetting: settings.model, outcome: null,
       settings: { mode: settings.mode, effort: settings.effort, ...(se.rule ? { effortRule: se.rule } : {}), web: settings.web }, session: { key, fresh: !!step || freshChat || !conv.sessions[key] },
-      ...(step ? { step } : {}), ...(kickoff ? { kickoff: true } : {}), ...(retryOf ? { retryOf } : {}), ...(shown ? { shown: String(shown).slice(0, 20000) } : {}), ...(label ? { label: String(label).slice(0, 80) } : {}), ...(asks ? { asks: String(asks).slice(0, 80) } : {}), ...(continues && !step ? { continues: String(continues).slice(0, 40) } : {}),
+      ...(step ? { step } : {}), ...(by === "app" ? { by } : {}), ...(kickoff ? { kickoff: true } : {}), ...(retryOf ? { retryOf } : {}), ...(resumeOf ? { resumeOf } : {}), ...(shown ? { shown: String(shown).slice(0, 20000) } : {}), ...(label ? { label: String(label).slice(0, 80) } : {}), ...(asks ? { asks: String(asks).slice(0, 80) } : {}), ...(continues && !step ? { continues: String(continues).slice(0, 40) } : {}),
       // pictures the chat card shows with the user's words (each film note's frame: { url, t, shot, text }), never a file path
       ...(Array.isArray(media) && media.length ? { media: media.slice(0, 200) } : {}) };
     this.tasks.set(task.id, task);
     this.running.set(projectId, task.id);
+    let spFile = null;
     try {
       // the film's first task ends the kickoff, whoever started it (the autopilot on open, or the Editor): a later Editor never
       // takes a pending kickoff for its own first step (it ran the Character step a second time)
       if (kickoff || meta.kickoff?.pending) this.updateMeta?.(projectId, (m) => { m.kickoff = { pending: false, taskId: task.id, at: task.createdAt }; });
-      rev.ensureRepo(dir);
-      task.revBefore = rev.commitAll(dir, "Changes before Claude task " + task.id);
+      // git beside the server's thread, in the project's queue (T22-5): every change asked for before is recorded first
+      task.revBefore = await rev.saveAsync(dir, "Changes before Claude task " + task.id);
       const { style, files: rules, first, qc } = prepareRules(dir, meta.style?.id, this.root);
       const { shots } = await this.readShots(dir);
       if (meta.look?.id && !scope.motion) { try { stageLook(dir, meta.look.id, this.root); } catch { /* the look store is not imported: the name is enough */ } }
@@ -837,7 +888,8 @@ export class Agent {
       const newsText = news.length ? `New since your last task: ${news.join("; ")}.` : "";
       // a pipeline step starts a fresh conversation each time it runs ("Make two more options" once resumed the first storyboard task's
       // 49 turns and its pictures, 2.5 M tokens re-read); the project's files carry the work across. The chat keeps its conversation.
-      const own = step || freshChat ? null : conv.sessions[key];
+      // a step taken up after its reply was cut goes on in the conversation it was cut in (its reads and its work so far)
+      const own = (step && !resumeOf) || freshChat ? null : conv.sessions[key];
       const before = freshChat && prev ? `Just before (this chat starts a new, small conversation; the project's files hold the work): ${prev.step ? `the ${prev.step} step` : `the request "${String(prev.text ?? "").split("\n")[0].slice(0, 200)}"`} ended with: ${String(prev.resultText ?? "").slice(0, 1500)}\nRead only the files this request needs, the part you change (Grep for it, then Edit).` : "";
       const sessionArgs = own?.sessionId ? ["--resume", own.sessionId] : ["--session-id", randomUUID()];
       const target = scope.kind === "selection" && scope.selection      // an element picked in the Editor's preview: its own request block (HF's format)
@@ -873,14 +925,16 @@ export class Agent {
           + " These are words and numbers, not code to paste: write the move with GSAP on the shot's own paused timeline from them (ease, durations, amounts scaled to the film's size).";
         this.event(task, { kind: "status", text: `Motion Library: ${staged.item.title}` });
       }
-      // the pipeline and the news live in the request only (they change every task; the system prompt carries what holds for the project)
-      const prompt = `${target}${motion}${pipeline ? `\n\n${pipeline}` : ""}${newsText ? `\n${newsText}` : ""}${before ? `\n\n${before}` : ""}\n\nRequest:\n${msg}`;
+      // the user's language (taskLanguage), kept on the task for the reminder after each app tool
+      const lang = taskLanguage({ step, by, text: msg, shown, earlier: this.list(projectId).filter((x) => x.id !== task.id), brief: meta.brief?.text });
+      task.lang = lang;
+      // the pipeline and the news live in the request only (they change every task; the system prompt carries what holds for the project);
+      // the request ends with the language of the replies (replyLanguage)
+      const prompt = taskRequest({ target, motion, pipeline, news: newsText, before, msg, lang });
       const tools = this.permitUrl ? Object.keys(this.appTools).filter((n) => APP_TOOLS[n]) : [];
       // the rule files this step must read (reads.mjs, after HF's own mandatory reads): named in the prompt, checked before the first edit
       const required = requiredReads(dir, { styleId: meta.style?.id, first, step });
       task.requiredReads = required;
-      // the user's language: this chat message, else their last chat message, else the brief
-      const lang = ownerLanguage([step ? null : msg, ...this.list(projectId).filter((x) => !x.step && x.id !== task.id).map((x) => x.text).reverse(), meta.brief?.text]);
       // the Brand Kit's fonts, checked by the app before Prepare and the chat: a font it lacks or without Vietnamese stops
       const brandFonts = meta.look?.id && (!step || step === "brief")
         ? await Promise.race([brandKitFonts(dir), new Promise((ok) => setTimeout(() => ok(null), 8000))]).catch(() => null) : null;
@@ -888,7 +942,10 @@ export class Agent {
         motionSpec: !this.stepOf || (this.stepOf(meta, null, true) ?? []).some((s) => s.done?.kind === "approval" && s.done.name === "motionPlan") });
       const mcpConfig = this.permitUrl ? JSON.stringify({ mcpServers: { mw: { command: process.execPath, args: [join(import.meta.dirname, "permit-mcp.mjs")] } } }) : null;
       const guard = required.length ? `"${process.execPath}" "${join(import.meta.dirname, "read-guard.mjs")}"` : null;
-      const args = claudeArgs({ settings, systemPrompt: sp, sessionArgs, mcpConfig, appTools: tools, guard });
+      // the system prompt in a file of the app's state (outside the project and its revisions), removed when the run ends; the task's
+      // cache pings read the same file while it runs
+      spFile = promptFile(join(stateDir(this.root), "claude-prompts"), task.id, sp);
+      const args = claudeArgs({ settings, systemPromptFile: spFile.path, sessionArgs, mcpConfig, appTools: tools, guard });
       const pins = loadPins(this.root);
       const env = claudeEnv();
       for (const k of Object.keys(env)) if (/^ANTHROPIC_(API_KEY|AUTH_TOKEN|BASE_URL)$/i.test(k) || (pins.stripEnv ?? []).includes(k.toUpperCase())) delete env[k];
@@ -896,17 +953,23 @@ export class Agent {
       // which the server takes for Claude's questions and the app's tools alone
       delete env.MW_TOKEN;
       Object.assign(env, { MW_REQUIRED_READS: JSON.stringify(required), MW_TASK: task.id, MW_PROJECT: dir });
+      // the most one reply of this step may hold, its thinking included (Opus 5.5's thinking has no budget of its own: output-limit.mjs)
+      const cap = outputCap(step);
+      if (cap) { env.CLAUDE_CODE_MAX_OUTPUT_TOKENS = String(Math.min(cap, Number(env.CLAUDE_CODE_MAX_OUTPUT_TOKENS) || cap)); task.settings.outputCap = Number(env.CLAUDE_CODE_MAX_OUTPUT_TOKENS); }
       if (this.permitUrl) Object.assign(env, { MW_PERMIT_URL: this.permitUrl, MW_PERMIT_TOKEN: this.permitToken ?? "", MW_PERMIT_TASK: task.id, MCP_TOOL_TIMEOUT: String(35 * 60 * 1000),
         MW_APP_TOOLS: JSON.stringify(tools.map((n) => ({ name: n, ...APP_TOOLS[n] }))) });
       task.stage = "working";
       this.event(task, { kind: "status", text: `Target: ${scope.kind === "shot" && scope.shot ? `Shot ${scope.shot.number}` : "Project"}` });
       this.event(task, { kind: "status", text: `${own?.sessionId ? "Continuing" : "New"} conversation for ${key === "chat" ? "the chat" : `step ${key}`} · ${settings.mode} · ${settings.model} · effort ${settings.effort}${se.rule === "step" ? " (this step's own)" : se.rule === "min" ? " (at least high)" : ""} · web ${settings.web}` });
-      const child = spawn(exe, args, { cwd: dir, env, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
+      // a command line over the budget is refused here in plain words (its largest part logged), never Windows' ENAMETOOLONG
+      checkArgv(exe, args);
+      const spawnFn = this.spawnClaude ?? spawn;
+      const child = spawnFn(exe, args, { cwd: dir, env, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
       this.procs.set(task.id, child);
       child.stdin.end(prompt, "utf8");
       // a long think or a long app tool (QC sheets, board stills) would let the 5-minute cache lapse; a one-word ping of a
       // copy of the conversation keeps it (its tokens are added to the task's usage)
-      const ka = keepAlive({ exe, args, sessionId: sessionArgs[1], cwd: dir, env, onPing: ({ ok, usage }) => {
+      const ka = keepAlive({ exe, args, sessionId: sessionArgs[1], cwd: dir, env, spawnFn, onPing: ({ ok, usage }) => {
         const k = task.keepAlive ??= { pings: 0, ok: 0, cacheRead: 0, cacheWrite: 0, output: 0, costUsd: 0 };
         k.pings++; if (ok) k.ok++;
         if (usage) { const [pi, pw, pr, po] = PRICES.find(([id]) => id === "claude-opus-5-5")[1];
@@ -920,16 +983,21 @@ export class Agent {
         while ((i = buf.indexOf("\n")) >= 0) { const line = buf.slice(0, i); buf = buf.slice(i + 1); ka.touch(line); this.onLine(task, line, dir, key); }
       });
       child.stderr.on("data", (d) => { errTail = (errTail + d.toString("utf8")).slice(-4000); });
-      child.on("close", (code) => { ka.stop(); this.procs.delete(task.id); this.finish(task, dir, code, errTail).catch((e) => this.fail(task, e)); });
-      child.on("error", (e) => this.fail(task, e));
-    } catch (e) { this.fail(task, e); }
+      child.on("close", (code) => { ka.stop(); spFile.drop(); this.procs.delete(task.id); this.finish(task, dir, code, errTail).catch((e) => this.fail(task, e)); });
+      child.on("error", (e) => { spFile.drop(); this.fail(task, e); });
+    } catch (e) { spFile?.drop(); this.fail(task, e); }
     return task;
   }
 
   onLine(task, line, dir, key = "chat") {
     let e; try { e = JSON.parse(line); } catch { return; }
+    // a reply cut at the output limit (or dropped mid-stream) after minutes of thinking: said in the chat as it happens (T23-2)
+    // (Claude Code goes on by itself after a cut reply; a run that stops on it is said when it ends, finishInner)
+    const cut = followCut(task, e);
+    if (cut && (cut.from === "reply" || cut.from === "nudge")) this.cutSaid(task, dir, cut, { then: "going" });
     if (e.type === "system" && e.subtype === "init") {
       task.model = e.model ?? null;
+      if (e.session_id) task.sessionId = e.session_id;
       if (e.session_id) {          // this step's session, and the one the next chat message continues
         const conv = readConversation(dir);
         // Claude Code's total_cost_usd counts the whole session, earlier runs of a resumed one too (a 2-turn chat once showed $1.51):
@@ -954,10 +1022,12 @@ export class Agent {
         else if (b.type === "thinking") task.doing = { kind: "think", at: new Date().toISOString() };
       }
     } else if (e.type === "user") {
-      for (const b of e.message?.content ?? []) if (b?.type === "tool_result" && b.is_error) this.event(task, { kind: "tool-error", text: String(typeof b.content === "string" ? b.content : JSON.stringify(b.content)).slice(0, 400) });
+      // (a user line of Claude Code's own, its nudge after a cut reply, may carry its words as a plain string)
+      const blocks = Array.isArray(e.message?.content) ? e.message.content : [];
+      for (const b of blocks) if (b?.type === "tool_result" && b.is_error) this.event(task, { kind: "tool-error", text: String(typeof b.content === "string" ? b.content : JSON.stringify(b.content)).slice(0, 400) });
       // a tool's answer is back, so Claude is thinking now (its thinking may stream nothing): the bar said "Font check for
-      // 15m 47s" through a 16-minute thinking turn
-      if ((e.message?.content ?? []).some((b) => b?.type === "tool_result")) task.doing = { kind: "think", at: new Date().toISOString() };
+      // 15m 47s" through a 16-minute thinking turn; and after Claude Code's nudge too
+      if (blocks.some((b) => b?.type === "tool_result") || cutOf(e)) task.doing = { kind: "think", at: new Date().toISOString() };
     } else if (e.type === "result") {
       task.resultText = e.result ?? "";
       task.claudeError = e.is_error ? (e.result || e.subtype) : null;
@@ -972,6 +1042,36 @@ export class Agent {
         } catch { /* the next run counts from zero */ }
       }
     }
+  }
+
+  /** A reply cut at the output limit or mid-stream, in one plain chat line (a "pipeline" note) and in the task's record: the minutes
+   *  and the money a lost think took are said, never a silent 20 minutes (T23-2). then: cutNote's (what follows the cut). */
+  cutSaid(task, dir, cut, { then = "going" } = {}) {
+    const price = (PRICES.find(([id]) => String(task.model ?? "").startsWith(id))?.[1] ?? PRICES.find(([id]) => id === "claude-opus-5-5")[1])[3] / 1e6;
+    const stepId = task.step ?? task.continues ?? null;
+    const title = stepId ? this.stepOf?.(this.getProject(task.projectId)?.meta ?? {}, stepId)?.title ?? null : null;
+    const n = cutNote(cut, { then, step: title, price, said: !!cut.said });
+    if (!cut.said) this.event(task, { kind: "status", text: `A reply was ${cut.kind === "stream" ? "cut off mid-stream" : "cut at the output limit"} after ${cut.minutes} min${cut.output ? ` (${cut.output} output tokens)` : ""}` });
+    cut.said = true;
+    try { addNote(dir, { kind: "pipeline", text: n.text, vars: n.vars }); } catch { /* notes are best effort */ }
+  }
+
+  /** The run ended on a cut reply before its work was written or said done: one plain line, and a pipeline step (or the chat turn
+   *  going on with one) is taken up again once, in its own conversation, with the nudge to work in small pieces; a second cut stops and
+   *  says how to go on. The task itself is not done (the pipeline never takes it for its step's result). */
+  cutEnded(task, dir, head, wrote) {
+    const stepId = task.step ?? task.continues ?? null;
+    const goOn = !!stepId && !task.resumeOf;
+    this.cutSaid(task, dir, task.cut.list.at(-1), { then: goOn ? "again" : stepId ? "stop" : "chat" });
+    task.revAfter = head; task.changed = wrote; task.errorCode = "OUTPUT_LIMIT";
+    if (goOn) {
+      task.retrying = true;
+      const again = { text: resumeText(task), scope: task.scope ?? { kind: "project" }, step: stepId, resumeOf: task.id, ...(task.label ? { label: task.label } : {}) };
+      setTimeout(() => {
+        this.start(task.projectId, again).catch((e) => { this.event(task, { kind: "error", text: `Going on failed: ${e.message}` }); try { this.persist(task); } catch { /* the project may be gone */ } });
+      }, RETRY_MS).unref?.();
+    }
+    return this.fail(task, new Error("This reply reached the most one reply can hold before the work was done."));
   }
 
   /** A task that ends while Claude waits for an answer: the question is closed with a no. */
@@ -1019,28 +1119,42 @@ export class Agent {
     if (task.usage && task.keepAlive?.costUsd) { task.usage.costUsd = Math.round(((task.usage.costUsd ?? 0) + task.keepAlive.costUsd) * 1e6) / 1e6;
       for (const f of ["cacheRead", "cacheWrite", "output"]) task.usage[f] = (task.usage[f] ?? 0) + task.keepAlive[f]; }
     if (task.status === "cancelling") {
-      task.revAfter = rev.commitAll(dir, `Cancelled Claude task ${task.id} (partial changes)`);
-      task.changed = rev.changedFiles(dir, task.revBefore, task.revAfter);
+      task.revAfter = await rev.commitAllAsync(dir, `Cancelled Claude task ${task.id} (partial changes)`);
+      task.changed = await rev.changedFilesAsync(dir, task.revBefore, task.revAfter);
       task.status = "cancelled"; task.stage = "cancelled";
       task.outcome = task.changed.length ? "partial" : "none";
       this.event(task, { kind: "status", text: task.changed.length ? "Stopped. Partial changes were kept as a revision you can undo." : "Stopped. No file was changed." });
       return this.persist(task);
     }
+    // replies cut at the output limit (T23-2): Claude Code holds a cut reply back from its stream while it goes on, so a run whose stream
+    // showed none is read again in its transcript; each cut not said yet is said now. A run that ended on one before its work was
+    // written or said done is not done: cutEnded
+    if (!task.cut?.list?.length && task.sessionId) {
+      const t = readTranscriptCuts(dir, task.sessionId, task.createdAt, claudeEnv());
+      if (t.list.length) task.cut = { ...t, fromTranscript: true };
+    }
+    const cuts = task.cut?.list ?? [];
+    for (const [i, c] of cuts.entries()) if (!c.said && !(task.cut.open && i === cuts.length - 1)) this.cutSaid(task, dir, c, { then: "after" });
+    if (task.cut?.open && cuts.length) {
+      const head = await rev.commitAllAsync(dir, `Claude: ${String(task.text ?? "").split("\n")[0].slice(0, 70)}`);
+      const wrote = await rev.changedFilesAsync(dir, task.revBefore, head);
+      if (!wrote.length || task.claudeError || !String(task.resultText ?? "").trim()) return this.cutEnded(task, dir, head, wrote);
+    }
     if (code !== 0 || task.claudeError) {
-      task.revAfter = rev.commitAll(dir, `Claude task ${task.id} (failed)`);
-      task.changed = rev.changedFiles(dir, task.revBefore, task.revAfter);
+      task.revAfter = await rev.commitAllAsync(dir, `Claude task ${task.id} (failed)`);
+      task.changed = await rev.changedFilesAsync(dir, task.revBefore, task.revAfter);
       const msg = task.claudeError || errTail.split(/\r?\n/).filter(Boolean).slice(-3).join(" ") || `Claude stopped (exit ${code})`;
       if (SIGNED_OUT_TEXT.test(msg)) { this.onSignedOut?.(); task.errorCode = "CLAUDE_SIGNED_OUT"; }
       // two Claude Code processes refreshing the sign-in at once is passing; the same request runs again once, a few seconds later
       if (OAUTH_RACE.test(msg) && !task.retryOf) {
         task.errorCode = "CLAUDE_BUSY_RETRY"; task.retrying = true;
-        const again = { text: task.text, scope: task.scope, step: task.step ?? null, retryOf: task.id };
+        const again = { text: task.text, scope: task.scope, step: task.step ?? null, retryOf: task.id, by: task.by ?? null };
         setTimeout(() => { this.start(task.projectId, again).catch((e) => this.event(task, { kind: "error", text: `Trying again failed: ${e.message}` })); }, RETRY_MS).unref?.();
         return this.fail(task, new Error("Claude Code was busy refreshing its sign-in: trying again in a few seconds"));
       }
       return this.fail(task, new Error(msg));
     }
-    const edited = rev.changedFiles(dir, task.revBefore, (() => { rev.commitAll(dir, `Claude: ${task.text.split("\n")[0].slice(0, 70)}`); return rev.head(dir); })());
+    const edited = await rev.changedFilesAsync(dir, task.revBefore, await rev.commitAllAsync(dir, `Claude: ${task.text.split("\n")[0].slice(0, 70)}`));
     if (edited.length) {
       task.stage = "checking"; task.doing = { kind: "rules", at: new Date().toISOString() }; this.event(task, { kind: "status", text: "Applying studio rules and checking the film" });
       // sound effects are placed at the Final Mix only, once the picture is locked, not after every task
@@ -1059,7 +1173,7 @@ export class Agent {
         if (bad) this.event(task, { kind: "tool-error", text: `The film's code does not compile: ${bad}` });
         this.updateMeta?.(task.projectId, (m) => { const pl = (m.pipeline ??= {}); if (bad) pl.buildError = { at: new Date().toISOString(), error: bad, taskId: task.id }; else delete pl.buildError; });
       } catch (e) { this.event(task, { kind: "tool-error", text: `Finalize: ${e.message}` }); }
-      rev.commitAll(dir, `Studio rules after Claude task ${task.id}`);
+      await rev.commitAllAsync(dir, `Studio rules after Claude task ${task.id}`);
       // the checks (HyperFrames' check, the pose check: minutes on a long code film) no longer hold the task open: Render once stayed
       // grey ("Claude is changing the film") for 6+ min after Claude's last word. They run after the task ends; their result joins the task
       // none before the Build (Prepare, Characters, Storyboard, Motion Plan): the film is not written yet, so a finding there ("To fix
@@ -1070,8 +1184,8 @@ export class Agent {
         this.lateChecks.set(task.id, dir);
       }
     }
-    task.revAfter = rev.head(dir);
-    task.changed = rev.changedFiles(dir, task.revBefore, task.revAfter);
+    task.revAfter = await rev.headAsync(dir);
+    task.changed = await rev.changedFilesAsync(dir, task.revBefore, task.revAfter);
     task.outcome = task.changed.length ? "applied" : "proposal";
     task.status = "done"; task.stage = "done";
     this.persist(task);
@@ -1084,11 +1198,11 @@ export class Agent {
       // Motion Plan or the build. The user's chat turns still change it (they are the user's own request).
       const approvedSb = this.getProject(task.projectId)?.meta?.approvals?.storyboard;
       if (sb != null && approvedSb && task.revBefore && order.indexOf(task.step) > order.indexOf("storyboard") && order.indexOf("storyboard") >= 0) {
-        const before = rev.fileAt(dir, task.revBefore, "STORYBOARD.md");
+        const before = await rev.fileAtAsync(dir, task.revBefore, "STORYBOARD.md");
         if (before != null && storyboardHash(before) !== storyboardHash(sb)) {
           sb = keepApprovedStoryboard(before, sb);
           writeFileSync(join(dir, "STORYBOARD.md"), sb.endsWith("\n") ? sb : sb + "\n");
-          try { rev.commitAll(dir, `The approved storyboard kept as approved (task ${task.id} had changed it)`); } catch { /* the file is right either way */ }
+          try { await rev.commitAllAsync(dir, `The approved storyboard kept as approved (task ${task.id} had changed it)`); } catch { /* the file is right either way */ }
           this.event(task, { kind: "status", text: "The approved storyboard was put back as you approved it (this step had changed its frames)" });
           task.storyboardKept = true;
         }
@@ -1142,8 +1256,8 @@ export class Agent {
     return t;
   }
 
-  /** Undo a finished task's changes with a new revision. */
-  revert(projectId, taskId) {
+  /** Undo a finished task's changes with a new revision (git beside the server's thread, in the project's queue). */
+  async revert(projectId, taskId) {
     const p = this.getProject(projectId);
     const all = this.list(projectId);
     const t = all.find((x) => x.id === taskId);
@@ -1151,11 +1265,11 @@ export class Agent {
     if (!t.changed?.length || !t.revAfter) throw Object.assign(new Error("This task changed no file"), { code: "INVALID" });
     if (t.reverted) throw Object.assign(new Error("Already undone"), { code: "INVALID" });
     if (this.running.has(projectId)) throw Object.assign(new Error("Wait until Claude has finished"), { code: "BUSY" });
-    const log = rev.log(p.path, 400);
+    const log = await rev.logAsync(p.path, 400);
     const span = []; let inside = false;
     for (const c of log) { if (c.rev === t.revAfter) inside = true; if (c.rev === t.revBefore) break; if (inside) span.push(c.rev); }
     let r = null;
-    for (const c of span) r = rev.revert(p.path, c);     // newest first
+    for (const c of span) r = await rev.revertAsync(p.path, c);     // newest first
     t.reverted = { at: new Date().toISOString(), rev: r };
     const live = this.tasks.get(taskId); if (live) live.reverted = t.reverted;
     this.persist(live ?? { ...t, events: t.events ?? [] });
@@ -1198,14 +1312,26 @@ export function linksLine(meta) {
 // the voice settings stay the user's choice (Claude once told the user to set speed 0.85)
 const VOICE_SETTINGS_RULE = "The voice's settings (speed, stability and the rest) are the owner's to set on the Voice screen and start at the voice service's own defaults: never set, suggest or name a number for them unless the owner asks.";
 
+/** The brief as Claude reads it, whole (BRIEF_MAX, the longest the app keeps): Test 24's 4,369-character brief was cut at 4,000, inside
+ *  its voice-over script, and Prepare wrote the script's first 9 of 12 lines as "the brief's script verbatim". A longer one says where
+ *  the app cut it, so nothing past it is taken for the end. */
+export function briefText(text, max = BRIEF_MAX) {
+  const s = String(text ?? "");
+  return s.length <= max ? s : `${s.slice(0, max)}\n[The app cut the brief here: ${(s.length - max).toLocaleString("en")} more characters are not shown. Tell the owner the brief is too long to read whole and ask for the rest in the chat.]`;
+}
+
+// Test 24: the brief carried a 12-line voice-over script ("dùng đúng nguyên văn"); Prepare put 9 lines in VOICEOVER.md, left the rest
+// "to the screen text", wrote "the brief's script verbatim" and "No conflict", and asked nothing
+const OWN_SCRIPT_RULE = "A script the owner wrote (the brief's voice-over script, \"lời đọc\" or \"kịch bản\", or a brief that is the script) is read word for word: VOICEOVER.md holds every line of it as the owner wrote it, in its order, nothing left out, merged, reworded or moved to the words on screen. Shortening it, splitting it, dropping a line or moving lines to the screen is a conflict (moworks-studio §2b): say what you would change and why, offer the choices (e.g. 1. the whole script as written · 2. your shorter version, its changed lines named · 3. the lines you would put on screen instead), and stop until the owner chooses. Never call a script you changed \"verbatim\" or \"as written\", in BRIEF.md, NOTES.md or your reply.";
+
 /** The ways to a voice-over the app offers, in every style (with the ElevenLabs key saved, Prepare once offered only "record and
  *  upload" or "no narration"; Claude once asked for a speed the Voice screen did not have). Empty when the film already has one. */
 export function voiceLine(meta, root = APP_ROOT) {
   if (meta?.voice?.file) return "";
   let keys = []; try { keys = Object.entries(secretsStatus(root)).filter(([, v]) => v.saved).map(([k]) => ({ elevenlabs: "ElevenLabs", fishaudio: "Fish Audio" })[k] ?? k); } catch { /* none */ }
-  return keys.length
+  return `${keys.length
     ? `Voice-over (the app says): none in the project yet, and ${keys.join(" and ")} is set up. When the brief already says which way (e.g. the voice made in the app), take it without asking (QC4-4). A film with a narration (made here or recorded by the owner) gets its words to read in VOICEOVER.md, the words only, one line per scene: the app then holds the Storyboard until the voice is made and its words are timed, so the Storyboard is timed to them in one pass (D39); never ask the owner to tell you when it is made. A film with no narration gets no VOICEOVER.md. When the brief wants a narration and does not say how, offer the ways on in this order: 1) make it here: the owner opens the Voice screen, picks a voice (a Vietnamese one for Vietnamese) and the app reads the script with ${keys[0]}; you write the words to read into VOICEOVER.md (the words only, one line per scene: the Voice screen's Script box is filled with them); 2) upload a recording with the Assets button; 3) no narration.`
-    : "Voice-over (the app says): none in the project yet, and no voice service is set up. When the brief wants a narration, offer the ways on: upload a recording with the Assets button, add an ElevenLabs or Fish Audio key in Settings › General › Voice-over to make it here, or no narration. A film with a narration (made here or recorded by the owner) gets its words to read in VOICEOVER.md, the words only, one line per scene: the app then holds the Storyboard until the voice is made and its words are timed, so the Storyboard is timed to them in one pass (D39); never ask the owner to tell you when it is made. A film with no narration gets no VOICEOVER.md.";
+    : "Voice-over (the app says): none in the project yet, and no voice service is set up. When the brief wants a narration, offer the ways on: upload a recording with the Assets button, add an ElevenLabs or Fish Audio key in Settings › General › Voice-over to make it here, or no narration. A film with a narration (made here or recorded by the owner) gets its words to read in VOICEOVER.md, the words only, one line per scene: the app then holds the Storyboard until the voice is made and its words are timed, so the Storyboard is timed to them in one pass (D39); never ask the owner to tell you when it is made. A film with no narration gets no VOICEOVER.md."} ${OWN_SCRIPT_RULE}`;
 }
 
 /** The user's lyrics (lyrics.txt) are placed only by the app's timing (LYRICS-TIMED.md, .moworks/lyrics/words.json), never by guess (Claude once
@@ -1220,11 +1346,18 @@ export function lyricsLine(dir) {
   return "The owner gave lyrics (lyrics.txt) and the app has not timed them yet" + (timedAt ? " (they changed after the last timing)" : "") + ". Never place lyrics by guess, on the beat or anywhere, even for a track with no singing: the app times them to the track. Tell the owner in one line to open Lyrics and press Time the lyrics (it needs the music track in the film first), and stop; the storyboard places the lines once LYRICS-TIMED.md is there.";
 }
 
+/** The sound section of the film style's own file (its author's sound palette: music, foley, mix), "" when it has none, null when the
+ *  style cannot be read. The music step and the sound effects follow it. */
+export function styleSound(meta, root = APP_ROOT) {
+  let text = ""; try { const s = getStyle(meta?.style?.id, root); const r = s?.rules?.find((x) => /-style$/.test(x.kind) && x.path); text = r ? readFileSync(r.path, "utf8") : ""; } catch { return null; }
+  return /^#{2,3}[^\n]*(sound|music|audio)[^\n]*\n([\s\S]*?)(?=^#{1,3}\s|(?![\s\S]))/im.exec(text)?.[2] ?? "";
+}
+
 /** The style author's own music line (its sound palette), for the music step (once three wedding harps were chosen for an HD-2D adventure whose
  *  palette is strings, horns, low choir and timpani with an arc). Empty when the style's file has no sound section. */
 export function musicLine(meta, root = APP_ROOT) {
-  let text = ""; try { const s = getStyle(meta?.style?.id, root); const r = s?.rules?.find((x) => /-style$/.test(x.kind) && x.path); text = r ? readFileSync(r.path, "utf8") : ""; } catch { return ""; }
-  const sec = /^#{2,3}[^\n]*(sound|music|audio)[^\n]*\n([\s\S]*?)(?=^#{1,3}\s|(?![\s\S]))/im.exec(text)?.[2] ?? "";
+  const sec = styleSound(meta, root);
+  if (sec == null) return "";
   const music = sec.split(/\r?\n/).map((l) => l.replace(/[*_`]/g, "").replace(/^\s*[-•]\s*/, "").trim()).filter((l) => /^music\b|music:/i.test(l)).join(" ").slice(0, 600);
   const palette = music ? `The style's author on the music: "${music}" ` : "";
   return `${palette}Choose the three tracks for the story's arc (its opening, its rise, its climax and the quiet before the hit), searching mixkit.co by the palette's instruments and that arc (e.g. "cinematic", "adventure", "epic", "fantasy"), not by one instrument alone; three different moods for the owner to choose from, never a piece made for another occasion (a wedding, a baby, a corporate presentation) (Test 13 #479).`;
@@ -1234,7 +1367,9 @@ export function musicLine(meta, root = APP_ROOT) {
  *  it, Prepare (and a chat turn before it is set) asks it with its other questions and records it with film_language. */
 export function filmLanguageLine(meta, step = null) {
   const id = meta?.language?.id;
-  if (id) return `The film's language (the voice-over and every word on screen): ${id === "en" ? "English" : "Vietnamese"}.`;
+  // Test 24: a CRT film's inverted status strips showed "NHAT KY · TRAM HON GIO", and neither the Build nor the Review saw it
+  if (id) return `The film's language (the voice-over and every word on screen): ${id === "en" ? "English" : "Vietnamese"}.${id === "en" ? ""
+    : " Every Vietnamese word on screen keeps every mark, in every film style: an ASCII, CRT, monospace, pixel or all-caps look is never a reason to drop them, and a band, strip, highlight or inverted cell behind the text leaves room for the marks above and below (moworks-studio §4). The app's checks name on-screen text written without its marks."}`;
   if (step && step !== "brief") return "The film's language is not set yet: write the words on screen in the brief's language and ask the owner in your reply which language the film speaks.";
   return "The brief does not say the film's language. Ask it with your other questions in one message (moworks-studio §2b): \"Lời đọc và chữ trên phim: tiếng Việt hay tiếng Anh?\" (Vietnamese first when the owner writes Vietnamese), and stop; when the owner answers, call film_language with vi or en before you go on.";
 }

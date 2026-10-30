@@ -31,12 +31,18 @@ const AUDIO_FILE = /\.(mp3|wav|m4a|aac|flac|ogg|opus)$/i;
 // HF's element ids, written into the film's HTML when the Editor opens it (not a film change; older films also carry the ones HF Studio
 // wrote). Opening the Editor stamped them on every element and <audio>, and the film's render and pre-render went stale with nothing drawn or heard changed.
 const STUDIO_ID = /\s+data-hf-id="[^"]*"/g;
+/** A page's text with its blank lines and the spaces at the ends of its lines left out: what an <audio> tag taken out leaves behind. */
+const drawnText = (s) => s.split(/\r?\n/).map((l) => l.trimEnd()).filter(Boolean).join("\n");
 /** The film's files, hashed in two parts: the picture (index.html and the compositions without their <audio> tags,
  *  CHARACTERS.json, every asset but sound files: names, sizes and dates) at its fps, and the sound (every <audio> tag and the sound files
- *  under assets/ and audio/). HF's element ids count in neither. */
+ *  under assets/ and audio/). HF's element ids count in neither. `drawn`: the picture once more with the pages' blank lines left out. The
+ *  Final Mix taking a sound out leaves its tag's line empty, so the picture read as changed: a full render (3 min) for a sound alone,
+ *  never the sound mixed again onto the picture (T25-3). `picture` stays as it was: the checks' hash and an export's reuse read it. */
 export function filmParts(dir, fps, { stamps = false } = {}) {
-  const pic = createHash("sha256"), snd = createHash("sha256");
-  pic.update(`fps:${fps}`);
+  const pic = createHash("sha256"), snd = createHash("sha256"), drw = createHash("sha256");
+  const both = (x) => { pic.update(x); drw.update(x); };
+  const page = (s) => { pic.update(s); drw.update(drawnText(s)); };
+  both(`fps:${fps}`);
   const text = (p) => { const s0 = readFileSync(p, "utf8"), s = stamps ? s0 : s0.replace(STUDIO_ID, ""); snd.update((s.match(AUDIO_TAG) ?? []).join("\n")); return s.replace(AUDIO_TAG, ""); };
   const walk = (d, deep, only = null) => {
     if (!existsSync(d)) return;
@@ -45,18 +51,18 @@ export function filmParts(dir, fps, { stamps = false } = {}) {
       if (s.isDirectory()) { if (!n.startsWith(".") && n !== "_app" && n !== "rounds") walk(p, deep, only); continue; }
       const sound = AUDIO_FILE.test(n);
       if (only === "sound" && !sound) continue;
-      const h = sound ? snd : pic;
-      h.update(rel);
-      if (deep && /\.html?$/i.test(n)) h.update(text(p));
-      else if (deep && /\.(js|mjs|json|css|ts)$/i.test(n)) h.update(readFileSync(p)); else h.update(`${s.size}:${Math.floor(s.mtimeMs)}`);
+      const add = sound ? (x) => snd.update(x) : both;
+      add(rel);
+      if (deep && /\.html?$/i.test(n)) page(text(p));
+      else if (deep && /\.(js|mjs|json|css|ts)$/i.test(n)) add(readFileSync(p)); else add(`${s.size}:${Math.floor(s.mtimeMs)}`);
     }
   };
-  if (existsSync(join(dir, "index.html"))) { pic.update("index.html"); pic.update(text(join(dir, "index.html"))); }
-  if (existsSync(join(dir, "CHARACTERS.json"))) { pic.update("CHARACTERS.json"); pic.update(readFileSync(join(dir, "CHARACTERS.json"))); }
+  if (existsSync(join(dir, "index.html"))) { both("index.html"); page(text(join(dir, "index.html"))); }
+  if (existsSync(join(dir, "CHARACTERS.json"))) { both("CHARACTERS.json"); both(readFileSync(join(dir, "CHARACTERS.json"))); }
   walk(join(dir, "compositions"), true);
   walk(join(dir, "assets"), false);
   walk(join(dir, "audio"), false, "sound");
-  return { picture: pic.digest("hex").slice(0, 16), sound: snd.digest("hex").slice(0, 16) };
+  return { picture: pic.digest("hex").slice(0, 16), sound: snd.digest("hex").slice(0, 16), drawn: drw.digest("hex").slice(0, 16) };
 }
 /** Whether every sound of the film sits on its root page (where the Final Mix places music, voice and effects): only then can the sound
  *  be mixed again onto a rendered picture (remix.mjs); a sound inside a sub-composition sends the film to a full render. */
@@ -108,6 +114,7 @@ const filmSeconds = (dir) => {
 
 export function proxyRoutes(ctx, { r, P, mustProject }) {
   const root = ctx.root, running = new Map(), smoothing = new Set();          // smoothing: jobs that only make the Smooth copy
+  const again = new Set();          // films asked for again while their job ran
   const url = (id, rel) => `${ctx.preview.base}/p/${id}/${rel}`;
   // the job as the app shows it (its record, not a handle): id, stage, progress, what it waits for
   const pub = (j) => { const r = j && (ctx.jobs.get?.(j.id) ?? j); return r ? { id: r.id, kind: r.kind, status: r.status, stage: r.stage, progress: r.progress ?? null, waitingFor: r.waitingFor ?? null } : null; };
@@ -128,8 +135,10 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
     }
     // the Editor plays the Smooth copy of this very file (a keyframe every second) when it is there; Render reuses the file itself
     const smooth = file && st.smooth?.of === st.hash && existsSync(join(p.path, ...st.smooth.file.split("/"))) ? st.smooth.file : null;
-    // a file counts when its picture is the film's now, at the quality this style renders at (an older draft preview does not)
-    const picture = !!file && st.picture === parts.picture && (QUALITY_RANK[st.quality] ?? -1) >= QUALITY_RANK[qualityOf(p.meta?.style?.id)];
+    // a file counts when its picture is the film's now, at the quality this style renders at (an older draft preview does not); a page
+    // whose only change is the empty line a sound taken out left is the same picture (drawn)
+    const samePicture = st?.picture === parts.picture || (!!st?.drawn && st.drawn === parts.drawn);
+    const picture = !!file && samePicture && (QUALITY_RANK[st.quality] ?? -1) >= QUALITY_RANK[qualityOf(p.meta?.style?.id)];
     const status = running.has(p.id) && !smoothing.has(p.id) ? "rendering" : !file ? "none" : picture && st.sound === parts.sound ? "fresh" : "stale";
     const job = smoothing.has(p.id) ? null : pub(running.get(p.id));          // the Smooth copy alone is quiet: nothing to wait for
     // the time left (or the whole render before it starts), from this film's last render or the style's usual cost per frame
@@ -175,7 +184,8 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
     if (tmp !== out) renameSync(tmp, out);
     keepOnly(dir, basename(out));
     const facts = await probe(out, root).catch(() => ({ duration: st.duration ?? null, audio: res.tracks > 0 }));
-    const next = { ...st, hash, file: rel, sound: parts.sound, at: new Date().toISOString(), remixed: { at: new Date().toISOString(), ms: Date.now() - t0, tracks: res.tracks }, ...facts };
+    // the picture as it reads now (only a blank line may differ: soundOnly), so the file is the film's now
+    const next = { ...st, hash, file: rel, picture: parts.picture, drawn: parts.drawn, sound: parts.sound, at: new Date().toISOString(), remixed: { at: new Date().toISOString(), ms: Date.now() - t0, tracks: res.tracks }, ...facts };
     writeState(p.path, next);
     return next;
   };
@@ -183,22 +193,27 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
    *  is built: a code film to play in the Editor, every film so that Render reuses it when neither its picture nor its
    *  sound changed; when only the sound changed, the sound is mixed again onto the picture (remixOnto) instead. It never takes the app's
    *  render slot, so Render and the chat stay free: it waits while an export runs or Claude changes the film, and stops (to start again
-   *  later) when either begins. Light: BG_WORKERS capture workers at below-normal priority. */
-  const make = (p) => {
+   *  later) when either begins. Light: BG_WORKERS capture workers at below-normal priority. `asked`: the user's Update, which waits
+   *  for Claude instead of starting nothing. */
+  const make = (p, { asked = false } = {}) => {
     const v = view(p);
-    if (running.has(p.id)) return running.get(p.id);
+    // asked again while one runs (the Final Mix changed the sound during it): that file is of the film as it was when it began, so the
+    // film is looked at again once it ends (T25-3: the render ended stale, with no job, and the Editor said "Updating…" for good)
+    if (running.has(p.id)) { again.add(p.id); return running.get(p.id); }
     if (v.status === "fresh" && v.needsSmooth) {          // a render made before the Smooth copy existed: only the copy
       const job = ctx.jobs.start("preview-proxy", { projectId: p.id, title: "Smooth preview" }, async (j) => {
-        try { j.update({ stage: "smooth preview", progress: 50 }); const st = await withSmooth(p, readState(p.path), { signal: j.signal }); return { hash: st.hash, file: st.file, smooth: st.smooth?.file ?? null }; }
-        finally { running.delete(p.id); smoothing.delete(p.id); }
+        let ok = false;
+        try { j.update({ stage: "smooth preview", progress: 50 }); const st = await withSmooth(p, readState(p.path), { signal: j.signal }); ok = true; return { hash: st.hash, file: st.file, smooth: st.smooth?.file ?? null }; }
+        finally { running.delete(p.id); smoothing.delete(p.id); lookAgain(p.id, ok); }
       });
       running.set(p.id, job); smoothing.add(p.id);          // the render stays fresh and plays meanwhile
       return job;
     }
     if (!existsSync(join(p.path, "index.html")) || v.status === "fresh") return null;
-    if (ctx.agent?.running?.has(p.id)) return null;
+    if (!asked && ctx.agent?.running?.has(p.id)) return null;
     const pre = prerendered(p.meta?.style?.id), quality = qualityOf(p.meta?.style?.id);
     const job = ctx.jobs.start("preview-proxy", { projectId: p.id, title: pre || !v.codeFilm ? "Rendering the film" : "Smooth preview" }, async (j) => {
+      let ok = false;
       try {
         for (let attempt = 0; ; attempt++) {
           for (let b = blocker(p); b && !j.signal.aborted; b = blocker(p)) { j.update({ stage: "waiting", waitingFor: b }); await pause(2000, j.signal); }
@@ -214,6 +229,7 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
             j.update({ stage: "mixing the sound", waitingFor: null, progress: 50 });
             const next = await remixOnto(p, st0, fps, { signal: j.signal, background: true });
             await withSmooth(fresh, next, { signal: j.signal });          // the new sound in the Smooth copy too
+            ok = true;
             return { hash: next.hash, file: next.file, remixed: true };
           }
           j.update({ stage: "rendering", waitingFor: null, progress: 0 });
@@ -234,16 +250,23 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
           const facts = await probe(join(p.path, ...rel.split("/")), root).catch(() => ({ duration: null, audio: false }));
           keepOnly(dir, `${hash}.mp4`);          // only the newest file
           const frames = res.totalFrames ?? Math.round((facts.duration ?? 0) * fps), msPerFrame = frames ? Math.round((Date.now() - t0) / frames) : null;
-          const st1 = { hash, picture: parts.picture, sound: parts.sound, file: rel, at: new Date().toISOString(), fps, quality, msPerFrame, ms: Date.now() - t0, gpu, workers, ...facts };
+          const st1 = { hash, picture: parts.picture, drawn: parts.drawn, sound: parts.sound, file: rel, at: new Date().toISOString(), fps, quality, msPerFrame, ms: Date.now() - t0, gpu, workers, ...facts };
           writeState(p.path, st1);
           j.update({ stage: "smooth preview", progress: 100 });
           await withSmooth(fresh, st1, { signal: j.signal });
+          ok = true;
           return { hash, file: rel, ...facts };
         }
-      } finally { running.delete(p.id); }
+      } finally { running.delete(p.id); lookAgain(p.id, ok); }
     });
     running.set(p.id, job);
     return job;
+  };
+  /** A job that ended well while the film was changed again: made again now when it is not fresh (the sound mixed again in seconds when
+   *  only the sound changed). Not after a stop or a failure: the next change, or the Editor's Update, asks again. */
+  const lookAgain = (id, ok) => {
+    if (!again.delete(id) || !ok) return;
+    setTimeout(() => { try { make(mustProject(id, root)); } catch { /* the next change asks again */ } }, 0);
   };
   // the pipeline calls this when a film is built and when it is finished, and again after a change to a finished film (the autopilot); nothing else starts
   // it: not opening the project, not the Editor's polls
@@ -267,7 +290,8 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
   };
   const routes = [
     r("GET", `/projects/${P}/preview-proxy`, ([id]) => view(mustProject(id, root))),
-    r("POST", `/projects/${P}/preview-proxy`, ([id]) => { const p = mustProject(id, root); const job = make(p); return { ...view(p), job: pub(job) }; }),
+    // the Editor's Update on a preview that is out of date: made now, after Claude's change when Claude is at work (the job waits for it)
+    r("POST", `/projects/${P}/preview-proxy`, ([id]) => { const p = mustProject(id, root); const job = make(p, { asked: true }); return { ...view(p), job: pub(job) }; }),
   ];
   return { routes };
 }

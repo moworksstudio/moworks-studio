@@ -18,6 +18,7 @@ import * as kit from "../character-kit/index.mjs";
 import { brushGate } from "../character-kit/brushgate.mjs";
 import { anidoodleSource, stageEngine } from "../anidoodle-styles/index.mjs";
 import { claudeEnv, findClaude } from "../system-status/index.mjs";
+import { checkArgv } from "../agent/argv.mjs";
 import { ffmpegExe } from "../library/preview-media.mjs";
 
 const TOOLS = join(import.meta.dirname, "lab-tools");
@@ -131,15 +132,24 @@ export function prepareLab(job, root = APP_ROOT) {
   return { lab, brief: fill(c.prompts["brush-kit"], vars), allowed: ["Bash(node tools/brush-sheets.mjs:*)"] };
 }
 
+/** The Claude Code arguments of a lab run. The brief is not among them: it goes on stdin (the description and the change are the
+ *  owner's own words, of any length; on the command line they could pass Windows' 32,767 characters, T27-14). */
+export function labArgs({ allowed, model, effort }) {
+  return ["-p", "--output-format", "stream-json", "--verbose", "--model", model, "--effort", effort, "--permission-mode", "acceptEdits",
+    "--tools", "Read,Edit,Write,Glob,Grep,Bash", "--allowedTools", ...allowed, "--strict-mcp-config", "--disable-slash-commands", "--no-session-persistence"];
+}
+
 /** One Claude Code run in the lab (stream-json): onEvent({ kind: "tool"|"text", ... }) as it works. { ok, result, turns, costUsd, usage, ms }. */
 export function runClaude({ lab, brief, allowed, root = APP_ROOT, model, effort, env = {}, signal = null, onEvent = () => {} }) {
   const exe = findClaude(root);
   if (!exe) return Promise.resolve({ ok: false, error: "Claude Code is not installed" });
-  const args = ["-p", brief, "--output-format", "stream-json", "--verbose", "--model", model, "--effort", effort, "--permission-mode", "acceptEdits",
-    "--tools", "Read,Edit,Write,Glob,Grep,Bash", "--allowedTools", ...allowed, "--strict-mcp-config", "--disable-slash-commands", "--no-session-persistence"];
+  const args = labArgs({ allowed, model, effort });
+  try { checkArgv(exe, args); } catch (e) { return Promise.resolve({ ok: false, error: e.message }); }
   const t0 = Date.now();
   return new Promise((ok) => {
-    const c = spawn(exe, args, { cwd: lab, env: { ...claudeEnv(), MW_APP_ROOT: root, ...env }, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
+    const c = spawn(exe, args, { cwd: lab, env: { ...claudeEnv(), MW_APP_ROOT: root, ...env }, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
+    c.stdin.on("error", () => { /* a run that ended at once: its close says why */ });
+    c.stdin.end(brief, "utf8");
     let buf = "", final = null, err = "";
     c.stdout.on("data", (d) => {
       buf += d;
@@ -173,7 +183,8 @@ function tool(lab, args, { root, env = {}, signal = null, timeout = 1200000 } = 
     signal?.addEventListener("abort", () => { try { spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true }); } catch { /* gone */ } }, { once: true });
   });
 }
-const ff = (root, args) => spawnSync(ffmpegExe(root), ["-v", "error", "-y", ...args], { windowsHide: true }).status === 0;
+// resolves true when FFmpeg made the file; off the event loop (the creator runs in the server's own process)
+const ff = (root, args) => new Promise((ok) => execFile(ffmpegExe(root), ["-v", "error", "-y", ...args], { windowsHide: true }, (e) => ok(!e)));
 const toWebp = (root, src, out, w = 1600) => ff(root, ["-i", src, "-vf", `scale='min(${w},iw)':-1`, "-c:v", "libwebp", "-quality", "82", out]);
 
 /** Make (or change) a character: the whole run. onStep(stage, progress) for the job; log(line). Returns the saved character's summary. */
@@ -263,9 +274,9 @@ export async function saveHuman({ job, lab, run, runInfo, root, env, signal, onS
   cpSync(mod, join(dir, "module", id), { recursive: true });
   for (const f of ["check.ts", "LEDGER.md"]) if (existsSync(join(lab, "anidoodle", f))) cpSync(join(lab, "anidoodle", f), join(dir, "module", f));
   for (const f of readdirSync(join(lab, "anidoodle", "films"))) cpSync(join(lab, "anidoodle", "films", f), join(dir, "module", "films", f), { recursive: true });
-  toWebp(root, join(lab, "out", "sheet.png"), join(dir, "sheet.webp"));
+  await toWebp(root, join(lab, "out", "sheet.png"), join(dir, "sheet.webp"));
   cpSync(join(lab, "out", "walk.mp4"), join(dir, "walk.mp4"));
-  ff(root, ["-ss", "1.5", "-i", join(dir, "walk.mp4"), "-frames:v", "1", "-vf", "scale=640:-1", "-c:v", "libwebp", "-quality", "82", join(dir, "poster.webp")]);
+  await ff(root, ["-ss", "1.5", "-i", join(dir, "walk.mp4"), "-frames:v", "1", "-vf", "scale=640:-1", "-c:v", "libwebp", "-quality", "82", join(dir, "poster.webp")]);
   const own = readJson(join(lab, "anidoodle", "character.json"), {});
   const src = anidoodleSource(root);
   const savedName = job.name || before?.name || own.name || id;

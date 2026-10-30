@@ -8,7 +8,7 @@
 // typed stays as a draft.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AudioLines, Bot, Check, CheckCircle2, ChevronDown, ChevronRight, CircleStop, Clapperboard, FileUp, Film as FilmIcon, FolderOpen, Globe, Hand, Library,
-  Loader2, MapPin, Play, RotateCcw, Send, ShieldAlert, ShieldCheck, Wand2, X, XCircle } from "lucide-react";
+  Loader2, MapPin, Play, RefreshCw, RotateCcw, Send, ShieldAlert, ShieldCheck, Wand2, X, XCircle } from "lucide-react";
 import { get, patch, post } from "../api.js";
 import { Banner } from "../components.jsx";
 import { ago, useToast } from "../lib.jsx";
@@ -20,6 +20,7 @@ import { OPENS } from "../workflow/Pipeline.jsx";
 import { useThemeId } from "../theme.jsx";
 import { Mark, notesOf } from "./FilmNotes.jsx";
 import { fmtTime } from "./Player.jsx";
+import { watchTask } from "./taskWatch.js";
 
 // English keys for t()
 const KIND_LABEL = { motion: "Motion", block: "Block", look: "Brand Kit" };
@@ -161,6 +162,12 @@ export function plainText(text) {
     .join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
+/** The user's own message as they typed it: plain text with its line breaks, never read as markdown (T23-10: an answer "1. … (a
+ *  paragraph) 2. …" showed as "1. … 1. …"). Claude's replies keep their markdown. */
+export function UserWords({ text }) {
+  return <div className="md"><p className="msg-plain">{String(text ?? "").replace(/\r\n/g, "\n").trim()}</p></div>;
+}
+
 export function TaskBlock({ t: task, projectId, toast, onChanged, onRetry, steps, interrupted = null, qaCurrent = true, onPlay = null, onSeek = null, fps = 24 }) {
   const t = useT();
   const step = stepOf(task, steps);
@@ -189,7 +196,7 @@ export function TaskBlock({ t: task, projectId, toast, onChanged, onRetry, steps
     : task.status === "failed" ? t("Not done") : task.status === "cancelled" ? t("Stopped") : name ?? (files.length ? t("Changed the film") : t("Answered"));
   return <li className="task">
     {/* a step task the user started with their own words (the server's `shown`: Submit feedback, Make another option with text) shows them as theirs */}
-    {(!step || task.shown) && <div className="msg user"><Markdown text={task.shown ?? task.text} className="md" />
+    {(!step || task.shown) && <div className="msg user"><UserWords text={task.shown ?? task.text} />
       {(task.scope?.kind === "shot" || task.scope?.kind === "selection" || task.scope?.motion) && <div className="msg-meta">
         {task.scope?.kind === "shot" && task.scope.shot && <span>{t("Shot {n}", { n: task.scope.shot.number })}</span>}
         {task.scope?.kind === "selection" && <span>{t("Selection")}</span>}
@@ -339,6 +346,7 @@ const NOTE_WORDS = {
   "Claude needs your choice before it goes on: read its message and answer in the chat.": "Claude needs your choice: answer its message in the chat.",
   "The storyboard is timed to the real voice-over: make it on the Voice screen (Claude's script is in the Script box), or choose No voice-over. The storyboard starts by itself once its words are in.": "Make the voice-over, or choose No voice-over: the storyboard starts once it is in.",
   "Check and save the voice-over's words on the Voice screen: the storyboard is timed to them and starts by itself once they are saved.": "Check and save the voice-over's words: the storyboard starts once they are saved.",
+  "The voice-over could not be made: open the Voice screen and create it again. The storyboard starts by itself once its words are in.": "The voice-over could not be made: create it again on the Voice screen.",
   "The voice-over's words could not be timed: open the Voice screen and transcribe it again. The storyboard starts by itself once its words are in.": "The voice-over's words could not be timed: transcribe it again.",
   "Time the lyrics in the Lyrics dialog: the storyboard places each line at its time and starts by itself once they are timed.": "Time the lyrics: the storyboard starts once they are timed.",
 };
@@ -359,6 +367,18 @@ function WaitCard({ stage, onOpen }) {
 
 /** Each project's last chat, for this app session: shown at once when the Editor opens again. */
 const LAST_CHAT = new Map();
+
+/** A note's Retry: runs its step again (the Review after its pictures could not be taken); off once pressed. */
+function RetryStep({ projectId, step, toast }) {
+  const t = useT();
+  const [state, setState] = useState(null);          // null | "busy" | "done"
+  const go = async () => {
+    setState("busy");
+    try { await post(`/api/projects/${projectId}/pipeline/${step}/run`, {}); setState("done"); }
+    catch (e) { setState(null); toast(e.message, "error"); }
+  };
+  return <button className="btn sm" disabled={!!state} onClick={go}>{state === "busy" ? <Loader2 size={12} className="spin" /> : <RefreshCw size={12} />}{t("Retry")}</button>;
+}
 
 function Note({ n, projectId, toast, onPlay = null, onFix = null, onDetails = null, checks = null, waitActive = false, onOpenSheet = null, onReply = null, onRecheck = null }) {
   const t = useT();
@@ -398,6 +418,11 @@ function Note({ n, projectId, toast, onPlay = null, onFix = null, onDetails = nu
     <span className="t" title={n.kind === "render" && n.vars?.file ? n.vars.file : undefined}>{n.kind === "assets" ? (files.length === 1 ? t("Added 1 file: {name}", { name: files[0].split("/").pop() }) : t("Added {n} files", { n: files.length }))
       : n.kind === "render" && n.text === "Render finished: {file}" ? t("Render finished") : t(noteWords(n.text), n.vars)}</span>
     {n.kind === "assets" && files.length > 1 && <button className="clink" onClick={() => setOpen((x) => !x)}>{open ? t("Hide") : t("Show")}</button>}
+    {/* a render that waits for the user (its quick check did not finish on a busy machine): Render opens again, with its Retry */}
+    {n.kind === "render" && n.open === "render" && onOpenSheet && <button className="clink" onClick={() => onOpenSheet("render")}>{t("Open Render")}</button>}
+    {/* the pictures could not be taken on a busy computer (T26-5): the Storyboard opens with its Retry, the Review runs again */}
+    {n.kind !== "render" && n.status === "warning" && OPENS[n.open] && onOpenSheet && <button className="clink" onClick={() => onOpenSheet(OPENS[n.open][0])}>{t(OPENS[n.open][1])}</button>}
+    {n.retry && <RetryStep projectId={projectId} step={n.retry} toast={toast} />}
     {n.kind === "render" && n.file && <><button className="clink" onClick={() => (onPlay ? onPlay(n.file) : file("open"))}><Play size={12} /> {t("Play")}</button><button className="clink" onClick={() => file("reveal")}><FolderOpen size={12} /> {t("Show")}</button></>}
     <time>{ago(n.updatedAt ?? n.at)}</time>
     {open && <ul className="plain cnote-files">{files.map((f) => <li key={f}>{shortPath(f, t)}</li>)}</ul>}
@@ -461,10 +486,12 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
   useEffect(() => { if (motionPick?.item) insertMotion(motionPick.item); }, [motionPick?.n]); // eslint-disable-line react-hooks/exhaustive-deps
   // the error of a failed read goes as soon as a later read works (the red "not running" card stood for minutes)
   const loadErr = useRef(null);
-  const load = async () => { try { const r = await get(`/api/projects/${projectId}/tasks`); setTasks(r.tasks); setNotes(r.notes ?? []); setRunning(r.running);
+  // `signal`: the watch below gave this read up (it ran out of time): no answer, and no red line for it
+  const load = async (signal) => { try { const r = await get(`/api/projects/${projectId}/tasks`, signal ? { signal } : undefined); if (signal?.aborted) return undefined;
+    setTasks(r.tasks); setNotes(r.notes ?? []); setRunning(r.running);
     LAST_CHAT.set(projectId, { tasks: r.tasks, notes: r.notes ?? [], running: r.running });
     if (loadErr.current) { const was = loadErr.current; loadErr.current = null; setErr((x) => (x === was ? null : x)); }
-    setRunInfo({ settings: r.settings, own: r.own, usage: r.usage }); return r; } catch (e) { loadErr.current = e.message; setErr(e.message); } };
+    setRunInfo({ settings: r.settings, own: r.own, usage: r.usage }); return r; } catch (e) { if (signal?.aborted) return undefined; loadErr.current = e.message; setErr(e.message); } };
   useEffect(() => { load(); }, [projectId, reloadKey]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {          // the app's lines (the pipeline's milestones, files added, a render finishing) arrive while Claude is idle too
     if (running) return;
@@ -482,17 +509,9 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
   useEffect(() => { if (seenSteps.current === stepsKey) return; seenSteps.current = stepsKey; if (tasks !== null) load(); }, [stepsKey]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (prefill) setText((x) => x || prefill); }, [prefill]);
   useEffect(() => { try { sessionStorage.setItem(`mw-draft:chat:${projectId}`, text); } catch {} }, [text, projectId]);
-  useEffect(() => {          // poll only while a task runs
-    if (!running) return;
-    let alive = true, prev = null;
-    const tick = async () => {
-      const r = await load();
-      if (!alive) return;
-      if (r?.running) { prev = r.running; setTimeout(tick, 1200); }
-    };
-    prev = running; const h = setTimeout(tick, 1200);
-    return () => { alive = false; clearTimeout(h); };
-  }, [running]); // eslint-disable-line react-hooks/exhaustive-deps
+  // poll only while a task runs: a read that failed, or that a busy server did not answer in time, is given up and asked again a little
+  // later, so the working state ends once the task has (T26-3: the reads stopped at the first failed one; T25-7: at one never answered)
+  useEffect(() => (running ? watchTask(load) : undefined), [running]); // eslint-disable-line react-hooks/exhaustive-deps
   // a task that ended tells the Editor, also when the app starts the next step at once (Build ended as the Review began, so
   // the film, its shots and the timeline stayed the 3 s placeholder until the whole stage was done)
   const lastRun = useRef(running);

@@ -4,6 +4,7 @@
 // on the commit it came from (packages and interface rebuilt for it). Only files git tracks change: the user's work (the work folder:
 // projects, library, characters; runtime/: settings, local pins, HF runtimes, logs) is outside git and is never touched.
 // The repo (GitHub `owner/name`, or a URL) and branch come from config/update.json; the sign-in is git's own (Git Credential Manager on Windows asks once).
+// The app also checks by itself while it runs (schedule.mjs), quietly: no sign-in window, an error only noted.
 import { execFile, spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -21,10 +22,10 @@ const writeState = (root, patch) => {
 const fail = (code, message, detail = null) => Object.assign(new Error(message), { code, detail });
 
 /** git in the app folder: stdout trimmed; throws with git's own message. No prompt in a console that nobody sees (the sign-in window of
- *  Git Credential Manager still opens). */
-export function git(root, args, { timeout = 120000 } = {}) {
+ *  Git Credential Manager still opens, unless `env` turns it off: the check the app makes by itself). */
+export function git(root, args, { timeout = 120000, env = {} } = {}) {
   return new Promise((ok, no) => execFile("git", ["-C", root, ...args], { windowsHide: true, timeout, maxBuffer: 32 * 1024 * 1024,
-    env: { ...process.env, GIT_TERMINAL_PROMPT: "0" } }, (e, out, err) => {
+    env: { ...process.env, GIT_TERMINAL_PROMPT: "0", ...env } }, (e, out, err) => {
     if (e) return no(fail("GIT", (String(err || e.message).trim().split(/\r?\n/).filter(Boolean).pop() ?? "git failed"), { args: args.join(" "), stderr: String(err ?? "").slice(-2000) }));
     ok(String(out).trim());
   }));
@@ -55,12 +56,23 @@ export async function status(root = APP_ROOT) {
 /** Files git tracks that differ from the commit (an update would overwrite them): none on a user's computer. */
 const localChanges = async (root) => (await git(root, ["status", "--porcelain", "--untracked-files=no"])).split(/\r?\n/).filter(Boolean).map((l) => l.slice(3));
 
-/** Ask the repo for its newest version: { available, current, latest, commits: [{short, date, subject}], files, blocked, changelog }. */
-export async function check(root = APP_ROOT) {
+/** The app can ask its repo for a new version: a git clone with a repo in config/update.json. */
+export const canCheck = (root = APP_ROOT) => existsSync(join(root, ".git")) && !!updateConfig(root).repo;
+
+// the check the app makes by itself (quiet): Git Credential Manager never opens its sign-in window, and a repo that does not answer
+// is given up sooner; a sign-in that is missing or refused is only noted (the user's own "Check for updates" signs in)
+const QUIET = { args: ["-c", "credential.interactive=never", "-c", "credential.guiPrompt=false"], env: { GCM_INTERACTIVE: "never", GCM_GUI_PROMPT: "false" }, timeout: 120000 };
+
+/** Ask the repo for its newest version: { available, current, latest, commits: [{short, date, subject}], files, blocked, changelog }.
+ *  `quiet`: the app's own check in the background (no sign-in window). */
+export async function check(root = APP_ROOT, { quiet = false } = {}) {
   const cfg = updateConfig(root);
   if (!existsSync(join(root, ".git"))) throw fail("NOT_GIT", "This copy of the app is not a git clone, so it cannot update itself: install it with git clone");
   if (!cfg.repo) throw fail("NO_REPO", "No update address yet: config/update.json has no repo");
-  try { await git(root, ["fetch", "--no-tags", "--quiet", cfg.repo, `+refs/heads/${cfg.branch}:${REF}`], { timeout: 300000 }); }
+  try {
+    await git(root, [...(quiet ? QUIET.args : []), "fetch", "--no-tags", "--quiet", cfg.repo, `+refs/heads/${cfg.branch}:${REF}`],
+      quiet ? { timeout: QUIET.timeout, env: QUIET.env } : { timeout: 300000 });
+  }
   catch (e) {
     const auth = /authentication|could not read username|permission denied|repository not found|403/i.test(e.message);
     throw fail(auth ? "AUTH" : "FETCH", auth ? "GitHub did not let the app read the repo: sign in to GitHub with git (Git Credential Manager), then check again"
@@ -135,4 +147,16 @@ export async function apply(root = APP_ROOT, { onStep = () => {}, signal = null,
   }
   const done = writeState(root, { update: { status: "done", from, to, at, endedAt: new Date().toISOString(), commits: c.commits.length } });
   return { from, to, commits: c.commits, restart: true, ...done.update };
+}
+
+/** The first start after an update: the version it brought ({ id, date, subject }), said once ("Updated to the version of …"), then
+ *  marked as said in the state file; null at any other start (no update, said before, or the folder is no longer on that version). */
+export async function justUpdated(root = APP_ROOT) {
+  const u = readJson(stateFile(root), {}).update;
+  if (u?.status !== "done" || u.announced || !u.to || !existsSync(join(root, ".git"))) return null;
+  let head;
+  try { head = await commitInfo(root, "HEAD"); } catch { return null; }
+  if (head.hash !== u.to) return null;
+  writeState(root, { update: { ...u, announced: new Date().toISOString() } });
+  return { id: head.short, date: head.date, subject: head.subject };
 }

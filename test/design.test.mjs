@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { designChoice, writeDesign } from "../packages/project-service/design.mjs";
+import { ASKED_KIT_FILE, designChoice, keepAskedKit, writeDesign } from "../packages/project-service/design.mjs";
 import { lookFrame } from "../packages/looks-library/index.mjs";
 import { designLines } from "../packages/agent/index.mjs";
 
@@ -36,6 +36,22 @@ test("the app writes the design: the Look's frame.md as HyperFrames ships it", a
   const mb = await writeDesign(b, designChoice({ look: null }));
   assert.ok(!existsSync(join(b, "frame.md")) && !existsSync(join(b, "design.md")));
   assert.deepEqual(mb, { look: null });
+});
+
+test("a Brand Kit chosen for an author's style is kept for Prepare to ask about, never applied (T25)", async () => {
+  const fr = lookFrame("frame/coral");
+  const d = fresh("asked");
+  const kit = await keepAskedKit(d, { id: "frame/coral" }, { now: "2026-10-30T00:00:00.000Z" });
+  assert.deepEqual([kit.id, kit.title, kit.file, kit.at], ["frame/coral", fr.title, ASKED_KIT_FILE, "2026-10-30T00:00:00.000Z"]);
+  assert.equal(readFileSync(join(d, ...ASKED_KIT_FILE.split("/")), "utf8"), fr.text.replace(/\s*$/, "\n"), "its spec as a reference");
+  assert.ok(!existsSync(join(d, "frame.md")), "not the film's design");
+  assert.equal(await keepAskedKit(d, null), null);
+  const lines = designLines({ designLocked: true, brandKitAsk: kit }, d).join("\n");
+  assert.match(lines, /the style's author's own[^\n]*no Brand Kit is applied to it/);
+  assert.match(lines, new RegExp(`chose the Brand Kit "${fr.title}"[^\\n]*did not apply it \\(its design spec, a reference only: \\.moworks/brand-kit/FRAME\\.md; never copy it to frame\\.md\\)`));
+  assert.match(lines, /In Prepare, ask how to use it, as one numbered point[^\n]*moworks-studio §2b[^\n]*write it in ASSETS\.md/);
+  assert.doesNotMatch(designLines({ designLocked: true }, d).join("\n"), /chose the Brand Kit/, "none chosen: no question");
+  assert.doesNotMatch(designLines({ brandKitAsk: kit }, d).join("\n"), /chose the Brand Kit "/, "a style that takes a design: not asked");
 });
 
 test("what Claude reads before the brief: the design lines, and the check of the brief against them", async () => {

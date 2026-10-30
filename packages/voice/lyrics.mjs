@@ -81,8 +81,8 @@ export async function align(dir, { track, workDir, signal, onEvent = () => {}, r
   mkdirSync(workDir, { recursive: true });
   // only the part of the song the film plays is heard (a 50 s film of a 105.7 s song); the times come back in the song's seconds
   const from = window?.start > 0 ? window.start : 0, to = window?.end > from ? window.end : null;
-  const wav = asr.toWav(at(dir, track), join(workDir, "song-voice.wav"), { song: true, from, to, root });     // what Whisper hears
-  const plain = asr.toWav(at(dir, track), join(workDir, "song.wav"), { from, to, root });                     // beats and attacks, kick included
+  const wav = await asr.toWav(at(dir, track), join(workDir, "song-voice.wav"), { song: true, from, to, root });     // what Whisper hears
+  const plain = await asr.toWav(at(dir, track), join(workDir, "song.wav"), { from, to, root });                     // beats and attacks, kick included
   const lyr = join(workDir, "lyrics.txt");
   writeFileSync(lyr, shiftMarks(text, from));
   const script = join(root, "tools", "asr", "align_lyrics.py");
@@ -123,7 +123,7 @@ export async function align(dir, { track, workDir, signal, onEvent = () => {}, r
   if (transcript.read(dir)?.status !== "saved") {             // a saved voice-over transcript keeps HyperFrames' transcript.json
     const hw = join(workDir, "lyrics-words.json");
     writeFileSync(hw, JSON.stringify(words.map(({ text: t, start, end }) => ({ text: t, start, end }))));
-    const r = importTranscript(dir, hw);
+    const r = await importTranscript(dir, hw);
     hf = { ok: r.ok, words: r.words };
   }
   return { ...result, words: undefined, hf };

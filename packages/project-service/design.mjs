@@ -3,9 +3,11 @@
 //   a Look   frame.md: the Look's FRAME.md as it is (HyperFrames' frame preset, or the user's Look at its version); Claude never
 //            changes it.
 //   Free     nothing: the design is Claude's.
+//   Asked    a Brand Kit chosen for a style with its author's design: kept in meta.brandKitAsk (its spec in .moworks/brand-kit/),
+//            never applied; Prepare asks how to use it.
 import { createHash } from "node:crypto";
-import { writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { APP_ROOT } from "../version-manager/index.mjs";
 
 const pick = (x) => (x?.id ? { id: String(x.id), ...(x.title ? { title: String(x.title) } : {}) } : null);
@@ -32,4 +34,24 @@ export async function writeDesign(dir, choice, { root = APP_ROOT, now = new Date
     Object.assign(look, { version: fr.version ?? null, hash: hash(text), frame: { at: now } });
   }
   return { look };
+}
+
+/** Where the Brand Kit asked about is kept: a reference for Prepare, never the film's design (frame.md). */
+export const ASKED_KIT_FILE = ".moworks/brand-kit/FRAME.md";
+/** A Brand Kit chosen in New project for a film style with its author's design: it is not applied (the author's design is the
+ *  film's), and it is not dropped either: it is recorded, with its spec copied as a reference, so Prepare asks how to use it
+ *  (house rules §2b). Returns { id, title, version?, file?, at } (null when none was chosen). */
+export async function keepAskedKit(dir, choice, { root = APP_ROOT, now = new Date().toISOString() } = {}) {
+  const kit = pick(choice);
+  if (!kit) return null;
+  const lib = await import("../looks-library/index.mjs");
+  const fr = (() => { try { return lib.lookFrame(kit.id, root); } catch { return null; } })();
+  const out = { id: kit.id, title: fr?.title ?? kit.title ?? null, at: now };
+  if (fr?.text) {
+    const file = join(dir, ...ASKED_KIT_FILE.split("/"));
+    mkdirSync(dirname(file), { recursive: true });
+    writeFileSync(file, fr.text.replace(/\s*$/, "\n"));
+    Object.assign(out, { version: fr.version ?? null, file: ASKED_KIT_FILE });
+  }
+  return out;
 }

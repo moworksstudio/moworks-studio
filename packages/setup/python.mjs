@@ -3,7 +3,7 @@
 // (runtime/python-libs), never into the system Python. A library the system Python already has at any version counts as present (the
 // scripts only need it to import); the pinned version is what the app installs when one is missing. Python itself is pins.python.exe
 // (the user installs Python 3.12 once: the first-run screen shows the winget line); every package is credited in the app's source registry.
-import { spawn, spawnSync } from "node:child_process";
+import { execFile, spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
@@ -39,23 +39,36 @@ for m in ${JSON.stringify(mods)}:
         out[m] = {"ok": False, "error": type(e).__name__ + ": " + str(e)[:160]}
 print(json.dumps(out))`;
 
-/** { python, ready, components: [{ module, pip, licence, link, for, ok, version, where, error }], missing: [pip] } */
-export function status(root = APP_ROOT) {
-  const exe = pythonExe(root);
-  if (!exe) return { python: null, ready: false, components: COMPONENTS.map((c) => ({ ...c, ok: false, error: "Python not found" })), missing: COMPONENTS.map((c) => c.pip) };
-  const r = spawnSync(exe, ["-I", "-c", probeCode(COMPONENTS.map((c) => c.module))], { encoding: "utf8", env: env(root), windowsHide: true, timeout: 120000 });
+const noPython = () => ({ python: null, ready: false, components: COMPONENTS.map((c) => ({ ...c, ok: false, error: "Python not found" })), missing: COMPONENTS.map((c) => c.pip) });
+const PROBE = { encoding: "utf8", windowsHide: true, timeout: 120000 };
+function statusOf(exe, stdout, stderr) {
   let got = {};
-  try { got = JSON.parse((r.stdout ?? "").trim().split(/\r?\n/).pop()); } catch { /* reported below */ }
-  const components = COMPONENTS.map((c) => ({ ...c, ...(got[c.module] ?? { ok: false, error: (r.stderr ?? "").trim().split(/\r?\n/).pop() || "could not check" }) }));
+  try { got = JSON.parse((stdout ?? "").trim().split(/\r?\n/).pop()); } catch { /* reported below */ }
+  const components = COMPONENTS.map((c) => ({ ...c, ...(got[c.module] ?? { ok: false, error: (stderr ?? "").trim().split(/\r?\n/).pop() || "could not check" }) }));
   const missing = components.filter((c) => !c.ok).map((c) => c.pip);
   return { python: exe, ready: missing.length === 0, components, missing };
 }
+/** { python, ready, components: [{ module, pip, licence, link, for, ok, version, where, error }], missing: [pip] } (the checks' worker) */
+export function status(root = APP_ROOT) {
+  const exe = pythonExe(root);
+  if (!exe) return noPython();
+  const r = spawnSync(exe, ["-I", "-c", probeCode(COMPONENTS.map((c) => c.module))], { ...PROBE, env: env(root) });
+  return statusOf(exe, r.stdout, r.stderr);
+}
+/** status() without holding the caller's event loop: importing the components takes seconds (librosa, playwright), and the server's
+ *  setup jobs ask for it (T27-3). */
+export async function statusAsync(root = APP_ROOT) {
+  const exe = pythonExe(root);
+  if (!exe) return noPython();
+  const r = await new Promise((ok) => execFile(exe, ["-I", "-c", probeCode(COMPONENTS.map((c) => c.module))], { ...PROBE, env: env(root) }, (_e, stdout, stderr) => ok({ stdout, stderr })));
+  return statusOf(exe, r.stdout, r.stderr);
+}
 
 /** pip install the missing ones into runtime/python-libs (a download: the user starts it from Settings › System). { installed, log }. */
-export function install(root = APP_ROOT, { only = null, signal = null, onLine = () => {} } = {}) {
+export async function install(root = APP_ROOT, { only = null, signal = null, onLine = () => {} } = {}) {
   const exe = pythonExe(root);
   if (!exe) return Promise.reject(Object.assign(new Error("Python is not on this computer"), { code: "NO_PYTHON" }));
-  const want = only ?? status(root).missing;
+  const want = only ?? (await statusAsync(root)).missing;
   if (!want.length) return Promise.resolve({ installed: [], log: "" });
   mkdirSync(pyLibs(root), { recursive: true });
   return new Promise((ok, bad) => {

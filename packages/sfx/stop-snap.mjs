@@ -3,6 +3,7 @@
 // (Whisper's words often touch, as there) just before the word after a sentence or clause ends; on a music beat in that pause when one is.
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { filmWords } from "../hf-edit/tracks.mjs";
 
 /** A gap between two words long enough to cut in, s; the margin kept from a word in it; the lead before a word that follows punctuation. */
 export const STOP_GAP = { min: 0.12, margin: 0.04, lead: 0.12, reach: 2 };
@@ -41,7 +42,8 @@ export function stopContext(dir, meta, musicStart = 0) {
   const read = (f) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return null; } };
   const v = meta?.voice;
   const t = v?.file && !v.offTimeline && existsSync(join(dir, "transcript.json")) ? read(join(dir, "transcript.json")) : null;
-  const words = Array.isArray(t) ? t : Array.isArray(t?.words) ? t.words : [];
+  // where the film speaks them: through the clips that play the voice (one clip a line, Test 22), else as the transcript has them
+  const words = !t ? [] : filmWords(dir) ?? (Array.isArray(t) ? t : Array.isArray(t?.words) ? t.words : []);
   const b = meta?.music?.beats ? read(join(dir, ...String(meta.music.beats).split("/"))) : null;
   const beats = (Array.isArray(b?.beats) ? b.beats : []).map((x) => Number(musicStart) + Number(x?.time ?? x)).filter(Number.isFinite);
   return { words, beats };

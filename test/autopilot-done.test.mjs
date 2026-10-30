@@ -231,9 +231,11 @@ test("a film whose code does not compile goes to Claude once with the compiler's
   assert.equal(projects.getProject(p.id).meta.pipeline.buildFix, undefined);
 });
 
-test("files that come in while a step asks the user are the answer: Claude goes on with them, once per batch", async () => {
+// T22-2: the app once sent "I added 1 file(s)… Use them and go on" in the user's name while the Storyboard asked; the file was the app's own
+// voice-over, and Claude took the message for the user's answer
+test("files that come in while a step asks the user: the app says so in the chat and sends nothing in the user's name; its own files never count", async () => {
   const dir = join(T, "work", "projects", "demo-files-answer");
-  mkdirSync(dir, { recursive: true });
+  mkdirSync(join(dir, "assets", "3_audio", "voiceover"), { recursive: true });
   writeFileSync(join(dir, "index.html"), "<div id=\"root\" data-composition-id=\"main\" data-duration=\"10\"></div>");
   const p = projects.openProject(dir);
   const texts = [];
@@ -241,18 +243,30 @@ test("files that come in while a step asks the user are the answer: Claude goes 
   const running = new Map();
   const ap = createAutopilot({ root: T, renders: createRenderQueue(), agent: { running, start: async (_id, t) => { texts.push(t.text); return { id: "t" }; } },
     pipelineOf: async () => ({ p: projects.getProject(p.id), facts: {}, state }), startQa: () => null, mix: {}, filesDelayMs: 20 });
+  const said = () => projects.readNotes(dir).filter((n) => /while Claude waits for your answer/.test(n.text ?? ""));
   ap.filesAdded(p.id, ["assets/1_design/images/PNG Logo.png"]); ap.filesAdded(p.id, ["assets/1_design/fonts/Brand.ttf"]);
   await new Promise((r) => setTimeout(r, 120));
-  assert.equal(texts.length, 1, "one turn for the batch");
-  assert.match(texts[0], /2 file\(s\).*PNG Logo\.png, Brand\.ttf/);
+  assert.equal(texts.length, 0, "no message in the user's name");
+  assert.equal(said().length, 1, "one line for the batch");
+  assert.equal(said()[0].kind, "pipeline");
+  assert.equal(said()[0].vars.names, '"PNG Logo.png", "Brand.ttf"');
+  // the app's own voice-over (the Voice screen's ElevenLabs file) is never a file the user added
+  const vo = "assets/3_audio/voiceover/elevenlabs-2026-10-29T16-38-02-118Z.mp3";
+  writeFileSync(join(dir, ...vo.split("/")), "mp3");
+  projects.updateMeta(p.id, (m) => { m.voice = { source: "elevenlabs", file: vo }; });
+  ap.filesAdded(p.id, [vo]);
+  await new Promise((r) => setTimeout(r, 120));
+  assert.equal(said().length, 1, "nothing said for the app's own file");
+  assert.equal(texts.length, 0);
   state = [{ id: "brief", status: "done" }];          // nothing asks: the files wait for the next task's news
   ap.filesAdded(p.id, ["assets/x.png"]);
   await new Promise((r) => setTimeout(r, 120));
-  assert.equal(texts.length, 1);
+  assert.equal(said().length, 1);
   state = [{ id: "brief", status: "needs-you", asking: true }]; running.set(p.id, "busy");          // Claude at work: not now
   ap.filesAdded(p.id, ["assets/y.png"]);
   await new Promise((r) => setTimeout(r, 120));
-  assert.equal(texts.length, 1);
+  assert.equal(said().length, 1);
+  assert.equal(texts.length, 0);
 });
 
 test("every wait for the user gets a reminder card in the chat (new characters, the storyboard, Approve and build)", async () => {

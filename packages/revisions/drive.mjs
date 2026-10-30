@@ -4,8 +4,9 @@
 // the history (many small files that change at every commit) does not. Drive for desktop has no ignore list and its drive takes no
 // junctions, so Studio's caches and .moworks/cache stay in the folder.
 import { createHash } from "node:crypto";
-import { spawnSync } from "node:child_process";
+import { execFile, spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { cp, rm } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { workRoot } from "../project-service/index.mjs";
 import { APP_ROOT } from "../version-manager/index.mjs";
@@ -60,6 +61,21 @@ export function moveGitOut(dir, root = APP_ROOT) {
   cpSync(k.gitdir, dest, { recursive: true });
   if (head(dest) !== before) { rmSync(dest, { recursive: true, force: true }); throw Object.assign(new Error("The copied history does not match; nothing was moved"), { code: "CONFLICT" }); }
   rmSync(k.gitdir, { recursive: true, force: true });
+  writeFileSync(join(dir, ".git"), `gitdir: ${dest.replace(/\\/g, "/")}\n`);
+  return dest;
+}
+/** moveGitOut beside the server's thread (the history's copy and git's checks; T22-5). The server runs it in the project's git queue. */
+export async function moveGitOutAsync(dir, root = APP_ROOT) {
+  const k = gitKind(dir);
+  if (k.kind !== "folder") throw Object.assign(new Error("This project has no .git folder to move"), { code: "INVALID" });
+  const dest = gitStoreFor(dir, root);
+  if (existsSync(dest)) throw Object.assign(new Error(`A history is already kept at ${dest}`), { code: "CONFLICT" });
+  const head = (gd) => new Promise((ok) => execFile("git", [`--git-dir=${gd}`, "rev-parse", "HEAD"], { encoding: "utf8", windowsHide: true }, (_e, out) => ok(String(out ?? "").trim())));
+  const before = await head(k.gitdir);
+  mkdirSync(join(dest, ".."), { recursive: true });
+  await cp(k.gitdir, dest, { recursive: true });
+  if ((await head(dest)) !== before) { await rm(dest, { recursive: true, force: true }); throw Object.assign(new Error("The copied history does not match; nothing was moved"), { code: "CONFLICT" }); }
+  await rm(k.gitdir, { recursive: true, force: true });
   writeFileSync(join(dir, ".git"), `gitdir: ${dest.replace(/\\/g, "/")}\n`);
   return dest;
 }

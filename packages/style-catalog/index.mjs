@@ -180,6 +180,15 @@ const ANI_PACK = "config/rules/anidoodle/SKILL.md";
 function aniFps(skillDir, module) {
   try { const m = /\bfps:\s*(\d+)|\bFPS\s*=\s*(\d+)/.exec(readFileSync(join(skillDir, ...String(module).split("/")), "utf8")); return m ? Number(m[1] ?? m[2]) : null; } catch { return null; }
 }
+/** The medium's own frame, from its module's `const W = 1080, H = 1080` (Hand embroidery draws a 1080 × 1080 hoop), when the app can make
+ *  that size (even numbers, 320 to 3840 a side); else null. New project takes it as the film's Size (T26-2: it stayed 1920 × 1080). */
+export function aniSize(skillDir, module) {
+  try {
+    const m = /\bconst\s+W\s*=\s*(\d+)\s*,\s*H\s*=\s*(\d+)\b/.exec(readFileSync(join(skillDir, ...String(module).split("/")), "utf8"));
+    const w = Number(m?.[1]), h = Number(m?.[2]);
+    return w >= 320 && h >= 320 && Math.max(w, h) <= 3840 && w % 2 === 0 && h % 2 === 0 ? [w, h] : null;
+  } catch { return null; }
+}
 /** The anidoodle media as catalog entries: each medium its reference, one shared rule pack and pipeline. */
 function anidoodleEntries(src, root, qc) {
   const ani = anidoodleSource(root);
@@ -205,7 +214,8 @@ function anidoodleEntries(src, root, qc) {
       preview: { image: card, poster: card, placeholder: !card, ...(pv?.video ? { video: `/media/anidoodle/previews/${pv.video}` } : {}),
         credit: `Alex Greenshpun (10x Company), Apache-2.0: ${s.card ? "the medium's tile of the author's style sheet" : "the last frame of the author's plate"}${pv?.video ? `; the film is the author's own drawing film (${s.drawFilm}), rendered here` : ""}` },
       demo: null, warnings: [],
-      anidoodle: { id: s.id, family: s.family, fps: aniFps(ani.skillDir, s.module), nearest: s.nearest ? `anidoodle-${s.nearest}` : null, module: s.module, drawFilm: s.drawFilm, ...(s.house ? { house: s.house } : {}) },
+      anidoodle: { id: s.id, family: s.family, fps: aniFps(ani.skillDir, s.module), nearest: s.nearest ? `anidoodle-${s.nearest}` : null, module: s.module, drawFilm: s.drawFilm, ...(s.house ? { house: s.house } : {}),
+        ...((size) => (size ? { size } : {}))(aniSize(ani.skillDir, s.module)) },
       credit: { ...s.credit, url: s.credit.link }, pipeline,
     };
   });
@@ -369,7 +379,9 @@ export function styleFormat(s) {
   const author = Number(s?.mg?.fps) || Number(s?.lemo?.fps) || Number(s?.anidoodle?.fps) || (rule?.default ?? null);          // anidoodle: the medium's own
   const choices = rule?.allowed?.length ? rule.allowed.map(Number) : FPS;
   const aspects = [...(s?.aspects ?? ["16:9", "9:16", "1:1", "4:5"])];
-  const own = Array.isArray(s?.mg?.size) ? { w: s.mg.size[0], h: s.mg.size[1] } : null;
+  // the author's own size: an MG style's, or the frame an anidoodle medium is drawn in (Hand embroidery 1080 × 1080, T26-2)
+  const ownSize = Array.isArray(s?.mg?.size) ? s.mg.size : Array.isArray(s?.anidoodle?.size) ? s.anidoodle.size : null;
+  const own = ownSize ? { w: ownSize[0], h: ownSize[1] } : null;
   const presets = aspects.filter((a) => PRESET[a]).map((a) => ({ w: PRESET[a][0], h: PRESET[a][1], label: a, ...(own && own.w === PRESET[a][0] && own.h === PRESET[a][1] ? { own: true } : {}) }));
   if (own && !presets.some((p) => p.own)) presets.unshift({ ...own, label: `${own.w}×${own.h}`, own: true });
   presets.sort((a, b) => (b.own ? 1 : 0) - (a.own ? 1 : 0));

@@ -26,14 +26,15 @@ const mtime = (f) => { try { return statSync(f).mtimeMs; } catch { return null; 
 const time = (iso) => (iso ? Date.parse(iso) || null : null);
 
 /** STORYBOARD.md's content for approval. Left out: the lines later steps write as bookkeeping (HF's frame `src` and `status` when a
- *  frame is built, `sfx` cues of the sound step), so building or adding a sound does not undo the approval of what the frames say. */
+ *  frame is built, `sfx` and `ambience` lines of the sound), so building or adding a sound does not undo the approval of what the frames say. */
 export function storyboardHash(text) {
-  return sha(String(text).replace(/\r\n/g, "\n").split("\n").filter((l) => !/^\s*-\s*(sfx|src|status)\s*:/i.test(l)).map((l) => l.trimEnd()).join("\n").trim());
+  return sha(String(text).replace(/\r\n/g, "\n").split("\n").filter((l) => !/^\s*-\s*(sfx|ambience|src|status)\s*:/i.test(l)).map((l) => l.trimEnd()).join("\n").trim());
 }
 /** The approved storyboard with a later step's own lines kept (once the Build moved shot 2 from 3.32 s to 1.787 s and every
- *  start): every frame as approved, plus the status / src / sfx lines the step wrote for it (HF's frame status, the scene file, the sounds). */
+ *  start): every frame as approved, plus the status / src / sfx / ambience lines the step wrote for it (HF's frame status, the scene file,
+ *  the sounds). */
 export function keepApprovedStoryboard(approved, now) {
-  const own = /^\s*-\s*(sfx|src|status)\s*:/i;
+  const own = /^\s*-\s*(sfx|ambience|src|status)\s*:/i;
   const blocks = (t) => String(t).replace(/\r\n/g, "\n").split(/(?=^##\s)/m);
   const num = (b) => Number(/^##\s*(?:Frame|Shot|Scene)?\s*(\d+)/i.exec(b)?.[1] ?? NaN);
   const later = new Map(blocks(now).map((b) => [num(b), b.split("\n").filter((l) => own.test(l))]));
@@ -86,7 +87,8 @@ export function qaFacts(lastQa, dir) {
  *  song's lyrics timed, so it times its frames to the real words in one pass. What it waits for: null (nothing: no narration planned, the
  *  user chose "No voice-over", or the words are in), "make" (Prepare wrote the words to read, VOICEOVER.md, and no voice is made yet),
  *  "words" (the voice being made or its words timed), "check" (the words differ from the script: the user checks and saves them),
- *  "failed" (their timing failed or never ran), "lyrics" (lyrics.txt not timed to the track yet), "lyricsTiming" (being timed). */
+ *  "failed" (their timing failed or never ran), "ttsFailed" (the voice could not be made: the user tries again), "lyrics" (lyrics.txt not
+ *  timed to the track yet), "lyricsTiming" (being timed). */
 export function voiceWaitOf(dir, m = {}, running = () => false) {
   if (m.pipeline?.voiceSkip) return null;
   let lyrics = "", lyricsAt = 0, timedAt = null;
@@ -105,11 +107,14 @@ export function voiceWaitOf(dir, m = {}, running = () => false) {
     return st === "review" ? "check" : "failed";          // failed, stopped, or never started (no Whisper model): the user times them
   }
   if (running("tts")) return "words";
+  // "ttsFailed": the voice-over could not be made (Test 24: the step went quietly back to "make the voice-over")
+  if (v.ttsFailed) return "ttsFailed";
   return scriptDraft(dir)?.from === "VOICEOVER.md" ? "make" : null;
 }
 /** The waits for the voice that the user acts on (the others are the app at work). */
 export const VOICE_WAITS = { make: "Waiting for you: make the voice-over", check: "Waiting for you: check and save the voice-over's words",
-  failed: "Waiting for you: time the voice-over's words", lyrics: "Waiting for you: time the lyrics" };
+  failed: "Waiting for you: time the voice-over's words", lyrics: "Waiting for you: time the lyrics",
+  ttsFailed: "Waiting for you: the voice-over could not be made, try again" };
 
 /** The warnings of the last Tech checks (the findings of the checks that do not stop the render, each with its plain line for the
  *  user), for the Pipeline's Tech checks row; checks that could not run (out of time, skipped) are no warning about the film. null: no report

@@ -78,9 +78,9 @@ const kindOf = (p) => (isDesignPath(p) ? "design" : AUDIO.test(p) ? "audio" : VI
   : FONT.test(p) ? "font" : IMAGE.test(p) ? "image" : "other");
 
 /** The Assets tab: { items: [{ path, name, folder, kind, size, duration?, width?, height?, frames?, status, usedIn, onTimeline, transcript, app? }] }.
- *  shots: readShots' shots (to name the shots that use a file); meta: the project's metadata (voice, music). Files seen for the first time
+ *  shots, layers: readShots' shots and layers (to name the shots that use a file); meta: the project's metadata (voice, music). Files seen for the first time
  *  are marked "new" once and remembered (.moworks/assets-seen.json); a project without that file starts with everything seen. */
-export function listAssets(dir, { shots = [], meta = {}, remember = true } = {}) {
+export function listAssets(dir, { shots = [], layers = [], meta = {}, remember = true } = {}) {
   const files = assetFiles(dir);
   const refs = referencedFiles(dir);
   const scan = Object.fromEntries((readJson(join(dir, ".moworks", "scan", "index.json"), { items: [] }).items ?? []).map((x) => [x.path, x]));
@@ -90,17 +90,18 @@ export function listAssets(dir, { shots = [], meta = {}, remember = true } = {})
   // a layer over the film that is no storyboard frame (a code film's words and logo, words.html at 16.5 s) was counted as one
   // more shot ("In shot 7" in a film of 6): it is in the shots it lies over, as the timeline places them
   const frames = placedShots(shots, filmLength(meta, { dir }).total).filter((x) => x.index != null);
+  // readShots' layers (the captions, a closing card over the last shots) are no shots either: the same, or the timeline when they lie over none
   const shotOf = (html) => {
-    const s = shots.find((x) => x.src && posix(x.src) === html);
-    if (!s?.notInStoryboard || s.start == null) return s ? [s.number] : null;
+    const s = shots.find((x) => x.src && posix(x.src) === html) ?? layers.find((x) => x.src && posix(x.src) === html);
+    if (!s?.notInStoryboard || s.start == null) return s ? (s.number != null ? [s.number] : ["timeline"]) : null;
     const over = frames.filter((x) => x.start < s.start + (Number(s.duration) || 0) - 0.01 && x.start + x.duration > s.start + 0.01).map((x) => x.number);
-    return over.length ? over : [s.number];
+    return over.length ? over : s.number != null ? [s.number] : ["timeline"];
   };
   const users = (list) => [...new Set(list.flatMap((h) => (h === "index.html" ? ["timeline"] : shotOf(h) ?? [h])))];
   const usedIn = (p) => users(refs.get(p) ?? []);
   const items = [];
   const sequences = new Map(), appFonts = new Map();
-  const placed = appSounds(dir);
+  const placed = appSounds(dir), made = appMade(dir, meta);
   for (const f of files) {
     const name = f.path.split("/").pop();
     const af = APP_FONT.exec(f.path);
@@ -127,7 +128,7 @@ export function listAssets(dir, { shots = [], meta = {}, remember = true } = {})
     const sc = scan[f.path] ?? {};
     items.push({ path: f.path, name, folder, kind: kindOf(f.path), size: f.size, ...(sc.duration ? { duration: sc.duration } : {}), ...(sc.width ? { width: sc.width, height: sc.height } : {}),
       // on the timeline: the voice, the music, or any sound placed in the root composition
-      status: seen.has(f.path) ? "ok" : "new", usedIn: usedIn(f.path), onTimeline: meta.voice?.file === f.path || meta.music?.file === f.path || (kindOf(f.path) === "audio" && (refs.get(f.path) ?? []).includes("index.html")),
+      status: seen.has(f.path) || made.has(f.path) ? "ok" : "new", usedIn: usedIn(f.path), onTimeline: meta.voice?.file === f.path || meta.music?.file === f.path || (kindOf(f.path) === "audio" && (refs.get(f.path) ?? []).includes("index.html")),
       ...(kindOf(f.path) === "audio" ? { transcript: meta.voice?.file === f.path ? (meta.voice.transcript?.status === "saved" ? "saved" : meta.voice.transcript?.status ?? "none") : "none" } : {}),
       ...(f.path.startsWith("assets/sfx/") || placed.has(f.path) ? { app: true } : {}) });          // the sounds the app placed
   }
@@ -145,6 +146,19 @@ export function listAssets(dir, { shots = [], meta = {}, remember = true } = {})
   for (const x of items) x.group = groupOf(x);          // the Assets tab's group (ASSET_GROUPS)
   items.sort((a, b) => (a.status === "missing" ? -1 : 0) - (b.status === "missing" ? -1 : 0) || a.path.localeCompare(b.path));
   return { items, fresh: fresh.map((x) => x.path), groups: ASSET_GROUPS };
+}
+
+/** Files in assets/ the app made itself, never "added by the user" (Test 22: the voice-over the Voice screen made with ElevenLabs was
+ *  taken for a file the user added, and the app told Claude in the user's name "I added 1 file(s)… Use them and go on" while the
+ *  Storyboard waited for the user's answer): a voice-over read by a voice service (named <service>-<time>.mp3), the voice and the music
+ *  track the app placed from its own choices, and the sound effects it placed. */
+export function appMade(dir, meta = {}) {
+  const out = new Set(appSounds(dir));
+  if (meta?.voice?.file && meta.voice.source && meta.voice.source !== "upload") out.add(meta.voice.file);
+  if (meta?.music?.file && meta.music.option) out.add(meta.music.file);          // one of Claude's three tracks, copied in by the app
+  const vo = join(dir, "assets", "3_audio", "voiceover");
+  if (existsSync(vo)) for (const n of readdirSync(vo)) if (/^(elevenlabs|fishaudio)-\d{4}-\d{2}-\d{2}T[\d-]+Z?\.mp3$/i.test(n)) out.add(`assets/3_audio/voiceover/${n}`);
+  return out;
 }
 
 /** Remember files the app put there itself (an upload, a copy), so they are not "new". */

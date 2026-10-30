@@ -11,20 +11,27 @@ import { promisify } from "node:util";
 import { APP_ROOT } from "../version-manager/index.mjs";
 import { ffmpegExe } from "../library/preview-media.mjs";
 import { readMounts } from "../hf-edit/shots.mjs";
+import { audioKind } from "../hf-edit/tracks.mjs";
 import { spokenWords } from "./auto.mjs";
 
 const run = promisify(execFile);
 const SR = 16000, MARGIN_DB = 3;
 const r2 = (n) => Math.round(n * 100) / 100;
 
-/** One stem: these clips mixed at their places on the timeline, mono 16 kHz, as Float32 samples (or null with no clip). */
+/** One stem: these clips mixed at their places on the timeline, mono 16 kHz, as Float32 samples (or null with no clip). Each clip plays its
+ *  part of the file (from its data-media-start: a voice cut into one clip a line, a song played again), with its edge fades. */
 async function stem(dir, clips, total, root) {
   const ok = clips.filter((c) => c.src && existsSync(join(dir, ...c.src.split("/"))));
   if (!ok.length) return null;
   const tmp = mkdtempSync(join(tmpdir(), "mw-voice-")), out = join(tmp, "stem.f32");
   try {
     const inputs = ok.flatMap((c) => ["-i", join(dir, ...c.src.split("/"))]);
-    const parts = ok.map((c, i) => `[${i}:a:0]aformat=channel_layouts=mono,aresample=${SR},atrim=0:${Math.max(0.01, c.duration ?? total)},volume=${Number.isFinite(c.volume) ? c.volume : 1},adelay=${Math.round((c.start ?? 0) * 1000)}:all=1[s${i}]`);
+    const parts = ok.map((c, i) => {
+      const from = Math.max(0, Number(c.mediaStart) || 0), d = Math.max(0.01, c.duration ?? total);
+      const fi = Math.min(d, Number(c.fadeIn) || 0), fo = Math.min(d, Number(c.fadeOut) || 0);
+      const fades = `${fi > 0 ? `,afade=t=in:st=0:d=${fi}` : ""}${fo > 0 ? `,afade=t=out:st=${Math.max(0, d - fo)}:d=${fo}` : ""}`;
+      return `[${i}:a:0]aformat=channel_layouts=mono,aresample=${SR},atrim=${from}:${from + d},asetpts=PTS-STARTPTS${fades},volume=${Number.isFinite(c.volume) ? c.volume : 1},adelay=${Math.round((c.start ?? 0) * 1000)}:all=1[s${i}]`;
+    });
     const graph = `${parts.join(";")};${ok.map((_, i) => `[s${i}]`).join("")}amix=inputs=${ok.length}:normalize=0:duration=longest,atrim=0:${total}[m]`;
     await run(ffmpegExe(root), ["-v", "error", "-y", ...inputs, "-filter_complex", graph, "-map", "[m]", "-f", "f32le", "-ac", "1", "-ar", String(SR), out], { windowsHide: true, timeout: 180000, maxBuffer: 16 << 20 });
     const buf = readFileSync(out);
@@ -47,7 +54,8 @@ export async function voiceCheck(dir, { root = APP_ROOT } = {}) {
   if (!words?.length) return { ran: false, words: 0, masked: [] };
   const { root: comp, audio } = readMounts(dir);
   const total = Number(comp?.duration) || Math.max(...words.map((w) => w.end)) + 1;
-  const voice = audio.filter((a) => a.id === "el-voice"), music = audio.filter((a) => a.id === "el-music"), effects = audio.filter((a) => a.id !== "el-voice" && a.id !== "el-music");
+  // the voice-over and the music on every clip they are on (a voice cut into one clip a line, Test 22: el-voice-01…13; a song played again)
+  const voice = audio.filter((a) => audioKind(a) === "voice"), music = audio.filter((a) => audioKind(a) === "music"), effects = audio.filter((a) => !audioKind(a));
   const [v, m, e] = await Promise.all([stem(dir, voice, total, root), stem(dir, music, total, root), stem(dir, effects, total, root)]);
   const masked = [];
   for (const w of words) {

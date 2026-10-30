@@ -7,6 +7,7 @@
 //              no demo films, no audio
 //   library/   the built stores (Blocks, intake, Looks, Vocabulary, tiles, anidoodle cards, the Clawd demo media at the shipped size, the
 //              Lemo-Opuscar fonts' Vietnamese check) and What If's demo film (made in the app, kept as it is)
+//   sfx/       the offline sound effects (made by tools/make-sfx-library.mjs from CC0 / public-domain packs; kept as they are, counted)
 //   MANIFEST.json  every part: files, bytes, source, commit, licence
 // Usage: node tools/make-bundle.mjs [outDir] [--only part,part]   (default app/bundle; each part's folder is replaced, a part whose pinned
 //   source is its own bundle folder is kept as it is, and a folder no part makes stays). Nothing is downloaded.
@@ -92,7 +93,7 @@ copyPart("lemo-opuscar", lemo.root, join(OUT, "styles", "lemo-opuscar"), {
   source: `https://github.com/${lemo.repo}`, commit: lemo.commit, licence: "MIT; demo stills CC BY 4.0; Poly Haven assets CC0; OPUSCAR 98 frames as shipped in the repo" });
 const mg = style("mgStyles");
 copyPart("mg-styles-15", mg.root, join(OUT, "styles", "mg-styles-15"), {
-  keep: (r) => (/^(prompts|lib|demos|assets)\//.test(r) && !/\.(ply|hdr|wav|flac|mp3|mp4|mov)$/i.test(r) && !/^lib\/audio\/samples\//.test(r)) || /^docs\/readme\/films\/[^/]+\.webp$/.test(r) || ["LICENSE", "README.md"].includes(r),
+  keep: (r) => (/^(prompts|lib|demos|assets)\//.test(r) && !/\.(ply|hdr|wav|flac|mp3|mp4|mov)$/i.test(r) && !/^lib\/audio\/samples\//.test(r)) || /^docs\/readme\/films\/[^/]+\.webp$/.test(r) || ["LICENSE", "README.md", "rubric.md", "template.md"].includes(r),
   recode: (r) => /^docs\/readme\/films\/[^/]+\.webp$/.test(r) ? "still-webp" : null,
   source: `https://github.com/${mg.repo}`, commit: mg.commit, licence: "MIT; a few images CC0 / public domain; no audio" });
 const ani = style("anidoodle");
@@ -162,6 +163,11 @@ copyPart("library-characters", join(lib, "characters"), join(OUT, "library", "ch
 // What If's demo film: made in the app, not from a pinned source, so it is only kept and counted (packages/what-if-styles DEMO)
 copyPart("library-what-if", join(OUT, "library", "what-if"), join(OUT, "library", "what-if"), {
   source: "made by Moworks Studio in the What If style (FreshStack's engine): the app's ElevenLabs voice-over, Mixkit music", licence: "Moworks; engine MIT (FreshStack)" });
+// the offline sound effects (packages/sfx/library.mjs): made once by tools/make-sfx-library.mjs from the packs in tools/sfx-library-packs.json,
+// so the bundle keeps and counts them (every sound's author, page and licence in sfx/catalog.json and sfx/CREDITS.md)
+copyPart("sfx", join(OUT, "sfx"), join(OUT, "sfx"), {
+  source: "Kenney audio packs (kenney.nl), OpenGameArt.org CC0 sets and Wikimedia Commons, cut and re-encoded by tools/make-sfx-library.mjs (tools/sfx-library-packs.json)",
+  licence: "CC0 1.0 and public domain (each sound's source in sfx/catalog.json and sfx/CREDITS.md)" });
 
 // --only: the other parts' entries stay as they were, in their order
 let all = parts;

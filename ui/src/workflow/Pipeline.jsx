@@ -82,15 +82,16 @@ export default function Pipeline({ projectId, data, starting = false, onOpen, on
     let line = plural ? t(plural[s.lineVars?.n === 1 ? 0 : 1], s.lineVars) : tr(s.line, s.lineVars);
     // the time left while Claude builds: the estimate less the time since the build started; none once the checks run
     const checking = data?.steps?.some((x) => x.id === "checks" && x.status === "running");
+    // counted down to the estimate "Approve and build" gave (`planned` once the server worked it out again past it), never to one that
+    // grows (T26-4: it climbed from 76 to 103 min, past the 77 the confirm said, and the Review's "8 min left" became 32)
     if (s.id === "build" && s.status === "running" && !app && !checking && data?.estimate?.minutes) {
       const since = data.estimate.startedAt ?? data.build?.startedAt;
-      const left = since ? Math.max(1, Math.round(data.estimate.minutes - (Date.now() - Date.parse(since)) / 60000)) : data.estimate.minutes;
-      line = `${line} · ${since ? t("about {n} min left", { n: left }) : t("about {n} min", { n: left })}`;
+      line = `${line} · ${etaLeft(t, { minutes: data.estimate.planned ?? data.estimate.minutes, startedAt: since })}`;
     }
     // the Storyboard and the Motion Plan: the server's line ends with its time left; the time is worked out again from its estimate
     const eta = data?.stepEstimate;
     if (eta?.minutes && s.id === eta.stage && s.status === "running" && !app) {
-      const base = String(s.line ?? "").replace(/ · (?:about \d+ min(?: left)?|taking longer than usual)$/, "");
+      const base = String(s.line ?? "").replace(/ · (?:about \d+ min(?: left)?|taking longer than usual(?: · \d+ min so far)?)$/, "");
       line = `${tr(base, s.lineVars)} · ${etaLeft(t, eta)}`;
     }
     const stopped = s.status === "stopped" || s.status === "failed";
@@ -160,13 +161,14 @@ export default function Pipeline({ projectId, data, starting = false, onOpen, on
 // itself); every action of the column above is here: Waiting for you, Continue, Keep it as it is / Approve again, Run checks again, the
 // Prepare links, "Press Stop in the chat to change this" and the brief that changed after the build.
 const SUB = { build: "Build", qcReview: "Review", sound: "Music and sound effects", checks: "Tech checks" };
-/** The time left of a running step, as the server's etaWords says it (packages/server/boards.mjs), from now. */
+/** The time left of a running step, as the server's etaWords says it (packages/server/boards.mjs), from now: "about N min left" down
+ *  to its estimate, then "taking longer than usual · N min so far". The time left never grows (T26-4: past the middle it jumped to the
+ *  time to the slowest, and the Build's went past the top of the range its confirm gave). Both themes' Pipeline say it. */
 export function etaLeft(t, est, now = Date.now()) {
-  const gone = est.startedAt ? (now - Date.parse(est.startedAt)) / 60000 : 0;
+  const gone = est.startedAt ? (now - Date.parse(est.startedAt)) / 60000 : NaN;
   if (!(gone >= 0)) return t("about {n} min", { n: est.minutes });
   if (gone < est.minutes) return t("about {n} min left", { n: Math.max(1, Math.round(est.minutes - gone)) });
-  if (gone < (est.high ?? est.minutes)) return t("about {n} min left", { n: Math.max(1, Math.round(est.high - gone)) });
-  return t("taking longer than usual");
+  return t("taking longer than usual · {n} min so far", { n: Math.round(gone) });
 }
 // The tech checks' warnings were only dots on the timeline ruler while the row said Tech checks ✓; the row says how many, its link opens the list
 const warnWords = (t, n) => (n === 1 ? t("1 warning") : t("{n} warnings", { n }));
@@ -206,7 +208,11 @@ function StudioLine({ data, stages, view, running, hasCast, here, actions, onOpe
           {id === "qcReview" && data?.qc?.final != null && <b className="num">{` ${data.qc.final}/10`}</b>}
           {id === "checks" && warnings > 0 && <span className="sp-warn num">{" · " + warnWords(t, warnings)}</span>}</button>;
       };
-      return <div key={s.id} className={`sp-st ${mat} ${s.status}` + (here === s.id ? " here" : "") + (act?.att ? " att" : "")} aria-current={here === s.id ? "step" : undefined}>
+      // the whole station opens what its head opens (T24-5, T26-9: a click on "05 Final Mix" beside its title did nothing); its own
+      // buttons inside keep theirs, and the head stays the control for the keyboard
+      const card = go && !go.off ? (e) => { if (!e.target.closest("button, a, input, select, summary, label")) go.on(); } : undefined;
+      return <div key={s.id} className={`sp-st ${mat} ${s.status}` + (here === s.id ? " here" : "") + (act?.att ? " att" : "") + (card ? " go" : "")} aria-current={here === s.id ? "step" : undefined}
+        onClick={card}>
         <button type="button" className="sp-head" disabled={!go || go.off} title={go?.title} onClick={go?.on}>
           <span className="sp-mark" aria-hidden="true">{s.status === "done" ? <Check size={10} /> : s.status === "running" ? <Loader2 size={10} className="spin" /> : null}</span>
           <span className="sp-no num">{String(s.n).padStart(2, "0")}</span><span className="sp-name">{t(s.title)}</span>

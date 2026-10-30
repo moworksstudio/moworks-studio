@@ -161,7 +161,11 @@ export function requiredReads(dir, { styleId, first = [], step = null } = {}) {
   else if (styleId === "what-if") { const t = WHATIF(); list = t[key] ?? t.chat; }
   else {
     const type = /^hf-([a-z0-9]+)$/.exec(String(styleId ?? ""))?.[1];
-    const own = [...first, ...(HF_TYPES.includes(type) ? [HF.entry, R(HF_SKILL, "references", "types", `${type}.md`)] : [])];
+    const typeFile = HF_TYPES.includes(type) ? [R(HF_SKILL, "references", "types", `${type}.md`)] : [];
+    // the music step picks the tracks and writes a line of notes: the house rules (their music and sound rules) and the style's own file,
+    // never HyperFrames' entry skill, which is the render contract and the work loop of the steps that write the film. Test 23's music
+    // step read none of the three it was given, was stopped once before NOTES.md and left the film's notes without its music (T23-7)
+    const own = key === "sound" ? (typeFile.length ? typeFile : first.filter((p) => p !== HF.entry)) : [...first, ...(typeFile.length ? [HF.entry, ...typeFile] : [])];
     const hf = { brief: [HF.story], storyboard: [HF.spec, HF.look, HF.storyboard, HF.boardFormat], motionSpec: [HF.motion],
       build: [HF.entry, HF.format, HF.runtimes, HF.motion], checks: [HF.entry], qcReview: [R("moworks-qc", "SKILL.md"), HF.review] }[key] ?? [];
     list = key === "qcReview" ? hf : [...own, ...hf];

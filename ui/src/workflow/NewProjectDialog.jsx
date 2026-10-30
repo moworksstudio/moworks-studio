@@ -36,8 +36,9 @@ const gcd = (a, b) => (b ? gcd(b, a % b) : a);
 const ratioOf = (w, h) => { const g = gcd(w, h) || 1; return `${w / g}:${h / g}`; };
 /** The preset aspect a size is (one of the four), else null. */
 const aspectOf = (w, h) => SIZES.find(([, pw, ph]) => pw * h === ph * w)?.[0] ?? null;
-/** What a style allows: { fps: [..], fpsDefault, sizes: [[label, w, h]], typed, locked }. */
-function formatRule(style) {
+/** What a style allows: { fps: [..], fpsDefault, sizes: [[label, w, h]], typed, locked, own ("1080 × 1080"), ownSize ([w, h]: the size the
+ *  style's author draws in, the film's Size when the style is picked) }. */
+export function formatRule(style) {
   const au = style ? authorOf(style) : null;
   const allowed = (style?.fps?.choices ?? style?.fps?.allowed)?.length ? (style.fps.choices ?? style.fps.allowed).map(String) : au === "johnheibel" ? ["24", "25", "30"] : FPS;
   const fpsDefault = String(style?.fps?.default ?? style?.mg?.fps ?? (au === "alexgreensh" ? 24 : 30));
@@ -55,10 +56,20 @@ function formatRule(style) {
     const list = au2 && !pre.some(([, w, h]) => w === au2[0] && h === au2[1]) ? [[ratioOf(au2[0], au2[1]), au2[0], au2[1]], ...pre] : pre;
     const locked = !!fm.sizes?.locked, typed = fm.sizes ? !!fm.sizes.custom && !locked : true;
     return { fps: choices, fpsDefault: choices.includes(def) ? def : choices[0], sizes: list, typed, locked: locked || (!typed && list.length === 1), slowAt: fm.fps?.slowAt != null ? String(fm.fps.slowAt) : null, slower: fm.fps?.slower ?? 2,
-      own: au2 ? `${au2[0]} × ${au2[1]}` : null };
+      own: au2 ? `${au2[0]} × ${au2[1]}` : null, ownSize: au2 ?? null };
   }
   if (au === "johnheibel") return { fps: allowed, fpsDefault, sizes: [["16:9", 1920, 1080]], typed: false, locked: true };
-  return { fps: allowed, fpsDefault: allowed.includes(fpsDefault) ? fpsDefault : allowed[0], sizes, typed: au !== "alexgreensh", locked: false, own: own ? own.join(" × ") : null };
+  return { fps: allowed, fpsDefault: allowed.includes(fpsDefault) ? fpsDefault : allowed[0], sizes, typed: au !== "alexgreensh", locked: false, own: own ? own.join(" × ") : null, ownSize: own ?? null };
+}
+/** The size a style gives the film when it is picked (`fresh`): its author's own size (Hand embroidery draws 1080 × 1080: T26-2 kept
+ *  1920 × 1080), unless the user set Size by hand; a size a style gave goes back to the next style's first when that one has none of its
+ *  own; a size the style cannot take becomes its first. The fields to set ({} keeps the size). */
+export function sizeForStyle(x, rule, fresh) {
+  if (fresh && !x.sizeByHand && rule.ownSize) return { width: rule.ownSize[0], height: rule.ownSize[1], sizeByStyle: true };
+  if (fresh && !x.sizeByHand && x.sizeByStyle) return { width: rule.sizes[0][1], height: rule.sizes[0][2], sizeByStyle: false };
+  const preset = rule.sizes.some(([, w, h]) => w === x.width && h === x.height);
+  const fits = rule.locked ? preset : rule.typed ? (!aspectOf(x.width, x.height) || rule.sizes.some(([, w, h]) => w * x.height === h * x.width)) : preset;
+  return fits ? {} : { width: rule.sizes[0][1], height: rule.sizes[0][2] };
 }
 const PRESETS = [15, 30, 45, 60, 90, 120, 180, 300, 600, 900, 1200];          // the length list under the timecode
 const KEY = "mw-draft:new-project-2";
@@ -85,7 +96,9 @@ export function toTimecode(sec, fps) {
 }
 /** A typed length -> seconds, or null. As in After Effects, digits alone fill frames, seconds, minutes, hours from the right ("1500" is
  *  0:00:15:00) and parts with colons do the same ("15:00" is 15 seconds); "1:30" with one colon reads as minutes:seconds, the way people
- *  write a length. Frames over the rate carry into seconds. */
+ *  write a length. Values over their range carry, as in After Effects (frames over the rate into seconds). The parts are split by
+ *  ":", "." or ";" (drop-frame), as After Effects takes them; anything else ("0:00:15:00a12000") is no length (T23-12: it was kept
+ *  as typed). */
 export function fromTimecode(text, fps) {
   const t = String(text ?? "").trim(), r = Number(fps) || 30;
   if (!t) return null;
@@ -127,11 +140,24 @@ function useOutside(ref, open, close) {
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 }
 
-/** Length: a typed timecode, tidied on leaving the field; no list. */
-function LengthField({ value, fps, onChange, invalid, describedBy }) {
+/** On leaving the Length field: a length is tidied to its timecode; anything else goes back to the last length it held (`last`, a
+ *  length typed before at this rate), and `reverted` says so. */
+export function leaveLength(value, last, fps) {
+  const s = fromTimecode(value, fps);
+  if (s != null) return { value: toTimecode(s, fps), reverted: false };
+  const b = fromTimecode(last, fps);
+  return { value: b != null ? toTimecode(b, fps) : value, reverted: b != null };
+}
+
+/** Length: a typed timecode, tidied on leaving the field; no list. What is no length goes back to the last length on leaving the field,
+ *  and the field says so (onReverted). */
+function LengthField({ value, fps, onChange, onReverted, invalid, describedBy }) {
   const t = useT();
+  const last = useRef(value);
+  useEffect(() => { if (fromTimecode(value, fps) != null) last.current = value; }, [value, fps]);
+  const leave = () => { const out = leaveLength(value, last.current, fps); onChange(out.value, { tidy: true }); if (out.reverted) onReverted?.(out.value); };
   return <div className={"pick-btn length" + (invalid ? " invalid" : "")}><Clock3 size={14} />
-    <input id="np-len" className="num" value={value} onChange={(e) => onChange(e.target.value)} onBlur={() => onChange(tidyLength(value, fps))} placeholder="0:00:15:00"
+    <input id="np-len" className="num" value={value} onChange={(e) => onChange(e.target.value)} onBlur={leave} placeholder="0:00:15:00"
       inputMode="numeric" spellCheck={false} aria-label={t("Length")} aria-invalid={invalid || undefined} aria-describedby={describedBy}
       title={t("Hours : minutes : seconds : frames")} />
     {fromTimecode(value, fps) != null && <span className="np-len-s num" aria-hidden="true">{secondsText(fromTimecode(value, fps))}</span>}</div>;
@@ -219,6 +245,7 @@ export default function NewProjectDialog({ onClose }) {
   const sampleBox = useRef(null);
   useOutside(sampleBox, sampleMenu, () => setSampleMenu(false));
   const [, setFieldsSet] = useState(false);      // what the user set; a sample brief never changes the boxes now
+  const [lenBack, setLenBack] = useState(null);     // the length the field went back to when what was typed was no length
   const [phase, setPhase] = useState(null);         // null | "creating" | "copying"
   const [err, setErr] = useState(null);
   const job = useRef(null);
@@ -249,10 +276,7 @@ export default function NewProjectDialog({ onClose }) {
     const fresh = lastStyle.current !== style.id; lastStyle.current = style.id;
     setD((x) => {
       const fps = fresh || !rule.fps.includes(x.fps) ? rule.fpsDefault : x.fps, sec = fromTimecode(x.length, x.fps);
-      const preset = rule.sizes.some(([, w, h]) => w === x.width && h === x.height);
-      const fits = rule.locked ? preset : rule.typed ? (!aspectOf(x.width, x.height) || rule.sizes.some(([, w, h]) => w * x.height === h * x.width)) : preset;
-      const size = fits ? {} : { width: rule.sizes[0][1], height: rule.sizes[0][2] };
-      return { ...x, ...size, fps, length: sec == null ? x.length : toTimecode(sec, fps) };
+      return { ...x, ...sizeForStyle(x, rule, fresh), fps, length: sec == null ? x.length : toTimecode(sec, fps) };
     });
   }, [style?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const aspect = aspectOf(d.width, d.height);
@@ -318,11 +342,11 @@ export default function NewProjectDialog({ onClose }) {
     setIdeas(false);
     setErr(null); setPhase("creating");
     try {
-      // the design: a style with its own design sends none
-      const free = style?.design ? style.design === "open" : !!style?.look;
+      // the design: the Brand Kit chosen is sent for every style; for a style with its author's design the server keeps it for Prepare
+      // to ask about and never applies it (T25: it was dropped without a word)
       // the size: one of the four presets as its aspect, else "custom" with the typed width and height
       const p = await post("/api/projects", { title: d.title.trim(), styleId: d.styleId, aspect: aspect ?? "custom", width: d.width, height: d.height, fps: Number(d.fps) || 30, durationSec: seconds,
-        brief: d.brief, look: free && d.look ? { id: d.look } : null,
+        brief: d.brief, look: d.look ? { id: d.look } : null,
         settings: { model: d.model, effort: d.effort, web: d.web }, location: loc?.path,
         characters: cast.mode !== "locked" && d.characters?.length ? d.characters : undefined,          // the box's own rule decides; written into the film at creation
         kickoff: true });
@@ -331,6 +355,7 @@ export default function NewProjectDialog({ onClose }) {
         job.current = uploadAll(p.id, files, (id, patch) => setFiles((xs) => xs.map((x) => (x.id === id ? { ...x, ...patch } : x))));
         const r = await job.current.done;
         if (r.failed) toast(t("{n} file(s) could not be copied; import them again in the Editor", { n: r.failed }), "error");
+        for (const a of r.archives ?? []) if (!a.unpacked) toast(a.error, "error");          // an archive that could not be unpacked, in plain words
       }
       sessionStorage.removeItem(KEY);
       toast(t("Created “{title}”: Claude starts in the Editor", { title: p.title }));
@@ -410,9 +435,10 @@ export default function NewProjectDialog({ onClose }) {
 
             <Step n={5} title={t("Format")}>
               <div className="np2-row3">
-                <div className="np2-field"><label className="np2-l" htmlFor="np-len">{t("Length")}</label><LengthField value={d.length} fps={d.fps} onChange={(v) => { setFieldsSet(true); set("length")(v); }} invalid={lenBad} describedBy={lenBad ? "np-len-d" : undefined} /></div>
+                <div className="np2-field"><label className="np2-l" htmlFor="np-len">{t("Length")}</label><LengthField value={d.length} fps={d.fps} onChange={(v, o) => { setFieldsSet(true); set("length")(v); if (!o?.tidy) setLenBack(null); }}
+                  onReverted={setLenBack} invalid={lenBad} describedBy={lenBad || (lenBack && lenBack === d.length) ? "np-len-d" : undefined} /></div>
                 <div className="np2-field"><span className="np2-l">{t("Size")}</span>
-                  <SizeField w={d.width} h={d.height} rule={rule} invalid={sizeBad} onChange={(width, height) => { setFieldsSet(true); setD((x) => ({ ...x, width, height })); }} /></div>
+                  <SizeField w={d.width} h={d.height} rule={rule} invalid={sizeBad} onChange={(width, height) => { setFieldsSet(true); setD((x) => ({ ...x, width, height, sizeByHand: true, sizeByStyle: false })); }} /></div>
                 <div className="np2-field"><label className="np2-l" htmlFor="np-fps">{t("Frame rate")}</label>
                   <select id="np-fps" className="select num" value={d.fps} onChange={setFps}>{fpsList.map((f) => <option key={f} value={f}>{f} fps</option>)}</select></div>
               </div>
@@ -422,7 +448,8 @@ export default function NewProjectDialog({ onClose }) {
               {!rule.locked && !rule.typed && <span className="np2-desc">{t("This style takes the four sizes in the list for now.")}</span>}
               {(rule.slowAt ? d.fps === rule.slowAt : authorOf(style ?? {}) === "alexgreensh" && d.fps === "60") && <span className="np2-desc">{t("At {fps} fps the film takes about {x}× longer to render.", { fps: d.fps, x: rule.slower ?? 2 })}</span>}
               {sizeBad && d.width > 0 && d.height > 0 && <span className="np2-err" role="alert">{t("Use even numbers, at least 320 and the long side at most 3840.")}</span>}
-              {(seconds == null || seconds > MAX_SECONDS || (touched && !(seconds >= 5))) && <span className="np2-err" id="np-len-d" role="alert">{seconds == null ? t("Hours:minutes:seconds:frames, e.g. 0:00:15:00") : seconds > MAX_SECONDS ? t("The longest film is 1:00:00:00.") : t("The shortest film is 0:00:05:00.")}</span>}          {/* no hint line under it */}
+              {(seconds == null || seconds > MAX_SECONDS || (touched && !(seconds >= 5))) ? <span className="np2-err" id="np-len-d" role="alert">{seconds == null ? t("Hours:minutes:seconds:frames, e.g. 0:00:15:00") : seconds > MAX_SECONDS ? t("The longest film is 1:00:00:00.") : t("The shortest film is 0:00:05:00.")}</span>
+                : lenBack && lenBack === d.length && <span className="np2-err" id="np-len-d" role="alert">{t("That was no length, so it is back to {len}.", { len: lenBack })}</span>}          {/* no hint line under it */}
             </Step>
 
             <Step n={6} title={t("System settings")}>
