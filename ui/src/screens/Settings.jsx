@@ -3,8 +3,9 @@
 // One round simpler. The selected section names the page (no second title); each setting has one short line, the
 // longer explanation in a quiet "?" tooltip; technical lists sit behind a single "Details" fold; no paths (the projects folder by its name).
 // Second round: four sections. General in small groups (Account, Projects folder,
-// Appearance, Voice-over, Render & export), Director (the AI that makes the films: model, effort, mode, web, bypass), System (one
-// "Components" checklist, folded while all is ready, the speech models in it; "Sources and licences" folded; backups one line), Update.
+// Appearance, Voice-over, Render & export), Director (the AI that makes the films: model, effort, mode, web, bypass), System (the
+// components as one line with Install or Check again and only what needs the user; the optional extras; "Open-source licences" folded;
+// backups one line), Update.
 // Old addresses (ai, workspace, voice, styles, ae, models) land in their new place. Whatever waits on the server shows a skeleton at once.
 import { useEffect, useState } from "react";
 import { ALargeSmall, Bot, Brain, Clapperboard, Cpu, Download, FlaskConical, FolderOpen, Gauge as GaugeIcon, Globe, Languages, Loader2, LogOut, Palette, RefreshCw, RotateCcw, RotateCw, ShieldCheck, SlidersHorizontal } from "lucide-react";
@@ -14,12 +15,12 @@ import { go, useData, useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 import { SignInFlow, useClaude } from "../workflow/claude.jsx";
 import { DriveNote, folderName } from "../workflow/folder.jsx";
-import { FirstRunList, SourcesFold, mb as mbOf } from "../workflow/FirstRun.jsx";
+import { ComponentsLine, Extras, LicencesFold, YourSteps, mb as mbOf, useSetupJob } from "../workflow/FirstRun.jsx";
 import AppUpdate from "../workflow/AppUpdate.jsx";          // the app updates itself from the user's repo
 import { UpdateDot } from "../workflow/UpdateNotice.jsx";          // a new version is ready: the Update section's dot
 import { KEEP_ON_RESET, SIZES, THEMES_SHOWN, useAppearance } from "../theme.jsx";
 import { flushPrefs } from "../prefs-sync.js";
-import Models, { useVoiceSettings } from "../voice/Models.jsx";
+import { useVoiceSettings } from "../voice/settings.js";
 import Keys from "../voice/Keys.jsx";
 
 // labels are English keys for t
@@ -95,6 +96,7 @@ function ProjectsFolder() {
   const open = async () => { try { await post("/api/storage/location/open"); } catch (e) { toast(e.message, "error"); } };          // a missing folder says so
   const d = place.data;
   return <Group title={t("Projects folder")}>
+    <p className="hint">{t("Choose the folder that stores your projects.")}</p>
     {d ? <><div className="folder-line">
       <button type="button" className="path-link mono" onClick={open} title={t("Open in Explorer")}><FolderOpen size={14} />{d.location === d.standard ? t("Standard folder") : folderName(d.location)}</button>
       <span className="spacer" />
@@ -227,47 +229,35 @@ function Backups() {
     : data.last && !data.last.ok ? t("The last backup did not finish.") : t("The app is backed up after each commit.")}</p>;
 }
 
-/** System: one "Components" checklist (what is on this computer, the speech models with it), folded while all is ready and
- *  opened by itself on a problem, its summary "13 components · all ready · 4.0 GB" with Check again; then "Sources and licences" folded;
- *  backups one line. Nothing the user has no need to act on stays open. */
+/** System: the components as one line (what is left to download with Install, or "All ready" and their size on disk with Check
+ *  again; a running install as one bar), under it only what needs the user (a failed check with its fix, FFmpeg or Python while missing);
+ *  then the optional extras, "Open-source licences" folded and the backups line. No list of parts, versions or sources (owner 30/10). */
 function Runtime({ sys, reload, loading }) {
   const t = useT();
   const fr = useChecks("/api/setup/first-run");
-  const voice = useVoiceSettings();
-  const [open, setOpen] = useState(null);          // null: the page decides (open on a problem); then the user's own choice
-  const again = () => { reload(); fr.reload(); voice.reload(); };
-  if (!sys || !fr.data) return <section className="section"><Waiting rows={4} label={t("Checking this computer…")} /></section>;
+  const again = () => { reload(); fr.reload(); };
+  const setup = useSetupJob(again);
+  if (!sys || !fr.data) return <section className="section"><Waiting rows={3} label={t("Checking this computer…")} /></section>;
   const c = sys.checks;
   const keys = ["hfRuntime", "hfSkills", "chromium", "ffmpeg", "node", "python", "pyComponents", "fonts", "storage"].filter((k) => c[k]);
   const bad = keys.filter((k) => c[k].status !== "ok");
-  const items = fr.data.items.filter((it) => it.id !== "work");
-  const models = voice.data?.models ?? [];
-  const missing = items.filter((it) => !it.ready && !it.optional).length + (models.length && !models.some((m) => m.installed) ? 1 : 0);
-  const problems = bad.length + missing;
-  const size = items.reduce((n, it) => n + (it.ready && it.diskMb ? it.diskMb : 0), 0) + models.reduce((n, m) => n + (m.installed ? m.size / 1048576 : 0), 0);
-  const count = items.length + models.length;
-  const isOpen = open ?? problems > 0;
-  const sum = [t("{n} components", { n: count }), problems ? t("{n} need attention", { n: problems }) : t("all ready"), size > 0 ? mbOf(size) : null].filter(Boolean).join(" · ");
+  const d = fr.data;
+  const need = d.items.some((it) => !it.ready && it.from !== "yours" && !it.optional);
+  const size = d.items.reduce((n, it) => n + (!it.optional && it.ready && it.diskMb ? it.diskMb : 0), 0);
+  const busy = loading || fr.loading;
   return <section className="section">
     <div className="panel">
-      <div className="comp-head">
-        <button type="button" className="comp-toggle" aria-expanded={isOpen} onClick={() => setOpen(!isOpen)}>
-          <StatusIcon status={problems ? "error" : "ok"} size={15} /><b>{t("Components")}</b><span className="muted num">{sum}</span></button>
-        <span className="spacer" />
-        <button className="btn sm" onClick={again} disabled={loading || fr.loading}>{loading || fr.loading ? <Loader2 size={14} className="spin" /> : <RefreshCw size={14} />}{t("Check again")}</button>
-      </div>
-      {isOpen && <div className="comp-body">
-        {bad.map((k) => <Check key={k} c={c[k]}>
-          {k === "fonts" && <SetupJob url="/api/setup/assets" label="Download" done={again} />}
-          {k === "hfSkills" && <SetupJob url="/api/setup/hf-skills" label="Download (about 120 MB)" done={again} />}
-          {k === "pyComponents" && c[k].action !== "Install Python 3.12" && <SetupJob url="/api/setup/python" label="Install" done={again} />}</Check>)}
-        <FirstRunList q={fr} onDone={again} skip={["work"]} creditsFolded />
-        {/* the speech-to-text models are components too, in the same list */}
-        {voice.error ? <Banner kind="error" action={<button className="btn sm" onClick={voice.reload}>{t("Retry")}</button>}>{voice.error.message}</Banner>
-          : <div className="comp-models"><Models data={voice.data} reload={voice.reload} compact /></div>}
-      </div>}
-      <SourcesFold d={fr.data} more={models.map((m) => ({ key: m.id, title: m.label, author: m.author, licence: m.licence, link: m.source }))} />
+      <ComponentsLine d={d} job={setup.job} label size={size > 0 ? mbOf(size) : null} problems={bad.length}
+        action={setup.job ? null : need ? <button className="btn primary sm" onClick={() => setup.start()}><Download size={14} />{d.mb > 0 ? t("Install ({size})", { size: mbOf(d.mb) }) : t("Install")}</button>
+          : <button className="btn sm" onClick={again} disabled={busy}>{busy ? <Loader2 size={14} className="spin" /> : <RefreshCw size={14} />}{t("Check again")}</button>} />
+      {bad.length > 0 && <div className="comp-body">{bad.map((k) => <Check key={k} c={c[k]}>
+        {k === "fonts" && <SetupJob url="/api/setup/assets" label="Download" done={again} />}
+        {k === "hfSkills" && <SetupJob url="/api/setup/hf-skills" label="Download (about 120 MB)" done={again} />}
+        {k === "pyComponents" && c[k].action !== "Install Python 3.12" && <SetupJob url="/api/setup/python" label="Install" done={again} />}</Check>)}</div>}
+      <YourSteps d={d} />
+      <LicencesFold d={d} />
     </div>
+    <Extras d={d} reload={again} />
     <Backups />
   </section>;
 }

@@ -62,6 +62,13 @@ function Uninstall() {
   </div>;
 }
 
+/** The new versions, newest first, with the ones in a row that share a subject as one ({ ...newest, n }). */
+export const sameInARow = (commits) => commits.reduce((out, c) => {
+  const last = out[out.length - 1];
+  if (last && last.subject === c.subject) last.n += 1; else out.push({ ...c, n: 1 });
+  return out;
+}, []);
+
 export default function AppUpdate() {
   const t = useT();
   const toast = useToast();
@@ -130,7 +137,9 @@ export default function AppUpdate() {
       {/* changed files by their count, never their paths in the repo */}
       {blocked.map((b) => <p key={b.code} className="warn-note"><AlertTriangle size={13} />{b.code === "LOCAL_CHANGES"
         ? t("{n} app file(s) were changed on this computer.", { n: b.files?.length ?? 0 }) : t(b.message)}</p>)}
-      <ol className="plain upd-commits">{(check.commits ?? []).map((c) => <li key={c.short}><span className="muted">{day(c.date)}</span><span>{c.subject}</span></li>)}</ol>
+      {/* releases in a row with one subject ("Bug fixes") read as one line with their count, dated by the newest */}
+      <ol className="plain upd-commits">{sameInARow(check.commits ?? []).map((c) => <li key={c.short}><span className="muted">{day(c.date)}</span>
+        <span>{c.subject}{c.n > 1 && <span className="muted"> · {t("{n} updates", { n: c.n })}</span>}</span></li>)}</ol>
       {(check.files != null || check.packages) && <p className="hint">{t("{n} file(s) change", { n: check.files ?? 0 })}{check.packages ? ` · ${t("the app's packages change too")}` : ""}</p>}
       {check.changelog && <details className="upd-log"><summary>{t("What's new")}</summary><pre>{check.changelog}</pre></details>}
     </div>}

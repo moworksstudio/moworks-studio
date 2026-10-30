@@ -392,7 +392,7 @@ export function routes(ctx) {
     // off the server's thread; the last list at once while it is checked again (?fresh=1 waits)
     r("GET", "/setup/first-run", async (_p, _b, q) => ({ ...(await ctx.checks.firstRun.get({ fresh: q.get("fresh") === "1" })), bundle: firstRun.bundleManifest(root) })),
     r("POST", "/setup/first-run", (_p, b) => ctx.jobs.start("first-run", { title: "Setting up Moworks Studio" }, async (job) =>
-      firstRun.firstRunAll({ root, ids: Array.isArray(b.ids) ? b.ids.map(String) : null, signal: job.signal, onProgress: ({ id, stage }) => job.update({ stage: `${id}: ${stage}` }) }))),
+      firstRun.firstRunAll({ root, ids: Array.isArray(b.ids) ? b.ids.map(String) : null, signal: job.signal, onProgress: ({ id, stage, progress }) => job.update({ stage: `${id}: ${stage}`, progress }) }))),
     r("POST", "/setup/work-folder", (_p, b) => firstRun.setWorkFolder(b.path, root)),
     // Whisper on the graphics card. GET: the card, the pack (name, source, size, licence), installed or not, `ask` (asked once on
     // a computer past its first run), the device Whisper uses and the last run's. POST { answer: yes | no }: yes installs it (a job)
@@ -403,7 +403,7 @@ export function routes(ctx) {
       cuda.answer(a, root);
       if (a !== "yes") return cuda.gpuState(root);
       return ctx.jobs.start("first-run", { title: cuda.PACK.title }, async (job) =>
-        firstRun.firstRunAll({ root, ids: [cuda.PACK.id], signal: job.signal, onProgress: ({ id, stage }) => job.update({ stage: `${id}: ${stage}` }) }));
+        firstRun.firstRunAll({ root, ids: [cuda.PACK.id], signal: job.signal, onProgress: ({ id, stage, progress }) => job.update({ stage: `${id}: ${stage}`, progress }) }));
     }),
     r("DELETE", "/setup/whisper-gpu", () => ({ pack: cuda.remove(root) })),
     r("POST", "/setup/style-source/(lemo|mgStyles|anidoodle|characterKit|whatIf)", ([key]) => ctx.jobs.start("style-source", { title: `Style source ${key}`, key }, async (job) =>

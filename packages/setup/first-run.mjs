@@ -1,8 +1,8 @@
 // First run on a new computer: everything the app needs beyond the repository, in one list with sizes, and
-// one "Download all". What came with the app in bundle/ is copied, not downloaded: the offline fonts and libraries
+// one Install ("Download all" before 30/10). What came with the app in bundle/ is copied, not downloaded: the offline fonts and libraries
 // (offline-assets), HyperFrames' skills and registry (read from bundle/hf in place), the style sources (read from bundle/styles in
 // place) and the built library stores (copied into the work folder's library, one folder per pin, checked at every start). The rest is downloaded at the pinned versions:
-// HyperFrames' runtime and its Chrome, the Python components, Whisper (only when wanted), and any style source that is not bundled (a thin
+// HyperFrames' runtime and its Chrome, the Python components, the speech-to-text model, and any style source that is not bundled (a thin
 // git checkout at the pinned commit: no history, no demo films, no audio).
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -13,9 +13,11 @@ import { workRoot } from "../project-service/index.mjs";
 import * as assets from "../offline-assets/index.mjs";
 import { fetchSkills, hfSources, verifySkills } from "./hf-skills.mjs";
 import * as py from "./python.mjs";
+import * as winget from "./winget.mjs";
 import { installRuntime, runtimeReady } from "../hf-setup/index.mjs";
 import { seedAuthorCharacters } from "../character-kit/index.mjs";
 import * as cuda from "../voice/cuda.mjs";
+import * as asr from "../voice/asr.mjs";
 import * as blocks from "../blocks-library/index.mjs";
 import * as looks from "../looks-library/index.mjs";
 import * as vocab from "../vocab-library/index.mjs";
@@ -161,18 +163,25 @@ function itemDirs(id, root) {
   if (id === "library") return [join(workRoot(root), "library")];
   if (id.startsWith("style-")) return [styleSource(id.slice(6), root).root];
   if (id === "python") return [py.pyLibs(root)];
+  if (id === "speech") { const m = speechModel(root); return m ? [m.path] : []; }
   if (id === cuda.PACK.id) return [cuda.packDir(root)];
   if (id === "ffmpeg") return [dirname(expandEnv(pins.ffmpeg.dir))];
   return [];
 }
 
 // ---- the list and "Download all"
+/** The speech-to-text model the app transcribes voice-overs with (the default one): its card, null when the catalog has none. */
+function speechModel(root) {
+  try { const all = asr.models(root); return all.find((m) => m.isDefault) ?? all[0] ?? null; } catch { return null; }
+}
+const ENGINE_MB = 70;          // faster-whisper with CTranslate2 (config/asr-models.json runtime.size)
+
 /** Every item of the first-run screen: { id, title, what, mb, from: bundle | download | yours, ready, optional, action }. `sizes`: each
  *  ready item's diskMb too (the worker measures it; null for the work folder or a folder not found). */
 export function firstRunItems(root = APP_ROOT, { sizes = false } = {}) {
   const items = [];
   const work = workRoot(root);
-  items.push({ id: "work", title: "Work folder", what: "Projects, the library and downloads", mb: 0, from: "yours", ready: existsSync(work), path: work });
+  items.push({ id: "work", title: "Projects folder", what: "Choose the folder that stores your projects.", mb: 0, from: "yours", ready: existsSync(work), path: work });
   const rt = runtimeReady(root);
   items.push({ id: "hf-runtime", title: "HyperFrames and its Chrome", version: rt.version, what: "The engine that builds and renders the films", mb: rt.installed ? (rt.chromium ? 0 : 270) : 546, from: "download", ready: rt.installed && !!rt.chromium });
   const sk = verifySkills(root, { fresh: true }), skFrom = inBundle(hfSources(root).skillsRoot, root) ? "bundle" : "download";
@@ -186,18 +195,29 @@ export function firstRunItems(root = APP_ROOT, { sizes = false } = {}) {
     const s = styleSource(key, root);
     items.push({ id: `style-${key}`, title: s.title, what: "A style author's prompts, rules and demo code at the pinned commit", mb: s.intact ? 0 : STYLE_SOURCES[key].mb, from: s.from === "missing" ? "download" : s.from, ready: s.intact });
   }
-  // the libraries go into the app's own folder with pip, so Python itself must be there first: without it the item is the user's step
+  // the libraries go into the app's own folder with pip, so Python itself must be there first: Install gets it with winget (for this
+  // user); without winget the item is the user's step, with the line to copy
   const p = py.status(root), pyMb = p.components.filter((c) => !c.ok).reduce((s, c) => s + (c.mb ?? 0), 0);
   items.push(p.python ? { id: "python", title: "Python components", what: "Export to After Effects, PSD and PPTX reading", mb: pyMb, from: "download", ready: p.ready }
-    : { id: "python", title: "Python components", what: "Install Python 3.12 once, then restart the app (it then downloads about 160 MB)",
+    : winget.hasWinget() ? { id: "python", title: "Python components", what: "Python 3.12 and the libraries the app's scripts use", mb: winget.MB.python + pyMb, from: "download", ready: false }
+    : { id: "python", title: "Python 3.12", what: "Install it once, then restart the app",
       command: "winget install -e --id Python.Python.3.12 --scope user", mb: 0, from: "yours", ready: false });
+  // the speech-to-text model: every voice-over is turned into timed words with it, so it is part of the install, not a choice
+  const sm = speechModel(root);
+  if (sm) items.push({ id: "speech", title: "Speech-to-text model", what: "Turns the voice-over into timed words", from: "download",
+    mb: (sm.installed ? 0 : Math.round(sm.size / MB)) + (sm.runtime.ok ? 0 : ENGINE_MB), ready: sm.installed && sm.runtime.ok,
+    author: sm.author, licence: sm.licence, source: sm.source, label: sm.label });
   let ff = false; try { checkFfmpeg(root); ff = true; } catch { /* not found */ }
   // Whisper on the graphics card, offered only on a computer with an NVIDIA card strong enough; optional: never in "Download all"
   // (the user says yes to it on its own), and the app runs without it (Whisper on the CPU)
   const g = cuda.gpuState(root);
   if (g.offer) items.push({ id: cuda.PACK.id, title: cuda.PACK.title, what: `Transcribes the voice-over on ${g.gpu.name} instead of the CPU`, version: cuda.PACK.version, mb: g.pack.installed ? 0 : cuda.PACK.mb,
     from: "download", ready: g.pack.installed, optional: true, source: cuda.PACK.source, licence: cuda.PACK.licence, author: cuda.PACK.author });
-  items.push({ id: "ffmpeg", title: "FFmpeg", what: ff ? "Found on this computer" : "Install it yourself once, then restart the app", command: ff ? null : `winget install Gyan.FFmpeg --version ${loadPins(root).ffmpeg.version}`, version: loadPins(root).ffmpeg.version, mb: 0, from: "yours", ready: ff });
+  // FFmpeg: Install gets it with winget when it is missing; without winget it is the user's step, with the line to copy
+  const ffv = loadPins(root).ffmpeg.version;
+  items.push(ff ? { id: "ffmpeg", title: "FFmpeg", what: "Found on this computer", version: ffv, mb: 0, from: "yours", ready: true }
+    : winget.hasWinget() ? { id: "ffmpeg", title: "FFmpeg", what: "Sound, previews and the final video", version: ffv, mb: winget.MB.ffmpeg, from: "download", ready: false }
+    : { id: "ffmpeg", title: "FFmpeg", what: "Install it yourself once, then restart the app", command: `winget install Gyan.FFmpeg --version ${ffv}`, version: ffv, mb: 0, from: "yours", ready: false });
   if (sizes) for (const i of items) i.diskMb = i.ready ? diskMb(itemDirs(i.id, root), root) : null;
   return { items, mb: items.filter((i) => !i.ready && i.from !== "yours" && !i.optional).reduce((s, i) => s + i.mb, 0), ready: items.every((i) => i.ready || i.optional) };
 }
@@ -216,10 +236,16 @@ export async function firstRunItemsAsync(root = APP_ROOT, { sizes = true } = {})
 /** Get every missing item (or only `ids`), in order. onProgress({ id, stage }). Returns the list again. */
 export async function firstRunAll({ root = APP_ROOT, ids = null, onProgress = () => {}, signal = null } = {}) {
   const want = (id) => !ids || ids.includes(id), done = [];          // an optional item only when asked by its id
+  // one progress for the whole run (0-100): each missing item weighs its download (a copy from the bundle weighs a little)
+  const before = await firstRunItemsAsync(root, { sizes: false }).catch(() => ({ items: [] }));
+  const weight = Object.fromEntries(before.items.filter((i) => !i.ready && i.from !== "yours" && want(i.id) && (!i.optional || ids?.includes(i.id))).map((i) => [i.id, Math.max(i.mb, 5)]));
+  const total = Object.values(weight).reduce((a, b) => a + b, 0) || 1;
+  let passed = 0;
+  const pct = (id, part = 0) => Math.min(99, Math.floor((100 * (passed + (weight[id] ?? 0) * part)) / total));
   // the progress lines show no folder of this computer ("into D:\…\runtime\hf\0.8.214" reads "into 0.8.214"): the rule of Settings' checks
   const noPaths = (s) => String(s ?? "").replace(/[A-Za-z]:[\\/][^,;()\n]*?(?=\s*(?:$|[,;()]|\.(?:\s|$)))/g, (m) => m.replace(/[\\/]+$/, "").split(/[\\/]/).pop());
-  const report = onProgress; onProgress = (x) => report({ ...x, stage: noPaths(x.stage) });
-  const step = async (id, fn) => { if (!want(id)) return; if (signal?.aborted) throw Object.assign(new Error("Cancelled"), { code: "CANCELLED" }); onProgress({ id, stage: "starting" }); await fn(); done.push(id); };
+  const report = onProgress; onProgress = (x) => report({ progress: pct(x.id, x.part ?? 0), ...x, stage: noPaths(x.stage) });
+  const step = async (id, fn) => { if (!want(id)) return; if (signal?.aborted) throw Object.assign(new Error("Cancelled"), { code: "CANCELLED" }); onProgress({ id, stage: "starting" }); await fn(); passed += weight[id] ?? 0; done.push(id); };
   await step("library", async () => libraryFromBundle(root));
   for (const key of Object.keys(STYLE_SOURCES)) await step(`style-${key}`, async () => {
     useBundled(key, root);
@@ -228,8 +254,30 @@ export async function firstRunAll({ root = APP_ROOT, ids = null, onProgress = ()
   await step("assets", async () => { if (!assets.status(root).ready) await assets.install({ root, signal, onProgress: (x) => onProgress({ id: "assets", stage: `${x.done} of ${x.total}` }) }); });
   await step("hf-skills", async () => { if (!verifySkills(root, { fresh: true }).ok) await fetchSkills(root, { onLine: (l) => onProgress({ id: "hf-skills", stage: l }) }); });
   await step("hf-runtime", async () => installRuntime({ root, signal, onLine: (l) => onProgress({ id: "hf-runtime", stage: l }) }));
-  // no Python yet: the item shows its winget line (the user's step), and the rest of Download all still counts as done
-  await step("python", async () => { const s = await py.statusAsync(root); if (s.python && !s.ready) await py.install(root, { signal, onLine: (l) => onProgress({ id: "python", stage: l.slice(0, 120) }) }); });
+  // FFmpeg and Python 3.12 with winget when missing (for this user, no administrator); without winget both stay the user's steps (the
+  // screen shows their lines) and the rest of the run still counts as done
+  const ffOk = () => { try { checkFfmpeg(root); return true; } catch { return false; } };
+  await step("ffmpeg", async () => {
+    if (ffOk() || !winget.hasWinget()) return;
+    const v = loadPins(root).ffmpeg.version;
+    await winget.install(winget.PACKAGES.ffmpeg(v), { signal, onLine: (l) => onProgress({ id: "ffmpeg", stage: l }) });
+    if (!ffOk()) throw Object.assign(new Error(`FFmpeg did not install with winget. Install it yourself (winget install Gyan.FFmpeg --version ${v}), then restart the app`), { code: "FFMPEG" });
+  });
+  await step("python", async () => {
+    if (!py.pythonExe(root) && winget.hasWinget()) {
+      await winget.install(winget.PACKAGES.python(), { signal, onLine: (l) => onProgress({ id: "python", stage: l }) });
+      if (!py.pythonExe(root)) throw Object.assign(new Error("Python 3.12 did not install with winget. Install it yourself (winget install -e --id Python.Python.3.12 --scope user), then restart the app"), { code: "NO_PYTHON" });
+    }
+    const s = await py.statusAsync(root);
+    if (s.python && !s.ready) await py.install(root, { signal, onLine: (l) => onProgress({ id: "python", stage: l.slice(0, 120) }) });
+  });
+  // the speech-to-text model's files, then its engine into the Python components (without Python only the files: Python is the user's step)
+  await step("speech", async () => {
+    const m = speechModel(root);
+    if (!m || (m.installed && m.runtime.ok)) return;
+    try { await asr.install(m.id, { root, signal, onProgress: ({ done: got, total: all }) => onProgress({ id: "speech", stage: "downloading", part: all ? got / all : 0 }) }); }
+    catch (e) { if (e.code !== "NO_PYTHON") throw e; }
+  });
   if (ids?.includes(cuda.PACK.id) && cuda.eligible(cuda.detectGpu()))
     await step(cuda.PACK.id, async () => { if (!cuda.packStatus(root).installed) await cuda.install(root, { signal, onLine: (l) => onProgress({ id: cuda.PACK.id, stage: l }) }); });
   // the list again off the server's thread (its checks, Python's imports among them, took seconds there)

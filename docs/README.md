@@ -226,20 +226,20 @@ named under each still.
      models\    ← only when Whisper is installed
    ```
    Use a local disk, not a synced folder (Google Drive, OneDrive, Dropbox): sync locks files while films render. The first-run
-   screen lets you choose another work folder.
+   screen lets you choose another folder for your projects.
 3. **Double-click `Moworks Studio\app\Moworks Studio.bat`**. The first time, it installs the app's packages (about 80 MB) and builds the
    interface, then opens the app window. Later starts take a few seconds.
-4. **Finish in the app**, one screen at a time. Choose a look (The Desk or The Studio); then **Set up Moworks Studio** lists only what
-   you still need to do or download: the work folder, then **Download all**. Anything you skip stays in Settings › System. Then click the
+4. **Finish in the app**, one screen at a time. Choose a look (The Desk or The Studio); then **Set up Moworks Studio** asks for two
+   things: the folder that stores your projects, and **Install**, which gets every component the app needs in one go. Then click the
    Claude chip in the top bar to sign in; Claude Code's own sign-in opens in the browser and the app never sees your password.
 
    | Component | Size | |
    |---|---|---|
-   | HyperFrames 0.8.214 and its Chrome | about 550 MB | downloaded by **Download all** |
-   | Python components (After Effects export, PSD / PowerPoint / PDF reading, music beats, lyric timing) | about 160 MB | downloaded by **Download all** |
-   | Whisper, for voice-over and lyric timing | about 1.7 GB with its engine | optional |
-   | Whisper's CUDA libraries, on an NVIDIA graphics card | about 1.3 GB | optional, offered only on a suitable card |
-   | FFmpeg 9.0 | installed by winget, not by the app | you run the winget line the screen shows |
+   | HyperFrames 0.8.214 and its Chrome | about 550 MB | installed by **Install** |
+   | Python components (After Effects export, PSD / PowerPoint / PDF reading, music beats, lyric timing) | up to 160 MB (less when your Python has some of them) | installed by **Install** |
+   | Speech-to-text model (Whisper turbo), for voice-over timing | about 1.7 GB with its engine | installed by **Install** |
+   | Whisper on an NVIDIA graphics card (CUDA libraries) | about 1.3 GB | optional, in Settings › System on a suitable card |
+   | FFmpeg 9.0 (and Python 3.12 when missing) | about 210 MB | installed by **Install** with winget, for your user only; without winget the screen shows the line to run |
    | HyperFrames' skills and registry, fonts, code libraries, film-style sources, the library | in the repository | nothing to download |
 5. **Add a voice key** *(optional)*: Settings › General › Voice-over. The key is encrypted for your Windows account.
 6. **Make a film:** Projects › New project.
@@ -343,7 +343,7 @@ The known limitations are listed in [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
 | `npm run dev:ui` | Interface with hot reload, for interface work |
 | `npm test` | The full test suite (about 30 minutes; close HyperFrames Studio first if you have it open) |
 
-On a new computer, the tests that render or check films need the components first: run **Download all** on the first-run screen and
+On a new computer, the tests that render or check films need the components first: run **Install** on the first-run screen and
 install FFmpeg, or they fail. Two tests also compare against a golden render that is not stored in the repository (`test-output/` is
 ignored); make it once before running the suite, or `test/edit.test.mjs` and `test/gpu.test.mjs` fail:
 

@@ -8,13 +8,7 @@
 a.ext { display: inline-flex; align-items: center; gap: 3px; color: var(--accent-ink); text-decoration: none; overflow-wrap: anywhere; }
 @media (hover: hover) and (pointer: fine) { a.ext:hover { text-decoration: underline; } }
 
-/* model and key cards */
-.model-card { border: 0; border-bottom: 1px solid var(--border); border-radius: 0; background: transparent; padding: 0.75rem 0; display: flex; flex-direction: column; gap: 0.6667rem; }
-.model-head { display: flex; align-items: flex-start; gap: 0.6667rem; }
-.model-head .t { font-weight: var(--strong-weight); display: flex; align-items: center; flex-wrap: wrap; gap: 0.2667rem; }
-.model-head .d { font-size: var(--fs-meta); color: var(--text-muted); margin-top: 2px; }
-.model-head .end { margin-left: auto; display: inline-flex; align-items: center; gap: 0.2667rem; white-space: nowrap; }
-.model-actions { display: flex; flex-wrap: wrap; gap: 0.5333rem; align-items: center; }
+/* key cards */
 .key-edit { display: flex; flex-wrap: wrap; gap: 0.5333rem; align-items: center; }
 .key-edit .input { flex: 1; min-width: 14.6667rem; }
 
@@ -78,7 +72,6 @@ pre.log { max-height: 17.3333rem; overflow: auto; white-space: pre-wrap; font-si
 .app-closed h2 { color: var(--text-primary); font-size: var(--fs-title); }
 .field-inline.hints { flex: 1; min-width: 17.3333rem; }
 .field-inline.hints .input { flex: 1; height: 2.1333rem; }
-.model-card:last-child { border-bottom: 0; }
 /* The Voice sheet as wide as New project with room above and below; the
    sources compact (what each is on hover); the voice and its settings left, the script right; each setting a narrow field, its hint on hover */
 /* one height whatever it holds, as the large sheets: the words of a transcript scroll inside it and its × stays where it was (T23-6:

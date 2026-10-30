@@ -17,7 +17,7 @@ import Settings from "./screens/Settings.jsx";
 import Library from "./screens/Library.jsx";
 import NewProjectDialog from "./workflow/NewProjectDialog.jsx";
 import { ClaudeChip, ClaudeProvider, useClaude } from "./workflow/claude.jsx";
-import FirstRun from "./workflow/FirstRun.jsx";          // the first-start dialogs, one at a time (Set up, then the speech models)
+import FirstRun from "./workflow/FirstRun.jsx";          // the first-start dialogs: the look, then Set up
 import ExitButton from "./ExitButton.jsx";
 import AiMark from "./intro/AiMark.jsx";   // "AI motion studio" beside the name
 import { useThemeId } from "./theme.jsx";

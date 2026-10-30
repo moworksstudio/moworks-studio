@@ -56,12 +56,13 @@ it directly. To open it again, the user double-clicks `Moworks Studio.bat`.
 Tell the user what the first start shows; they do it in the app, not you:
 
 1. **Choose a look**: The Desk (dark) or The Studio (light table). Settings › General changes it later.
-2. **Set up Moworks Studio**: the work folder, then **Download all**: HyperFrames 0.8.214 and its Chrome (about 550 MB) and the Python
-   components (about 160 MB). Fonts, the library, HyperFrames' skills, the five film-style sources and Motion Prompt (the Vocabulary, not a style) come with the repository. Whisper
-   (voice and lyric timing, about 1.7 GB with its engine) and, on an NVIDIA graphics card, its CUDA libraries (about 1.3 GB) are optional.
+2. **Set up Moworks Studio**: the folder that stores the projects, then **Install**, which gets every component in one go: HyperFrames
+   0.8.214 and its Chrome (about 550 MB), the Python components (up to 160 MB) and the speech-to-text model (about 1.7 GB with its
+   engine); FFmpeg and Python 3.12 too when they are missing (with winget, for this user). Fonts, the library, HyperFrames' skills and the film-style sources come with the repository. On an NVIDIA graphics card,
+   Settings › System offers Whisper on the card (about 1.3 GB, optional).
 3. **Sign in to Claude** in the app (it runs `claude auth login` and opens the browser).
 
-The setup screen stays in Settings › System for anything skipped.
+Settings › System shows the same components line later (Install again if something is missing).
 
 ## Updating and removing
 

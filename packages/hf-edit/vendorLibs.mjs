@@ -113,7 +113,7 @@ export function vendorInto(projectDir, needs) {
   const copy = (src, dst) => { if (!src || !existsSync(src) || existsSync(dst)) return; mkdirSync(dirname(dst), { recursive: true }); copyFileSync(src, dst); };
   for (const v of needs.three ?? []) {
     const src = join(threeDir(), v), dst = join(vendor, "three", v);
-    if (!existsSync(src)) throw Object.assign(new Error(`three.js ${v} is not downloaded yet (Settings › System › Download all)`), { code: "THREE_MISSING" });
+    if (!existsSync(src)) throw Object.assign(new Error(`three.js ${v} is not downloaded yet (Settings › System › Install)`), { code: "THREE_MISSING" });
     cpSync(src, dst, { recursive: true, force: false, errorOnExist: false });          // files a newer pin added are copied, the rest kept
   }
   if (needs.gsap) copy(gsapFile(), join(vendor, "gsap.min.js"));

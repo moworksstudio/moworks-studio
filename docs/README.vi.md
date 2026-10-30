@@ -226,21 +226,20 @@ Mọi style còn theo hai bộ luật chung của app: **phim luôn sống độ
      models\    ← chỉ có khi đã cài Whisper
    ```
    Hãy dùng ổ đĩa trên máy, không dùng thư mục đồng bộ (Google Drive, OneDrive, Dropbox): việc đồng bộ khoá file khi phim đang render.
-   Màn hình lần đầu cho phép chọn thư mục làm việc khác.
+   Màn hình lần đầu cho phép chọn thư mục khác để lưu các project của bạn.
 3. **Bấm đúp `Moworks Studio\app\Moworks Studio.bat`**. Lần đầu, file này cài các gói của app (khoảng 80 MB) và dựng giao diện, rồi mở
    cửa sổ app. Các lần sau chỉ mất vài giây.
-4. **Hoàn tất trong app**, mỗi lần một màn hình. Chọn giao diện (The Desk hoặc The Studio); rồi **Set up Moworks Studio** chỉ liệt kê những
-   gì bạn còn phải làm hoặc tải: thư mục làm việc, rồi **Download all**. Mục nào bỏ qua vẫn còn trong Settings › System. Sau đó bấm chip
-   Claude trên thanh trên cùng để đăng nhập; trang đăng nhập của chính Claude Code mở trong trình duyệt và app không bao giờ thấy mật khẩu
-   của bạn.
+4. **Hoàn tất trong app**, mỗi lần một màn hình. Chọn giao diện (The Desk hoặc The Studio); rồi **Set up Moworks Studio** hỏi hai
+   việc: thư mục lưu các project của bạn, và **Install**, cài một lần mọi thành phần app cần. Sau đó bấm chip Claude trên thanh trên cùng
+   để đăng nhập; trang đăng nhập của chính Claude Code mở trong trình duyệt và app không bao giờ thấy mật khẩu của bạn.
 
    | Thành phần | Dung lượng | |
    |---|---|---|
-   | HyperFrames 0.8.214 và Chrome của nó | khoảng 550 MB | tải bằng **Download all** |
-   | Thành phần Python (xuất After Effects, đọc PSD / PowerPoint / PDF, phân tích nhịp nhạc, canh thời gian lời bài hát) | khoảng 160 MB | tải bằng **Download all** |
-   | Whisper, để canh thời gian lời đọc và lời bài hát | khoảng 1,7 GB kèm engine | tuỳ chọn |
-   | Thư viện CUDA cho Whisper, trên card đồ hoạ NVIDIA | khoảng 1,3 GB | tuỳ chọn, chỉ đề xuất khi máy có card phù hợp |
-   | FFmpeg 9.0 | cài bằng winget, không phải bởi app | bạn tự chạy dòng winget mà màn hình hiện ra |
+   | HyperFrames 0.8.214 và Chrome của nó | khoảng 550 MB | cài bằng **Install** |
+   | Thành phần Python (xuất After Effects, đọc PSD / PowerPoint / PDF, phân tích nhịp nhạc, canh thời gian lời bài hát) | tối đa 160 MB (ít hơn nếu Python của bạn đã có sẵn một phần) | cài bằng **Install** |
+   | Model speech-to-text (Whisper turbo), để canh thời gian lời đọc | khoảng 1,7 GB kèm engine | cài bằng **Install** |
+   | Whisper chạy trên card đồ hoạ NVIDIA (thư viện CUDA) | khoảng 1,3 GB | tuỳ chọn, trong Settings › System khi máy có card phù hợp |
+   | FFmpeg 9.0 (và Python 3.12 nếu máy chưa có) | khoảng 210 MB | cài bằng **Install** qua winget, chỉ cho tài khoản của bạn; máy không có winget thì màn hình hiện dòng lệnh để bạn tự chạy |
    | Skill và registry của HyperFrames, font, thư viện code, nguồn film style, thư viện | có sẵn trong repo | không cần tải |
 5. **Thêm key giọng đọc** *(tuỳ chọn)*: Settings › General › Voice-over. Key được mã hoá cho tài khoản Windows của bạn.
 6. **Làm phim:** Projects › New project.
@@ -345,7 +344,7 @@ Các giới hạn đã biết nằm ở [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
 | `npm run dev:ui` | Giao diện tự tải lại khi sửa, để làm phần giao diện |
 | `npm test` | Toàn bộ bộ test (khoảng 30 phút; đóng HyperFrames Studio trước nếu đang mở) |
 
-Trên máy mới, các test render hoặc kiểm tra phim cần các thành phần trước: chạy **Download all** ở màn hình lần đầu và cài FFmpeg, nếu
+Trên máy mới, các test render hoặc kiểm tra phim cần các thành phần trước: chạy **Install** ở màn hình lần đầu và cài FFmpeg, nếu
 không chúng sẽ báo lỗi. Hai test còn so với một bản render chuẩn (golden) không lưu trong repo (`test-output/` bị bỏ qua); tạo bản này một
 lần trước khi chạy bộ test, nếu không `test/edit.test.mjs` và `test/gpu.test.mjs` sẽ báo lỗi:
 

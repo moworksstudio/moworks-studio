@@ -837,7 +837,6 @@ details.diag pre { white-space: pre-wrap; overflow-wrap: anywhere; background: v
 .row-more { display: inline-grid; place-items: center; width: 1rem; height: 1rem; margin-left: 0.4rem; border-radius: 50%; border: 1px solid var(--border-strong); color: var(--text-muted);
   font: 600 0.625rem / 1 var(--font-body); cursor: help; vertical-align: middle; }
 .row-more:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-.model-more > summary { cursor: pointer; font-size: var(--fs-meta); color: var(--text-secondary); }
 /* ---- Buttons and chips in the body face, sentence case, normal tracking: the uppercase letter-spaced label face
    was hard to read on buttons too. Size and weight follow the button's size. */
 .btn, .chip { font-family: var(--font-body); text-transform: none; letter-spacing: 0; font-weight: var(--strong-weight); line-height: 1.2; }
@@ -1073,23 +1072,9 @@ input[inputmode="numeric"], .num, time, .pager-count, .pager-nums { font-variant
 .key-row { padding: var(--sp-2) 0; }
 .key-row .key-state { font-size: var(--fs-meta); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .key-row-wrap .key-edit { padding: 0 0 var(--sp-2); }
-.comp-toggle { display: inline-flex; align-items: center; gap: 0.5rem; min-width: 0; padding: 0.25rem 0; border: 0; background: none; color: var(--text-primary); font: inherit; cursor: pointer; }
-.comp-toggle::before { content: "▸"; color: var(--text-muted); font-size: 0.75em; transition: transform var(--t-press) var(--ease-out); }
-.comp-toggle[aria-expanded="true"]::before { transform: rotate(90deg); }
-.comp-toggle .muted { font-size: var(--fs-meta); }
 .comp-body { margin-top: var(--sp-3); display: flex; flex-direction: column; gap: var(--sp-3); }
-.comp-models .model-card { padding: 0.5rem 0.75rem; background: var(--surface-2); border-bottom: 1px solid var(--border); }
 .fr-sources { margin-top: var(--sp-3); }
 .fr-sources ul { display: flex; flex-direction: column; gap: 0.25rem; font-size: var(--fs-meta); margin-top: 0.5rem; }
-/* a speech model reads as one more line of the Components list (its size and Remove on the same line) */
-.comp-models { margin-top: calc(-1 * var(--sp-3)); border: 1px solid var(--border); border-top: 0; border-radius: 0 0 var(--r-lg) var(--r-lg); overflow: hidden; }
-.comp-models > div { gap: 0 !important; }
-.comp-models .model-card { flex-direction: row; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; background: var(--surface-2); border-bottom: 1px solid var(--border); }
-.comp-models .model-card:last-child { border-bottom: 0; }
-.comp-models .model-head { flex: 1; min-width: 0; align-items: center; }
-.comp-models .model-head .d { display: none; }
-.comp-models .model-actions { flex: none; }
-.comp-body .fr-list:has(+ .comp-models), .comp-body .fr:has(+ .comp-models) .fr-list { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
 .set-line .select { width: min(18rem, 100%); flex: none; }
 /* every card keeps ONE 16:9 picture frame; a page holds the whole rows that fit, the band
    left (under a row) is split above and below the grid; a project's film of another shape sits whole in the frame (contain) */
