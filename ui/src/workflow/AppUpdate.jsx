@@ -6,7 +6,7 @@
 // is ready · Update" lands here). Update while Claude works or a film renders asks to wait, by the rule the update itself keeps.
 // Data: GET /api/app/update (with the last check's answer); POST /api/app/update/check; POST /api/app/update/apply (a job "app-update").
 import { useState } from "react";
-import { AlertTriangle, Check, Clock, Download, Loader2, RefreshCw, RotateCcw } from "lucide-react";
+import { AlertTriangle, Check, Clock, Download, Loader2, RefreshCw, RotateCcw, Trash2 } from "lucide-react";
 import { get, post, watchJob } from "../api.js";
 import { Banner, Dialog } from "../components.jsx";
 import { ago, useData, useToast } from "../lib.jsx";
@@ -25,6 +25,41 @@ function LastResult({ last }) {
   return <p className="state-line stop"><AlertTriangle size={14} />{last.status === "rolled-back"
     ? t("The update failed at “{step}”; the app went back to the version before, {when}.", { step: t(last.failedAt ?? "?"), when: ago(last.at) })
     : t("The last update failed, {when}.", { when: ago(last.at) })}{last.error ? ` ${t(last.error)}` : ""}</p>;
+}
+
+/** Uninstall (owner 30/10, after the Moworks Motion kit's uninstall): the app and what it installed on this PC to the Recycle Bin after
+ *  one question, to install it clean again. The films, the library and the models stay unless ticked; a copy with work of its own that is
+ *  not on GitHub stays, with the reason. The removal runs in its own window once the app has stopped (packages/setup/uninstall.mjs).
+ *  Data: GET /api/app/uninstall (what goes, sizes); POST /api/app/uninstall { models, films }. */
+function Uninstall() {
+  const t = useT();
+  const [open, setOpen] = useState(false), [plan, setPlan] = useState(null), [models, setModels] = useState(false), [films, setFilms] = useState(false);
+  const [busy, setBusy] = useState(false), [err, setErr] = useState(null);
+  const size = (b) => (b == null ? "…" : b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : `${Math.max(1, Math.round(b / 1e6))} MB`);
+  const show = () => { setOpen(true); setErr(null); setPlan(null); setModels(false); setFilms(false); get("/api/app/uninstall").then(setPlan).catch((e) => setErr(e.message)); };
+  const go = async () => { setBusy(true); setErr(null); try { await post("/api/app/uninstall", { models, films }); } catch (e) { setErr(e.message); setBusy(false); } };
+  const filmsSize = plan?.films?.length ? plan.films.reduce((a, f) => a + f.size, 0) : null;
+  return <div className="panel upd-uninstall">
+    <div className="panel-head"><h2>{t("Uninstall")}</h2>
+      <button className="btn danger sm end" onClick={show}><Trash2 size={14} />{t("Uninstall Moworks Studio…")}</button></div>
+    <p className="hint">{t("Removes the app from this PC, to install it clean again. Everything goes to the Recycle Bin.")}</p>
+    {open && <Dialog danger title={t("Uninstall Moworks Studio?")} onClose={busy ? undefined : () => setOpen(false)} footer={<>
+      {err && <span className="state-line stop"><AlertTriangle size={14} />{t(err)}</span>}<span className="spacer" />
+      <button className="btn" onClick={() => setOpen(false)} disabled={busy}>{t("Cancel")}</button>
+      <button className="btn danger" onClick={go} disabled={busy || !plan}>{busy ? <Loader2 size={14} className="spin" /> : <Trash2 size={14} />}{t("Uninstall")}</button></>}>
+      <div className="dlg-lines">
+        <p>{t("The app, HyperFrames, Chromium, its settings and keys go to the Recycle Bin.")} <span className="muted num">{size(plan?.app?.size)}</span></p>
+        {plan?.app?.keep && <p className="dlg-warn">{t("This copy of the app stays: {why}.", { why: t(plan.app.keep) })}</p>}
+        {!plan && !err && <p className="muted"><Loader2 size={13} className="spin" /> {t("Measuring…")}</p>}
+        {plan?.models && <label className="check"><input type="checkbox" checked={models} disabled={busy} onChange={(e) => setModels(e.target.checked)} />
+          {t("Also the downloaded models ({size}): they download again when needed", { size: size(plan.models.size) })}</label>}
+        {filmsSize != null && <label className="check"><input type="checkbox" checked={films} disabled={busy} onChange={(e) => setFilms(e.target.checked)} />
+          {t("Also my films and my library ({size})", { size: size(filmsSize) })}</label>}
+        {films && <p className="dlg-warn">{t("Your films and characters go too. Copy them somewhere first if you want to keep them.")}</p>}
+        <p className="hint">{t("Kept: Git, Node.js, Python, FFmpeg and Claude Code. The app closes, then a window shows what was removed.")}</p>
+      </div>
+    </Dialog>}
+  </div>;
 }
 
 export default function AppUpdate() {
@@ -110,5 +145,7 @@ export default function AppUpdate() {
       <button className="btn ok" onClick={apply}><Download size={14} />{t("Update and restart")}</button></>}>
       <p>{t("The app updates to the version of {date} and restarts. Your projects stay as they are. If a step fails, it goes back to the version you have now.", { date: day(check?.latest?.date) })}</p>
     </Dialog>}
+
+    <Uninstall />
   </div>;
 }

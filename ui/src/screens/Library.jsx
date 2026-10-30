@@ -1,5 +1,5 @@
-// Motion Library page: the whole library from the left rail, outside any project. Browse, preview, favourites
-// and credits; Copy puts the motion's description on the clipboard, to paste into a project's Claude panel (inside a project, the
+// Motion Library page: the whole library from the left rail, outside any project. Browse, preview and favourites;
+// Copy puts the motion's description on the clipboard, to paste into a project's Claude panel (inside a project, the
 // Motion Library button in the Claude panel inserts it directly).
 import { useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
@@ -21,7 +21,7 @@ export default function Library() {
   </div>;
   return <div className="page gal-page">
     <div className="page-head"><div><BackButton /><h1>{t("Motion Library")}</h1>
-      <p className="lead">{t("Motions and blocks, by author. Hover to play; Copy puts the text on the clipboard.")}</p></div></div>
+      <p className="lead">{t("Motions, blocks and motion words. Hover to play; Copy puts the text on the clipboard.")}</p></div></div>
     <MotionLibrary page pickLabel={t("Copy")} onPick={copy} />
   </div>;
 }

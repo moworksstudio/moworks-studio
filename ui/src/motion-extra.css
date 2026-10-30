@@ -1,4 +1,4 @@
-/* Motion: ideas read from the Lucian UX/UI Prompt library (MIT, lucianlabs.dev/uxui-prompt), written new for the
+/* Motion, written for the
    app's own tokens and curves. Loaded after every other sheet (motion.js imports it). transform and opacity only; both themes; hover only
    on a fine pointer; reduced motion drops the movement and keeps the meaning. Nothing here loops except the queued bar, which is a wait. */
 

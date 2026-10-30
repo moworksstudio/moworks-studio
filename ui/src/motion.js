@@ -1,6 +1,6 @@
 import "./motion-extra.css";   // tooltip, toasts, queued bar; loaded after every other sheet
 import "./tooltip.js";
-// Sliding selection (from Emil Kowalski's find-animation-opportunities): when the pressed segment or the selected
+// Sliding selection: when the pressed segment or the selected
 // tab changes, a ghost of the highlight slides from the old one to the new one (FLIP: transform only, 160 ms, the app's ease-out), then
 // the new one shows. One listener for every segmented control and tab row; nothing runs with reduced motion.
 const GROUPS = [
@@ -10,7 +10,7 @@ const GROUPS = [
 const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 document.addEventListener("click", (e) => {
-  // a keyboard-made click (detail 0: Enter or Space) does not animate (Emil: keyboard actions stay instant)
+  // a keyboard-made click (detail 0: Enter or Space) does not animate (keyboard actions stay instant)
   if (still() || e.detail === 0 || !(e.target instanceof Element)) return;
   for (const g of GROUPS) {
     const box = e.target.closest(g.group);

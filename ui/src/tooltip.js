@@ -1,4 +1,4 @@
-// Tooltips (from the Lucian "gliding tooltip" idea, written new; Emil's gate: tens of uses a day, so small and quick).
+// Tooltips (a gliding tooltip, written new; seen tens of times a day, so small and quick).
 // One tooltip for the whole app, driven by what is already in the markup: a `title` (the browser's own tip is slow and unstyled, so
 // it is held back while ours is up) or the `aria-label` of a control that shows no words of its own (icon buttons, the collapsed rail).
 // The first tip waits a beat; moving to the next control while one is up, or just after one went, shows at once and glides over.

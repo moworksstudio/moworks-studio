@@ -586,7 +586,7 @@
 [data-theme="studio"] .st-fig.person.front .st-card { width: calc(var(--m) * var(--h) * var(--fw)); background: #E9E4D6; }
 [data-theme="studio"] .st-fig.person img.st-front { position: absolute; max-width: none; object-fit: fill; }
 
-/* hover only where there is a mouse (Emil): touch screens fire hover on tap */
+/* hover only where there is a mouse: touch screens fire hover on tap */
 @media (hover: hover) and (pointer: fine) {
   [data-theme="studio"] .btn.primary:hover:not(:disabled) { background: var(--registration-hover); border-color: var(--registration-hover); }
   [data-theme="studio"] .st-cats button:hover, [data-theme="studio"] .st-chip:hover { color: var(--room-ink); background: var(--room-hover); }
@@ -614,7 +614,7 @@
   [data-theme="studio"] .page-settings .settings-nav .rail-item:hover { background: var(--room-hover); color: var(--room-ink); }
   [data-theme="studio"] .st-linkish:hover { color: var(--room-ink); }
 }
-/* a press answers at once (Emil): the sleeve, film, book, figure or pitch card gives a little under the finger */
+/* a press answers at once: the sleeve, film, book, figure or pitch card gives a little under the finger */
 [data-theme="studio"] :is(.st-sleeve, .st-film, .st-book, .st-fig, .st-pitch):active { scale: 0.98; }
 @media (prefers-reduced-motion: reduce) {
   [data-theme="studio"] .st-mixrow:hover .st-fr { animation: none; }

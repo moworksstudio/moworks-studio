@@ -34,7 +34,7 @@
   --fs-code: max(0.8125rem, 12px);
   --lh-label: 1.125rem;                             /* one line box for caps labels in both themes */
 
-  /* ---- motion (Emil Kowalski's rules: custom curves, under 300 ms, transform and opacity) ---- */
+  /* ---- motion: custom curves, under 300 ms, transform and opacity ---- */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
@@ -94,7 +94,7 @@
   --danger: var(--status-stop);
   --focus-ring: #86D8E5;
   --scrim: rgba(2, 8, 13, 0.7);
-  /* named roles for the fixed values components had written by hand (DESIGN.md "Fixed roles") */
+  /* named roles for the fixed values components had written by hand */
   --media-bg: #000;                             /* the bed behind a picture or video (letterbox) */
   --on-media: #fff;                             /* text and icons over a picture */
   --media-paper: #fff;                          /* a white page a motion preview is drawn on */

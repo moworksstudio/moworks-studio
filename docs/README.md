@@ -9,7 +9,8 @@
   <img src="https://img.shields.io/badge/Claude-Opus_5.5_·_Sonnet_5.5-d97757" alt="Claude Opus 5.5 and Sonnet 5.5">
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-555" alt="Windows 10 | 11">
   <img src="https://img.shields.io/badge/film_styles-126_from_7_authors-0a7" alt="126 film styles from 7 authors">
-  <img src="https://img.shields.io/badge/export-MP4_·_After_Effects-8a2be2" alt="MP4 and After Effects">
+  <img src="https://img.shields.io/badge/library-895_motions_·_448_blocks_·_168_terms-0a7" alt="Motion Library: 895 motions, 448 blocks, 168 motion terms">
+  <img src="https://img.shields.io/badge/export-MP4_·_MOV_·_WebM_·_After_Effects-8a2be2" alt="MP4, MOV, WebM and After Effects">
 </p>
 
 <p align="center">
@@ -30,7 +31,8 @@
 Moworks Studio is a desktop application for making motion-graphic films with Claude. You write a brief and add your material (artwork,
 PSD, deck, pictures, music, a voice-over script) and choose one of 126 film styles. Claude plans the film, draws a storyboard for you to
 approve and writes a Motion Plan in numbers; then the app builds the film shot by shot in code, reviews and scores it, mixes music and
-sound effects, runs technical checks and renders an MP4. Films in most styles can also be exported to After Effects as editable layers.
+sound effects, runs technical checks and renders the film as MP4, MOV or WebM. Films in most styles can also be exported to After
+Effects as editable layers.
 
 **Change the film on the picture itself.** In the Editor, click any words in the frame to edit them on the spot, with their font, size
 and colour (each change is one step you can undo). Or press **Pin a note** (N), click a point or drag a box on the frame, and write what
@@ -80,7 +82,7 @@ Colours: grey = set-up · orange = Claude and the app · blue = you write, choos
 | **Review** | Claude watches its own film, scores it out of 10 and fixes what it finds, in rounds | read the score |
 | **Final Mix** | Music (three free Mixkit tracks to choose from, or your own) and sound effects placed on the picture, mixed to −16 LUFS | choose |
 | **Tech checks** | Contrast, text overlap, still frames, loudness and file checks, in plain words | read |
-| **Render** | MP4 (Standard for web and social, or High), plus a Smooth preview copy for playback in the Editor | render |
+| **Render** | MP4 (H.264: Standard for web and social, or High), MOV (QuickTime) or WebM, plus a Smooth preview copy for playback in the Editor | render |
 | **After Effects** | **Port to After Effects** builds an AE project with real text and shape layers where the style allows it | port |
 
 The **Editor** plays the film frame by frame as it will render, with the shots and the pipeline on the left, the timeline below the picture
@@ -179,13 +181,13 @@ named under each still.
 | **Projects** | Your films, newest first; each opens in the Editor |
 | **Brand Kits** | A brand's colours, fonts and components, worn by a whole film. HyperFrames' 13 frame presets ship ready to use; make your own from a brand guideline (PDF, PowerPoint or pictures) and check it before use |
 | **Film Styles** | The gallery above, with demo films, credits and AE badges |
-| **Motion Library** | Motions (from Magic UI, Codrops and Motion Reference), Blocks (448 HyperFrames registry blocks and components) and Vocabulary (168 motion terms from Motion Prompt), each with its author, source and licence |
+| **Motion Library** | The studio's own library of Motions (895), Blocks (448 blocks and components) and Vocabulary (168 motion terms), arranged by type and category. The licences of the sources it draws on are in [THIRD-PARTY.md](THIRD-PARTY.md) |
 | **Characters** | The project's characters: drawn with the Character maker, or from the Anidoodle author's own character rigs |
-| **Settings** | General (Claude account, projects folder, appearance, voice-over, render), Director (Claude model and effort), System (components and health), Update |
+| **Settings** | General (Claude account, projects folder, appearance, voice-over, render), Director (Claude model and effort), System (components and health), Update (and Uninstall) |
 
 <table>
 <tr>
-<td width="50%" valign="top"><img src="images/desk-motion-library.jpg" alt="Motion Library: every item with a preview, its author, source and licence"><br><sub>Motion Library: every item with a preview, its author, source and licence</sub></td>
+<td width="50%" valign="top"><img src="images/desk-motion-library.jpg" alt="Motion Library: every item with a preview, by type and category"><br><sub>Motion Library: every item with a preview, by type and category</sub></td>
 <td width="50%" valign="top"><img src="images/desk-brand-kits.jpg" alt="Brand Kits: HyperFrames' 13 frame presets and your own"><br><sub>Brand Kits: HyperFrames' 13 frame presets and your own</sub></td>
 </tr>
 </table>
@@ -291,6 +293,20 @@ Settings › Update brings the app folder to the newest version of this reposito
 to the commit it came from. Only files tracked by git change; your projects, library, settings and keys are never touched.
 
 You can also update by hand: close the app, run `git pull`, `npm install` and `npm run build` in the app folder, and start `Moworks Studio.bat` again.
+
+## Uninstall
+
+Settings › Update › **Uninstall Moworks Studio…** removes the app from this PC, to install it clean again. It asks once, then everything
+goes to the Recycle Bin (Windows asks before it deletes for good anything too big for the bin):
+
+- the app folder: the app, HyperFrames, Chromium, the app window's data, its settings and keys;
+- only if you tick them: the downloaded models, and your films and library.
+
+Git, Node.js, Python, FFmpeg and Claude Code stay (other programs use them), and so do the work folder itself and films opened from
+other folders. A copy of the app with changes of its own that are not on GitHub stays, with the reason. The app closes, then a window
+shows what was removed. To install again, clone this repository and start `Moworks Studio.bat`.
+
+If the app does not start: run `tools\uninstall.bat` in the app folder (add `--models` or `--films` to remove those too).
 
 ## Troubleshooting
 

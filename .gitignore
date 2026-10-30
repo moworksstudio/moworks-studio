@@ -8,8 +8,6 @@ test-output/
 **/.hyperframes/
 __pycache__/
 ui/dist/
-# Impeccable's design memory, mocks and drafts: the design tool's own working files, local only
-.impeccable/
 .env
 *.bak
 *.old

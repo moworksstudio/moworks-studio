@@ -456,7 +456,7 @@ ol.plain.conversation, .conversation { padding: var(--sp-3); gap: 0.875rem; }
 .cstatus.undone .cs-t { text-decoration: line-through; }
 .cdot { width: 0.4375rem; height: 0.4375rem; border-radius: 50%; background: var(--status-ok); flex: none; }
 .cstatus.failed .cdot, .cstatus.cancelled .cdot { background: var(--status-stop); }
-/* a quiet fill, not a side stripe (DESIGN.md) */
+/* a quiet fill, not a side stripe */
 .cdetail { display: flex; flex-direction: column; gap: 0.125rem; padding: 0.375rem 0.625rem; border-radius: var(--r-sm); background: var(--surface-2); }
 [data-theme="studio"] .cdetail { padding: 0 0 0 0.625rem; border-radius: 0; background: none; border-left: 2px solid var(--border-strong); }          /* The Studio keeps its look */
 .cdetail .cstep { margin: 0.125rem 0; }
@@ -823,7 +823,7 @@ ol.plain.conversation, .conversation { padding: var(--sp-3); gap: 0.875rem; }
   font-size: var(--fs-control); line-height: 1.5; color: var(--text-primary); }
 [data-theme="studio"] .mo2 .mo-shot-says { box-shadow: none; border-left: 3px solid var(--state-done); }          /* The Studio keeps its look */
 /* the Motion Plan's rows are a table: fixed columns, every one left-aligned at the same x, light rules between rows instead of
-   a box per row, a little less padding (impeccable / emil: align to a grid, let the rows breathe, one weight of separator) */
+   a box per row, a little less padding (aligned to a grid, the rows breathing, one weight of separator) */
 .mo2 .mo-rows { gap: 0; }
 .mo2 .mo-row { border: 0; border-bottom: 1px solid color-mix(in oklab, var(--border) 75%, transparent); border-radius: 0; background: transparent; padding: 0.3125rem 0.5rem; }
 @media (hover: hover) and (pointer: fine) { .mo2 .mo-row:hover { background: color-mix(in oklab, var(--surface-2) 60%, transparent); } }

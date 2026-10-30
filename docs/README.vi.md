@@ -9,7 +9,8 @@
   <img src="https://img.shields.io/badge/Claude-Opus_5.5_·_Sonnet_5.5-d97757" alt="Claude Opus 5.5 và Sonnet 5.5">
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-555" alt="Windows 10 | 11">
   <img src="https://img.shields.io/badge/film_styles-126_từ_7_tác_giả-0a7" alt="126 film style từ 7 tác giả">
-  <img src="https://img.shields.io/badge/export-MP4_·_After_Effects-8a2be2" alt="MP4 và After Effects">
+  <img src="https://img.shields.io/badge/library-895_motion_·_448_block_·_168_thuật_ngữ-0a7" alt="Motion Library: 895 motion, 448 block, 168 thuật ngữ chuyển động">
+  <img src="https://img.shields.io/badge/export-MP4_·_MOV_·_WebM_·_After_Effects-8a2be2" alt="MP4, MOV, WebM và After Effects">
 </p>
 
 <p align="center">
@@ -30,7 +31,7 @@
 Moworks Studio là ứng dụng máy tính để làm phim motion graphic cùng Claude. Bạn viết brief, đưa chất liệu (thiết kế, PSD, deck, ảnh,
 nhạc, kịch bản lời đọc) và chọn một trong 126 film style. Claude lên kế hoạch cho phim, vẽ storyboard để bạn duyệt và viết Motion Plan
 bằng số liệu; sau đó app dựng phim từng shot bằng code, tự review và chấm điểm, trộn nhạc và hiệu ứng âm thanh, kiểm tra kỹ thuật và xuất
-MP4. Phim ở phần lớn các style còn xuất được sang After Effects thành layer chỉnh sửa được.
+phim ra MP4, MOV hoặc WebM. Phim ở phần lớn các style còn xuất được sang After Effects thành layer chỉnh sửa được.
 
 **Sửa phim ngay trên khung hình.** Trong Editor, bấm vào chữ bất kỳ trên khung hình để sửa tại chỗ, cả font, cỡ chữ và màu (mỗi lần sửa
 là một bước có thể hoàn tác). Hoặc bấm **Pin a note** (N), chấm một điểm hay kéo một khung trên hình rồi ghi cần sửa gì ở đó: ghi chú
@@ -80,7 +81,7 @@ Màu: xám = cài đặt · cam = Claude và app thực hiện · xanh dương =
 | **Review** | Claude tự xem phim của mình, chấm điểm trên 10 và sửa những gì tìm thấy, qua nhiều vòng | đọc điểm |
 | **Final Mix** | Nhạc (3 bài miễn phí từ Mixkit để chọn, hoặc nhạc của bạn) và hiệu ứng âm thanh đặt theo hình, trộn về −16 LUFS | chọn |
 | **Tech checks** | Kiểm độ tương phản, chữ chồng nhau, khung đứng hình, âm lượng và file, báo bằng lời dễ hiểu | đọc |
-| **Render** | MP4 (Standard cho web và mạng xã hội, hoặc High), kèm một bản Smooth để phát mượt trong Editor | render |
+| **Render** | MP4 (H.264: Standard cho web và mạng xã hội, hoặc High), MOV (QuickTime) hoặc WebM, kèm một bản Smooth để phát mượt trong Editor | render |
 | **After Effects** | **Port to After Effects** dựng project AE với text layer và shape layer thật ở những style cho phép | port |
 
 **Editor** phát phim đúng từng khung hình như khi render: danh sách shot và quy trình ở bên trái, timeline dưới khung hình, Claude ở
@@ -180,13 +181,13 @@ Mọi style còn theo hai bộ luật chung của app: **phim luôn sống độ
 | **Projects** | Các phim của bạn, mới nhất ở trên; mỗi phim mở trong Editor |
 | **Brand Kits** | Màu, font và các thành phần của một thương hiệu, áp cho cả phim. Có sẵn 13 frame preset của HyperFrames; bạn tự tạo Brand Kit từ brand guideline (PDF, PowerPoint hoặc ảnh) rồi kiểm lại trước khi dùng |
 | **Film Styles** | Thư viện style ở trên, kèm phim mẫu, ghi công và huy hiệu AE |
-| **Motion Library** | Motions (từ Magic UI, Codrops và Motion Reference), Blocks (448 block và component trong registry của HyperFrames) và Vocabulary (168 thuật ngữ chuyển động từ Motion Prompt); mục nào cũng ghi tác giả, nguồn và giấy phép |
+| **Motion Library** | Thư viện riêng của studio: Motions (895), Blocks (448 block và component) và Vocabulary (168 thuật ngữ chuyển động), xếp theo loại và nhóm. Giấy phép của các nguồn được dùng nằm trong [THIRD-PARTY.md](THIRD-PARTY.md) |
 | **Characters** | Nhân vật của dự án: vẽ bằng Character maker, hoặc lấy từ các rig nhân vật của tác giả Anidoodle |
-| **Settings** | General (tài khoản Claude, thư mục dự án, giao diện, lời đọc, render), Director (model và effort của Claude), System (thành phần và tình trạng máy), Update |
+| **Settings** | General (tài khoản Claude, thư mục dự án, giao diện, lời đọc, render), Director (model và effort của Claude), System (thành phần và tình trạng máy), Update (cả Uninstall) |
 
 <table>
 <tr>
-<td width="50%" valign="top"><img src="images/desk-motion-library.jpg" alt="Motion Library: mục nào cũng có bản xem trước, tác giả, nguồn và giấy phép"><br><sub>Motion Library: mục nào cũng có bản xem trước, tác giả, nguồn và giấy phép</sub></td>
+<td width="50%" valign="top"><img src="images/desk-motion-library.jpg" alt="Motion Library: mục nào cũng có bản xem trước, xếp theo loại và nhóm"><br><sub>Motion Library: mục nào cũng có bản xem trước, xếp theo loại và nhóm</sub></td>
 <td width="50%" valign="top"><img src="images/desk-brand-kits.jpg" alt="Brand Kits: 13 frame preset của HyperFrames và Brand Kit của bạn"><br><sub>Brand Kits: 13 frame preset của HyperFrames và Brand Kit của bạn</sub></td>
 </tr>
 </table>
@@ -294,6 +295,20 @@ lại giao diện, kiểm tra app khởi động được rồi khởi động l
 theo dõi mới thay đổi; dự án, thư viện, cài đặt và key của bạn không bao giờ bị đụng tới.
 
 Bạn cũng có thể cập nhật bằng tay: đóng app, chạy `git pull`, `npm install` và `npm run build` trong thư mục app, rồi mở lại `Moworks Studio.bat`.
+
+## Gỡ cài đặt
+
+Settings › Update › **Uninstall Moworks Studio…** gỡ app khỏi máy để cài sạch lại. App hỏi một lần, rồi mọi thứ vào Thùng rác (món nào
+quá to so với Thùng rác thì Windows hỏi trước khi xoá hẳn):
+
+- thư mục app: app, HyperFrames, Chromium, dữ liệu của cửa sổ app, cài đặt và key;
+- chỉ khi bạn chọn: các model đã tải, và phim cùng thư viện của bạn.
+
+Git, Node.js, Python, FFmpeg và Claude Code được giữ (chương trình khác cũng dùng), thư mục làm việc và các phim mở từ thư mục khác cũng
+vậy. Bản app có thay đổi riêng chưa lên GitHub được giữ lại, kèm lý do. App đóng lại, rồi một cửa sổ cho biết những gì đã gỡ. Muốn cài
+lại: clone repo này và mở `Moworks Studio.bat`.
+
+Nếu app không mở được: chạy `tools\uninstall.bat` trong thư mục app (thêm `--models` hoặc `--films` để gỡ cả những thứ đó).
 
 ## Xử lý sự cố
 

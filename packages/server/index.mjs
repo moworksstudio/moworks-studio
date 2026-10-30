@@ -70,6 +70,7 @@ import { pickFolder } from "./folder-picker.mjs";
 import { gitKind, isDrivePath, moveGitOutAsync } from "../revisions/drive.mjs";
 import * as appUpdate from "../app-update/index.mjs";
 import { createUpdateChecker } from "../app-update/schedule.mjs";
+import { startUninstall, uninstallPlan } from "../setup/uninstall.mjs";
 import * as characterMaker from "../character-maker/index.mjs";
 
 /** Backups to Drive run as child processes (tools/backup.mjs), so the server never waits on git or Drive: the app and the user's characters once at start and
@@ -338,6 +339,17 @@ export function routes(ctx) {
         if (ctx.onRestart) setTimeout(() => ctx.onRestart(), 2000);          // the window reads "done" first; the new version opens a new window
         return { ...res, restarting: !!ctx.onRestart };
       });
+    }),
+    // Settings › Update › Uninstall: what goes and what stays, with sizes (measured off the server's thread); then the removal starts in
+    // its own window, which waits for this service to stop, and the app stops (packages/setup/uninstall.mjs)
+    r("GET", "/app/uninstall", () => uninstallPlan(root)),
+    r("POST", "/app/uninstall", async (_p, b) => {
+      if (!ctx.onExit) throw new HttpError(404, "NOT_FOUND", "Uninstall works when the app was started from its launcher");
+      const busy = ctx.running().filter((x) => !x.idle);
+      if (busy.length) throw new HttpError(409, "BUSY", `Uninstall when nothing is running: ${busy.map((x) => x.title).join(", ")}`);
+      const res = await startUninstall(root, { models: !!b?.models, films: !!b?.films, waitPid: process.pid });
+      setTimeout(() => ctx.onExit(), 500);          // answer first, then stop: the window closes, the removal begins
+      return res;
     }),
     // Claude sign-in: the top-bar chip reads it; sign in / out run Claude Code's own `auth login` / `auth logout`
     r("GET", "/claude/status", (_p, _b, q) => ctx.claude.status({ refresh: q.get("refresh") === "1" })),
