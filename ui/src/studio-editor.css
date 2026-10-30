@@ -22,6 +22,7 @@
 
 /* ---- the slate ------------------------------------------------------------------------------------------------------------------ */
 [data-theme="studio"] .st-slate { height: auto; min-height: 3.4rem; gap: 1rem; padding: 0.55rem 1.25rem; background: var(--room-2); border-bottom: 1px solid #000; }
+[data-theme="studio"] .st-slate .ed-back { margin-right: -0.5rem; color: var(--room-ink-3); }
 [data-theme="studio"] .st-clap { flex: none; width: 2.4rem; height: 1.8rem; border-radius: 0.2rem;
   background: repeating-linear-gradient(-45deg, var(--room-ink) 0 0.35rem, var(--room) 0.35rem 0.7rem); box-shadow: inset 0 -0.95rem 0 var(--room); }
 [data-theme="studio"] .st-name { min-width: 0; display: flex; flex-direction: column; gap: 0.1rem; }

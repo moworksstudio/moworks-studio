@@ -71,10 +71,12 @@ export function readMounts(dir) {
     mounts.push({ id: attr(tag, "id") ?? attr(tag, "data-composition-id"), compositionId: attr(tag, "data-composition-id"), src: attr(tag, "data-composition-src"),
       start: num(attr(tag, "data-start")) ?? 0, duration: num(attr(tag, "data-duration")), track: num(attr(tag, "data-track-index")), kind: trackKind(tag) });
   }
-  // each sound with its part of the file (a voice cut into one clip a line plays from its data-media-start), its lane and its edge fades
+  // each sound with its part of the file (a voice cut into one clip a line plays from its data-media-start), its lane, its edge fades and
+  // its volume lane (HF's data-automation: the music ducked under the words), [{ t, v }] in the clip's own seconds
+  const laneOf = (tag) => { try { return JSON.parse(String(attr(tag, "data-automation") ?? "").replace(/&quot;/g, '"')).lanes?.find((l) => l.target === "volume")?.points ?? null; } catch { return null; } };
   const audio = [...html.matchAll(/<audio\b[^>]*>/g)].map((m) => ({ id: attr(m[0], "id"), src: attr(m[0], "src"), start: num(attr(m[0], "data-start")) ?? 0,
     duration: num(attr(m[0], "data-duration")), volume: num(attr(m[0], "data-volume")) ?? 1, mediaStart: num(attr(m[0], "data-media-start")) ?? 0,
-    role: attr(m[0], "data-timeline-role"), fadeIn: num(attr(m[0], "data-fade-in")) ?? 0, fadeOut: num(attr(m[0], "data-fade-out")) ?? 0 }));
+    role: attr(m[0], "data-timeline-role"), fadeIn: num(attr(m[0], "data-fade-in")) ?? 0, fadeOut: num(attr(m[0], "data-fade-out")) ?? 0, lane: laneOf(m[0]) }));
   return { root, mounts, audio };
 }
 

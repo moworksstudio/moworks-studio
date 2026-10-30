@@ -21,7 +21,9 @@ Thumbs.db
 *.pem
 *.key
 *.pfx
-.claude/
+# Claude Code's local settings stay on this computer; the repo's own instructions for Claude sessions are kept
+.claude/*
+!.claude/CLAUDE.md
 desktop.ini
 # editors, OS and tool caches
 .vscode/

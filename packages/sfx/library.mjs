@@ -60,7 +60,8 @@ export function words(s) {
 const GROUPS = [
   ["bell", "ding", "dong", "ting", "tink", "ring", "chime", "jingle", "tinkle", "gong", "toll"],
   ["whoosh", "swish", "swipe", "whip", "sweep", "rush", "zip", "fly", "pass"],
-  ["impact", "thud", "thump", "bump", "bonk", "knock", "hit", "smack", "slam", "bang", "clunk", "land", "drop", "fall", "punch"],
+  ["impact", "thud", "thump", "bump", "bonk", "knock", "hit", "smack", "slam", "bang", "clunk", "land", "drop", "fall", "punch", "catch"],
+  ["rattle", "shake", "shaker", "clatter", "jiggle"],
   ["footstep", "step", "walk", "stomp", "tread", "pace", "run", "foot"],
   ["cloth", "rustle", "fabric", "garment", "jacket", "shirt", "dress", "coat", "leather", "thread", "needle", "stitch", "sew", "yarn", "floss", "linen", "flutter", "flap"],
   ["paper", "page", "sheet", "book", "card", "crumple", "crinkle", "letter", "map", "envelope", "flip"],
@@ -84,7 +85,7 @@ for (const g of GROUPS) for (const w of g) GROUP_OF.set(w, [...(GROUP_OF.get(w) 
 // The family a word points at (the cue's head word wins: "lamp ting" is a ting, "oar paddle" a paddle, "heavy enter key" a key).
 const FAMILY_WORDS = {
   pop: "pop plop bloop blop boing pluck appear spawn bounce", whoosh: "whoosh swish swipe whip sweep transition",
-  impact: "impact thud thump bump bonk smack punch slam bang hit crash clunk rattle clatter",
+  impact: "impact thud thump bump bonk smack punch slam bang hit crash clunk rattle clatter catch",          // a hand's catch, not a door's (Test 27: "soft catch" got a latch)
   footstep: "footstep step walk stomp tread", cloth: "cloth rustle fabric velcro leather flutter flap", paper: "paper page book card crumple crinkle map envelope slide",
   door: "door drawer hinge latch gate creak lock unlock", switch: "switch toggle lever plug", water: "water drip splash pour river stream wave oar paddle bubble puddle faucet",
   wind: "wind gust breeze blizzard gale", rain: "rain drizzle downpour thunder", fire: "fire flame crackle ember campfire fireplace match torch",
@@ -101,7 +102,8 @@ for (const [f, ws] of Object.entries(FAMILY_WORDS)) for (const w of ws.split(" "
 const OBJECT_WORDS = {
   cloth: "thread needle stitch sew embroider floss yarn wool string rope linen silk cotton lace ribbon seam quilt hem knot wing feather sail scarf cape curtain flag banner blanket towel sleeve",
   paper: "box lid cardboard carton parcel package pencil pen chalk crayon marker scribble sketch notebook newspaper ticket receipt postcard origami",
-  impact: "spool bobbin dice marble pebble brick", animal: "bee wasp hornet mosquito beetle", mechanical: "chain",
+  impact: "spool bobbin dice marble pebble brick pepper salt shaker spice",          // a shaker shakes in rattles (Test 27: "pepper shake" got a cloth)
+  animal: "bee wasp hornet mosquito beetle", mechanical: "chain",
   water: "stomach tummy fish koi carp goldfish",          // a hungry stomach growls in gurgles (Test 25's "stomach growl"); a fish turns in water
   footstep: "boot shoe sneaker heel slipper sandal",          // a rubber boot's hop is a step (Test 27: "boot" took the computer's power-on, ten times)
 };
@@ -191,6 +193,9 @@ export function rankLocal(name, { family = null, style = null, exclude = [], lib
       else if ((GROUP_OF.get(w) ?? []).some((x) => ws.has(x))) score += 1.2 * wt;
       if (idWords.has(w)) score += 0.5;
     });
+    // the cue's head word names its kind, and a sound of another kind shares only that word: another meaning of it ("ball catch" is no
+    // door's catch, Test 27); "door catch" names the door too
+    if (want && !obj && s.family !== want && s.family !== family && hits.length === 1 && hits[0] === q[q.length - 1] && FAMILY_OF.get(hits[0]) === want) continue;
     const own = idOwn.filter((w) => !q.includes(w)).length;          // what the sound is of that the cue does not name (a camera's click)
     score -= 0.05 * own;          // breaks a tie for the plainer sound
     for (const g of grams) if (phrases.has(g)) score += 3;

@@ -6,7 +6,7 @@
 // wait too, and one render runs at a time in the whole app. The stages open as sheets over the Editor; after Create
 // project the brief goes to Claude as soon as the film is open (the kickoff); from there the app runs the steps by itself.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Film, LayoutList, Library, Loader2, Plus, Sliders, Smile } from "lucide-react";
+import { ArrowLeft, Film, LayoutList, Library, Loader2, Plus, Sliders, Smile } from "lucide-react";
 import { get, patch, post } from "../api.js";
 import { Banner, Dialog, Panes } from "../components.jsx";
 import { clock, go, usePref, useData, useToast } from "../lib.jsx";
@@ -148,12 +148,15 @@ function ProjectStrip({ p, id, pipeline, myRender, busy, rendering, onSheet, onR
   const render = rendering || waiting ? <button className="btn sm ed-render" onClick={() => onSheet("render", {})}>{rendering ? <><Loader2 size={13} className="spin" />{pct != null ? t("Rendering {n}%", { n: pct }) : t("Rendering…")}</> : t("Queued to render")}</button>
     : <button className="btn primary sm ed-render" onClick={() => onSheet("render", {})} disabled={busy}
       title={busy ? t("Claude is changing the film: render when it finishes") : other ? t("{title} is rendering: this one waits its turn", { title: other.title }) : t("Render the film as MP4, MOV or WebM")}><Film size={14} />{t("Render")}</button>;
+  // back to the films, left of the name (owner 30/10: one click back to Projects from any film)
+  const back = <button type="button" className="btn ghost icon sm ed-back" onClick={() => go("/projects")} aria-label={t("Back to Projects")} title={t("Back to Projects")}><ArrowLeft size={16} /></button>;
   // The Studio's slate: the clapper, the name, the facts in one mono line, what runs or what the film waits for
   if (studio) {
     const ws = pipeline?.stages?.find((s) => s.status === "waiting" && s.id !== "feedback");
     const wline = ws?.line ? t(ws.line, Object.fromEntries(Object.entries(ws.lineVars ?? {}).map(([k, v]) => [k, typeof v === "string" ? t(v) : v]))) : null;
     const wait = !state && wline ? (/^Waiting for you/.test(ws.line) ? wline : t("Waiting for you: {what}", { what: wline })) : null;
     return <div className="ed-strip st-slate">
+      {back}
       <span className="st-clap" aria-hidden="true" />
       <div className="st-name">{titleBox("ed-title st-title")}{meta && <span className="ed-meta num">{meta}</span>}</div>
       <span className="ed-gap" />
@@ -165,6 +168,7 @@ function ProjectStrip({ p, id, pipeline, myRender, busy, rendering, onSheet, onR
     </div>;
   }
   return <div className="ed-strip">
+    {back}
     <input className="ed-title" value={title} onChange={(e) => setTitle(e.target.value)} onBlur={rename} onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); if (e.key === "Escape") { setTitle(p?.title ?? ""); e.currentTarget.blur(); } }}
       aria-label={t("Film name")} title={t("Click to rename")} size={Math.max(8, Math.min(48, title.length + 1))} />
     {meta && <span className="ed-meta num">{meta}</span>}

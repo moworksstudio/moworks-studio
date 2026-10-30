@@ -8,6 +8,7 @@ import { join, resolve } from "node:path";
 import { runHf } from "../hf-qa/cli.mjs";
 import { endFade, fadeOfTotal, filmEnding, filmLength } from "./ending.mjs";
 import { isStarterPage } from "./shots.mjs";
+import { MUSIC_DUCK, duckLane, speechSpans } from "../sfx/actions.mjs";
 
 const ROLES = { voice: { id: "el-voice", role: "voiceover", track: 10, volume: 1 }, music: { id: "el-music", role: "music", track: 11, volume: 0.6 } };
 const BEGIN = "<!-- mw:tracks -->", END = "<!-- /mw:tracks -->";
@@ -230,11 +231,58 @@ export function fitMusicToFilm(dir) {
   if (!old) return null;
   const a = attrsOf(old[0]);
   const loops = fitMusic(a, filmOf(html, dir), endingOf(dir), beatTimes(dir, a.src));
-  if (loops == null) return null;          // a stop, the user's own fade: left as they are
+  if (loops == null) { duckMusic(dir); return null; }          // a stop, the user's own fade: left as they are (still ducked under the words)
   const out = withLoops(html.replace(old[0], audioLine(a)), loops);
-  if (out === html) return null;
-  writeFileSync(f, out);
-  return a;
+  if (out !== html) writeFileSync(f, out);
+  duckMusic(dir);          // the repeats' lanes in their own seconds
+  return out === html ? null : a;
+}
+
+// ---- The levels the app sets on the voice-over and the music (sfx/actions.mjs trackGains, measured by sfx/mixlevels.mjs) and the music
+// ducked under the spoken words, the HyperFrames way: media-use's scripts/audio-duck.mjs writes a volume lane (data-automation) on the
+// bed, a quarter of its level from each spoken span's first word to its last (attack 0.15 s, release 0.4 s, spans closer than 0.6 s one;
+// Apache-2.0). Each music clip (a repeat of the song too) gets its lane in its own seconds. What the app wrote is kept beside it (data-mw-gain,
+// data-mw-duck: its signature), so a level or a lane the user changed in Studio stays theirs; the earlier fixed levels (voice 1, music 0.6)
+// count as the app's.
+const DEFAULT_GAIN = { voice: "1", music: "0.6" };
+const sig = (s) => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) | 0; return (h >>> 0).toString(36); };
+/** Whether a clip's level is the app's to set (kind: "voice" | "music"). */
+const gainIsOurs = (a, kind) => (a["data-mw-gain"] != null ? a["data-volume"] === a["data-mw-gain"] : (a["data-volume"] ?? "1") === DEFAULT_GAIN[kind]);
+/** Set the app's level on every clip of the voice-over or the music whose level is the app's (gain: a number). Returns how many changed. */
+export function setTrackGain(dir, kind, gain) {
+  const f = join(dir, "index.html");
+  let html; try { html = readFileSync(f, "utf8"); } catch { return 0; }
+  if (!Number.isFinite(gain) || !ROLES[kind]) return 0;
+  let n = 0;
+  const v = String(Math.round(gain * 1000) / 1000);
+  const out = html.replace(/<audio\b[^>]*>/gi, (tag) => {
+    const a = attrsOf(tag);
+    if (audioKind(a) !== kind || !gainIsOurs(a, kind) || (a["data-volume"] === v && a["data-mw-gain"] === v)) return tag;
+    a["data-volume"] = v; a["data-mw-gain"] = v; n++;
+    return audioLine(a);
+  });
+  if (out !== html) writeFileSync(f, out);
+  return n;
+}
+/** The music's duck lanes written for the film's words as they are now (none without a transcript). Returns how many clips duck. */
+export function duckMusic(dir) {
+  const f = join(dir, "index.html");
+  let html; try { html = readFileSync(f, "utf8"); } catch { return 0; }
+  const words = filmWords(dir), spans = words?.length ? speechSpans(words) : [];
+  let n = 0;
+  const out = html.replace(/<audio\b[^>]*>/gi, (tag) => {
+    const a = attrsOf(tag);
+    if (audioKind(a) !== "music") return tag;
+    const had = a["data-automation"];
+    if (had != null && a["data-mw-duck"] !== sig(had)) return tag;          // a lane the user drew or changed in Studio
+    const duration = Number(a["data-duration"]);
+    const lane = duration > 0 ? duckLane({ start: Number(a["data-start"]) || 0, duration }, spans, { duck: MUSIC_DUCK }) : null;
+    delete a["data-automation"]; delete a["data-mw-duck"];
+    if (lane) { a["data-automation"] = JSON.stringify(lane).replace(/"/g, "&quot;"); a["data-mw-duck"] = sig(a["data-automation"]); n++; }
+    return had === a["data-automation"] ? tag : audioLine(a);
+  });
+  if (out !== html) writeFileSync(f, out);
+  return n;
 }
 
 /** Place (or move) one track: { kind: "voice" | "music", src: project-relative path, duration: seconds }. Returns the attributes written. */
@@ -278,6 +326,7 @@ export function placeTrack(dir, { kind, src, duration, start = null }) {
   }
   if (loops) html = withLoops(html, loops);          // the song played again to the film's end, or none
   writeFileSync(f, html);
+  duckMusic(dir);          // the music under the words (a voice placed: the words it speaks)
   return a;
 }
 
@@ -328,6 +377,7 @@ export function stopMusic(dir, at) {
   html = html.replace(old[0], audioLine(a));
   if (loops) html = withLoops(html, loops);
   writeFileSync(f, html);
+  duckMusic(dir);
   return { at: at == null ? null : r3(Number(at)), start, duration: Number(a["data-duration"]) };
 }
 

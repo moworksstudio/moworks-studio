@@ -84,7 +84,9 @@ export async function check(root = APP_ROOT, { quiet = false } = {}) {
     .map((l) => { const [short, date, subject] = l.split("\0"); return { short, date, subject }; }) : [];
   const files = ahead ? (await git(root, ["diff", "--name-only", `HEAD...${REF}`])).split(/\r?\n/).filter(Boolean) : [];
   let changelog = null;
-  if (ahead && files.includes("CHANGELOG.md")) { try { changelog = (await git(root, ["show", `${REF}:CHANGELOG.md`])).slice(0, 8000); } catch { /* none */ } }
+  // the changelog is in docs/ (the repo's root keeps only the launcher, 30/10); an older update has it at the root
+  const log = ["docs/CHANGELOG.md", "CHANGELOG.md"].find((f) => files.includes(f));
+  if (ahead && log) { try { changelog = (await git(root, ["show", `${REF}:${log}`])).slice(0, 8000); } catch { /* none */ } }
   const blocked = [];
   if (behind) blocked.push({ code: "DIVERGED", message: `This copy has ${behind} change(s) of its own that the repo does not have: it can only be updated by hand` });
   const changed = ahead ? await localChanges(root) : [];

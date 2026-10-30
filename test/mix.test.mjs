@@ -161,9 +161,10 @@ test("a Final Mix revision is sound only: the picture's check stays valid; a pic
   assert.equal(rev.changedSince(d, checked), true);
 });
 
-test("Final Mix levels by family (one-shots under the music bed and the voice, the set moved with the measured mix); the master to -16 LUFS", { timeout: 120000 }, async () => {
+test("Final Mix levels: each effect by its loudest moment, HIT_OVER dB over the music between the words, never far over the voice; the master to -16 LUFS", { timeout: 120000 }, async () => {
   const { levels } = await import("../packages/sfx/auto.mjs");
-  const { LEVELS, REF_BED, REF_LUFS, volumeFor } = await import("../packages/sfx/actions.mjs");
+  const { loudnessOf } = await import("../packages/sfx/mixlevels.mjs");
+  const { HIT_OVER, LEVEL, LEVELS, MAX_GAIN, REF_BED, hitVolume, volumeFor } = await import("../packages/sfx/actions.mjs");
   const { masterLoudness, loudness } = await import("../packages/hf-qa/loudness.mjs");
   const d = join(T, "levels"); mkdirSync(join(d, "assets", "audio"), { recursive: true }); mkdirSync(join(d, "assets", "sfx"), { recursive: true }); mkdirSync(join(d, ".moworks"), { recursive: true });
   const gen = (args, out) => execFileSync(ffmpegExe(), ["-v", "error", "-y", "-f", "lavfi", ...args, out], { windowsHide: true });
@@ -176,27 +177,28 @@ test("Final Mix levels by family (one-shots under the music bed and the voice, t
   const html = (voice) => `<div data-composition-id="r"><audio id="el-music" src="assets/audio/bed.wav" data-volume="0.6"></audio>${voice ? '<audio id="el-voice" src="assets/audio/vo.wav" data-volume="1"></audio>' : ""}</div>`;
   writeFileSync(join(d, "index.html"), html(false));
   const a = await levels(d, ["pop", "thud"]);
-  assert.ok(Math.abs(a.shift - Math.max(-6, Math.min(6, a.bed - REF_BED))) < 0.01, "the set follows the measured bed");
-  // the library's hit is never boosted by its low integrated loudness: its family's level, moved with the mix
-  assert.equal(a.volumes.thud, volumeFor("impact", -24, { shift: a.shift }));
-  // a sound from the search, measured quiet (the test tone is about -33 LUFS), is brought up, at most 6 dB
-  const ref = volumeFor("pop", REF_LUFS, { shift: a.shift });
-  assert.ok(a.volumes.pop > ref && a.volumes.pop <= Math.round(ref * 2 * 100) / 100 + 0.01, `${a.volumes.pop} against ${ref}`);
-  assert.ok(a.volumes.pop > 0.02 && a.volumes.pop <= 1, String(a.volumes.pop));
+  assert.ok(Math.abs(a.shift - Math.max(-6, Math.min(6, a.bed - REF_BED))) < 0.01, "the ambience follows the measured bed");
+  // each effect by its own loudest 400 ms (a library sound's catalog loudness is its integrated one, which reads low for a hit: not used)
+  const peak = await loudnessOf(d, "assets/sfx/pop.wav", { short: true });
+  assert.ok(Number.isFinite(peak) && peak > -45 && peak < -15, `peak ${peak}`);
+  assert.equal(a.volumes.thud, hitVolume("impact", peak, { bed: a.bed }));
+  assert.equal(a.volumes.pop, hitVolume("pop", peak, { bed: a.bed }));
+  // HIT_OVER dB over the bed, its family a little louder or softer (an impact over a pop)
+  const at = (v) => peak + 20 * Math.log10(v);
+  assert.ok(Math.abs(at(a.volumes.pop) - (a.bed + HIT_OVER + 20 * Math.log10(LEVELS.pop / LEVEL))) < 0.1 || a.volumes.pop === MAX_GAIN, `pop at ${at(a.volumes.pop)} over a ${a.bed} bed`);
+  assert.ok(a.volumes.thud >= a.volumes.pop);
   writeFileSync(join(d, "index.html"), html(true));
   const b = await levels(d, ["pop", "thud"]);
   assert.ok(Number.isFinite(b.voice));
-  // with a voice-over the levels never rise, and a sound at the reference loudness sits at least 4 dB under the voice
-  assert.equal(b.volumes.thud, volumeFor("impact", -24, { shift: b.shift, voice: b.voice }));
-  assert.ok(b.volumes.thud <= a.volumes.thud && b.volumes.pop <= a.volumes.pop);
-  assert.ok(REF_LUFS + 20 * Math.log10(volumeFor("impact", REF_LUFS, { shift: b.shift, voice: b.voice })) <= b.voice - 4 + 0.1, "under the voice");
-  // the levels by family: clicks quietest, impacts loudest of the one-shots, ambience a quiet bed
+  // with a voice-over: never more than 2 dB over the voice's own level
+  assert.equal(b.volumes.thud, hitVolume("impact", peak, { bed: b.bed, voice: b.voice }));
+  assert.ok(at(b.volumes.thud) <= b.voice + 2 + 0.1, "not far over the voice");
+  // the family table: clicks quietest, impacts loudest of the one-shots, ambience a quiet bed; the ambience beds keep their rule
   assert.ok(LEVELS.click < LEVELS.pop && LEVELS.pop < LEVELS.whoosh && LEVELS.whoosh < LEVELS.impact && LEVELS.ambience < LEVELS.click);
-  assert.equal(volumeFor("pop", -16), 0.25);
-  assert.equal(volumeFor("pop", -28), 0.25, "a library one-shot under -16 LUFS stays at its family's level");
   assert.equal(volumeFor("ambience", -28, { maxBoost: 18 }), 0.48, "a -28 LUFS loop brought up to the bed's level");
-  assert.ok(volumeFor("impact", -10) < LEVELS.impact, "a loud sound is brought down");
-  assert.ok(volumeFor("impact", -16, { voice: -24 }) < LEVELS.impact, "4 dB under a quiet voice");
+  // a hit too quiet even at full scale goes up to HyperFrames' ceiling (+12 dB), a loud one comes down
+  assert.equal(hitVolume("impact", -60, { bed: -20 }), MAX_GAIN);
+  assert.ok(hitVolume("impact", -6, { bed: -20 }) < 0.5);
   // the master: a quiet render brought to the rule
   const mp4 = join(T, "quiet.mp4");
   execFileSync(ffmpegExe(), ["-v", "error", "-y", "-f", "lavfi", "-i", "color=c=black:s=64x36:d=5", "-f", "lavfi", "-i", "sine=frequency=330:duration=5", "-af", "volume=-12dB", "-shortest", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", mp4], { windowsHide: true });

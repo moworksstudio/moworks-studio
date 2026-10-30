@@ -150,7 +150,7 @@ test("the Final Mix and the chat say a far shorter song repeats; the chat's note
   assert.match(src("ui/src/workflow/MixSheet.jsx"), /d\.music\?\.repeat\?\.short[\s\S]{0,200}The song is shorter than the film; it repeats from \{at\}/);
   const prod = src("packages/server/production.mjs");
   assert.match(prod, /kind: "music", status: "warning", open: "mix", text: "The song is shorter than the film; it repeats from \{at\}/);
-  assert.match(prod, /fitMusicToFilm\(p\.path\);\s+repeatNote\(p\);/, "said when the film is checked or rendered");
+  assert.match(prod, /fitMusicToFilm\(p\.path\);[^\n]*\n(?:\s*await levelTracks\(p\.path[^\n]*\n)?\s*repeatNote\(p\);/, "said when the film is checked or rendered");
 });
 
 // ---- T22-11: a voice in one clip a line

@@ -149,7 +149,7 @@ test("the plan keeps its ending; the rules and the plan prompt say how a film en
   assert.doesNotMatch(house, /data-fade-out.{0,20}2 s/);
   assert.match(rule("general-style/SKILL.md"), /\*\*The ending:\*\* no film stops dead.*60 s is a 65 s file/);
   assert.match(rule("general-style/references/storyboard.md"), /add up to the film's whole length \(the length set in New project and the ending's fade after it/);
-  assert.match(readFileSync(new URL("../CHANGELOG.md", import.meta.url), "utf8").replace(/\s+/g, " "), /Films end with a picture and music fade:.*added after the length you set \(a 60 s film is a 65 s file\)/);
+  assert.match(readFileSync(new URL("../docs/CHANGELOG.md", import.meta.url), "utf8").replace(/\s+/g, " "), /Films end with a picture and music fade:.*added after the length you set \(a 60 s film is a 65 s file\)/);
   // the picture's own ending is the author's in every style but General and HyperFrames' own
   for (const id of ["general", "hf-launch"]) assert.equal(styleTraits(id).ownEnding, false, id);
   for (const id of ["lemo-opuscar-brick-toy", "what-if"]) assert.equal(styleTraits(id).ownEnding, true, id);
@@ -200,7 +200,7 @@ test("an author's ending stands only when the plan names it and the last shot pl
   assert.match(house, /\*\*Name it and play it:\*\* the Motion Plan's `ending\.author` says what the author's ending is/);
   assert.match(house, /gets the house fade: the picture and the music fade together, after the set length/);
   assert.match(house, /Tech checks flag a film whose last half second is a hard cut .* in every style, naming the time/);
-  assert.match(readFileSync(new URL("../CHANGELOG.md", import.meta.url), "utf8").replace(/\s+/g, " "), /a style author's own ending counts only when the Motion Plan names it and plays it in the last shot/);
+  assert.match(readFileSync(new URL("../docs/CHANGELOG.md", import.meta.url), "utf8").replace(/\s+/g, " "), /a style author's own ending counts only when the Motion Plan names it and plays it in the last shot/);
 });
 
 test("the ending check: a hard cut on the last half second is flagged in every style, a fade is not; an author's ending may end dark, on a dot or held", async () => {

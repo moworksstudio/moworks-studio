@@ -9,7 +9,7 @@
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { APP_ROOT, expandEnv, loadPins, sourceHead } from "../version-manager/index.mjs";
-import { levelOf } from "./actions.mjs";
+import { MAX_GAIN, levelOf } from "./actions.mjs";
 import { matchLocal, plainName } from "./library.mjs";
 
 export const OPENVERSE = "https://api.openverse.org/v1/audio/";
@@ -338,7 +338,7 @@ export function mount(dir, cues, { filmEnd = null, endFade = 0, cueKey: key = un
     const fadeOut = Math.max(held ? 0.15 : 0, inFade ? r3(Math.max(0.05, start + dur - Math.max(fadeAt, start))) : 0);
     // the sound's level from the Final Mix (auto.mjs levels: its family's), else its family's, else the default; a small motion's cue is quieter
     const level = v?.volume ?? s.volume ?? (s.family ? levelOf(s.family) : VOLUME);
-    const volume = String(Math.round(Math.min(1, Math.max(0.01, level * (Number(c.gain) || 1) * fadeGain)) * 100) / 100);
+    const volume = String(Math.round(Math.min(MAX_GAIN, Math.max(0.01, level * (Number(c.gain) || 1) * fadeGain)) * 100) / 100);          // HF carries gain to +12 dB
     const ours = { id, src: file, "data-start": String(start), "data-duration": String(dur), "data-track-index": String(laneAt(start, dur)), "data-volume": volume,
       ...(fadeOut > 0 ? { "data-fade-out": String(Math.min(dur, fadeOut)) } : {}) };
     const was = old.get(id)?.src === file ? old.get(id) : null;

@@ -10,6 +10,7 @@ import { readShots } from "../hf-edit/shots.mjs";
 import { audioKind, laneOfFile, placeClip, placeTrack, removeRepeats, trackClips } from "../hf-edit/tracks.mjs";
 import { muteMounted, readState as readSfx } from "../sfx/index.mjs";
 import { updatePrefs } from "../sfx/prefs.mjs";
+import { levelTracks } from "../sfx/mixlevels.mjs";
 
 /** After a sound was taken off the timeline (the Editor's Remove; the element itself is removed by HF's own source mutation in
  *  editor.mjs): the music stops being the film's music, the voice-over stays off the timeline until it is put back (its words are kept),
@@ -128,6 +129,7 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
         if (v?.file === rel && v.transcript?.status === "saved") {          // its words are checked: straight back on the timeline
           placeTrack(p.path, { kind: "voice", src: rel, duration: Number(info?.duration ?? v.info?.duration) || 1, start });
           projects.updateMeta(id, (m) => { if (m.voice) delete m.voice.offTimeline; }, root);
+          await levelTracks(p.path, { root }).catch(() => null);          // the voice at its level, the music ducked under its words
           await commit(p, `Voice-over on the timeline: ${rel}`);
           return { lane, voice: { file: rel } };
         }

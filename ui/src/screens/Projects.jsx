@@ -2,7 +2,7 @@
 // picture taken from the film (the server picks the most detailed still once the film has shots), a one-line title, the aspect and the
 // style as two tags, the stage gauge without its name; the folder path line went. The actions are icon buttons on the
 // status row and there is no Open button (a click on the card opens it). A loading line with the studio's mark while the list loads.
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, ArrowDownUp, CircleCheck, CircleDashed, Eye, FilterX, FolderInput, FolderOpen, FolderSearch, LayoutGrid, List, ListX, MoreHorizontal, Pencil, Plus, RotateCw, Search, Trash2 } from "lucide-react";
 import { del, patch, post, get } from "../api.js";
 import { Banner, Dialog, Gauge, Menu, Pager, useGalleryGrid } from "../components.jsx";
@@ -17,6 +17,9 @@ import ReelWall from "../studio/ReelWall.jsx";
 const FILTERS = [["all", "All", LayoutGrid], ["in_progress", "In progress", CircleDashed], ["needs_review", "Needs review", Eye], ["exported", "Exported", CircleCheck]];
 const STATUS_ICON = { in_progress: CircleDashed, needs_review: Eye, exported: CircleCheck, missing: AlertTriangle };
 const SORTS = [["opened", "Last opened"], ["updated", "Last changed"], ["name", "Name"]];
+// the page the grid was on, kept while the app is open: Back from a film (the Editor's arrow, the rail) returns to it (owner 30/10: a film
+// opened from page 4 came back to page 1); a page the list no longer reaches (films removed) is the first
+let lastPage = 0;
 const statusOf = (p) => p.missing ? "missing" : p.status === "exported" ? "exported" : p.status === "needs_review" ? "needs_review" : "in_progress";
 const STATUS_LABEL = { in_progress: "In progress", needs_review: "Needs review", exported: "Exported", missing: "Folder missing" };
 const scenes = (t, n) => (n === 1 ? t("1 scene") : t("{n} scenes", { n: n ?? 0 }));
@@ -94,12 +97,14 @@ export default function Projects() {
   const studio = useThemeId() === "studio";
   // the cards a step smaller, and pages under the grid (as on Motion Library) instead of a scroll: a page holds the
   // columns the width gives times the rows that fit above the pager
-  const [page, setPage] = useState(0);
+  const [page, keepPage] = useState(lastPage);
+  const setPage = (n) => { lastPage = n; keepPage(n); };
   // the gallery pages' one grid: the columns that leave the least room under the whole rows that fit above the pager, each card's
   // picture in its one 16:9 frame; the pager sits right under the last row
   const grid = useGalleryGrid({ card: ".project-card", media: ".card-thumb", min: 16, max: 24, room: (el, rem) => window.innerHeight - el.getBoundingClientRect().top - 3.75 * rem });          // the pager's own height under the rows
   const per = grid.size;
-  useEffect(() => setPage(0), [q, filter, sort]);
+  const searched = useRef(false);          // a new search, filter or sort starts on the first page; coming back keeps the page
+  useEffect(() => { if (searched.current) setPage(0); searched.current = true; }, [q, filter, sort]);
 
   const items = useMemo(() => {
     let list = (data?.projects ?? []).filter((p) => (filter === "all" || statusOf(p) === filter) && (!q || p.title.toLowerCase().includes(q.toLowerCase())));
@@ -107,7 +112,7 @@ export default function Projects() {
     list = [...list].sort((a, b) => sort === "name" ? key(a).localeCompare(key(b)) : key(b).localeCompare(key(a)));
     return list;
   }, [data, q, filter, sort]);
-  const pageNow = Math.min(page, Math.max(0, Math.ceil(items.length / per) - 1));
+  const pageNow = page * per < items.length ? page : 0;
 
   const openExisting = async (path) => {
     const p = await post("/api/projects/open", { path });

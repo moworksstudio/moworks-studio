@@ -13,7 +13,8 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { VARIANT_KEY, cueKey, cuesOf, mount, mountAmbience, patchState, readState, resolveCues, setVolumes, slug, useLibrarySound, useOwnerSound, writeCredits } from "./index.mjs";
-import { DENSITY, TYPING, ambienceBeds, boostOf, duckLane, motionCues, mixShift, placeOf, speechSpans, styleHint, thin, tiles, volumeFor } from "./actions.mjs";
+import { BED_UNDER, DENSITY, REF_BED, TYPING, ambienceBeds, boostOf, duckLane, hitVolume, motionCues, mixShift, placeOf, speechSpans, styleHint, thin, tiles, volumeFor } from "./actions.mjs";
+import { levelTracks, loudnessOf } from "./mixlevels.mjs";
 import { familyOf, findAmbience, pickVariant } from "./library.mjs";
 import { DEFAULT_DENSITY, briefOf, isOff, readPrefs, soundPolicy } from "./prefs.mjs";
 import { fadeOfTotal, planEnding } from "../hf-edit/ending.mjs";
@@ -250,6 +251,7 @@ async function placeAmbience(dir, shots, { prefs = {}, filmEnd = null, endFade =
  *  silent }. opts: whoosh (false: the style's palette has no whoosh, whooshAllowed), palette (the style's sound section: silence or fewer
  *  sounds, its material), styleId / styleTitle (the material when the palette says none), root, signal, fetchImpl, timeoutMs, online. */
 export async function autoSfx(dir, shots, plan, opts = {}) {
+  await levelTracks(dir, { root: opts.root }).catch(() => null);          // the voice and the music at their levels first: the effects sit against them
   const prefs = readPrefs(dir), palette = opts.palette ?? "";
   const policy = soundPolicy({ prefs, brief: briefOf(dir), palette });
   const style = opts.style ?? styleHint({ palette, id: opts.styleId, title: opts.styleTitle });
@@ -306,40 +308,32 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
     near, offline: !!res.offline, names: [...new Set(placed.map((p) => p.name))], ambience: beds.length, thinned: thinned.length, density: policy.density, silent: null };
 }
 
-/** Loudness (LUFS, FFmpeg EBU R128): a bed or a voice by its integrated loudness; a short effect by its loudest 400 ms (momentary max),
- *  since an effect is mostly silence around one hit. */
-async function lufsOf(file, root, { short = false } = {}) {
-  const { stderr } = await run(ffmpegExe(root), ["-hide_banner", "-nostats", "-i", file, "-map", "0:a:0", "-af", "ebur128", "-f", "null", "-"], { windowsHide: true, maxBuffer: 64 << 20, timeout: 180000 });
-  if (short) {
-    const ms = [...stderr.matchAll(/\sM:\s*(-?[\d.]+)/g)].map((m) => Number(m[1])).filter(Number.isFinite);
-    return ms.length ? Math.max(...ms) : null;
-  }
-  const i = /I:\s*(-?[\d.]+)\s*LUFS/.exec(stderr.slice(stderr.lastIndexOf("Summary:")));
-  return i ? Number(i[1]) : null;
-}
-const meanDb = (file, root) => lufsOf(file, root);
 const db = (v) => 20 * Math.log10(Math.max(0.001, Number(v) || 0));
-/** Levels by family (actions.mjs LEVELS: one-shots under the music bed and the voice): each sound at its family's level, brought from its
- *  own loudness (the library's catalog LUFS, else measured) to the level's, the whole set moved with the film's measured mix (mixShift: the
- *  music bed, else the voice) and kept 4 dB under the voice. { volumes: { name: 0-1, "name|#|variant": 0-1 }, bed, voice, shift }. */
+/** Levels of the film's effects (actions.mjs hitVolume): each sound by its own loudest 400 ms (measured once, mixlevels.mjs loudnessOf; a
+ *  library sound's catalog loudness is its integrated one, which reads low for a hit) set HIT_OVER dB over the music between the words as
+ *  the film plays it (its file's loudness at its clip's level; with no music, where it would sit under the voice), its family a little
+ *  louder or softer, never far over the voice. The ambience beds follow the mix as before (mixShift). { volumes: { name: 0-MAX_GAIN,
+ *  "name|#|variant": … }, bed, voice, shift }. */
 export async function levels(dir, names, { root } = {}) {
   const html = readFileSync(join(dir, "index.html"), "utf8");
   // the voice-over and the music, however many clips each is on (a voice cut into one clip a line, a song played again): their file
   const track = (kind) => { const c = trackClips(html, kind).find((x) => x.src && existsSync(join(dir, ...x.src.split("/"))));
     return c ? { src: c.src, vol: c.volume } : null; };
   const music = track("music"), voice = track("voice");
-  const bed = music ? (await meanDb(join(dir, ...music.src.split("/")), root).catch(() => null)) : null;
-  const vo = voice ? (await meanDb(join(dir, ...voice.src.split("/")), root).catch(() => null)) : null;
+  const bed = music ? await loudnessOf(dir, music.src, { root }) : null;
+  const vo = voice ? await loudnessOf(dir, voice.src, { root }) : null;
   const mix = { bed: bed != null ? bed + db(music.vol) : null, voice: vo != null ? vo + db(voice.vol) : null };
-  const shift = mixShift(mix);
+  const shift = mixShift(mix), under = mix.bed ?? (mix.voice != null ? mix.voice - BED_UNDER : REF_BED);
   const st = readState(dir), volumes = {};
   for (const n of names) {
     const s = st.sounds[n];
     if (!s || !existsSync(join(dir, ...s.file.split("/")))) continue;
-    const loud = Number.isFinite(s.lufs) ? s.lufs : await lufsOf(join(dir, ...s.file.split("/")), root, { short: true }).catch(() => null);
-    const family = s.family ?? familyOf(n), maxBoost = boostOf(s);
-    volumes[n] = volumeFor(family, loud, { shift, voice: mix.voice, maxBoost });
-    for (const v of s.variants ?? []) volumes[`${n}${VARIANT_KEY}${v.id}`] = volumeFor(family, Number.isFinite(v.lufs) ? v.lufs : loud, { shift, voice: mix.voice, maxBoost });
+    const family = s.family ?? familyOf(n), peak = await loudnessOf(dir, s.file, { root, short: true });
+    volumes[n] = hitVolume(family, peak, { bed: under, voice: mix.voice });
+    for (const v of s.variants ?? []) {
+      const vp = v.file && existsSync(join(dir, ...v.file.split("/"))) ? await loudnessOf(dir, v.file, { root, short: true }) : peak;
+      volumes[`${n}${VARIANT_KEY}${v.id}`] = hitVolume(family, vp ?? peak, { bed: under, voice: mix.voice });
+    }
   }
   return { volumes, bed: mix.bed, voice: mix.voice, shift };
 }

@@ -12,9 +12,21 @@ const any = (ws, list) => list.split(" ").some((w) => ws.has(w));
  *  film's type block, a typeface): Test 20 got 13 typing sounds from "the type block slides in". */
 export const TYPING = /\btyping\b|\btyp(?:es|ed)\s+(?:out|in)\b|\btype-on\b|\btypewriter|\bkeyboard|\bcaret\b|g[õo] ch[ữu]/i;
 
-// ---- Levels: each family's volume for a sound at the library's loudness (one-shots -16 LUFS), so one-shots sit under the music bed and
-// the voice (the kit's old rule put every effect 4 dB over the bed; with a sound on every action that is a wall of sound). A sound of
-// another loudness is brought to it first (the library's own LUFS, or measured), and the whole set follows the film's mix (mixShift).
+// ---- Levels, the HyperFrames way (its skills at the pinned commit, Apache-2.0: hyperframes/references/sound.md §4-5, media-use's
+// bgm.md, tts.md and scripts/lib/duck.mjs). The voice-over is brought to about -16 LUFS (a mix of -16 to -14 LUFS for social); the music
+// sits 4 dB under it between the words and is ducked to a quarter (-12 dB: about -31 LUFS under a -16 voice) while they are spoken; a
+// film with no voice has its music at -16 LUFS. Each effect is set by its loudest 400 ms (momentary LUFS: an effect is mostly silence round
+// one hit, so its integrated loudness reads low) to HIT_OVER dB over the music between the words ("each hit sits 3-6 dB over the bed"),
+// its family a little louder or softer (LEVELS around LEVEL). Owner 30/10, after Tests 21-26: the music at a fixed 0.6 and never ducked
+// covered the voice, and the effects, set under the bed, could not be heard. Gains go up to HyperFrames' own ceiling, +12 dB (core
+// audioGain.ts MAX_AUDIO_GAIN_DB at 0.8.214: Studio's fader, the preview and the render all carry gain over unity).
+export const VOICE_LUFS = -16, ALONE_LUFS = -16;          // the voice-over; the music of a film with no voice
+export const BED_UNDER = 4;             // the music between the words, dB under the voice
+export const MUSIC_DUCK = 0.25;         // the music while words are spoken (media-use audio-duck's default)
+export const HIT_OVER = 4;              // an effect's loudest moment, dB over the music between the words
+export const MAX_GAIN = Math.round(10 ** (12 / 20) * 100) / 100;          // +12 dB
+// LEVELS: each family's place against the others (impact louder, click softer) and, for the ambience beds, their volume at the library's
+// loudness (loops -28 LUFS, brought up to it), moved with the film's mix (mixShift)
 export const LEVELS = Object.freeze({ click: 0.2, switch: 0.22, pop: 0.25, footstep: 0.25, cloth: 0.25, typing: 0.25, electronic: 0.25, whoosh: 0.3,
   magic: 0.3, paper: 0.3, bell: 0.3, water: 0.3, mechanical: 0.28, fire: 0.3, wind: 0.3, rain: 0.3, animal: 0.3, crowd: 0.3, door: 0.35, impact: 0.45,
   ambience: 0.12 });
@@ -40,6 +52,25 @@ export function volumeFor(family, lufs = null, { shift = 0, voice = null, maxBoo
   let gain = 20 * Math.log10(levelOf(family)) + shift;
   if (Number.isFinite(voice)) gain = Math.min(gain, voice - 4 - REF_LUFS);
   return Math.round(clamp(10 ** ((gain + norm) / 20), 0.02, 1) * 100) / 100;
+}
+/** A sound effect's volume (0.02 to MAX_GAIN): its loudest 400 ms (`peak`, momentary LUFS; null: at REF_LUFS) brought HIT_OVER dB over
+ *  the music between the words (`bed`, LUFS; with no music, where it would be), its family up to 4 dB louder or softer (LEVELS against
+ *  LEVEL), and never more than 2 dB over the voice's own level (`voice`, LUFS): the effects sit in the pauses (afterWords). */
+export function hitVolume(family, peak = null, { bed = REF_BED, voice = null } = {}) {
+  let target = bed + HIT_OVER + clamp(20 * Math.log10(levelOf(family) / LEVEL), -4, 4);
+  if (Number.isFinite(voice)) target = Math.min(target, voice + 2);
+  return Math.round(clamp(10 ** ((target - (Number.isFinite(peak) ? peak : REF_LUFS)) / 20), 0.02, MAX_GAIN) * 100) / 100;
+}
+/** The levels of the voice-over and the music ({ voice, music }: each file's integrated LUFS, null when the film has none; words: whether
+ *  the spoken words are known, so the music can duck under them): { voiceGain, musicGain, voice: the voice's level after its gain, bed: the
+ *  music's between the words after its gain }. Music under a voice whose words are not known yet sits where the duck would put it. */
+export function trackGains({ voice = null, music = null, words = false } = {}) {
+  const gain = (db) => Math.round(clamp(10 ** (db / 20), 0.02, MAX_GAIN) * 1000) / 1000;
+  const voiceGain = Number.isFinite(voice) ? gain(VOICE_LUFS - voice) : null;
+  const V = Number.isFinite(voice) ? voice + 20 * Math.log10(voiceGain) : null;
+  const want = V == null ? ALONE_LUFS : V - BED_UNDER + (words ? 0 : 20 * Math.log10(MUSIC_DUCK));
+  const musicGain = Number.isFinite(music) ? gain(want - music) : null;
+  return { voiceGain, musicGain, voice: V, bed: musicGain == null ? null : music + 20 * Math.log10(musicGain) };
 }
 /** How far a sound may be brought up to REF_LUFS: a loop all the way, a sound measured by its loudest moment a little, a library one-shot not. */
 export const boostOf = (s) => (s?.loop ? 18 : s?.source === "library" ? 0 : 6);

@@ -24,13 +24,17 @@
   <a href="THIRD-PARTY.md">Bên thứ ba</a>
 </p>
 
-<p align="center"><img src="docs/images/hero-films.jpg" alt="Ảnh tĩnh từ sáu phim mẫu làm bằng Moworks Studio"></p>
+<p align="center"><img src="images/hero-films.jpg" alt="Ảnh tĩnh từ sáu phim mẫu làm bằng Moworks Studio"></p>
 <p align="center"><sub>Phim mẫu làm bằng app. Hàng trên: ra mắt chiếc đèn (Launch · style của HeyGen) · đồng hồ báo thức (Character · style của HeyGen) · đồng hồ mặt trời (Explainer · style của HeyGen).<br>Hàng dưới: khu vườn qua những con số (Data · style của HeyGen) · trạm xe buýt (Isometric Picture Book · style của Lemomo) · thành phố neon (Music video · style của HeyGen). Xem thêm ở <a href="#làm-bằng-app">Làm bằng app</a>.</sub></p>
 
 Moworks Studio là ứng dụng máy tính để làm phim motion graphic cùng Claude. Bạn viết brief, đưa chất liệu (thiết kế, PSD, deck, ảnh,
 nhạc, kịch bản lời đọc) và chọn một trong 126 film style. Claude lên kế hoạch cho phim, vẽ storyboard để bạn duyệt và viết Motion Plan
 bằng số liệu; sau đó app dựng phim từng shot bằng code, tự review và chấm điểm, trộn nhạc và hiệu ứng âm thanh, kiểm tra kỹ thuật và xuất
 MP4. Phim ở phần lớn các style còn xuất được sang After Effects thành layer chỉnh sửa được.
+
+**Sửa phim ngay trên khung hình.** Trong Editor, bấm vào chữ bất kỳ trên khung hình để sửa tại chỗ, cả font, cỡ chữ và màu (mỗi lần sửa
+là một bước có thể hoàn tác). Hoặc bấm **Pin a note** (N), chấm một điểm hay kéo một khung trên hình rồi ghi cần sửa gì ở đó: ghi chú
+gửi tới Claude kèm đúng thời điểm, shot và vị trí trên hình.
 
 Mỗi bước dừng lại chờ bạn ở chỗ cần thiết: bạn duyệt storyboard và Motion Plan, theo dõi phim được dựng ngay trong Editor, và nhờ sửa bằng
 lời. App chạy trên máy của bạn và điều khiển Claude Code bằng tài khoản Claude của chính bạn; dự án, key và tài liệu của khách hàng nằm lại
@@ -40,7 +44,7 @@ trên máy.
 
 ## Cách app hoạt động
 
-<p align="center"><img src="docs/images/diagram-how-it-works.vi.png" width="760" alt="Cách app hoạt động: Claude (1 Bộ luật, 2 Đạo diễn) → Moworks Studio (3 Các bước và Editor, 4 Dựng phim, 5 Review và QA, 6 Mix và render, render bằng engine HyperFrames giữ nguyên bản) → Thành phẩm (7 Phim, 8 Kiểm tra, chưa đạt thì về bước 4)"></p>
+<p align="center"><img src="images/diagram-how-it-works.vi.png" width="760" alt="Cách app hoạt động: Claude (1 Bộ luật, 2 Đạo diễn) → Moworks Studio (3 Các bước và Editor, 4 Dựng phim, 5 Review và QA, 6 Mix và render, render bằng engine HyperFrames giữ nguyên bản) → Thành phẩm (7 Phim, 8 Kiểm tra, chưa đạt thì về bước 4)"></p>
 
 Màu: cam = Claude · xanh dương = Moworks Studio · xanh lá = thành phẩm · xám = engine render mã nguồn mở.
 
@@ -61,7 +65,7 @@ Phần render dùng engine mã nguồn mở HyperFrames, nguyên như bản phá
 Mọi film style đi theo cùng một quy trình. Mỗi bước để lại một file trong dự án; bước sau chỉ chạy khi bước trước đã xong hoặc được bạn
 bỏ qua.
 
-<p align="center"><img src="docs/images/diagram-workflow.vi.png" width="560" alt="Quy trình: Cài đặt một lần (1 Cài app, 2 Lần đầu mở) → Lên kế hoạch (3 New project, 4 Prepare, 5 Storyboard bạn duyệt, 6 Motion Plan bạn duyệt) → Dựng phim (7 Build và Review, 8 Final Mix) → Thành phẩm (9 Render, MP4 hoặc Port to After Effects)"></p>
+<p align="center"><img src="images/diagram-workflow.vi.png" width="560" alt="Quy trình: Cài đặt một lần (1 Cài app, 2 Lần đầu mở) → Lên kế hoạch (3 New project, 4 Prepare, 5 Storyboard bạn duyệt, 6 Motion Plan bạn duyệt) → Dựng phim (7 Build và Review, 8 Final Mix) → Thành phẩm (9 Render, MP4 hoặc Port to After Effects)"></p>
 
 Màu: xám = cài đặt · cam = Claude và app thực hiện · xanh dương = bạn viết, chọn hoặc duyệt · xanh lá = thành phẩm.
 
@@ -82,7 +86,7 @@ Màu: xám = cài đặt · cam = Claude và app thực hiện · xanh dương =
 **Editor** phát phim đúng từng khung hình như khi render: danh sách shot và quy trình ở bên trái, timeline dưới khung hình, Claude ở
 cột chat bên phải. Bấm vào một phần tử trong phim để Claude nhắm vào nó, hoặc tự sửa chữ của nó bằng tay.
 
-<p align="center"><img src="docs/images/desk-editor.jpg" alt="Editor (The Desk): shot và quy trình bên trái, phim trong trình phát, timeline, và Claude thuật lại từng bước bên phải"><br><sub>Editor (The Desk): shot và quy trình bên trái, phim trong trình phát, timeline, và Claude thuật lại từng bước bên phải</sub></p>
+<p align="center"><img src="images/desk-editor.jpg" alt="Editor (The Desk): shot và quy trình bên trái, phim trong trình phát, timeline, và Claude thuật lại từng bước bên phải"><br><sub>Editor (The Desk): shot và quy trình bên trái, phim trong trình phát, timeline, và Claude thuật lại từng bước bên phải</sub></p>
 
 ### Huy hiệu After Effects
 
@@ -104,16 +108,16 @@ Appearance.
 
 <table>
 <tr>
-<td width="50%" valign="top"><img src="docs/images/desk-projects.jpg" alt="The Desk · Projects"><br><sub>The Desk · Projects</sub></td>
-<td width="50%" valign="top"><img src="docs/images/studio-projects.jpg" alt="The Studio · Projects"><br><sub>The Studio · Projects</sub></td>
+<td width="50%" valign="top"><img src="images/desk-projects.jpg" alt="The Desk · Projects"><br><sub>The Desk · Projects</sub></td>
+<td width="50%" valign="top"><img src="images/studio-projects.jpg" alt="The Studio · Projects"><br><sub>The Studio · Projects</sub></td>
 </tr>
 <tr>
-<td width="50%" valign="top"><img src="docs/images/desk-new-project.jpg" alt="The Desk · New project"><br><sub>The Desk · New project</sub></td>
-<td width="50%" valign="top"><img src="docs/images/studio-new-project.jpg" alt="The Studio · New project"><br><sub>The Studio · New project</sub></td>
+<td width="50%" valign="top"><img src="images/desk-new-project.jpg" alt="The Desk · New project"><br><sub>The Desk · New project</sub></td>
+<td width="50%" valign="top"><img src="images/studio-new-project.jpg" alt="The Studio · New project"><br><sub>The Studio · New project</sub></td>
 </tr>
 <tr>
-<td width="50%" valign="top"><img src="docs/images/desk-film-styles.jpg" alt="The Desk · Film Styles, 126 style theo tác giả"><br><sub>The Desk · Film Styles, 126 style theo tác giả</sub></td>
-<td width="50%" valign="top"><img src="docs/images/studio-film-styles.jpg" alt="The Studio · Film Styles thành từng thùng đĩa theo tác giả"><br><sub>The Studio · Film Styles thành từng thùng đĩa theo tác giả</sub></td>
+<td width="50%" valign="top"><img src="images/desk-film-styles.jpg" alt="The Desk · Film Styles, 126 style theo tác giả"><br><sub>The Desk · Film Styles, 126 style theo tác giả</sub></td>
+<td width="50%" valign="top"><img src="images/studio-film-styles.jpg" alt="The Studio · Film Styles thành từng thùng đĩa theo tác giả"><br><sub>The Studio · Film Styles thành từng thùng đĩa theo tác giả</sub></td>
 </tr>
 </table>
 
@@ -142,30 +146,30 @@ Mọi style còn theo hai bộ luật chung của app: **phim luôn sống độ
 
 <table>
 <tr>
-<td width="33%" valign="top"><img src="docs/images/film-pebble.jpg" alt="Pebble, ra mắt một chiếc đèn"><br><sub><b>Pebble, ra mắt một chiếc đèn</b> · Launch · style của HeyGen</sub></td>
-<td width="33%" valign="top"><img src="docs/images/film-sundial.jpg" alt="Đồng hồ mặt trời hoạt động thế nào"><br><sub><b>Đồng hồ mặt trời hoạt động thế nào</b> · Explainer · style của HeyGen</sub></td>
-<td width="33%" valign="top"><img src="docs/images/film-garden.jpg" alt="Khu vườn cộng đồng qua những con số"><br><sub><b>Khu vườn cộng đồng qua những con số</b> · Data · style của HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-pebble.jpg" alt="Pebble, ra mắt một chiếc đèn"><br><sub><b>Pebble, ra mắt một chiếc đèn</b> · Launch · style của HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-sundial.jpg" alt="Đồng hồ mặt trời hoạt động thế nào"><br><sub><b>Đồng hồ mặt trời hoạt động thế nào</b> · Explainer · style của HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-garden.jpg" alt="Khu vườn cộng đồng qua những con số"><br><sub><b>Khu vườn cộng đồng qua những con số</b> · Data · style của HeyGen</sub></td>
 </tr>
 <tr>
-<td width="33%" valign="top"><img src="docs/images/film-isometric.jpg" alt="Hai cửa lên xe buýt"><br><sub><b>Hai cửa lên xe buýt</b> · Isometric Picture Book · style của Lemomo</sub></td>
-<td width="33%" valign="top"><img src="docs/images/film-night-music.jpg" alt="Thành phố sáng đèn theo nhịp"><br><sub><b>Thành phố sáng đèn theo nhịp</b> · Music video · style của HeyGen</sub></td>
-<td width="33%" valign="top"><img src="docs/images/film-papercraft.jpg" alt="Thị trấn sân khấu giấy"><br><sub><b>Thị trấn sân khấu giấy</b> · Toy-theatre paper collage · style của Alex Greenshpun</sub></td>
+<td width="33%" valign="top"><img src="images/film-isometric.jpg" alt="Hai cửa lên xe buýt"><br><sub><b>Hai cửa lên xe buýt</b> · Isometric Picture Book · style của Lemomo</sub></td>
+<td width="33%" valign="top"><img src="images/film-night-music.jpg" alt="Thành phố sáng đèn theo nhịp"><br><sub><b>Thành phố sáng đèn theo nhịp</b> · Music video · style của HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-papercraft.jpg" alt="Thị trấn sân khấu giấy"><br><sub><b>Thị trấn sân khấu giấy</b> · Toy-theatre paper collage · style của Alex Greenshpun</sub></td>
 </tr>
 <tr>
-<td width="33%" valign="top"><img src="docs/images/film-clouds.jpg" alt="Nếu ta gấp được mây thì sao?"><br><sub><b>Nếu ta gấp được mây thì sao?</b> · What If · style của FreshStack</sub></td>
-<td width="33%" valign="top"><img src="docs/images/film-slideshow.jpg" alt="Một ngày leo núi"><br><sub><b>Một ngày leo núi</b> · Slideshow · style của HeyGen</sub></td>
-<td width="33%" valign="top"><img src="docs/images/film-puzzle-cube.jpg" alt="Khối lập phương tách rời"><br><sub><b>Khối lập phương tách rời</b> · 3D · style của HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-clouds.jpg" alt="Nếu ta gấp được mây thì sao?"><br><sub><b>Nếu ta gấp được mây thì sao?</b> · What If · style của FreshStack</sub></td>
+<td width="33%" valign="top"><img src="images/film-slideshow.jpg" alt="Một ngày leo núi"><br><sub><b>Một ngày leo núi</b> · Slideshow · style của HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-puzzle-cube.jpg" alt="Khối lập phương tách rời"><br><sub><b>Khối lập phương tách rời</b> · 3D · style của HeyGen</sub></td>
 </tr>
 </table>
 
-<p align="center"><img src="docs/images/formats-films.jpg" alt="Phim vuông, dọc và đứng"><br>
+<p align="center"><img src="images/formats-films.jpg" alt="Phim vuông, dọc và đứng"><br>
 <sub>Mọi khổ hình mà style cho phép: <b>Geometric Bauhaus</b> (style của Vincentwei1021) 1:1 · <b>tiệm bánh mở cửa</b> (General Style của Moworks) 4:5 ·
 <b>Spoke &amp; Brew</b> (Vertical · style của HeyGen) 9:16 · <b>khối lập phương</b> (3D · style của HeyGen) 1:1</sub></p>
 
 <table>
 <tr>
-<td width="50%" valign="top"><img src="docs/images/film-bolt.gif" alt="Nhân vật đồng hồ báo thức thức dậy"><br><sub><b>Ngày đầu của chiếc đồng hồ báo thức</b> · Character · style của HeyGen</sub></td>
-<td width="50%" valign="top"><img src="docs/images/film-lighthouse.gif" alt="Chú mèo thắp đèn hải đăng"><br><sub><b>Chú mèo gác hải đăng</b> · Brush cartoon · style của John Heibel, do một nhân vật vẽ bằng Character maker của app diễn</sub></td>
+<td width="50%" valign="top"><img src="images/film-bolt.gif" alt="Nhân vật đồng hồ báo thức thức dậy"><br><sub><b>Ngày đầu của chiếc đồng hồ báo thức</b> · Character · style của HeyGen</sub></td>
+<td width="50%" valign="top"><img src="images/film-lighthouse.gif" alt="Chú mèo thắp đèn hải đăng"><br><sub><b>Chú mèo gác hải đăng</b> · Brush cartoon · style của John Heibel, do một nhân vật vẽ bằng Character maker của app diễn</sub></td>
 </tr>
 </table>
 
@@ -182,8 +186,8 @@ Mọi style còn theo hai bộ luật chung của app: **phim luôn sống độ
 
 <table>
 <tr>
-<td width="50%" valign="top"><img src="docs/images/desk-motion-library.jpg" alt="Motion Library: mục nào cũng có bản xem trước, tác giả, nguồn và giấy phép"><br><sub>Motion Library: mục nào cũng có bản xem trước, tác giả, nguồn và giấy phép</sub></td>
-<td width="50%" valign="top"><img src="docs/images/desk-brand-kits.jpg" alt="Brand Kits: 13 frame preset của HyperFrames và Brand Kit của bạn"><br><sub>Brand Kits: 13 frame preset của HyperFrames và Brand Kit của bạn</sub></td>
+<td width="50%" valign="top"><img src="images/desk-motion-library.jpg" alt="Motion Library: mục nào cũng có bản xem trước, tác giả, nguồn và giấy phép"><br><sub>Motion Library: mục nào cũng có bản xem trước, tác giả, nguồn và giấy phép</sub></td>
+<td width="50%" valign="top"><img src="images/desk-brand-kits.jpg" alt="Brand Kits: 13 frame preset của HyperFrames và Brand Kit của bạn"><br><sub>Brand Kits: 13 frame preset của HyperFrames và Brand Kit của bạn</sub></td>
 </tr>
 </table>
 
@@ -244,9 +248,9 @@ Mọi style còn theo hai bộ luật chung của app: **phim luôn sống độ
 
 Dán câu này vào Claude Code (giữ nguyên tiếng Anh):
 
-> Install Moworks Studio from https://github.com/moworksstudio/moworks-studio: clone it and follow its CLAUDE.md.
+> Install Moworks Studio from https://github.com/moworksstudio/moworks-studio: clone it and follow its .claude/CLAUDE.md.
 
-Claude làm theo `CLAUDE.md` của repo: kiểm tra Git, Node.js 22, Python 3.12 và FFmpeg 9.0 (và hỏi trước khi cài những gì còn thiếu),
+Claude làm theo `.claude/CLAUDE.md` của repo: kiểm tra Git, Node.js 22, Python 3.12 và FFmpeg 9.0 (và hỏi trước khi cài những gì còn thiếu),
 clone vào `Moworks Studio\app` rồi chạy `Moworks Studio.bat`; màn hình lần đầu của app làm nốt phần còn lại.
 
 ## Làm thử một phim
@@ -266,7 +270,7 @@ Một phim 30 giây, từ brief tới MP4:
 7. **Play** phim trong Editor. Nhờ Claude sửa trong chat (bấm vào một phần tử trước để chỉ đúng chỗ), hoặc tự sửa chữ bằng tay.
 8. **Render** MP4, và **Port to After Effects** nếu huy hiệu của style cho phép.
 
-<p align="center"><img src="docs/images/studio-editor.jpg" alt="Một phim đã xong trong Editor (The Studio): năm bước dọc phía trên, ghi chú của Claude từ Review và Final Mix bên phải"><br><sub>Một phim đã xong trong Editor (The Studio): năm bước dọc phía trên, ghi chú của Claude từ Review và Final Mix bên phải</sub></p>
+<p align="center"><img src="images/studio-editor.jpg" alt="Một phim đã xong trong Editor (The Studio): năm bước dọc phía trên, ghi chú của Claude từ Review và Final Mix bên phải"><br><sub>Một phim đã xong trong Editor (The Studio): năm bước dọc phía trên, ghi chú của Claude từ Review và Final Mix bên phải</sub></p>
 
 Để tham khảo: một phim 34 giây ở một style Lemo-Opuscar mất 1 giờ 17 phút từ lúc Create tới MP4 hoàn chỉnh, trong đó 44 phút tính từ
 **Approve and build**; lượng dùng Claude cho cả phim tương đương khoảng 13 USD theo giá API.
@@ -341,7 +345,6 @@ node tools/golden/run.mjs --label G214 --only hf-native-30
 | [CHANGELOG.md](CHANGELOG.md) | Nội dung của phiên bản này |
 | [KNOWN-ISSUES.md](KNOWN-ISSUES.md) | Vấn đề còn mở và giới hạn, kèm cách xử lý |
 | [THIRD-PARTY.md](THIRD-PARTY.md) | Mọi nguồn đóng gói kèm hoặc tải về: tác giả, link đúng commit đã ghim, giấy phép, cách dùng |
-| [DESIGN.md](DESIGN.md), [PRODUCT.md](PRODUCT.md) | Hệ thống thiết kế giao diện và nguyên tắc sản phẩm |
 
 ## Công nghệ
 

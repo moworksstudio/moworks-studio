@@ -36,6 +36,7 @@ import { briefScript, scriptDraft, scriptGap } from "../voice/script.mjs";
 import { MASTER, loudness, masterLoudness } from "../hf-qa/loudness.mjs";
 import { capWebBitrate } from "../hf-qa/webBitrate.mjs";
 import { analyseBeats, fitMusicToFilm, musicRepeats, musicUsed, placeTrack } from "../hf-edit/tracks.mjs";
+import { levelTracks } from "../sfx/mixlevels.mjs";
 import { refreshBridge } from "../hf-edit/lemoPage.mjs";
 import { resolveRuntime } from "../version-manager/index.mjs";
 import { filmHash } from "./proxy.mjs";
@@ -347,6 +348,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     placeTrack(p.path, { kind: "music", src: rel, duration: Number(info?.duration) || 1, start });
     const beats = await analyseBeats(p.path, rel);
     if (beats.ok) { try { fitMusicToFilm(p.path); } catch { /* fitted again before the checks */ } }          // a song shorter than the film repeats on its beats
+    await levelTracks(p.path, { root }).catch(() => null);          // under the voice, ducked under its words (sfx/actions.mjs trackGains)
     meta(p.id, (m) => { m.music = { file: rel, duration: info?.duration ?? null, beats: beats.ok ? beats.file : null, at: new Date().toISOString() };
       (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "music", text: `Music on the timeline: ${basename(rel)}` }); });
     note(p, { kind: "voice", text: beats.ok ? "Music on the timeline, beats measured: {file}" : "Music on the timeline: {file}", vars: { file: basename(rel) } });
@@ -385,6 +387,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     async function renderNow(job) {
       projects.keepRootFps(projects.getProject(p.id, root) ?? p);          // the film's data-fps back on the root before HF reads it
       fitMusicToFilm(p.path);          // the music ends with the film, fading down with the picture (ending.mjs)
+      await levelTracks(p.path, { root }).catch(() => null);          // the voice and the music at their levels, the music ducked under the words
       repeatNote(p);
       refreshBridge(p.path);          // a code film built before a bridge change gets today's bridge
       await commit(p, "Changes before render");
@@ -470,6 +473,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     return jobs.start("qa", { projectId: p.id, title: "Running checks", onEnd, ...(background ? { background: true } : {}) }, async (job) => {
       projects.keepRootFps(projects.getProject(p.id, root) ?? p);          // `hyperframes check` and the stills read the root's data-fps
       fitMusicToFilm(p.path);
+      await levelTracks(p.path, { root }).catch(() => null);
       repeatNote(p);
       refreshBridge(p.path);
       await freshFilm(p.path);          // the film as it is now, before the commit (G-BUILD would bundle it after)
@@ -554,6 +558,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     return jobs.start(estimate ? "ae-estimate" : "ae", { projectId: p.id, title: estimate ? "Checking the AE export size" : "Export to After Effects", outDir }, async (job) => {
       projects.keepRootFps(projects.getProject(p.id, root) ?? p);
       fitMusicToFilm(p.path);
+      await levelTracks(p.path, { root }).catch(() => null);
       await commit(p, "Changes before Export to AE");
       // the Log the user reads has no addresses (plainLog); the whole log as written stays in the film's cache (port.log)
       const raw = [], log = (line) => { raw.push(line); job.log(plainLog(line)); };
@@ -609,6 +614,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "voice", text: `Transcript saved (${out.hf.words} words in transcript.json${byOwner ? ", corrected by the owner" : ""})` }); });
     const v = projects.getProject(p.id, root)?.meta?.voice;
     if (v?.file && !v.from && !v.offTimeline) { try { placeTrack(p.path, { kind: "voice", src: v.file, duration: Number(v.info?.duration) || 1 }); } catch { /* an index.html Studio cannot read stays as it is */ } }
+    await levelTracks(p.path, { root }).catch(() => null);          // the words known: the voice at its level, the music ducked under them
     await commit(p, "Transcript saved");
     return out.hf.words;
   }

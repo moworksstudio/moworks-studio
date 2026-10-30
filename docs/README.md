@@ -24,13 +24,17 @@
   <a href="THIRD-PARTY.md">Third-party</a>
 </p>
 
-<p align="center"><img src="docs/images/hero-films.jpg" alt="Stills from six demo films made in Moworks Studio"></p>
+<p align="center"><img src="images/hero-films.jpg" alt="Stills from six demo films made in Moworks Studio"></p>
 <p align="center"><sub>Demo films made in the app. Top: a lamp launch (Launch · style by HeyGen) · an alarm clock (Character · style by HeyGen) · a sundial (Explainer · style by HeyGen).<br>Bottom: a garden in numbers (Data · style by HeyGen) · a bus stop (Isometric Picture Book · style by Lemomo) · a neon city (Music video · style by HeyGen). More in <a href="#made-in-the-app">Made in the app</a>.</sub></p>
 
 Moworks Studio is a desktop application for making motion-graphic films with Claude. You write a brief and add your material (artwork,
 PSD, deck, pictures, music, a voice-over script) and choose one of 126 film styles. Claude plans the film, draws a storyboard for you to
 approve and writes a Motion Plan in numbers; then the app builds the film shot by shot in code, reviews and scores it, mixes music and
 sound effects, runs technical checks and renders an MP4. Films in most styles can also be exported to After Effects as editable layers.
+
+**Change the film on the picture itself.** In the Editor, click any words in the frame to edit them on the spot, with their font, size
+and colour (each change is one step you can undo). Or press **Pin a note** (N), click a point or drag a box on the frame, and write what
+should change there: the note goes to Claude with the exact moment, the shot and that place of the picture.
 
 Every step waits for you where it matters: you approve the storyboard and the Motion Plan, follow the build live in the Editor, and ask
 for changes in plain words. The app runs on your computer and drives Claude Code under your own Claude account; your projects, keys and
@@ -40,7 +44,7 @@ client material stay on the machine.
 
 ## How it works
 
-<p align="center"><img src="docs/images/diagram-how-it-works.en.png" width="760" alt="How it works: Claude (1 Rules, 2 Directing) → Moworks Studio (3 Steps and Editor, 4 Build, 5 Review and QA, 6 Mix and render, rendering with the HyperFrames engine unmodified) → Output (7 Film, 8 Checks, back to step 4 if not passed)"></p>
+<p align="center"><img src="images/diagram-how-it-works.en.png" width="760" alt="How it works: Claude (1 Rules, 2 Directing) → Moworks Studio (3 Steps and Editor, 4 Build, 5 Review and QA, 6 Mix and render, rendering with the HyperFrames engine unmodified) → Output (7 Film, 8 Checks, back to step 4 if not passed)"></p>
 
 Colours: orange = Claude · blue = Moworks Studio · green = output · grey = the open-source render engine.
 
@@ -61,7 +65,7 @@ mixes the sound and renders. Rendering uses the open-source HyperFrames engine a
 Every film style follows the same pipeline. Each step leaves a file in the project, and nothing moves on until its step is done or you
 skip it.
 
-<p align="center"><img src="docs/images/diagram-workflow.en.png" width="560" alt="Workflow: Set up once (1 Install, 2 First run) → Plan (3 New project, 4 Prepare, 5 Storyboard you approve, 6 Motion Plan you approve) → Build (7 Build and Review, 8 Final Mix) → Output (9 Render, MP4 or Port to After Effects)"></p>
+<p align="center"><img src="images/diagram-workflow.en.png" width="560" alt="Workflow: Set up once (1 Install, 2 First run) → Plan (3 New project, 4 Prepare, 5 Storyboard you approve, 6 Motion Plan you approve) → Build (7 Build and Review, 8 Final Mix) → Output (9 Render, MP4 or Port to After Effects)"></p>
 
 Colours: grey = set-up · orange = Claude and the app · blue = you write, choose or approve · green = output.
 
@@ -82,7 +86,7 @@ Colours: grey = set-up · orange = Claude and the app · blue = you write, choos
 The **Editor** plays the film frame by frame as it will render, with the shots and the pipeline on the left, the timeline below the picture
 and Claude in a chat column on the right. Click an element in the film to make it Claude's target, or edit its words by hand.
 
-<p align="center"><img src="docs/images/desk-editor.jpg" alt="The Editor (The Desk): shots and pipeline on the left, the film in the player, the timeline, and Claude's account of each step on the right"><br><sub>The Editor (The Desk): shots and pipeline on the left, the film in the player, the timeline, and Claude's account of each step on the right</sub></p>
+<p align="center"><img src="images/desk-editor.jpg" alt="The Editor (The Desk): shots and pipeline on the left, the film in the player, the timeline, and Claude's account of each step on the right"><br><sub>The Editor (The Desk): shots and pipeline on the left, the film in the player, the timeline, and Claude's account of each step on the right</sub></p>
 
 ### After Effects badges
 
@@ -103,16 +107,16 @@ The app has two complete themes with the same features; the first start asks whi
 
 <table>
 <tr>
-<td width="50%" valign="top"><img src="docs/images/desk-projects.jpg" alt="The Desk · Projects"><br><sub>The Desk · Projects</sub></td>
-<td width="50%" valign="top"><img src="docs/images/studio-projects.jpg" alt="The Studio · Projects"><br><sub>The Studio · Projects</sub></td>
+<td width="50%" valign="top"><img src="images/desk-projects.jpg" alt="The Desk · Projects"><br><sub>The Desk · Projects</sub></td>
+<td width="50%" valign="top"><img src="images/studio-projects.jpg" alt="The Studio · Projects"><br><sub>The Studio · Projects</sub></td>
 </tr>
 <tr>
-<td width="50%" valign="top"><img src="docs/images/desk-new-project.jpg" alt="The Desk · New project"><br><sub>The Desk · New project</sub></td>
-<td width="50%" valign="top"><img src="docs/images/studio-new-project.jpg" alt="The Studio · New project"><br><sub>The Studio · New project</sub></td>
+<td width="50%" valign="top"><img src="images/desk-new-project.jpg" alt="The Desk · New project"><br><sub>The Desk · New project</sub></td>
+<td width="50%" valign="top"><img src="images/studio-new-project.jpg" alt="The Studio · New project"><br><sub>The Studio · New project</sub></td>
 </tr>
 <tr>
-<td width="50%" valign="top"><img src="docs/images/desk-film-styles.jpg" alt="The Desk · Film Styles, 126 styles by author"><br><sub>The Desk · Film Styles, 126 styles by author</sub></td>
-<td width="50%" valign="top"><img src="docs/images/studio-film-styles.jpg" alt="The Studio · Film Styles as crates by author"><br><sub>The Studio · Film Styles as crates by author</sub></td>
+<td width="50%" valign="top"><img src="images/desk-film-styles.jpg" alt="The Desk · Film Styles, 126 styles by author"><br><sub>The Desk · Film Styles, 126 styles by author</sub></td>
+<td width="50%" valign="top"><img src="images/studio-film-styles.jpg" alt="The Studio · Film Styles as crates by author"><br><sub>The Studio · Film Styles as crates by author</sub></td>
 </tr>
 </table>
 
@@ -141,30 +145,30 @@ named under each still.
 
 <table>
 <tr>
-<td width="33%" valign="top"><img src="docs/images/film-pebble.jpg" alt="Pebble, a lamp launch"><br><sub><b>Pebble, a lamp launch</b> · Launch · style by HeyGen</sub></td>
-<td width="33%" valign="top"><img src="docs/images/film-sundial.jpg" alt="How a sundial works"><br><sub><b>How a sundial works</b> · Explainer · style by HeyGen</sub></td>
-<td width="33%" valign="top"><img src="docs/images/film-garden.jpg" alt="A community garden in numbers"><br><sub><b>A community garden in numbers</b> · Data · style by HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-pebble.jpg" alt="Pebble, a lamp launch"><br><sub><b>Pebble, a lamp launch</b> · Launch · style by HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-sundial.jpg" alt="How a sundial works"><br><sub><b>How a sundial works</b> · Explainer · style by HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-garden.jpg" alt="A community garden in numbers"><br><sub><b>A community garden in numbers</b> · Data · style by HeyGen</sub></td>
 </tr>
 <tr>
-<td width="33%" valign="top"><img src="docs/images/film-isometric.jpg" alt="Two doors on the bus"><br><sub><b>Two doors on the bus</b> · Isometric Picture Book · style by Lemomo</sub></td>
-<td width="33%" valign="top"><img src="docs/images/film-night-music.jpg" alt="A city lit to the beat"><br><sub><b>A city lit to the beat</b> · Music video · style by HeyGen</sub></td>
-<td width="33%" valign="top"><img src="docs/images/film-papercraft.jpg" alt="A toy-theatre town"><br><sub><b>A toy-theatre town</b> · Toy-theatre paper collage · style by Alex Greenshpun</sub></td>
+<td width="33%" valign="top"><img src="images/film-isometric.jpg" alt="Two doors on the bus"><br><sub><b>Two doors on the bus</b> · Isometric Picture Book · style by Lemomo</sub></td>
+<td width="33%" valign="top"><img src="images/film-night-music.jpg" alt="A city lit to the beat"><br><sub><b>A city lit to the beat</b> · Music video · style by HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-papercraft.jpg" alt="A toy-theatre town"><br><sub><b>A toy-theatre town</b> · Toy-theatre paper collage · style by Alex Greenshpun</sub></td>
 </tr>
 <tr>
-<td width="33%" valign="top"><img src="docs/images/film-clouds.jpg" alt="What if you could fold clouds?"><br><sub><b>What if you could fold clouds?</b> · What If · style by FreshStack</sub></td>
-<td width="33%" valign="top"><img src="docs/images/film-slideshow.jpg" alt="A day's hike"><br><sub><b>A day's hike</b> · Slideshow · style by HeyGen</sub></td>
-<td width="33%" valign="top"><img src="docs/images/film-puzzle-cube.jpg" alt="A puzzle cube comes apart"><br><sub><b>A puzzle cube comes apart</b> · 3D · style by HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-clouds.jpg" alt="What if you could fold clouds?"><br><sub><b>What if you could fold clouds?</b> · What If · style by FreshStack</sub></td>
+<td width="33%" valign="top"><img src="images/film-slideshow.jpg" alt="A day's hike"><br><sub><b>A day's hike</b> · Slideshow · style by HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-puzzle-cube.jpg" alt="A puzzle cube comes apart"><br><sub><b>A puzzle cube comes apart</b> · 3D · style by HeyGen</sub></td>
 </tr>
 </table>
 
-<p align="center"><img src="docs/images/formats-films.jpg" alt="Square, portrait and vertical films"><br>
+<p align="center"><img src="images/formats-films.jpg" alt="Square, portrait and vertical films"><br>
 <sub>Every format the style allows: <b>Geometric Bauhaus</b> (style by Vincentwei1021) 1:1 · <b>a bakery opens</b> (General Style by Moworks) 4:5 ·
 <b>Spoke &amp; Brew</b> (Vertical · style by HeyGen) 9:16 · <b>a puzzle cube</b> (3D · style by HeyGen) 1:1</sub></p>
 
 <table>
 <tr>
-<td width="50%" valign="top"><img src="docs/images/film-bolt.gif" alt="An alarm clock character wakes up"><br><sub><b>An alarm clock's first day</b> · Character · style by HeyGen</sub></td>
-<td width="50%" valign="top"><img src="docs/images/film-lighthouse.gif" alt="A cat lights the lighthouse"><br><sub><b>The lighthouse cat</b> · Brush cartoon · style by John Heibel, acted by a character drawn in the app's Character maker</sub></td>
+<td width="50%" valign="top"><img src="images/film-bolt.gif" alt="An alarm clock character wakes up"><br><sub><b>An alarm clock's first day</b> · Character · style by HeyGen</sub></td>
+<td width="50%" valign="top"><img src="images/film-lighthouse.gif" alt="A cat lights the lighthouse"><br><sub><b>The lighthouse cat</b> · Brush cartoon · style by John Heibel, acted by a character drawn in the app's Character maker</sub></td>
 </tr>
 </table>
 
@@ -181,8 +185,8 @@ named under each still.
 
 <table>
 <tr>
-<td width="50%" valign="top"><img src="docs/images/desk-motion-library.jpg" alt="Motion Library: every item with a preview, its author, source and licence"><br><sub>Motion Library: every item with a preview, its author, source and licence</sub></td>
-<td width="50%" valign="top"><img src="docs/images/desk-brand-kits.jpg" alt="Brand Kits: HyperFrames' 13 frame presets and your own"><br><sub>Brand Kits: HyperFrames' 13 frame presets and your own</sub></td>
+<td width="50%" valign="top"><img src="images/desk-motion-library.jpg" alt="Motion Library: every item with a preview, its author, source and licence"><br><sub>Motion Library: every item with a preview, its author, source and licence</sub></td>
+<td width="50%" valign="top"><img src="images/desk-brand-kits.jpg" alt="Brand Kits: HyperFrames' 13 frame presets and your own"><br><sub>Brand Kits: HyperFrames' 13 frame presets and your own</sub></td>
 </tr>
 </table>
 
@@ -242,9 +246,9 @@ named under each still.
 
 Paste this into Claude Code:
 
-> Install Moworks Studio from https://github.com/moworksstudio/moworks-studio: clone it and follow its CLAUDE.md.
+> Install Moworks Studio from https://github.com/moworksstudio/moworks-studio: clone it and follow its .claude/CLAUDE.md.
 
-Claude follows the repository's `CLAUDE.md`: it checks Git, Node.js 22, Python 3.12 and FFmpeg 9.0 (and asks before installing what is
+Claude follows the repository's `.claude/CLAUDE.md`: it checks Git, Node.js 22, Python 3.12 and FFmpeg 9.0 (and asks before installing what is
 missing), clones into `Moworks Studio\app` and runs `Moworks Studio.bat`; the app's first-run screen does the rest.
 
 ## Walkthrough
@@ -264,7 +268,7 @@ A 30-second film, from brief to MP4:
 7. **Play** the film in the Editor. Ask Claude for changes in the chat (click an element first to point at it), or edit its words by hand.
 8. **Render** an MP4, and **Port to After Effects** if the style's badge allows it.
 
-<p align="center"><img src="docs/images/studio-editor.jpg" alt="A finished film in the Editor (The Studio): the five steps along the top, Claude's notes from Review and Final Mix on the right"><br><sub>A finished film in the Editor (The Studio): the five steps along the top, Claude's notes from Review and Final Mix on the right</sub></p>
+<p align="center"><img src="images/studio-editor.jpg" alt="A finished film in the Editor (The Studio): the five steps along the top, Claude's notes from Review and Final Mix on the right"><br><sub>A finished film in the Editor (The Studio): the five steps along the top, Claude's notes from Review and Final Mix on the right</sub></p>
 
 As a reference, a 34-second film in a Lemo-Opuscar style took 1 h 17 min from Create to the finished MP4, of which 44 minutes from
 **Approve and build**; Claude usage for the whole film was worth about US$13 at API prices.
@@ -338,7 +342,6 @@ node tools/golden/run.mjs --label G214 --only hf-native-30
 | [CHANGELOG.md](CHANGELOG.md) | What this version contains |
 | [KNOWN-ISSUES.md](KNOWN-ISSUES.md) | Open issues and limitations, with workarounds |
 | [THIRD-PARTY.md](THIRD-PARTY.md) | Every bundled or downloaded source: author, link at the pinned commit, licence, how it is used |
-| [DESIGN.md](DESIGN.md), [PRODUCT.md](PRODUCT.md) | The interface's design system and product principles |
 
 ## Technology
 
