@@ -377,6 +377,6 @@ at the exact commits and licences, is in [THIRD-PARTY.md](THIRD-PARTY.md).
 
 ## Licence
 
-Free for personal, non-commercial use by invited users only; no redistribution, sale or sharing, including modified versions
+Free for personal, non-commercial use; no redistribution, sale or sharing, including modified versions
 ([LICENSE](LICENSE)). © 2026 Moworks. Third-party components keep their own licences, listed in [THIRD-PARTY.md](THIRD-PARTY.md);
 nothing in this licence limits them.

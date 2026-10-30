@@ -378,6 +378,6 @@ tác phẩm của HeyGen, Lemomo, Vincentwei1021, Alex Greenshpun, John Heibel v
 
 ## Giấy phép
 
-Miễn phí cho người được mời, chỉ dùng cá nhân, phi thương mại; không phát tán lại, bán hay chia sẻ, kể cả bản đã sửa
+Miễn phí để dùng cá nhân, phi thương mại; không phát tán lại, bán hay chia sẻ, kể cả bản đã sửa
 ([LICENSE](LICENSE)). © 2026 Moworks. Các thành phần bên thứ ba giữ giấy phép riêng, liệt kê trong [THIRD-PARTY.md](THIRD-PARTY.md);
 giấy phép này không giới hạn quyền mà các giấy phép đó trao.
