@@ -1,7 +1,7 @@
 ---
 name: moworks-studio
 description: Moworks Studio's house rules for every film style, read first in every step - the five rules of every film (collisions, readable text, determinism, truth, logos), the guideline or Brand Kit on every piece of text, the client's logo used as given, Vietnamese text, hand-drawn styles under a Brand Kit, character acting, a sound on every action, text over a canvas film, and how every film ends. Adds only what HyperFrames and the style leave open.
-version: 1.3.12
+version: 1.3.14
 derived-from: Moworks Motion kit 2.0.4 (Moworks; commit 30b7dcb65808b2a5299ad6a3357280a12773395f) - engine/skill/moworks-motion/SKILL.md step 3 ("Brand") and "Rules in every film" 1-5, workflow/characters.md sections 2, 3 ("Faces", "Hands") and 6 ("Collisions and physics"), brands/other.md; written from the idea for Moworks Studio. HyperFrames (Apache-2.0, 0.8.214 at 4719543) read as shipped where cited. Owner rules 24/10/2026 (#345, #346); the ending, owner 29/10/2026; the docs/ folder, owner 30/10/2026.
 ---
 
@@ -55,7 +55,10 @@ This is the one rule for every conflict and every gap, in every step and every s
 - **What counts:** the brief against the film style's own design (colours, fonts, look: an author's style) or its limits (what the style
   cannot draw, a size or rate it does not make); the brief against a New project field (format, rate, length, the Brand Kit chosen
   there); a brand guideline in the files against the chosen Brand Kit; the brief or the chat against the
-  guideline; a file, link, logo, voice or text the film needs and nobody gave; a script the owner wrote for the voice-over (the brief's
+  guideline; a file, link, logo, voice or text the film needs and nobody gave; a PDF with a password, whether the app's scan names it or you
+  find it when you open it, in any step and in the chat: name the file, say none of its pages reached you, and offer its password in the chat (pass the
+  owner's words to the app's unlock_pdf tool, then read what it names; write the password nowhere), a copy without a password, or going on without
+  it; a wrong password: say so and ask again; never guess one, never go on as if you had read it; a script the owner wrote for the voice-over (the brief's
   "lời đọc" or "kịch bản", or a brief that is the script) that you would shorten, split, reword, cut lines from or move lines of to the
   words on screen: it is read word for word unless the owner chooses otherwise, so ask with the whole script as one choice and your
   version (its changed lines named) as another; never call a changed script "verbatim" (a 12-line script went to the voice as its first
@@ -263,10 +266,33 @@ ends with a short fade under the end card); this adds the fade:
   full and lit on its last frame), in every style, naming the time; with the author's own ending named and played, a dark screen, a dot
   or a held end card ends the film too.
 
-## 10. Captions the owner can change (owner 31/10)
+## 10. Subtitles: plain, like YouTube's, and the owner can change them (owner 31/10)
 
-HyperFrames' `references/captions.md` holds as it ships. This adds one thing: the Editor's Captions row lists the groups written in the captions
-composition, and the owner changes their words there by hand. So each group is a real element in that file, with its own `data-start` and
-`data-duration` and its words inside it, never built by a script at run time. A ready-made caption style that builds its groups by script is
-rewritten that way when it is installed. Its motion stays in the timeline as HyperFrames says. Look at each group over its own frames: where it
-covers the film's subject (Test 29: the clock's hand, a hand holding the watch), move that group, and if it cannot move, say so in your reply.
+Subtitles or captions of the voice are not part of the film's design: they look the same in every film and every style, whatever §2 or the
+style's own rules say of other text. Only the owner's own words can ask for a styled caption (karaoke, popping words); a lyric video's lyrics and
+the film's own words on screen are the film's design, not subtitles. HyperFrames' `references/captions.md` holds for words, timings and structure;
+its sizes, places, blends and motion give way to this:
+
+- **One line, always:** one group on screen at a time, on one line that fits inside the safe width, at most about 42 characters. Too long: split it
+  at the phrase, with the next group taking the words at their own time. Sentence case, as spoken; never all capitals.
+- **White, thin, plain:** `#FFFFFF`, weight 400, **Roboto Flex** (the app bundles it; it draws Vietnamese). A film with a Brand Kit uses the kit's body
+  font at its regular weight instead. No shadow, outline, gradient, colour per word or highlight.
+- **Size:** 3.7 % of the frame's shorter side (40 px on a 1080 side), in every format.
+- **Place:** centred, the bottom of the line resting on the frame's bottom safe margin (5 % of its height, or the bottom margin `frame.md` gives). Every
+  group in the same place: no group moves for a shot. Where one covers something that matters in the picture or the film's own words, it stays,
+  and your reply names the time.
+- **No motion:** a group appears and goes on a cut, with no fade, slide, pop or word-by-word reveal.
+- **A dim layer only if needed:** where white is hard to read over the film (a light or busy ground), the same black layer behind the words in every
+  group, tight to the line, opacity between 0.3 and 0.5, the lowest that reads; a dark film has none. Look at frames from the film to choose once.
+
+```html
+<style>
+  .cap { position: absolute; left: 5%; right: 5%; bottom: 5%; margin: 0; text-align: center; white-space: nowrap; }
+  .cap span { font: 400 40px/1.3 "Roboto Flex", sans-serif; color: #FFFFFF; padding: 0 .35em; background: rgba(0, 0, 0, .4); /* background only if needed */ }
+</style>
+<p id="cap-01" class="clip cap" data-start="1.56" data-duration="2.04" data-track-index="0"><span>Một phút mỗi ngày</span></p>
+```
+
+The Editor's Captions row lists the groups written in the captions composition, and the owner changes their words there by hand. So each group is a
+real element in that file, with its own `data-start` and `data-duration` and its words inside it, never built by a script at run time; a ready-made
+caption style that builds its groups by script is not used.

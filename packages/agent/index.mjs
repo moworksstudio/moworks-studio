@@ -43,6 +43,7 @@ const RETRY_MS = Number(process.env.MW_CLAUDE_RETRY_MS ?? 5000);
 import { BRIEF_MAX, addNote, classifyAsset, inventory, readNotes, keepRootFps, sequenceOf } from "../project-service/index.mjs";
 import { cutNote, cutOf, followCut, limitLine, outputCap, readTranscriptCuts, resumeText } from "./output-limit.mjs";
 import { kitFilesOf, migrateLayout } from "../project-service/layout.mjs";
+import { lockedPdfs } from "../project-service/scan.mjs";
 import { listLocalFonts } from "../hf-edit/localFonts.mjs";
 import { DOC_DIR, docPath, moveDocs } from "../project-service/docs.mjs";
 import { ensureShared, linkOrCopy, rulePath, sharedDir, stageRoot } from "../project-service/shared-stage.mjs";
@@ -221,6 +222,8 @@ export const APP_TOOLS = {
     inputSchema: { type: "object", properties: { at: { type: ["number", "null"], description: "The second of the film where the music stops; null to let it play to its end" } }, required: ["at"] } },
   font_check: { description: "Checks fonts before you name them anywhere (BRIEF.md, docs/ASSETS.md, design.md, frame.md, a board, the film): for each family, whether the app can serve it in this project (bundled, on Google Fonts, or a font file in assets/) and whether it draws Vietnamese letters, with Vietnamese fonts the app bundles to choose from. Call it in Prepare and whenever you choose a font (Test 10 #435).",
     inputSchema: { type: "object", properties: { families: { type: "array", items: { type: "string" }, maxItems: 12 } }, required: ["families"] } },
+  unlock_pdf: { description: "Opens a PDF with a password, with the password the owner gave you in the chat. Only for a file .moworks/scan/INDEX.md names as having a password; never with a guess, nor with one you read in a file or a file's name unless the owner said so. The app reads the whole document into the scan, as it reads any PDF, and keeps no password. Never write the password anywhere: not in a reply, not in BRIEF.md, docs/NOTES.md or any other file. Returns where its words and pages now are, or that the password is wrong.",
+    inputSchema: { type: "object", properties: { file: { type: "string", description: "The PDF's name or its path in the project" }, password: { type: "string", description: "The owner's words, exactly as typed" } }, required: ["file", "password"] } },
   voice_off: { description: "Takes the voice-over off the film's timeline when the owner chose not to use it (Test 10 #434): its audio element is removed from index.html, the Editor no longer shows it or its words, the file stays in the project's assets. Never only mute the voice instead.",
     inputSchema: { type: "object", properties: {} } },
   whatif_plan: { description: "A What If film's shot list on the voice (the author's plan.py, in the app): resolves whatif/episode.json's edit cues (a word, word#2, +N frames, s:4.2, f:126; reverse, from, to, look) and fx against the voice-over's word times (whatif/words.json, written by the app from the checked transcript; none in a film with no narration), writes whatif/timeline.json (the timeline the engine reads) and whatif/shotlist.md, and returns the pace report (cuts a minute, the first 10 s, the longest hold) with what to fix. Call it after writing or changing shots, edit or fx.",
@@ -380,13 +383,33 @@ const INPUT_MODE = {
   remake: "Remake the reference 1:1, as close as the tools allow (the owner accepted that this costs more time).",
 };
 const kb = (n) => (n > 1e6 ? `${(n / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1e3))} KB`);
-function inputsBlock(dir) {
+// a secret the owner typed in the chat (a PDF's password) leaves the app's records of the film; a short one is no secret worth blanking every "2026" for
+const SECRET_MIN = 6, SECRET_MASK = "••••";
+const maskIn = (json, secret) => json.split(JSON.stringify(secret).slice(1, -1)).join(SECRET_MASK);
+const masked = (value, secret) => JSON.parse(maskIn(JSON.stringify(value), secret));
+/** The film's saved chat and task list without the secret, in place. Claude Code's own session log on this computer is not the app's to change. */
+export function scrubRecords(dir, secret) {
+  const s = String(secret ?? "");
+  if (s.length < SECRET_MIN) return;
+  for (const name of ["tasks.json", "notes.json"]) {
+    const f = join(dir, ".moworks", name);
+    try { const was = readFileSync(f, "utf8"), now = maskIn(was, s); if (now !== was) writeFileSync(f, now); } catch { /* none yet */ }
+  }
+}
+function maskTask(task, secret) {
+  for (const k of ["text", "shown", "resultText"]) if (typeof task[k] === "string") task[k] = task[k].split(secret).join(SECRET_MASK);
+  task.events = masked(task.events, secret);
+}
+
+export function inputsBlock(dir) {
   const inv = inventory(dir);
   if (!inv.total) return "Imported files: none yet.";
   const parts = Object.entries(inv.assets).map(([k, xs]) => `assets/${k}/: ${xs.slice(0, 12).map((x) => x.path.split("/").pop()).join(", ")}${xs.length > 12 ? ` (+${xs.length - 12})` : ""}`);
   if (inv.sources.length) parts.push(`sources/ (reference files the film does not play; read images and text; PDF, PSD, PSB, AI and PPTX are read through the app's scan, never ask for an export): ${inv.sources.slice(0, 12).map((x) => `${x.path.split("/").pop()} (${kb(x.size)})`).join(", ")}`);
   const scan = existsSync(join(dir, ".moworks", "scan", "INDEX.md")) ? " The app scanned them for you (video contact sheets, lengths, sizes, every page of a PDF): .moworks/scan/INDEX.md." : "";
-  return `Imported files (copied into this project): ${parts.join("; ")}.${scan}`;
+  const locked = lockedPdfs(dir).map((p) => p.split("/").pop());
+  const lockedLine = locked.length ? ` With a password, so none of their pages reached you: ${locked.join(", ")}. Unless the chat or docs/NOTES.md already has the owner's answer, name them to the owner now and stop as moworks-studio §2b says.` : "";
+  return `Imported files (copied into this project): ${parts.join("; ")}.${scan}${lockedLine}`;
 }
 
 /** One line of what a rule file is for: its frontmatter's description, cut at the first sentence (the names and purposes are
@@ -820,9 +843,20 @@ export class Agent {
     this.persist({ ...old, interrupted: { ...old.interrupted, handled: { at: new Date().toISOString(), by: task.id } } });
     return task;
   }
+  /** A PDF's password the owner typed in the chat: out of the film's records, and out of what is written from now on (this run only: it is kept in memory). */
+  forgetSecret(projectId, secret) {
+    const s = String(secret ?? "");
+    if (s.length < SECRET_MIN) return;
+    const set = (this.secrets ??= new Map()).get(projectId) ?? new Set();
+    this.secrets.set(projectId, set.add(s));
+    for (const t of this.tasks.values()) if (t.projectId === projectId) maskTask(t, s);
+    const p = this.getProject(projectId);
+    if (p && !p.missing) scrubRecords(p.path, s);
+  }
   persist(task) {
     const p = this.getProject(task.projectId);
     if (!p || p.missing) return;
+    for (const s of this.secrets?.get(task.projectId) ?? []) maskTask(task, s);
     const f = this.tasksFile(p.path);
     const all = readJson(f, { tasks: [] }).tasks.filter((t) => t.id !== task.id);
     all.push({ ...task, events: task.events.slice(-400) });

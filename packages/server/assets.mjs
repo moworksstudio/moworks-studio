@@ -6,6 +6,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, statSync
 import { basename, dirname, extname, join, normalize, sep } from "node:path";
 import * as projects from "../project-service/index.mjs";
 import { listAssets, referencedFiles, rememberAssets, rewriteRefs } from "../project-service/assets.mjs";
+import { unlockPdf } from "../project-service/scan.mjs";
 import { readShots } from "../hf-edit/shots.mjs";
 import { audioKind, laneOfFile, placeClip, placeTrack, removeRepeats, trackClips } from "../hf-edit/tracks.mjs";
 import { ADDED, muteMounted, readState as readSfx, writeCredits } from "../sfx/index.mjs";
@@ -161,6 +162,16 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
       const fams = (Array.isArray(args?.families) ? args.families : []).map((x) => String(x).trim()).filter(Boolean).slice(0, 12);
       const { checkFonts, fontCheckText } = await import("../agent/index.mjs");
       return fontCheckText(fams.length ? await checkFonts(project.path, fams) : null);
+    },
+    // a locked PDF, with the password the owner gave in the chat: it goes to one reading and leaves the chat's records, right or wrong
+    unlock_pdf: async ({ project, args }) => {
+      const password = String(args?.password ?? "");
+      ctx.agent?.forgetSecret?.(project.id, password);
+      const r = await unlockPdf(project.path, args?.file, password, { root });
+      if (r.ok) return `"${r.name}" is open, ${r.pages} page(s). All its words: ${r.text.join(", ")}. Every page small and numbered on sheets: ${r.sheets.join(", ")}. Read them now. The password is not kept: write it nowhere.`;
+      if (r.reason === "wrong") return `That password does not open "${r.name}". Say so to the owner and ask again; never guess one.`;
+      if (r.reason === "none") return `No PDF named "${r.name}" has a password here: .moworks/scan/INDEX.md names the locked ones.`;
+      return `The app could not read "${r.name}": ${r.reason}`;
     },
     voice_off: async ({ project }) => {
       const p = projects.getProject(project.id, root);

@@ -327,7 +327,7 @@ async function readFiles(m, dir, root, { signal = null, onProgress = () => {} } 
   const hints = { colours: [], fonts: [], pptx: [] }, inputs = [], reading = [], unread = [], pageDirs = [];
   const files = m.files.filter((f) => existsSync(join(dir, "files", f.name)));
   const INTAKE = "tools/intake/intake.py";
-  const fail = (f, reason) => unread.push({ name: f.name, reason });
+  const fail = (f, reason, more = {}) => unread.push({ name: f.name, reason, ...more });
   const why = (r, f) => r.password ? PASSWORD_REASON
     : /not installed|Python is not/i.test(r.error ?? "") ? "the app's Python components are missing: Install them in Settings › System"
       : f.kind === "ai" ? "saved without PDF content: add a PDF or PNG export of it" : DAMAGED_REASON;
@@ -368,7 +368,7 @@ async function readFiles(m, dir, root, { signal = null, onProgress = () => {} } 
       if (twin) { reading.push(`- ${f.name}: the same file as ${twin}.`); continue; }
       const sub = `work/${f.kind}-${i + 1}`, abs = join(dir, ...sub.split("/"));
       const r = await runPy(root, INTAKE, ["pdf", p, abs, ...(f.kind === "ai" ? ["--logo"] : [])], { timeoutMs: 10 * 60 * 1000, signal });
-      if (!r.ok) { fail(f, why(r, f)); continue; }
+      if (!r.ok) { fail(f, why(r, f), r.password ? { password: true } : {}); continue; }
       const texts = r.chars ? r.text.map((x) => `${sub}/${x}`) : [], sheets = r.sheets.map((x) => `${sub}/${x}`);
       inputs.push(...texts, ...sheets);
       pageDirs.push(join(abs, "pages"));
@@ -502,18 +502,23 @@ export async function claudeWriter({ dir, look, root = APP_ROOT, model = "claude
 
 /** Scan the Look's files into a new version: make them readable (what cannot be read is named on the kit), hints, Claude writes FRAME.md,
  *  stills, the Vietnamese check. */
-export async function scanLook(id, { root = APP_ROOT, onProgress = () => {}, writer = claudeWriter, stills = true, google = undefined, signal = null } = {}) {
+export async function scanLook(id, { root = APP_ROOT, onProgress = () => {}, writer = claudeWriter, stills = true, google = undefined, signal = null, withoutLocked = false } = {}) {
   let m = must(id, root);
   if (m.status === "scanning") throw err("BUSY", "The Brand Kit is being scanned");
   if (!m.files.length) throw err("INVALID", "Add the guideline's files first");
-  m.status = "scanning"; m.error = null; saveMeta(m, root);
+  const had = m.version > 0;
+  m.status = "scanning"; m.error = null; m.stopped = null; saveMeta(m, root);
   const dir = dirOf(m.slug, root), work = join(dir, "work");
   try {
     onProgress({ stage: "Reading the files", progress: 5 });
     rmSync(work, { recursive: true, force: true }); mkdirSync(work, { recursive: true });
     rmSync(join(dir, "derived"), { recursive: true, force: true });
     const read = await readFiles(m, dir, root, { signal, onProgress });
-    m.unread = read.unread; saveMeta(m, root);
+    m.unread = read.unread;
+    // a password is the client's to lift (owner 31/10): the scan stops here, before Claude is paid for, and the popup asks for a copy without
+    // one or going on without the file; the kit stays as it was
+    if (!withoutLocked && read.unread.some((x) => x.password)) { m.status = had ? "ready" : "draft"; m.stopped = "locked"; return saveMeta(m, root); }
+    saveMeta(m, root);
     // nothing to read: Claude is not asked, and the panel says why
     if (!read.inputs.length) throw err("INVALID", read.unread.length ? "None of the guideline's files could be read." : "Add the guideline too: a PDF, a PowerPoint or pictures.");
     const { hints, inputs } = read, unread = [...read.unread, ...(m.leftOut ?? [])];
@@ -664,7 +669,7 @@ export function publicLook(m) {
     preview: { image: m.stills?.[0] ? media(m.slug, m.stills[0]) : null, video: null }, fonts: fontRows(m.vi, m.fonts), vi: m.vi?.status ?? null,
     version: m.version, updatedAt: m.updatedAt, editable: true, status: m.status, error: m.error ?? null,
     // what the kit holds without having read it: named on its panel, a kit made before this list has none
-    unread: [...(m.unread ?? []), ...(m.leftOut ?? [])],
+    unread: [...(m.unread ?? []), ...(m.leftOut ?? [])], stopped: m.stopped ?? null,
     source: { kind: "guideline", files: (m.files ?? []).map((f) => f.name), credit: OWNER } };
 }
 export function hfLook(l, root = APP_ROOT) {

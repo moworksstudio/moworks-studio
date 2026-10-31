@@ -70,6 +70,20 @@ export function UnreadFiles({ look, onRemove, onAdd, busy }) {
   </div></div>;
 }
 
+/** A PDF with a password stopped the scan before Claude was asked: a copy without one is the user's to give, or the scan goes on without it. */
+export function LockedDialog({ names, canGoOn, onAdd, onGoOn, onClose }) {
+  const t = useT();
+  const pick = useRef(null);
+  return <Dialog wide danger title={t(names.length > 1 ? "These files have a password" : "This file has a password")} onClose={onClose} footer={<><span className="spacer" />
+    <button className="btn" onClick={onClose}>{t("Not now")}</button>
+    {canGoOn && <button className="btn" onClick={onGoOn}>{t("Scan without it")}</button>}
+    <button className="btn primary" onClick={() => pick.current?.click()}><Upload size={14} />{t("Add a copy without a password")}</button>
+    <input ref={pick} type="file" multiple hidden accept={ACCEPT_ATTR} onChange={(e) => { onAdd([...e.target.files]); e.target.value = ""; }} /></>}>
+    <div className="dlg-lines"><ul className="plain">{names.map((n) => <li key={n}><b>{n}</b></li>)}</ul>
+      <p className="dlg-warn">{t("Claude cannot read it, so its rules would be missing from this Brand Kit.")}</p>
+      <p>{t("Claude has not started. Nothing was used.")}</p></div></Dialog>;
+}
+
 function Swatches({ colors, big }) {
   if (!colors?.length) return null;
   return <span className={"lk-sw" + (big ? " big" : "")} aria-hidden="true">{(colors ?? []).slice(0, 5).map((c) => <i key={c} style={{ background: c }} />)}</span>;
@@ -117,36 +131,45 @@ export function lookSummary(desc) {
 }
 
 /** The Look in hand: stills, description, colours, fonts, versions, actions, credit. */
-function LookDetails({ id, onChanged, onDeleted }) {
+function LookDetails({ id, onChanged, onDeleted, askLocked = false }) {
   const t = useT();
   const toast = useToast();
   const d = useData(() => get(`/api/looks/${id}`), [id]);
   const [edit, setEdit] = useState(false);
   const [ask, setAsk] = useState(false);
   const [scan, setScan] = useState(null);           // a scan run again from here: { stage, progress }
+  const [lockedOpen, setLockedOpen] = useState(askLocked);          // the scan stopped on a password: the popup, once per stop
+  const addMore = useRef(null);
   if (d.error) return <Banner kind="error">{d.error.message}</Banner>;
   const l = d.data;
   if (!l) return <div className="skeleton" style={{ height: "20rem" }} />;
+  const locked = (l.unread ?? []).filter((x) => x.password).map((x) => x.name);
   const restore = async (v) => { try { await post(`/api/looks/${id}/versions/${v}/restore`); toast(t("Version {v} restored", { v })); d.reload(); onChanged(); } catch (e) { toast(e.message, "error"); } };
   // a failed or draft Look scans again with the files it has (e.g. after Claude is signed in)
-  const rescan = async () => {
+  const rescan = async (body) => {
+    setLockedOpen(false);
     try {
-      const r = await post(`/api/looks/${id}/scan`); const j = r.job ?? r; setScan(j);
-      watchJob(j.id, (x) => { if (!x) return; setScan(x); if (x.status !== "running") { setScan(null); d.reload(); onChanged(); if (x.status === "failed") toast(x.error?.message ?? t("The scan did not finish."), "error"); } }, 1200);
+      const r = await post(`/api/looks/${id}/scan`, body); const j = r.job ?? r; setScan(j);
+      watchJob(j.id, (x) => { if (!x) return; setScan(x); if (x.status !== "running") { setScan(null); d.reload(); onChanged(); if (x.status === "failed") toast(x.error?.message ?? t("The scan did not finish."), "error"); if (x.result?.stopped === "locked") setLockedOpen(true); } }, 1200);
     } catch (e) { toast(e.message, "error"); }
   };
   const remove = async () => { try { await del(`/api/looks/${id}`); toast(t("Deleted “{title}”", { title: l.title })); onDeleted(); } catch (e) { toast(e.message, "error"); } };
   const removeFile = async (name) => { try { await del(`/api/looks/${id}/files?name=${encodeURIComponent(name)}`); d.reload(); onChanged(); } catch (e) { toast(e.message, "error"); } };
-  // a readable copy of what the kit could not read: the files go in, then the scan runs again and makes the next version
+  // a readable copy of what the kit could not read: the files go in, then the scan runs again and makes the next version. A copy takes the place
+  // of its locked file, by name or else in the order picked, so the locked one does not stop the next scan
   const addFiles = async (list) => {
+    setLockedOpen(false);
     try {
-      const { take, leftOut } = sortPicked(list, l.files ?? []);
+      const picked = [...list], same = locked.filter((n) => picked.some((f) => f.name === n));
+      const gone = [...same, ...locked.filter((n) => !same.includes(n)).slice(0, Math.max(0, picked.length - same.length))];
+      setScan({ stage: t("Adding the files") });
+      for (const n of gone) await del(`/api/looks/${id}/files?name=${encodeURIComponent(n)}`);
+      const { take, leftOut } = sortPicked(picked, (l.files ?? []).filter((f) => !gone.includes(f.name)));
       if (leftOut.length) await patch(`/api/looks/${id}`, { leftOut });
       if (take.length) {
-        setScan({ stage: t("Adding the files") });
         for (const x of take) await upload(`/api/looks/${id}/files`, new File([x.file], x.name));
         await rescan();
-      } else { d.reload(); onChanged(); }
+      } else { setScan(null); d.reload(); onChanged(); }
     } catch (e) { setScan(null); toast(e.message, "error"); }
   };
   const stills = l.stills?.length ? l.stills : l.preview?.image ? [l.preview.image] : [];
@@ -160,14 +183,18 @@ function LookDetails({ id, onChanged, onDeleted }) {
     {l.status === "failed" && <p className="warn-note"><AlertTriangle size={13} />{t(l.error ?? "The scan did not finish. Upload the guideline again or try another file.")}</p>}
     {l.unread?.length > 0 && <UnreadFiles look={l} onRemove={removeFile} onAdd={addFiles} busy={!!scan || l.status === "scanning"} />}
     {scan ? <p className="lk-stage"><Loader2 size={14} className="spin" />{scan.stage ? t(scan.stage) : t("Reading the guideline…")}{scan.progress != null ? ` · ${scan.progress}%` : ""}</p>
-      : l.editable && ["failed", "draft"].includes(l.status) && l.files?.length > 0 && <div className="sgb-acts"><button className="btn" onClick={rescan}><Upload size={14} />{t("Scan again")}</button></div>}
+      : l.editable && ["failed", "draft"].includes(l.status) && l.files?.length > 0 && <div className="sgb-acts"><button className="btn" onClick={() => rescan()}><Upload size={14} />{t("Scan again")}</button></div>}
     <Swatches colors={l.swatches} big />
     <Fonts fonts={l.fonts} />
     <div className="sgb-acts">
       <button className="btn primary" onClick={() => go(`/new?look=${encodeURIComponent(id)}`)} disabled={l.status !== "ready"}><Plus size={15} />{t("Use in a new project")}</button>
       {l.editable && <button className="btn" onClick={() => setEdit(true)}><Pencil size={14} />{t("Edit")}</button>}
+      {/* the list of what was not read has its own: with nothing on it (or the locked file just taken off), a copy still has a way in */}
+      {l.editable && !l.unread?.length && <><button className="btn" onClick={() => addMore.current?.click()} disabled={!!scan || l.status === "scanning"} title={t("Add files and scan again")}><Plus size={14} />{t("Add files")}</button>
+        <input ref={addMore} type="file" multiple hidden accept={ACCEPT_ATTR} onChange={(e) => { addFiles([...e.target.files]); e.target.value = ""; }} /></>}
       {l.editable && <button className="btn ghost" onClick={() => setAsk(true)}><Trash2 size={14} />{t("Delete")}</button>}
     </div>
+    {lockedOpen && locked.length > 0 && !scan && <LockedDialog names={locked} canGoOn={(l.files ?? []).some((f) => !locked.includes(f.name))} onAdd={addFiles} onGoOn={() => rescan({ withoutLocked: true })} onClose={() => setLockedOpen(false)} />}
     {l.versions?.length > 1 && <details className="lk-versions"><summary><History size={13} />{t("Versions")} <span className="num">{l.versions.length}</span></summary>
       <ul className="plain">{[...l.versions].reverse().map((x) => <li key={x.v}><b>v{x.v}</b><span className="muted">{ago(x.at)}{x.note ? ` · ${x.note}` : ""}</span>
         {x.v !== l.version && <button className="btn ghost sm" onClick={() => restore(x.v)}>{t("Restore")}</button>}</li>)}</ul></details>}
@@ -231,6 +258,7 @@ function CreateLook({ onClose, onDone }) {
       watchJob((j.job ?? j).id, (x) => {
         if (!x) return;
         setJob(x);
+        if (x.status === "done" && x.result?.stopped === "locked") { onDone(l.id, true); return; }          // the kit's panel opens with the popup
         if (x.status === "done") { const n = x.result?.unread?.length ?? 0; toast(n ? t("“{title}” is ready, {n} file(s) not read", { title: title.trim(), n }) : t("“{title}” is ready", { title: title.trim() })); onDone(l.id); }
         if (x.status === "failed") { setErr(x.error?.message ?? t("The scan did not finish.")); setPhase(null); }
       }, 1200);
@@ -268,6 +296,8 @@ export default function Looks() {
   const [src, setSrc] = usePref("looks:sources", []);          // the sources ticked in the filter column; none: every Look
   const [qs, setQs] = useState("");
   const [make, setMake] = useState(false);
+  const [askLocked, setAskLocked] = useState(null);          // the kit just made whose scan stopped on a password
+  const created = (id, locked = false) => { setMake(false); setCur(id); setAskLocked(locked ? id : null); if (locked && matchMedia("(max-width: 1100px)").matches) setPanel("style"); q.reload(); };
   const [panel, setPanel] = useState(null);          // narrow window: "filters" or "style" (the Look) over the grid
   const looks = q.data?.looks ?? [];
   useEffect(() => { if (!looks.some((l) => l.status === "scanning")) return undefined; const h = setInterval(q.reload, 3000); return () => clearInterval(h); }, [looks]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -291,8 +321,8 @@ export default function Looks() {
   // The Studio: the same state and data, as swatch books on shelves by source (studio/SwatchBooks.jsx)
   if (studio) return <SwatchBooks looks={looks} list={list} sources={sources} on={on} setSrc={setSrc} qs={qs} setQs={setQs} sel={sel} onPick={(l) => setCur(l.id)} label={label}
     tagOf={(s) => SOURCES[s]?.[1] ?? s.slice(0, 4).toUpperCase()} error={q.error} loading={!q.data && !q.error} onReload={q.reload} onCreate={() => setMake(true)}
-    details={(l) => <LookDetails id={l.id} onChanged={q.reload} onDeleted={() => { setCur(null); q.reload(); }} />}
-    dialogs={make && <CreateLook onClose={() => setMake(false)} onDone={(id) => { setMake(false); setCur(id); q.reload(); }} />} />;
+    details={(l) => <LookDetails id={l.id} askLocked={askLocked === l.id} onChanged={q.reload} onDeleted={() => { setCur(null); q.reload(); }} />}
+    dialogs={make && <CreateLook onClose={() => setMake(false)} onDone={created} />} />;
   return <div className="page lk-page gal-page">
     <div className="page-head"><div><BackButton /><h1>{t("Brand Kits")}</h1><p className="lead">{t("A brand's colours, fonts and components, worn by a whole film. Make one from a brand guideline.")}</p></div>
       <div className="actions"><button className="btn primary" onClick={() => setMake(true)}><Upload size={15} />{t("Create a Brand Kit from a guideline")}</button></div></div>
@@ -320,9 +350,9 @@ export default function Looks() {
       </section>
       <aside className="sgb-insp" aria-label={sel ? sel.title : t("Brand Kit")}>
         {panel === "style" && <BackButton className="insp" onClick={() => setPanel(null)} />}
-        {sel ? <div className="insp-in" key={sel.id}><LookDetails id={sel.id} onChanged={q.reload} onDeleted={() => { setCur(null); q.reload(); }} /></div> : <p className="hint">{t("Choose a Brand Kit to see it here.")}</p>}
+        {sel ? <div className="insp-in" key={sel.id}><LookDetails id={sel.id} askLocked={askLocked === sel.id} onChanged={q.reload} onDeleted={() => { setCur(null); q.reload(); }} /></div> : <p className="hint">{t("Choose a Brand Kit to see it here.")}</p>}
       </aside>
     </div>}
-    {make && <CreateLook onClose={() => setMake(false)} onDone={(id) => { setMake(false); setCur(id); q.reload(); }} />}
+    {make && <CreateLook onClose={() => setMake(false)} onDone={created} />}
   </div>;
 }

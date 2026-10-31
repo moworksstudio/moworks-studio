@@ -19,6 +19,7 @@ import { characterNeedsWork } from "../character-kit/index.mjs";
 import { voiceFit, voiceFitText } from "../agent/voice-fit.mjs";
 import { scriptGap } from "../voice/script.mjs";
 import { appMade, rememberAssets } from "../project-service/assets.mjs";
+import { unheardSongs } from "../project-service/scan.mjs";
 import { createHash } from "node:crypto";
 import { STILLS_BUSY } from "../hf-qa/cli.mjs";
 
@@ -240,6 +241,11 @@ export function createAutopilot(ctx) {
         try { ctx.jobs.start("scan", { projectId: id, title: "Reading your files", onEnd: () => done() }, async (job) => { job.update({ stage: "reading your files" }); await ctx.scanAssets(p.path); }); }
         catch { Promise.resolve(ctx.scanAssets?.(p.path)).catch(() => {}).then(() => done()); }          // no job list (a test), or one already running
       });
+      // a song whose words Whisper could not hear: the owner is told once, with the way to give them; the film goes on
+      if (unheardSongs(p.path).length && !p.meta?.pipeline?.songNotice) {
+        meta(id, (m) => { (m.pipeline ??= {}).songNotice = true; });
+        try { projects.addNote(p.path, { kind: "lyrics", status: "warning", open: "lyrics", text: "The app could not hear this song's words. If the film should follow them, paste them in the Lyrics dialog." }); } catch { /* notes are best effort */ }
+      }
     }
     if (s.id === "brief" && kickoff) {          // the brief is the chat's first message, then the app's line
       const brief = String(p.meta?.brief?.text ?? "").trim();

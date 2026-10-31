@@ -123,8 +123,50 @@ export function sequences(items) {
   return [...groups.values()].filter((g) => g.length >= 12 || (g.length >= 5 && g.every((x) => x.digits >= 3))).map((g) => g.sort((a, b) => a.n - b.n));
 }
 
-/** Scan the project's files; returns { items, changed }. Never throws for one bad file: its entry says what failed. */
-export async function scanAssets(dir, { root = APP_ROOT, words = true } = {}) {
+const isPdf = (path) => PDF.has(extname(path).toLowerCase());
+const scanned = (dir) => { try { return JSON.parse(readFileSync(join(dir, ".moworks", "scan", "index.json"), "utf8")).items; } catch { return []; } };
+/** The PDFs with a password the scan found: the paths Claude cannot read, for its prompt. */
+export const lockedPdfs = (dir) => scanned(dir).filter((x) => x.password).map((x) => x.path);
+/** The songs of a film set to its lyrics whose words Whisper could not hear: the owner is told, and gives them in the Lyrics dialog. */
+export const unheardSongs = (dir) => scanned(dir).filter((x) => x.wordsUnheard).map((x) => x.path);
+/** A locked PDF, with the password the owner gave in the chat: read whole, as any PDF is, into the scan; the password goes to that one reading and
+ *  is kept nowhere (the scan's own reading of an unchanged file keeps what this one read). { ok, name, pages, text, sheets } or { ok: false, name, reason }: "wrong", "none", or the app's words. */
+export async function unlockPdf(dir, file, password, { root = APP_ROOT } = {}) {
+  const want = String(file ?? "").replace(/\\/g, "/"), base = want.split("/").pop();
+  const index = JSON.parse(readFileSync(join(dir, ".moworks", "scan", "index.json"), "utf8"));
+  const it = index.items.find((x) => x.password && (x.path === want || x.path.split("/").pop() === base));
+  if (!it) return { ok: false, name: base, reason: "none" };
+  const name = it.path.split("/").pop(), sub = `.moworks/scan/${shortSlug(it.path)}`, abs = join(dir, ...sub.split("/"));
+  rmSync(abs, { recursive: true, force: true });
+  const m = await runPy(root, "tools/intake/intake.py", ["pdf", join(dir, ...it.path.split("/")), abs], { timeoutMs: 10 * 60 * 1000, more: { MW_PDF_PASSWORD: String(password ?? "") } });
+  if (m.password) return { ok: false, name, reason: "wrong" };
+  if (!m.ok) return { ok: false, name, reason: m.error ?? "it could not be read" };
+  const of = (x) => `${sub}/${x}`;
+  delete it.password; delete it.error;
+  Object.assign(it, { pages: m.pages, chars: m.chars, text: m.text.map(of), sheets: m.sheets.map(of), pagesDir: of("pages") });
+  if (it.sheets.length) it.sheet = it.sheets[0];
+  writeIndex(join(dir, ".moworks", "scan"), index.items, index.sequences ?? []);
+  return { ok: true, name, pages: it.pages, text: it.text, sheets: it.sheets };
+}
+function writeIndex(out, items, seqs) {
+  const inSeq = new Set(seqs.flatMap((s) => s.members));
+  writeFileSync(join(out, "index.json"), JSON.stringify({ at: new Date().toISOString(), items, sequences: seqs }, null, 2));
+  writeFileSync(join(out, "INDEX.md"), indexMd([...items.filter((x) => !inSeq.has(x.path)), ...seqs]));
+}
+/** PDFs added since the last scan: a chat message reads only these first (a video's speech can take minutes), as a job the top bar names. */
+export async function readNewPdfs(ctx, project, root = APP_ROOT) {
+  const dir = project.path, inv = inventory(dir), old = new Map(scanned(dir).map((x) => [x.path, x]));
+  const fresh = [...Object.values(inv.assets).flat(), ...inv.sources].filter((f) => isPdf(f.path) && !(old.get(f.path)?.size === f.size && old.get(f.path)?.whole));
+  if (!fresh.length) return;
+  const read = () => scanAssets(dir, { root, only: isPdf });
+  await new Promise((done) => {
+    try { ctx.jobs.start("scan", { projectId: project.id, title: "Reading your files", onEnd: () => done() }, async (job) => { job.update({ stage: "reading your files" }); await read(); }); }
+    catch { read().catch(() => {}).then(() => done()); }          // no job list (a test), or one already running
+  });
+}
+
+/** Scan the project's files; returns { items, changed }. Never throws for one bad file: its entry says what failed. only: the paths to read now; the others keep what they have. */
+export async function scanAssets(dir, { root = APP_ROOT, words = true, only = null } = {}) {
   const out = join(dir, ".moworks", "scan");
   mkdirSync(out, { recursive: true });
   const indexFile = join(out, "index.json");
@@ -141,6 +183,7 @@ export async function scanAssets(dir, { root = APP_ROOT, words = true } = {}) {
     const abs = join(dir, ...f.path.split("/"));
     const mtime = statSync(abs).mtimeMs;
     const prev = old[f.path];
+    if (only && !only(f.path)) { if (prev) items.push(prev); continue; }
     // a PDF read by the older scan (its first 40 pages) is read again, whole; the film's other files keep what they have (a video's speech took minutes)
     if (prev && prev.v === SCAN_V && prev.size === f.size && prev.mtime === mtime && (prev.kind !== "pdf" || prev.whole) && (!prev.sheet || existsSync(join(dir, ...prev.sheet.split("/"))))) { items.push(prev); continue; }
     changed++;
@@ -177,7 +220,7 @@ export async function scanAssets(dir, { root = APP_ROOT, words = true } = {}) {
             const perMin = w.words != null && it.duration ? w.words / (it.duration / 60) : 0;
             if (w.words != null && w.words >= SUNG_MIN && perMin >= SUNG_PER_MIN) Object.assign(it, { words: w.words, wordsFile: rel("words.md") });
             else {
-              if (w.words != null) rmSync(join(subAbs, "words.md"), { force: true });
+              if (w.words != null) { rmSync(join(subAbs, "words.md"), { force: true }); it.wordsUnheard = true; }
               it.wordsNote = w.words != null ? `sung words not heard (Whisper heard ${w.words}); the app transcribes speech, not singing: for a lyric video ask the owner to paste the lyrics in the Lyrics step` : w.skipped;
             }
           }
@@ -225,10 +268,7 @@ export async function scanAssets(dir, { root = APP_ROOT, words = true } = {}) {
     seqs.push({ v: SCAN_V, kind: "sequence", path: folder, count: g.length, first: g[0].path, last: g.at(-1).path, width: g[0].width, height: g[0].height,
       sheet: existsSync(join(dir, ...sheet.split("/"))) ? sheet : null, members: g.map((x) => x.path) });
   }
-  const inSeq = new Set(seqs.flatMap((s) => s.members));
-  const shown = [...items.filter((x) => !inSeq.has(x.path)), ...seqs];
-  writeFileSync(indexFile, JSON.stringify({ at: new Date().toISOString(), items, sequences: seqs }, null, 2));
-  writeFileSync(join(out, "INDEX.md"), indexMd(shown));
+  writeIndex(out, items, seqs);
   return { items, sequences: seqs, changed };
 }
 
@@ -243,7 +283,7 @@ const line = (x) => {
     case "pptx": return `- ${x.path}: PowerPoint, ${x.slides ?? "?"} slide(s)${x.md ? `: texts, notes, pictures in ${x.md}` : ""}${x.sheet ? `; slide pictures (PowerPoint): ${x.sheet}, each in ${x.slidesDir}/` : ""}`;
     case "pdf": {
       const what = x.path.toLowerCase().endsWith(".ai") ? "Illustrator file" : "PDF";
-      if (x.password) return `- ${x.path}: ${what} with a password: not read, none of its pages reached you. Tell the owner, and ask for a copy without one`;
+      if (x.password) return `- ${x.path}: ${what} with a password: not read, none of its pages reached you. Tell the owner, and offer its password in the chat (the app's unlock_pdf tool) or a copy without one`;
       if (!x.text) return `- ${x.path}: ${what}, not read`;
       return `- ${x.path}: ${what}, ${x.pages} page(s). ${x.chars ? `All its words, every page: ${x.text.join(", ")}` : "No text in it: its words are only in its pictures, open the pages that matter"}. Every page small and numbered on sheets: ${x.sheets.join(", ")}. One page closer: ${x.pagesDir}/page-NNN.jpg (NNN: its number in three digits), only where a page sets a rule its text does not fully give (a gradient, a lockup, a logo's place)`;
     }

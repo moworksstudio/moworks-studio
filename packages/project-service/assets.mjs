@@ -127,7 +127,8 @@ export function listAssets(dir, { shots = [], layers = [], meta = {}, remember =
     }
     const sc = scan[f.path] ?? {};
     items.push({ path: f.path, name, folder, kind: kindOf(f.path), size: f.size, ...(sc.duration ? { duration: sc.duration } : {}), ...(sc.width ? { width: sc.width, height: sc.height } : {}),
-      ...(sc.password ? { unread: "has a password: use a copy without one" } : {}),          // named on its row, as a Brand Kit names it on its panel
+      // named on its row, as a Brand Kit names it on its panel
+      ...(sc.password ? { unread: "has a password: give Claude the password in the chat, or add a copy without one" } : sc.wordsUnheard ? { unread: "its sung words could not be heard: paste them in the Lyrics dialog" } : {}),
       // on the timeline: the voice, the music, or any sound placed in the root composition
       status: seen.has(f.path) || made.has(f.path) ? "ok" : "new", usedIn: usedIn(f.path), onTimeline: meta.voice?.file === f.path || meta.music?.file === f.path || (kindOf(f.path) === "audio" && (refs.get(f.path) ?? []).includes("index.html")),
       ...(kindOf(f.path) === "audio" ? { transcript: meta.voice?.file === f.path ? (meta.voice.transcript?.status === "saved" ? "saved" : meta.voice.transcript?.status ?? "none") : "none" } : {}),

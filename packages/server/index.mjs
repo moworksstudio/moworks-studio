@@ -47,7 +47,7 @@ import * as vocab from "../vocab-library/index.mjs";
 import { renderPreviews as renderIntakePreviews } from "../intake-library/previews.mjs";
 import * as plan from "../motion-plan/index.mjs";
 import * as pipe from "../pipeline/index.mjs";
-import { scanAssets } from "../project-service/scan.mjs";
+import { readNewPdfs, scanAssets } from "../project-service/scan.mjs";
 import { isOption, listRounds, nextLetter, ownerRoundOf, ownerRounds, pendingRevision, recordPick } from "../hf-edit/boards.mjs";
 import { spawn } from "node:child_process";
 import { createJobs } from "./jobs.mjs";
@@ -467,11 +467,11 @@ export function routes(ctx) {
     r("GET", "/looks", () => customLooks.apiLooks(root)),
     r("GET", "/looks/((?:frame|custom)/[a-z0-9-]+)", ([id]) => customLooks.apiLook(id, root)),
     r("POST", "/looks", (_p, b) => customLooks.publicLook(customLooks.createLook(b, root))),
-    r("POST", "/looks/(custom/[a-z0-9-]+)/scan", ([id]) => {
+    r("POST", "/looks/(custom/[a-z0-9-]+)/scan", ([id], b) => {
       const m = customLooks.getCustom(id, root);
       if (!m) throw new HttpError(404, "NOT_FOUND", "Brand Kit not found");
       if (!m.files.length) throw new HttpError(400, "INVALID", "Add the guideline's files first");
-      return ctx.jobs.start("look-scan", { title: `Scanning ${m.title}`, key: id }, async (job) => customLooks.publicLook(await customLooks.scanLook(id, { root, signal: job.signal,
+      return ctx.jobs.start("look-scan", { title: `Scanning ${m.title}`, key: id }, async (job) => customLooks.publicLook(await customLooks.scanLook(id, { root, signal: job.signal, withoutLocked: !!b?.withoutLocked,
         onProgress: ({ stage, progress }) => job.update({ stage, progress }) })));
     }),
     r("PATCH", "/looks/(custom/[a-z0-9-]+)", async ([id], b) => customLooks.publicLook(await customLooks.patchLook(id, b, { root }))),
@@ -911,6 +911,8 @@ export function routes(ctx) {
     r("POST", `/projects/${P}/tasks`, async ([id], b) => {
       // the user's answer after Prepare asked about a Google Slides link it could not read ("done, it is shared now"): read them again first
       { const p0 = projects.getProject(id, root); if (Object.values(p0?.meta?.links ?? {}).some((v) => !v?.ok)) { try { await ctx.slidesFromBrief?.(p0); } catch { /* Claude is told what still fails */ } } }
+      // a PDF added since the last scan is read before Claude answers, so a password on it reaches Claude and its row in Assets
+      await readNewPdfs(ctx, mustProject(id, root), root);
       // notes pinned on the film come in the message: a still of each note's frame, its shot and place for Claude, drawn on the card
       // the user's message answers Claude's question: its "Answer Claude" card closes (it stood after the answer)
       const answered = (t) => { try { projects.closeChatWaits(mustProject(id, root).path); } catch { /* the card is best effort */ } return t; };

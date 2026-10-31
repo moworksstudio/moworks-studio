@@ -83,11 +83,11 @@ export async function install(root = APP_ROOT, { only = null, signal = null, onL
 }
 
 /** Run one of the app's Python scripts (tools/…) with the components on its path; the last stdout line is its JSON answer. */
-export function runPy(root, script, args, { timeoutMs = 10 * 60 * 1000, signal = null } = {}) {
+export function runPy(root, script, args, { timeoutMs = 10 * 60 * 1000, signal = null, more = null } = {}) {
   const exe = pythonExe(root);
   if (!exe) return Promise.resolve({ ok: false, error: "Python is not on this computer" });
   return new Promise((ok) => {
-    const c = spawn(exe, ["-I", join(root, script), ...args], { env: env(root), windowsHide: true });
+    const c = spawn(exe, ["-I", join(root, script), ...args], { env: more ? { ...env(root), ...more } : env(root), windowsHide: true });
     let out = "", err = "";
     c.stdout.on("data", (d) => { out = (out + d).slice(-200000); });
     c.stderr.on("data", (d) => { err = (err + d).slice(-8000); });

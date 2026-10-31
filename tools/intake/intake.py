@@ -200,10 +200,10 @@ PASSWORD = "has a password: use a copy without one"
 
 def _open_pdf(file):
     """The document, or a clear answer for one that asks for a password (pdfium opens a file with only an owner password as it is; only a
-    password needed to open it stops here)."""
+    password needed to open it stops here). The password the owner gave in the chat comes in MW_PDF_PASSWORD, never on the command line."""
     try: import pypdfium2 as pdfium
     except Exception: fail("pypdfium2 is not installed (an app component: Settings > Health)")
-    try: return pdfium.PdfDocument(file)
+    try: return pdfium.PdfDocument(file, password=os.environ.get("MW_PDF_PASSWORD") or None)
     except Exception as e:
         if "password" in str(e).lower(): done({"ok": False, "password": True, "error": PASSWORD})
         raise
