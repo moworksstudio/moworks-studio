@@ -1,0 +1,26 @@
+{
+  "uid": "in:moworks/title-credits-roll",
+  "hash": "5648437bfa2e66ad",
+  "at": "2026-10-17T10:12:06.037Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "JetBrains Mono"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__title-credits-roll.mp4",
+    "poster": "previews/moworks__title-credits-roll.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ffbe7b664a10bac358ca8129b91d18dd9e52b61ffd0f86dce5d0ab5324b07cfb",
+    "size": 38456,
+    "seconds": 32.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

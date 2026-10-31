@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-diagonal-wipe",
+  "hash": "cb3f9bcc797ff336",
+  "at": "2026-10-17T11:02:35.584Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-diagonal-wipe.mp4",
+    "poster": "previews/moworks__motion-diagonal-wipe.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ad64e32b59f5175270515d9eb3fad82c0be2ddff98042f538e0b1806c05fb2db",
+    "size": 8739,
+    "seconds": 25.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

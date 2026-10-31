@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-send-morph",
+  "type": "hyperframes:component",
+  "title": "Send Morph",
+  "description": "Bấm GỬI, nút co thành hình tròn, một chiếc máy bay giấy hiện ra, lùi lấy đà rồi vút bay chéo lên khỏi khung, nút chuyển xanh với dấu tích rồi giãn lại.",
+  "tags": [
+    "button",
+    "send",
+    "morph",
+    "success",
+    "ui-buttons",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "ui-send-morph.html",
+      "target": "compositions/components/ui-send-morph.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-send-morph",
+    "author": "moworks",
+    "call": "MW.uiSendMorph(q(\".sm\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.uiSendMorph",
+    "options": {
+      "press": "s the button is clicked (0.3); the rest follows its own timing",
+      "fly": "[x, y] px of the flight ([632, −296])",
+      "bulge": "px the curve sags below the straight line (104)",
+      "pull": "px the plane pulls back first (16)",
+      "success": "colour on success",
+      "label": "the label",
+      "cursor": "an optional cursor that makes the clicks",
+      "approach": "[x, y] px the cursor comes from",
+      "lead": "s it arrives before a click"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Pill 140x46 → circle 46 (0.38-0.68 s power2.inOut); 'SEND' fades 0.36-0.46 s. Paper plane pops in (0.62-0.74 s back.out), pulls back 4 px (0.1 s power1.out), flies 0.84-1.32 s power2.in on a curve 158 px right and 74 px up (bulging 26 px below the straight line), turned along its path, 4 fading trail dots. 1.5 s fill turns green with a 1.12 pop, tick draws 1.6-1.85 s. 2.3-2.65 s width back to 140 (power2.out), 'SEND' returns. Params: width (140 → 46 px) · fly (0.48 s, power2.in) · path (158 px ngang, 74 px lên) · success (1.5 s).",
+    "titleVi": "Nút gửi thu tròn, máy bay giấy"
+  }
+}

@@ -5,12 +5,12 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, normalize, relative, sep } from "node:path";
 import { audioFolder, isDesignPath, sequenceOf } from "./index.mjs";
-import { appSounds } from "./layout.mjs";
+import { appSounds, kitFiles } from "./layout.mjs";
 import { placedShots } from "../hf-edit/shots.mjs";
 import { filmLength } from "../hf-edit/ending.mjs";
 
 const posix = (p) => p.split(sep).join("/");
-const IMAGE = /\.(png|jpe?g|webp|gif|avif|bmp|tiff?|heic|svg|exr)$/i, VIDEO = /\.(mp4|mov|webm|m4v|mkv|avi)$/i, AUDIO = /\.(mp3|wav|m4a|flac|ogg|aac|opus)$/i, FONT = /\.(ttf|otf|woff2?)$/i;
+const IMAGE = /\.(png|jpe?g|webp|gif|avif|bmp|tiff?|heic|svg|exr)$/i, VIDEO = /\.(mp4|mov|webm|m4v|mkv|avi)$/i, AUDIO = /\.(mp3|wav|m4a|flac|ogg|aac|opus)$/i, FONT = /\.(ttf|otf|woff2?|eot)$/i;
 const HIDDEN = /^assets\/(_app\/(vendor|psd)|vendor|psd)\//;          // the app's own copies (GSAP) and the layers it exports for Claude
 // the fonts the app embeds (Google Fonts subsets, the bundled set): one row per family, not dozens of subset files
 const APP_FONT = /^assets\/(?:_app\/)?fonts\/(google|kit|bundled)\/(?:([^/]+)\/)?/;
@@ -127,6 +127,7 @@ export function listAssets(dir, { shots = [], layers = [], meta = {}, remember =
     }
     const sc = scan[f.path] ?? {};
     items.push({ path: f.path, name, folder, kind: kindOf(f.path), size: f.size, ...(sc.duration ? { duration: sc.duration } : {}), ...(sc.width ? { width: sc.width, height: sc.height } : {}),
+      ...(sc.password ? { unread: "has a password: use a copy without one" } : {}),          // named on its row, as a Brand Kit names it on its panel
       // on the timeline: the voice, the music, or any sound placed in the root composition
       status: seen.has(f.path) || made.has(f.path) ? "ok" : "new", usedIn: usedIn(f.path), onTimeline: meta.voice?.file === f.path || meta.music?.file === f.path || (kindOf(f.path) === "audio" && (refs.get(f.path) ?? []).includes("index.html")),
       ...(kindOf(f.path) === "audio" ? { transcript: meta.voice?.file === f.path ? (meta.voice.transcript?.status === "saved" ? "saved" : meta.voice.transcript?.status ?? "none") : "none" } : {}),
@@ -151,9 +152,9 @@ export function listAssets(dir, { shots = [], layers = [], meta = {}, remember =
 /** Files in assets/ the app made itself, never "added by the user" (Test 22: the voice-over the Voice screen made with ElevenLabs was
  *  taken for a file the user added, and the app told Claude in the user's name "I added 1 file(s)… Use them and go on" while the
  *  Storyboard waited for the user's answer): a voice-over read by a voice service (named <service>-<time>.mp3), the voice and the music
- *  track the app placed from its own choices, and the sound effects it placed. */
+ *  track the app placed from its own choices, the sound effects it placed, and the logos and fonts it copied in from the film's Brand Kit. */
 export function appMade(dir, meta = {}) {
-  const out = new Set(appSounds(dir));
+  const out = new Set([...appSounds(dir), ...kitFiles(dir)]);
   if (meta?.voice?.file && meta.voice.source && meta.voice.source !== "upload") out.add(meta.voice.file);
   if (meta?.music?.file && meta.music.option) out.add(meta.music.file);          // one of Claude's three tracks, copied in by the app
   const vo = join(dir, "assets", "3_audio", "voiceover");

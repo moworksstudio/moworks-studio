@@ -1,26 +1,27 @@
 // First run on a new computer: everything the app needs beyond the repository, in one list with sizes, and
 // one Install ("Download all" before 30/10). What came with the app in bundle/ is copied, not downloaded: the offline fonts and libraries
 // (offline-assets), HyperFrames' skills and registry (read from bundle/hf in place), the style sources (read from bundle/styles in
-// place) and the built library stores (copied into the work folder's library, one folder per pin, checked at every start). The rest is downloaded at the pinned versions:
+// place), the app's characters (read from bundle/library/characters in place) and the built library stores (copied into the work folder's library, one folder per pin, checked at every start). The rest is downloaded at the pinned versions:
 // HyperFrames' runtime and its Chrome, the Python components, the speech-to-text model, and any style source that is not bundled (a thin
 // git checkout at the pinned commit: no history, no demo films, no audio).
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { APP_ROOT, checkFfmpeg, expandEnv, loadPins, paths, setLocalPins, sourceHead } from "../version-manager/index.mjs";
-import { workRoot } from "../project-service/index.mjs";
+import { defaultLocation, workRoot } from "../project-service/index.mjs";
 import * as assets from "../offline-assets/index.mjs";
 import { fetchSkills, hfSources, verifySkills } from "./hf-skills.mjs";
 import * as py from "./python.mjs";
 import * as winget from "./winget.mjs";
 import { installRuntime, runtimeReady } from "../hf-setup/index.mjs";
-import { seedAuthorCharacters } from "../character-kit/index.mjs";
+import { migrateShippedCopies } from "../character-kit/index.mjs";
 import * as cuda from "../voice/cuda.mjs";
 import * as asr from "../voice/asr.mjs";
 import * as blocks from "../blocks-library/index.mjs";
 import * as looks from "../looks-library/index.mjs";
 import * as vocab from "../vocab-library/index.mjs";
+import * as intake from "../intake-library/index.mjs";
 
 const MB = 1048576;
 const readJson = (f, d) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
@@ -80,8 +81,9 @@ export async function fetchStyleSource(key, { root = APP_ROOT, onLine = () => {}
 // Each store's folder is named for the pins it was built at (blocks, looks: hf-<version>-<commit>; vocab: mp-<commit>-hf-<commit>), and the
 // app reads only the folder for this computer's pins, so a new pin is a new folder. Per kind: the store for the current pins that this
 // computer built (or changed) stays; else the bundle's copy of it is taken (again when a newer app brings a changed copy under the same
-// name, e.g. intake-1, while this computer's copy is still the one it took); current.json points at the store in use. A store at another
-// pin is left where it is and never read. A kind without a pinned name (intake) takes the name the bundle ships.
+// name while this computer's copy is still the one it took); current.json points at the store in use. A store at another
+// pin is left where it is and never read. A kind without a pinned name (intake) takes the name the bundle ships; a new name replaces the
+// copy the app took under the old one (dropReplacedIntake).
 const STORES = { blocks: blocks.storeName, intake: () => null, looks: looks.storeName, vocab: vocab.storeName };          // the Moworks Motion kit's "motion" store was removed
 const wantStore = (s, root, shipped) => { try { return STORES[s](root) ?? shipped; } catch { return shipped; } };
 /** A short hash of a store's catalog and manifest: which copy of a store a folder holds. */
@@ -92,9 +94,31 @@ export function libraryState(root = APP_ROOT) {
   const names = Object.keys(STORES);
   return { stores: Object.fromEntries(names.map((s) => [s, have(s)])), ready: names.every(have), bundled: existsSync(b) };
 }
+/** A file of the folder written after the time (a change or an addition since the app took it). */
+const writtenSince = (dir, t) => readdirSync(dir, { recursive: true }).some((n) => { const st = statSync(join(dir, n)); return st.isFile() && st.mtimeMs > t; });
+/** The intake store came under a new name: the copy the app took under an older one goes while it is still exactly that copy (its stamp,
+ *  and no file written since it was taken). One this computer built or changed stays where it is, never read. Returns the names removed. */
+function dropReplacedIntake(lib, takenAt) {
+  const base = join(lib, "intake"), file = join(base, "from-bundle.json"), taken = readJson(file, {}), cur = readJson(join(base, "current.json"), null)?.dir;
+  const old = Object.keys(taken).filter((n) => n !== cur && /^intake-\d+$/.test(n));
+  if (!old.length || !cur || !existsSync(join(base, cur, "catalog.json"))) return [];
+  const removed = [];
+  for (const n of old) {
+    const dir = join(base, n);
+    if (existsSync(join(dir, "catalog.json")) && !lstatSync(dir).isSymbolicLink() && stampOf(dir) === taken[n] && !writtenSince(dir, takenAt)) {
+      rmSync(dir, { recursive: true, force: true });
+      removed.push(n);
+    }
+    delete taken[n];
+  }
+  writeFileSync(file, JSON.stringify(taken) + "\n");
+  return removed;
+}
 export function libraryFromBundle(root = APP_ROOT) {
   const b = join(bundleDir(root), "library"), lib = join(workRoot(root), "library"), copied = [];
   if (!existsSync(b)) return { copied };
+  let intakeTakenAt = 0;          // when the intake store was last taken, before this start takes one
+  try { intakeTakenAt = statSync(join(lib, "intake", "from-bundle.json")).mtimeMs; } catch { /* never taken here */ }
   for (const s of Object.keys(STORES)) {
     const shipped = readJson(join(b, s, "current.json"), null)?.dir, want = wantStore(s, root, shipped);
     if (!want) continue;
@@ -107,20 +131,24 @@ export function libraryFromBundle(root = APP_ROOT) {
     } else if (!inBundle) continue;          // the bundle has it at another pin: the library's own import builds it
     cpSync(from, mine, { recursive: true, force: true });
     writeFileSync(takenFile, JSON.stringify({ ...taken, [want]: stampOf(mine) }) + "\n");
+    if (s === "intake") { try { intake.dropDeleted(mine, root); } catch { /* the user can delete it again */ } }          // what the user deleted stays deleted in the new copy
     writeFileSync(join(lib, s, "current.json"), JSON.stringify({ dir: want }) + "\n");
     copied.push(s);
   }
+  try { dropReplacedIntake(lib, intakeTakenAt); } catch { /* tried again at the next start */ }
   // the vocabulary's previews sit beside its store, by item: the bundle's are taken for items that have none here as they are now
   try { if (existsSync(join(b, "vocab", "previews")) && vocab.adoptPreviews(join(b, "vocab", "previews"), root)) copied.push("vocab previews"); } catch { /* no store yet */ }
-  // what is there stays: the gallery's tiles (made again here when a still is newer), the character media (beside the user's own),
-  // anidoodle's cards and previews and the Lemo fonts' Vietnamese check (a folder per pinned commit: a new pin is a new folder)
-  for (const d of ["thumbs", "anidoodle", "characters", "lemo"]) if (existsSync(join(b, d))) {
+  // what is there stays: the gallery's tiles (made again here when a still is newer), anidoodle's cards and previews and the Lemo fonts'
+  // Vietnamese check (a folder per pinned commit: a new pin is a new folder). Never the characters: the app's are read from bundle/ in place,
+  // and library/characters holds only the user's
+  for (const d of ["thumbs", "anidoodle", "lemo"]) if (existsSync(join(b, d))) {
     cpSync(join(b, d), join(lib, d), { recursive: true, force: false, errorOnExist: false });
     copied.push(d);
   }
-  // anidoodle's own rigged characters (Bit, the cheetah): their records, beside the copied media
-  try { if (seedAuthorCharacters(root).length) copied.push("anidoodle characters"); } catch { /* not pinned: nothing to seed */ }
-  return { copied };
+  // the copies of the app's characters that earlier versions took, gone when they are only the app's files; never a reason to stop
+  let characters = null;
+  try { characters = migrateShippedCopies(root); } catch { /* tried again at the next start */ }
+  return { copied, characters };
 }
 
 // ---- what each installed item takes on the disk (Settings › System): measured once per folder
@@ -180,8 +208,9 @@ const ENGINE_MB = 70;          // faster-whisper with CTranslate2 (config/asr-mo
  *  ready item's diskMb too (the worker measures it; null for the work folder or a folder not found). */
 export function firstRunItems(root = APP_ROOT, { sizes = false } = {}) {
   const items = [];
-  const work = workRoot(root);
-  items.push({ id: "work", title: "Projects folder", what: "Choose the folder that stores your projects.", mb: 0, from: "yours", ready: existsSync(work), path: work });
+  // the one folder the user picks: where films go (Settings › General's own setting), the app's projects folder until they pick another; the
+  // library, the models and the app's data stay beside the app (owner 30/10), so it always has an answer and never holds Set up open
+  items.push({ id: "work", title: "Projects folder", what: "Choose the folder that stores your projects.", mb: 0, from: "yours", ready: true, path: defaultLocation(root) });
   const rt = runtimeReady(root);
   items.push({ id: "hf-runtime", title: "HyperFrames and its Chrome", version: rt.version, what: "The engine that builds and renders the films", mb: rt.installed ? (rt.chromium ? 0 : 270) : 546, from: "download", ready: rt.installed && !!rt.chromium });
   const sk = verifySkills(root, { fresh: true }), skFrom = inBundle(hfSources(root).skillsRoot, root) ? "bundle" : "download";
@@ -282,13 +311,5 @@ export async function firstRunAll({ root = APP_ROOT, ids = null, onProgress = ()
     await step(cuda.PACK.id, async () => { if (!cuda.packStatus(root).installed) await cuda.install(root, { signal, onLine: (l) => onProgress({ id: cuda.PACK.id, stage: l }) }); });
   // the list again off the server's thread (its checks, Python's imports among them, took seconds there)
   return { done, ...(await firstRunItemsAsync(root, { sizes: false })) };
-}
-/** The work folder picked at first start (this computer's local pins; the default is the folder that holds the app). */
-export function setWorkFolder(path, root = APP_ROOT) {
-  const p = String(path ?? "").trim();
-  if (!p) throw Object.assign(new Error("Choose a folder"), { code: "INVALID" });
-  mkdirSync(p, { recursive: true });
-  setLocalPins({ "storage.workRoot": p }, root);
-  return { workRoot: workRoot(root) };
 }
 export const bundleManifest = (root = APP_ROOT) => readJson(join(bundleDir(root), "MANIFEST.json"), null);

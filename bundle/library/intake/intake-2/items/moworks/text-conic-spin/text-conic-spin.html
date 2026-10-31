@@ -1,0 +1,47 @@
+<!--
+  Conic Gradient Spin (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Lòng chữ phủ dải màu hình nón ba màu xoay tròn quanh tâm khối chữ, mỗi vòng 4 giây.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textConicSpin(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - colors: three colours (the first repeats at the end)
+      - duration: s per turn (4), linear
+      - loops: (1)
+
+  Notes: Conic-gradient fill (3 colours, first = last: stops 0 / 33 / 66 / 100 %) centred on the text box, clipped to the letters; start angle 0 → 360° over 4 s linear (from the top, clockwise), loop. Params: colors: ba màu (đầu = cuối) · duration: mỗi vòng (4 s).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">XOAY MÀU</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"colors":["#ff6fb5","#ffd23d","#3dd6f5"],"duration":4,"loops":1};
+  var run = function (el, tl, at, o) {
+        var cs = o.colors.concat([o.colors[0]]).map(function (c, i, a) { return c + " " + (100 * i / (a.length - 1)).toFixed(1) + "%"; }).join(", ");
+        return MW.drive(tl, at, o.duration * o.loops, function (t) { el.style.backgroundImage = "conic-gradient(from " + (360 * t / o.duration).toFixed(2) + "deg at 50% 50%, " + cs + ")"; });
+      };
+  MW.textConicSpin = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

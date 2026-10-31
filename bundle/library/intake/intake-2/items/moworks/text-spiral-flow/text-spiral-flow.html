@@ -1,0 +1,67 @@
+<!--
+  Spiral Text (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Dòng chữ lặp lại chạy theo đường xoắn ốc, nhỏ dần khi tiến vào tâm và mờ mất ở giữa, quay vòng liên tục.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textSpiralFlow(q(".sf"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - text: 
+      - turns: (3.2)
+      - radius: px at the outer end (360)
+      - size: letter size as a share of the radius (0.24)
+      - flow: radians of spiral per loop (1.8), rounded to whole units
+      - inner: [gone, full] px near the centre ([30, 140])
+      - sep: 
+      - loop: s (5)
+
+  Notes: Text + ' • ' (separator accent) repeated on an Archimedean spiral of 3.2 turns, r = 72 px × θ / θmax. Font size = 0.24 × r, so each char takes a constant angle (0.24 × its width in em). The string flows inward linearly about 1.8 rad of spiral angle per 5 s (whole units, seamless). Each glyph rotated to its angle + 90°; fades in from the outer end over 1.4 rad and out near the centre (r 6 → 28 px). Demo loop 5 s (recipe: 8 s loop). Params: số vòng (3.2) · bán kính (72 px) · cỡ chữ (0.24 × bán kính) · tốc độ (1.8 rad / 5 s). An Archimedean spiral; since the size grows with the radius, each letter takes a constant angle.
+-->
+
+<div class="st"><div class="sf"></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"text":"Moworks Studio","turns":3.2,"radius":360,"size":0.24,"flow":1.8,"inner":[30,140],"sep":"#8b7bff","loop":5};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var rail = function (pts, closed) { var L = [0]; for (var i = 1; i < pts.length; i++) L.push(L[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])); var tot = L[L.length - 1];
+    return { len: tot, at: function (s) { s = closed ? ((s % tot) + tot) % tot : Math.max(0, Math.min(tot, s)); var lo = 0, hi = L.length - 1; while (hi - lo > 1) { var m = (lo + hi) >> 1; if (L[m] <= s) lo = m; else hi = m; } var f = (s - L[lo]) / ((L[hi] - L[lo]) || 1), a = pts[lo], b = pts[hi]; return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]; } }; };
+  var ang = function (R, s, ch) { var a = R.at(s - ch), b = R.at(s + ch); return Math.atan2(b[1] - a[1], b[0] - a[0]); };
+  var glyphs = function (host, list, fs, sepColor) { return list.map(function (g) { var s = document.createElement("span"); s.textContent = g; s.style.cssText = "position:absolute;left:0;top:0;white-space:pre;line-height:1;font-size:" + fs + "px;" + (g === "•" && sepColor ? "color:" + sepColor + ";" : ""); host.appendChild(s); return { s: s, w: s.offsetWidth, h: s.offsetHeight }; }); };
+  var place = function (q, x, y, a, op) { gsap.set(q.s, { x: x - q.w / 2, y: y - q.h * 0.8, rotation: a * 180 / Math.PI, transformOrigin: "50% 80%" }); q.s.style.opacity = op == null ? "1" : String(op); };
+  var cx = el.clientWidth / 2, cy = el.clientHeight / 2, F = 100, unit = gr(o.text + " • "), probe = glyphs(el, unit, F, o.sep), uem = probe.map(function (q) { return q.w / F; }); probe.forEach(function (q) { q.s.remove(); });
+  var ua = uem.reduce(function (a, b) { return a + b; }, 0) * o.size, TH = 2 * Math.PI * o.turns, reps = Math.ceil(TH / ua) + 2, list = [], A = []; for (var k = 0; k < reps; k++) { list = list.concat(unit); A = A.concat(uem); }
+  var G = glyphs(el, list, F, o.sep), a0 = 0; G.forEach(function (q, i) { q.o = a0 + A[i] * o.size / 2; a0 += A[i] * o.size; });
+  var speed = Math.max(1, Math.round(o.flow / ua)) * ua / o.loop;
+  return MW.drive(tl, at, o.loop, function (t) {
+    var off = (speed * t) % ua; G.forEach(function (q) { var th = TH - (q.o - ua + off), r = o.radius * th / TH; if (th <= 0 || th > TH) { q.s.style.opacity = "0"; return; }
+      var a = th, x = cx + r * Math.cos(a), y = cy + r * Math.sin(a), sc = o.size * r / F, fade = Math.min(1, (TH - th) / 1.4, (r - o.inner[0]) / (o.inner[1] - o.inner[0]));
+      gsap.set(q.s, { x: x - q.w / 2, y: y - q.h * 0.8, rotation: a * 180 / Math.PI - 90, scale: sc, transformOrigin: "50% 80%" }); q.s.style.opacity = String(Math.max(0, fade)); });
+  });
+  };
+  MW.textSpiralFlow = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

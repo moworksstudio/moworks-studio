@@ -1,25 +1,43 @@
-// The user's own Looks: a brand guideline (PDF, PPTX, pictures, a folder of them) scanned into a
+// The user's own Looks: a brand guideline (PDF, PPTX, pictures, fonts, AI, PSD, an archive, a folder of them) scanned into a
 // Look the HyperFrames way: a FRAME.md in HF's frame-preset format (YAML tokens + prose; HyperFrames' references/look.md, "The project's design spec"),
 // preview stills drawn from its tokens, the Vietnamese check of its fonts, kept with versions. Stored in <work>/library/looks/custom/<slug>/:
-//   look.json  { id, slug, title, status, version, versions, files, swatches, fonts, vi, description, stills, error, createdAt, updatedAt }
-//   files/     what the user uploaded, as uploaded
-//   work/      what the scan unpacked (a PPTX's theme, text and pictures; the colour and font hints) and the copy of HF's format
+//   look.json  { id, slug, title, status, version, versions, files, swatches, fonts, vi, description, stills, error, createdAt, updatedAt,
+//                unread: [{ name, reason }] (what the last scan could not read), leftOut: [{ name, reason }] (what was picked and not taken) }
+//   files/     what the user uploaded, as uploaded (an archive unpacked)
+//   derived/   a logo that came only as AI or PSD, as a picture a film can show
+//   work/      what the scan made readable (each PDF's whole text, contact sheets and pages through tools/intake/intake.py; a PPTX's theme,
+//              text and pictures; the colour and font hints; READING.md, the list Claude reads) and the copy of HF's format
 //   v<N>/      FRAME.md and stills/ of version N (a version is never changed: an edit or a restore makes the next one)
-// The FRAME.md is written by a short Claude run that reads the guideline itself (PDFs and pictures through Read) beside one HF frame preset
-// as the example of the format; the app reads its tokens back for the swatches, fonts and stills. The Look is the film's design: the
-// project's frame.md is a plain copy of the current version (lookFrame in ./index.mjs).
+// The FRAME.md is written by a short Claude run that reads what the app made readable, beside one HF frame preset as the example of the
+// format; the app reads its tokens back for the swatches, fonts and stills. The Look is the film's design: the project's frame.md is a
+// plain copy of the current version (lookFrame in ./index.mjs), and the film gets its own copy of the kit's logos and fonts (placeKit).
 import { execFileSync, spawn } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { basename, join, resolve, sep } from "node:path";
+import { createHash } from "node:crypto";
+import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { basename, extname, join, resolve, sep } from "node:path";
 import { inflateRawSync } from "node:zlib";
 import { APP_ROOT, resolveRuntime } from "../version-manager/index.mjs";
 import { claudeEnv, findClaude } from "../system-status/index.mjs";
 import { safeFileName } from "../project-service/index.mjs";
+import { ARCHIVE, MAX_UNPACK_BYTES, MAX_UNPACK_FILES, PROGRAM, unpackArchive } from "../project-service/archive.mjs";
+import { KIT_FILES } from "../project-service/layout.mjs";
+import { familyKey, fontSlug, listLocalFonts, readFaces, useLocalFont } from "../hf-edit/localFonts.mjs";
+import { runPy } from "../setup/python.mjs";
 import { encodePoster } from "../library/preview-media.mjs";
 import { currentStore, ffmpegExe, hfLookDir, items as hfItems, LOOK_GUIDE, puppeteerOf, storeRoot, vietnameseCheck } from "./index.mjs";
 
-export const ACCEPT = /\.(pdf|pptx|png|jpe?g|webp|gif|svg)$/i;
-export const MAX_FILE = 500 * 1024 * 1024, MAX_FILES = 60;
+// the same list as OK_FILES in ui/src/screens/Looks.jsx
+export const ACCEPT = /\.(pdf|pptx|png|jpe?g|webp|gif|svg|ttf|otf|woff2?|zip|rar|7z|ai|psd|psb)$/i;
+// MAX_FILES (ui/src/screens/Looks.jsx too): a brand folder holds logos in each colour and format and each font in several formats: the one
+// that set this came with 97 files, 81 without Windows' own, 73 kept once its .eot twins and an archive that repeated them were gone. 300
+// leaves room for four of those and still stops a folder picked by mistake. More files do not mean more tokens: Claude never reads a font
+// file, an artwork is read in one format, and pictures past READ_PICTURES go on sheets.
+export const MAX_FILE = 500 * 1024 * 1024, MAX_FILES = 300;
+const READ_PICTURES = 30;
+// Windows' and a Mac's own files: ignored without a word (the dialog does the same, SYSTEM_FILE in Looks.jsx)
+export const SYSTEM_FILE = /^(desktop\.ini|thumbs\.db|ehthumbs\.db|\.ds_store|\._.*|~\$.*)$/i;
+export const PASSWORD_REASON = "has a password: use a copy without one";
+const DAMAGED_REASON = "could not be opened: it may be damaged, try another copy";
 export const FREE = { id: null, title: "Free (Claude designs)" };
 const OWNER = { author: "The owner (uploaded guideline)", link: null, licence: "the owner's own brand material", made: "written from the idea", madeNote: "scanned by the app from the owner's guideline files into HyperFrames' frame-preset format" };
 
@@ -30,7 +48,24 @@ const uniq = (a) => [...new Set(a)];
 const customRoot = (root) => join(storeRoot(root), "custom");
 const dirOf = (slug, root) => join(customRoot(root), slug);
 export const customSlug = (id) => /^custom\/([a-z0-9][a-z0-9-]{0,47})$/.exec(String(id ?? ""))?.[1] ?? null;
-const kindOf = (n) => /\.pdf$/i.test(n) ? "pdf" : /\.pptx$/i.test(n) ? "pptx" : /\.svg$/i.test(n) ? "svg" : "image";
+const kindOf = (n) => /\.pdf$/i.test(n) ? "pdf" : /\.pptx$/i.test(n) ? "pptx" : /\.svg$/i.test(n) ? "svg" : /\.(ttf|otf|woff2?)$/i.test(n) ? "font" : /\.ai$/i.test(n) ? "ai" : /\.ps[db]$/i.test(n) ? "psd" : "image";
+const baseOf = (n) => String(n).replace(/\.[^.]+$/, "").toLowerCase();
+
+/** Why a picked file is not taken, in the owner's words: shown on the kit's panel and told to Claude. */
+export function leftOutReason(name) {
+  const e = extname(String(name)).toLowerCase();
+  if (ARCHIVE.test(name)) return "an archive inside an archive: unpack it and add the files";
+  if (ACCEPT.test(name)) return `over the limit of ${MAX_FILES} files in a Brand Kit`;
+  if (e === ".eot") return "an old web font format: add the font as TTF, OTF or WOFF";
+  if (e === ".ppt") return "an old PowerPoint file: save it as PPTX";
+  if ([".doc", ".docx", ".xls", ".xlsx", ".key", ".indd", ".eps", ".fig", ".sketch", ".xd"].includes(e)) return "cannot be read here: add a PDF export of it";
+  if (/^\.(mp4|mov|webm|m4v|mkv|avi|mp3|wav|m4a|flac|ogg|aac|opus)$/.test(e)) return "a video or a sound: add it to the film's assets instead";
+  if (PROGRAM.test(name)) return "a program, not brand material";
+  return "a kind of file a Brand Kit does not read";
+}
+/** The names as left-out rows: a kit's name once, without Windows' own files. */
+const leftOutRows = (names) => uniq((names ?? []).map((n) => safeFileName(n, ""))).filter((n) => n && !SYSTEM_FILE.test(n)).map((name) => ({ name, reason: leftOutReason(name) }));
+const mergeRows = (a, b) => [...new Map([...(a ?? []), ...b].map((x) => [x.name, x])).values()];
 
 /** A Look's name as a folder name: ASCII, Vietnamese letters without their marks. */
 export function slugify(title) {
@@ -48,7 +83,7 @@ export function customLooks(root = APP_ROOT) {
 export function getCustom(id, root = APP_ROOT) { const s = customSlug(id); return s ? readJson(join(dirOf(s, root), "look.json"), null) : null; }
 function must(id, root) { const m = getCustom(id, root); if (!m) throw err("NOT_FOUND", "Brand Kit not found"); return m; }
 
-export function createLook({ title } = {}, root = APP_ROOT) {
+export function createLook({ title, leftOut } = {}, root = APP_ROOT) {
   const t = String(title ?? "").trim().replace(/\s+/g, " ").slice(0, 80);
   if (!t) throw err("INVALID", "Name the Brand Kit");
   const base = slugify(t);
@@ -56,21 +91,63 @@ export function createLook({ title } = {}, root = APP_ROOT) {
   while (existsSync(dirOf(slug, root))) slug = `${base.slice(0, 36)}-${i++}`;
   mkdirSync(join(dirOf(slug, root), "files"), { recursive: true });
   return saveMeta({ id: `custom/${slug}`, slug, title: t, status: "draft", version: 0, versions: [], files: [], swatches: [], fonts: [], vi: null, description: "",
-    stills: [], error: null, createdAt: now() }, root);
+    stills: [], error: null, unread: [], leftOut: leftOutRows(leftOut), createdAt: now() }, root);
 }
 
-/** Where an uploaded file goes (the server streams the body there, then calls fileAdded). */
+/** Where an uploaded file goes (the server streams the body there, then calls fileAdded, or addArchive for an archive). */
 export function fileTarget(id, name, root = APP_ROOT) {
   const m = must(id, root);
   if (m.status === "scanning") throw err("BUSY", "The Brand Kit is being scanned");
   const n = safeFileName(name, "file");
-  if (!ACCEPT.test(n)) throw err("INVALID", "A guideline is PDF, PPTX or pictures (PNG, JPG, WebP, GIF, SVG)");
+  if (!ACCEPT.test(n)) throw err("INVALID", "A guideline is PDF, PPTX, pictures, fonts, AI, PSD or a ZIP of them");
   if (m.files.length >= MAX_FILES && !m.files.some((f) => f.name === n)) throw err("INVALID", `At most ${MAX_FILES} files per Brand Kit`);
   return join(dirOf(m.slug, root), "files", n);
 }
 export function fileAdded(id, path, root = APP_ROOT) {
   const m = must(id, root), name = basename(path);
   m.files = [...m.files.filter((f) => f.name !== name), { name, size: statSync(path).size, kind: kindOf(name), at: now() }];
+  m.leftOut = (m.leftOut ?? []).filter((x) => x.name !== name);
+  return saveMeta(m, root);
+}
+/** The name a file takes among the kit's: its own; null when the kit has it already (the same name and size); "name (2)" when the name holds other bytes. */
+function nameAmong(files, name, size) {
+  const e = extname(name), b = name.slice(0, name.length - e.length);
+  for (let i = 1, n = name; ; n = `${b} (${++i})${e}`) {
+    const x = files.find((y) => y.name === n);
+    if (!x) return n;
+    if (x.size === size) return null;
+  }
+}
+/** An uploaded archive, unpacked the way the Assets tab does it (project-service/archive.mjs: Windows' tar, guarded against a zip bomb and
+ *  paths that lead outside): its files join the kit by name, a file the kit already has (same name, same size) once, one of the same
+ *  name and other bytes as "name (2)"; what is not taken is listed. The archive's own copy goes. */
+export async function addArchive(id, path, root = APP_ROOT) {
+  const name = basename(path), u = await unpackArchive(path);
+  rmSync(path, { force: true });
+  const m = must(id, root), files = join(dirOf(m.slug, root), "files");
+  if (!u.ok) {
+    const why = { unsafe: "has files that point outside it: unpack it and add the files", "too-many": `has over ${MAX_UNPACK_FILES} files: unpack it and add the ones you need`,
+      "too-large": `is over ${Math.round(MAX_UNPACK_BYTES / 1024 ** 3)} GB unpacked: unpack it and add the ones you need`, empty: "has no files to add" }[u.reason] ?? "could not be opened: unpack it and add the files";
+    m.leftOut = mergeRows(m.leftOut, [{ name, reason: why }]);
+    return saveMeta(m, root);
+  }
+  try {
+    const names = u.files.map((f) => safeFileName(f.name, "file")), bases = new Set(names.filter((n) => ACCEPT.test(n) && !ARCHIVE.test(n)).map(baseOf));
+    const skipped = [...u.skipped];
+    for (const f of u.files) {
+      let n = safeFileName(f.name, "file");
+      if (SYSTEM_FILE.test(n)) continue;
+      // an .eot beside the same font in a format the kit takes says nothing more
+      if (/\.eot$/i.test(n) && bases.has(baseOf(n))) continue;
+      if (!ACCEPT.test(n) || ARCHIVE.test(n)) { skipped.push(n); continue; }
+      n = nameAmong(m.files, n, f.size);
+      if (!n) continue;
+      if (m.files.length >= MAX_FILES) { skipped.push(n); continue; }
+      copyFileSync(f.abs, join(files, n));
+      m.files.push({ name: n, size: f.size, kind: kindOf(n), at: now() });
+    }
+    m.leftOut = mergeRows(m.leftOut, leftOutRows(skipped));
+  } finally { u.cleanup(); }
   return saveMeta(m, root);
 }
 export function removeFile(id, name, root = APP_ROOT) {
@@ -78,6 +155,8 @@ export function removeFile(id, name, root = APP_ROOT) {
   if (m.status === "scanning") throw err("BUSY", "The Brand Kit is being scanned");
   rmSync(join(dirOf(m.slug, root), "files", n), { force: true });
   m.files = m.files.filter((f) => f.name !== n);
+  m.unread = (m.unread ?? []).filter((x) => x.name !== n);
+  m.leftOut = (m.leftOut ?? []).filter((x) => x.name !== n);
   return saveMeta(m, root);
 }
 export function deleteLook(id, root = APP_ROOT) {
@@ -178,10 +257,196 @@ export function parseFrame(md) {
     colors, fonts, display: pick(/display|headline|title|hero|h1/i) ?? fonts[0] ?? null, body: pick(/^body|text|paragraph|copy/i) ?? fonts[1] ?? fonts[0] ?? null };
 }
 
+// ---- the kit's fonts and logos
+/** The kit's fonts as their files say: [{ family, vi, files: [{ file, weight, italic }] }], one file a face (a font in several formats is one). */
+export function kitFonts(m, root = APP_ROOT) {
+  if (!(m?.files ?? []).some((f) => f.kind === "font")) return [];
+  try { return listLocalFonts({ dir: join(dirOf(m.slug, root), "files") }); } catch { return []; }
+}
+// what a film takes for an artwork that came in several formats: the one that scales, then the ones with no ground
+const LOGO_ORDER = [".svg", ".png", ".webp", ".gif", ".jpg", ".jpeg"];
+const logoRank = (n) => { const i = LOGO_ORDER.indexOf(extname(n).toLowerCase()); return i < 0 ? LOGO_ORDER.length : i; };
+const MAX_LOGOS = 100, MAX_LOGO_BYTES = 30 * 1024 * 1024;
+/** The kit's logos and pictures for a film: each artwork once, and an AI or PSD that came with no picture as the one the scan made. */
+export function kitLogos(m, root = APP_ROOT) {
+  const dir = dirOf(m.slug, root), unread = new Set((m.unread ?? []).map((x) => x.name)), best = new Map();
+  const take = (file, name) => { const k = baseOf(name), was = best.get(k); if (!was || logoRank(name) < logoRank(was.name)) best.set(k, { file, name }); };
+  for (const f of m.files ?? []) {
+    if (!["image", "svg"].includes(f.kind) || unread.has(f.name)) continue;
+    const p = join(dir, "files", f.name);
+    if (existsSync(p) && statSync(p).size <= MAX_LOGO_BYTES) take(p, f.name);
+  }
+  const made = join(dir, "derived");
+  if (existsSync(made)) for (const n of readdirSync(made)) if (!best.has(baseOf(n))) take(join(made, n), n);
+  return [...best.values()].slice(0, MAX_LOGOS);
+}
+/** Where a film's copy of the kit's logos goes; the fonts go in assets/1_design/fonts/<family>/, as a font the user adds. */
+export const KIT_LOGOS = "assets/1_design/images/brand-kit";
+const ASKED_DIR = ".moworks/brand-kit";
+
+/** Copy the kit's logos and fonts into a new film, once, when the film is made: the film keeps these copies, so a kit changed or deleted
+ *  later never changes it. The fonts FRAME.md names (all of them when it names none it has), declared in index.html; recorded in KIT_FILES,
+ *  so they never count as files the user added, and Claude is told of them apart (agent designLines). asked: a kit that is only a
+ *  reference for Prepare (the style keeps its author's design): beside its spec in .moworks/brand-kit/, declared nowhere. Returns what was
+ *  copied (paths in the project), or null when the id is no kit of the user's. */
+export function placeKit(id, filmDir, { root = APP_ROOT, now: at = now(), asked = false } = {}) {
+  const m = getCustom(id, root);
+  if (!m) return null;
+  const want = new Set(parseFrame(frameText(m, root) ?? "").fonts.map(familyKey));
+  const all = kitFonts(m, root), named = all.filter((f) => want.has(familyKey(f.family)));
+  const out = { id: m.id, title: m.title, version: m.version, at, logos: [], fonts: [] };
+  const logoDir = asked ? `${ASKED_DIR}/logos` : KIT_LOGOS;
+  for (const l of kitLogos(m, root)) {
+    mkdirSync(join(filmDir, ...logoDir.split("/")), { recursive: true });
+    copyFileSync(l.file, join(filmDir, ...logoDir.split("/"), l.name));
+    out.logos.push(`${logoDir}/${l.name}`);
+  }
+  for (const f of named.length ? named : all) {
+    const rel = `${asked ? `${ASKED_DIR}/fonts` : "assets/1_design/fonts"}/${fontSlug(f.family)}`;
+    let names;
+    if (asked) {
+      mkdirSync(join(filmDir, ...rel.split("/")), { recursive: true });
+      names = f.files.map((x) => { copyFileSync(x.file, join(filmDir, ...rel.split("/"), basename(x.file))); return basename(x.file); });
+    } else names = useLocalFont(filmDir, f.family, { dir: join(dirOf(m.slug, root), "files") })?.files ?? [];
+    out.fonts.push({ family: f.family, vi: f.vi, files: names.map((n) => `${rel}/${n}`) });
+  }
+  if (!asked && (out.logos.length || out.fonts.length)) {
+    mkdirSync(join(filmDir, ".moworks"), { recursive: true });
+    writeFileSync(join(filmDir, ...KIT_FILES.split("/")), JSON.stringify(out, null, 1) + "\n");
+  }
+  return out;
+}
+
 // ---- the scan
-/** The Claude run that writes work/FRAME.md from the guideline (cwd: the Look's folder; Read and Write only, nothing outside it). Returns
- *  the text, or throws with Claude's own answer. */
-export async function claudeWriter({ dir, look, inputs, root = APP_ROOT, model = "claude-opus-5-5", effort = "medium", signal = null, timeoutMs = 20 * 60 * 1000 }) {
+/** What each file is for Claude, read once: { hints, inputs, reading, unread, pageDirs }. inputs: the paths Claude reads; reading: the same as
+ *  lines of READING.md, said per file; unread: [{ name, reason }]. A PDF goes through tools/intake/intake.py (Read stops at 20 MB and a
+ *  long PDF is many reads): its whole text, a contact sheet of every page, each page ready for a closer look. A password is found here,
+ *  before Claude is asked for anything. An artwork in several formats is read in one of them (AI and PSD need not be opened when the same name
+ *  came as a picture); the same bytes under two names are read once. */
+async function readFiles(m, dir, root, { signal = null, onProgress = () => {} } = {}) {
+  const hints = { colours: [], fonts: [], pptx: [] }, inputs = [], reading = [], unread = [], pageDirs = [];
+  const files = m.files.filter((f) => existsSync(join(dir, "files", f.name)));
+  const INTAKE = "tools/intake/intake.py";
+  const fail = (f, reason) => unread.push({ name: f.name, reason });
+  const why = (r, f) => r.password ? PASSWORD_REASON
+    : /not installed|Python is not/i.test(r.error ?? "") ? "the app's Python components are missing: Install them in Settings › System"
+      : f.kind === "ai" ? "saved without PDF content: add a PDF or PNG export of it" : DAMAGED_REASON;
+  const pictures = new Map();
+  for (const f of files) if (["image", "svg"].includes(f.kind)) { const k = baseOf(f.name); pictures.set(k, [...(pictures.get(k) ?? []), f]); }
+  const seen = new Map();          // size → the files of that size: the same bytes under two names are read once
+  const hashOf = (p) => createHash("sha1").update(readFileSync(p)).digest("hex");
+  const sameAs = (f, p) => {
+    const list = seen.get(f.size) ?? [];
+    if (!list.length) { seen.set(f.size, [{ name: f.name, p }]); return null; }
+    const h = hashOf(p), hit = list.find((x) => (x.h ??= hashOf(x.p)) === h);
+    if (!hit) list.push({ name: f.name, p, h });
+    return hit?.name ?? null;
+  };
+  const made = (from, f) => { mkdirSync(join(dir, "derived"), { recursive: true }); cpSync(from, join(dir, "derived", `${f.name.replace(/\.[^.]+$/, "")}.png`)); };
+  const others = files.filter((f) => !["image", "svg"].includes(f.kind));
+  for (const [i, f] of others.entries()) {
+    const p = join(dir, "files", f.name);
+    onProgress({ stage: "Reading the files", progress: 5 + Math.round((14 * i) / others.length) });
+    if (f.kind === "font") {
+      try { if (!readFaces(p).length) fail(f, "has no family name: it cannot be used"); } catch { fail(f, "could not be read as a font"); }
+    } else if (f.kind === "pptx") {
+      const twin = sameAs(f, p);
+      if (twin) { reading.push(`- ${f.name}: the same file as ${twin}.`); continue; }
+      const sub = `work/pptx-${i + 1}`;
+      try {
+        const r = readPptx(p, join(dir, ...sub.split("/")));
+        hints.pptx.push({ file: f.name, slides: r.slides, theme: r.theme, colours: r.colors, fonts: r.fonts });
+        hints.colours.push(...Object.values(r.theme.colors), ...r.colors);
+        hints.fonts.push(...[r.theme.heading, r.theme.body].filter(Boolean), ...r.fonts);
+        const media = r.media.map((x) => `${sub}/${x}`);
+        inputs.push(`${sub}/slides.md`, ...media);
+        reading.push(`- ${f.name}, PowerPoint, ${r.slides} slide(s): its text: ${sub}/slides.md${media.length ? `; its pictures: ${media.join(", ")}` : ""}.`);
+      } catch { fail(f, DAMAGED_REASON); }
+    } else if (f.kind === "pdf" || f.kind === "ai") {
+      if (f.kind === "ai" && pictures.has(baseOf(f.name))) { reading.push(`- ${f.name}: the same artwork as the picture of that name.`); continue; }
+      const twin = sameAs(f, p);
+      if (twin) { reading.push(`- ${f.name}: the same file as ${twin}.`); continue; }
+      const sub = `work/${f.kind}-${i + 1}`, abs = join(dir, ...sub.split("/"));
+      const r = await runPy(root, INTAKE, ["pdf", p, abs, ...(f.kind === "ai" ? ["--logo"] : [])], { timeoutMs: 10 * 60 * 1000, signal });
+      if (!r.ok) { fail(f, why(r, f)); continue; }
+      const texts = r.chars ? r.text.map((x) => `${sub}/${x}`) : [], sheets = r.sheets.map((x) => `${sub}/${x}`);
+      inputs.push(...texts, ...sheets);
+      pageDirs.push(join(abs, "pages"));
+      reading.push(`- ${f.name}, ${f.kind === "ai" ? "Illustrator file" : "PDF"}, ${r.pages} page(s): ${texts.length ? `its whole text: ${texts.join(", ")}` : "no text in it, its words are only in its pictures: open the pages that matter"}; every page small and numbered on sheets: ${sheets.join(", ")}; one page closer: ${sub}/pages/page-NNN.jpg (NNN: its number in three digits).`);
+      if (r.logo) made(join(abs, r.logo), f);
+    } else if (f.kind === "psd") {
+      if (pictures.has(baseOf(f.name))) { reading.push(`- ${f.name}: the same artwork as the picture of that name.`); continue; }
+      const sub = `work/psd-${i + 1}`, abs = join(dir, ...sub.split("/"));
+      const r = await runPy(root, INTAKE, ["psd", p, abs], { timeoutMs: (f.size > 1e9 ? 30 : 8) * 60 * 1000, signal });
+      if (!r.ok) { fail(f, why(r, f)); continue; }
+      hints.fonts.push(...(r.fonts ?? []));
+      inputs.push(`${sub}/PSD.md`, ...(r.composite ? [`${sub}/${r.composite}`] : []));
+      reading.push(`- ${f.name}, Photoshop file: layers and texts: ${sub}/PSD.md${r.composite ? `; the whole file: ${sub}/${r.composite}` : ""}.`);
+      if (r.composite) made(join(abs, r.composite), f);
+    }
+  }
+  // the pictures: an artwork once (a picture Claude can see before the XML of an SVG); the first READ_PICTURES each, the rest on sheets
+  onProgress({ stage: "Reading the files", progress: 19 });
+  const PIC_ORDER = [".png", ".webp", ".jpg", ".jpeg", ".gif", ".svg"], rank = (n) => PIC_ORDER.indexOf(extname(n).toLowerCase());
+  const onSheets = [];
+  let shown = 0;
+  for (const group of pictures.values()) {
+    const good = group.filter((f) => {
+      if (f.kind === "svg") return true;
+      if (isPicture(join(dir, "files", f.name))) return true;
+      fail(f, DAMAGED_REASON);
+      return false;
+    }).sort((a, b) => rank(a.name) - rank(b.name));
+    if (!good.length) continue;
+    const f = good[0], p = join(dir, "files", f.name), rel = `files/${f.name}`, also = good.slice(1).map((x) => x.name);
+    const alsoLine = also.length ? ` (also came as ${also.join(", ")})` : "";
+    if (f.kind === "svg") {
+      const s = readFileSync(p, "utf8");
+      hints.colours.push(...[...s.matchAll(/#[0-9a-fA-F]{6}\b/g)].map((x) => x[0].toUpperCase()));
+      hints.fonts.push(...[...s.matchAll(/font-family[=:]\s*["']?([^"';,]+)/g)].map((x) => x[1].trim()));
+      // a heavy SVG is too long to read as text: its colours and fonts are in the hints
+      if (f.size <= 200 * 1024 && shown++ < READ_PICTURES) { inputs.push(rel); reading.push(`- ${rel}: picture (SVG)${alsoLine}.`); }
+      continue;
+    }
+    if (shown++ < READ_PICTURES) {
+      hints.colours.push(...pictureColours(p, root));
+      inputs.push(rel);
+      reading.push(`- ${rel}: picture${alsoLine}.`);
+    } else onSheets.push(p);
+  }
+  if (onSheets.length) {
+    const list = join(dir, "work", "pictures.txt"), abs = join(dir, "work", "pictures");
+    writeFileSync(list, onSheets.join("\n") + "\n");
+    const r = await runPy(root, INTAKE, ["sheet", list, abs], { timeoutMs: 5 * 60 * 1000, signal });
+    if (r.ok) {
+      const sheets = r.sheets.map((x) => `work/pictures/${x}`);
+      inputs.push(...sheets);
+      reading.push(`- ${onSheets.length} more pictures, each with its name, on sheets: ${sheets.join(", ")}.`);
+    } else for (const p of onSheets) unread.push({ name: basename(p), reason: why(r, { kind: "image" }) });
+  }
+  return { hints, inputs, reading, unread, pageDirs };
+}
+/** The first bytes say it is a PNG, JPEG, GIF or WebP (a damaged or empty file would stop nothing until Claude tries to open it). */
+function isPicture(p) {
+  try {
+    const b = readFileSync(p).subarray(0, 12);
+    return b.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) || (b[0] === 0xff && b[1] === 0xd8) || b.toString("latin1", 0, 3) === "GIF"
+      || (b.toString("latin1", 0, 4) === "RIFF" && b.toString("latin1", 8, 12) === "WEBP");
+  } catch { return false; }
+}
+/** READING.md: what Claude reads, the kit's fonts by their real names, the logos a film gets, and what could not be read. */
+function readingMd({ reading, unread, fonts, logos }) {
+  const weights = (f) => uniq(f.files.map((x) => `${x.weight}${x.italic ? " italic" : ""}`)).sort((a, b) => parseInt(a, 10) - parseInt(b, 10)).join(", ");
+  return ["# The guideline, as the app made it readable", "", ...reading, "",
+    ...(fonts.length ? ["# Font files in this Brand Kit", "", "Family names as the files themselves give them; every film made with this kit gets these files:", "",
+      ...fonts.map((f) => `- ${f.family}: weights ${weights(f)}; ${f.vi ? "draws every Vietnamese letter" : "does NOT draw every Vietnamese letter"}`), ""] : []),
+    ...(logos.length ? ["# Logos and pictures every film made with this kit gets", "", `In the film's assets, at ${KIT_LOGOS}/<file name>:`, "", ...logos.map((n) => `- ${n}`), ""] : []),
+    ...(unread.length ? ["# Not read", "", "The owner gave these and the app could not read or did not take them:", "", ...unread.map((x) => `- ${x.name}: ${x.reason}`), ""] : [])].join("\n");
+}
+
+/** The Claude run that writes work/FRAME.md from what the app made readable (cwd: the Look's folder; Read and Write only, nothing outside
+ *  it). Returns the text, or throws with Claude's own answer. What the run took (time, turns, tokens, cost) stays in work/claude-run.json. */
+export async function claudeWriter({ dir, look, root = APP_ROOT, model = "claude-opus-5-5", effort = "medium", signal = null, timeoutMs = 20 * 60 * 1000 }) {
   const exe = findClaude(root);
   if (!exe) throw err("NO_CLAUDE", "Claude Code is not installed or not signed in");
   const env = claudeEnv();
@@ -189,14 +454,19 @@ export async function claudeWriter({ dir, look, inputs, root = APP_ROOT, model =
   const prompt = [
     `You turn a brand guideline into a Brand Kit (a HyperFrames look) named "${look.title}".`,
     "1. Read work/look.md (how HyperFrames uses a design spec: \"The project's design spec\") and work/example-FRAME.md (one of HyperFrames' frame presets: the format to follow).",
-    `2. Read the guideline, all of it: ${inputs.join(", ")}. PDFs and pictures you read with Read; a PPTX was unpacked for you into its slides' text (slides.md) and its pictures (media/).`,
+    "2. Read work/READING.md: the guideline as the app made it readable, file by file. Then read all it lists, every text part and every sheet, several in one go. The original PDFs are too big to open: use these.",
+    "   A PDF's text parts hold all its words. Its sheets show every page small and numbered: look at them for colours, gradients, type and layout. Open a page closer only where a page sets a rule its text does not fully give (a gradient, a lockup, a logo position, an end card): up to 30 pages in all.",
     "   work/hints.json lists the colours and fonts the app found in the files (a PPTX's theme, the main colours of the pictures): a hint only; the guideline itself wins.",
     `3. Write work/FRAME.md in exactly the example's format: the YAML front matter (version, name "${look.title} — Frame (video / frame layer)", description, unit, principle,`,
-    "   colors as named hex tokens, typography with the exact font family names the guideline uses, then spacing, rounded and the other token groups the example has, where the",
+    "   colors as named hex tokens, typography with the exact font family names, then spacing, rounded and the other token groups the example has, where the",
     "   guideline gives them), then the prose sections in the example's order (the atoms, composition, logo use, do and don't).",
-    "Rules: take every colour, font, size ratio, logo rule and layout rule from the guideline and keep its names for them. Where the guideline is silent, choose what fits it and",
-    "mark that token or line with \"# inferred\". Motion is out of scope, as in the example. Never copy the example's colours, fonts or wording. Films may be in Vietnamese: name the",
-    "fonts as the guideline does, never swap them. Write only work/FRAME.md. Reply with one line: what you took from which file.",
+    "Rules: take every colour, font, size ratio, logo rule and layout rule from the guideline and keep its names for them: a gradient with its exact colour stops, a glow, a special display type are tokens or rules too. Where the guideline is silent, choose what fits it and",
+    "mark that token or line with \"# inferred\". Motion is out of scope, as in the example. Never copy the example's colours, fonts or wording. Films may be in Vietnamese.",
+    "Fonts: when READING.md lists font files, typography uses exactly those family names (the guideline's own name for a font may be written differently: write the name in that list); choose among them as the guideline says, for screens where it tells screen and print apart. A font READING.md does not list: name it as the guideline does, never swap it.",
+    "Logos: in the logo section, name the file to use for each case by its file name from READING.md's list; say when one file holds several versions.",
+    "Never write that a font, a logo or a file was not in the folder, was not supplied or is missing: READING.md says what the owner gave. Its \"Not read\" list is what the app could not read: where a rule may be in one of those files, say so by name and mark what you chose \"# inferred\"; it was given, it was not read.",
+    "The description says what the brand looks like and names no file: the owner reads it on the kit's panel.",
+    "Write only work/FRAME.md. Reply with one line: what you took from which file.",
   ].join("\n");
   const args = ["-p", "--output-format", "json", "--restricted", "--tools", "Read,Write", "--permission-mode", "acceptEdits", "--permission-prompts", "none", "--strict-mcp-config",
     "--disable-slash-commands", "--model", model, "--effort", effort, "--no-session-persistence"];
@@ -210,7 +480,14 @@ export async function claudeWriter({ dir, look, inputs, root = APP_ROOT, model =
     c.stdout.on("data", (d) => { o += d; });
     c.stderr.resume();
     c.stdin.end(prompt, "utf8");
-    c.on("close", () => { clearTimeout(t); try { const j = JSON.parse(o); ok(String(j.result ?? "").trim()); } catch { ok(o.slice(-300)); } });
+    c.on("close", () => {
+      clearTimeout(t);
+      try {
+        const j = JSON.parse(o);
+        try { writeFileSync(join(dir, "work", "claude-run.json"), JSON.stringify({ model, effort, ms: j.duration_ms, turns: j.num_turns, costUsd: j.total_cost_usd, usage: j.usage }, null, 1) + "\n"); } catch { /* only a record */ }
+        ok(String(j.result ?? "").trim());
+      } catch { ok(o.slice(-300)); }
+    });
     c.on("error", (e) => no(e));
   });
   let answer = await run();
@@ -219,11 +496,12 @@ export async function claudeWriter({ dir, look, inputs, root = APP_ROOT, model =
     await new Promise((r) => setTimeout(r, 5000));
     answer = await run();
   }
-  if (!existsSync(out)) throw err("ERROR", `Claude wrote no frame.md${answer ? `: ${answer.slice(0, 300)}` : ""}`);
+  if (!existsSync(out)) throw err("ERROR", `Claude wrote no Brand Kit${answer ? `: ${answer.slice(0, 300)}` : ""}`);
   return readFileSync(out, "utf8");
 }
 
-/** Scan the Look's files into a new version: unpack, hints, Claude writes FRAME.md, stills, the Vietnamese check. */
+/** Scan the Look's files into a new version: make them readable (what cannot be read is named on the kit), hints, Claude writes FRAME.md,
+ *  stills, the Vietnamese check. */
 export async function scanLook(id, { root = APP_ROOT, onProgress = () => {}, writer = claudeWriter, stills = true, google = undefined, signal = null } = {}) {
   let m = must(id, root);
   if (m.status === "scanning") throw err("BUSY", "The Brand Kit is being scanned");
@@ -233,34 +511,23 @@ export async function scanLook(id, { root = APP_ROOT, onProgress = () => {}, wri
   try {
     onProgress({ stage: "Reading the files", progress: 5 });
     rmSync(work, { recursive: true, force: true }); mkdirSync(work, { recursive: true });
-    const hints = { colours: [], fonts: [], pptx: [] }, inputs = [];
-    m.files.forEach((f, i) => {
-      const p = join(dir, "files", f.name), rel = `files/${f.name}`;
-      if (!existsSync(p)) return;
-      if (f.kind === "pptx") {
-        const sub = `work/pptx-${i + 1}`, r = readPptx(p, join(dir, ...sub.split("/")));
-        hints.pptx.push({ file: f.name, slides: r.slides, theme: r.theme, colours: r.colors, fonts: r.fonts });
-        hints.colours.push(...Object.values(r.theme.colors), ...r.colors);
-        hints.fonts.push(...[r.theme.heading, r.theme.body].filter(Boolean), ...r.fonts);
-        inputs.push(`${sub}/slides.md`, ...r.media.map((x) => `${sub}/${x}`));
-      } else if (f.kind === "svg") {
-        const s = readFileSync(p, "utf8");
-        hints.colours.push(...[...s.matchAll(/#[0-9a-fA-F]{6}\b/g)].map((x) => x[0].toUpperCase()));
-        hints.fonts.push(...[...s.matchAll(/font-family[=:]\s*["']?([^"';,]+)/g)].map((x) => x[1].trim()));
-        inputs.push(rel);
-      } else {
-        if (f.kind === "image") hints.colours.push(...pictureColours(p, root));
-        inputs.push(rel);
-      }
-    });
+    rmSync(join(dir, "derived"), { recursive: true, force: true });
+    const read = await readFiles(m, dir, root, { signal, onProgress });
+    m.unread = read.unread; saveMeta(m, root);
+    // nothing to read: Claude is not asked, and the panel says why
+    if (!read.inputs.length) throw err("INVALID", read.unread.length ? "None of the guideline's files could be read." : "Add the guideline too: a PDF, a PowerPoint or pictures.");
+    const { hints, inputs } = read, unread = [...read.unread, ...(m.leftOut ?? [])];
     onProgress({ stage: "Colours and fonts", progress: 20 });
     hints.colours = count(hints.colours).slice(0, 16); hints.fonts = count(hints.fonts).slice(0, 8);
     writeFileSync(join(work, "hints.json"), JSON.stringify(hints, null, 2) + "\n");
+    const fonts = kitFonts(m, root), logos = kitLogos(m, root).map((x) => x.name);
+    writeFileSync(join(work, "READING.md"), readingMd({ reading: read.reading, unread, fonts, logos }));
     const hf = hfLookDir(root), example = hfItems(root)[0];
     if (example) cpSync(join(hf, example.file), join(work, "example-FRAME.md"));
     if (existsSync(join(hf, ...LOOK_GUIDE.split("/")))) cpSync(join(hf, ...LOOK_GUIDE.split("/")), join(work, "look.md"));
-    onProgress({ stage: "Writing frame.md", progress: 30 });
-    const text = await writer({ dir, work, look: m, hints, inputs, root, signal });
+    onProgress({ stage: "Writing the Brand Kit", progress: 30 });
+    const text = await writer({ dir, work, look: m, hints, inputs, unread, fonts, logos, root, signal });
+    for (const d of read.pageDirs) rmSync(d, { recursive: true, force: true });          // the page pictures were for this run; the text and the sheets stay
     m = await saveVersion(id, text, { root, note: `scanned from ${m.files.length} file(s)`, by: "scan", stills, google, onProgress, scanning: true });
     m.status = "ready";
     return saveMeta(m, root);
@@ -277,15 +544,16 @@ export async function saveVersion(id, text, { root = APP_ROOT, note = "", by = "
   const m = must(id, root);
   if (m.status === "scanning" && !scanning) throw err("BUSY", "The Brand Kit is being scanned");
   const t = String(text ?? "").replace(/\r\n/g, "\n"), p = parseFrame(t);
-  if (!p.colors.length) throw err("INVALID", "frame.md has no colours: its front matter needs a colors block of named hex tokens");
+  if (!p.colors.length) throw err("INVALID", "The design spec has no colours: its front matter needs a colors block of named hex tokens");
   const v = Math.max(0, ...m.versions.map((x) => x.v)) + 1, vd = join(dirOf(m.slug, root), `v${v}`);
   mkdirSync(vd, { recursive: true });
   writeFileSync(join(vd, "FRAME.md"), t.endsWith("\n") ? t : t + "\n");
   onProgress({ stage: "Preview stills", progress: 70 });
+  const own = kitFonts(m, root);
   let shots = [], stillsError = null;
-  if (stills) { try { shots = await drawStills(p, m.title, join(vd, "stills"), root); } catch (e) { stillsError = String(e?.message ?? e).slice(0, 200); } }
+  if (stills) { try { shots = await drawStills(p, m.title, join(vd, "stills"), root, own); } catch (e) { stillsError = String(e?.message ?? e).slice(0, 200); } }
   onProgress({ stage: "Vietnamese check", progress: 90 });
-  const vi = await vietnameseCheck(p.fonts, google ? { google } : undefined);
+  const vi = await vietnameseCheck(p.fonts, { ...(google ? { google } : {}), own });
   Object.assign(m, { version: v, swatches: uniq(p.colors.map((c) => c.hex)).slice(0, 5), fonts: p.fonts, vi, description: p.description.slice(0, 300),
     stills: shots.map((n) => `v${v}/stills/${n}`), status: scanning ? m.status : "ready", error: stillsError && `Stills: ${stillsError}` });
   m.versions.push({ v, at: now(), by, note: String(note).slice(0, 200) });
@@ -302,6 +570,7 @@ export async function patchLook(id, b = {}, opts = {}) {
     if (!s.length || s.length > 8 || !s.every((x) => /^#[0-9A-F]{6}$/.test(x))) throw err("INVALID", "Swatches are 1 to 8 colours like #1B2566");
     m.swatches = s;
   }
+  if (b.leftOut !== undefined) m.leftOut = mergeRows(m.leftOut, leftOutRows(Array.isArray(b.leftOut) ? b.leftOut : []));
   return saveMeta(m, root);
 }
 export async function restoreVersion(id, v, opts = {}) {
@@ -327,14 +596,23 @@ export function roles(colors) {
   return { bg, ink, accent: by(/^(accent|brand|primary|highlight)/i) ?? rest[0]?.hex ?? ink };
 }
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-export function stillsHtml(p, title) {
+const FACE_FORMAT = { ".ttf": ["font/ttf", "truetype"], ".otf": ["font/otf", "opentype"], ".woff": ["font/woff", "woff"], ".woff2": ["font/woff2", "woff2"] };
+/** @font-face rules with the font inside the page (the stills are drawn from a page with no folder of its own), for a family the kit has. */
+const embeddedFaces = (written, fam) => fam.files.filter((x) => !x.italic).map((x) => {
+  const [type, format] = FACE_FORMAT[extname(x.file).toLowerCase()] ?? FACE_FORMAT[".ttf"];
+  return `@font-face{font-family:'${String(written).replace(/'/g, "")}';src:url(data:${type};base64,${readFileSync(x.file).toString("base64")}) format('${format}');font-weight:${x.weight};font-style:normal;font-display:block}`;
+}).join("\n");
+/** own: the kit's fonts (kitFonts): a family it has is drawn from its files; only another family comes from Google Fonts. */
+export function stillsHtml(p, title, own = []) {
   const { bg, ink, accent } = roles(p.colors), disp = p.display ?? "sans-serif", body = p.body ?? disp;
   const fam = uniq([disp, body]).filter((f) => f && !/^(sans-serif|serif|monospace)$/.test(f));
-  const gf = fam.length ? `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fam.map((f) => `family=${encodeURIComponent(f).replace(/%20/g, "+")}:wght@400;700`).join("&")}&display=swap">` : "";
-  const ff = (f) => `'${String(f).replace(/'/g, "")}', system-ui, sans-serif`;
+  const ownOf = (f) => own.find((x) => familyKey(x.family) === familyKey(f)), web = fam.filter((f) => !ownOf(f));
+  const gf = web.length ? `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?${web.map((f) => `family=${encodeURIComponent(f).replace(/%20/g, "+")}:wght@400;700`).join("&")}&display=swap">` : "";
+  const faces = fam.filter(ownOf).map((f) => embeddedFaces(f, ownOf(f))).join("\n");
+  const ff = (f) => `'${String(f).replace(/'/g, "")}', ${ownOf(f) ? "" : "system-ui, "}sans-serif`;
   const frame = (inner, b = bg) => `<section class="frame" style="background:${b}">${inner}</section>`;
   const sw = p.colors.slice(0, 8).map((c) => `<div class="sw"><i style="background:${c.hex}"></i><b>${esc(c.name)}</b><span>${c.hex}</span></div>`).join("");
-  return `<!doctype html><html><head><meta charset="utf-8">${gf}<style>
+  return `<!doctype html><html><head><meta charset="utf-8">${gf}<style>${faces}
 *{margin:0;box-sizing:border-box}body{background:#000}
 .frame{width:1920px;height:1080px;position:relative;overflow:hidden;color:${ink};font-family:${ff(body)};padding:120px 140px}
 h1{font-family:${ff(disp)};font-size:150px;line-height:1.02;font-weight:700;max-width:1500px}
@@ -349,7 +627,7 @@ ${frame(`<div class="lab">Colours</div><div class="sws">${sw}</div>`)}
 ${frame(`<div class="lab">Typography · Tiếng Việt</div><h2>Chất lượng là danh dự: Đổi mới mỗi ngày</h2><p>Văn bản mẫu có đủ dấu tiếng Việt: ă â đ ê ô ơ ư, ả ã ạ ỳ ỹ ỵ. The quick brown fox jumps over the lazy dog, 0123456789.</p><div class="card">${esc(title)}</div>`)}
 </body></html>`;
 }
-async function drawStills(p, title, outDir, root) {
+async function drawStills(p, title, outDir, root, own = []) {
   const puppeteer = puppeteerOf(root);
   rmSync(outDir, { recursive: true, force: true }); mkdirSync(outDir, { recursive: true });
   const browser = await puppeteer.launch({ executablePath: resolveRuntime(null, root).chromium, headless: true, args: ["--hide-scrollbars", "--force-color-profile=srgb"] });
@@ -357,7 +635,7 @@ async function drawStills(p, title, outDir, root) {
   try {
     const page = await browser.newPage();
     await page.setViewport({ width: 1920, height: 1080, deviceScaleFactor: 1 });
-    await page.setContent(stillsHtml(p, title), { waitUntil: "networkidle0", timeout: 30000 }).catch(() => {});
+    await page.setContent(stillsHtml(p, title, own), { waitUntil: "networkidle0", timeout: 30000 }).catch(() => {});
     await page.evaluate(() => document.fonts?.ready);
     const frames = await page.$$(".frame");
     for (let i = 0; i < frames.length; i++) {
@@ -385,6 +663,8 @@ export function publicLook(m) {
   return { id: m.id, title: m.title, group: "yours", description: wholeText(m.description), swatches: m.swatches ?? [],
     preview: { image: m.stills?.[0] ? media(m.slug, m.stills[0]) : null, video: null }, fonts: fontRows(m.vi, m.fonts), vi: m.vi?.status ?? null,
     version: m.version, updatedAt: m.updatedAt, editable: true, status: m.status, error: m.error ?? null,
+    // what the kit holds without having read it: named on its panel, a kit made before this list has none
+    unread: [...(m.unread ?? []), ...(m.leftOut ?? [])],
     source: { kind: "guideline", files: (m.files ?? []).map((f) => f.name), credit: OWNER } };
 }
 export function hfLook(l, root = APP_ROOT) {

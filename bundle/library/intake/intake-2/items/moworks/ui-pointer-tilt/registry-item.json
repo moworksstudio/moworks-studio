@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-pointer-tilt",
+  "type": "hyperframes:component",
+  "title": "Pointer Tilt",
+  "description": "Thẻ nghiêng 3D về phía góc con trỏ đang chỉ (±6° hai trục), con trỏ về giữa thì thẻ phẳng lại.",
+  "tags": [
+    "tilt",
+    "3d",
+    "cursor",
+    "card",
+    "web-interaction",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-pointer-tilt.html",
+      "target": "compositions/components/ui-pointer-tilt.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-pointer-tilt",
+    "author": "moworks",
+    "call": "MW.uiPointerTilt(q(\".pt\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.uiPointerTilt",
+    "options": {
+      "tilt": "degrees on both axes (6)",
+      "perspective": "px (2100)",
+      "period": "s per loop (1.8)",
+      "cycles": "(2)",
+      "ease": "(power2.inOut)",
+      "title": "a part lifted forward",
+      "depth": "px it sits forward (120)",
+      "unit": "px per reference unit for the cursor (5)",
+      "cursor": "an optional cursor"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Card with perspective 420 px (recipe says 500); 1.8 s loop, each move eased in-out: flat to 10 %, rotateX −6° rotateY −6° by 32 % (cursor upper centre), hold to 44 %, rotateX +6° rotateY +6° by 66 % (cursor lower left), hold to 78 %, flat by 92 %. Card title sits 24 px forward (translateZ). Cursor offsets from centre: (−58,−18) → (0,−45) at 32 % → (−114,11) at 66 % → back at 92 %. Params: tilt (6°) · perspective (420 px) · keys [[giây, rotX, rotY]] · ease (power2.inOut).",
+    "titleVi": "Thẻ nghiêng theo con trỏ"
+  }
+}

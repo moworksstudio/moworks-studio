@@ -1,0 +1,56 @@
+<!--
+  Bass-style Racing Credits (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Trên một lưới nghiêng, vạch màu lao ngang qua khung, chức danh và tên trượt vào ngay sau vạch theo hai chiều ngược nhau, đi đều không êm dần, rồi lao ra ngược hướng.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.lowerRacingCredits(q(".rc"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - unit: px per reference unit (5)
+      - exitAt: s (3.2): out at the same speed, opposite ways
+
+  Notes: Stage skewY −11.3° over a grid (verticals every 26 px grow down 0.05–0.45 s, +0.03 s per line from centre, power2.out; horizontals every 24 px). Accent bar 110 × 4 px races 200 → −420 px in 0.4 s linear from 0.5 s; role (15 px accent) slides 260 → 0 in 0.27 s linear from 0.6 s. Second bar −200 → 420 px from 0.85 s; name (32 px) −300 → 0 from 0.95 s. Role underline 0.87–1.1 s power2.out. Exit at the same speed, opposite ways, 3.2–3.36 s. Params: độ nghiêng (−11°) · thời gian trượt (0.27 s, đều) · vạch (110 × 4 px).
+-->
+
+<div class="rc"><div class="rc-v" style="left:50px"></div><div class="rc-v" style="left:180px"></div><div class="rc-v" style="left:310px"></div><div class="rc-v" style="left:440px"></div><div class="rc-v" style="left:570px"></div><div class="rc-v" style="left:700px"></div><div class="rc-v" style="left:830px"></div><div class="rc-v" style="left:960px"></div><div class="rc-v" style="left:1090px"></div><div class="rc-v" style="left:1220px"></div><div class="rc-v" style="left:1350px"></div><div class="rc-v" style="left:1480px"></div><div class="rc-v" style="left:1610px"></div><div class="rc-v" style="left:1740px"></div><div class="rc-v" style="left:1870px"></div><div class="rc-h" style="top:0px"></div><div class="rc-h" style="top:120px"></div><div class="rc-h" style="top:240px"></div><div class="rc-h" style="top:360px"></div><div class="rc-h" style="top:480px"></div><div class="rc-h" style="top:600px"></div><div class="rc-h" style="top:720px"></div><div class="rc-h" style="top:840px"></div><div class="rc-h" style="top:960px"></div><div class="rc-h" style="top:1080px"></div>
+<div class="rc-bar" style="top:425px"></div><div class="rc-bar" style="top:600px"></div><div class="rc-role">ĐẠO DIỄN</div><div class="rc-ul"></div><div class="rc-name">Nguyễn Minh Anh</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"unit":5,"exitAt":3.2};
+  var run = function (el, tl, at, o) {
+        var k = o.unit, bars = el.querySelectorAll(".rc-bar"), role = el.querySelector(".rc-role"), name = el.querySelector(".rc-name"), ul = el.querySelector(".rc-ul"), vs = el.querySelectorAll(".rc-v"), p2 = gsap.parseEase("power2.out");
+        var lin = function (a, d, t) { return Math.max(0, Math.min(1, (t - a) / d)); };
+        return MW.drive(tl, at, o.exitAt + 0.4, function (t) {
+          var e = t > o.exitAt ? lin(o.exitAt, 0.16, t) : 0;
+          vs.forEach(function (v, i) { var c = Math.abs(i - (vs.length - 1) / 2); gsap.set(v, { scaleY: p2(lin(0.05 + 0.03 * c, 0.4, t)) }); });
+          gsap.set(bars[0], { x: (200 - 620 * lin(0.5, 0.4, t)) * k }); bars[0].style.opacity = t > 0.5 && t < 0.9 ? "1" : "0";
+          gsap.set(bars[1], { x: (-200 + 620 * lin(0.85, 0.4, t)) * k }); bars[1].style.opacity = t > 0.85 && t < 1.25 ? "1" : "0";
+          gsap.set(role, { x: (260 * (1 - lin(0.6, 0.27, t)) - 600 * e) * k }); role.style.opacity = t >= 0.6 ? "1" : "0";
+          gsap.set(name, { x: (-300 * (1 - lin(0.95, 0.27, t)) + 600 * e) * k }); name.style.opacity = t >= 0.95 ? "1" : "0";
+          if (ul) gsap.set(ul, { scaleX: p2(lin(0.87, 0.23, t)) * (1 - e) });
+        });
+      };
+  MW.lowerRacingCredits = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

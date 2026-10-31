@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/background-snow-layers",
+  "hash": "c354a8672e182140",
+  "at": "2026-10-17T09:12:00.246Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__background-snow-layers.mp4",
+    "poster": "previews/moworks__background-snow-layers.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a639010bbf9ba542f16da6e211dafe292a259bbf7f5f63fdda422775fe593a44",
+    "size": 46663,
+    "seconds": 30.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

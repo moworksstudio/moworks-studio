@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-light-leak",
+  "type": "hyperframes:component",
+  "title": "Light Leak",
+  "description": "Một luồng sáng ấm mềm lướt ngang và loá mạnh nhất đúng lúc cắt cảnh rồi tan đi.",
+  "tags": [
+    "light-leak",
+    "overlay",
+    "warm",
+    "transitions",
+    "soft",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "transition-light-leak.html",
+      "target": "compositions/components/transition-light-leak.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/transition-light-leak",
+    "author": "moworks",
+    "call": "MW.transitionLightLeak(q(\".tk-b\"), tl, 1.5, {});",
+    "function": "MW.transitionLightLeak",
+    "options": {
+      "duration": "s (0.8; the cut is under the peak, at the middle)",
+      "radius": "0-1 of the width (0.62: 200 on a 320 frame)",
+      "y": "0-1 of the height (0.4)",
+      "peak": "opacity of the warm core (0.95)",
+      "from": "the outgoing scene"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "A soft radial light (stops rgba(255,214,140,.95) -> rgba(255,140,80,.45) at 50 % -> transparent, radius 200 on a 320 frame, y 40 %) sweeps left -> right (centre x -120 -> W + 120) easeInOutSine over 800 ms with opacity sin(pi p): builds 0-400 ms, the cut happens at 400 ms under the peak, fades 400-800 ms. Params: duration (0.8 s) · color (cam ấm) · peak (0.95). Called with the cut time: the leak starts half its duration before it.",
+    "titleVi": "Vệt sáng loá che điểm cắt"
+  }
+}

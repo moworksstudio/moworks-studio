@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-ripple-reveal",
+  "type": "hyperframes:component",
+  "title": "Ripple Reveal",
+  "description": "Từ một điểm chạm, hai vòng gợn lan ra và nội dung hiện dần trong một vòng tròn lớn dần theo vòng gợn đầu.",
+  "tags": [
+    "ripple",
+    "reveal",
+    "circle",
+    "tap",
+    "effects-transitions",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "effect-ripple-reveal.html",
+      "target": "compositions/components/effect-ripple-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-ripple-reveal",
+    "author": "moworks",
+    "call": "MW.effectRippleReveal(q(\".rp\"), tl, 0.4, { point: [0.42, 0.55] });",
+    "function": "MW.effectRippleReveal",
+    "options": {
+      "duration": "s (0.95, ease-out cubic)",
+      "point": "[x, y] share of the element",
+      "start": "px ring radius at the start (40)",
+      "radius": "px of the first ring at the end (null: to the farthest corner)",
+      "delay2": "s the second ring starts (0.11)",
+      "stroke": "[ring 1, ring 2] px ([10, 6])",
+      "accent": ""
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "At a tap point (default centre): ring 1 (2.5 px stroke) radius 8 -> 88 px, opacity 0.9 -> 0, 950 ms easeOutCubic; ring 2 (1.5 px, opacity 0.5 -> 0) starts 110 ms later, ends with ring 1. Target revealed by a circle clip from the tap that grows with ring 1 (x1.05) and opacity 0 -> 1 from +80 to +700 ms easeOutCubic. Optional 5 px tap dot for 140 ms. Params: duration (0.95 s) · x, y: điểm chạm (giữa) · radius (8 → 88 px) · delay vòng 2 (0.11 s).",
+    "titleVi": "Gợn sóng mở lộ nội dung"
+  }
+}

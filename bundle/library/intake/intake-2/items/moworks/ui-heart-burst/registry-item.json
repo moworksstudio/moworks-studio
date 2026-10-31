@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-heart-burst",
+  "type": "hyperframes:block",
+  "title": "Heart Burst",
+  "description": "Ấn trái tim, tim lún xuống rồi bật lại đầy màu bằng lò xo, sáu trái tim nhỏ hai màu bay toả lên hình quạt, lắc nhẹ và tan, số lượt thích tăng một.",
+  "tags": [
+    "like",
+    "heart",
+    "burst",
+    "spring",
+    "feedback-reactions",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-heart-burst.html",
+      "target": "compositions/components/ui-heart-burst.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-heart-burst",
+    "author": "moworks",
+    "call": "MW.uiHeartBurst(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiHeartBurst",
+    "options": {
+      "press": "s (0.35)",
+      "life": "s per small heart (0.95)",
+      "count": "",
+      "caption": "",
+      "accent": "",
+      "loop": "s (2.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Heart r30 outline. Press 0.35-0.45 s scale 1 → 0.85; release fills it and springs back to 1 (k300 d12). Six small hearts r7 (accent / yellow alternating) start 0.47 s, 45 ms apart, on a fan around straight up (−90° ± 55°, 22° steps): fly from 28 to 58-72 px out (power2.out), rise 10 px extra, sway ±4 px, size min(1, 5p) × (0.9 − 0.3p), fade over the last 45 % of 0.95 s. Counter 128 → 129. Params: press (0.85) · spring (k300 c12) · hearts (6, cách 0.045 s) · fan (±55°) · life (0.95 s). Pressed to 0.85, then filled and sprung back (k300 c12); six small hearts fan out around straight up (±55°), 0.045 s apart.",
+    "titleVi": "Bấm tim, tim nhỏ bay toả lên"
+  }
+}

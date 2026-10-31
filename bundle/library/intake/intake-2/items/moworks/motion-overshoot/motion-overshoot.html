@@ -1,0 +1,52 @@
+<!--
+  Overshoot (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Khối đi tới 108 % quãng đường rồi lùi về đúng đích.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionOvershoot(q(".os"), tl, 0.3, { backAt: 1.5 });
+
+  Options (defaults in brackets):
+      - distance: px (880)
+      - over: share past the end (0.08)
+      - duration: s (0.6): 72 % power2.out out, the rest power2.inOut back
+      - backAt: s after the start to return (null)
+      - back: s (0.4)
+
+  Notes: Square x 0 → 108 % of the distance in 430 ms power2.out, back to 100 % by 600 ms (170 ms power2.inOut) — the back.out look as two keys; demo distance 176 px. Return 400 ms power2.inOut. Params: duration (0.6 s) · overshoot (8 %) · x: quãng đi.
+-->
+
+<div class="os-t"></div><div class="os-m"></div><div class="os-ml">100 %</div><div class="os"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"distance":880,"over":0.08,"duration":0.6,"backAt":null,"back":0.4};
+  var run = function (el, tl, at, o) {
+        var p2 = gsap.parseEase("power2.out"), io = gsap.parseEase("power2.inOut"), a = o.duration * 0.717;
+        return MW.drive(tl, at, o.backAt == null ? o.duration : o.backAt + o.back, function (t) {
+          var x = t < a ? o.distance * (1 + o.over) * p2(t / a) : o.distance * (1 + o.over - o.over * io(Math.min(1, (t - a) / (o.duration - a)))); if (o.backAt != null && t > o.backAt) x = o.distance * (1 - io(Math.min(1, (t - o.backAt) / o.back)));
+          gsap.set(el, { x: x });
+        });
+      };
+  MW.motionOvershoot = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

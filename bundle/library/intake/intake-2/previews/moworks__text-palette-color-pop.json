@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-palette-color-pop",
+  "hash": "5695095d9f5e0d19",
+  "at": "2026-10-17T10:31:33.168Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-palette-color-pop.mp4",
+    "poster": "previews/moworks__text-palette-color-pop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "abebed1b91616c27b42e09b48ed2c1f1bb72d4e8bd151a4aff1983b033a56820",
+    "size": 26173,
+    "seconds": 27.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

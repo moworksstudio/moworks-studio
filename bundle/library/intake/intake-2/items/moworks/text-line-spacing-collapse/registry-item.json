@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-line-spacing-collapse",
+  "type": "hyperframes:component",
+  "title": "Line-Spacing Collapse",
+  "description": "Các dòng chữ bắt đầu cách nhau rất xa rồi cùng khép lại thành một đoạn chặt, cỡ chữ và khoảng chữ giữ nguyên.",
+  "tags": [
+    "lines",
+    "leading",
+    "collapse",
+    "layout",
+    "text-layout-reflow",
+    "smooth",
+    "heavy",
+    "layout-reflow"
+  ],
+  "files": [
+    {
+      "path": "text-line-spacing-collapse.html",
+      "target": "compositions/components/text-line-spacing-collapse.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-line-spacing-collapse",
+    "author": "moworks",
+    "call": "MW.textLineSpacingCollapse(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textLineSpacingCollapse",
+    "options": {
+      "spread": "extra space per gap at the start, em (1.5)",
+      "start": "s (0.6)",
+      "duration": "s (1)",
+      "accent": "the last line's colour",
+      "loop": "s (3.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Text split into ≤ 4 lines (word groups), ≤ 36 px (30 px if more than 2 lines), line height 1.12 em, block centred. Extra spacing per gap starts at ≈1.5 em (min(56 px, fit) in the demo) and closes to 0 in 1 s, 0.6–1.6 s, cubic-bezier(.65,0,.35,1) (power2.inOut-like); lines stay centred around the middle. Fade in 0.1–0.45 s, out 3.0–3.35 s linear; reopen 3.38–3.75 s. Last line accent. Loop 3.8 s. Params: độ giãn thêm (1.5 em) · thời gian (1 s) · số dòng (≤ 4).",
+    "titleVi": "Các dòng giãn xa rồi khép lại"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-infinite-marquee",
+  "type": "hyperframes:component",
+  "title": "Infinite Marquee",
+  "description": "Ba hàng chữ lặp lại chạy ngang liên tục, xen kẽ chiều: hàng chữ đặc, hàng chữ trên dải màu nhấn, hàng chữ chỉ có nét viền; hai mép mờ vào nền.",
+  "tags": [
+    "marquee",
+    "loop",
+    "bands",
+    "outline",
+    "text-loops-decoration",
+    "smooth",
+    "loops-decoration"
+  ],
+  "files": [
+    {
+      "path": "text-infinite-marquee.html",
+      "target": "compositions/components/text-infinite-marquee.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-infinite-marquee",
+    "author": "moworks",
+    "call": "MW.textInfiniteMarquee(q(\".mq\"), tl, 0, {});",
+    "function": "MW.textInfiniteMarquee",
+    "options": {
+      "rows": "the moving rows (each one's first child is one copy)",
+      "dirs": "−1 left, 1 right, per row",
+      "copies": "copies each row moves per loop (1)",
+      "fade": "px the edges fade (136)",
+      "loop": "s (6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Track = text + ' • ' repeated (two copies, x 0 → −50 % in the recipe, 10–20 s per copy, linear, seamless). Demo rows: 26 px filled ink moving left; 30 px in the background colour on a full-width accent band 1.64 em tall moving right; 26 px outline only (1.2 px) moving left; each moves a whole number of copies per 6 s loop (≈40 px/s in a 320 px demo). Both frame edges fade into the background over 34 px. Params: tốc độ (≈ 8 s mỗi chiều rộng khung) · kiểu hàng (đặc / dải / viền) · ký tự ngăn (•).",
+    "titleVi": "Băng chữ chạy vô tận nhiều hàng"
+  }
+}

@@ -8,7 +8,7 @@ import { join, resolve } from "node:path";
 import { runHf } from "../hf-qa/cli.mjs";
 import { endFade, fadeOfTotal, filmEnding, filmLength } from "./ending.mjs";
 import { isStarterPage } from "./shots.mjs";
-import { MUSIC_DUCK, duckLane, speechSpans } from "../sfx/actions.mjs";
+import { MUSIC_DUCK, duckLane, sig, speechSpans } from "../sfx/actions.mjs";
 
 const ROLES = { voice: { id: "el-voice", role: "voiceover", track: 10, volume: 1 }, music: { id: "el-music", role: "music", track: 11, volume: 0.6 } };
 const BEGIN = "<!-- mw:tracks -->", END = "<!-- /mw:tracks -->";
@@ -245,7 +245,6 @@ export function fitMusicToFilm(dir) {
 // data-mw-duck: its signature), so a level or a lane the user changed in Studio stays theirs; the earlier fixed levels (voice 1, music 0.6)
 // count as the app's.
 const DEFAULT_GAIN = { voice: "1", music: "0.6" };
-const sig = (s) => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) | 0; return (h >>> 0).toString(36); };
 /** Whether a clip's level is the app's to set (kind: "voice" | "music"). */
 const gainIsOurs = (a, kind) => (a["data-mw-gain"] != null ? a["data-volume"] === a["data-mw-gain"] : (a["data-volume"] ?? "1") === DEFAULT_GAIN[kind]);
 /** Set the app's level on every clip of the voice-over or the music whose level is the app's (gain: a number). Returns how many changed. */
@@ -264,11 +263,15 @@ export function setTrackGain(dir, kind, gain) {
   if (out !== html) writeFileSync(f, out);
   return n;
 }
-/** The music's duck lanes written for the film's words as they are now (none without a transcript). Returns how many clips duck. */
-export function duckMusic(dir) {
+/** The music's duck lanes written for the film's words as they are now (none without a transcript). deep: [{ start, duck }], the spoken spans
+ *  (by their start) where the song is too loud for the usual duck to keep the words clear; by default what the last fit found (sfx/voicefit.mjs,
+ *  kept in sfx.json), so the lane stays as it was while nothing changed. Returns how many clips duck. */
+export function duckMusic(dir, { deep = null } = {}) {
   const f = join(dir, "index.html");
   let html; try { html = readFileSync(f, "utf8"); } catch { return 0; }
-  const words = filmWords(dir), spans = words?.length ? speechSpans(words) : [];
+  let deeper = deep;
+  if (!deeper) { try { deeper = JSON.parse(readFileSync(join(dir, ".moworks", "sfx.json"), "utf8")).fit?.deep ?? []; } catch { deeper = []; } }
+  const words = filmWords(dir), spans = (words?.length ? speechSpans(words) : []).map((s) => ({ ...s, duck: deeper.find((d) => d.start === s.start)?.duck }));
   let n = 0;
   const out = html.replace(/<audio\b[^>]*>/gi, (tag) => {
     const a = attrsOf(tag);
@@ -394,6 +397,7 @@ export async function analyseBeats(dir, src, { version = null } = {}) {
 // verbatim). Moving one and taking it off is HF's own source mutation (editor.mjs → handEdit.mjs setAudio / removeAudio: Studio's
 // patchElementInHtml / removeElementFromHtml in studio-server/src/helpers/sourceMutation.ts). Lanes are data-timeline-role: "voiceover",
 // "music", "sfx" (the app's older sound effects carry none).
+// the block films placed before 31/10/2026 have; a clip still goes in it when it is there (placeClip)
 const CLIPS_BEGIN = "<!-- mw:clips (Moworks Studio: sounds the owner put on the timeline) -->", CLIPS_END = "<!-- /mw:clips -->";
 const CLIP_TRACK = 40, CLIP_VOLUME = 0.8;
 const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -408,22 +412,32 @@ export function laneOfFile(rel, classify = null) {
   return /voiceover/.test(f) ? "voiceover" : /sfx/.test(f) ? "sfx" : "music";
 }
 /** Put a sound effect on the timeline at `start`: its own <audio> on its own track in the user's block, so the app's sfx block (rewritten
- *  from the storyboard's cues) never takes it away. Returns the attributes written. */
-export function placeClip(dir, { src, duration, start = 0 }) {
+ *  from the storyboard's cues) never takes it away. Returns the attributes written. volume, fadeOut: its level and its fade at its end.
+ *  freeLane: the first of the user's lanes free at its time, not one lane per clip (the Sounds drawer's many short sounds keep a few rows). */
+export function placeClip(dir, { src, duration, start = 0, volume = CLIP_VOLUME, fadeOut = 0, freeLane = false }) {
   const f = join(dir, "index.html");
   let html = readFileSync(f, "utf8");
   const used = [...html.matchAll(/\bid="el-clip-(\d+)"/g)].map((m) => Number(m[1]));
-  const n = used.length ? Math.max(...used) + 1 : 1;
-  const a = { id: `el-clip-${n}`, src, "data-start": String(r3(Math.max(0, Number(start) || 0))), "data-duration": String(r3(duration)),
-    "data-track-index": String(CLIP_TRACK + n), "data-volume": String(CLIP_VOLUME), "data-timeline-role": "sfx" };
+  const n = used.length ? Math.max(...used) + 1 : 1, at = r3(Math.max(0, Number(start) || 0));
+  let track = CLIP_TRACK + n;
+  if (freeLane) {
+    const clips = [...html.matchAll(/<audio\b[^>]*\bid="el-clip-\d+"[^>]*>/gi)].map((m) => attrsOf(m[0]));
+    const clash = (k) => clips.some((c) => Number(c["data-track-index"]) === k && Number(c["data-start"]) < at + duration - 1e-3 && at < Number(c["data-start"]) + Number(c["data-duration"]) - 1e-3);
+    for (track = CLIP_TRACK + 1; clash(track); track++);
+  }
+  const a = { id: `el-clip-${n}`, src, "data-start": String(at), "data-duration": String(r3(duration)),
+    "data-track-index": String(track), "data-volume": String(volume), ...(fadeOut > 0 ? { "data-fade-out": String(r3(fadeOut)) } : {}), "data-timeline-role": "sfx" };
   const line = `<audio ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}></audio>`;
   const block = new RegExp(`(${esc(CLIPS_BEGIN)})([\\s\\S]*?)(${esc(CLIPS_END)})`);
   if (block.test(html)) html = html.replace(block, (m0, b, inner, e) => `${b}${inner.replace(/\s*$/, "")}\n    ${line}\n    ${e}`);
   else {
+    // on a page with no such block, the tags alone: it still reads as the same picture (server/proxy.mjs filmParts: drawn), so the first sound the
+    // user adds is mixed onto the rendered film in seconds, never a whole render for two comment lines
     const root = /<[a-z]+\b[^>]*\bdata-composition-id="[^"]*"[^>]*>/i.exec(html);
     if (!root) throw Object.assign(new Error("index.html has no root composition"), { code: "INVALID" });
-    const at = root.index + root[0].length;
-    html = `${html.slice(0, at)}\n    ${CLIPS_BEGIN}\n    ${line}\n    ${CLIPS_END}${html.slice(at)}`;
+    const last = [...html.matchAll(/<audio\b[^>]*\bid="el-clip-\d+"[^>]*>(?:\s*<\/audio>)?/gi)].at(-1);
+    const pos = last ? last.index + last[0].length : root.index + root[0].length;
+    html = `${html.slice(0, pos)}\n    ${line}${html.slice(pos)}`;
   }
   writeFileSync(f, html);
   return a;

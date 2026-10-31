@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-spin-stop",
+  "hash": "d62023743af84315",
+  "at": "2026-10-17T09:32:47.216Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-spin-stop.mp4",
+    "poster": "previews/moworks__motion-spin-stop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "e37dc4cf9f35af20a0d04f818db992a20d3521db08257ab314a25bc6f63804c3",
+    "size": 17290,
+    "seconds": 31,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

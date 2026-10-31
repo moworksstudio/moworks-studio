@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-blur-crossfade",
+  "hash": "02c354d78ee13160",
+  "at": "2026-10-17T09:13:58.757Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-blur-crossfade.mp4",
+    "poster": "previews/moworks__text-blur-crossfade.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "15842095ceb2b566a49b08479318052629dcbd5ab8e4f1c4bc962feab8b45c00",
+    "size": 12772,
+    "seconds": 28.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

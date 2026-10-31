@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-ime-conversion",
+  "hash": "3b4df70d06513836",
+  "at": "2026-10-17T10:21:06.930Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__ui-ime-conversion.mp4",
+    "poster": "previews/moworks__ui-ime-conversion.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6edb8a490dec1a0bbfbd51917e5e2b15d038e81cf103a8124882150de2aab8b2",
+    "size": 10720,
+    "seconds": 30.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

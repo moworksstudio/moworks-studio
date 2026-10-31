@@ -1,0 +1,46 @@
+<!--
+  Chart Draw (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Đường biểu đồ tự vẽ từ trái sang phải trên lưới mờ, hiện dần cùng lúc, tới điểm cuối thì đủ hình.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.lineChartLineDraw(q(".cl"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - duration: s (1.2)
+      - ease: (power2.out)
+
+  Notes: Path in a 160x70 box: M8 57 C32 55 35 29 58 36 S92 52 111 20 S137 27 152 10, stroke 4 px accent, round caps. pathLength 1: dashoffset 1 → 0 with opacity 0 → 1, 1.2 s power2.out. Three faint horizontal grid lines (y 14 / 36 / 58) stay static. Params: duration (1.2 s) · ease (power2.out) · width (4 px). Apply to an SVG path; it draws left → right while it fades in, on the same eased clock.
+-->
+
+<div class="st"><div class="ch"><svg viewBox="0 0 160 70" width="1280" height="560"><g stroke="#2a3142" stroke-width="0.4"><line x1="0" y1="14" x2="160" y2="14"/><line x1="0" y1="36" x2="160" y2="36"/><line x1="0" y1="58" x2="160" y2="58"/></g><path class="cl" d="M8 57 C32 55 35 29 58 36 S92 52 111 20 S137 27 152 10" fill="none" stroke="#8b7bff" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":1.2,"ease":"power2.out"};
+  var run = function (el, tl, at, o) {
+        var L = el.getTotalLength(), e = gsap.parseEase(o.ease); el.style.strokeDasharray = L + " " + L;
+        return MW.drive(tl, at, o.duration, function (t) { var p = e(Math.min(1, t / o.duration)); el.style.strokeDashoffset = String(L * (1 - p)); el.style.opacity = String(p); });
+      };
+  MW.lineChartLineDraw = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

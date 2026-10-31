@@ -1,0 +1,61 @@
+<!--
+  Coin Spin (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Đồng xu xoay ba vòng quanh trục dọc rồi chậm dần, mặt trước và mặt sau đổi nhau, cạnh dày hiện ra khi nghiêng.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionCoinSpin(q(".cs"), tl, 0.3, { shadow: ".cs-sh" });
+
+  Options (defaults in brackets):
+      - turns: (3)
+      - duration: s (0.9)
+      - ease: (power3.out)
+      - edge: px of edge at a quarter turn (35)
+      - edgeColor: 
+      - front: front face
+      - back: back face
+      - shadow: contact shadow (scales 0.55–1)
+
+  Notes: rotateY 0 → 1080° (demo; recipe 900°, ending on the back) in 900 ms power3.out (easeOutQuart); perspective 320 px in the recipe, the demo draws it flat (width × |cos|). Front face (star) while cos(angle) ≥ 0, back face (ring) when < 0, swapped at each 90° (not via backface-visibility); a 7 px edge band drawn as 7·|sin| between the faces; contact shadow scales 0.55–1 with |cos|. Ends face-on. Params: duration (0.9 s) · turns: số vòng (3) · edge: độ dày cạnh (7 px) · end: dừng mặt trước | sau. Drawn flat: width × |cos|, the face swapped at each quarter turn, the edge as an offset disc behind it.
+-->
+
+<div class="cs-sh"></div><div class="st"><div class="cs-w"><div class="cs"><div class="cs-f"><svg viewBox="-10 -10 20 20" width="100%" height="100%"><path d="M0 -10 L2.6 -2.6 L10 0 L2.6 2.6 L0 10 L-2.6 2.6 L-10 0 L-2.6 -2.6 Z" fill="currentColor"/></svg></div><div class="cs-b"><i></i></div></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"turns":3,"duration":0.9,"ease":"power3.out","edge":35,"edgeColor":"#b07600","front":".cs-f","back":".cs-b","shadow":null};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var ghost = function () { var g = el.cloneNode(true); g.removeAttribute("id"); g.style.position = "absolute"; g.style.margin = "0"; g.style.pointerEvents = "none"; g.style.opacity = "0";
+    g.style.left = el.offsetLeft + "px"; g.style.top = el.offsetTop + "px"; g.style.width = el.offsetWidth + "px"; g.style.height = el.offsetHeight + "px"; host.insertBefore(g, el); return g; };
+  var f = el.querySelector(o.front), b = el.querySelector(o.back), edge = document.createElement("div"), e = gsap.parseEase(o.ease), sh = o.shadow ? host.querySelector(o.shadow) : null;
+  edge.style.cssText = "position:absolute;pointer-events:none;border-radius:50%;opacity:0;background:" + o.edgeColor + ";left:" + el.offsetLeft + "px;top:" + el.offsetTop + "px;width:" + el.offsetWidth + "px;height:" + el.offsetHeight + "px;"; host.insertBefore(edge, el);
+  return MW.drive(tl, at, o.duration, function (t) {
+    var a = o.turns * 2 * Math.PI * e(Math.max(0, Math.min(1, t / o.duration))), c = Math.cos(a), s = Math.sin(a), w = Math.max(0.02, Math.abs(c));
+    gsap.set(el, { scaleX: w }); f.style.visibility = c >= 0 ? "visible" : "hidden"; b.style.visibility = c >= 0 ? "hidden" : "visible";
+    gsap.set(edge, { scaleX: w, x: o.edge * s }); edge.style.opacity = Math.abs(s) > 0.02 ? "1" : "0"; if (sh) gsap.set(sh, { scaleX: 0.55 + 0.45 * Math.abs(c) });
+  });
+  };
+  MW.motionCoinSpin = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

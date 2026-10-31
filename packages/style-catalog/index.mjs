@@ -366,11 +366,11 @@ export const AUTHOR_DISPLAY = {
 };
 
 /** A style's output choices: { fps: { default, choices, slowAt?, slower? }, sizes: { presets, custom,
- *  locked?, aspects, author? } }. fps: the author's rate, else 30; 24 · 25 · 30 · 60 for every style but Brush (never 50 or 60);
+ *  locked?, aspects, author? } }. fps: the author's rate, else 30; 24 · 25 · 30 · 50 · 60 for every style without a rule of its own, as Brush and What If have (never 50 or 60);
  *  anidoodle at 60 renders about 2.5 times as long (measured: 2.0-2.5×, the checks 1.2×). sizes.presets: [{ w, h, label, own? }], the
  *  author's own size first (own: true; MG), then the style's aspects; a typed size (even numbers, the long side at most 3840) for every
  *  style but Brush, whose engine paints 1920 × 1080 only (locked; anidoodle opened after a test of 1440×1080, 1080×1350, 2160×1080). */
-export const FPS = [24, 25, 30, 60];
+export const FPS = [24, 25, 30, 50, 60];
 export const MAX_SIDE = 3840;
 const PRESET = { "16:9": [1920, 1080], "9:16": [1080, 1920], "1:1": [1080, 1080], "4:5": [1080, 1350] };
 export function styleFormat(s) {

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-inset-reveal",
+  "type": "hyperframes:component",
+  "title": "Inset (clip-path)",
+  "description": "Cảnh mới mở ra từ tâm khung thành một hình chữ nhật lớn dần tới kín khung, cảnh cũ đứng yên.",
+  "tags": [
+    "inset",
+    "clip-path",
+    "reveal",
+    "transitions",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "transition-inset-reveal.html",
+      "target": "compositions/components/transition-inset-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/transition-inset-reveal",
+    "author": "moworks",
+    "call": "MW.transitionInsetReveal(q(\".tk-b\"), tl, 1.2, { ease: \"expo.out\", duration: 0.6 });",
+    "function": "MW.transitionInsetReveal",
+    "options": {
+      "duration": "s (0.5)",
+      "ease": "power2.inOut, or expo.out as the small demo",
+      "reverse": "true: the outgoing scene closes to the centre instead",
+      "from": "the outgoing scene"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Incoming scene clipped inset(50 %) -> inset(0) from the centre over 500 ms easeInOutCubic (demo: expo.out); outgoing still. Optional reverse (the outgoing closes to the centre). Params: duration (0.5 s) · ease (power2.inOut / expo.out) · reverse: đóng về tâm.",
+    "titleVi": "Mở khung chữ nhật từ giữa"
+  }
+}

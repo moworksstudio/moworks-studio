@@ -1,0 +1,49 @@
+<!--
+  Marching Dashes (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Nét đứt chạy đều quanh một khung hay dọc một đường như vùng chọn, đường nối đang hoạt động.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.lineMarchingDashes(q(".md"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - dash: (10)
+      - gap: (8)
+      - period: s per dash period, linear (1)
+      - duration: s (3)
+
+  Notes: Dashed stroke, dash 10 / gap 8 px; lineDashOffset decreases linearly by one dash period (18 px) every 1000 ms (recipe; the demo runs 36 px / s), looping seamlessly. Demo on a rounded rect 180 x 100 (r 12, 3 px stroke) and a baseline. Params: dash (10 px) · gap (8 px) · speed (1 chu kỳ / 1 s).
+-->
+
+<div class="sv"><svg class="md" width="1200" height="800" viewBox="0 0 240 160"><rect x="30" y="20" width="180" height="100" rx="12" fill="rgba(139,123,255,0.08)" stroke="#a99bff" stroke-width="3"/><line x1="30" y1="140" x2="210" y2="140" stroke="#6c778b" stroke-width="3"/></svg></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"dash":10,"gap":8,"period":1,"duration":3};
+  var run = function (el, tl, at, o) {
+        var shapes = el.tagName.toLowerCase() === "svg" ? Array.prototype.slice.call(el.querySelectorAll("rect, path, line")) : [el];
+        shapes.forEach(function (s) { s.setAttribute("stroke-dasharray", o.dash + " " + o.gap); });
+        return MW.drive(tl, at, o.duration, function (t) { shapes.forEach(function (s) { s.setAttribute("stroke-dashoffset", String(-(o.dash + o.gap) * t / o.period)); }); });
+      };
+  MW.lineMarchingDashes = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

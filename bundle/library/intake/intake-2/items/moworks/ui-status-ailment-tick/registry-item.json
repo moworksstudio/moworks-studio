@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-status-ailment-tick",
+  "type": "hyperframes:component",
+  "title": "Status Ailment",
+  "description": "Biểu tượng độc bay theo đường cong tới mục tiêu và dính lên, mục tiêu rung, loé rồi ngả màu xanh; sau đó cứ mỗi nhịp một số \"−6\" bay lên, mục tiêu co nhẹ, thanh máu tụt và chấm đếm sáng thêm.",
+  "tags": [
+    "status",
+    "tick",
+    "popup",
+    "tint",
+    "combat-hit-fx",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-status-ailment-tick.html",
+      "target": "compositions/components/ui-status-ailment-tick.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-status-ailment-tick",
+    "author": "moworks",
+    "call": "MW.uiStatusAilmentTick(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiStatusAilmentTick",
+    "options": {
+      "applyAt": "s the icon sticks (0.6, after a 300 ms ease-in quad arc)",
+      "tick": "s between ticks (0.35)",
+      "ticks": "(4)",
+      "drop": "of the health bar per tick (0.12)",
+      "amount": "",
+      "tint": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. Icon (r 11) flies on a quadratic arc (44,34) via (100,10) to the target's top-right in 300 ms in-quad (0.3-0.6 s), scale 0.6 → 1, then lands 1.5 → 1 (250 ms back.out). Target shakes ±3 px 250 ms, flashes 80 % → 0 in 120 ms, green tint fades in over 250 ms (45 %). Ticks at 0.95, 1.3, 1.65, 2.0 s: green '−6' rises 18 px in 600 ms outCubic, fades 350-600 ms; target squash 6 % (200 ms half-sine); HP bar −12 % per tick; 4 tick dots light. Params: applyAt: lúc dính (0.6 s) · tick: nhịp mất máu (0.35 s) · ticks: số nhịp (4) · amount: số mỗi nhịp (\"−6\") · tint: màu nhiễm (xanh lá).",
+    "titleVi": "Dính độc, mất máu theo nhịp"
+  }
+}

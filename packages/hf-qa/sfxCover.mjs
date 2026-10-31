@@ -7,7 +7,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { placedShots, readShots } from "../hf-edit/shots.mjs";
 import { read as readPlan } from "../motion-plan/index.mjs";
-import { readState } from "../sfx/index.mjs";
+import { readState, sfxNone } from "../sfx/index.mjs";
 import { briefOf, isOff, readPrefs, soundPolicy } from "../sfx/prefs.mjs";
 import { motionCues, placeOf } from "../sfx/actions.mjs";
 import { whooshInto } from "../sfx/auto.mjs";
@@ -35,6 +35,7 @@ export function sfxCover(dir, shots, plan) {
   const skip = new Set(prefs.skip ?? []);
   const placed = (shots ?? []).filter((s) => s.start != null && s.duration).sort((a, b) => a.start - b.start), findings = [], seen = new Set();
   placed.forEach((s, i) => {
+    if (sfxNone(s)) return;          // the storyboard says this shot is silent
     const motions = plan.shots.find((x) => x.shot === s.number)?.motions ?? [];
     const cut = i > 0 && whooshInto(s, placed[i - 1], plan);
     for (const c of motionCues(s, motions, { allow, surface: placeOf(s)?.surface ?? null, skipCut: cut })) {

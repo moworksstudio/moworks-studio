@@ -625,9 +625,10 @@
 @media (hover: hover) and (pointer: fine) { [data-theme="studio"] .scx .sgb-card:hover { transform: rotate(0deg) translateY(-0.4rem); } }
 @media (prefers-reduced-motion: reduce) { [data-theme="studio"] .scx .sgb-card { transition: none; } }
 [data-theme="studio"] .scx .sgb-card.on .shot { border-color: transparent; box-shadow: none; }          /* the red ring of the sleeve is the one mark */
-/* Settings and the Motion Library stand on the same margins and head as the other rooms (titles no longer jump) */
-[data-theme="studio"] .page:is(.page-settings, .st-motionlib) { max-width: none; margin: 0;
-  padding: clamp(1rem, 2.2vh, 2.25rem) clamp(1.25rem, 3vw, 3.5rem) clamp(1rem, 2vh, 2rem); }
+/* Settings and the Motion Library stand on the same margins and head as the other rooms; the Motion Library takes the whole width, Settings
+   stands centred at its own width, as in The Desk (owner 30/10) */
+[data-theme="studio"] .page:is(.page-settings, .st-motionlib) { padding: clamp(1rem, 2.2vh, 2.25rem) clamp(1.25rem, 3vw, 3.5rem) clamp(1rem, 2vh, 2rem); }
+[data-theme="studio"] .page.st-motionlib { max-width: none; margin: 0; }
 [data-theme="studio"] .page-settings .page-head { margin-bottom: clamp(0.9rem, 2vh, 1.75rem); }
 [data-theme="studio"] .page-settings .page-head h1 { margin: 0; font: 400 clamp(2.6rem, 2rem + 2vw, 4.2rem) / 0.95 var(--font-studio-display); letter-spacing: -0.02em; color: var(--room-ink); }
 [data-theme="studio"] .page-settings .page-head .back-btn { display: none; }          /* the gear and the peg bar are the way in and out */

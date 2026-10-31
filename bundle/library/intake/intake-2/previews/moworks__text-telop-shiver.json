@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-telop-shiver",
+  "hash": "c7412a4c53ea4952",
+  "at": "2026-10-17T10:20:14.027Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-telop-shiver.mp4",
+    "poster": "previews/moworks__text-telop-shiver.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "391e57afea2f57d59f054ca14eac23821109d81f1bea9cf272d06c8342e06ddb",
+    "size": 29143,
+    "seconds": 28.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

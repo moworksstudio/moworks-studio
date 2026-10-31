@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-noise-wobble",
+  "hash": "a98881fc0c5bb8c0",
+  "at": "2026-10-17T11:40:14.203Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-noise-wobble.mp4",
+    "poster": "previews/moworks__motion-noise-wobble.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "2c22c12b7371c6bc94378e84fe1930ee3fdb189f63d920a1cda5d7a398004cda",
+    "size": 38959,
+    "seconds": 36.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

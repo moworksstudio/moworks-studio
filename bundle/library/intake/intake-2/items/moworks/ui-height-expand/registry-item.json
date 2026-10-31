@@ -1,0 +1,53 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-height-expand",
+  "type": "hyperframes:block",
+  "title": "Intrinsic Height Expand",
+  "description": "Bấm tiêu đề, phần nội dung mở ra đúng bằng chiều cao của nó (66 px), mũi tên lật ngược và mục bên dưới bị đẩy xuống theo, không kéo méo chữ.",
+  "tags": [
+    "accordion",
+    "height",
+    "expand",
+    "reflow",
+    "layout-navigation",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-height-expand.html",
+      "target": "compositions/components/ui-height-expand.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-height-expand",
+    "author": "moworks",
+    "call": "MW.uiHeightExpand(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiHeightExpand",
+    "options": {
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Header 200x26 r7 'PROJECT DETAILS' with a chevron that rotates 0 → 180°. Content (66 px tall: accent 3 px left bar, a title and two lines) is revealed by a clip whose height goes 0 → 66 px over 0.4-0.95 s power2.inOut (recipe 650 ms); the NEXT SECTION row and the lines under it move down by the same height. Collapse 2.0-2.45 s. Cursor clicks at 0.3 s and 1.9 s. Text is never scaled. Params: height (theo nội dung, 66 px) · duration (0.55 s) · chevron (180°) · ease (power2.inOut). The content keeps its own height (66 units): only the clip opens; the rows below move down by the same amount; text is never scaled.",
+    "titleVi": "Mục mở theo chiều cao nội dung"
+  }
+}

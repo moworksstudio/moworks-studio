@@ -1,7 +1,7 @@
 // The Brush character gate: a Brush cartoon character is checked automatically, like an anidoodle
 // character by its own gate, before anyone is asked to approve it. The app's character layer draws a definition (character.js: the
 // body from its ground point up, the face on it, legs under it, arms at its sides, three colours for body, shade and light), so the
-// gate holds a definition to what that drawing needs, as PASS / FAIL lines with the reason: the schema, never Clawd, colours that
+// gate holds a definition to what that drawing needs, as PASS / FAIL lines with the reason: the schema, colours that
 // separate from each other and from a light and a dark ground, a face on the body, legs that stand under it and reach the ground, arms
 // that attach, key views that agree, and (when they are drawn) model sheets that are not blank. Units are u, the body unit; negative
 // y is up.
@@ -10,7 +10,6 @@ import { join } from "node:path";
 import { checkCharacter } from "./index.mjs";
 
 const PAPER = "#F3EBDC", DARK = "#22201E";          // the kit's page and a dark ground
-const CLAWD = ["#D97757", "#A84D33", "#F5B394"];
 const lum = (hex) => {
   const n = parseInt(String(hex).slice(1), 16), ch = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
   return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
@@ -32,10 +31,6 @@ export function brushGate(def, { sheetsDir = null, still = null, drawn = false }
   if (schema.length) return { id, passed: lines.filter((l) => l.startsWith("PASS")).length, failed: lines.filter((l) => l.startsWith("FAIL")).length, lines };
   const { colors: c, body, face, head, legs, arms } = def, top = body.bottom - body.h, half = body.w / 2;
 
-  check("never Clawd (Anthropic's mascot): not its colours, not its body", [
-    ...(Object.values(c).some((x) => CLAWD.includes(String(x).toUpperCase())) ? ["a colour is Clawd's: choose the character's own"] : []),
-    ...(body.shape === "box" && legs.xs.length === 4 && Math.abs(body.w - 10) < 1.5 && Math.abs(body.h - 6) < 1.5 ? ["a wide box on four legs is Clawd's body: give the character its own shape"] : []),
-  ]);
   check("its three colours separate (body, shade darker, light lighter)", [
     ...(lum(c.dk) >= lum(c.col) ? [`the shade ${c.dk} is not darker than the body ${c.col}`] : contrast(c.col, c.dk) < 1.25 ? [`the shade ${c.dk} is too close to the body ${c.col} (contrast ${r2(contrast(c.col, c.dk))}, at least 1.25)`] : []),
     ...(lum(c.lt) <= lum(c.col) ? [`the light ${c.lt} is not lighter than the body ${c.col}`] : contrast(c.col, c.lt) < 1.03 ? [`the light ${c.lt} is too close to the body ${c.col} (contrast ${r2(contrast(c.col, c.lt))}, at least 1.03)`] : []),

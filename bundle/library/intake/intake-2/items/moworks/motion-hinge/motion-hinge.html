@@ -1,0 +1,61 @@
+<!--
+  Layer Peel (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Tấm trên cùng xoay mở quanh mép trái như mở cửa hay lật trang (tới −140°), tối dần khi nghiêng, để lộ tấm bên dưới đứng yên; giữ rồi đóng lại.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionHinge(q(".top"), tl, 0, { back: ".bk" });
+
+  Options (defaults in brackets):
+      - angle: degrees about the left edge (−140)
+      - open: s (0.9)
+      - openAt: s (0.4)
+      - closeAt: s (3.0)
+      - close: s (0.65)
+      - perspective: px (3000)
+      - back: the panel's back face (shown past 90°)
+
+  Notes: Top panel 136x108 r8 rotates about its left edge, rotateY 0 → −140° (perspective 560) over 0.9 s power2.inOut (0.4-1.3 s), back after a hold (3.0-3.65 s). The front face darkens by up to 50 % × sin(angle) (a dark overlay); when the back faces the camera it shows a plain back (dark panel, accent outline, one grey bar). The lower panel (chart card) stays fixed beneath; dashed hinge line with end dots. Params: angle (−140°) · open (0.9 s, power2.inOut) · close (0.65 s) · perspective (560) · edge (left).
+-->
+
+<div class="gm"><div class="hs"><div class="low"><h3 style="margin:0;font-size:44px">Doanh thu quý</h3><div class="b" style="left:90px;height:160px"></div><div class="b" style="left:200px;height:260px"></div><div class="b" style="left:310px;height:210px"></div><div class="b" style="left:420px;height:340px"></div><div class="b" style="left:530px;height:300px"></div></div>
+<div class="top"><h3>Tổng quan</h3><p>Mở để xem chi tiết bên dưới</p><div class="bk"><i></i></div></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"angle":-140,"open":0.9,"openAt":0.4,"closeAt":3,"close":0.65,"perspective":3000,"back":null};
+  var run = function (el, tl, at, o) {
+        var io = gsap.parseEase("power2.inOut"), shade = document.createElement("div"), back = o.back ? el.querySelector(o.back) : null;
+        shade.style.cssText = "position:absolute;inset:0;border-radius:inherit;background:#05060a;pointer-events:none;opacity:0;"; el.appendChild(shade);
+        el.parentNode.style.perspective = o.perspective + "px";
+        return MW.drive(tl, at, o.closeAt + o.close, function (t) {
+          var p = t < o.openAt ? 0 : t < o.openAt + o.open ? io((t - o.openAt) / o.open) : t < o.closeAt ? 1 : 1 - io(Math.min(1, (t - o.closeAt) / o.close)), a = o.angle * p;
+          gsap.set(el, { rotationY: a, transformOrigin: "0% 50%" });
+          var showBack = Math.abs(a) > 90;
+          shade.style.opacity = String(showBack ? 0 : 0.5 * Math.sin(Math.abs(a) * Math.PI / 180));
+          Array.prototype.forEach.call(el.children, function (ch) { if (ch !== shade && ch !== back) ch.style.visibility = showBack ? "hidden" : "visible"; });
+          if (back) { back.style.visibility = showBack ? "visible" : "hidden"; back.style.transform = "scaleX(-1)"; }
+        });
+      };
+  MW.motionHinge = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

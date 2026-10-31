@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-pulse-rings",
+  "type": "hyperframes:block",
+  "title": "Pulse Ring",
+  "description": "Từ chấm tròn ở giữa, hai vòng tròn lần lượt toả ra và mờ dần, lặp đều đặn như tín hiệu đang ghi hay đang phát trực tiếp.",
+  "tags": [
+    "pulse",
+    "rings",
+    "live",
+    "loop",
+    "loading-progress",
+    "soft",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-pulse-rings.html",
+      "target": "compositions/components/ui-pulse-rings.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-pulse-rings",
+    "author": "moworks",
+    "call": "MW.uiPulseRings(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiPulseRings",
+    "options": {
+      "period": "s (1.6), two rings half a cycle apart",
+      "from": "px (18)",
+      "to": "px (58)",
+      "color": "",
+      "label": "",
+      "loop": "s (3.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Centre dot r16 accent. Two 3 px accent rings half a cycle apart: radius 18 → 58 px and opacity 1 → 0 linearly over each 1.6 s cycle (demo); recipe: scale 1 → 2.2 with opacity 0.6 → 0, power2.out. Params: period (1.6 s) · rings (2, lệch nửa chu kỳ) · radius (18 → 58 px) · stroke (3 px).",
+    "titleVi": "Vòng sóng toả ra liên tục"
+  }
+}

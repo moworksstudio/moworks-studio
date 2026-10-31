@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-reading-hold",
+  "type": "hyperframes:block",
+  "title": "Reading Hold",
+  "description": "Bài học: chữ phải đứng yên ít nhất max(0.7 s, 0.25 s + số ký tự / 17), cộng 0.25 giây cho mỗi từ.",
+  "tags": [
+    "lesson",
+    "timing",
+    "reading",
+    "timing-rhythm",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-reading-hold.html",
+      "target": "compositions/components/motion-reading-hold.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-reading-hold",
+    "author": "moworks",
+    "call": "MW.motionReadingHold(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionReadingHold",
+    "options": {
+      "words": "",
+      "slot": "s per word (1.33)",
+      "min": "s (0.7)",
+      "cps": "characters a second (17)",
+      "perWord": "s added per word (0.25)",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Three short words cycle every 1330 ms: fade in 133 ms, hold, fade out 133 ms; a progress bar fills over each word and turns accent after 75 %. Rule: hold text at least max(0.70 s, 0.25 s + chars / 17), +0.25 s per word; even short phrases over 1 s. Recipe: enter 300 ms, hold, exit 200 ms. Params: min (0.7 s) · chars_per_s (17) · per_word (0.25 s). Hold text at least max(0.7 s, 0.25 s + characters / 17), plus 0.25 s a word; even short phrases over 1 s.",
+    "titleVi": "Giữ đủ lâu để đọc"
+  }
+}

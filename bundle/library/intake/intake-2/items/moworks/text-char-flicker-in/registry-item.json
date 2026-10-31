@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-char-flicker-in",
+  "type": "hyperframes:component",
+  "title": "Per-char Flicker In",
+  "description": "Từng ký tự loé hai ký hiệu ngẫu nhiên rất nhanh (mỗi lần 50 ms) rồi mới hiện đúng chữ, lần lượt từ trái sang.",
+  "tags": [
+    "typing",
+    "flicker",
+    "glitch",
+    "letters",
+    "text-typing-decoding",
+    "crisp",
+    "typing-decoding"
+  ],
+  "files": [
+    {
+      "path": "text-char-flicker-in.html",
+      "target": "compositions/components/text-char-flicker-in.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-char-flicker-in",
+    "author": "moworks",
+    "call": "MW.textCharFlickerIn(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textCharFlickerIn",
+    "options": {
+      "delay": "s between letters (0.18)",
+      "fit": "s the line is fitted into (1.6)",
+      "start": "s (0.3)",
+      "glyphs": "flash symbols",
+      "accent": "flash colour",
+      "fadeAt": "s (3.05)",
+      "seed": "symbols"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Codrops (MIT); a faithful port of Codrops' effects is in the Codrops collection"
+    },
+    "thirdParty": [],
+    "notes": "Split chars; char i starts at (i + 1) × 0.18 s (demo capped so the line fits 1.6 s, from 0.3 s). Each char: a random symbol (#%&*+=?@$!<>/|^~, seeded) flashes 50 ms in accent, blank 30 ms, a second symbol 50 ms, then the real char appears at +130 ms with no fade. Demo: a 2 px accent underline marks the active char; faint dots mark empty slots. Loop exit: fade 3.05–3.3 s; loop 3.4 s. Params: delay: mỗi ký tự (0.18 s) · flash: mỗi lần loé (0.05 s) · gap (0.03 s) · glyphs: bộ ký hiệu.",
+    "titleVi": "Ký tự loé ký hiệu rồi hiện chữ"
+  }
+}

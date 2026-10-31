@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-bar-wipe",
+  "hash": "160e1705f853e483",
+  "at": "2026-10-17T07:40:29.489Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-bar-wipe.mp4",
+    "poster": "previews/moworks__text-bar-wipe.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "8a52b9b12da1162266f87c7561c8fc6b72ce7004d5c0f80890d03c87d9abd7ff",
+    "size": 12313,
+    "seconds": 29,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,54 @@
+<!--
+  Inset (clip-path) (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Cảnh mới mở ra từ tâm khung thành một hình chữ nhật lớn dần tới kín khung, cảnh cũ đứng yên.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.transitionInsetReveal(q(".tk-b"), tl, 1.2, { ease: "expo.out", duration: 0.6 });
+
+  Options (defaults in brackets):
+      - duration: s (0.5)
+      - ease: power2.inOut, or expo.out as the small demo
+      - reverse: true: the outgoing scene closes to the centre instead
+      - from: the outgoing scene
+
+  Notes: Incoming scene clipped inset(50 %) -> inset(0) from the centre over 500 ms easeInOutCubic (demo: expo.out); outgoing still. Optional reverse (the outgoing closes to the centre). Params: duration (0.5 s) · ease (power2.inOut / expo.out) · reverse: đóng về tâm.
+-->
+
+<section class="tk-scene tk-a"><div class="tk-mark circle"></div><div class="tk-sc-text"><div class="tk-sc-letter">A</div><div class="tk-sc-cap">Cảnh mở đầu</div></div></section>
+<section class="tk-scene tk-b"><div class="tk-mark square"></div><div class="tk-sc-text"><div class="tk-sc-letter">B</div><div class="tk-sc-cap">Cảnh tiếp theo</div></div></section>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.5,"ease":"power2.inOut","reverse":false,"from":null};
+  var run = function (el, tl, at, o) {
+        var out = o.from ? MW.el(o.from) : el.previousElementSibling, ease = gsap.parseEase(o.ease);
+        if (o.reverse && out) out.parentNode.appendChild(out);
+        return MW.drive(tl, at, o.duration, function (t) {
+          var p = ease(t / o.duration);
+          if (!o.reverse) { el.style.clipPath = "inset(" + (50 * (1 - p)) + "%)"; el.style.visibility = t > 0 ? "visible" : "hidden"; if (out) out.style.visibility = p >= 1 ? "hidden" : "visible"; }
+          else if (out) { out.style.clipPath = "inset(" + (50 * p) + "%)"; out.style.visibility = p >= 1 ? "hidden" : "visible"; el.style.visibility = "visible"; }
+        });
+      };
+  MW.transitionInsetReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

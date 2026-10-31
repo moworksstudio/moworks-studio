@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-tooltip-pop",
+  "hash": "b9e454682526ec06",
+  "at": "2026-10-17T10:06:43.563Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__ui-tooltip-pop.mp4",
+    "poster": "previews/moworks__ui-tooltip-pop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "164589478931f68dff16b9b089d63876d23da0476ec4f7978cddda2da900ce37",
+    "size": 7447,
+    "seconds": 16.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

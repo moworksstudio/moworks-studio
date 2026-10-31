@@ -1,0 +1,55 @@
+<!--
+  SVG Gradient Flow (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Một dải sáng đuôi tối dần, đầu trắng chạy dọc một đường đứng yên.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.lineLightFlow(q(".lf"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - segments: (8)
+      - length: of the path each (0.045)
+      - duration: s per pass, linear (2.2)
+      - passes: (1)
+      - width: stroke width (6)
+      - tail: colour at the tail
+      - head: at the head
+
+  Notes: Path (pathLength 1) drawn faint, 4 px. 8 windows 0.045 long; window k ends 0.025 x (7 - k) behind the head; head travels 0 -> 1.24 linear over 2200 ms (enters and fully leaves). Colours step dark -> white along the band (#172541 ... #ffffff; canvas: accent windows at opacity (k + 1) / 8, head in ink with a round cap), 6 px wide. Params: segments (8) · length (0.045) · duration (2.2 s) · colors: đuôi / đầu.
+-->
+
+<div class="sv"><svg width="1400" height="700" viewBox="0 0 280 140"><path class="lf" d="M20 110 C80 110 80 30 140 30 S200 110 260 110" fill="none" stroke="#3a4466" stroke-width="4"/></svg></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"segments":8,"length":0.045,"duration":2.2,"passes":1,"width":6,"tail":"#172541","head":"#ffffff"};
+  var run = function (el, tl, at, o) {
+        var segs = [], mix = gsap.utils.interpolate(o.tail, o.head); el.setAttribute("pathLength", "1"); el.setAttribute("opacity", "0.25");
+        for (var k = 0; k < o.segments; k++) { var p = el.cloneNode(true); p.setAttribute("opacity", "1"); p.setAttribute("stroke", mix(k / (o.segments - 1))); p.setAttribute("stroke-width", o.width); p.style.strokeDasharray = o.length + " 3"; p.setAttribute("stroke-linecap", k === o.segments - 1 ? "round" : "butt"); el.parentNode.appendChild(p); segs.push({ p: p, k: k }); }
+        return MW.drive(tl, at, o.duration * o.passes, function (t) {
+          var head = ((t / o.duration) % 1) * 1.24;
+          segs.forEach(function (s) { var end = head - 0.025 * (o.segments - 1 - s.k); s.p.style.strokeDashoffset = String(o.length - end); });
+        });
+      };
+  MW.lineLightFlow = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-arc-move",
+  "type": "hyperframes:component",
+  "title": "Arcs",
+  "description": "Chấm đi theo đường cong có điểm giữa lệch khỏi đường thẳng, cạnh một chấm xám đi thẳng để so sánh.",
+  "tags": [
+    "arc",
+    "path",
+    "principle",
+    "principles",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-arc-move.html",
+      "target": "compositions/components/motion-arc-move.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-arc-move",
+    "author": "moworks",
+    "call": "MW.motionArcMove(q(\".am-a\"), tl, 0.3, { compare: \".am-b\", backAt: 2 });",
+    "function": "MW.motionArcMove",
+    "options": {
+      "dx": "px to the end (−1080)",
+      "dy": "px (−540)",
+      "bend": "px the mid-point sits off the straight line (270; the recipe 10–20)",
+      "duration": "s (1.2; the recipe 0.9 s sine.inOut)",
+      "ease": "(power2.inOut)",
+      "compare": "a second element that goes straight",
+      "backAt": "s after the start to come back (null)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Dot travels a quadratic arc (start (270,160) → end (70,60), control (250,50) on a 320×200 stage: the mid-point sits ~50 px off the chord) in 1200 ms power2.inOut, beside a grey dot on the straight chord. Recipe: 900 ms sine.inOut with the mid-point 10–20 px off (15 px); thrown objects follow a parabola. Params: duration (0.9 s) · offset: lệch điểm giữa (15 px) · ease (sine.inOut).",
+    "titleVi": "Đi theo cung thay vì đường thẳng"
+  }
+}

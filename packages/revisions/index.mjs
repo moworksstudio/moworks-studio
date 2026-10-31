@@ -1,7 +1,7 @@
 // Project revisions (git): a local git repository inside each project folder records every change the app or
 // Claude makes, so any change can be reviewed and reverted. Nothing is pushed anywhere. Generated files (posters, renders, HF snapshot
-// output) are not tracked. The client's source files (sources/: PSD, PPTX, PDF, guidelines) and any file over 20 MB stay in the project
-// folder, so a copied folder still has everything, but out of the history.
+// output) are not tracked. The client's source files (sources/: PSD, PPTX, PDF, guidelines), numbered picture sequences (assets/2_footage/<name>/)
+// and any file over 20 MB stay in the project folder, so a copied folder still has everything, but out of the history.
 // Every operation comes in two forms: the sync one (`commitAll`), for the CLI tools and the tests, and the one the server uses
 // (`commitAllAsync`), which runs git beside the server's thread and one call at a time per project (below).
 import { execFile, execFileSync } from "node:child_process";
@@ -11,11 +11,20 @@ import { gitStoreFor, isDrivePath } from "./drive.mjs";
 
 const ID = ["-c", "user.name=Moworks Studio", "-c", "user.email=studio@moworks.local", "-c", "core.autocrlf=false", "-c", "core.quotepath=false"];
 // .thumbnails/ and .waveform-cache/ are HyperFrames Studio's caches
-const IGNORE = [".moworks/cache/", ".moworks/rules/", ".moworks/library/", ".moworks/tasks.json", ".moworks/claude.json", ".moworks/notes.json", "renders/", ".hyperframes/",
+const IGNORE = [".moworks/cache/", ".moworks/rules/", ".moworks/library/", ".moworks/trash/", ".moworks/tasks.json", ".moworks/claude.json", ".moworks/notes.json", "renders/", ".hyperframes/",
   ".thumbnails/", ".waveform-cache/", "*.tmp", "*.part", "Thumbs.db", "desktop.ini", "sources/", "assets/5_design/",
   // the design files at 1_design's top level stay out of git; its images/ and fonts/ are the film's own files
   "assets/1_design/*", "!assets/1_design/images/", "!assets/1_design/fonts/",
-  ".moworks/qc/", ".moworks/scan/", "audio/music-options/"];          // made again on demand: QC sheets, the files scan, the music options to listen to (now in .moworks/cache/)
+  // a numbered picture sequence (its own folder under 2_footage, layout.mjs; the video files beside those folders stay tracked): 641 PNGs were
+  // 683 MB in the folder and again in the history (T30-8). A film made before keeps what its git already tracks: nothing is taken out of it
+  "assets/2_footage/*/",
+  ".moworks/qc/", ".moworks/scan/", "audio/music-options/",          // made again on demand: QC sheets, the files scan, the music options to listen to (now in .moworks/cache/)
+  // HF's `capture` folder at the root (a website's raw pictures, or debug pictures: T28-6, 18 MB into a film's history): what the film uses goes to assets/ (copy_to_assets)
+  "/capture/", "/capture-*/"];
+/** What an ignore line above names and an older film's git may still track: taken out of the index when the line is added (the files stay). */
+const UNTRACK = { "/capture/": "capture", "/capture-*/": "capture-*" };
+/** A frame of a sequence, in the folder the rule above keeps out of the history. */
+const SEQUENCE_FRAME = /^assets\/2_footage\/[^/]+\//;
 export const LARGE_BYTES = 20 * 1024 * 1024;
 const LARGE_HEAD = "# over 20 MB: kept in the project folder, not in the history";
 const escapeIgnore = (p) => "/" + p.replace(/([\\*?[\]!#])/g, "\\$1").replace(/ $/, "\\ ");
@@ -99,6 +108,7 @@ const forms = (op, { read = false } = {}) => [(dir, ...a) => runSync(dir, op(dir
 function* headOp() { try { return yield ["rev-parse", "--verify", "-q", "HEAD"]; } catch { return null; } }
 function* dirtyOp() { return (yield ["status", "--porcelain"]).length > 0; }
 function* commitAllOp(dir, message) {
+  yield* ignoreRulesOp(dir);          // a version opened or a revert can bring back an older .gitignore: a sequence must not slip into the history then
   let listed = "";
   try { listed = yield ["ls-files", "--others", "--exclude-standard", "-z"]; } catch { /* none listed */ }
   if (listed) ignoreLarge(dir, listed);
@@ -141,11 +151,18 @@ function* ensureRepoOp(dir) {
     if (isDrivePath(dir)) { const store = gitStoreFor(dir); mkdirSync(join(store, ".."), { recursive: true }); yield ["init", "-q", "-b", "main", "--template=", `--separate-git-dir=${store}`]; }
     else yield ["init", "-q", "-b", "main", "--template="];
   }
+  yield* ignoreRulesOp(dir);
+  if (!(yield* headOp(dir))) yield* commitAllOp(dir, "Project start");
+}
+/** The ignore rules above in the film's .gitignore. */
+function* ignoreRulesOp(dir) {
   const gi = join(dir, ".gitignore");
   const have = existsSync(gi) ? readFileSync(gi, "utf8") : "";
   const missing = IGNORE.filter((l) => !have.split(/\r?\n/).includes(l));
   if (missing.length) writeFileSync(gi, (have && !have.endsWith("\n") ? have + "\n" : have) + missing.join("\n") + "\n");
-  if (!(yield* headOp(dir))) yield* commitAllOp(dir, "Project start");
+  // a film committed before the line: git goes on tracking what it has, so the next commit takes it out of the history from here on
+  const untrack = missing.map((l) => UNTRACK[l]).filter(Boolean);
+  if (untrack.length) { try { yield ["rm", "-r", "-q", "--cached", "--ignore-unmatch", "--", ...untrack]; } catch { /* nothing tracked, or no history yet */ } }
 }
 function* saveOp(dir, message) { yield* ensureRepoOp(dir); return yield* commitAllOp(dir, message); }
 function* changedFilesOp(dir, from, to) {
@@ -191,14 +208,21 @@ function* changedSinceOp(dir, from) {
     // the root before
     return (yield ["log", "--format=%H", "--invert-grep", "-F", `--grep=${STUDIO_IDS}`, `--grep=${SOUND_MIX}`, `${from}..${h}`, "--", ".", ":(exclude).moworks",
       ":(exclude)NOTES.md", ":(exclude)QC-REVIEW.md", ":(exclude)QC-REVIEW.json", ":(exclude)ASSETS.md", ":(exclude)BRIEF.md",
-      ":(exclude)docs/NOTES.md", ":(exclude)docs/QC-REVIEW.md", ":(exclude)docs/QC-REVIEW.json", ":(exclude)docs/ASSETS.md", ":(exclude)docs/*.old"]).length > 0;
+      ":(exclude)docs/NOTES.md", ":(exclude)docs/QC-REVIEW.md", ":(exclude)docs/QC-REVIEW.json", ":(exclude)docs/ASSETS.md", ":(exclude)docs/*.old",
+      // the ignore rules, and capture/ leaving the history with them: a finished film's checks still hold
+      ":(exclude).gitignore", ":(exclude)capture", ":(exclude)capture-*"]).length > 0;
   } catch { return true; }
 }
+const RM_AT_ONCE = 100;          // file names on one git command line (Windows takes about 32,000 characters)
 function* restoreTreeOp(dir, rev, message) {
   if (yield* dirtyOp(dir)) yield* commitAllOp(dir, "Changes before opening a version");
   // a file moved since (a document into docs/) counts as added here, not renamed, so the version's own place for it wins
   const added = (yield ["diff", "--name-only", "--no-renames", "--diff-filter=A", rev, "HEAD", "--", ".", ":(exclude).moworks"]).split(/\r?\n/).filter(Boolean);
-  for (const f of added) yield ["rm", "-q", "--", f];
+  // a sequence's frames in a film that tracked them before the rule leave the version, not the disk: nothing else could bring back a frame
+  // that came in after the rule (a new film's frames are not in its git at all, so no version touches them)
+  const frames = added.filter((f) => SEQUENCE_FRAME.test(f)), others = added.filter((f) => !SEQUENCE_FRAME.test(f));
+  for (let i = 0; i < frames.length; i += RM_AT_ONCE) yield ["--literal-pathspecs", "rm", "-q", "--cached", "--", ...frames.slice(i, i + RM_AT_ONCE)];
+  for (let i = 0; i < others.length; i += RM_AT_ONCE) yield ["--literal-pathspecs", "rm", "-q", "--", ...others.slice(i, i + RM_AT_ONCE)];
   yield ["checkout", rev, "--", ".", ":(exclude).moworks"];
   return yield* commitAllOp(dir, message);
 }

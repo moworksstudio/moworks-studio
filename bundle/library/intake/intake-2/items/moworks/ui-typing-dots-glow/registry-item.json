@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-typing-dots-glow",
+  "type": "hyperframes:block",
+  "title": "Typing Indicator",
+  "description": "Trong bong bóng chat, ba chấm lần lượt sáng lên và nhích lên 2 px rồi tối lại thành làn sóng chậm, báo người bên kia đang gõ.",
+  "tags": [
+    "typing",
+    "dots",
+    "chat",
+    "loop",
+    "loading-progress",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "ui-typing-dots-glow.html",
+      "target": "compositions/components/ui-typing-dots-glow.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-typing-dots-glow",
+    "author": "moworks",
+    "call": "MW.uiTypingDotsGlow(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiTypingDotsGlow",
+    "options": {
+      "cycle": "s (1.4)",
+      "offset": "of a cycle per dot (0.15)",
+      "lift": "px (2)",
+      "sent": "the outgoing message",
+      "input": "placeholder",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Incoming bubble 82x40 r18 with a tail dot; three dots r5, 19 px apart. Each dot runs a 1.4 s cycle offset by 0.15 of a cycle per dot (210 ms; the caption says 150 ms): during the first 55 % of its cycle k = (0.5 − 0.5 cos(2π p / 0.55))^1.5, the dot crossfades grey → light by k and lifts 2 px × k; rest otherwise. An outgoing bubble above and an input bar below are static. Params: cycle (1.4 s) · offset (0.15 vòng) · lift (2 px) · brightness (xám → sáng). Each dot glows and lifts for the first 55 % of its cycle with k = (0.5 − 0.5 cos(2π p / 0.55))^1.5.",
+    "titleVi": "Ba chấm đang gõ sáng dần lần lượt"
+  }
+}

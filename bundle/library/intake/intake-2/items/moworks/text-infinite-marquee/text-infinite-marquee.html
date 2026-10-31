@@ -1,0 +1,50 @@
+<!--
+  Infinite Marquee (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Ba hàng chữ lặp lại chạy ngang liên tục, xen kẽ chiều: hàng chữ đặc, hàng chữ trên dải màu nhấn, hàng chữ chỉ có nét viền; hai mép mờ vào nền.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textInfiniteMarquee(q(".mq"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - rows: the moving rows (each one's first child is one copy)
+      - dirs: −1 left, 1 right, per row
+      - copies: copies each row moves per loop (1)
+      - fade: px the edges fade (136)
+      - loop: s (6)
+
+  Notes: Track = text + ' • ' repeated (two copies, x 0 → −50 % in the recipe, 10–20 s per copy, linear, seamless). Demo rows: 26 px filled ink moving left; 30 px in the background colour on a full-width accent band 1.64 em tall moving right; 26 px outline only (1.2 px) moving left; each moves a whole number of copies per 6 s loop (≈40 px/s in a 320 px demo). Both frame edges fade into the background over 34 px. Params: tốc độ (≈ 8 s mỗi chiều rộng khung) · kiểu hàng (đặc / dải / viền) · ký tự ngăn (•).
+-->
+
+<div class="mq"><div class="im-r a"><span>LÀM PHIM NHANH • ĐẸP • ĐÚNG HẸN •</span></div><div class="im-r b"><span>LÀM PHIM NHANH • ĐẸP • ĐÚNG HẸN •</span></div><div class="im-r c"><span>LÀM PHIM NHANH • ĐẸP • ĐÚNG HẸN •</span></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"rows":".im-r","dirs":[-1,1,-1],"copies":1,"fade":136,"loop":6};
+  var run = function (el, tl, at, o) {
+        var rows = Array.prototype.slice.call(el.querySelectorAll(o.rows)).map(function (r, i) { var u = r.firstElementChild, w = u.offsetWidth; for (var k = 0; k < 4; k++) r.appendChild(u.cloneNode(true)); return { r: r, w: w, dir: o.dirs[i % o.dirs.length] }; });
+        el.style.webkitMaskImage = el.style.maskImage = "linear-gradient(90deg, transparent 0, #000 " + o.fade + "px, #000 calc(100% - " + o.fade + "px), transparent 100%)";
+        return MW.drive(tl, at, o.loop, function (t) { rows.forEach(function (q) { var p = (t / o.loop * o.copies) % 1; gsap.set(q.r, { x: q.dir < 0 ? -q.w * p : -q.w * (1 - p) }); }); });
+      };
+  MW.textInfiniteMarquee = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

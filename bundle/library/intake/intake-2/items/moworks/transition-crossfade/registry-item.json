@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-crossfade",
+  "type": "hyperframes:component",
+  "title": "Crossfade / Dissolve",
+  "description": "Cảnh mới hiện dần đè lên cảnh cũ trong khoảng 12 khung hình, cảnh cũ giữ nguyên bên dưới cho tới hết.",
+  "tags": [
+    "crossfade",
+    "dissolve",
+    "opacity",
+    "transitions",
+    "smooth",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "transition-crossfade.html",
+      "target": "compositions/components/transition-crossfade.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/transition-crossfade",
+    "author": "moworks",
+    "call": "MW.transitionCrossfade(q(\".tk-b\"), tl, 1.2, { duration: 0.5, ease: \"sine.inOut\" });",
+    "function": "MW.transitionCrossfade",
+    "options": {
+      "duration": "s (0.5)",
+      "ease": "none, or sine.inOut as the small demo",
+      "from": "the outgoing scene"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Incoming scene opacity 0 -> 1 over the outgoing one in 500 ms (atlas: ~12 frames at 24 fps), linear (the demo eases it in-out); the outgoing scene stays at 1 underneath (no dip to the film background) and hides at the end. HF showcase-dissolve ships Crossfade / Color Dip / Blur Crossfade / Focus Pull (Apache-2.0). Params: duration (0.5 s) · ease (none / sine.inOut).",
+    "titleVi": "Hoà tan chéo giữa hai cảnh"
+  }
+}

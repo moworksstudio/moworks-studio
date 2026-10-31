@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-heartbeat",
+  "hash": "39c624d2a2984fe2",
+  "at": "2026-10-17T09:51:43.454Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-heartbeat.mp4",
+    "poster": "previews/moworks__motion-heartbeat.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "54c584ba6014b4fe99c049036b60c6cf60df1006dedfde7e66bb02f407e0ede2",
+    "size": 11007,
+    "seconds": 24.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

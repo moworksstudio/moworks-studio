@@ -1,0 +1,65 @@
+<!--
+  Tsukkomi Slam Telop (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Câu chêm kiểu tsukkomi nghiêng −8° đập xuống từ cỡ to gấp rưỡi trong ba khung, cả khung hình rung mạnh tắt dần, các tia tập trung loé rồi mờ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.handTsukkomiSlam(q(".tk"), tl, 0.35, {});
+
+  Options (defaults in brackets):
+      - angle: degrees (−8)
+      - shake: ± px for 8 frames at 24 fps, fading (48); the text moves half as much
+      - rays: speed-line wedges (40)
+      - inner: [min, max] px of the inner ellipse ([360, 560])
+      - outer: px (1400)
+      - bg: the shot that shakes
+      - offAt: s after the start (1.9)
+      - seed: (9)
+
+  Notes: From 0.35 s: telop (44 px heavy, ink fill, accent outer stroke 0.32 em, dark (4, 4) px shadow) rotated −8°, scale 2.5 → 1 over 3 frames at 30 fps (0.1 s) power1.in. From impact the background shakes seeded ±12 px × (1 − k / 8) for 8 frames at 24 fps (the text moves half as much). 40 radial wedges (0.02–0.04 rad) from an inner ellipse 72–112 px (×0.7 vertically) to 230 px, re-jittered every 24 fps frame, 75 %, fading 0.1–0.5 s after impact. Off at 2.25 s. Loop 2.6 s. Params: tỉ lệ (250 % → 100 %, 3 khung) · góc (−8°) · rung (±12 px, 8 khung) · tia (40, mờ trong 0.4 s). Scale 2.5 → 1 in 3 frames (power1.in); the wedges re-jitter every 24 fps frame and fade 0.1–0.5 s after the hit.
+-->
+
+<div class="ft"></div><div class="st"><div class="tk">Sao lại thế!</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"angle":-8,"shake":48,"rays":40,"inner":[360,560],"outer":1400,"bg":".ft","offAt":1.9,"seed":9};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, bg = o.bg ? document.querySelector(o.bg) : null, p1 = gsap.parseEase("power1.in"), cv = document.createElement("canvas");
+        if (getComputedStyle(host).position === "static") host.style.position = "relative"; var CW = host.clientWidth, CH = host.clientHeight, X0 = CW / 2, Y0 = CH / 2;
+        cv.width = CW; cv.height = CH; cv.style.cssText = "position:absolute;left:0;top:0;pointer-events:none;width:" + CW + "px;height:" + CH + "px;"; host.insertBefore(cv, el); var c = cv.getContext("2d"), imp = 3 / 30;
+        return MW.drive(tl, at, o.offAt + 0.05, function (t) {
+          var s = t <= 0 ? 0 : t < imp ? 2.5 - 1.5 * p1(t / imp) : 1, u = t - imp, f = Math.floor(u * 24), k = u > 0 && f < 8 ? 1 - f / 8 : 0, r = MW.rand(o.seed + f * 31), sx = (r() * 2 - 1) * o.shake * k, sy = (r() * 2 - 1) * o.shake * k;
+          if (bg) gsap.set(bg, { x: sx, y: sy }); gsap.set(el, { scale: s, rotation: o.angle, x: sx / 2, y: sy / 2 }); el.style.visibility = t > 0 && t < o.offAt ? "visible" : "hidden";
+          c.clearRect(0, 0, CW, CH); var a = u > 0 ? 0.75 * (1 - Math.max(0, Math.min(1, (u - 0.1) / 0.4))) : 0;
+          if (a > 0 && t < o.offAt) { c.fillStyle = "rgba(255,255,255," + a.toFixed(3) + ")"; var rr = MW.rand(o.seed * 7 + f); for (var i = 0; i < o.rays; i++) { var th = i / o.rays * 2 * Math.PI + rr() * 0.05, w = 0.02 + rr() * 0.02, ri = o.inner[0] + rr() * (o.inner[1] - o.inner[0]);
+            c.beginPath(); c.moveTo(X0 + ri * Math.cos(th), Y0 + 0.7 * ri * Math.sin(th)); c.lineTo(X0 + o.outer * Math.cos(th - w), Y0 + o.outer * Math.sin(th - w)); c.lineTo(X0 + o.outer * Math.cos(th + w), Y0 + o.outer * Math.sin(th + w)); c.closePath(); c.fill(); } }
+        });
+      };
+  MW.handTsukkomiSlam = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

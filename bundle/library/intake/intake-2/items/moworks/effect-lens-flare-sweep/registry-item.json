@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-lens-flare-sweep",
+  "type": "hyperframes:component",
+  "title": "Lens Flare Sweep",
+  "description": "Một nguồn sáng lướt ngang qua tiêu đề kèm vệt loé dài và các đốm phản chiếu chạy ngược, sáng nhất khi đi qua giữa.",
+  "tags": [
+    "flare",
+    "light",
+    "sweep",
+    "lens",
+    "light-glow",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "effect-lens-flare-sweep.html",
+      "target": "compositions/components/effect-lens-flare-sweep.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-lens-flare-sweep",
+    "author": "moworks",
+    "call": "MW.effectLensFlareSweep(q(\".tk-head\"), tl, 0.5, {});",
+    "function": "MW.effectLensFlareSweep",
+    "options": {
+      "duration": "s (1.05), in-out",
+      "unit": "px per reference unit (5)",
+      "tint": "title tint at the peak (35 %)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "A light source sweeps x −155 → +155 px across a title in 1050 ms power2.inOut; envelope sin(π p)^0.5, peak when centred (Gaussian width 60 px). Source: core r 4–7 px, halo r 12–20 px, horizontal streak (ellipse radius 70–110 px, 6 % tall, blur 3). Three ghost discs at +0.7×, −0.7× and −0.4× the offset (r 10 / 7 / 14 px, 20–35 % opacity), additive (lighter); title tinted 35 % at the peak. Params: duration (1.05 s) · x (±155 px) · ghosts (0.7 / −0.7 / −0.4) · streak (140–220 px) · tint (35 %).",
+    "titleVi": "Loé ống kính lướt ngang"
+  }
+}

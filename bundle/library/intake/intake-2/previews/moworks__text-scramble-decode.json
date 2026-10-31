@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-scramble-decode",
+  "hash": "57dff3860efe5de3",
+  "at": "2026-10-17T09:35:14.171Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-scramble-decode.mp4",
+    "poster": "previews/moworks__text-scramble-decode.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "275089cd755199bd20fd800f62c720a26a6f3ac0d1563ede557f5f5e0bb882d0",
+    "size": 32244,
+    "seconds": 26,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

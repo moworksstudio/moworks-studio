@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/data-stat-card",
+  "hash": "0cb48f94d70832c8",
+  "at": "2026-10-17T08:26:35.326Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__data-stat-card.mp4",
+    "poster": "previews/moworks__data-stat-card.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "8c724b1d25c3e90e166920988c0245a33eeb241e1b8d75b984cbe25b92cb9928",
+    "size": 9424,
+    "seconds": 26.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-beat-punch-in",
+  "type": "hyperframes:component",
+  "title": "Punch-in on the Beat",
+  "description": "Mỗi phách mạnh khung phóng vụt lên một chút rồi lùi về rất nhanh, mạnh hơn sau đoạn drop.",
+  "tags": [
+    "beat",
+    "punch",
+    "scale",
+    "music",
+    "camera",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-beat-punch-in.html",
+      "target": "compositions/components/motion-beat-punch-in.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-beat-punch-in",
+    "author": "moworks",
+    "call": "MW.motionBeatPunchIn(q(\".tk-cam\"), tl, 0.3, { beats: 6 });",
+    "function": "MW.motionBeatPunchIn",
+    "options": {
+      "bpm": "tempo (120)",
+      "beats": "number of beats (6)",
+      "amp": "scale jump on a beat (0.03)",
+      "ampDrop": "after the drop (0.07)",
+      "dropAt": "beat index where the drop starts (0: every beat as after a drop, as the small demo)",
+      "tau": "s, decay time constant (0.11)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "On each downbeat scale jumps by +0.03 (+0.07 after the drop) and decays back with time constant 0.11 s: s = 1 + A e^(-t / 0.11). Demo: A 0.07 every 0.5 s (120 BPM). Params: amp (0.03 / 0.07) · decay (τ 0.11 s) · beats.",
+    "titleVi": "Đẩy vào nhanh theo phách"
+  }
+}

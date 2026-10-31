@@ -1,0 +1,59 @@
+<!--
+  Page Stack Transition (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Trang mới trượt từ dưới lên phủ trang cũ, trang cũ lùi lại thu nhỏ 0.94, nhích lên 10 px và tối đi; quay lại thì chạy ngược đúng như vậy.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.transitionStackPushUp(q(".sp2"), tl, 0.5, { backAt: 1.6 });
+
+  Options (defaults in brackets):
+      - duration: s (0.72), in-out
+      - scale: the old page shrinks to (0.94)
+      - rise: px it rises (50)
+      - dim: it darkens to (0.45)
+      - radius: px of the new page's top corners (50)
+      - backAt: s after the start for the exact reverse (null: stay)
+      - from: the outgoing page
+
+  Notes: Incoming scene slides up from y = 100 % to 0 with rounded top corners (10 px); the outgoing scene stays under it, scales 1 → 0.94 about its centre, rises 10 px and darkens 0 → 45 % (overlay). 720 ms power2.inOut (easeInOutCubic). Back: the exact reverse. Params: duration (0.72 s) · scale (0.94) · rise (10 px) · dim (45 %) · radius (10 px) · ease (power2.inOut).
+-->
+
+<div class="gm sp-win"><section class="sp1 app dark"><div class="app-bar"><b></b><span>Danh sách</span></div>
+<div class="app-body"><div class="app-hero" style="background:#8b7bff"></div><div class="app-row"></div><div class="app-row" style="width:70%"></div><div class="app-row" style="width:85%"></div></div></section><section class="sp2 app dark"><div class="app-bar"><b></b><span>Chi tiết</span></div>
+<div class="app-body"><div class="app-hero" style="background:#ff5d8f"></div><div class="app-row"></div><div class="app-row" style="width:70%"></div><div class="app-row" style="width:85%"></div></div></section></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.72,"scale":0.94,"rise":50,"dim":0.45,"radius":50,"backAt":null,"from":null};
+  var run = function (el, tl, at, o) {
+        var out = o.from ? MW.el(o.from) : el.previousElementSibling, io = gsap.parseEase("power2.inOut"), dim = document.createElement("div");
+        dim.style.cssText = "position:absolute;inset:0;background:#000;pointer-events:none;opacity:0;"; if (out) out.appendChild(dim);
+        el.style.borderRadius = o.radius + "px " + o.radius + "px 0 0";
+        return MW.drive(tl, at, o.backAt == null ? o.duration : o.backAt + o.duration, function (t) {
+          var p = io(Math.max(0, Math.min(1, t / o.duration))); if (o.backAt != null) p *= 1 - io(Math.max(0, Math.min(1, (t - o.backAt) / o.duration)));
+          gsap.set(el, { yPercent: 100 * (1 - p) }); el.style.visibility = p > 0 ? "visible" : "hidden";
+          if (out) { gsap.set(out, { scale: 1 - (1 - o.scale) * p, y: -o.rise * p }); dim.style.opacity = String(o.dim * p); }
+        });
+      };
+  MW.transitionStackPushUp = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

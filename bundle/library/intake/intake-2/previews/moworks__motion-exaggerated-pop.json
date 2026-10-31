@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-exaggerated-pop",
+  "hash": "a6506c17a7ca4187",
+  "at": "2026-10-17T09:34:19.831Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-exaggerated-pop.mp4",
+    "poster": "previews/moworks__motion-exaggerated-pop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6a5dc58b0cd383bfc4bf01c18aaa20340294e03ed9d6220fdf12b9fcec25ec09",
+    "size": 9558,
+    "seconds": 28.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

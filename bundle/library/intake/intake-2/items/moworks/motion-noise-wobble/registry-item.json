@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-noise-wobble",
+  "type": "hyperframes:component",
+  "title": "Noise Wobble",
+  "description": "Mỗi phần tử xê dịch và nghiêng một chút theo nhiễu chậm, mỗi cái một kiểu, cho cảm giác vẽ tay chưa yên.",
+  "tags": [
+    "wobble",
+    "noise",
+    "loop",
+    "ambient",
+    "loops-ambient",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "motion-noise-wobble.html",
+      "target": "compositions/components/motion-noise-wobble.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-noise-wobble",
+    "author": "moworks",
+    "call": "MW.motionNoiseWobble(q(\".nw\"), tl, 0, { items: \"i\" });",
+    "function": "MW.motionNoiseWobble",
+    "options": {
+      "items": "children to wobble (null: the element itself)",
+      "amp": "± px (14; 2 at UI size)",
+      "rotate": "± degrees (6)",
+      "loop": "s the wobble repeats (4)",
+      "seed": "(3)",
+      "duration": "s (8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Each element gets x, y and rotation from slow smooth noise: recipe noise(t x 0.5), +-2 px and +-1 deg, looping every 4 s. Demo (3 squares 48 px): x, y +-5 px (noise at 1.2 t and 1.4 t), rotation +-0.2 rad, a different seed per element. Params: amp (±2 px / ±1°) · loop (4 s) · seed. Smooth noise made of three sines with whole cycles per loop, a different seed per element, so it loops seamlessly.",
+    "titleVi": "Lắc lư nhẹ theo nhiễu"
+  }
+}

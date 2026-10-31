@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-letter-collision",
+  "hash": "3e3ba883929fd80f",
+  "at": "2026-10-17T08:44:29.194Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-letter-collision.mp4",
+    "poster": "previews/moworks__text-letter-collision.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "df7a27874d4dcfa5582de40b3df6a015299474ab86a28290592a819c94dacf98",
+    "size": 11405,
+    "seconds": 27.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

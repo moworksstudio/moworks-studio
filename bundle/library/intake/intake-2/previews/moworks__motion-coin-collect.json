@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-coin-collect",
+  "hash": "84ab324f14e90449",
+  "at": "2026-10-17T10:55:10.132Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-coin-collect.mp4",
+    "poster": "previews/moworks__motion-coin-collect.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "236e24fc6502e5238e96e8352440e9620927145f5931b9b2ea3c72111a6996ce",
+    "size": 16161,
+    "seconds": 28.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

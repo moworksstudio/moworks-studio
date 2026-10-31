@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-shuffle-to-grid",
+  "type": "hyperframes:component",
+  "title": "Shuffle to Grid",
+  "description": "Các ô đang nằm lộn xộn, xoay lệch và nhỏ đi, lần lượt bay về đúng lưới thẳng hàng.",
+  "tags": [
+    "grid",
+    "stagger",
+    "scatter",
+    "seed",
+    "list-grid",
+    "crisp",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-shuffle-to-grid.html",
+      "target": "compositions/components/motion-shuffle-to-grid.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-shuffle-to-grid",
+    "author": "moworks",
+    "call": "MW.motionShuffleToGrid(q(\".sg\"), tl, 0.3, { backAt: 1.9 });",
+    "function": "MW.motionShuffleToGrid",
+    "options": {
+      "items": "",
+      "scatter": "± px (96)",
+      "rot": "± degrees (18)",
+      "from": "start scale (0.72)",
+      "stagger": "s in reading order (0.035)",
+      "duration": "s (0.72, back.inOut)",
+      "backAt": "s after the start to scatter again (null)",
+      "seed": "(23)",
+      "cols": ""
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "3×3 tiles (34 px, 10 px gap) start scattered: each offset by a seeded uniform random up to ±24 px in x and y (recipe ±26), rotated up to ±18°, scale 0.72 (seed 23); they settle into the grid (0°, scale 1) in 720 ms back.inOut, each 35 ms after the previous in reading order (≈1 s in all). Reverse to scatter: all at once in 400 ms power2.inOut. Params: scatter: độ lệch (24 px) · rot (18°) · scale đầu (0.72) · stagger (35 ms) · seed.",
+    "titleVi": "Ô rải rác xếp về lưới"
+  }
+}

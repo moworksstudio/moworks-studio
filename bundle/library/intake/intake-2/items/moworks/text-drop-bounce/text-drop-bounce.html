@@ -1,0 +1,90 @@
+<!--
+  Drop & Bounce In (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Từng chữ cái rơi từ trên cao xuống, chạm sàn rồi nảy thấp dần ba lần trước khi nằm yên, có bóng đổ dưới sàn theo độ cao.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textDropBounce(q(".tk-head"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - height: px it drops from (800)
+      - duration: s (0.9), bounce.out
+      - stagger: s (0.04, all start within 1.2 s)
+      - shadow: a floor shadow under each letter
+      - drop: px it sinks on the exit (120)
+      - exitAt: s after the start (2.85)
+      - accent: first letter colour
+
+  Notes: Per char: y −200 px → 0, bounce.out 0.9 s, stagger 0.04 s (capped so all start within 1.2 s), from 0.3 s; 3 shrinking rebounds. Optional floor shadow under each char: ellipse 0.9 × char width, scaleY 0.18, scaleX max(0.2, 1 − h / 200), opacity 0.28 × (1 − h / 160), h = height above the floor. Exit 3.15–3.45 s: opacity 1 → 0 and y +30 px, power2.in. First char accent. Loop 3.6 s. Params: độ cao rơi (200 px) · thời gian (0.9 s) · cách nhau (0.04 s) · bóng sàn (bật / tắt).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Nảy trên sàn</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"height":800,"duration":0.9,"stagger":0.04,"shadow":true,"drop":120,"exitAt":2.85,"accent":"#a99bff"};
+  var run = function (el, tl, at, o) {
+        var ch = MW.split(el, "chars").chars, n = ch.length, st = Math.min(o.stagger, 1.2 / Math.max(1, n - 1)), bo = gsap.parseEase("bounce.out"), pi = gsap.parseEase("power2.in"), sh = [];
+        if (o.accent) ch[0].style.color = o.accent;
+        if (o.shadow) ch.forEach(function (c) { var s = document.createElement("span"); s.style.cssText = "position:absolute;left:5%;width:90%;bottom:-0.08em;height:0.2em;border-radius:50%;background:#000;pointer-events:none;"; c.style.position = "relative"; c.appendChild(s); sh.push(s); });
+        return MW.drive(tl, at, o.exitAt + 0.3, function (t) {
+          var e = pi(Math.max(0, Math.min(1, (t - o.exitAt) / 0.3)));
+          ch.forEach(function (c, i) { var u = Math.max(0, Math.min(1, (t - i * st) / o.duration)), h = o.height * (1 - bo(u)); gsap.set(c, { y: -h + e * o.drop }); c.style.opacity = t >= i * st ? String(1 - e) : "0";
+            if (sh[i]) { gsap.set(sh[i], { y: h, scaleX: Math.max(0.2, 1 - h / o.height), scaleY: 0.9 }); sh[i].style.opacity = String(Math.max(0, 0.28 * (1 - h / (o.height * 0.8))) * (1 - e)); } });
+        });
+      };
+  MW.textDropBounce = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

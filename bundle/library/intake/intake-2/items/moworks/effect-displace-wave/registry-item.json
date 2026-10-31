@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-displace-wave",
+  "type": "hyperframes:component",
+  "title": "Displacement Wave",
+  "description": "Chữ được cắt thành nhiều dải mỏng, mỗi dải lệch ngang theo một làn sóng chạy qua hai lượt, đầu và cuối đều thẳng hàng.",
+  "tags": [
+    "wave",
+    "distort",
+    "bands",
+    "text",
+    "effects-transitions",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "effect-displace-wave.html",
+      "target": "compositions/components/effect-displace-wave.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-displace-wave",
+    "author": "moworks",
+    "call": "MW.effectDisplaceWave(q(\".tk-head\"), tl, 0.3, {});",
+    "function": "MW.effectDisplaceWave",
+    "options": {
+      "bands": "(26)",
+      "amp": "px (48)",
+      "duration": "s (2.2, linear): the crest crosses twice"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Element cut into 26 horizontal bands (recipe: 10). Band i shifts x by 16 px x sin(0.16 i - 4 pi tau) x sin^2(pi tau), tau 0 -> 1 linear over 2200 ms (recipe 1000 ms): the crest travels across the bands twice and the envelope is zero at both ends, so the outline is clean at start and end. Areas outside the band zone stay still. Params: bands (26) · amp (16 px) · duration (2.2 s). x = amp × sin(0.16 i − 4π τ) × sin²(π τ): clean at the start and at the end.",
+    "titleVi": "Sóng ngang chạy qua dải chữ"
+  }
+}

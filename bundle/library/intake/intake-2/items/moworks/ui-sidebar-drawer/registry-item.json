@@ -1,0 +1,53 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-sidebar-drawer",
+  "type": "hyperframes:block",
+  "title": "Sidebar Reveal",
+  "description": "Bấm nút menu, ngăn kéo trượt vào từ mép trái và nền phía sau tối dần trễ một nhịp; bấm ra ngoài thì ngăn kéo rút về.",
+  "tags": [
+    "drawer",
+    "sidebar",
+    "slide",
+    "backdrop",
+    "layout-navigation",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "ui-sidebar-drawer.html",
+      "target": "compositions/components/ui-sidebar-drawer.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-sidebar-drawer",
+    "author": "moworks",
+    "call": "MW.uiSidebarDrawer(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiSidebarDrawer",
+    "options": {
+      "loop": "s (3.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "App window 240x146 (two content cards). Panel 104 px wide slides x −104 → 0 over 0.45-1.1 s (650 ms) power2.out; backdrop dims to 62 % over 0.53-1.18 s (starts 80 ms later) power2.out. Panel: accent pill header 88x18, 4 icon rows 20 px apart. Close: panel back 2.05-2.45 s, backdrop out 2.05-2.4 s, both power2.in. Cursor taps the menu icon at 0.3 s and the backdrop at 1.9 s. Params: width (104 px) · duration (0.65 s) · backdrop (62 %, trễ 0.08 s) · ease (power2.out / power2.in khi đóng).",
+    "titleVi": "Ngăn kéo bên trượt ra, nền tối lại"
+  }
+}

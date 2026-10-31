@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-counter-rotate",
+  "hash": "0b4bcd4b40105653",
+  "at": "2026-10-17T09:33:18.202Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-counter-rotate.mp4",
+    "poster": "previews/moworks__motion-counter-rotate.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6ee2dfde452bf81d66b8d47d13f6cec81a78b3bd5ae16499c677302a1dec5e97",
+    "size": 27433,
+    "seconds": 30.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

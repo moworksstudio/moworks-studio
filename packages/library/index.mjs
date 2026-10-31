@@ -1,6 +1,6 @@
 // The library as the user arranges it: author first, then the kinds that author has, then categories.
 //   HyperFrames  Motions = HF registry components, Blocks = HF registry blocks, Looks = the hyperframes skill's frame presets
-//   Magic UI, Codrops, TakayuStudio: the library intake (packages/intake-library): each item written as a HyperFrames component
+//   Magic UI, Codrops, the studio's own (Moworks Studio): the library intake (packages/intake-library): each item written as a HyperFrames component
 //   Shohei Ohtaki: Vocabulary (packages/vocab-library): Motion Prompt's names and numbers, words for Claude
 // The Moworks Motion kit's motion group (100 items: the studio's own, anime.js, iart.ai, claude-animation and 18 copies of HF skill templates) was
 // removed. Kinds stay apart (video styles / looks vs motions vs blocks);
@@ -10,6 +10,7 @@ import * as blocks from "../blocks-library/index.mjs";
 import * as looks from "../looks-library/index.mjs";
 import * as intake from "../intake-library/index.mjs";
 import * as vocab from "../vocab-library/index.mjs";
+import { currentUid } from "../intake-library/renamed.mjs";
 
 export const KINDS = { motion: "Motions", block: "Blocks", look: "Looks", vocab: "Vocabulary" };
 const KIND_ORDER = ["motion", "block", "look", "vocab"];
@@ -38,7 +39,7 @@ export function all(root = APP_ROOT) {
       video: it.preview?.video ? `/media/looks/${it.preview.video}` : null, vi: it.vi?.status ?? null, viFamilies: (it.vi?.families ?? []).filter((f) => f.vi !== true).map((f) => f.family),
       credit: it.credit, previewNote: it.preview?.method ? `Preview: ${it.preview.method}` : null, tags: [it.kind, ...(it.fonts ?? [])], colors: it.colors?.slice(0, 8) ?? [] });
   }
-  for (const it of intake.items(root)) {        // the intake: one author each (Magic UI, Codrops, TakayuStudio)
+  for (const it of intake.items(root)) {        // the intake: one author each (Magic UI, Codrops, Moworks Studio)
     const third = (it.thirdParty ?? []).map((t) => `${t.name} (${t.licence})`).join("; ");
     list.push({ uid: it.uid, origin: "intake", id: it.uid, kind: it.kind, author: it.collection, category: it.category, title: it.title, sub: it.sub, desc: it.desc,
       poster: it.preview?.poster ? `/media/intake/${it.preview.poster}` : null, video: it.preview?.video ? `/media/intake/${it.preview.video}` : null, vi: it.vi === "no-text" ? null : it.vi,
@@ -65,7 +66,8 @@ const count = (arr, f) => { const o = {}; for (const x of arr) o[f(x)] = (o[f(x)
 
 /** One page and the three facets: authors (whole library), kinds (within the author), categories (within author and kind). `kinds`: only
  *  these kinds at all (the Motion Library shows motions and blocks; HyperFrames' Looks have their own page). */
-export function search({ q = "", author = "all", kind = "all", category = "all", ids = null, offset = 0, limit = 12, kinds = null } = {}, root = APP_ROOT) {
+export function search({ q = "", author = "all", kind = "all", category = "all", ids: asked = null, offset = 0, limit = 12, kinds = null } = {}, root = APP_ROOT) {
+  const ids = asked && [...new Set(asked.map(currentUid))];
   const words = String(q).toLowerCase().normalize("NFC").split(/\s+/).filter(Boolean);
   const list0 = all(root).filter((x) => !kinds || kinds.includes(x.kind));
   const byAuthor = list0.filter((x) => author === "all" || x.author === author);
@@ -81,8 +83,8 @@ export function search({ q = "", author = "all", kind = "all", category = "all",
 export function reload() { cache = null; intake.reloadItems(); vocab.reloadItems(); }
 
 /** The full item with the text for Claude and how the agent stages it (`library`: motion | blocks | looks | intake | vocab). */
-export function getItem(uid, root = APP_ROOT) {
-  const card = all(root).find((x) => x.uid === uid);
+export function getItem(ref, root = APP_ROOT) {
+  const uid = currentUid(ref), card = all(root).find((x) => x.uid === uid);
   if (!card) return null;
   if (card.origin === "vocab") { const it = vocab.getItem(card.uid, root); return { ...card, library: "vocab", version: it.credit?.commit ?? null, spec: vocab.specText(it), numbers: it.spec, names: it.names, meanings: it.meaning, asks: it.ask, use: it.use,
     hfSame: it.hfSame, studioNote: it.studioNote, size: { w: it.width, h: it.height, cycle: it.cycle } }; }
@@ -94,8 +96,9 @@ export function getItem(uid, root = APP_ROOT) {
 
 /** Copy one item into a project for Claude (the files under .moworks/library/, as the Editor's motion picker does); `ref` is a library
  *  uid ("hf:component/count-up") or an id with no prefix ("component/count-up"). A retired kit id gives null. Returns { uid, title, files } or null. */
-export function stageItem(projectDir, ref, root = APP_ROOT) {
-  if (isRetired(ref)) return null;
+export function stageItem(projectDir, asked, root = APP_ROOT) {
+  if (isRetired(asked)) return null;
+  const ref = currentUid(asked);
   const list = all(root);
   const card = list.find((x) => x.uid === ref) ?? list.find((x) => x.uid === `hf:${ref}` || x.uid === `look:${ref}` || x.uid === `vocab:${String(ref).replace(/^vocab:|^#/, "")}`);
   if (!card) return null;

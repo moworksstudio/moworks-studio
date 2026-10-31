@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-depth-fly-in",
+  "type": "hyperframes:component",
+  "title": "Fly In From Depth",
+  "description": "Từng chữ cái bay từ sâu trong khung lao về phía trước, chụm về điểm giữa lúc còn xa, vượt quá một chút rồi về đúng chỗ, kèm vệt bóng mờ.",
+  "tags": [
+    "3d",
+    "depth",
+    "letters",
+    "overshoot",
+    "text-3d-depth",
+    "bouncy",
+    "crisp",
+    "3d-depth"
+  ],
+  "files": [
+    {
+      "path": "text-depth-fly-in.html",
+      "target": "compositions/components/text-depth-fly-in.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-depth-fly-in",
+    "author": "moworks",
+    "call": "MW.textDepthFlyIn(q(\".tk-head\"), tl, 0.3, { exit: 2.1 });",
+    "function": "MW.textDepthFlyIn",
+    "options": {
+      "depth": "z at the start, px (−800)",
+      "perspective": "px (1000)",
+      "duration": "s (0.9), back.out(1.2)",
+      "stagger": "s (0.04, ≤ 0.9 s)",
+      "color": "trail colour",
+      "exit": "s after the start to fade (null)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Codrops (MIT); a faithful port of Codrops' effects is in the Codrops collection"
+    },
+    "thirdParty": [],
+    "notes": "Per char: z −800 → 0 with perspective 1000 px toward the frame centre (position and scale × P / (P − z)), back.out(1.2) 0.9 s (slight overshoot past z 0), stagger 0.04 s (capped at 0.9 s total), from 0.3 s; opacity = 0.2 → 1 following z. Three accent trail copies 30 / 60 / 90 ms behind at opacity 0.24 / 0.18 / 0.12. Exit 2.4–2.75 s fade power2.in. Loop 3.2 s. Params: độ sâu (z −800 px) · phối cảnh (1000 px) · thời gian (0.9 s) · cách nhau (0.04 s).",
+    "titleVi": "Chữ bay từ xa lao tới"
+  }
+}

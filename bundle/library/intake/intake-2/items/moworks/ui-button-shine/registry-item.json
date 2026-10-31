@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-button-shine",
+  "type": "hyperframes:component",
+  "title": "Shine Sweep",
+  "description": "Một vệt sáng chéo đi kèm một vệt mảnh lướt qua mặt nút đúng một lần trong 0.7 s, chỉ nằm trong nút.",
+  "tags": [
+    "shine",
+    "sweep",
+    "gloss",
+    "button",
+    "ui-buttons",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-button-shine.html",
+      "target": "compositions/components/ui-button-shine.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-button-shine",
+    "author": "moworks",
+    "call": "MW.uiButtonShine(q(\".bs\"), tl, 0, {});",
+    "function": "MW.uiButtonShine",
+    "options": {
+      "duration": "s per pass (0.7)",
+      "ease": "(power2.inOut)",
+      "times": "s each pass starts",
+      "band": "px (72)",
+      "thin": "px (24)",
+      "slant": "px the top edge leads (112)",
+      "ahead": "px the thin band leads (104)",
+      "light": "[band, thin] white opacity",
+      "cursor": "an optional cursor that makes the clicks",
+      "approach": "[x, y] px the cursor comes from",
+      "lead": "s it arrives before a click"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Accent button 140x44 r14 'UPGRADE'. A slanted light band (parallelogram 18 px wide, top edge 28 px ahead of the bottom edge, 85 % light) and a thin 6 px band 26 px ahead of it (70 %) travel x 52 → 270 (across the frame) over 0.6-1.3 s (700 ms) power2.inOut, clipped to the button face; once per pass. Params: duration (0.7 s, power2.inOut) · band (18 px + 6 px) · slant (28 px) · at.",
+    "titleVi": "Vệt sáng lướt chéo qua nút"
+  }
+}

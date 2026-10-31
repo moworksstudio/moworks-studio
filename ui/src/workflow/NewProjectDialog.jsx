@@ -9,7 +9,7 @@
 // Without a Claude sign-in it cannot create: the first message (the brief and the style's skill) must reach a Claude that is ready.
 // Create makes the project, copies the files in, and opens the Editor, where Claude starts with the style's first step.
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertCircle, ArrowDown, Check, ChevronDown, Clock3, FileText, Lightbulb, Loader2, Lock, Sparkles, X } from "lucide-react";
+import { AlertCircle, ArrowDown, Check, ChevronDown, FileText, Lightbulb, Loader2, Lock, Sparkles, X } from "lucide-react";
 import { get, post } from "../api.js";
 import { go, useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
@@ -29,7 +29,7 @@ import "../workflow.css";
 // typed like After Effects (its ratio shown beside it) or one of four presets; even numbers, the long side at most 3840; Lemo and MG list
 // the author's own size first; Brush draws only 1920 × 1080; Anidoodle keeps the presets until other sizes are tried.
 const SIZES = [["16:9", 1920, 1080], ["9:16", 1080, 1920], ["1:1", 1080, 1080], ["4:5", 1080, 1350]];
-const FPS = ["24", "25", "30", "60"];
+const FPS = ["24", "25", "30", "50", "60"];
 const MAX_SIDE = 3840, MIN_SIDE = 320;          // the server's limits
 const gcd = (a, b) => (b ? gcd(b, a % b) : a);
 /** 1350 × 1080 → "5:4". */
@@ -149,6 +149,13 @@ export function leaveLength(value, last, fps) {
   return { value: b != null ? toTimecode(b, fps) : value, reverted: b != null };
 }
 
+/** A click in a time code takes the number under it (hours, minutes, seconds or frames) to type over, as a click on one of After Effects'
+ *  numbers does; a drag's own selection stays. */
+export function pickNumber(el) {
+  if (el.selectionStart !== el.selectionEnd) return;
+  const s = el.value, at = el.selectionStart, from = at ? s.lastIndexOf(":", at - 1) + 1 : 0, next = s.indexOf(":", at);
+  el.setSelectionRange(from, next < 0 ? s.length : next);
+}
 /** Length: a typed timecode, tidied on leaving the field; no list. What is no length goes back to the last length on leaving the field,
  *  and the field says so (onReverted). */
 function LengthField({ value, fps, onChange, onReverted, invalid, describedBy }) {
@@ -156,15 +163,14 @@ function LengthField({ value, fps, onChange, onReverted, invalid, describedBy })
   const last = useRef(value);
   useEffect(() => { if (fromTimecode(value, fps) != null) last.current = value; }, [value, fps]);
   const leave = () => { const out = leaveLength(value, last.current, fps); onChange(out.value, { tidy: true }); if (out.reverted) onReverted?.(out.value); };
-  return <div className={"pick-btn length" + (invalid ? " invalid" : "")}><Clock3 size={14} />
-    <input id="np-len" className="num" value={value} onChange={(e) => onChange(e.target.value)} onBlur={leave} placeholder="0:00:15:00"
+  return <div className={"pick-btn length" + (invalid ? " invalid" : "")}>
+    <input id="np-len" className="num" value={value} onChange={(e) => onChange(e.target.value)} onClick={(e) => pickNumber(e.target)} onBlur={leave} placeholder="0:00:15:00"
       inputMode="numeric" spellCheck={false} aria-label={t("Length")} aria-invalid={invalid || undefined} aria-describedby={describedBy}
-      title={t("Hours : minutes : seconds : frames")} />
-    {fromTimecode(value, fps) != null && <span className="np-len-s num" aria-hidden="true">{secondsText(fromTimecode(value, fps))}</span>}</div>;
+      title={t("Hours : minutes : seconds : frames")} /></div>;
 }
 
-/** Size: width × height typed as in After Effects, the ratio shown beside it, and a list of the style's sizes (the
- *  author's own first). Locked for a style that draws one size only; presets only while typed sizes are not tried for the style. */
+/** Size: width × height as After Effects writes them (a click takes the number to type over), and a list of the style's sizes with their
+ *  ratios (the author's own first). Locked for a style that draws one size only; presets only while typed sizes are not tried for the style. */
 function SizeField({ w, h, rule, onChange, invalid }) {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -181,14 +187,13 @@ function SizeField({ w, h, rule, onChange, invalid }) {
     setOpen((o) => !o);
   };
   const num = (v) => { const n = parseInt(String(v).replace(/\D/g, ""), 10); return Number.isFinite(n) ? n : 0; };
-  if (rule.locked) return <div className="pick-btn np-size locked" title={t("Follows film style")}><Lock size={13} /><span className="num">{w} × {h}</span><span className="np-size-r num">{ratioOf(w, h)}</span></div>;
+  if (rule.locked) return <div className="pick-btn np-size locked" title={t("Follows film style")}><Lock size={13} /><span className="num">{w} × {h}</span></div>;
   return <div className="pick np-size-wrap" ref={ref}>
-    <div className={"pick-btn np-size" + (invalid ? " invalid" : "")}>
-      <input className="num" value={w || ""} onChange={(e) => onChange(num(e.target.value), h)} disabled={!rule.typed} aria-label={t("Width")} inputMode="numeric" />
+    <div className={"pick-btn np-size" + (invalid ? " invalid" : "")} title={w && h ? ratioOf(w, h) : undefined}>
+      <input className="num" value={w || ""} onChange={(e) => onChange(num(e.target.value), h)} onClick={(e) => e.target.select()} onFocus={(e) => e.target.select()} disabled={!rule.typed} aria-label={t("Width")} inputMode="numeric" />
       <span aria-hidden="true">×</span>
-      <input className="num" value={h || ""} onChange={(e) => onChange(w, num(e.target.value))} disabled={!rule.typed} aria-label={t("Height")} inputMode="numeric" />
-      <span className="np-size-r num" title={t("Aspect ratio")}>{w && h ? ratioOf(w, h) : ""}</span>
-      <button type="button" className="btn ghost icon sm" onClick={toggle} aria-haspopup="listbox" aria-expanded={open} aria-label={t("Sizes")}><ChevronDown size={14} /></button>
+      <input className="num" value={h || ""} onChange={(e) => onChange(w, num(e.target.value))} onClick={(e) => e.target.select()} onFocus={(e) => e.target.select()} disabled={!rule.typed} aria-label={t("Height")} inputMode="numeric" />
+      <button type="button" className="np-caret" onClick={toggle} aria-haspopup="listbox" aria-expanded={open} aria-label={t("Sizes")} />
     </div>
     {open && <ul className={"pick-list np-size-list" + (up ? " up" : "")} role="listbox">{rule.sizes.map(([a, pw, ph], i) => <li key={a + pw} role="option" aria-selected={pw === w && ph === h}>
       <button type="button" onClick={() => { onChange(pw, ph); setOpen(false); }}><span className="tx"><b className="num">{pw} × {ph}</b>
@@ -355,6 +360,7 @@ export default function NewProjectDialog({ onClose }) {
         job.current = uploadAll(p.id, files, (id, patch) => setFiles((xs) => xs.map((x) => (x.id === id ? { ...x, ...patch } : x))));
         const r = await job.current.done;
         if (r.failed) toast(t("{n} file(s) could not be copied; import them again in the Editor", { n: r.failed }), "error");
+        if (r.same) toast(t("{n} identical file(s) left out: already there", { n: r.same }));
         for (const a of r.archives ?? []) if (!a.unpacked) toast(a.error, "error");          // an archive that could not be unpacked, in plain words
       }
       sessionStorage.removeItem(KEY);

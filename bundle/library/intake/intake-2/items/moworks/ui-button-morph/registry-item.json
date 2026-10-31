@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-button-morph",
+  "type": "hyperframes:block",
+  "title": "Submit Success Morph",
+  "description": "Bấm nút gửi, nút nhún nhẹ rồi giãn rộng thành viền có vòng xoay ĐANG GỬI, sau đó co lại thành nút xanh có dấu tích ĐÃ GỬI.",
+  "tags": [
+    "button",
+    "loading",
+    "success",
+    "morph",
+    "forms-state",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-button-morph.html",
+      "target": "compositions/components/ui-button-morph.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-button-morph",
+    "author": "moworks",
+    "call": "MW.uiButtonMorph(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiButtonMorph",
+    "options": {
+      "widths": "px [send, sending, sent] ([128, 176, 140])",
+      "stiffness": "(260)",
+      "damping": "(24)",
+      "times": "s [sending, sent] ([0.55, 1.9])",
+      "resetAt": "s (2.95)",
+      "labels": "",
+      "fields": "",
+      "loop": "s (3.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Pill button 44 px tall. Press 0.45-0.6 s: scale 1 → 0.96 → 1. Width on a spring k260 c24 (sum of springs): 128 → 176 at 0.55 s (sending) → 140 at 1.9 s (sent) → 128 at 2.95 s. 0.55-0.75 s crossfade to an outlined surface with a spinning 8 px arc (about 240°, 8 rad/s) and 'SENDING…'; 1.9-2.05 s crossfade to green with a tick drawing over 2.0-2.3 s and 'SENT'. Each new label rises 4 px as it fades in. Reset to SEND 2.95-3.15 s. Params: widths ([128, 176, 140] px) · spring (k260 c24) · times ([0.55, 1.9] s) · labels. The width is a sum of springs between the states; each new label rises 4 px as it fades in; the spinner is a 240° arc at 8 rad/s.",
+    "titleVi": "Nút gửi: đang gửi rồi thành công"
+  }
+}

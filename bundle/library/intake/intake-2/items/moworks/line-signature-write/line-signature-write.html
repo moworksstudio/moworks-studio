@@ -1,0 +1,56 @@
+<!--
+  Signature Stroke (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Ba nét của chữ ký được viết theo thứ tự: chữ cái đầu, phần nối rồi gạch chân, nét viết xong vẫn giữ lại.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.lineSignatureWrite(q(".sgs"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - windows: [from, to] s per stroke, in writing order
+      - pen: the pen dot
+      - fadeAt: s (2.9)
+
+  Notes: Three paths, pathLength 1, dashoffset 1 -> 0 in writing order, ease-in-out: initial 0.25-0.9 s, connected letters 0.85-1.6 s, underline 1.55-2.05 s (recipe: 8-34 %, 32-64 %, 62-84 % of the loop); strokes overlap slightly and stay drawn; 4.5 px strokes, underline 3 px in the second colour; a small pen dot rides the active tip. All fade 2.9-3.25 s. Params: strokes (3) · windows: giờ từng nét · width (4.5 / 3 px).
+-->
+
+<div class="sv"><div class="sgc"><svg class="sgs" width="900" height="420" viewBox="0 0 300 140"><g fill="none" stroke-linecap="round" stroke-linejoin="round">
+<path d="M30 100 C34 70 40 40 46 30 C50 50 54 70 58 84 C64 64 70 44 78 30 C80 56 80 80 82 102" stroke="#2a2a55" stroke-width="4.5"/>
+<path d="M82 102 C90 90 96 80 100 76 C100 86 100 94 104 98 C110 86 116 74 120 70 C122 84 124 96 130 96 C136 84 140 76 146 70 C146 84 148 94 156 94 C164 86 170 70 172 50 C172 66 172 82 176 96 C182 86 188 78 196 80 C202 84 202 92 208 96" stroke="#2a2a55" stroke-width="4.5"/>
+<path d="M40 118 C100 112 170 112 250 116" stroke="#8b7bff" stroke-width="3"/></g><circle class="sg-pen" r="4" fill="#8b7bff" opacity="0"/></svg></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"windows":[[0.25,0.9],[0.85,1.6],[1.55,2.05]],"pen":".sg-pen","fadeAt":2.9};
+  var run = function (el, tl, at, o) {
+        var paths = Array.prototype.slice.call(el.querySelectorAll("path")), pen = el.querySelector(o.pen), io = gsap.parseEase("power2.inOut");
+        paths.forEach(function (p) { p.setAttribute("pathLength", "1"); p.style.strokeDasharray = "1 1"; });
+        return MW.drive(tl, at, o.fadeAt + 0.35, function (t) {
+          var tip = null;
+          paths.forEach(function (p, i) { var w = o.windows[i], u = io(Math.max(0, Math.min(1, (t - w[0]) / (w[1] - w[0])))); p.style.strokeDashoffset = String(1 - u); if (u > 0 && u < 1) { var L = p.getTotalLength(), q = p.getPointAtLength(L * u); tip = q; } });
+          if (pen) { pen.setAttribute("opacity", tip ? "1" : "0"); if (tip) { pen.setAttribute("cx", tip.x); pen.setAttribute("cy", tip.y); } }
+          el.style.opacity = String(1 - Math.max(0, Math.min(1, (t - o.fadeAt) / 0.35)));
+        });
+      };
+  MW.lineSignatureWrite = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-grid-row-sweep",
+  "hash": "dd0827bb6487ac46",
+  "at": "2026-10-17T10:56:32.111Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-grid-row-sweep.mp4",
+    "poster": "previews/moworks__motion-grid-row-sweep.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "601c6d0e128eaaeab15a8dec98cef30300dcdd6ea7041caca4dd438586ac10d6",
+    "size": 11198,
+    "seconds": 24.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,111 @@
+<!--
+  Daily Bonus (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Sáu ô ngày đã nhận đứng yên, chỉ ô ngày 7 nhấc lên bằng lò xo; con trỏ bấm vào, ô đổ màu nhấn, dấu tích bật ra ở góc, hạt nổ và nhãn "đã nhận" hiện, rồi ô hạ xuống.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiDailyBonusClaim(q(".gm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - claimAt: s (1.15)
+      - dropAt: s (1.85)
+      - accent: 
+      - loop: s (2.8)
+
+  Notes: px @320x200. 7 cards 34 x 58 (r 8), 6 px gap; days 1-6 claimed (green check badges), never move. Day 7 lifts −14 px by spring k220 d16 at 0.35 s (shadow 30 %), returns by spring k220 d22 at 1.85 s. Cursor arrives 0.6-1.0 s outCubic, presses 1.05-1.12 s (card 0.94), releases 1.15-1.25 s. Claim at 1.15 s: accent fill in 150 ms, icon colours invert, check badge pops (300 ms back.out), 10-dot burst to 30 px (450 ms), 'claimed' label. Loop fade 2.44-2.8 s. Params: days: số ô (7) · lift: nhấc lên (14 px, k220 d16) · claimAt: lúc bấm nhận (1.15 s) · dropAt: lúc hạ (1.85 s). Days one to six never move; only day seven lifts (spring k220 c16), is pressed, fills and drops back (k220 c22).
+-->
+
+<div class="gm"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  MW.span = MW.span || function (t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); };
+  MW.yAt = MW.yAt || function (pts, x) { if (x <= pts[0][0]) return pts[0][1]; for (var i = 1; i < pts.length; i++) if (x <= pts[i][0]) { var u = (x - pts[i - 1][0]) / ((pts[i][0] - pts[i - 1][0]) || 1); return pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * u; } return pts[pts.length - 1][1]; };
+  MW.polyToX = MW.polyToX || function (c, pts, x) { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) { if (pts[i][0] <= x) c.lineTo(pts[i][0], pts[i][1]); else { c.lineTo(x, MW.yAt(pts, x)); break; } } return [Math.min(x, pts[pts.length - 1][0]), MW.yAt(pts, Math.min(x, pts[pts.length - 1][0]))]; };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"claimAt":1.15,"dropAt":1.85,"accent":"#8b7bff","loop":2.8};
+  var run = function (el,tl,at,o
+  ) {
+  var star5 = function (c, x, y, r, rot) { c.beginPath(); for (var i = 0; i < 10; i++) { var a = rot - Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.45 : r; c.lineTo(x + rr * Math.cos(a), y + rr * Math.sin(a)); } c.closePath(); };
+  var spark4 = function (c, x, y, r, rot) { c.save(); c.translate(x, y); c.rotate(rot); c.beginPath(); for (var i = 0; i < 4; i++) { var a = i * Math.PI / 2; c.lineTo(r * Math.cos(a), r * Math.sin(a)); c.quadraticCurveTo(0.16 * r * Math.cos(a + Math.PI / 4) * 1.4, 0.16 * r * Math.sin(a + Math.PI / 4) * 1.4, r * Math.cos(a + Math.PI / 2), r * Math.sin(a + Math.PI / 2)); } c.closePath(); c.restore(); };
+  var burst = function (c, x, y, n, u, r0, r1, seed, cols, size) { if (u <= 0 || u >= 1) return; var rr = MW.rand(seed), e = 1 - Math.pow(1 - u, 3); for (var i = 0; i < n; i++) { var a = i / n * 2 * Math.PI + rr() * 0.5, d = r0 + (r1 - r0) * rr(); c.globalAlpha = 1 - u; c.fillStyle = cols[i % cols.length]; c.beginPath(); c.arc(x + d * e * Math.cos(a), y + d * e * Math.sin(a), size * (1 - 0.5 * u), 0, 2 * Math.PI); c.fill(); } c.globalAlpha = 1; };
+  var T = function (t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); }, oc = function (u) { return 1 - Math.pow(1 - u, 3); }, ic = function (u) { return u * u * u; };
+  var S = MW.stage320(el), c = S.ctx, up = MW.spring(220, 16), dn = MW.spring(220, 22), bo = gsap.parseEase("back.out(1.7)"), x0 = 23;
+  var check = function (x, y, r, s) { c.save(); c.translate(x, y); c.scale(s, s); c.fillStyle = "#3ddc84"; c.beginPath(); c.arc(0, 0, r, 0, 2 * Math.PI); c.fill(); c.strokeStyle = "#0b2a18"; c.lineWidth = 1.6; c.beginPath(); c.moveTo(-r * 0.45, 0); c.lineTo(-r * 0.1, r * 0.35); c.lineTo(r * 0.5, -r * 0.35); c.stroke(); c.restore(); };
+  return MW.drive(tl, at, o.loop, function (t) {
+    S.clear(); var f = 1 - T(t, o.loop - 0.36, o.loop); c.globalAlpha = f;
+    for (var i = 0; i < 7; i++) { var x = x0 + i * 40, y = 70, last = i === 6, lift = 0, s = 1, claimed = !last || t >= o.claimAt;
+      if (last) { lift = t > 0.35 ? 14 * up.at(t - 0.35) : 0; if (t > o.dropAt) lift = 14 * (1 - dn.at(t - o.dropAt)); if (t > 1.05 && t < 1.15) s = 0.94; else if (t >= 1.15 && t < 1.25) s = 0.94 + 0.06 * T(t, 1.15, 1.25); }
+      c.save(); c.translate(x + 17, y + 29 - lift); c.scale(s, s); if (last && lift > 0.5) { c.fillStyle = "rgba(0,0,0,0.3)"; c.beginPath(); c.ellipse(0, 33 + lift, 15, 3, 0, 0, 2 * Math.PI); c.fill(); }
+      var fill = last ? T(t, o.claimAt, o.claimAt + 0.15) : 0; MW.rr(c, -17, -29, 34, 58, 8); c.fillStyle = fill > 0.5 ? o.accent : "#1b2130"; c.fill(); c.strokeStyle = last ? "#ffd23d" : "#2a3350"; c.lineWidth = 1.2; c.stroke();
+      MW.txt(c, "Ngày " + (i + 1), 0, -18, 6, fill > 0.5 ? "#0b0d12" : "#8f9ab3", 800); c.fillStyle = fill > 0.5 ? "#0b0d12" : (last ? "#ffd23d" : "#3dd6f5"); c.beginPath(); c.moveTo(0, -8); c.lineTo(8, 2); c.lineTo(0, 12); c.lineTo(-8, 2); c.closePath(); c.fill();
+      if (claimed) check(12, -24, 6, last ? bo(T(t, o.claimAt, o.claimAt + 0.3)) : 1); c.restore();
+      if (last) { burst(c, x + 17, y + 29 - lift, 10, T(t, o.claimAt, o.claimAt + 0.45), 6, 30, 4, ["#ffd23d", o.accent, "#fff"], 1.6); c.globalAlpha = f; if (t > o.claimAt) { c.globalAlpha = f * T(t, o.claimAt, o.claimAt + 0.2); MW.txt(c, "đã nhận", x + 17, y + 72, 7, "#ffd23d", 800); c.globalAlpha = f; } } }
+    var cp = MW.path([[0, 300, 200], [0.6, 300, 200], [1, x0 + 6 * 40 + 22, 110], [1.3, x0 + 6 * 40 + 22, 110], [1.9, 300, 190]], t, "power3.out"); MW.cursor(c, cp[0], cp[1], t > 1.05 && t < 1.15 ? 0.85 : 1); c.globalAlpha = 1;
+  });
+  };
+  MW.uiDailyBonusClaim = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

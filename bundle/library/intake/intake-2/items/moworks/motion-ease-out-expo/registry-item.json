@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-out-expo",
+  "type": "hyperframes:component",
+  "title": "Ease-out Expo",
+  "description": "Lao ra gần như tức thì rồi giảm tốc rất dài; đường cong vào cảnh mặc định khi còn phân vân.out).",
+  "tags": [
+    "ease",
+    "entrance",
+    "expo",
+    "easing",
+    "crisp",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-out-expo.html",
+      "target": "compositions/components/motion-ease-out-expo.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-ease-out-expo",
+    "author": "moworks",
+    "call": "MW.motionEaseOutExpo(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseOutExpo",
+    "options": {
+      "duration": "s (0.4)",
+      "ease": "the curve (cubic-bezier(.16,1,.3,1))",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Target moves 0 → 100 % on cubic-bezier(.16,1,.3,1), 400 ms (300–500 ms). Rule: the standard entrance; when unsure, use this. GSAP expo.out is close; for the exact curve write custom(M0,0 C .16,1 .3,1 1,1). Small demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: duration (0.4 s; 0.3–0.5) · prop (x) · ease (custom .16,1,.3,1).",
+    "titleVi": "Ease-out expo (vào nhanh, dừng dài)"
+  }
+}

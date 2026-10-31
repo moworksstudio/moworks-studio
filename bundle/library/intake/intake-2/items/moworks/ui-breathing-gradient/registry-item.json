@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-breathing-gradient",
+  "type": "hyperframes:component",
+  "title": "Breathing Gradient",
+  "description": "Mặt nút là một dải gradient vàng, màu nhấn, xanh có tâm trôi qua lại, quầng sáng và viền ngoài phập phồng theo nhịp thở, lặp liền mạch.",
+  "tags": [
+    "gradient",
+    "glow",
+    "loop",
+    "button",
+    "ui-buttons",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-breathing-gradient.html",
+      "target": "compositions/components/ui-breathing-gradient.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-breathing-gradient",
+    "author": "moworks",
+    "call": "MW.uiBreathingGradient(q(\".bg\"), tl, 0, {});",
+    "function": "MW.uiBreathingGradient",
+    "options": {
+      "period": "s, a seamless loop (2.8)",
+      "cycles": "(2)",
+      "drift": "± px the centre drifts (160)",
+      "radius": "px of the gradient (360)",
+      "glow": "[base, added] px of shadow blur ([16, 56])",
+      "halo": "px ring width (5)",
+      "offset": "[base, added] px ring offset ([24, 16])",
+      "colors": "[centre, middle, edge]",
+      "cursor": "an optional cursor that makes the clicks",
+      "approach": "[x, y] px the cursor comes from",
+      "lead": "s it arrives before a click"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Button 140x46, radius 16, seamless 2.8 s loop: glow I = 0.5 − 0.5 cos(2π t / 2.8); radial gradient (yellow 0 → accent 0.55 → blue 1, radius 90 px) centred at x = centre + 40 px × sin(2π t / 2.8); shadow blur 4 + 14 I; outer halo ring (1.2 px) offset 6 + 4 I px, opacity 0.15 + 0.35 I. Frame 0 equals frame 2.8 s. Params: period (2.8 s) · drift (±40 px) · glow (4 → 18 px) · colors (vàng → nhấn → xanh).",
+    "titleVi": "Nút gradient thở, tâm màu trôi"
+  }
+}

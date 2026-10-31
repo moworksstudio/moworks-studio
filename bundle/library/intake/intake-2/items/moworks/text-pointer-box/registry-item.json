@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-pointer-box",
+  "type": "hyperframes:component",
+  "title": "Pointer Highlight Box",
+  "description": "Một khung viền màu nhấn kéo từ góc trên trái ra ôm lấy cụm từ trong 1 giây, con trỏ chuột bám theo góc dưới phải.",
+  "tags": [
+    "emphasis",
+    "box",
+    "pointer",
+    "outline",
+    "text-emphasis",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "text-pointer-box.html",
+      "target": "compositions/components/text-pointer-box.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-pointer-box",
+    "author": "moworks",
+    "call": "MW.textPointerBox(q(\".pb-w\"), tl, 0.05, { cursor: \".ui-cursor\" });",
+    "function": "MW.textPointerBox",
+    "options": {
+      "duration": "s (1), in-out, from the top-left corner",
+      "padX": "em (0.3)",
+      "padY": "em (0.06)",
+      "border": "px (5)",
+      "color": "colour",
+      "cursor": "the pointer riding the corner",
+      "fadeAt": "s (2.3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Aceternity UI: written from the idea only"
+    },
+    "thirdParty": [],
+    "notes": "Box round the phrase: 1.5 px accent border, radius 3 px, 10 % accent fill, padding 0.3 em left/right, ~0.06 em top/bottom; width and height 0 → 100 % together from a fixed top-left corner, 1 s ease-in-out (CSS (.42,0,.58,1); demo (.65,0,.35,1)), demo from 0.45 s. A pointer arrow (~0.5 em, accent, dark outline) flies in from off-frame bottom-right (0.05–0.45 s, easeOutCubic), then rides the bottom-right corner. Exit fade 2.7–3.0 s; loop 3.2 s. Params: duration (1 s) · padding (0.3 em) · border (1.5 px) · fill: nền mờ (10 %) · pointer: con trỏ ở góc (bật).",
+    "titleVi": "Khung chữ nhật kéo ra theo con trỏ"
+  }
+}

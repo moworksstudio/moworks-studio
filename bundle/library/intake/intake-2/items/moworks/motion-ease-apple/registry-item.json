@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-apple",
+  "type": "hyperframes:component",
+  "title": "Apple HIG",
+  "description": "Giống hệt ease mặc định của CSS; nên chọn có chủ đích chứ không để mặc định.",
+  "tags": [
+    "ease",
+    "css",
+    "ui",
+    "easing",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-apple.html",
+      "target": "compositions/components/motion-ease-apple.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-ease-apple",
+    "author": "moworks",
+    "call": "MW.motionEaseApple(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseApple",
+    "options": {
+      "duration": "s (0.35)",
+      "ease": "the curve (css-ease)",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "cubic-bezier(.25, .1, .25, 1) (CSS 'ease'), 350 ms. Rule: same as CSS ease; pick it on purpose, not as an unexamined default. GSAP has no 'ease' name: write custom(M0,0 C .25,.1 .25,1 1,1); proposed alias css.ease. Small demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: duration (0.35 s) · ease (custom .25,.1,.25,1).",
+    "titleVi": "Đường cong chuẩn kiểu Apple"
+  }
+}

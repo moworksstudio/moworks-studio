@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-seamless-loop",
+  "hash": "c7677b946e2273d0",
+  "at": "2026-10-17T11:40:14.176Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-seamless-loop.mp4",
+    "poster": "previews/moworks__motion-seamless-loop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "aeb4a0897d6ec5ed2b51a88738616dcb861548cfbe84b74f9d680580e39929eb",
+    "size": 17076,
+    "seconds": 29.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

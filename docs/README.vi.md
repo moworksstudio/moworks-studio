@@ -5,7 +5,7 @@
 <p align="center"><b>Xưởng làm phim motion trên máy tính: Claude đạo diễn, Moworks Studio dựng và kiểm từng khung hình, bạn duyệt từng bước.</b></p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.8.214.2-1d3fd8" alt="version 0.8.214.2">
+  <img src="https://img.shields.io/badge/version-0.8.214.3-1d3fd8" alt="version 0.8.214.3">
   <img src="https://img.shields.io/badge/Claude-Opus_5.5_·_Sonnet_5.5-d97757" alt="Claude Opus 5.5 và Sonnet 5.5">
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-555" alt="Windows 10 | 11">
   <img src="https://img.shields.io/badge/film_styles-126_từ_7_tác_giả-0a7" alt="126 film style từ 7 tác giả">
@@ -179,7 +179,7 @@ Mọi style còn theo hai bộ luật chung của app: **phim luôn sống độ
 | Màn | Nội dung |
 |---|---|
 | **Projects** | Các phim của bạn, mới nhất ở trên; mỗi phim mở trong Editor |
-| **Brand Kits** | Màu, font và các thành phần của một thương hiệu, áp cho cả phim. Có sẵn 13 frame preset của HyperFrames; bạn tự tạo Brand Kit từ brand guideline (PDF, PowerPoint hoặc ảnh) rồi kiểm lại trước khi dùng |
+| **Brand Kits** | Màu, font và các thành phần của một thương hiệu, áp cho cả phim. Có sẵn 13 frame preset của HyperFrames; bạn tự tạo Brand Kit từ cả thư mục của thương hiệu (PDF, PowerPoint, ảnh, font, AI, PSD, ZIP) rồi kiểm lại trước khi dùng; phim làm từ kit có sẵn logo và font của kit |
 | **Film Styles** | Thư viện style ở trên, kèm phim mẫu, ghi công và huy hiệu AE |
 | **Motion Library** | Thư viện riêng của studio: Motions (895), Blocks (448 block và component) và Vocabulary (168 thuật ngữ chuyển động), xếp theo loại và nhóm. Giấy phép của các nguồn được dùng nằm trong [THIRD-PARTY.md](THIRD-PARTY.md) |
 | **Characters** | Nhân vật của dự án: vẽ bằng Character maker, hoặc lấy từ các rig nhân vật của tác giả Anidoodle |
@@ -216,7 +216,7 @@ Mọi style còn theo hai bộ luật chung của app: **phim luôn sống độ
    Moworks Studio\
      app\       ← bản clone: mã nguồn, HyperFrames đã cài, cài đặt
      projects\  ← các phim
-     library\   ← Brand Kits, nhân vật, thư viện
+     library\   ← Brand Kits, nhân vật của bạn, thư viện
      models\    ← chỉ có khi đã cài Whisper
    ```
    Hãy dùng ổ đĩa trên máy, không dùng thư mục đồng bộ (Google Drive, OneDrive, Dropbox): việc đồng bộ khoá file khi phim đang render.
@@ -235,7 +235,7 @@ Mọi style còn theo hai bộ luật chung của app: **phim luôn sống độ
    | Whisper chạy trên card đồ hoạ NVIDIA (thư viện CUDA) | khoảng 1,3 GB | tuỳ chọn, trong Settings › System khi máy có card phù hợp |
    | FFmpeg 9.0 (và Python 3.12 nếu máy chưa có) | khoảng 210 MB | cài bằng **Install** qua winget, chỉ cho tài khoản của bạn; máy không có winget thì màn hình hiện dòng lệnh để bạn tự chạy |
    | Skill và registry của HyperFrames, font, thư viện code, nguồn film style, thư viện | có sẵn trong repo | không cần tải |
-5. **Thêm key giọng đọc** *(tuỳ chọn)*: Settings › General › Voice-over. Key được mã hoá cho tài khoản Windows của bạn.
+5. **Thêm key giọng đọc** *(tuỳ chọn)*: Settings › System › Voice-over. Key được mã hoá cho tài khoản Windows của bạn.
 6. **Làm phim:** Projects › New project.
 
 ### Hoặc để Claude cài
@@ -278,6 +278,8 @@ Một phim 30 giây, từ brief tới MP4:
 | `projects\` (cạnh `app\`, trong thư mục làm việc) | Phim của bạn: mỗi phim một thư mục; file của HyperFrames ở ngoài cùng (`index.html`, `BRIEF.md`, `STORYBOARD.md`, composition, assets), tài liệu của app trong `docs\` (ghi chú, ghi công, Review, nhân vật, Motion Plan), storyboard và `renders\` | không |
 | `library\`, `models\` (cạnh `app\`, trong thư mục làm việc) | Thư viện, Brand Kits và nhân vật của bạn; Whisper, khi đã cài | không |
 
+Các nhân vật đi kèm app (Clawd, Mira, Theo, Bit, chú báo) nằm trong `app\bundle\library\characters\` và được đọc tại đó. `library\characters\` chỉ chứa nhân vật do bạn làm, nên bản cập nhật không thể đổi hay trộn lẫn chúng. Nhân vật mới có tên trùng với nhân vật của app sẽ có id riêng (`mira-2`).
+
 Settings › General › Projects folder đổi nơi lưu dự án mới. Mỗi phim có một `docs\CREDITS.md` ghi công nhạc và hiệu ứng âm thanh phim dùng
 (tên, tác giả, nguồn, giấy phép); font tải về đi kèm file giấy phép của nó.
 
@@ -313,7 +315,7 @@ Nếu app không mở được: chạy `tools\uninstall.bat` trong thư mục ap
 | Một thành phần báo thiếu | Settings › System liệt kê mọi thành phần, trạng thái và bước tiếp theo; FFmpeg cần lệnh `winget` hiện ở đó |
 | "The local service is not running" | Dịch vụ nền của app đã dừng. Mở lại `Moworks Studio.bat`; nhật ký ở `runtime\logs\app.log` |
 | Một style hiện ổ khoá | Một file nguồn của style không còn khớp bản đã ghim. Settings › System cho tải lại |
-| Không tạo được lời đọc | Thêm hoặc kiểm tra key ElevenLabs ở Settings › General › Voice-over; key cần quyền text-to-speech |
+| Không tạo được lời đọc | Thêm hoặc kiểm tra key ElevenLabs ở Settings › System › Voice-over; key cần quyền text-to-speech |
 | Port After Effects lỗi | Cài After Effects, đóng mọi hộp thoại đang mở trong đó rồi port lại; thông báo lỗi trong app nêu bước bị lỗi |
 
 Các giới hạn đã biết nằm ở [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
@@ -336,15 +338,9 @@ Các giới hạn đã biết nằm ở [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
 | `npm start` | Chạy server cục bộ của app (file .bat đã làm việc này) |
 | `npm run build` | Dựng giao diện vào `ui/dist` |
 | `npm run dev:ui` | Giao diện tự tải lại khi sửa, để làm phần giao diện |
-| `npm test` | Toàn bộ bộ test (khoảng 30 phút; đóng HyperFrames Studio trước nếu đang mở) |
 
-Trên máy mới, các test render hoặc kiểm tra phim cần các thành phần trước: chạy **Install** ở màn hình lần đầu và cài FFmpeg, nếu
-không chúng sẽ báo lỗi. Hai test còn so với một bản render chuẩn (golden) không lưu trong repo (`test-output/` bị bỏ qua); tạo bản này một
-lần trước khi chạy bộ test, nếu không `test/edit.test.mjs` và `test/gpu.test.mjs` sẽ báo lỗi:
-
-```bash
-node tools/golden/run.mjs --label G214 --only hf-native-30
-```
+Bản phát hành công khai không kèm bộ test, nên `npm test` không có gì để chạy: `test/` chỉ giữ một phim mẫu nhỏ mà bước kiểm tra phiên bản
+HyperFrames dùng để render.
 
 ## Tài liệu
 

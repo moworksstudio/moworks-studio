@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-attention-bounce",
+  "type": "hyperframes:component",
+  "title": "Attention Bounce",
+  "description": "Cả từ nhảy hai nhịp (cao 30 % rồi 12 %), bẹp nhẹ khi chạm đất, rồi nghỉ 2 giây trước khi nhảy lại.",
+  "tags": [
+    "emphasis",
+    "bounce",
+    "squash",
+    "loop",
+    "text-emphasis",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "text-attention-bounce.html",
+      "target": "compositions/components/text-attention-bounce.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-attention-bounce",
+    "author": "moworks",
+    "call": "MW.textAttentionBounce(q(\".ab-b\"), tl, 0.3, { shadow: \".ab-s\" });",
+    "function": "MW.textAttentionBounce",
+    "options": {
+      "rest": "s between bounces (2)",
+      "cycles": "(1)",
+      "shadow": "the floor shadow"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Whole word, pivot bottom centre. Jump 1: y 0 → −30 % of its height in 0.24 s ease-out, back to 0 in 0.2 s ease-in, squash scale (1.06, 0.9) for 0.1 s on landing; jump 2: −12 % in 0.16 s, down in 0.12 s, squash (1.04, 0.94) for 0.08 s; 0.8 s in all, then 2 s rest (loop 2.8 s, CSS keys at 8.6 / 15.7 / 21.4 / 25.7 / 28.6 %). Demo adds a small take-off squash (0.95) and a floor shadow ellipse that shrinks while airborne. Params: heights: độ cao hai nhịp (30 % / 12 %) · duration (0.8 s) · squash (0.9) · rest: nghỉ giữa các lần (2 s).",
+    "titleVi": "Từ nhảy hai nhịp gây chú ý"
+  }
+}

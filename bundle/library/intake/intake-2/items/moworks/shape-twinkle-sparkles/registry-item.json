@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "shape-twinkle-sparkles",
+  "type": "hyperframes:block",
+  "title": "Twinkle Sparkles",
+  "description": "Các ngôi sao bốn cánh nhỏ lần lượt loé lên rồi tắt ở các chỗ khác nhau, không bao giờ cùng lúc.",
+  "tags": [
+    "sparkle",
+    "twinkle",
+    "loop",
+    "ambient",
+    "particles",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "shape-twinkle-sparkles.html",
+      "target": "compositions/components/shape-twinkle-sparkles.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/shape-twinkle-sparkles",
+    "author": "moworks",
+    "call": "MW.shapeTwinkleSparkles(q(\".gm\"), tl, 0, {});",
+    "function": "MW.shapeTwinkleSparkles",
+    "options": {
+      "count": "(12)",
+      "period": "s each sparkle repeats (1.5); it glows in the first 35 %",
+      "duration": "s (4.5)",
+      "seed": "spots and phases"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "12 four-point sparkles at seeded spots; each repeats every 1.5 s with a seeded phase and glows only in the first 35 % of its cycle: size 4 -> 4 + 10 x seed -> 4 as sin(pi u) (recipe: 600 ms, scale 0 -> 1 -> 0, ease-in-out), turning slowly at 0.5 rad / s; 2 in 3 yellow, 1 in 3 accent. Never all at once. Params: count (12) · duration mỗi lần loé (0.6 s) · seed.",
+    "titleVi": "Lấp lánh lệch nhịp"
+  }
+}

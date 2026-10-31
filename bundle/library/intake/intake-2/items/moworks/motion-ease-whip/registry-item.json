@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-whip",
+  "type": "hyperframes:component",
+  "title": "Whip",
+  "description": "Gần như đứng yên ở hai đầu và vụt qua ở giữa; cho cú đập và chuyển cảnh, thêm nhoè ở đoạn nhanh.",
+  "tags": [
+    "ease",
+    "whip",
+    "fast",
+    "easing",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-whip.html",
+      "target": "compositions/components/motion-ease-whip.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-ease-whip",
+    "author": "moworks",
+    "call": "MW.motionEaseWhip(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseWhip",
+    "options": {
+      "duration": "s (0.5)",
+      "ease": "the curve (whip)",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "cubic-bezier(.9, 0, .1, 1), 500 ms: a near-vertical peak. For slams and transitions; add a smear (motion blur) to the fast middle. Writable now as custom(M0,0 C .9,0 .1,1 1,1); proposed alias whip. Small demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: duration (0.5 s) · ease (custom .9,0,.1,1) · smear: nhoè đoạn giữa (bật/tắt).",
+    "titleVi": "Đường cong quất roi (whip)"
+  }
+}

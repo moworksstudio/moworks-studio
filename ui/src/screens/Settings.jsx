@@ -3,9 +3,9 @@
 // One round simpler. The selected section names the page (no second title); each setting has one short line, the
 // longer explanation in a quiet "?" tooltip; technical lists sit behind a single "Details" fold; no paths (the projects folder by its name).
 // Second round: four sections. General in small groups (Account, Projects folder,
-// Appearance, Voice-over, Render & export), Director (the AI that makes the films: model, effort, mode, web, bypass), System (the
-// components as one line with Install or Check again and only what needs the user; the optional extras; "Open-source licences" folded;
-// backups one line), Update.
+// Appearance, Render & export), Director (the AI that makes the films: model, effort, mode, web, bypass), System (what runs the app: the
+// components as one line with Install, or Check again when something is wrong, and only what needs the user; Voice-over; the optional
+// extras; "Open-source licences" folded; backups one line), Update.
 // Old addresses (ai, workspace, voice, styles, ae, models) land in their new place. Whatever waits on the server shows a skeleton at once.
 import { useEffect, useState } from "react";
 import { ALargeSmall, Bot, Brain, Clapperboard, Cpu, Download, FlaskConical, FolderOpen, Gauge as GaugeIcon, Globe, Languages, Loader2, LogOut, Palette, RefreshCw, RotateCcw, RotateCw, ShieldCheck, SlidersHorizontal } from "lucide-react";
@@ -26,7 +26,7 @@ import Keys from "../voice/Keys.jsx";
 // labels are English keys for t
 const SECTIONS = [["general", "General", SlidersHorizontal], ["director", "Director", Bot], ["runtime", "System", Cpu], ["update", "Update", Download]];
 // old addresses still land in their new place
-const ALIAS = { ai: "director", workspace: "general", ae: "general", voice: "general", models: "runtime", styles: "general" };
+const ALIAS = { ai: "director", workspace: "general", ae: "general", voice: "runtime", models: "runtime", styles: "general" };
 
 /** A check's text without the computer's addresses: "C:\…\python.exe" reads as "python.exe", "E:\Films" as "Films". */
 const noPaths = (s) => String(s ?? "").replace(/[A-Za-z]:[\\/][^,;()\n]*?(?=\s*(?:$|[,;()]|\.(?:\s|$)))/g, (m) => m.replace(/[\\/]+$/, "").split(/[\\/]/).pop());
@@ -175,7 +175,7 @@ function Director() {
   const { data, reload } = useData(() => get("/api/agent/settings"));
   const save = async (k, v) => { try { await patch("/api/agent/settings", { [k]: v }); toast(t("Saved")); reload(); } catch (e) { toast(e.message, "error"); } };
   if (!data) return <Waiting rows={5} label={t("Loading…")} />;
-  return <section className="section"><p className="lead set-lead">{t("The AI that makes your films.")}</p><div className="panel settings-compact">
+  return <section className="section"><div className="panel settings-compact">
     <Row icon={<Brain size={16} />} title={t("Model")} desc={t("For every project that does not pick its own.")} more={t("Each reply in the chat shows the model, the time and what it would cost at API prices.")}>
       <select className="select" value={data.model} onChange={(e) => save("model", e.target.value)} aria-label={t("Model")}>{data.models.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
     </Row>
@@ -245,11 +245,13 @@ function Runtime({ sys, reload, loading }) {
   const need = d.items.some((it) => !it.ready && it.from !== "yours" && !it.optional);
   const size = d.items.reduce((n, it) => n + (!it.optional && it.ready && it.diskMb ? it.diskMb : 0), 0);
   const busy = loading || fr.loading;
-  return <section className="section">
+  // nothing to do while all is ready (the page checks by itself each time it opens): Check again only when something is wrong
+  const wrong = bad.length > 0 || d.items.some((it) => it.from === "yours" && it.id !== "work" && !it.ready);
+  return <section className="section set-general">
     <div className="panel">
       <ComponentsLine d={d} job={setup.job} label size={size > 0 ? mbOf(size) : null} problems={bad.length}
         action={setup.job ? null : need ? <button className="btn primary sm" onClick={() => setup.start()}><Download size={14} />{d.mb > 0 ? t("Install ({size})", { size: mbOf(d.mb) }) : t("Install")}</button>
-          : <button className="btn sm" onClick={again} disabled={busy}>{busy ? <Loader2 size={14} className="spin" /> : <RefreshCw size={14} />}{t("Check again")}</button>} />
+          : wrong ? <button className="btn sm" onClick={again} disabled={busy}>{busy ? <Loader2 size={14} className="spin" /> : <RefreshCw size={14} />}{t("Check again")}</button> : null} />
       {bad.length > 0 && <div className="comp-body">{bad.map((k) => <Check key={k} c={c[k]}>
         {k === "fonts" && <SetupJob url="/api/setup/assets" label="Download" done={again} />}
         {k === "hfSkills" && <SetupJob url="/api/setup/hf-skills" label="Download (about 120 MB)" done={again} />}
@@ -257,6 +259,7 @@ function Runtime({ sys, reload, loading }) {
       <YourSteps d={d} />
       <LicencesFold d={d} />
     </div>
+    <VoiceOver />
     <Extras d={d} reload={again} />
     <Backups />
   </section>;
@@ -283,7 +286,6 @@ export default function Settings({ section, claude, onRecheckClaude, updateReady
             <Account claude={claude} onRecheck={onRecheckClaude} />
             <ProjectsFolder />
             <Appearance />
-            <VoiceOver />
             <RenderExport sys={sys.data} reload={sys.reload} />
           </section>}
           {cur[0] === "director" && <Director />}

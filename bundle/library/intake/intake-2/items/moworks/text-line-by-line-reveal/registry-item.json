@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-line-by-line-reveal",
+  "type": "hyperframes:component",
+  "title": "Line-by-Line Reveal",
+  "description": "Ba dòng chữ lần lượt trồi lên 28 px, mỗi dòng trong mặt nạ riêng, dòng sau bắt đầu khi dòng trước vừa đọc được.",
+  "tags": [
+    "reveal",
+    "mask",
+    "lines",
+    "stagger",
+    "text-reveal",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "text-line-by-line-reveal.html",
+      "target": "compositions/components/text-line-by-line-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-line-by-line-reveal",
+    "author": "moworks",
+    "call": "MW.textLineByLineReveal(q(\".lbl\"), tl, 0, {});",
+    "function": "MW.textLineByLineReveal",
+    "options": {
+      "lines": "the line elements (each gets its own mask)",
+      "start": "s (0.3)",
+      "stagger": "s (0.24)",
+      "duration": "s per line (0.55)",
+      "y": "em (1.08)",
+      "exitY": "em they leave upward (1.3, 0.25 s ease-in cubic)",
+      "outAt": "s (2.2)",
+      "fadeIn": "also fade in (the DOM version)",
+      "ease": "(ease-out cubic)",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "3 lines (26 px type), each in its own overflow-hidden mask (140×32 px). Line i: translateY +28 px → 0, 0.55 s easeOutCubic, start 0.3 + 0.24·i s (no fade in the canvas demo). Loop exit: line i slides up 34 px out of its mask, 2.2 + 0.06·i s, 0.25 s inCubic; loop 2.8 s. DOM version (2.2 s loop): same 28 px plus opacity 0 → 1, 682 ms each, 242 ms apart, ease cubic-bezier(.65,0,.35,1). Params: duration: mỗi dòng (0.55 s) · stagger: độ lệch giữa các dòng (0.24 s) · y: quãng trồi (28 px) · ease (easeOutCubic).",
+    "titleVi": "Từng dòng trồi lên khỏi mặt nạ"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/data-audio-bars",
+  "hash": "c7f8ddfbb5c53e35",
+  "at": "2026-10-17T11:49:03.627Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__data-audio-bars.mp4",
+    "poster": "previews/moworks__data-audio-bars.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ea3d8fc7f73c675fd5fe8763e55309afeb38a22630573a2ad6eef0bfdce23fea",
+    "size": 27913,
+    "seconds": 28.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

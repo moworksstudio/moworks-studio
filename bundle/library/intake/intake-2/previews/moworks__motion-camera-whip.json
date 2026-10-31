@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-camera-whip",
+  "hash": "09ecb83626c034d6",
+  "at": "2026-10-17T07:44:57.273Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-camera-whip.mp4",
+    "poster": "previews/moworks__motion-camera-whip.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "fadd07088020a58b080a70ec86ac4596d8fa6231d1052e0e2a435170a9cb194b",
+    "size": 22900,
+    "seconds": 33.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

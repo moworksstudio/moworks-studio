@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-riso-misregister",
+  "type": "hyperframes:component",
+  "title": "Misregistration",
+  "description": "Hai bản màu in xanh và hồng chồng nhân màu, lệch nhau vài pixel và nhích về từng khung như in riso.",
+  "tags": [
+    "riso",
+    "print",
+    "misregistration",
+    "texture",
+    "texture-look",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "effect-riso-misregister.html",
+      "target": "compositions/components/effect-riso-misregister.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-riso-misregister",
+    "author": "moworks",
+    "call": "MW.effectRisoMisregister(q(\".rz\"), tl, 0, {});",
+    "function": "MW.effectRisoMisregister",
+    "options": {
+      "layers": "[cyan layer, pink layer], each a copy of the art",
+      "steps": "px offsets per frame ([16, 12, 8, 4, 8, 12])",
+      "fps": "(12)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Two copies of the art in print inks (cyan #2ec4e8, pink #ff4fa3) blended multiply, offset in opposite directions by (o, o/2): o steps 4 -> 3 -> 2 -> 1 -> 2 -> 3 px, one step per 12 fps frame (~83 ms; recipe 4 -> 3 -> 2 over 3 frames), cycling. Params: offset (4 → 1 px) · fps (12) · colors (#2ec4e8 / #ff4fa3). The two inks (cyan #2ec4e8, pink #ff4fa3) are blended multiply on paper white.",
+    "titleVi": "Lệch bản in kiểu riso"
+  }
+}

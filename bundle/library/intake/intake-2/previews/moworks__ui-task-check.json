@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-task-check",
+  "hash": "5f07ee675c93c922",
+  "at": "2026-10-17T10:34:27.348Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-task-check.mp4",
+    "poster": "previews/moworks__ui-task-check.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "d7089f99026e0a32fbe30e7542842c8c257e786e557e1ca7cb89e921bc68abcf",
+    "size": 11770,
+    "seconds": 29.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

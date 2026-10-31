@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-handheld-drift",
+  "hash": "10a6bf377879fadc",
+  "at": "2026-10-17T07:44:58.131Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-handheld-drift.mp4",
+    "poster": "previews/moworks__motion-handheld-drift.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "d8fdc97987bed171ed3911d0c845f3e575ac4bb081722d6f8dc642f754d1b181",
+    "size": 26172,
+    "seconds": 32.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

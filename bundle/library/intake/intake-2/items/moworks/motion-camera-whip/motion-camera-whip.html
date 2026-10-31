@@ -1,0 +1,82 @@
+<!--
+  Whip (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Máy quay vụt nhanh sang một khung khác trong cùng cảnh, nhoè vệt ở giữa và dừng sắc nét.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionCameraWhip(q(".tk-cam"), tl, 0.9, {});
+
+  Options (defaults in brackets):
+      - duration: s (0.45)
+      - distance: px at depth 1 (600; 200 on the small frame), each layer by its depth
+      - start: px the camera starts from (0; the swing back starts where the last ended)
+      - ease: whip, cubic-bezier(.9,0,.1,1)
+      - layers: selector of the layers
+
+  Notes: Within one scene the camera swings x by 200 px at depth 1 (each layer by its depth factor) over 450 ms cubic-bezier(.9,0,.1,1); smear = 3 trailing copies 12 px apart at opacity 0.25 x sin(pi u) (u = swing progress), so it shows only mid-swing; landing frame sharp. Demo swings out at 0.9 s and back at 2.3 s. Params: duration (0.45 s) · distance (200 px) · ease (cubic-bezier .9,0,.1,1).
+-->
+
+<div class="tk-cam"><div class="tk-far" data-depth="0.2"><div class="sun"></div><div class="star" style="left:12%;top:14%"></div><div class="star" style="left:24%;top:30%"></div><div class="star" style="left:36%;top:10%"></div><div class="star" style="left:70%;top:18%"></div><div class="star" style="left:82%;top:34%"></div><div class="star" style="left:90%;top:12%"></div><div class="star" style="left:46%;top:22%"></div><div class="star" style="left:16%;top:40%"></div></div>
+<div class="tk-mid" data-depth="0.55"><svg viewBox="0 0 1000 300" preserveAspectRatio="none"><path d="M0 300 L0 170 Q120 90 240 150 T480 120 T720 160 T1000 110 L1000 300 Z" fill="#3b2f6b"/><path d="M0 300 L0 220 Q160 160 320 210 T640 190 T1000 200 L1000 300 Z" fill="#2a2150"/></svg></div>
+<div class="tk-near" data-depth="1"><div class="card">Toàn cảnh</div></div>
+<div class="tk-fore" data-depth="1.6"><div class="blob" style="left:6%;top:62%;width:380px;height:380px"></div><div class="blob" style="left:80%;top:8%;width:300px;height:300px"></div><div class="blob" style="left:86%;top:70%;width:420px;height:420px"></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.45,"distance":-600,"start":0,"ease":"whip","layers":"[data-depth]"};
+  var run = function (el, tl, at, o) {
+        var ease = MW.ez(o.ease), sel = o.layers, ghosts = [];
+        var Ls = Array.prototype.slice.call(el.querySelectorAll(sel));
+        for (var k = 1; k <= 3; k++) { var g = el.cloneNode(true); g.removeAttribute("id"); g.style.pointerEvents = "none"; g.style.opacity = "0"; el.parentNode.insertBefore(g, el.nextSibling); ghosts.push({ g: g, k: k, Ls: Array.prototype.slice.call(g.querySelectorAll(sel)) }); }
+        var place = function (list, x) { list.forEach(function (l) { var d = parseFloat(l.getAttribute("data-depth") || "1"); gsap.set(l, { x: x * d }); }); };
+        return MW.drive(tl, at, o.duration, function (t) {
+          var u = t / o.duration, x = o.start + o.distance * ease(u), sm = Math.sin(Math.PI * u);
+          place(Ls, x);
+          // three trailing copies, 36 px apart, opacity 0.25 × sin(πu): a smear only mid-swing; the landing frame is sharp
+          ghosts.forEach(function (h) { place(h.Ls, x + h.k * 36 * (o.distance > 0 ? -1 : 1)); h.g.style.opacity = u > 0 && u < 1 ? String(0.25 * sm) : "0"; });
+        });
+      };
+  MW.motionCameraWhip = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

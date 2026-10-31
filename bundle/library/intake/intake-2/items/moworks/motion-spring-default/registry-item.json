@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-spring-default",
+  "type": "hyperframes:component",
+  "title": "react-spring default",
+  "description": "Bộ số lò xo chuẩn của react-spring: không vượt đích, dừng trong khoảng 0.51 giây; mốc tham chiếu khi phân vân.default).",
+  "tags": [
+    "spring",
+    "default",
+    "smooth",
+    "springs"
+  ],
+  "files": [
+    {
+      "path": "motion-spring-default.html",
+      "target": "compositions/components/motion-spring-default.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.91,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-spring-default",
+    "author": "moworks",
+    "call": "MW.motionSpringDefault(q(\".sp-b\"), tl, 0.4, { back: 1.70 });",
+    "function": "MW.motionSpringDefault",
+    "options": {
+      "stiffness": "",
+      "damping": "",
+      "mass": "",
+      "prop": "the property it drives: x | y | scale | rotation (x)",
+      "from": "(0)",
+      "to": "(560 px)",
+      "back": "s after the start to spring back (null)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after react-spring"
+    },
+    "thirdParty": [],
+    "notes": "Target moves 0 → 1 on tension 170, friction 26, mass 1 (damping ratio 1.0): no overshoot, within 1 % by ~510 ms. The kit's spring.default is exactly k 170, d 26 (duration 0.51 s). Rule: the reference value when unsure. Small demo: the target moves 102 px beside the response graph, with overshoot and settle readouts. Params: tension (170) · friction (26) · duration (0.51 s). react-spring's default (tension 170, friction 26): critically damped in practice, no overshoot, ~0.51 s. The reference when unsure.",
+    "titleVi": "Lò xo mặc định react-spring"
+  }
+}

@@ -1,0 +1,53 @@
+<!--
+  Accordion Open (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Bấm tiêu đề, phần nội dung mở cao dần từ mép trên và hiện ra, mục bên dưới bị đẩy xuống cùng nhịp rồi đóng lại.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiAccordionOpen(q(".ac"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - body: the part that opens (its first child is measured)
+      - open: [from, to] share of the loop ([0.08, 0.47])
+      - close: [from, to] ([0.86, 1])
+      - period: s per loop (1.6)
+      - cycles: (2)
+      - ease: (power2.inOut)
+
+  Notes: Heading row stays; body scales Y 0.04 → 1 from the top edge with opacity 0 → 1 over about 620 ms (8-47 % of a 1.6 s loop, eased in-out); the next section moves y −38 → 0 in sync; hold to 86 %; closes back the same way. Recipe: grid rows 0fr → 1fr, inner overflow hidden (real height, text not stretched). Params: open (0.62 s) · hold (0.6 s) · push (38 px) · ease (power2.inOut). Real height, not a stretch: the text keeps its shape and the next section is pushed down.
+-->
+
+<div class="ui-wrap"><div class="ui-card ac"><div class="ac-h">Cách đặt lịch quay<span>+</span></div><div class="ac-b"><div><p>Chọn ngày trống trong lịch của đội.</p><p>Gửi kịch bản trước hai ngày.</p><p>Xác nhận địa điểm với khách.</p></div></div><div class="ac-h ac-n">Câu hỏi tiếp theo<span>+</span></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"body":".ac-b","open":[0.08,0.47],"close":[0.86,1],"period":1.6,"cycles":2,"ease":"power2.inOut"};
+  var run = function (el, tl, at, o) {
+        var body = el.querySelector(o.body), inner = body.firstElementChild, io = gsap.parseEase(o.ease), Hh = inner ? inner.offsetHeight : body.scrollHeight; body.style.overflow = "hidden";
+        return MW.drive(tl, at, o.period * o.cycles, function (t) {
+          var u = (t % o.period) / o.period, p = io(Math.max(0, Math.min(1, (u - o.open[0]) / (o.open[1] - o.open[0])))) * (1 - io(Math.max(0, Math.min(1, (u - o.close[0]) / (o.close[1] - o.close[0])))));
+          body.style.height = (Hh * p).toFixed(1) + "px"; body.style.opacity = String(p);
+        });
+      };
+  MW.uiAccordionOpen = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

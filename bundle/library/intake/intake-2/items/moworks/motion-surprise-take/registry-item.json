@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-surprise-take",
+  "type": "hyperframes:component",
+  "title": "Take",
+  "description": "Nhân vật co lại một nhịp, vươn dài mở to mắt như giật mình, rồi về dáng và giữ nguyên.",
+  "tags": [
+    "take",
+    "squash",
+    "character",
+    "spring",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-surprise-take.html",
+      "target": "compositions/components/motion-surprise-take.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-surprise-take",
+    "author": "moworks",
+    "call": "MW.motionSurpriseTake(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionSurpriseTake",
+    "options": {
+      "at": "s (0.6)",
+      "squash": "scaleY (0.8, in 0.1 s)",
+      "loop": "s (2.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Recipe: compress 120 ms, stretch 200 ms, settle 280 ms back.out, hold. Demo: at 0.6 s scaleY 1 -> 0.8 in 100 ms (scaleX = 2 - scaleY), then a spring (stiffness 260, damping 9) back to 1 with an overshooting stretch; eyes open to 1.4 x, mouth appears; 5 surprise lines above fade 1.0-1.4 s. Params: squash (0.8) · spring (260 / 9) · lines (5). Compress, then a spring (k260 c9) overshoots into a stretch; the eyes open 1.4× and five lines flash above.",
+    "titleVi": "Giật mình (take)"
+  }
+}

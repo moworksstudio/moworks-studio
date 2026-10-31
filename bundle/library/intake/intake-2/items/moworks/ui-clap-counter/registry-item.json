@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-clap-counter",
+  "type": "hyperframes:block",
+  "title": "Clap Counter",
+  "description": "Mỗi lần bấm nút vỗ tay, hai bàn tay khép lại có tia loé, số đếm bên cạnh cuộn lên thêm một và chữ +1 bay lên mờ dần.",
+  "tags": [
+    "counter",
+    "clap",
+    "roll",
+    "reaction",
+    "feedback-reactions",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "ui-clap-counter.html",
+      "target": "compositions/components/ui-clap-counter.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-clap-counter",
+    "author": "moworks",
+    "call": "MW.uiClapCounter(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiClapCounter",
+    "options": {
+      "taps": "s of each clap",
+      "from": "the count before (24)",
+      "resetAt": "s (2.5)",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Clap button: circle r32 with two rounded hands 12x26 r6 tilted ±0.38 rad, closing to ±0.1 rad and the icon scaling 0.92 at each tap, 3 spark lines flash. Taps at 0.45 / 1.0 / 1.55 s. Counter cell 66x44 r10: the number rolls up one step (40 px, clipped) over 0.2 s power2.out right after each tap, 24 → 27. A '+1' floats up 16 px (power2.out) and fades over 0.53 s. Reset at 2.5 s. Params: taps ([0.45, 1.0, 1.55] s) · roll (0.2 s, 40 px) · from (24) · float (+1, 16 px).",
+    "titleVi": "Vỗ tay, bộ đếm cuộn thêm một"
+  }
+}

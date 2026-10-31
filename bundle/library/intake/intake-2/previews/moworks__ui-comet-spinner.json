@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-comet-spinner",
+  "hash": "745d69cbdff0e3ec",
+  "at": "2026-10-17T11:15:14.495Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-comet-spinner.mp4",
+    "poster": "previews/moworks__ui-comet-spinner.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f843057ba54dc0616caa77ba9e46e57752c43690732c490cf85ffeb59a891465",
+    "size": 16078,
+    "seconds": 30.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-settle-drop",
+  "type": "hyperframes:component",
+  "title": "Settle Drop",
+  "description": "Khối nặng rơi xuống, lún bẹp sâu 145 / 62 % rồi từ từ trở lại hình dạng, không nảy, bụi tung hai bên.",
+  "tags": [
+    "drop",
+    "squash",
+    "weight",
+    "heavy",
+    "bounce-reaction"
+  ],
+  "files": [
+    {
+      "path": "motion-settle-drop.html",
+      "target": "compositions/components/motion-settle-drop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-settle-drop",
+    "author": "moworks",
+    "call": "MW.motionSettleDrop(q(\".sd\"), tl, 0.3, { shadow: \".sd-s\" });",
+    "function": "MW.motionSettleDrop",
+    "options": {
+      "drop": "px (440)",
+      "fall": "s (0.32, power1.in)",
+      "squash": "[scaleX, scaleY] at the bottom ([1.45, 0.62])",
+      "squashIn": "s (0.06)",
+      "recover": "s (0.55, power2.out, no overshoot)",
+      "dust": "[min, max] px beyond each side ([56, 164])",
+      "shadow": ""
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Fall y −110 → 0 (demo −94 px) in 320 ms power1.in, stretching to scaleY 1.1 / scaleX 1/1.1 at contact; it then squashes over 60 ms (power2.out) to scaleX 1.45 / scaleY 0.62 (origin bottom) and recovers to 1/1 in 550 ms power2.out with no overshoot (heavy); dust dots puff 14–41 px beyond each side over 500 ms; shadow widens. Params: drop (110 px) · squash (1.45 / 0.62) · squash_in (0.06 s) · recover (0.55 s).",
+    "titleVi": "Rơi nặng, lún sâu, từ từ đứng lên"
+  }
+}

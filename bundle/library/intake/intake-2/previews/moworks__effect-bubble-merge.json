@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-bubble-merge",
+  "hash": "17ebd118a3bf7021",
+  "at": "2026-10-17T09:58:01.238Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__effect-bubble-merge.mp4",
+    "poster": "previews/moworks__effect-bubble-merge.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "76a33d2addb58c2bf89e47d1aa329643526582c145e65555107315b99dfaeb27",
+    "size": 15031,
+    "seconds": 28,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

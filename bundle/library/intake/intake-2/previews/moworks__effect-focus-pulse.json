@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-focus-pulse",
+  "hash": "76a7eb90dc67d2e5",
+  "at": "2026-10-17T09:38:35.656Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__effect-focus-pulse.mp4",
+    "poster": "previews/moworks__effect-focus-pulse.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "edad04e4a30ccea1390923ba69596341212353a3ebc3dc9668fdf514c99e6ccb",
+    "size": 6741,
+    "seconds": 27.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

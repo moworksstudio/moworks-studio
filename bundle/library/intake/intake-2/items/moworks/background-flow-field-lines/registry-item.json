@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "background-flow-field-lines",
+  "type": "hyperframes:block",
+  "title": "Flow Field",
+  "description": "Các đường ngắn chảy theo hướng của một trường nhiễu, như gió, nước hay dòng dữ liệu.",
+  "tags": [
+    "flow-field",
+    "noise",
+    "lines",
+    "ambient",
+    "particles",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "background-flow-field-lines.html",
+      "target": "compositions/components/background-flow-field-lines.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/background-flow-field-lines",
+    "author": "moworks",
+    "call": "MW.backgroundFlowFieldLines(q(\".gm\"), tl, 0, {});",
+    "function": "MW.backgroundFlowFieldLines",
+    "options": {
+      "count": "streamlines (70)",
+      "duration": "s (5)",
+      "seed": "start points and field"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "70 streamlines from seeded start points; each traced 14 steps of 4 px along angle = noise2(x x 0.012, y x 0.012 + t x 0.15) x 2 pi x 1.5, redrawn each frame so the field drifts; 1.4 px strokes, 1 in 7 accent, others grey. Recipe: position += (cos theta, sin theta) x speed, theta = noise(x, y). Params: count (70) · steps (14 × 4 px) · drift (0.15) · seed.",
+    "titleVi": "Trường dòng chảy theo nhiễu"
+  }
+}

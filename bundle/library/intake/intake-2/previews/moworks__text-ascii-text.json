@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-ascii-text",
+  "hash": "953c1dffb0cd791e",
+  "at": "2026-10-17T10:38:10.909Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-ascii-text.mp4",
+    "poster": "previews/moworks__text-ascii-text.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c610602fc1507dd51430c902ecde18b0b0706d55aa06648b1d28cd24b86184d5",
+    "size": 48061,
+    "seconds": 19.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

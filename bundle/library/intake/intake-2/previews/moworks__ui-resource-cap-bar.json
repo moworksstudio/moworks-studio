@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-resource-cap-bar",
+  "hash": "8bfc410ffa13ca05",
+  "at": "2026-10-17T10:55:37.922Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-resource-cap-bar.mp4",
+    "poster": "previews/moworks__ui-resource-cap-bar.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "0e0eb7f30af3ed195c0b41e42baaf04de364f1f590774b6dd5973b6df34a0e29",
+    "size": 12765,
+    "seconds": 27.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

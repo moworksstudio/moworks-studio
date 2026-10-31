@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-scramble-decode",
+  "type": "hyperframes:component",
+  "title": "Scramble Decode",
+  "description": "Chữ bắt đầu là các ký tự ngẫu nhiên đổi 25 lần mỗi giây, sau 0.5 giây thì chốt dần đúng chữ từ trái sang.",
+  "tags": [
+    "scramble",
+    "decode",
+    "per-frame",
+    "text-typing-decoding",
+    "crisp",
+    "typing-decoding"
+  ],
+  "files": [
+    {
+      "path": "text-scramble-decode.html",
+      "target": "compositions/components/text-scramble-decode.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-scramble-decode",
+    "author": "moworks",
+    "call": "MW.textScrambleDecode(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textScrambleDecode",
+    "options": {
+      "delay": "s before letters start to lock (0.5)",
+      "span": "s the locking spreads over (1.1)",
+      "fps": "noise rate (25)",
+      "start": "s (0.25)",
+      "backAt": "s it scrambles again from the right (2.95)",
+      "fadeAt": "s (3.2)",
+      "accent": "noise colour",
+      "loop": "s (3.4)",
+      "seed": "noise"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after anime.js (MIT)"
+    },
+    "thirdParty": [],
+    "notes": "Text starts as random glyphs of each char's class (upper / lower / digits; kana for CJK), changing at 25 fps (seeded per char and frame; demo accent 90 %). After a 0.5 s reveal delay real chars lock left → right, evenly over ~1 s (demo min(1.1 s, 90 ms × n), from 0.75 s), linear. GSAP ScrambleText: 1 s, chars 'upperCase', revealDelay 0.5, speed 0.3. Demo loop: from 2.95 s chars fall back to noise from the right over 0.25 s, fade 3.2–3.4 s; loop 3.4 s. Params: duration (1 s) · revealDelay (0.5 s) · chars: bộ ký tự (chữ hoa) · fps nhiễu (25) · seed.",
+    "titleVi": "Chữ nhiễu rồi giải mã từ trái sang"
+  }
+}

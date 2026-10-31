@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-rotate-reveal",
+  "type": "hyperframes:component",
+  "title": "Rotate Reveal",
+  "description": "Thẻ có bản lề ở mép trái xoay từ gần vuông góc về phẳng như mở cửa, rõ dần theo góc.",
+  "tags": [
+    "entrance",
+    "door",
+    "3d",
+    "rotation",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-rotate-reveal.html",
+      "target": "compositions/components/motion-rotate-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.9,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-rotate-reveal",
+    "author": "moworks",
+    "call": "MW.motionRotateReveal(q(\".rr\"), tl, 0.3, { closeAt: 1.8 });",
+    "function": "MW.motionRotateReveal",
+    "options": {
+      "from": "degrees (−88)",
+      "duration": "s (0.72)",
+      "ease": "(power2.out)",
+      "perspective": "px (1800)",
+      "closeAt": "s after the start to close (null)",
+      "close": "s (0.45, power2.in)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Card hinged on its left edge opens like a door: rotationY −88° → 0 in 720 ms power2.out, perspective 360 px; opacity follows the angle, 0.2 → 1. Exit: closes back to −88° in 450 ms power2.in. (The DOM fallback adds a 5° overshoot at 84 %.) Params: duration (0.72 s) · from (−88°) · perspective (360 px) · origin (mép trái).",
+    "titleVi": "Mở ra như cánh cửa"
+  }
+}

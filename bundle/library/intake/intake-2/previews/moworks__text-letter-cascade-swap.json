@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-letter-cascade-swap",
+  "hash": "be9fd649e2775c3a",
+  "at": "2026-10-17T09:14:29.199Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-letter-cascade-swap.mp4",
+    "poster": "previews/moworks__text-letter-cascade-swap.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "896e50dea23d35b6bc2072110b5adbd6ff66b1f639646abf11d3913a953a1414",
+    "size": 19952,
+    "seconds": 22.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

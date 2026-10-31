@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-stamp-pop",
+  "hash": "3a124b89b145d242",
+  "at": "2026-10-17T08:04:16.113Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-stamp-pop.mp4",
+    "poster": "previews/moworks__text-stamp-pop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "290f678cc7972528c84dbc7a55bd9a8d7170749f0b8645aa6b5a492c927a40a9",
+    "size": 18204,
+    "seconds": 29,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

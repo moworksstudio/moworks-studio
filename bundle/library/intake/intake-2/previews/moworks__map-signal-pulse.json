@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/map-signal-pulse",
+  "hash": "6280b65481c5a81f",
+  "at": "2026-10-17T08:25:03.155Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__map-signal-pulse.mp4",
+    "poster": "previews/moworks__map-signal-pulse.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "15e915a33c82e8006632253ab5bac10ea627c7cab4e31ba4f4a3f71dad25ed76",
+    "size": 28916,
+    "seconds": 32.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

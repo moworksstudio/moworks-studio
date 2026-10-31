@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "lower-news-crawl",
+  "type": "hyperframes:block",
+  "title": "News Ticker Crawl",
+  "description": "Thanh tin tối dưới đáy khung có nhãn màu nhấn bên trái, dòng tin chạy ngang đều với số px nguyên mỗi khung để không giật, các bản tin ngăn bằng chấm màu.",
+  "tags": [
+    "ticker",
+    "crawl",
+    "news",
+    "loop",
+    "text-broadcast-telop",
+    "smooth",
+    "crisp",
+    "broadcast-telop"
+  ],
+  "files": [
+    {
+      "path": "lower-news-crawl.html",
+      "target": "compositions/components/lower-news-crawl.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/lower-news-crawl",
+    "author": "moworks",
+    "call": "MW.lowerNewsCrawl(q(\".nc\"), tl, 0, {});",
+    "function": "MW.lowerNewsCrawl",
+    "options": {
+      "track": "the moving row (its first child is one headline unit)",
+      "loop": "s for one unit (4): the speed is a whole number of px per 60 fps frame",
+      "minPx": "px a frame at least (8)",
+      "loops": "(1)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Dark band 30 px tall at the bottom with a 2 px accent line on top; accent label block 58 px wide on the left (13 px weight 800 label). Headline 15 px bold crawls left at a whole number of px per 60 fps frame (2 px = 120 px/s; demo picks 2–6 px so the 4 s loop is seamless), position = floor(t × 60) × px, copies separated by an accent dot, clipped right of the label. Loop 4 s. Params: tốc độ (2 px / khung ở 60 fps = 120 px/s) · nhãn (58 px) · cỡ chữ (15 px). Position = floor(t × 60) × px, never fractional, so the crawl never judders; the unit is padded so the loop is seamless.",
+    "titleVi": "Thanh tin chạy chữ đều, không giật"
+  }
+}

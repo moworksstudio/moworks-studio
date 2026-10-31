@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-bounce-squash",
+  "type": "hyperframes:component",
+  "title": "CustomBounce with Squash",
+  "description": "Quả bóng rơi nảy nhiều lần, chỉ bẹp đúng khung chạm đất và bẹp yếu dần qua mỗi lần nảy.",
+  "tags": [
+    "bounce",
+    "squash",
+    "drop",
+    "easing",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-bounce-squash.html",
+      "target": "compositions/components/motion-bounce-squash.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-bounce-squash",
+    "author": "moworks",
+    "call": "MW.motionBounceSquash(q(\".bs\"), tl, 0.3, {});",
+    "function": "MW.motionBounceSquash",
+    "options": {
+      "drop": "px (560)",
+      "duration": "s (1.6), bounce.out (contacts at 36 / 73 / 91 %)",
+      "squash": "at the first contact (0.32 here; 0.5 × (1 − p))"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after GSAP"
+    },
+    "thirdParty": [],
+    "notes": "Recipe: first contact at 400 ms; each bounce keeps 70 % of the previous height (strength 0.7) and lasts √0.7 of the previous, ~1200 ms in all; squash only on the 1–2 contact frames, weaker each bounce, origin bottom; slight stretch in the fast fall. Small demo: bounce.out over 1600 ms, 112 px drop (contacts at 36 / 73 / 91 %), squash = 0.5·(1 − p) within 4 % of the floor: scaleY 0.68 / 0.86 / 0.95, scaleX 1 + the same amount. Params: strength (0.7) · squash đầu (0.32) · duration (1.2 s) · origin (đáy).",
+    "titleVi": "Nảy có bẹp mỗi lần chạm"
+  }
+}

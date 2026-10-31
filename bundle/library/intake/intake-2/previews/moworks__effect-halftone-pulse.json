@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-halftone-pulse",
+  "hash": "f3c801a178ae29a4",
+  "at": "2026-10-17T10:50:14.692Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__effect-halftone-pulse.mp4",
+    "poster": "previews/moworks__effect-halftone-pulse.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4febd7f4c3f981feb0ce74ed2d5b05d659d4aaacd4275fbfa32ca07592ed909b",
+    "size": 111758,
+    "seconds": 25.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-arc-travel",
+  "type": "hyperframes:component",
+  "title": "Arc Travel",
+  "description": "Khối vuông đi theo một cung Bézier bậc hai, giữ nguyên hướng, không xoay.",
+  "tags": [
+    "move",
+    "arc",
+    "path",
+    "movement",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-arc-travel.html",
+      "target": "compositions/components/motion-arc-travel.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-arc-travel",
+    "author": "moworks",
+    "call": "MW.motionArcTravel(q(\".at\"), tl, 0.3, {});",
+    "function": "MW.motionArcTravel",
+    "options": {
+      "to": "[x, y] px of the end ([1080, 0])",
+      "control": "[x, y] px of the Bézier control point ([540, −840]: the apex about −420)",
+      "duration": "s (0.8)",
+      "ease": "(sine.inOut)",
+      "hold": "s held at the end (0.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Square follows a quadratic Bézier, rotation fixed. Recipe: x 0 → 90 → 180 px with y 0 → −70 → 0 (apex at 400 ms), 800 ms sine.inOut. Small demo: P0 (0,0), control (104,−124), P2 (208,0) (apex −62 px), traversed at constant speed in 2200 ms linear. Control lines and labels are guides only. Params: duration (0.8 s) · x (180 px) · height: độ cao đỉnh cung (70 px) · ease (sine.inOut). The square keeps its orientation along the arc.",
+    "titleVi": "Đi theo cung tròn, không xoay"
+  }
+}

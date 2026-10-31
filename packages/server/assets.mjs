@@ -8,7 +8,8 @@ import * as projects from "../project-service/index.mjs";
 import { listAssets, referencedFiles, rememberAssets, rewriteRefs } from "../project-service/assets.mjs";
 import { readShots } from "../hf-edit/shots.mjs";
 import { audioKind, laneOfFile, placeClip, placeTrack, removeRepeats, trackClips } from "../hf-edit/tracks.mjs";
-import { muteMounted, readState as readSfx } from "../sfx/index.mjs";
+import { ADDED, muteMounted, readState as readSfx, writeCredits } from "../sfx/index.mjs";
+import { placeAdded } from "../sfx/added.mjs";
 import { updatePrefs } from "../sfx/prefs.mjs";
 import { levelTracks } from "../sfx/mixlevels.mjs";
 
@@ -16,7 +17,7 @@ import { levelTracks } from "../sfx/mixlevels.mjs";
  *  editor.mjs): the music stops being the film's music, the voice-over stays off the timeline until it is put back (its words are kept),
  *  one of the app's own sound effects (el-sfx-N) stays off when the sound effects are placed again, and so does a scene's ambience bed
  *  (el-amb-N: the owner's sound choices keep it out). `sound`: { id, src }. */
-export function soundTakenOff(p, { id = null, src = null } = {}, root) {
+export function soundTakenOff(p, { id = null, src = null, cue = null } = {}, root) {
   const m0 = p.meta ?? {};
   // one clip of a voice cut into one clip a line taken off leaves the voice on the timeline (T22-11); the song's own clip taken off takes
   // its repeats with it (tracks.mjs musicLoop), one repeat taken off leaves the music
@@ -26,7 +27,8 @@ export function soundTakenOff(p, { id = null, src = null } = {}, root) {
   if (src && m0.voice?.file === src && !left("voice").length) projects.updateMeta(p.id, (m) => { if (m.voice) m.voice.offTimeline = true; }, root);
   const bed = id && /^el-amb-\d+$/.test(id) ? readSfx(p.path).ambience?.placed?.[Number(id.slice(7))] : null;
   if (bed?.key) updatePrefs(p.path, { skip: [bed.key] });
-  const muted = id && /^el-sfx-\d+$/.test(id) ? muteMounted(p.path, id) : bed?.key ? { name: bed.name, start: bed.start } : null;
+  const muted = id && /^el-sfx-\d+$/.test(id) ? muteMounted(p.path, id, { cue }) : bed?.key ? { name: bed.name, start: bed.start } : null;
+  if (id && /^el-clip-\d+$/.test(id)) writeCredits(p.path);          // a sound from the Sounds drawer leaves the credits with its clip
   return { music: !!(src && m0.music?.file === src), voice: !!(src && m0.voice?.file === src), muted };
 }
 import { extractAudio, probe } from "../voice/audio.mjs";
@@ -140,6 +142,9 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
         await commit(p, `Music on the timeline: ${rel}`);
         return { lane, music };
       }
+      // a sound added from the Sounds drawer and taken off comes back with its level and its credit
+      const added = Object.entries(readSfx(p.path).sounds ?? {}).find(([n, s]) => n.startsWith(ADDED) && s.file === rel)?.[0];
+      if (added) { const x = await placeAdded(p.path, added, { at: start ?? 0, root }); await commit(p, `Sound effect on the timeline: ${rel}`); return { lane, clip: x.tag }; }
       const clip = placeClip(p.path, { src: rel, duration: Number(info?.duration) || 1, start: start ?? 0 });
       await commit(p, `Sound effect on the timeline: ${rel}`);
       return { lane, clip };

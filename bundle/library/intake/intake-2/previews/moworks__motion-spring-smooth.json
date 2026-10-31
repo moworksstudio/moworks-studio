@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-spring-smooth",
+  "hash": "a9e3c219f7ef312a",
+  "at": "2026-10-17T11:46:57.822Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-spring-smooth.mp4",
+    "poster": "previews/moworks__motion-spring-smooth.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4e2ae5f0bd3bf514424ad68e17790103781f07de1f7bb7fe7d2f85a5a3407a01",
+    "size": 13687,
+    "seconds": 32.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

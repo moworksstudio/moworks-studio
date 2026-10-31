@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-blinds-reveal",
+  "type": "hyperframes:component",
+  "title": "Venetian Blinds Reveal",
+  "description": "Khối chữ chia thành mười nan ngang, từng nan mở từ mép trên xuống cách nhau 0.05 giây như rèm sáo.",
+  "tags": [
+    "reveal",
+    "mask",
+    "blinds",
+    "stripes",
+    "text-mask-clip",
+    "crisp",
+    "mask-clip"
+  ],
+  "files": [
+    {
+      "path": "text-blinds-reveal.html",
+      "target": "compositions/components/text-blinds-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-blinds-reveal",
+    "author": "moworks",
+    "call": "MW.textBlindsReveal(q(\".tk-head\"), tl, 0.3, { exit: 2.5 });",
+    "function": "MW.textBlindsReveal",
+    "options": {
+      "slats": "horizontal strips (10)",
+      "duration": "s each strip opens from its top edge (0.6), ease-out quad",
+      "stagger": "s (0.05)",
+      "exit": "s after the start when each strip folds to its bottom edge (0.5 s ease-in; null: stay)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Text box (first baseline − 0.95 em to last + 0.28 em) cut into 10 equal horizontal strips (copies clipped with inset); strip i opens from its top edge (clip bottom 100 % → 0) in 0.6 s easeOutQuad (CSS cubic-bezier(.5,1,.89,1); labelled power2.out) from 0.3 + 0.05·i s; seams vanish when open. Close: each strip folds to its bottom edge, 0.5 s easeInQuad, same 50 ms stagger (demo from 2.8 s); loop 4 s. Params: slats: số nan (10) · duration (0.6 s) · stagger (0.05 s) · ease (easeOutQuad).",
+    "titleVi": "Chữ hiện qua mười nan rèm"
+  }
+}

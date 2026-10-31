@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-speaker-color-captions",
+  "type": "hyperframes:block",
+  "title": "Comment-Follow Telop",
+  "description": "Mỗi câu thoại hiện bằng một cú bật nhẹ ở cùng vị trí, viền chữ mang màu riêng của người nói và có huy hiệu tên nhỏ bên trái, giữ đủ lâu để đọc.",
+  "tags": [
+    "captions",
+    "speakers",
+    "telop",
+    "pop",
+    "text-broadcast-telop",
+    "bouncy",
+    "crisp",
+    "broadcast-telop"
+  ],
+  "files": [
+    {
+      "path": "text-speaker-color-captions.html",
+      "target": "compositions/components/text-speaker-color-captions.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-speaker-color-captions",
+    "author": "moworks",
+    "call": "MW.textSpeakerColorCaptions(q(\".sc\"), tl, 0, {});",
+    "function": "MW.textSpeakerColorCaptions",
+    "options": {
+      "lines": "the caption lines, in order (each with data-color)",
+      "badge": "the speaker badge in a line",
+      "turn": "s per line (2.2; hold at least chars ÷ 4 s)",
+      "colors": "fallback outline colours"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "One line at a time (24 px heavy, ≤ 2 lines, same place for all): ink fill, 0.3 em outer stroke in the speaker's colour, dark (2, 2) px shadow, a small badge (8 px circle, speaker letter) at its left. Each line pops 0.1 s after its turn starts: scale 0.85 → 1 in 5 frames at 30 fps back.out(1.7), opaque at a third of it; holds ≥ chars ÷ 4 s; fades out over 0.15 s ending 0.13 s before the next. Demo 3 lines × 2.2 s. Params: màu viền mỗi người · bật (0.85 → 1, 5 khung) · giữ (≥ số chữ ÷ 4 s) · ra (0.15 s). Each line pops 0.1 s after its turn starts (0.85 → 1 in 5 frames, back.out), all in the same place, and fades over 0.15 s ending 0.13 s before the next.",
+    "titleVi": "Telop lời thoại viền màu theo người nói"
+  }
+}

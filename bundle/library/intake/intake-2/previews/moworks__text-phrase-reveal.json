@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-phrase-reveal",
+  "hash": "b03cf91fe8d95c8e",
+  "at": "2026-10-17T10:20:40.441Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-phrase-reveal.mp4",
+    "poster": "previews/moworks__text-phrase-reveal.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f8cc83bb34f1611683787dc7f2a19923bdf015284860f488a4db5cba63bda249",
+    "size": 14657,
+    "seconds": 24.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

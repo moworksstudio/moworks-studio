@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-stamp-pop",
+  "type": "hyperframes:component",
+  "title": "Rubber-Stamp Cut-out Pop",
+  "description": "Từng từ đập xuống như con dấu theo phách, to quá một khung, hụt một khung rồi đứng yên, nét chữ lấm tấm chỗ thiếu mực, nền đổi màu ở mỗi phách.",
+  "tags": [
+    "stamp",
+    "beat",
+    "posterize",
+    "texture",
+    "text-titles-film",
+    "bouncy",
+    "crisp",
+    "titles-film"
+  ],
+  "files": [
+    {
+      "path": "text-stamp-pop.html",
+      "target": "compositions/components/text-stamp-pop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-stamp-pop",
+    "author": "moworks",
+    "call": "MW.textStampPop(q(\".sp h1\"), tl, 0, { shapes: \".sp .s1, .sp .s2\" });",
+    "function": "MW.textStampPop",
+    "options": {
+      "beat": "s between words (0.36, at most 1.7 s ÷ words)",
+      "start": "s (0.4)",
+      "offAt": "s all off (3.42)",
+      "colors": "background per beat",
+      "base": "background before",
+      "card": "the background card (the text's parent)",
+      "shapes": "flat shapes stamped on beats 1, 2",
+      "loop": "s (3.8)",
+      "seed": "tilts and ink voids"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Posterized 12 fps. Units = words (chars if one word); beats every min(0.36, 1.7 / n) s from 0.4 s. On its beat a unit appears at scale 1.18, next 12 fps frame 0.95, then 1.0 (no tweening), with a seeded tilt ±3.4°. The background card hard-switches each beat: accent → second accent → yellow (text in background colour). Flat shapes (a 16 px dot, a small rectangle) stamp on beats 1 and 2. Ink voids: ~90 holes 0.5–1.8 px punched out of the letters. All off at 3.42 s. Loop 3.8 s. Params: nhịp phách (0.36 s) · nhịp hình (12 fps) · bật (1.18 → 0.95 → 1) · màu nền (3 màu luân phiên).",
+    "titleVi": "Từ đóng dấu theo phách, nền đổi màu"
+  }
+}

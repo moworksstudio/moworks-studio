@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-minimap-ping",
+  "type": "hyperframes:block",
+  "title": "Minimap Ping",
+  "description": "Bản đồ đứng yên, một ghim bật lên ở điểm được chọn và toả hai cặp vòng sóng mỏng; nhãn khoảng cách hiện bên cạnh rồi tất cả thu về.",
+  "tags": [
+    "ping",
+    "rings",
+    "pin",
+    "map",
+    "game-hud",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "ui-minimap-ping.html",
+      "target": "compositions/components/ui-minimap-ping.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-minimap-ping",
+    "author": "moworks",
+    "call": "MW.uiMinimapPing(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiMinimapPing",
+    "options": {
+      "rings": "s each ring starts ([0.45, 0.73, 1.4, 1.68])",
+      "label": "",
+      "outAt": "s (2.35)",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. Static map card 148 x 148 (r 14); pin pops at 0.42 s (300 ms back.out). Rings from the pin: radius 4 → 34 in 1.0 s outCubic, opacity 1 → 0, stroke 2, accent; starts 0.45, 0.73, 1.40, 1.68 s (two 280 ms apart, the pair repeated 950 ms later). Distance label fades in 0.5-0.7 s; pin and label leave 2.35-2.55 s (pin in-cubic). The map never moves. Params: rings: lúc phát từng vòng (0.45 / 0.73 / 1.40 / 1.68 s) · radius: bán kính (4 → 34 px) · ring: thời gian một vòng (1.0 s) · label: nhãn (\"64 m\"). The map never moves; rings 4 → 34 units in 1 s (ease-out cubic), in pairs.",
+    "titleVi": "Ghim nháy sóng trên bản đồ nhỏ"
+  }
+}

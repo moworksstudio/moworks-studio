@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-swipe-dismiss",
+  "hash": "3ffc8b4e4b00168b",
+  "at": "2026-10-17T10:45:48.278Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-swipe-dismiss.mp4",
+    "poster": "previews/moworks__motion-swipe-dismiss.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6b745abd30b218f34b9d3b6cbe0238bbb675aa0c49626eddc3e4e83627523b31",
+    "size": 18677,
+    "seconds": 27.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

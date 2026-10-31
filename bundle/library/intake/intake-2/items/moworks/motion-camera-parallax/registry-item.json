@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-camera-parallax",
+  "type": "hyperframes:component",
+  "title": "Parallax Layers",
+  "description": "Ba lớp cùng đi một quãng nhưng lớp trước đi trọn, lớp giữa một nửa, lớp sau một phần năm.",
+  "tags": [
+    "parallax",
+    "layers",
+    "depth",
+    "camera",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-camera-parallax.html",
+      "target": "compositions/components/motion-camera-parallax.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-camera-parallax",
+    "author": "moworks",
+    "call": "MW.motionCameraParallax(q(\".tk-cam\"), tl, 0, {});",
+    "function": "MW.motionCameraParallax",
+    "options": {
+      "distance": "px the front travels (180; 60 on the small frame); middle half, back a fifth (by data-depth)",
+      "duration": "s (4)",
+      "loop": "true: a seamless sine there and back (the small demo); false: constant speed",
+      "layers": "selector of the layers"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Parallax: one travel D; foreground moves D x 1.0, mid D x 0.5, background D x 0.2, linear constant speed over the shot (demo: 4 s, D = +-60 px as a sine loop). Params: distance (60 px) · depth (1 / 0.5 / 0.2) · duration (4 s).",
+    "titleVi": "Thị sai ba lớp"
+  }
+}

@@ -100,11 +100,11 @@ export function DemoLink({ s, className = "btn" }) {
 /** What the style is built with, as green tags with a check; fonts without Vietnamese letters are a red one. */
 export function TechTags({ s }) {
   const t = useT();
-  const ok = [s.dim, RENDERERS[s.renderer] ?? s.renderer, s.vnFont === true ? t("Vietnamese letters") : null].filter(Boolean);
-  if (!ok.length && s.vnFont !== false && !aeLevel(s)) return null;
+  // no tag for a font without Vietnamese letters (owner 30/10: it read as "cannot write Vietnamese"; Claude stops in Prepare and offers fonts that have them)
+  const ok = [s.dim, RENDERERS[s.renderer] ?? s.renderer].filter(Boolean);
+  if (!ok.length && !aeLevel(s)) return null;
   // what After Effects gets of it is one more tag, in its own status colour
   return <p className="tech-tags">{ok.map((x) => <span key={x} className="tech ok"><Check size={11} />{x}</span>)}
-    {s.vnFont === false && <span className="tech bad" title={s.vnFontNote ?? undefined}><AlertTriangle size={11} />{t("No Vietnamese letters")}</span>}
     <AeBadge s={s} /></p>;
 }
 

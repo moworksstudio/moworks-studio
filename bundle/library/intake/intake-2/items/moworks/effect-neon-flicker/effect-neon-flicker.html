@@ -1,0 +1,50 @@
+<!--
+  Neon Flicker (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Biển neon bật lên chập chờn theo từng nấc sáng tối không đều rồi sáng ổn định.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectNeonFlicker(q(".nf"), tl, 0.4, {});
+
+  Options (defaults in brackets):
+      - duration: s it takes to come on (0.9): held steps 20 / 100 / 35 / 100 / 55 / 100 %
+      - lit: the lit layer (the dim tube stays under it)
+      - wash: the soft glow behind
+
+  Notes: Neon sign turns on over 900 ms: opacity holds in steps (no tween) at 20 % from 0, 100 % from 9 %, 35 % from 14 %, 100 % from 22 %, 55 % from 31 %, 100 % from 42 % on. Lit tube = 3 px stroke with a 16 px glow (the frame outline lights with the text) plus a soft radial wash (16 % opacity) behind; the unlit tube stays visible as a dim outline. Params: duration (0.9 s) · steps: các nấc (20 / 100 / 35 / 100 / 55 / 100 %) · glow (16 px) · color.
+-->
+
+<div class="gm"><div class="nf"><div class="nf-wash"></div><div class="nf-dim">MỞ CỬA</div><div class="nf-lit">MỞ CỬA</div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.9,"lit":".nf-lit","wash":".nf-wash"};
+  var run = function (el, tl, at, o) {
+        var lit = el.querySelector(o.lit) || el, wash = o.wash ? el.querySelector(o.wash) : null, S = [[0, 0.2], [0.09, 1], [0.14, 0.35], [0.22, 1], [0.31, 0.55], [0.42, 1]];
+        return MW.drive(tl, at, o.duration + 0.2, function (t) {
+          var u = t / o.duration, a = 0; if (t > 0) S.forEach(function (s) { if (u >= s[0]) a = s[1]; });
+          lit.style.opacity = String(a); if (wash) wash.style.opacity = String(0.16 * a);
+        });
+      };
+  MW.effectNeonFlicker = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

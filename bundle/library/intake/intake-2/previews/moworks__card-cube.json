@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/card-cube",
+  "hash": "6e51fc482b8af76d",
+  "at": "2026-10-17T11:26:39.994Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__card-cube.mp4",
+    "poster": "previews/moworks__card-cube.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "bc9af8809edd434b88789002849b63c32353b4f1b9395f3c31c769a59abc70a6",
+    "size": 70644,
+    "seconds": 41.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

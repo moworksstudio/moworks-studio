@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-card-fan",
+  "type": "hyperframes:component",
+  "title": "Card Stack Fan",
+  "description": "Ba thẻ chồng nhau xoè ra: thẻ dưới sang phải, thẻ trên cùng sang trái, mỗi thẻ nghiêng 18° bằng lò xo lệch nhịp, chỉ thẻ trên cùng vượt quá rồi về; sau đó gom lại.",
+  "tags": [
+    "fan",
+    "cards",
+    "spring",
+    "stack",
+    "web-interaction",
+    "bouncy",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-card-fan.html",
+      "target": "compositions/components/motion-card-fan.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-card-fan",
+    "author": "moworks",
+    "call": "MW.motionCardFan(q(\".cf\"), tl, 0, {});",
+    "function": "MW.motionCardFan",
+    "options": {
+      "cards": "cards from the bottom of the stack to the top",
+      "spread": "px (280)",
+      "angle": "degrees (18)",
+      "start": "s (0.3)",
+      "each": "s between cards (0.06; the top card last)",
+      "k": "spring stiffness (220)",
+      "c": "[others, top card] damping ([22, 12]: only the top card overshoots)",
+      "closeAt": "s (2.3)",
+      "close": "s (0.4, power2.inOut)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "3 cards 80x110 r10 (top accent, middle blue, bottom light) stacked at the centre, each rotating about its own centre. Card k spreads by v = spring(k220): x (k − 1) × 70 px and rotation (k − 1) × 0.32 rad (±18°), the middle card stays. Starts: bottom card 0.3 s, middle 0.36 s, top 0.42 s (60 ms apart); only the top card is underdamped (c12, ≈ 25 % overshoot), the others c22. Close 2.3-2.7 s power2.inOut. Recipe: ~600 ms springs, 40 ms apart, 8-15°. Params: spread (±70 px, ±18°) · each (0.06 s, thẻ trên cùng sau cùng) · top (k220 c12) · others (k220 c22) · close (0.4 s).",
+    "titleVi": "Chồng thẻ xoè ra hai bên"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-upload-progress",
+  "hash": "2ac7b7d349c21715",
+  "at": "2026-10-17T11:16:44.165Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-upload-progress.mp4",
+    "poster": "previews/moworks__ui-upload-progress.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "2d4e806a226d22e4a693580830c5acd0785b5cf00cf1539ab439252df2ec47ce",
+    "size": 13359,
+    "seconds": 29.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

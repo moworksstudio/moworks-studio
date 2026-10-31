@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-stretch-rise",
+  "hash": "c5dff7b99f747f05",
+  "at": "2026-10-17T11:41:15.029Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-stretch-rise.mp4",
+    "poster": "previews/moworks__text-stretch-rise.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "633bf28b7bb91fc769ad02c4c2e771f67e7229eb5442cf7c8f6176536eb1f0e4",
+    "size": 10748,
+    "seconds": 27.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

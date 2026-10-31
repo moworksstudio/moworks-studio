@@ -1,0 +1,53 @@
+<!--
+  Zabuton Plate Wipe (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Tấm nền màu (zabuton) quét ra từ trái trong bảy khung, ba khung sau chữ trượt nhẹ vào trên nền; khi ra chữ tắt trước rồi nền quét đi.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.lowerTelopPlateWipe(q(".zp"), tl, 0.35, {});
+
+  Options (defaults in brackets):
+      - plate: 
+      - text: 
+      - frames: frames at 30 fps per wipe (7)
+      - delay: frames before the text (3)
+      - slide: px (56)
+      - outAt: s after the start the text fades (2.3)
+
+  Notes: Plate (accent, radius 3, text + 32 px wide, text + 12 px tall) scaleX 0 → 1 from the left in 7 frames at 30 fps (0.23 s) expo.out from 0.35 s. 3 frames later the text (26 px heavy, light colour) fades in and slides −14 px → 0 in 0.3 s expo.out, clipped to the plate. Exit: text fades 2.65–2.8 s, then the plate wipes off to the right in 7 frames power2.in from 2.82 s. Loop 3.4 s. Params: quét nền (7 khung ở 30 fps) · trễ chữ (3 khung) · lề nền (16 / 6 px). Exit: the text fades first, then the plate wipes off to the right.
+-->
+
+<div class="ft"></div><div class="zp"><i class="zp-p"></i><span class="zp-t">Bí quyết nấu phở ngon</span></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"plate":".zp-p","text":".zp-t","frames":7,"delay":3,"slide":56,"outAt":2.3};
+  var run = function (el, tl, at, o) {
+        var pl = el.querySelector(o.plate), tx = el.querySelector(o.text), ex = gsap.parseEase("expo.out"), pin = gsap.parseEase("power2.in"), w = o.frames / 30; gsap.set(pl, { transformOrigin: "0% 50%" });
+        return MW.drive(tl, at, o.outAt + 0.17 + w + 0.05, function (t) {
+          var s = ex(Math.max(0, Math.min(1, t / w))), u = ex(Math.max(0, Math.min(1, (t - w - o.delay / 30) / 0.3))), f = 1 - Math.max(0, Math.min(1, (t - o.outAt) / 0.15)), x = pin(Math.max(0, Math.min(1, (t - o.outAt - 0.17) / w)));
+          pl.style.clipPath = "inset(0 0 0 " + (100 * x).toFixed(2) + "%)"; gsap.set(pl, { scaleX: s }); tx.style.opacity = String(u * f); gsap.set(tx, { x: -o.slide * (1 - u) });
+        });
+      };
+  MW.lowerTelopPlateWipe = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

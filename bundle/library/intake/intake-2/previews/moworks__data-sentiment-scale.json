@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/data-sentiment-scale",
+  "hash": "ec2098a28d9d658a",
+  "at": "2026-10-17T08:26:33.452Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__data-sentiment-scale.mp4",
+    "poster": "previews/moworks__data-sentiment-scale.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "781e291246a126f176d1e53f5219b06326049cc7ee541428e2e7e2af84e69dad",
+    "size": 15073,
+    "seconds": 28,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

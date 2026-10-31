@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-wave-loop",
+  "hash": "3318191c3e776efb",
+  "at": "2026-10-17T10:24:32.696Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-wave-loop.mp4",
+    "poster": "previews/moworks__text-wave-loop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6197845a7d4f4f574a2cf6d66811c02252fe29146be45ca10d3b436c5f653b9d",
+    "size": 22595,
+    "seconds": 28.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

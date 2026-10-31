@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-particles-coalesce",
+  "type": "hyperframes:block",
+  "title": "Particles Coalesce",
+  "description": "Sáu mươi hạt từ khắp khung bay về các điểm trên viền một hình (trái tim, logo) theo lò xo, hơi vượt rồi đứng yên.",
+  "tags": [
+    "particles",
+    "assemble",
+    "spring",
+    "logo",
+    "smooth",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "effect-particles-coalesce.html",
+      "target": "compositions/components/effect-particles-coalesce.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-particles-coalesce",
+    "author": "moworks",
+    "call": "MW.effectParticlesCoalesce(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectParticlesCoalesce",
+    "options": {
+      "count": "(60)",
+      "k": "spring stiffness (60)",
+      "c": "damping (10)",
+      "exitAt": "s they scatter back (2.6)",
+      "seed": "start spots"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "60 particles (r 3) from seeded random spots over the frame to points on the target outline (heart in the demo, a logo in a film), each on a spring (stiffness 60, damping 10, small overshoot), starts spread over 0-300 ms; ~1200 ms; exit reverses in 500 ms ease-in. Params: count (60) · spring (60 / 10) · src: hình đích (SVG / PNG). The target here is a heart outline; in a film, sample the client logo's outline into points.",
+    "titleVi": "Hạt tụ lại thành hình"
+  }
+}

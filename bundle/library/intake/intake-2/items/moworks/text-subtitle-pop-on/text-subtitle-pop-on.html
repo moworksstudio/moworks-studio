@@ -1,0 +1,48 @@
+<!--
+  Pop-On Subtitle (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Phụ đề phim chuẩn: mỗi câu hiện và tắt tức thì, không chuyển động, theo quy tắc độ dài dòng, tốc độ đọc và khoảng nghỉ hai khung giữa các câu.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textSubtitlePopOn(q(".pa"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - times: [[in, out], ...] s per cue, snapped to frames ([[0.35, 1.95], [2.03, 3.6]])
+      - fps: (24)
+      - cues: selector of the cues
+      - loop: s (4.2)
+
+  Notes: Cues cut on and off, no motion. Rules: ≤ 42 chars per line, ≤ 2 lines, ≤ 17–20 chars/s, each cue ≥ 20 frames at 24 fps (5/6 s) and ≤ 7 s, ≥ 2-frame gap, times snapped to frames. Demo: two sentences as cues 0.35–1.95 s and 2.03–3.6 s; text 18 px bold, white with a 3.5 px dark outline (no box), centred in the lower third. Loop 4.2 s. Params: tối đa (42 ký tự × 2 dòng) · tốc độ đọc (≤ 17–20 ký tự/s) · thời lượng (0.83–7 s) · nghỉ (2 khung). Rules: ≤ 42 characters a line, ≤ 2 lines, ≤ 17-20 characters a second, each cue 20 frames to 7 s, a gap of at least 2 frames; no motion.
+-->
+
+<div class="ft"></div><div class="pa"><div class="cap po">Chúng tôi bắt đầu từ một ý tưởng nhỏ</div><div class="cap po">và biến nó thành một bộ phim.</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"times":[[0.35,1.95],[2.03,3.6]],"fps":24,"cues":".po","loop":4.2};
+  var run = function (el, tl, at, o) {
+        var cues = Array.prototype.slice.call(el.querySelectorAll(o.cues)), snap = function (s) { return Math.round(s * o.fps) / o.fps; };
+        return MW.drive(tl, at, o.loop, function (t) { cues.forEach(function (c, i) { var w = o.times[i]; c.style.visibility = t >= snap(w[0]) && t < snap(w[1]) ? "visible" : "hidden"; }); });
+      };
+  MW.textSubtitlePopOn = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

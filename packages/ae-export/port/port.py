@@ -9,7 +9,7 @@ kit.py ae <project>: an editable After Effects project from a v2 film (plan sect
   python engine/kit.py ae <project> [--run] [--check 1.5,4] [--no-save]
   python engine/kit.py ae <project> --estimate          size of a port (layers x samples, MB, minutes) before running it: seconds
   python engine/kit.py ae <project> --rebuild [--check auto]   the AE step again from the saved recording (rec.json.gz), no new recording:
-              after a change to the port code
+              after a change to the port code (a finished export keeps its recording and footage only with MW_AE_KEEP_WORK=1)
   python engine/kit.py ae <project> --jsx <fix.jsx> [--check auto]   a script on the project open in AE (precomps, names, keys, fonts...):
               saves a copy of the .aep first, renders the check frames before and after, compares them (and with the browser)
 
@@ -290,6 +290,9 @@ def hermite(v0, v1, m0, m1, dt, u):
     return (2 * u3 - 3 * u2 + 1) * v0 + (u3 - 2 * u2 + u) * m0 * dt + (-2 * u3 + 3 * u2) * v1 + (u3 - u2) * m1 * dt
 
 
+SLOPE_SPAN = 0.002
+
+
 class Track:
     """a sampled value v(t), linear between samples"""
     def __init__(self, ts, vs):
@@ -302,13 +305,19 @@ class Track:
         i = self.bis(T, t) - 1; a, b = T[i], T[i + 1]
         return V[i] if b - a < 1e-12 else V[i] + (V[i + 1] - V[i]) * (t - a) / (b - a)
     def d(self, t, side):
+        """the slope to one side of t, over SLOPE_SPAN at least. Every tween's start and end has samples 0.4 ms off it (run): GSAP rounds a scale to 4 decimals,
+        so one step of 0.01 % across that gap read as 25 %/s while the camera moved 2 %/s"""
         T, V = self.t, self.v; i = self.bis(T, t) - 1
         if side > 0:
             j = max(0, min(i, len(T) - 2)); j = j + 1 if T[j + 1] <= t + 1e-9 and j + 2 < len(T) else j
+            k = j + 1
+            while T[k] - T[j] < SLOPE_SPAN and k + 1 < len(T): k += 1
         else:
-            j = max(0, min(i if T[i] < t - 1e-9 else i - 1, len(T) - 2))
-        a, b = T[j], T[j + 1]
-        return 0.0 if b - a < 1e-12 else (V[j + 1] - V[j]) / (b - a)
+            k = max(0, min(i if T[i] < t - 1e-9 else i - 1, len(T) - 2)) + 1
+            j = k - 1
+            while T[k] - T[j] < SLOPE_SPAN and j > 0: j -= 1
+        a, b = T[j], T[k]
+        return 0.0 if b - a < 1e-12 else (V[k] - V[j]) / (b - a)
 
 
 def windows(ts, vs, tol):
@@ -327,6 +336,32 @@ def windows(ts, vs, tol):
     return merged
 
 
+def eases_hold(ts, vs, stops, tol):
+    """keys only at these samples, speed 0 (in AE a hold key ends as a smooth key: ae_runtime.jsx setKeys): do the samples between them stay on that curve?
+    A slow move with no jump in it read as "steps" and came out as one ease from end to end, whatever it did between"""
+    for p, q in zip(stops, stops[1:]):
+        dt = ts[q] - ts[p]
+        if dt < 1e-6: continue
+        for k in range(p + 1, q):
+            if abs(hermite(vs[p], vs[q], 0.0, 0.0, dt, (ts[k] - ts[p]) / dt) - vs[k]) > tol: return False
+    return True
+
+
+def key_curve(keys, t):
+    """(value, slope) at t of the curve AE draws through keys [t, v, inSpeed, outSpeed, hold]: Hermite between them (Bezier with influence 33.3 %, speed = slope), held before and after"""
+    if t <= keys[0][0]: return keys[0][1], 0.0
+    if t >= keys[-1][0]: return keys[-1][1], 0.0
+    i = bisect.bisect_right([k[0] for k in keys], t) - 1
+    a, b = keys[i], keys[i + 1]
+    dt = b[0] - a[0]
+    if dt < 1e-9: return b[1], 0.0
+    u = (t - a[0]) / dt; u2 = u * u
+    m0, m1 = a[3], b[2]
+    v = hermite(a[1], b[1], m0, m1, dt, u)
+    s = ((6 * u2 - 6 * u) * a[1] + (3 * u2 - 4 * u + 1) * m0 * dt + (-6 * u2 + 6 * u) * b[1] + (3 * u2 - 2 * u) * m1 * dt) / dt
+    return v, s
+
+
 def fit(ts, vs, tol):
     """-> AE keys [t, v, inSpeed, outSpeed, hold] or None (static); first value always defined"""
     W = windows(ts, vs, tol)
@@ -342,7 +377,7 @@ def fit(ts, vs, tol):
         diffs = [abs(vs[k + 1] - vs[k]) for k in range(i0, i1)]
         big = [k for k in range(i0, i1) if abs(vs[k + 1] - vs[k]) > max(tol * 4, 0.25 * max(diffs))]
         if b - a < 0.0105 or (len(big) <= max(1, (i1 - i0) // 6) and all(abs(vs[k + 1] - vs[k]) <= tol * 0.3 for k in range(i0, i1) if k not in big)
-                              and len(big) * 3 < (i1 - i0)):
+                              and len(big) * 3 < (i1 - i0) and eases_hold(ts, vs, [i0] + [k + 1 for k in big] + [i1], tol)):
             # steps: hold keys at each jump
             add(a, vs[i0], hold=True)
             for k in big: add(ts[k + 1], vs[k + 1], hold=True)
@@ -510,17 +545,32 @@ def film_kind(st, canvas, later=0):
     return "mostly-canvas" if cv and canvas["area"] >= 0.5 else "layers"
 
 
-def estimate(st, times, say=say, canvas=None, seek=0.0, later=0):
+def export_minutes(costs, layers, samples):
+    """The whole export in minutes, from what the size check measured (measure_costs). (T28-24: a 3D film was promised 4 min and had not finished after 78.)
+    Opening the film (twice when pictures are made: their page is a second one), a real sample at every sample time (the recording's Python
+    reads each too: 0.13 ms a layer a sample, at least), every picture, a minute for the keyframes and AE's build (not measured), and about 5 s a shot for
+    its check frame in HF and in AE (costs["checks"], one a shot)."""
+    record = samples * max(costs["sample"], layers * 1.27e-4) / 60
+    pics = (costs["frames"] + costs["stills"]) * costs["frame"] / 60
+    if costs["frames"] or costs["stills"]: pics += costs["open"] / 60
+    return {"minutes": round(costs["open"] / 60 + record + pics + 1 + costs.get("checks", 3) * 5 / 60, 1), "record": round(record, 1), "pictures": round(pics, 1)}
+
+
+def estimate(st, times, say=say, canvas=None, seek=0.0, later=0, costs=None):
     """how big a port is before it records (a 50 s film with 792 layers ran 13 minutes, then failed): layers x
-    samples, MB of samples (about 100 bytes a layer a sample), minutes (about 0.13 ms a layer a sample, measured on that film, plus HF's
-    own seek at every sample: a canvas film said "about 1 min" and recorded for 63), and which elements bring the most layers (the
+    samples, MB of samples (about 100 bytes a layer a sample), and which elements bring the most layers (the
     cells of a pixel transition: 144 each). kind: film_kind; a "canvas" or "dynamic" film is not recorded (about a minute: the film
-    copied, AE builds); later: the most elements that show at a later time and were not in the page at 0 s (AE gets none of them)"""
+    copied, AE builds); later: the most elements that show at a later time and were not in the page at 0 s (AE gets none of them).
+    Minutes and the pictures' size only from what was measured on this film (costs: the size check's measure_costs, export_minutes);
+    a size check without them (a style's AE badge reads the layers only, on the GPU), and the export itself, say neither"""
     n, k = len(st["nodes"]), len(times)
     canvas = canvas or {"count": 0, "area": 0.0}
     kind = film_kind(st, canvas, later)
     mb, mins = n * k * 100 / 1e6, (n * k * 1.27e-4 + k * seek) / 60
-    if kind in ("canvas", "dynamic", "empty"): mb, mins = 0, 1.0
+    if kind in ("canvas", "dynamic", "empty"): mb, mins, costs = 0, 1.0, None
+    spent = export_minutes(costs, n, k) if costs else None
+    # what stays on disk: the pictures as weighed and the sound (the samples are a Python object: nothing of them is kept)
+    if spent: mins, mb = spent["minutes"], costs.get("picturesMb", costs["frames"] * costs["frameMb"]) + costs.get("soundMb", 0.0) + 5
     pictures = sum(1 for nd in st["nodes"] if nd["kind"] == "raster")       # svg / canvas / video: shapes where AE can, else pictures
     els = st.get("els") or []
     def who(nd):
@@ -532,11 +582,115 @@ def estimate(st, times, say=say, canvas=None, seek=0.0, later=0):
     cnt = {}
     for nd in st["nodes"]: cnt[who(nd)] = cnt.get(who(nd), 0) + 1
     big = sorted(cnt.items(), key=lambda x: -x[1])[:4]
-    say(f"  port size: {n} layers in {len(st['groups'])} comps x {k} samples = about {mb:,.0f} MB of samples, about {max(1, round(mins))} "
-        f"min to record (+ pictures and the AE build). Most layers: " + ", ".join(f"{a} {b}" for a, b in big) + f"; film: {kind}, "
+    said = f"about {mb:,.0f} MB, about {max(1, round(mins))} min in all ({spent['record']} to record, {spent['pictures']} for {costs['frames'] + costs['stills']} pictures, {costs['sample'] * 1000:.0f} ms a sample)" if spent else f"about {mb:,.0f} MB of samples"
+    say(f"  port size: {n} layers in {len(st['groups'])} comps x {k} samples = {said}. Most layers: " + ", ".join(f"{a} {b}" for a, b in big) + f"; film: {kind}, "
         f"{canvas['count']} canvas(es) over {canvas['area']:.0%} of the frame, {later} element(s) only later, {seek * 1000:.0f} ms a seek")
     return {"layers": n, "comps": len(st["groups"]), "samples": k, "mb": round(mb), "minutes": round(mins, 1), "most": big,
-            "kind": kind, "canvas": {"count": canvas["count"], "area": round(canvas["area"], 3)}, "later": later, "pictures": pictures, "seekMs": round(seek * 1000)}
+            "kind": kind, "canvas": {"count": canvas["count"], "area": round(canvas["area"], 3)}, "later": later, "pictures": pictures, "seekMs": round(seek * 1000),
+            **({"high": round(spent["minutes"] * 1.5, 1), "frames": costs["frames"] + costs["stills"], "sampleMs": round(costs["sample"] * 1000), "frameMs": round(costs["frame"] * 1000),
+                "recordMinutes": spent["record"], "pictureMinutes": spent["pictures"]} if spent else {})}
+
+
+def left_words(spent, done, total):
+    """", about 20 min left": what is left at the pace so far ("" before there is a pace)."""
+    if done <= 0 or spent < 5 or total <= done: return ""
+    m = spent / done * (total - done) / 60
+    return f", about {m:.0f} min left" if m >= 1 else ", under a minute left"
+
+
+SAMPLE_JS = "async ([t, o]) => JSON.stringify(await window.__aimkRec.sample(t, o))"
+PICTURE_LINE_S = 10.0                                            # a progress line while pictures are made, at most this often
+# How the size check measures a port on this film (T28-24). Timing HF's seek alone said 12 ms where a sample took 127: a seek returns before a
+# WebGL film has drawn, and that work is paid when the recording next reads the canvas. So: real samples in a row at a few places, as
+# the recording takes them; a grid over the film for what changes and how long it shows; a few real pictures of a layer that changes.
+PROBE_PLACES, PROBE_RUN, PROBE_GRID, PROBE_BUDGET = (0.1, 0.3, 0.5, 0.7, 0.9), 13, 40, 30.0     # samples in a row (sigEvery 4 reads the canvases on the first and the last), grid points, s
+PROBE_FRAMES = (0.2, 0.3, 0.5, 0.7)                              # pictures taken per layer (at most 2 layers), where in its span: the first only sets the page up, and is not counted
+PROBE_WEIGH = 40                                                 # layers weighed for the size, at most (spread over the film)
+
+
+def seq_frames(ops, grid, D, fps):
+    """How many PNGs a layer that changes takes (the pictures' own count at the export: its visible span in frames, port.record), from the grid:
+    it shows from about half a step before its first visible point to half a step after its last."""
+    vis = [i for i, o in enumerate(ops) if o > 0.001]
+    if not vis: return 0
+    half = D / max(1, len(grid) - 1) / 2
+    return int(math.ceil(min(D, grid[vis[-1]] + half) * fps)) - int(math.floor(max(0.0, grid[vis[0]] - half) * fps)) + 1
+
+
+async def measure_costs(pg, info, st, times, work, opened, say=say):
+    """{ sample, frame (s), frameMb, frames, stills, open (s) } of THIS film. Only the size check runs it, on the page it opened and closes
+    after: the export's own recording is not touched."""
+    from appenv import PAINT
+    D, t0, spent, took = info["duration"], time.time(), 0.0, 0
+    async def take(ts, o): return json.loads(await pg.evaluate(SAMPLE_JS, [ts, o]) or "null")
+    for f in PROBE_PLACES:
+        i = bisect.bisect_left(times, D * f); run = times[i:i + PROBE_RUN]
+        if not run: continue
+        a = time.time(); await take(run, {"sigEvery": 4}); spent += time.time() - a; took += len(run)
+        if time.time() - t0 > PROBE_BUDGET: break
+    sample = spent / took if took else 0.0
+    points = max(8, min(PROBE_GRID, int(PROBE_BUDGET / max(sample, 1e-3))))
+    grid = sorted({round(D * j / points, 5) for j in range(points + 1)})
+    smp = await take(grid, {"sigEvery": 1})
+    sty = await pg.evaluate("window.__aimkRec.styles()")
+    need = plan_pictures({"structure": st, "styles": sty, "samples": smp})
+    seqs = {n: seq_frames([s[0][12] for s in smp["nodes"][n]], grid, D, FPS) for n, h in need.items() if h["mode"] in ("seq", "seqT")}
+    still_ids = [n for n, h in need.items() if h["mode"] == "still"]; stills = len(still_ids)
+    frame, frame_mb, size_mb = 0.25, 0.0, 0.0                    # no layer to time: a still is about a quarter of a second
+    if seqs or stills:
+        VW, VH = int(info["w"]) + 2 * MARGIN, int(info["h"]) + 2 * MARGIN
+        f = work / "_probe.png"; dur, size, n_timed = 0.0, 0, 0
+        await pg.set_viewport_size({"width": VW, "height": VH})
+        async def shot(n, t):
+            how = need[n]
+            await pg.evaluate(f"window.__aimk.seek({t})")
+            await pg.evaluate(f"window.__aimkRec.isolate({n}, {how['pad']}, {MARGIN}, {'true' if how['mode'] == 'seqT' else 'false'})")
+            await pg.evaluate(PAINT); await pg.screenshot(path=str(f), clip={"x": 0, "y": 0, "width": VW, "height": VH}, omit_background=True)
+            await pg.evaluate(f"window.__aimkRec.restore({n})")
+            return f.stat().st_size / 1e6
+        visible = lambda n: [i for i, o in enumerate(s[0][12] for s in smp["nodes"][n]) if o > 0.001]
+        try:
+            for n in (list(seqs) or still_ids)[:2]:
+                vis = visible(n)
+                if not vis: continue
+                for j, where in enumerate(PROBE_FRAMES):
+                    a = time.time()
+                    mb = await shot(n, grid[vis[int(where * (len(vis) - 1))]])
+                    if j: dur += time.time() - a; size += mb * 1e6; n_timed += 1
+            if n_timed: frame, frame_mb = dur / n_timed, size / n_timed / 1e6
+            # what the pictures weigh: one picture of each layer that changes, every one if there is time. Two layers said 0.24 MB a frame for a film whose
+            # frames came to 0.5 (~750 MB for 1.6 GB, T29-23): the first shots are not the busy ones. Stills are at 2x in the export: about 3 times the bytes
+            weigh = lambda ids: [ids[int(i * len(ids) / min(len(ids), PROBE_WEIGH))] for i in range(min(len(ids), PROBE_WEIGH))] if ids else []
+            until = time.time() + PROBE_BUDGET
+            per = {}
+            for n in weigh(list(seqs)):
+                vis = visible(n)
+                if vis and time.time() < until: per[n] = await shot(n, grid[vis[len(vis) // 2]])
+            still_mb = []
+            for n in weigh(still_ids)[:6]:
+                vis = visible(n)
+                if vis and time.time() < until: still_mb.append(await shot(n, grid[vis[len(vis) // 2]]))
+            mean = sum(per[n] * seqs[n] for n in per) / max(1, sum(seqs[n] for n in per)) if per else frame_mb
+            size_mb = sum(seqs[n] * per.get(n, mean) for n in seqs) + stills * (sum(still_mb) / len(still_mb) * 3 if still_mb else frame_mb)
+        finally:
+            f.unlink(missing_ok=True)
+    return {"sample": sample, "frame": frame, "frameMb": frame_mb, "frames": sum(seqs.values()), "stills": stills, "open": opened, "picturesMb": size_mb}
+
+
+def sound_mb(cl, p, total):
+    """what the sound weighs in the export: each file on the timeline once, as it is or as WAV when After Effects cannot import it (24-bit, 48 kHz), and the
+    mix and its three stems, the film's length each at 24-bit, 48 kHz, stereo"""
+    from audio_mix import AE_TAKES, probe
+    if not cl or not p: return 0.0
+    mb = 4 * total * 288000 / 1e6
+    for src in {re.sub(r"^(?:https?://[^/]+)?/+", "", c["src"]) for c in cl if c.get("src")}:
+        f = Path(p) / src
+        try:
+            if f.suffix.lower() in AE_TAKES: mb += f.stat().st_size / 1e6
+            else:
+                d, ch = probe(f); mb += d * 144000 * ch / 1e6
+        except (OSError, SystemExit): pass
+    return mb
 
 
 async def record(url, work, say=say, film_dir=None, estimate_only=False):
@@ -555,7 +709,9 @@ async def record(url, work, say=say, film_dir=None, estimate_only=False):
             await pg.evaluate(REC_JS); await pg.evaluate("window.__aimk.seek(0)")
             st = await pg.evaluate(f"window.__aimkRec.structure({json.dumps(info['stage'])}, {info['duration']})")
             return pg, info, st, errs
+        t_open = time.time()
         pg, info, st, errs = await open_page(1)
+        t_open = time.time() - t_open
         D = info["duration"]
         bounds = [b for b in await pg.evaluate(BOUNDS_JS) if 0 <= b <= D]
         times = sorted({round(i / RATE, 5) for i in range(int(D * RATE) + 1)} | {round(D, 5)} | set(bounds)
@@ -566,7 +722,14 @@ async def record(url, work, say=say, film_dir=None, estimate_only=False):
             sk = await pg.evaluate(SEEK_JS, [info["stage"], [round(D * f, 3) for f in (0.1, 0.3, 0.5, 0.7, 0.9)]])
             seek = sum(sk["ms"]) / len(sk["ms"]) / 1000 if sk["ms"] else 0.0
             later = int(sk["later"])
-        est = estimate(st, times, say, canvas=canvas, seek=seek, later=later)
+        costs = None
+        if estimate_only and os.environ.get("MW_AE_GPU") != "1" and film_kind(st, canvas, later) not in ("canvas", "dynamic", "empty"):
+            try:
+                costs = await measure_costs(pg, info, st, times, work, t_open, say)
+                costs["soundMb"] = sound_mb(await pg.evaluate("window.__aimk.audio()"), film_dir, D)
+                costs["checks"] = max(3, len(info.get("markers") or []))
+            except Exception as e: say(f"  the size check could not time this film: {str(e).splitlines()[0][:200]}")
+        est = estimate(st, times, say, canvas=canvas, seek=seek, later=later, costs=costs)
         if estimate_only: await br.close(); return {"estimate": est}
         if est["kind"] in ("canvas", "dynamic", "empty"):          # nothing to record; the rendered film goes in as one video layer (run)
             audio = await pg.evaluate("window.__aimk.audio()")
@@ -582,8 +745,7 @@ async def record(url, work, say=say, film_dir=None, estimate_only=False):
         CHUNK = 1000                                              # a multiple of sigEvery
         smp = None
         for i in range(0, len(times), CHUNK):
-            part = json.loads(await pg.evaluate("async ([t, o]) => JSON.stringify(await window.__aimkRec.sample(t, o))",
-                                                [times[i:i + CHUNK], {"sigEvery": 4}]) or "null")
+            part = json.loads(await pg.evaluate(SAMPLE_JS, [times[i:i + CHUNK], {"sigEvery": 4}]) or "null")
             if not part or part.get("nodes") is None or part.get("groups") is None:
                 raise SystemExit(f"AE port: sampling times {times[i]:.3f}-{times[min(i + CHUNK, len(times)) - 1]:.3f} s came back empty "
                                  f"({len(st['nodes'])} layers): the page returned no data")
@@ -592,7 +754,9 @@ async def record(url, work, say=say, film_dir=None, estimate_only=False):
                 smp["t"] += part["t"]
                 for a, b in zip(smp["nodes"], part["nodes"]): a.extend(b)
                 for a, b in zip(smp["groups"], part["groups"]): a.extend(b)
-            if len(times) > CHUNK: say(f"  sampled {min(i + CHUNK, len(times))}/{len(times)} times ({time.time() - t0:.0f} s)")
+            if len(times) > CHUNK:
+                got = min(i + CHUNK, len(times))
+                say(f"  sampled {got}/{len(times)} times ({time.time() - t0:.0f} s{left_words(time.time() - t0, got, len(times))})")
         await pg.evaluate("window.__aimk.seek(0)")
         sty = await pg.evaluate("window.__aimkRec.styles()")
         say(f"  recorded {len(st['nodes'])} layers in {len(st['groups'])} comps, {len(times)} samples ({time.time() - t0:.1f} s)")
@@ -608,6 +772,22 @@ async def record(url, work, say=say, film_dir=None, estimate_only=False):
                 if e < len(els) and els[e].get("source"): return els[e]["source"]
             return None
         if need:
+            # progress counted in pictures, not layers, and said while one is made: 54 animated pictures = 8398 frames took 24 min with no line,
+            # and a 3D film's "pictures 2/5" stood at 40 % for 42 min over its 3751 PNGs (T28-24)
+            nseq = sum(1 for h in need.values() if h["mode"] in ("seq", "seqT"))
+            def frames_of(n):
+                vis = [k for k, s in enumerate(smp["nodes"][n]) if s[0][12] > 0.001]
+                return int(math.ceil(times[vis[-1]] * FPS)) - int(math.floor(times[vis[0]] * FPS)) + 1
+            work_total = sum(frames_of(n) if h["mode"] in ("seq", "seqT") else 1 for n, h in need.items())
+            work_done, said_at = 0, time.time()
+            say(f"  pictures to make: {len(need) - nseq} still, {nseq} animated (a PNG per frame of each, the slow part)")
+            say(f"  pictures 0/{work_total}: opening the film for them")
+            tp = time.time()
+            def tick(k, what, force=False):
+                nonlocal said_at
+                if not force and time.time() - said_at < PICTURE_LINE_S: return
+                said_at = time.time()
+                say(f"  pictures {work_done}/{work_total}: layer {k} of {len(need)}, {what} ({time.time() - tp:.0f} s{left_words(time.time() - tp, work_done, work_total)})")
             pg2, _, st2, _ = await open_page(2)
             assert len(st2["nodes"]) == len(st["nodes"]), "structure differs between pages"
             VW, VH = int(info["w"]) + 2 * MARGIN, int(info["h"]) + 2 * MARGIN
@@ -616,16 +796,13 @@ async def record(url, work, say=say, film_dir=None, estimate_only=False):
                 b, pgb = r["box"], r["page"]
                 x0, y0 = max(0, pgb[0]), max(0, pgb[1]); x1, y1 = min(VW, pgb[0] + pgb[2]), min(VH, pgb[1] + pgb[3])
                 return [b[0] + x0 - pgb[0], b[1] + y0 - pgb[1], x1 - x0, y1 - y0], {"x": x0, "y": y0, "width": max(1, x1 - x0), "height": max(1, y1 - y0)}
-            # progress, one line per picture (54 animated pictures = 8398 frames took 24 min with no line: the port looked hung)
-            nseq = sum(1 for h in need.values() if h["mode"] in ("seq", "seqT"))
-            say(f"  pictures to make: {len(need) - nseq} still, {nseq} animated (a PNG per frame of each, the slow part)")
-            tp = time.time()
             for k, (n, how) in enumerate(need.items(), 1):
                 seq = smp["nodes"][n]; ops = [s[0][12] for s in seq]
                 if how["mode"] == "remap":                              # the film's own sequence files, not screenshots
                     pic = sequence_footage(film_dir, shots, n, how["seq"], seq, say, source_of(n))
+                    work_done += 1
                     if pic: rec["pictures"][n] = pic; continue
-                    say(f"  n{n:03d}: the files of its image sequence were not found next to the film: a still picture instead")
+                    say(f"  layer {k} of {len(need)}: the files of its image sequence were not found next to the film: a still picture instead")
                     how = {"mode": "still", "pad": 0}
                 if how["mode"] == "still":
                     # the middle of the longest stretch at its fullest opacity (the first such sample was often the scene's first frame,
@@ -642,13 +819,14 @@ async def record(url, work, say=say, film_dir=None, estimate_only=False):
                     await pg2.evaluate(PAINT); await pg2.screenshot(path=str(f), clip=clip, omit_background=True)
                     await pg2.evaluate(f"window.__aimkRec.restore({n})")
                     rec["pictures"][n] = {"mode": "still", "file": f.name, "box": box, "scale": 2, "t": t}
-                    say(f"  pictures {k}/{len(need)}: n{n:03d} still ({time.time() - tp:.0f} s)")
+                    work_done += 1
+                    tick(k, "still", force=True)
                 else:                                                   # paint changes over time: a PNG sequence over the visible span
                     vis = [k for k, o in enumerate(ops) if o > 0.001]
                     a, b = times[vis[0]], times[vis[-1]]
                     d = shots / f"n{n:03d}_seq"; d.mkdir(exist_ok=True)
                     f0, f1 = int(math.floor(a * FPS)), int(math.ceil(b * FPS))
-                    say(f"  pictures {k}/{len(need)}: n{n:03d} animated, {f1 - f0 + 1} frames ({time.time() - tp:.0f} s)")
+                    tick(k, f"animated, {f1 - f0 + 1} frames", force=True)
                     # the whole frame plus the margin: the element may grow, move or change its layout
                     box = [-MARGIN, -MARGIN, VW, VH]
                     await pg.set_viewport_size({"width": VW, "height": VH})
@@ -658,6 +836,8 @@ async def record(url, work, say=say, film_dir=None, estimate_only=False):
                         await pg.evaluate(f"window.__aimkRec.isolate({n}, {how['pad']}, {MARGIN}, {keepT})")
                         await pg.evaluate(PAINT); await pg.screenshot(path=str(d / f"f_{fr - f0:05d}.png"), clip={"x": 0, "y": 0, "width": VW, "height": VH}, omit_background=True)
                         await pg.evaluate(f"window.__aimkRec.restore({n})")
+                        work_done += 1
+                        tick(k, f"animated, frame {fr - f0 + 1} of {f1 - f0 + 1}")
                     await pg.set_viewport_size({"width": int(info["w"]), "height": int(info["h"])})
                     rec["pictures"][n] = {"mode": how["mode"], "dir": d.name, "box": box, "scale": 1, "t0": f0 / FPS, "frames": f1 - f0 + 1,
                                           "withText": how.get("withText")}
@@ -821,17 +1001,23 @@ PATH = {"anchor": ["ADBE Transform Group", "ADBE Anchor Point"], "x": ["ADBE Tra
 
 
 def multi(ts, cols, tol, shift):
-    """several scalars of one AE property (scale x/y, anchor x/y, size w/h): keys at the union of their knots"""
-    chans = [channel(ts, c, tol, 0.0) for c in cols]
-    if all(c[0] == "set" for c in chans): return ("set", [c[1] for c in chans])
-    knots = sorted({k[0] for c in chans if c[0] == "keys" for k in c[1]})
-    trs = [Track(ts, c) for c in cols]
-    holds = {k[0] for c in chans if c[0] == "keys" for k in c[1] if k[4]}
+    """several scalars of one AE property (scale x/y, anchor x/y, size w/h): keys at the union of their knots. Each scalar keeps the curve fit() checked
+    against its samples: its own speeds at its own keys; a key it only shares is a point on that curve with the curve's slope there, which leaves the curve as it was.
+    (Speeds read off the samples instead gave a camera's slow zoom, 100 to 105 % over 3.4 s, 25 %/s out of a key 2.7 s long: 107.09 % at 1 s where the film had 101 %.)"""
+    fits = [fit(ts, c, tol) for c in cols]
+    if not any(fits): return ("set", [round(c[0], 4) for c in cols])
+    knots = sorted({k[0] for f in fits if f for k in f})
+    holds = {k[0] for f in fits if f for k in f if k[4]}
+    own = [{k[0]: k for k in f} if f else {} for f in fits]
     out = []
-    for i, t in enumerate(knots):
-        first, last = i == 0, i == len(knots) - 1
-        v = [round(tr(t), 4) for tr in trs]
-        ins = [0.0 if first else round(tr.d(t, -1), 4) for tr in trs]; outs = [0.0 if last else round(tr.d(t, +1), 4) for tr in trs]
+    for t in knots:
+        v, ins, outs = [], [], []
+        for f, o, c in zip(fits, own, cols):
+            if not f: v.append(round(c[0], 4)); ins.append(0.0); outs.append(0.0)
+            elif t in o: v.append(o[t][1]); ins.append(o[t][2]); outs.append(o[t][3])
+            else:
+                x, s = key_curve(f, t); s = round(s, 4)
+                v.append(round(x, 4)); ins.append(s); outs.append(s)
         out.append([round(t - shift, 5), v, ins, outs, t in holds])
     return ("keys", out)
 
@@ -1473,45 +1659,228 @@ class Builder:
         return out
 
 
+def level_layer_keys(c, start, mg, dur):
+    """Audio Levels of a clip as the runtime takes them: {"set": [dB, dB]} or {"keys": [[film s, [dB, dB], inSpeed, outSpeed, hold]...]}, straight between
+    keys: each key's speed is the slope of the piece it ends and of the piece it starts"""
+    from audio_mix import level_keys
+    kind, v = level_keys(c, mg, dur)
+    if kind == "set": return {"set": [v, v]}
+    out = []
+    for i, (t, db) in enumerate(v):
+        slope = lambda a, b: (b[1] - a[1]) / (b[0] - a[0])
+        out.append([round(start + t, 5), [db, db], round(slope(v[i - 1], v[i]), 3) if i else 0.0, round(slope(v[i], v[i + 1]), 3) if i < len(v) - 1 else 0.0, 0])
+    return {"keys": out}
+
+
 def audio_layers(p, film, work, cl=None, total=0.0):
-    """the film's <audio> clips as AE audio layers: file copied into footage/audio/ (travels with the .aep), layer start = clip start - media
-    start, in / out = the clip, Audio Levels = 20 log10(volume) dB, fades as linear dB keys from -48 dB"""
-    from audio_mix import master
-    out, used = [], set()
+    """the film's <audio> clips as AE audio layers: each file once in footage/audio/ (travels with the .aep), one AE cannot import as WAV (audio_mix AE_TAKES),
+    layer start = clip start - media start, in / out = the clip, Audio Levels = the clip's whole gain: volume, HF's volume lane, fades (audio_mix level_keys).
+    -> (layers, {"clips", "converted": [names], "lost": [{name, file, why}], "plain": [names]}): "lost" a clip with no layer and why, "plain" a clip whose speed, loop or
+    effects stay behind (neither its layer nor the stems have them)"""
+    from audio_mix import AE_TAKES, duration, master, to_wav
+    out, used, files = [], set(), {}
     cl = [c for c in (cl or []) if c.get("src")]
+    info = {"clips": len(cl), "converted": [], "lost": [], "plain": []}
     for c in cl:                                          # HF's bundle writes paths from the project root (a page URL path too)
         c["src"] = re.sub(r"^(?:https?://[^/]+)?/+", "", c["src"])
     # the same master gain as mix.wav, so AE's mix is at the film's loudness too; mix.wav + stems (voice / music / sfx) written beside the project
     # (the stems come with Port to AE; the MOV / MP4 are finished films and carry their sound inside)
-    mg = master(p, cl, total, work / "audio") if cl else 0.0
-    for c in cl:
-        src = p / c["src"]
-        if not src.is_file(): continue
-        dst = work / "footage" / "audio"; dst.mkdir(parents=True, exist_ok=True)
-        fn = src.name
-        while fn in used: fn = "_" + fn
-        used.add(fn); d = dst / fn
-        # the same file from the last port: AE may still hold it open (the kit's last .aep is closed only by the JSX, later), so do not copy
-        # again; a changed file that AE holds goes in under a new name (a rebuilt film's sound effects, re-ported with AE open)
+    bad = {}
+    mg = master(p, [c for c in cl if (p / c["src"]).is_file()], total, work / "audio", bad) if cl else 0.0
+    dst = work / "footage" / "audio"
+
+    def footage_of(src):
+        """the file in footage/audio/ for a source: copied, or as WAV; a file on the timeline many times is one footage item in AE"""
+        key = str(src)
+        if key in files: return files[key]
+        convert = src.suffix.lower() not in AE_TAKES
+        stem, ext = src.stem, ".wav" if convert else src.suffix
+        fn = stem + ext
+        while fn.lower() in used: fn = "_" + fn
+        dst.mkdir(parents=True, exist_ok=True)
+        # the same file from a port whose AE still holds it: not copied again; a changed file that AE holds goes in under a new name
         same = lambda x: x.exists() and x.stat().st_size == src.stat().st_size and x.read_bytes() == src.read_bytes()
-        if not same(d):
-            try: shutil.copy2(src, d)
+        k = 2
+        while True:
+            used.add(fn.lower()); d = dst / fn
+            try:
+                if convert: to_wav(src, d)
+                elif not same(d): shutil.copy2(src, d)
+                break
             except PermissionError:
-                k = 2
-                while (dst / f"{Path(fn).stem}_{k}{Path(fn).suffix}").exists() and not same(dst / f"{Path(fn).stem}_{k}{Path(fn).suffix}"): k += 1
-                fn = f"{Path(fn).stem}_{k}{Path(fn).suffix}"; used.add(fn); d = dst / fn
-                if not same(d): shutil.copy2(src, d)
-        db = round(max(-96.0, 20 * math.log10(c["volume"]) + mg) if c["volume"] > 0 else -96.0, 2)
-        a, b = c["start"], c["start"] + c["dur"]
-        L = {"type": "footage", "src": "footage/audio/" + fn, "name": "♪ " + (c["id"] or fn), "start": round(a - c["media_start"], 4),
+                fn = f"{stem}_{k}{ext}"; k += 1
+            except subprocess.CalledProcessError:              # ffmpeg holds no lock message of its own: a held file and a bad file look alike, so one try under a new name
+                if d.exists() and k == 2: fn = f"{stem}_{k}{ext}"; k += 1; continue
+                raise
+        if convert: info["converted"].append(src.name)
+        files[key] = fn
+        return fn
+
+    for c in cl:
+        src = p / c["src"]; name = "♪ " + (c["id"] or src.name)
+        if not src.is_file():
+            info["lost"].append({"name": name, "file": src.name, "why": "the file is not in the film's folder"}); continue
+        if (c["id"] or c["src"]) in bad:
+            info["lost"].append({"name": name, "file": src.name, "why": "the file cannot be read as sound"}); continue
+        try: fn = footage_of(src)
+        except (subprocess.CalledProcessError, OSError) as e:
+            info["lost"].append({"name": name, "file": src.name, "why": f"it could not be made into a WAV ({type(e).__name__})"}); continue
+        try: d = c["dur"] if c["dur"] > 0 else max(0.05, duration(src) - c["media_start"])
+        except (SystemExit, OSError):
+            info["lost"].append({"name": name, "file": src.name, "why": "the file cannot be read as sound"}); continue
+        a, b = c["start"], c["start"] + d
+        L = {"type": "footage", "src": "footage/audio/" + fn, "name": name, "start": round(a - c["media_start"], 4),
              "inPoint": round(a, 4), "outPoint": round(b, 4), "paths": {"audio": ["ADBE Audio Group", "ADBE Audio Levels"]}}
-        keys = []
-        if c["fade_in"] > 0: s = (db + 48) / c["fade_in"]; keys += [[round(a, 4), [-48, -48], s, s, 0], [round(a + c["fade_in"], 4), [db, db], s, s, 0]]
-        if c["fade_out"] > 0: s = (db + 48) / c["fade_out"]; keys += [[round(b - c["fade_out"], 4), [db, db], s, s, 0], [round(b, 4), [-48, -48], s, s, 0]]
-        if keys: L["keys"] = {"audio": keys}
-        else: L["set"] = {"audio": [db, db]}
+        L.update({k: {"audio": v} for k, v in level_layer_keys(c, a, mg, d).items()})
+        if c.get("rate", 1) != 1 or c.get("loop") or c.get("fx"): info["plain"].append(c["id"] or src.name)
         out.append(L)
+    return out, info
+
+
+def port_report(p, film_title, comps, B, pictures, rec, audio, sound, lost=(), made=None, checks=None):
+    """AE-PORT.md. Before AE runs it says what was sent; lost / made: what After Effects built, so the file says what the project holds"""
+    n = sum(len(c["layers"]) for c in comps)
+    sound_made = len(audio) - sum(1 for x in lost if x["sound"]) if made else len(audio)
+    lines = [f"# AE port: {film_title}", "", f"- built {time.strftime('%Y-%m-%d %H:%M')}, {len(comps)} comps ({B.stats['precomps']} of them precomps of "
+             "grouped layers, folder Precomps), " + (f"{n - len(lost)} of {n} layers made, " if made and lost else f"{n} layers, ") + f"{B.stats['keys']} keys",
+             f"- pictures: {pictures} (still PNG at 2x or PNG sequence, in footage/)", "- motion blur: switch on for moving layers, comp switch off (turn it on in the comp)"]
+    if sound["clips"]:
+        conv = f"; {len(sound['converted'])} file(s) After Effects cannot import went in as WAV ({', '.join(sorted(set(Path(x).suffix.lower() for x in sound['converted'])))})" if sound["converted"] else ""
+        lines.append(f"- audio: {sound_made} of {sound['clips']} sound layer(s) in the main comp (files in footage/audio/{conv}; volume, volume lane and fades as Audio Levels keys); "
+                     "the whole mix and its stems: Audio/mix.wav + voice.wav, music.wav, sfx.wav next to it, the film's loudness target")
+    gone = [x for x in sound["lost"]] + [x for x in lost]
+    if gone:
+        lines += ["", "## Not in the project", ""] + [f"- {x['name']}{' (' + x['file'] + ')' if x.get('file') else ''}: {x['why']}" for x in gone]
+    if sound["plain"]:
+        lines += ["", "## Sound that plays differently in the film", "", f"- at another speed, in a loop or with effects in the film; as a plain clip here and in the stems: {', '.join(sound['plain'])}"]
+    if checks:
+        off = [c for c in checks if c.get("diff") is None or c["diff"] > 0.02]
+        lines += ["", "## Frame checks (After Effects against the film)", "", f"- {len(checks)} frame(s), {len(off)} off by more than 2 % of pixels"]
+        lines += [f"- {c['t']} s: " + ("no reference frame" if c.get("diff") is None else f"{c['diff']:.2%} of pixels differ") for c in off]
+    lines.append("")
+    if rec["page_errors"]: lines.append(f"- page errors while recording: {rec['page_errors']}")
+    if B.notes: lines += ["## Not ported / check", ""] + [f"- {x}" for x in sorted(B.notes)]
+    return "\n".join(lines) + "\n"
+
+
+def ae_failures(work):
+    """the layers After Effects did not build, from the runtime's build.log.failed: [{comp, name, file, why, sound}]"""
+    f = work / "build.log.failed"
+    if not f.exists(): return []
+    out = []
+    for line in f.read_text(encoding="utf-8", errors="replace").splitlines():
+        cols = line.split("\t")
+        if len(cols) < 4: continue
+        why = re.sub(r"^Error:\s*", "", cols[3]); why = re.sub(r"^After Effects(?: \(Beta\))? error:\s*", "", why); why = re.sub(r"\s*\(line \d+\)\s*$", "", why)
+        out.append({"comp": cols[0], "name": cols[1], "file": Path(cols[2]).name if cols[2] else "", "why": why, "sound": cols[1].startswith("♪")})
     return out
+
+
+CLOSE_JSX = r"""(function () {
+  var out = [], P = app.project;
+  try {
+    // only the project the port built: nothing of the user's
+    if (P.file !== null && P.file.fsName.replace(/\\/g, "/").toLowerCase().indexOf(K.work.toLowerCase()) === 0) { P.close(CloseOptions.DO_NOT_SAVE_CHANGES); out.push("closed"); }
+    else out.push("left open");
+  } catch (e) { out.push("ERROR " + e.toString() + " (line " + e.line + ")"); }
+  var d = new File(K.done); d.encoding = "UTF-8"; d.open("w"); d.write(out.join("\n")); d.close();
+})();
+"""
+
+
+def small_jsx(work, name, code, K, timeout=300, say=say):
+    done = work / f"{name}.done"
+    (work / f"{name}.jsx").write_text("var K = " + json.dumps({**K, "done": str(done).replace("\\", "/")}, ensure_ascii=False) + ";\n" + code, encoding="utf-8")
+    return run_jsx(work / f"{name}.jsx", done, timeout=timeout, say=say)
+
+
+def close_work_project(work, say=say):
+    small_jsx(work, "close", CLOSE_JSX, {"work": str(work).replace("\\", "/") + "/"}, timeout=120, say=say)
+
+
+REOPEN_JSX = r"""(function () {
+  var out = [], P, i, it, miss = 0;
+  try {
+    app.beginSuppressDialogs();
+    P = app.open(new File(K.aep));
+    for (i = 1; i <= P.numItems; i++) { it = P.item(i); if (it instanceof FootageItem && it.footageMissing) { miss++; if (miss <= 5) out.push("MISSING " + it.name); } }
+    out.push("missing " + miss);
+  } catch (e) { out.push("ERROR " + e.toString() + " (line " + e.line + ")"); }
+  try { app.endSuppressDialogs(false); } catch (e2) {}
+  var d = new File(K.done); d.encoding = "UTF-8"; d.open("w"); d.write(out.join("\n")); d.close();
+})();
+"""
+
+
+# AE has found its footage beside it, which marks the project changed, and the next export stops on "unsaved changes". A save in the script that opened it says "Access is denied"
+# (After Effects (Beta) 27.1): AE still holds the file. It takes a script of its own.
+RESAVE_JSX = r"""(function () {
+  var out = [], P = app.project, errs = [];
+  try {
+    if (P.file !== null && P.file.fsName.replace(/\\/g, "/").toLowerCase() === K.aep.toLowerCase() && P.dirty) {
+      app.beginSuppressDialogs();
+      app.onError = function (m) { errs.push(m); };
+      P.save();
+      app.onError = null;
+      app.endSuppressDialogs(false);
+    }
+    out.push("dirty " + P.dirty + (errs.length ? " " + errs.join(" ") : ""));
+  } catch (e) { out.push("ERROR " + e.toString() + " (line " + e.line + ")"); }
+  var d = new File(K.done); d.encoding = "UTF-8"; d.open("w"); d.write(out.join("\n")); d.close();
+})();
+"""
+
+
+def open_copy(aep, work, say=say):
+    """the project in the film's folder opened in After Effects: the one the user keeps, and no more reason to hold the work folder. -> "" or what went wrong"""
+    K = {"aep": str(aep).replace("\\", "/")}
+    res = small_jsx(work, "open", REOPEN_JSX, K, timeout=300, say=say)
+    if "ERROR" in res: return res.strip().splitlines()[-1][:200]
+    m = re.search(r"missing (\d+)", res)
+    if m and m[1] != "0": return f"{m[1]} footage item(s) not found"
+    res = small_jsx(work, "resave", RESAVE_JSX, K, timeout=120, say=say)
+    # a folder path past Windows' limit ("cannot find the path"): the project works; the next export says to save or close it
+    m = re.search(r"dirty true\s*(.*)", res)
+    if m: say(f"  note: After Effects could not save the finished project where it is ({re.sub(r'^.*warning:[ ]*', '', m[1]).strip() or 'no reason given'}). Save it from After Effects, or close it before the next export.")
+    return ""
+
+
+KEEP_WORK = ("port.json", "build.log", "build.out", "build.log.failed", "open.out")
+
+
+def clean_work(work, say=say):
+    """the work folder holds nothing the finished project needs: footage, sound and the .aep went to the film's folder (a 60 s film left 1.7 GB behind).
+    MW_AE_KEEP_WORK=1 keeps it for --rebuild."""
+    if os.environ.get("MW_AE_KEEP_WORK") == "1": return
+    for f in sorted(work.iterdir()):
+        if f.name in KEEP_WORK: continue
+        if f.is_dir(): shutil.rmtree(f, ignore_errors=True)
+        else:
+            try: f.unlink()
+            except OSError: pass
+
+
+def lost_note(sound_lost, sound_total, ae_lost, layers_total):
+    """the dialog's line when a layer did not make it, in plain words: how many of how many, which files. The whole list is in AE-PORT.md"""
+    gone = [x for x in sound_lost] + [x for x in ae_lost if x["sound"]]
+    pics = [x for x in ae_lost if not x["sound"]]
+    out = []
+    if gone:
+        files = sorted({x["file"] or x["name"] for x in gone})
+        out.append(f"{len(gone)} of {sound_total} sound layers are not in the project ({', '.join(files[:6])}{'…' if len(files) > 6 else ''}). Audio/mix.wav holds every sound that could be read")
+    if pics:
+        names = [x["name"] for x in pics]
+        out.append(f"{len(pics)} of {layers_total} layers are not in the project ({', '.join(names[:6])}{'…' if len(names) > 6 else ''})")
+    return "  note: " + ". ".join(out) + ". Why each one: AE-PORT.md."
+
+
+def carry(src, dst):
+    """a folder to the film's folder: moved when both sit on one disk (a second copy of 1.6 GB took as long as AE's build, and the disk held both), else copied"""
+    if not src.exists(): return
+    if not dst.exists():
+        try: os.replace(src, dst); return
+        except OSError: pass
+    shutil.copytree(src, dst, dirs_exist_ok=True)
 
 
 def _where(project):
@@ -1557,7 +1926,7 @@ def run(project, run_ae=False, check="", save=True, say=say, estimate_only=False
     webfonts(p)
     if rebuild:                                           # the AE step again from the saved recording: no new recording
         f = work / "rec.json.gz"
-        if not f.exists(): raise SystemExit(f"no saved recording in {work} (ports made before 07/10/2026 night have none): run the port again")
+        if not f.exists(): raise SystemExit(f"no saved recording in {work} (a finished export empties its work folder unless MW_AE_KEEP_WORK=1): run the port again")
         with gzip.open(f, "rt", encoding="utf-8") as fh: rec = json.load(fh)
         say(f"AE port of {film_name(p)}: rebuilt from the recording of {time.strftime('%d/%m %H:%M', time.localtime(f.stat().st_mtime))} (no new recording)")
     else:
@@ -1576,7 +1945,7 @@ def run(project, run_ae=False, check="", save=True, say=say, estimate_only=False
         B = Builder(rec, name, work); B.say = say; B._said = time.time()
         say(f"  keyframes: {len(rec['structure']['nodes'])} elements, every key fitted (a minute or more on a long film)")
     comps = B.build()
-    audio = audio_layers(p, film, work, rec.get("audio"), rec["info"]["duration"])
+    audio, sound = audio_layers(p, film, work, rec.get("audio"), rec["info"]["duration"])
     comps[-1]["layers"] += audio                          # the main comp; audio on top (no picture)
     aep = work / f"{name}.aep"
     data = {"root": name, "fps": FPS, "paths": PATH, "comps": comps, "base": str(work).replace("\\", "/") + "/",
@@ -1588,41 +1957,55 @@ def run(project, run_ae=False, check="", save=True, say=say, estimate_only=False
         D = rec["info"]["duration"]
         ts = [round(D * k, 2) for k in (0.25, 0.5, 0.85)] if check == "auto" else [float(x) for x in check.split(",") if x.strip()]
         for t in ts:
-            data["renders"].append({"comp": name, "t": t, "file": str(work / "check" / f"ae_{t:06.2f}.png").replace("\\", "/")})
+            data["renders"].append({"comp": name, "t": t, "file": str(work / "check" / f"ae_{t:07.3f}.png").replace("\\", "/")})
     (work / "port.json").write_text(json.dumps(data, ensure_ascii=False, indent=0), encoding="utf-8")
     rt = (HERE / "ae_runtime.jsx").read_text(encoding="utf-8")
     (work / "build.jsx").write_text("var DATA = " + json.dumps(data, ensure_ascii=False) + ";\n" + rt, encoding="utf-8")
-    report = [f"# AE port: {film_name(p)}", "", f"- built {time.strftime('%Y-%m-%d %H:%M')}, {len(comps)} comps ({B.stats['precomps']} of them precomps of "
-              "grouped layers, folder Precomps), " + f"{B.stats['layers']} layers, {B.stats['keys']} keys",
-              f"- pictures: {len(rec['pictures'])} (still PNG at 2x or PNG sequence, in footage/)", "- motion blur: switch on for moving layers, comp switch off (turn it on in the comp)"]
-    if audio: report.append(f"- audio: {len(audio)} layer(s) in the main comp (files copied to footage/audio/; volume and fades as Audio Levels); "
-                            "the whole mix and its stems: Audio/mix.wav + voice|music|sfx.wav next to it (older films: audio/mix.wav + "
-                            "audio/stems/), the film's loudness target")
-    report.append("")
-    if rec["page_errors"]: report.append(f"- page errors while recording: {rec['page_errors']}")
-    if B.notes: report += ["## Not ported / check", ""] + [f"- {x}" for x in sorted(B.notes)]
-    (work / "AE-PORT.md").write_text("\n".join(report) + "\n", encoding="utf-8")
+    report = lambda **kw: port_report(p, film_name(p), comps, B, len(rec["pictures"]), rec, audio, sound, **kw)
+    (work / "AE-PORT.md").write_text(report(), encoding="utf-8")
     say(f"  data: {len(comps)} comps ({B.stats['precomps']} precomps), {B.stats['layers']} layers, {B.stats['keys']} keys ({time.time() - t0:.1f} s) -> {work / 'build.jsx'}")
     for x in sorted(B.notes): say("  note: " + x)
-    if run_ae:
-        res = run_jsx(work / "build.jsx", work / "build.done", say=say)
-        if "ERROR" in res: return res
-        if check: compare(p, work, data["renders"], say, ref_dir)
-        if save and aep.exists():
-            dst = renders(p, "ae")                                    # <film>/05_AE (older films: renders/ae)
-            for f in [aep, work / "AE-PORT.md"]: shutil.copy2(f, dst / f.name)
-            if (work / "footage").exists(): shutil.copytree(work / "footage", dst / "footage", dirs_exist_ok=True)
-            if (work / "audio").exists():
-                if True:                                                  # Moworks Studio: <out>/Audio (mix.wav + stems)                               # 05_AE/Audio: mix.wav and the stems side by side
-                    (dst / "Audio").mkdir(exist_ok=True)
-                    new = {f.name: f for f in (work / "audio").rglob("*.wav")}
-                    for name, f in sorted(new.items()): shutil.copy2(f, dst / "Audio" / name)
-                    say(f"  audio: {dst / 'Audio'} (mix.wav + " + ", ".join(f.name for f in sorted((work / 'audio' / 'stems').glob('*.wav'))) + ")")
-                else:
-                    shutil.copytree(work / "audio", dst / "audio", dirs_exist_ok=True); say(f"  audio: {dst / 'audio' / 'mix.wav'} + stems")
-            say(f"  copied to {dst}")
+    if sound["converted"]:
+        kinds = sorted({Path(x).suffix.lower() for x in sound["converted"]})
+        say(f"  audio: {len(sound['converted'])} file(s) went in as WAV, After Effects does not import {', '.join(kinds)}")
+    if sound["plain"]: say(f"  note: {len(sound['plain'])} sound(s) play at another speed, in a loop or with effects in the film; After Effects and the stems have them plain: {', '.join(sound['plain'][:6])}")
+    if not run_ae:
+        if sound["lost"]: say(lost_note(sound["lost"], sound["clips"], [], len(comps)))
+        return work
+    res = run_jsx(work / "build.jsx", work / "build.done", say=say)
+    if "ERROR" in res:
         return res
-    return work
+    lost = ae_failures(work)
+    n_layers = sum(len(c["layers"]) for c in comps)
+    # the true counts, on the dialog (index.mjs: result.layers) and in AE-PORT.md
+    gone_sound = len(sound["lost"]) + sum(1 for x in lost if x["sound"])
+    say("AE-LAYERS " + json.dumps({"layers": n_layers - len(lost), "of": n_layers, "sound": sound["clips"] - gone_sound, "soundOf": sound["clips"], "converted": len(sound["converted"]),
+                                   "lost": [{k: x.get(k, "") for k in ("name", "file", "why")} for x in sound["lost"] + lost][:40]}, ensure_ascii=False))
+    if sound["lost"] or lost: say(lost_note(sound["lost"], sound["clips"], lost, n_layers))
+    checks = compare(p, work, data["renders"], say, ref_dir) if check else None
+    (work / "AE-PORT.md").write_text(report(lost=lost, made=True, checks=checks), encoding="utf-8")
+    if save and aep.exists():
+        dst = renders(p, "ae")                                    # <film>/05_AE (older films: renders/ae)
+        for f in [aep, work / "AE-PORT.md"]: shutil.copy2(f, dst / f.name)
+        # AE lets go of the project in the work folder before its footage moves: AE then opens the copy it hands over, the one its title bar should say (it said
+        # runtime/work), and finds the footage beside it: nothing in the work folder is linked any more
+        close_work_project(work, say)
+        carry(work / "footage", dst / "footage")
+        if (work / "audio").exists():                             # Moworks Studio: <out>/Audio (mix.wav + stems)
+            (dst / "Audio").mkdir(exist_ok=True)
+            new = {f.name: f for f in (work / "audio").rglob("*.wav")}
+            for fn, f in sorted(new.items()): shutil.copy2(f, dst / "Audio" / fn)
+            say(f"  audio: {dst / 'Audio'} (mix.wav + " + ", ".join(f.name for f in sorted((work / 'audio' / 'stems').glob('*.wav'))) + ")")
+        # the check frames of a shot that is off, side by side, for whoever looks at it
+        off = [c for c in checks or [] if c.get("diff") is not None and c["diff"] > 0.02 and c.get("file") and Path(c["file"]).exists()]
+        if off:
+            (dst / "check").mkdir(exist_ok=True)
+            for c in off: shutil.copy2(c["file"], dst / "check" / Path(c["file"]).name)
+        say(f"  copied to {dst}")
+        why = open_copy(dst / aep.name, work, say)
+        if why: say(f"  note: After Effects did not open the finished project by itself ({why}). Show in folder has it.")
+        clean_work(work, say)
+    return res
 
 
 FIX_JSX = r"""(function () {
@@ -1701,13 +2084,29 @@ def run_jsx(jsx, done, timeout=3600, say=say):
     return out
 
 
+def settled(f, tries=60):
+    """the frame AE wrote, read whole: AE writes its check frames after its script has ended, so one that exists may still be half written (with a frame a shot: "image file is
+    truncated" on the 13th). None when it stays unreadable."""
+    from PIL import Image
+    for _ in range(tries):
+        try:
+            with Image.open(f) as im: return im.convert("RGB")
+        except (OSError, SyntaxError): time.sleep(0.5)
+    return None
+
+
 def compare(p, work, renders, say=say, ref_dir=None):
     """HF's frame (hyperframes snapshot --at: ref_dir/frame-NN-at-<t>s.png, made by the app) vs AE's frame, side by side.
-    Moworks Studio: the reference is HF's own still, not the recorder's browser (kit: its own driver, which drew HF blocks blank)."""
+    Moworks Studio: the reference is HF's own still, not the recorder's browser (kit: its own driver, which drew HF blocks blank).
+    -> [{t, diff, file}], diff None for a frame that could not be compared"""
     from PIL import Image
     import numpy as np
-    for _ in range(120):
-        if all(Path(r["file"]).exists() for r in renders): break
+    # a frame a shot now: AE writes them after its script ends, so the wait runs from the last one written, not from the start
+    seen, since = -1, time.time()
+    while time.time() - since < 60:
+        got = sum(1 for r in renders if Path(r["file"]).exists())
+        if got == len(renders): break
+        if got != seen: seen, since = got, time.time()
         time.sleep(0.5)
     refs = {}
     for f in (Path(ref_dir).glob("frame-*-at-*s.png") if ref_dir else []):
@@ -1719,10 +2118,12 @@ def compare(p, work, renders, say=say, ref_dir=None):
         # rounding both to 2 decimals split them (5.50 vs 5.51: "missing frame")
         near = min(refs, key=lambda t: abs(t - r["t"]), default=None)
         a = refs[near] if near is not None and abs(near - r["t"]) < 0.005 else None; b = Path(r["file"])
-        if not (a and a.exists() and b.exists()): say(f"  check {r['t']}: missing frame"); continue
-        A = Image.open(a).convert("RGB"); Bm = Image.open(b).convert("RGB").resize(A.size)
+        Bm = settled(b) if a and a.exists() and b.exists() else None
+        if Bm is None:
+            say(f"  check {r['t']}: missing frame"); out.append({"t": r["t"], "diff": None}); continue
+        A = Image.open(a).convert("RGB"); Bm = Bm.resize(A.size)
         sbs = Image.new("RGB", (A.width * 2 + 10, A.height), "white"); sbs.paste(A, (0, 0)); sbs.paste(Bm, (A.width + 10, 0))
-        sbs.thumbnail((1920, 1080)); f = work / "check" / f"cmp_{r['t']:06.2f}.png"; sbs.save(f)
+        sbs.thumbnail((1920, 1080)); f = work / "check" / f"cmp_{r['t']:07.3f}.png"; sbs.save(f)
         d = float((np.abs(np.asarray(A).astype(int) - np.asarray(Bm).astype(int)).max(axis=2) > 40).mean())
         say(f"  check {r['t']} s: {d:.2%} of pixels differ by more than 40/255 -> {f}")
         out.append({"t": r["t"], "diff": round(d, 5), "file": str(f)})

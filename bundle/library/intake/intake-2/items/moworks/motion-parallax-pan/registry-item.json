@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-parallax-pan",
+  "type": "hyperframes:component",
+  "title": "Parallax Inspector",
+  "description": "Máy quay lia qua lại sang hai bên, lớp nền chỉ dịch một phần tư, lớp nội dung hơn một nửa, lớp giao diện trên cùng dịch đủ, tạo chiều sâu.",
+  "tags": [
+    "parallax",
+    "pan",
+    "layers",
+    "depth",
+    "spatial-ui-depth",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-parallax-pan.html",
+      "target": "compositions/components/motion-parallax-pan.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-parallax-pan",
+    "author": "moworks",
+    "call": "MW.motionParallaxPan(q(\".pp\"), tl, 0, {});",
+    "function": "MW.motionParallaxPan",
+    "options": {
+      "keys": "[[s, x px], ...] of the swing (±238: 44 of 320 × 5.4), eased in-out per move",
+      "factors": "by data-depth (0.25 / 0.6 / 1)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Three layers BG / CONTENT / UI move ×0.25 / ×0.6 / ×1 of a sideways swing: 0 → +44 px (0.35-1.05 s), hold, → −44 px (1.85-2.75 s), hold, → 0 (3.45-4.15 s), power2.inOut (700-900 ms per move). BG = picture card 188x104, CONTENT = text card 160x84, UI = accent panel 120x64; dashed outlines mark rest positions; a bar readout per layer (optional). Params: swing (±44 px) · factors ([0.25, 0.6, 1]) · moves (0.7-0.9 s, power2.inOut) · holds.",
+    "titleVi": "Lia ngang có thị sai ba lớp"
+  }
+}

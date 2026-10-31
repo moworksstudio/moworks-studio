@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/transition-focus-portal",
+  "hash": "cf2cade06a4b5c09",
+  "at": "2026-10-17T08:01:32.376Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__transition-focus-portal.mp4",
+    "poster": "previews/moworks__transition-focus-portal.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6cb0f3476ca6d8eba1e4bb18f86389b26c1f97bb602cd5b8a5a4dcc0188252c3",
+    "size": 20109,
+    "seconds": 35.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

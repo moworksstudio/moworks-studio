@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-highlight-sweep",
+  "hash": "a990f6133d611e04",
+  "at": "2026-10-17T07:36:03.002Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__effect-highlight-sweep.mp4",
+    "poster": "previews/moworks__effect-highlight-sweep.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "290dd9af58e2dd589d9a2eefc2babb789ec500d966f18cce11657a96fba358f5",
+    "size": 8285,
+    "seconds": 46,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

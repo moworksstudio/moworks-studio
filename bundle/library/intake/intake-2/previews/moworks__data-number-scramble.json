@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/data-number-scramble",
+  "hash": "c4d265fb94610276",
+  "at": "2026-10-17T08:12:01.966Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__data-number-scramble.mp4",
+    "poster": "previews/moworks__data-number-scramble.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4e1d15c97ae4e1c1180ef6d2630fd13a648161210ff0ddd641c4cf079be886e7",
+    "size": 16633,
+    "seconds": 26.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

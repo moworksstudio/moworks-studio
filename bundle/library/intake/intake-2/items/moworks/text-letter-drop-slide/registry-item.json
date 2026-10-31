@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-letter-drop-slide",
+  "type": "hyperframes:component",
+  "title": "Horizontal Scroll Letter Drop",
+  "description": "Tiêu đề trượt vào từ bên phải trong khi từng chữ cái rơi từ trên cao xuống, to gấp ba rồi thu về đúng cỡ và nảy nhẹ khi chạm dòng.",
+  "tags": [
+    "letters",
+    "drop",
+    "scale",
+    "slide",
+    "text-scroll",
+    "bouncy",
+    "heavy",
+    "scroll"
+  ],
+  "files": [
+    {
+      "path": "text-letter-drop-slide.html",
+      "target": "compositions/components/text-letter-drop-slide.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-letter-drop-slide",
+    "author": "moworks",
+    "call": "MW.textLetterDropSlide(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textLetterDropSlide",
+    "options": {
+      "drop": "em each letter falls (2.9)",
+      "gap": "px beyond its width the title slides in from (200)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Codrops (MIT); a faithful port of Codrops' effects is in the Codrops collection"
+    },
+    "thirdParty": [],
+    "notes": "Progress p 0 → 1 over 0.3–2.3 s, cubic-bezier(.3,0,.5,1), back 3.1–3.7 s. Title shifts in from the right by its width + 40 px, linear in p, done at p = 0.7. Letter i: q = (p − 0.12 − i × each) / 0.45, each = min(0.05, 0.4 / (n − 1)) of p; b = back.out(2)(q): y −2.9 em × (1 − b) (demo 180 px at 62 px; recipe yPercent −900), scale 3 → 1 by b (min 0.2), origin baseline; opacity reaches 1 at q = 0.25. Loop 4 s. Params: quãng rơi (2.9 em) · tỉ lệ đầu (3) · độ nảy (back 2) · lệch mỗi chữ (0.05 tiến độ).",
+    "titleVi": "Tiêu đề trượt ngang, chữ rơi xuống"
+  }
+}

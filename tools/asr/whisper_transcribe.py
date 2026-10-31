@@ -22,6 +22,11 @@ def emit(obj):
     sys.stdout.flush()
 
 
+def made_up_tail(words):
+    # Whisper repeating its last line over the silent tail: at least half the words take no time at all (Test 28: 20 words, each 0 s long)
+    return bool(words) and sum(1 for w in words if w["end"] <= w["start"]) * 2 >= len(words)
+
+
 def load(model_dir, device):
     # NVIDIA's CUDA libraries the app installed (packages/voice/cuda.mjs): their DLL folders, for CTranslate2 to find cuBLAS and cuDNN
     for d in os.environ.get("MW_CUDA_DLLS", "").split(os.pathsep):
@@ -122,9 +127,11 @@ def main():
         # the silent tail of a voice-over: Whisper's stock lines and lines timed past the end of the file are made up
         if STOCK.search(s.text) or s.start >= info.duration - 0.05:
             continue
-        n += 1
         words = [{"text": w.word.strip(), "start": round(w.start, 3), "end": round(w.end, 3), "p": round(w.probability, 3)}
                  for w in (s.words or []) if w.word.strip()]
+        if made_up_tail(words):
+            continue
+        n += 1
         emit({"type": "segment", "start": round(s.start, 3), "end": round(s.end, 3), "text": s.text.strip(), "words": words})
     emit({"type": "done", "segments": n})
 

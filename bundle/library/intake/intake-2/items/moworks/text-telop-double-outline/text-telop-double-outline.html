@@ -1,0 +1,56 @@
+<!--
+  Pop-In Double-Outline Telop (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Chữ telop kiểu truyền hình Nhật: ruột vàng, viền trong trắng, viền ngoài màu và bóng cứng, bật từ 0 lên 110 % rồi về 100 % trong sáu khung.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textTelopDoubleOutline(q(".td"), tl, 0.35, {});
+
+  Options (defaults in brackets):
+      - inner: em of light outline (0.18)
+      - outer: em of coloured outline (0.34)
+      - offset: em of the hard shadow (0.05)
+      - fill: 
+      - light: 
+      - accent: outer outline
+      - shadow: 
+      - offAt: s after the start it cuts off (1.95)
+
+  Notes: Heavy gothic (weight 900, spacing 0.03 em), yellow fill; strokes drawn outside-in: dark copy of the outer stroke offset (3, 3) px as a hard shadow, accent outer stroke 0.34 em wide, light inner stroke 0.18 em wide, then the fill. Scale keys 0 (0.35 s) → 1.1 (+4 frames at 30 fps) → 1.0 (+6 frames), power1.out between keys; SFX on the first frame. Cut off at 2.3 s. Loop 2.6 s. Params: bật (0 → 110 → 100 %, 6 khung ở 30 fps) · viền trong (0.18 em) · viền ngoài (0.34 em) · bóng (3 px). 0 → 110 % in 4 frames and back to 100 % in 6 (30 fps), power1.out between the keys; cut, not faded.
+-->
+
+<div class="ft"></div><div class="st"><div class="td">Thật luôn hả?!</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"inner":0.18,"outer":0.34,"offset":0.05,"fill":"#ffe14d","light":"#ffffff","accent":"#ff4f8b","shadow":"#1b1030","offAt":1.95};
+  var run = function (el, tl, at, o) {
+        var txt = el.textContent, p1 = gsap.parseEase("power1.out"); el.textContent = ""; if (getComputedStyle(el).position === "static") el.style.position = "relative"; el.style.display = "inline-block";
+        [[o.outer * 2, o.shadow, o.shadow, o.offset], [o.outer * 2, o.accent, o.accent, 0], [o.inner * 2, o.light, o.fill, 0]].forEach(function (s, i) { var sp = document.createElement("span"); sp.textContent = txt; sp.style.cssText = "display:block;white-space:nowrap;" + (i ? "position:absolute;left:0;top:0;" : "") + "-webkit-text-stroke:" + s[0] + "em " + s[1] + ";paint-order:stroke fill;color:" + s[2] + ";" + (s[3] ? "transform:translate(" + s[3] + "em," + s[3] + "em);" : ""); el.appendChild(sp); });
+        var a = 4 / 30, b = a + 6 / 30;
+        return MW.drive(tl, at, o.offAt + 0.05, function (t) {
+          var s = t <= 0 ? 0 : t < a ? 1.1 * p1(t / a) : t < b ? 1.1 - 0.1 * p1((t - a) / (b - a)) : 1; gsap.set(el, { scale: s }); el.style.visibility = t > 0 && t < o.offAt ? "visible" : "hidden";
+        });
+      };
+  MW.textTelopDoubleOutline = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-hard-cut",
+  "type": "hyperframes:component",
+  "title": "Hard Cut",
+  "description": "Cảnh mới hiện trọn ngay khung đầu tiên sau điểm cắt, không có khung chuyển tiếp, cắt đúng phách nhạc.",
+  "tags": [
+    "cut",
+    "beat",
+    "edit",
+    "transitions",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "transition-hard-cut.html",
+      "target": "compositions/components/transition-hard-cut.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/transition-hard-cut",
+    "author": "moworks",
+    "call": "MW.transitionHardCut(q(\".tk-b\"), tl, 1.5, {});",
+    "function": "MW.transitionHardCut",
+    "options": {
+      "from": "the outgoing scene (the previous sibling)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "No interpolation: the outgoing scene shows until the cut frame and the incoming scene is 100 % complete on the next frame (nothing assembles late, or it reads as loading). Cut on a beat or a word; shift the composition's weight across the cut. Demo: scene A (dark card, circle + 'A') <-> scene B (accent, square + 'B'), cut halfway through each 1.5 s half. Params: cut: điểm cắt (phách / từ) · không có duration.",
+    "titleVi": "Cắt thẳng đúng phách"
+  }
+}

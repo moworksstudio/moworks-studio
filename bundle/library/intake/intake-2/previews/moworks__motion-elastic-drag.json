@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-elastic-drag",
+  "hash": "7e2465b5090bd658",
+  "at": "2026-10-17T09:51:42.502Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-elastic-drag.mp4",
+    "poster": "previews/moworks__motion-elastic-drag.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "58e477cecac19c7bd8f5355c01526d92ba1fbbff535d3d672e19ac121110b5ea",
+    "size": 10106,
+    "seconds": 22.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

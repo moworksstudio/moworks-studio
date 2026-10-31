@@ -6,7 +6,10 @@ frames from artboards or top-level groups, text layers with their fonts, layer e
   python intake.py psd <file.psd|psb> <out> [--width 1600]          tree, composite, one picture per artboard / group frame, texts, fonts
   python intake.py psd-export <file> <out> --frame <name> [--width 1920]   one frame's visible layers as PNGs + layout.json (keep design)
   python intake.py pptx <file.pptx> <out>                           slides: texts, notes, layout, pictures (slide pictures: PowerPoint, by the app)
-  python intake.py pdf <file.pdf|ai> <out> [--width 1200] [--max 40]  pages as pictures + their text (pypdfium2)
+  python intake.py pdf <file.pdf|ai> <out> [--width 1200] [--logo]  the whole document (pypdfium2), for a film's files and a Brand Kit alike: every page's text in
+                                                                    TEXT-NN.md, every page as a picture (pages/) and on numbered contact sheets (sheet-NN.jpg);
+                                                                    --logo: page 1 on no ground (logo.png)
+  python intake.py sheet <list.txt> <out>                           pictures named one a line, on contact sheets (sheet-NN.jpg)
   python intake.py music <file> <out>                               length, tempo, beats, the loudest passages (librosa)
 
 Libraries (pinned in config/pins.json python.intake, installed as the app's components): psd-tools (MIT), python-pptx (MIT),
@@ -193,27 +196,117 @@ def pptx_scan(file, out):
 
 
 # ---- PDF (and Illustrator files saved with PDF content) -------------------------------------------------------------------------------------
-def pdf_scan(file, out, width, most):
+PASSWORD = "has a password: use a copy without one"
+
+def _open_pdf(file):
+    """The document, or a clear answer for one that asks for a password (pdfium opens a file with only an owner password as it is; only a
+    password needed to open it stops here)."""
     try: import pypdfium2 as pdfium
     except Exception: fail("pypdfium2 is not installed (an app component: Settings > Health)")
-    pdf = pdfium.PdfDocument(file)
+    try: return pdfium.PdfDocument(file)
+    except Exception as e:
+        if "password" in str(e).lower(): done({"ok": False, "password": True, "error": PASSWORD})
+        raise
+
+# What Claude's Read takes in one go: about 25,000 tokens, 2,000 lines, 2,000 characters a line. A part stays well under all three, for
+# text in any language (Vietnamese and Korean run near 2 characters a token).
+TEXT_PART, TEXT_LINES, TEXT_LINE = 30000, 1500, 1800
+SHEET_W, SHEET_MANY = 1568, 320          # the long edge Claude reads an image at, unscaled; past SHEET_MANY pages, 36 to a sheet
+
+def _clean(t): return re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f￾￿]", "", str(t).replace("\r\n", "\n").replace("\r", "\n")).strip()
+
+def _text_parts(title, blocks, out):
+    """Every block whole, across TEXT-NN.md files a single Read takes entire (a long line is wrapped, never cut)."""
+    parts, cur, size, lines = [], [], 0, 0
+    def flush():
+        nonlocal cur, size, lines
+        if cur: parts.append(cur)
+        cur, size, lines = [], 0, 0
+    for head, text in blocks:
+        rows = [head, ""]
+        for row in (text or "(no text: a picture page)").split("\n"):
+            rows += [row[i:i + TEXT_LINE] for i in range(0, len(row), TEXT_LINE)] or [""]
+        rows.append("")
+        for row in rows:
+            if size + len(row) + 1 > TEXT_PART or lines + 1 > TEXT_LINES: flush()
+            cur.append(row); size += len(row) + 1; lines += 1
+    flush()
+    names = []
+    for i, rows in enumerate(parts, 1):
+        name = f"TEXT-{i:02d}.md"
+        (out / name).write_text("\n".join([f"# {title}: its text, part {i} of {len(parts)}", ""] + rows) + "\n", encoding="utf-8", errors="replace")
+        names.append(name)
+    return names
+
+def _sheets(items, out, per=16):
+    """Pictures (path, label) on contact sheets, per to a sheet, each with its label; returns the sheets' names. The width is what Claude
+    reads an image at, so a sheet costs its pixels / 750 tokens: about 1,800 for 16 pages of 16:9."""
+    from PIL import Image, ImageDraw, ImageFont
+    cols = 4 if per <= 16 else 6
+    cell = SHEET_W // cols
+    try: font = ImageFont.load_default(size=16 if cols == 4 else 13)
+    except Exception: font = ImageFont.load_default()
+    names = []
+    for s in range(0, len(items), per):
+        shots = []
+        for path, label in items[s:s + per]:
+            try:
+                with Image.open(path) as im:
+                    im.load()
+                    # a picture with no ground is seen on mid grey, so a white logo and a black logo both show
+                    if im.mode in ("RGBA", "LA", "P"):
+                        rgba = im.convert("RGBA"); pic = Image.new("RGB", rgba.size, (128, 128, 128)); pic.paste(rgba, mask=rgba.getchannel("A"))
+                    else: pic = im.convert("RGB")
+            except Exception: pic = Image.new("RGB", (cell, cell // 2), (32, 32, 32))
+            pic.thumbnail((cell - 4, round(cell * 1.42)), Image.LANCZOS)
+            shots.append((pic, label))
+        tall = max(p.height for p, _ in shots)
+        rows = (len(shots) + cols - 1) // cols
+        sheet = Image.new("RGB", (cell * cols, (tall + 4) * rows), (24, 24, 24))
+        draw = ImageDraw.Draw(sheet)
+        for i, (pic, label) in enumerate(shots):
+            x, y = (i % cols) * cell + 2, (i // cols) * (tall + 4) + 2
+            sheet.paste(pic, (x, y))
+            box = draw.textbbox((x + 3, y + 2), label, font=font)
+            draw.rectangle((box[0] - 3, box[1] - 2, box[2] + 3, box[3] + 2), fill=(0, 0, 0))
+            draw.text((x + 3, y + 2), label, fill=(255, 255, 255), font=font)
+        name = f"sheet-{s // per + 1:02d}.jpg"
+        sheet.save(out / name, quality=80)
+        names.append(name)
+    return names
+
+def pdf_whole(file, out, width, logo):
+    """A guideline, whole: a page limit would drop what it says after page 40, and one picture a page would cost more than its text. Every
+    page's text goes in TEXT-NN.md; every page is on a numbered contact sheet, to see its colours, type and layout; every page also waits
+    as a picture (pages/), which costs nothing until Claude opens one for a closer look."""
+    pdf = _open_pdf(file)
     n = len(pdf)
-    pages = []
-    for i in range(min(n, most)):
+    (out / "pages").mkdir(exist_ok=True)
+    blocks, items, chars = [], [], 0
+    for i in range(n):
         page = pdf[i]
-        w, h = page.get_size()
-        img = page.render(scale=max(0.1, width / w)).to_pil()
-        name = f"page-{i + 1:03d}.png"
-        img.save(out / name)
-        try: text = page.get_textpage().get_text_range().strip()
+        w, _ = page.get_size()
+        name = f"pages/page-{i + 1:03d}.jpg"
+        page.render(scale=max(0.1, width / w)).to_pil().convert("RGB").save(out / name, quality=82)
+        items.append((out / name, str(i + 1)))
+        try: text = _clean(page.get_textpage().get_text_range())
         except Exception: text = ""
-        pages.append({"page": i + 1, "file": name, "size": [round(w), round(h)], "text": text[:4000]})
-    md = [f"# {Path(file).name}", "", f"{n} page(s)" + (f"; the first {most} as pictures" if n > most else "") + ".", ""]
-    for p in pages:
-        md += [f"## Page {p['page']}: `{p['file']}`", "", p["text"][:1500] or "(no text: a picture page)", ""]
-    (out / "PDF.md").write_text("\n".join(md) + "\n", encoding="utf-8")
-    (out / "pdf.json").write_text(json.dumps({"pages": n, "shown": pages}, ensure_ascii=False, indent=1), encoding="utf-8")
-    done({"ok": True, "kind": "pdf", "pages": n, "pictures": len(pages), "md": "PDF.md"})
+        chars += len(text)
+        blocks.append((f"## Page {i + 1}", text))
+    logo_file = None
+    if logo and n:
+        page = pdf[0]
+        w, h = page.get_size()
+        img = page.render(scale=max(0.1, 2000 / max(w, h)), fill_color=(0, 0, 0, 0)).to_pil().convert("RGBA")
+        box = img.getchannel("A").getbbox()
+        if box: img.crop(box).save(out / "logo.png"); logo_file = "logo.png"
+    done({"ok": True, "kind": "pdf", "pages": n, "chars": chars, "text": _text_parts(Path(file).name, blocks, out),
+          "sheets": _sheets(items, out, 16 if n <= SHEET_MANY else 36), "logo": logo_file})
+
+def sheets_of(listing, out):
+    """Pictures named one a line, on contact sheets labelled with their names."""
+    paths = [l.strip() for l in Path(listing).read_text(encoding="utf-8").splitlines() if l.strip()]
+    done({"ok": True, "kind": "sheet", "pictures": len(paths), "sheets": _sheets([(p, Path(p).name[:34]) for p in paths], out)})
 
 
 # ---- Music -----------------------------------------------------------------------------------------------------------------------------------
@@ -257,7 +350,8 @@ if __name__ == "__main__":
         if cmd == "psd": psd_scan(file, out, int(arg("--width", 1600)))
         elif cmd == "psd-export": psd_export(file, out, arg("--frame", ""), int(arg("--width", 1920)))
         elif cmd == "pptx": pptx_scan(file, out)
-        elif cmd == "pdf": pdf_scan(file, out, int(arg("--width", 1200)), int(arg("--max", 40)))
+        elif cmd == "pdf": pdf_whole(file, out, int(arg("--width", 1200)), "--logo" in sys.argv)
+        elif cmd == "sheet": sheets_of(file, out)
         elif cmd == "music": music_scan(file, out)
         elif cmd == "zip": zip_list(file, out)
         else: fail(f"unknown command {cmd}")

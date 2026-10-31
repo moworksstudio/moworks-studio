@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/lower-side-super",
+  "hash": "7478ad0ccd03efee",
+  "at": "2026-10-17T10:12:36.949Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__lower-side-super.mp4",
+    "poster": "previews/moworks__lower-side-super.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "5c3710b32237f8aae85f380bcee317b6a08c357f1f3cb3dbfe157b726c5ff4a7",
+    "size": 14770,
+    "seconds": 28.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

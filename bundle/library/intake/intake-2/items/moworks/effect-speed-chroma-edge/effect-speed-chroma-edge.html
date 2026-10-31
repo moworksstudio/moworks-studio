@@ -1,0 +1,82 @@
+<!--
+  Chromatic Glass Edge (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Thẻ kính trượt qua lại, khi chạy nhanh viền tách thành hai bản vàng và xanh lệch nhau theo hướng chạy (tối đa 6 px), dừng lại thì khớp về viền màu nhấn.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectSpeedChromaEdge(q(".gm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - max: units of split at full speed (6)
+      - speed: units a second for the full split (230)
+      - colors: [yellow, blue] outlines, added
+      - title: 
+      - accent: outline at rest
+      - loop: s (3.6)
+
+  Notes: Card 112x80 r14 (60 % opaque) moves x 104 → 216 (0.4-1.3 s power2.inOut) and back (2.3-3.2 s). Two outline copies (yellow, blue, 2 px, additive) shift by −/+ offset where offset = 6 px × clamp(speed / 230 px/s) in the travel direction; the normal accent outline fades out as the offset passes 3 px. 0 px at rest. Background vertical bars show through. Params: max (6 px) · speed (230 px/s cho đủ lệch) · colors (vàng / xanh, cộng sáng) · path.
+-->
+
+<div class="gm"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  MW.span = MW.span || function (t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); };
+  MW.yAt = MW.yAt || function (pts, x) { if (x <= pts[0][0]) return pts[0][1]; for (var i = 1; i < pts.length; i++) if (x <= pts[i][0]) { var u = (x - pts[i - 1][0]) / ((pts[i][0] - pts[i - 1][0]) || 1); return pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * u; } return pts[pts.length - 1][1]; };
+  MW.polyToX = MW.polyToX || function (c, pts, x) { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) { if (pts[i][0] <= x) c.lineTo(pts[i][0], pts[i][1]); else { c.lineTo(x, MW.yAt(pts, x)); break; } } return [Math.min(x, pts[pts.length - 1][0]), MW.yAt(pts, Math.min(x, pts[pts.length - 1][0]))]; };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"max":6,"speed":230,"colors":["#ffd23d","#3d9bff"],"title":"Kính màu","accent":"#8b7bff","loop":3.6};
+  var run = function (el, tl, at, o) {
+        var S = MW.stage320(el), c = S.ctx, io = gsap.parseEase("power2.inOut"), X = function (t) { return 104 + 112 * (io(MW.span(t, 0.4, 1.3)) - io(MW.span(t, 2.3, 3.2))); };
+        return MW.drive(tl, at, o.loop, function (t) {
+          S.clear(); for (var i = 0; i < 14; i++) { c.fillStyle = i % 2 ? "#1b2130" : "#2a2350"; c.fillRect(20 + i * 20, 30, 10, 140); }
+          var x = X(t), v = (X(t + 0.01) - X(t - 0.01)) / 0.02, off = o.max * Math.min(1, Math.abs(v) / o.speed) * Math.sign(v), L = x - 56, Tp = 60;
+          MW.rr(c, L, Tp, 112, 80, 14); c.fillStyle = "rgba(21,26,36,0.6)"; c.fill(); MW.txt(c, o.title, L + 14, Tp + 22, 10, "#e8ebf3", 800, "left"); c.fillStyle = "#3a4466"; MW.rr(c, L + 14, Tp + 38, 70, 5, 2.5); c.fill(); MW.rr(c, L + 14, Tp + 50, 50, 5, 2.5); c.fill();
+          c.save(); c.globalCompositeOperation = "lighter"; c.lineWidth = 2; c.strokeStyle = o.colors[0]; MW.rr(c, L - off, Tp, 112, 80, 14); c.stroke(); c.strokeStyle = o.colors[1]; MW.rr(c, L + off, Tp, 112, 80, 14); c.stroke(); c.restore();
+          c.globalAlpha = Math.max(0, 1 - Math.abs(off) / 3); c.strokeStyle = o.accent; c.lineWidth = 2; MW.rr(c, L, Tp, 112, 80, 14); c.stroke(); c.globalAlpha = 1;
+        });
+      };
+  MW.effectSpeedChromaEdge = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

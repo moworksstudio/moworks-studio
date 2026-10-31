@@ -735,6 +735,14 @@ details.diag pre { white-space: pre-wrap; overflow-wrap: anywhere; background: v
 .lk-up .bar { height: 4px; border-radius: var(--r-pill); background: var(--surface-3); overflow: hidden; }
 .lk-up .bar span { display: block; height: 100%; background: var(--accent); transform-origin: left; transition: transform 200ms var(--ease-out); }
 .lk-stage { margin: 0; display: flex; align-items: center; gap: 0.5rem; font-size: var(--fs-meta); color: var(--text-secondary); }
+/* what a kit could not read: inside the warning, the names in the text's own colour so they read first, the reason under each */
+.lk-unread-in { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+.lk-unread-t { margin: 0; font-weight: 600; }
+.lk-unread ul { margin: 0; width: 100%; display: flex; flex-direction: column; gap: 0.35rem; max-height: 12rem; overflow-y: auto; }
+.lk-unread li { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 0.4rem; align-items: start; }
+.lk-unread .nm { min-width: 0; overflow-wrap: anywhere; color: var(--text-primary); }
+.lk-unread .why { grid-column: 1; grid-row: 2; }
+.lk-unread li .btn { grid-column: 2; grid-row: 1 / span 2; }
 @media (prefers-reduced-motion: reduce) { .lk-up .bar span { transition: none; } }
 /* Characters: the Look page's layout; the showreel and the two sheets in the panel */
 .ch-reel video { width: 100%; height: 100%; object-fit: contain; display: block; background: var(--surface-2); }
@@ -1066,7 +1074,6 @@ input[inputmode="numeric"], .num, time, .pager-count, .pager-nums { font-variant
 .set-line .status { display: inline-flex; align-items: center; gap: 0.3rem; }
 .set-foot { margin: var(--sp-2) 0 0; }
 .set-foot .clink { display: inline-flex; align-items: center; gap: 0.3rem; }
-.set-lead { margin: 0 0 var(--sp-3); }
 .key-rows { display: flex; flex-direction: column; }
 .key-row-wrap + .key-row-wrap { border-top: 1px solid var(--border); }
 .key-row { padding: var(--sp-2) 0; }

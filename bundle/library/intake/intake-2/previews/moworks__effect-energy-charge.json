@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-energy-charge",
+  "hash": "2274a01557546b6d",
+  "at": "2026-10-17T08:34:46.855Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__effect-energy-charge.mp4",
+    "poster": "previews/moworks__effect-energy-charge.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "36897c26cdded268944226a3556f1b81f45002a981ec7d6318e3bb30ea37e113",
+    "size": 34504,
+    "seconds": 24.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

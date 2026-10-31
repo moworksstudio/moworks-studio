@@ -1,0 +1,56 @@
+<!--
+  Shrink Fade Exit (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Ô biểu tượng thu về 22 %, nhoè 3 px và mờ hẳn, để lại một chấm nhỏ ở chỗ biến mất.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionShrinkFadeExit(q(".sf"), tl, 0.5, { returnAt: 1.6 });
+
+  Options (defaults in brackets):
+      - to: end scale (0.22)
+      - blur: px (9)
+      - duration: s (0.52, power2.in)
+      - dot: px mark at the vanishing point (10)
+      - accent: 
+      - returnAt: s after the start to come back (null)
+
+  Notes: Icon tile scales 1 → 0.22 about its centre, opacity 1 → 0 and blur 0 → 3 px, together in 520 ms power2.in (easeInCubic); a 2.5 px dot marks the vanishing point for the last quarter and ~0.5 s after. Return: 0.9 → 1 with fade-in, 400 ms power2.out. Params: duration (0.52 s) · scale (0.22) · blur (3 px) · ease (power2.in).
+-->
+
+<div class="st"><div class="sf"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3" fill="#fff"/><path d="M3 7 L12 13 L21 7" fill="none" stroke="#1580b8" stroke-width="2"/></svg></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"to":0.22,"blur":9,"duration":0.52,"dot":10,"accent":"#a99bff","returnAt":null};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var ghost = function () { var g = el.cloneNode(true); g.removeAttribute("id"); g.style.position = "absolute"; g.style.margin = "0"; g.style.pointerEvents = "none"; g.style.opacity = "0"; g.style.left = el.offsetLeft + "px"; g.style.top = el.offsetTop + "px"; g.style.width = el.offsetWidth + "px"; g.style.height = el.offsetHeight + "px"; host.insertBefore(g, el); return g; };
+  var add = function (css) { var d = document.createElement("div"); d.style.cssText = "position:absolute;pointer-events:none;" + css; host.appendChild(d); return d; };
+  var cx0 = el.offsetLeft + el.offsetWidth / 2, cy0 = el.offsetTop + el.offsetHeight / 2;
+  var pin = gsap.parseEase("power2.in"), p2 = gsap.parseEase("power2.out"), dot = add("width:" + o.dot + "px;height:" + o.dot + "px;margin:-" + o.dot / 2 + "px 0 0 -" + o.dot / 2 + "px;border-radius:50%;background:" + o.accent + ";left:" + cx0 + "px;top:" + cy0 + "px;opacity:0;");
+  return MW.drive(tl, at, o.returnAt == null ? o.duration + 0.5 : o.returnAt + 0.4, function (t) { var u = pin(Math.min(1, t / o.duration)), s = 1 - (1 - o.to) * u, a = 1 - u, b = o.blur * u; if (o.returnAt != null && t > o.returnAt) { var r = p2(Math.min(1, (t - o.returnAt) / 0.4)); s = 0.9 + 0.1 * r; a = r; b = 0; }
+    gsap.set(el, { scale: s }); el.style.opacity = String(a); el.style.filter = b > 0.01 ? "blur(" + b.toFixed(2) + "px)" : ""; var dv = t > o.duration * 0.75 && t < o.duration + 0.5 && (o.returnAt == null || t < o.returnAt); dot.style.opacity = dv ? "1" : "0"; });
+  };
+  MW.motionShrinkFadeExit = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

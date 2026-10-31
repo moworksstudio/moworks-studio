@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-weight-wave-loop",
+  "type": "hyperframes:component",
+  "title": "Variable Weight Wave",
+  "description": "Một đỉnh sóng độ đậm chạy dọc dòng chữ lặp đi lặp lại, ký tự nào sóng đi qua thì phình đậm rồi mảnh lại.",
+  "tags": [
+    "variable-font",
+    "weight",
+    "wave",
+    "loop",
+    "text-variable-fonts",
+    "smooth",
+    "soft",
+    "variable-fonts"
+  ],
+  "files": [
+    {
+      "path": "text-weight-wave-loop.html",
+      "target": "compositions/components/text-weight-wave-loop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-weight-wave-loop",
+    "author": "moworks",
+    "call": "MW.textWeightWaveLoop(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textWeightWaveLoop",
+    "options": {
+      "from": "wght (200)",
+      "to": "wght (900)",
+      "period": "s a wave (1.6)",
+      "stagger": "s per letter (0.08)",
+      "sharp": "power that narrows the crest (5; 1 = a plain cosine)",
+      "tint": "accent at the crest (0.85)",
+      "base": "",
+      "accent": "",
+      "loop": "s (3.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after splitting.js"
+    },
+    "thirdParty": [],
+    "notes": "Split chars; each char's wght cycles 200 → 900 → 200 every 1.6 s (peak at 50 %), char i delayed 80 ms, so a crest runs left → right and repeats (CSS ease-in-out keyframes; GSAP 0.8 s sine.inOut yoyo). The demo sharpens the crest: wght = 200 + 700 × ((1 − cos)/2)^5, and tints chars accent with the crest (up to 85 %); loop 3.2 s (two waves). Params: from, to: độ đậm (200 → 900) · period: mỗi sóng (1.6 s) · stagger (0.08 s).",
+    "titleVi": "Sóng độ đậm chạy lặp dọc dòng chữ"
+  }
+}

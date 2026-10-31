@@ -1,0 +1,51 @@
+<!--
+  Popover Enter and Exit (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Bấm nút, bảng nổi hiện ra và phóng từ 0.94 lên đủ cỡ quanh đúng góc gắn với nút; đóng thì thu lại về góc đó rồi biến mất.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiPopoverAnchor(q(".pa-pop"), tl, 0.4, {});
+
+  Options (defaults in brackets):
+      - origin: the anchored corner (0% 100%: bottom-left)
+      - closeAt: s after opening to close (1.4); 0.36 s ease-in, then hidden
+
+  Notes: Anchor button (circle r12 with '…'). Popover 128x74 r10 whose bottom-left corner sits on the anchor point: opacity 0 → 1 and scale 0.94 → 1 about that corner over 0.4-0.92 s (520 ms) power2.out. Exit at 1.8 s: the reverse over 360 ms power2.in, then hidden (display none). Content: accent title bar + 3 lines. Cursor clicks at 0.3 s and 1.7 s. Params: anchor: góc neo · scale (0.94 → 1) · in (0.52 s, power2.out) · out (0.36 s, power2.in).
+-->
+
+<div class="gm"><section class="pa-app app dark"><div class="app-bar"><b></b><span>Thư viện</span></div>
+<div class="app-body"><div class="app-hero" style="background:#8b7bff"></div><div class="app-row"></div><div class="app-row" style="width:70%"></div><div class="app-row" style="width:85%"></div></div></section><div class="pa-btn">•••</div><div class="pa-pop"><i></i><b></b><b style="width:80%"></b><b style="width:60%"></b></div></div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"origin":"0% 100%","closeAt":1.4};
+  var run = function (el, tl, at, o) {
+        var out = gsap.parseEase("power2.out"), pin = gsap.parseEase("power2.in");
+        el.style.transformOrigin = o.origin;
+        return MW.drive(tl, at, o.closeAt + 0.36, function (t) {
+          var p = out(Math.max(0, Math.min(1, t / 0.52))), q = 1 - pin(Math.max(0, Math.min(1, (t - o.closeAt) / 0.36))), k = p * q;
+          gsap.set(el, { scale: 0.94 + 0.06 * k }); el.style.opacity = String(k); el.style.visibility = t > 0 && (t < o.closeAt + 0.36) ? "visible" : "hidden";
+        });
+      };
+  MW.uiPopoverAnchor = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

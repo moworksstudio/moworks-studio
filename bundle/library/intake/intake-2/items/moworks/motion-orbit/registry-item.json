@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-orbit",
+  "type": "hyperframes:component",
+  "title": "Orbit",
+  "description": "Một chấm bay vòng quanh tâm với bán kính không đổi và tốc độ góc đều.",
+  "tags": [
+    "rotate",
+    "orbit",
+    "loop",
+    "rotation",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-orbit.html",
+      "target": "compositions/components/motion-orbit.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-orbit",
+    "author": "moworks",
+    "call": "MW.motionOrbit(q(\".ob-d\"), tl, 0, { duration: 2 });",
+    "function": "MW.motionOrbit",
+    "options": {
+      "duration": "s per lap, linear (1.1; the small demo 2.6)",
+      "radius": "px (215)",
+      "direction": "1 clockwise, -1 the other way",
+      "laps": "(2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "A dot on an arm of radius 43 px circles a fixed centre: arm rotation 0 → 360° linear, constant radius, looping; small DOM demo 2600 ms per lap (motion_ms 1100); a faint circular guide and the centre dot stay still. Port as a wrapper rotating with the child offset by the radius. Params: duration: một vòng (1.1 s) · radius (43 px) · direction: chiều quay (thuận) · repeat.",
+    "titleVi": "Bay vòng quanh tâm"
+  }
+}

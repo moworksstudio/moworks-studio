@@ -1,0 +1,58 @@
+<!--
+  Chromatic Split (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Hai bản đỏ và xanh lơ tách xa hai bên, giữ một nhịp rồi chụm dần về giữa và tan, khối chính bật nhẹ, rung rồi đứng yên.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectChromaticSplit(q(".tk-head"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - duration: s (0.9, ease-in-out cubic over the keys)
+      - offset: px each way (60)
+      - colors: [cyan, red], blended with screen
+      - shake: px of the core's jolt (8)
+
+  Notes: Cyan copy at x -34 px, red copy at +34 px over the white core (screen blend), opacity 1. Keys over 900 ms easeInOutCubic: 0 % +-34, 42 % +-30 (slow hold), 68 % +-12 (opacity 0.95), 90 % 0 (opacity 0), hold to 100 %. Core on keys 0/20/38/56/100 %: scale 0.82 / 1.08 / 0.98 / 1.02 / 1, x 0 / +4 / -3 / +1 / 0 px; opacity 0.35 -> 1 and blur 2 -> 0 px by 20 %. Colours cyan #00e0ff, red #ff3060. Params: duration (0.9 s) · offset (34 px) · colors (#ff3060 / #00e0ff) · shake (4 px).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">TÁCH MÀU</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.9,"offset":60,"colors":["#00e0ff","#ff3060"],"shake":8};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var clone = function () { var g = el.cloneNode(true); g.removeAttribute("id"); g.style.position = "absolute"; g.style.margin = "0"; g.style.pointerEvents = "none"; g.style.boxSizing = "border-box";
+    g.style.left = el.offsetLeft + "px"; g.style.top = el.offsetTop + "px"; var br = el.getBoundingClientRect(); g.style.width = (br.width + 0.5) + "px"; g.style.height = el.offsetHeight + "px"; host.insertBefore(g, el.nextSibling); return g; };
+  var cy = clone(), rd = clone(), io = gsap.parseEase("power2.inOut"); [cy, rd].forEach(function (g, i) { g.style.color = o.colors[i]; g.style.webkitTextFillColor = o.colors[i]; g.style.mixBlendMode = "screen"; });
+  var K = function (keys, u) { for (var i = 1; i < keys.length; i++) if (u <= keys[i][0]) { var a = keys[i - 1], b = keys[i], f = (u - a[0]) / (b[0] - a[0]); return a[1] + (b[1] - a[1]) * f; } return keys[keys.length - 1][1]; };
+  var SP = [[0, 1], [0.42, 30 / 34], [0.68, 12 / 34], [0.9, 0], [1, 0]], SA = [[0, 1], [0.42, 1], [0.68, 0.95], [0.9, 0], [1, 0]], CS = [[0, 0.82], [0.2, 1.08], [0.38, 0.98], [0.56, 1.02], [1, 1]], CX = [[0, 0], [0.2, 1], [0.38, -0.75], [0.56, 0.25], [1, 0]];
+  return MW.drive(tl, at, o.duration, function (t) {
+    var u = io(Math.max(0, Math.min(1, t / o.duration))), s = K(CS, u), f = Math.min(1, u / 0.2), on = t > 0;
+    gsap.set(el, { scale: s, x: o.shake * K(CX, u) }); el.style.opacity = String(on ? 0.35 + 0.65 * f : 0); el.style.filter = f < 1 ? "blur(" + (2 * (1 - f)).toFixed(2) + "px)" : "";
+    var d = o.offset * K(SP, u), a = on ? K(SA, u) : 0; gsap.set(cy, { x: -d, scale: s }); gsap.set(rd, { x: d, scale: s }); cy.style.opacity = rd.style.opacity = String(a);
+  });
+  };
+  MW.effectChromaticSplit = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

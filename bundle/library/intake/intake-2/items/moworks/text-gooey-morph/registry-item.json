@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-gooey-morph",
+  "type": "hyperframes:component",
+  "title": "Gooey Morphing Text",
+  "description": "Từ này tan chảy như chất lỏng rồi kết lại thành từ kia (nhoè cộng ngưỡng alpha), mỗi lần đổi 1.5 giây, nghỉ 0.5 giây.",
+  "tags": [
+    "swap",
+    "gooey",
+    "morph",
+    "blur",
+    "text-swap",
+    "soft",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "text-gooey-morph.html",
+      "target": "compositions/components/text-gooey-morph.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-gooey-morph",
+    "author": "moworks",
+    "call": "MW.textGooeyMorph(q(\".gmo\"), tl, 0, {});",
+    "function": "MW.textGooeyMorph",
+    "options": {
+      "words": "the pair",
+      "morph": "s (1.5)",
+      "at": "s (0.3)",
+      "backAt": "s it morphs back (2.6)",
+      "maxBlur": "px (18)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Magic UI (MIT); a faithful port is in the Magic UI collection"
+    },
+    "thirdParty": [],
+    "notes": "Two words stacked. Over 1.5 s (linear fraction f 0 → 1): new word opacity f^0.4, blur min(8/f − 8, 100) px; old word the same with 1 − f. The pair goes through an alpha threshold (feColorMatrix alpha ×255 −140; demo: alpha < 130 → 0, > 150 → 255, linear between), so the blurred shapes merge like liquid. Cooldown 0.5 s between morphs. Demo: A → B 0.3–1.8 s, back 2.6–4.1 s (blur capped 18 px); loop 4.6 s. Params: morph: thời gian đổi (1.5 s) · cooldown: nghỉ giữa hai lần (0.5 s) · words: danh sách từ. Liquid look: the two blurred words pass through an alpha threshold (feColorMatrix alpha × 255 − 140).",
+    "titleVi": "Chữ tan chảy thành chữ khác"
+  }
+}

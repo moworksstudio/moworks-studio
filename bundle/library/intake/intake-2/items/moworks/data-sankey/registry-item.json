@@ -1,0 +1,51 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-sankey",
+  "type": "hyperframes:block",
+  "title": "Sankey Flow Reveal",
+  "description": "Một cột nguồn 100 chảy thành hai dải 60 và 40, độ dày đúng theo giá trị, cột đích mọc lên khi dải tới nơi rồi hiện phép cộng.",
+  "tags": [
+    "chart",
+    "flow",
+    "sankey",
+    "proof",
+    "data-storytelling",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "data-sankey.html",
+      "target": "compositions/components/data-sankey.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/data-sankey",
+    "author": "moworks",
+    "call": "MW.dataSankey(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataSankey",
+    "options": {},
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Source bar (10 px wide) grows to 100 px 200-600 ms easeOutExpo. Two ribbons (60 and 40, thickness = value px, cubic curves, control points at mid-x) revealed by a clip edge moving left -> right linearly 600-2200 ms; a dotted streak (2/9) flows along each at 26 px/s. Target bars 60 / 40 grow 2050-2450 / 2150-2550 ms easeOutExpo; labels 2300-2600; '60 + 40 = 100' 2700-3000; fade out 3600-3950. Params: values (100 → 60 + 40) · flow: thời gian chảy (1.6 s) · colors.",
+    "titleVi": "Biểu đồ dòng chảy Sankey"
+  }
+}

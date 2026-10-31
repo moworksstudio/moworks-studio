@@ -5,7 +5,7 @@
 <p align="center"><b>A desktop studio for motion films: Claude directs, Moworks Studio builds and checks every frame, you approve each step.</b></p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.8.214.2-1d3fd8" alt="version 0.8.214.2">
+  <img src="https://img.shields.io/badge/version-0.8.214.3-1d3fd8" alt="version 0.8.214.3">
   <img src="https://img.shields.io/badge/Claude-Opus_5.5_·_Sonnet_5.5-d97757" alt="Claude Opus 5.5 and Sonnet 5.5">
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-555" alt="Windows 10 | 11">
   <img src="https://img.shields.io/badge/film_styles-126_from_7_authors-0a7" alt="126 film styles from 7 authors">
@@ -179,7 +179,7 @@ named under each still.
 | Screen | What it holds |
 |---|---|
 | **Projects** | Your films, newest first; each opens in the Editor |
-| **Brand Kits** | A brand's colours, fonts and components, worn by a whole film. HyperFrames' 13 frame presets ship ready to use; make your own from a brand guideline (PDF, PowerPoint or pictures) and check it before use |
+| **Brand Kits** | A brand's colours, fonts and components, worn by a whole film. HyperFrames' 13 frame presets ship ready to use; make your own from a brand's whole folder (PDF, PowerPoint, pictures, fonts, AI, PSD, ZIP) and check it before use; a film made with it gets its logos and fonts |
 | **Film Styles** | The gallery above, with demo films, credits and AE badges |
 | **Motion Library** | The studio's own library of Motions (895), Blocks (448 blocks and components) and Vocabulary (168 motion terms), arranged by type and category. The licences of the sources it draws on are in [THIRD-PARTY.md](THIRD-PARTY.md) |
 | **Characters** | The project's characters: drawn with the Character maker, or from the Anidoodle author's own character rigs |
@@ -216,7 +216,7 @@ named under each still.
    Moworks Studio\
      app\       ← the clone: code, installed HyperFrames, settings
      projects\  ← films
-     library\   ← Brand Kits, characters, the library
+     library\   ← Brand Kits, your characters, the library
      models\    ← only when Whisper is installed
    ```
    Use a local disk, not a synced folder (Google Drive, OneDrive, Dropbox): sync locks files while films render. The first-run
@@ -235,7 +235,7 @@ named under each still.
    | Whisper on an NVIDIA graphics card (CUDA libraries) | about 1.3 GB | optional, in Settings › System on a suitable card |
    | FFmpeg 9.0 (and Python 3.12 when missing) | about 210 MB | installed by **Install** with winget, for your user only; without winget the screen shows the line to run |
    | HyperFrames' skills and registry, fonts, code libraries, film-style sources, the library | in the repository | nothing to download |
-5. **Add a voice key** *(optional)*: Settings › General › Voice-over. The key is encrypted for your Windows account.
+5. **Add a voice key** *(optional)*: Settings › System › Voice-over. The key is encrypted for your Windows account.
 6. **Make a film:** Projects › New project.
 
 ### Or let Claude do it
@@ -278,6 +278,8 @@ As a reference, a 34-second film in a Lemo-Opuscar style took 1 h 17 min from Cr
 | `projects\` (next to `app\`, in the work folder) | Your films: one folder each, with HyperFrames' own files at its top (`index.html`, `BRIEF.md`, `STORYBOARD.md`, compositions, assets), the app's documents in `docs\` (notes, credits, the Review, the cast, the Motion Plan), boards and `renders\` | no |
 | `library\`, `models\` (next to `app\`, in the work folder) | The library, Brand Kits and your characters; Whisper, when installed | no |
 
+The characters that come with the app (Clawd, Mira, Theo, Bit, the cheetah) stay in `app\bundle\library\characters\` and are read from there. `library\characters\` holds only the characters you made, so an update can neither change nor mix them. A new character with a name the app already uses gets its own id (`mira-2`).
+
 Settings › General › Projects folder changes where new projects are saved. Every film writes a `docs\CREDITS.md` that credits the music and sound effects it uses (title, author, source, licence); downloaded fonts travel with their licence files.
 
 ## Updates
@@ -312,7 +314,7 @@ If the app does not start: run `tools\uninstall.bat` in the app folder (add `--m
 | A component shows as missing | Settings › System lists every component with its state and the next step; FFmpeg needs the `winget` command shown there |
 | "The local service is not running" | The app's background service stopped. Start `Moworks Studio.bat` again; the log is `runtime\logs\app.log` |
 | A style shows a lock | One of its source files no longer matches the pinned version. Settings › System offers to fetch it again |
-| A voice-over cannot be made | Add or check the ElevenLabs key in Settings › General › Voice-over; the key needs the text-to-speech permission |
+| A voice-over cannot be made | Add or check the ElevenLabs key in Settings › System › Voice-over; the key needs the text-to-speech permission |
 | After Effects port fails | Install After Effects, close any dialog open in it, and port again; the error in the app names the step that failed |
 
 The known limitations are listed in [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
@@ -335,15 +337,9 @@ The known limitations are listed in [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
 | `npm start` | Starts the app's local server (the launcher does this for you) |
 | `npm run build` | Builds the interface into `ui/dist` |
 | `npm run dev:ui` | Interface with hot reload, for interface work |
-| `npm test` | The full test suite (about 30 minutes; close HyperFrames Studio first if you have it open) |
 
-On a new computer, the tests that render or check films need the components first: run **Install** on the first-run screen and
-install FFmpeg, or they fail. Two tests also compare against a golden render that is not stored in the repository (`test-output/` is
-ignored); make it once before running the suite, or `test/edit.test.mjs` and `test/gpu.test.mjs` fail:
-
-```bash
-node tools/golden/run.mjs --label G214 --only hf-native-30
-```
+The public release does not include the test suite, so `npm test` has nothing to run: `test/` keeps only the small sample film the
+HyperFrames version check renders.
 
 ## Documentation
 

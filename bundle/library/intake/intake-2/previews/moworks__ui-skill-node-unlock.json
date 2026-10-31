@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-skill-node-unlock",
+  "hash": "23653cf212634157",
+  "at": "2026-10-17T10:45:18.688Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-skill-node-unlock.mp4",
+    "poster": "previews/moworks__ui-skill-node-unlock.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f0d68b75645ad9a7daca6b105f58eb482cc737c54941c5fc3215a7b8612a5d1f",
+    "size": 13260,
+    "seconds": 29.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

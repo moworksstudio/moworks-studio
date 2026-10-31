@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-flip-up-3d",
+  "type": "hyperframes:component",
+  "title": "3D Flip Up",
+  "description": "Từng chữ cái nằm rạp ra sau rồi lật dựng đứng lên quanh bản lề ở chân chữ, nối nhau rất nhanh và dừng êm.",
+  "tags": [
+    "3d",
+    "flip",
+    "letters",
+    "stagger",
+    "text-3d-depth",
+    "smooth",
+    "3d-depth"
+  ],
+  "files": [
+    {
+      "path": "text-flip-up-3d.html",
+      "target": "compositions/components/text-flip-up-3d.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-flip-up-3d",
+    "author": "moworks",
+    "call": "MW.textFlipUp3d(q(\".tk-head\"), tl, 0.3, { exit: 2.2 });",
+    "function": "MW.textFlipUp3d",
+    "options": {
+      "duration": "s per letter (0.8), expo.out",
+      "stagger": "s (0.04, ≤ 1 s in all)",
+      "perspective": "em (9)",
+      "exit": "s after the start to fade out (null: stay)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Codrops (MIT); a faithful port of Codrops' effects is in the Codrops collection"
+    },
+    "thirdParty": [],
+    "notes": "Per char: rotateX −90° → 0 about its baseline (origin 50 % 100 %), y +25 % of the glyph box → 0, opacity 0 → 1 reached at 40 % of the move; 0.8 s expo.out (cubic-bezier .16,1,.3,1), stagger 40 ms (capped at 1 s total), from 0.3 s. Perspective about 9 em (demo 460 px at 52 px text; recipe 600–2000 px). Exit 2.5–2.85 s fade power2.in. Loop 3 s. Params: góc (−90° → 0) · thời gian (0.8 s) · cách nhau (40 ms) · phối cảnh (9 em).",
+    "titleVi": "Từng chữ lật dựng lên từ chân"
+  }
+}

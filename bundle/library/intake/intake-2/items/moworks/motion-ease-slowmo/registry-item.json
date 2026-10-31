@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-slowmo",
+  "type": "hyperframes:component",
+  "title": "SlowMo",
+  "description": "Lướt nhanh vào, đi rất chậm qua đoạn giữa rồi tăng tốc ra; cho tiêu đề đi xuyên khung kiểu quay chậm.",
+  "tags": [
+    "ease",
+    "slowmo",
+    "title",
+    "easing",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-slowmo.html",
+      "target": "compositions/components/motion-ease-slowmo.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-ease-slowmo",
+    "author": "moworks",
+    "call": "MW.motionEaseSlowmo(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseSlowmo",
+    "options": {
+      "duration": "s (1.2)",
+      "ease": "the curve (slowmo)",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after GSAP"
+    },
+    "thirdParty": [],
+    "notes": "SlowMo(0.7, 0.7) as one ease: the first 15 % of the time covers about 40 % of the distance (fast, easing into the slow part), the middle 70 % moves linearly through only about 21 % (value 0.35 + 0.3 p), the last 15 % covers the remaining ~40 %, accelerating out; 1200 ms. For titles passing through the frame; the key moment sits in the slow middle. Small demo approximates it with cubic-bezier(.1,.65,.9,.35). Params: duration (1.2 s) · linear: tỷ lệ đoạn chậm (0.7) · power (0.7).",
+    "titleVi": "SlowMo (nhanh, chậm, nhanh)"
+  }
+}

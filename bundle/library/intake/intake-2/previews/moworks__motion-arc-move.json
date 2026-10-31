@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-arc-move",
+  "hash": "02fbe398f3c4bee5",
+  "at": "2026-10-17T09:33:48.004Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-arc-move.mp4",
+    "poster": "previews/moworks__motion-arc-move.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "feba27da108559515cd0cc26289c00a371e35943f5b324f148d38803f1d0fbd5",
+    "size": 11431,
+    "seconds": 29.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

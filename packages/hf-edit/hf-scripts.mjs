@@ -4,7 +4,7 @@
 // pinned commit (bundle/hf, as the app ships them; never edited), in the project folder. Only the skills the project loaded, only
 // allow-listed scripts and CLI commands, no path outside the project; a run that goes online (needsWeb) follows the project's web setting.
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync } from "node:fs";
 import { isAbsolute, join, normalize, resolve, sep } from "node:path";
 import { APP_ROOT, loadPins, resolveRuntime } from "../version-manager/index.mjs";
 import { cliEntry } from "../hf-qa/cli.mjs";
@@ -55,6 +55,17 @@ export function listScripts(skills, root = APP_ROOT) {
   return out;
 }
 
+/** Where `keyframes --shot` pictures go: the film's cache, out of its root and out of git. */
+export const DEBUG_DIR = ".moworks/cache/debug";
+/** `hyperframes keyframes --shot <file>` draws one element's motion as a debug picture (guide lines over its samples, no HTML text), never a
+ *  frame of the film. Whatever file is asked, it goes in DEBUG_DIR under its own name (T28-6: a path outside the film was refused, so the
+ *  Review wrote capture/ at the film's root, 18 MB into the film's history). The other commands' arguments stay as they are. */
+export function debugArgs(name, args) {
+  if (cliOf(name) !== "keyframes") return args;
+  const inCache = (v) => `${DEBUG_DIR}/${String(v).split(/[\\/]/).pop() || "keyframes.png"}`;
+  return args.map((a, i) => (typeof a === "string" && a.startsWith("--shot=") ? `--shot=${inCache(a.slice(7))}` : args[i - 1] === "--shot" ? inCache(a) : a));
+}
+
 /** Arguments stay inside the project: no absolute path elsewhere, no "..", no shell. */
 function checkArgs(dir, args) {
   for (const a of args) {
@@ -70,8 +81,10 @@ function checkArgs(dir, args) {
 const python = () => { for (const exe of ["py", "python"]) { const r = spawnSync(exe, ["-c", "import sys; print(sys.version_info[0])"], { encoding: "utf8", windowsHide: true }); if (r.status === 0 && r.stdout.trim() === "3") return exe; } return null; };
 
 /** Run one script or CLI command in the project: { ok, exitCode, stdout, stderr, command }. `name`: "carve", "hyperframes capture"… */
-export async function runScript(dir, { name, args = [], skills = [], root = APP_ROOT, timeoutMs = 10 * 60 * 1000, signal = null }) {
+export async function runScript(dir, { name, args: asked = [], skills = [], root = APP_ROOT, timeoutMs = 10 * 60 * 1000, signal = null }) {
+  const args = debugArgs(name, asked);
   checkArgs(dir, args);
+  if (args !== asked) mkdirSync(join(dir, ...DEBUG_DIR.split("/")), { recursive: true });
   const rt = resolveRuntime();
   const env = { ...rt.env, NO_COLOR: "1" };
   let cmd, argv, shown;

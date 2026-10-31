@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "hand-watercolor-wash",
+  "type": "hyperframes:block",
+  "title": "Watercolor Wash",
+  "description": "Nhiều lớp màu nước trong mờ loang rộng dần chồng lên nhau, mép đậm hơn lòng.",
+  "tags": [
+    "watercolor",
+    "wash",
+    "hand-drawn",
+    "texture",
+    "texture-look",
+    "soft",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "hand-watercolor-wash.html",
+      "target": "compositions/components/hand-watercolor-wash.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/hand-watercolor-wash",
+    "author": "moworks",
+    "call": "MW.handWatercolorWash(q(\".gm\"), tl, 0, {});",
+    "function": "MW.handWatercolorWash",
+    "options": {
+      "layers": "(5)",
+      "colors": "",
+      "title": "",
+      "seed": "(5)",
+      "loop": "s (3.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Translucent washes stacked: recipe each layer spreads over 2000 ms ease-out at 10-15 % opacity, 200 ms apart. Demo: 5 noisy blobs (50 points, edge +-35 % noise, 1.4 x wider than tall); layer k radius 0 -> 30 + 6k px over 1.8 s easeOutCubic from 0.2 + 0.25k s; fill 16 % plus a 2 px stroke of the same colour so the edges read darker. Params: layers (5) · spread (2 s) · opacity (10–15 %). Each layer spreads over 1.8 s (ease-out cubic), 0.25 s after the last, at 16 % with a stroke of the same colour so the edges read darker.",
+    "titleVi": "Màu nước loang chồng lớp"
+  }
+}

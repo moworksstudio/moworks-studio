@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-cube-roll",
+  "type": "hyperframes:component",
+  "title": "3D Roll Flip",
+  "description": "Mỗi chữ cái là một khối hộp nhỏ lăn lên 90° nối nhau, mặt dưới mang chữ kiểu khác màu nhấn lật ra phía trước, rồi lăn về.",
+  "tags": [
+    "3d",
+    "cube",
+    "roll",
+    "swap",
+    "text-3d-depth",
+    "crisp",
+    "3d-depth"
+  ],
+  "files": [
+    {
+      "path": "text-cube-roll.html",
+      "target": "compositions/components/text-cube-roll.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-cube-roll",
+    "author": "moworks",
+    "call": "MW.textCubeRoll(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textCubeRoll",
+    "options": {
+      "at": "s each cube turns (0.55; 0.03 s apart, ≤ 0.6 s)",
+      "back": "s they turn back (2.15)",
+      "font": "the second face's font (a serif)",
+      "color": "its colour",
+      "perspective": "em (11)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Magic UI (MIT); a faithful port is in the Magic UI collection"
+    },
+    "thirdParty": [],
+    "notes": "Each char is a cube as deep as its glyph box: front face = normal text; bottom face = same char in accent serif 700. On cue (0.55 s) each cube turns rotateX 0 → 90° about its centre (bottom face comes to the front) in 0.4 s power2.inOut, delay 30 ms × i (capped at 0.6 s total); front fades 1 → 0.3, new face 0.3 → 1 during the turn. Reverse from 2.15 s. Demo perspective 520 px at 46 px. Loop 3.4 s. Params: góc (0 → 90°) · thời gian (0.4 s) · cách nhau (30 ms) · kiểu chữ mặt sau (serif màu nhấn).",
+    "titleVi": "Từng chữ lăn như khối hộp đổi mặt"
+  }
+}

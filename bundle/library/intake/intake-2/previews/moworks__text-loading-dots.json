@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-loading-dots",
+  "hash": "cc7bb0bc945ebc9a",
+  "at": "2026-10-17T10:25:00.767Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-loading-dots.mp4",
+    "poster": "previews/moworks__text-loading-dots.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "04ea1bea2108eb6bc6dd7438ebe5f852c36f41987284fd2ffc4afd58d32515c4",
+    "size": 6015,
+    "seconds": 25.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

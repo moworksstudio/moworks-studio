@@ -1,0 +1,78 @@
+<!--
+  Fit-to-width Title (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Cỡ chữ tiêu đề luôn được tính lại để dòng chữ vừa khít bề rộng khung (trừ lề), có giới hạn cỡ tối đa; khung hẹp lại thì chữ nhỏ theo.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textFitWidthTitle(q(".fw h1"), tl, 0, { cursor: ".ui-cursor" });
+
+  Options (defaults in brackets):
+      - pad: px each side (70)
+      - cap: largest font size, px (460)
+      - wide: card px (1400)
+      - narrow: px (750)
+      - card: the box it fits (the title's parent)
+      - cursor: the cursor dragging the corner
+      - loop: s (4.2)
+
+  Notes: fontSize = min(cap, size × (frame width − 2 × padding) ÷ measured width), measured after the font loads; one line, no wrap; re-measure whenever the text or box changes. Demo: card width 280 → 150 px (0.4–1.2 s) and back (2.2–3.0 s), cubic-bezier(.65,0,.35,1), padding 14 px, cap 92 px, the title refitting every frame; a cursor drags the card's corner. Loop 4.2 s. Params: lề (14 px mỗi bên) · cỡ tối đa (92 px) · bề rộng khung. fontSize = min(cap, size × (box width − 2 × pad) ÷ measured width), re-measured every frame; one line.
+-->
+
+<div class="fw"><h1>VỪA KHÍT</h1></div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"pad":70,"cap":460,"wide":1400,"narrow":750,"card":null,"cursor":null,"loop":4.2};
+  var run = function (el, tl, at, o) {
+        var card = o.card ? MW.el(o.card) : el.parentNode, io = MW.ez("in-out"), cur = o.cursor ? MW.el(o.cursor) : null;
+        el.style.whiteSpace = "nowrap"; el.style.fontSize = "100px"; var w100 = el.scrollWidth;
+        return MW.drive(tl, at, o.loop, function (t) {
+          var w = o.wide + (o.narrow - o.wide) * (io(Math.max(0, Math.min(1, (t - 0.4) / 0.8))) - io(Math.max(0, Math.min(1, (t - 2.2) / 0.8))));
+          card.style.width = w + "px"; el.style.fontSize = Math.min(o.cap, 100 * (w - 2 * o.pad) / w100) + "px";
+          if (cur) { cur.style.left = (card.offsetLeft + w - 10) + "px"; cur.style.top = (card.offsetTop + card.offsetHeight - 10) + "px"; }
+        });
+      };
+  MW.textFitWidthTitle = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

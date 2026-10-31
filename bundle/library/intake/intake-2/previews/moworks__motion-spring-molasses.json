@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-spring-molasses",
+  "hash": "f97c2ba99ae5888d",
+  "at": "2026-10-17T11:47:30.492Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-spring-molasses.mp4",
+    "poster": "previews/moworks__motion-spring-molasses.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "28415c9d1f4ef0913a8e1ca36122f77d874d9aab12a0929d0ad12b1f6d469f35",
+    "size": 18360,
+    "seconds": 32.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

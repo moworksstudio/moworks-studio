@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-color-pulse",
+  "type": "hyperframes:component",
+  "title": "Color Pulse",
+  "description": "Nhãn trạng thái chuyển từ xanh dương sang xanh lá rồi về, nền, viền và chữ đổi cùng nhịp, không di chuyển.",
+  "tags": [
+    "color",
+    "pulse",
+    "status",
+    "attention-emphasis",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "motion-color-pulse.html",
+      "target": "compositions/components/motion-color-pulse.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-color-pulse",
+    "author": "moworks",
+    "call": "MW.motionColorPulse(q(\".cp\"), tl, 0.5, {});",
+    "function": "MW.motionColorPulse",
+    "options": {
+      "duration": "s (0.76): blue → green → blue as one bump",
+      "from": "background (#294c68)",
+      "to": "background at the peak (#337b60)",
+      "borderFrom": "#6499bd",
+      "borderTo": "#a6efd0",
+      "textFrom": "#c4deed",
+      "textTo": "#e4fff3"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Status pill: background #294c68 → #337b60 → #294c68 with border #6499bd → #a6efd0 and text #c4deed → #e4fff3 in step; no transform. Small demo: one blue → green → blue pulse over 2200 ms (canvas: a sine bump peaking mid-way; DOM keys at 12 / 45 / 80 %); motion_ms 760. Params: from (#294c68) · to (#337b60) · duration (0.76 s) · yoyo.",
+    "titleVi": "Đổi màu nhấp nháy, không xê dịch"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/shape-play-pause-morph",
+  "hash": "1be670697581b5cd",
+  "at": "2026-10-17T10:34:57.380Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__shape-play-pause-morph.mp4",
+    "poster": "previews/moworks__shape-play-pause-morph.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4118f8ae67179a1d9996445787c9243f9a8ba5d33f121e9ee197b2af60305dc9",
+    "size": 11658,
+    "seconds": 27.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

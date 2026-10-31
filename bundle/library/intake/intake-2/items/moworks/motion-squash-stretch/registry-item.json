@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-squash-stretch",
+  "type": "hyperframes:component",
+  "title": "Squash & Stretch",
+  "description": "Quả bóng giãn dài khi rơi nhanh, bẹp ra lúc chạm đất mà vẫn giữ thể tích, rồi bật lên tròn trở lại.",
+  "tags": [
+    "squash",
+    "stretch",
+    "bounce",
+    "principle",
+    "principles",
+    "bouncy",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "motion-squash-stretch.html",
+      "target": "compositions/components/motion-squash-stretch.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-squash-stretch",
+    "author": "moworks",
+    "call": "MW.motionSquashStretch(q(\".sq-a\"), tl, 0, { ghost: \".sq-g\" });",
+    "function": "MW.motionSquashStretch",
+    "options": {
+      "height": "px of the bounce (448)",
+      "period": "s per bounce (1.1)",
+      "stretch": "scaleY = 1 + stretch × speed² (0.22)",
+      "squash": "[scaleX, scaleY] on the floor ([1.36, 0.72])",
+      "contact": "s in the squash pose (0.11)",
+      "bounces": "(3)",
+      "ghost": "an undeformed copy that moves the same"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Recipe: ball falls in 300 ms power1.in (easeInQuad), stretching with speed up to scaleY 1.2 / scaleX 0.85; at contact scaleY 0.75 / scaleX 1.33 (volume kept, origin bottom) for 2–4 frames; rises 300–550 ms power1.out back to 1/1. Small demo: endless parabolic bounce 112 px high, 1100 ms per bounce, stretch scaleY 1 + 0.22·v² (v = speed 0–1, scaleX = 1/scaleY), contact pose 0.72 / 1.36 for the 110 ms around the floor; an undeformed ghost alongside. Params: fall (0.3 s) · stretch (1.2 / 0.85) · squash (0.75 / 1.33) · hold: số khung bẹp (2–4). The recipe: a 0.3 s fall power1.in stretching to 1.2 / 0.85, 2–4 frames at 0.75 / 1.33 on the floor, a 0.3–0.55 s rise power1.out.",
+    "titleVi": "Bẹp và giãn (nguyên lý)"
+  }
+}

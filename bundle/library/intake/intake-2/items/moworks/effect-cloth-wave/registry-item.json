@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-cloth-wave",
+  "type": "hyperframes:component",
+  "title": "Cloth Wave Panel",
+  "description": "Tấm bảng cắt thành 18 dải dọc gợn sóng lên xuống như lá cờ vải, sóng lan từ trái sang, mạnh dần rồi lặng đi, mỗi dải sáng tối theo độ dốc.",
+  "tags": [
+    "cloth",
+    "wave",
+    "flag",
+    "ripple",
+    "material-surface-motion",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "effect-cloth-wave.html",
+      "target": "compositions/components/effect-cloth-wave.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-cloth-wave",
+    "author": "moworks",
+    "call": "MW.effectClothWave(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectClothWave",
+    "options": {
+      "strips": "(18)",
+      "amp": "units (9)",
+      "period": "s (0.85)",
+      "lag": "s per strip (0.045)",
+      "start": "s (0.3)",
+      "settle": "[from, to] s the wave dies down ([1.4, 2.3])",
+      "text": "",
+      "sub": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Panel cut into 18 vertical strips 11 px wide (198x88). Strip edge i offset y = 9 px × ramp × decay × sin(2π τ / 0.85 s), τ = t − 0.3 s − 45 ms × i; ramp 0 → 1 over 0.35 s, decay 1 → 0 between 1.4-2.3 s (power2.inOut); the bottom edge moves 1.25× the top. Shade each strip by its slope (lighter where it rises to the right, up to 40 %; darker where it falls, up to 50 %); hairline seams between strips. Params: strips (18 × 11 px) · amp (9 px) · period (0.85 s) · lag (0.045 s / dải) · settle (1.4-2.3 s).",
+    "titleVi": "Tấm bảng gợn sóng như vải"
+  }
+}

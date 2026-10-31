@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-emphasis-slam",
+  "type": "hyperframes:component",
+  "title": "Emphasis Slam",
+  "description": "Một từ đập xuống bằng lò xo nặng, bẹp lại lúc chạm và làm khung rung vài khung hình.",
+  "tags": [
+    "emphasis",
+    "slam",
+    "spring",
+    "squash",
+    "shake",
+    "text-emphasis",
+    "heavy",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "text-emphasis-slam.html",
+      "target": "compositions/components/text-emphasis-slam.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-emphasis-slam",
+    "author": "moworks",
+    "call": "MW.textEmphasisSlam(q(\".tk-head\"), tl, 0.3, {});",
+    "function": "MW.textEmphasisSlam",
+    "options": {
+      "from": "start scale (3)",
+      "k": "spring stiffness (80)",
+      "c": "damping (16)",
+      "m": "mass (1.6): a heavy spring",
+      "shake": "px (16)",
+      "shakeFrames": "frames at 24 fps (3)",
+      "duration": "s (1.6)",
+      "stage": "what shakes",
+      "seed": "shake"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Recipe: one word starts at scale 3 and lands on a heavy spring (k 80, c 16, m 1.6; ζ ≈ 0.71, ~0.7 s), squashes on landing, the frame shakes 2–4 frames. Demo (2.4 s loop): 'BOOM' 56 px drops from y −80 px to 0 on spring k 260, c 16, m 1 from 0.3 s; during 0.45–0.6 s it holds squash scaleY 0.82 / scaleX 1.22 and shakes x ±4 px per frame (seeded). Params: from: cỡ đầu (3 lần) · spring: độ cứng / giảm chấn / khối lượng (80 / 16 / 1.6) · squash (0.82) · shake: rung ngang (4 px, 2–4 khung).",
+    "titleVi": "Từ nhấn đập xuống bằng lò xo nặng"
+  }
+}

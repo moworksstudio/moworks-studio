@@ -1,10 +1,11 @@
 // The film's design as the New project dialog chose it: Style → Look. The app writes it into the project when the project is made,
 // so Claude reads it before the brief and never makes it up again:
 //   a Look   frame.md: the Look's FRAME.md as it is (HyperFrames' frame preset, or the user's Look at its version); Claude never
-//            changes it.
+//            changes it. The user's Look also brings its logos (assets/1_design/images/brand-kit/) and fonts (assets/1_design/fonts/<family>/,
+//            declared in index.html): the film's own copies, a change to the kit later never reaches them.
 //   Free     nothing: the design is Claude's.
-//   Asked    a Brand Kit chosen for a style with its author's design: kept in meta.brandKitAsk (its spec in .moworks/brand-kit/),
-//            never applied; Prepare asks how to use it.
+//   Asked    a Brand Kit chosen for a style with its author's design: kept in meta.brandKitAsk (its spec, logos and fonts in
+//            .moworks/brand-kit/), never applied; Prepare asks how to use it.
 import { createHash } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -32,6 +33,7 @@ export async function writeDesign(dir, choice, { root = APP_ROOT, now = new Date
     const text = fr.text.replace(/\s*$/, "\n");
     writeFileSync(join(dir, "frame.md"), text);
     Object.assign(look, { version: fr.version ?? null, hash: hash(text), frame: { at: now } });
+    try { lib.placeKit(choice.look.id, dir, { root, now }); } catch (e) { console.error(`[brand kit] logos and fonts not copied: ${e.message}`); }
   }
   return { look };
 }
@@ -52,6 +54,9 @@ export async function keepAskedKit(dir, choice, { root = APP_ROOT, now = new Dat
     mkdirSync(dirname(file), { recursive: true });
     writeFileSync(file, fr.text.replace(/\s*$/, "\n"));
     Object.assign(out, { version: fr.version ?? null, file: ASKED_KIT_FILE });
+    // its logos and fonts wait beside the spec: "only its logo" is one of Prepare's choices
+    let placed = null; try { placed = lib.placeKit(kit.id, dir, { root, now, asked: true }); } catch (e) { console.error(`[brand kit] logos and fonts not copied: ${e.message}`); }
+    if (placed?.logos.length || placed?.fonts.length) out.files = { logos: placed.logos, fonts: placed.fonts };
   }
   return out;
 }

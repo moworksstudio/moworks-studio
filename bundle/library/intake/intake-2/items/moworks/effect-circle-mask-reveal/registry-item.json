@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-circle-mask-reveal",
+  "type": "hyperframes:component",
+  "title": "SVG Mask Reveal",
+  "description": "Nội dung đứng yên, một mặt nạ tròn mở rộng từ một điểm gần góc trái để lộ dần toàn bộ.",
+  "tags": [
+    "mask",
+    "circle",
+    "reveal",
+    "clip-path",
+    "svg-path",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "effect-circle-mask-reveal.html",
+      "target": "compositions/components/effect-circle-mask-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-circle-mask-reveal",
+    "author": "moworks",
+    "call": "MW.effectCircleMaskReveal(q(\".cm\"), tl, 0.4, { duration: 1.6, ease: \"power2.inOut\", exitAt: 2.4 });",
+    "function": "MW.effectCircleMaskReveal",
+    "options": {
+      "x": "centre, 0-1 of the width (0.16)",
+      "y": "(0.58)",
+      "radius": "px, enough to clear the far corner (950)",
+      "duration": "s (0.98)",
+      "ease": "power2.out (the small demo: 1.6 s in-out)",
+      "guide": "show the dashed guide ring",
+      "exitAt": "s after the start to close in 0.35 s (null)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Element stays still; a circle clip centred at about 16 % x / 58 % y of the element grows radius 0 -> 190 px (enough to clear the far corner) over 980 ms easeOutCubic (demo: 1.6 s ease-in-out); optional thin dashed guide ring. Exit: radius back to 0 over 350 ms ease-in. Params: x, y: tâm (16 % / 58 %) · radius (190 px) · duration (0.98 s) · ease (power2.out).",
+    "titleVi": "Mặt nạ tròn mở lộ nội dung"
+  }
+}

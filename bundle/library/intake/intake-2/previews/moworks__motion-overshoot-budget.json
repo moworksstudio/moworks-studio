@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-overshoot-budget",
+  "hash": "6e5b593b26465721",
+  "at": "2026-10-17T11:48:00.970Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-overshoot-budget.mp4",
+    "poster": "previews/moworks__motion-overshoot-budget.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "826e05769f1a974b6a3c92d77cdf3e2d220bdc4e384a716ac3ed3a8c7f60230a",
+    "size": 11771,
+    "seconds": 29.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

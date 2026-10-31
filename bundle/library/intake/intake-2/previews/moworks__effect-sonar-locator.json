@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-sonar-locator",
+  "hash": "1a212363046bd21f",
+  "at": "2026-10-17T08:03:12.470Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__effect-sonar-locator.mp4",
+    "poster": "previews/moworks__effect-sonar-locator.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "aea084c0ec881c98b3f76601b8890cfd9f3e60771976b8a125901f41947c6807",
+    "size": 53412,
+    "seconds": 37.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

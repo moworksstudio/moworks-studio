@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-loading-dots",
+  "type": "hyperframes:block",
+  "title": "Loading Dots",
+  "description": "Ba chấm tròn lần lượt nhún lên rồi xuống và sáng lên, thành một làn sóng chạy từ trái sang.",
+  "tags": [
+    "dots",
+    "loading",
+    "wave",
+    "loop",
+    "loading-data",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "ui-loading-dots.html",
+      "target": "compositions/components/ui-loading-dots.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-loading-dots",
+    "author": "moworks",
+    "call": "MW.uiLoadingDots(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiLoadingDots",
+    "options": {
+      "size": "px (10)",
+      "gap": "px (12)",
+      "bob": "px (10)",
+      "each": "s later per dot (0.09)",
+      "period": "s (0.9, sine.inOut up and down)",
+      "label": "",
+      "loop": "s (1.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Three 10 px accent dots, 12 px gap. Each dot: y 0 → −10 px → 0 and opacity 0.35 → 1 → 0.35 over a 900 ms loop, sine.inOut; dot k starts k × 90 ms later (recipe: −9 px, 110 ms apart). Label PLEASE WAIT below. Params: dots (3 × 10 px, cách 12 px) · bob (10 px) · each (0.09 s) · period (0.9 s) · ease (sine.inOut).",
+    "titleVi": "Ba chấm nhún sóng khi chờ"
+  }
+}

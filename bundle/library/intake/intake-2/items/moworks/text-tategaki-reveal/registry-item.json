@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-tategaki-reveal",
+  "type": "hyperframes:component",
+  "title": "Tategaki Reveal",
+  "description": "Chữ viết dọc kiểu Nhật: từng chữ rơi nhẹ vào ô của nó từ trên xuống trong mỗi cột, các cột nối nhau từ phải sang trái.",
+  "tags": [
+    "vertical",
+    "reveal",
+    "stagger",
+    "japanese",
+    "text-japanese",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "text-tategaki-reveal.html",
+      "target": "compositions/components/text-tategaki-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-tategaki-reveal",
+    "author": "moworks",
+    "call": "MW.textTategakiReveal(q(\".tg\"), tl, 0, {});",
+    "function": "MW.textTategakiReveal",
+    "options": {
+      "drop": "px (80)",
+      "duration": "s (0.5, expo.out)",
+      "stagger": "s (0.05)",
+      "cap": "s all units start within (1.4)",
+      "gap": "em between columns (1.5)",
+      "start": "s (0.35)",
+      "exitAt": "s (2.95)",
+      "accent": "colour while moving",
+      "loop": "s (3.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "vertical-rl: chars top → bottom, columns right → left, column gap 1.5 em (demo ≤ 30 px fitting 126 px columns); punctuation to the upper right, long-vowel marks rotated 90°, Latin sideways. From 0.35 s each char drops y −20 px → 0 with opacity 0 → 1, 0.5 s expo.out, stagger 50 ms (recipe 40–60, ≤ 1.4 s total); chars still moving tinted accent. Exit 2.95–3.25 s power2.in. Loop 3.4 s. Recipe: text-combine-upright for 2-digit numbers. Params: độ rơi (20 px) · thời gian (0.5 s) · cách nhau (50 ms) · khoảng cột (1.5 em). Columns run right to left, top to bottom; for Vietnamese each syllable is one unit (Japanese uses writing-mode: vertical-rl).",
+    "titleVi": "Chữ dọc hiện từ trên xuống"
+  }
+}

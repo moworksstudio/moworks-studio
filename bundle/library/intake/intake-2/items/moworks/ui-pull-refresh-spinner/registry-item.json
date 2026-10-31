@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-pull-refresh-spinner",
+  "type": "hyperframes:block",
+  "title": "Pull to Refresh",
+  "description": "Danh sách bị kéo xuống 18 px, biểu tượng làm mới rơi xuống vừa xoay vừa hiện, quay tiếp khi đang tải rồi bay lên biến mất, danh sách trở về.",
+  "tags": [
+    "refresh",
+    "pull",
+    "spinner",
+    "gesture",
+    "gesture-mobile",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "ui-pull-refresh-spinner.html",
+      "target": "compositions/components/ui-pull-refresh-spinner.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-pull-refresh-spinner",
+    "author": "moworks",
+    "call": "MW.uiPullRefreshSpinner(q(\".gm\"), tl, 0, { duration: 1.6 });",
+    "function": "MW.uiPullRefreshSpinner",
+    "options": {
+      "duration": "s per pass (0.92; slower in the demo)",
+      "start": "s (0.3)",
+      "loop": "s (2.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "In a 920 ms pass (each segment eased in-out; data lists back.out): refresh icon (34 px circle, accent ring) y −70 → −20 px, rotate 0 → 220°, opacity 0 → 1 by 50 %; spins to 360° at 62 % and 720° at 86 % (loading); flies back to −70 with rotate 760° and opacity 0 by 100 %. List rows (72 % wide, 16 px) move down 18 px by 50 %, hold to 86 %, return. Recipe: pull clamped 0-88 px, icon rotation = progress × 240°. Params: pull (18 px) · drop (50 px) · spin (760°) · duration (0.92 s) · ease (power2.inOut từng đoạn). The icon drops while turning to 220°, spins to 360° and 720° while loading, then flies back up at 760°; the list moves down 18 units and back.",
+    "titleVi": "Kéo xuống làm mới, biểu tượng xoay"
+  }
+}

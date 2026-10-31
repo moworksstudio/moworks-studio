@@ -1,0 +1,70 @@
+<!--
+  Critical Lens Compression (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Cả cảnh bị ép hẹp ngang và cao lên trong tích tắc, bật ngược ra rộng quá cỡ rồi về đúng cỡ bằng lò xo, như ống kính bị nén lúc đòn chí mạng; chữ "CRITICAL" bật lên sau đó.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionSqueezeRebound(q(".sq"), tl, 0, { label: ".crit" });
+
+  Options (defaults in brackets):
+      - at: s of the squeeze (0.45)
+      - squeeze: scaleX (0.72)
+      - rebound: scaleX (1.14), then a spring k260 d14
+      - volume: scaleY = 1 + (1 − scaleX) × this (0.45)
+      - label: the title that pops after (0.2 s back.out)
+      - outAt: s the label leaves (3.6)
+
+  Notes: Whole scene, pivot at its centre: scaleX 1 → 0.72 in 150 ms in-cubic (0.45-0.6 s), → 1.14 in 140 ms outCubic (to 0.74 s), then to 1 by spring k260 d14; scaleY = 1 + (1 − scaleX) × 0.45 (1.126 at the squeeze, 0.937 at the rebound). 'CRITICAL' pops at 0.74 s (200 ms back.out), out 3.6-3.9 s. Params: at: lúc ép (0.45 s) · squeeze: bóp ngang (0.72) · rebound: bật ra (1.14) · volume: bù chiều cao (0.45) · spring: lò xo (k260 d14).
+-->
+
+<div class="sq"><div class="burst"></div><div class="crit">CHÍ MẠNG</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"at":0.45,"squeeze":0.72,"rebound":1.14,"volume":0.45,"label":null,"outAt":3.6};
+  var run = function (el, tl, at, o) {
+        var inn = gsap.parseEase("power2.in"), out = gsap.parseEase("power2.out"), sp = MW.spring(260, 14), lab = o.label ? MW.el(o.label) : null, bk = gsap.parseEase("back.out");
+        return MW.drive(tl, at, o.outAt + 0.3, function (t) {
+          var d = t - o.at, sx = d < 0 ? 1 : d < 0.15 ? 1 - (1 - o.squeeze) * inn(d / 0.15) : d < 0.29 ? o.squeeze + (o.rebound - o.squeeze) * out((d - 0.15) / 0.14) : o.rebound + (1 - o.rebound) * sp.at(d - 0.29);
+          gsap.set(el, { scaleX: sx, scaleY: 1 + (1 - sx) * o.volume });
+          if (lab) { var u = Math.max(0, Math.min(1, (d - 0.29) / 0.2)), e = t > o.outAt ? 1 - Math.min(1, (t - o.outAt) / 0.3) : 1; gsap.set(lab, { scale: bk(u) * e, opacity: Math.min(1, u * 3) * e }); }
+        });
+      };
+  MW.motionSqueezeRebound = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

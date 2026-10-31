@@ -82,11 +82,9 @@ export default function Pipeline({ projectId, data, starting = false, onOpen, on
     let line = plural ? t(plural[s.lineVars?.n === 1 ? 0 : 1], s.lineVars) : tr(s.line, s.lineVars);
     // the time left while Claude builds: the estimate less the time since the build started; none once the checks run
     const checking = data?.steps?.some((x) => x.id === "checks" && x.status === "running");
-    // counted down to the estimate "Approve and build" gave (`planned` once the server worked it out again past it), never to one that
-    // grows (T26-4: it climbed from 76 to 103 min, past the 77 the confirm said, and the Review's "8 min left" became 32)
     if (s.id === "build" && s.status === "running" && !app && !checking && data?.estimate?.minutes) {
       const since = data.estimate.startedAt ?? data.build?.startedAt;
-      line = `${line} · ${etaLeft(t, { minutes: data.estimate.planned ?? data.estimate.minutes, startedAt: since })}`;
+      line = `${line} · ${etaLeft(t, { minutes: stageMinutes(data.estimate), startedAt: since })}`;
     }
     // the Storyboard and the Motion Plan: the server's line ends with its time left; the time is worked out again from its estimate
     const eta = data?.stepEstimate;
@@ -170,6 +168,10 @@ export function etaLeft(t, est, now = Date.now()) {
   if (gone < est.minutes) return t("about {n} min left", { n: Math.max(1, Math.round(est.minutes - gone)) });
   return t("taking longer than usual · {n} min so far", { n: Math.round(gone) });
 }
+/** What the Build row counts down to: the estimate "Approve and build" gave (`planned` once the server worked it out again), never one that grows
+ *  past it (T26-4: it climbed from 76 to 103 min, past the 77 the confirm said, and the Review's "8 min left" became 32). Once the server
+ *  works the time out from the steps left and they end sooner, those (T28-13: "about 43 min left" at a 2 min music step, counted to the plan). */
+export const stageMinutes = (est) => (est.basis === "steps" ? Math.min(est.planned ?? est.minutes, est.minutes) : est.planned ?? est.minutes);
 // The tech checks' warnings were only dots on the timeline ruler while the row said Tech checks ✓; the row says how many, its link opens the list
 const warnWords = (t, n) => (n === 1 ? t("1 warning") : t("{n} warnings", { n }));
 const MATERIAL = { todo: "todo", done: "done", running: "wip", waiting: "wip", stopped: "wip", redo: "wip", failed: "wip" };

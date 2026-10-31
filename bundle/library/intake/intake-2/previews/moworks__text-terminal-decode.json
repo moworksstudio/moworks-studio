@@ -1,0 +1,26 @@
+{
+  "uid": "in:moworks/text-terminal-decode",
+  "hash": "3cf013a334a4871b",
+  "at": "2026-10-17T09:34:46.489Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "JetBrains Mono"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-terminal-decode.mp4",
+    "poster": "previews/moworks__text-terminal-decode.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "1d059989091df9f9c14ea2a577737c326df1a960afc9afa15c5ff6840461bfc4",
+    "size": 30387,
+    "seconds": 27.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

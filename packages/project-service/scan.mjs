@@ -3,9 +3,11 @@
 //   audio: length; music (not a voice-over) also tempo, bar starts and loudest passages (librosa) and its words when it is sung;
 //   PSD / PSB: the layer tree, a picture of the whole file and of each artboard / top-level group, every text layer with font, size, colour;
 //   PowerPoint: each slide's texts, notes and pictures, and the slides as pictures when PowerPoint is on this computer;
-//   PDF / AI: the pages as pictures and their text;  pictures: size; numbered pictures in one folder: one image sequence with a sheet.
+//   PDF / AI: the whole document, every page's text and every page on numbered sheets (intake.py pdf, as a Brand Kit reads it), each page
+//   ready for a closer look;  pictures: size; numbered pictures in one folder: one image sequence with a sheet.
 // Everything lands in .moworks/scan/ (INDEX.md for Claude, index.json for the app), redone only for files that changed.
 import { execFile, spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { extname, join } from "node:path";
 import { promisify } from "node:util";
@@ -27,6 +29,8 @@ const NEEDS_EXPORT = new Set([".key", ".docx", ".doc", ".xlsx", ".fig", ".sketch
 const WORDS_MAX_S = 15 * 60;          // speech / lyrics written out for clips up to 15 minutes
 const r2 = (n) => Math.round(n * 100) / 100;
 const slug = (p) => p.replace(/[^\w.-]+/g, "_");
+// a long PDF's folder holds pages/page-NNN.jpg: a long file name in a deep project must not pass Windows' 260 characters
+const shortSlug = (p) => { const s = slug(p); return s.length <= 80 ? s : `${s.slice(0, 64)}-${createHash("sha1").update(p).digest("hex").slice(0, 10)}`; };
 const POWERPOINT = "C:/Program Files/Microsoft Office/root/Office16/POWERPNT.EXE";
 
 async function probe(file, root) {
@@ -137,11 +141,12 @@ export async function scanAssets(dir, { root = APP_ROOT, words = true } = {}) {
     const abs = join(dir, ...f.path.split("/"));
     const mtime = statSync(abs).mtimeMs;
     const prev = old[f.path];
-    if (prev && prev.v === SCAN_V && prev.size === f.size && prev.mtime === mtime && (!prev.sheet || existsSync(join(dir, ...prev.sheet.split("/"))))) { items.push(prev); continue; }
+    // a PDF read by the older scan (its first 40 pages) is read again, whole; the film's other files keep what they have (a video's speech took minutes)
+    if (prev && prev.v === SCAN_V && prev.size === f.size && prev.mtime === mtime && (prev.kind !== "pdf" || prev.whole) && (!prev.sheet || existsSync(join(dir, ...prev.sheet.split("/"))))) { items.push(prev); continue; }
     changed++;
     const ext = extname(f.path).toLowerCase();
     const kind = VIDEO.has(ext) ? "video" : AUDIO.has(ext) ? "audio" : IMAGE.has(ext) ? "image" : PSD.has(ext) ? "psd" : PPT.has(ext) ? "pptx" : PDF.has(ext) ? "pdf"
-      : READS.has(ext) ? "document" : [".zip", ".rar", ".7z"].includes(ext) ? "archive" : NEEDS_EXPORT.has(ext) ? "needs-export" : /\.(ttf|otf|woff2?)$/.test(ext) ? "font" : "other";
+      : READS.has(ext) ? "document" : [".zip", ".rar", ".7z"].includes(ext) ? "archive" : NEEDS_EXPORT.has(ext) ? "needs-export" : /\.(ttf|otf|woff2?|eot)$/.test(ext) ? "font" : "other";
     const it = { v: SCAN_V, path: f.path, size: f.size, mtime, kind };
     const sub = `.moworks/scan/${slug(f.path)}`, subAbs = join(dir, ...sub.split("/"));
     const rel = (name) => `${sub}/${name}`;
@@ -194,12 +199,18 @@ export async function scanAssets(dir, { root = APP_ROOT, words = true } = {}) {
         if (pics) { it.slidePictures = pics.length; it.sheet = rel("slides.jpg"); await pictureSheet(pics, join(subAbs, "slides.jpg"), root).catch(() => { it.sheet = null; }); it.slidesDir = rel("slides"); }
         if (!m.ok && !pics) it.error = m.error ?? "PowerPoint is not on this computer to read an old .ppt";
       } else if (kind === "pdf") {
-        const m = await runPy(root, "tools/intake/intake.py", ["pdf", abs, subAbs], { timeoutMs: 10 * 60 * 1000 });
+        // the whole document, as a Brand Kit reads it: every page's text, every page on numbered sheets, each page ready for a closer look
+        // (a page limit of 40 kept pages 41-130 of a guideline from Claude, and the film broke rules it could not read: T30-7)
+        const pdfSub = `.moworks/scan/${shortSlug(f.path)}`, pdfAbs = join(dir, ...pdfSub.split("/"));
+        rmSync(subAbs, { recursive: true, force: true }); rmSync(pdfAbs, { recursive: true, force: true });          // an older scan's pictures of it
+        const m = await runPy(root, "tools/intake/intake.py", ["pdf", abs, pdfAbs], { timeoutMs: 10 * 60 * 1000 });
+        it.whole = true;
         if (m.ok) {
-          Object.assign(it, { pages: m.pages, pictures: m.pictures, md: rel("PDF.md") });
-          const pages = readdirSync(subAbs).filter((n) => /^page-\d+\.png$/.test(n)).sort().map((n) => join(subAbs, n));
-          if (pages.length > 1) { await pictureSheet(pages, join(subAbs, "pages.jpg"), root).catch(() => {}); if (existsSync(join(subAbs, "pages.jpg"))) it.sheet = rel("pages.jpg"); }
-        } else it.error = ext === ".ai" ? "this Illustrator file was saved without PDF content: ask for a PDF or PNG export" : m.error;
+          const of = (x) => `${pdfSub}/${x}`;
+          Object.assign(it, { pages: m.pages, chars: m.chars, text: m.text.map(of), sheets: m.sheets.map(of), pagesDir: of("pages") });
+          if (it.sheets.length) it.sheet = it.sheets[0];
+        } else if (m.password) Object.assign(it, { password: true, error: m.error });
+        else it.error = ext === ".ai" ? "this Illustrator file was saved without PDF content: ask for a PDF or PNG export" : m.error;
       }
     } catch (e) { it.error = String(e.message ?? e).split("\n")[0].slice(0, 200); }
     items.push(it);
@@ -230,7 +241,12 @@ const line = (x) => {
     case "sequence": return `- ${x.path}: ${x.count} numbered pictures (${x.first.split("/").pop()} … ${x.last.split("/").pop()}${dims ? `, ${dims}` : ""}), an image sequence or a set of frames${x.sheet ? `; sheet of up to 12 of them: ${x.sheet}` : ""}`;
     case "psd": return `- ${x.path}: Photoshop file ${dims}, ${x.artboards ? `${x.artboards} artboard(s)` : `${x.frames ?? 0} top-level group frame(s)`}, ${x.texts ?? 0} text layer(s), fonts: ${(x.fonts ?? []).join(", ") || "none"}. Read ${x.md} (layer tree, texts with font / size / colour, frame pictures)${x.composite ? `; the whole file: ${x.composite}` : ""}. For a keep-design rebuild, the app's psd_layers tool exports a frame's layers`;
     case "pptx": return `- ${x.path}: PowerPoint, ${x.slides ?? "?"} slide(s)${x.md ? `: texts, notes, pictures in ${x.md}` : ""}${x.sheet ? `; slide pictures (PowerPoint): ${x.sheet}, each in ${x.slidesDir}/` : ""}`;
-    case "pdf": return `- ${x.path}: ${x.path.toLowerCase().endsWith(".ai") ? "Illustrator file" : "PDF"}, ${x.pages ?? "?"} page(s): pictures and text in ${x.md}${x.sheet ? `; sheet: ${x.sheet}` : ""}`;
+    case "pdf": {
+      const what = x.path.toLowerCase().endsWith(".ai") ? "Illustrator file" : "PDF";
+      if (x.password) return `- ${x.path}: ${what} with a password: not read, none of its pages reached you. Tell the owner, and ask for a copy without one`;
+      if (!x.text) return `- ${x.path}: ${what}, not read`;
+      return `- ${x.path}: ${what}, ${x.pages} page(s). ${x.chars ? `All its words, every page: ${x.text.join(", ")}` : "No text in it: its words are only in its pictures, open the pages that matter"}. Every page small and numbered on sheets: ${x.sheets.join(", ")}. One page closer: ${x.pagesDir}/page-NNN.jpg (NNN: its number in three digits), only where a page sets a rule its text does not fully give (a gradient, a lockup, a logo's place)`;
+    }
     case "document": return `- ${x.path}: document (open it)`;
     case "archive": return `- ${x.path}: archive${x.entries != null ? ` of ${x.entries} file(s), e.g. ${(x.sample ?? []).join(", ")}` : ""}; its files are not in the project until the owner unpacks it and imports them`;
     case "needs-export": return `- ${x.path}: cannot be opened here; ask the owner for a PNG or PDF export of it`;
@@ -239,5 +255,5 @@ const line = (x) => {
   }
 };
 const indexMd = (items) => ["# The app's scan of your files", "",
-  "Written by Moworks Studio before the Assets analysis. Pictures: open them. Videos, PSD, PowerPoint, PDF: read the sheets and the .md files named here (you cannot play a video or open a PSD). Words written out by Whisper are rough.", "",
-  ...items.map((x) => line(x) + (x.error ? ` (scan failed: ${x.error})` : "")), ""].join("\n");
+  "Written by Moworks Studio before the Assets analysis. Pictures: open them. Videos, PSD, PowerPoint, PDF: read the sheets and the .md files named here (you cannot play a video or open a PSD); a PDF's words are all in its text parts: read every part, never the PDF itself (a large one fails). Words written out by Whisper are rough.", "",
+  ...items.map((x) => line(x) + (x.error && !x.password ? ` (scan failed: ${x.error})` : "")), ""].join("\n");

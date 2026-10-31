@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-kinetic-camera",
+  "hash": "158d55546ad86249",
+  "at": "2026-10-17T08:04:53.180Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-kinetic-camera.mp4",
+    "poster": "previews/moworks__text-kinetic-camera.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "8bd89ba7e19054cb345fb5140141af266ec465b63ad2c6ce7aa148c289ded486",
+    "size": 54261,
+    "seconds": 28.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

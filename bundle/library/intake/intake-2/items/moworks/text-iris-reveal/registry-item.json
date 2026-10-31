@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-iris-reveal",
+  "type": "hyperframes:component",
+  "title": "Iris Circle Reveal",
+  "description": "Chữ hiện ra qua một vòng tròn mở rộng từ điểm bấm chuột, viền màu nhấn chạy theo mép vòng.",
+  "tags": [
+    "reveal",
+    "mask",
+    "circle",
+    "iris",
+    "text-mask-clip",
+    "smooth",
+    "mask-clip"
+  ],
+  "files": [
+    {
+      "path": "text-iris-reveal.html",
+      "target": "compositions/components/text-iris-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-iris-reveal",
+    "author": "moworks",
+    "call": "MW.textIrisReveal(q(\".ir\"), tl, 0.7, { close: 2.2 });",
+    "function": "MW.textIrisReveal",
+    "options": {
+      "x": "centre, 0-1 of the text's width (0.3)",
+      "y": "0-1 of its height (0.5)",
+      "duration": "s (0.8)",
+      "ease": "cubic-bezier(.7,0,.3,1)",
+      "rim": "px of the accent rim (4.5)",
+      "color": "rim colour",
+      "close": "s after the start to close the same way (null: stay)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Text (on a card panel) revealed by a growing circle clip: centre at the click point (demo 30 % across the text, mid-height; CSS --x 30 % --y 50 %), radius 0 → 150 % (to the farthest frame corner) over 0.8 s cubic-bezier(.7,0,.3,1); a 1.5 px accent rim follows the circle until it nearly fills. Demo: cursor clicks at 0.5 s, open 0.7–1.5 s, close 2.9–3.7 s (same ease); loop 4.2 s. Params: x, y: tâm vòng (30 %, 50 %) · duration (0.8 s) · ease (cubic-bezier(.7,0,.3,1)) · rim: viền vòng (1.5 px).",
+    "titleVi": "Chữ hiện qua vòng tròn mở rộng"
+  }
+}

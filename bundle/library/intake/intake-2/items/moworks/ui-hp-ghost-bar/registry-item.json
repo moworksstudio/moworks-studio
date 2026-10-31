@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-hp-ghost-bar",
+  "type": "hyperframes:block",
+  "title": "HP Ghost Bar",
+  "description": "Trúng đòn thì thanh máu tụt ngay, một vệt sáng phía sau chờ một nhịp rồi mới co theo để người xem thấy phần máu vừa mất; thanh rung nhẹ, nhãn \"−42\" hiện giữa hai mép.",
+  "tags": [
+    "bar",
+    "damage",
+    "trail",
+    "shake",
+    "game-hud",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-hp-ghost-bar.html",
+      "target": "compositions/components/ui-hp-ghost-bar.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-hp-ghost-bar",
+    "author": "moworks",
+    "call": "MW.uiHpGhostBar(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiHpGhostBar",
+    "options": {
+      "from": "(100)",
+      "to": "(58)",
+      "hitAt": "s (0.6)",
+      "lag": "s the ghost waits (0.4)",
+      "trail": "s it shrinks (0.5)",
+      "healAt": "s (2.3)",
+      "label": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. Bar 220 x 14, r 4. At the hit (0.6 s) the accent fill jumps 100 → 58 % at once; a light-ink ghost fill behind it (opacity 1 for 100 ms, then 0.7) waits 400 ms then shrinks to 58 % in 500 ms inOut. Bar shakes ±3 px x for 200 ms (per-frame hash, linear decay). Readout 'NN / 100' turns accent; loss label '−42' centred in the gap while the gap > 3 %. Heal back 400 ms inOut at 2.3 s. Skip the time graph (lesson). Params: from / to: máu trước và sau (100 → 58) · hitAt: lúc trúng (0.6 s) · lag: chờ trước khi vệt co (0.4 s) · trail: thời gian vệt co (0.5 s). The fill drops at once; a light ghost behind it waits, then shrinks, so the loss stays readable.",
+    "titleVi": "Thanh máu tụt có vệt trễ"
+  }
+}

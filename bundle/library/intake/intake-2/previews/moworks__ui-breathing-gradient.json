@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-breathing-gradient",
+  "hash": "50f77b67463362a9",
+  "at": "2026-10-17T09:52:04.929Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__ui-breathing-gradient.mp4",
+    "poster": "previews/moworks__ui-breathing-gradient.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "48d79ab5f3a9d87b6c64176cd7c76d4088c287a7df40f84b1303074b4c97e32a",
+    "size": 22664,
+    "seconds": 21,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-scale-down-vanish",
+  "hash": "176d23ffb1dafd60",
+  "at": "2026-10-17T11:31:55.826Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-scale-down-vanish.mp4",
+    "poster": "previews/moworks__text-scale-down-vanish.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a918cda2e236212f683c4c59b948223f812f3019a8876d5b817b748e04190230",
+    "size": 12735,
+    "seconds": 21.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

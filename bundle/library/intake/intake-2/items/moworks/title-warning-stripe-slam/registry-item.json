@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "title-warning-stripe-slam",
+  "type": "hyperframes:block",
+  "title": "Warning Stripe Slam",
+  "description": "Hai dải sọc nguy hiểm lao vào từ hai phía ngược nhau bằng lò xo, chạm chỗ thì bẹp dọc và khung rung ngắn; 0.12 giây sau chữ cảnh báo thu từ to về cỡ, sọc chạy đều ngược chiều.",
+  "tags": [
+    "warning",
+    "stripes",
+    "slam",
+    "squash",
+    "game-impact-fx",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "title-warning-stripe-slam.html",
+      "target": "compositions/components/title-warning-stripe-slam.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/title-warning-stripe-slam",
+    "author": "moworks",
+    "call": "MW.titleWarningStripeSlam(q(\".gm\"), tl, 0, {});",
+    "function": "MW.titleWarningStripeSlam",
+    "options": {
+      "inAt": "s the bands rush in (0.3), spring k380 d24",
+      "textDelay": "s after landing that the word slams (0.12)",
+      "exitAt": "s (3.5)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. Two hazard bands (20 px, stripes every 18 px) at y 63 and 133 rush in, top from the left, bottom from the right, by spring k380 d24 (~200 ms) at 0.3 s; on landing (0.52 s) they squash to scaleY 0.65, recovering 1 − 0.35 e^(−16t); frame shakes ±4 px 120 ms. 'DANGER' (30 px) scales 1.3 → 1 over 180 ms outExpo from 0.64 s. Stripes drift 18 px/s opposite. Exit 280 ms in-expo at 3.5 s (top out left, bottom out right). Params: inAt: lúc vào (0.3 s) · spring: lò xo (k380 d24) · squash: bẹp lúc chạm (0.65) · textDelay: chữ vào sau (0.12 s) · drift: tốc độ sọc (18 px/s).",
+    "titleVi": "Dải sọc cảnh báo đập vào khung"
+  }
+}

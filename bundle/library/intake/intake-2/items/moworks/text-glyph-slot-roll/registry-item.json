@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-glyph-slot-roll",
+  "type": "hyperframes:component",
+  "title": "Glyph Slot Roll",
+  "description": "Mỗi chữ cái là một ô quay qua bốn chữ ngẫu nhiên rồi dừng đúng chữ mới, các ô dừng cách nhau 0.1 giây, nảy nhẹ khi dừng và kéo dài khi quay nhanh.",
+  "tags": [
+    "swap",
+    "slot",
+    "reel",
+    "stagger",
+    "text-swap",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "text-glyph-slot-roll.html",
+      "target": "compositions/components/text-glyph-slot-roll.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-glyph-slot-roll",
+    "author": "moworks",
+    "call": "MW.textGlyphSlotRoll(q(\".gs\"), tl, 0, {});",
+    "function": "MW.textGlyphSlotRoll",
+    "options": {
+      "from": "the first word",
+      "to": "the second (same letter count)",
+      "pool": "letters the reels pass through",
+      "at": "s (0.3): reel i stops 0.75 + 0.1 i s later, back.out(0.5)",
+      "backAt": "s the reels roll back (2.4)",
+      "gap": "px between windows (24)",
+      "cell": "window colour",
+      "seed": "the passing letters"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Char windows 1.2 em wide × 1.7 em tall (34×48 px at 28 px type, 6 px gap), row pitch 1.43 em. Reel cycle: word A glyph, 4 seeded random A–Z, word B glyph, 4 random. Roll 1 at 0.3 s: 5 rows A → B, reel i lasts 0.75 + 0.1·i s (stops 100 ms apart), ease back.out(0.5) (overshoot ≈0.04 row ≈ 6 % of the glyph). Moving glyph scaleY = 1 + min(0.5, 0.03·rows/s), scaleX = 1/√scaleY. Roll 2 at 2.4 s B → A, same timing; loop 4.2 s. Params: to: từ mới · rows: số chữ ngẫu nhiên trước đích (4) · duration: ô đầu (0.75 s) · stagger: độ lệch dừng (0.1 s) · stretch: kéo giãn theo tốc độ (0.03).",
+    "titleVi": "Chữ quay như máy xèng, dừng lệch nhau"
+  }
+}

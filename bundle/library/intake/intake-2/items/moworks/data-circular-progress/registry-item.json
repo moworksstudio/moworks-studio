@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-circular-progress",
+  "type": "hyperframes:block",
+  "title": "Circular Progress",
+  "description": "Vòng tròn tô dần theo chiều kim đồng hồ từ đỉnh tới đúng 75 %, số ở giữa đếm lên cùng nhịp rồi giữ.",
+  "tags": [
+    "progress",
+    "ring",
+    "counter",
+    "data",
+    "loading-data",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "data-circular-progress.html",
+      "target": "compositions/components/data-circular-progress.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/data-circular-progress",
+    "author": "moworks",
+    "call": "MW.dataCircularProgress(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataCircularProgress",
+    "options": {
+      "value": "% (75)",
+      "start": "s (0.26)",
+      "duration": "s (1.28), linear",
+      "radius": "px (37)",
+      "stroke": "px (7)",
+      "color": "(#75e4d2)",
+      "loop": "s (2.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Ring r37, stroke 7: track #28374b, fill #75e4d2 starting at 12 o'clock, clockwise, butt caps. In a 2.2 s loop: stroke dash 0 → 75 % of the circumference linear from 12 % to 70 % (0.26-1.54 s); the centre number (22 px) shows floor(progress × 75) % on the same clock; holds. Params: value (75 %) · duration (1.28 s) · radius (37 px) · stroke (7 px) · ease (none).",
+    "titleVi": "Vòng tiến độ tới 75 %"
+  }
+}

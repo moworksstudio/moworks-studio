@@ -1,6 +1,6 @@
 ---
 name: brush-cartoon-app
-description: How Moworks Studio makes a Brush cartoon film - ClaudeAnimationBase's hand-painted cartoon method (p5.brush, boil, flat 2D, acting), the project's own characters defined as data and approved on model sheets, one renderAt(t) page driven by HyperFrames, sound from the app. Never Clawd.
+description: How Moworks Studio makes a Brush cartoon film - ClaudeAnimationBase's hand-painted cartoon method (p5.brush, boil, flat 2D, acting), the project's own characters defined as data and approved on model sheets, one renderAt(t) page driven by HyperFrames, sound from the app. The kit's Clawd stays a demo.
 version: 1.0.0
 derived-from: ClaudeAnimationBase by John Heibel, commit 0ac8bf2b31942376cb6b8c4074715595d512acd2, MIT - ANIMATION_GUIDE.md (rules, principles, workflow), src/core.js and src/timeline.js (the engine and page contract), src/clawd.js (faces, emotions, moves), rewritten for Moworks Studio's character layer. https://github.com/JohnHeibel/ClaudeAnimationBase/tree/0ac8bf2b31942376cb6b8c4074715595d512acd2
 ---
@@ -13,11 +13,12 @@ The project's style is ClaudeAnimationBase's hand-painted cartoon. Its own rule 
 hats, emotes, moves, turns, as shipped), `src/character.js` (the app's character layer) and `examples/definition.json` (the fields of a definition, never a character to draw).
 **Moworks Studio runs every command** (stills, checks, render): where the guide says `node render.mjs`, `studio.html` or a sheet, skip it.
 
-## 0. Never Clawd
+## 0. The kit's Clawd demo
 
-Clawd is Anthropic's mascot. It is never in this film, in any board, as a cameo, a silhouette, a lookalike or a name. Never call `clawd()`
-or `dancer()`, never copy the kit's `clawd.js`. The guide's examples say Clawd: read them as the project's own characters. The app refuses a
-film that draws Clawd.
+Clawd is Anthropic's mascot and stays the kit's demo. Do not bring it into a film on your own. Never call `clawd()` or `dancer()`, never copy
+the kit's `clawd.js`. The guide's examples say Clawd: read them as the project's own characters. The app refuses a film that draws the kit's
+Clawd. When the user asks for a character like it, make that: the project's own definition, drawn in this style, with an id of its own (not
+`clawd`).
 
 ## 1. What wins where
 
@@ -55,7 +56,7 @@ film that draws Clawd.
 - Then call the app's **`character_sheet`** tool: it draws every character's model sheets (the five views, the moves and hats; all 31
   emotions) through HyperFrames and returns their paths. Read them once; fix a real problem in the definition (a face off the body, a part
   that does not read, colours that do not separate), call it again once.
-- Then call the app's **`character_gate`** tool: the Brush gate checks every character automatically (the schema, never Clawd, colours
+- Then call the app's **`character_gate`** tool: the Brush gate checks every character automatically (the schema, colours
   that separate and read on a light and a dark ground, the face on the body, legs that stand under it and reach the ground, arms at its
   sides, the key views, the sheets drawn and not blank) and says why a check fails. Fix the definition and call it again until it passes;
   only then stop: the owner approves the sheets in the Character dialog (a new character is approved only after a pass).

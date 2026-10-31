@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-letter-zoom",
+  "type": "hyperframes:component",
+  "title": "Mask Wipe through Letterforms",
+  "description": "Cảnh mới hiện trong lòng một chữ to giữa khung, rồi chữ phóng lớn rất nhanh cho tới khi cảnh mới phủ kín.",
+  "tags": [
+    "mask",
+    "letter",
+    "zoom",
+    "typography",
+    "transitions",
+    "crisp",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "transition-letter-zoom.html",
+      "target": "compositions/components/transition-letter-zoom.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/transition-letter-zoom",
+    "author": "moworks",
+    "call": "MW.transitionLetterZoom(q(\".tk-b\"), tl, 0.9, { duration: 1.4 });",
+    "function": "MW.transitionLetterZoom",
+    "options": {
+      "letter": "the letter or short word (B)",
+      "size": "px at scale 1 (760)",
+      "scale": "scale it reaches (30)",
+      "duration": "s (0.9: 0.4 the letter appears, 0.5 it zooms, expo.in)",
+      "font": "font family (Inter)",
+      "from": "the outgoing scene"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Incoming scene shown only inside one huge heavy letter (or short word) centred on the frame: 0-400 ms the letter mask appears, 400-900 ms the mask scales 1 -> 30 easeInExpo until a stroke covers the frame, then the mask is removed. Align the letter's centre with the next subject. In AE: text layer as track matte. Params: letter (B) · scale (1 → 30) · duration (0.9 s) · ease (expo.in).",
+    "titleVi": "Lao qua lòng chữ sang cảnh mới"
+  }
+}

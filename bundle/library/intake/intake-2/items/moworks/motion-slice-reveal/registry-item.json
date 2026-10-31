@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-slice-reveal",
+  "type": "hyperframes:component",
+  "title": "Slice Reveal",
+  "description": "Phần tử được cắt thành bốn lát ngang, lát lẻ từ trái lát chẵn từ phải trượt vào và hiện dần, cùng dừng một lúc thành một khối.",
+  "tags": [
+    "slices",
+    "reveal",
+    "slide",
+    "stagger",
+    "effects-transitions",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-slice-reveal.html",
+      "target": "compositions/components/motion-slice-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-slice-reveal",
+    "author": "moworks",
+    "call": "MW.motionSliceReveal(q(\".sr\"), tl, 0.3, { exitAt: 1.7 });",
+    "function": "MW.motionSliceReveal",
+    "options": {
+      "slices": "(4)",
+      "distance": "px (120): odd strips from the left, even from the right",
+      "stagger": "s (0.036); all land together",
+      "duration": "s (0.84, ease-in-out cubic)",
+      "exitAt": "s after the start to slide apart again (null, 0.2 s)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Element cut into 4 equal horizontal strips (clipped copies). Strips 1 and 3 start at x -42 px, strips 2 and 4 at +42 px, each opacity 0 -> 1; strip i starts at i x 36 ms and all land together at 840 ms (each lasts 840 - 36i ms), easeInOutCubic. Exit (200 ms ease-in cubic): the same tween runs back, strips slide apart again while fading. Params: slices (4) · distance (42 px) · stagger (36 ms) · duration (0.84 s).",
+    "titleVi": "Bốn lát ngang trượt vào khớp"
+  }
+}

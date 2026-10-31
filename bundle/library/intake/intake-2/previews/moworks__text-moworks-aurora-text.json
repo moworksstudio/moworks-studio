@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-moworks-aurora-text",
+  "hash": "57f039534c60a675",
+  "at": "2026-10-17T10:31:05.859Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-moworks-aurora-text.mp4",
+    "poster": "previews/moworks__text-moworks-aurora-text.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "121b43ff15e55d7d749f6e28ee9a594af0d5a816a851f6e7db6b1ccc78c38021",
+    "size": 50414,
+    "seconds": 29.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

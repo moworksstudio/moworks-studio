@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-placeholder-replace",
+  "hash": "93021abad8b4914a",
+  "at": "2026-10-17T09:35:41.468Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-placeholder-replace.mp4",
+    "poster": "previews/moworks__text-placeholder-replace.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a91f08dae235ef7c3ca475c725df08065d9ca5873d09922dac57a5f052f8c421",
+    "size": 11321,
+    "seconds": 22.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

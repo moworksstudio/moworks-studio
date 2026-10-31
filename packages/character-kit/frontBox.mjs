@@ -7,9 +7,9 @@
 // 2.5% of the sheet is the Front figure (the scale's numbers at the far left are narrower); its rows are the tallest run of inked rows in
 // those columns (the "FRONT" label under the feet is a run of its own).
 
-import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { resolveRuntime } from "../version-manager/index.mjs";
 
 const INK = 60;           // RGB distance from the paper
@@ -54,7 +54,8 @@ export async function frontBoxOf(file, { sharp }) {
 }
 
 // ---- kept with the character (library data): <character dir>/front.json { "<media field>": { box, file, size, mtimeMs } }, made again
-// when its sheet changes. GET /api/characters reads it as it is and asks for a fill in the background when a sheet has none yet.
+// when its sheet changes. GET /api/characters reads it as it is and asks for a fill in the background when a sheet has none yet. A character
+// the app ships keeps its measures elsewhere (`keep`, the state folder): nothing is ever written to bundle/.
 export const FRONT_FILE = "front.json";
 const readJson = (f) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return null; } };
 let sharpMod = null;
@@ -62,8 +63,8 @@ const loadSharp = () => (sharpMod ??= createRequire(join(resolveRuntime().dir, "
 const stamp = (f) => { const s = statSync(f); return { size: s.size, mtimeMs: Math.round(s.mtimeMs) }; };
 
 /** The Front boxes kept for a character's sheets ({ field: [x, y, w, h] }), only those whose sheet is the one they were measured on. */
-export function frontBoxes(dir, sheets) {
-  const kept = readJson(join(dir, FRONT_FILE)) ?? {}, out = {};
+export function frontBoxes(dir, sheets, { keep = null } = {}) {
+  const kept = readJson(keep ?? join(dir, FRONT_FILE)) ?? {}, out = {};
   for (const [field, name] of sheets) {
     const k = kept[field], f = join(dir, name);
     if (k?.box && k.file === name && existsSync(f)) { const s = stamp(f); if (s.size === k.size && s.mtimeMs === k.mtimeMs) out[field] = k.box; }
@@ -71,8 +72,8 @@ export function frontBoxes(dir, sheets) {
   return out;
 }
 /** Measure the sheets that have no fresh box yet and keep them; returns the fields measured. */
-export async function fillFrontBoxes(dir, sheets, { sharp = null } = {}) {
-  const have = frontBoxes(dir, sheets), kept = readJson(join(dir, FRONT_FILE)) ?? {}, done = [];
+export async function fillFrontBoxes(dir, sheets, { sharp = null, keep = null } = {}) {
+  const file = keep ?? join(dir, FRONT_FILE), have = frontBoxes(dir, sheets, { keep }), kept = readJson(file) ?? {}, done = [];
   for (const [field, name] of sheets) {
     const f = join(dir, name);
     if (have[field] || !existsSync(f)) continue;
@@ -80,6 +81,6 @@ export async function fillFrontBoxes(dir, sheets, { sharp = null } = {}) {
     kept[field] = { box, file: name, ...stamp(f) };
     done.push(field);
   }
-  if (done.length) writeFileSync(join(dir, FRONT_FILE), JSON.stringify(kept, null, 2) + "\n");
+  if (done.length) { mkdirSync(dirname(file), { recursive: true }); writeFileSync(file, JSON.stringify(kept, null, 2) + "\n"); }
   return done;
 }

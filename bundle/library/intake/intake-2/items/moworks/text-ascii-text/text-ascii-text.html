@@ -1,0 +1,69 @@
+<!--
+  ASCII Text (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Chữ hiện thành lưới ký tự ASCII theo độ đậm (10 mức), các hàng gợn sóng nhẹ, tô dải màu xanh sang màu nhấn.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textAsciiText(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - cell: [w, h] px per character ([12, 17])
+      - charset: light to dense (' .:-=+*#%@')
+      - wave: ± px of row ripple (8)
+      - fps: refresh a second (12)
+      - colors: [left, right] of the fill gradient
+      - seed: (4)
+      - loop: s (3.4)
+
+  Notes: Text rasterised to a grid of mono cells (demo 5 × 7 px at 96 px type; recipe 5–12 px), each cell's coverage mapped to 10 levels ' .:-=+*#%@', glyphs filled with a cyan → accent horizontal gradient. Rows ripple sideways ±3.2 px (sin(0.45·row + phase), 2 waves per 3.4 s), refreshed at 12 fps with ~10 % of cells flickering one level up. Demo reveal: cells switch on left → right with seeded noise over 0.3–1.2 s; dissolve 2.6–3.1 s; loop 3.4 s. Params: cell: cỡ ô (5–12 px) · charset (' .:-=+*#%@') · wave: biên độ gợn (3 px) · fps (12). Cells switch on left to right with seeded noise over 0.3–1.2 s and dissolve 2.6–3.1 s; about one in ten flickers a level up each refresh.
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">MÃ HOÁ</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"cell":[12,17],"charset":" .:-=+*#%@","wave":8,"fps":12,"colors":["#3dd6f5","#a693ff"],"seed":4,"loop":3.4};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var clone = function () { var g = el.cloneNode(true), br = el.getBoundingClientRect(); g.removeAttribute("id"); g.style.position = "absolute"; g.style.margin = "0"; g.style.pointerEvents = "none"; g.style.boxSizing = "border-box";
+    g.style.left = el.offsetLeft + "px"; g.style.top = el.offsetTop + "px"; g.style.width = (br.width + 0.5) + "px"; g.style.height = el.offsetHeight + "px"; host.insertBefore(g, el.nextSibling); return g; };
+  var raster = function (m) { var cs = getComputedStyle(el), W = el.offsetWidth + 2 * m, Hh = el.offsetHeight + 2 * m, cv = document.createElement("canvas"), off = document.createElement("canvas"); cv.width = off.width = W; cv.height = off.height = Hh;
+    cv.style.cssText = "position:absolute;pointer-events:none;left:" + (el.offsetLeft - m) + "px;top:" + (el.offsetTop - m) + "px;width:" + W + "px;height:" + Hh + "px;"; host.insertBefore(cv, el.nextSibling);
+    var g = off.getContext("2d"); g.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily; g.fillStyle = cs.color; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(el.textContent, W / 2, Hh / 2 + parseFloat(cs.fontSize) * 0.04);
+    el.style.visibility = "hidden"; return { cv: cv, c: cv.getContext("2d"), off: off, W: W, H: Hh, fs: parseFloat(cs.fontSize), font: g.font }; };
+  var Rr = raster(20), c = Rr.c, cw = o.cell[0], chh = o.cell[1], cols = Math.ceil(Rr.W / cw), rows = Math.ceil(Rr.H / chh), img = Rr.off.getContext("2d").getImageData(0, 0, Rr.W, Rr.H).data, L = [], cs = o.charset, r0 = MW.rand(o.seed), N = [];
+  for (var y = 0; y < rows; y++) for (var x = 0; x < cols; x++) { var s = 0, k = 0; for (var yy = y * chh; yy < Math.min(Rr.H, (y + 1) * chh); yy += 2) for (var xx = x * cw; xx < Math.min(Rr.W, (x + 1) * cw); xx += 2) { s += img[(yy * Rr.W + xx) * 4 + 3]; k++; } L.push(Math.round((s / Math.max(1, k)) / 255 * (cs.length - 1))); N.push(r0()); }
+  var g = c.createLinearGradient(0, 0, Rr.W, 0); g.addColorStop(0, o.colors[0]); g.addColorStop(1, o.colors[1]);
+  return MW.drive(tl, at, o.loop, function (t) {
+    c.clearRect(0, 0, Rr.W, Rr.H); c.font = "700 " + Math.round(chh * 1.05) + "px 'JetBrains Mono', monospace"; c.fillStyle = g; c.textBaseline = "top"; var fr = Math.floor(t * o.fps), rf = MW.rand(o.seed * 17 + fr), ph = 2 * Math.PI * 2 * t / o.loop;
+    for (var y = 0; y < rows; y++) { var dx = o.wave * Math.sin(0.45 * y + ph); for (var x = 0; x < cols; x++) { var i = y * cols + x, lv = L[i]; if (lv <= 0) continue; var rev = (t - 0.3) / 0.9 - (x / cols * 0.8 + N[i] * 0.2), dis = (t - 2.6) / 0.5 - (N[i] * 0.8 + 0.2 * x / cols); if (rev < 0 || dis > 0) continue; if (rf() < 0.1) lv = Math.min(cs.length - 1, lv + 1); c.fillText(cs[lv], x * cw + dx, y * chh); } }
+  });
+  };
+  MW.textAsciiText = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

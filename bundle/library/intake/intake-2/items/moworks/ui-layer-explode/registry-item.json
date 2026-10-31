@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-layer-explode",
+  "type": "hyperframes:component",
+  "title": "Volumetric Menu",
+  "description": "Ba lớp menu nghiêng 3D xếp chồng tách ra theo chiều dọc (−56 / 0 / +56 px) bằng lò xo lệch nhịp, có đường nối các góc, rồi gộp lại.",
+  "tags": [
+    "layers",
+    "explode",
+    "3d",
+    "stack",
+    "spatial-ui-depth",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-layer-explode.html",
+      "target": "compositions/components/ui-layer-explode.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-layer-explode",
+    "author": "moworks",
+    "call": "MW.uiLayerExplode(q(\".le\"), tl, 0, { panels: \".lp.a, .lp.b, .lp.c\" });",
+    "function": "MW.uiLayerExplode",
+    "options": {
+      "panels": "selector of the panel wrappers, top first",
+      "spread": "px (302; 56 of 320)",
+      "rotX": "(−57)",
+      "rotY": "(−29)",
+      "perspective": "px (2800)",
+      "at": "s (0.45)",
+      "collapseAt": "s (2.9)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Three panels 150x92 (ONE accent on top, TWO, THREE) tilted rotateX −57° and rotateY −29° (perspective 520), stacked. Separation along screen Y: −56 / 0 / +56 px (plus a 4 px base step) on springs k200 c20, the middle at 0.45 s, the outer ones 60 ms later (bottom +40 ms more). Dashed lines join the corners once apart; y readouts at the side. Collapse 2.9-3.35 s power2.inOut. Params: tilt (rotX 57°, rotY 29°) · spread (56 px) · spring (k200 c20) · each (0.06 s) · collapse (0.45 s).",
+    "titleVi": "Ba lớp menu tách ra theo chiều sâu"
+  }
+}

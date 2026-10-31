@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-diagonal-wipe",
+  "type": "hyperframes:component",
+  "title": "Diagonal Wipe",
+  "description": "Nội dung đứng yên, một mép chéo 45° quét từ góc dưới trái lên góc trên phải để lộ ra.",
+  "tags": [
+    "reveal",
+    "wipe",
+    "diagonal",
+    "entrance-exit",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-diagonal-wipe.html",
+      "target": "compositions/components/motion-diagonal-wipe.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-diagonal-wipe",
+    "author": "moworks",
+    "call": "MW.motionDiagonalWipe(q(\".dw\"), tl, 0.3, { exitAt: 1.7 });",
+    "function": "MW.motionDiagonalWipe",
+    "options": {
+      "duration": "s (0.68, power4.inOut)",
+      "angle": "degrees of the gradient (45: from the lower left to the upper right)",
+      "exitAt": "s (null)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Still content revealed by a 45° edge travelling from the lower-left corner to the upper-right: edge offset 0 → 145 % (of ~232 px on a 200×120 box; clip-path polygon) in 680 ms power4.inOut (easeInOutQuint); a 2 px light line rides the edge while it crosses. Exit: fade 320 ms power2.in. Params: duration (0.68 s) · angle (45°) · from: góc bắt đầu (dưới trái) · ease (power4.inOut).",
+    "titleVi": "Quét lộ theo đường chéo"
+  }
+}

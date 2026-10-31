@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-slash-reveal",
+  "hash": "dfe23c181c0104ab",
+  "at": "2026-10-17T07:43:00.709Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-slash-reveal.mp4",
+    "poster": "previews/moworks__text-slash-reveal.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "92493ecfcbd447cc52330483df0ccc5aa797da4a5d8d27cd88dce2dd8977de4d",
+    "size": 12985,
+    "seconds": 30,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

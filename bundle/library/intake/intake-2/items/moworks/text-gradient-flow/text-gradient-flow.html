@@ -1,0 +1,48 @@
+<!--
+  Animated Gradient Text (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Lòng chữ phủ dải ba màu (màu đầu bằng màu cuối) trôi ngang liên tục, liền mạch không thấy chỗ nối.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textGradientFlow(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - colors: three colours (the first repeats at the end)
+      - angle: degrees (90)
+      - period: s per colour cycle (4), linear and seamless
+      - loops: (1)
+
+  Notes: Text filled with a 90° linear gradient of 3 colours with first = last (A, B, C, A), background-size 300 % × 100 %, clipped to the letters. The gradient shifts left one full colour cycle (3 text widths) every 4 s, linear, seamless: CSS background-position-x 0 → 300 % over 8 s (two cycles), demo one cycle per 4 s loop; letters still. Params: colors: ba màu (đầu = cuối) · speed: một vòng màu mỗi (4 s) · angle (90°).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Màu chảy trong chữ</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"colors":["#ff6fb5","#8b7bff","#3dd6f5"],"angle":90,"period":4,"loops":1};
+  var run = function (el, tl, at, o) {
+        var W = el.getBoundingClientRect().width; el.style.backgroundImage = "linear-gradient(" + o.angle + "deg, " + o.colors.concat([o.colors[0]]).join(", ") + ")"; el.style.backgroundSize = 3 * W + "px 100%"; el.style.backgroundRepeat = "repeat-x";
+        return MW.drive(tl, at, o.period * o.loops, function (t) { el.style.backgroundPosition = (-3 * W * ((t / o.period) % 1)).toFixed(1) + "px 0"; });
+      };
+  MW.textGradientFlow = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

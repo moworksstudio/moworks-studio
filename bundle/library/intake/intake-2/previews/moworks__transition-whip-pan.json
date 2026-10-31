@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/transition-whip-pan",
+  "hash": "fb567709e4b5411a",
+  "at": "2026-10-17T07:20:34.316Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__transition-whip-pan.mp4",
+    "poster": "previews/moworks__transition-whip-pan.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "44f05652a3d0af736057819f7d9c79bcd8f13403e95779bbf97d9ec67fc431d8",
+    "size": 16970,
+    "seconds": 29.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

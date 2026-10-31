@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-energy-arc",
+  "hash": "171f5fe8b0891816",
+  "at": "2026-10-17T10:50:10.429Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-energy-arc.mp4",
+    "poster": "previews/moworks__motion-energy-arc.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "801ffd4d446b8c3a8db3e3df8d4f635a3e5c8129d55bf7c8a0231b444634ddc7",
+    "size": 12040,
+    "seconds": 27.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

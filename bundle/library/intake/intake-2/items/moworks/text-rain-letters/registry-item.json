@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-rain-letters",
+  "type": "hyperframes:component",
+  "title": "Raining Characters",
+  "description": "Các chữ cái rơi xuống theo thứ tự ngẫu nhiên như mưa và khớp đúng chỗ, lúc rơi kéo theo ba bóng mờ màu nhấn, cuối cùng lại rơi tiếp xuống dưới để ra.",
+  "tags": [
+    "letters",
+    "random",
+    "echo",
+    "drop",
+    "text-glyph-physics",
+    "smooth",
+    "crisp",
+    "glyph-physics"
+  ],
+  "files": [
+    {
+      "path": "text-rain-letters.html",
+      "target": "compositions/components/text-rain-letters.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-rain-letters",
+    "author": "moworks",
+    "call": "MW.textRainLetters(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textRainLetters",
+    "options": {
+      "drop": "px (600)",
+      "start": "s (0.3)",
+      "spread": "s the starts spread over (1)",
+      "exitAt": "s (2.85)",
+      "seed": "the orders"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Chars in seeded random order, start times spread evenly over 1.0 s from 0.3 s; each falls y −150 px → 0 in 0.5 s power2.out (hidden before its start, no fade). While moving, 3 accent echoes trail 33 / 66 / 99 ms behind at opacity 0.5 / 0.35 / 0.2, drawn only when more than 1.5 px from the char. Exit: second seeded random order spread over 0.55 s from 2.85 s, each falls +150 px in 0.45 s power2.in fading to 0 at 150 px. Loop 4 s. Params: quãng rơi (150 px) · thời gian rơi (0.5 s) · khoảng rải (1 s) · bóng (3 × 33 ms).",
+    "titleVi": "Chữ rơi như mưa, có vệt bóng"
+  }
+}

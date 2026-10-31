@@ -1,0 +1,61 @@
+<!--
+  Depth Pullback (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Thẻ từ 220 % nhoè và loá thu về đúng cỡ, rõ nét dần, rồi bốn góc khung hiện ra.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionDepthPullback(q(".dp"), tl, 0.3, { exitAt: 2.1 });
+
+  Options (defaults in brackets):
+      - from: start scale (2.2)
+      - blur: px (28)
+      - bright: start brightness (1.35)
+      - duration: s (0.76)
+      - ease: (power2.inOut)
+      - bracket: px corner size (60)
+      - gap: px outside the card (30)
+      - stroke: px (6)
+      - accent: 
+      - exitAt: s after the start to fade (null)
+
+  Notes: Card scales 2.2 → 1 about its centre with blur 8 → 0 px and brightness 1.35 → 1, together in 760 ms power2.inOut; it fades in over the first 300 ms of the loop; four corner brackets fade in over 250 ms once it lands. Exit: fade 300 ms. Params: duration (0.76 s) · scale đầu (2.2) · blur (8 px) · brightness (1.35).
+-->
+
+<div class="st"><div class="dp">Toàn cảnh</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":2.2,"blur":28,"bright":1.35,"duration":0.76,"ease":"power2.inOut","bracket":60,"gap":30,"stroke":6,"accent":"#e8ebf3","exitAt":null};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, e = gsap.parseEase(o.ease), br = [], z = o.bracket, g = o.gap;
+        if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        var L = el.offsetLeft, Tp = el.offsetTop, W = el.offsetWidth, Hh = el.offsetHeight;
+        [[0, 0, "top", "left"], [1, 0, "top", "right"], [0, 1, "bottom", "left"], [1, 1, "bottom", "right"]].forEach(function (c) { var b = document.createElement("div"); b.style.cssText = "position:absolute;pointer-events:none;opacity:0;width:" + z + "px;height:" + z + "px;border-" + c[2] + ":" + o.stroke + "px solid " + o.accent + ";border-" + c[3] + ":" + o.stroke + "px solid " + o.accent + ";left:" + (c[0] ? L + W + g - z : L - g) + "px;top:" + (c[1] ? Tp + Hh + g - z : Tp - g) + "px;"; host.appendChild(b); br.push(b); });
+        return MW.drive(tl, at, o.exitAt == null ? o.duration + 0.25 : o.exitAt + 0.3, function (t) {
+          var p = e(Math.min(1, t / o.duration)), a = Math.min(1, t / 0.3), x = o.exitAt != null && t > o.exitAt ? Math.min(1, (t - o.exitAt) / 0.3) : 0;
+          gsap.set(el, { scale: o.from + (1 - o.from) * p }); el.style.filter = p < 1 ? "blur(" + (o.blur * (1 - p)).toFixed(2) + "px) brightness(" + (1 + (o.bright - 1) * (1 - p)).toFixed(3) + ")" : ""; el.style.opacity = String(a * (1 - x));
+          var bq = Math.max(0, Math.min(1, (t - o.duration) / 0.25)) * (1 - x); br.forEach(function (b) { b.style.opacity = String(bq); });
+        });
+      };
+  MW.motionDepthPullback = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

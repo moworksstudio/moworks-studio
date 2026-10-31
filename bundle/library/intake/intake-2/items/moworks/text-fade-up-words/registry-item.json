@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-fade-up-words",
+  "type": "hyperframes:component",
+  "title": "Word Fade Up",
+  "description": "Từng từ lần lượt nổi lên 20 px và hiện dần, nhịp điềm tĩnh hơn từng ký tự.",
+  "tags": [
+    "reveal",
+    "words",
+    "stagger",
+    "fade",
+    "text-reveal",
+    "smooth",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "text-fade-up-words.html",
+      "target": "compositions/components/text-fade-up-words.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-fade-up-words",
+    "author": "moworks",
+    "call": "MW.textFadeUpWords(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textFadeUpWords",
+    "options": {
+      "y": "em (0.45)",
+      "duration": "s (0.5)",
+      "stagger": "s (0.12)",
+      "cap": "s (0.9)",
+      "start": "s (0.3)",
+      "outAt": "s (2.6)",
+      "ease": "(ease-out cubic)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Magic UI (MIT); a faithful port is in the Magic UI collection"
+    },
+    "thirdParty": [],
+    "notes": "Split words (Japanese: phrase chunks with particles glued to the previous word). Each word y +20 px (0.45 em) → 0, opacity 0 → 1, 0.5 s easeOutCubic (cubic-bezier(.215,.61,.355,1)), stagger 120 ms capped so all starts fit 0.9 s, from 0.3 s. Recipe range: stagger 0.05–0.15 s, duration 0.3–0.5 s. Loop exit: all fade 2.6–2.9 s inCubic; loop 3 s. Params: duration (0.5 s) · stagger (0.12 s) · y: quãng nổi (20 px) · ease (easeOutCubic).",
+    "titleVi": "Từng từ nổi lên và hiện dần"
+  }
+}

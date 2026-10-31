@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-milestone-progress",
+  "type": "hyperframes:block",
+  "title": "Progress Milestone Firefly",
+  "description": "Thanh tiến độ đầy dần tới 75 %, các mốc sáng lên khi được vượt qua, đầu thanh là đốm sáng kéo theo đuôi tia lửa nhỏ.",
+  "tags": [
+    "progress",
+    "milestones",
+    "glow",
+    "bar",
+    "data-storytelling",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "data-milestone-progress.html",
+      "target": "compositions/components/data-milestone-progress.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/data-milestone-progress",
+    "author": "moworks",
+    "call": "MW.dataMilestoneProgress(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataMilestoneProgress",
+    "options": {
+      "value": "% (75)",
+      "seed": "spark drift"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Bar 8 px tall fills 0 -> 75 % over 400-2400 ms easeInOut. Milestone dots (r 6) at 0/25/50/75/100 % turn accent the frame the fill passes them. Head: glowing accent dot (r 7, 14 px glow) with a background-colour core (r 3) at the fill end, % tag above; 8 trail sparks at 70 ms steps behind, shrinking, fading, +-5 px seeded y drift. At 2400 ms a ring 8 -> 34 px fades over 700 ms easeOutCubic. Back to 0 over 3500-3900 ms ease-in cubic. Params: value (75 %) · duration (2 s) · milestones (0 / 25 / 50 / 75 / 100).",
+    "titleVi": "Thanh tiến độ có đốm sáng dẫn đầu"
+  }
+}

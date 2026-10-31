@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-conic-spin",
+  "hash": "4e9013b5287c63ec",
+  "at": "2026-10-17T10:31:05.868Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-conic-spin.mp4",
+    "poster": "previews/moworks__text-conic-spin.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "655209948250ba62c6a5fe2e95276c51fa93f2b58f84c8251a238e2df89100d3",
+    "size": 25078,
+    "seconds": 27.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-combo-heat-gauge",
+  "type": "hyperframes:block",
+  "title": "Combo Heat Escalation",
+  "description": "Mỗi đòn số combo tăng và nảy, thanh nhiệt đuổi theo bằng lò xo và đổi màu theo ba nấc lạnh, ấm, nóng; từ đòn thứ năm tia lửa bốc lên trên thanh, cuối cùng tất cả về 0.",
+  "tags": [
+    "gauge",
+    "counter",
+    "spring",
+    "heat",
+    "game-impact-fx",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "ui-combo-heat-gauge.html",
+      "target": "compositions/components/ui-combo-heat-gauge.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-combo-heat-gauge",
+    "author": "moworks",
+    "call": "MW.uiComboHeatGauge(q(\".cb\"), tl, 0, {});",
+    "function": "MW.uiComboHeatGauge",
+    "options": {
+      "hits": "seconds of each hit ([0.35, 0.8, 1.15, 1.45, 1.7, 1.9])",
+      "resetAt": "s the gauge returns to 0 (3.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. Hits at 0.35, 0.8, 1.15, 1.45, 1.7, 1.9 s: count 1 → 6 (56 px + 'HIT') with pop 1 + 0.35 e^(−12t) cos(20t); colour stages blue (≤ 2), yellow (≤ 4), accent; gauge 200 x 12 (dividers at 1/3, 2/3) follows n/6 by a sum of springs k260 d22, new colour cross-fading in 150 ms; COOL / WARM / HOT labels light. From hit 5, 10 sparks loop up 30 px above the gauge's right third (0.9 Hz). Reset: gauge → 0 at 3.4 s, number out 3.4-3.8 s. Params: hits: lúc trúng (6 đòn, 0.35 … 1.9 s) · stages: nấc màu (≤ 2 xanh, ≤ 4 vàng, còn lại màu nhấn) · spring: lò xo thanh (k260 d22) · resetAt: lúc về 0 (3.4 s).",
+    "titleVi": "Thang nhiệt combo đổi màu theo số đòn"
+  }
+}

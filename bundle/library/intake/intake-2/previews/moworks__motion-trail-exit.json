@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-trail-exit",
+  "hash": "a42ec70f42ca77b7",
+  "at": "2026-10-17T11:02:34.778Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-trail-exit.mp4",
+    "poster": "previews/moworks__motion-trail-exit.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c43923655fd3f873cdadd7ac133a957c83231fb5d3a9dc3101b068376300fb4d",
+    "size": 6576,
+    "seconds": 24.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -15,7 +15,6 @@ them.
 | [KI-06](#ki-06-whisper-on-rtx-50-series-cards-not-yet-tried) | Whisper on RTX 50-series cards not yet tried | Voice-over | Open |
 | [KI-07](#ki-07-vietnamese-letters-in-the-studios-mono-labels) | Vietnamese letters in The Studio's mono labels | Interface | Limitation |
 | [KI-08](#ki-08-mixkit-music-is-for-online-use) | Mixkit music is for online use | Final Mix | Limitation |
-| [KI-09](#ki-09-two-tests-need-a-golden-render-first) | Two tests need a golden render first | Tests | Limitation |
 
 ---
 
@@ -65,9 +64,3 @@ letters. The Desk is not affected.
 podcasts and online ads are allowed; TV / radio broadcast, CD / DVD and games are not. The Final Mix dialog says so, and the film's
 `docs/CREDITS.md` records it.
 **Workaround:** for broadcast work, use your own licensed music (Final Mix accepts your own file).
-
-## KI-09: Two tests need a golden render first
-
-**Limitation.** `test/edit.test.mjs` and `test/gpu.test.mjs` compare against a golden render in `test-output/golden/G214`, which is not
-stored in the repository. On a new computer they fail until it is made.
-**Workaround:** run `node tools/golden/run.mjs --label G214 --only hf-native-30` once (it renders in software, no graphics card needed), then `npm test`.

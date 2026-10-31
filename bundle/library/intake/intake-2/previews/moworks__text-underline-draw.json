@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-underline-draw",
+  "hash": "407e4ca0c3293b08",
+  "at": "2026-10-17T09:12:59.837Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-underline-draw.mp4",
+    "poster": "previews/moworks__text-underline-draw.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ce75ab956e89410c78b9196e27b897710535254ed134cf9dc82cb907b573ba7b",
+    "size": 6313,
+    "seconds": 27.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

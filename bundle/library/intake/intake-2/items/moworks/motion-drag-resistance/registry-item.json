@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-drag-resistance",
+  "type": "hyperframes:component",
+  "title": "Drag Resistance",
+  "description": "Con trỏ kéo mép phải đi trước, mép trái theo sau nên viên thuốc giãn ra; thả tay nó bật về chỗ cũ.",
+  "tags": [
+    "drag",
+    "stretch",
+    "spring",
+    "resistance",
+    "bounce-reaction",
+    "heavy",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-drag-resistance.html",
+      "target": "compositions/components/motion-drag-resistance.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-drag-resistance",
+    "author": "moworks",
+    "call": "MW.motionDragResistance(q(\".dr\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.motionDragResistance",
+    "options": {
+      "grab": "s (0.3)",
+      "pull": "px the front edge moves (460)",
+      "duration": "s (0.6, power2.inOut)",
+      "lag": "s the back edge trails (0.1)",
+      "max": "stretch at most (1.35)",
+      "k": "spring stiffness back (220)",
+      "c": "damping (16)",
+      "cursor": "an optional cursor on the front edge"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Grab the right edge: it moves +92 px in 600 ms power2.inOut while the left edge lags (follows 100 ms later, width kept within 80–108 px: scaleX up to 1.35, height 1/scaleX); release: the pill springs back (k 220, d 16) ~12 px past its slot and settles, stretching up to +18 % with speed on the way. Params: pull (92 px) · lag: trễ mép sau (0.1 s) · stretch max (1.35) · spring (k 220, d 16).",
+    "titleVi": "Kéo nặng tay, mép sau trễ lại"
+  }
+}

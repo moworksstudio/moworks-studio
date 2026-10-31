@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-tap-ripple",
+  "type": "hyperframes:component",
+  "title": "Tap Ripple",
+  "description": "Mỗi lần chạm, một vòng sáng mờ loang ra từ đúng điểm chạm tới góc xa nhất của nút rồi tan, chỉ nằm trong nút.",
+  "tags": [
+    "ripple",
+    "tap",
+    "touch",
+    "feedback",
+    "ui-buttons",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "ui-tap-ripple.html",
+      "target": "compositions/components/ui-tap-ripple.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-tap-ripple",
+    "author": "moworks",
+    "call": "MW.uiTapRipple(q(\".tr\"), tl, 0, {});",
+    "function": "MW.uiTapRipple",
+    "options": {
+      "taps": "[[s, x share, y share], ...]",
+      "grow": "s to the farthest corner (0.55, power2.out)",
+      "opacity": "(0.38)",
+      "fade": "[from, to] s after the tap ([0.2, 0.75])",
+      "ink": "ripple colour",
+      "dot": "px radius of the touch mark (30)",
+      "cursor": "an optional cursor that makes the clicks",
+      "approach": "[x, y] px the cursor comes from",
+      "lead": "s it arrives before a click"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Accent button 160x52, radius 14. Each tap: a light ink circle (#e8ebf3) at the tap point, radius 0 → distance of the farthest corner in 550 ms power2.out, opacity 38 % fading to 0 from 200 to 750 ms after the tap, clipped to the button. Two taps 1.1 s apart at different points (0.55 s left-low, 1.65 s right-high); a small touch dot (r3 + ring r6) marks each tap for 0.35 s. Params: taps [[giây, x, y]] · grow (0.55 s, power2.out) · opacity (0.38) · fade (0.2 → 0.75 s).",
+    "titleVi": "Gợn sáng loang từ điểm chạm"
+  }
+}

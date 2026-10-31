@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-checkbox-draw",
+  "type": "hyperframes:block",
+  "title": "Checkbox Stroke",
+  "description": "Ô vuông đổi sang màu nhấn trước, rồi dấu tích được vẽ ra từ nét ngắn sang nét dài và giữ nguyên.",
+  "tags": [
+    "checkbox",
+    "check",
+    "draw",
+    "form",
+    "forms-state",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "ui-checkbox-draw.html",
+      "target": "compositions/components/ui-checkbox-draw.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-checkbox-draw",
+    "author": "moworks",
+    "call": "MW.uiCheckboxDraw(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiCheckboxDraw",
+    "options": {
+      "color": "(#75e4d2)",
+      "label": "",
+      "sub": "",
+      "loop": "s (2.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "In a 2.2 s loop: the box fill #182231 → #75e4d2 and border #536277 → #75e4d2 over 12-30 % (0.26-0.66 s) cubic-bezier(.65,0,.35,1); then the check path M31 59 L40 68 L58 47 (short arm first) draws, dashoffset 1 → 0 over 28-53 % (0.62-1.17 s); holds checked. Label 'Save preference' static. Params: fill (0.4 s) · draw (0.55 s) · color (#75e4d2) · ease (power2.inOut). The box fills first (0.26–0.66 s), then the tick draws short arm first (0.62–1.17 s), both cubic-bezier(.65,0,.35,1); it holds checked.",
+    "titleVi": "Ô chọn tô màu rồi vẽ dấu tích"
+  }
+}

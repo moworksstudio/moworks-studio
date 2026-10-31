@@ -1,0 +1,56 @@
+<!--
+  Scroll Velocity Marquee (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Hai băng chữ cỡ lớn chạy ngược chiều nhau, mỗi lần có cú hích thì vụt nhanh gấp năm, đổi chiều, rồi chậm dần về tốc độ thường.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textVelocityMarquee(q(".vm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - bands: selector of the bands
+      - speeds: base px/s per band ([230, 200])
+      - boosts: [[s, strength, flips direction], ...] ([[0.6, 4, 0], [2.3, 4, 1], [3.9, 2.5, 1]])
+      - loop: s (5); the travel is rounded to whole copies so it loops
+
+  Notes: Band 1: text + '  ·  ' in 64 px black weight, ink, repeated to fill; band 2: same at 34 px as 1.2 px accent outline, running the opposite way. Speed = direction × (1 + boosts) × base (≈46 / 40 px/s in a 320 px demo). Boost events at 0.6 s (+4, leftward), 2.3 s (+4, direction flips), 3.9 s (+2.5, flips back): each rises over 0.25 s power1.out then decays e^(−4t). Position = integral of speed, scaled so the 5 s loop moves whole copies (seamless). Params: tốc độ nền (46 px/s) · cú hích (×5, 0.25 s) · độ tắt (4 /s) · các mốc hích.
+-->
+
+<div class="gm vm"><div class="vm-b a">Làm video nhanh hơn  ·  </div><div class="vm-b b">Kể chuyện hay hơn  ·  </div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"bands":".vm-b","speeds":[230,200],"boosts":[[0.6,4,0],[2.3,4,1],[3.9,2.5,1]],"loop":5};
+  var run = function (el, tl, at, o) {
+        var bands = Array.prototype.slice.call(el.querySelectorAll(o.bands)), p1 = gsap.parseEase("power1.out"), dt = 1 / 120;
+        bands.forEach(function (b) { var t0 = b.innerHTML; b.innerHTML = ""; var s = document.createElement("span"); s.style.cssText = "display:inline-block;white-space:nowrap;"; for (var i = 0; i < 12; i++) s.innerHTML += t0; b.appendChild(s); b.__w = s.offsetWidth / 12; b.__s = s; });
+        var boost = function (t) { var v = 0; o.boosts.forEach(function (q) { var d = t - q[0]; if (d < 0) return; v += q[1] * (d < 0.25 ? p1(d / 0.25) : Math.exp(-4 * (d - 0.25))); }); return v; };
+        var dir = function (t) { var d = -1; o.boosts.forEach(function (q) { if (t >= q[0] && q[2]) d = -d; }); return d; };
+        var I = function (T) { var x = 0; for (var s = 0; s < T; s += dt) x += dir(s) * (1 + boost(s)) * dt; return x; }, tot = I(o.loop);
+        return MW.drive(tl, at, o.loop, function (t) {
+          var x = I(t);
+          bands.forEach(function (b, i) { var sp = o.speeds[i] || o.speeds[0], whole = Math.max(1, Math.round(Math.abs(tot * sp) / b.__w)) * b.__w * Math.sign(tot || 1), k = tot ? whole / tot : 0, X = x * k * (i % 2 ? -1 : 1);
+            var m = ((X % b.__w) + b.__w) % b.__w; gsap.set(b.__s, { x: -b.__w * 3 + m }); });
+        });
+      };
+  MW.textVelocityMarquee = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

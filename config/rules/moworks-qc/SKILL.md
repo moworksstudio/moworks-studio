@@ -20,8 +20,15 @@ The app makes the pictures (you cannot run commands): call its **qc_sheets** too
 - the result of **HyperFrames' check**: lint, script errors, layout (text overlapping, occluded, clipped, overflowing the frame or its box),
   contrast, motion; plus the app's checks (offline, fonts present, every Vietnamese letter drawn).
 
+Every shot and every cut is on a sheet: a long film takes more pages of each (`beats-2`, `cuts-2`, the answer says which shots each page holds).
+The first round opens them all; a later round opens only the pages with a shot you changed, the others show what you saw already.
+
 Look at the sheets closely, quality first. Read them as sheets (a sheet is one picture), not frame by frame: every extra picture costs the
 whole conversation again.
+
+To look closer at one moment (a small word, a mark, the frame a turn lands on), call **film_frames** with its seconds: the frame whole, as the
+render draws it, every word included, at the film's size. `keyframes --shot` is no frame of the film: it draws one element's motion with
+guide lines and no HTML text, so a word missing from it says nothing about the film.
 
 ## 2. Score 1-10, each criterion
 
@@ -84,7 +91,7 @@ Only a matter of taste or one only the owner can decide may end the Review under
 **Score only what you have seen after your last change** (three fixes of the last round were never looked at): when a
 round ends with a fix, call qc_sheets once more before you write the final score, fix nothing in that look, and score it; a fix you could
 not see again is named in the review as unchecked, never counted as done. Seconds the sheets or the check did not reach (the check ran
-out of time, a sheet is missing): look at the beats sheet for them yourself, and name the ones you still could not see. Sync before the
+out of time, a sheet is missing): look at them with film_frames, and name the ones you still could not see. Sync before the
 music is placed: score it on the voice-over and the cuts the film has, and say the music comes after; never leave it unscored for that.
 A score you cannot raise without the owner (sync when you cannot hear the song, a colour only they can approve): ask them right away, with
 the seconds to check, instead of stopping quietly.

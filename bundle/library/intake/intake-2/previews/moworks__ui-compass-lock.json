@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-compass-lock",
+  "hash": "5e53a24c7a24f094",
+  "at": "2026-10-17T10:55:38.522Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-compass-lock.mp4",
+    "poster": "previews/moworks__ui-compass-lock.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "5b1a0e000393c068c55ce66e71e09ddd95ad10cda28d190f9acc99449721c252",
+    "size": 16890,
+    "seconds": 27.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

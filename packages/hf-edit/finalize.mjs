@@ -3,7 +3,8 @@
 //  R-RUNTIME root document loads the pinned HF runtime from assets/_app/vendor (offline preview; render unchanged)
 //  R-FONTS   every composition file declares @font-face for each bundled family it uses (config/fonts.json, downloaded from google/fonts,
 //            packages/offline-assets; the project folder: assets/_app/fonts/kit) (HF lint wants the declaration
-//            in the file that uses the family)
+//            in the file that uses the family); a family whose files are in the project's own fonts (assets/1_design/fonts: the Brand
+//            Kit's, the user's) is declared from them first
 //  R-BG      opaque backgrounds of full-frame containers move to their own composited layer, so text never paints into an opaque
 //            layer (no LCD fringes, no blur)
 //  R-MOTIONPATH root document loads GSAP's MotionPathPlugin from assets/_app/vendor: HyperFrames Studio fetches it from jsDelivr unless the
@@ -32,6 +33,7 @@ import { lemoBoard, lemoFilm } from "./lemoPage.mjs";
 import { buildAnidoodle } from "./anidoodleBuild.mjs";
 import { buildWhatIf } from "./whatIfBuild.mjs";
 import { clawdIn, refreshFilmKit } from "../character-kit/index.mjs";
+import { familyKey, projectFonts } from "./localFonts.mjs";
 
 /** A What If film draws its text in SVG from script, where R-FONTS cannot see the faces: name each one in the page (one rule per family,
  *  so every family is served, not only a stack's first) in a style block the app owns and rewrites. */
@@ -152,13 +154,16 @@ async function applyFonts(projectDir, file, html, report, hfAliases, { googleFon
   const add = new Map();
   const google = new Map();
   const googleVi = new Map();          // families of the pinned Vietnamese list
+  const own = projectFonts(projectDir), ownAdd = new Map();          // the project's own font files (the Brand Kit's, the user's)
   for (const stack of familyStacks(html)) {
-    // the first family of the stack that something serves wins: a declaration in this file, a kit font (added here),
-    // a family of the pinned Vietnamese Google Fonts list, a one-time Google Fonts download, or HF's alias map
+    // the first family of the stack that something serves wins: a declaration in this file, the project's own font files, a kit font
+    // (added here), a family of the pinned Vietnamese Google Fonts list, a one-time Google Fonts download, or HF's alias map
     let served = null;
     for (const fam of stack) {
       const key = fam.toLowerCase();
-      if (declared.has(key) || add.has(key) || google.has(key) || googleVi.has(key)) { served = { fam, by: "declared" }; break; }
+      if (declared.has(key) || add.has(key) || google.has(key) || googleVi.has(key) || ownAdd.has(key)) { served = { fam, by: "declared" }; break; }
+      const mine = own.get(familyKey(fam));
+      if (mine) { ownAdd.set(key, { written: fam, mine }); served = { fam, by: "project" }; break; }
       const kitName = byKey.get(key);
       if (kitName) { add.set(key, { written: fam, kitName }); served = { fam, by: "kit" }; break; }
       // a name HF aliases to a font the kit has keeps the kit's font (below); any other family of the list is served with its pinned files
@@ -185,14 +190,19 @@ async function applyFonts(projectDir, file, html, report, hfAliases, { googleFon
     // substitute too, or it still fetches the substitute from Google Fonts (seen with Arial -> inter)
     for (const fam of stack) {
       const key = fam.toLowerCase();
-      if (declared.has(key) || add.has(key) || googleVi.has(key) || !hfAliases[key]) continue;
+      if (declared.has(key) || add.has(key) || googleVi.has(key) || ownAdd.has(key) || !hfAliases[key]) continue;
       const kitTarget = byKey.get(String(hfAliases[key]).replace(/-/g, " ").toLowerCase());
       if (kitTarget) add.set(key, { written: fam, kitName: kitTarget });
     }
   }
-  if (!add.size && !google.size && !googleVi.size) return html;
+  if (!add.size && !google.size && !googleVi.size && !ownAdd.size) return html;
   const kitDir = fontsDir();      // the bundled fonts, downloaded from google/fonts; "kit" names stay for existing projects
   const css = [];
+  for (const { written, mine } of ownAdd.values()) {
+    const faceCss = mine.css(written);
+    css.push(faceCss);
+    report.fontsAdded.push({ file, family: written, project: true, css: faceCss });
+  }
   for (const got of googleVi.values()) {
     const faceCss = placeViFamily(projectDir, got);
     css.push(faceCss);

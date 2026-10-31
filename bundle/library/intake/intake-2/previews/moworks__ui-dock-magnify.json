@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-dock-magnify",
+  "hash": "58a9c385dcd4d154",
+  "at": "2026-10-17T08:01:32.402Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-dock-magnify.mp4",
+    "poster": "previews/moworks__ui-dock-magnify.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c504ef358ec4084176ca012805473843cef319e9a9fdbef10f460f3c0baa241b",
+    "size": 20001,
+    "seconds": 34.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

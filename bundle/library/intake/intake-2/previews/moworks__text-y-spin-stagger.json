@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-y-spin-stagger",
+  "hash": "ca06d9e8fc2091dc",
+  "at": "2026-10-17T10:25:01.889Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-y-spin-stagger.mp4",
+    "poster": "previews/moworks__text-y-spin-stagger.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "bffe851169b4e2b12788a66f38c8ebfc1bb1d409343cee45c576f4bfd6b1863e",
+    "size": 16781,
+    "seconds": 25,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

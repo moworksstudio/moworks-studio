@@ -1,0 +1,53 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-nudge",
+  "type": "hyperframes:component",
+  "title": "Nudge",
+  "description": "Nút nhích sang phải 9 px, lùi 3 px rồi về chỗ, một lần, để gợi ý bấm.",
+  "tags": [
+    "attention",
+    "nudge",
+    "button",
+    "attention-emphasis",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-nudge.html",
+      "target": "compositions/components/motion-nudge.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-nudge",
+    "author": "moworks",
+    "call": "MW.motionNudge(q(\".nx\"), tl, 0.6, {});",
+    "function": "MW.motionNudge",
+    "options": {
+      "amp": "px to the side (27; 9 in the small demo)",
+      "back": "px of the counter-move (9)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "x keys 0 → +9 px (180 ms) → −3 px (330 ms) → 0 (520 ms), sine.inOut between keys; only the target moves (a 'Next' button), once. Same preset family: styles nod, jelly, hop, tilt (one preset with a style param, like text/land-in). Params: amp (9 px) · back (3 px) · duration (0.52 s).",
+    "titleVi": "Huých nhẹ sang bên"
+  }
+}

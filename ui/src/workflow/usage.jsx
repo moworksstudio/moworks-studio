@@ -11,12 +11,14 @@ export const usd = (x) => (x == null ? "" : x < 0.01 ? "<$0.01" : `$${x.toFixed(
  *  slower: a build estimated at 15 min took 26), else "5". */
 export const minutesOf = (e) => (e?.high > e?.minutes ? `${e.minutes}–${e.high}` : String(e?.minutes ?? ""));
 
+/** An estimate's cost: "$2.43–$3.00" when the server gives a `costHigh` above it (one price was half the truth for a long film, T28-13), else "$1.20". */
+const costOf = (e) => (e.costHigh > e.costUsd ? `${usd(e.costUsd)}–${usd(e.costHigh)}` : usd(e.costUsd));
 /** What the step does and what it takes, in one sentence:
- *  "Claude writes the motion for 12 shots: about 5–8 min, about $1.20." `what` is already in words; `estimate` is the server's
- *  { minutes, high, costUsd }. */
+ *  "Claude writes the motion for 12 shots: about 5–8 min, about $1.30–$1.60." `what` is already in words; `estimate` is the server's
+ *  { minutes, high, costUsd, costHigh }. */
 export function stepLine(t, what, estimate) {
   if (!estimate?.minutes) return t("{what}: a few minutes.", { what });
-  return estimate.costUsd != null ? t("{what}: about {min} min, about {usd}.", { what, min: minutesOf(estimate), usd: usd(estimate.costUsd) })
+  return estimate.costUsd != null ? t("{what}: about {min} min, about {usd}.", { what, min: minutesOf(estimate), usd: costOf(estimate) })
     : t("{what}: about {min} min.", { what, min: minutesOf(estimate) });
 }
 

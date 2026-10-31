@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-outline-spotlight",
+  "hash": "b1bcc1b86bdcb518",
+  "at": "2026-10-17T11:48:27.370Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-outline-spotlight.mp4",
+    "poster": "previews/moworks__text-outline-spotlight.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "16542f086d0f14b9a5959595bf6531aa8b4bcb254b5723ead1dded2b8296fa2d",
+    "size": 22911,
+    "seconds": 37.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

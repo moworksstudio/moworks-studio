@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/background-swarm",
+  "hash": "091808fed75adfe0",
+  "at": "2026-10-17T09:12:00.247Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__background-swarm.mp4",
+    "poster": "previews/moworks__background-swarm.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b0bc97c0721c86900e135058c170e63c82fcec8043bc19878adee9f95e296ff2",
+    "size": 59222,
+    "seconds": 32.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

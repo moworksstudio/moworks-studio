@@ -1,0 +1,79 @@
+<!--
+  Focus Word Explosion (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Từ chính giữa phóng to 2.4 lần trong khi tám từ nhỏ quanh nó bay toả ra xa và mờ đi, rồi tất cả thu về chỗ cũ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textFocusWordBurst(q(".fb"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - scale: the main word's scale (2.4)
+      - spread: the satellites fly to × their distance (2.4)
+      - at: s (0.7)
+      - returnAt: s (3.3)
+      - unit: px per reference unit (5)
+      - main: the main word
+      - satellites: the 8 small words
+      - loop: s (4.2)
+
+  Notes: Centre word (20 px, accent) and 8 small mono satellite words (11 px) on an ellipse (rx 74/88, ry 44/52 px alternating; angle i/8 × 360° + 11.5°). At 0.7 s the centre scales 1 → 2.4 over 0.55 s back.out (cubic-bezier(.34,1.56,.64,1)); satellites fly out along their rays to 2.4× their distance and fade 1 → 0, ending 1.3 s, expo.out, starts 0/30/60 ms by i mod 3; faint trail lines while moving. 3.3–3.9 s: everything returns (in-out); loop 4.2 s. Params: words: các từ vệ tinh (8) · scale: phóng từ chính (2.4) · spread: nhân khoảng cách bay (2.4) · at / returnAt (0.7 s / 3.3 s).
+-->
+
+<div class="fb"><div class="fb-m">SÁNG TẠO</div><div class="fb-s">ý tưởng</div><div class="fb-s">màu sắc</div><div class="fb-s">nhịp điệu</div><div class="fb-s">âm thanh</div><div class="fb-s">khung hình</div><div class="fb-s">câu chữ</div><div class="fb-s">ánh sáng</div><div class="fb-s">chuyển động</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"scale":2.4,"spread":2.4,"at":0.7,"returnAt":3.3,"unit":5,"main":".fb-m","satellites":".fb-s","loop":4.2};
+  var run = function (el, tl, at, o) {
+        var main = el.querySelector(o.main), sats = Array.prototype.slice.call(el.querySelectorAll(o.satellites)), bk = MW.ez("cubic-bezier(.34,1.56,.64,1)"), ex = gsap.parseEase("expo.out"), io = MW.ez("in-out");
+        var pos = sats.map(function (s, i) { var a = (i / sats.length * 360 + 11.5) * Math.PI / 180, rx = (i % 2 ? 88 : 74) * o.unit, ry = (i % 2 ? 52 : 44) * o.unit; return [rx * Math.cos(a), ry * Math.sin(a)]; });
+        return MW.drive(tl, at, o.loop, function (t) {
+          var back = io(Math.max(0, Math.min(1, (t - o.returnAt) / 0.6))), m = bk(Math.max(0, Math.min(1, (t - o.at) / 0.55))) * (1 - back);
+          gsap.set(main, { xPercent: -50, yPercent: -50, scale: 1 + (o.scale - 1) * m });
+          sats.forEach(function (s, i) { var st = o.at + [0, 0.03, 0.06][i % 3], u = ex(Math.max(0, Math.min(1, (t - st) / (1.3 - (st - o.at))))) * (1 - back), f = 1 + (o.spread - 1) * u; gsap.set(s, { xPercent: -50, yPercent: -50, x: pos[i][0] * f, y: pos[i][1] * f }); s.style.opacity = String(1 - u); });
+        });
+      };
+  MW.textFocusWordBurst = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

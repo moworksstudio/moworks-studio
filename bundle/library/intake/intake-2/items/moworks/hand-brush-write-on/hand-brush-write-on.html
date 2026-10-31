@@ -1,0 +1,47 @@
+<!--
+  Brush Write-on (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Chữ hay hình vẽ hiện ra từng nét theo đúng thứ tự viết, nét sau bắt đầu ngay khi nét trước xong.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.handBrushWriteOn(q(".bw"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - duration: s per stroke (0.4)
+      - gap: s between strokes (0.06)
+      - start: s (0.2)
+
+  Notes: Strokes drawn in writing order, each 200-400 ms ease-in-out, 60 ms between strokes, ~1500 ms total (recipe). Demo: 4 polyline strokes (9 px, round caps and joins), stroke i drawn by length from 0.2 + 0.5 i s over 400 ms ease-in-out. Params: duration mỗi nét (0.2–0.4 s) · gap (60 ms) · width. Strokes are drawn in document order, so put them in writing order.
+-->
+
+<div class="st"><div class="bw"><svg viewBox="0 0 320 200"><g fill="none" stroke="#ffd23d" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M60 60 L92 142 L124 60"/><path d="M146 92 L146 124 Q146 142 162 142 Q178 142 180 124 L180 92 L180 142"/><path d="M206 98 L206 142"/><path d="M206 70 L206 72"/></g></svg></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.4,"gap":0.06,"start":0.2};
+  var run = function (el, tl, at, o) {
+        var P = Array.prototype.slice.call(el.querySelectorAll("path, polyline, line")), io = gsap.parseEase("power2.inOut"), L = P.map(function (p) { var l = p.getTotalLength(); p.style.strokeDasharray = l + " " + l; p.style.strokeDashoffset = String(l); return l; });
+        return MW.drive(tl, at, o.start + P.length * (o.duration + o.gap) + 0.3, function (t) { P.forEach(function (p, i) { var u = io(Math.max(0, Math.min(1, (t - o.start - i * (o.duration + o.gap)) / o.duration))); p.style.strokeDashoffset = String(L[i] * (1 - u)); }); });
+      };
+  MW.handBrushWriteOn = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

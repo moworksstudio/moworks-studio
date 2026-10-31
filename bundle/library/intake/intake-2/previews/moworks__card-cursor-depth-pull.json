@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/card-cursor-depth-pull",
+  "hash": "a2bb06e573080404",
+  "at": "2026-10-17T08:01:32.372Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__card-cursor-depth-pull.mp4",
+    "poster": "previews/moworks__card-cursor-depth-pull.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "91e0b0ade37af80782fe13b8b66c26ede20d781f43e0fb37c9ed61ccaa837b5b",
+    "size": 19079,
+    "seconds": 35.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

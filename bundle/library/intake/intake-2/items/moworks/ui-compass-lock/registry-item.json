@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-compass-lock",
+  "type": "hyperframes:block",
+  "title": "Compass Lock",
+  "description": "Dải la bàn trượt dưới một kim cố định từ 250° về hướng Bắc và chốt bằng lò xo; hai ngoặc khép vào, chữ N đổi màu nhấn, nhãn \"LOCK\" bật ra và số độ ba chữ số chạy theo.",
+  "tags": [
+    "compass",
+    "tape",
+    "lock",
+    "spring",
+    "game-hud",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-compass-lock.html",
+      "target": "compositions/components/ui-compass-lock.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-compass-lock",
+    "author": "moworks",
+    "call": "MW.uiCompassLock(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiCompassLock",
+    "options": {
+      "from": "degrees (250)",
+      "to": "degrees (360: north)",
+      "lockAt": "s (1.45)",
+      "backAt": "s (2.35)",
+      "label": "",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. Tape 220 x 40 under a fixed pointer: heading 250 → 356° in 1.1 s outCubic from 0.3 s, plus +4° by spring k520 d20 from 1.4 s (settles at 360 = N); 2 px per degree, ticks every 5° (longer every 15°), labels N / NE / E… every 45°, edges fade by 1 − (dx/112)². Lock at 1.45 s: brackets close ±42 → ±20 px (250 ms back.out), N turns accent and grows 13 → 15 px, 'LOCK' pill scales in; 3-digit readout. Back to 250° 2.35-2.75 s inOut. Params: from / to: hướng (250° → 360°) · turn: thời gian quay (1.1 s) · lockAt: lúc khoá (1.45 s) · pxPerDeg: px mỗi độ (2). Turns 1.1 s (ease-out cubic), the last 4° on a stiff spring (k520 c20); 2 units per degree, the tape's edges fade.",
+    "titleVi": "La bàn quay rồi khoá hướng"
+  }
+}

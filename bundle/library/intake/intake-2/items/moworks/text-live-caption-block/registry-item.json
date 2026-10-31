@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-live-caption-block",
+  "type": "hyperframes:block",
+  "title": "Live Caption Block",
+  "description": "Phụ đề trực tiếp kiểu Nhật: mỗi khối hai dòng hiện trên nền tối rồi bị thay nguyên khối bằng khối tiếp theo bằng một nhát cắt, không cuộn.",
+  "tags": [
+    "caption",
+    "cut",
+    "block",
+    "live",
+    "text-captions-subtitles",
+    "crisp",
+    "captions-subtitles"
+  ],
+  "files": [
+    {
+      "path": "text-live-caption-block.html",
+      "target": "compositions/components/text-live-caption-block.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-live-caption-block",
+    "author": "moworks",
+    "call": "MW.textLiveCaptionBlock(q(\".lw\"), tl, 0, {});",
+    "function": "MW.textLiveCaptionBlock",
+    "options": {
+      "times": "[[in, out], ...] per block ([[0.3, 2.6], [2.6, 4.9]]); a block's time ≈ its characters ÷ 270 × 60 s",
+      "blocks": "selector of the blocks",
+      "loop": "s (5.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "2-line block (≤ 30 chars per line, 17 px bold) on an opaque dark box 268 × 50 px (radius 3) near the bottom. Blocks are replaced wholesale on a hard cut, no scroll or fade: demo 0.3–2.6 s and 2.6–4.9 s. Pacing: about 270 chars per minute measured on live TV (film guideline 240 per minute), so a block's time = its chars / 270 × 60 s. Optional LIVE tag (red dot + mono label) top-left. Loop 5.4 s. Params: tối đa (2 dòng × 30 ký tự) · nhịp (≈ 240–270 ký tự/phút) · nền (hộp tối).",
+    "titleVi": "Phụ đề trực tiếp thay nguyên khối"
+  }
+}

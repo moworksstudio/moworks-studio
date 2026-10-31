@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-vignette-breathe",
+  "type": "hyperframes:component",
+  "title": "Vignette Breathe",
+  "description": "Bốn góc khung tối nhẹ và đậm nhạt chậm theo nhịp thở để kéo mắt vào giữa.",
+  "tags": [
+    "vignette",
+    "overlay",
+    "loop",
+    "focus",
+    "texture-look",
+    "smooth",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "effect-vignette-breathe.html",
+      "target": "compositions/components/effect-vignette-breathe.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-vignette-breathe",
+    "author": "moworks",
+    "call": "MW.effectVignetteBreathe(q(\".vg\"), tl, 0, {});",
+    "function": "MW.effectVignetteBreathe",
+    "options": {
+      "edge": "[min, max] edge darkness ([0.25, 0.45])",
+      "inner": "clear radius in the 320 frame (60)",
+      "outer": "full at (200)",
+      "period": "s (3)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Radial gradient overlay, clear in the middle, edges darkening; edge darkness 15 % <-> 25 % on a 3000 ms sine loop (opacity yoyo). Demo: clear inside r 60, full at r 200 on a 320 x 200 frame, edge alpha 0.25-0.45. House lesson: no grade + vignette over footage by default. Params: amount (15 ↔ 25 %) · period (3 s). House rule: no grade and vignette over footage by default.",
+    "titleVi": "Viền tối thở chậm"
+  }
+}

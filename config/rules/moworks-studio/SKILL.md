@@ -1,9 +1,8 @@
 ---
 name: moworks-studio
 description: Moworks Studio's house rules for every film style, read first in every step - the five rules of every film (collisions, readable text, determinism, truth, logos), the guideline or Brand Kit on every piece of text, the client's logo used as given, Vietnamese text, hand-drawn styles under a Brand Kit, character acting, a sound on every action, text over a canvas film, and how every film ends. Adds only what HyperFrames and the style leave open.
-version: 1.3.8
+version: 1.3.12
 derived-from: Moworks Motion kit 2.0.4 (Moworks; commit 30b7dcb65808b2a5299ad6a3357280a12773395f) - engine/skill/moworks-motion/SKILL.md step 3 ("Brand") and "Rules in every film" 1-5, workflow/characters.md sections 2, 3 ("Faces", "Hands") and 6 ("Collisions and physics"), brands/other.md; written from the idea for Moworks Studio. HyperFrames (Apache-2.0, 0.8.214 at 4719543) read as shipped where cited. Owner rules 24/10/2026 (#345, #346); the ending, owner 29/10/2026; the docs/ folder, owner 30/10/2026.
-source: https://github.com/moworksstudio/moworks-motion-dev/blob/30b7dcb65808b2a5299ad6a3357280a12773395f/engine/skill/moworks-motion/SKILL.md
 ---
 
 # Moworks Studio: the house rules of every film
@@ -64,7 +63,8 @@ This is the one rule for every conflict and every gap, in every step and every s
   project (a 45.6 s voice made a 40 s film 47.5 s, said only after): offer a longer film (the voice plus the end hold), a shorter
   script with the voice made again, a faster voice (the Voice screen's speed), and tighter pauses only when they add up to the difference;
   never lengthen the film, drop the end hold or cut the voice on your own; a voice-over well short of that length (an 80 s voice on a
-  100 s film got a 24 s wordless shot, said only after it was drawn): offer a shorter film (the voice plus the end hold), a longer script
+  100 s film got a 24 s wordless shot, said only after it was drawn): offer first the usual answer, the voice kept as it is, cut by sentence
+  and spread across the film with the gaps left to picture and music, then a shorter film (the voice plus the end hold), a longer script
   with the voice made again, or wordless stretches planned with the owner (where each falls and how long); never fill the gap with a
   wordless or longer shot on your own; and any change to a Brand Kit value: a colour, or a font that cannot draw Vietnamese or
   that the app does not have (offer 2-3 Vietnamese fonts the app can use, nearest first with a short reason, "upload the font file" when
@@ -79,10 +79,17 @@ This is the one rule for every conflict and every gap, in every step and every s
   choice (an earlier step's own reading of a note) is not a choice: ask with these choices before you build, and keep the mark until the
   owner answers.
 - **What to do:** write nothing that depends on it. In one message, list every point (what each side says, in plain words), and for each
-  offer two or three choices with your suggestion first (e.g. "1. giữ màu đỏ của tác giả · 2. dùng xanh ngọc #00A6A6 của brand · 3. đỏ cho
-  nền, xanh ngọc cho chữ"); for something missing, say what it is and the ways on (add it with the Assets button, a stand-in, go on
-  without it). Group every question of the step in that one message, then stop: the app shows "Waiting for you" and a card. Never pick
-  for the owner, never "follow X and say so in one line".
+  ask one short question on its own line with its two or three choices as a bullet list under it, one choice a line, your suggestion
+  first, never inside the question's sentence, however the rules above list them:
+
+      1. Màu chủ đạo nào?
+      - giữ màu đỏ của tác giả (tôi gợi ý)
+      - dùng xanh ngọc #00A6A6 của brand
+      - đỏ cho nền, xanh ngọc cho chữ
+
+  For something missing, say what it is and the ways on (add it with the Assets button, a stand-in, go on without it), as the same list.
+  Group every question of the step in that one message, then stop: the app shows "Waiting for you" and a card. Never pick for the
+  owner, never "follow X and say so in one line".
 - **After the answer:** follow what the owner chose for each point (write it in docs/ASSETS.md or docs/NOTES.md so later steps keep it), then go
   on. No answer yet: nothing moves; New project's fields stand only until they choose.
 
@@ -198,6 +205,10 @@ mood"):
   where a visible motion of the plan has no sound.
 - **The owner's word holds:** when the owner asks for no whoosh, fewer or more sounds, no ambience or silence, call the app's `sfx_prefs`
   tool; the app keeps the choice on every placement. Never only edit the `- sfx:` lines for that: the app would put its own sounds back.
+  A frame whose `- sfx:` says `none` stays silent: the app adds nothing of its own there, no whoosh into it either.
+- **A cue changed in the chat:** on a film whose sounds are already placed, the app places a `- sfx:` line you add or change by itself, a few
+  seconds after your turn ends. Tell the owner it will be in the mix in a moment; never say it is not in the mix or ask them to press Place
+  them again. A sound the owner moved or took off on the timeline stays as they left it.
 
 ## 8. Text over a canvas film (owner 27/10)
 
@@ -251,3 +262,11 @@ ends with a short fade under the end card); this adds the fade:
   whole length, sets its fade to the same seconds, and Tech checks flag a film whose last half second is a hard cut (the picture still
   full and lit on its last frame), in every style, naming the time; with the author's own ending named and played, a dark screen, a dot
   or a held end card ends the film too.
+
+## 10. Captions the owner can change (owner 31/10)
+
+HyperFrames' `references/captions.md` holds as it ships. This adds one thing: the Editor's Captions row lists the groups written in the captions
+composition, and the owner changes their words there by hand. So each group is a real element in that file, with its own `data-start` and
+`data-duration` and its words inside it, never built by a script at run time. A ready-made caption style that builds its groups by script is
+rewritten that way when it is installed. Its motion stays in the timeline as HyperFrames says. Look at each group over its own frames: where it
+covers the film's subject (Test 29: the clock's hand, a hand holding the watch), move that group, and if it cannot move, say so in your reply.

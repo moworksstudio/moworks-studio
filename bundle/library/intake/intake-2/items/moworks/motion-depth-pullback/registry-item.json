@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-depth-pullback",
+  "type": "hyperframes:component",
+  "title": "Depth Pullback",
+  "description": "Thẻ từ 220 % nhoè và loá thu về đúng cỡ, rõ nét dần, rồi bốn góc khung hiện ra.",
+  "tags": [
+    "zoom",
+    "depth",
+    "blur",
+    "scale",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "motion-depth-pullback.html",
+      "target": "compositions/components/motion-depth-pullback.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-depth-pullback",
+    "author": "moworks",
+    "call": "MW.motionDepthPullback(q(\".dp\"), tl, 0.3, { exitAt: 2.1 });",
+    "function": "MW.motionDepthPullback",
+    "options": {
+      "from": "start scale (2.2)",
+      "blur": "px (28)",
+      "bright": "start brightness (1.35)",
+      "duration": "s (0.76)",
+      "ease": "(power2.inOut)",
+      "bracket": "px corner size (60)",
+      "gap": "px outside the card (30)",
+      "stroke": "px (6)",
+      "accent": "",
+      "exitAt": "s after the start to fade (null)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Card scales 2.2 → 1 about its centre with blur 8 → 0 px and brightness 1.35 → 1, together in 760 ms power2.inOut; it fades in over the first 300 ms of the loop; four corner brackets fade in over 250 ms once it lands. Exit: fade 300 ms. Params: duration (0.76 s) · scale đầu (2.2) · blur (8 px) · brightness (1.35).",
+    "titleVi": "Lùi ra từ cận cảnh nhoè"
+  }
+}

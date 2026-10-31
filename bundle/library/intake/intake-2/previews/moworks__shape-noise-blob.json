@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/shape-noise-blob",
+  "hash": "daf83a34033dd03e",
+  "at": "2026-10-17T08:57:59.869Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__shape-noise-blob.mp4",
+    "poster": "previews/moworks__shape-noise-blob.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "be023d804b32101e406c513b0b6b817d0f13c557913bb471d4d935c3807fc3fa",
+    "size": 19078,
+    "seconds": 30.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

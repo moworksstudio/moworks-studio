@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-simple-turn",
+  "type": "hyperframes:component",
+  "title": "Simple Turn",
+  "description": "Ô mũi tên xoay 180° quanh tâm, tăng tốc rồi giảm tốc, có bóng mờ theo sau.",
+  "tags": [
+    "rotate",
+    "turn",
+    "rotation",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-simple-turn.html",
+      "target": "compositions/components/motion-simple-turn.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-simple-turn",
+    "author": "moworks",
+    "call": "MW.motionSimpleTurn(q(\".st-t\"), tl, 0.3, { duration: 0.8 });",
+    "function": "MW.motionSimpleTurn",
+    "options": {
+      "duration": "s per turn (0.7; the small demo 0.8)",
+      "rotation": "degrees a turn (180)",
+      "ease": "(power2.inOut)",
+      "ghosts": "trailing copies (3)",
+      "gap": "s between copies (0.035)",
+      "ghostOpacity": "(0.12)",
+      "turns": "turns in a row (2)",
+      "hold": "s between turns (0.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Arrow tile rotates 0 → 180° about its centre, power2.inOut (bezier .65,0,.35,1): recipe 700 ms, demo 800 ms; after an 800 ms hold it turns another 180°. Three faint copies (opacity 0.12) trail 35 / 70 / 105 ms behind while it moves. Use a shape whose orientation reads. Params: duration (0.7 s) · rotation (180°) · ease (power2.inOut) · ghosts (3).",
+    "titleVi": "Xoay nửa vòng êm"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-calendar-flip",
+  "type": "hyperframes:component",
+  "title": "Perspective Calendar Fold",
+  "description": "Tờ lịch ngày 24 lật lên quanh mép trên (tới −170°), tối dần khi nghiêng và mờ đi sau khi qua đỉnh, để lộ ngày 25 nằm sẵn bên dưới.",
+  "tags": [
+    "hinge",
+    "calendar",
+    "flip",
+    "3d",
+    "spatial-ui-depth",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-calendar-flip.html",
+      "target": "compositions/components/motion-calendar-flip.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-calendar-flip",
+    "author": "moworks",
+    "call": "MW.motionCalendarFlip(q(\".top\"), tl, 0, {});",
+    "function": "MW.motionCalendarFlip",
+    "options": {
+      "angle": "degrees about the top edge (−170)",
+      "duration": "s (0.8)",
+      "at": "s (0.45)",
+      "backAt": "s (3.05)",
+      "shade": "darkest shade (0.45)",
+      "perspective": "px (2300)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Calendar sheet 112x92 under an accent header 112x28 ('OCT') with two rings. The top sheet ('24 THU', 48 px number) rotates about its top edge, rotateX 0 → −170° (perspective 420), 0.8 s power2.inOut at 0.45 s; a dark shade up to 45 % × sin(angle); the next day ('25 FRI') waits beneath; the turned sheet shows a plain back and fades between about 110° and 158°. Back 3.05-3.5 s. Params: angle (−170°) · duration (0.8 s, power2.inOut) · shade (45 %) · edge (top) · perspective (420).",
+    "titleVi": "Lật tờ lịch sang ngày mới"
+  }
+}

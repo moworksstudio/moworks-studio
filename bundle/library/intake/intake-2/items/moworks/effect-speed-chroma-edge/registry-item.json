@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-speed-chroma-edge",
+  "type": "hyperframes:component",
+  "title": "Chromatic Glass Edge",
+  "description": "Thẻ kính trượt qua lại, khi chạy nhanh viền tách thành hai bản vàng và xanh lệch nhau theo hướng chạy (tối đa 6 px), dừng lại thì khớp về viền màu nhấn.",
+  "tags": [
+    "chromatic",
+    "speed",
+    "edge",
+    "glass",
+    "material-surface-motion",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "effect-speed-chroma-edge.html",
+      "target": "compositions/components/effect-speed-chroma-edge.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-speed-chroma-edge",
+    "author": "moworks",
+    "call": "MW.effectSpeedChromaEdge(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectSpeedChromaEdge",
+    "options": {
+      "max": "units of split at full speed (6)",
+      "speed": "units a second for the full split (230)",
+      "colors": "[yellow, blue] outlines, added",
+      "title": "",
+      "accent": "outline at rest",
+      "loop": "s (3.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Card 112x80 r14 (60 % opaque) moves x 104 → 216 (0.4-1.3 s power2.inOut) and back (2.3-3.2 s). Two outline copies (yellow, blue, 2 px, additive) shift by −/+ offset where offset = 6 px × clamp(speed / 230 px/s) in the travel direction; the normal accent outline fades out as the offset passes 3 px. 0 px at rest. Background vertical bars show through. Params: max (6 px) · speed (230 px/s cho đủ lệch) · colors (vàng / xanh, cộng sáng) · path.",
+    "titleVi": "Viền tách màu theo tốc độ"
+  }
+}

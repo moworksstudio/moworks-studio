@@ -1,0 +1,52 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-moworks-match-cut",
+  "type": "hyperframes:component",
+  "title": "Match Cut",
+  "description": "Cắt thẳng ở chỗ khung cuối cảnh cũ và khung đầu cảnh mới trùng hình dạng và vị trí, như mặt trời hoá đồng xu.",
+  "tags": [
+    "match-cut",
+    "cut",
+    "shape",
+    "transitions",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "transition-moworks-match-cut.html",
+      "target": "compositions/components/transition-moworks-match-cut.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/transition-moworks-match-cut",
+    "author": "moworks",
+    "call": "MW.transitionMoworksMatchCut(q(\".mc-b\"), tl, 1.5, {});",
+    "function": "MW.transitionMoworksMatchCut",
+    "options": {
+      "from": "the outgoing scene"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "A plain cut (no interpolation) where the last frame of A and the first frame of B share shape, position and size: demo A = blue frame with a yellow circle r 40 at the centre; B = light frame with the same yellow circle turned into a coin (ring r 30, 3 px, currency mark); cut halfway through each 1.5 s half. Params: shape · position · size: phải khớp hai bên điểm cắt. The motion is a plain cut; the match is in the layout: the last frame of the outgoing scene and the first of the incoming share a shape at the same place and size.",
+    "titleVi": "Cắt khớp hình giữa hai cảnh"
+  }
+}

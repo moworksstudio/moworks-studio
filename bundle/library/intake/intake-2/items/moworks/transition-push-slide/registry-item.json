@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-push-slide",
+  "type": "hyperframes:component",
+  "title": "Push / Slide",
+  "description": "Cảnh mới từ bên phải đẩy cảnh cũ ra bên trái, hai cảnh dính liền nhau.",
+  "tags": [
+    "push",
+    "slide",
+    "direction",
+    "transitions",
+    "smooth",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "transition-push-slide.html",
+      "target": "compositions/components/transition-push-slide.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/transition-push-slide",
+    "author": "moworks",
+    "call": "MW.transitionPushSlide(q(\".tk-b\"), tl, 1.2, {});",
+    "function": "MW.transitionPushSlide",
+    "options": {
+      "duration": "s (0.4; 0.3-0.5)",
+      "direction": "where the new scene comes from: left (from the right, default), right, up, down",
+      "ease": "power2.inOut (cubic)",
+      "from": "the outgoing scene"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Incoming scene x +100 % -> 0 while the outgoing x 0 -> -100 % (one frame width), together, 400 ms easeInOutCubic (recipe range 300-500 ms), from the right; no gap, no scale, no fade. Params: duration (0.4 s) · direction (từ phải) · ease (power2.inOut).",
+    "titleVi": "Đẩy cảnh sang ngang"
+  }
+}

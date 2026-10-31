@@ -8,7 +8,7 @@ import { AlertCircle, AudioLines, File as FileIcon, FileImage, FileText, FileVid
 import { uploadAsset } from "../api.js";
 import { useT } from "../i18n.jsx";
 
-const RX = { image: /\.(png|jpe?g|webp|gif|avif|bmp|tiff?|heic|svg)$/i, video: /\.(mp4|mov|webm|m4v|mkv|avi)$/i, audio: /\.(mp3|wav|m4a|flac|ogg|aac|opus)$/i, font: /\.(ttf|otf|woff2?)$/i };
+const RX = { image: /\.(png|jpe?g|webp|gif|avif|bmp|tiff?|heic|svg)$/i, video: /\.(mp4|mov|webm|m4v|mkv|avi)$/i, audio: /\.(mp3|wav|m4a|flac|ogg|aac|opus)$/i, font: /\.(ttf|otf|woff2?|eot)$/i };
 /** Same sorting as the server (packages/project-service classifyAsset), for showing where a file will go. */
 export function kindOf(name) {
   if (RX.audio.test(name)) return "audio";
@@ -73,7 +73,7 @@ export function AssetPicker({ items, onAdd, onRemove, busy = false, compact = fa
         <span className="n" title={x.file.webkitRelativePath || x.file.name}>{x.file.name}</span>
         <span className="muted num s">{size(x.file.size)}</span>
         {x.status === "uploading" ? <span className="prog"><span style={{ width: `${Math.round((x.progress ?? 0) * 100)}%` }} /></span>
-          : x.status === "done" ? <span className="ok-t">{x.unpacked != null ? t("Unpacked: {n} file(s)", { n: x.unpacked }) : t("Copied")}</span>
+          : x.status === "done" ? <span className="ok-t">{x.unpacked != null ? t("Unpacked: {n} file(s)", { n: x.unpacked }) : x.same ? t("Already there") : t("Copied")}</span>
           : x.status === "warn" ? <span className="warn-t" title={x.error}>{t("Not unpacked")}</span>
           : x.status === "error" ? <span className="error-text" title={x.error}>{t("Failed")}</span>
           : !busy && <button type="button" className="btn ghost icon sm" onClick={() => onRemove?.(x.id)} aria-label={t("Remove {name}", { name: x.file.name })}><X size={13} /></button>}
@@ -85,7 +85,7 @@ export function AssetPicker({ items, onAdd, onRemove, busy = false, compact = fa
       {items.filter((x) => x.skipped?.length).map((x) => <span key={"s" + x.id} className="asset-warn-l">{t("Left out {n} program file(s) from {name}.", { n: x.skipped.length, name: x.file.name })}</span>)}</span></div>}
     {note && <div className="asset-note" role="status"><AlertCircle size={14} /><span>
       {note.bad.length > 0 && <>{t("Skipped {n} program file(s), which are not film material: {names}.", { n: note.bad.length, names: note.bad.slice(0, 3).join(", ") + (note.bad.length > 3 ? "…" : "") })} </>}
-      {note.dup.length > 0 && t("Same name twice: {names}. The second one gets a number.", { names: note.dup.slice(0, 3).join(", ") + (note.dup.length > 3 ? "…" : "") })}</span>
+      {note.dup.length > 0 && t("Same name twice: {names}. An identical copy is left out; a different file gets a number.", { names: note.dup.slice(0, 3).join(", ") + (note.dup.length > 3 ? "…" : "") })}</span>
       <button type="button" className="btn ghost icon sm" onClick={() => setNote(null)} aria-label={t("Close")}><X size={14} /></button></div>}
   </div>;
 }
@@ -98,6 +98,7 @@ export function uploadAll(projectId, items, onItem) {
   const run = (async () => {
     let ok = 0, failed = 0, voice = null;
     const archives = [];
+    let same = 0;
     for (const x of items) {
       if (stopped) break;
       onItem(x.id, { status: "uploading", progress: 0 });
@@ -106,12 +107,13 @@ export function uploadAll(projectId, items, onItem) {
         const r = await current.done; if (r.voice) voice = r.voice;
         const a = r.archive;
         if (a) archives.push({ name: a.name, unpacked: !!a.unpacked, count: a.files?.length ?? 0, skipped: a.skipped ?? [], error: a.error ?? null });
-        ok += a?.unpacked ? a.files.length : 1;
-        onItem(x.id, { ...(a && !a.unpacked ? { status: "warn", error: a.error } : { status: "done", ...(a?.unpacked ? { unpacked: a.files.length } : {}) }), progress: 1, ...(a?.skipped?.length ? { skipped: a.skipped } : {}) });
+        const twins = r.same ? 1 : a?.same ?? 0;          // already there, byte for byte: nothing was copied
+        ok += (a?.unpacked ? a.files.length : 1) - twins; same += twins;
+        onItem(x.id, { ...(a && !a.unpacked ? { status: "warn", error: a.error } : { status: "done", ...(a?.unpacked ? { unpacked: a.files.length } : {}), ...(r.same ? { same: true } : {}) }), progress: 1, ...(a?.skipped?.length ? { skipped: a.skipped } : {}) });
       }
       catch (e) { if (e.code === "CANCELLED") { onItem(x.id, { status: null }); break; } failed++; onItem(x.id, { status: "error", error: e.message }); }
     }
-    return { ok, failed, voice, archives, cancelled: stopped };
+    return { ok, failed, same, voice, archives, cancelled: stopped };
   })();
   return { done: run, cancel: () => { stopped = true; current?.abort(); } };
 }

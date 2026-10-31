@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-pill-tab-indicator",
+  "type": "hyperframes:block",
+  "title": "Pill Indicator",
+  "description": "Viên thuốc màu nhấn trượt dưới các nhãn tab đứng yên bằng lò xo, phần chữ nằm trên viên thuốc đổi màu đúng theo mép viên.",
+  "tags": [
+    "tabs",
+    "pill",
+    "spring",
+    "indicator",
+    "selection-controls",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "ui-pill-tab-indicator.html",
+      "target": "compositions/components/ui-pill-tab-indicator.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-pill-tab-indicator",
+    "author": "moworks",
+    "call": "MW.uiPillTabIndicator(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiPillTabIndicator",
+    "options": {
+      "targets": "[[s, tab], ...] springs k240 c24",
+      "labels": "",
+      "accent": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Bar 240x40 r20; pill 72x32 r16 accent. Pill centre x on a sum of springs k240 c24: 88 → 232 at 0.3 s → 160 at 1.2 s → 88 at 2.0 s. Labels HOME / WORK / SAVE (12 px bold) stay fixed and are drawn twice: light outside, dark inside the pill (clipped to the pill), so the colour flips exactly at its edges. Params: spring (k240 c24) · pill (72x32) · targets [[giây, x]] · labels. The labels never move; drawn twice, they flip colour exactly at the pill's edges.",
+    "titleVi": "Viên thuốc trượt dưới nhãn tab"
+  }
+}

@@ -1,0 +1,92 @@
+<!--
+  Pointer Reveal Card (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Trên một thẻ, con trỏ kéo qua đến đâu thì chữ mặt trước bị thay bằng chữ mặt sau màu nhấn đến đó, rời thẻ thì vạch chia trượt về mép trái.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.compareTextRevealCard(q(".rc"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - front: the front layer
+      - back: the back layer (same size, on top of the front)
+      - follow: s the divider takes to follow (0.4, power2.out)
+      - line: px (7)
+      - handle: [w, h] px ([30, 100])
+      - scan: px between scanlines on the back (30)
+      - accent: 
+      - ease: of the pointer (cubic-bezier(.65,0,.35,1))
+      - cursor: 
+      - loop: s (4.4)
+
+  Notes: Card 276 × 118 px, radius 10; front text (ink) and back text (accent), 44 px, same centre. Divider x follows the cursor x inside the card (else the left edge) with a 0.4 s power2.out response. Right of it the front text; left the back text plus faint accent scanlines every 6 px (6 %). Divider 1.5 px accent with a 6 × 20 px handle. Cursor enters left 0.85 s, sweeps to the right edge by 2.1 s, nudges 3.0 s, leaves 3.35 s (divider returns in 0.4 s). Loop 4.4 s. Params: chữ mặt trước / mặt sau · thời gian trả về (0.4 s) · vạch chia (1.5 px). Left of the divider shows the back text with faint accent scanlines, right of it the front; outside the card the divider returns to the left edge.
+-->
+
+<div class="st"><div class="rc"><div class="fr">Ý tưởng thô</div><div class="bk">Thành phim</div></div></div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  var defaults = {"front":".fr","back":".bk","follow":0.4,"line":7,"handle":[30,100],"scan":30,"accent":"#8b7bff","ease":"cubic-bezier(.65,0,.35,1)","cursor":".ui-cursor","loop":4.4};
+  var run = function (el, tl, at, o) {
+        var fr = el.querySelector(o.front), bk = el.querySelector(o.back), cu = o.cursor ? document.querySelector(o.cursor) : null, W = el.offsetWidth, e = MW.ez(o.ease), po2 = gsap.parseEase("power2.out"), dv = document.createElement("div"), hd = document.createElement("i"), sl = document.createElement("div");
+        if (getComputedStyle(el).position === "static") el.style.position = "relative"; el.style.overflow = "hidden";
+        sl.style.cssText = "position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(180deg, " + o.accent + " 0 2px, transparent 2px " + o.scan + "px);opacity:0.06;"; el.insertBefore(sl, bk.nextSibling);
+        dv.style.cssText = "position:absolute;top:0;bottom:0;left:0;width:" + o.line + "px;margin-left:-" + o.line / 2 + "px;background:" + o.accent + ";pointer-events:none;"; hd.style.cssText = "position:absolute;left:50%;top:50%;width:" + o.handle[0] + "px;height:" + o.handle[1] + "px;margin:-" + o.handle[1] / 2 + "px 0 0 -" + o.handle[0] / 2 + "px;border-radius:" + o.handle[0] / 2 + "px;background:" + o.accent + ";"; dv.appendChild(hd); el.appendChild(dv);
+        var R = el.getBoundingClientRect(), cy = R.top + R.height * 0.62, PK = [[0, R.left - 0.15 * R.width, R.bottom + 0.6 * R.height], [0.85, R.left + 0.03 * R.width, cy], [2.1, R.right - 0.03 * R.width, cy], [2.6, R.right - 0.03 * R.width, cy], [3.0, R.left + 0.7 * R.width, cy], [3.35, R.right + 0.3 * R.width, R.bottom + 0.6 * R.height]];
+        var P = function (t) { return MW.path(PK, t, e); }, tgt = function (t) { var p = P(t); return p[0] > R.left && p[0] < R.right && p[1] > R.top && p[1] < R.bottom ? p[0] - R.left : 0; };
+        return MW.drive(tl, at, o.loop, function (t) { var s0 = Math.max(0, t - 0.6), x = tgt(s0), prev = x; for (var s = s0 + 1 / 60; s <= t + 1e-9; s += 1 / 60) { var q = tgt(s); x += (q - prev) * po2(Math.max(0, Math.min(1, (t - s) / o.follow))); prev = q; }
+          bk.style.clipPath = sl.style.clipPath = "inset(0 " + (W - x).toFixed(1) + "px 0 0)"; fr.style.clipPath = "inset(0 0 0 " + x.toFixed(1) + "px)"; dv.style.transform = "translateX(" + x.toFixed(1) + "px)"; dv.style.opacity = x > 1 ? "1" : "0";
+          if (cu) { var p = P(t), pr = (cu.offsetParent || cu.parentNode).getBoundingClientRect(); gsap.set(cu, { x: p[0] - pr.left - 12, y: p[1] - pr.top - 6 }); } });
+      };
+  MW.compareTextRevealCard = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

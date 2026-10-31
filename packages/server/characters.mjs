@@ -52,7 +52,7 @@ export function characterRoutes(ctx, { r, P, mustProject, HttpError }) {
             // in the user's library only when it is there (one taken from it, or one saved to it), never a new one before approval
             from: c.from ?? null, sheets: { sheet: sheet(c.id, "sheet"), poster: sheet(c.id, "poster") }, saved: savedHumans.has(c.id) }
         : { id: c.id, name: c.name, about: c.about ?? "", colors: c.colors, from: c.from ?? null,
-            sheets: { views: sheet(c.id, "views"), emotions: sheet(c.id, "emotions") }, saved: kit.getCharacter(c.id, root)?.group === "yours" }),
+            sheets: { views: sheet(c.id, "views"), emotions: sheet(c.id, "emotions") }, saved: !!kit.savedAs(c.id, root) }),
       humanHand: humanHandOf(p.meta?.style?.id, root),
       approval: a, drawing: busy.has(p.id) };
   };

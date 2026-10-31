@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-circle-spin",
+  "type": "hyperframes:component",
+  "title": "Circular Text Spin",
+  "description": "Chữ được xếp quanh một vòng tròn, chân chữ hướng vào tâm, vòng quay đều liên tục như con dấu, có thể tăng tốc gấp bốn trong chốc lát.",
+  "tags": [
+    "circle",
+    "loop",
+    "rotate",
+    "badge",
+    "text-path-shape",
+    "smooth",
+    "path-shape"
+  ],
+  "files": [
+    {
+      "path": "text-circle-spin.html",
+      "target": "compositions/components/text-circle-spin.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-circle-spin",
+    "author": "moworks",
+    "call": "MW.textCircleSpin(q(\".cs\"), tl, 0, {});",
+    "function": "MW.textCircleSpin",
+    "options": {
+      "text": "",
+      "radius": "px (232)",
+      "size": "px at most (96), fitted so the ring closes",
+      "turn": "s per turn (10), linear",
+      "boost": "speed-up factor (4)",
+      "boostAt": "[in from, in to, out from, out to] s ([1.5, 1.9, 3.1, 3.5])",
+      "ease": "(cubic-bezier(.65,0,.35,1))",
+      "sep": "separator colour",
+      "loop": "s (5)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Magic UI (MIT); a faithful port is in the Magic UI collection"
+    },
+    "thirdParty": [],
+    "notes": "Text + ' • ' (Japanese '・', separator accent) repeated m times so it fills the circle (demo radius 58 px, chars ≤ 24 px); char placed by arc length, rotated to the tangent with tops outward. The ring turns 360° per 10–20 s linear, seamless. Optional speed-up ×4 eased in 1.5–1.9 s and out 3.1–3.5 s (cubic-bezier .65,0,.35,1), rotation = integral of speed. Demo loop 5 s. Params: bán kính (58 px) · một vòng (10 s) · hệ số tăng tốc (×4) · ký tự ngăn (•). Letters are placed by arc length with their tops outward; the turn is the integral of the speed.",
+    "titleVi": "Chữ xếp vòng tròn xoay đều"
+  }
+}

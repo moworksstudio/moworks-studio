@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-subtitle-reposition",
+  "hash": "0b140c78d95c67cc",
+  "at": "2026-10-17T10:21:38.110Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-subtitle-reposition.mp4",
+    "poster": "previews/moworks__text-subtitle-reposition.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "9bbce9d5fa3e0678f7301188e5b53e18a85c2ad19a1cbf4aa8ffdc6d53c2b974",
+    "size": 15409,
+    "seconds": 22.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-comet-spinner",
+  "type": "hyperframes:block",
+  "title": "Gradient Arc",
+  "description": "Một cung sáng dài khoảng 290° quay đều quanh vòng, đầu sáng rõ có chấm tròn và đuôi mờ dần về 0.",
+  "tags": [
+    "spinner",
+    "comet",
+    "loading",
+    "loop",
+    "loading-progress",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-comet-spinner.html",
+      "target": "compositions/components/ui-comet-spinner.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-comet-spinner",
+    "author": "moworks",
+    "call": "MW.uiCometSpinner(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiCometSpinner",
+    "options": {
+      "period": "s a turn (1.4), linear",
+      "arc": "degrees (288)",
+      "radius": "px (40)",
+      "stroke": "px (7)",
+      "label": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Ring r40 with a 7 px grey track. Comet arc 288° (1.6π) of 7 px accent whose opacity falls from 1 at the head to 0 at the tail as (1 − s)^1.6; head dot r3.5. Rotates clockwise, linear, 1.4 s per turn; 'LOADING' at the centre. Params: period (1.4 s / vòng) · arc (288°) · radius (40 px) · stroke (7 px). The tail's opacity falls from the head as (1 − s)^1.6.",
+    "titleVi": "Vòng tải sao chổi"
+  }
+}

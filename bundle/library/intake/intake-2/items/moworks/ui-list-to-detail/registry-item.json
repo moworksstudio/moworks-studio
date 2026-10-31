@@ -1,0 +1,53 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-list-to-detail",
+  "type": "hyperframes:block",
+  "title": "List-to-Detail Expand",
+  "description": "Bấm một dòng, dòng đó mở rộng thành bảng chi tiết, ảnh nhỏ thành ảnh lớn và chữ dời xuống dưới ảnh, các dòng khác mờ còn 25 %.",
+  "tags": [
+    "flip",
+    "expand",
+    "detail",
+    "list",
+    "layout-navigation",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-list-to-detail.html",
+      "target": "compositions/components/ui-list-to-detail.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-list-to-detail",
+    "author": "moworks",
+    "call": "MW.uiListToDetail(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiListToDetail",
+    "options": {
+      "loop": "s (3.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "List rows 128x38 r8 at (24, 40 + 46 i). Click row 2 at 0.34 s; it morphs over 0.45-1.27 s (820 ms) power2.inOut: rect (24,86,128,38) → (64,24,192,148), radius 8 → 15, padding 5 → 10; thumbnail 28x28 → full width x 64 (r5 → 9); title moves from beside the thumb to below the image (60 → 100 wide); body lines fade in over the last 30 %. Other rows fade to 25 %; a dashed slot stays at the origin. Back over 2.15-2.75 s. Params: from / to: khung dòng, khung chi tiết · duration (0.82 s) · radius (8 → 15) · siblings (25 %) · ease (power2.inOut).",
+    "titleVi": "Dòng danh sách mở thành trang chi tiết"
+  }
+}

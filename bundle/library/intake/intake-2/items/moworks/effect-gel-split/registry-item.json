@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-gel-split",
+  "type": "hyperframes:block",
+  "title": "Gel Button Split",
+  "description": "Một nút gel bị kéo căng hai bên, cổ chất lỏng ở giữa mảnh dần rồi đứt thành hai nút A và B nảy rung; sau đó hai nút hút lại nhập thành một.",
+  "tags": [
+    "gooey",
+    "split",
+    "button",
+    "spring",
+    "material-surface-motion",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "effect-gel-split.html",
+      "target": "compositions/components/effect-gel-split.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-gel-split",
+    "author": "moworks",
+    "call": "MW.effectGelSplit(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectGelSplit",
+    "options": {
+      "rejoin": "s the halves pull back together (3.0)",
+      "label": "text on the joined button",
+      "accent": "",
+      "loop": "s (4.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Two pills 60x44 start overlapped (centres ±22). 0.3-0.5 s squeeze to ±18 (power2.out, scaleX 0.94); 0.5-1.3 s pull apart to ±54 (power1.in), scaleX to 1.16, scaleY = 1 / √scaleX, neck width 22 × scaleY × (1 − (d − 22) / 32)^1.4, reaching 0 at 1.3 s (split). Then centres to ±74 on a spring k260 d12 with a scaleX wobble 1 + 0.16 × (1 − spring k300 d9). Rejoin at 3.0 s on a spring k200 d22 (scaleX bump 1.05), neck back after 0.18 s. Params: squeeze (±18 px) · pull (±54 px, 0.8 s) · split (1.3 s) · spring (k260 c12) · wobble (k300 c9) · rejoin (k200 c22). Squeeze to ±18 (power2.out), pull apart to ±54 (power1.in) with the neck 22 × scaleY × (1 − (d − 22) / 32)^1.4, split, then springs k260 c12 (centres) and k300 c9 (wobble); rejoin on k200 c22.",
+    "titleVi": "Nút gel tách đôi rồi nhập lại"
+  }
+}

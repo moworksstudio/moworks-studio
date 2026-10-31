@@ -1,0 +1,76 @@
+<!--
+  Terminal Decode (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Một từ chữ mono trong khung terminal: các ký tự nhiễu đổi 20 lần mỗi giây rồi chốt lần lượt từ trái sang, mỗi ký tự chốt nảy nhẹ 1.18 lần.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textTerminalDecode(q(".td-w"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - text: the word (mono)
+      - glyphs: noise characters
+      - fps: noise changes a second (20)
+      - start: s the first letter locks (0.8)
+      - step: s per letter (0.3)
+      - backAt: s it falls back to noise (3.7)
+      - accent: locked colour
+      - mute: noise colour
+      - loop: s (4.2)
+      - seed: noise
+
+  Notes: Mono word (28 px, 30 px pitch) in a dark terminal card ('$ decode --msg'). From 0.5 s chars lock left → right, one per 300 ms (char i at 0.8 + 0.3·i s); unlocked chars cycle seeded noise from '#%&?*01<>/=_7Q' at 20 fps (muted, weight 500); a locked char turns accent, weight 700, pops 1.18 → 1 over 120 ms linear. Block caret under the next char, blinks 2 Hz once done. Loop: 3.7–3.95 s all chars fall back to noise (linear); loop 4.2 s. Params: glyphs: bộ ký tự nhiễu (#%&?*01<>/=_7Q) · step: mỗi ký tự chốt sau (0.3 s) · fps: tốc độ nhiễu (20) · pop: nảy khi chốt (1.18).
+-->
+
+<div class="td"><div class="td-b"><i></i><i></i><i></i></div><div class="td-p">$ decode --msg</div><div class="td-w">THÀNH CÔNG</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"text":"THÀNH CÔNG","glyphs":"#%&?*01<>/=_7Q","fps":20,"start":0.8,"step":0.3,"backAt":3.7,"accent":"#3ddc84","mute":"#6c778b","loop":4.2,"seed":2};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var cells = function (el, text) { el.textContent = ""; var word = null; return gr(text).map(function (g) { var s = document.createElement("span"); s.textContent = g; s.style.display = "inline-block"; s.style.whiteSpace = "pre";
+    if (g === " ") { word = null; el.appendChild(s); } else { if (!word) { word = document.createElement("span"); word.style.display = "inline-block"; word.style.whiteSpace = "nowrap"; el.appendChild(word); } word.appendChild(s); } return s; }); };
+  var target = gr(o.text), cs = cells(el, o.text), caret = document.createElement("span"), noise = gr(o.glyphs);
+  el.style.position = "relative"; caret.style.cssText = "position:absolute;height:0.12em;width:0.62em;background:" + o.accent + ";bottom:-0.08em;"; el.appendChild(caret);
+  cs.forEach(function (c) { c.style.width = "0.72em"; c.style.textAlign = "center"; });
+  return MW.drive(tl, at, o.loop, function (t) {
+    var f = Math.floor(t * o.fps), back = t >= o.backAt, nextI = -1;
+    cs.forEach(function (c, i) {
+      var lockT = o.start + o.step * i, b = back ? (t - o.backAt) / 0.25 > (i / cs.length) : false, locked = t >= lockT && !b;
+      if (target[i] === " ") { c.textContent = " "; return; }
+      if (locked) { var u = Math.min(1, (t - lockT) / 0.12); c.textContent = target[i]; c.style.color = o.accent; c.style.fontWeight = "700"; c.style.transform = "scale(" + (1.18 - 0.18 * u) + ")"; }
+      else { var r = MW.rand(o.seed * 131 + i * 977 + f); c.textContent = noise[Math.floor(r() * noise.length)]; c.style.color = o.mute; c.style.fontWeight = "500"; c.style.transform = ""; if (nextI < 0) nextI = i; }
+    });
+    var done = nextI < 0, tgt = done ? cs[cs.length - 1] : cs[nextI]; caret.style.left = (tgt.offsetLeft + (done ? tgt.offsetWidth : 0) + (tgt.offsetWidth - 0.62 * parseFloat(getComputedStyle(el).fontSize)) / 2 * (done ? 0 : 1)) + "px";
+    caret.style.opacity = done ? (Math.floor(t * 4) % 2 ? "0" : "1") : "1";
+  });
+  };
+  MW.textTerminalDecode = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

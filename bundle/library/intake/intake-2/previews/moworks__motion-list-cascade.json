@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-list-cascade",
+  "hash": "3cfde09675403d31",
+  "at": "2026-10-17T10:56:05.415Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-list-cascade.mp4",
+    "poster": "previews/moworks__motion-list-cascade.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "5de8e96ebf53bda1b9a77d78515d8969820d877f3aff30fe3d3dfc705c39cfe2",
+    "size": 8087,
+    "seconds": 25.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-three-star-clear",
+  "type": "hyperframes:block",
+  "title": "Three Star Clear",
+  "description": "Ba ngôi sao lần lượt đập xuống ô xám cách nhau 0.42 giây: từ to và nghiêng về đúng cỡ, nảy lò xo, rung nhẹ và bắn hạt; cuối cùng chữ \"CLEAR\" trồi lên với gạch chân.",
+  "tags": [
+    "stars",
+    "stamp",
+    "stagger",
+    "spring",
+    "rewards-loot",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-three-star-clear.html",
+      "target": "compositions/components/ui-three-star-clear.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-three-star-clear",
+    "author": "moworks",
+    "call": "MW.uiThreeStarClear(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiThreeStarClear",
+    "options": {
+      "first": "s the first star lands (0.35)",
+      "stagger": "s (0.42)",
+      "from": "start scale (2.2)",
+      "tilt": "start degrees (−40)",
+      "label": "",
+      "accent": "underline",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. Stars r 22 / 28 / 22 (middle 12 px higher) over grey slots; landings at 0.35, 0.77, 1.19 s: each approaches in 180 ms in-cubic, scale 2.2 → 1 and rotation −40° → 0 (fade in 80 ms), then 0.8 → 1 spring k400 d14; ±2 px frame shake 150 ms and an 8-dot burst to r + 16 per landing (350 ms). 'CLEAR' fades in 1.75-1.95 s and rises 8 px (1.75-2.0 s outCubic) with an 80 px accent underline. Loop fade 2.4-2.8 s. Params: stars: số sao (3) · stagger: cách nhau (0.42 s) · from: cỡ đầu (2.2) · tilt: nghiêng đầu (−40°) · label (\"CLEAR\"). Each star comes down in 0.18 s (ease-in cubic), then springs 0.8 → 1 (k400 c14) with a small frame shake and a dot burst.",
+    "titleVi": "Ba sao đóng dấu từng ngôi"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-flip-reorder",
+  "type": "hyperframes:component",
+  "title": "FLIP Reorder",
+  "description": "Sáu thẻ đánh số cùng lúc bay từ chỗ cũ sang chỗ mới để lưới đọc thành thứ tự ngược 06 05 04 / 03 02 01, mỗi thẻ giữ danh tính.",
+  "tags": [
+    "flip",
+    "reorder",
+    "layout",
+    "grid",
+    "layout-navigation",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-flip-reorder.html",
+      "target": "compositions/components/motion-flip-reorder.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-flip-reorder",
+    "author": "moworks",
+    "call": "MW.motionFlipReorder(q(\".fr\"), tl, 0.31, { backAt: 2.2 });",
+    "function": "MW.motionFlipReorder",
+    "options": {
+      "order": "the slot each tile moves to (default: reversed)",
+      "duration": "s (1.19)",
+      "backAt": "s after the start to move back (null: stay)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "6 tiles 54x34 r6 in a 3x2 grid (65 px column, 43 px row pitch), numbered 01-06. All tiles move at once (no stagger) from 0.31 s to 1.5 s (14-68 % of a 2.2 s loop), cubic-bezier(.65,0,.35,1), each to the mirrored slot so the grid reads 06 05 04 / 03 02 01; hold. The motion data lists 760 ms; the demo move lasts 1.19 s. Params: order: thứ tự mới · duration (1.19 s) · ease (power2.inOut) · each (0 s).",
+    "titleVi": "Lưới thẻ đảo thứ tự (FLIP)"
+  }
+}

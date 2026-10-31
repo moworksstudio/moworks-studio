@@ -4,19 +4,20 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { APP_ROOT } from "../version-manager/index.mjs";
-import { getCharacter, humanCharacters, humanDir, mediaRoot } from "./index.mjs";
+import { characterFile, getCharacter, humanCharacters, humanFolder } from "./index.mjs";
 
 export const REF_DIR = "assets/_app/characters";
 
-/** A character any film may take as a reference: a selectable one of the character layer, or one of the user's anidoodle humans (its
- *  poster and its sheets in each hand). { c, src, pictures } or null. */
+/** A character any film may take as a reference: a selectable one of the character layer, or an anidoodle human, the user's or the app's (its
+ *  poster and its sheets in each hand). { c, file: (picture) => its path or null, pictures } or null. */
 function referenceOf(id, root) {
   const k = getCharacter(id, root);
-  if (k?.selectable) return { c: k, src: join(mediaRoot(root), k.id), pictures: ["poster.webp", "views.webp", "emotions.webp", "sheets/views.png", "sheets/emotions.png"] };
+  if (k?.selectable) return { c: k, file: (f) => characterFile(k.id, f, root), pictures: ["poster.webp", "views.webp", "emotions.webp", "sheets/views.png", "sheets/emotions.png"] };
   const h = humanCharacters(root).find((x) => x.id === id);
   if (!h) return null;
-  const src = join(humanDir(root), h.id);
-  return { c: h, src, pictures: ["poster.webp", ...(existsSync(src) ? readdirSync(src).filter((n) => /^sheet(-[a-z]+)?\.webp$/.test(n)).sort() : [])] };
+  const src = humanFolder(h.id, root);
+  return { c: h, file: (f) => { const p = join(src, ...f.split("/")); return existsSync(p) ? p : null; },
+    pictures: ["poster.webp", ...(existsSync(src) ? readdirSync(src).filter((n) => /^sheet(-[a-z]+)?\.webp$/.test(n)).sort() : [])] };
 }
 
 /** Copy each character's reference into the film. Returns the ids staged (a missing or demo-only character is skipped). */
@@ -25,13 +26,14 @@ export function stageReference(projectDir, ids, root = APP_ROOT) {
   for (const id of ids ?? []) {
     const r = referenceOf(String(id), root);
     if (!r) continue;
-    const { c, src } = r, dest = join(projectDir, ...REF_DIR.split("/"), c.id);
+    const { c } = r, dest = join(projectDir, ...REF_DIR.split("/"), c.id);
     mkdirSync(dest, { recursive: true });
     const files = [];
     for (const f of r.pictures) {
-      if (!existsSync(join(src, ...f.split("/")))) continue;
+      const from = r.file(f);
+      if (!from) continue;
       const to = f.replace("sheets/", "sheet-");
-      cpSync(join(src, ...f.split("/")), join(dest, to)); files.push(to);
+      cpSync(from, join(dest, to)); files.push(to);
     }
     const colors = Object.entries(c.colors ?? {}).map(([k, v]) => `${k} ${v}`).join(", ");
     writeFileSync(join(dest, "CHARACTER.md"), [

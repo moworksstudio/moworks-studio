@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-cover-flow",
+  "type": "hyperframes:component",
+  "title": "Cover Flow",
+  "description": "Thẻ đang chọn nằm phẳng giữa khung, các thẻ hai bên xoay 60° và lùi sâu, việc chọn chuyển qua lại bằng lò xo.",
+  "tags": [
+    "coverflow",
+    "3d",
+    "carousel",
+    "spring",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-cover-flow.html",
+      "target": "compositions/components/motion-cover-flow.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-cover-flow",
+    "author": "moworks",
+    "call": "MW.motionCoverFlow(q(\".cf\"), tl, 0, {});",
+    "function": "MW.motionCoverFlow",
+    "options": {
+      "items": "",
+      "keys": "[[s, selected index], ...] joined by springs",
+      "stiffness": "(200)",
+      "damping": "(22)",
+      "angle": "degrees, facing the centre (60)",
+      "depth": "px back at 1 and 2 steps ([400, 600])",
+      "step": "px per card (320)",
+      "gap": "px extra beside the centre (110)",
+      "perspective": "px (1800)",
+      "duration": "s (4.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Cards (68 x 92) in a row; the selected one flat at centre; others rotateY +-60 deg (facing the centre), z -80 to -120 px, x = 70 px x offset + 20 px gap per side, opacity 1 - min(0.6, 0.3 x |offset|). Selection moves on a spring (stiffness 200, damping 22-24, ~500 ms) through 0 -> 1 -> 2 -> 1 -> 0 at 0.8 / 1.8 / 2.8 / 3.6 s. Params: angle (±60°) · depth (80–120 px) · spring (200 / 22). Opacity 1 − min(0.6, 0.3 |offset|). The small demo moves the selection 0 → 1 → 2 → 1 → 0; here it starts on the second of five cards so both sides show.",
+    "titleVi": "Băng thẻ cover flow"
+  }
+}

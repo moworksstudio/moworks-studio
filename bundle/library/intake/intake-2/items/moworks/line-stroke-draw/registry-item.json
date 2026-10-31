@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "line-stroke-draw",
+  "type": "hyperframes:component",
+  "title": "SVG Stroke Draw",
+  "description": "Một đường SVG tự vẽ từ đầu tới cuối bằng cách rút dần khoảng lệch của nét đứt.",
+  "tags": [
+    "svg",
+    "draw",
+    "stroke",
+    "line",
+    "svg-path",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "line-stroke-draw.html",
+      "target": "compositions/components/line-stroke-draw.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/line-stroke-draw",
+    "author": "moworks",
+    "call": "MW.lineStrokeDraw(q(\".sd\"), tl, 0.2, { duration: 1.4, ease: \"power2.inOut\", eraseAt: 2.0 });",
+    "function": "MW.lineStrokeDraw",
+    "options": {
+      "duration": "s (1.1)",
+      "ease": "power2.out (the small card: power2.inOut over 1.4 s)",
+      "eraseAt": "s after the start to erase forward in 0.5 s (null: stay drawn)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "pathLength = 1, stroke-dasharray 1, dashoffset 1 -> 0 over 1100 ms easeOutCubic. Small demo: a two-segment cubic curve, 5 px round-cap stroke, draws over 1.4 s ease-in-out from 0.2 s, holds, then erases forward (offset 0 -> -1) over 0.5 s from 2.2 s; 2.8 s loop. Params: duration (1.1 s) · ease (power2.out) · width: độ dày nét.",
+    "titleVi": "Nét SVG tự vẽ ra"
+  }
+}

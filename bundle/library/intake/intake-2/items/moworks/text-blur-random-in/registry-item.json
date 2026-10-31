@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-blur-random-in",
+  "type": "hyperframes:component",
+  "title": "Random Blur In",
+  "description": "Các ký tự rõ dần từ vùng nhoè 20 px theo thứ tự ngẫu nhiên, như sương tan.",
+  "tags": [
+    "reveal",
+    "blur",
+    "random",
+    "letters",
+    "text-blur-focus",
+    "smooth",
+    "soft",
+    "blur-focus"
+  ],
+  "files": [
+    {
+      "path": "text-blur-random-in.html",
+      "target": "compositions/components/text-blur-random-in.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-blur-random-in",
+    "author": "moworks",
+    "call": "MW.textBlurRandomIn(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textBlurRandomIn",
+    "options": {
+      "duration": "s per letter (0.6, power1.inOut)",
+      "gap": "[min, max] s between letters, 1 s / (n − 1) clamped ([0.05, 0.14])",
+      "blur": "px (20)",
+      "ease": "",
+      "start": "s (0.3)",
+      "exitAt": "s (2.45)",
+      "loop": "s (3)",
+      "seed": "the order"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Codrops (MIT); a faithful port of Codrops' effects is in the Codrops collection"
+    },
+    "thirdParty": [],
+    "notes": "Split chars, seeded random order; each char opacity 0 → 1 and blur 20 → 0 px, 0.6 s power1.inOut (easeInOutQuad, CSS cubic-bezier(.45,0,.55,1)), 50 ms apart (demo 1 s/(n−1) clamped 50–140 ms) from 0.3 s. The source is scroll-scrubbed (top bottom → center center); here it runs on time. Loop exit: fade 2.45–2.75 s; loop 3 s. Params: duration (0.6 s) · stagger: ngẫu nhiên (0.05 s) · blur (20 px) · seed. Scroll-scrubbed in the source; here it runs on the film's clock.",
+    "titleVi": "Ký tự rõ nét ngẫu nhiên"
+  }
+}

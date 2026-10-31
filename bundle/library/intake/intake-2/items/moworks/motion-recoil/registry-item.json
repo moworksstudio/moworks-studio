@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-recoil",
+  "type": "hyperframes:component",
+  "title": "Recoil",
+  "description": "Khối lao mạnh tới, bẹp khi chạm đỉnh, giật lùi một đoạn rồi nhích lại vị trí dừng.",
+  "tags": [
+    "move",
+    "recoil",
+    "impact",
+    "bounce-reaction",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "motion-recoil.html",
+      "target": "compositions/components/motion-recoil.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-recoil",
+    "author": "moworks",
+    "call": "MW.motionRecoil(q(\".rc\"), tl, 0.4, {});",
+    "function": "MW.motionRecoil",
+    "options": {
+      "keys": "x px at each key ([0, 680, 530, 590])",
+      "times": "s of each leg ([0.26 power3.out, 0.114 power2.out, 0.146 power2.inOut])",
+      "squash": "scaleX at the wall (0.82)",
+      "accent": "speed lines"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "x keys 42 → 178 (260 ms power3.out) → 148 (+114 ms power2.out) → 160 (+146 ms power2.inOut), done at 520 ms (demo px ×1.2). At the 260 ms peak the block squashes along x (scaleX 0.82, scaleY 1/scaleX, 120 ms triangle); three speed lines trail it on the way in and a small spark fan flashes at the wall (220 ms). Params: duration (0.52 s) · keys (42 → 178 → 148 → 160) · squash (0.18).",
+    "titleVi": "Lao tới, giật lùi, đứng lại"
+  }
+}

@@ -1,0 +1,117 @@
+<!--
+  Bar Wipe Reveal (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Một thanh màu nhấn mọc ra phủ dòng chữ rồi rút về phía phải, chữ hiện ra ngay sau mép thanh, mỗi dòng cách nhau 0.08 giây.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textBarWipe(q(".tk-head"), tl, 0.3, { exit: 2.4 });
+
+  Options (defaults in brackets):
+      - duration: s the bar grows, then the same to pull away (0.4 + 0.4)
+      - stagger: s between lines (0.08)
+      - overhang: px past each side (24)
+      - color: bar colour
+      - exit: s after the start for the mirrored exit (null: stay)
+
+  Notes: Per line (80 ms apart): accent bar (line height × 1.06, 8 px past each side) scaleX 0 → 1 from the left in 0.4 s power2.inOut, then 1 → 0 toward the right in 0.4 s; the text is clipped to the area left of the bar trailing edge, so it appears as the bar pulls away. Exit mirrors (bar grows over the text, text clipped right of the leading edge). Demo: in from 0.3 s, exit from 2.7 s; loop 4 s. Params: duration: mọc / rút (0.4 s + 0.4 s) · stagger: giữa các dòng (0.08 s) · color: màu thanh (màu nhấn) · overhang (8 px).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Thanh màu quét qua<br>chữ hiện ngay sau</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.lines = MW.lines || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwLines) return el.__mwLines;
+    var s = MW.split(el, mode || "words"), out = [];
+    s.lines.forEach(function (ws) {
+      var d = document.createElement("span"); d.className = "mw-line"; d.style.display = "block";
+      ws[0].parentNode.insertBefore(d, ws[0]);
+      ws.forEach(function (w, i) { d.appendChild(w); if (i < ws.length - 1) d.appendChild(document.createTextNode(" ")); });
+      out.push(d);
+    });
+    Array.prototype.slice.call(el.childNodes).forEach(function (n) { if ((n.nodeType === 3 && !n.nodeValue.trim()) || n.nodeName === "BR") el.removeChild(n); });
+    el.__mwLines = { lines: out, chars: s.chars, words: s.words };
+    return el.__mwLines;
+  };
+  var defaults = {"duration":0.4,"stagger":0.08,"overhang":24,"color":"#8b7bff","exit":null};
+  var run = function (el, tl, at, o) {
+        var L = MW.lines(el, "words").lines, io = gsap.parseEase("power2.inOut"), parts = [];
+        L.forEach(function (l) {
+          var s = document.createElement("span"); s.style.display = "inline-block"; while (l.firstChild) s.appendChild(l.firstChild); l.appendChild(s);
+          l.style.position = "relative"; var b = document.createElement("span");
+          b.style.cssText = "position:absolute;top:-3%;height:106%;pointer-events:none;background:" + o.color + ";transform-origin:0 50%;"; l.appendChild(b); parts.push({ l: l, s: s, b: b });
+        });
+        var each = 2 * o.duration, end = (L.length - 1) * o.stagger + each + (o.exit == null ? 0 : o.exit);
+        return MW.drive(tl, at, end, function (t) {
+          parts.forEach(function (p, i) {
+            var w = p.s.offsetWidth, x0 = p.s.offsetLeft - o.overhang, W = w + 2 * o.overhang, u = t - i * o.stagger, lead, trail, clipL = 0, clipR = 0;
+            p.b.style.left = x0 + "px"; p.b.style.width = W + "px";
+            if (o.exit != null && u >= o.exit) {
+              var v = u - o.exit;
+              if (v < o.duration) { lead = W * io(v / o.duration); trail = 0; clipL = lead; } else { trail = W * io(Math.min(1, (v - o.duration) / o.duration)); lead = W; clipL = W; }
+            } else if (u < o.duration) { lead = W * io(Math.max(0, u) / o.duration); trail = 0; clipR = W; }
+            else { trail = W * io(Math.min(1, (u - o.duration) / o.duration)); lead = W; clipR = W - trail; }
+            gsap.set(p.b, { x: trail, scaleX: Math.max(0, (lead - trail) / W) });
+            // the text shows left of the bar's trailing edge on the way in, right of its leading edge on the way out
+            var a = Math.max(0, clipL - o.overhang), b = Math.max(0, clipR - o.overhang);
+            p.s.style.clipPath = "inset(-0.5em " + Math.min(w, b) + "px -0.5em " + Math.min(w, a) + "px)";
+            if (u <= 0) p.s.style.clipPath = "inset(-0.5em " + w + "px -0.5em 0px)";
+          });
+        });
+      };
+  MW.textBarWipe = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

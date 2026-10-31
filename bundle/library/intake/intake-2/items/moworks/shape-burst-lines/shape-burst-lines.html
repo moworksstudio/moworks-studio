@@ -1,0 +1,52 @@
+<!--
+  Radiating Burst Lines (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Mười hai tia thẳng bung ra quanh tâm lệch nhịp nhau rồi biến mất, để nhấn một chữ, một con số hay dấu chấm than.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.shapeBurstLines(q(".bl-s"), tl, 0.4, {});
+
+  Options (defaults in brackets):
+      - r0: start radius (30)
+      - r1: end radius (80)
+      - stagger: s per line (0.02)
+      - cx: (160)
+      - cy: (100)
+
+  Notes: 12 straight 4 px strokes (butt caps in the demo) at 30 deg steps around a centre (behind a word, number or '!'). Line i starts at i x 20 ms (recipe 30 ms): its head extends from radius 30 to 80 px over 300 ms easeOutCubic, then its tail follows from 30 to 80 px over the next 300 ms easeInCubic, so each line flies out and vanishes; ~820 ms total. Params: count (12) · radius (30 → 80 px) · stagger (20 ms) · width (4 px). Call it on the SVG holding the 12 lines (one per 30°), behind a word, a number or '!'.
+-->
+
+<div class="sv"><div class="bl"><svg class="bl-s" width="1600" height="1000" viewBox="0 0 320 200"><line stroke="#ffd23d" stroke-width="4" opacity="0"/><line stroke="#ffd23d" stroke-width="4" opacity="0"/><line stroke="#ffd23d" stroke-width="4" opacity="0"/><line stroke="#ffd23d" stroke-width="4" opacity="0"/><line stroke="#ffd23d" stroke-width="4" opacity="0"/><line stroke="#ffd23d" stroke-width="4" opacity="0"/><line stroke="#ffd23d" stroke-width="4" opacity="0"/><line stroke="#ffd23d" stroke-width="4" opacity="0"/><line stroke="#ffd23d" stroke-width="4" opacity="0"/><line stroke="#ffd23d" stroke-width="4" opacity="0"/><line stroke="#ffd23d" stroke-width="4" opacity="0"/><line stroke="#ffd23d" stroke-width="4" opacity="0"/></svg><b>!</b></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"r0":30,"r1":80,"stagger":0.02,"cx":160,"cy":100};
+  var run = function (el, tl, at, o) {
+        var lines = el.querySelectorAll("line"), out = gsap.parseEase("power2.out"), inn = gsap.parseEase("power2.in");
+        return MW.drive(tl, at, (lines.length - 1) * o.stagger + 0.6, function (t) {
+          Array.prototype.forEach.call(lines, function (l, i) { var a = i / lines.length * 2 * Math.PI, d = t - i * o.stagger, h = o.r0 + (o.r1 - o.r0) * out(Math.max(0, Math.min(1, d / 0.3))), tt = o.r0 + (o.r1 - o.r0) * inn(Math.max(0, Math.min(1, (d - 0.3) / 0.3)));
+            l.setAttribute("x1", o.cx + Math.cos(a) * tt); l.setAttribute("y1", o.cy + Math.sin(a) * tt); l.setAttribute("x2", o.cx + Math.cos(a) * h); l.setAttribute("y2", o.cy + Math.sin(a) * h); l.setAttribute("opacity", d > 0 && h - tt > 0.3 ? "1" : "0"); });
+        });
+      };
+  MW.shapeBurstLines = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

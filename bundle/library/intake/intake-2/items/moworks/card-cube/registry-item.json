@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "card-cube",
+  "type": "hyperframes:component",
+  "title": "Cube Rotation",
+  "description": "Một khối lập phương sáu mặt (ảnh hoặc chữ) xoay đều quanh trục dọc, hơi nghiêng xuống để thấy mặt trên.",
+  "tags": [
+    "cube",
+    "3d",
+    "rotate",
+    "loop",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "card-cube.html",
+      "target": "compositions/components/card-cube.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/card-cube",
+    "author": "moworks",
+    "call": "MW.cardCube(q(\".cb\"), tl, 0, {});",
+    "function": "MW.cardCube",
+    "options": {
+      "faces": "the six faces: front, right, back, left, top, bottom",
+      "period": "s a turn (4), linear",
+      "tilt": "degrees toward the viewer (20; the small demo about 29)",
+      "perspective": "× the parent's width (1.1)",
+      "duration": "s (8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "CSS 3D cube, 6 faces (pictures or text), perspective about 1.1 x the frame width; rotateY 0 -> 360 deg over 4000 ms linear with a fixed rotateX 20 deg (demo ~29 deg), faces z-sorted, seamless loop. Params: period (4 s) · tilt (20°) · perspective (1.1 × khung).",
+    "titleVi": "Khối lập phương xoay"
+  }
+}

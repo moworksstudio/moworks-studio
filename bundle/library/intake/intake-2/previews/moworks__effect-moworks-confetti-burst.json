@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-moworks-confetti-burst",
+  "hash": "4e5091b795249616",
+  "at": "2026-10-17T09:12:00.216Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__effect-moworks-confetti-burst.mp4",
+    "poster": "previews/moworks__effect-moworks-confetti-burst.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "d939282d0223574e2300f116bc60e63e9227a2f7969cc0975c48f11403835733",
+    "size": 30179,
+    "seconds": 29.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

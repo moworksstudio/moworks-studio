@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-lock-unlock",
+  "type": "hyperframes:block",
+  "title": "Lock and Unlock",
+  "description": "Càng khoá nhấc lên 10 px rồi xoay nghiêng quanh chân trái bằng lò xo, thân khoá đứng yên, chữ ĐÃ KHOÁ đổi thành ĐÃ MỞ; đóng lại thì càng hạ xuống có vạch loé.",
+  "tags": [
+    "lock",
+    "icon",
+    "spring",
+    "state",
+    "selection-controls",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "ui-lock-unlock.html",
+      "target": "compositions/components/ui-lock-unlock.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-lock-unlock",
+    "author": "moworks",
+    "call": "MW.uiLockUnlock(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiLockUnlock",
+    "options": {
+      "closeAt": "s (1.85)",
+      "locked": "",
+      "open": "",
+      "accent": "",
+      "loop": "s (2.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Lock body 72x56 r10 (accent, keyhole). Shackle: U of 8 px stroke (legs 40 px apart, arc r20). Lift 0 → 10 px over 0.35-0.55 s power2.out; then pivot on the left leg to −0.5 rad (−28.6°) on spring k200 c12 from 0.55 s (overshoot). Close: angle back over 1.85-2.05 s power2.in, lift down 2.05-2.17 s power1.in, two click marks flash at the landing (decay e^(−12 t)). Label LOCKED → UNLOCKED crossfades with the opening. Params: lift (10 px) · angle (−28.6°) · spring (k200 c12) · close (1.85 s). The shackle lifts 10 units, then swings on its left leg to −0.5 rad on a spring k200 c12; it closes with two click marks.",
+    "titleVi": "Ổ khoá mở, càng khoá bật nghiêng"
+  }
+}

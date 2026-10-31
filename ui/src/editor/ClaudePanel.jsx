@@ -3,7 +3,7 @@
 // as Claude's short sentences; every Claude task is ONE status line (working, with its time; or done, with its time, Details and Undo)
 // and Claude's reply under it; what it did on the way (reading, editing, the app's checks, the files) folds under "Details". The head
 // holds the model and effort (usage on hover). Under the composer: the picked element or shot as one chip ("Selected: …", × clears it:
-// the whole film), the motion drawer, Stop while Claude works (the only Stop), Send. Messages typed while
+// the whole film), the motion and sound drawers, Stop while Claude works (the only Stop), Send. Messages typed while
 // Claude works or while the project renders wait in a queue that sends itself. Without a Claude sign-in nothing is sent and what is
 // typed stays as a draft.
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -93,7 +93,7 @@ export function fileWords(path) {
   if (/^(png|jpe?g|webp|gif|svg|avif|psd)$/.test(ext)) return "a picture";
   if (/^(wav|mp3|m4a|aac|ogg|flac)$/.test(ext)) return "a sound";
   if (/^(mp4|mov|webm)$/.test(ext)) return "a video";
-  if (/^(ttf|otf|woff2?)$/.test(ext)) return "a font";
+  if (/^(ttf|otf|woff2?|eot)$/.test(ext)) return "a font";
   if (/^(md|txt)$/.test(ext)) return "the notes";
   if (ext === "json") return "the film's settings";
   return ext ? "a file" : "a folder";
@@ -430,7 +430,7 @@ function Note({ n, projectId, toast, onPlay = null, onFix = null, onDetails = nu
 }
 
 export default function ClaudePanel({ projectId, selectedShot, onClearTarget, onChanged, prefill, selection = null, inject = null, reloadKey = 0, motionPick = null,
-  onOpenMotions = null, motionsOpen = false, steps = null, rendering = false, actions = [], onWaiting = null, stage = null, interrupted = null, onPlay = null, onOpenSheet = null, checks = null,
+  onOpenMotions = null, motionsOpen = false, onOpenSounds = null, soundsOpen = false, steps = null, rendering = false, actions = [], onWaiting = null, stage = null, interrupted = null, onPlay = null, onOpenSheet = null, checks = null,
   waiting = null, pins = null, onPinsSent = null, onSeek = null, fps = 24 }) {
   const t = useT();
   const toast = useToast();
@@ -448,6 +448,7 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
   const [queue, setQueue] = useState([]);              // messages typed while Claude works or the film renders; the first one sends itself after
   const [err, setErr] = useState(null);
   const [sending, setSending] = useState(false);
+  const [sentAt, setSentAt] = useState(0);          // when Send was pressed: a message with notes first has their frames taken, which can take a while
   // what the message is about follows what the user picked: an element in the film, else a shot, else the whole film;
   // a message holding notes pinned on the film is about the film, the notes saying their own shots ("Notes on shot 1, 2")
   const pinned = pins?.length ? notesOf(text, pins) : [];
@@ -527,26 +528,27 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
   const scopeOf = (kind) => (kind === "selection" && selection ? { kind: "selection", selection: selection.context, shot: selectedShot ? { number: selectedShot.number, title: selectedShot.title, src: selectedShot.src } : null }
     : kind === "shot" && selectedShot ? { kind: "shot", shot: { number: selectedShot.number, title: selectedShot.title, src: selectedShot.src, start: selectedShot.start, duration: selectedShot.duration } }
       : { kind: "project" });
-  const submit = async (msg, kind, motion, scope = null) => {
+  const submit = async (msg, kind, motion, scope = null, heldPins = null) => {
     scope = scope ?? scopeOf(kind);
     if (motion && msg.includes(motion.title)) scope.motion = { id: motion.id, name: motion.title, kind: motion.kind, version: motion.version ?? motion.credit?.commit ?? null, library: motion.library ?? "motion" };
     // the notes pinned on the film whose lines the message still holds go with it (each line's time, shot, place and words)
-    const notes = notesOf(msg, pins);
+    // (a queued message keeps the notes it was queued with: their lines have left the box, and with them the pins)
+    const notes = notesOf(msg, heldPins ?? pins);
     const task = await post(`/api/projects/${projectId}/tasks`, { text: msg, scope, ...(notes.length ? { notes: notes.map(({ id: _id, ...n }) => n) } : {}) });
-    if (pins?.length) onPinsSent?.(pins.map((p) => p.id));
+    if (notes.length) onPinsSent?.(notes.map((n) => n.id));
     setRunning(task.id); await load();
   };
   const wait = !!running || rendering;
   const send = async () => {
     if (!text.trim() || sending) return;
     if (signedOut) { setErr(t("Claude is not connected: sign in, then send. Your message stays here.")); return; }
-    if (wait) { setQueue((q) => [...q, { text, kind: scopeKind, motion: motionCtx }]); setText(""); setMotionCtx(null);
+    if (wait) { setQueue((q) => [...q, { text, kind: scopeKind, motion: motionCtx, pins }]); setText(""); setMotionCtx(null);
       toast(rendering && !running ? t("Queued: it goes when the render finishes") : t("Queued: it goes when Claude finishes")); return; }
-    setSending(true); setErr(null);
+    setSending(true); setErr(null); setSentAt(Date.now());
     try { await submit(text, scopeKind, motionCtx); setText(""); setMotionCtx(null); }
     catch (e) {
       // Claude had just started a step this panel had not seen yet (the idle poll is 5 s): the message waits in the queue
-      if (e.code === "BUSY") { setQueue((q) => [...q, { text, kind: scopeKind, motion: motionCtx }]); setText(""); setMotionCtx(null); toast(t("Queued: it goes when Claude finishes")); load(); }
+      if (e.code === "BUSY") { setQueue((q) => [...q, { text, kind: scopeKind, motion: motionCtx, pins }]); setText(""); setMotionCtx(null); toast(t("Queued: it goes when Claude finishes")); load(); }
       else { if (e.code === "CLAUDE_SIGNED_OUT") claude?.refresh(true); setErr(e.message); }
     } finally { setSending(false); }
   };
@@ -571,7 +573,7 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
     setQueue(rest);
     // the autopilot may start the next step the moment a task ends; a busy answer puts the message back at the front
     // (after a short wait, so the poll can see the new task), never drops it; any other error hands it back to the composer
-    submit(next.text, next.kind, next.motion, next.scope ?? null).catch((e) => {
+    submit(next.text, next.kind, next.motion, next.scope ?? null, next.pins ?? null).catch((e) => {
       if (e.code === "BUSY") setTimeout(() => { setQueue((q) => [next, ...q]); load(); }, 1500);
       else { setText((cur) => cur || next.text); setErr(e.message); }
     });
@@ -623,6 +625,9 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
         <button key={a.key} className={"btn sm cact" + (a.att ? " att" : "")} disabled={a.off} title={a.title} onClick={a.onClick}>{a.icon}{a.label}</button>)}</section>}
       <section className="cpanel composer" aria-label={t("Message to Claude")}>
         {signedOut && <NeedsClaude text={t("Claude is not connected: your message stays here as a draft")} />}
+        {/* Send with notes waits for each note's frame to be drawn (17 s on a 3D film, with only a spinner on the button) */}
+        {sending && pinned.length > 0 && <div className="csending" role="status"><Loader2 size={13} className="spin" />
+          <span className="t">{pinned.length === 1 ? t("Taking the picture of your note") : t("Taking the pictures of your {n} notes", { n: pinned.length })}</span><span className="cs-m"><Elapsed since={sentAt} /></span></div>}
         {queue.length > 0 && <div className="cqueue">{queue.map((q, i) => <span key={i} className="cchip"><span className="t">{t("Queued:")} {q.text}</span>
           <button className="btn ghost icon sm" onClick={() => setQueue((x) => x.filter((_, j) => j !== i))} aria-label={t("Remove from the queue")}><X size={12} /></button></span>)}</div>}
         {(targetLabel || pinned.length > 0 || (motionCtx && text.includes(motionCtx.title))) && <div className="ctarget">
@@ -634,11 +639,12 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
             <button className="btn ghost icon sm" onClick={() => setMotionCtx(null)} aria-label={t("Detach the library item")} title={t("Detach (the text stays)")}><X size={12} /></button></span>}
         </div>}
         {!text && !targetLabel && <div className="csuggest">{suggestions.map((s) => <button key={s} className="cchip sug" onClick={() => { setText(s); taRef.current?.focus(); }} title={s}><Wand2 size={12} /><span className="t">{s}</span></button>)}</div>}
-        <textarea ref={taRef} className="textarea composer-input" rows={3} value={text} onChange={(e) => setText(e.target.value)} aria-label={t("Message to Claude")}
+        <textarea ref={taRef} className="textarea composer-input" rows={3} value={text} readOnly={sending} onChange={(e) => setText(e.target.value)} aria-label={t("Message to Claude")}
           onSelect={(e) => { caret.current = e.currentTarget.selectionStart; }} onBlur={(e) => { caret.current = e.currentTarget.selectionStart; }}
           placeholder={placeholder} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} />
         <div className="composer-actions">
           {onOpenMotions && <button className={"btn ghost sm" + (motionsOpen ? " on" : "")} onClick={onOpenMotions} aria-expanded={motionsOpen} title={t("Motions (opens under the film)")}><Library size={14} /><span className="lbl">{t("Motions")}</span></button>}
+          {onOpenSounds && <button className={"btn ghost sm" + (soundsOpen ? " on" : "")} onClick={onOpenSounds} aria-expanded={soundsOpen} title={t("Sounds (opens under the film)")}><AudioLines size={14} /><span className="lbl">{t("Sounds")}</span></button>}
           {text && <button className="clink" onClick={() => { setText(""); setMotionCtx(null); }}>{t("Clear")}</button>}
           <span className="gap" />
           {running && <button className="btn sm cstop" onClick={stop} disabled={stopping} title={t("Stop what Claude is doing; what is done is kept")}>{stopping ? <Loader2 size={13} className="spin" /> : <CircleStop size={14} />}<span className="lbl">{t("Stop")}</span></button>}

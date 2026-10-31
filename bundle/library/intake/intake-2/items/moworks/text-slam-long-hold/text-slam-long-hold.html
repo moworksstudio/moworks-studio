@@ -1,0 +1,58 @@
+<!--
+  Victory Impact Hold (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Chữ chiến thắng thu từ rất to về đúng cỡ trong 0.18 giây, chạm thì rung và bẹp nảy vài nhịp, hai vạch kẻ bắn ra hai bên; sau đó đứng yên gần bốn giây cho người xem đọc.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textSlamLongHold(q(".vw"), tl, 0, { rules: ".rule" });
+
+  Options (defaults in brackets):
+      - landAt: s of the contact (0.58)
+      - from: start scale (2.6)
+      - land: s of the slam, ease-in quad (0.18)
+      - wobble: squash at contact (0.14)
+      - outAt: s it leaves after the long hold (4.6)
+      - rules: selector of the two side rules
+      - gap: px from centre where the rules start (200)
+      - reach: px they grow outward (500)
+
+  Notes: px @320x200, 5.2 s loop. Word (44 px, accent) scales 2.6 → 1 in 180 ms in-quad (0.4-0.58 s), fade in 80 ms; at contact a squash wobble scaleX 1 + 0.14 e^(−14t) cos(34t), scaleY 1 − the same; shake ±4 px x/y 140 ms. Side rules grow 100 px outward from ±40 px (400 ms outExpo), fade 0.78-1.18 s. Holds to 4.6 s, out 4.6-4.95 s in-cubic. Params: landAt: lúc chạm (0.58 s) · from: cỡ đầu (2.6) · land: thời gian đập (0.18 s) · hold: giữ (3.8 s) · wobble: bẹp nảy (14 %).
+-->
+
+<div class="vh"><div class="rule"></div><div class="rule"></div><div class="vw">CHIẾN THẮNG</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"landAt":0.58,"from":2.6,"land":0.18,"wobble":0.14,"outAt":4.6,"rules":null,"gap":200,"reach":500};
+  var run = function (el, tl, at, o) {
+        var inq = gsap.parseEase("power1.in"), ex = gsap.parseEase("expo.out"), inn = gsap.parseEase("power2.in"), rules = o.rules ? Array.prototype.slice.call(document.querySelectorAll(o.rules)) : [];
+        return MW.drive(tl, at, o.outAt + 0.4, function (t) {
+          var L = o.landAt, d = t - L, s = t < L - o.land ? o.from : t < L ? o.from + (1 - o.from) * inq((t - L + o.land) / o.land) : 1;
+          var wob = d > 0 ? o.wobble * Math.exp(-14 * d) * Math.cos(34 * d) : 0, sh = d > 0 && d < 0.14 ? 12 * (1 - d / 0.14) : 0, out = t > o.outAt ? inn(Math.min(1, (t - o.outAt) / 0.35)) : 0;
+          gsap.set(el, { scaleX: s * (1 + wob), scaleY: s * (1 - wob), x: sh * Math.sin(t * 190), y: sh * Math.cos(t * 160) });
+          el.style.opacity = String(Math.min(1, Math.max(0, (t - L + o.land) / 0.08)) * (1 - out));
+          rules.forEach(function (r, i) { var g = d > 0 ? ex(Math.min(1, d / 0.4)) : 0, f = t < 0.78 ? 1 : Math.max(0, 1 - (t - 0.78) / 0.4); gsap.set(r, { x: (i ? 1 : -1) * (o.gap + o.reach * g), scaleX: g }); r.style.opacity = d > 0 ? String(f) : "0"; });
+        });
+      };
+  MW.textSlamLongHold = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

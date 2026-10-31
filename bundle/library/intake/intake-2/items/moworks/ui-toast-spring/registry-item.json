@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-toast-spring",
+  "type": "hyperframes:block",
+  "title": "Toast",
+  "description": "Thông báo nhỏ bật lên từ mép dưới bằng lò xo, nằm yên vài giây rồi trượt nhanh xuống biến mất.",
+  "tags": [
+    "toast",
+    "spring",
+    "notification",
+    "slide",
+    "feedback-reactions",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-toast-spring.html",
+      "target": "compositions/components/ui-toast-spring.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-toast-spring",
+    "author": "moworks",
+    "call": "MW.uiToastSpring(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiToastSpring",
+    "options": {
+      "k": "spring stiffness (260)",
+      "c": "damping (22)",
+      "inAt": "s (0.3)",
+      "outAt": "s (2.6, 0.25 s power2.in)",
+      "label": "",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Toast 180x40 r10 (light, green status dot, label) rises from below the frame (y 220 → 136, 84 px) on a spring k260 c22 from 0.3 s (≈ 400 ms); holds; slides back down over 2.6-2.85 s power2.in. Recipe: hold 3-5 s in a product; several toasts stack upward. Params: spring (k260 c22) · rise (84 px) · hold (2.3 s) · out (0.25 s, power2.in). In a product hold it 3–5 s; several toasts stack upward.",
+    "titleVi": "Thông báo nhỏ bật lên từ đáy"
+  }
+}

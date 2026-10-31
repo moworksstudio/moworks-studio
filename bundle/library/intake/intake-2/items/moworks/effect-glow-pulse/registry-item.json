@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-glow-pulse",
+  "type": "hyperframes:component",
+  "title": "Glow Pulse",
+  "description": "Quầng sáng quanh phần tử mạnh lên rồi dịu đi theo nhịp 1.1 giây, phần tử cũng sáng và phồng nhẹ theo.",
+  "tags": [
+    "glow",
+    "pulse",
+    "loop",
+    "light-glow",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "effect-glow-pulse.html",
+      "target": "compositions/components/effect-glow-pulse.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-glow-pulse",
+    "author": "moworks",
+    "call": "MW.effectGlowPulse(q(\".gp-d\"), tl, 0, {});",
+    "function": "MW.effectGlowPulse",
+    "options": {
+      "period": "s per cycle (1.1)",
+      "cycles": "(3)",
+      "glow": "px of the glow, rest to peak ([32, 104])",
+      "ring": "px of the ring's border (30)",
+      "color": "glow colour"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Looping glow on a 36 px accent dot, 1100 ms per cycle, each half eased in-out (runtime bezier .45,.05,.2,1; recipe sine.inOut): box-shadow blur 8 → 26 → 8 px (recipe 8 → 24, opacity 35 → 85 %), brightness 0.92 → 1.22, scale 0.98 → 1.03 (the target is not still). Behind it a 48 px ring with an 8 px accent border: scale 0.9 → 1.35, opacity 0.28 → 0.9, blur 5 → 10 px, same cycle. Params: period (1.1 s) · glow (8 → 26 px) · brightness (0.92 → 1.22) · scale (0.98 → 1.03) · color.",
+    "titleVi": "Quầng sáng phập phồng"
+  }
+}

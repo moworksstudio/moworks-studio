@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-strike-correct",
+  "hash": "e5180c1d33685ca2",
+  "at": "2026-10-17T09:13:30.296Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-strike-correct.mp4",
+    "poster": "previews/moworks__text-strike-correct.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f9c4cddadc538021c3e835fff55a99f07c921bce2ffedddf02ca5f25b0276833",
+    "size": 15483,
+    "seconds": 28.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-scribble-circle",
+  "hash": "8bcdaa0107aee045",
+  "at": "2026-10-17T09:13:03.059Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-scribble-circle.mp4",
+    "poster": "previews/moworks__text-scribble-circle.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "cc016b6de7ff1ae0c6dc829f8416030f45ea8d63fcdaa0da02499d581477f517",
+    "size": 9182,
+    "seconds": 27.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

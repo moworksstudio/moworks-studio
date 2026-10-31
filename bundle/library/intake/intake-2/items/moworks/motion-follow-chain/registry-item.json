@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-follow-chain",
+  "type": "hyperframes:component",
+  "title": "Follow Through",
+  "description": "Thân di chuyển rồi dừng, chiếc ăng-ten năm đốt trên đỉnh nghiêng trễ theo, vượt qua rồi lắc nhẹ mới yên.",
+  "tags": [
+    "follow-through",
+    "chain",
+    "spring",
+    "secondary",
+    "bounce-reaction",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "motion-follow-chain.html",
+      "target": "compositions/components/motion-follow-chain.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-follow-chain",
+    "author": "moworks",
+    "call": "MW.motionFollowChain(q(\".fc\"), tl, 0.2, {});",
+    "function": "MW.motionFollowChain",
+    "options": {
+      "segments": "(5)",
+      "seg": "px per segment (50)",
+      "k": "stiffness of the first segment (240), softer up the chain",
+      "ratio": "damping ratio (0.26)",
+      "lean": "degrees per px of lag (0.46)",
+      "limit": "± degrees (66)",
+      "distance": "px (900)",
+      "move": "s (0.88, power2.inOut)",
+      "backAt": "s it comes back (2.0)",
+      "color": "",
+      "tip": ""
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "A 40 px body moves x 0 → 180 px in 880 ms power2.inOut and stops; a 5-segment chain (10 px each) stands up from its top centre. Each segment leans 0.04 rad per px of lag (its own spring-tracked x, stiffness 240 / (1 + 0.8 i), damping ratio 0.26, minus the body x), limited to ±66°: the tip lags ~24 px, overshoots ~11 px after the stop and settles by ~90 % of the cycle. Returns the same way. Params: segments (5 × 10 px) · stiffness (240) · damping ratio (0.26) · limit (±66°). Each segment tracks the body on its own spring; the lean follows the lag, so the tip trails, overshoots after the stop and settles.",
+    "titleVi": "Ăng-ten lắc theo sau thân"
+  }
+}

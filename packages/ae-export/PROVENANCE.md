@@ -11,9 +11,9 @@ The kit itself is not modified.
 |---|---|---|
 | `port/port.py` | `engine/ae/port.py` | see below |
 | `port/record.js` | `engine/ae/record.js` | a scene is also a mounted HF sub-composition (a top-level host with `data-composition-id`; its comp root is HF's `[data-hf-inner-root]`; its length `data-hf-authored-duration`); `<audio>` is never a scene |
-| `port/ae_runtime.jsx` | `engine/ae/ae_runtime.jsx` | none (it already takes the comp rate from `DATA.fps`) |
+| `port/ae_runtime.jsx` | `engine/ae/ae_runtime.jsx` | a canvas film's `audioOff`; the layers After Effects did not build, one a line in `build.log.failed` (it already takes the comp rate from `DATA.fps`) |
 | `port/run_jsx.ps1`, `port/ae_windows.ps1` | `engine/ae/` same names | none |
-| `port/audio_mix.py` | `engine/audio/media.py` | `bake_music` removed (kit music builder); FFmpeg from the app's pins |
+| `port/audio_mix.py` | `engine/audio/media.py` | `bake_music` removed (kit music builder); FFmpeg from the app's pins; HF's volume lane (`gain_at`, HF's own curve), Audio Levels keys (`level_keys`), a role by the app's names (`voiceover`), WAV for what AE cannot import (`to_wav`) |
 | `port/appenv.py` | (new) | replaces the kit's `common.py`, `render/browser.py`, `audio/loudness.ffmpeg`: pinned Chromium, pinned FFmpeg, app work folder, output folder |
 | `port/hf_driver.js` | replaces `engine/runtime/driver.js` | new: the kit's `window.__aimk` interface on HF's own page; every seek is HF's `window.__hf.seek`; tween bounds of every HF timeline and `<audio>` of sub-compositions on the film clock |
 
@@ -36,6 +36,14 @@ The kit itself is not modified.
    rendered film (`--film`, the app's render of the film as it is now) as one video layer with its sound off, beside the audio layers.
    `record.js`: a top-level clip that is itself a picture (`<canvas class="clip" data-start>`) is a raster layer of the main comp, not an
    empty scene. `ae_runtime.jsx`: a footage layer's `audioOff`.
+10. Sound: each file on the timeline once; one AE refuses as WAV (tried in AE (Beta) 27.1: `.ogg`, `.oga`, `.opus`, `.flac`, `.webm`, `.mka`); Audio Levels carry
+    the whole gain (volume, HF's `data-automation`, fades), the stems too; `voice.wav` for HF's `voiceover`.
+11. True counts: the layers AE did not build come back from the build; `AE-PORT.md` is written again after it, and the dialog says them (`AE-LAYERS` line).
+12. Keys: `multi` keeps each scalar on the curve `fit` checked; `fit` checks a slow move before calling it steps; a slope is never read across the 0.4 ms samples
+    beside a tween's bound.
+13. Check frames: one in every shot (`index.mjs`), read when AE has finished writing them.
+14. After the build AE closes the project in the work folder and opens the copy in the output folder (footage found beside it, saved so the links stay); the work folder
+    keeps only `port.json` and the logs (`MW_AE_KEEP_WORK=1` keeps it all, for `--rebuild`).
 
 Not taken: the kit's `engine/render/serve.py` (copied first as `port/serve.py`, later removed because nothing used it; the export uses
 HF's file server).

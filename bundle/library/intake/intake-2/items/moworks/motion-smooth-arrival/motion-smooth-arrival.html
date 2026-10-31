@@ -1,0 +1,48 @@
+<!--
+  Smooth Arrival (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Khối vuông đi 180 px, tăng tốc rồi giảm tốc êm, nhanh nhất ở giữa đường.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionSmoothArrival(q(".sa"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - x: px (1200)
+      - duration: s (0.76)
+      - ease: (power2.inOut: fastest mid-way)
+      - fadeAt: s it fades to reappear at the start (1.65)
+
+  Notes: Square x 0 → 180 px (demo 200) in 760 ms power2.inOut (easeInOutCubic, bezier .65,0,.35,1), fastest mid-way, between dashed start and end slots. Small demo: fades out 200 ms at 1950 ms and fades back in at the start (250 ms). The speed graph is a guide. Params: duration (0.76 s) · x (180 px) · ease (power2.inOut).
+-->
+
+<div class="sa-s" style="left:300px"></div><div class="sa-s" style="left:1500px"></div><div class="sa"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"x":1200,"duration":0.76,"ease":"power2.inOut","fadeAt":1.65};
+  var run = function (el, tl, at, o) {
+        var io = gsap.parseEase(o.ease);
+        return MW.drive(tl, at, o.fadeAt + 0.2 + 0.25, function (t) { var u = io(Math.max(0, Math.min(1, t / o.duration))), f = Math.max(0, Math.min(1, (t - o.fadeAt) / 0.2)), back = Math.max(0, Math.min(1, (t - o.fadeAt - 0.2) / 0.25)); gsap.set(el, { x: back > 0 ? 0 : o.x * u }); el.style.opacity = String(back > 0 ? back : 1 - f); });
+      };
+  MW.motionSmoothArrival = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

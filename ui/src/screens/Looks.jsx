@@ -16,7 +16,59 @@ import SwatchBooks from "../studio/SwatchBooks.jsx";
 // the sources a Look comes from, in this order; a source the server names later shows by its own name
 const SOURCES = { hf: ["HyperFrames", "HF"], yours: ["Yours", "YOU"] };
 const sourceOf = (l) => l.group ?? "hf";
-const OK_FILES = /\.(pdf|pptx|png|jpe?g|webp|gif|svg)$/i;
+// the same lists as packages/looks-library/custom.mjs (ACCEPT, MAX_FILES, SYSTEM_FILE)
+const OK_FILES = /\.(pdf|pptx|png|jpe?g|webp|gif|svg|ttf|otf|woff2?|zip|rar|7z|ai|psd|psb)$/i;
+const ACCEPT_ATTR = ".pdf,.pptx,.png,.jpg,.jpeg,.webp,.gif,.svg,.ttf,.otf,.woff,.woff2,.zip,.rar,.7z,.ai,.psd,.psb";
+const MAX_FILES = 300;
+const SYSTEM_FILE = /^(desktop\.ini|thumbs\.db|ehthumbs\.db|\.ds_store|\._.*|~\$.*)$/i;
+const baseName = (n) => n.replace(/\.[^.]+$/, "").toLowerCase();
+
+/** What a pick of files comes to, against the files the kit already takes (names, sizes). take: the files, each under the name it is
+ *  uploaded with: one of a name another file has, with other bytes (two folders' logo.png), takes its folder's name, so neither is lost;
+ *  the same name and size is one file. leftOut: the names not taken. Windows' and a Mac's own files, and an .eot beside the same font in
+ *  a format the kit reads, go without a word. */
+export function sortPicked(list, have = [], room = MAX_FILES) {
+  const picked = [...list], fonts = new Set(picked.filter((f) => OK_FILES.test(f.name)).map((f) => baseName(f.name)));
+  const taken = [...have], take = [], leftOut = [];
+  for (const f of picked) {
+    if (SYSTEM_FILE.test(f.name) || (/\.eot$/i.test(f.name) && fonts.has(baseName(f.name)))) continue;
+    if (!OK_FILES.test(f.name)) { leftOut.push(f.name); continue; }
+    if (taken.some((x) => x.name === f.name && x.size === f.size)) continue;
+    let name = f.name;
+    if (taken.some((x) => x.name === name)) {
+      const folder = String(f.webkitRelativePath ?? "").split("/").slice(-2, -1)[0];
+      const ext = f.name.match(/\.[^.]+$/)?.[0] ?? "", stem = f.name.slice(0, f.name.length - ext.length);
+      if (folder) name = `${folder} ${f.name}`;
+      for (let i = 2; taken.some((x) => x.name === name); i++) name = `${stem} (${i})${ext}`;
+    }
+    if (taken.length >= room) { leftOut.push(f.name); continue; }
+    taken.push({ name, size: f.size });
+    take.push({ file: f, name });
+  }
+  return { take, leftOut };
+}
+
+/** The picked files that are not taken, by name; the kit's panel keeps them too (with the reason). */
+function LeftOut({ names }) {
+  const t = useT();
+  if (!names.length) return null;
+  return <div className="warn-note lk-unread"><AlertTriangle size={13} /><div className="lk-unread-in">
+    <p className="lk-unread-t">{t("{n} file(s) left out", { n: names.length })}</p>
+    <ul className="plain">{names.map((n) => <li key={n}><span className="nm">{n}</span></li>)}</ul></div></div>;
+}
+
+/** What the kit could not read or did not take, each with its reason. Remove one the kit does not need; a copy it can read is added here. */
+export function UnreadFiles({ look, onRemove, onAdd, busy }) {
+  const t = useT();
+  const pick = useRef(null);
+  return <div className="warn-note lk-unread" role="status"><AlertTriangle size={13} /><div className="lk-unread-in">
+    <p className="lk-unread-t">{t("{n} file(s) not read", { n: look.unread.length })}</p>
+    <ul className="plain">{look.unread.map((x) => <li key={x.name}><span className="nm">{x.name}</span><span className="why">{t(x.reason)}</span>
+      {look.editable && <button type="button" className="btn ghost icon sm" onClick={() => onRemove(x.name)} disabled={busy} aria-label={t("Remove {name} from this Brand Kit", { name: x.name })} title={t("Remove from this Brand Kit")}><X size={13} /></button>}</li>)}</ul>
+    {look.editable && <><button type="button" className="btn sm" onClick={() => pick.current?.click()} disabled={busy}><Plus size={14} />{t("Add files and scan again")}</button>
+      <input ref={pick} type="file" multiple hidden accept={ACCEPT_ATTR} onChange={(e) => { onAdd([...e.target.files]); e.target.value = ""; }} /></>}
+  </div></div>;
+}
 
 function Swatches({ colors, big }) {
   if (!colors?.length) return null;
@@ -35,7 +87,7 @@ function LookCard({ l, on, onPick }) {
   return <button type="button" className={"sgb-card lk-card" + (on ? " on" : "")} aria-pressed={on} onClick={() => onPick(l)}>
     <span className="shot">{l.preview?.image ? <img src={l.preview.image} alt="" loading="lazy" /> : <span className="lk-noimg"><Swatches colors={l.swatches} big /></span>}
       {l.status === "scanning" && <span className="mark"><Loader2 size={11} className="spin" />{t("Scanning")}</span>}
-      {l.status === "failed" && <span className="mark warn"><AlertTriangle size={11} /></span>}
+      {(l.status === "failed" || (l.status === "ready" && l.unread?.length > 0)) && <span className="mark warn" title={l.unread?.length ? t("{n} file(s) not read", { n: l.unread.length }) : undefined}><AlertTriangle size={11} /></span>}
       {on && <span className="chk"><Check size={13} /></span>}</span>
     <span className="nm">{l.title}</span>
     <span className="by"><span className="au-tag">{SOURCES[sourceOf(l)]?.[1] ?? sourceOf(l).slice(0, 4).toUpperCase()}</span><Swatches colors={l.swatches} /></span>
@@ -61,7 +113,7 @@ export function lookSummary(desc) {
     if (out) return out[0].toUpperCase() + out.slice(1) + ".";
   }
   const first = (s.match(/^.+?[.!?](\s|$)/)?.[0] ?? s).trim();
-  return first.replace(/\s*\b(?:(?:from|in|of|see|per)\s+)?[\w'’-]+\.(md|json|html?|css|js|txt|pdf)\b/gi, "").replace(/\s+([.,])/g, "$1").trim();
+  return first.replace(/\s*\b(?:(?:from|in|of|see|per)\s+)?[\w'’-]+\.(md|json|html?|css|js|txt|pdf)\b/gi, "").replace(/\s*\(\s*\)/g, "").replace(/\s+([.,])/g, "$1").trim();
 }
 
 /** The Look in hand: stills, description, colours, fonts, versions, actions, credit. */
@@ -84,6 +136,19 @@ function LookDetails({ id, onChanged, onDeleted }) {
     } catch (e) { toast(e.message, "error"); }
   };
   const remove = async () => { try { await del(`/api/looks/${id}`); toast(t("Deleted “{title}”", { title: l.title })); onDeleted(); } catch (e) { toast(e.message, "error"); } };
+  const removeFile = async (name) => { try { await del(`/api/looks/${id}/files?name=${encodeURIComponent(name)}`); d.reload(); onChanged(); } catch (e) { toast(e.message, "error"); } };
+  // a readable copy of what the kit could not read: the files go in, then the scan runs again and makes the next version
+  const addFiles = async (list) => {
+    try {
+      const { take, leftOut } = sortPicked(list, l.files ?? []);
+      if (leftOut.length) await patch(`/api/looks/${id}`, { leftOut });
+      if (take.length) {
+        setScan({ stage: t("Adding the files") });
+        for (const x of take) await upload(`/api/looks/${id}/files`, new File([x.file], x.name));
+        await rescan();
+      } else { d.reload(); onChanged(); }
+    } catch (e) { setScan(null); toast(e.message, "error"); }
+  };
   const stills = l.stills?.length ? l.stills : l.preview?.image ? [l.preview.image] : [];
   return <>
     <div className="sgb-big">{stills[0] ? <img src={stills[0]} alt="" /> : <span className="lk-noimg"><Swatches colors={l.swatches} big /></span>}</div>
@@ -93,6 +158,7 @@ function LookDetails({ id, onChanged, onDeleted }) {
         {l.updatedAt && <span>{ago(l.updatedAt)}</span>}</p></div>
     {lookSummary(l.description) && <p className="sgb-desc">{lookSummary(l.description)}</p>}
     {l.status === "failed" && <p className="warn-note"><AlertTriangle size={13} />{t(l.error ?? "The scan did not finish. Upload the guideline again or try another file.")}</p>}
+    {l.unread?.length > 0 && <UnreadFiles look={l} onRemove={removeFile} onAdd={addFiles} busy={!!scan || l.status === "scanning"} />}
     {scan ? <p className="lk-stage"><Loader2 size={14} className="spin" />{scan.stage ? t(scan.stage) : t("Reading the guideline…")}{scan.progress != null ? ` · ${scan.progress}%` : ""}</p>
       : l.editable && ["failed", "draft"].includes(l.status) && l.files?.length > 0 && <div className="sgb-acts"><button className="btn" onClick={rescan}><Upload size={14} />{t("Scan again")}</button></div>}
     <Swatches colors={l.swatches} big />
@@ -129,7 +195,7 @@ function EditLook({ look, onClose, onSaved }) {
   return <Dialog wide title={t("Edit “{title}”", { title: look.title })} onClose={onClose} footer={<><span className="hint">{t("Saving keeps the old version; projects made with it keep theirs.")}</span><span className="spacer" />
     <button className="btn" onClick={onClose}>{t("Cancel")}</button><button className="btn primary" onClick={save} disabled={busy || !title.trim()}><Check size={14} />{t("Save")}</button></>}>
     <label className="field"><span className="label">{t("Name")}</span><input className="input" value={title} onChange={(e) => setTitle(e.target.value)} /></label>
-    <label className="field"><span className="label">frame.md</span><textarea className="textarea lk-frame" value={frame} onChange={(e) => setFrame(e.target.value)} spellCheck={false} /></label>
+    <label className="field"><span className="label">{t("Design spec")}</span><textarea className="textarea lk-frame" value={frame} onChange={(e) => setFrame(e.target.value)} spellCheck={false} /></label>
   </Dialog>;
 }
 
@@ -138,21 +204,25 @@ function CreateLook({ onClose, onDone }) {
   const t = useT();
   const toast = useToast();
   const [title, setTitle] = useState("");
-  const [files, setFiles] = useState([]);           // [{ file, progress, status }]
+  const [files, setFiles] = useState([]);           // [{ file, name, progress, status }]
+  const [left, setLeft] = useState([]);             // the names of what was picked and not taken
   const [phase, setPhase] = useState(null);         // null | "uploading" | "scanning"
   const [job, setJob] = useState(null);
   const [err, setErr] = useState(null);
   const pickFiles = useRef(null), pickFolder = useRef(null);
-  const add = (list) => setFiles((xs) => [...xs, ...[...list].filter((f) => OK_FILES.test(f.name) && !xs.some((x) => x.file.name === f.name && x.file.size === f.size)).map((file) => ({ file, progress: 0, status: "waiting" }))]);
-  const skipped = (list) => [...list].filter((f) => !OK_FILES.test(f.name)).length;
-  const onDrop = (e) => { e.preventDefault(); const n = skipped(e.dataTransfer.files); add(e.dataTransfer.files); if (n) toast(t("{n} file(s) skipped: only PDF, PPTX and pictures", { n }), "error"); };
+  const add = (list) => {
+    const { take, leftOut } = sortPicked(list, files.map((x) => ({ name: x.name, size: x.file.size })));
+    setFiles((xs) => [...xs, ...take.map(({ file, name }) => ({ file, name, progress: 0, status: "waiting" }))]);
+    setLeft((xs) => [...new Set([...xs, ...leftOut])]);
+  };
+  const onDrop = (e) => { e.preventDefault(); add(e.dataTransfer.files); };
   const start = async () => {
     setErr(null); setPhase("uploading");
     try {
-      const l = await post("/api/looks", { title: title.trim() });
+      const l = await post("/api/looks", { title: title.trim(), leftOut: left });
       for (let i = 0; i < files.length; i++) {
         setFiles((xs) => xs.map((x, j) => (j === i ? { ...x, status: "uploading" } : x)));
-        await upload(`/api/looks/${l.id}/files`, files[i].file, (p) => setFiles((xs) => xs.map((x, j) => (j === i ? { ...x, progress: p } : x))));
+        await upload(`/api/looks/${l.id}/files`, new File([files[i].file], files[i].name), (p) => setFiles((xs) => xs.map((x, j) => (j === i ? { ...x, progress: p } : x))));
         setFiles((xs) => xs.map((x, j) => (j === i ? { ...x, status: "done", progress: 1 } : x)));
       }
       setPhase("scanning");
@@ -161,7 +231,7 @@ function CreateLook({ onClose, onDone }) {
       watchJob((j.job ?? j).id, (x) => {
         if (!x) return;
         setJob(x);
-        if (x.status === "done") { toast(t("“{title}” is ready", { title: title.trim() })); onDone(l.id); }
+        if (x.status === "done") { const n = x.result?.unread?.length ?? 0; toast(n ? t("“{title}” is ready, {n} file(s) not read", { title: title.trim(), n }) : t("“{title}” is ready", { title: title.trim() })); onDone(l.id); }
         if (x.status === "failed") { setErr(x.error?.message ?? t("The scan did not finish.")); setPhase(null); }
       }, 1200);
     } catch (e) { setErr(e.message); setPhase(null); }
@@ -173,15 +243,16 @@ function CreateLook({ onClose, onDone }) {
     <label className="field"><span className="label">{t("Name")}</span><input className="input" spellCheck={false} value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("e.g. Moworks")} disabled={!!phase} autoFocus /></label>
     <div className={"dropzone lk-drop" + (phase ? " busy" : "")} onDragOver={(e) => e.preventDefault()} onDrop={phase ? undefined : onDrop}>
       <Upload size={20} /><div style={{ flex: 1, minWidth: 0 }}><div className="drop-t">{t("Drop the guideline here: files or a folder")}</div>
-        <div className="hint">{t("PDF, PPTX and pictures (PNG, JPG, WebP, SVG). Everything stays on this computer.")}</div></div>
+        <div className="hint">{t("PDF, PPTX, pictures, fonts, AI, PSD and ZIP. Everything stays on this computer.")}</div></div>
       <button type="button" className="btn sm" onClick={() => pickFiles.current?.click()} disabled={!!phase}>{t("Choose files")}</button>
       <button type="button" className="btn sm" onClick={() => pickFolder.current?.click()} disabled={!!phase}><FolderOpen size={14} />{t("Choose a folder")}</button>
-      <input ref={pickFiles} type="file" multiple hidden accept=".pdf,.pptx,.png,.jpg,.jpeg,.webp,.gif,.svg" onChange={(e) => { add(e.target.files); e.target.value = ""; }} />
-      <input ref={pickFolder} type="file" multiple hidden webkitdirectory="" directory="" onChange={(e) => { const n = skipped(e.target.files); add(e.target.files); if (n) toast(t("{n} file(s) skipped: only PDF, PPTX and pictures", { n }), "error"); e.target.value = ""; }} />
+      <input ref={pickFiles} type="file" multiple hidden accept={ACCEPT_ATTR} onChange={(e) => { add(e.target.files); e.target.value = ""; }} />
+      <input ref={pickFolder} type="file" multiple hidden webkitdirectory="" directory="" onChange={(e) => { add(e.target.files); e.target.value = ""; }} />
     </div>
-    {files.length > 0 && <ul className="plain lk-up">{files.map((x, i) => <li key={x.file.name + i}><span className="nm">{x.file.name}</span>
+    {files.length > 0 && <ul className="plain lk-up">{files.map((x, i) => <li key={x.name + i}><span className="nm">{x.name}</span>
       <span className="bar"><span style={{ transform: `scaleX(${x.progress})` }} /></span>
       {!phase && <button type="button" className="btn ghost icon sm" onClick={() => setFiles((xs) => xs.filter((_, j) => j !== i))} aria-label={t("Remove")}><X size={13} /></button>}</li>)}</ul>}
+    <LeftOut names={left} />
     {phase === "scanning" && <p className="lk-stage"><Loader2 size={14} className="spin" />{job?.stage ? t(job.stage) : t("Reading the guideline…")}{job?.progress != null ? ` · ${job.progress}%` : ""}</p>}
     {err && <Banner kind="error">{err}</Banner>}
   </Dialog>;

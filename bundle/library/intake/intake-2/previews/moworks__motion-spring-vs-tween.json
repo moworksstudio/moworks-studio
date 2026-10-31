@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-spring-vs-tween",
+  "hash": "d46e53d47e5ca039",
+  "at": "2026-10-17T11:48:02.572Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-spring-vs-tween.mp4",
+    "poster": "previews/moworks__motion-spring-vs-tween.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a21a46b1ca4e0bcafe97b4d65a4e989ff89ab2b2c14ba9746c159932f7f5324b",
+    "size": 12225,
+    "seconds": 28.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

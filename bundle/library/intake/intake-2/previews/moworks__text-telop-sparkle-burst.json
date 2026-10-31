@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-telop-sparkle-burst",
+  "hash": "4bf4e353d0d0fe53",
+  "at": "2026-10-17T10:12:38.748Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-telop-sparkle-burst.mp4",
+    "poster": "previews/moworks__text-telop-sparkle-burst.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "8e2a8061f8bc4b0fe1536e4b20de62fc3eac0e6019ffbee84625634448a93c71",
+    "size": 17207,
+    "seconds": 29.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

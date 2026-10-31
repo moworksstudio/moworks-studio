@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "shape-gooey-merge",
+  "type": "hyperframes:component",
+  "title": "Gooey Merge",
+  "description": "Hai hình tròn tiến lại gần, một cổ dẻo như chất lỏng mọc ra trước khi chạm rồi nhập thành một khối, sau đó tách ra.",
+  "tags": [
+    "gooey",
+    "metaball",
+    "merge",
+    "shape",
+    "svg-path",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "shape-gooey-merge.html",
+      "target": "compositions/components/shape-gooey-merge.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.1,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/shape-gooey-merge",
+    "author": "moworks",
+    "call": "MW.shapeGooeyMerge(q(\".gm-g\"), tl, 0, {});",
+    "function": "MW.shapeGooeyMerge",
+    "options": {
+      "from": "half distance at rest (64)",
+      "to": "half distance merged (22)",
+      "cx": "centre x in the SVG's units (160)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Two circles r 26 px in a group with a goo filter (Gaussian blur 7 px, then alpha x 22 - 9). Centres start +-64 px from the middle, hold 300 ms, move to +-22 px over 1000 ms easeInOut (a neck forms before contact), hold 900 ms, return over 900 ms. One fill colour. Params: distance (±64 → ±22 px) · blur (7 px) · threshold (22a − 9) · color. The two circles sit in a group with a goo filter: Gaussian blur 7, then alpha × 22 − 9 (feColorMatrix).",
+    "titleVi": "Hai giọt dẻo dính vào nhau"
+  }
+}

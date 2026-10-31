@@ -1,0 +1,76 @@
+<!--
+  Forecast Confidence Fog (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Đường thực tế vẽ trước, sau mốc hôm nay một đường dự báo nét đứt kéo dài kèm dải mờ loe rộng dần về tương lai.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.dataForecastBand(q(".gm"), tl, 0, {});
+
+  Notes: Observed line (5 points) draws 300-1300 ms easeInOut, end dot. 'Today' divider + labels fade 1200-1500. Forecast: dashed (5/4) curve from the last point draws 1500-2800 ms easeOutCubic; behind it a band whose half-width grows linearly from 0 at today to +-34 px at the end, as 4 nested bands (100 / 72 / 46 / 22 % width) at 11 % opacity each, revealed in step with the forecast. Width bracket fades 2600-2900. Params: spread (±34 px) · bands (4) · forecast: thời gian dự báo (1.3 s).
+-->
+
+<div class="gm"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  MW.span = MW.span || function (t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); };
+  MW.yAt = MW.yAt || function (pts, x) { if (x <= pts[0][0]) return pts[0][1]; for (var i = 1; i < pts.length; i++) if (x <= pts[i][0]) { var u = (x - pts[i - 1][0]) / ((pts[i][0] - pts[i - 1][0]) || 1); return pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * u; } return pts[pts.length - 1][1]; };
+  MW.polyToX = MW.polyToX || function (c, pts, x) { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) { if (pts[i][0] <= x) c.lineTo(pts[i][0], pts[i][1]); else { c.lineTo(x, MW.yAt(pts, x)); break; } } return [Math.min(x, pts[pts.length - 1][0]), MW.yAt(pts, Math.min(x, pts[pts.length - 1][0]))]; };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {};
+  var run = function (el, tl, at, o) {
+        var S = MW.stage320(el), c = S.ctx, sp = MW.span, io = gsap.parseEase("power2.inOut"), out = gsap.parseEase("power2.out"), A = [[30, 140], [70, 120], [110, 128], [150, 100], [180, 92]], F = [[180, 92], [220, 80], [260, 66], [290, 56]];
+        return MW.drive(tl, at, 4, function (t) {
+          S.clear(); var f = 1 - sp(t, 3.6, 3.95); c.globalAlpha = f; c.strokeStyle = "#262c3a"; c.lineWidth = 1; [40, 80, 120, 160].forEach(function (y) { c.beginPath(); c.moveTo(24, y); c.lineTo(296, y); c.stroke(); });
+          var fx = 180 + 110 * out(sp(t, 1.5, 2.8));
+          if (t > 1.5) { [1, 0.72, 0.46, 0.22].forEach(function (w) { c.fillStyle = "rgba(255,210,61,0.11)"; c.beginPath(); var x, n = 24; for (x = 0; x <= n; x++) { var xx = 180 + (fx - 180) * x / n, hw = 34 * w * (xx - 180) / 110; if (x === 0) c.moveTo(xx, MW.yAt(F, xx) - hw); else c.lineTo(xx, MW.yAt(F, xx) - hw); } for (x = n; x >= 0; x--) { var x2 = 180 + (fx - 180) * x / n, h2 = 34 * w * (x2 - 180) / 110; c.lineTo(x2, MW.yAt(F, x2) + h2); } c.closePath(); c.fill(); });
+            c.setLineDash([5, 4]); c.strokeStyle = "#ffd23d"; c.lineWidth = 2; MW.polyToX(c, F, fx); c.stroke(); c.setLineDash([]); }
+          c.strokeStyle = "#8b7bff"; c.lineWidth = 2.5; var h = MW.polyToX(c, A, 30 + 150 * io(sp(t, 0.3, 1.3))); c.stroke(); if (t > 1.3) { c.fillStyle = "#fff"; c.beginPath(); c.arc(180, 92, 3.5, 0, 2 * Math.PI); c.fill(); }
+          c.globalAlpha = f * sp(t, 1.2, 1.5); c.strokeStyle = "#4a5478"; c.setLineDash([2, 3]); c.beginPath(); c.moveTo(180, 24); c.lineTo(180, 176); c.stroke(); c.setLineDash([]); MW.txt(c, "Hôm nay", 180, 18, 8, "#c9d2ea", 800); MW.txt(c, "Thực tế", 100, 182, 8, "#8b7bff", 700); MW.txt(c, "Dự báo", 240, 182, 8, "#ffd23d", 700);
+          c.globalAlpha = f * sp(t, 2.6, 2.9); c.strokeStyle = "#ffd23d"; c.lineWidth = 1; c.beginPath(); c.moveTo(298, 22); c.lineTo(298, 90); c.stroke(); MW.txt(c, "±34", 306, 56, 7, "#ffd23d", 700); c.globalAlpha = 1; void h;
+        });
+      };
+  MW.dataForecastBand = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

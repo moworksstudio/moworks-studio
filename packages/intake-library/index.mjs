@@ -3,12 +3,11 @@
 //   Magic UI   magicuidesign/magicui @ efe76fc, MIT: React components ported to GSAP on the film's clock (adapted), numbers kept
 //   Codrops    codrops/OnScrollTypographyAnimations @ af28d61 and codrops/ImageExpansionTypography @ 0d61479, MIT: scroll effects ported
 //              to the film's clock (adapted), values kept
-//   TakayuStudio  motion-reference.takayustudio.jp, read 12/10/2026, no licence: ideas and numbers only, each motion written here from
-//              the checked spec (never the site's code)
+//   Moworks Studio  the studio's own motions, written here from the specs in moworks/specs.json
 // The sources (items/<author>/*.mjs) live in the app's git; the store (<work>/library/intake/<dir>) holds the built components, the
 // catalog with each item's credit, and the previews rendered here (previews.mjs: the film's own finalize and export checks, then the
-// render worker). Credit rule: author, permalink at the commit (or the item's own URL), commit or date read, licence, how
-// it was made. No traceable source, no entry: an item without one fails the build.
+// render worker). Credit rule: author, permalink at the commit, commit and date read, licence, how it was made. No traceable source, no
+// entry: an item without one fails the build. The studio's own items (own: true) have no outside source to trace.
 import { execFileSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
@@ -17,11 +16,12 @@ import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
 import { workRoot } from "../project-service/index.mjs";
 import { buildItem, camel, useLine } from "./build.mjs";
 import { helperSource } from "./helpers.mjs";
+import { currentUid } from "./renamed.mjs";
 
 const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
 export const storeRoot = (root = APP_ROOT) => process.env.MW_INTAKE_ROOT ?? join(workRoot(root), "library", "intake");
 const ITEMS_DIR = join(import.meta.dirname, "items");
-const STORE_DIR = "intake-1";
+const STORE_DIR = "intake-2";
 
 /** Each author: the name in the Author row, how the credit reads, where the code came from. */
 export const AUTHORS = {
@@ -29,33 +29,26 @@ export const AUTHORS = {
     notice: "MIT License, Copyright (c) Magic UI (LICENSE.md)", read: "2026-10-12", made: "adapted" },
   codrops: { name: "Codrops", author: "Codrops", licence: "MIT", notice: "MIT License, Copyright (c) 2009 - 2022 / 2024 Codrops (LICENSE)", read: "2026-10-12", made: "adapted",
     repos: { "codrops/OnScrollTypographyAnimations": "af28d61d1f8d3d117f5d1e9b09d5209e20a1a212", "codrops/ImageExpansionTypography": "0d614791f94198bcab655762b26a3cb85da851f4" } },
-  takayu: { name: "TakayuStudio", author: "TakayuStudio (motion-reference)", licence: "No licence stated: idea and numbers only", site: "https://motion-reference.takayustudio.jp/",
-    read: "2026-10-12", made: "idea" },
+  moworks: { name: "Moworks Studio", author: "Moworks Studio", licence: "the studio's own", made: "own", own: true },
 };
-export const MADE = { shipped: "as shipped", adapted: "adapted", idea: "written from the idea" };
+export const MADE = { shipped: "as shipped", adapted: "adapted", own: "written here" };
 const MADE_NOTE = { shipped: "the original code, unchanged", adapted: "ported to GSAP on the film's clock; same timings, eases, sizes and colours; the original is linked",
-  idea: "written here from the idea and its numbers; none of the source's code" };
-const DATE = (d) => d.split("-").reverse().join("/");
+  own: "the studio's own motion, written here" };
 
-/** The credit of one item (throws when it has no traceable source). */
+/** The credit of one item (throws when an outside source's item has no traceable source; the studio's own need no link). */
 export function creditOf(item) {
   const a = AUTHORS[item.author];
   if (!a) throw new Error(`${item.uid}: unknown author ${item.author}`);
   const made = item.made ?? a.made;
+  if (a.own) return { author: a.author, collection: a.name, link: null, commit: null, read: null, licence: a.licence, notice: null, made: MADE[made], madeNote: MADE_NOTE[made],
+    sourceText: a.name, upstream: item.upstream ?? null };
   const s = item.source ?? {};
-  let link, commit = null, sourceText;
-  if (a.site) {
-    if (!s.url || !s.url.startsWith(a.site)) throw new Error(`${item.uid}: no source URL on ${a.site}`);
-    link = s.url; sourceText = `${s.url.replace(/^https:\/\//, "")} (read ${DATE(a.read)})`;
-  } else {
-    const repo = s.repo ?? a.repo, c = a.repos?.[repo] ?? (repo === a.repo ? a.commit : null);
-    if (!repo || !c || !s.path) throw new Error(`${item.uid}: no repository, commit or path`);
-    commit = c;
-    const lines = s.lines ? `#L${s.lines[0]}-L${s.lines[1]}` : "";
-    link = `https://github.com/${repo}/blob/${c}/${s.path}${lines}`;
-    sourceText = `${repo} at ${c.slice(0, 7)}, ${s.path}${s.lines ? ` lines ${s.lines[0]}-${s.lines[1]}` : ""}`;
-  }
-  return { author: a.author, collection: a.name, link, commit, read: a.read, licence: a.licence, notice: a.notice ?? null, made: MADE[made] + (a.site ? ` (site read ${DATE(a.read)})` : ""),
+  const repo = s.repo ?? a.repo, commit = a.repos?.[repo] ?? (repo === a.repo ? a.commit : null);
+  if (!repo || !commit || !s.path) throw new Error(`${item.uid}: no repository, commit or path`);
+  const lines = s.lines ? `#L${s.lines[0]}-L${s.lines[1]}` : "";
+  const link = `https://github.com/${repo}/blob/${commit}/${s.path}${lines}`;
+  const sourceText = `${repo} at ${commit.slice(0, 7)}, ${s.path}${s.lines ? ` lines ${s.lines[0]}-${s.lines[1]}` : ""}`;
+  return { author: a.author, collection: a.name, link, commit, read: a.read, licence: a.licence, notice: a.notice ?? null, made: MADE[made],
     madeNote: MADE_NOTE[made], sourceText, upstream: item.upstream ?? null };
 }
 
@@ -86,7 +79,7 @@ export async function loadItems({ only = null } = {}) {
       const bad = /\bgsap\.timeline\(|Math\.random|Date\.now|new Date\(|performance\.now|requestAnimationFrame|setTimeout|setInterval/.exec(code);
       if (bad) throw new Error(`${it.uid}: ${bad[0]} is not allowed in a motion (use the film's timeline and MW.rand)`);
       // every option the motion reads has a default (an option left undefined would turn a duration into NaN)
-      if (it.author === "takayu") for (const m of it.fn.toString().matchAll(/\bo\.(\w+)/g)) if (!(m[1] in (it.defaults ?? {}))) throw new Error(`${it.uid}: o.${m[1]} has no default`);
+      if (it.author === "moworks") for (const m of it.fn.toString().matchAll(/\bo\.(\w+)/g)) if (!(m[1] in (it.defaults ?? {}))) throw new Error(`${it.uid}: o.${m[1]} has no default`);
       // every MW.<helper> the motion or its demo calls comes with the helpers it names in `uses`
       const have = new Set([...helperSource(it.uses ?? []).matchAll(/MW\.(\w+) = /g)].map((m) => m[1]).concat([...code.matchAll(/MW\.(\w+) = /g)].map((m) => m[1])));
       for (const m of code.matchAll(/MW\.(\w+)\s*\(/g)) if (!have.has(m[1]) && m[1] !== camel(it.id)) throw new Error(`${it.uid}: MW.${m[1]} is used but its helper is not in uses`);
@@ -192,7 +185,7 @@ export function items(root = APP_ROOT) {
   cache = { dir: st.dir, items: list };
   return list;
 }
-export const getItem = (uid, root = APP_ROOT) => items(root).find((x) => x.uid === uid) ?? null;
+export const getItem = (uid, root = APP_ROOT) => { const id = currentUid(uid); return items(root).find((x) => x.uid === id) ?? null; };
 
 /** What goes into the Claude feedback (or the clipboard). */
 export function specText(it) {
@@ -201,7 +194,7 @@ export function specText(it) {
     `How to use it: paste the snippet's markup, CSS and script into the shot's composition, then on the shot's timeline ${it.call}`,
     Object.keys(it.options ?? {}).length ? `Options: ${Object.entries(it.options).map(([k, v]) => `${k} (${v})`).join("; ")}.` : "",
     it.vi === "missing" ? "Vietnamese: the demo's font lacks Vietnamese letters; use a font that has them." : "",
-    `Credit: ${it.credit.author}, ${it.credit.licence}, ${it.credit.made}, ${it.credit.link}.`].filter(Boolean).join("\n");
+    `Credit: ${[it.credit.author, it.credit.licence, it.credit.made, it.credit.link].filter(Boolean).join(", ")}.`].filter(Boolean).join("\n");
 }
 
 /** Copy the built component into the project (.moworks/library/intake/<author>/<id>/) for Claude to read. */
@@ -217,17 +210,25 @@ export function stageForProject(projectDir, uid, root = APP_ROOT) {
 }
 
 /** The items the user deleted for good (kept outside the store's folder, so a rebuild into a new folder keeps them out too). */
-export function deletedList(root = APP_ROOT) { return readJson(join(storeRoot(root), "deleted.json"), { items: [] }).items ?? []; }
+export function deletedList(root = APP_ROOT) {
+  return (readJson(join(storeRoot(root), "deleted.json"), { items: [] }).items ?? [])
+    .map((x) => (currentUid(x.uid) === x.uid ? x : { ...x, uid: currentUid(x.uid), author: AUTHORS.moworks.name }));
+}
 function saveDeleted(root, list) {
   mkdirSync(storeRoot(root), { recursive: true });
   writeFileSync(join(storeRoot(root), "deleted.json"), JSON.stringify({ items: list }, null, 2) + "\n");
+}
+/** One item's component and preview leave a store's folder. */
+function removeFiles(dir, it) {
+  rmSync(join(dir, it.folder), { recursive: true, force: true });
+  for (const ext of ["mp4", "webp", "jpg", "png", "json"]) rmSync(join(dir, "previews", `${slugOf(it.uid)}.${ext}`), { force: true });
 }
 
 /** Delete an item for good (what is not good enough): its component, its preview and its catalog entry
  *  leave the store, and the build skips it from now on. Films that already copied it keep their copy. Its source stays in the app's git,
  *  so restoreItem can bring it back. */
-export function deleteItem(uid, root = APP_ROOT) {
-  const st = currentStore(root);
+export function deleteItem(ref, root = APP_ROOT) {
+  const uid = currentUid(ref), st = currentStore(root);
   if (!st) throw Object.assign(new Error("The intake store is not built yet"), { code: "NO_STORE" });
   const all = readJson(join(st.dir, "catalog.json"), { items: [] }).items;
   const it = all.find((x) => x.uid === uid);
@@ -235,15 +236,24 @@ export function deleteItem(uid, root = APP_ROOT) {
   const list = deletedList(root).filter((x) => x.uid !== uid);
   list.push({ uid, title: it.title, author: it.collection, at: new Date().toISOString() });
   saveDeleted(root, list);
-  rmSync(join(st.dir, it.folder), { recursive: true, force: true });
-  for (const ext of ["mp4", "webp", "jpg", "png", "json"]) rmSync(join(st.dir, "previews", `${slugOf(uid)}.${ext}`), { force: true });
+  removeFiles(st.dir, it);
   saveCatalog(st.dir, all.filter((x) => x.uid !== uid));
   return { uid, deleted: true, title: it.title, total: list.length };
 }
 
+/** A store just taken from the bundle has every item: the ones the user deleted leave it again. Returns how many left. */
+export function dropDeleted(dir, root = APP_ROOT) {
+  const gone = new Set(deletedList(root).map((x) => x.uid)), all = readJson(join(dir, "catalog.json"), { items: [] }).items;
+  const out = all.filter((x) => !gone.has(x.uid));
+  if (out.length === all.length) return 0;
+  for (const it of all) if (gone.has(it.uid)) removeFiles(dir, it);
+  saveCatalog(dir, out);
+  return all.length - out.length;
+}
+
 /** Take an item off the deleted list; the next build writes it again and its preview is rendered again. */
-export function restoreItem(uid, root = APP_ROOT) {
-  const list = deletedList(root);
+export function restoreItem(ref, root = APP_ROOT) {
+  const uid = currentUid(ref), list = deletedList(root);
   if (!list.some((x) => x.uid === uid)) throw Object.assign(new Error("Not a deleted item"), { code: "NOT_FOUND" });
   saveDeleted(root, list.filter((x) => x.uid !== uid));
   return { uid, restored: true };

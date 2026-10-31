@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/data-seven-segment",
+  "hash": "d6a4b515eaf9b5fc",
+  "at": "2026-10-17T08:12:02.689Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__data-seven-segment.mp4",
+    "poster": "previews/moworks__data-seven-segment.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "d5c05c182a152b38d1110f70e8698dd8e19466df19a184cff679925d6b395a2a",
+    "size": 12095,
+    "seconds": 26.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

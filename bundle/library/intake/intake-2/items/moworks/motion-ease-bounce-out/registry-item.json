@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-bounce-out",
+  "type": "hyperframes:component",
+  "title": "Bounce Out",
+  "description": "Dừng lại bằng mấy cú nảy như vật rơi xuống sàn; cho rơi và tiếp đất.out).",
+  "tags": [
+    "ease",
+    "bounce",
+    "drop",
+    "easing",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-bounce-out.html",
+      "target": "compositions/components/motion-ease-bounce-out.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-ease-bounce-out",
+    "author": "moworks",
+    "call": "MW.motionEaseBounceOut(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseBounceOut",
+    "options": {
+      "duration": "s (0.8)",
+      "ease": "the curve (bounce.out)",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Target moves 0 → 100 % on bounce.out, 800 ms: contacts at 36 / 73 / 91 % of the time, rebounds 25 / 6 / 1.6 % high. Rule: falls and landings. Squash on contact is a separate item (CustomBounce with Squash). Small demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: duration (0.8 s) · ease (bounce.out).",
+    "titleVi": "Bounce out (nảy trên sàn)"
+  }
+}

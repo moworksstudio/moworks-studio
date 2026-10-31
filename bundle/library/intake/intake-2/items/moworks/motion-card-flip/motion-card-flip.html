@@ -1,0 +1,56 @@
+<!--
+  Card Flip (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Thẻ xoay 180° quanh trục dọc, đổi từ mặt trước sang mặt sau ở giữa chừng.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionCardFlip(q(".cf"), tl, 0.3, { returnAt: 1.6 });
+
+  Options (defaults in brackets):
+      - duration: s per flip (0.76)
+      - ease: (power2.inOut)
+      - axis: x | y
+      - perspective: px (1000)
+      - turns: half turns (1)
+      - returnAt: s after the start to flip back (null)
+      - front: front face
+      - back: back face
+
+  Notes: Card rotates rotationY 0 → 180° in 760 ms power2.inOut (easeInOutCubic), hinge at the centre; small DOM demo: 58×42 px card, perspective 200 px in its transform, front 'F' in the accent, back 'B' in a darker accent (65 % mix). At 90° (380 ms) the front hides and the back shows — port as fold to 90°, swap, unfold from −90° (backface-visibility is unreliable in renders); the back reads unmirrored. Params: duration, axis x | y, perspective, turns. Params: duration (0.76 s) · axis: trục (y) · perspective (200 px) · turns: số nửa vòng (1). Folds to 90°, swaps the faces and unfolds from −90°, so the back reads unmirrored without backface-visibility.
+-->
+
+<div class="st"><div class="cf"><div class="cf-f">MẶT TRƯỚC</div><div class="cf-b">MẶT SAU</div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.76,"ease":"power2.inOut","axis":"y","perspective":1000,"turns":1,"returnAt":null,"front":".cf-f","back":".cf-b"};
+  var run = function (el, tl, at, o) {
+        var f = el.querySelector(o.front), b = el.querySelector(o.back), e = gsap.parseEase(o.ease), rot = o.axis === "x" ? "rotationX" : "rotationY", n = 180 * o.turns;
+        return MW.drive(tl, at, o.returnAt == null ? o.duration : o.returnAt + o.duration, function (t) {
+          var A = n * e(Math.max(0, Math.min(1, t / o.duration))); if (o.returnAt != null) A -= n * e(Math.max(0, Math.min(1, (t - o.returnAt) / o.duration)));
+          var face = ((Math.floor((A + 90) / 180) % 2) + 2) % 2, shown = A - 180 * Math.round(A / 180), s = {}; s[rot] = shown; s.transformPerspective = o.perspective; gsap.set(el, s);
+          f.style.visibility = face === 0 ? "visible" : "hidden"; b.style.visibility = face === 1 ? "visible" : "hidden";
+        });
+      };
+  MW.motionCardFlip = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

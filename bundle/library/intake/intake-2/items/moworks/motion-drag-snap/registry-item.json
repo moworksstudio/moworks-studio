@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-drag-snap",
+  "type": "hyperframes:component",
+  "title": "Drag Snap",
+  "description": "Thẻ được kéo từ ô đầu sang ô đích, hơi nghiêng khi bay, vượt quá vài px rồi bám đúng vào ô và thẳng lại.",
+  "tags": [
+    "drag",
+    "snap",
+    "overshoot",
+    "drop",
+    "web-interaction",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-drag-snap.html",
+      "target": "compositions/components/motion-drag-snap.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.9,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-drag-snap",
+    "author": "moworks",
+    "call": "MW.motionDragSnap(q(\".ds\"), tl, 0.4, { backAt: 1.7, cursor: \".ui-cursor\" });",
+    "function": "MW.motionDragSnap",
+    "options": {
+      "from": "[x, y, degrees] at the start slot ([−360, 150, −8])",
+      "over": "[x, y, degrees] past the end slot at 68 % ([290, −125, 5])",
+      "to": "[x, y, degrees] in the end slot ([255, −100, 0])",
+      "duration": "s (0.82), each leg ease-in-out",
+      "backAt": "s after the start to return (null)",
+      "cursor": "an optional cursor that carries it"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Chip DRAG moves from the start slot (offset −72, +30 px, rotate −8°) to past the end slot (+58, −25 px, rotate 5°) at 68 %, then settles into it (+51, −20 px, rotate 0) by 100 %; 820 ms; the overshoot is keyed, each segment eased in-out (data lists easeOutBack). Dashed start and end slots, arrow between. Params: from / to: ô đầu, ô đích · duration (0.82 s) · overshoot (~7 px, có keyframe) · tilt (−8° → 5° → 0) · ease (power2.inOut).",
+    "titleVi": "Kéo thả bám vào ô gần nhất"
+  }
+}

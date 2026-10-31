@@ -1,0 +1,92 @@
+<!--
+  Bunsetsu Phrase Reveal (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Câu hiện theo từng cụm từ có nghĩa (tiếng Nhật theo văn tiết, tiếng Việt theo từ), mỗi cụm nổi lên rõ dần, dòng chỉ ngắt giữa các cụm.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textPhraseReveal(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - chunk: elements that are the phrases (if none, the words)
+      - rise: em (0.5)
+      - duration: s (0.6, expo.out)
+      - stagger: s (0.12)
+      - cap: s the phrases start within (1)
+      - bracket: an underline bracket under each phrase
+      - start: s (0.35)
+      - exitAt: s (2.95)
+      - accent: 
+      - loop: s (3.4)
+
+  Notes: Text 32 px, line height 1.6, ≤ 3 lines, breaking only between chunks (phrases: BudouX / Intl.Segmenter for Japanese; words for Vietnamese). From 0.35 s chunk k rises y 0.5 em → 0 with opacity 0 → 1, 0.6 s expo.out, stagger 0.12 s (capped at 1 s total). Optional accent bracket under each chunk (2 px line with 4 px end ticks) fading in with it. Exit 2.95–3.25 s power2.in. Loop 3.4 s. Params: độ nổi (0.5 em) · thời gian (0.6 s) · cách nhau (0.12 s). Lines break only between phrases (BudouX or Intl.Segmenter for Japanese; words and compounds for Vietnamese).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head "><span class="ch">Mùa thu</span> <span class="ch">Hà Nội</span> <span class="ch">có</span> <span class="ch">hương</span> <span class="ch">hoa sữa</span></h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"chunk":".ch","rise":0.5,"duration":0.6,"stagger":0.12,"cap":1,"bracket":true,"start":0.35,"exitAt":2.95,"accent":"#8b7bff","loop":3.4};
+  var run = function (el, tl, at, o) {
+        var ch = el.querySelectorAll(o.chunk).length ? Array.prototype.slice.call(el.querySelectorAll(o.chunk)) : MW.split(el, "words").words, n = ch.length, st = Math.min(o.stagger, o.cap / Math.max(1, n - 1)), ex = gsap.parseEase("expo.out"), pin = gsap.parseEase("power2.in"), fs = parseFloat(getComputedStyle(el).fontSize), br = [];
+        ch.forEach(function (c) { c.style.display = "inline-block"; c.style.whiteSpace = "nowrap"; c.style.position = "relative"; if (!o.bracket) { br.push(null); return; } var b = document.createElement("span"); b.style.cssText = "position:absolute;left:4%;right:4%;bottom:-0.08em;height:0.035em;background:" + o.accent + ";opacity:0;";
+          ["left", "right"].forEach(function (s) { var k = document.createElement("span"); k.style.cssText = "position:absolute;" + s + ":0;bottom:0;width:0.035em;height:0.11em;background:" + o.accent + ";"; b.appendChild(k); }); c.appendChild(b); br.push(b); });
+        return MW.drive(tl, at, o.loop, function (t) {
+          var x = pin(Math.max(0, Math.min(1, (t - o.exitAt) / 0.3)));
+          ch.forEach(function (c, i) { var u = ex(Math.max(0, Math.min(1, (t - o.start - i * st) / o.duration))); gsap.set(c, { y: o.rise * fs * (1 - u) }); c.style.opacity = String(u * (1 - x)); if (br[i]) br[i].style.opacity = String(u); });
+        });
+      };
+  MW.textPhraseReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

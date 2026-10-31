@@ -1,0 +1,93 @@
+<!--
+  Paint-On Caption (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Phụ đề được dàn sẵn cả câu rồi từng ký tự bật hiện đúng chỗ của nó, mỗi ký tự có nền tối riêng, nghỉ ngắn giữa các từ, không xô dòng.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textPaintOnCaption(q(".pw"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - char: s per character (0.12)
+      - pause: s between words (0.14)
+      - max: s it may take (2.2)
+      - start: s (0.35)
+      - cutAt: s the caption is cut (3.75)
+      - pad: px each box's side pad (6)
+      - box: box colour
+      - accent: caret colour
+      - caption: the caption
+
+  Notes: Full caption laid out first (20 px bold, ≤ 2 lines, no reflow). From 0.35 s each char switches on in place at 120 ms per char plus a 140 ms pause between words (all scaled to fit 2.2 s when longer); each shown char gets its own dark box behind it (line height tall, 2 px side pad), so the background grows with the text. A blinking accent caret (3 Hz, 60 % on) sits at the next char. Whole caption cut at 3.75 s. Loop 4.2 s. Params: nhịp ký tự (120 ms) · nghỉ giữa từ (140 ms) · thời gian tối đa (2.2 s).
+-->
+
+<div class="ft"></div><div class="pw"><div class="cap pc">Xin chào, tôi là Minh</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"char":0.12,"pause":0.14,"max":2.2,"start":0.35,"cutAt":3.75,"pad":6,"box":"rgba(8,9,14,0.88)","accent":"#a99bff","caption":".pc"};
+  var run = function (el, tl, at, o) {
+        var cap = el.querySelector(o.caption), S = MW.split(cap, "chars"), times = [], t0 = 0, caret = document.createElement("span");
+        S.words.forEach(function (w, wi) { Array.prototype.forEach.call(w.querySelectorAll(".mw-ch"), function () { times.push(t0); t0 += o.char; }); t0 += o.pause; });
+        var scale = Math.min(1, o.max / t0); S.chars.forEach(function (c) { c.style.padding = "0 " + o.pad + "px"; c.style.margin = "0 " + (-o.pad) + "px"; });
+        caret.style.cssText = "position:absolute;width:8px;background:" + o.accent + ";pointer-events:none;"; el.appendChild(caret);
+        return MW.drive(tl, at, o.cutAt + 0.1, function (t) {
+          var next = null, on = t < o.cutAt;
+          S.chars.forEach(function (c, i) { var vis = on && t >= o.start + times[i] * scale; c.style.visibility = vis ? "visible" : "hidden"; c.style.background = vis ? o.box : "transparent"; if (!vis && next == null) next = c; });
+          if (next && on && t > o.start && Math.floor(t * 3 * 5) % 5 < 3) { var r = next.getBoundingClientRect(), b = el.getBoundingClientRect(); caret.style.left = (r.left - b.left) + "px"; caret.style.top = (r.top - b.top) + "px"; caret.style.height = r.height + "px"; caret.style.opacity = "1"; } else caret.style.opacity = "0";
+        });
+      };
+  MW.textPaintOnCaption = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

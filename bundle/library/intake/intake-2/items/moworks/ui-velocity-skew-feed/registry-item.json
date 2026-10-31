@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-velocity-skew-feed",
+  "type": "hyperframes:block",
+  "title": "Scroll Velocity Skew",
+  "description": "Danh sách thẻ cuộn nhanh thì các thẻ nghiêng theo hướng cuộn (tối đa 9°), dừng lại là thẳng ngay.",
+  "tags": [
+    "skew",
+    "velocity",
+    "scroll",
+    "feed",
+    "web-scroll",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "ui-velocity-skew-feed.html",
+      "target": "compositions/components/ui-velocity-skew-feed.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-velocity-skew-feed",
+    "author": "moworks",
+    "call": "MW.uiVelocitySkewFeed(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiVelocitySkewFeed",
+    "options": {
+      "factor": "degrees per unit/s of scroll speed (0.012), ±9°",
+      "k": "spring stiffness (520)",
+      "c": "damping (30)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Viewport 160x158; cards 128x50 r8 every 62 px. List scrolls 0 → 190 px (0.3-0.85 s power2.inOut), holds, returns 1.6-2.15 s. Each card skewY (around its centre) = clamp(speed px/s × 0.012, −9°, +9°), smoothed by a spring k520 c30 so it is back at 0° about 180 ms after the scroll stops. Only small surfaces lean. Params: scroll (190 px) · factor (0.012 °/(px/s)) · max (9°) · spring (k520 c30).",
+    "titleVi": "Thẻ nghiêng theo tốc độ cuộn"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-fade-up-chars",
+  "type": "hyperframes:component",
+  "title": "Character Fade Up",
+  "description": "Từng ký tự lần lượt nổi lên 40 px từ dưới và hiện dần, từ trái sang phải, cách nhau 0.05 giây.",
+  "tags": [
+    "reveal",
+    "letters",
+    "stagger",
+    "fade",
+    "text-reveal",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "text-fade-up-chars.html",
+      "target": "compositions/components/text-fade-up-chars.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-fade-up-chars",
+    "author": "moworks",
+    "call": "MW.textFadeUpChars(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textFadeUpChars",
+    "options": {
+      "y": "em (0.8)",
+      "duration": "s (0.9)",
+      "stagger": "s (0.05)",
+      "cap": "s all starts fit in (1)",
+      "start": "s (0.3)",
+      "outAt": "s (2.8)",
+      "ease": "(ease-out cubic)",
+      "loop": "s (3.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after react-bits (MIT + Commons Clause): written from the idea only, no react-bits code"
+    },
+    "thirdParty": [],
+    "notes": "Split chars; each char y +40 px (0.8 em at 48 px) → 0, opacity 0 → 1, 0.9 s easeOutCubic (cubic-bezier(.215,.61,.355,1); GSAP recipe says power3.out), stagger 50 ms but capped so all starts fit 1 s (min(0.05, 1/(n−1))), from 0.3 s. Loop exit: all fade 2.8–3.1 s inCubic; loop 3.2 s. Params: duration (0.9 s) · stagger (0.05 s) · y: quãng nổi (40 px) · ease (easeOutCubic).",
+    "titleVi": "Từng ký tự nổi lên và hiện dần"
+  }
+}

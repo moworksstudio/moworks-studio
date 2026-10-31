@@ -180,6 +180,11 @@
   --text-primary: var(--ink); --text-secondary: var(--ink-2); --text-muted: var(--ink-3); --surface-2: var(--paper-white); --surface-3: var(--paper-2); --border: var(--paper-3); --border-strong: #CDBFA5;
   --btn-line: #CDBFA5; --accent-ink: #B8301A; --accent-soft: var(--registration-soft); }
 [data-theme="studio"] .lt-film .pv-bar .btn { color: var(--ink); }
+/* the edit card on the table: white paper in ink, its fields as on every sheet (they were pale grey with white words) */
+[data-theme="studio"] .lt-film .pe-card { background: var(--paper-white); color: var(--ink); border-color: var(--paper-3); box-shadow: 0 0.5rem 1.2rem rgba(70, 50, 20, 0.3); -webkit-backdrop-filter: none; backdrop-filter: none;
+  --surface-2: var(--paper-white); --surface-3: var(--paper-2); --border: var(--paper-3); --border-strong: #CDBFA5; --text-primary: var(--ink); --text-secondary: var(--ink-2); --text-muted: var(--ink-3); --accent-ink: #B8301A; --btn-line: #CDBFA5; }
+[data-theme="studio"] .lt-film .pe-card :is(.input, .select) { background-color: #fff; border-color: var(--paper-3); color: var(--ink); }
+[data-theme="studio"] .lt-film .pe-card .btn { color: var(--ink); }
 [data-theme="studio"] .lt-film .pv-play.btn { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 [data-theme="studio"] .lt-film .pv-time { font: 500 0.95rem var(--font-mono); color: var(--ink); }
 [data-theme="studio"] .lt-film .pv-time .muted { color: var(--ink-3); }
@@ -278,7 +283,15 @@
 [data-theme="studio"] .st-ed .tl-chip { background: rgba(255, 253, 247, 0.9); color: var(--ink); text-shadow: none; }
 [data-theme="studio"] .st-ed .tl-chip b { color: var(--registration); font-family: var(--font-mono); font-weight: 500; }
 [data-theme="studio"] .st-ed .tl-word { color: #1E4D43; background: rgba(47, 143, 122, 0.16); border-color: rgba(47, 143, 122, 0.5); }
+[data-theme="studio"] .st-ed .tl-cap { background: var(--paper-white); border: 0; border-radius: 0.2rem; box-shadow: inset 0 0 0 1px rgba(29, 26, 21, 0.35); color: var(--ink); font-family: var(--font-mono); }
+[data-theme="studio"] .st-ed .tl-cap:hover { background: var(--lamp-paper); }
+[data-theme="studio"] .st-ed .tl-cap.sel { box-shadow: inset 0 0 0 2px var(--registration); }
+[data-theme="studio"] .st-ed .tl-capedit .input { background: var(--paper-white); color: var(--ink); }
 [data-theme="studio"] .st-ed .tl-tick { background: #CFE0F2; box-shadow: inset 0 0 0 1px #7FA9D6; }
+[data-theme="studio"] .st-ed .tl-aclip.sfx { background: #A9C6E6; box-shadow: inset 0 0 0 1px #5F8DBF; }
+[data-theme="studio"] .st-ed .tl-aclip.sfx.bed { background: #E4EDF6; box-shadow: inset 0 0 0 1px #A9C6E6; }
+[data-theme="studio"] .st-ed .tl-aclip.sfx.sel { box-shadow: 0 0 0 2px var(--registration); }
+[data-theme="studio"] .st-ed .tl-aname, [data-theme="studio"] .st-ed .tl-aclip.sfx.bed .tl-aname { color: var(--ink); font-family: var(--font-mono); }
 [data-theme="studio"] .st-ed .tl-music { background: #F3DDB0 repeating-linear-gradient(90deg, rgba(122, 90, 30, 0.35) 0 1px, transparent 1px 3px); border-color: #D9B46A; }
 [data-theme="studio"] .st-ed .tl-music path { fill: #7A5A1E; opacity: 0.55; }
 [data-theme="studio"] .st-ed .tl-empty { font: 0.95rem var(--font-studio-hand); color: var(--ink-3); }
@@ -315,14 +328,8 @@
 [data-theme="studio"] .lt-sheet .bd-still::before { content: ""; position: absolute; top: -0.35rem; left: 50%; z-index: 2; width: 0.85rem; height: 0.85rem; margin-left: -0.42rem; border-radius: 50%; pointer-events: none;
   background: radial-gradient(circle at 35% 30%, #FF8C72, var(--registration) 60%, #7D1E0E); box-shadow: 0 2px 3px rgba(0, 0, 0, 0.35); }
 [data-theme="studio"] .lt-sheet .bd-still .num { left: 0.5rem; top: 0.5rem; font-family: var(--font-mono); }
-/* a tall film's option (9:16) is one row of its nine panels across the wall, a square one (1:1, 4:5) two rows of five; the options
-   stack, a row each, each as large as the sheet's height lets it (the sheet body is a size container; 14rem: the round's and option's heads
-   and the pager). A 3 x 3 sheet of a 9:16 film was nine 50 px panels in the middle of an empty wall */
+/* a tall or square film's options stack, one to a row (Boards.jsx lays each out as large as the wall lets its panels be: sheetGrid; the feedback box under it) */
 [data-theme="studio"] .st-ed[data-shape] .lt-sheet .bd-cols { grid-template-columns: minmax(0, 1fr); }
-[data-theme="studio"] .st-ed[data-shape="tall"] .lt-sheet .bd-col[style] .bd-stills { grid-template-columns: repeat(9, minmax(0, 1fr));
-  width: min(100%, calc(9 * ((100cqh - 14rem) * var(--bd-ar) + 0.6rem) + 5.6rem)); }
-[data-theme="studio"] .st-ed[data-shape="square"] .lt-sheet .bd-col[style] .bd-stills { grid-template-columns: repeat(5, minmax(0, 1fr));
-  width: min(100%, calc(5 * ((100cqh - 15rem) / 2 * var(--bd-ar) + 0.6rem) + 2.8rem)); }
 @media (prefers-reduced-motion: reduce) { [data-theme="studio"] .lt-sheet .bd-still { transition: none; } }
 [data-theme="studio"] .lt-sheet .sb-bar { background: var(--paper); border-top: 1px dashed var(--paper-3); }
 /* Motion Plan: the dope sheet's rows on white paper, the shot cards as small pinned stills */

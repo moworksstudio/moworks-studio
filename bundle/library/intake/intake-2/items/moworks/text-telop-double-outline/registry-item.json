@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-telop-double-outline",
+  "type": "hyperframes:component",
+  "title": "Pop-In Double-Outline Telop",
+  "description": "Chữ telop kiểu truyền hình Nhật: ruột vàng, viền trong trắng, viền ngoài màu và bóng cứng, bật từ 0 lên 110 % rồi về 100 % trong sáu khung.",
+  "tags": [
+    "telop",
+    "outline",
+    "pop",
+    "variety",
+    "text-broadcast-telop",
+    "bouncy",
+    "crisp",
+    "broadcast-telop"
+  ],
+  "files": [
+    {
+      "path": "text-telop-double-outline.html",
+      "target": "compositions/components/text-telop-double-outline.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-telop-double-outline",
+    "author": "moworks",
+    "call": "MW.textTelopDoubleOutline(q(\".td\"), tl, 0.35, {});",
+    "function": "MW.textTelopDoubleOutline",
+    "options": {
+      "inner": "em of light outline (0.18)",
+      "outer": "em of coloured outline (0.34)",
+      "offset": "em of the hard shadow (0.05)",
+      "fill": "",
+      "light": "",
+      "accent": "outer outline",
+      "shadow": "",
+      "offAt": "s after the start it cuts off (1.95)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after booth.pm"
+    },
+    "thirdParty": [],
+    "notes": "Heavy gothic (weight 900, spacing 0.03 em), yellow fill; strokes drawn outside-in: dark copy of the outer stroke offset (3, 3) px as a hard shadow, accent outer stroke 0.34 em wide, light inner stroke 0.18 em wide, then the fill. Scale keys 0 (0.35 s) → 1.1 (+4 frames at 30 fps) → 1.0 (+6 frames), power1.out between keys; SFX on the first frame. Cut off at 2.3 s. Loop 2.6 s. Params: bật (0 → 110 → 100 %, 6 khung ở 30 fps) · viền trong (0.18 em) · viền ngoài (0.34 em) · bóng (3 px). 0 → 110 % in 4 frames and back to 100 % in 6 (30 fps), power1.out between the keys; cut, not faded.",
+    "titleVi": "Telop chữ vàng viền kép bật vào"
+  }
+}

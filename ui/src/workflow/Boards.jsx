@@ -1,13 +1,13 @@
 // The Storyboard dialog's options. Every option is its own board, newest on top, never written over: "Option A", "Option B" (Make another
 // option: a clearly different one), "Option B2 · revised from Option B" (Feedback on B: only the panels with a note are drawn again, marked
-// "revised"). No "Round" anywhere. An option is a card: its name, its idea and its panels as one 3 × 3 sheet a page (any shape, as large as a 16:9 one),
-// The Desk's pager past nine. Clicking the card chooses it; clicking a panel opens it large (arrows step through every panel, PNG, and "Note
+// "revised"). No "Round" anywhere. An option is a card: its name, its idea and its panels, a page at a time, as many across and down as make them
+// largest in the room the dialog has (sheetGrid; any shape), never fewer than nine a page. Clicking the card chooses it; clicking a panel opens it large (arrows step through every panel, PNG, and "Note
 // for this panel"). The chosen option's Feedback box sits under its card: notes for the whole board or per panel as "@Panel_3: …" (typing @
 // lists the panels with their pictures; the hover button on a panel adds one), each panel shows how many notes it has, and the draft is saved
 // in the project as it is typed (it is there after closing the dialog or the app). The three actions (Approve, Feedback, Make another option)
 // are the dialog's bar (Storyboard.jsx). The pictures are taken by the app on its own whenever the boards changed; a board can be downloaded
 // as a PDF for a client.
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronLeft, ChevronRight, Download, FolderOpen, Loader2, MessageSquarePlus, Plus, ShieldCheck, X } from "lucide-react";
 import { api, download, get, post } from "../api.js";
@@ -15,7 +15,54 @@ import { Banner, Pager } from "../components.jsx";
 import { ago, useData, useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 
-const SHEET = 9;          // panels a page on a card: one 3 × 3 sheet; more panels, more pages (the large view steps through all)
+const SHEET = 9;          // panels a page on a card, at least: more panels, more pages (the large view steps through all)
+
+/** The panels of a page in a room W × H px: the rows and columns that make a panel of this shape largest; of two about as large, the one with more on a
+ *  page. At least `least` a page (or all of them); no more columns than a short board can fill. gap: between panels; chromeW / chromeH: what each
+ *  panel has around its picture. T28-19: nine 120 px squares in the left half of a dialog with room for fifteen of 240. */
+export function sheetGrid(W, H, ar, n, { gap = 6, chromeW = 0, chromeH = 0, least = SHEET } = {}) {
+  const want = Math.max(1, Math.min(least, n));
+  let best = null;
+  for (let rows = 1; rows <= 8; rows++) for (let cols = 1; cols <= 16; cols++) {
+    const per = cols * rows;
+    if (per < want || (per > n && per - Math.max(cols, rows) >= n)) continue;
+    const w = Math.min((W - (cols - 1) * gap) / cols, ((H - (rows - 1) * gap) / rows - chromeH) * ar + chromeW);
+    if (w <= 0) continue;
+    if (!best || w > best.w * 1.03 || (w > best.w * 0.97 && per > best.per)) best = { cols, rows, per, w: Math.floor(w) };
+  }
+  return best ?? { cols: Math.max(1, Math.ceil(Math.sqrt(want))), rows: Math.ceil(want / Math.max(1, Math.ceil(Math.sqrt(want)))), per: want, w: 0 };
+}
+
+/** An option's page, measured: the room is the sheet's own height less what stands above the panels and under them, as if the option were the first,
+ *  so a second row of options is as large and the sheet scrolls to it. Both themes, every shape. */
+function useSheetGrid(ref, ar, n) {
+  const [grid, setGrid] = useState(null);
+  useLayoutEffect(() => {
+    const el = ref.current, col = el?.closest(".bd-col"), body = el?.closest(".sheet-body"), sheet = body?.parentElement;
+    if (!el || !ar || !n || !col || !sheet) return undefined;
+    const px = (v) => parseFloat(v) || 0;
+    const measure = () => {
+      const cs = getComputedStyle(col), st = getComputedStyle(el), still = el.querySelector(".bd-still"), ss = still ? getComputedStyle(still) : null;
+      const W = col.clientWidth - px(cs.paddingLeft) - px(cs.paddingRight);
+      const round = el.closest(".bd-round") ?? col, top = (el.closest(".boards") ?? round).getBoundingClientRect().top;
+      const above = top - sheet.getBoundingClientRect().top + body.scrollTop + (el.getBoundingClientRect().top - round.getBoundingClientRect().top) + px(st.paddingTop);
+      const pagerH = n > SHEET ? 2.5 * px(getComputedStyle(document.documentElement).fontSize) : 0;
+      let below = pagerH + 2;
+      for (let x = col; x && x !== sheet; x = x.parentElement) { const s = getComputedStyle(x); below += px(s.paddingBottom) + px(s.marginBottom) + px(s.borderBottomWidth); }
+      const bar = body.querySelector(".sb-bar");          // the dialog's bar: under the content on The Studio's table, over the sheet's foot on The Desk
+      if (bar && getComputedStyle(bar).position !== "absolute") below += bar.offsetHeight + px(getComputedStyle(bar.parentElement).rowGap);
+      const room = (px(getComputedStyle(sheet).maxHeight) || sheet.clientHeight) - above - below;
+      const g = sheetGrid(W, Math.max(180, room), ar, n, { gap: px(st.columnGap) || 6, chromeW: ss ? px(ss.paddingLeft) + px(ss.paddingRight) : 0, chromeH: ss ? px(ss.paddingTop) + px(ss.paddingBottom) : 0 });
+      setGrid((x) => (x?.per === g.per && x?.w === g.w && x?.cols === g.cols ? x : { ...g, style: { gridTemplateColumns: `repeat(${g.cols}, ${g.w}px)`, justifyContent: "center", width: "100%" } }));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(col); ro.observe(sheet);
+    addEventListener("resize", measure);
+    return () => { ro.disconnect(); removeEventListener("resize", measure); };
+  }, [ref, ar, n]);
+  return grid;
+}
 
 /** A selection key: the option's own label. Not the draft its pictures come from: that draft changes when the app takes the stills,
  *  and the chosen option was lost a few seconds after the dialog opened. */
@@ -188,10 +235,12 @@ function Option({ o, chosen, approved, onChoose, onLight, counts, onNote, busy =
   // the option's own name (`name`: the server names old options too), else read off its heading
   const name = o.name ?? nameOf(o.heading);
   const choose = () => onChoose(o.key);
-  // panels in the film's own shape, no black bars; the sheet is 3 × 3 for every shape, as large as a 16:9 one
+  // panels in the film's own shape, no black bars
   const [ar, setAr] = useState(null);
   const tall = ar != null && ar < 0.8;
-  const [pg, setPg] = useState(0);
+  const [pg0, setPg] = useState(0);
+  const stills = useRef(null), n = o.stillUrls.length;
+  const grid = useSheetGrid(stills, ar, n), per = grid?.per ?? SHEET, pg = Math.min(pg0, Math.max(0, Math.ceil(n / per) - 1));
   return <article className={"bd-col" + (chosen ? " picked" : "") + (tall ? " tall" : "")} onClick={choose} style={ar ? { "--bd-ar": String(ar) } : undefined}>
     <header><button type="button" className="bd-pickbtn" role="radio" aria-checked={chosen} aria-label={t("Choose Option {o}", { o: o.label })} onClick={(e) => { e.stopPropagation(); choose(); }}>
         <span className="bd-radio" aria-hidden="true">{chosen && <Check size={11} strokeWidth={3} />}</span>
@@ -199,8 +248,8 @@ function Option({ o, chosen, approved, onChoose, onLight, counts, onNote, busy =
         {name ? <span className="bd-title">{name}</span> : <span className="bd-title muted">{t("Choose this option")}</span>}</button>
       {o.picked && (approved ? <span className="state-badge ok"><ShieldCheck size={15} />{t("Approved")}</span> : <span className="tag ok">{t("Picked")}</span>)}</header>
     {o.idea && <p className="hint bd-idea">{o.idea}</p>}
-    {/* one 3 × 3 sheet a page (any shape); past nine panels the next page, the pager under it */}
-    <div className="bd-stills">{o.stillUrls.slice(pg * SHEET, (pg + 1) * SHEET).map((u, k) => { const i = pg * SHEET + k, n = i + 1, c = counts[n] ?? 0;
+    {/* the page's panels, as large as the room lets them be (any shape); the next page's under the pager */}
+    <div className="bd-stills" ref={stills} style={grid?.style ?? undefined}>{o.stillUrls.slice(pg * per, (pg + 1) * per).map((u, k) => { const i = pg * per + k, n = i + 1, c = counts[n] ?? 0;
       return <span key={`${i}:${u}`} className="bd-cell">
         <button type="button" className="bd-still" data-tip-side="bottom" onClick={(e) => { e.stopPropagation(); onLight({ option: o, i }); }}
           aria-label={t("Open panel {n} large", { n })} title={o.frames[i]?.title}>
@@ -211,8 +260,8 @@ function Option({ o, chosen, approved, onChoose, onLight, counts, onNote, busy =
           <MessageSquarePlus size={13} /></button>}
       </span>; })}
       {/* a short last page keeps the sheet's size, so the dialog neither shrinks nor jumps */}
-      {o.stillUrls.length > SHEET && Array.from({ length: SHEET - Math.min(SHEET, o.stillUrls.length - pg * SHEET) }, (_, k) => <span key={"e" + k} className="bd-cell bd-empty" aria-hidden="true" />)}</div>
-    {o.stillUrls.length > SHEET && <div onClick={(e) => e.stopPropagation()}><Pager className="bd-pager" page={pg} size={SHEET} total={o.stillUrls.length} onPage={setPg} /></div>}
+      {n > per && Array.from({ length: per - Math.min(per, n - pg * per) }, (_, k) => <span key={"e" + k} className="bd-cell bd-empty" aria-hidden="true" />)}</div>
+    {n > per && <div onClick={(e) => e.stopPropagation()}><Pager className="bd-pager" page={pg} size={per} total={n} onPage={setPg} /></div>}
     {!o.stillUrls.length && !busy && <p className="muted">{t("The pictures of this option are being made.")}</p>}
   </article>;
 }

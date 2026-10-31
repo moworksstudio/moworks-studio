@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-guard-break-split",
+  "hash": "24e2f88fa89847be",
+  "at": "2026-10-17T11:16:14.182Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__effect-guard-break-split.mp4",
+    "poster": "previews/moworks__effect-guard-break-split.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b531f39e608e15524abe67d8a45326186625ed1b4af3531d07dc911b2c755c14",
+    "size": 19308,
+    "seconds": 29.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

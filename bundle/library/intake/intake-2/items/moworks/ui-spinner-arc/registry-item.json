@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-spinner-arc",
+  "type": "hyperframes:block",
+  "title": "Spinner Arc",
+  "description": "Một vòng tròn có nửa cung màu nhấn xoay đều liên tục, báo đang chờ mà không cho biết còn bao lâu.",
+  "tags": [
+    "spinner",
+    "loading",
+    "rotate",
+    "loop",
+    "loading-data",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "ui-spinner-arc.html",
+      "target": "compositions/components/ui-spinner-arc.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-spinner-arc",
+    "author": "moworks",
+    "call": "MW.uiSpinnerArc(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiSpinnerArc",
+    "options": {
+      "size": "px (42)",
+      "stroke": "px (5)",
+      "period": "s a turn (0.9), linear",
+      "label": "",
+      "loop": "s (1.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Ring 42 px, 5 px stroke #455166; the top and right quarters are accent (a 180° arc). Rotates 0 → 360° linear every 900 ms, repeating; LOADING label below, static. Params: size (42 px) · stroke (5 px) · arc (nửa vòng) · period (0.9 s) · ease (none).",
+    "titleVi": "Vòng xoay chờ tải"
+  }
+}

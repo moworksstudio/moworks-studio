@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "line-trim-window",
+  "type": "hyperframes:component",
+  "title": "SVG Segment Trim",
+  "description": "Đường giữ nguyên, chỉ một đoạn dài 22 % chạy từ đầu tới cuối như một vệt sáng.",
+  "tags": [
+    "svg",
+    "trim",
+    "trail",
+    "line",
+    "svg-path",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "line-trim-window.html",
+      "target": "compositions/components/line-trim-window.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/line-trim-window",
+    "author": "moworks",
+    "call": "MW.lineTrimWindow(q(\".tw\"), tl, 0.22, { duration: 1.63 });",
+    "function": "MW.lineTrimWindow",
+    "options": {
+      "length": "share of the path lit (0.22)",
+      "duration": "s (0.9), in-out",
+      "guide": "opacity of the faint full path (0.18)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "pathLength = 1, stroke-dasharray 0.22 1; dashoffset 0.22 -> -1, so a 22 % window enters at the start and leaves past the end, 900 ms easeInOutCubic; faint full guide path under it. Demo 2.2 s: run between 10 % and 84 %. Small demo: trim paths on a circle r 50, 8 px round cap: end 0 -> 1 over 0.2-0.9 s, start follows over 0.45-1.2 s, ease-in-out. Params: length: độ dài vệt (0.22) · duration (0.9 s) · ease (power2.inOut).",
+    "titleVi": "Vệt chạy dọc đường cố định"
+  }
+}

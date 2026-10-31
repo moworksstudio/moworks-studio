@@ -9,14 +9,15 @@
 // stays in Assets). + and - zoom, not while typing. A sound dragged from the Assets tab drops on the lane under the pointer, at the
 // pointer's time: the lane lights and a thin line shows the time while it is over it (not on a locked film or one shown as its render).
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, ChevronUp, Film, Mic2, Music, Sparkles, Trash2, ZoomIn, ZoomOut } from "lucide-react";
-import { usePref } from "../lib.jsx";
+import { Captions, ChevronDown, ChevronUp, Film, Mic2, Music, Sparkles, Trash2, ZoomIn, ZoomOut } from "lucide-react";
+import { usePref, useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 import { fmtTime } from "./Player.jsx";
 
 const LABEL = 116;          // the label column, wide enough for "NARRATION"
 
 const keyOf = (c) => c.hfId || c.id || `${c.src}@${c.start}`;
+const cls_sfx = (audio) => sfxRows(audio.filter((c) => c.lane === "sfx"));
 
 /** A sound dragged from the Assets tab: this type carries its project-relative path, which never shows on screen. */
 export const SOUND_MIME = "application/x-moworks-sound";
@@ -30,15 +31,47 @@ export const clockTenths = (s) => {
   const d = Math.round(Math.max(0, Number(s) || 0) * 10), m = Math.floor(d / 600), r = d - m * 600;
   return `${m}:${String(Math.floor(r / 10)).padStart(2, "0")}${r % 10 ? `.${r % 10}` : ""}`;
 };
+/** A sound's name as a label on its clip: "ambience-room-tone-1.ogg" reads "ambience room tone 1". */
+export const clipLabel = (name) => String(name ?? "").replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim();
+/** A sound's name in words, the one the Sounds drawer gives it ("Bell desk 1"), never its file's: what a toast, a button and a screen reader say. */
+export const soundName = (c) => c?.title || clipLabel(c?.name).replace(/^./, (x) => x.toUpperCase());
+/** The latest a sound may start: it ends with the film. One already running past the end (a long recording) may stay or move earlier, never later. */
+export const latestStart = (c, filmEnd, from = c?.start ?? 0, last = 0) => Math.max(0, filmEnd - (c?.duration ?? 0), Math.min(from, filmEnd - last));
+/** A long bed under the effects (an ambience): drawn lighter, so the effects over it stay readable. */
+export const isBed = (c) => /^ambien/i.test(String(c.name ?? "")) || /^el-amb-/.test(String(c.id ?? ""));
+/** The SFX lane's rows: one per HF track the sounds sit on (`data-track-index`, HF's own timeline data), beds first; a sound with no track takes
+ *  the first row where it overlaps nothing, and so does every sound when they sit on more tracks than the lane has room for. Returns { rows, rowOf(clip) }.
+ *  A film's 99 sounds on six tracks read one by one; on one bar they could not. */
+const SFX_ROWS = 8;
+export function sfxRows(all) {
+  const many = new Set(all.map((c) => c.track).filter((n) => n != null)).size > SFX_ROWS;
+  const clips = many ? all.map((c) => ({ ...c, track: null })) : all;
+  const tracks = [...new Set(clips.filter((c) => c.track != null).map((c) => c.track))].sort((a, b) => a - b);
+  const beds = tracks.filter((n) => clips.some((c) => c.track === n && isBed(c)));
+  const order = [...beds, ...tracks.filter((n) => !beds.includes(n))];
+  const row = new Map(order.map((n, i) => [n, i]));
+  const ends = order.map((n) => Math.max(0, ...clips.filter((c) => c.track === n).map((c) => c.start + (c.duration ?? 0.3))));
+  const free = new Map();
+  for (const c of [...clips].filter((x) => x.track == null).sort((a, b) => a.start - b.start)) {
+    let k = ends.findIndex((e) => e <= c.start + 1e-3);
+    if (k < 0) { k = ends.length; ends.push(0); }
+    ends[k] = c.start + (c.duration ?? 0.3);
+    free.set(keyOf(c), k);
+  }
+  return { rows: Math.max(1, ends.length), rowOf: (c) => (!many && c.track != null && row.has(c.track) ? row.get(c.track) : free.get(keyOf(c)) ?? 0) };
+}
 /** The drop line on a lane while a sound from the Assets tab is over it, with the time it would start at (its chip turns left at the end). */
 export const DropLine = ({ x, time, end = false }) => <div className={"tl-drop" + (end ? " end" : "")} style={{ left: x }} aria-hidden="true"><b className="num">{time}</b></div>;
 
-export default function Timeline({ data, time, duration, shot, onSeek, onShot, range, onRange, posters = null, fps = 30, locked = false, onAudioMove = null, onAudioRemove = null,
+export default function Timeline({ data, time, duration, shot, onSeek, onShot, range, onRange, posters = null, fps = 30, locked = false, onAudioMove = null, onAudioRemove = null, onCaptionSave = null, onCaptionLive = null,
   readOnly = false, onSoundDrop = null }) {
   const t = useT();
+  const toast = useToast();
   const [pps, setPps] = usePref("editor:tl-pps", 0);          // pixels per second; 0 = fit
   const [folded, setFolded] = usePref("editor:tl-folded", false);
   const box = useRef(null);
+  const [cue, setCue] = useState(null);             // the caption group whose words are open in the head: { file, start, parts }
+  const [cueText, setCueText] = useState({});
   const [w, setW] = useState(800);
   const [drag, setDrag] = useState(null);           // { x0, t0, mode: "scrub" | "range" }
   useEffect(() => { const el = box.current; if (!el) return; const ro = new ResizeObserver(() => setW(el.clientWidth)); ro.observe(el); setW(el.clientWidth); return () => ro.disconnect(); }, []);
@@ -73,8 +106,18 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
   }, [time, scale]);
   // sounds: selected (Delete takes it off), dragged along or across lanes; + and - zoom (not while typing)
   const [sel, setSel] = useState(null);
-  const [move, setMove] = useState(null);
-  const [say, setSay] = useState("");          // the live line: what a keyboard move did          // { key, clip, x0, y0, start0, lane0, start, lane, moved }
+  const [move, setMove] = useState(null);          // { key, clip, x0, y0, start0, lane0, start, lane, moved }
+  const moveNow = useRef(null);          // the same drag's latest, for the pointer's release
+  const [say, setSay] = useState("");          // the live line: what a keyboard move did
+  // A sound dropped stays where it was dropped until the film's own list says so, the server's fit and the history take a second or more: it jumped back meanwhile, and a
+  // second drag from where it had been dropped pressed on the empty lane (T29-10). { key: { start, lane, n } }
+  const [held, setHeld] = useState({});
+  const heldN = useRef(0);
+  const moveTo = (c, to) => {
+    const k = keyOf(c), n = ++heldN.current;
+    setHeld((h) => ({ ...h, [k]: { start: to.start ?? c.start, lane: to.lane ?? c.lane, n } }));
+    Promise.resolve(onAudioMove(c, to)).finally(() => setHeld((h) => { if (h[k]?.n !== n) return h; const { [k]: _gone, ...rest } = h; return rest; }));
+  };
   const rowsRef = useRef({});
   const audio = data?.audio ?? [];
   const selClip = audio.find((c) => keyOf(c) === sel) ?? null;
@@ -127,26 +170,36 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
     e.stopPropagation();
     setSel(keyOf(c));
     if (locked || !onAudioMove) return;
-    setMove({ key: keyOf(c), clip: c, x0: e.clientX, y0: e.clientY, start0: c.start, lane0: c.lane, start: c.start, lane: c.lane, moved: false });
+    const m0 = { key: keyOf(c), clip: c, x0: e.clientX, y0: e.clientY, start0: c.start, lane0: c.lane, start: c.start, lane: c.lane, moved: false };
+    moveNow.current = m0;
+    setMove(m0);
   };
   useEffect(() => {
     if (!move) return;
     const mv = (e) => {
+      if (!moveNow.current) return;          // released a moment ago
       const dx = e.clientX - move.x0, dy = e.clientY - move.y0;
-      const start = Math.max(0, Math.round((move.start0 + dx / scale) * fps) / fps);
-      const lane = laneAt(e.clientY) ?? move.lane0;
-      setMove((m) => (m ? { ...m, start, lane, moved: m.moved || Math.abs(dx) > 3 || Math.abs(dy) > 6 } : m));
+      // within the film: a clip stops where it ends with the film, as the Sounds drawer's Add moves one back
+      const latest = latestStart(move.clip, data?.duration || D, move.start0, 1 / fps);
+      // (a drag across the lanes only is no move in time, not even to the nearest frame)
+      const start = Math.abs(dx) <= 3 ? move.start0 : Math.min(latest, Math.max(0, Math.round((move.start0 + dx / scale) * fps) / fps));
+      // a sound effect stays on its lane: on Narration it would shift the voice's lines, on Music it would become the film's music (T29-5)
+      const over = laneAt(e.clientY) ?? move.lane0, lane = move.clip.effect && over !== "sfx" ? move.lane0 : over;
+      const m = { ...moveNow.current, start, lane, off: !!move.clip.effect && over !== "sfx", moved: moveNow.current.moved || Math.abs(dx) > 3 || Math.abs(dy) > 6 };
+      moveNow.current = m;
+      setMove(m);
     };
     const up = () => {
-      setMove((m) => {
-        if (m?.moved && (Math.abs(m.start - m.start0) > 1e-3 || m.lane !== m.lane0)) onAudioMove(m.clip, { start: m.start !== m.start0 ? m.start : null, lane: m.lane !== m.lane0 ? m.lane : null });
-        return null;
-      });
+      const m = moveNow.current;
+      moveNow.current = null;
+      setMove(null);
+      if (m?.moved && m.off) toast(t("A sound effect stays on the SFX lane. To use its file as the voice or the music, drop it there from Assets."));
+      if (m?.moved && (Math.abs(m.start - m.start0) > 1e-3 || m.lane !== m.lane0)) moveTo(m.clip, { start: m.start !== m.start0 ? m.start : null, lane: m.lane !== m.lane0 ? m.lane : null });
     };
     addEventListener("pointermove", mv); addEventListener("pointerup", up);
     return () => { removeEventListener("pointermove", mv); removeEventListener("pointerup", up); };
   }, [move?.key, scale]); // eslint-disable-line react-hooks/exhaustive-deps
-  const clipsIn = (ln) => audio.map((c) => (move && keyOf(c) === move.key ? { ...c, start: move.start, lane: move.lane, moving: true } : c)).filter((c) => c.lane === ln);
+  const clipsIn = (ln) => audio.map((c) => (move && keyOf(c) === move.key ? { ...c, start: move.start, lane: move.lane, moving: true } : held[keyOf(c)] ? { ...c, start: held[keyOf(c)].start, lane: held[keyOf(c)].lane } : c)).filter((c) => c.lane === ln);
   // a sound moves without a mouse too (WCAG 2.2, 2.5.7): focus it, ←/→ one frame, Shift+←/→ one second, ↑/↓ the lane
   // next to it; Delete takes it off. Each move is said in the live line below the lanes.
   const LANES = ["voice", "sfx", "music"];
@@ -155,35 +208,49 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
     e.preventDefault(); e.stopPropagation();          // the player's own arrow keys (a frame of the film) do not run as well
     if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
       const step = (e.shiftKey ? 1 : 1 / fps) * (e.key === "ArrowLeft" ? -1 : 1);
-      const start = Math.max(0, Math.round((c.start + step) * fps) / fps);
+      const start = Math.min(latestStart(c, data?.duration || D, c.start, 1 / fps), Math.max(0, Math.round((c.start + step) * fps) / fps));
       if (Math.abs(start - c.start) < 1e-6) return;
-      onAudioMove(c, { start, lane: null });
-      setSay(t("{name} starts at {time}", { name: c.name, time: fmtTime(start, fps) }));
+      moveTo(c, { start, lane: null });
+      setSay(t("{name} starts at {time}", { name: soundName(c), time: fmtTime(start, fps) }));
     } else {
       const lane = LANES[LANES.indexOf(c.lane) + (e.key === "ArrowUp" ? -1 : 1)];
       if (!lane) return;
-      onAudioMove(c, { start: null, lane });
-      setSay(t("{name} moved to {lane}", { name: c.name, lane: t(NAME[lane]) }));
+      if (c.effect && lane !== "sfx") { setSay(t("A sound effect stays on the SFX lane. To use its file as the voice or the music, drop it there from Assets.")); return; }
+      moveTo(c, { start: null, lane });
+      setSay(t("{name} moved to {lane}", { name: soundName(c), lane: t(NAME[lane]) }));
     }
   };
-  const clip = (c, cls, inner = null) => <span key={keyOf(c)} className={`tl-aclip ${cls}` + (keyOf(c) === sel ? " sel" : "") + (c.moving ? " moving" : "") + (locked ? " locked" : "")}
-    style={{ left: px(c.start), width: Math.max(8, px(c.duration ?? (cls === "sfx" ? 0.3 : D - c.start))) }} title={`${c.name} · ${c.start.toFixed(2)} s`}
-    tabIndex={0} role="button" aria-label={t("{name}, starts at {time}; arrow keys move it, Delete takes it off", { name: c.name, time: fmtTime(c.start, fps) })}
+  // the SFX lane shows each sound: thin enough not to run into the next one at Fit, its name on it once a zoom gives it the room
+  const sfx = cls_sfx(audio);
+  const clip = (c, cls, inner = null) => <span key={keyOf(c)} className={`tl-aclip ${cls}` + (cls === "sfx" && isBed(c) ? " bed" : "") + (keyOf(c) === sel ? " sel" : "") + (c.moving ? " moving" : "") + (locked ? " locked" : "")}
+    style={{ left: px(c.start), width: Math.max(cls === "sfx" ? 3 : 8, px(c.duration ?? (cls === "sfx" ? 0.3 : D - c.start))), ...(cls === "sfx" ? { "--row": sfx.rowOf(c) } : null) }} title={`${soundName(c)} · ${c.start.toFixed(2)} s`}
+    tabIndex={0} role="button" aria-label={t("{name}, starts at {time}; arrow keys move it, Delete takes it off", { name: soundName(c), time: fmtTime(c.start, fps) })}
     onFocus={() => setSel(keyOf(c))} onKeyDown={nudge(c)} onPointerDown={grab(c)}>{inner}</span>;
   const wheel = (e) => { if (e.ctrlKey) { e.preventDefault(); setPps(Math.min(400, Math.max(2, scale * (e.deltaY < 0 ? 1.2 : 1 / 1.2)))); } };
   const px = (s) => s * scale;
   const music = data?.music;
   const hasAudio = !!data?.audio;
-  const rows = folded ? ["shots"] : ["shots", "voice", "sfx", "music"];
-  const ICON = { shots: Film, voice: Mic2, sfx: Sparkles, music: Music };
-  const NAME = { shots: "Shots", voice: "Narration", sfx: "SFX", music: "Music" };
+  const captions = data?.captions ?? [];
+  const canEdit = !!onCaptionSave && !locked;
+  const openCue = (host, c) => {
+    onSeek(c.start + Math.min(0.2, (c.duration ?? 0.4) / 2));          // a little in: a group fades in from its first frame
+    if (canEdit) { setCue({ file: host.file, start: c.start, parts: c.parts }); setCueText(Object.fromEntries(c.parts.map((x) => [x.hfId, x.text]))); }
+  };
+  const closeCue = () => { setCue(null); setCueText({}); };
+  const rows = folded ? ["shots"] : ["shots", "voice", "captions", "sfx", "music"];
+  const ICON = { shots: Film, voice: Mic2, captions: Captions, sfx: Sparkles, music: Music };
+  const NAME = { shots: "Shots", voice: "Narration", captions: "Captions", sfx: "SFX", music: "Music" };
   return <div className={"tl" + (folded ? " folded" : "")} ref={box}>
     <span className="sr-only" role="status" aria-live="polite">{say}</span>
     <div className="tl-head">
       <span className="tl-name" title={t("Click to jump · drag to scrub · Shift + drag to loop a part · Ctrl + wheel to zoom")}>{t("Timeline")}</span>
-      <span className="tl-gap" />
+      {cue ? <span className="tl-capedit">{cue.parts.map((x) => <input key={x.hfId} autoFocus={x === cue.parts[0]} spellCheck={false} className="input sm" value={cueText[x.hfId] ?? ""} aria-label={t("Caption words")}
+        onChange={(e) => { const v = e.target.value; setCueText((o) => ({ ...o, [x.hfId]: v })); onCaptionLive?.(x.hfId, v); }}
+        onKeyDown={(e) => { e.stopPropagation(); if (e.key === "Enter") e.currentTarget.blur(); if (e.key === "Escape") { onCaptionLive?.(x.hfId, x.text); closeCue(); } }}
+        onBlur={(e) => { const v = e.target.value.trim(); if (!v || v === x.text) { onCaptionLive?.(x.hfId, x.text); if (e.relatedTarget?.closest?.(".tl-capedit") == null) closeCue(); return; }
+          onCaptionSave(cue.file, x.hfId, v); if (e.relatedTarget?.closest?.(".tl-capedit") == null) closeCue(); }} />)}</span> : <span className="tl-gap" />}
       {selClip && onAudioRemove && <button className="btn ghost sm" disabled={locked} onClick={() => { onAudioRemove(selClip); setSel(null); }} title={t("Delete key")}>
-        <Trash2 size={13} />{t("Take {name} off the timeline", { name: selClip.name })}</button>}
+        <Trash2 size={13} />{t("Take {name} off the timeline", { name: soundName(selClip) })}</button>}
       {range && <button className="clink" onClick={() => onRange(null)}>{t("Clear the loop {a}–{b} s", { a: range[0].toFixed(1), b: range[1].toFixed(1) })}</button>}
       <span className="tl-tools">
         <button className="btn ghost icon sm" onClick={() => setPps(Math.max(2, scale / 1.4))} aria-label={t("Zoom out")}><ZoomOut size={14} /></button>
@@ -193,7 +260,7 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
           {folded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}</button>
       </span>
     </div>
-    <div className="tl-body" ref={scroller} onWheel={wheel}>
+    <div className="tl-body" ref={scroller} onWheel={wheel} style={{ "--sfx-rows": sfx.rows }}>
       <div className="tl-labels">{["ruler", ...rows].map((k) => { const I = ICON[k]; return <div key={k} className={"tl-label " + k}>{I && <I size={12} />}{NAME[k] ? t(NAME[k]) : ""}</div>; })}</div>
       <div className={"tl-lanes" + (readOnly ? " ro" : "")} ref={lane} style={{ width }} onPointerDown={down}
         onDragOver={canDrop ? dragOver : undefined} onDragLeave={canDrop ? dragLeave : undefined} onDrop={canDrop ? drop : undefined}
@@ -208,7 +275,12 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
           <div className={"tl-row voice" + (over?.lane === "voice" ? " drop-on" : "")} {...dropRow("voice")} ref={(el) => { rowsRef.current.voice = el; }}>{hasAudio && clipsIn("voice").map((c) => clip(c, "voice"))}
             {(data?.voice ?? []).map((v, i) => <span key={i} className="tl-word" style={{ left: px(v.start), width: Math.max(2, px(v.end - v.start) - 1) }} title={v.text}>{v.text}</span>)}
             {!data?.voice?.length && !(hasAudio && clipsIn("voice").length) && <span className="tl-empty">{t("No voice-over")}</span>}{dropLine("voice")}</div>
-          <div className={"tl-row sfx" + (over?.lane === "sfx" ? " drop-on" : "")} {...dropRow("sfx")} ref={(el) => { rowsRef.current.sfx = el; }}>{hasAudio ? clipsIn("sfx").map((c) => clip(c, "sfx"))
+          <div className="tl-row captions">{captions.flatMap((h) => (h.cues?.length ? h.cues.map((c) => <button key={`${h.id}@${c.start}`} type="button" className={"tl-cap" + (cue?.start === c.start ? " sel" : "")}
+              style={{ left: px(c.start), width: Math.max(2, px(c.duration ?? 1)) }} title={canEdit ? `${c.text} · ${t("Click to change the words")}` : c.text} onPointerDown={(e) => e.stopPropagation()} onClick={() => openCue(h, c)}>{c.text}</button>)
+            // words a script builds: the track shows where they are, Claude changes them
+            : [<span key={h.id ?? h.start} className="tl-cap whole" style={{ left: px(h.start), width: Math.max(2, px(h.duration ?? D - h.start)) }} title={t("These captions are made by a script: ask Claude to change them")}>{t("Captions")}</span>]))}
+            {!captions.length && <span className="tl-empty">{t("No captions")}</span>}</div>
+          <div className={"tl-row sfx" + (over?.lane === "sfx" ? " drop-on" : "")} {...dropRow("sfx")} ref={(el) => { rowsRef.current.sfx = el; }}>{hasAudio ? clipsIn("sfx").map((c) => clip(c, "sfx", px(c.duration ?? 0.3) >= 44 ? <span className="tl-aname">{soundName(c)}</span> : null))
             : (data?.sfx ?? []).map((x, i) => <span key={i} className="tl-tick" style={{ left: px(x.start), width: Math.max(6, px(x.duration ?? 0.3)) }} title={`${x.name} · ${x.start.toFixed(2)} s`} />)}
             {!(hasAudio ? clipsIn("sfx").length : data?.sfx?.length) && <span className="tl-empty">{t("No sound effects")}</span>}{dropLine("sfx")}</div>
           <div className={"tl-row music" + (over?.lane === "music" ? " drop-on" : "")} {...dropRow("music")} ref={(el) => { rowsRef.current.music = el; }}>{hasAudio ? clipsIn("music").map((c) => clip(c, "music",

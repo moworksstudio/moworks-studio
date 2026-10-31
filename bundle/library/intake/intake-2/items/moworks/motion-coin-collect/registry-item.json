@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-coin-collect",
+  "type": "hyperframes:block",
+  "title": "Coin Collect",
+  "description": "Năm đồng xu nảy nhẹ rồi lần lượt bay theo đường cong vào ví, vừa bay vừa xoay và nhỏ lại; mỗi lần chạm ví thì ví bẹp nhẹ, số dư nhảy +5 và chữ \"+5\" bay lên.",
+  "tags": [
+    "collect",
+    "arc",
+    "counter",
+    "stagger",
+    "game-hud",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-coin-collect.html",
+      "target": "compositions/components/motion-coin-collect.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-coin-collect",
+    "author": "moworks",
+    "call": "MW.motionCoinCollect(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionCoinCollect",
+    "options": {
+      "count": "(5)",
+      "first": "s the first coin lands (0.9)",
+      "stagger": "s (0.26)",
+      "flight": "s (0.5, ease-in quad on a quadratic arc)",
+      "step": "per coin (5)",
+      "from": "(100)",
+      "unit": "",
+      "seed": "(4)",
+      "loop": "s (3.3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. 5 coins (r 9) scattered; each hops up 4 px (140 ms half-sine) then flies to the wallet on a quadratic arc (control: midpoint x −24, 58 px above the higher end) in 500 ms in-quad, arrivals every 260 ms from 0.9 s; coin shrinks to 0.65 and spins (scaleX = |cos 9u|). Each arrival: wallet squash 280 ms (1.12 / 0.88 sine), counter 100 → 125 (+5) pops 1.22 in accent, '+5' rises 18 px in 400 ms outCubic, fades 160-340 ms. Reset 2.9-3.25 s. Params: target: id ví / đích · stagger: cách nhau (0.26 s) · flight: thời gian bay (0.5 s) · step: cộng mỗi lần (5) · from: số dư đầu (100).",
+    "titleVi": "Xu bay vào ví, số cộng dồn"
+  }
+}

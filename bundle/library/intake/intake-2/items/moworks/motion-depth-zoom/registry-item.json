@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-depth-zoom",
+  "type": "hyperframes:component",
+  "title": "Depth Zoom",
+  "description": "Thẻ từ rất nhỏ và nhoè lao tới, phóng vượt cỡ gốc lên 135 % và rõ nét dần.",
+  "tags": [
+    "entrance",
+    "zoom",
+    "depth",
+    "blur",
+    "scale",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "motion-depth-zoom.html",
+      "target": "compositions/components/motion-depth-zoom.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-depth-zoom",
+    "author": "moworks",
+    "call": "MW.motionDepthZoom(q(\".dz\"), tl, 0.3, { exitAt: 1.8 });",
+    "function": "MW.motionDepthZoom",
+    "options": {
+      "from": "(0.15)",
+      "to": "ends larger than its layout size (1.35)",
+      "blur": "px at the start (24)",
+      "duration": "s (0.74)",
+      "ease": "(power4.inOut)",
+      "exitAt": "s after the start to fade (null)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Card scales about its centre 0.15 → 1.35 (ends larger than its layout size), blur 6 → 0 px and opacity 0.2 → 1, together in 740 ms power4.inOut (easeInOutQuint). Small demo: fade in over the first 250 ms of the loop; exit fade 300 ms power2.in. Perspective guide lines are not ported. Params: duration (0.74 s) · scale (0.15 → 1.35) · blur (6 px) · ease (power4.inOut).",
+    "titleVi": "Lao từ xa tới gần"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-punctuation-pause-type",
+  "type": "hyperframes:component",
+  "title": "Punctuation-Aware Pause",
+  "description": "Chữ hiện từng ký tự theo nhịp gõ, sau dấu phẩy thì ngừng ngắn, sau dấu chấm, chấm than, chấm hỏi thì ngừng lâu hơn, như người đang nói.",
+  "tags": [
+    "typing",
+    "pause",
+    "punctuation",
+    "rhythm",
+    "text-japanese",
+    "crisp",
+    "japanese"
+  ],
+  "files": [
+    {
+      "path": "text-punctuation-pause-type.html",
+      "target": "compositions/components/text-punctuation-pause-type.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-punctuation-pause-type",
+    "author": "moworks",
+    "call": "MW.textPunctuationPauseType(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textPunctuationPauseType",
+    "options": {
+      "per": "s per character (0.06)",
+      "comma": "s added after a comma (0.2)",
+      "stop": "s after . ! ? (0.4)",
+      "fit": "s the line is compressed into if longer (1.9)",
+      "rise": "px (12)",
+      "caret": "px (10)",
+      "start": "s (0.35)",
+      "exitAt": "s (3.1)",
+      "accent": "",
+      "loop": "s (3.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "From 0.35 s, chars appear at 60 ms per char (recipe 40–60); +200 ms after '、 , ，' and +400 ms after '。 . ！ ! ？ ?' (recipe 100–200 / 250–400); closing quotes and brackets appear with the previous char and the pause comes after them; schedule compressed to 1.9 s if longer. Each char fades in over 60 ms rising 3 px. Accent caret 2.5 px after the last char: steady while typing, then blinks (0.5 s period, 55 % on). Exit 3.1–3.4 s. Loop 3.6 s. Params: nhịp ký tự (60 ms) · nghỉ sau dấu phẩy (200 ms) · nghỉ sau dấu chấm (400 ms). Closing quotes and brackets come with the character before them, and the pause falls after them.",
+    "titleVi": "Gõ chữ, ngừng nhịp sau dấu câu"
+  }
+}

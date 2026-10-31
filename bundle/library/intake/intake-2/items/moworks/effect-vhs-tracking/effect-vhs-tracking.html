@@ -1,0 +1,68 @@
+<!--
+  VHS Tracking Noise (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Lớp phủ kiểu băng VHS: vân quét ngang, một dải nhiễu trôi từ trên xuống, hình giật lên xuống vài khung và viền màu đỏ xanh lệch nhẹ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectVhsTracking(q(".vh"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - picture: the picture that jumps
+      - title: text that gets the colour bleed
+      - scan: scanline darkness (0.38)
+      - band: noise band as a share of the height (0.09)
+      - roll: s per pass (3)
+      - jumpAt: s the frame jumps (1.6)
+      - seed: (7)
+      - loop: s (3)
+
+  Notes: Overlay: 1 px dark scanline every 2 px (15 %; demo 38 %, phase flips at 30 fps); a noise band 6 % (demo 9 %) of the frame height rolls top → bottom every 3 s linear, its rows (4 sub-bands) shifted ±7 px, seeded per 24 fps frame, with a light wash and white dashes; every 2–4 s (demo once per loop, CSS 3.2 s) the picture jumps −7 / +4 / −2 / +1 px over 4 frames with a dark edge bar; chroma bleed red −2 / cyan +2 px at ~80 % screen (4 px in a jump). Loop 3 s. Params: scanlines: vân quét (2 px) · band: dải nhiễu (6–9 %, 3 s một lượt) · jump: giật hình (mỗi 2–4 s) · chroma (±2 px).
+-->
+
+<div class="vh"><div class="vh-p"></div><div class="vh-t">Kỷ niệm 1998</div><div class="vh-c"><i></i>PLAY  00:12:34</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"picture":".vh-p","title":".vh-t","scan":0.38,"band":0.09,"roll":3,"jumpAt":1.6,"seed":7,"loop":3};
+  var run = function (el, tl, at, o) {
+        var pic = o.picture ? el.querySelector(o.picture) : null, title = o.title ? el.querySelector(o.title) : null, sc = document.createElement("div"), cv = document.createElement("canvas"), bar = document.createElement("div"), W = el.clientWidth, Hh = el.clientHeight;
+        if (getComputedStyle(el).position === "static") el.style.position = "relative";
+        sc.style.cssText = "position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg, rgba(0,0,0," + o.scan + ") 0 2px, transparent 2px 4px);z-index:5;"; el.appendChild(sc);
+        cv.width = W; cv.height = Hh; cv.style.cssText = "position:absolute;inset:0;pointer-events:none;z-index:6;"; el.appendChild(cv); var c = cv.getContext("2d");
+        bar.style.cssText = "position:absolute;left:0;right:0;bottom:0;height:0;background:#000;z-index:7;"; el.appendChild(bar);
+        var J = [-28, 16, -8, 4];
+        return MW.drive(tl, at, o.loop, function (t) {
+          sc.style.backgroundPosition = "0 " + (Math.floor(t * 30) % 2 ? 2 : 0) + "px";
+          var jf = Math.floor((t - o.jumpAt) * 24), jy = jf >= 0 && jf < 4 ? J[jf] : 0; if (pic) gsap.set(pic, { y: jy }); bar.style.height = jy ? Math.abs(jy) + 12 + "px" : "0";
+          if (title) { var ch = jy ? 16 : 8; title.style.textShadow = (-ch) + "px 0 0 rgba(255,40,80,0.75), " + ch + "px 0 0 rgba(0,224,255,0.75)"; }
+          c.clearRect(0, 0, W, Hh); var bh = o.band * Hh, by = ((t % o.roll) / o.roll) * (Hh + bh) - bh, f = Math.floor(t * 24), r = MW.rand(o.seed + f);
+          for (var k = 0; k < 4; k++) { var y = by + k * bh / 4, dx = (r() * 2 - 1) * 28; c.fillStyle = "rgba(255,255,255," + (0.06 + 0.06 * r()).toFixed(3) + ")"; c.fillRect(dx, y, W, bh / 4); for (var d = 0; d < 14; d++) { c.fillStyle = "rgba(255,255,255," + (0.4 + 0.5 * r()).toFixed(3) + ")"; c.fillRect(r() * W, y + r() * bh / 4, 20 + r() * 60, 2); } }
+        });
+      };
+  MW.effectVhsTracking = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

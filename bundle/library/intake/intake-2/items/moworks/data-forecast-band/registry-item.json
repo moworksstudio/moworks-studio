@@ -1,0 +1,51 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-forecast-band",
+  "type": "hyperframes:block",
+  "title": "Forecast Confidence Fog",
+  "description": "Đường thực tế vẽ trước, sau mốc hôm nay một đường dự báo nét đứt kéo dài kèm dải mờ loe rộng dần về tương lai.",
+  "tags": [
+    "chart",
+    "forecast",
+    "uncertainty",
+    "line",
+    "data-storytelling",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "data-forecast-band.html",
+      "target": "compositions/components/data-forecast-band.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/data-forecast-band",
+    "author": "moworks",
+    "call": "MW.dataForecastBand(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataForecastBand",
+    "options": {},
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Observed line (5 points) draws 300-1300 ms easeInOut, end dot. 'Today' divider + labels fade 1200-1500. Forecast: dashed (5/4) curve from the last point draws 1500-2800 ms easeOutCubic; behind it a band whose half-width grows linearly from 0 at today to +-34 px at the end, as 4 nested bands (100 / 72 / 46 / 22 % width) at 11 % opacity each, revealed in step with the forecast. Width bracket fades 2600-2900. Params: spread (±34 px) · bands (4) · forecast: thời gian dự báo (1.3 s).",
+    "titleVi": "Dự báo có dải bất định loe rộng"
+  }
+}

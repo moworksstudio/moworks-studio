@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-like-burst",
+  "type": "hyperframes:block",
+  "title": "Heart Like",
+  "description": "Bấm thích, trái tim viền biến mất, trái tim đầy bật lên quá cỡ rồi về, tám hạt màu nhỏ bắn toả ra xung quanh rồi rơi tan.",
+  "tags": [
+    "like",
+    "heart",
+    "burst",
+    "particles",
+    "selection-controls",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "ui-like-burst.html",
+      "target": "compositions/components/ui-like-burst.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-like-burst",
+    "author": "moworks",
+    "call": "MW.uiLikeBurst(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiLikeBurst",
+    "options": {
+      "at": "s the heart fills (0.7)",
+      "color": "",
+      "count": "likes before",
+      "caption": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Loop 2.8 s: the outline heart hides at 0.67 s (0.1 s); the filled heart (#ff8ca3) pops from 0.7 s: scale 0.65 → 1.14 in 0.2 s, to 1 in 0.22 s, fading in; 8 particles (4x7 px, r1, hues 35° + 36° each) from 0.78 s: scale 0.3 → 1 (0.11 s), fly radially to (cos a × 56 / 65 / 74, sin a × 37 − 18 px) rotating 39° × i by +0.56 s, then drift to ×1.12 / ×1.45 further, rotate 91° × i and fade by +1.46 s. The runtime eases each segment in-out. Params: at · pop (0.65 → 1.14 → 1) · particles (8) · reach (56-74 px) · duration (1.46 s). The filled heart pops 0.65 → 1.14 → 1; eight particles (hues 35° + 36° each) fly out, rotate and fade by 1.46 s.",
+    "titleVi": "Tim thích bật đầy, bắn hạt"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "shape-play-pause-morph",
+  "type": "hyperframes:block",
+  "title": "Play and Pause",
+  "description": "Bấm, tam giác phát tách thành hai khối rồi biến dáng thành hai thanh tạm dừng trong 0.35 s; bấm lại thì về hình tam giác.",
+  "tags": [
+    "morph",
+    "icon",
+    "play",
+    "pause",
+    "selection-controls",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "shape-play-pause-morph.html",
+      "target": "compositions/components/shape-play-pause-morph.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/shape-play-pause-morph",
+    "author": "moworks",
+    "call": "MW.shapePlayPauseMorph(q(\".gm\"), tl, 0, {});",
+    "function": "MW.shapePlayPauseMorph",
+    "options": {
+      "at": "[s to pause, s back to play] ([0.4, 1.75])",
+      "duration": "s (0.35, power2.inOut)",
+      "play": "",
+      "pause": "",
+      "accent": "",
+      "loop": "s (2.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Circle r54 button. Play = two quads: left (140,66) (168,80) (168,116) (140,130) and right (168,80) (196,98) (196,98) (168,116). Pause = two bars 18x64 at x 136 and 166 (y 66-130). Each vertex lerps to its partner over 0.4-0.75 s (350 ms) power2.inOut; reverse 1.75-2.1 s. Vertex dots flash mid-morph (teaching aid, optional). Label PLAY → PAUSE. Params: duration (0.35 s) · ease (power2.inOut) · size (64 px cao). The triangle is two quads whose vertices each move to a partner on the two bars.",
+    "titleVi": "Nút phát biến thành tạm dừng"
+  }
+}

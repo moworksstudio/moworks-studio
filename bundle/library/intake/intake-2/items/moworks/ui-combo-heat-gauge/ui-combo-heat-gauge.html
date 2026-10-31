@@ -1,0 +1,75 @@
+<!--
+  Combo Heat Escalation (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Mỗi đòn số combo tăng và nảy, thanh nhiệt đuổi theo bằng lò xo và đổi màu theo ba nấc lạnh, ấm, nóng; từ đòn thứ năm tia lửa bốc lên trên thanh, cuối cùng tất cả về 0.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiComboHeatGauge(q(".cb"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - hits: seconds of each hit ([0.35, 0.8, 1.15, 1.45, 1.7, 1.9])
+      - resetAt: s the gauge returns to 0 (3.4)
+
+  Notes: px @320x200. Hits at 0.35, 0.8, 1.15, 1.45, 1.7, 1.9 s: count 1 → 6 (56 px + 'HIT') with pop 1 + 0.35 e^(−12t) cos(20t); colour stages blue (≤ 2), yellow (≤ 4), accent; gauge 200 x 12 (dividers at 1/3, 2/3) follows n/6 by a sum of springs k260 d22, new colour cross-fading in 150 ms; COOL / WARM / HOT labels light. From hit 5, 10 sparks loop up 30 px above the gauge's right third (0.9 Hz). Reset: gauge → 0 at 3.4 s, number out 3.4-3.8 s. Params: hits: lúc trúng (6 đòn, 0.35 … 1.9 s) · stages: nấc màu (≤ 2 xanh, ≤ 4 vàng, còn lại màu nhấn) · spring: lò xo thanh (k260 d22) · resetAt: lúc về 0 (3.4 s).
+-->
+
+<div class="cb"><div class="cnum">1</div><div class="chit">HIT</div><div class="cg"><div class="cbar"></div><i style="left:33.3%"></i><i style="left:66.6%"></i></div>
+<div class="cls"><span class="cst">LẠNH</span><span class="cst">ẤM</span><span class="cst">NÓNG</span></div><div class="csp"><b style="left:0px"></b><b style="left:30px"></b><b style="left:60px"></b><b style="left:90px"></b><b style="left:120px"></b><b style="left:150px"></b><b style="left:180px"></b><b style="left:210px"></b><b style="left:240px"></b><b style="left:270px"></b></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"hits":[0.35,0.8,1.15,1.45,1.7,1.9],"resetAt":3.4};
+  var run = function (el, tl, at, o) {
+        var num = el.querySelector(".cnum"), bar = el.querySelector(".cbar"), labs = el.querySelectorAll(".cst"), sparks = el.querySelector(".csp"), sp = MW.spring(260, 22), cols = ["#3dd6f5", "#ffd23d", "#8b7bff"];
+        var stage = function (n) { return n <= 2 ? 0 : n <= 4 ? 1 : 2; };
+        return MW.drive(tl, at, o.resetAt + 0.6, function (t) {
+          var n = 0, g = 0, last = -1;
+          o.hits.forEach(function (h, i) { if (t >= h) { n = i + 1; last = h; g += (1 / o.hits.length) * sp.at(t - h); } });
+          if (t >= o.resetAt) g *= 1 - sp.at(t - o.resetAt);
+          var pop = last >= 0 ? 1 + 0.35 * Math.exp(-12 * (t - last)) * Math.cos(20 * (t - last)) : 1, st = stage(n), prev = stage(Math.max(0, n - 1));
+          var mix = last >= 0 ? Math.min(1, (t - last) / 0.15) : 1, col = gsap.utils.interpolate(cols[prev], cols[st], st !== prev ? mix : 1);
+          num.firstChild.nodeValue = String(Math.max(1, n)); gsap.set(num, { scale: n ? pop : 0.001 }); num.style.color = col; num.style.opacity = t >= o.resetAt ? String(Math.max(0, 1 - (t - o.resetAt) / 0.4)) : n ? "1" : "0";
+          bar.style.width = (Math.max(0, g) * 100) + "%"; bar.style.background = col;
+          labs.forEach(function (l, i) { l.style.color = n && i === st && t < o.resetAt ? cols[i] : "#4a5270"; });
+          sparks.style.opacity = n >= 5 && t < o.resetAt ? "1" : "0";
+          Array.prototype.forEach.call(sparks.children, function (s, i) { var ph = (t * 0.9 + i / 10) % 1; gsap.set(s, { y: -150 * ph, opacity: 1 - ph }); });
+        });
+      };
+  MW.uiComboHeatGauge = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

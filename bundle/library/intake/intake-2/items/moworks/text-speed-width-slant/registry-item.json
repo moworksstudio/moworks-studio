@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-speed-width-slant",
+  "type": "hyperframes:component",
+  "title": "Width/Slant Velocity",
+  "description": "Khi khung chữ trượt nhanh, chữ giãn rộng và nghiêng về trước; khi dừng, chữ bật về hình gốc như lò xo.",
+  "tags": [
+    "variable-font",
+    "velocity",
+    "spring",
+    "scroll",
+    "text-variable-fonts",
+    "bouncy",
+    "crisp",
+    "variable-fonts"
+  ],
+  "files": [
+    {
+      "path": "text-speed-width-slant.html",
+      "target": "compositions/components/text-speed-width-slant.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-speed-width-slant",
+    "author": "moworks",
+    "call": "MW.textSpeedWidthSlant(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textSpeedWidthSlant",
+    "options": {
+      "distance": "px the text travels (900)",
+      "start": "s (0.3)",
+      "duration": "s (1.5)",
+      "ease": "(cubic-bezier(.3,0,.7,1))",
+      "stiffness": "of the spring that smooths the speed (200)",
+      "damping": "(16)",
+      "rest": "wdth at rest (75)",
+      "fast": "wdth at full speed (125)",
+      "slant": "slnt at full speed (−12, clamped to the font's −10)",
+      "loop": "s (3.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "v = speed of a scroll / pan move normalised to 0..1 (demo: 216 px over 0.3–1.8 s, ease (.3,0,.7,1); GSAP |velocity| / 2000), smoothed by a spring (demo k 200, c 16 ≈ 11 % overshoot; GSAP quickTo 0.8 s power3); wdth = 75 + 50v (condensed 75 at rest, 125 at full speed), slnt = −12v (RFlex clamps at −10), pivot on the baseline; when the move stops v springs back to 0. Loop 3.2 s. Params: wdth: hẹp khi nghỉ → rộng khi nhanh (75 → 125) · slnt (0 → −12) · spring: độ cứng / giảm chấn (200 / 16) · move: chuyển động dẫn. The speed is normalised to 0–1 and smoothed by a spring stepped on the film clock, so the letters widen and lean while the text moves fast and spring back when it stops.",
+    "titleVi": "Chữ giãn và nghiêng theo tốc độ"
+  }
+}

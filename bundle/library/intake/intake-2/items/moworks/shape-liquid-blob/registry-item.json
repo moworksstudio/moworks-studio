@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "shape-liquid-blob",
+  "type": "hyperframes:component",
+  "title": "Liquid Morph",
+  "description": "Một khối tròn méo đi như giọt nước: bốn góc bo đổi riêng, co giãn ngang dọc rồi trở về đúng hình tròn ban đầu.",
+  "tags": [
+    "blob",
+    "morph",
+    "liquid",
+    "shape",
+    "effects-transitions",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "shape-liquid-blob.html",
+      "target": "compositions/components/shape-liquid-blob.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/shape-liquid-blob",
+    "author": "moworks",
+    "call": "MW.shapeLiquidBlob(q(\".lb\"), tl, 0.2, {});",
+    "function": "MW.shapeLiquidBlob",
+    "options": {
+      "keys": "[[s, [TL, TR, BR, BL] % radii, scaleX, scaleY], ...], each leg ease-in-out cubic",
+      "cycles": "(2)",
+      "gap": "s between cycles (0.5)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Box with per-corner radii (TL/TR/BR/BL, % of size): 50/50/50/50 -> 62/38/55/45 -> 34/66/42/58 -> 50/50/50/50 at 0 / 360 / 740 / 1100 ms, each leg easeInOutCubic; on the same keys scaleX 1 -> 1.12 -> 0.90 -> 1 and scaleY 1 -> 0.90 -> 1.10 -> 1. Ends exactly on the start shape. Params: duration (1.1 s) · amount: độ méo (12 %) · ease (power2.inOut). It ends exactly on the start shape.",
+    "titleVi": "Khối lỏng méo rồi về tròn"
+  }
+}

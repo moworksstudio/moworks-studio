@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-moworks-crossfade",
+  "type": "hyperframes:component",
+  "title": "View Crossfade",
+  "description": "Cảnh cũ mờ đi trong lúc cảnh mới hiện lên cùng lúc, không di chuyển và không có khung trống ở giữa.",
+  "tags": [
+    "crossfade",
+    "dissolve",
+    "fade",
+    "transition",
+    "layout-navigation",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "transition-moworks-crossfade.html",
+      "target": "compositions/components/transition-moworks-crossfade.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/transition-moworks-crossfade",
+    "author": "moworks",
+    "call": "MW.transitionMoworksCrossfade(q(\".tk-b\"), tl, 1.2, {});",
+    "function": "MW.transitionMoworksCrossfade",
+    "options": {
+      "duration": "s (0.52)",
+      "ease": "power2.inOut",
+      "from": "the outgoing scene"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Two scenes overlap: outgoing opacity 1 → 0 and incoming 0 → 1 at the same time, 520 ms power2.inOut (easeInOutCubic), no movement, no empty frame between. Targets [out inner, in inner] as in transition/push. Params: duration (0.52 s) · ease (power2.inOut) · targets: [cảnh ra, cảnh vào]. Unlike the dissolve, the outgoing scene fades out at the same time (no movement, no empty frame).",
+    "titleVi": "Hoà cảnh cũ sang cảnh mới"
+  }
+}

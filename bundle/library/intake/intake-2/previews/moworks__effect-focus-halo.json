@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-focus-halo",
+  "hash": "a082c5d8824adce2",
+  "at": "2026-10-17T07:36:02.993Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__effect-focus-halo.mp4",
+    "poster": "previews/moworks__effect-focus-halo.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4f3f3dc803f612c545f70a70d54fd5c0985cba358d2e207e4a0c1a8e5e6a5951",
+    "size": 8550,
+    "seconds": 46,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

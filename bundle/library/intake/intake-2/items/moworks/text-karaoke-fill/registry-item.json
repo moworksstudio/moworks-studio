@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-karaoke-fill",
+  "type": "hyperframes:block",
+  "title": "Karaoke Fill",
+  "description": "Màu nhấn tô từ trái sang phải trên từng từ đúng bằng thời gian hát từ đó, từ ngân dài tô chậm, từ ngắn tô nhanh, và giữ màu sau khi hát xong.",
+  "tags": [
+    "karaoke",
+    "fill",
+    "lyrics",
+    "captions",
+    "text-captions-subtitles",
+    "smooth",
+    "captions-subtitles"
+  ],
+  "files": [
+    {
+      "path": "text-karaoke-fill.html",
+      "target": "compositions/components/text-karaoke-fill.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-karaoke-fill",
+    "author": "moworks",
+    "call": "MW.textKaraokeFill(q(\".kfw\"), tl, 0, {});",
+    "function": "MW.textKaraokeFill",
+    "options": {
+      "from": "s (0.4)",
+      "to": "s (3.6): each word fills over exactly its own time (split by length here; from the transcript in a film)",
+      "accent": "fill colour",
+      "ink": "edge line colour",
+      "outAt": "s (4.2)",
+      "caption": "the lyric line"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Remotion"
+    },
+    "thirdParty": [],
+    "notes": "Line 30 px weight 800, white with a 4 px dark outline. Word times from the transcript (demo: split 0.4–3.6 s by word length). Each word's accent copy (same outline) is revealed by a clip growing left → right linearly over exactly its own duration, clamped, and stays filled; a 1 px ink line marks the fill edge while it moves. Fade out 4.2–4.5 s. Loop 4.8 s. ASS equivalent: \\kf in centiseconds. Params: thời điểm từng từ (theo lời) · màu tô (nhấn) · viền chữ (4 px).",
+    "titleVi": "Karaoke tô màu theo độ dài từ"
+  }
+}

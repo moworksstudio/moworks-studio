@@ -8,12 +8,15 @@ import { rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { TEST_STAGE } from "../packages/project-service/shared-stage.mjs";
 
 const AGE_MS = 12 * 3600 * 1000;
 const base = tmpdir(), now = Date.now();
-const old = readdirSync(base).filter((n) => /^mw-/.test(n)).map((n) => join(base, n)).filter((p) => {
-  try { const s = statSync(p); return s.isDirectory() && now - s.mtimeMs > AGE_MS; } catch { return false; }
-});
+const stale = (p) => { try { const s = statSync(p); return s.isDirectory() && now - s.mtimeMs > AGE_MS; } catch { return false; } };
+const list = (d) => { try { return readdirSync(d).map((n) => join(d, n)); } catch { return []; } };
+// the tests' shared stage stays, a suite in another checkout may be reading it: only the sets no test touched for that long go (each is touched when used)
+const old = [...list(base).filter((p) => /^mw-/.test(p.slice(base.length + 1)) && p.slice(base.length + 1) !== TEST_STAGE).filter(stale),
+  ...list(join(base, TEST_STAGE)).flatMap(list).filter(stale)];
 const done = await Promise.all(old.map((p) => rm(p, { recursive: true, force: true }).then(() => 1, () => 0)));
 const n = done.reduce((a, b) => a + b, 0);
 if (n) console.log(`Removed ${n} temporary folder(s) of earlier test runs.`);

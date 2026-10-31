@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-damage-number-pop",
+  "type": "hyperframes:component",
+  "title": "Damage Numbers",
+  "description": "Đúng khung hình trúng đòn, con số hiện ở mục tiêu, phóng vượt cỡ rồi về cỡ, bay lên và mờ đi; mục tiêu bị đẩy lùi một chút và loé sáng.",
+  "tags": [
+    "popup",
+    "number",
+    "float",
+    "impact",
+    "combat-hit-fx",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "text-damage-number-pop.html",
+      "target": "compositions/components/text-damage-number-pop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-damage-number-pop",
+    "author": "moworks",
+    "call": "MW.textDamageNumberPop(q(\".gm\"), tl, 0, {});",
+    "function": "MW.textDamageNumberPop",
+    "options": {
+      "hitAt": "s (0.62)",
+      "gap": "s to the second hit (0.8)",
+      "rise": "px (26)",
+      "peak": "scale (1.35)",
+      "life": "s (1.05)",
+      "knock": "px (7)",
+      "values": "the numbers shown",
+      "loop": "s (2.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. On the hit frame (0.62 s; second hit 1.42 s, x +24 px) the number appears above the target: scale 0.3 → 1.35 in 160 ms outCubic, then 1.35 → 1 in 160 ms outCubic; rises 26 px over 1.0 s outCubic; fades 700-1050 ms. Target knocks back 7 px (60 ms sine out, back over 390 ms outCubic) and flashes light ink 80 % → 0 in 120 ms; 7-dot burst to 16 px (300 ms) at the contact. A projectile travels 320 ms linear before each hit. Params: hitAt: lúc trúng (0.62 s) · rise: quãng bay lên (26 px) · peak: cỡ vọt (1.35) · life: thời gian sống (1.05 s) · knock: đẩy lùi mục tiêu (7 px). Scale 0.3 → 1.35 → 1 (160 ms each, ease-out cubic), rises 26 px over 1 s, fades 0.7–1.05 s; the target knocks back and flashes, and a projectile flies 320 ms before each hit.",
+    "titleVi": "Số sát thương bật lên rồi bay"
+  }
+}

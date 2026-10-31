@@ -1,0 +1,53 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-card-to-modal",
+  "type": "hyperframes:block",
+  "title": "Modal Morph",
+  "description": "Con trỏ bấm một thẻ trong hàng, thẻ phình ra giữa khung thành hộp thoại, nền tối lại và nội dung chi tiết hiện sau; bấm X thì thu về.",
+  "tags": [
+    "modal",
+    "morph",
+    "dialog",
+    "backdrop",
+    "layout-navigation",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-card-to-modal.html",
+      "target": "compositions/components/ui-card-to-modal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-card-to-modal",
+    "author": "moworks",
+    "call": "MW.uiCardToModal(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiCardToModal",
+    "options": {
+      "loop": "s (3.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Row of 4 cards 60x72 r6 (x 22 + 72 i, y 62). Click at 0.42 s; card 1 morphs over 0.55-1.15 s power2.inOut: rect (22,62,60,72) → (60,26,200,144), radius 6 → 12, padding 6 → 12, image 28 → 52 tall, title bar 36 → 96 wide. Backdrop dims to 66 % over 0.65-1.12 s power2.out. Two text lines, a button and an X fade in and rise 6 px over 1.0-1.28 s. Close: click X 2.04 s, content out 2.06-2.2, morph back 2.25-2.65, backdrop out 2.25-2.55 (power2.in). Params: from / to: khung thẻ, khung hộp thoại · duration (0.6 s) · backdrop (66 %) · ease (power2.inOut).",
+    "titleVi": "Thẻ nhỏ phình thành hộp thoại"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-chest-open-rays",
+  "type": "hyperframes:block",
+  "title": "Chest Open",
+  "description": "Rương rung nhẹ, nắp bật mở có vọt, năm tia sáng xoè lên từ lòng rương kèm quầng sáng; phần thưởng trồi lên bằng lò xo rồi lơ lửng nhấp nhô, vài hạt nổ quanh nó.",
+  "tags": [
+    "reveal",
+    "rays",
+    "spring",
+    "loot",
+    "rewards-loot",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "effect-chest-open-rays.html",
+      "target": "compositions/components/effect-chest-open-rays.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-chest-open-rays",
+    "author": "moworks",
+    "call": "MW.effectChestOpenRays(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectChestOpenRays",
+    "options": {
+      "openAt": "s the lid opens (0.5, 0.35 s back.out)",
+      "rays": "(5)",
+      "length": "units (96)",
+      "rise": "units the reward rises (58, spring k160 c12)",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. Box 96 wide shakes ±1.8 px (sine 70 rad/s, half-sine envelope) 0.2-0.5 s; lid opens to 1.95 rad in 350 ms back.out from 0.5 s. 5 yellow wedges fan upward at −132…−48° (half-width 5°, 3 nested layers 100 / 68 / 40 % long, 22 % each) grow to 96 px in 350 ms outCubic from 0.65 s with a glow ellipse 40 x 5; they dim to half 2.0-2.4 s. Reward rises 58 px out of the box by spring k160 d12 from 1.0 s, then bobs ±2 px (4 rad/s); 8-dot burst at 1.25 s. Params: openAt: lúc mở nắp (0.5 s) · rays: số tia / độ dài (5 / 96 px) · rise: phần thưởng trồi (58 px) · spring: lò xo (k160 d12).",
+    "titleVi": "Mở rương, tia sáng và phần thưởng"
+  }
+}

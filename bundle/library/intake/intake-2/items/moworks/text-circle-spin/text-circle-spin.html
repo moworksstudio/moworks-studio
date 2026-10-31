@@ -1,0 +1,90 @@
+<!--
+  Circular Text Spin (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Chữ được xếp quanh một vòng tròn, chân chữ hướng vào tâm, vòng quay đều liên tục như con dấu, có thể tăng tốc gấp bốn trong chốc lát.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textCircleSpin(q(".cs"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - text: 
+      - radius: px (232)
+      - size: px at most (96), fitted so the ring closes
+      - turn: s per turn (10), linear
+      - boost: speed-up factor (4)
+      - boostAt: [in from, in to, out from, out to] s ([1.5, 1.9, 3.1, 3.5])
+      - ease: (cubic-bezier(.65,0,.35,1))
+      - sep: separator colour
+      - loop: s (5)
+
+  Notes: Text + ' • ' (Japanese '・', separator accent) repeated m times so it fills the circle (demo radius 58 px, chars ≤ 24 px); char placed by arc length, rotated to the tangent with tops outward. The ring turns 360° per 10–20 s linear, seamless. Optional speed-up ×4 eased in 1.5–1.9 s and out 3.1–3.5 s (cubic-bezier .65,0,.35,1), rotation = integral of speed. Demo loop 5 s. Params: bán kính (58 px) · một vòng (10 s) · hệ số tăng tốc (×4) · ký tự ngăn (•). Letters are placed by arc length with their tops outward; the turn is the integral of the speed.
+-->
+
+<div class="st"><div class="cs"><div class="cs-l">M</div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"text":"MOWORKS STUDIO","radius":232,"size":96,"turn":10,"boost":4,"boostAt":[1.5,1.9,3.1,3.5],"ease":"cubic-bezier(.65,0,.35,1)","sep":"#8b7bff","loop":5};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var rail = function (pts, closed) { var L = [0]; for (var i = 1; i < pts.length; i++) L.push(L[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])); var tot = L[L.length - 1];
+    return { len: tot, at: function (s) { s = closed ? ((s % tot) + tot) % tot : Math.max(0, Math.min(tot, s)); var lo = 0, hi = L.length - 1; while (hi - lo > 1) { var m = (lo + hi) >> 1; if (L[m] <= s) lo = m; else hi = m; } var f = (s - L[lo]) / ((L[hi] - L[lo]) || 1), a = pts[lo], b = pts[hi]; return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]; } }; };
+  var ang = function (R, s, ch) { var a = R.at(s - ch), b = R.at(s + ch); return Math.atan2(b[1] - a[1], b[0] - a[0]); };
+  var glyphs = function (host, list, fs, sepColor) { return list.map(function (g) { var s = document.createElement("span"); s.textContent = g; s.style.cssText = "position:absolute;left:0;top:0;white-space:pre;line-height:1;font-size:" + fs + "px;" + (g === "•" && sepColor ? "color:" + sepColor + ";" : ""); host.appendChild(s); return { s: s, w: s.offsetWidth, h: s.offsetHeight }; }); };
+  var place = function (q, x, y, a, op) { gsap.set(q.s, { x: x - q.w / 2, y: y - q.h * 0.8, rotation: a * 180 / Math.PI, transformOrigin: "50% 80%" }); q.s.style.opacity = op == null ? "1" : String(op); };
+  var unit = gr(o.text + " • "), R = o.radius, probe = glyphs(el, unit, o.size, o.sep), uw = probe.reduce(function (a, q) { return a + q.w; }, 0); probe.forEach(function (q) { q.s.remove(); });
+  var m = Math.max(1, Math.round(2 * Math.PI * R / uw)), fs = o.size * 2 * Math.PI * R / (m * uw), list = []; for (var i = 0; i < m; i++) list = list.concat(unit);
+  var G = glyphs(el, list, fs, o.sep), e = MW.ez(o.ease), s0 = 0; if (getComputedStyle(el).position === "static") el.style.position = "relative";
+  var cx = el.clientWidth / 2, cy = el.clientHeight / 2; G.forEach(function (q) { q.a = (s0 + q.w / 2) / R; s0 += q.w; });
+  var spd = function (t) { return 1 + (o.boost - 1) * (e(Math.max(0, Math.min(1, (t - o.boostAt[0]) / (o.boostAt[1] - o.boostAt[0])))) - e(Math.max(0, Math.min(1, (t - o.boostAt[2]) / (o.boostAt[3] - o.boostAt[2]))))); };
+  return MW.drive(tl, at, o.loop, function (t) {
+    var A = 0, dt = 1 / 240; for (var s = 0; s < t; s += dt) A += spd(s) * dt; A *= 2 * Math.PI / o.turn;
+    G.forEach(function (q) { var a = q.a + A; gsap.set(q.s, { x: cx + R * Math.sin(a) - q.w / 2, y: cy - R * Math.cos(a) - q.h * 0.8, rotation: a * 180 / Math.PI, transformOrigin: "50% 80%" }); });
+  });
+  };
+  MW.textCircleSpin = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

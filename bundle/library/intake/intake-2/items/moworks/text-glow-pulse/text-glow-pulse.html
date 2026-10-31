@@ -1,0 +1,53 @@
+<!--
+  Glow Pulse (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Quầng sáng quanh chữ phồng từ 4 lên 16 px rồi tắt dần theo nhịp 1.5 lần mỗi giây, kèm viền sáng mỏng ở đỉnh.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textGlowPulse(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - rate: beats a second (1.5)
+      - blur: [rest, peak] px of glow ([12, 48])
+      - outline: share of the font size at the peak (0.08)
+      - color: 
+      - loop: s (2: three beats)
+
+  Notes: Repeat at 1.5 Hz (period 0.667 s): glow blur 4 → 16 px, glow opacity 0.55 → 1, outline 0 → 8 % of font size at 50 % alpha; envelope: 15 % attack (easeOutQuad), then 85 % decay as (1 − x)^2.5 (fast fall, slow tail); core slightly whiter at the peak. CSS keys 0 / 15 / 100 % ease-out. Loop 2 s (3 beats). Params: rate: nhịp (1.5 Hz) · blur: quầng (4 → 16 px) · outline: viền ở đỉnh (8 % cỡ chữ). Each beat: a 15 % attack (ease-out quad), then a fall as (1 − x)^2.5, fast at first with a slow tail.
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">NHỊP ĐẬP</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"rate":1.5,"blur":[12,48],"outline":0.08,"color":"#c9c0ff","loop":2};
+  var run = function (el, tl, at, o) {
+        var p2 = gsap.parseEase("power2.out"), fs = parseFloat(getComputedStyle(el).fontSize), core = gsap.utils.interpolate(o.color, "#ffffff"), per = 1 / o.rate;
+        return MW.drive(tl, at, o.loop, function (t) {
+          var x = (t % per) / per, v = x < 0.15 ? p2(x / 0.15) : Math.pow(1 - (x - 0.15) / 0.85, 2.5), b = o.blur[0] + (o.blur[1] - o.blur[0]) * v, a = 0.55 + 0.45 * v;
+          el.style.color = core(0.35 * v); el.style.textShadow = "0 0 " + b.toFixed(1) + "px rgba(169,155,255," + a.toFixed(3) + "), 0 0 " + (2 * b).toFixed(1) + "px rgba(139,123,255," + (0.6 * a).toFixed(3) + ")";
+          el.style.webkitTextStroke = (o.outline * fs * v).toFixed(2) + "px rgba(255,255,255,0.5)";
+        });
+      };
+  MW.textGlowPulse = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

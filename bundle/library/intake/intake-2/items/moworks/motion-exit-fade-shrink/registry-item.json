@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-exit-fade-shrink",
+  "type": "hyperframes:component",
+  "title": "Discrete Property Exit",
+  "description": "Bấm dấu X, thẻ mờ dần, thu nhỏ còn 0.96 và hạ 8 px rồi ẩn hẳn khỏi bố cục; sau đó hiện lại bằng mờ dần ngược lại.",
+  "tags": [
+    "exit",
+    "fade",
+    "scale",
+    "dismiss",
+    "layout-navigation",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-exit-fade-shrink.html",
+      "target": "compositions/components/motion-exit-fade-shrink.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-exit-fade-shrink",
+    "author": "moworks",
+    "call": "MW.motionExitFadeShrink(q(\".ex-card\"), tl, 0.5, { returnAt: 1.5 });",
+    "function": "MW.motionExitFadeShrink",
+    "options": {
+      "duration": "s (0.48), ease-in",
+      "scale": "(0.96)",
+      "drop": "px (40)",
+      "returnAt": "s after the start to come back (0.4 s ease-out, no drop; null: stay hidden)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Card 140x64 r10 with a close X; click at 0.38 s. Exit over 0.5-0.98 s (480 ms) power2.in: opacity 1 → 0, scale 1 → 0.96, y 0 → +8 px; then hidden (display none, a dashed placeholder shows the empty slot). Demo re-entry at 2.0-2.4 s power2.out: opacity 0 → 1, scale 0.96 → 1, no y move. Params: duration (0.48 s) · scale (0.96) · drop (8 px) · ease (power2.in) · back (0.4 s, power2.out). After the exit the element is display: none (out of the layout), as a discrete property ends a CSS exit.",
+    "titleVi": "Thẻ mờ thu nhỏ rồi ẩn hẳn"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-diff-retype",
+  "type": "hyperframes:component",
+  "title": "Diff Text Replace",
+  "description": "Phần chữ giống nhau đứng yên, chỉ những ký tự khác (giá, số phiên bản) lần lượt được thay từ trái sang, ký tự mới màu nhấn có gạch chân.",
+  "tags": [
+    "swap",
+    "diff",
+    "typing",
+    "price",
+    "text-swap",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "text-diff-retype.html",
+      "target": "compositions/components/text-diff-retype.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-diff-retype",
+    "author": "moworks",
+    "call": "MW.textDiffRetype(q(\".dr\"), tl, 0, {});",
+    "function": "MW.textDiffRetype",
+    "options": {
+      "from": "text before",
+      "to": "text after (the shared start and end stay still)",
+      "perChar": "s per changed character (0.14, ≤ 1.2 s)",
+      "at": "s (0.6)",
+      "backAt": "s it changes back (2.8)",
+      "underline": "px (4)",
+      "accent": "colour of new characters"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Common prefix / suffix stay still; the changed span is replaced in place left → right, one char per step (new char k replaces old char k; extras appear / vanish at the end), linear: demo 140 ms per changed char (max 1.2 s) from 0.6 s, GSAP TextPlugin 2 s. New chars pop 1.25 → 1 in 120 ms, accent, 1.5 px underline (offset 0.2 em); old chars waiting to change are muted (CSS 50 %); a 2 px accent caret marks the edit point. Demo reverses at 2.8 s; loop 4 s. Params: to: chuỗi mới · perChar: thời gian mỗi ký tự đổi (0.14 s, tối đa 1.2 s) · color: màu ký tự mới (màu nhấn) · underline (1.5 px).",
+    "titleVi": "Chỉ gõ lại phần chữ thay đổi"
+  }
+}

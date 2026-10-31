@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-route-slide",
+  "type": "hyperframes:component",
+  "title": "Route Slide",
+  "description": "Bấm vào một dòng, trang cũ và trang chi tiết trượt sang trái như một dải liền; bấm quay lại thì dải chạy ngược đúng đường cũ.",
+  "tags": [
+    "slide",
+    "push",
+    "navigation",
+    "transition",
+    "layout-navigation",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "transition-route-slide.html",
+      "target": "compositions/components/transition-route-slide.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/transition-route-slide",
+    "author": "moworks",
+    "call": "MW.transitionRouteSlide(q(\".pg2\"), tl, 0.4, { backAt: 1.5 });",
+    "function": "MW.transitionRouteSlide",
+    "options": {
+      "duration": "s (0.6), in-out",
+      "backAt": "s after the start to slide back the same way (null: stay)",
+      "parallax": "true: the old page moves only −18 % and dims (the push variant)",
+      "from": "the outgoing page"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Window 200x136. Old page x 0 → −100 % and new page x 100 % → 0 move as one strip over 600 ms power2.inOut (0.4-1.0 s), a 1 px divider on the new page's left edge. Back reverses the same path (1.9-2.5 s). Cursor clicks a row at 0.3 s and the back arrow at 1.8 s. DOM recipe variant: old x 0 → −18 % with opacity 1 → 0.4 (parallax push). Params: duration (0.6 s) · direction (forward | back) · ease (power2.inOut).",
+    "titleVi": "Trang mới trượt vào đẩy trang cũ"
+  }
+}

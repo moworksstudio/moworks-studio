@@ -24,7 +24,7 @@ const ALIAS = { typing: "type", typed: "type", types: "type", typewriting: "type
   sparkles: "sparkle", sparkling: "sparkle", sparkly: "sparkle", glittering: "glitter", shimmering: "shimmer", twinkling: "twinkle", birdsong: "bird",
   tv: "television", telly: "television", monitor: "screen", bike: "bicycle", ship: "boat", ships: "boat", oars: "oar", rowing: "row", paddling: "paddle",
   "e-mail": "email", ok: "okay", pc: "computer", wooden: "wood", sewing: "sew", sewn: "sew", sews: "sew", embroidery: "embroider", embroidered: "embroider",
-  rattling: "rattle", rattles: "rattle", clattering: "clatter" };
+  rattling: "rattle", rattles: "rattle", clattering: "clatter", sliding: "slide", slides: "slide", slid: "slide", rolling: "roll", rolls: "roll", rolled: "roll" };
 function stem(w) {
   if (ALIAS[w]) return ALIAS[w];
   let s = w;
@@ -84,8 +84,9 @@ const GROUP_OF = new Map();
 for (const g of GROUPS) for (const w of g) GROUP_OF.set(w, [...(GROUP_OF.get(w) ?? []), ...g.filter((x) => x !== w)]);
 // The family a word points at (the cue's head word wins: "lamp ting" is a ting, "oar paddle" a paddle, "heavy enter key" a key).
 const FAMILY_WORDS = {
-  pop: "pop plop bloop blop boing pluck appear spawn bounce", whoosh: "whoosh swish swipe whip sweep transition",
-  impact: "impact thud thump bump bonk smack punch slam bang hit crash clunk rattle clatter catch",          // a hand's catch, not a door's (Test 27: "soft catch" got a latch)
+  pop: "pop plop bloop blop boing pluck appear spawn", whoosh: "whoosh swish swipe whip sweep transition",
+  // a hand's catch, not a door's (Test 27: "soft catch" got a latch); a bounce is a thing hitting something, a boing only in a cartoon (Test 28: a marble on a wooden stair)
+  impact: "impact thud thump bump bonk smack punch slam bang hit crash clunk rattle clatter catch bounce",
   footstep: "footstep step walk stomp tread", cloth: "cloth rustle fabric velcro leather flutter flap", paper: "paper page book card crumple crinkle map envelope slide",
   door: "door drawer hinge latch gate creak lock unlock", switch: "switch toggle lever plug", water: "water drip splash pour river stream wave oar paddle bubble puddle faucet",
   wind: "wind gust breeze blizzard gale", rain: "rain drizzle downpour thunder", fire: "fire flame crackle ember campfire fireplace match torch",
@@ -166,10 +167,38 @@ const INDEX = new WeakMap();
 
 /** The longest sound a cue may get (index.mjs MAX_AUTO_S: a clip plays at most that long). */
 const ONE_SHOT_MAX_S = 6;
+
+// ---- A sound that lasts. A sustained action is heard while it happens: a tick is no marble rolling (Test 28: "brass marble rolling" got a
+// 0.15 s knock, because the library has no rolling sound and "marble" alone counted as an answer, so the search was never asked).
+const SUSTAINED = /\b(roll(s|ing|ed)?|rumbl(e|es|ing)|sliding|glid(es|ing)|drag(s|ging)?|scrap(e|es|ing)|grind(s|ing)?|pour(s|ing)?|trickl(e|es|ing)|long (run|slide))\b|\b(marble|ball|bead|hoop|wheel)s?\b.*\b(slow(s|ing)?|runs?|running|travel(s|ling|ing)?|circl(es|ing))\b/;
+/** The shortest sound a sustained action takes, s. */
+export const SUSTAINED_MIN_S = 0.8;
+/** Does this cue name an action that lasts ("brass marble rolling", "water pour", "marble slowing on curved brass")? */
+export const sustainedCue = (name) => SUSTAINED.test(norm(name));
+/** The part of a cue's name a search looks for when all of it finds nothing: the thing and its action ("brass marble rolling on oak": "marble rolling"). */
+export function sustainedQuery(name) {
+  const ws = norm(name).split(/[^a-z0-9]+/).filter(Boolean);
+  const v = ws.findIndex((w) => SUSTAINED.test(w) || SUSTAINED.test(`marble ${w}`));
+  return v > 0 ? ws.slice(v - 1, v + 1).join(" ") : v === 0 ? ws[0] : null;
+}
+// What stands in for a sustained sound the library does not have while the search has no answer: the library's nearest sounds that last (a
+// drawer on its runners, a wind-up's rattle), said so to the owner by name. The library has no rolling, scraping or dragging sound of its own.
+const SUSTAINED_STAND_INS = [[/roll|rumbl|marble|ball|bead|hoop|wheel|long run/, ["door-drawer-open-1", "mechanical-gears-1", "mechanical-gears-2"]], [/slid|glid|long slide/, ["door-drawer-open-1", "whoosh-scroll-1"]],
+  [/drag|scrap|grind/, ["door-drawer-open-1", "mechanical-gears-2"]], [/pour|trickl/, ["water-pour-2", "water-stream-1"]]];
+/** The library's entries that stand in for a sustained cue (at least SUSTAINED_MIN_S), or []. */
+export function sustainedStandIn(name, { library = null, root = APP_ROOT } = {}) {
+  const lib = library ?? loadLibrary(root), ids = SUSTAINED_STAND_INS.find(([re]) => re.test(norm(name)))?.[1] ?? [];
+  return ids.map((id) => lib.sounds.find((s) => s.id === id)).filter(Boolean);
+}
+// A bell that is to ring out (Test 28: the film's "Keng" got a 0.59 s hand bell that is 20 dB under the voice after 0.1 s): among the bells
+// that answer, those that ring at least RING_MIN_S, the longest first. A bare "bell", a "boat bell", a "ting" keep their own sound.
+const RINGS = /\b(ring(s|ing)?|chimes?|tolls?|tolling|peals?|resonat\w*|reverberat\w*)\b/;
+const RING_MIN_S = 1;
+const wantsRing = (name) => RINGS.test(norm(name)) && !/\b(ting|tink|tiny|tick|phone|alarm|doorbell|timer)\b/.test(norm(name));
 /** Every entry scored for a cue name, best first: [{ entry, score }] (only those that match). Options as findLocal; oneShot: true leaves out
  *  the ambience loops and the recordings longer than a cue may play (a cue is one sound at its moment: only the ambience beds use a loop;
  *  Test 26's "needle park" got 4.3 s of birds, and "rain" would get a 10 s thunder roll). */
-export function rankLocal(name, { family = null, style = null, exclude = [], library = null, root = APP_ROOT, oneShot = false } = {}) {
+export function rankLocal(name, { family = null, style = null, exclude = [], library = null, root = APP_ROOT, oneShot = false, minDuration = 0 } = {}) {
   const lib = library ?? loadLibrary(root), index = INDEX.get(lib) ?? INDEX.get(fromCatalog({ sounds: lib.sounds }, lib.dir)) ?? [];
   const q = words(name);
   if (!q.length) return [];
@@ -182,7 +211,7 @@ export function rankLocal(name, { family = null, style = null, exclude = [], lib
   const styleWords = new Set(words(style ?? ""));
   const out = [];
   for (const { s, words: ws, heads, phrases, idWords, idOwn, first } of index) {
-    if (skip.has(s.id) || (oneShot && (s.loop || s.duration > ONE_SHOT_MAX_S))) continue;
+    if (skip.has(s.id) || (oneShot && (s.loop || s.duration > ONE_SHOT_MAX_S)) || s.duration < minDuration) continue;
     // a cue about a thing: another kind's sound only when that thing is one of its own tags (a thread's pull is no plug's, a box no door)
     if (obj && s.family !== want && !ws.has(obj)) continue;
     let score = 0, direct = 0;
@@ -195,7 +224,7 @@ export function rankLocal(name, { family = null, style = null, exclude = [], lib
     });
     // the cue's head word names its kind, and a sound of another kind shares only that word: another meaning of it ("ball catch" is no
     // door's catch, Test 27); "door catch" names the door too
-    if (want && !obj && s.family !== want && s.family !== family && hits.length === 1 && hits[0] === q[q.length - 1] && FAMILY_OF.get(hits[0]) === want) continue;
+    if (want && !obj && s.family !== want && s.family !== family && hits.length === 1 && hits[0] === q[q.length - 1] && FAMILY_OF.get(hits[0]) === want && !styleWords.has("cartoon")) continue;
     const own = idOwn.filter((w) => !q.includes(w)).length;          // what the sound is of that the cue does not name (a camera's click)
     score -= 0.05 * own;          // breaks a tie for the plainer sound
     for (const g of grams) if (phrases.has(g)) score += 3;
@@ -211,15 +240,29 @@ export function rankLocal(name, { family = null, style = null, exclude = [], lib
   return out.sort((a, b) => b.score - a.score || a.entry.id.localeCompare(b.entry.id));
 }
 
-/** A cue name looked up: { entry, score, choices, good, right, generic? } or null. choices: the best entry and its close variants (what
+/** A run of steps, which one short step is not (Test 29: "hurried footsteps" was one 0.2 s step). */
+export const stepsRun = (name) => /\b(foot)?steps\b/.test(norm(name));
+/** A cue name looked up: { entry, score, choices, good, right, exact, closeness, generic? } or null. choices: the best entry and its close variants (what
  *  findLocal's seed picks from), best first; good: the name is matched by the sound's own tags (its last word, or most of its words), not
  *  only by words of its kind, so the online search need not be asked (the placement looks the library up first); right: the sound is of the
- *  cue's own kind (opts.family, else the family its words name), good enough not to wait on the search either. A loose match of another
- *  kind is no answer for a cue whose kind is known: that kind's soft, plain sound instead (generic: true), or null for a kind with none. */
+ *  cue's own kind (opts.family, else the family its words name), good enough not to wait on the search either; exact: the sound is what the name says (all its words but
+ *  a size, or all but one in front of its head word), so a name someone wrote has no need of the search (closeness: the share of its words the sound's tags have). A
+ *  loose match of another kind is no answer for a cue whose kind is known: that kind's soft, plain sound instead (generic: true), or null for a kind with none.
+ *  minDuration: only sounds at least that long, and no plain sound of the kind (a sustained action, sustainedCue). A bell that is to ring out
+ *  (wantsRing) takes the longest of the bells that answer it, at least RING_MIN_S when the library has one. */
 export function matchLocal(name, opts = {}) {
   const fam = opts.family ?? familyOf(name), q = words(name);
   if (opts.oneShot && fam === "ambience") return null;          // a place's sound is its ambience bed, never a cue's one-shot ("room tone": no beep)
-  const ranked = rankLocal(name, opts), n = q.length;
+  let ranked = rankLocal(name, opts);
+  const n = q.length;
+  if (fam === "bell" && wantsRing(name)) {
+    // a bell of its own kind ("bicycle bell", "church bell") only when the cue names that thing or tolls; a success ding is no bell
+    const thingOf = (e) => { const t = words(e.tags?.[0] ?? ""); return t.length === 2 && t[1] === "bell" ? t[0] : null; };
+    const rings = ranked.filter((r) => { const thing = thingOf(r.entry);
+      return r.entry.family === "bell" && r.direct >= 1 && r.entry.duration >= RING_MIN_S && !(r.entry.tags ?? []).includes("correct") && (!thing || q.includes(thing) || (r.last && q.at(-1) === "toll")); });
+    const named = (r) => (q.includes(thingOf(r.entry)) ? 1 : 0);
+    if (rings.length) ranked = rings.sort((a, b) => named(b) - named(a) || b.entry.duration - a.entry.duration).map((r, i) => ({ ...r, score: r.score + (i ? 0 : 1) }));
+  }
   // a cue named for a place or a weather ("rain", "crowd murmur") takes a one-shot only when it is that very sound, never a thunder crack
   // or an applause of its kind (the ambience bed is its sound)
   const env = opts.oneShot && ENV.has(q.at(-1)) && !kindOf(q).obj;
@@ -227,13 +270,15 @@ export function matchLocal(name, opts = {}) {
   const good = !!top && (top.last || top.direct >= Math.ceil(n / 2));
   // only the family's own name matched ("water swirl": every water sound says "water"): an arbitrary member of it is a guess
   const plainOnly = !!top && n > 1 && top.hits.length > 0 && top.hits.every((w) => FAMILY_NAMES.has(w)) && !!GENERIC[fam];
+  const said = q.filter((w) => !SIZES.has(w)), hit = top ? said.filter((w) => top.hits.includes(w)).length : 0, closeness = said.length ? Math.round((hit / said.length) * 100) / 100 : 1;
   // weak and wrong: matched by none of its words (only words of its kind), or a loose match of another kind
   if (fam && (!top || plainOnly || (!good && (!top.direct || top.entry.family !== fam)))) {
-    const plain = GENERIC[fam] ? rankLocal(GENERIC[fam], { ...opts, family: fam }).filter((r) => r.entry.family === fam) : [];
-    return plain.length ? { ...picked(plain), good: false, right: true, generic: true } : null;
+    const plain = GENERIC[fam] && !opts.minDuration ? rankLocal(GENERIC[fam], { ...opts, family: fam }).filter((r) => r.entry.family === fam) : [];
+    return plain.length ? { ...picked(plain), good: false, right: true, exact: false, closeness, generic: true } : null;
   }
   if (!top) return null;
-  return { ...picked(ranked), good, right: !!fam && top.entry.family === fam };
+  const exact = !stepsRun(name) && (hit === said.length || (top.last && said.length >= 2 && hit >= said.length - 1));
+  return { ...picked(ranked), good, right: !!fam && top.entry.family === fam, exact, closeness };
 }
 /** The best of a ranking and its close variants: its ties, its own numbered variants, and a sound of its family about as close that answers
  *  the name's last word too (a film's repeats need more than one file). At most four: a generic name ("whoosh" ties 14 ways) keeps one

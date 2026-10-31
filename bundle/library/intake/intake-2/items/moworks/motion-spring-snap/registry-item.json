@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-spring-snap",
+  "type": "hyperframes:component",
+  "title": "Snap",
+  "description": "Lò xo cứng và nhẹ: vượt 8 % rồi dừng trong khoảng 0.37 giây; cho nút bấm, điểm nhấn nhỏ.7)).",
+  "tags": [
+    "spring",
+    "snappy",
+    "ui",
+    "springs",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-spring-snap.html",
+      "target": "compositions/components/motion-spring-snap.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.77,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-spring-snap",
+    "author": "moworks",
+    "call": "MW.motionSpringSnap(q(\".sp-b\"), tl, 0.4, { back: 1.70 });",
+    "function": "MW.motionSpringSnap",
+    "options": {
+      "stiffness": "",
+      "damping": "",
+      "mass": "",
+      "prop": "the property it drives: x | y | scale | rotation (x)",
+      "from": "(0)",
+      "to": "(560 px)",
+      "back": "s after the start to spring back (null)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Target moves 0 → 1 on a damped spring, stiffness 180, damping 13, mass 0.6 (closed-form step response, damping ratio 0.63): 8.1 % overshoot, within 1 % by ~370 ms. Kit form: springk(300, 21.7) (k/m, c/m) over 0.37 s. Rule: UI presses, small accents, crisp. Small demo: the target moves 102 px beside the response graph, with overshoot and settle readouts. Params: stiffness (180) · damping (13) · mass (0.6) · duration (0.37 s). Damping ratio 0.63: about 8 % past, within 1 % by ~0.37 s. For presses and small accents.",
+    "titleVi": "Lò xo búng (snap)"
+  }
+}

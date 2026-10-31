@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-stagger-random",
+  "type": "hyperframes:component",
+  "title": "Stagger: Random",
+  "description": "Các ô hiện rải rác ngẫu nhiên nhưng cố định theo hạt giống, lần nào dựng cũng giống nhau.",
+  "tags": [
+    "stagger",
+    "random",
+    "seed",
+    "timing-rhythm",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "motion-stagger-random.html",
+      "target": "compositions/components/motion-stagger-random.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-stagger-random",
+    "author": "moworks",
+    "call": "MW.motionStaggerRandom(q(\".sr\"), tl, 0.3, {});",
+    "function": "MW.motionStaggerRandom",
+    "options": {
+      "from": "random",
+      "spread": "s the starts are spread over (0.6)",
+      "seed": "fixed, so every render matches",
+      "cols": "tiles per row (8)",
+      "k": "spring stiffness (260)",
+      "c": "damping (20: about 8 % overshoot)",
+      "outAt": "s they fade (2.0)",
+      "each": "",
+      "rowEach": ""
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "8 × 4 grid of 24 px tiles (32 px pitch): start = rng(seed, i) × 600 ms (small demo: hash(9·col + 31·row) × 600 ms), each 300 ms power2.out (demo: spring k 260, c 20). Fixed seed so every render matches. Rule: sparkles and textured appearances. Params: spread (0.6 s) · duration (0.3 s) · seed. For sparkles and textured appearances.",
+    "titleVi": "So le ngẫu nhiên có hạt giống"
+  }
+}

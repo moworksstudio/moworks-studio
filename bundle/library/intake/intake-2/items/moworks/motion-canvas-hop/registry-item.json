@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-canvas-hop",
+  "type": "hyperframes:component",
+  "title": "Infinite Canvas Jump",
+  "description": "Trên một bảng vẽ vô tận, máy quay lùi ra cho thấy toàn cảnh, bay ngang từ khung A sang khung B rồi đẩy vào sát khung B, kèm bản đồ thu nhỏ.",
+  "tags": [
+    "camera",
+    "zoom",
+    "pan",
+    "canvas",
+    "spatial-ui-depth",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-canvas-hop.html",
+      "target": "compositions/components/motion-canvas-hop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.9,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-canvas-hop",
+    "author": "moworks",
+    "call": "MW.motionCanvasHop(q(\".cv\"), tl, 0, { minimap: \".mm\" });",
+    "function": "MW.motionCanvasHop",
+    "options": {
+      "world": "the canvas inside (.cw)",
+      "from": "[x, y] world px of frame A",
+      "to": "[x, y] of frame B (3120 px across, 660 down: 520 / 110 of the small demo × 6)",
+      "zoom": "zoom at both ends (2); 0.42 mid-way",
+      "at": "s (0.45)",
+      "duration": "s (1.8)",
+      "minimap": "the minimap (with a .vp viewport box)",
+      "worldSize": "[w, h] world px",
+      "fadeAt": "s (3.55)",
+      "loop": "s (3.9)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Canvas with frames A and B 520 px apart (110 px vertically), dotted grid and filler cards. The camera centre moves A to B over 1.8 s power2.inOut (0.45-2.25 s) while zoom = 2 × 0.21^(sin(π u)) (u = eased progress): 2× at both ends, 0.42× at the midpoint, so it pulls out, travels and pushes in. Optional minimap (78x38) with the viewport rectangle. Demo fades to dark 3.55-3.85 s to loop. Params: zoom (2× → 0.42× → 2×) · duration (1.8 s, power2.inOut) · from / to: khung A, khung B · minimap.",
+    "titleVi": "Máy quay lùi ra, bay sang, đẩy vào"
+  }
+}

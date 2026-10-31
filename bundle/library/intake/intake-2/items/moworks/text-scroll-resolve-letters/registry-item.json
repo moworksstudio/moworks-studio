@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-scroll-resolve-letters",
+  "type": "hyperframes:component",
+  "title": "Text Scroll Resolve",
+  "description": "Từng ký tự của tiêu đề nhích lên 8 px, sáng từ 18 % lên đủ và hết nhoè, lần lượt từ trái sang theo tiến độ cuộn.",
+  "tags": [
+    "reveal",
+    "letters",
+    "blur",
+    "stagger",
+    "web-scroll",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "text-scroll-resolve-letters.html",
+      "target": "compositions/components/text-scroll-resolve-letters.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-scroll-resolve-letters",
+    "author": "moworks",
+    "call": "MW.textScrollResolveLetters(q(\".tk-head\"), tl, 0.3, {});",
+    "function": "MW.textScrollResolveLetters",
+    "options": {
+      "each": "s between letters (0.1)",
+      "duration": "s per letter, linear (0.35)",
+      "from": "opacity at the start (0.18)",
+      "blur": "px (15)",
+      "rise": "px (40)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Per character: y +8 → 0 px, opacity 0.18 → 1, blur 5 → 0 px, each over 350 ms, starting at index × 100 ms (6 letters fill a 1 s pass), linear because it follows scroll progress; holds resolved. Params: each (0.1 s) · duration (0.35 s / ký tự) · opacity (0.18 → 1) · blur (5 px) · rise (8 px).",
+    "titleVi": "Chữ rõ dần từng ký tự khi cuộn"
+  }
+}

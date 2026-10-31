@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "line-conic-ring-spin",
+  "type": "hyperframes:block",
+  "title": "Rotating Gradient Ring",
+  "description": "Một vòng tròn viền gradient hình nón xoay đều, như viền nút hay ánh sáng chờ.",
+  "tags": [
+    "ring",
+    "gradient",
+    "loop",
+    "glow",
+    "loops-ambient",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "line-conic-ring-spin.html",
+      "target": "compositions/components/line-conic-ring-spin.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/line-conic-ring-spin",
+    "author": "moworks",
+    "call": "MW.lineConicRingSpin(q(\".gm\"), tl, 0, {});",
+    "function": "MW.lineConicRingSpin",
+    "options": {
+      "radius": "px outer (50)",
+      "width": "px (8)",
+      "period": "s a turn (2), linear",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Ring (outer r 50, 8 px band) filled with a conic gradient: accent -> yellow at 30 % -> transparent at 60 % -> accent; the gradient's start angle turns 0 -> 360 deg every 2000 ms linear, looping seamlessly. Params: radius (50 px) · width (8 px) · period (2 s) · colors. A conic gradient accent → yellow (30 %) → transparent (60 %) → accent whose start angle turns.",
+    "titleVi": "Vòng sáng gradient xoay tròn"
+  }
+}

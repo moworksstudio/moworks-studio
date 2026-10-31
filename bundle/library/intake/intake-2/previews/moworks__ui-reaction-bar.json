@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-reaction-bar",
+  "hash": "b17eb1e951fe4cdd",
+  "at": "2026-10-17T10:41:05.910Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-reaction-bar.mp4",
+    "poster": "previews/moworks__ui-reaction-bar.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "661156e6ca3f0832cf7b1fc790153de5dfbc05b6b66169132712c0662a3c4e9a",
+    "size": 17814,
+    "seconds": 28.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

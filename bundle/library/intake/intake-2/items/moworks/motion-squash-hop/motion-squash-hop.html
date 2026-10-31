@@ -1,0 +1,77 @@
+<!--
+  Clay Morph Icon (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Khối vuông mềm nhún xuống lấy đà, bật nhảy theo parabol, vừa bay vừa xoay 90° và nặn dần thành hình tròn, chạm đất thì bẹp rồi nảy về; lần sau nhảy lại thành hình vuông.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionSquashHop(q(".sq"), tl, 0, { shadow: ".sh" });
+
+  Options (defaults in brackets):
+      - hops: s each hop starts (wind-up)
+      - windup: scaleY (0.72, 0.3 s power2.out)
+      - air: s in the air (0.66)
+      - apex: px (310)
+      - stretch: at take-off (1.14)
+      - land: scaleY on landing (0.8)
+      - k: landing spring (320)
+      - c: damping (11)
+      - radius: px corner of the square (40)
+      - shadow: a floor shadow
+
+  Notes: Soft square r27 on the floor (hops at 0.3 / 2.4 s). Wind-up squash scaleY 1 → 0.72 in 0.3 s power2.out (scaleX inverse); hop 0.66 s parabola, apex 62 px, stretch 1.14 at take-off (gone by 40 % of the air time); in the air it spins 90° and morphs square → circle (both power2.inOut; morph 0.36-0.92 s after the wind-up starts ≈ 9-94 % of the hop); landing squash 0.8, spring k320 d11 back to 1; shadow shrinks with height. Second hop morphs back. Params: windup (0.72, 0.3 s) · hop (0.66 s, cao 62 px) · stretch (1.14) · spin (90°) · land (0.8, k320 c11). It spins 90° in the air and turns from a square into a circle on the first hop, back on the second.
+-->
+
+<div class="fl"></div><div class="sh"></div><div class="sq"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"hops":[0.3,2.4],"windup":0.72,"air":0.66,"apex":310,"stretch":1.14,"land":0.8,"k":320,"c":11,"radius":40,"shadow":null};
+  var run = function (el, tl, at, o) {
+        var p2 = gsap.parseEase("power2.out"), io = gsap.parseEase("power2.inOut"), sp = MW.spring(o.k, o.c), sh = o.shadow ? el.parentNode.querySelector(o.shadow) : null, half = el.offsetWidth / 2, hh = el.offsetHeight / 2; gsap.set(el, { transformOrigin: "50% 50%" });
+        var air = o.air;
+        return MW.drive(tl, at, o.hops[o.hops.length - 1] + 0.3 + air + sp.duration, function (t) {
+          var y = 0, sx = 1, sy = 1, rot = 0, m = 0;
+          o.hops.forEach(function (T0, i) { var u = t - T0, mm = io(Math.max(0, Math.min(1, (u - 0.36) / 0.56))), r = i % 2 ? o.radius + (half - o.radius) * (1 - mm) : o.radius + (half - o.radius) * mm; if (u <= 0) return; m = r; rot = 90 * i + 90 * io(Math.max(0, Math.min(1, (u - 0.3) / air)));
+            if (u < 0.3) { sy = 1 - (1 - o.windup) * p2(u / 0.3); sx = 1 / sy; y = 0; } else if (u < 0.3 + air) { var a = (u - 0.3) / air; y = -o.apex * 4 * a * (1 - a); sy = 1 + (o.stretch - 1) * (1 - Math.min(1, a / 0.4)); sx = 1 / sy; }
+            else { y = 0; sy = o.land + (1 - o.land) * sp.at(u - 0.3 - air); sx = 1 / sy; } });
+          el.style.borderRadius = (m || o.radius).toFixed(1) + "px"; gsap.set(el, { y: y + (1 - sy) * hh, scaleX: sx, scaleY: sy, rotation: rot }); if (sh) { var f = 1 + y / o.apex * 0.5; gsap.set(sh, { scaleX: f }); sh.style.opacity = String(0.4 + 0.6 * f); }
+        });
+      };
+  MW.motionSquashHop = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

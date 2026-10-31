@@ -1,0 +1,53 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-scroll-progress-bar",
+  "type": "hyperframes:component",
+  "title": "Scroll Progress",
+  "description": "Thanh mảnh ở mép trên dài ra từ trái sang phải đúng theo tiến độ cuộn trang.",
+  "tags": [
+    "progress",
+    "bar",
+    "scroll",
+    "line",
+    "web-scroll",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "ui-scroll-progress-bar.html",
+      "target": "compositions/components/ui-scroll-progress-bar.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-scroll-progress-bar",
+    "author": "moworks",
+    "call": "MW.uiScrollProgressBar(q(\".spb-bar\"), tl, 0.3, { duration: 2.2 });",
+    "function": "MW.uiScrollProgressBar",
+    "options": {
+      "duration": "s it fills, linear (follows the scroll in a page)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Thin bar at the top edge of the viewport: scaleX 0 → 1, transform-origin left, 1 s linear (follows scroll progress, reverses with it). Text lines and a page block sit below, static. Params: duration (1 s) · origin (left) · ease (none).",
+    "titleVi": "Thanh tiến độ đọc trang"
+  }
+}

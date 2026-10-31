@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-soft-shrink",
+  "type": "hyperframes:component",
+  "title": "Soft Shrink",
+  "description": "Thẻ thu nhỏ về 20 % quanh tâm và mờ dần, các thẻ bên cạnh đứng yên.",
+  "tags": [
+    "exit",
+    "scale",
+    "fade",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "motion-soft-shrink.html",
+      "target": "compositions/components/motion-soft-shrink.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-soft-shrink",
+    "author": "moworks",
+    "call": "MW.motionSoftShrink(q(\".sk .x\"), tl, 0.4, { returnAt: 1.5 });",
+    "function": "MW.motionSoftShrink",
+    "options": {
+      "to": "end scale (0.2)",
+      "duration": "s (0.6)",
+      "ease": "(power2.in)",
+      "returnAt": "s after the start to come back from 0.9 (null)",
+      "slotColor": "dashed outline of its slot"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Card scales 1 → 0.2 about its centre and fades 1 → 0 in 600 ms power2.in (easeInCubic); neighbours stay put; a dashed outline of its slot fades in as it goes. Return: 0.9 → 1 with fade-in, 400 ms power2.out. Params: duration (0.6 s) · scale cuối (0.2) · ease (power2.in).",
+    "titleVi": "Thu nhỏ êm rồi biến mất"
+  }
+}

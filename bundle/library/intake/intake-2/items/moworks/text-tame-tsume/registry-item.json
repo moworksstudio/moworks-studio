@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-tame-tsume",
+  "type": "hyperframes:component",
+  "title": "Lyric Motion Tame/Tsume",
+  "description": "Từng từ của lời bài hát ghìm lại rồi giật mạnh vào chỗ đúng phách, lần lượt từ trái, trên, phải, dưới, hình chạy giật 12 khung mỗi giây, từ vừa chạm loé màu nhấn.",
+  "tags": [
+    "lyric",
+    "beat",
+    "snap",
+    "posterize",
+    "text-japanese",
+    "crisp",
+    "japanese"
+  ],
+  "files": [
+    {
+      "path": "text-tame-tsume.html",
+      "target": "compositions/components/text-tame-tsume.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-tame-tsume",
+    "author": "moworks",
+    "call": "MW.textTameTsume(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textTameTsume",
+    "options": {
+      "beat": "s between beats (0.32)",
+      "cap": "s all beats fall within (1.9)",
+      "move": "s each word comes in before its beat (0.3)",
+      "ease": "(cubic-bezier(.9,0,.1,1)): held, then snapped",
+      "dist": "px it comes from (280)",
+      "fps": "frame rate the time is stepped to (12)",
+      "start": "s of the first beat (0.55)",
+      "cutAt": "s (3.25)",
+      "accent": "flash on the beat (two frames)",
+      "seed": "rest offsets",
+      "loop": "s (3.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after booth.pm"
+    },
+    "thirdParty": [],
+    "notes": "Time posterized to 12 fps (83 ms steps). Units = words (chars if fewer than 3 words); beats every 0.32 s (capped at 1.9 s total) from 0.55 s. Each unit moves in during the 0.3 s before its beat with cubic-bezier(.9,0,.1,1): from x −70 px / rot −20°, then y −46 px / +14°, x +70 px / +20°, y +46 px / −14° (cycling), scale 1.25 → 1, to a seeded rest offset (x ±2 px, y ±5 px, ±3°). Accent for 2 frames (167 ms) on its beat. All cut at 3.25 s. Loop 3.6 s. Params: đường cong (.9,0,.1,1) · thời gian vào (0.3 s) · nhịp phách (0.32 s) · khung hình (12 fps). Words come from the left, top, right, bottom in turn, scale 1.25 → 1, to a small seeded rest offset.",
+    "titleVi": "Lời bài hát ghìm rồi giật đúng nhịp"
+  }
+}

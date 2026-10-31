@@ -1,0 +1,52 @@
+<!--
+  SVG Motion Path (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Một vật chạy dọc đường cong chữ S và luôn xoay mũi theo hướng đi.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionPathFollow(q(".pf-a"), tl, 0.31, { path: ".pf-p", duration: 1.87 });
+
+  Options (defaults in brackets):
+      - path: the SVG path to follow (same SVG as the moving group)
+      - duration: s (1.2)
+      - ease: power2.inOut
+      - rotate: turn along the path (true)
+
+  Notes: offset-path: S curve of two tangent-continuous cubics (demo M18 84 C48 3 69 13 109 60 S176 107 202 24 in a 220 x 120 box), offset-distance 0 -> 100 %, offset-rotate auto, 1200 ms easeInOutCubic; the same d drawn as a faint guide with end dots. Demo 2.6 s: move from 12 % to 84 %. Small demo: a sine path, arrow ping-pongs every 3 s ease-in-out. Params: path · duration (1.2 s) · ease (power2.inOut) · rotate: tự xoay (auto).
+-->
+
+<div class="sv"><svg width="1540" height="840" viewBox="0 0 220 120"><path class="pf-p" d="M18 84 C48 3 69 13 109 60 S176 107 202 24" fill="none" stroke="#4a5478" stroke-width="1.2" stroke-dasharray="3 3"/><circle cx="18" cy="84" r="2.5" fill="#4a5478"/><circle cx="202" cy="24" r="2.5" fill="#4a5478"/>
+<g class="pf-a"><path d="M-8 -6 L10 0 L-8 6 L-4 0 Z" fill="#a99bff"/></g></svg></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"path":null,"duration":1.2,"ease":"power2.inOut","rotate":true};
+  var run = function (el, tl, at, o) {
+        var path = MW.el(o.path), L = path.getTotalLength(), io = gsap.parseEase(o.ease);
+        return MW.drive(tl, at, o.duration, function (t) {
+          var s = io(Math.max(0, Math.min(1, t / o.duration))) * L, p = path.getPointAtLength(s), q = path.getPointAtLength(Math.min(L, s + 0.5)), r = path.getPointAtLength(Math.max(0, s - 0.5)), a = Math.atan2(q.y - r.y, q.x - r.x) * 180 / Math.PI;
+          el.setAttribute("transform", "translate(" + p.x + " " + p.y + ")" + (o.rotate ? " rotate(" + a + ")" : ""));
+        });
+      };
+  MW.motionPathFollow = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

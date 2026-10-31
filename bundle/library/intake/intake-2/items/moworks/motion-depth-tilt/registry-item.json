@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-depth-tilt",
+  "type": "hyperframes:block",
+  "title": "Solid Drawing / Depth",
+  "description": "Thẻ nghiêng qua lại ±8° và bóng đổ trượt ngược chiều, tạo cảm giác có độ dày.",
+  "tags": [
+    "tilt",
+    "depth",
+    "shadow",
+    "principle",
+    "principles",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-depth-tilt.html",
+      "target": "compositions/components/motion-depth-tilt.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-depth-tilt",
+    "author": "moworks",
+    "call": "MW.motionDepthTilt(q(\".dt-c\"), tl, 0, { shadow: \".dt-sh\" });",
+    "function": "MW.motionDepthTilt",
+    "options": {
+      "angle": "degrees each way (8)",
+      "period": "s (3)",
+      "cycles": "(1.5)",
+      "perspective": "px (1400)",
+      "shadow": "the shadow under it",
+      "shift": "px of shadow per radian, the other way (600)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Card tilts about its vertical axis ±8° (0.14 rad); its drop shadow (a flat ellipse under it) moves opposite, x offset = −120 px per rad (±17 px), size unchanged, linked to the angle. Small demo: a continuous sine sway, 3 s period, drawn in 2D (width × cos 4θ, skewY 0.6 θ). Recipe: rotateY −8° → +8° in 800 ms power2.inOut, shadow x linked opposite. Params: angle (±8°) · period (3 s) · shadow: độ trượt bóng (120 px / rad).",
+    "titleVi": "Nghiêng có chiều sâu, bóng theo"
+  }
+}

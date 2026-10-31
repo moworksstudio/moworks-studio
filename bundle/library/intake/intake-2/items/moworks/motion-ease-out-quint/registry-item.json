@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-out-quint",
+  "type": "hyperframes:component",
+  "title": "Ease-out Quint",
+  "description": "Đường cong vào cảnh hay dùng của Motion (motion.dev), hợp cú vào dài 0.6–0.8 giây.out).",
+  "tags": [
+    "ease",
+    "entrance",
+    "quint",
+    "easing",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-out-quint.html",
+      "target": "compositions/components/motion-ease-out-quint.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-ease-out-quint",
+    "author": "moworks",
+    "call": "MW.motionEaseOutQuint(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseOutQuint",
+    "options": {
+      "duration": "s (0.7)",
+      "ease": "the curve (cubic-bezier(.22,1,.36,1))",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Target moves 0 → 100 % on cubic-bezier(.22,1,.36,1) (≈ power4.out), 700 ms (0.6–0.8 s). Rule: the common entrance curve of Motion (motion.dev). Small demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: duration (0.7 s; 0.6–0.8) · ease (custom .22,1,.36,1).",
+    "titleVi": "Ease-out quint (vào cảnh mượt)"
+  }
+}

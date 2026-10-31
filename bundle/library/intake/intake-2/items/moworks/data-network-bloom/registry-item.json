@@ -1,0 +1,51 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-network-bloom",
+  "type": "hyperframes:block",
+  "title": "Network Topology Bloom",
+  "description": "Từ nút trung tâm, các đường nối lần lượt vẽ ra và mỗi nút bật lên ở đầu đường kèm một vòng sóng.",
+  "tags": [
+    "network",
+    "nodes",
+    "stagger",
+    "diagram",
+    "data-storytelling",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "data-network-bloom.html",
+      "target": "compositions/components/data-network-bloom.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/data-network-bloom",
+    "author": "moworks",
+    "call": "MW.dataNetworkBloom(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataNetworkBloom",
+    "options": {},
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Hub A (r 18, accent) fixed. Link i to node i (5 nodes around it) starts at 300 + 280 i ms and draws from the hub edge over 320 ms easeOutCubic with a small accent head dot; the node (r 13, card fill, letter label) then pops 0 -> 1 over 300 ms back.out while a ring 13 -> 25 px fades over 600 ms easeOutCubic. Exit from 3.4 s: nodes and links retract in reverse order, 50 ms apart, 300 ms ease-in cubic. Params: nodes (5) · stagger (0.28 s) · draw: vẽ đường (0.32 s).",
+    "titleVi": "Mạng lưới nở từ nút trung tâm"
+  }
+}

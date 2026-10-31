@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-spring-chain",
+  "type": "hyperframes:component",
+  "title": "Spring Chain Follow",
+  "description": "Chỉ chữ đầu tiên chạy theo một đường vòng, mỗi chữ sau bám chữ trước bằng một lò xo nên cả từ quất như cái đuôi rồi xếp lại thẳng hàng.",
+  "tags": [
+    "chain",
+    "spring",
+    "follow",
+    "letters",
+    "text-glyph-physics",
+    "soft",
+    "bouncy",
+    "glyph-physics"
+  ],
+  "files": [
+    {
+      "path": "text-spring-chain.html",
+      "target": "compositions/components/text-spring-chain.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-spring-chain",
+    "author": "moworks",
+    "call": "MW.textSpringChain(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textSpringChain",
+    "options": {
+      "ax": "em the lead swings sideways (0.85)",
+      "ay": "em up (1.35)",
+      "start": "s (0.35)",
+      "duration": "s of the lead's path (1.9)",
+      "stiffness": "per frame at 60 fps (0.2)",
+      "damping": "(0.6)",
+      "loop": "s (4.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Lead char path from 0.35 s over 1.9 s, progress e = cubic-bezier(.65,0,.35,1): offset x = 0.85 em × sin(2πe), y = −1.35 em × sin(πe) (demo 34 / 54 px at 40 px), then home. Every other char, stepped at 60 fps from the start: target = previous char's position last frame + its rest offset; v = (v + (target − x) × 0.2) × 0.6, same for y; the first char of a new line follows the lead instead. Each char rotates by its link angle vs rest, clamped ±0.7 rad. Loop 4.2 s. Params: độ cứng (0.2 / khung) · độ hãm (0.6) · biên độ đường dẫn (0.85 × 1.35 em) · thời gian dẫn (1.9 s).",
+    "titleVi": "Chữ nối đuôi nhau như chuỗi lò xo"
+  }
+}

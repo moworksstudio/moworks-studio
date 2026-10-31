@@ -1,0 +1,88 @@
+<!--
+  Inertia Letters (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Từng chữ cái bay vào từ làn riêng, xen kẽ trên và dưới, chạm chỗ rồi lắc qua lại như con lắc với biên độ giảm dần tới khi đứng yên.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textInertiaLetters(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - distance: px it flies in from (480)
+      - start: s (0.3)
+      - stagger: s (0.08)
+      - swing: radians after landing (0.5)
+      - decay: s (0.25)
+      - accent: first letter colour
+      - loop: s (3)
+
+  Notes: Per letter (demo INERTIA, 36 px): starts at 0.3 + i × 0.08 s, flies 120 px in from below (even i) or above (odd i) in 0.25 s power2.out. After landing it rotates θ = 0.5 rad (28.6°) × e^(−t / 0.25) × sin(30 t) about its baseline centre (period 0.21 s ≈ 12.6 frames at 60 fps; under 3° after 0.6 s). First letter accent. Loop 3 s. Params: quãng bay (120 px) · cách nhau (80 ms) · biên độ lắc (0.5 rad) · độ tắt (0.25 s).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">QUÁN TÍNH</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"distance":480,"start":0.3,"stagger":0.08,"swing":0.5,"decay":0.25,"accent":"#a99bff","loop":3};
+  var run = function (el, tl, at, o) {
+        var ch = MW.split(el, "chars").chars, p2 = gsap.parseEase("power2.out");
+        if (o.accent) ch[0].style.color = o.accent; ch.forEach(function (c) { c.style.transformOrigin = "50% 90%"; });
+        return MW.drive(tl, at, o.loop, function (t) {
+          ch.forEach(function (c, i) { var s0 = o.start + i * o.stagger, u = Math.max(0, Math.min(1, (t - s0) / 0.25)), d = t - s0 - 0.25, th = d > 0 ? o.swing * Math.exp(-d / o.decay) * Math.sin(30 * d) : 0;
+            gsap.set(c, { y: (i % 2 ? -1 : 1) * o.distance * (1 - p2(u)), rotation: th * 57.3 }); c.style.opacity = t >= s0 ? "1" : "0"; });
+        });
+      };
+  MW.textInertiaLetters = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

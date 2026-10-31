@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-sidebar-drawer",
+  "hash": "08403621e5a99802",
+  "at": "2026-10-17T08:17:55.541Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-sidebar-drawer.mp4",
+    "poster": "previews/moworks__ui-sidebar-drawer.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "8c317d1722d2a0d04945bdbe576e592c5bdcf196bfd30eb3b140858352ede6cf",
+    "size": 21079,
+    "seconds": 27.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

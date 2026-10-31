@@ -1,0 +1,54 @@
+<!--
+  Line Shadow Text (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Sau chữ là một bản bóng lệch xuống phải phủ sọc chéo 45°, các sọc trôi chậm liên tục.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textStripeShadow(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - offset: em the shadow sits down-right (0.09)
+      - pitch: em between stripes (0.14)
+      - line: share of the pitch that is stripe (0.42)
+      - pitches: pitches the stripes travel per loop (3)
+      - color: 
+      - loop: s (3)
+
+  Notes: A copy of the text offset +0.04 em x / y behind it, filled with 45° stripes (stripe 0.06 em, colour / transparent) via background-clip; stripes scroll background-position 0 0 → 100 % −100 % over 15 s linear, loop; main text static. Demo exaggerates: offset 0.09 em, pitch 0.14 em (lines 42 % of it), main text with a 2 px background-colour outline; 3 pitches per 3 s loop. Params: offset: độ lệch bóng (0.04 em) · stripe: bước sọc (0.06 em) · duration: một vòng trôi (15 s).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Bóng sọc chéo</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"offset":0.09,"pitch":0.14,"line":0.42,"pitches":3,"color":"#8b7bff","loop":3};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, fs = parseFloat(getComputedStyle(el).fontSize), pitch = o.pitch * fs, g = el.cloneNode(true), br = el.getBoundingClientRect();
+        if (getComputedStyle(host).position === "static") host.style.position = "relative"; if (getComputedStyle(el).position === "static") el.style.position = "relative"; el.style.zIndex = "1";
+        g.removeAttribute("id"); g.style.cssText += ";position:absolute;margin:0;pointer-events:none;box-sizing:border-box;left:" + (el.offsetLeft + o.offset * fs) + "px;top:" + (el.offsetTop + o.offset * fs) + "px;width:" + (br.width + 0.5) + "px;-webkit-text-stroke:0;-webkit-text-fill-color:transparent;color:transparent;-webkit-background-clip:text;background-clip:text;";
+        g.style.backgroundImage = "repeating-linear-gradient(45deg, " + o.color + " 0, " + o.color + " " + (pitch * o.line).toFixed(2) + "px, transparent " + (pitch * o.line).toFixed(2) + "px, transparent " + pitch.toFixed(2) + "px)"; host.insertBefore(g, el);
+        var px = pitch * Math.SQRT2;
+        return MW.drive(tl, at, o.loop, function (t) { g.style.backgroundPosition = (px * o.pitches * (t / o.loop)).toFixed(2) + "px 0"; });
+      };
+  MW.textStripeShadow = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

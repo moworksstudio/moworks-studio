@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-shape-iris",
+  "type": "hyperframes:component",
+  "title": "Shaped Iris",
+  "description": "Cảnh mới hiện trong một hình có nghĩa (trái tim, ổ khoá, ngôi sao) phóng từ 0 tới phủ kín khung.",
+  "tags": [
+    "iris",
+    "shape",
+    "heart",
+    "clip-path",
+    "transitions",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "transition-shape-iris.html",
+      "target": "compositions/components/transition-shape-iris.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/transition-shape-iris",
+    "author": "moworks",
+    "call": "MW.transitionShapeIris(q(\".tk-b\"), tl, 1.1, { duration: 0.9 });",
+    "function": "MW.transitionShapeIris",
+    "options": {
+      "shape": "heart (default), star, diamond",
+      "size": "0-1 of the width at scale 1 (0.16)",
+      "duration": "s (0.7)",
+      "ease": "power2.in",
+      "from": "the outgoing scene"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Incoming scene clipped to a shape centred on the frame, scale 0 -> cover (until the shape clears every corner; ~7 x a heart 16 % of frame width) over 700 ms easeInCubic. Use a polygon clip (KI-03: clip-path path() fails in After Effects). HF showcase-radial ships a Diamond Iris. Params: shape (trái tim) · duration (0.7 s) · ease (power2.in).",
+    "titleVi": "Mở cảnh qua hình trái tim"
+  }
+}

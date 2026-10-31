@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-gacha-capsule-open",
+  "hash": "3ac5fead50c623e1",
+  "at": "2026-10-17T10:24:03.177Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__effect-gacha-capsule-open.mp4",
+    "poster": "previews/moworks__effect-gacha-capsule-open.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "fb9ccd591e9f43e9206a8eaa7c691931878a45a5aaf8f52baeffa2c327b8e2f5",
+    "size": 36726,
+    "seconds": 29.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

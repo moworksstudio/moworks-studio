@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-bar-stagger",
+  "type": "hyperframes:component",
+  "title": "Staggered Bar Chart",
+  "description": "Năm cột biểu đồ mọc lên từ trục đáy lần lượt cách nhau 75 ms, sáng dần khi cao lên.",
+  "tags": [
+    "chart",
+    "bars",
+    "stagger",
+    "grow",
+    "loading-data",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "data-bar-stagger.html",
+      "target": "compositions/components/data-bar-stagger.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/data-bar-stagger",
+    "author": "moworks",
+    "call": "MW.dataBarStagger(q(\".bs\"), tl, 0.3, {});",
+    "function": "MW.dataBarStagger",
+    "options": {
+      "items": "",
+      "each": "s later per bar (0.075)",
+      "duration": "s: every bar finishes then (1.1)",
+      "from": "scaleY (0.04)",
+      "ease": "(power2.out)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "5 bars (9 % wide, 15 % apart, heights 24 % + 8 % per bar, top radius 3, accent mixed darker to lighter) on a 1 px axis. Each bar scaleY 0.04 → 1 from the bottom with opacity 0.35 → 1, power2.out; bar k starts k × 75 ms later and all finish at 1.1 s (later bars move faster). Params: each (0.075 s) · duration (1.1 s) · from (0.04) · ease (power2.out). Later bars start later but all land together, so they move faster.",
+    "titleVi": "Cột biểu đồ mọc lần lượt"
+  }
+}

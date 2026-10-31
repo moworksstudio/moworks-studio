@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-color-band-sweep",
+  "type": "hyperframes:component",
+  "title": "Colour Band Sweep",
+  "description": "Chữ bắt đầu màu xám, một dải sáng chạy từ trái sang và để lại phía sau màu chính của chữ.",
+  "tags": [
+    "color",
+    "sweep",
+    "fill",
+    "reveal",
+    "text-colour-light",
+    "smooth",
+    "colour-light"
+  ],
+  "files": [
+    {
+      "path": "text-color-band-sweep.html",
+      "target": "compositions/components/text-color-band-sweep.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-color-band-sweep",
+    "author": "moworks",
+    "call": "MW.textColorBandSweep(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textColorBandSweep",
+    "options": {
+      "duration": "s (1.5)",
+      "start": "s (0.3)",
+      "ease": "(cubic-bezier(.65,0,.35,1))",
+      "band": "half width as a share of the text (0.15)",
+      "minBand": "px (64)",
+      "final": "colour left behind",
+      "tint": "the band",
+      "grey": "start colour",
+      "resetAt": "s (3.0)",
+      "loop": "s (3.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Magic UI (MIT); a faithful port is in the Magic UI collection"
+    },
+    "thirdParty": [],
+    "notes": "Text starts muted grey (#6c778b); a band moves left → right over 1.5 s ease-in-out (cubic-bezier(.65,0,.35,1); GSAP power2.inOut): gradient final colour at edge − 15 %, a pale warm tint at the edge (#fff3c4), grey at edge + 15 % (demo half-width 15 % of the text, min 16 px); behind the band the final colour stays. CSS: --p −20 % → 120 %. AE: Fill Colour animator, range offset −100 → 100 %. Demo 0.3–1.8 s, reset fade 3.0–3.4 s; loop 3.6 s. Params: duration (1.5 s) · band: bề rộng dải (±15 %) · colors: xám → sáng → màu chính.",
+    "titleVi": "Dải màu quét qua, chữ nhuộm màu"
+  }
+}

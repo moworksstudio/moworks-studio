@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-text-generate",
+  "type": "hyperframes:component",
+  "title": "Text Generate Effect",
+  "description": "Từng từ của câu trả lời AI hiện ra từ vùng nhoè 10 px, cách nhau 0.2 giây.",
+  "tags": [
+    "reveal",
+    "blur",
+    "words",
+    "ai",
+    "text-blur-focus",
+    "soft",
+    "smooth",
+    "blur-focus"
+  ],
+  "files": [
+    {
+      "path": "text-text-generate.html",
+      "target": "compositions/components/text-text-generate.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-text-generate",
+    "author": "moworks",
+    "call": "MW.textTextGenerate(q(\".tg-t\"), tl, 0, { dots: \".tg-d i\" });",
+    "function": "MW.textTextGenerate",
+    "options": {
+      "duration": "s per word (0.8, power1.out)",
+      "stagger": "s (0.2)",
+      "cap": "s the whole answer starts within (2)",
+      "blur": "px (10)",
+      "ease": "",
+      "start": "s (0.5)",
+      "exitAt": "s (3.7)",
+      "loop": "s (4.2)",
+      "dots": "typing dots shown before the text (near it)",
+      "bob": "px (6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Aceternity UI: written from the idea only"
+    },
+    "thirdParty": [],
+    "notes": "Split words; each word opacity 0 → 1 and blur 10 → 0 px over 0.5–1 s ease-out (demo 0.8 s easeOutQuad; CSS 1 s), 0.2 s apart (demo capped 2 s total), from 0.5 s. Demo shows it in an AI-chat card (26 px, left aligned) with three typing dots bobbing ±1.5 px that fade 0.4–0.55 s before the text; loop exit fade 3.7–4.0 s; loop 4.2 s. Params: duration: mỗi từ (0.8 s) · stagger (0.2 s) · blur (10 px).",
+    "titleVi": "Từng từ hiện từ nhoè kiểu AI"
+  }
+}

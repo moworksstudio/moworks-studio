@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-camera-push-in",
+  "type": "hyperframes:component",
+  "title": "Push In / Dolly In",
+  "description": "Máy quay tiến chậm vào chủ thể, lớp gần phóng nhiều hơn lớp xa nên khung hình có chiều sâu.",
+  "tags": [
+    "camera",
+    "push-in",
+    "parallax",
+    "depth",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-camera-push-in.html",
+      "target": "compositions/components/motion-camera-push-in.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-camera-push-in",
+    "author": "moworks",
+    "call": "MW.motionCameraPushIn(q(\".tk-cam\"), tl, 0.6, { duration: 2.2, scale: 1.2 });",
+    "function": "MW.motionCameraPushIn",
+    "options": {
+      "duration": "s (1.6)",
+      "scale": "the subject's scale at the end (1.12); a layer scales by 0.12 × its depth",
+      "flat": "true: every layer the same (a lens zoom)",
+      "layers": "selector of the layers (with data-depth)",
+      "ease": "power2.inOut"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Layers listed with depth factors (background 0.2, mid 0.55, subject 1.0, foreground 1.6). Push: each layer scales about the frame centre from 1 to 1 + 0.12 x depth (subject 1.12, foreground ~1.2) over 1600 ms easeInOutCubic. Flat mode = all layers equal (a zoom). Params: duration (1.6 s) · scale chủ thể (1.12) · depth (0.2 / 0.55 / 1 / 1.6).",
+    "titleVi": "Máy quay đẩy vào có chiều sâu"
+  }
+}

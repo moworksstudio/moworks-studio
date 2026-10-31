@@ -451,3131 +451,3131 @@
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/motion-nudge": {
+ "in:moworks/motion-nudge": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-attention-hop": {
+ "in:moworks/motion-attention-hop": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/ui-corner-badge-pop": {
+ "in:moworks/ui-corner-badge-pop": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/effect-focus-halo": {
+ "in:moworks/effect-focus-halo": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/effect-highlight-sweep": {
+ "in:moworks/effect-highlight-sweep": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/line-border-chase": {
+ "in:moworks/line-border-chase": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/ui-press-feedback": {
+ "in:moworks/ui-press-feedback": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-jelly-emphasis": {
+ "in:moworks/motion-jelly-emphasis": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-color-pulse": {
+ "in:moworks/motion-color-pulse": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-icon-nod": {
+ "in:moworks/motion-icon-nod": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/effect-spotlight-focus": {
+ "in:moworks/effect-spotlight-focus": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-error-shake": {
+ "in:moworks/motion-error-shake": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-camera-push-in": {
+ "in:moworks/motion-camera-push-in": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-camera-pull-out": {
+ "in:moworks/motion-camera-pull-out": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-camera-truck": {
+ "in:moworks/motion-camera-truck": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-camera-pan": {
+ "in:moworks/motion-camera-pan": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-camera-pedestal": {
+ "in:moworks/motion-camera-pedestal": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-camera-roll": {
+ "in:moworks/motion-camera-roll": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-camera-flat-zoom": {
+ "in:moworks/motion-camera-flat-zoom": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-dolly-zoom": {
+ "in:moworks/motion-dolly-zoom": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-camera-crane": {
+ "in:moworks/motion-camera-crane": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-camera-whip": {
+ "in:moworks/motion-camera-whip": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-orbit-turntable": {
+ "in:moworks/motion-orbit-turntable": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-rack-focus": {
+ "in:moworks/motion-rack-focus": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-handheld-drift": {
+ "in:moworks/motion-handheld-drift": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-hit-shake": {
+ "in:moworks/motion-hit-shake": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-beat-punch-in": {
+ "in:moworks/motion-beat-punch-in": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-ken-burns-drift": {
+ "in:moworks/motion-ken-burns-drift": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-camera-parallax": {
+ "in:moworks/motion-camera-parallax": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-camera-follow": {
+ "in:moworks/motion-camera-follow": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-hit-stop-hold": {
+ "in:moworks/motion-hit-stop-hold": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/text-shockwave-type": {
+ "in:moworks/text-shockwave-type": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/text-slash-reveal": {
+ "in:moworks/text-slash-reveal": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/effect-freeze-color-drain": {
+ "in:moworks/effect-freeze-color-drain": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/ui-combo-heat-gauge": {
+ "in:moworks/ui-combo-heat-gauge": {
   "kind": "block",
   "category": "Game · Impact & combat"
  },
- "in:takayu/effect-edge-damage-pulse": {
+ "in:moworks/effect-edge-damage-pulse": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/effect-crack-spread": {
+ "in:moworks/effect-crack-spread": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/motion-squeeze-rebound": {
+ "in:moworks/motion-squeeze-rebound": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/effect-panel-tile-shatter": {
+ "in:moworks/effect-panel-tile-shatter": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/background-speed-lines-tunnel": {
+ "in:moworks/background-speed-lines-tunnel": {
   "kind": "block",
   "category": "Backgrounds"
  },
- "in:takayu/effect-parry-freeze-sparks": {
+ "in:moworks/effect-parry-freeze-sparks": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/effect-element-burst": {
+ "in:moworks/effect-element-burst": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/motion-recoil-kick": {
+ "in:moworks/motion-recoil-kick": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/motion-afterimage-dash": {
+ "in:moworks/motion-afterimage-dash": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/text-slam-long-hold": {
+ "in:moworks/text-slam-long-hold": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/effect-loot-light-beam": {
+ "in:moworks/effect-loot-light-beam": {
   "kind": "block",
   "category": "Game · Impact & combat"
  },
- "in:takayu/title-warning-stripe-slam": {
+ "in:moworks/title-warning-stripe-slam": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/ui-shield-recharge-ring": {
+ "in:moworks/ui-shield-recharge-ring": {
   "kind": "block",
   "category": "Game · Impact & combat"
  },
- "in:takayu/text-stamp-punch": {
+ "in:moworks/text-stamp-punch": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/text-split-halves-cut": {
+ "in:moworks/text-split-halves-cut": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/text-line-mask-rise": {
+ "in:moworks/text-line-mask-rise": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-char-mask-rise": {
+ "in:moworks/text-char-mask-rise": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-slide-x-mask": {
+ "in:moworks/text-slide-x-mask": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-split-halves": {
+ "in:moworks/text-split-halves": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-soft-mask-wipe": {
+ "in:moworks/text-soft-mask-wipe": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-bar-wipe": {
+ "in:moworks/text-bar-wipe": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-iris-reveal": {
+ "in:moworks/text-iris-reveal": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/transition-shape-mask-cut": {
+ "in:moworks/transition-shape-mask-cut": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/text-blinds-reveal": {
+ "in:moworks/text-blinds-reveal": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-diagonal-cut": {
+ "in:moworks/text-diagonal-cut": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-outline-fill-sweep": {
+ "in:moworks/text-outline-fill-sweep": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-texture-fill": {
+ "in:moworks/text-texture-fill": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/card-cursor-depth-pull": {
+ "in:moworks/card-cursor-depth-pull": {
   "kind": "block",
   "category": "3D, camera & maps"
  },
- "in:takayu/transition-focus-portal": {
+ "in:moworks/transition-focus-portal": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/ui-radial-bloom": {
+ "in:moworks/ui-radial-bloom": {
   "kind": "block",
   "category": "3D, camera & maps"
  },
- "in:takayu/card-depth-breadcrumb": {
+ "in:moworks/card-depth-breadcrumb": {
   "kind": "block",
   "category": "3D, camera & maps"
  },
- "in:takayu/ui-dock-magnify": {
+ "in:moworks/ui-dock-magnify": {
   "kind": "block",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-hinge": {
+ "in:moworks/motion-hinge": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-edge-aware-placement": {
+ "in:moworks/motion-edge-aware-placement": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/effect-magnifier": {
+ "in:moworks/effect-magnifier": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/data-magnetic-converge": {
+ "in:moworks/data-magnetic-converge": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/motion-canvas-hop": {
+ "in:moworks/motion-canvas-hop": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/ui-notification-from-depth": {
+ "in:moworks/ui-notification-from-depth": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-dolly-layers": {
+ "in:moworks/motion-dolly-layers": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/ui-layer-explode": {
+ "in:moworks/ui-layer-explode": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-parallax-pan": {
+ "in:moworks/motion-parallax-pan": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/ui-search-results-fly": {
+ "in:moworks/ui-search-results-fly": {
   "kind": "block",
   "category": "3D, camera & maps"
  },
- "in:takayu/ui-orbit-context-menu": {
+ "in:moworks/ui-orbit-context-menu": {
   "kind": "block",
   "category": "3D, camera & maps"
  },
- "in:takayu/card-depth-cycle": {
+ "in:moworks/card-depth-cycle": {
   "kind": "block",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-calendar-flip": {
+ "in:moworks/motion-calendar-flip": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/cursor-raycast-select": {
+ "in:moworks/cursor-raycast-select": {
   "kind": "block",
   "category": "Cursor & pointer"
  },
- "in:takayu/effect-sonar-locator": {
+ "in:moworks/effect-sonar-locator": {
   "kind": "block",
   "category": "3D, camera & maps"
  },
- "in:takayu/transition-hard-cut": {
+ "in:moworks/transition-hard-cut": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-crossfade": {
+ "in:moworks/transition-crossfade": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-blur-crossfade": {
+ "in:moworks/transition-blur-crossfade": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-push-slide": {
+ "in:moworks/transition-push-slide": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-whip-pan": {
+ "in:moworks/transition-whip-pan": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-linear-wipe": {
+ "in:moworks/transition-linear-wipe": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-inset-reveal": {
+ "in:moworks/transition-inset-reveal": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-clock-wipe": {
+ "in:moworks/transition-clock-wipe": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-iris-open": {
+ "in:moworks/transition-iris-open": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-shape-iris": {
+ "in:moworks/transition-shape-iris": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-color-flood": {
+ "in:moworks/transition-color-flood": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-scale-through": {
+ "in:moworks/transition-scale-through": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-blinds": {
+ "in:moworks/transition-blinds": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-block-cover": {
+ "in:moworks/transition-block-cover": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-pixel-dissolve": {
+ "in:moworks/transition-pixel-dissolve": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-shape-morph-bridge": {
+ "in:moworks/transition-shape-morph-bridge": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-takayu-match-cut": {
+ "in:moworks/transition-moworks-match-cut": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-glitch-cut": {
+ "in:moworks/transition-glitch-cut": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-light-leak": {
+ "in:moworks/transition-light-leak": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-card-flip": {
+ "in:moworks/transition-card-flip": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-brush-wipe": {
+ "in:moworks/transition-brush-wipe": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-letter-zoom": {
+ "in:moworks/transition-letter-zoom": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-gravity-drop": {
+ "in:moworks/transition-gravity-drop": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-light-streak-whip": {
+ "in:moworks/transition-light-streak-whip": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/motion-j-l-cut": {
+ "in:moworks/motion-j-l-cut": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/data-sankey": {
+ "in:moworks/data-sankey": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/data-odometer-cascade": {
+ "in:moworks/data-odometer-cascade": {
   "kind": "motion",
   "category": "Data & charts"
  },
- "in:takayu/data-threshold-alert": {
+ "in:moworks/data-threshold-alert": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/data-forecast-band": {
+ "in:moworks/data-forecast-band": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/map-signal-pulse": {
+ "in:moworks/map-signal-pulse": {
   "kind": "block",
   "category": "3D, camera & maps"
  },
- "in:takayu/data-delta-compare": {
+ "in:moworks/data-delta-compare": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/data-timeline-scrub": {
+ "in:moworks/data-timeline-scrub": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/data-network-bloom": {
+ "in:moworks/data-network-bloom": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/data-milestone-progress": {
+ "in:moworks/data-milestone-progress": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/data-heatmap-ripple": {
+ "in:moworks/data-heatmap-ripple": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/data-stream-graph": {
+ "in:moworks/data-stream-graph": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/data-rank-overtake": {
+ "in:moworks/data-rank-overtake": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/data-dot-merge": {
+ "in:moworks/data-dot-merge": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/flow-step-domino": {
+ "in:moworks/flow-step-domino": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/effect-spotlight-relay": {
+ "in:moworks/effect-spotlight-relay": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/data-donut-bloom": {
+ "in:moworks/data-donut-bloom": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/data-calendar-heatmap": {
+ "in:moworks/data-calendar-heatmap": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/motion-queue-compress": {
+ "in:moworks/motion-queue-compress": {
   "kind": "motion",
   "category": "Data & charts"
  },
- "in:takayu/data-sentiment-scale": {
+ "in:moworks/data-sentiment-scale": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/data-goal-projection": {
+ "in:moworks/data-goal-projection": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/data-stat-card": {
+ "in:moworks/data-stat-card": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/map-pin-drop": {
+ "in:moworks/map-pin-drop": {
   "kind": "block",
   "category": "3D, camera & maps"
  },
- "in:takayu/data-scatter-reveal": {
+ "in:moworks/data-scatter-reveal": {
   "kind": "block",
   "category": "Data & charts"
  },
- "in:takayu/ui-lucky-wheel-spin": {
+ "in:moworks/ui-lucky-wheel-spin": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/data-countdown-go": {
+ "in:moworks/data-countdown-go": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/title-boss-warning-bands": {
+ "in:moworks/title-boss-warning-bands": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-victory-tracking-title": {
+ "in:moworks/text-victory-tracking-title": {
   "kind": "motion",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-letter-dissolve-out": {
+ "in:moworks/text-letter-dissolve-out": {
   "kind": "motion",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/title-chapter-intro": {
+ "in:moworks/title-chapter-intro": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/title-raid-start-lineup": {
+ "in:moworks/title-raid-start-lineup": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/effect-letterbox-push": {
+ "in:moworks/effect-letterbox-push": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/data-digit-odometer": {
+ "in:moworks/data-digit-odometer": {
   "kind": "motion",
   "category": "Numbers & counters"
  },
- "in:takayu/data-count-up-expo": {
+ "in:moworks/data-count-up-expo": {
   "kind": "motion",
   "category": "Numbers & counters"
  },
- "in:takayu/data-odometer-roll": {
+ "in:moworks/data-odometer-roll": {
   "kind": "motion",
   "category": "Numbers & counters"
  },
- "in:takayu/data-ticker-flash": {
+ "in:moworks/data-ticker-flash": {
   "kind": "motion",
   "category": "Numbers & counters"
  },
- "in:takayu/data-score-flip": {
+ "in:moworks/data-score-flip": {
   "kind": "motion",
   "category": "Numbers & counters"
  },
- "in:takayu/data-number-scramble": {
+ "in:moworks/data-number-scramble": {
   "kind": "motion",
   "category": "Numbers & counters"
  },
- "in:takayu/data-percent-ring": {
+ "in:moworks/data-percent-ring": {
   "kind": "block",
   "category": "Numbers & counters"
  },
- "in:takayu/data-countdown-zoom": {
+ "in:moworks/data-countdown-zoom": {
   "kind": "motion",
   "category": "Numbers & counters"
  },
- "in:takayu/data-seven-segment": {
+ "in:moworks/data-seven-segment": {
   "kind": "block",
   "category": "Numbers & counters"
  },
- "in:takayu/ui-shared-element-hero": {
+ "in:moworks/ui-shared-element-hero": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/transition-takayu-crossfade": {
+ "in:moworks/transition-moworks-crossfade": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/motion-flip-reorder": {
+ "in:moworks/motion-flip-reorder": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-card-to-modal": {
+ "in:moworks/ui-card-to-modal": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-tab-indicator-stretch": {
+ "in:moworks/ui-tab-indicator-stretch": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-filter-reflow-grid": {
+ "in:moworks/ui-filter-reflow-grid": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/transition-route-slide": {
-  "kind": "motion",
-  "category": "Transitions"
- },
- "in:takayu/transition-cover-wipe": {
+ "in:moworks/transition-route-slide": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/ui-sidebar-drawer": {
-  "kind": "block",
-  "category": "UI · Layout, lists & navigation"
- },
- "in:takayu/ui-command-palette": {
-  "kind": "block",
-  "category": "UI · Layout, lists & navigation"
- },
- "in:takayu/ui-dropdown-menu": {
-  "kind": "block",
-  "category": "UI · Layout, lists & navigation"
- },
- "in:takayu/ui-list-to-detail": {
-  "kind": "block",
-  "category": "UI · Layout, lists & navigation"
- },
- "in:takayu/ui-popover-anchor": {
-  "kind": "motion",
-  "category": "UI · Layout, lists & navigation"
- },
- "in:takayu/ui-dialog-backdrop": {
-  "kind": "block",
-  "category": "UI · Layout, lists & navigation"
- },
- "in:takayu/transition-circle-reveal-click": {
+ "in:moworks/transition-cover-wipe": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/motion-exit-fade-shrink": {
-  "kind": "motion",
-  "category": "UI · Layout, lists & navigation"
- },
- "in:takayu/ui-height-expand": {
+ "in:moworks/ui-sidebar-drawer": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/transition-stack-push-up": {
-  "kind": "motion",
-  "category": "Transitions"
+ "in:moworks/ui-command-palette": {
+  "kind": "block",
+  "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-modal-spring": {
+ "in:moworks/ui-dropdown-menu": {
+  "kind": "block",
+  "category": "UI · Layout, lists & navigation"
+ },
+ "in:moworks/ui-list-to-detail": {
+  "kind": "block",
+  "category": "UI · Layout, lists & navigation"
+ },
+ "in:moworks/ui-popover-anchor": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/data-chapter-scrub-reel": {
+ "in:moworks/ui-dialog-backdrop": {
+  "kind": "block",
+  "category": "UI · Layout, lists & navigation"
+ },
+ "in:moworks/transition-circle-reveal-click": {
+  "kind": "motion",
+  "category": "Transitions"
+ },
+ "in:moworks/motion-exit-fade-shrink": {
+  "kind": "motion",
+  "category": "UI · Layout, lists & navigation"
+ },
+ "in:moworks/ui-height-expand": {
+  "kind": "block",
+  "category": "UI · Layout, lists & navigation"
+ },
+ "in:moworks/transition-stack-push-up": {
+  "kind": "motion",
+  "category": "Transitions"
+ },
+ "in:moworks/ui-modal-spring": {
+  "kind": "motion",
+  "category": "UI · Layout, lists & navigation"
+ },
+ "in:moworks/data-chapter-scrub-reel": {
   "kind": "motion",
   "category": "Data & charts"
  },
- "in:takayu/text-scroll-word-highlight": {
+ "in:moworks/text-scroll-word-highlight": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-view-word-reveal": {
+ "in:moworks/text-view-word-reveal": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-scroll-blur-tilt": {
+ "in:moworks/text-scroll-blur-tilt": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-clip-wipe-on": {
+ "in:moworks/text-clip-wipe-on": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-velocity-marquee": {
+ "in:moworks/text-velocity-marquee": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/motion-velocity-skew": {
+ "in:moworks/motion-velocity-skew": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/text-letter-drop-slide": {
+ "in:moworks/text-letter-drop-slide": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-wave-columns": {
+ "in:moworks/text-wave-columns": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-echo-fan": {
+ "in:moworks/text-echo-fan": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/transition-zoom-through-letter": {
+ "in:moworks/transition-zoom-through-letter": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/text-sticky-shrink": {
+ "in:moworks/text-sticky-shrink": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-line-parallax": {
+ "in:moworks/text-line-parallax": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/effect-glow-pulse": {
+ "in:moworks/effect-glow-pulse": {
   "kind": "motion",
   "category": "Light, glow & colour"
  },
- "in:takayu/effect-neon-flicker": {
+ "in:moworks/effect-neon-flicker": {
   "kind": "motion",
   "category": "Light, glow & colour"
  },
- "in:takayu/effect-light-sweep": {
+ "in:moworks/effect-light-sweep": {
   "kind": "motion",
   "category": "Light, glow & colour"
  },
- "in:takayu/effect-bloom-reveal": {
+ "in:moworks/effect-bloom-reveal": {
   "kind": "motion",
   "category": "Light, glow & colour"
  },
- "in:takayu/effect-rim-glow": {
+ "in:moworks/effect-rim-glow": {
   "kind": "motion",
   "category": "Light, glow & colour"
  },
- "in:takayu/effect-energy-charge": {
+ "in:moworks/effect-energy-charge": {
   "kind": "block",
   "category": "Light, glow & colour"
  },
- "in:takayu/motion-light-trail": {
+ "in:moworks/motion-light-trail": {
   "kind": "motion",
   "category": "Light, glow & colour"
  },
- "in:takayu/effect-scan-line": {
+ "in:moworks/effect-scan-line": {
   "kind": "motion",
   "category": "Light, glow & colour"
  },
- "in:takayu/effect-aurora-glow": {
+ "in:moworks/effect-aurora-glow": {
   "kind": "motion",
   "category": "Light, glow & colour"
  },
- "in:takayu/effect-radial-flash": {
+ "in:moworks/effect-radial-flash": {
   "kind": "motion",
   "category": "Light, glow & colour"
  },
- "in:takayu/effect-lens-flare-sweep": {
+ "in:moworks/effect-lens-flare-sweep": {
   "kind": "motion",
   "category": "Light, glow & colour"
  },
- "in:takayu/effect-holo-sheen": {
+ "in:moworks/effect-holo-sheen": {
   "kind": "motion",
   "category": "Light, glow & colour"
  },
- "in:takayu/text-ribbon-banner": {
+ "in:moworks/text-ribbon-banner": {
   "kind": "motion",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-tracking-contract": {
+ "in:moworks/text-tracking-contract": {
   "kind": "motion",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-slow-tracking-expand": {
+ "in:moworks/text-slow-tracking-expand": {
   "kind": "motion",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-fade-black-card": {
+ "in:moworks/text-fade-black-card": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-slam-in-blur": {
+ "in:moworks/text-slam-in-blur": {
   "kind": "motion",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-flash-frame-cut": {
+ "in:moworks/text-flash-frame-cut": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/title-opening-crawl": {
+ "in:moworks/title-opening-crawl": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/lower-racing-credits": {
+ "in:moworks/lower-racing-credits": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-slice-in": {
+ "in:moworks/text-slice-in": {
   "kind": "motion",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/hand-film-jitter": {
+ "in:moworks/hand-film-jitter": {
   "kind": "motion",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-stamp-pop": {
+ "in:moworks/text-stamp-pop": {
   "kind": "motion",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-light-leak-burn": {
+ "in:moworks/text-light-leak-burn": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/effect-letterbox-reveal": {
+ "in:moworks/effect-letterbox-reveal": {
   "kind": "motion",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-line-reflow": {
+ "in:moworks/text-line-reflow": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-counterweight-seesaw": {
+ "in:moworks/text-counterweight-seesaw": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-fit-width-title": {
+ "in:moworks/text-fit-width-title": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-fit-stack": {
+ "in:moworks/text-fit-stack": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-word-swap-reflow": {
+ "in:moworks/text-word-swap-reflow": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-anagram-flip": {
+ "in:moworks/text-anagram-flip": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-balanced-reflow": {
+ "in:moworks/text-balanced-reflow": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-line-spacing-collapse": {
+ "in:moworks/text-line-spacing-collapse": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-kinetic-camera": {
+ "in:moworks/text-kinetic-camera": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/ui-read-more-expand": {
+ "in:moworks/ui-read-more-expand": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-echo-ghosts": {
+ "in:moworks/motion-echo-ghosts": {
   "kind": "motion",
   "category": "Captions & subtitles"
  },
- "in:takayu/text-subtitle-pop-on": {
+ "in:moworks/text-subtitle-pop-on": {
   "kind": "block",
   "category": "Captions & subtitles"
  },
- "in:takayu/text-paint-on-caption": {
+ "in:moworks/text-paint-on-caption": {
   "kind": "block",
   "category": "Captions & subtitles"
  },
- "in:takayu/text-roll-up-caption": {
+ "in:moworks/text-roll-up-caption": {
   "kind": "block",
   "category": "Captions & subtitles"
  },
- "in:takayu/text-live-caption-block": {
+ "in:moworks/text-live-caption-block": {
   "kind": "block",
   "category": "Captions & subtitles"
  },
- "in:takayu/text-active-word-caption": {
+ "in:moworks/text-active-word-caption": {
   "kind": "block",
   "category": "Captions & subtitles"
  },
- "in:takayu/text-caption-glide-pill": {
+ "in:moworks/text-caption-glide-pill": {
   "kind": "block",
   "category": "Captions & subtitles"
  },
- "in:takayu/text-caption-key-pop": {
+ "in:moworks/text-caption-key-pop": {
   "kind": "block",
   "category": "Captions & subtitles"
  },
- "in:takayu/text-caption-spring-pop": {
+ "in:moworks/text-caption-spring-pop": {
   "kind": "block",
   "category": "Captions & subtitles"
  },
- "in:takayu/text-karaoke-fill": {
+ "in:moworks/text-karaoke-fill": {
   "kind": "block",
   "category": "Captions & subtitles"
  },
- "in:takayu/text-subtitle-fade-sync": {
+ "in:moworks/text-subtitle-fade-sync": {
   "kind": "motion",
   "category": "Captions & subtitles"
  },
- "in:takayu/text-rsvp-flash": {
+ "in:moworks/text-rsvp-flash": {
   "kind": "motion",
   "category": "Captions & subtitles"
  },
- "in:takayu/text-phrase-line-break": {
+ "in:moworks/text-phrase-line-break": {
   "kind": "block",
   "category": "Captions & subtitles"
  },
- "in:takayu/line-stroke-draw": {
+ "in:moworks/line-stroke-draw": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/shape-path-morph": {
+ "in:moworks/shape-path-morph": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/line-trim-window": {
+ "in:moworks/line-trim-window": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/motion-path-follow": {
+ "in:moworks/motion-path-follow": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/effect-circle-mask-reveal": {
+ "in:moworks/effect-circle-mask-reveal": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/line-light-flow": {
+ "in:moworks/line-light-flow": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/shape-gooey-merge": {
+ "in:moworks/shape-gooey-merge": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/line-signature-write": {
+ "in:moworks/line-signature-write": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/shape-radial-repeater": {
+ "in:moworks/shape-radial-repeater": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/shape-noise-blob": {
+ "in:moworks/shape-noise-blob": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/shape-burst-lines": {
+ "in:moworks/shape-burst-lines": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/line-marching-dashes": {
+ "in:moworks/line-marching-dashes": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/motion-ease-linear": {
+ "in:moworks/motion-ease-linear": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-out-expo": {
+ "in:moworks/motion-ease-out-expo": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-in-expo": {
+ "in:moworks/motion-ease-in-expo": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-in-out-cubic": {
+ "in:moworks/motion-ease-in-out-cubic": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-house": {
+ "in:moworks/motion-ease-house": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-whip": {
+ "in:moworks/motion-ease-whip": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-glide": {
+ "in:moworks/motion-ease-glide": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-out-quint": {
+ "in:moworks/motion-ease-out-quint": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-md3-standard": {
+ "in:moworks/motion-ease-md3-standard": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-md3-emphasized": {
+ "in:moworks/motion-ease-md3-emphasized": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-md3-accelerate": {
+ "in:moworks/motion-ease-md3-accelerate": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-apple": {
+ "in:moworks/motion-ease-apple": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-back-out": {
+ "in:moworks/motion-ease-back-out": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-back-in": {
+ "in:moworks/motion-ease-back-in": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-back-in-out": {
+ "in:moworks/motion-ease-back-in-out": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-sine-loop": {
+ "in:moworks/motion-ease-sine-loop": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-circ-out": {
+ "in:moworks/motion-ease-circ-out": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-elastic-out": {
+ "in:moworks/motion-ease-elastic-out": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-bounce-out": {
+ "in:moworks/motion-ease-bounce-out": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-steps": {
+ "in:moworks/motion-ease-steps": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-slowmo": {
+ "in:moworks/motion-ease-slowmo": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-rough": {
+ "in:moworks/motion-ease-rough": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-expo-scale": {
+ "in:moworks/motion-ease-expo-scale": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-ease-wiggle": {
+ "in:moworks/motion-ease-wiggle": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/motion-bounce-squash": {
+ "in:moworks/motion-bounce-squash": {
   "kind": "motion",
   "category": "Easing curves"
  },
- "in:takayu/effect-takayu-confetti-burst": {
+ "in:moworks/effect-moworks-confetti-burst": {
   "kind": "block",
   "category": "Particles & debris"
  },
- "in:takayu/shape-twinkle-sparkles": {
+ "in:moworks/shape-twinkle-sparkles": {
   "kind": "block",
   "category": "Particles & debris"
  },
- "in:takayu/background-embers": {
+ "in:moworks/background-embers": {
   "kind": "block",
   "category": "Backgrounds"
  },
- "in:takayu/background-snow-layers": {
+ "in:moworks/background-snow-layers": {
   "kind": "block",
   "category": "Backgrounds"
  },
- "in:takayu/effect-fireworks": {
+ "in:moworks/effect-fireworks": {
   "kind": "block",
   "category": "Particles & debris"
  },
- "in:takayu/background-swarm": {
+ "in:moworks/background-swarm": {
   "kind": "block",
   "category": "Backgrounds"
  },
- "in:takayu/background-flow-field-lines": {
+ "in:moworks/background-flow-field-lines": {
   "kind": "block",
   "category": "Backgrounds"
  },
- "in:takayu/effect-particles-coalesce": {
+ "in:moworks/effect-particles-coalesce": {
   "kind": "block",
   "category": "Particles & debris"
  },
- "in:takayu/text-focus-word-burst": {
+ "in:moworks/text-focus-word-burst": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-emphasis-slam": {
+ "in:moworks/text-emphasis-slam": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-elastic-stretch": {
+ "in:moworks/text-elastic-stretch": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-bump-wave": {
+ "in:moworks/text-bump-wave": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-jelly-letters": {
+ "in:moworks/text-jelly-letters": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-keyword-punch": {
+ "in:moworks/text-keyword-punch": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-wiggly-jitter": {
+ "in:moworks/text-wiggly-jitter": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-marker-sweep": {
+ "in:moworks/text-marker-sweep": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-underline-draw": {
+ "in:moworks/text-underline-draw": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-scribble-circle": {
+ "in:moworks/text-scribble-circle": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-strike-correct": {
+ "in:moworks/text-strike-correct": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-attention-bounce": {
+ "in:moworks/text-attention-bounce": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-pointer-box": {
+ "in:moworks/text-pointer-box": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-comic-pop": {
+ "in:moworks/text-comic-pop": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-glyph-slot-roll": {
+ "in:moworks/text-glyph-slot-roll": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-letter-flip": {
+ "in:moworks/text-letter-flip": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-split-flap-board": {
+ "in:moworks/text-split-flap-board": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-rotating-letters-pill": {
+ "in:moworks/text-rotating-letters-pill": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-vertical-word-roll": {
+ "in:moworks/text-vertical-word-roll": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-flip-words-blur": {
+ "in:moworks/text-flip-words-blur": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-gooey-morph": {
+ "in:moworks/text-gooey-morph": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-blur-crossfade": {
+ "in:moworks/text-blur-crossfade": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-cube-rotate-swap": {
+ "in:moworks/text-cube-rotate-swap": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-skew-swipe": {
+ "in:moworks/text-skew-swipe": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-letter-cascade-swap": {
+ "in:moworks/text-letter-cascade-swap": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-diff-retype": {
+ "in:moworks/text-diff-retype": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/background-type-tunnel": {
+ "in:moworks/background-type-tunnel": {
   "kind": "block",
   "category": "Backgrounds"
  },
- "in:takayu/text-flip-up-3d": {
+ "in:moworks/text-flip-up-3d": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-swing-door": {
+ "in:moworks/text-swing-door": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-depth-fly-in": {
+ "in:moworks/text-depth-fly-in": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-tumble-in-3d": {
+ "in:moworks/text-tumble-in-3d": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-cube-roll": {
+ "in:moworks/text-cube-roll": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-cylinder-ring": {
+ "in:moworks/text-cylinder-ring": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-layered-extrude": {
+ "in:moworks/text-layered-extrude": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-paper-fold": {
+ "in:moworks/text-paper-fold": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-falloff-sweep": {
+ "in:moworks/text-falloff-sweep": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-char-magnetize": {
+ "in:moworks/text-char-magnetize": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-letter-collision": {
+ "in:moworks/text-letter-collision": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-inertia-letters": {
+ "in:moworks/text-inertia-letters": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-drop-bounce": {
+ "in:moworks/text-drop-bounce": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-rain-letters": {
+ "in:moworks/text-rain-letters": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-falling-pile": {
+ "in:moworks/text-falling-pile": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-pendulum-letters": {
+ "in:moworks/text-pendulum-letters": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-squash-hop": {
+ "in:moworks/text-squash-hop": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-spring-chain": {
+ "in:moworks/text-spring-chain": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-zero-gravity": {
+ "in:moworks/text-zero-gravity": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-domino-topple": {
+ "in:moworks/text-domino-topple": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-particle-gather": {
+ "in:moworks/text-particle-gather": {
   "kind": "block",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/ui-thumbnail-to-hero": {
+ "in:moworks/ui-thumbnail-to-hero": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-sheet-spring-dim": {
+ "in:moworks/ui-sheet-spring-dim": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-takayu-card-flip": {
+ "in:moworks/motion-moworks-card-flip": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/transition-fab-circle-reveal": {
+ "in:moworks/transition-fab-circle-reveal": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/transition-parallax-push": {
+ "in:moworks/transition-parallax-push": {
   "kind": "motion",
   "category": "Transitions"
  },
- "in:takayu/ui-list-stagger-reveal": {
+ "in:moworks/ui-list-stagger-reveal": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-press-bounce": {
+ "in:moworks/ui-press-bounce": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/motion-jelly-squash": {
+ "in:moworks/motion-jelly-squash": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-tap-ripple": {
+ "in:moworks/ui-tap-ripple": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-pulse-glow": {
+ "in:moworks/ui-pulse-glow": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/motion-takayu-error-shake": {
+ "in:moworks/motion-moworks-error-shake": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-fill-sweep-select": {
+ "in:moworks/ui-fill-sweep-select": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-send-morph": {
+ "in:moworks/ui-send-morph": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-press-3d": {
+ "in:moworks/ui-press-3d": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/effect-confetti-button": {
+ "in:moworks/effect-confetti-button": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-hold-fill-button": {
+ "in:moworks/ui-hold-fill-button": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-focus-ring-draw": {
+ "in:moworks/ui-focus-ring-draw": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-button-shine": {
+ "in:moworks/ui-button-shine": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-loading-to-success": {
+ "in:moworks/ui-loading-to-success": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-icon-swap-rotate": {
+ "in:moworks/ui-icon-swap-rotate": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/motion-heartbeat": {
+ "in:moworks/motion-heartbeat": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/motion-wobble-tilt": {
+ "in:moworks/motion-wobble-tilt": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/motion-elastic-drag": {
+ "in:moworks/motion-elastic-drag": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-press-inset": {
+ "in:moworks/ui-press-inset": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-color-splash": {
+ "in:moworks/ui-color-splash": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-breathing-gradient": {
+ "in:moworks/ui-breathing-gradient": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-press": {
+ "in:moworks/ui-press": {
   "kind": "motion",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-shape-state-morph": {
+ "in:moworks/ui-shape-state-morph": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/motion-simple-turn": {
+ "in:moworks/motion-simple-turn": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-spin-stop": {
+ "in:moworks/motion-spin-stop": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-pendulum-wobble": {
+ "in:moworks/motion-pendulum-wobble": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-card-flip": {
+ "in:moworks/motion-card-flip": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-orbit": {
+ "in:moworks/motion-orbit": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-tilt-reaction": {
+ "in:moworks/motion-tilt-reaction": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-tumble-in": {
+ "in:moworks/motion-tumble-in": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-counter-rotate": {
+ "in:moworks/motion-counter-rotate": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-coin-spin": {
+ "in:moworks/motion-coin-spin": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/shape-gyroscope": {
+ "in:moworks/shape-gyroscope": {
   "kind": "block",
   "category": "Movement & travel"
  },
- "in:takayu/motion-rotate-reveal": {
+ "in:moworks/motion-rotate-reveal": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-squash-stretch": {
+ "in:moworks/motion-squash-stretch": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-anticipation": {
+ "in:moworks/motion-anticipation": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-staging-focus": {
+ "in:moworks/motion-staging-focus": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-pose-vs-straight": {
+ "in:moworks/motion-pose-vs-straight": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/motion-follow-overlap": {
+ "in:moworks/motion-follow-overlap": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-slow-in-out": {
+ "in:moworks/motion-slow-in-out": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/motion-arc-move": {
+ "in:moworks/motion-arc-move": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-secondary-action": {
+ "in:moworks/motion-secondary-action": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-timing-weight": {
+ "in:moworks/motion-timing-weight": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/motion-exaggerated-pop": {
+ "in:moworks/motion-exaggerated-pop": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-depth-tilt": {
+ "in:moworks/motion-depth-tilt": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/ui-toggle-appeal": {
+ "in:moworks/ui-toggle-appeal": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-domino-chain": {
+ "in:moworks/motion-domino-chain": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-stagger-jitter": {
+ "in:moworks/motion-stagger-jitter": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-three-layers": {
+ "in:moworks/motion-three-layers": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/motion-no-dead-frames": {
+ "in:moworks/motion-no-dead-frames": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/motion-counter-motion": {
+ "in:moworks/motion-counter-motion": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-pop-scale": {
+ "in:moworks/motion-pop-scale": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-breathing-scale": {
+ "in:moworks/motion-breathing-scale": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-elastic-scale": {
+ "in:moworks/motion-elastic-scale": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-speed-stretch": {
+ "in:moworks/motion-speed-stretch": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/effect-focus-pulse": {
+ "in:moworks/effect-focus-pulse": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-depth-zoom": {
+ "in:moworks/motion-depth-zoom": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-soft-shrink": {
+ "in:moworks/motion-soft-shrink": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-impact-squash": {
+ "in:moworks/motion-impact-squash": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-center-punch": {
+ "in:moworks/motion-center-punch": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-width-reveal": {
+ "in:moworks/motion-width-reveal": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-depth-pullback": {
+ "in:moworks/motion-depth-pullback": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/text-text-generate": {
+ "in:moworks/text-text-generate": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-blur-in-steps": {
+ "in:moworks/text-blur-in-steps": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-blur-in-chars": {
+ "in:moworks/text-blur-in-chars": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-blur-random-in": {
+ "in:moworks/text-blur-random-in": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-tracking-blur-build": {
+ "in:moworks/text-tracking-blur-build": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-directional-blur-slide": {
+ "in:moworks/text-directional-blur-slide": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-scale-blur-zoom": {
+ "in:moworks/text-scale-blur-zoom": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-rack-focus": {
+ "in:moworks/text-rack-focus": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-focus-frame": {
+ "in:moworks/text-focus-frame": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-terminal-decode": {
+ "in:moworks/text-terminal-decode": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-typewriter-steps": {
+ "in:moworks/text-typewriter-steps": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-caret-typewriter": {
+ "in:moworks/text-caret-typewriter": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-type-backspace-loop": {
+ "in:moworks/text-type-backspace-loop": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-human-typewriter": {
+ "in:moworks/text-human-typewriter": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-terminal-type-scroll": {
+ "in:moworks/text-terminal-type-scroll": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-scramble-decode": {
+ "in:moworks/text-scramble-decode": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-decrypt-center": {
+ "in:moworks/text-decrypt-center": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-char-flicker-in": {
+ "in:moworks/text-char-flicker-in": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-slot-shuffle": {
+ "in:moworks/text-slot-shuffle": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-char-offset-cycle": {
+ "in:moworks/text-char-offset-cycle": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-placeholder-replace": {
+ "in:moworks/text-placeholder-replace": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/ui-scroll-reveal-feed": {
+ "in:moworks/ui-scroll-reveal-feed": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-parallax-layers": {
+ "in:moworks/motion-parallax-layers": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-sticky-pin-section": {
+ "in:moworks/ui-sticky-pin-section": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-scroll-progress-bar": {
+ "in:moworks/ui-scroll-progress-bar": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-horizontal-scrub": {
+ "in:moworks/ui-horizontal-scrub": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-vertical-pager-snap": {
+ "in:moworks/ui-vertical-pager-snap": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/text-scroll-resolve-letters": {
+ "in:moworks/text-scroll-resolve-letters": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/motion-depth-zoom-in": {
+ "in:moworks/motion-depth-zoom-in": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-pinned-story-steps": {
+ "in:moworks/ui-pinned-story-steps": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/title-marquee-band": {
+ "in:moworks/title-marquee-band": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/motion-clip-open": {
+ "in:moworks/motion-clip-open": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-velocity-skew-feed": {
+ "in:moworks/ui-velocity-skew-feed": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/lower-name-role-tag": {
+ "in:moworks/lower-name-role-tag": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/lower-news-crawl": {
+ "in:moworks/lower-news-crawl": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/lower-breaking-banner": {
+ "in:moworks/lower-breaking-banner": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/title-credits-roll": {
+ "in:moworks/title-credits-roll": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-led-matrix": {
+ "in:moworks/text-led-matrix": {
   "kind": "motion",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-telop-double-outline": {
+ "in:moworks/text-telop-double-outline": {
   "kind": "motion",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-telop-shiver": {
+ "in:moworks/text-telop-shiver": {
   "kind": "motion",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/lower-telop-plate-wipe": {
+ "in:moworks/lower-telop-plate-wipe": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/hand-tsukkomi-slam": {
+ "in:moworks/hand-tsukkomi-slam": {
   "kind": "motion",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-telop-sparkle-burst": {
+ "in:moworks/text-telop-sparkle-burst": {
   "kind": "motion",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-speaker-color-captions": {
+ "in:moworks/text-speaker-color-captions": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/lower-side-super": {
+ "in:moworks/lower-side-super": {
   "kind": "block",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/motion-overshoot": {
+ "in:moworks/motion-overshoot": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-bounce-land": {
+ "in:moworks/motion-bounce-land": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-spring-follow": {
+ "in:moworks/motion-spring-follow": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-rubber-stretch": {
+ "in:moworks/motion-rubber-stretch": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-recoil": {
+ "in:moworks/motion-recoil": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-double-bounce": {
+ "in:moworks/motion-double-bounce": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-snap-back": {
+ "in:moworks/motion-snap-back": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-after-shake": {
+ "in:moworks/motion-after-shake": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-settle-drop": {
+ "in:moworks/motion-settle-drop": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-drag-resistance": {
+ "in:moworks/motion-drag-resistance": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-follow-chain": {
+ "in:moworks/motion-follow-chain": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/effect-blur-zoom-in": {
+ "in:moworks/effect-blur-zoom-in": {
   "kind": "motion",
   "category": "Masks, blur & reveals"
  },
- "in:takayu/effect-chromatic-split": {
+ "in:moworks/effect-chromatic-split": {
   "kind": "motion",
   "category": "Masks, blur & reveals"
  },
- "in:takayu/effect-glitch-in": {
+ "in:moworks/effect-glitch-in": {
   "kind": "motion",
   "category": "Masks, blur & reveals"
  },
- "in:takayu/effect-pixel-tiles-in": {
+ "in:moworks/effect-pixel-tiles-in": {
   "kind": "motion",
   "category": "Masks, blur & reveals"
  },
- "in:takayu/shape-particle-burst": {
+ "in:moworks/shape-particle-burst": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/effect-ripple-reveal": {
+ "in:moworks/effect-ripple-reveal": {
   "kind": "motion",
   "category": "Masks, blur & reveals"
  },
- "in:takayu/motion-slice-reveal": {
+ "in:moworks/motion-slice-reveal": {
   "kind": "motion",
   "category": "Masks, blur & reveals"
  },
- "in:takayu/effect-noise-resolve": {
+ "in:moworks/effect-noise-resolve": {
   "kind": "motion",
   "category": "Masks, blur & reveals"
  },
- "in:takayu/shape-liquid-blob": {
+ "in:moworks/shape-liquid-blob": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/effect-ink-reveal": {
+ "in:moworks/effect-ink-reveal": {
   "kind": "motion",
   "category": "Masks, blur & reveals"
  },
- "in:takayu/effect-mosaic-flip": {
+ "in:moworks/effect-mosaic-flip": {
   "kind": "motion",
   "category": "Masks, blur & reveals"
  },
- "in:takayu/effect-displace-wave": {
+ "in:moworks/effect-displace-wave": {
   "kind": "motion",
   "category": "Masks, blur & reveals"
  },
- "in:takayu/ui-hover-lift": {
+ "in:moworks/ui-hover-lift": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/cursor-magnetic-button": {
+ "in:moworks/cursor-magnetic-button": {
   "kind": "block",
   "category": "Cursor & pointer"
  },
- "in:takayu/ui-pointer-tilt": {
+ "in:moworks/ui-pointer-tilt": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/cursor-follow-trail": {
+ "in:moworks/cursor-follow-trail": {
   "kind": "block",
   "category": "Cursor & pointer"
  },
- "in:takayu/motion-drag-inertia": {
+ "in:moworks/motion-drag-inertia": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-ink-ripple": {
+ "in:moworks/ui-ink-ripple": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-toggle-morph": {
+ "in:moworks/ui-toggle-morph": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-accordion-open": {
+ "in:moworks/ui-accordion-open": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-hover-fill": {
+ "in:moworks/ui-hover-fill": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-menu-to-close": {
+ "in:moworks/ui-menu-to-close": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/card-cursor-spotlight": {
+ "in:moworks/card-cursor-spotlight": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-drag-snap": {
+ "in:moworks/motion-drag-snap": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-card-fan": {
+ "in:moworks/motion-card-fan": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-tooltip-pop": {
+ "in:moworks/ui-tooltip-pop": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-cursor-path": {
+ "in:moworks/ui-cursor-path": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/text-phrase-reveal": {
+ "in:moworks/text-phrase-reveal": {
   "kind": "motion",
   "category": "Text · Japanese typesetting"
  },
- "in:takayu/text-punctuation-pause-type": {
+ "in:moworks/text-punctuation-pause-type": {
   "kind": "motion",
   "category": "Text · Japanese typesetting"
  },
- "in:takayu/text-tategaki-reveal": {
+ "in:moworks/text-tategaki-reveal": {
   "kind": "motion",
   "category": "Text · Japanese typesetting"
  },
- "in:takayu/text-ruby-sync": {
+ "in:moworks/text-ruby-sync": {
   "kind": "motion",
   "category": "Text · Japanese typesetting"
  },
- "in:takayu/ui-ime-conversion": {
+ "in:moworks/ui-ime-conversion": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/text-stroke-order": {
+ "in:moworks/text-stroke-order": {
   "kind": "motion",
   "category": "Text · Japanese typesetting"
  },
- "in:takayu/text-brush-write-on": {
+ "in:moworks/text-brush-write-on": {
   "kind": "motion",
   "category": "Text · Japanese typesetting"
  },
- "in:takayu/hand-onomatopoeia-impact": {
+ "in:moworks/hand-onomatopoeia-impact": {
   "kind": "motion",
   "category": "Titles, lower thirds & credits"
  },
- "in:takayu/text-tame-tsume": {
+ "in:moworks/text-tame-tsume": {
   "kind": "motion",
   "category": "Text · Japanese typesetting"
  },
- "in:takayu/social-danmaku-comments": {
+ "in:moworks/social-danmaku-comments": {
   "kind": "block",
   "category": "Social, ads & showcase"
  },
- "in:takayu/text-mincho-cut-cards": {
+ "in:moworks/text-mincho-cut-cards": {
   "kind": "motion",
   "category": "Text · Japanese typesetting"
  },
- "in:takayu/text-subtitle-cps-timing": {
+ "in:moworks/text-subtitle-cps-timing": {
   "kind": "motion",
   "category": "Text · Japanese typesetting"
  },
- "in:takayu/text-subtitle-reposition": {
+ "in:moworks/text-subtitle-reposition": {
   "kind": "motion",
   "category": "Text · Japanese typesetting"
  },
- "in:takayu/text-handwritten-subtitle": {
+ "in:moworks/text-handwritten-subtitle": {
   "kind": "block",
   "category": "Text · Japanese typesetting"
  },
- "in:takayu/ui-liquid-tab-bridge": {
+ "in:moworks/ui-liquid-tab-bridge": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/effect-gel-split": {
+ "in:moworks/effect-gel-split": {
   "kind": "block",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/effect-glass-lens-window": {
+ "in:moworks/effect-glass-lens-window": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/effect-ink-drip": {
+ "in:moworks/effect-ink-drip": {
   "kind": "block",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/effect-foil-sheen-tilt": {
+ "in:moworks/effect-foil-sheen-tilt": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/ui-soft-body-toggle": {
+ "in:moworks/ui-soft-body-toggle": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-viscous-progress": {
+ "in:moworks/ui-viscous-progress": {
   "kind": "block",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/effect-speed-chroma-edge": {
+ "in:moworks/effect-speed-chroma-edge": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/motion-paper-fold": {
+ "in:moworks/motion-paper-fold": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/effect-cloth-wave": {
+ "in:moworks/effect-cloth-wave": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/effect-bubble-merge": {
+ "in:moworks/effect-bubble-merge": {
   "kind": "block",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/effect-frost-melt": {
+ "in:moworks/effect-frost-melt": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/shape-membrane": {
+ "in:moworks/shape-membrane": {
   "kind": "block",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/effect-sand-dissolve": {
+ "in:moworks/effect-sand-dissolve": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/effect-iridescent-select": {
+ "in:moworks/effect-iridescent-select": {
   "kind": "block",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/effect-ferro-badge": {
+ "in:moworks/effect-ferro-badge": {
   "kind": "block",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/effect-crack": {
+ "in:moworks/effect-crack": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/line-neon-sign-draw": {
+ "in:moworks/line-neon-sign-draw": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/effect-chrome-ripple": {
+ "in:moworks/effect-chrome-ripple": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/motion-squash-hop": {
+ "in:moworks/motion-squash-hop": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-level-up-burst": {
+ "in:moworks/ui-level-up-burst": {
   "kind": "block",
   "category": "Game · Rewards & loot"
  },
- "in:takayu/effect-chest-open-rays": {
+ "in:moworks/effect-chest-open-rays": {
   "kind": "block",
   "category": "Game · Rewards & loot"
  },
- "in:takayu/ui-three-star-clear": {
+ "in:moworks/ui-three-star-clear": {
   "kind": "block",
   "category": "Game · Rewards & loot"
  },
- "in:takayu/effect-gacha-capsule-open": {
+ "in:moworks/effect-gacha-capsule-open": {
   "kind": "block",
   "category": "Game · Rewards & loot"
  },
- "in:takayu/text-new-record-stamp": {
+ "in:moworks/text-new-record-stamp": {
   "kind": "block",
   "category": "Game · Rewards & loot"
  },
- "in:takayu/line-rarity-border-beam": {
+ "in:moworks/line-rarity-border-beam": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/ui-achievement-toast": {
+ "in:moworks/ui-achievement-toast": {
   "kind": "block",
   "category": "Game · Rewards & loot"
  },
- "in:takayu/ui-daily-bonus-claim": {
+ "in:moworks/ui-daily-bonus-claim": {
   "kind": "block",
   "category": "Game · Rewards & loot"
  },
- "in:takayu/motion-currency-rain-catch": {
+ "in:moworks/motion-currency-rain-catch": {
   "kind": "block",
   "category": "Game · Rewards & loot"
  },
- "in:takayu/motion-card-flip-reveal": {
+ "in:moworks/motion-card-flip-reveal": {
   "kind": "block",
   "category": "Game · Rewards & loot"
  },
- "in:takayu/text-wave-loop": {
+ "in:moworks/text-wave-loop": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-infinite-marquee": {
+ "in:moworks/text-infinite-marquee": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-scale-breathe": {
+ "in:moworks/text-scale-breathe": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-sparkles": {
+ "in:moworks/text-sparkles": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-hop-sequence": {
+ "in:moworks/text-hop-sequence": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-y-spin-stagger": {
+ "in:moworks/text-y-spin-stagger": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-loading-dots": {
+ "in:moworks/text-loading-dots": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-hanging-sign": {
+ "in:moworks/text-hanging-sign": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/motion-walk-cycle": {
+ "in:moworks/motion-walk-cycle": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-jump-squash": {
+ "in:moworks/motion-jump-squash": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-blink": {
+ "in:moworks/motion-blink": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-surprise-take": {
+ "in:moworks/motion-surprise-take": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-head-turn": {
+ "in:moworks/motion-head-turn": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-idle-breathe": {
+ "in:moworks/motion-idle-breathe": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-takayu-follow-chain": {
+ "in:moworks/motion-moworks-follow-chain": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-duration-by-size": {
+ "in:moworks/motion-duration-by-size": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/motion-duration-by-distance": {
+ "in:moworks/motion-duration-by-distance": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/motion-exit-faster": {
+ "in:moworks/motion-exit-faster": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/motion-stagger-sequential": {
+ "in:moworks/motion-stagger-sequential": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-stagger-center": {
+ "in:moworks/motion-stagger-center": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-stagger-edges": {
+ "in:moworks/motion-stagger-edges": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-stagger-random": {
+ "in:moworks/motion-stagger-random": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-stagger-diagonal": {
+ "in:moworks/motion-stagger-diagonal": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-cadence-twos": {
+ "in:moworks/motion-cadence-twos": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-snap-hold": {
+ "in:moworks/motion-snap-hold": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-beat-grid": {
+ "in:moworks/motion-beat-grid": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/motion-speed-ramp": {
+ "in:moworks/motion-speed-ramp": {
   "kind": "motion",
   "category": "Principles & timing"
  },
- "in:takayu/motion-overlap-levels": {
+ "in:moworks/motion-overlap-levels": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/motion-reading-hold": {
+ "in:moworks/motion-reading-hold": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/motion-energy-arc": {
+ "in:moworks/motion-energy-arc": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/text-shine-sweep": {
+ "in:moworks/text-shine-sweep": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-gradient-flow": {
+ "in:moworks/text-gradient-flow": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-takayu-aurora-text": {
+ "in:moworks/text-moworks-aurora-text": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-conic-spin": {
+ "in:moworks/text-conic-spin": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-color-band-sweep": {
+ "in:moworks/text-color-band-sweep": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-hue-cycle": {
+ "in:moworks/text-hue-cycle": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-palette-color-pop": {
+ "in:moworks/text-palette-color-pop": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-neon-flicker": {
+ "in:moworks/text-neon-flicker": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-glow-pulse": {
+ "in:moworks/text-glow-pulse": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-stripe-shadow": {
+ "in:moworks/text-stripe-shadow": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-long-shadow": {
+ "in:moworks/text-long-shadow": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-blend-overlap": {
+ "in:moworks/text-blend-overlap": {
   "kind": "motion",
   "category": "Text · Emphasis, colour & loops"
  },
- "in:takayu/text-circle-spin": {
+ "in:moworks/text-circle-spin": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-curved-marquee": {
+ "in:moworks/text-curved-marquee": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-path-run": {
+ "in:moworks/text-path-run": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-tracking-inertia": {
+ "in:moworks/text-tracking-inertia": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-outline-draw-fill": {
+ "in:moworks/text-outline-draw-fill": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-handwrite-mask": {
+ "in:moworks/text-handwrite-mask": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-spiral-flow": {
+ "in:moworks/text-spiral-flow": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-path-morph-ride": {
+ "in:moworks/text-path-morph-ride": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-shape-contour": {
+ "in:moworks/text-shape-contour": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/ui-switch-spring-squash": {
+ "in:moworks/ui-switch-spring-squash": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/flow-day-night-toggle": {
+ "in:moworks/flow-day-night-toggle": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-liquid-stretch-switch": {
+ "in:moworks/ui-liquid-stretch-switch": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-task-check": {
+ "in:moworks/ui-task-check": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-like-burst": {
+ "in:moworks/ui-like-burst": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-lock-unlock": {
+ "in:moworks/ui-lock-unlock": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-speaker-mute": {
+ "in:moworks/ui-speaker-mute": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/shape-play-pause-morph": {
+ "in:moworks/shape-play-pause-morph": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-underline-stretch": {
+ "in:moworks/ui-underline-stretch": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-pill-tab-indicator": {
+ "in:moworks/ui-pill-tab-indicator": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-radial-menu": {
+ "in:moworks/ui-radial-menu": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-hopping-dot-indicator": {
+ "in:moworks/ui-hopping-dot-indicator": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-liquid-tab-blob": {
+ "in:moworks/ui-liquid-tab-blob": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-segment-tint": {
+ "in:moworks/ui-segment-tint": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-heart-burst": {
+ "in:moworks/ui-heart-burst": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/ui-star-rating-tap": {
+ "in:moworks/ui-star-rating-tap": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/ui-clap-counter": {
+ "in:moworks/ui-clap-counter": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/ui-reaction-bar": {
+ "in:moworks/ui-reaction-bar": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/data-digit-roll-ticker": {
+ "in:moworks/data-digit-roll-ticker": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/effect-confetti-rain": {
+ "in:moworks/effect-confetti-rain": {
   "kind": "block",
   "category": "Attention & loops"
  },
- "in:takayu/ui-toast-spring": {
+ "in:moworks/ui-toast-spring": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/ui-dynamic-island": {
+ "in:moworks/ui-dynamic-island": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/effect-film-grain-flicker": {
+ "in:moworks/effect-film-grain-flicker": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/effect-subframe-motion-blur": {
+ "in:moworks/effect-subframe-motion-blur": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/effect-riso-misregister": {
+ "in:moworks/effect-riso-misregister": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/effect-halftone-pulse": {
+ "in:moworks/effect-halftone-pulse": {
   "kind": "block",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/hand-watercolor-wash": {
+ "in:moworks/hand-watercolor-wash": {
   "kind": "block",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/hand-brush-write-on": {
+ "in:moworks/hand-brush-write-on": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/hand-paper-cut-layers": {
+ "in:moworks/hand-paper-cut-layers": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/effect-pixelate": {
+ "in:moworks/effect-pixelate": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/effect-vignette-breathe": {
+ "in:moworks/effect-vignette-breathe": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/effect-crt-scanlines": {
+ "in:moworks/effect-crt-scanlines": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/text-rgb-split-glitch": {
+ "in:moworks/text-rgb-split-glitch": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-slice-glitch": {
+ "in:moworks/text-slice-glitch": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-fuzzy-text": {
+ "in:moworks/text-fuzzy-text": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-turbulence-wobble": {
+ "in:moworks/text-turbulence-wobble": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-ascii-text": {
+ "in:moworks/text-ascii-text": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/effect-vhs-tracking": {
+ "in:moworks/effect-vhs-tracking": {
   "kind": "block",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/effect-pixel-mosaic": {
+ "in:moworks/effect-pixel-mosaic": {
   "kind": "motion",
   "category": "Texture, glitch & film look"
  },
- "in:takayu/text-melt-drip": {
+ "in:moworks/text-melt-drip": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/lower-quest-ribbon-banner": {
+ "in:moworks/lower-quest-ribbon-banner": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-skill-node-unlock": {
+ "in:moworks/ui-skill-node-unlock": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-streak-day-light": {
+ "in:moworks/ui-streak-day-light": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-battery-refill": {
+ "in:moworks/ui-battery-refill": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-xp-overflow-bar": {
+ "in:moworks/ui-xp-overflow-bar": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-tier-track-unlock": {
+ "in:moworks/ui-tier-track-unlock": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-mission-step-check": {
+ "in:moworks/ui-mission-step-check": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-rank-up-badge": {
+ "in:moworks/ui-rank-up-badge": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/motion-collection-last-slot": {
+ "in:moworks/motion-collection-last-slot": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/motion-swipe-dismiss": {
+ "in:moworks/motion-swipe-dismiss": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-swipe-actions-row": {
+ "in:moworks/ui-swipe-actions-row": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-fill-confirm": {
+ "in:moworks/ui-fill-confirm": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-pull-refresh-spinner": {
+ "in:moworks/ui-pull-refresh-spinner": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/motion-drag-lift": {
+ "in:moworks/motion-drag-lift": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-reorder-list-drag": {
+ "in:moworks/ui-reorder-list-drag": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-bottom-sheet-detents": {
+ "in:moworks/ui-bottom-sheet-detents": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/cursor-pinch-zoom": {
+ "in:moworks/cursor-pinch-zoom": {
   "kind": "block",
   "category": "Cursor & pointer"
  },
- "in:takayu/card-cube": {
+ "in:moworks/card-cube": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/motion-cover-flow": {
+ "in:moworks/motion-cover-flow": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/card-depth-flythrough": {
+ "in:moworks/card-depth-flythrough": {
   "kind": "motion",
   "category": "3D, camera & maps"
  },
- "in:takayu/ui-skeleton-shimmer": {
+ "in:moworks/ui-skeleton-shimmer": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/ui-spinner-arc": {
+ "in:moworks/ui-spinner-arc": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/data-progress-fill": {
+ "in:moworks/data-progress-fill": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/data-circular-progress": {
+ "in:moworks/data-circular-progress": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/ui-loading-dots": {
+ "in:moworks/ui-loading-dots": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/data-count-up-percent": {
+ "in:moworks/data-count-up-percent": {
   "kind": "motion",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/line-chart-line-draw": {
+ "in:moworks/line-chart-line-draw": {
   "kind": "motion",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/ui-toast-stack": {
+ "in:moworks/ui-toast-stack": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/ui-success-check-draw": {
+ "in:moworks/ui-success-check-draw": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/data-bar-stagger": {
+ "in:moworks/data-bar-stagger": {
   "kind": "motion",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/data-donut-segments": {
+ "in:moworks/data-donut-segments": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/ui-optimistic-update": {
+ "in:moworks/ui-optimistic-update": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/text-weight-pulse": {
+ "in:moworks/text-weight-pulse": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-weight-wave-loop": {
+ "in:moworks/text-weight-wave-loop": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-width-stretch": {
+ "in:moworks/text-width-stretch": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-weight-breathe": {
+ "in:moworks/text-weight-breathe": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-thin-to-bold-in": {
+ "in:moworks/text-thin-to-bold-in": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-slant-swing": {
+ "in:moworks/text-slant-swing": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-speed-width-slant": {
+ "in:moworks/text-speed-width-slant": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-text-pressure": {
+ "in:moworks/text-text-pressure": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/text-variable-proximity": {
+ "in:moworks/text-variable-proximity": {
   "kind": "motion",
   "category": "Text · Kinetic & glyph effects"
  },
- "in:takayu/motion-coin-collect": {
+ "in:moworks/motion-coin-collect": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-hp-ghost-bar": {
+ "in:moworks/ui-hp-ghost-bar": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-cooldown-ring": {
+ "in:moworks/ui-cooldown-ring": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/data-score-rollup": {
+ "in:moworks/data-score-rollup": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-stamina-low-pulse": {
+ "in:moworks/ui-stamina-low-pulse": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-ammo-reload": {
+ "in:moworks/ui-ammo-reload": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-compass-lock": {
+ "in:moworks/ui-compass-lock": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-minimap-ping": {
+ "in:moworks/ui-minimap-ping": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-objective-marker": {
+ "in:moworks/ui-objective-marker": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-resource-cap-bar": {
+ "in:moworks/ui-resource-cap-bar": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-party-row-alert": {
+ "in:moworks/ui-party-row-alert": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/ui-buff-timer-ring": {
+ "in:moworks/ui-buff-timer-ring": {
   "kind": "block",
   "category": "Game · HUD & progression"
  },
- "in:takayu/motion-list-stagger": {
+ "in:moworks/motion-list-stagger": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-list-cascade": {
+ "in:moworks/motion-list-cascade": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-list-alternate": {
+ "in:moworks/motion-list-alternate": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-row-expand": {
+ "in:moworks/motion-row-expand": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-grid-wave": {
+ "in:moworks/motion-grid-wave": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-grid-center-out": {
+ "in:moworks/motion-grid-center-out": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-grid-row-sweep": {
+ "in:moworks/motion-grid-row-sweep": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-shuffle-to-grid": {
+ "in:moworks/motion-shuffle-to-grid": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-list-slide-stack": {
+ "in:moworks/motion-list-slide-stack": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-list-trim-collapse": {
+ "in:moworks/motion-list-trim-collapse": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-grid-spiral": {
+ "in:moworks/motion-grid-spiral": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/motion-grid-diagonal": {
+ "in:moworks/motion-grid-diagonal": {
   "kind": "motion",
   "category": "UI · Layout, lists & navigation"
  },
- "in:takayu/ui-bouncing-dots": {
+ "in:moworks/ui-bouncing-dots": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/ui-comet-spinner": {
+ "in:moworks/ui-comet-spinner": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/ui-progress-to-success": {
+ "in:moworks/ui-progress-to-success": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/ui-skeleton-shimmer-resolve": {
+ "in:moworks/ui-skeleton-shimmer-resolve": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/ui-typing-dots-glow": {
+ "in:moworks/ui-typing-dots-glow": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/data-equalizer-bars": {
+ "in:moworks/data-equalizer-bars": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/ui-orbit-dots-spinner": {
+ "in:moworks/ui-orbit-dots-spinner": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/ui-indeterminate-bar": {
+ "in:moworks/ui-indeterminate-bar": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/ui-pulse-rings": {
+ "in:moworks/ui-pulse-rings": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/ui-squares-loader": {
+ "in:moworks/ui-squares-loader": {
   "kind": "block",
   "category": "UI · Loading & feedback"
  },
- "in:takayu/text-damage-number-pop": {
+ "in:moworks/text-damage-number-pop": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/ui-combo-counter": {
+ "in:moworks/ui-combo-counter": {
   "kind": "block",
   "category": "Game · Impact & combat"
  },
- "in:takayu/effect-critical-hit-flash": {
+ "in:moworks/effect-critical-hit-flash": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/ui-hit-confirm-reticle": {
+ "in:moworks/ui-hit-confirm-reticle": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/effect-guard-break-split": {
+ "in:moworks/effect-guard-break-split": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/motion-perfect-dodge": {
+ "in:moworks/motion-perfect-dodge": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/effect-parry-timing-ring": {
+ "in:moworks/effect-parry-timing-ring": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/ui-status-ailment-tick": {
+ "in:moworks/ui-status-ailment-tick": {
   "kind": "motion",
   "category": "Game · Impact & combat"
  },
- "in:takayu/flow-floating-label-field": {
+ "in:moworks/flow-floating-label-field": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-checkbox-draw": {
+ "in:moworks/ui-checkbox-draw": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-switch-squash": {
+ "in:moworks/ui-switch-squash": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/flow-inline-validation": {
+ "in:moworks/flow-inline-validation": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-button-morph": {
+ "in:moworks/ui-button-morph": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-upload-progress": {
+ "in:moworks/ui-upload-progress": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/flow-password-strength": {
+ "in:moworks/flow-password-strength": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/ui-skeleton-resolve": {
+ "in:moworks/ui-skeleton-resolve": {
   "kind": "block",
   "category": "UI · Buttons & controls"
  },
- "in:takayu/motion-fade-slide": {
+ "in:moworks/motion-fade-slide": {
   "kind": "motion",
   "category": "Entrance & exit"
  },
- "in:takayu/motion-mask-wipe": {
+ "in:moworks/motion-mask-wipe": {
   "kind": "motion",
   "category": "Entrance & exit"
  },
- "in:takayu/motion-iris-open": {
+ "in:moworks/motion-iris-open": {
   "kind": "motion",
   "category": "Entrance & exit"
  },
- "in:takayu/motion-soft-rise": {
+ "in:moworks/motion-soft-rise": {
   "kind": "motion",
   "category": "Entrance & exit"
  },
- "in:takayu/motion-snap-in": {
+ "in:moworks/motion-snap-in": {
   "kind": "motion",
   "category": "Entrance & exit"
  },
- "in:takayu/motion-split-reveal": {
+ "in:moworks/motion-split-reveal": {
   "kind": "motion",
   "category": "Entrance & exit"
  },
- "in:takayu/motion-trail-exit": {
+ "in:moworks/motion-trail-exit": {
   "kind": "motion",
   "category": "Entrance & exit"
  },
- "in:takayu/motion-collapse-away": {
+ "in:moworks/motion-collapse-away": {
   "kind": "motion",
   "category": "Entrance & exit"
  },
- "in:takayu/motion-diagonal-wipe": {
+ "in:moworks/motion-diagonal-wipe": {
   "kind": "motion",
   "category": "Entrance & exit"
  },
- "in:takayu/motion-fold-in-3d": {
+ "in:moworks/motion-fold-in-3d": {
   "kind": "motion",
   "category": "Entrance & exit"
  },
- "in:takayu/motion-shrink-fade-exit": {
+ "in:moworks/motion-shrink-fade-exit": {
   "kind": "motion",
   "category": "Entrance & exit"
  },
- "in:takayu/motion-linear-travel": {
+ "in:moworks/motion-linear-travel": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-smooth-arrival": {
+ "in:moworks/motion-smooth-arrival": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-arc-travel": {
+ "in:moworks/motion-arc-travel": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-anticipation-move": {
+ "in:moworks/motion-anticipation-move": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-heavy-stop": {
+ "in:moworks/motion-heavy-stop": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-takayu-path-follow": {
+ "in:moworks/motion-moworks-path-follow": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-stagger-follow": {
+ "in:moworks/motion-stagger-follow": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-magnetic-snap": {
+ "in:moworks/motion-magnetic-snap": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-zigzag-travel": {
+ "in:moworks/motion-zigzag-travel": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-momentum-drift": {
+ "in:moworks/motion-momentum-drift": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/motion-waypoint-hop": {
+ "in:moworks/motion-waypoint-hop": {
   "kind": "motion",
   "category": "Movement & travel"
  },
- "in:takayu/text-char-exit-up": {
+ "in:moworks/text-char-exit-up": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-fade-down-out": {
+ "in:moworks/text-fade-down-out": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-blur-evaporate-out": {
+ "in:moworks/text-blur-evaporate-out": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-explode-scatter-out": {
+ "in:moworks/text-explode-scatter-out": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-gravity-drop-out": {
+ "in:moworks/text-gravity-drop-out": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-scale-down-vanish": {
+ "in:moworks/text-scale-down-vanish": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-reverse-erase": {
+ "in:moworks/text-reverse-erase": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-collapse-to-center": {
+ "in:moworks/text-collapse-to-center": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/text-noise-dissolve": {
+ "in:moworks/text-noise-dissolve": {
   "kind": "motion",
   "category": "Text · Exit & swap"
  },
- "in:takayu/motion-seamless-loop": {
+ "in:moworks/motion-seamless-loop": {
   "kind": "block",
   "category": "Attention & loops"
  },
- "in:takayu/motion-float-shadow": {
+ "in:moworks/motion-float-shadow": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-marquee-loop": {
+ "in:moworks/motion-marquee-loop": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/line-conic-ring-spin": {
+ "in:moworks/line-conic-ring-spin": {
   "kind": "block",
   "category": "Lines, shapes & paths"
  },
- "in:takayu/motion-noise-wobble": {
+ "in:moworks/motion-noise-wobble": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/hand-line-boil": {
+ "in:moworks/hand-line-boil": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/motion-hold-cycle": {
+ "in:moworks/motion-hold-cycle": {
   "kind": "motion",
   "category": "Attention & loops"
  },
- "in:takayu/text-line-by-line-reveal": {
+ "in:moworks/text-line-by-line-reveal": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-word-ghost-slide": {
+ "in:moworks/text-word-ghost-slide": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-verb-cue-lines": {
+ "in:moworks/text-verb-cue-lines": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-fade-up-chars": {
+ "in:moworks/text-fade-up-chars": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-fade-up-words": {
+ "in:moworks/text-fade-up-words": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-slide-down-chars": {
+ "in:moworks/text-slide-down-chars": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-alternating-line-reveal": {
+ "in:moworks/text-alternating-line-reveal": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-stretch-rise": {
+ "in:moworks/text-stretch-rise": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-scale-y-unfold": {
+ "in:moworks/text-scale-y-unfold": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-converge-from-spread": {
+ "in:moworks/text-converge-from-spread": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-center-out-reveal": {
+ "in:moworks/text-center-out-reveal": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-scatter-assemble": {
+ "in:moworks/text-scatter-assemble": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-random-tilt-scale-in": {
+ "in:moworks/text-random-tilt-scale-in": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-smear-stretch-in": {
+ "in:moworks/text-smear-stretch-in": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-scale-pop-in": {
+ "in:moworks/text-scale-pop-in": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-range-soft-wave": {
+ "in:moworks/text-range-soft-wave": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-random-order-fade": {
+ "in:moworks/text-random-order-fade": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-tracking-in-expand": {
+ "in:moworks/text-tracking-in-expand": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/text-grapheme-pop": {
+ "in:moworks/text-grapheme-pop": {
   "kind": "motion",
   "category": "Text · Reveal & entrance"
  },
- "in:takayu/motion-spring-snap": {
+ "in:moworks/motion-spring-snap": {
   "kind": "motion",
   "category": "Springs & physics"
  },
- "in:takayu/motion-spring-bounce": {
+ "in:moworks/motion-spring-bounce": {
   "kind": "motion",
   "category": "Springs & physics"
  },
- "in:takayu/motion-spring-smooth": {
+ "in:moworks/motion-spring-smooth": {
   "kind": "motion",
   "category": "Springs & physics"
  },
- "in:takayu/motion-spring-heavy": {
+ "in:moworks/motion-spring-heavy": {
   "kind": "motion",
   "category": "Springs & physics"
  },
- "in:takayu/motion-spring-default": {
+ "in:moworks/motion-spring-default": {
   "kind": "motion",
   "category": "Springs & physics"
  },
- "in:takayu/motion-spring-wobbly": {
+ "in:moworks/motion-spring-wobbly": {
   "kind": "motion",
   "category": "Springs & physics"
  },
- "in:takayu/motion-spring-molasses": {
+ "in:moworks/motion-spring-molasses": {
   "kind": "motion",
   "category": "Springs & physics"
  },
- "in:takayu/motion-spring-framer-bouncy": {
+ "in:moworks/motion-spring-framer-bouncy": {
   "kind": "motion",
   "category": "Springs & physics"
  },
- "in:takayu/motion-spring-modal": {
+ "in:moworks/motion-spring-modal": {
   "kind": "motion",
   "category": "Springs & physics"
  },
- "in:takayu/motion-spring-critical": {
+ "in:moworks/motion-spring-critical": {
   "kind": "motion",
   "category": "Springs & physics"
  },
- "in:takayu/motion-spring-retarget": {
+ "in:moworks/motion-spring-retarget": {
   "kind": "motion",
   "category": "Springs & physics"
  },
- "in:takayu/motion-spring-split-edge": {
+ "in:moworks/motion-spring-split-edge": {
   "kind": "motion",
   "category": "Springs & physics"
  },
- "in:takayu/motion-spring-vs-tween": {
+ "in:moworks/motion-spring-vs-tween": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/motion-overshoot-budget": {
+ "in:moworks/motion-overshoot-budget": {
   "kind": "block",
   "category": "Principles & timing"
  },
- "in:takayu/motion-inertia-glide": {
+ "in:moworks/motion-inertia-glide": {
   "kind": "motion",
   "category": "Springs & physics"
  },
- "in:takayu/motion-projectile-arc": {
+ "in:moworks/motion-projectile-arc": {
   "kind": "motion",
   "category": "Springs & physics"
  },
- "in:takayu/text-magnetic-letters": {
+ "in:moworks/text-magnetic-letters": {
   "kind": "motion",
   "category": "Cursor & pointer"
  },
- "in:takayu/text-proximity-repel": {
+ "in:moworks/text-proximity-repel": {
   "kind": "motion",
   "category": "Cursor & pointer"
  },
- "in:takayu/text-proximity-scramble": {
+ "in:moworks/text-proximity-scramble": {
   "kind": "motion",
   "category": "Cursor & pointer"
  },
- "in:takayu/text-clone-roll-hover": {
+ "in:moworks/text-clone-roll-hover": {
   "kind": "motion",
   "category": "Cursor & pointer"
  },
- "in:takayu/text-hover-word-lift": {
+ "in:moworks/text-hover-word-lift": {
   "kind": "motion",
   "category": "Cursor & pointer"
  },
- "in:takayu/cursor-word-trail": {
+ "in:moworks/cursor-word-trail": {
   "kind": "block",
   "category": "Cursor & pointer"
  },
- "in:takayu/text-outline-spotlight": {
+ "in:moworks/text-outline-spotlight": {
   "kind": "motion",
   "category": "Cursor & pointer"
  },
- "in:takayu/compare-text-reveal-card": {
+ "in:moworks/compare-text-reveal-card": {
   "kind": "block",
   "category": "Social, ads & showcase"
  },
- "in:takayu/effect-lens-bulge": {
+ "in:moworks/effect-lens-bulge": {
   "kind": "block",
   "category": "Cursor & pointer"
  },
- "in:takayu/motion-sfx-cues": {
+ "in:moworks/motion-sfx-cues": {
   "kind": "block",
   "category": "Sound sync"
  },
- "in:takayu/data-audio-bars": {
+ "in:moworks/data-audio-bars": {
   "kind": "block",
   "category": "Sound sync"
  },
- "in:takayu/motion-sidechain-duck": {
+ "in:moworks/motion-sidechain-duck": {
   "kind": "motion",
   "category": "Sound sync"
  },
- "in:takayu/text-word-locked-pop": {
+ "in:moworks/text-word-locked-pop": {
   "kind": "motion",
   "category": "Sound sync"
  }

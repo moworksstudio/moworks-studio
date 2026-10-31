@@ -1,0 +1,56 @@
+<!--
+  Trail Exit (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Phần tử lao sang phải và mờ đi, ba bản sao nhạt dần chạy trễ phía sau như vệt bóng.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionTrailExit(q(".te"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - x: px (1050)
+      - duration: s (0.52, ease-in quart)
+      - copies: (3)
+      - delay: s each (0.032)
+      - weights: opacity of each copy ([0.42, 0.24, 0.12])
+      - fadeIn: s it fades in first (0.25)
+
+  Notes: Exit to the right: main element x 0 → +175 px (recipe / readout; the demo moves 210 px on a 320 px canvas, ≈×6 at 1920) and opacity 1 → 0 in 520 ms power3.in (easeInQuart). Three copies under it run the same tween 32, 64 and 96 ms later at 0.42 / 0.24 / 0.12 of its opacity and vanish with it. Entrance before it: fade in 250 ms power2.out. Params: duration (0.52 s) · x: quãng lao (175 px) · copies (3) · delay: trễ mỗi bản (32 ms) · ease (power3.in).
+-->
+
+<div class="fl"></div><div class="te"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"x":1050,"duration":0.52,"copies":3,"delay":0.032,"weights":[0.42,0.24,0.12],"fadeIn":0.25};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var ghost = function () { var g = el.cloneNode(true); g.removeAttribute("id"); g.style.position = "absolute"; g.style.margin = "0"; g.style.pointerEvents = "none"; g.style.opacity = "0"; g.style.left = el.offsetLeft + "px"; g.style.top = el.offsetTop + "px"; g.style.width = el.offsetWidth + "px"; g.style.height = el.offsetHeight + "px"; host.insertBefore(g, el); return g; };
+  var add = function (css) { var d = document.createElement("div"); d.style.cssText = "position:absolute;pointer-events:none;" + css; host.appendChild(d); return d; };
+  var cx0 = el.offsetLeft + el.offsetWidth / 2, cy0 = el.offsetTop + el.offsetHeight / 2;
+  var e = gsap.parseEase("power3.in"), p2 = gsap.parseEase("power2.out"), G = []; for (var i = 0; i < o.copies; i++) G.push(ghost());
+  return MW.drive(tl, at, o.fadeIn + o.duration + o.copies * o.delay + 0.1, function (t) { var a = p2(Math.min(1, t / o.fadeIn)), X = function (tt) { return e(Math.max(0, Math.min(1, (tt - o.fadeIn - 0.1) / o.duration))); }, u = X(t);
+    gsap.set(el, { x: o.x * u }); el.style.opacity = String(a * (1 - u)); G.forEach(function (g, i) { var v = X(t - o.delay * (i + 1)); gsap.set(g, { x: o.x * v }); g.style.opacity = v > 0 ? String(o.weights[i] * (1 - v)) : "0"; }); });
+  };
+  MW.motionTrailExit = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

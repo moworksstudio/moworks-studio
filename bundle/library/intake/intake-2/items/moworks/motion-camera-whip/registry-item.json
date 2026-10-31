@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-camera-whip",
+  "type": "hyperframes:component",
+  "title": "Whip",
+  "description": "Máy quay vụt nhanh sang một khung khác trong cùng cảnh, nhoè vệt ở giữa và dừng sắc nét.",
+  "tags": [
+    "camera",
+    "whip",
+    "smear",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-camera-whip.html",
+      "target": "compositions/components/motion-camera-whip.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-camera-whip",
+    "author": "moworks",
+    "call": "MW.motionCameraWhip(q(\".tk-cam\"), tl, 0.9, {});",
+    "function": "MW.motionCameraWhip",
+    "options": {
+      "duration": "s (0.45)",
+      "distance": "px at depth 1 (600; 200 on the small frame), each layer by its depth",
+      "start": "px the camera starts from (0; the swing back starts where the last ended)",
+      "ease": "whip, cubic-bezier(.9,0,.1,1)",
+      "layers": "selector of the layers"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Within one scene the camera swings x by 200 px at depth 1 (each layer by its depth factor) over 450 ms cubic-bezier(.9,0,.1,1); smear = 3 trailing copies 12 px apart at opacity 0.25 x sin(pi u) (u = swing progress), so it shows only mid-swing; landing frame sharp. Demo swings out at 0.9 s and back at 2.3 s. Params: duration (0.45 s) · distance (200 px) · ease (cubic-bezier .9,0,.1,1).",
+    "titleVi": "Máy quay vụt sang khung khác"
+  }
+}

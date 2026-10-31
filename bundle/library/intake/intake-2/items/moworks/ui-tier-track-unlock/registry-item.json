@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-tier-track-unlock",
+  "type": "hyperframes:block",
+  "title": "Battle Pass",
+  "description": "Thanh tiến độ chạy tới mốc kế tiếp, thẻ phần thưởng ở mốc đó phồng nhẹ, đổ màu nhấn và toả viền, các bậc chưa tới vẫn tối kèm ổ khoá.",
+  "tags": [
+    "track",
+    "milestone",
+    "unlock",
+    "pop",
+    "progression-quests",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-tier-track-unlock.html",
+      "target": "compositions/components/ui-tier-track-unlock.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-tier-track-unlock",
+    "author": "moworks",
+    "call": "MW.uiTierTrackUnlock(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiTierTrackUnlock",
+    "options": {
+      "fill": "s (0.8, ease-in-out)",
+      "reachAt": "s (1.2)",
+      "base": "the first tier's number (6)",
+      "label": "",
+      "resetAt": "s (2.45)",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. Track 4 px from x 40 to 280; 4 nodes (r 5) at 60 / 127 / 193 / 260 under reward cards 44 x 40 (r 7); nodes 1-2 done (accent + check). Progress fills node 2 → 3 in 0.4-1.2 s inOut. At 1.2 s card 3 bumps 14 % (300 ms half-sine), its accent fill and light gem cross-fade in, an outline grows +10 px over 500 ms outCubic, fading; node 3 turns accent. Card 4 stays dim with a lock and 'NEXT'. Label fades in 1.35-1.6 s; reset 2.45-2.72 s. Params: tiers: số mốc (4) · from / to: bậc (7 → 8) · fill: thời gian chạy (0.8 s) · reachAt: lúc tới (1.2 s).",
+    "titleVi": "Thanh bậc thưởng mở thêm một bậc"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-press-feedback",
+  "type": "hyperframes:component",
+  "title": "Press Feedback",
+  "description": "Nút thu nhỏ còn 94 % và bóng đổ giảm còn 25 % khi bị bấm, rồi nảy về ngay.",
+  "tags": [
+    "press",
+    "button",
+    "feedback",
+    "attention-emphasis",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "ui-press-feedback.html",
+      "target": "compositions/components/ui-press-feedback.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-press-feedback",
+    "author": "moworks",
+    "call": "MW.uiPressFeedback(q(\".pb\"), tl, 0.9, {});",
+    "function": "MW.uiPressFeedback",
+    "options": {
+      "scale": "pressed scale (0.94)",
+      "down": "s to press, ease-out (0.12)",
+      "up": "s back (0.3)",
+      "depth": "px of the slab under the button (18)",
+      "shadow": "slab and shadow while pressed, × (0.25)",
+      "slab": "slab colour"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Button (132×46, r 14) presses: scale 1 → 0.94 in 120 ms power2.out, holds 60 ms, back to 1 in 300 ms power2.out; its under-slab depth (6 px) and drop shadow fall to 25 % while pressed and return with it. A cursor glides in (450 ms) and clicks. Params: scale (0.94) · down (0.12 s) · up (0.3 s) · shadow (25 %).",
+    "titleVi": "Nút lún xuống khi bấm"
+  }
+}

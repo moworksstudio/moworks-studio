@@ -43,12 +43,16 @@
     return [...out].sort((a, b) => a - b);
   };
 
-  A.audio = () => [...document.querySelectorAll("audio[data-start]")].map(a => ({
+  // what HF's mixer takes of a clip (engine audioMixer parseAudioElements): one it hides stays out; its volume lane goes on (data-automation);
+  // speed, loop and effects are named so the port can say it does not carry them
+  A.audio = () => [...document.querySelectorAll("audio[data-start]")].filter(a => !a.closest("[data-hidden]")).map(a => ({
     id: a.id || "", src: a.getAttribute("src") || "", start: +startOf(a).toFixed(5),
     dur: parseFloat(a.getAttribute("data-duration") || "0") || 0, media_start: parseFloat(a.getAttribute("data-media-start") || "0") || 0,
     volume: a.hasAttribute("data-volume") ? parseFloat(a.getAttribute("data-volume")) : 1,
     role: a.getAttribute("data-timeline-role") || a.getAttribute("data-role") || "",
     fade_in: parseFloat(a.getAttribute("data-fade-in") || "0") || 0, fade_out: parseFloat(a.getAttribute("data-fade-out") || "0") || 0,
+    automation: a.getAttribute("data-automation") || "", rate: parseFloat(a.getAttribute("data-playback-rate") || "1") || 1,
+    loop: a.hasAttribute("loop"), fx: !!a.getAttribute("data-fx-chain"),
   }));
 
   window.addEventListener("load", async () => {

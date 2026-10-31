@@ -9,6 +9,10 @@ import * as rev from "../revisions/index.mjs";
 import { placedShots, readShots } from "../hf-edit/shots.mjs";
 import { isStarter } from "../pipeline/index.mjs";
 import * as hand from "../hf-edit/handEdit.mjs";
+import { readState as readSfxState, shiftPlaced, soundTitles } from "../sfx/index.mjs";
+import { soundMoved } from "../sfx/added.mjs";
+import { fitEffects } from "../sfx/voicefit.mjs";
+import { turnsPerFilm } from "./sounds.mjs";
 import { listLocalFonts, useLocalFont } from "../hf-edit/localFonts.mjs";
 import { declaredFamilies, finalize, fontMap, htmlFiles, usedFamilies } from "../hf-edit/finalize.mjs";
 import { snapshotAtAsync } from "../hf-qa/cli.mjs";
@@ -53,6 +57,13 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
   // recorded beside the server's thread, in the project's git queue (T22-5); never rejects
   const commit = async (p, id, message) => { try { await rev.saveAsync(p.path, message); } catch { /* revisions optional */ } ctx.backupProject?.(id); };
   const short = (s) => String(s ?? "").replace(/\s+/g, " ").trim().slice(0, 40);
+  // a sound moved or taken off: one at a time on a film, with the Sounds drawer's Add (each reads and writes the page and the sound record, and the fit takes seconds:
+  // a second drag in that time must not be written over), never while the app places the sounds
+  const inTurn = (ctx.soundTurn ??= turnsPerFilm());
+  const busySound = (id) => {
+    busy(id);
+    if (ctx.jobs?.list?.({ kind: "mix-sfx" }).some((j) => j.projectId === id && j.status === "running")) throw new HttpError(409, "BUSY", "The sound effects are being placed: change this one when that finishes");
+  };
 
   return { routes: [
     // the Editor opens: HF's element ids pinned into every composition (the picker and the hand edits address elements by them). Committed
@@ -184,6 +195,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
       const p = mustProject(id, root); busy(id);
       try {
         const out = await hand.setShotTiming(p.path, b.mountId, { duration: b.duration ?? null, rate: b.rate ?? null });
+        shiftPlaced(p.path, out.movedFrom, out.delta);          // the sounds that moved with their shots: no move of the user's
         await commit(p, id, `Hand edit: shot ${b.number ?? ""} ${b.duration != null ? `${r3(b.duration)} s` : ""}${b.rate != null ? ` speed ${b.rate}x` : ""}`.replace(/\s+/g, " ").trim());
         return out;
       } catch (e) { fail(e); }
@@ -194,14 +206,18 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
       const s = await readShots(p.path);
       const html = existsSync(join(p.path, "index.html")) ? readFileSync(join(p.path, "index.html"), "utf8") : "";
       const tags = html.match(/<audio\b[^>]*>/g) ?? [];
-      const attr = (t, a) => new RegExp(`\\b${a}="([^"]*)"`).exec(t)?.[1] ?? null;
-      const clips = tags.map((t) => ({ id: attr(t, "id"), hfId: attr(t, "data-hf-id"), src: attr(t, "src"), role: attr(t, "data-timeline-role"), start: Number(attr(t, "data-start") ?? 0),
+      // the attribute itself, never the end of a longer name: the id of `<audio data-hf-id="hf-k4k5" id="el-sfx-3">` is el-sfx-3, the src of a scene's
+      // data-composition-src is no src (T29-1: every sound on the timeline had its HF id as its id)
+      const attr = (t, a) => new RegExp(`(?<![\\w-])${a}="([^"]*)"`).exec(t)?.[1] ?? null;
+      const clips = tags.map((t) => ({ id: attr(t, "id"), hfId: attr(t, "data-hf-id"), src: attr(t, "src"), role: attr(t, "data-timeline-role"), track: attr(t, "data-track-index") != null ? Number(attr(t, "data-track-index")) : null, start: Number(attr(t, "data-start") ?? 0),
         mediaStart: attr(t, "data-media-start") != null ? Number(attr(t, "data-media-start")) : null, duration: attr(t, "data-duration") != null ? Number(attr(t, "data-duration")) : null }));
       // each sound's lane: its role, else its folder (voiceover / music / sound effects), as the Assets tab sorts them
       const laneOf = (c) => (c.role === "voiceover" ? "voice" : c.role === "music" ? "music" : c.role === "sfx" ? "sfx"
         : /(^|\/)voiceover\//.test(c.src ?? "") ? "voice" : /(^|\/)music\//.test(c.src ?? "") ? "music" : "sfx");
       const rates = Object.fromEntries((html.match(/<(?:div|section)\b[^>]*data-composition-src="[^"]*"[^>]*>/g) ?? []).map((t) => [attr(t, "data-composition-src"), Number(attr(t, "data-playback-rate") ?? 1)]));
-      const music = clips.find((c) => laneOf(c) === "music") ?? null;          // the waveform of the first sound on the Music lane
+      // what the app itself calls this clip's sound: an effect left on a track's lane by an older drag is no voice line and no music of the film
+      const effect = (c) => hand.isEffectClip({ id: c.id, src: c.src, "data-timeline-role": c.role ?? undefined });
+      const music = clips.find((c) => laneOf(c) === "music" && !/^el-(sfx|clip|amb)-/.test(c.id ?? "")) ?? null;          // the waveform of the first sound on the Music lane
       let musicPeaks = null;
       if (music?.src && existsSync(join(p.path, music.src))) {
         const f = join(p.path, music.src), st = statSync(f);
@@ -212,44 +228,65 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
       }
       const tr = transcript.read(p.path);
       // each line at the place its clip plays it in the film (e.g. one file cut into three clips at 3.5, 21 and 32 s)
-      const voiceClips = clips.filter((c) => c.role === "voiceover");
+      const voiceClips = clips.filter((c) => c.role === "voiceover" && !/^el-(sfx|clip|amb)-/.test(c.id ?? ""));
+      const titles = soundTitles(readSfxState(p.path));          // each sound's name as the Sounds drawer gives it
       // before the build (or in a film that is one page of code, with no frame mounted) the storyboard's frames are the shots,
       // one after another by their planned length, marked `planned`
       // before the build the root is the 3 s starter: the planned shots keep the storyboard's own lengths, never scaled to it
       // (12 shots of a 34 s film fell into 0-2.9 s)
       const total = s.root?.starter ? null : s.root?.duration;
       const mounted = isStarter(s.shots) ? s.shots.filter((x) => x.start != null) : placedShots(s.shots, total);
+      // a captions track (HF's data-track-kind): the groups written in its file, in film seconds, for the Captions row
+      const captions = await Promise.all((html.match(/<(?:div|section)\b[^>]*\bdata-track-kind="captions"[^>]*>/g) ?? []).map(async (t) => {
+        const start = Number(attr(t, "data-start") ?? 0), file = attr(t, "data-composition-src");
+        const cues = file ? await hand.captionCues(p.path, file).catch(() => []) : [];
+        return { id: attr(t, "id"), file, start, duration: attr(t, "data-duration") != null ? Number(attr(t, "data-duration")) : null, cues: cues.map((c) => ({ ...c, start: r3(start + c.start) })) };
+      }));
       return {
         duration: total ?? Math.max(0, ...mounted.map((x) => (x.start ?? 0) + (x.duration ?? 0))),
         shots: mounted.map((x) => ({ number: x.number, index: x.index, title: x.title, start: x.start, duration: x.duration, src: x.src, mountId: x.mountId,
           rate: rates[x.src] ?? 1, ...(x.planned ? { planned: true } : {}) })),
         voice: tr?.segments?.length && !p.meta?.voice?.offTimeline ? transcript.onFilm(tr.segments, voiceClips) : [],
-        audio: clips.map((c) => ({ id: c.id, hfId: c.hfId, src: c.src, start: c.start, duration: c.duration, lane: laneOf(c), name: (c.src ?? "").split("/").pop() })),
+        audio: clips.map((c) => ({ id: c.id, hfId: c.hfId, src: c.src, start: c.start, duration: c.duration, lane: laneOf(c), track: c.track, name: (c.src ?? "").split("/").pop(), title: titles.get(c.src) ?? null, effect: effect(c) })),
         sfx: clips.filter((c) => !c.role && /\/sfx\//.test(c.src ?? "")).map((c) => ({ start: c.start, duration: c.duration, name: (c.src ?? "").split("/").pop().replace(/\.[^.]+$/, "") })),
         music: music ? { start: music.start, duration: music.duration, name: (music.src ?? "").split("/").pop(), peaks: musicPeaks } : null,
+        captions,
         qc: qcDots(p.path),
       };
     }),
     // a sound on the timeline: moved (start, lane) or taken off (the file stays in Assets); HF's own source mutation (handEdit.mjs)
-    r("POST", `/projects/${P}/edit/audio`, async ([id], b) => {
-      const p = mustProject(id, root); busy(id);
+    r("POST", `/projects/${P}/edit/audio`, ([id], b) => inTurn(id, async () => {
+      const p = mustProject(id, root); busySound(id);
+      const what = `sound ${b.name ?? b.id ?? b.hfId ?? ""}${b.start != null ? ` at ${r3(b.start)} s` : ""}${b.lane ? ` on ${b.lane}` : ""}`.replace(/\s+/g, " ").trim();
       try {
-        // the sound is named by its HF id or id, else by its src and its present start (`at`); `start` is where it goes
-        const out = await hand.setAudio(p.path, { hfId: b.hfId, id: b.id, src: b.src, start: b.at }, { start: b.start ?? null, lane: b.lane ?? null });
-        if (out.changed) await commit(p, id, `Hand edit: sound ${b.name ?? b.id ?? b.hfId ?? ""}${b.start != null ? ` at ${r3(b.start)} s` : ""}${b.lane ? ` on ${b.lane}` : ""}`.replace(/\s+/g, " ").trim());
-        return out;
+        // a sound-only revision, as the Final Mix's: the picture's checks hold, and a finished film gets the new sound mixed onto its render in seconds
+        const { changed } = await ctx.mix.change(p, what, async () => {
+          // the sound is named by its HF id or id, else by its src and its present start (`at`); `start` is where it goes
+          const out = await hand.setAudio(p.path, { hfId: b.hfId, id: b.id, src: b.src, start: b.at }, { start: b.start ?? null, lane: b.lane ?? null });
+          if (!out.changed) return out;
+          // what it was at its old place (the ending's fade, a cut at the film's end) follows it; every effect under the words is fitted again, wherever it came from
+          if (b.start != null && hand.isEffectClip(out.now)) await soundMoved(p.path, out.was, out.now, { root }).catch(() => null);
+          await fitEffects(p.path, { root }).catch(() => null);
+          return out;
+        });
+        if (changed) ctx.backupProject?.(id);
+        return { changed };
       } catch (e) { fail(e); }
-    }),
-    r("POST", `/projects/${P}/edit/audio/remove`, async ([id], b) => {
-      const p = mustProject(id, root); busy(id);
+    })),
+    r("POST", `/projects/${P}/edit/audio/remove`, ([id], b) => inTurn(id, async () => {
+      const p = mustProject(id, root); busySound(id);
       try {
-        const out = await hand.removeAudio(p.path, { hfId: b.hfId, id: b.id, src: b.src, start: b.at });
-        // assets.mjs keeps the record: the music forgotten, the voice kept off when its words are saved again, an app cue muted
-        try { (await import("./assets.mjs")).soundTakenOff?.(p, { id: b.id, src: b.src }, root); } catch { /* the edit stands */ }
-        await commit(p, id, `Hand edit: sound ${b.name ?? b.id ?? b.hfId ?? ""} taken off the timeline`.replace(/\s+/g, " ").trim());
-        return out;
+        const out = await ctx.mix.change(p, `sound ${b.name ?? b.id ?? b.hfId ?? ""} taken off the timeline`.replace(/\s+/g, " ").trim(), async () => {
+          const x = await hand.removeAudio(p.path, { hfId: b.hfId, id: b.id, src: b.src, start: b.at });
+          // assets.mjs keeps the record: the music forgotten, the voice kept off when its words are saved again, an app cue muted (by the tag's own id: the Editor
+          // names a sound by its HF id first)
+          try { (await import("./assets.mjs")).soundTakenOff?.(p, { id: x.was.id ?? b.id, src: x.was.src ?? b.src, cue: x.was["data-mw-cue"] ?? null }, root); } catch { /* the edit stands */ }
+          return x;
+        });
+        ctx.backupProject?.(id);
+        return { changed: out.changed };
       } catch (e) { fail(e); }
-    }),
+    })),
     // every motion and block of the library, small cards for the Editor's motion drawer (looks stay apart: they are a whole video's look)
     r("GET", "/editor/motions", () => ({ items: library.all(root).filter((x) => x.kind !== "look" && x.kind !== "vocab").map((x) => ({ uid: x.uid, kind: x.kind, title: x.title, author: x.author,
       category: x.category, desc: (x.desc ?? "").slice(0, 160), poster: x.poster, video: x.video, vi: x.vi, tags: (x.tags ?? []).slice(0, 8) })) })),

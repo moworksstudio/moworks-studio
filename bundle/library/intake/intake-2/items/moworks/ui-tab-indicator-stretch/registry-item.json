@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-tab-indicator-stretch",
+  "type": "hyperframes:block",
+  "title": "Tab Indicator",
+  "description": "Vạch chọn dưới tab chạy sang tab mới: mép trước lao đi trước, mép sau đuổi theo sau nên vạch giãn dài rồi co lại vừa chữ.",
+  "tags": [
+    "tabs",
+    "indicator",
+    "stretch",
+    "ui",
+    "layout-navigation",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "ui-tab-indicator-stretch.html",
+      "target": "compositions/components/ui-tab-indicator-stretch.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-tab-indicator-stretch",
+    "author": "moworks",
+    "call": "MW.uiTabIndicatorStretch(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiTabIndicatorStretch",
+    "options": {
+      "labels": "the three tabs",
+      "loop": "s (3.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Tabs HOME / WORK / ABOUT (12 px bold, centres 100 / 160 / 220). Indicator 3 px tall r1.5, width = label width. Each move: the edge on the travel side moves over 0.34 s power2.out, the other edge over 0.38 s starting 0.14 s later. Moves at 0.4 s (1→2), 1.5 s (2→3), 2.6 s (3→1). Labels brighten as the indicator centre comes within 46 px. Content panel: old fades out 0.12 s, new fades in 0.1-0.32 s. Cursor clicks 0.1 s before each move. Params: lead (0.34 s) · trail (0.38 s, trễ 0.14 s) · ease (power2.out) · moves [[giây, từ, tới]].",
+    "titleVi": "Vạch tab co giãn theo hướng đi"
+  }
+}

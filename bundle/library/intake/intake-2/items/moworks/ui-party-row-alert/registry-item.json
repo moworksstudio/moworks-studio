@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-party-row-alert",
+  "type": "hyperframes:block",
+  "title": "Party Status",
+  "description": "Bảng đội bốn người, chỉ hàng thứ ba phản ứng: rung ngắn, loé đỏ rồi giữ nền đỏ nhạt, biểu tượng tia sét bật ra ở cuối hàng kèm vài hạt nổ.",
+  "tags": [
+    "list",
+    "shake",
+    "flash",
+    "pop",
+    "game-hud",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-party-row-alert.html",
+      "target": "compositions/components/ui-party-row-alert.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-party-row-alert",
+    "author": "moworks",
+    "call": "MW.uiPartyRowAlert(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiPartyRowAlert",
+    "options": {
+      "row": "the row that reacts (3)",
+      "hitAt": "s (0.6)",
+      "names": "",
+      "outAt": "s (2.45)",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. Panel 180 x 150 (r 12), 4 rows 34 px apart (avatar r 10, name bar, HP bar 90 x 5). At 0.6 s only row 3 reacts: shakes ±3 px x for 250 ms (per-frame hash, decaying); accent row fill flashes 42 % and decays to 12 % over 350 ms, then holds; avatar tinted accent 55 %; bolt icon (r 9) pops at 0.68 s (300 ms back.out) at the row end with an 8-dot burst to 18 px (370 ms). Out 2.45-2.65 s. Other rows never move. Params: row: hàng phản ứng (3) · hitAt: lúc trúng (0.6 s) · shake: rung (3 px / 0.25 s) · icon: biểu tượng bật ra (tia sét). Only that row reacts: a short shake, a flash that settles to a light tint, a bolt icon with a small burst. The others never move.",
+    "titleVi": "Một hàng trong đội báo bị đánh"
+  }
+}

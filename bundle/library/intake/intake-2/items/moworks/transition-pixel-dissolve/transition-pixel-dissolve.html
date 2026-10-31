@@ -1,0 +1,64 @@
+<!--
+  Pixel Dissolve (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Khung chia thành các ô vuông nhỏ, mỗi ô đổi sang cảnh mới ở một thời điểm ngẫu nhiên cố định, không mờ dần.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.transitionPixelDissolve(q(".tk-b"), tl, 1.2, {});
+
+  Options (defaults in brackets):
+      - cell: cell size, 0-1 of the width (0.05)
+      - duration: s (0.6), linear
+      - seed: the cells' order
+
+  Notes: Frame divided into square cells (16 px on a 320 px frame = 5 % of width); each cell gets a fixed seeded threshold 0..1; progress 0 -> 1 linear over 600 ms; a cell switches from old to new scene on the frame progress passes its threshold (hard per-cell cut, no fade). Params: cell (5 % chiều ngang) · duration (0.6 s) · seed.
+-->
+
+<section class="tk-scene tk-a"><div class="tk-mark circle"></div><div class="tk-sc-text"><div class="tk-sc-letter">A</div><div class="tk-sc-cap">Cảnh mở đầu</div></div></section>
+<section class="tk-scene tk-b"><div class="tk-mark square"></div><div class="tk-sc-text"><div class="tk-sc-letter">B</div><div class="tk-sc-cap">Cảnh tiếp theo</div></div></section>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"cell":0.05,"duration":0.6,"seed":7,"from":null};
+  var run = function (el, tl, at, o) {
+        var out = o.from ? MW.el(o.from) : el.previousElementSibling, W = el.offsetWidth, H = el.offsetHeight, c = o.cell * W, cols = Math.ceil(W / c), rows = Math.ceil(H / c);
+        var r = MW.rand(o.seed), cells = [];
+        for (var j = 0; j < rows; j++) for (var i = 0; i < cols; i++) cells.push({ x: i * c, y: j * c, th: r() });
+        return MW.drive(tl, at, o.duration, function (t) {
+          var p = t / o.duration, pts = ["0px 0px"], all = true;
+          // the cells already switched, as one polygon: each cell joined to the corner by a zero-area thread
+          for (var k = 0; k < cells.length; k++) {
+            var q = cells[k]; if (q.th >= p) { all = false; continue; }
+            pts.push(q.x + "px " + q.y + "px", (q.x + c) + "px " + q.y + "px", (q.x + c) + "px " + (q.y + c) + "px", q.x + "px " + (q.y + c) + "px", q.x + "px " + q.y + "px", "0px 0px");
+          }
+          el.style.clipPath = all ? "none" : pts.length < 3 ? "inset(50%)" : "polygon(" + pts.join(",") + ")"; el.style.visibility = t > 0 ? "visible" : "hidden";
+          if (out) out.style.visibility = all ? "hidden" : "visible";
+        });
+      };
+  MW.transitionPixelDissolve = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-spotlight-relay",
+  "type": "hyperframes:block",
+  "title": "KPI Spotlight Relay",
+  "description": "Một đèn rọi bật lên và trượt bằng lò xo qua ba thẻ số liệu, thẻ được rọi sáng rõ có viền nhấn, các con số không hề xê dịch.",
+  "tags": [
+    "spotlight",
+    "kpi",
+    "focus",
+    "cards",
+    "data-storytelling",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "effect-spotlight-relay.html",
+      "target": "compositions/components/effect-spotlight-relay.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-spotlight-relay",
+    "author": "moworks",
+    "call": "MW.effectSpotlightRelay(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectSpotlightRelay",
+    "options": {
+      "cards": "[[value, label], ...] (3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "3 KPI cards (74 x 58) fixed at 22 / 50 / 78 % width. Spotlight (lamp + cone at 14 % accent + floor ellipse at 30 %) turns on 200-450 ms, moves card to card by springs (stiffness 170, damping 24) at 1350 and 2450 ms, back to the first at 3600; off 3350-3600. Card lit = 1 - |cone x - card x| / 56 px: opacity 0.45 -> 1 and accent border when lit > 0.5. Values never move. Params: cards (3) · moves (1.35 / 2.45 s) · spring (170 / 24).",
+    "titleVi": "Đèn rọi chuyền qua từng thẻ số"
+  }
+}

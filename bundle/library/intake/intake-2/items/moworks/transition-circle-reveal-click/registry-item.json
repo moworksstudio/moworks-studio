@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-circle-reveal-click",
+  "type": "hyperframes:component",
+  "title": "Circular View Transition",
+  "description": "Bấm nút đổi giao diện, giao diện mới lộ ra trong một vòng tròn lan từ đúng điểm bấm tới góc xa nhất của khung.",
+  "tags": [
+    "circle",
+    "reveal",
+    "theme",
+    "transition",
+    "layout-navigation",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "transition-circle-reveal-click.html",
+      "target": "compositions/components/transition-circle-reveal-click.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/transition-circle-reveal-click",
+    "author": "moworks",
+    "call": "MW.transitionCircleRevealClick(q(\".cr-b\"), tl, 0.45, { backAt: 1.6 });",
+    "function": "MW.transitionCircleRevealClick",
+    "options": {
+      "x": "click point, 0-1 of the width (0.82)",
+      "y": "(0.24)",
+      "duration": "s (0.76), in-out",
+      "backAt": "s after the start: the old page comes back the same way (null: stay)",
+      "from": "the outgoing page"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Window 240x146 (page in dark theme). Click on a toggle at (262,48) at 0.4 s: the light-theme page is revealed through a circle clip centred on the click point, radius 0 → distance to the farthest corner (≈ 252 px) over 0.45-1.21 s (760 ms) power2.inOut. Second click at 2.0 s reveals the dark page back the same way (2.05-2.81 s). The toggle icon flips sun / moon as the edge passes it. Params: center: điểm bấm · duration (0.76 s) · radius: tới góc xa nhất · ease (power2.inOut).",
+    "titleVi": "Vòng tròn lan từ điểm bấm"
+  }
+}

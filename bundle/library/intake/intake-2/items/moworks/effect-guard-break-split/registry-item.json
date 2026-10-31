@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-guard-break-split",
+  "type": "hyperframes:component",
+  "title": "Guard Break",
+  "description": "Đòn đánh trúng khiên, khiên rung và một đường nứt zigzag chạy từ trên xuống; rồi khiên tách làm hai nửa văng sang hai bên, rơi xuống nảy nhẹ, vài mảnh vụn bay ra và chữ \"BREAK\" bật lên.",
+  "tags": [
+    "crack",
+    "split",
+    "shatter",
+    "gravity",
+    "combat-hit-fx",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "effect-guard-break-split.html",
+      "target": "compositions/components/effect-guard-break-split.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-guard-break-split",
+    "author": "moworks",
+    "call": "MW.effectGuardBreakSplit(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectGuardBreakSplit",
+    "options": {
+      "impactAt": "s (0.45)",
+      "splitAt": "s (1.0)",
+      "spread": "± px (46, 600 ms ease-out cubic)",
+      "fall": "px (40, 550 ms ease-in quad)",
+      "shards": "(6)",
+      "label": "",
+      "seed": "(8)",
+      "loop": "s (2.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. Shield 68 x 86 shakes ±4 px from impact (0.45 s) to 1.0 s, decaying; a 6-point zigzag crack (dark, 2.5 px) draws top → bottom in 250 ms outCubic. At 1.0 s it splits along the crack: halves move ±46 px (600 ms outCubic), fall 40 px (550 ms in-quad), rotate ±0.55 rad, bounce 5 px (200 ms). 6 seeded shards: vx ±60, vy −40…−100 px/s, y += 160·t² (320 px/s²), spin 8 rad/s, fade 0.4-0.7 s. 'BREAK' pops at 1.05 s (300 ms back.out). Params: impactAt: lúc trúng (0.45 s) · splitAt: lúc vỡ (1.0 s) · spread: văng ngang (±46 px) · fall: rơi (40 px) · shards: số mảnh (6). The shield shakes ±4 px while a six-point zigzag crack draws top → bottom in 250 ms; then the halves split along it, turn ±0.55 rad, fall, bounce 5 px, and shards fly with gravity 320 px/s².",
+    "titleVi": "Khiên nứt rồi vỡ đôi"
+  }
+}

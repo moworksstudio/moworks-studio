@@ -18,6 +18,17 @@ const HEAVY = { layers: [600, 1500], mb: [300, 1000], minutes: [3, 10] };
 const level = (k, v) => (v == null || !HEAVY[k] ? 0 : v < HEAVY[k][0] ? 0 : v < HEAVY[k][1] ? 1 : 2);
 const LEVEL = [["ok", "ok"], ["run", "warning"], ["stop", "error"]];
 
+/** How long the export takes as the size check measured it: "4–6 min", from an hour and a half on in hours: "2.5–4 h". A range: it
+ *  depends on the computer (T28-24: "about 4 min" for an export not done after 78). */
+export function exportTime(t, e) {
+  const low = Math.max(1, Math.round(e?.minutes ?? 0)), high = Math.round(e?.high ?? 0);
+  if (low < 90) return t("{n} min", { n: high > low ? `${low}–${high}` : low });
+  const h = (m) => Math.round(m / 30) / 2;
+  return t("{n} h", { n: h(high) > h(low) ? `${h(low)}–${h(high)}` : h(low) });
+}
+/** "~26 MB", "~18.7 GB": the pictures of a canvas film can run to many gigabytes. */
+const sizeWords = (mb, n) => (mb >= 1000 ? `~${n(Math.round(mb / 100) / 10)} GB` : `~${n(Math.round(mb ?? 0))} MB`);
+
 /** "About 252 layers in 6 comps, ~41 MB, about 1 min to export. Heaviest scene: 3 (92 layers)." with the numbers in bold, coloured by weight.
  *  A film drawn on one canvas says so, and "0 layers" is never green (red: nothing to export). The canvas notice takes the
  *  style's AE badge colour (amber when the style has none). */
@@ -32,19 +43,52 @@ export function SizeSummary({ e, ae = null }) {
   const later = e.kind === "layers" && e.later > 0;          // parts that show only later in the film: the export reads the layers at 0 s
   const worst = Math.max(level("layers", e.layers), level("mb", e.mb), level("minutes", e.minutes), e.kind === "mostly-canvas" || later ? 1 : 0);
   const top = Array.isArray(e.most) && e.most[0];
-  const scene = top ? String(top[0]).match(/(\d+)$/)?.[1] ?? String(top[0]) : null;
-  const min = Math.max(1, Math.round(e.minutes ?? 0));
+  const scene = top ? String(top[0]).match(/(\d+)$/)?.[1] ?? null : null;          // the scene's number; a scene named by the film's code is not named here
   return <div className={"ae-size state-line " + LEVEL[worst][0]} role="status"><StatusIcon status={LEVEL[worst][1]} />
-    <span>{t("About")} <b>{t("{n} layers", { n: n(e.layers) })}</b> {t("in")} <b>{t("{n} comps", { n: n(e.comps) })}</b>, <b>~{n(Math.round(e.mb ?? 0))} MB</b>, {t("about")} <b>{t("{n} min", { n: min })}</b> {t("to export.")}
-      {scene && <> {t("Heaviest scene:")} <b>{scene}</b> ({t("{n} layers", { n: n(top[1]) })}).</>}
+    <span>{t("About")} <b>{t("{n} layers", { n: n(e.layers) })}</b> {t("in")} <b>{t("{n} comps", { n: n(e.comps) })}</b>, {e.frames > 0 && <><b>{t("{n} pictures", { n: n(e.frames) })}</b>, </>}<b>{sizeWords(e.mb, n)}</b>, {t("about")} <b>{exportTime(t, e)}</b> {t("to export.")}
+      {top && (scene ? <> {t("Heaviest scene:")} <b>{scene}</b> ({t("{n} layers", { n: n(top[1]) })}).</> : <> {t("The heaviest scene has")} <b>{t("{n} layers", { n: n(top[1]) })}</b>.</>)}
       {e.kind === "mostly-canvas" && <> {t("Most of the picture is drawn on a canvas: it comes as pictures; the other layers can be edited.")}</>}
       {later && <> {t("Some parts show only later in the film: After Effects does not get them.")}</>}
-      {worst > 0 && e.kind !== "mostly-canvas" && !later && <> {t(worst === 2 ? "A very large export: expect a long run and a heavy project." : "A large export: it takes a while.")}</>}</span></div>;
+      {worst > 0 && !later && (e.kind !== "mostly-canvas" || worst === 2) && <> {t(worst === 2 ? "A very large export: expect a long run and a heavy project." : "A large export: it takes a while.")}</>}</span></div>;
 }
 // the films After Effects gets as one video layer (the rendered film), and why, as the size check names them (port.py film_kind)
 const VIDEO = { canvas: "This film is drawn on one canvas:", dynamic: "This film makes its picture as it plays:", empty: "This film draws outside its layers:" };
 const STAGE = { page: "Opening the film in HyperFrames", reference: "Taking HyperFrames reference stills", record: "Recording the motion", pictures: "Making pictures for non-native layers",
   keys: "Writing keyframes", ae: "Building the project in After Effects", check: "Checking frames against HyperFrames", copy: "Copying footage and audio", film: "Getting the rendered film", starting: "Starting" };
+
+/** A frame check's colour: a frame that could not be compared is no pass. */
+const checkStatus = (c) => (c.diff == null ? "error" : c.diff <= 0.02 ? "ok" : c.diff <= 0.06 ? "warning" : "error");
+/** "Shot 6 · 18.71 s: 34.20 % of pixels differ" */
+function CheckRow({ c }) {
+  const t = useT();
+  const at = t("{time} s", { time: c.t.toFixed(2) });
+  return <li><StatusIcon status={checkStatus(c)} /><span className="num">{c.shot != null ? t("Shot {n} · {at}", { n: c.shot, at }) : at}: {c.diff == null ? t("could not be compared") : t("{pct} % of pixels differ", { pct: (c.diff * 100).toFixed(2) })}</span></li>;
+}
+/** One frame of every shot against the film: the ones that are off by name, every frame under All frames (a film of 20 shots: 20 lines). */
+export function FrameChecks({ checks }) {
+  const t = useT();
+  const off = checks.filter((c) => checkStatus(c) !== "ok");
+  const shots = [...new Set(off.map((c) => c.shot).filter((n) => n != null))];
+  return <>
+    <h3 style={{ fontSize: "var(--fs-control)", fontWeight: 500 }}>{t("Frame checks (After Effects against the film)")}</h3>
+    <p className={"state-line " + (off.some((c) => checkStatus(c) === "error") ? "stop" : off.length ? "run" : "ok")} role="status"><StatusIcon status={off.some((c) => checkStatus(c) === "error") ? "error" : off.length ? "warning" : "ok"} />
+      <span>{off.length === 0 ? t("All {n} frames match the film.", { n: checks.length })
+        : shots.length ? t("{k} of {n} frames are off: {which}.", { k: off.length, n: checks.length, which: `${shots.length === 1 ? t("shot") : t("shots")} ${shots.join(", ")}` })
+        : t("{k} of {n} frames are off.", { k: off.length, n: checks.length })}</span></p>
+    {off.length > 0 && <ul className="plain checklist">{off.map((c) => <CheckRow key={c.t} c={c} />)}</ul>}
+    <details className="diag"><summary>{t("All frames")}</summary><ul className="plain checklist">{checks.map((c) => <CheckRow key={c.t} c={c} />)}</ul></details>
+    <p className="hint">{t("Small differences come from anti-aliasing and motion blur; a large one points at a layer to check.")}</p></>;
+}
+/** What After Effects really built, and what it did not (T29-18: "finished" with 64 of 85 sound layers gone). */
+export function BuiltLine({ layers: b }) {
+  const t = useT();
+  const gone = b.lost?.length ?? 0;
+  return <ul className="plain checklist">
+    <li className={b.layers < b.of ? "stop" : "ok"}><StatusIcon status={b.layers < b.of ? "error" : "ok"} /><span>{t("{n} of {of} layers made in After Effects", { n: b.layers, of: b.of })}</span></li>
+    {b.soundOf > 0 && <li className={b.sound < b.soundOf ? "stop" : "ok"}><StatusIcon status={b.sound < b.soundOf ? "error" : "ok"} /><span>{t("{n} of {of} sound layers", { n: b.sound, of: b.soundOf })}{b.converted > 0 ? <span className="muted"> · {t("{n} files went in as WAV", { n: b.converted })}</span> : null}</span></li>}
+    {gone > 0 && b.lost.slice(0, 8).map((x, i) => <li key={i} className="stop"><StatusIcon status="error" /><span>{x.file || x.name}: {x.why}</span></li>)}
+  </ul>;
+}
 
 export default function PortAE({ id, setCrumbs = () => {} }) {
   const t = useT();
@@ -67,13 +111,15 @@ export default function PortAE({ id, setCrumbs = () => {} }) {
   const d = st.data, p = project.data;
   const style = p?.meta?.style?.ae ? p.meta.style : styles.data?.styles?.find((x) => x.id === p?.meta?.style?.id) ?? null;
   const projectName = String(p?.path ?? p?.title ?? "").split(/[\\/]/).pop();          // the folder's own name: the export folder takes it, with the date and time
-  // the server says built (a one-page code film has no scene files); its count is the scenes, else the shots
+  // the server says built (a one-page code film has no scene files); its count is the film's shots ("29 scenes" for a 27-shot film counted
+  // the stage and the grade, T28-21), the scene files only when it has no shot list
   const built = d?.built ?? (p?.scenes ?? 0) > 0;
-  const parts = (p?.scenes ?? 0) > 0 ? (p.scenes === 1 ? t("1 scene") : t("{n} scenes", { n: p.scenes })) : d?.shots ? t("{n} shots", { n: d.shots }) : null;
+  const parts = d?.shots ? (d.shots === 1 ? t("1 shot") : t("{n} shots", { n: d.shots })) : (p?.scenes ?? 0) > 0 ? (p.scenes === 1 ? t("1 scene") : t("{n} scenes", { n: p.scenes })) : null;
   const running = job?.status === "running" ? job : null;
   const last = running ? null : job?.status ? (job.result ?? job.error?.detail ?? null) : d?.last;
   // A Stop kept with the film is "stopped" when the page opens again, never "failed"
   const lastStatus = running ? null : job?.status ?? (["done", "cancelled"].includes(d?.last?.status) ? d.last.status : d?.last ? "failed" : null);
+  const missing = last?.layers?.lost?.length ?? 0;
   // the size check of the film as it is now: this session's, or the last one kept with the film (what AE gets of a canvas film)
   const size = est?.status === "done" && est.result?.estimate ? est.result.estimate : d?.estimate ?? null;
   // The last export to After Effects (the Render's time is not one)
@@ -98,7 +144,7 @@ export default function PortAE({ id, setCrumbs = () => {} }) {
       {est?.status === "failed" && <p className="state-line stop"><XCircle size={14} />{t("The size check did not finish:")} {est.error?.message}</p>}
       <div className="ae-acts">
         <AeBadge s={style} />
-        <button className="btn" onClick={() => start(true)} disabled={!built || est?.status === "running" || !!running} title={t("Counts the layers, comps and size before the real export; takes seconds")}>{est?.status === "running" ? <Loader2 size={14} className="spin" /> : <Gauge size={14} />}{t("Check size")}</button>
+        <button className="btn" onClick={() => start(true)} disabled={!built || est?.status === "running" || !!running} title={t("Measures the film and says how long the real export takes")}>{est?.status === "running" ? <Loader2 size={14} className="spin" /> : <Gauge size={14} />}{t("Check size")}</button>
         <button className="btn primary" onClick={() => setAsk(true)} disabled={!built || !d.running || !!running}><Clapperboard size={16} />{t("Export to AE")}</button></div>
     </section>
 
@@ -110,15 +156,14 @@ export default function PortAE({ id, setCrumbs = () => {} }) {
     </section>}
 
     {last && <section className="panel" aria-label={t("Result")}>
-      <div className="panel-head">{lastStatus === "done" ? <CheckCircle2 size={16} color="var(--success)" /> : lastStatus === "cancelled" ? <Square size={16} /> : <XCircle size={16} color="var(--danger)" />}
-        <h2>{lastStatus === "done" ? t("Export to AE finished") : lastStatus === "cancelled" ? t("Export to AE stopped") : t("Export to AE failed")}</h2>{last.at && <span className="muted end" style={{ fontSize: "var(--fs-meta)" }}>{ago(last.at)}</span>}</div>
+      <div className="panel-head">{lastStatus === "done" ? (missing ? <AlertTriangle size={16} color="var(--warning)" /> : <CheckCircle2 size={16} color="var(--success)" />) : lastStatus === "cancelled" ? <Square size={16} /> : <XCircle size={16} color="var(--danger)" />}
+        <h2>{lastStatus === "done" ? (missing ? t("Export to AE finished, {n} layers are missing", { n: missing }) : t("Export to AE finished")) : lastStatus === "cancelled" ? t("Export to AE stopped") : t("Export to AE failed")}</h2>{last.at && <span className="muted end" style={{ fontSize: "var(--fs-meta)" }}>{ago(last.at)}</span>}</div>
       {lastStatus === "cancelled" && <p className="hint">{t("You stopped the export.")}</p>}
       {lastStatus !== "done" && lastStatus !== "cancelled" && <Banner kind="error">{last.message ?? job?.error?.message ?? t("Export to AE failed.")}{last.code === "AE_NOT_RUNNING" ? "" : " " + t("See the log below.")}</Banner>}
 
       {last.aep && <div><button className="btn sm" onClick={() => reveal(last.aep)}><FolderOpen size={14} />{t("Show in folder")}</button></div>}
-      {last.checks?.length > 0 && <><h3 style={{ fontSize: "var(--fs-control)", fontWeight: 500 }}>{t("Frame checks (After Effects against the film)")}</h3>
-        <ul className="plain checklist">{last.checks.map((c) => <li key={c.t}><StatusIcon status={c.diff <= 0.02 ? "ok" : c.diff <= 0.06 ? "warning" : "error"} /><span className="num">{t("{time} s: {pct} % of pixels differ", { time: c.t.toFixed(2), pct: (c.diff * 100).toFixed(2) })}</span></li>)}</ul>
-        <p className="hint">{t("Small differences come from anti-aliasing and motion blur; a large one points at a layer to check.")}</p></>}
+      {lastStatus === "done" && last.layers && <BuiltLine layers={last.layers} />}
+      {last.checks?.length > 0 && <FrameChecks checks={last.checks} />}
       {last.notes?.length > 0 && <><h3 style={{ fontSize: "var(--fs-control)", fontWeight: 500 }}><AlertTriangle size={13} color="var(--warning)" /> {t("Notes, font swaps included")}</h3>
         <ul className="plain checklist">{last.notes.map((n, i) => <li key={i}><StatusIcon status="warning" />{n}</li>)}</ul></>}
       {(last.log ?? job?.log)?.length > 0 && <details className="diag"><summary>{t("Log")}</summary><pre className="mono log">{(last.log ?? job.log).slice(-60).join("\n")}</pre></details>}
@@ -127,7 +172,9 @@ export default function PortAE({ id, setCrumbs = () => {} }) {
 
     {ask && <Dialog title={t("Export to After Effects now?")} onClose={() => setAsk(false)} footer={<><span className="spacer" /><button className="btn" onClick={() => setAsk(false)}>{t("Cancel")}</button>
       <button className="btn primary" onClick={() => start(false)}>{t("Export to AE")}</button></>}>
-      <p>{t("The app drives After Effects for a few minutes; do not use it until it finishes.")}</p>
+      {/* the size check's time when there is one; "a few minutes" was said for a film not done after 78 (T28-24) */}
+      <p>{size?.frames != null || VIDEO[size?.kind] ? t("The export takes about {time}. The app drives After Effects at its end: do not use it until it finishes.", { time: exportTime(t, size) })
+        : t("The app drives After Effects at the end of the export: do not use it until it finishes. A heavy film can take hours: Check size says how long.")}</p>
       <p><b>{t("Its caches and Undo history are cleared.")}</b> {t("Save your AE work first.")}</p>
       {/* What After Effects gets of a film drawn on a canvas, said before the export */}
       {VIDEO[size?.kind] ? <p><b>{t(VIDEO[size.kind])}</b> {t("After Effects gets it as one video layer, not as layers you can edit.")}</p>

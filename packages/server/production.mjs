@@ -4,7 +4,7 @@
 import { stampBase, stampParts } from "../render-names/index.mjs";
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { copyFileSync, createReadStream, createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, createReadStream, createWriteStream, existsSync, linkSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { basename, extname, join, resolve, sep } from "node:path";
 import { pipeline } from "node:stream/promises";
 import * as projects from "../project-service/index.mjs";
@@ -211,7 +211,42 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   const J = "([a-z-]+-[0-9a-z]+)";
   const meta = (id, fn) => projects.updateMeta(id, fn, root);
   // recorded beside the server's thread, in the project's git queue (T22-5); never rejects. Awaited where what follows reads the revision
-  const commit = async (p, msg) => { try { await rev.saveAsync(p.path, msg); } catch { /* revisions optional */ } ctx.backupProject(p.id); };
+  const save = async (p, msg) => { try { await rev.saveAsync(p.path, msg); } catch { /* revisions optional */ } ctx.backupProject(p.id); };
+  const commit = async (p, msg) => { takeBatch(p.id); await save(p, msg); };          // it takes what an import left waiting
+  // An import comes one request a file: one commit for all of them, once no file is coming and none came for a moment (Test 30: 695 "Asset
+  // added" commits, about 0.85 s a file, 10 min for 723 files). Whatever needs the film committed meanwhile (a Claude task, a render, the checks,
+  // opening a version, the Editor opening) commits what it finds first, as it always did, and this commit then finds nothing to do.
+  const importing = new Map();          // project id: { p, open: files coming now, count: files waiting, message, timer }
+  const quiet = () => Number(process.env.MW_ASSET_QUIET_MS) || 3000;
+  /** The commit message of what waits, or null; nothing waits after this. */
+  const takeBatch = (id) => {
+    const b = importing.get(id);
+    if (!b) return null;
+    clearTimeout(b.timer); b.timer = null;
+    const message = b.count ? b.message : null;
+    b.count = 0; b.message = null;
+    if (!b.open) importing.delete(id);
+    return message;
+  };
+  const flushAssets = async (id) => { const p = importing.get(id)?.p, message = takeBatch(id); if (message) await save(p, message); };
+  ctx.flushAssetCommits = () => Promise.all([...importing.keys()].map(flushAssets));
+  /** A file starts coming: no commit until it has landed. */
+  const fileComing = (p) => {
+    const b = importing.get(p.id) ?? { p, open: 0, count: 0, message: null, timer: null };
+    importing.set(p.id, b);
+    clearTimeout(b.timer); b.timer = null; b.open++;
+    return b;
+  };
+  /** A file has landed (or failed): the commit waits for the quiet moment after the last one. */
+  const fileLanded = (b) => {
+    b.open = Math.max(0, b.open - 1);
+    if (b.open) return;
+    if (!b.count) { importing.delete(b.p.id); return; }
+    b.timer = setTimeout(() => { flushAssets(b.p.id).catch(() => {}); }, quiet());
+    b.timer.unref?.();
+  };
+  /** What the batch's commit says: one file by its name, more by their number. */
+  const addToBatch = (b, n, message) => { b.message = b.count ? `Assets added (${b.count + n} files)` : message; b.count += n; };
   const workDir = (p, ...xs) => join(p.path, ".moworks", "cache", ...xs);
   const voiceOf = (p) => projects.getProject(p.id, root)?.meta?.voice ?? null;
   const audioPath = (p) => { const v = voiceOf(p); return v?.file ? join(p.path, ...v.file.split("/")) : null; };
@@ -406,7 +441,8 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       const pre = await ctx.preRendered?.(p, { format, fps, quality, signal: job.signal }, (stage) => job.update({ stage })).catch((e) => { job.log?.(`reuse: ${e.message}`); return null; });
       if (pre) {
         job.update({ stage: "copying the film", progress: 100, reused: true });
-        copyFileSync(pre, out);
+        // the same file twice takes the room once: a hard link on one disk (either name can go, the other stays; the pre-render is replaced, never written over), a copy where links do not work (Google Drive, another disk)
+        try { rmSync(out, { force: true }); linkSync(pre, out); } catch { copyFileSync(pre, out); }
         return delivered({ type: "done", reused: true, reusedFrom: ctx.preRenderInfo?.(p) ?? null, logFile: null, totalFrames: null, duration: null, wallMs: 0, hfVersion: null }, { mode: "reused", reason: "pre-rendered", renderer: null, ms: 0 });
       }
       // GPU or CPU: one test frame on the GPU first; a failed or blank one sends this render to the CPU, said in one line
@@ -601,7 +637,8 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       if (result.status === "cancelled") throw Object.assign(err("CANCELLED", STOPPED.message), { detail: result });
       if (result.status !== "done" && result.status !== "estimate") throw Object.assign(err(result.code ?? "PORT_FAILED", result.message ?? "The port failed"), { detail: result });
       if (!estimate) meta(p.id, (m) => { (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "ae", text: `Ported to After Effects (${basename(result.aep ?? "")})` }); });
-      if (!estimate) note(p, { kind: "ae", text: "Export to AE finished: {file}", vars: { file: basename(result.aep ?? "") } });
+      const lost = result.layers?.lost?.length ?? 0;
+      if (!estimate) note(p, { kind: "ae", ...(lost ? { status: "error" } : {}), text: lost ? "Export to AE finished, {n} layers are not in the project: {file}" : "Export to AE finished: {file}", vars: { file: basename(result.aep ?? ""), n: lost } });
       if (!estimate) { try { ctx.styleAe?.filmPorted(projects.getProject(p.id, root) ?? p); } catch { /* the badge waits for the next start */ } }          // its style's AE badge, when not measured yet
       return result;
     });
@@ -635,19 +672,27 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   /** Copy one file into the project by kind, as an upload is (a short sound goes to sfx once it is measured): its import entry. */
   async function placeFile(p, from, name, size) {
     let d = projects.assetDestination(p.path, name);
+    const entry = (x, rel, same = false) => ({ name: basename(rel), path: rel, area: x.area, folder: x.folder, kind: x.kind, size, ...(same ? { same: true } : {}) });
+    const twin = await projects.sameFileThere(p.path, d, from);          // already there, byte for byte: not copied again
+    if (twin) return entry(d, twin, true);
     copyFileSync(from, d.path + ".part"); renameSync(d.path + ".part", d.path);
     if (d.kind === "audio" && d.folder !== "3_audio/sfx") {
       let info = null; try { info = await probe(d.path, root); } catch { /* not readable as audio: stays where it is */ }
-      if (info?.duration > 0 && info.duration < 3) { const to = projects.assetDestination(p.path, basename(d.path), "sfx"); renameSync(d.path, to.path); d = to; }
+      if (info?.duration > 0 && info.duration < 3) {
+        const to = projects.assetDestination(p.path, basename(d.path), "sfx");
+        const inSfx = await projects.sameFileThere(p.path, to, d.path);
+        if (inSfx) { rmSync(d.path, { force: true }); return entry(to, inSfx, true); }
+        renameSync(d.path, to.path); d = to;
+      }
     }
-    return { name: basename(d.path), path: d.rel, area: d.area, folder: d.folder, kind: d.kind, size };
+    return entry(d, d.rel);
   }
 
   /** An imported archive (already copied to d): unpacked with Windows' tar, its files copied in by kind with the same naming rules, the
    *  archive's own copy removed (the user's original stays where it was). One that cannot be unpacked stays as it came, and the
    *  result says so in plain words. Its files wait in the Assets tab for the user's choice of voice-over or music, as later uploads do.
    *  Returns the upload's answer with archive: { name, unpacked, files?, skipped?, error? }. */
-  async function importArchive(p, d, size) {
+  async function importArchive(p, d, size, batch) {
     const name = basename(d.path);
     const u = await unpackArchive(d.path);
     const placed = [];
@@ -656,15 +701,70 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       finally { u.cleanup(); }
       rmSync(d.path, { force: true });
     } else if (u.ok) u.cleanup();
-    const ok = placed.length > 0;
-    const rels = ok ? placed.map((x) => x.path) : [d.rel];
-    rememberAssets(p.path, rels);
-    note(p, { kind: "assets", text: "Added {n} file(s)", files: rels });
-    try { ctx.autopilot?.filesAdded?.(p.id, rels); } catch { /* the note stands */ }
-    await commit(p, ok ? `Assets added from ${name} (${placed.length} file(s))` : `Asset added: ${d.rel}`);
-    return ok ? { file: null, voice: null, archive: { name, unpacked: true, files: placed, skipped: u.skipped ?? [] } }
+    const ok = placed.length > 0, fresh = placed.filter((x) => !x.same);
+    const rels = ok ? fresh.map((x) => x.path) : [d.rel];
+    if (rels.length) {
+      rememberAssets(p.path, rels);
+      note(p, { kind: "assets", text: "Added {n} file(s)", files: rels });
+      try { ctx.autopilot?.filesAdded?.(p.id, rels); } catch { /* the note stands */ }
+      addToBatch(batch, rels.length, ok ? `Assets added from ${name} (${rels.length} file(s))` : `Asset added: ${d.rel}`);
+    }
+    return ok ? { file: null, voice: null, archive: { name, unpacked: true, files: placed, skipped: u.skipped ?? [], same: placed.length - fresh.length } }
       : { file: { name, path: d.rel, area: d.area, folder: d.folder, kind: d.kind, size }, voice: null,
         archive: { name, unpacked: false, skipped: u.skipped ?? [], error: archiveMessage(name, u.ok ? "empty" : u.reason) } };
+  }
+
+  /** One imported file, as the request's body (X-File-Name, X-Asset-Role): copied into the project by kind. Its commit joins the batch's. */
+  async function takeFile(p, req, batch) {
+    const name = projects.safeFileName(decodeURIComponent(req.headers["x-file-name"] ?? ""), "file");
+    // no role needed: the app sorts audio by name and length; an old client's role still counts
+    const asked = projects.AUDIO_ROLES.includes(req.headers["x-asset-role"]) ? req.headers["x-asset-role"] : null;
+    if (Number(req.headers["content-length"] ?? 0) > projects.MAX_ASSET_BYTES) throw new HttpError(413, "TOO_LARGE", "The file is over 4 GB");
+    let d = projects.assetDestination(p.path, name, asked);
+    let n = 0;
+    const limit = async function* (src) { for await (const c of src) { n += c.length; if (n > projects.MAX_ASSET_BYTES) throw new HttpError(413, "TOO_LARGE", "The file is over 4 GB"); yield c; } };
+    try { await pipeline(req, limit, createWriteStream(d.path + ".part")); } catch (e) { rmSync(d.path + ".part", { force: true }); throw e; }
+    // the same file again (a zip and its unpacked folder together: T30-14): the one already there stands, nothing new
+    const already = (x, rel) => ({ file: { name: basename(rel), path: rel, area: x.area, folder: x.folder, kind: x.kind, size: n }, voice: null, same: true });
+    const twin = await projects.sameFileThere(p.path, d, d.path + ".part");
+    if (twin) { rmSync(d.path + ".part", { force: true }); return already(d, twin); }
+    renameSync(d.path + ".part", d.path);
+    // an archive (.zip, .rar, .7z) is unpacked and its files go in as any import (T25: they stayed archives)
+    if (ARCHIVE.test(d.path)) return await importArchive(p, d, n, batch);
+    let info = null;
+    if (d.kind === "audio") {
+      try { info = await probe(d.path, root); } catch { /* not readable as audio: stays where it is */ }
+      if (!asked && info?.duration > 0 && info.duration < 3 && d.folder !== "3_audio/sfx") {          // a short sound is a sound effect
+        const to = projects.assetDestination(p.path, basename(d.path), "sfx");
+        const inSfx = await projects.sameFileThere(p.path, to, d.path);
+        if (inSfx) { rmSync(d.path, { force: true }); return already(to, inSfx); }
+        renameSync(d.path, to.path); d = to;
+      }
+    }
+    rememberAssets(p.path, [d.rel]);
+    const role = asked ?? (d.kind === "audio" ? d.folder.split("/")[1] : null);
+    const file = { name: basename(d.path), path: d.rel, area: d.area, folder: d.folder, kind: d.kind, size: n };
+    note(p, { kind: "assets", text: "Added {n} file(s)", files: [d.rel] });
+    try { ctx.autopilot?.filesAdded?.(p.id, [d.rel]); } catch { /* the note stands */ }          // Claude goes on when it was waiting for files
+    let voice = null;
+    const m0 = projects.getProject(p.id, root)?.meta ?? {};
+    // the first voice-over is transcribed at once and the first music goes on the timeline; later ones wait for the user's choice in the Assets tab
+    if (role === "voiceover" && (d.kind === "audio" || d.kind === "video") && (asked || !m0.voice?.file)) {
+      try {
+        let audio = d.path;
+        if (d.kind === "video") {            // the clip's sound, for the transcript (the video itself stays in assets/video/)
+          audio = projects.assetDestination(p.path, basename(d.path, extname(d.path)) + ".m4a", "voiceover").path;
+          await extractAudio(d.path, audio, root);
+        }
+        voice = await useVoice(p, audio, await probe(audio, root), { source: "upload", size: statSync(audio).size, from: d.kind === "video" ? d.rel : null });
+      } catch (e) { voice = { error: e.code === "INVALID" ? e.message : "This file could not be read as audio" }; }
+    } else if (role === "music" && d.kind === "audio" && (asked || !m0.music?.file)) {         // the user's track: on the timeline at once, its beats measured
+      let music = null;
+      try { music = await placeMusic(p, d.rel, info ?? await probe(d.path, root)); } catch (e) { music = { error: e.message }; }
+      await commit(p, `Music added: ${d.rel}`);
+      return { file, voice, music };
+    } else addToBatch(batch, 1, `Asset added: ${d.rel}`);
+    return { file, voice };
   }
 
   const raw = [
@@ -673,49 +773,8 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     ["POST", new RegExp(`^/api/projects/${P}/assets/upload$`), async ([id], req) => {
       const p = mustProject(id, root);
       if (ctx.renders?.isRendering(id)) throw new HttpError(409, "RENDERING", "The film is being rendered: wait until the render finishes");
-      const name = projects.safeFileName(decodeURIComponent(req.headers["x-file-name"] ?? ""), "file");
-      // no role needed: the app sorts audio by name and length; an old client's role still counts
-      const asked = projects.AUDIO_ROLES.includes(req.headers["x-asset-role"]) ? req.headers["x-asset-role"] : null;
-      if (Number(req.headers["content-length"] ?? 0) > projects.MAX_ASSET_BYTES) throw new HttpError(413, "TOO_LARGE", "The file is over 4 GB");
-      let d = projects.assetDestination(p.path, name, asked);
-      let n = 0;
-      const limit = async function* (src) { for await (const c of src) { n += c.length; if (n > projects.MAX_ASSET_BYTES) throw new HttpError(413, "TOO_LARGE", "The file is over 4 GB"); yield c; } };
-      try { await pipeline(req, limit, createWriteStream(d.path + ".part")); } catch (e) { rmSync(d.path + ".part", { force: true }); throw e; }
-      renameSync(d.path + ".part", d.path);
-      // an archive (.zip, .rar, .7z) is unpacked and its files go in as any import (T25: they stayed archives)
-      if (ARCHIVE.test(d.path)) return importArchive(p, d, n);
-      let info = null;
-      if (d.kind === "audio") {
-        try { info = await probe(d.path, root); } catch { /* not readable as audio: stays where it is */ }
-        if (!asked && info?.duration > 0 && info.duration < 3 && d.folder !== "3_audio/sfx") {          // a short sound is a sound effect
-          const to = projects.assetDestination(p.path, basename(d.path), "sfx");
-          renameSync(d.path, to.path); d = to;
-        }
-      }
-      rememberAssets(p.path, [d.rel]);
-      const role = asked ?? (d.kind === "audio" ? d.folder.split("/")[1] : null);
-      const file = { name: basename(d.path), path: d.rel, area: d.area, folder: d.folder, kind: d.kind, size: n };
-      note(p, { kind: "assets", text: "Added {n} file(s)", files: [d.rel] });
-      try { ctx.autopilot?.filesAdded?.(id, [d.rel]); } catch { /* the note stands */ }          // Claude goes on when it was waiting for files
-      let voice = null;
-      const m0 = projects.getProject(id, root)?.meta ?? {};
-      // the first voice-over is transcribed at once and the first music goes on the timeline; later ones wait for the user's choice in the Assets tab
-      if (role === "voiceover" && (d.kind === "audio" || d.kind === "video") && (asked || !m0.voice?.file)) {
-        try {
-          let audio = d.path;
-          if (d.kind === "video") {            // the clip's sound, for the transcript (the video itself stays in assets/video/)
-            audio = projects.assetDestination(p.path, basename(d.path, extname(d.path)) + ".m4a", "voiceover").path;
-            await extractAudio(d.path, audio, root);
-          }
-          voice = await useVoice(p, audio, await probe(audio, root), { source: "upload", size: statSync(audio).size, from: d.kind === "video" ? d.rel : null });
-        } catch (e) { voice = { error: e.code === "INVALID" ? e.message : "This file could not be read as audio" }; }
-      } else if (role === "music" && d.kind === "audio" && (asked || !m0.music?.file)) {         // the user's track: on the timeline at once, its beats measured
-        let music = null;
-        try { music = await placeMusic(p, d.rel, info ?? await probe(d.path, root)); } catch (e) { music = { error: e.message }; }
-        await commit(p, `Music added: ${d.rel}`);
-        return { file, voice, music };
-      } else await commit(p, `Asset added: ${d.rel}`);
-      return { file, voice };
+      const batch = fileComing(p);          // no commit while this file is coming
+      try { return await takeFile(p, req, batch); } finally { fileLanded(batch); }
     }],
     // upload: the body is the file itself (X-File-Name header); always followed by transcription when a model is ready
     ["POST", new RegExp(`^/api/projects/${P}/voice/upload$`), async ([id], req) => {
@@ -749,7 +808,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   ];
 
   const routes = [
-    // ---- service keys and speech-to-text settings (Settings › General › Voice-over; the speech models in Settings › System)
+    // ---- service keys and speech-to-text settings (Settings › System › Voice-over; the speech models in Settings › System)
     r("GET", "/voice/settings", () => ({ settings: asr.voiceSettings(root), models: asr.models(root), modelsRoot: asr.modelsRoot(root), keys: secrets.status(root),
       providers: Object.entries(PROVIDERS).map(([id, x]) => ({ id, title: x.title })), jobs: jobs.list({ kind: "model-install" }).slice(0, 5) })),
     r("PATCH", "/voice/settings", (_p, b) => ({ settings: asr.saveVoiceSettings(b, root) })),
@@ -972,9 +1031,11 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       const count = placedShots(shots, comp?.duration).filter((s) => s.duration).length;
       const fps = projects.projectFps(p), last = readJson(workDir(p, "ae", "last.json"), null);
       // the last size check while the film is unchanged (what AE gets: a canvas film is one video layer), and the film's canvases
+      // (a check from before it measured the film counted HF's seeks only and no picture, T28-24: "about 4 min" for 78 and more; it is made again)
       const est = readJson(workDir(p, "ae", "estimate.json"), null);
+      const measured = est && (est.frames != null || ["canvas", "dynamic", "empty"].includes(est.kind));
       return { fps, built: p.built === true || (p.built !== false && (p.scenes ?? 0) > 0), scenes: p.scenes ?? 0, shots: count,
-        canvas: canvasCount(p.path), estimate: est && est.hash === filmHash(p.path, Number(fps)) ? est : null,
+        canvas: canvasCount(p.path), estimate: measured && est.hash === filmHash(p.path, Number(fps)) ? est : null,
         // an export made before the Log lost its addresses reads the same; lastExport is the Render's (the dialog shows the AE export's time)
         last: last && { ...last, message: last.message && plainLog(last.message), log: (last.log ?? []).map(plainLog) },
         running: await aeRunningAsync(), installs: aeInstalls(), lastExport: p.meta?.lastExport ?? null,

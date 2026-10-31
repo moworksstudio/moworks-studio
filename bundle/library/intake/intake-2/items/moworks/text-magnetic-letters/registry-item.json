@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-magnetic-letters",
+  "type": "hyperframes:component",
+  "title": "Magnetic Letters",
+  "description": "Khi con trỏ lướt gần, các chữ cái trong bán kính bị hút nghiêng về phía nó, càng gần càng hút mạnh và ửng màu nhấn, con trỏ đi xa thì chữ về chỗ.",
+  "tags": [
+    "cursor",
+    "magnet",
+    "letters",
+    "pull",
+    "text-pointer",
+    "smooth",
+    "pointer"
+  ],
+  "files": [
+    {
+      "path": "text-magnetic-letters.html",
+      "target": "compositions/components/text-magnetic-letters.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-magnetic-letters",
+    "author": "moworks",
+    "call": "MW.textMagneticLetters(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textMagneticLetters",
+    "options": {
+      "radius": "em of the pull (2.1)",
+      "strength": "share of the gap pulled at the centre (0.4)",
+      "follow": "s each change takes, power2.out (0.4)",
+      "window": "s of history summed (0.6)",
+      "tintAt": "em of pull at full accent (0.33)",
+      "accent": "",
+      "keys": "s the pointer arrives at each point ([0.35, 1.1, 2.0, 2.6, 3.35])",
+      "ease": "(cubic-bezier(.65,0,.35,1))",
+      "cursor": "",
+      "loop": "s (4.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Scripted cursor (cubic-bezier .65,0,.35,1 between keys): off-frame to 0.35 s → 18 % into the text, 30 px below centre (1.1 s) → 22 % from the right end, 18 px above (2.0 s) → 8 % from the right, 14 px below (2.6 s) → off (3.35 s). Char target = (cursor − char) × 0.4 × (1 − d / 100 px) inside 100 px, else 0, followed with a 0.4 s power2.out response (last 0.6 s summed). Tint to accent with displacement (full at 16 px). Loop 4.2 s. Params: bán kính (100 px) · lực hút (0.4) · thời gian bám (0.4 s). Each letter's target is (pointer − letter) × 0.4 × (1 − d / radius); the shown offset sums the target's changes, each eased in over 0.4 s.",
+    "titleVi": "Chữ bị hút về con trỏ"
+  }
+}

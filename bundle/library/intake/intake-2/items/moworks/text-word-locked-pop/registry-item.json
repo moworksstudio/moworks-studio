@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-word-locked-pop",
+  "type": "hyperframes:component",
+  "title": "Word-locked Sync",
+  "description": "Mỗi từ bật lên ngay trước lúc nó được nói hay hát, theo mốc thời gian từng từ.",
+  "tags": [
+    "lyrics",
+    "captions",
+    "sync",
+    "word",
+    "sound-sync",
+    "bouncy",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "text-word-locked-pop.html",
+      "target": "compositions/components/text-word-locked-pop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-word-locked-pop",
+    "author": "moworks",
+    "call": "MW.textWordLockedPop(q(\".tk-head\"), tl, 0, { wave: \".wv i\" });",
+    "function": "MW.textWordLockedPop",
+    "options": {
+      "times": "s each word is spoken (word timestamps)",
+      "lead": "s the pop comes before the word (0.3; 0.2–0.6)",
+      "duration": "s (0.25, back.out)",
+      "spoken": "s a word lasts on the waveform (0.55)",
+      "wave": "waveform bars that light as words are heard (optional)",
+      "accent": "",
+      "outAt": "s (3.6)",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Each word appears over 250 ms back.out (scale 0 -> 1), starting 0.2-0.6 s before it is spoken (word-level timestamps). Demo: 4 words at 0.3 / 1.1 / 2.0 / 2.9 s, the third in the accent, over a waveform that lights while each word is heard. Params: duration (0.25 s, back.out) · lead: sớm hơn lời (0.2–0.6 s). Take the times from the voice clip's word timestamps.",
+    "titleVi": "Chữ bật đúng lúc lời nói"
+  }
+}

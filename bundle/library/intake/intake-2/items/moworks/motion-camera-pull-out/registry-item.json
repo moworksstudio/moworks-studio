@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-camera-pull-out",
+  "type": "hyperframes:component",
+  "title": "Pull Out",
+  "description": "Máy quay lùi dần để lộ toàn cảnh, lớp gần thu nhỏ nhiều hơn lớp xa.",
+  "tags": [
+    "camera",
+    "pull-out",
+    "parallax",
+    "depth",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-camera-pull-out.html",
+      "target": "compositions/components/motion-camera-pull-out.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-camera-pull-out",
+    "author": "moworks",
+    "call": "MW.motionCameraPullOut(q(\".tk-cam\"), tl, 0.6, { duration: 2.2 });",
+    "function": "MW.motionCameraPullOut",
+    "options": {
+      "duration": "s (1.6)",
+      "scale": "the subject's scale at the start (1.3); a layer starts at 1 + 0.3 × its depth",
+      "layers": "selector of the layers",
+      "ease": "power2.inOut"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Pull out: each layer scale 1 + 0.3 x depth -> 1 (subject 1.3 -> 1) over 1600 ms easeInOutCubic. Params: duration (1.6 s) · scale đầu (1.3) · depth.",
+    "titleVi": "Máy quay lùi ra toàn cảnh"
+  }
+}

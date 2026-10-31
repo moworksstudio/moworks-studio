@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-list-to-detail",
+  "hash": "dc2f4d8982c7c99b",
+  "at": "2026-10-17T08:17:53.023Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-list-to-detail.mp4",
+    "poster": "previews/moworks__ui-list-to-detail.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a5b3cb2bcd7023c44da6a39e8ad16de8e569941c3d82521fd0aa9913491e4778",
+    "size": 21149,
+    "seconds": 26.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

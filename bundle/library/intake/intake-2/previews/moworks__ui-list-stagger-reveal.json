@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-list-stagger-reveal",
+  "hash": "812a184921841878",
+  "at": "2026-10-17T09:50:26.242Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__ui-list-stagger-reveal.mp4",
+    "poster": "previews/moworks__ui-list-stagger-reveal.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b759c43452e52c9b49aca35590a38b910b30faef1154ff31ff8ad9278b60dce6",
+    "size": 9265,
+    "seconds": 28,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

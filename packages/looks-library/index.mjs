@@ -17,9 +17,11 @@ import { APP_ROOT, expandEnv, loadPins, resolveRuntime, sourceHead } from "../ve
 import { workRoot } from "../project-service/index.mjs";
 import { HF_SKILL } from "../hf-edit/hf-scripts.mjs";
 import { fontMap } from "../hf-edit/finalize.mjs";
+import { familyKey } from "../hf-edit/localFonts.mjs";
 import { googleHasVietnamese, WINDOWS_VI } from "../blocks-library/index.mjs";
 import { encodePosterAsync, PREVIEW } from "../library/preview-media.mjs";
 import { customMedia, customSlug, frameText, getCustom } from "./custom.mjs";
+export { placeKit } from "./custom.mjs";
 
 const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
 export const storeRoot = (root = APP_ROOT) => process.env.MW_LOOKS_ROOT ?? join(workRoot(root), "library", "looks");
@@ -73,13 +75,16 @@ export function currentStore(root = APP_ROOT) {
   return { dir, manifest: readJson(join(dir, "manifest.json"), {}) };
 }
 
-/** Does every font of a look have Vietnamese letters? { status: ok | missing | unknown | null (no fonts), families }. */
-export async function vietnameseCheck(fonts, { google = googleHasVietnamese, cache = new Map() } = {}) {
+/** Does every font of a look have Vietnamese letters? { status: ok | missing | unknown | null (no fonts), families }. own: font families
+ *  the look or the film has as files ([{ family, vi }], listLocalFonts): the file itself answers, before anything else. */
+export async function vietnameseCheck(fonts, { google = googleHasVietnamese, cache = new Map(), own = [] } = {}) {
   if (!fonts.length) return { status: null, families: [] };
   const bundled = new Set(Object.keys(fontMap()).map((k) => k.toLowerCase()));
+  const files = new Map(own.map((f) => [familyKey(f.family), f]));
   const families = [];
   for (const fam of fonts) {
-    const key = fam.toLowerCase();
+    const key = fam.toLowerCase(), file = files.get(familyKey(fam));
+    if (file) { families.push({ family: fam, vi: file.vi, via: "font file" }); continue; }
     if (bundled.has(key)) { families.push({ family: fam, vi: true, via: "bundled with the app" }); continue; }
     if (WINDOWS_VI.has(key)) { families.push({ family: fam, vi: true, via: "Windows font" }); continue; }
     if (!cache.has(key)) cache.set(key, await google(fam));

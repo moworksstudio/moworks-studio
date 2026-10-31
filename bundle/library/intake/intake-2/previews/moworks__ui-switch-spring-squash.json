@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-switch-spring-squash",
+  "hash": "5a4bdd7c7c718f81",
+  "at": "2026-10-17T10:34:27.333Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-switch-spring-squash.mp4",
+    "poster": "previews/moworks__ui-switch-spring-squash.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "86c3ae32a5d9c7f36552d20b395452df3d92f74e724e328170954c98f7ddaf4c",
+    "size": 11892,
+    "seconds": 29.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

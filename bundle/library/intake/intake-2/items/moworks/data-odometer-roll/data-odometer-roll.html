@@ -1,0 +1,65 @@
+<!--
+  Odometer Digit Roll (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Mỗi chữ số cuộn dọc trong khung có mép mờ tới chữ số mới, cuộn lên khi số tăng, cuộn xuống khi số giảm.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.dataOdometerRoll(q(".or-n"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - values: the values as text, same layout (['1.024', '2.048', '1.024'])
+      - times: s of each change ([0.4, 2.45])
+      - duration: s per roll (0.75)
+      - tint: accent while rolling
+      - loop: s (4.4)
+
+  Notes: Per digit a 0–9 strip in a window one line tall (demo pitch 1.4 em) with a 0.25 em soft fade top / bottom; on a change each digit rolls to its new digit in 750 ms easeOutQuart (CSS cubic-bezier(.25,1,.5,1); GSAP power3.out), forward when the value rises, backward when it falls, tinting accent while rolling; added / removed chars fade over 350 ms ease-out while sliding with the roll; line-height 0.85–1. Demo: 1,024 → 2,048 at 0.4 s, back at 2.45 s; loop 4.4 s. Params: from, to: số đầu / cuối (1.024 → 2.048) · duration (0.75 s) · fade: chữ số mới hiện (0.35 s) · mask: mép mờ (0.25 em).
+-->
+
+<div class="gm or"><div><div class="or-n">1.024</div><p>người đăng ký mới</p></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"values":["1.024","2.048","1.024"],"times":[0.4,2.45],"duration":0.75,"tint":"#a99bff","loop":4.4};
+  var run = function (el, tl, at, o) {
+        var q3 = gsap.parseEase("power3.out"), A = o.values[0], cols = [], col = getComputedStyle(el).color, mix = gsap.utils.interpolate(col, o.tint);
+        el.textContent = ""; el.style.fontVariantNumeric = "tabular-nums"; el.style.display = "inline-flex";
+        for (var i = 0; i < A.length; i++) {
+          if (!/\d/.test(A[i])) { var s = document.createElement("span"); s.textContent = A[i]; el.appendChild(s); cols.push(null); continue; }
+          var w = document.createElement("span"); w.style.cssText = "display:inline-block;overflow:hidden;height:1.4em;-webkit-mask-image:linear-gradient(transparent, #000 0.25em, #000 1.15em, transparent);mask-image:linear-gradient(transparent, #000 0.25em, #000 1.15em, transparent);";
+          var strip = document.createElement("span"); strip.style.cssText = "display:block;line-height:1.4em;"; for (var j = 0; j < 30; j++) { var d = document.createElement("span"); d.style.display = "block"; d.textContent = String(j % 10); strip.appendChild(d); }
+          w.appendChild(strip); el.appendChild(w); cols.push({ strip: strip, w: w });
+        }
+        // each change: the digits that differ roll forward (value up) or backward (value down) to the new digit, 0.75 s ease-out quart
+        var num = function (s) { return +s.replace(/[^\d]/g, ""); }, steps = [];
+        for (var c = 1; c < o.values.length; c++) steps.push({ t: o.times[c - 1], up: num(o.values[c]) > num(o.values[c - 1]), a: o.values[c - 1], b: o.values[c] });
+        return MW.drive(tl, at, o.loop, function (t) {
+          cols.forEach(function (q, i) {
+            if (!q) return; var row = 10 + +A[i], roll = false;
+            steps.forEach(function (s) { var da = +s.a[i], db = +s.b[i]; if (da === db) return; var n = s.up ? (db - da + 10) % 10 : -((da - db + 10) % 10), u = Math.max(0, Math.min(1, (t - s.t) / o.duration)); row += n * q3(u); if (u > 0 && u < 1) roll = true; });
+            gsap.set(q.strip, { y: -((row % 10) + 10) * 1.4 + "em" }); q.w.style.color = roll ? mix(1) : col;
+          });
+        });
+      };
+  MW.dataOdometerRoll = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

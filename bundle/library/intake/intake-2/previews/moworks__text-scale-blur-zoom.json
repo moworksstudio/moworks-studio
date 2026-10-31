@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-scale-blur-zoom",
+  "hash": "d36921452958898e",
+  "at": "2026-10-17T09:39:30.455Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-scale-blur-zoom.mp4",
+    "poster": "previews/moworks__text-scale-blur-zoom.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4e776c1b5e827480b44130d6cb5ea7e5d7a35e18dfda48e754485040f69ecb2e",
+    "size": 11777,
+    "seconds": 22.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

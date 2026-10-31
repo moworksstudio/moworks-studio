@@ -1,0 +1,54 @@
+<!--
+  Light Sweep (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Một vệt sáng xiên, mờ mép quét qua bề mặt, sáng nhất khi đi qua giữa.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectLightSweep(q(".ls-p"), tl, 0.5, {});
+
+  Options (defaults in brackets):
+      - duration: s (0.95)
+      - width: px of the band (400)
+      - angle: degrees (20)
+      - strength: at the middle (0.9)
+      - pad: px before and past the element (250)
+
+  Notes: On a gold pill (200×72, vertical gradient): an 80 px soft white band, skewed ~20°, sweeps from 50 px before to 50 px past the pill in 950 ms power2.inOut, additive; strength 0.9 × (0.3 + 0.7·exp(−(d / 60 px)²)), d = distance from the centre, so it is brightest mid-way (recipe: x −150 % → 250 %, blur 8, add). Params: duration (0.95 s) · width (80 px) · angle (≈20°) · strength đỉnh (0.9) · blend (add).
+-->
+
+<div class="gm ls"><div class="ls-p">VÀNG</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.95,"width":400,"angle":20,"strength":0.9,"pad":250};
+  var run = function (el, tl, at, o) {
+        var band = document.createElement("div"), io = gsap.parseEase("power2.inOut");
+        if (getComputedStyle(el).position === "static") el.style.position = "relative"; el.style.overflow = "hidden";
+        band.style.cssText = "position:absolute;top:-30%;bottom:-30%;width:" + o.width + "px;pointer-events:none;mix-blend-mode:plus-lighter;background:linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,1), rgba(255,255,255,0));filter:blur(" + o.width / 10 + "px);"; el.appendChild(band);
+        return MW.drive(tl, at, o.duration, function (t) {
+          var W = el.offsetWidth, p = io(t / o.duration), x = -o.pad - o.width / 2 + (W + 2 * o.pad + o.width) * p, d = x - W / 2;
+          gsap.set(band, { x: x - o.width / 2, skewX: -o.angle }); band.style.opacity = t > 0 && t < o.duration ? String(o.strength * (0.3 + 0.7 * Math.exp(-Math.pow(d / (W / 3.3), 2)))) : "0";
+        });
+      };
+  MW.effectLightSweep = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

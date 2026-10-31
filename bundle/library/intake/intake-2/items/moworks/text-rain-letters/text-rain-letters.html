@@ -1,0 +1,95 @@
+<!--
+  Raining Characters (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Các chữ cái rơi xuống theo thứ tự ngẫu nhiên như mưa và khớp đúng chỗ, lúc rơi kéo theo ba bóng mờ màu nhấn, cuối cùng lại rơi tiếp xuống dưới để ra.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textRainLetters(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - drop: px (600)
+      - start: s (0.3)
+      - spread: s the starts spread over (1)
+      - exitAt: s (2.85)
+      - seed: the orders
+
+  Notes: Chars in seeded random order, start times spread evenly over 1.0 s from 0.3 s; each falls y −150 px → 0 in 0.5 s power2.out (hidden before its start, no fade). While moving, 3 accent echoes trail 33 / 66 / 99 ms behind at opacity 0.5 / 0.35 / 0.2, drawn only when more than 1.5 px from the char. Exit: second seeded random order spread over 0.55 s from 2.85 s, each falls +150 px in 0.45 s power2.in fading to 0 at 150 px. Loop 4 s. Params: quãng rơi (150 px) · thời gian rơi (0.5 s) · khoảng rải (1 s) · bóng (3 × 33 ms).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Mưa chữ rơi</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"drop":600,"start":0.3,"spread":1,"exitAt":2.85,"seed":3};
+  var run = function (el, tl, at, o) {
+        var ch = MW.split(el, "chars").chars, n = ch.length, r = MW.rand(o.seed), p2 = gsap.parseEase("power2.out"), pi = gsap.parseEase("power2.in");
+        var order = ch.map(function (_, i) { return i; }).sort(function () { return r() - 0.5; }), out = ch.map(function (_, i) { return i; }).sort(function () { return r() - 0.5; }), s0 = [], s1 = [];
+        order.forEach(function (ci, k) { s0[ci] = o.start + o.spread * k / Math.max(1, n - 1); }); out.forEach(function (ci, k) { s1[ci] = o.exitAt + 0.55 * k / Math.max(1, n - 1); });
+        var Y = function (i, t) { if (t < s0[i]) return null; if (t < s1[i]) return -o.drop * (1 - p2(Math.min(1, (t - s0[i]) / 0.5))); return o.drop * pi(Math.min(1, (t - s1[i]) / 0.45)); };
+        return MW.drive(tl, at, o.exitAt + 1.1, function (t) {
+          ch.forEach(function (c, i) {
+            var y = Y(i, t); if (y == null) { c.style.opacity = "0"; return; } gsap.set(c, { y: y }); c.style.opacity = t >= s1[i] ? String(1 - Math.min(1, y / o.drop)) : "1";
+            var sh = []; [[0.033, 0.5], [0.066, 0.35], [0.099, 0.2]].forEach(function (q) { var yp = Y(i, t - q[0]); if (yp == null) return; var dy = yp - y; if (Math.abs(dy) > 6) sh.push("0 " + dy + "px 0 rgba(139,123,255," + q[1] + ")"); }); c.style.textShadow = sh.join(",") || "none";
+          });
+        });
+      };
+  MW.textRainLetters = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

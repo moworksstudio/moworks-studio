@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-bouncing-dots",
+  "type": "hyperframes:block",
+  "title": "Bouncing Dots",
+  "description": "Ba chấm lần lượt nảy lên theo parabol cao 34 px, giãn nhẹ khi bay, chạm đất thì bẹp xuống rồi tròn lại, bóng dưới chân co giãn theo độ cao, lặp liên tục.",
+  "tags": [
+    "dots",
+    "bounce",
+    "loading",
+    "loop",
+    "loading-progress",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "ui-bouncing-dots.html",
+      "target": "compositions/components/ui-bouncing-dots.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-bouncing-dots",
+    "author": "moworks",
+    "call": "MW.uiBouncingDots(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiBouncingDots",
+    "options": {
+      "cycle": "s (0.7)",
+      "each": "s later per dot (0.12)",
+      "apex": "px (34)",
+      "squash": "on landing (−0.28)",
+      "r": "px (9)",
+      "gap": "px (36)",
+      "label": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Three dots r9, 36 px apart; cycle 700 ms, each dot 120 ms later. First half of the cycle: parabolic hop, apex 34 px, slight stretch (up to +14 % at take-off, +8 % at landing); landing: squash scaleY −28 % over 12 % of the cycle (half sine, scaleX inverse); a ground shadow ellipse shrinks to 1 − h / 80 and fades with height. Loops. Params: cycle (0.7 s) · each (0.12 s) · apex (34 px) · squash (−28 %) · dots (3 × r9). A parabolic hop in the first half of the cycle with a small stretch, a squash on landing and a ground shadow that shrinks with height.",
+    "titleVi": "Ba chấm nảy có bẹp khi chạm"
+  }
+}

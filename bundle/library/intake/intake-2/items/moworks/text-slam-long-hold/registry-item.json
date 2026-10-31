@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-slam-long-hold",
+  "type": "hyperframes:component",
+  "title": "Victory Impact Hold",
+  "description": "Chữ chiến thắng thu từ rất to về đúng cỡ trong 0.18 giây, chạm thì rung và bẹp nảy vài nhịp, hai vạch kẻ bắn ra hai bên; sau đó đứng yên gần bốn giây cho người xem đọc.",
+  "tags": [
+    "slam",
+    "hold",
+    "squash",
+    "shake",
+    "game-impact-fx",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "text-slam-long-hold.html",
+      "target": "compositions/components/text-slam-long-hold.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-slam-long-hold",
+    "author": "moworks",
+    "call": "MW.textSlamLongHold(q(\".vw\"), tl, 0, { rules: \".rule\" });",
+    "function": "MW.textSlamLongHold",
+    "options": {
+      "landAt": "s of the contact (0.58)",
+      "from": "start scale (2.6)",
+      "land": "s of the slam, ease-in quad (0.18)",
+      "wobble": "squash at contact (0.14)",
+      "outAt": "s it leaves after the long hold (4.6)",
+      "rules": "selector of the two side rules",
+      "gap": "px from centre where the rules start (200)",
+      "reach": "px they grow outward (500)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200, 5.2 s loop. Word (44 px, accent) scales 2.6 → 1 in 180 ms in-quad (0.4-0.58 s), fade in 80 ms; at contact a squash wobble scaleX 1 + 0.14 e^(−14t) cos(34t), scaleY 1 − the same; shake ±4 px x/y 140 ms. Side rules grow 100 px outward from ±40 px (400 ms outExpo), fade 0.78-1.18 s. Holds to 4.6 s, out 4.6-4.95 s in-cubic. Params: landAt: lúc chạm (0.58 s) · from: cỡ đầu (2.6) · land: thời gian đập (0.18 s) · hold: giữ (3.8 s) · wobble: bẹp nảy (14 %).",
+    "titleVi": "Chữ đập mạnh rồi giữ thật lâu"
+  }
+}

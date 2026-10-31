@@ -1,7 +1,8 @@
 // A 45.6 s ElevenLabs voice-over on a film set to 40 s in New project once made Claude stretch the film to 47.5 s by itself, saying so
 // only after. The app measures the voice against the set length; a voice longer than it is the user's choice, asked with its ways on, and nothing is timed past the set length before the answer.
 // The other way too: an 80 s voice on a film set to 100 s was met with a 24 s wordless shot the Storyboard planned by itself, said only
-// after it was drawn (Test 21). A voice well short of the set length is the user's choice the same way.
+// after it was drawn (Test 21). A voice well short of the set length is the user's choice the same way, and its usual answer comes first:
+// the voice kept as it is, cut by sentence and spread across the film (T22-10, T28-16: Test 28's owner chose it and the question had not offered it).
 import { SETTINGS } from "../voice/tts.mjs";
 
 /** How far a voice may run past the set length before it is a question (a breath at the end, a word's tail). */
@@ -29,17 +30,18 @@ export function voiceFitText(meta) {
   const f = voiceFit(meta);
   if (!f) return "";
   if (f.short != null) {
-    return `The voice-over is ${f.voice} s, ${f.short} s shorter than the film's ${f.target} s set in New project. That is the owner's choice (moworks-studio §2b), asked once in the step's one message before anything is timed: `
-      + `1. make the film shorter, the voice's ${f.voice} s plus the hold the brief asks for (the app's project_format tool sets it once the owner chooses it) · `
-      + `2. write a longer script and make the voice again on the Voice screen · `
-      + `3. keep the ${f.target} s with wordless stretches planned now: say where each one falls (an opening, a turn in the story, the end) and how long, adding up to ${f.short} s. `
-      + `Your suggestion first. Never fill the gap with a wordless shot, a longer shot or a longer end hold on your own, and never only say afterwards that you did; until the owner answers, time no frame. `
-      + `Write the answer in docs/NOTES.md; once it is there, follow it and do not ask again.`;
+    return `The voice-over is ${f.voice} s, ${f.short} s shorter than the film's ${f.target} s set in New project. That is the owner's choice (moworks-studio §2b), asked once in the step's one message before anything is timed, one short question with these choices as a bullet list under it, in this order, the first your suggestion unless the brief clearly asks for another:\n`
+      + `- keep the voice as it is and the film's ${f.target} s: cut it by sentence and spread it across the film, the gaps left to picture and music (no word changes)\n`
+      + `- make the film shorter, the voice's ${f.voice} s plus the hold the brief asks for (the app's project_format tool sets it once the owner chooses it)\n`
+      + `- write a longer script and make the voice again on the Voice screen\n`
+      + `- keep the ${f.target} s with wordless stretches planned now: say where each one falls (an opening, a turn in the story, the end) and how long, adding up to ${f.short} s\n`
+      + `Never fill the gap with a wordless shot, a longer shot or a longer end hold on your own, and never only say afterwards that you did; until the owner answers, time no frame. `
+      + `Write the answer in docs/NOTES.md; once it is there, follow it and do not ask again. When the owner chose to cut and spread the voice: the file stays as it is and so does transcript.json; each sentence is one <audio> trim of that same file in the root (el-voice-01, el-voice-02…, data-timeline-role="voiceover", data-media-start, data-duration, data-start, the same volume, short edge fades), each cut inside a pause, written in docs/VOICE-CUT.json (each segment's seconds in the file and in the film); every frame is timed to where its sentence now plays.`;
   }
-  return `The voice-over is ${f.voice} s, ${f.over} s longer than the film's ${f.target} s set in New project. That is the owner's choice (moworks-studio §2b), asked once in the step's one message before anything is timed past ${f.target} s: `
-    + `1. make the film longer, the voice's ${f.voice} s plus the hold the brief asks for (the app's project_format tool sets it once the owner chooses it) · `
-    + `2. shorten the script and make the voice again on the Voice screen · `
-    + (f.faster ? `3. make the voice again faster on the Voice screen (its Speed setting, the owner sets the number) · ` : "")
-    + `and, only when the pauses between its sentences (transcript.json) add up to ${f.over} s or more, tighten them to fit. Your suggestion first. `
+  return `The voice-over is ${f.voice} s, ${f.over} s longer than the film's ${f.target} s set in New project. That is the owner's choice (moworks-studio §2b), asked once in the step's one message before anything is timed past ${f.target} s, one short question with these choices as a bullet list under it, your suggestion first:\n`
+    + `- make the film longer, the voice's ${f.voice} s plus the hold the brief asks for (the app's project_format tool sets it once the owner chooses it)\n`
+    + `- shorten the script and make the voice again on the Voice screen\n`
+    + (f.faster ? `- make the voice again faster on the Voice screen (its Speed setting, the owner sets the number)\n` : "")
+    + `- only when the pauses between its sentences (transcript.json) add up to ${f.over} s or more: tighten them to fit\n`
     + `Never lengthen the film, drop the end hold or cut the voice on your own, and never only say afterwards that you did; until the owner answers, every time stays within ${f.target} s. Write the answer in docs/NOTES.md; once it is there, follow it and do not ask again.`;
 }

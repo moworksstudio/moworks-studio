@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/flow-inline-validation",
+  "hash": "678d6e1731f43c01",
+  "at": "2026-10-17T11:16:43.037Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__flow-inline-validation.mp4",
+    "poster": "previews/moworks__flow-inline-validation.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "15f4d8e6b4754f9c16acd8c59e9261b5600f502dc2ad4cc9cdb9baccf09bf4f0",
+    "size": 17767,
+    "seconds": 28.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

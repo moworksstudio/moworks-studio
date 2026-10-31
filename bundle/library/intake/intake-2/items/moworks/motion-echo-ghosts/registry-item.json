@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-echo-ghosts",
+  "type": "hyperframes:component",
+  "title": "Echo Trail Caption",
+  "description": "Dòng phụ đề trượt vào từ trái kéo theo ba bản sao mờ chạy trễ dần phía sau, các bóng mờ tắt ngay khi chữ tới chỗ.",
+  "tags": [
+    "echo",
+    "ghost",
+    "slide",
+    "trail",
+    "text-captions-subtitles",
+    "smooth",
+    "captions-subtitles"
+  ],
+  "files": [
+    {
+      "path": "motion-echo-ghosts.html",
+      "target": "compositions/components/motion-echo-ghosts.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-echo-ghosts",
+    "author": "moworks",
+    "call": "MW.motionEchoGhosts(q(\".eg span\"), tl, 0.3, {});",
+    "function": "MW.motionEchoGhosts",
+    "options": {
+      "distance": "px it slides (1100)",
+      "duration": "s (0.9), expo.out",
+      "exitAt": "s (3.25)",
+      "unit": "px per reference unit (5)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Caption (30 px, accent) inside a card 260 × 44 px, radius 8, clipped to it. Slides x −220 px → 0 from 0.3 s in 0.9 s expo.out (cubic-bezier .16,1,.3,1). 3 ghost copies replay the same tween 70 / 140 / 210 ms late at opacity 0.45 / 0.25 / 0.12; ghosts fade out 1.15–1.5 s power1.out (0.85 s after the start). Exit 3.55–3.9 s: opacity 1 → 0 and x +8 px, power2.in. Loop 4.2 s. Params: quãng trượt (220 px) · số bóng (3) · độ trễ (70 ms) · độ mờ (0.45 / 0.25 / 0.12).",
+    "titleVi": "Phụ đề trượt vào kéo ba bóng mờ"
+  }
+}

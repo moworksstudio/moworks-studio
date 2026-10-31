@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-elastic-stretch",
+  "hash": "fd13636c09bc76e3",
+  "at": "2026-10-17T09:12:29.462Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-elastic-stretch.mp4",
+    "poster": "previews/moworks__text-elastic-stretch.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "50e894ce4f08925afaee5cb989c1da5648d4e2a178b6f6724454a6de3b512be5",
+    "size": 12712,
+    "seconds": 30.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

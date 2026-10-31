@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-cube-rotate-swap",
+  "type": "hyperframes:component",
+  "title": "Cube Rotate Swap",
+  "description": "Mỗi ký tự là một khối lập phương lật lên 90°, mặt mới từ dưới cuộn lên thế chỗ, lệch nhau từng ký tự.",
+  "tags": [
+    "swap",
+    "cube",
+    "3d",
+    "letters",
+    "text-swap",
+    "crisp",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "text-cube-rotate-swap.html",
+      "target": "compositions/components/text-cube-rotate-swap.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-cube-rotate-swap",
+    "author": "moworks",
+    "call": "MW.textCubeRotateSwap(q(\".cr\"), tl, 0, {});",
+    "function": "MW.textCubeRotateSwap",
+    "options": {
+      "from": "first word",
+      "to": "second (same length)",
+      "duration": "s (0.6), in-out",
+      "stagger": "s (0.067, ≤ 0.4 s)",
+      "depth": "em behind the face the cube turns about (0.6)",
+      "perspective": "px (2400)",
+      "at": "s (0.4)",
+      "backAt": "s (2.2)",
+      "accent": "new face colour"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Per char a 2-face cube (front = old char, bottom = new char), pivot 0.6 em behind the face (transformOrigin 50 % 50 % −0.6 em), perspective 600 px. Swap: cubes rotateX 0 → 90° (old face tips up and away, new face rolls up from below), 0.6 s cubic-bezier(.65,0,.35,1) (GSAP power2.inOut), chars 2 frames apart (67 ms at 30 fps; demo capped 0.4 s total); faces dim toward edge-on (opacity 0.25 at 90°). Demo: A → B at 0.4 s, back at 2.2 s; loop 3.6 s. Params: to: từ mới · duration (0.6 s) · stagger (0.067 s) · depth: độ sâu khối (0.6 em) · perspective (600 px).",
+    "titleVi": "Ký tự lật như khối lập phương"
+  }
+}

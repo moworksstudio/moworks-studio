@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-counter-rotate",
+  "type": "hyperframes:component",
+  "title": "Counter Rotation",
+  "description": "Vòng ngoài xoay thuận một vòng trong khi khối bên trong xoay ngược, cùng một tâm cố định.",
+  "tags": [
+    "rotate",
+    "counter",
+    "loader",
+    "rotation",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-counter-rotate.html",
+      "target": "compositions/components/motion-counter-rotate.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-counter-rotate",
+    "author": "moworks",
+    "call": "MW.motionCounterRotate(q(\".cr\"), tl, 0.2, {});",
+    "function": "MW.motionCounterRotate",
+    "options": {
+      "duration": "s (1)",
+      "outerTurn": "degrees (360)",
+      "innerTurn": "degrees (−360)",
+      "ease": "(sine.inOut)",
+      "loop": "s per cycle (2)",
+      "loops": "(2)",
+      "outer": "the outer ring",
+      "inner": "the inner shape"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Outer ring (8 dots on r 62 px, one larger marker) rotates 0 → +360° while the inner square (50 px) rotates 0 → −360°, both 1000 ms sine.inOut about one fixed centre; loop 2000 ms (1 s rest). Params: duration (1 s) · outer (+360°) · inner (−360°) · ease (sine.inOut).",
+    "titleVi": "Hai lớp xoay ngược chiều"
+  }
+}

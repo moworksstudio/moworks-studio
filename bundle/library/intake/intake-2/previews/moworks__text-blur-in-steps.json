@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-blur-in-steps",
+  "hash": "e1b1b7c303613b7b",
+  "at": "2026-10-17T09:39:29.989Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-blur-in-steps.mp4",
+    "poster": "previews/moworks__text-blur-in-steps.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b95dc98c0463c6e97c16af4d68b4e1550621b889f942dd86e293f222c095f6cd",
+    "size": 19018,
+    "seconds": 23.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

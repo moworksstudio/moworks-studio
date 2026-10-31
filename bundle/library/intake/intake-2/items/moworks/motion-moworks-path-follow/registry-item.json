@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-moworks-path-follow",
+  "type": "hyperframes:component",
+  "title": "Path Follow",
+  "description": "Mũi tên chạy dọc đường cong và luôn xoay theo tiếp tuyến, phần đường đã đi hiện màu.",
+  "tags": [
+    "move",
+    "path",
+    "rotate",
+    "movement",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-moworks-path-follow.html",
+      "target": "compositions/components/motion-moworks-path-follow.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-moworks-path-follow",
+    "author": "moworks",
+    "call": "MW.motionMoworksPathFollow(q(\".pf\"), tl, 0.3, {});",
+    "function": "MW.motionMoworksPathFollow",
+    "options": {
+      "to": "[x, y] px ([1080, 0])",
+      "control": "[x, y] px ([540, −840])",
+      "duration": "s (1.0)",
+      "ease": "(sine.inOut)",
+      "rotate": "turn with the tangent",
+      "trail": "an SVG path on the same curve that draws behind it",
+      "hold": "s (0.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Arrow rides an arc and turns to its tangent (θ = atan2(dy, dx) from the same progress). Recipe: 1000 ms sine.inOut, x 0 → 90 → 180, y 0 → −70 → 0, rotation −28° → 0 → +28°. Small demo: the steeper arc of arc-travel (−50° → +50°) at constant speed in 2200 ms; the travelled part draws as a 2 px accent line, the rest dashed. Params: duration (1 s) · path: đường SVG · rotate: xoay theo hướng (true) · ease (sine.inOut).",
+    "titleVi": "Đi theo đường, xoay theo hướng"
+  }
+}

@@ -20,7 +20,13 @@ function inline(text, key = "") {
   return out;
 }
 
-/** Blocks: ``` fences, # headings, - / * / 1. lists, | tables (shown as aligned rows), paragraphs. */
+const ITEM = /^(\s*)([-*•]|\d+[.)])\s+(.*)$/;
+const isNumber = (mark) => /\d/.test(mark);
+/** The index of the next line that holds something, or lines.length. */
+const nextFull = (lines, i) => { while (i < lines.length && !lines[i].trim()) i++; return i; };
+
+/** Blocks: ``` fences, # headings, - / * / 1. lists, | tables (shown as aligned rows), paragraphs. A numbered line's bullets (indented or not, a
+ *  blank line or none between them) are a list under it, so a question and its choices read as one and the next question keeps its number. */
 export default function Markdown({ text, className = "md" }) {
   const lines = String(text ?? "").replace(/\r\n/g, "\n").split("\n");
   const blocks = [];
@@ -33,11 +39,20 @@ export default function Markdown({ text, className = "md" }) {
     }
     const h = /^(#{1,4})\s+(.+)$/.exec(l);
     if (h) { const H = `h${Math.min(6, h[1].length + 3)}`; blocks.push(<H key={blocks.length}>{inline(h[2], `h${i}`)}</H>); i++; continue; }
-    if (/^\s*([-*•]|\d+[.)])\s+/.test(l)) {
-      const ordered = /^\s*\d+[.)]\s+/.test(l), items = [];
-      while (i < lines.length && /^\s*([-*•]|\d+[.)])\s+/.test(lines[i])) { items.push(lines[i].replace(/^\s*([-*•]|\d+[.)])\s+/, "")); i++; }
-      const L = ordered ? "ol" : "ul";
-      blocks.push(<L key={blocks.length}>{items.map((t, j) => <li key={j}>{inline(t, `l${i}-${j}`)}</li>)}</L>); continue;
+    const first = ITEM.exec(l);
+    if (first) {
+      const ordered = isNumber(first[2]), base = first[1].length, items = [];
+      for (;;) {
+        const m = ITEM.exec(lines[i] ?? "");
+        if (!m) { const n = nextFull(lines, i), after = ITEM.exec(lines[n] ?? ""); if (!after || (!ordered && isNumber(after[2]))) break; i = n; continue; }
+        const under = items.length > 0 && (m[1].length > base || (ordered && !isNumber(m[2])));
+        if (!under && isNumber(m[2]) !== ordered) break;
+        if (under) items.at(-1).kids.push(m[3]); else items.push({ text: m[3], kids: [], n: parseInt(m[2], 10) });
+        i++;
+      }
+      const L = ordered ? "ol" : "ul", from = ordered && items[0].n !== 1 ? { start: items[0].n } : null;
+      blocks.push(<L key={blocks.length} {...from}>{items.map((x, j) => <li key={j}>{inline(x.text, `l${i}-${j}`)}
+        {x.kids.length > 0 && <ul>{x.kids.map((t, k) => <li key={k}>{inline(t, `l${i}-${j}-${k}`)}</li>)}</ul>}</li>)}</L>); continue;
     }
     if (/^\s*\|.*\|\s*$/.test(l)) {
       const rows = [];

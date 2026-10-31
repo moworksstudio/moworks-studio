@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-ammo-reload",
+  "type": "hyperframes:block",
+  "title": "Ammo Reload",
+  "description": "Từng viên đạn rơi vào ô trống cách nhau 85 ms, mỗi viên vào thì số đạn nhảy lên một và phồng nhẹ (3 → 12); hết lượt thì các viên vừa nạp bay lên và mờ đi.",
+  "tags": [
+    "pips",
+    "stagger",
+    "counter",
+    "drop",
+    "game-hud",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-ammo-reload.html",
+      "target": "compositions/components/ui-ammo-reload.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-ammo-reload",
+    "author": "moworks",
+    "call": "MW.uiAmmoReload(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiAmmoReload",
+    "options": {
+      "slots": "(12)",
+      "from": "rounds before (3)",
+      "start": "s the first drops (0.55)",
+      "stagger": "s (0.085)",
+      "exitAt": "s (2.15)",
+      "label": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. 12 outlined slots 10 x 26, 16 px apart; rounds 4-12 drop in from 34 px above, 160 ms back.out, opacity in 50 ms, 85 ms apart from 0.55 s. Counter (mono 28 + '/ 12') steps 3 → 12 100 ms after each drop starts, with a 1.2 kick (200 ms half-sine); yellow while ≤ 3. 'RELOAD' label 0.35-1.45 s. Exit from 2.15 s: the 9 new rounds rise 16 px and fade in 140 ms outCubic, 35 ms apart from the last; the first 3 stay and the count falls back to 3. Params: slots: số ô (12) · from / to: số đạn (3 → 12) · stagger: cách nhau (0.085 s) · drop: quãng rơi (34 px).",
+    "titleVi": "Nạp đạn từng viên, số đếm theo"
+  }
+}

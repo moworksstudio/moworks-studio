@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-corner-badge-pop",
+  "type": "hyperframes:component",
+  "title": "Badge Pop",
+  "description": "Chỉ huy hiệu ở góc thẻ bật từ 0 lên 120 %, xoay lắc nhẹ rồi về chỗ; thẻ đứng yên.",
+  "tags": [
+    "attention",
+    "badge",
+    "pop",
+    "attention-emphasis",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "ui-corner-badge-pop.html",
+      "target": "compositions/components/ui-corner-badge-pop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-corner-badge-pop",
+    "author": "moworks",
+    "call": "MW.uiCornerBadgePop(q(\".bdg\"), tl, 0.6, {});",
+    "function": "MW.uiCornerBadgePop",
+    "options": {
+      "duration": "s (0.56)",
+      "peak": "overshoot scale (1.2)",
+      "rotation": "starting angle (−18°)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Badge on the corner of a still 'Inbox' card: scale 0 → 1.2 → 0.95 → 1, rotation −18° → +5° → −2° → 0, opacity 0 → 1 in the first segment. Small DOM demo keys at 0 / 638 / 968 / 1254 ms of a 2200 ms loop (starting at 330 ms), each segment eased in-out; motion_ms 560 → scale the keys to 0 / 285 / 430 / 560 ms. The parent never moves. Params: duration (0.56 s) · peak (1.2) · rot đầu (−18°) · origin (giữa huy hiệu).",
+    "titleVi": "Huy hiệu góc bật ra xoay nhẹ"
+  }
+}

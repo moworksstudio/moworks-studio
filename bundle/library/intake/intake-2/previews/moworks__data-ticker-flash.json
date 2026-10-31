@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/data-ticker-flash",
+  "hash": "2255c22c75cc9c5b",
+  "at": "2026-10-17T08:11:27.527Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__data-ticker-flash.mp4",
+    "poster": "previews/moworks__data-ticker-flash.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3269fafe5ea26b93866fe3c353636e281e7f17ef9ed4783f91eaf219c0a743f2",
+    "size": 18404,
+    "seconds": 34.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

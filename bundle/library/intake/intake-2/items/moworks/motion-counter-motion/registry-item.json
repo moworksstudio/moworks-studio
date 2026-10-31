@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-counter-motion",
+  "type": "hyperframes:component",
+  "title": "Counter-motion",
+  "description": "Vai chính vào từ trái trong khi nền chạy ngược sang phải một đoạn ngắn, cú vào trông mạnh hơn.",
+  "tags": [
+    "parallax",
+    "counter",
+    "principle",
+    "principles",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-counter-motion.html",
+      "target": "compositions/components/motion-counter-motion.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-counter-motion",
+    "author": "moworks",
+    "call": "MW.motionCounterMotion(q(\".cm\"), tl, 0.3, { exitAt: 1.9 });",
+    "function": "MW.motionCounterMotion",
+    "options": {
+      "hero": "",
+      "bg": "the background layer",
+      "heroX": "px it enters from (−800)",
+      "bgX": "px the background moves the other way (200: 20–30 % of the hero)",
+      "duration": "s (0.8)",
+      "ease": "(expo.out; the recipe power2.out)",
+      "exitAt": "s after the start to reverse (null)",
+      "exit": "s (0.4, power2.in)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Hero card enters x −160 → 0 px while the background (diagonal stripes) moves the opposite way 0 → +40 px, both on one 800 ms curve (recipe power2.out; small demo expo.out); background at 20–30 % of the hero's travel. Exit: both reverse in 400 ms power2.in. Params: hero x (−160 px) · bg x (+40 px) · duration (0.8 s) · ease (power2.out).",
+    "titleVi": "Nền chạy ngược chiều vai chính"
+  }
+}

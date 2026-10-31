@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-orbit-turntable",
+  "type": "hyperframes:component",
+  "title": "Orbit / Turntable",
+  "description": "Các thẻ chạy vòng quanh một tâm, thẻ phía sau nhỏ và tối hơn, thứ tự trước sau đổi đúng theo chiều sâu.",
+  "tags": [
+    "orbit",
+    "carousel",
+    "depth",
+    "loop",
+    "camera",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-orbit-turntable.html",
+      "target": "compositions/components/motion-orbit-turntable.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-orbit-turntable",
+    "author": "moworks",
+    "call": "MW.motionOrbitTurntable(q(\".orbit\"), tl, 0, {});",
+    "function": "MW.motionOrbitTurntable",
+    "options": {
+      "radius": "px (550; 110 on the small frame)",
+      "tilt": "the circle's flattening, y radius ÷ x radius (0.2)",
+      "period": "s per turn (4), linear",
+      "turns": "turns (1)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "6 cards (44 x 60, one accent) on a circle: x = centre + 110 cos(a), y = centre + 22 sin(a), depth z = sin(a); scale 0.6 -> 1 and opacity 0.45 -> 1 from back to front; drawing order sorted by z every frame; angle 0 -> 360 deg over 4000 ms linear, seamless loop. Params: count (6) · radius (110 px) · period (4 s).",
+    "titleVi": "Quay vòng quanh chủ thể"
+  }
+}

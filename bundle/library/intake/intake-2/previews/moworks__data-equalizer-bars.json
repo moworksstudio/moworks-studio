@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/data-equalizer-bars",
+  "hash": "a19a369f7b029f80",
+  "at": "2026-10-17T11:15:14.540Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__data-equalizer-bars.mp4",
+    "poster": "previews/moworks__data-equalizer-bars.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "06810c2c6dba2a34ff252f0109fc2d64f520b4dfcb1c61a63a3686c76667a375",
+    "size": 14911,
+    "seconds": 30.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-telop-sparkle-burst",
+  "type": "hyperframes:component",
+  "title": "Sparkle-Appear Telop",
+  "description": "Chữ telop bật ra từ cỡ nhỏ, một chùm sao bốn cánh bung ra quanh chữ rồi tắt, một vệt sáng lướt qua trong lòng chữ, vài ngôi sao nhỏ nháy ở góc khi giữ.",
+  "tags": [
+    "sparkle",
+    "pop",
+    "telop",
+    "shine",
+    "text-broadcast-telop",
+    "bouncy",
+    "soft",
+    "broadcast-telop"
+  ],
+  "files": [
+    {
+      "path": "text-telop-sparkle-burst.html",
+      "target": "compositions/components/text-telop-sparkle-burst.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-telop-sparkle-burst",
+    "author": "moworks",
+    "call": "MW.textTelopSparkleBurst(q(\".sb\"), tl, 0.3, {});",
+    "function": "MW.textTelopSparkleBurst",
+    "options": {
+      "stars": "(16)",
+      "size": "[min, max] px ([16, 36])",
+      "colors": "",
+      "sweepAt": "s the light band crosses (1.05, 0.6 s)",
+      "outAt": "s (2.6)",
+      "seed": "(4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after booth.pm"
+    },
+    "thirdParty": [],
+    "notes": "From 0.3 s text (38 px heavy, accent fill, dark stroke 0.24 em) scales 0.7 → 1 in 7 frames at 30 fps back.out(1.7), fades in 0.12 s. 16 four-point stars (yellow / ink / second accent), starts 0–0.12 s apart, live 0.7–1.1 s power2.out, moving out on an ellipse round the text (60 % → 115–165 %), size 4–9 px × sin(πq), rotation 0 → 2 rad. Light sweep 1.05–1.65 s: a ~7° band at 75 % inside the letters. 3 corner stars twinkle 1–2.7 s. Exit 2.6–2.85 s. Params: bật (0.7 → 1, 7 khung) · số sao (16) · đời sao (0.7–1.1 s) · vệt sáng (0.6 s).",
+    "titleVi": "Telop bật ra kèm sao lấp lánh"
+  }
+}

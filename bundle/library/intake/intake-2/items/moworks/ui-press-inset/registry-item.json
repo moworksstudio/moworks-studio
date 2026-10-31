@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-press-inset",
+  "type": "hyperframes:component",
+  "title": "Inner Press",
+  "description": "Bấm nút, mặt nút chỉ hạ 1 px nhưng bóng đổ bên trong hiện lên như bị ấn lõm, viền sáng trên tắt đi; thả ra thì trở lại phẳng.",
+  "tags": [
+    "press",
+    "inset",
+    "shadow",
+    "button",
+    "ui-buttons",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-press-inset.html",
+      "target": "compositions/components/ui-press-inset.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-press-inset",
+    "author": "moworks",
+    "call": "MW.uiPressInset(q(\".pi\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.uiPressInset",
+    "options": {
+      "press": "s (0.7)",
+      "release": "s (1.6)",
+      "down": "s (0.12)",
+      "up": "s (0.25)",
+      "inset": "px of inner shadow when pressed (32)",
+      "y": "px it sinks (4)",
+      "ease": "(power2.out)",
+      "shadow": "its outer shadow",
+      "cursor": "an optional cursor that makes the clicks",
+      "approach": "[x, y] px the cursor comes from",
+      "lead": "s it arrives before a click"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Accent button 140x46 r14. Press at 0.7 s: k 0 → 1 in 120 ms power2.out; release at 1.6 s: back in 250 ms power2.out. translateY = 1 px × k; the face darkens 12 % × k; an inner shadow of 8 soft rings from the top edge (0 → 8 px); the top light line (40 %) fades out and a light bottom line (30 %) fades in; no scale. Params: down (0.12 s) · up (0.25 s) · inset (8 px) · y (1 px) · ease (power2.out).",
+    "titleVi": "Nút lõm vào khi bấm"
+  }
+}

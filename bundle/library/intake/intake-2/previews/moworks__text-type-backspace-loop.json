@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-type-backspace-loop",
+  "hash": "f7f05d8f64b77ab0",
+  "at": "2026-10-17T09:35:11.955Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-type-backspace-loop.mp4",
+    "poster": "previews/moworks__text-type-backspace-loop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a80086c0b9d2d30d1a4e747743c5a5fc48d57839aac64cdea088feb833df5ae8",
+    "size": 22563,
+    "seconds": 29.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

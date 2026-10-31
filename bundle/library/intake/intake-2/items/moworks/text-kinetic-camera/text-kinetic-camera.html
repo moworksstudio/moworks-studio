@@ -1,0 +1,88 @@
+<!--
+  Kinetic Camera Follow (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Các cụm chữ cỡ khác nhau được dàn trên một mặt lớn, có cụm xoay 90°; máy quay lia, xoay và zoom tới từng cụm đúng lúc nó bật ra, cuối cùng lùi ra cho thấy cả bố cục.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textKineticCamera(q(".kc"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - world: the plane holding the phrases
+      - start: s the first phrase lands (0.3)
+      - each: s between phrases (0.85)
+      - gap: px (40)
+      - fadeAt: s (5.2)
+
+  Notes: Words in ≤ 4 phrases, sizes 44 / 30 / 56 / 36 px; odd phrases turned 90° and set right of the previous one, others below it (10 px gaps). Camera per phrase: centred on it, rotation −its angle, zoom min(220 / w, 70 / h, 3). Phrase i lands at 0.3 + 0.85 i s; the camera moves there in the 0.4 s before, cubic-bezier(.8,0,.2,1), zoom in log space; on landing it pops 0.5 → 1.08 → 1 (0 / 0.12 / 0.24 s, power1.out). Then a 0.55 s pull-back fits all; fade 5.2–5.6 s. Params: nhịp cụm (0.85 s) · thời gian lia (0.4 s) · cỡ chữ (44 · 30 · 56 · 36 px) · đường cong (.8,0,.2,1).
+-->
+
+<div class="kc"><div class="kc-w"><span style="font-size:176px">Mỗi ngày</span><span style="font-size:120px;color:#a99bff">một</span><span style="font-size:224px">câu chuyện</span><span style="font-size:144px;color:#3dd6f5">mới</span></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"world":".kc-w","start":0.3,"each":0.85,"gap":40,"fadeAt":5.2};
+  var run = function (el, tl, at, o) {
+        var world = el.querySelector(o.world), P = Array.prototype.slice.call(world.children), ease = MW.ez("cubic-bezier(.8,0,.2,1)"), p1 = gsap.parseEase("power1.out");
+        var x = 0, y = 0, boxes = [];
+        P.forEach(function (p, i) {
+          p.style.position = "absolute"; p.style.whiteSpace = "nowrap"; var w = p.offsetWidth, h = p.offsetHeight, rot = i % 2 ? 90 : 0, bw = rot ? h : w, bh = rot ? w : h, b;
+          if (i === 0) b = { x: 0, y: 0 }; else if (rot) b = { x: boxes[i - 1].x + boxes[i - 1].w + o.gap, y: boxes[i - 1].y }; else b = { x: boxes[i - 1].x, y: boxes[i - 1].y + boxes[i - 1].h + o.gap };
+          b.w = bw; b.h = bh; b.rot = rot; b.cx = b.x + bw / 2; b.cy = b.y + bh / 2; boxes.push(b);
+          p.style.left = (b.cx - w / 2) + "px"; p.style.top = (b.cy - h / 2) + "px"; p.style.transform = "rotate(" + rot + "deg)";
+        });
+        var minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9; boxes.forEach(function (b) { minX = Math.min(minX, b.x); minY = Math.min(minY, b.y); maxX = Math.max(maxX, b.x + b.w); maxY = Math.max(maxY, b.y + b.h); });
+        var W = el.offsetWidth, Hh = el.offsetHeight, cams = boxes.map(function (b) { return { x: b.cx, y: b.cy, r: -b.rot, z: Math.min(W * 0.69 / b.w, Hh * 0.35 / b.h, 3) }; });
+        cams.push({ x: (minX + maxX) / 2, y: (minY + maxY) / 2, r: 0, z: Math.min(W * 0.85 / (maxX - minX), Hh * 0.8 / (maxY - minY)) });
+        var land = function (i) { return o.start + o.each * i; };
+        return MW.drive(tl, at, o.fadeAt + 0.4, function (t) {
+          var c = cams[0];
+          for (var i = 1; i < cams.length; i++) { var t1 = i < P.length ? land(i) : land(P.length - 1) + 0.7 + 0.55, d = i < P.length ? 0.4 : 0.55; if (t >= t1 - d) { var u = ease(Math.min(1, (t - t1 + d) / d)), a = cams[i - 1], b = cams[i]; c = { x: a.x + (b.x - a.x) * u, y: a.y + (b.y - a.y) * u, r: a.r + (b.r - a.r) * u, z: Math.exp(Math.log(a.z) + (Math.log(b.z) - Math.log(a.z)) * u) }; } }
+          world.style.transformOrigin = "0 0"; world.style.transform = "translate(" + W / 2 + "px," + Hh / 2 + "px) rotate(" + c.r + "deg) scale(" + c.z + ") translate(" + (-c.x) + "px," + (-c.y) + "px)";
+          P.forEach(function (p, i) { var d = t - land(i), s = d < 0 ? 0 : d < 0.12 ? 0.5 + 0.58 * p1(d / 0.12) : d < 0.24 ? 1.08 - 0.08 * p1((d - 0.12) / 0.12) : 1; p.style.opacity = d >= 0 ? "1" : "0"; p.style.transform = "rotate(" + boxes[i].rot + "deg) scale(" + s + ")"; });
+          el.style.opacity = String(1 - Math.max(0, Math.min(1, (t - o.fadeAt) / 0.4)));
+        });
+      };
+  MW.textKineticCamera = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

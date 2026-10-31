@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-shape-state-morph",
+  "hash": "af15515d0052abd0",
+  "at": "2026-10-17T09:52:10.745Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__ui-shape-state-morph.mp4",
+    "poster": "previews/moworks__ui-shape-state-morph.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "96bcf9825a5e6f3c6032ee628c82f33bf9cbed17da5b6eb4d6e4ff1d31e6123b",
+    "size": 15543,
+    "seconds": 19.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

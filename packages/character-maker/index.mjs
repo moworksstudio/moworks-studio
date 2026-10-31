@@ -63,14 +63,12 @@ export function styles(root = APP_ROOT) {
 }
 export const styleOf = (engine, hand, root = APP_ROOT) => styles(root).find((s) => s.engine === engine && (engine === "brush-kit" || s.hand === hand)) ?? null;
 
-/** A free id for a new character from its name or description: lowercase letters, digits and dashes, not taken in either store. */
+/** A free id for a new character from its name or description: lowercase letters, digits and dashes, never one the app ships (Mira → mira-2),
+ *  never one of the user's. */
 export function newId(text, root = APP_ROOT) {
   const base = String(text ?? "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d").replace(/[^a-z0-9]+/g, " ").trim()
     .split(" ").filter((w) => !["a", "an", "the", "with", "and", "of", "in", "wearing"].includes(w)).slice(0, 3).join("-").replace(/^[^a-z]+/, "") || "character";
-  const taken = new Set([...kit.characters(root).map((c) => c.id), ...kit.humanCharacters(root).map((c) => c.id), "user", "clawd"]);
-  let id = base.slice(0, 28);
-  for (let n = 2; taken.has(id); n++) id = `${base.slice(0, 25)}-${n}`;
-  return id;
+  return kit.freeId(base, root);
 }
 
 const fill = (t, v) => Object.entries(v).reduce((s, [k, x]) => s.split(`{{${k}}}`).join(x ?? ""), t);
@@ -83,7 +81,7 @@ function placePicture(lab, image, root) {
   mkdirSync(join(lab, "reference"), { recursive: true });
   const m = /^data:image\/(png|jpe?g|webp);base64,(.+)$/s.exec(String(image));
   if (m) { const f = `reference/picture.${m[1].replace("jpeg", "jpg")}`; writeFileSync(join(lab, f), Buffer.from(m[2], "base64")); return f; }
-  if (/\.(png|jpe?g|webp)$/i.test(image) && inside(kit.mediaRoot(root), image)) { const f = `reference/picture${extname(image).toLowerCase()}`; cpSync(image, join(lab, f)); return f; }
+  if (/\.(png|jpe?g|webp)$/i.test(image) && (inside(kit.mediaRoot(root), image) || inside(kit.shippedRoot(root), image))) { const f = `reference/picture${extname(image).toLowerCase()}`; cpSync(image, join(lab, f)); return f; }
   throw Object.assign(new Error("The reference picture must be a PNG, JPEG or WebP added in the creator"), { code: "INVALID" });
 }
 function copyTools(lab, names, root) {
@@ -92,9 +90,13 @@ function copyTools(lab, names, root) {
   writeFileSync(join(lab, "tools", "app-root.txt"), `${root}\n`);
 }
 
+/** A module of the author's as it reads outside the engine: its imports, relative where it sits in the engine, name the staged engine. */
+const fromEngine = (text) => text.split('"../../').join('"anidoodle/canvas-core/');
 /** Stage a lab for one run: { lab, brief, allowed } (the Bash commands Claude may run there). */
 export function prepareLab(job, root = APP_ROOT) {
   const { engine, hand, id, name, description, image, change, from } = job, c = config(root), st = styleOf(engine, hand, root);
+  // Change with Claude on a character the app ships makes the user's own copy (saved in the user's folder): its gate and films are not in place yet
+  const fromRecord = from && engine === kit.HUMAN_ENGINE ? kit.humanRecord(from, root) : null, fromShipped = fromRecord?.credit?.made === "as shipped";
   const rig = job.rig ?? rigOf(engine, null, null, root), rigLabel = { human: "a person", animal: "an animal", thing: "a thing (neither a person nor an animal)" }[rig] ?? rig;
   if (!st) throw Object.assign(new Error(`No such style: ${engine}${hand ? ` / ${hand}` : ""}`), { code: "INVALID" });
   const lab = join(labRoot(root), job.jobId);
@@ -102,7 +104,7 @@ export function prepareLab(job, root = APP_ROOT) {
   const pic = placePicture(lab, image, root);
   const vars = { DESCRIPTION: description, ID: id, NAME: name ? `${name} (use exactly this name, in its name and wherever its about names it)` : "(choose one from the description, and use it in its name and its about)", HAND: hand ?? "brush", HAND_LABEL: st.label, RIG_LABEL: rigLabel, RENDER: st.render ?? "",
     REFERENCE: pic ? `A reference picture: \`${pic}\` (look at it with Read; the character must read as it).\n` : "",
-    CHANGE: change ? `\nThis character already exists (its files are in place, from the library): change it as asked, keep everything else as it is. The change: ${change}\nDraw the sheet again after the change and look at it: the change must show. End your reply with one line \`Changed: <what you changed>\`, and, for any part you could not do, one line \`Could not: <what, and why: e.g. the character layer has no such part>\`. Keep the two labels \`Changed:\` and \`Could not:\` in English (the app reads them); write what follows them in the language of the description.\n` : "" };
+    CHANGE: change ? `\nThis character already exists (its files are in place, from the library): change it as asked, keep everything else as it is.${fromShipped ? " It is the author's character as shipped, and this change makes the owner's own copy of it: its gate, its model sheet and its walk are not in place yet, so write them as the recipe below says." : ""} The change: ${change}\nDraw the sheet again after the change and look at it: the change must show. End your reply with one line \`Changed: <what you changed>\`, and, for any part you could not do, one line \`Could not: <what, and why: e.g. the character layer has no such part>\`. Keep the two labels \`Changed:\` and \`Could not:\` in English (the app reads them); write what follows them in the language of the description.\n` : "" };
   if (engine === kit.HUMAN_ENGINE) {
     for (const d of ["anidoodle/films", "out", "reference"]) mkdirSync(join(lab, ...d.split("/")), { recursive: true });
     copyTools(lab, ["mw.mjs", "still.mjs", "render.mjs", "gate.mjs"], root);
@@ -111,12 +113,12 @@ export function prepareLab(job, root = APP_ROOT) {
     cpSync(join(src.skillDir, "engine", "tools", "character-check.entry.ts"), join(lab, "reference", "character-check.entry.ts"));
     stageEngine(lab, root);
     if (from) {          // Change with Claude: the saved module back in place
-      const saved = join(kit.humanDir(root), from, "module");
-      cpSync(join(saved, from), join(lab, "anidoodle", "characters", from), { recursive: true });
+      const folder = kit.humanFolder(from, root), saved = join(folder, "module"), staged = join(lab, "anidoodle", "characters", from);
+      cpSync(join(saved, from), staged, { recursive: true });
+      if (fromShipped) for (const f of readdirSync(staged, { recursive: true }).map(String).filter((n) => n.endsWith(".ts"))) writeFileSync(join(staged, f), fromEngine(readFileSync(join(staged, f), "utf8")));
       for (const f of ["check.ts", "LEDGER.md"]) if (existsSync(join(saved, f))) cpSync(join(saved, f), join(lab, "anidoodle", f));
       for (const f of ["sheet.ts", "walk.ts"]) if (existsSync(join(saved, "films", f))) { mkdirSync(join(lab, "anidoodle", "films"), { recursive: true }); cpSync(join(saved, "films", f), join(lab, "anidoodle", "films", f)); }
-      const cj = readJson(join(kit.humanDir(root), from, "character.json"));
-      if (cj) writeFileSync(join(lab, "anidoodle", "character.json"), JSON.stringify({ id: cj.id, name: cj.name, about: cj.about }, null, 2) + "\n");
+      if (fromRecord) writeFileSync(join(lab, "anidoodle", "character.json"), JSON.stringify({ id: fromRecord.id, name: fromRecord.name, about: fromRecord.about }, null, 2) + "\n");
     }
     // a person: the author's human recipe and gate; an animal or a thing: a rig and a gate of its own
     return { lab, brief: fill(c.prompts[rig === "human" ? kit.HUMAN_ENGINE : "anidoodle-rig"], vars), allowed: ["Bash(node tools/still.mjs:*)", "Bash(node tools/gate.mjs:*)", "Bash(node tools/render.mjs:*)"] };
@@ -192,17 +194,22 @@ const ff = (root, args) => new Promise((ok) => execFile(ffmpegExe(root), ["-v", 
 const toWebp = (root, src, out, w = 1600) => ff(root, ["-i", src, "-vf", `scale='min(${w},iw)':-1`, "-c:v", "libwebp", "-quality", "82", out]);
 
 /** Make (or change) a character: the whole run. onStep(stage, progress) for the job; log(line). Returns the saved character's summary. */
-export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = null, onStep = () => {}, log = () => {}, env = {}, renderDemo = null, claude = runClaude } = {}) {
+export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = null, onStep = () => {}, log = () => {}, env = {}, renderDemo = null, claude = runClaude, runTool = tool } = {}) {
   const engine = input.engine === "brush-kit" ? "brush-kit" : kit.HUMAN_ENGINE, hand = engine === "brush-kit" ? "brush" : input.hand;
   const c = config(root), est = c.estimate?.[engine] ?? null, expectMs = est ? ((est.minutes[0] + est.minutes[1]) / 2) * 60000 : 20 * 60000;
   const from = input.from ?? null;
-  if (from && engine === kit.HUMAN_ENGINE && !kit.humanCharacters(root).some((x) => x.id === from && x.credit?.made !== "as shipped"))
-    throw Object.assign(new Error("Only the owner's own anidoodle characters can be changed (Mira and Theo are the author's, as shipped)"), { code: "INVALID" });
+  // a character the app ships is changed as the user's own copy (copy on write: saveHuman writes only to the user's folder). The author's rigs
+  // (Bit, the cheetah) have no module to change: their code stays in the pinned engine
+  if (from && engine === kit.HUMAN_ENGINE) {
+    const folder = kit.humanFolder(from, root);
+    if (!folder) throw Object.assign(new Error("No such character"), { code: "NOT_FOUND" });
+    if (!existsSync(join(folder, "module", from))) throw Object.assign(new Error(`${kit.humanRecord(from, root)?.name ?? from}'s code stays in the pinned engine: it cannot be changed here`), { code: "INVALID" });
+  }
   if (from && engine === "brush-kit" && kit.getCharacter(from, root)?.group !== "yours") throw Object.assign(new Error("Only your own Brush characters can be changed"), { code: "INVALID" });
   const id = from ?? newId(input.name || input.description, root);
   if (!String(input.description ?? "").trim() && !from) throw Object.assign(new Error("Describe the character first"), { code: "INVALID" });
   const savedRec = from && engine === kit.HUMAN_ENGINE ? kit.humanCharacters(root).find((x) => x.id === from) : null, savedHand = savedRec ? savedRec.hand ?? savedRec.hands?.[0] ?? null : null;
-  const beforeRec = from ? (engine === kit.HUMAN_ENGINE ? readJson(join(kit.humanDir(root), from, "character.json")) : kit.getCharacter(from, root)) : null;
+  const beforeRec = from ? (engine === kit.HUMAN_ENGINE ? kit.humanRecord(from, root) : kit.getCharacter(from, root)) : null;
   const rig = rigOf(engine, input.rig, from ? beforeRec?.kind ?? (engine === kit.HUMAN_ENGINE ? "human" : "thing") : null, root);
   const job = { jobId, engine, rig, hand: savedHand ?? hand, id, name: input.name || beforeRec?.name || null, description: input.description || beforeRec?.description || beforeRec?.about || "",
     image: input.image ?? null, change: from ? (input.text || input.change || "") : null, from };
@@ -230,7 +237,9 @@ export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = nu
   let changes = null;
   if (from) {
     if (engine === kit.HUMAN_ENGINE) {
-      const a = filesOf(join(kit.humanDir(root), from, "module", from)), b = filesOf(join(lab, "anidoodle", "characters", from));
+      const a = filesOf(join(kit.humanFolder(from, root), "module", from)), b = filesOf(join(lab, "anidoodle", "characters", from));
+      // a shipped module was staged with its imports naming the engine: that is not a change
+      if (beforeRec?.credit?.made === "as shipped") for (const k of Object.keys(a)) a[k] = fromEngine(a[k]);
       changes = [...new Set([...Object.keys(a), ...Object.keys(b)])].filter((k) => a[k] !== b[k]);
     } else {
       const cast = kit.readCast(lab), after = cast.characters.find((x) => x.id === from) ?? cast.characters[0] ?? null;
@@ -246,7 +255,7 @@ export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = nu
     onStep("keeping the version before", 86);
     snapshot(id, `before: ${job.change}`, root);
   }
-  const saved = engine === kit.HUMAN_ENGINE ? await saveHuman({ job, lab, run, runInfo, root, env, signal, onStep, log, before: beforeRec })
+  const saved = engine === kit.HUMAN_ENGINE ? await saveHuman({ job, lab, run, runInfo, root, env, signal, onStep, log, before: beforeRec, runTool })
     : await saveBrush({ job, lab, runInfo, root, env, signal, onStep, log, renderDemo, before: beforeRec });
   const outcome = !from ? "created" : says.couldNot ? "partly" : "changed";
   const history = kit.addHistory(id, { kind: from ? "change" : "create", text: job.change ?? job.description, outcome, changes, says, ...runInfo }, root);
@@ -256,24 +265,24 @@ export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = nu
 }
 
 /** The anidoodle character: the gate again (the app's own run), the sheet and the walk rendered, everything into the store. */
-export async function saveHuman({ job, lab, run, runInfo, root, env, signal, onStep, log, before = null }) {
+export async function saveHuman({ job, lab, run, runInfo, root, env, signal, onStep, log, before = null, runTool = tool }) {
   const { id, hand } = job, mod = join(lab, "anidoodle", "characters", id);
   if (!existsSync(mod)) throw Object.assign(new Error(`Claude did not write anidoodle/characters/${id}/`), { code: "CLAUDE_FAILED", detail: { lab } });
   onStep("checking the character gate", 87);
-  const g = await tool(lab, ["tools/gate.mjs", "check.ts"], { root, env, signal });
+  const g = await runTool(lab, ["tools/gate.mjs", "check.ts"], { root, env, signal });
   const m = /(\d+) passed, (\d+) failed/.exec(g.out), gate = m ? { passed: +m[1], failed: +m[2] } : { passed: 0, failed: null };
   log(`gate: ${m ? m[0] : "did not run"}`);
   if (g.code !== 0 || !m || gate.failed) throw Object.assign(new Error(`The character gate did not pass (${m ? m[0] : g.out.trim().split(/\r?\n/).pop()})`), { code: "GATE_FAILED", detail: { lab } });
   onStep("drawing the model sheet", 90);
-  const s = await tool(lab, ["tools/still.mjs", "films/sheet.ts", "out/sheet.png"], { root, env, signal });
+  const s = await runTool(lab, ["tools/still.mjs", "films/sheet.ts", "out/sheet.png"], { root, env, signal });
   if (s.code !== 0) throw Object.assign(new Error(`The model sheet could not be drawn: ${s.out.trim().split(/\r?\n/).pop()}`), { code: "RENDER_FAILED", detail: { lab } });
   onStep("rendering the walk", 94);
-  const w = await tool(lab, ["tools/render.mjs", "films/walk.ts", "out/walk.mp4"], { root, env, signal });
+  const w = await runTool(lab, ["tools/render.mjs", "films/walk.ts", "out/walk.mp4"], { root, env, signal });
   if (w.code !== 0) throw Object.assign(new Error(`The walk could not be rendered: ${w.out.trim().split(/\r?\n/).pop()}`), { code: "RENDER_FAILED", detail: { lab } });
   onStep("saving to the library", 98);
   if (kit.userStoreInRepo(root)) throw Object.assign(new Error("The characters store is inside the app's repository: a user's characters are never kept there"), { code: "INVALID" });
   const dir = join(kit.humanDir(root), id);
-  rmSync(dir, { recursive: true, force: true });          // a change: the version before was kept first (snapshot)
+  kit.removeFromStore(dir, root);          // a change: the version before was kept first (snapshot); always the user's folder, a shipped character's stays
   mkdirSync(join(dir, "module", "films"), { recursive: true });
   cpSync(mod, join(dir, "module", id), { recursive: true });
   for (const f of ["check.ts", "LEDGER.md"]) if (existsSync(join(lab, "anidoodle", f))) cpSync(join(lab, "anidoodle", f), join(dir, "module", f));
@@ -289,7 +298,9 @@ export async function saveHuman({ job, lab, run, runInfo, root, env, signal, onS
     : before?.heightM ? { heightM: before.heightM, heightBy: before.heightBy ?? "inferred", heightNote: before.heightNote ?? null } : {};
   const record = { id, name: savedName, about: alignAbout(own.about || before?.about || job.description, savedName), engine: kit.HUMAN_ENGINE, kind: job.rig ?? "human", ...height, hand, hands: [hand],
     description: job.description, version: (before?.version ?? 0) + 1, changes: [...(before?.changes ?? []), ...(job.change ? [{ at: new Date().toISOString(), text: job.change }] : [])],
-    credit: { author: "The owner (made by Claude the author's way)", link: null, licence: "the owner's own; built on anidoodle (Apache-2.0)", made: "written from the idea",
+    // the user's copy of the author's character stays credited to the author, as adapted
+    credit: { ...(["as shipped", "adapted"].includes(before?.credit?.made) ? { author: before.credit.author, link: before.credit.link, commit: before.credit.commit, licence: before.credit.licence, made: "adapted", madeNote: "the author's character, changed by the owner with Claude" }
+        : { author: "The owner (made by Claude the author's way)", link: null, licence: "the owner's own; built on anidoodle (Apache-2.0)", made: "written from the idea" }),
       engine: src ? { repo: src.repo, commit: src.commit, link: `https://github.com/${src.repo}/tree/${src.commit}` } : null, run: before?.credit?.run ?? runInfo, gate },
     module: readdirSync(join(dir, "module"), { recursive: true }).map(String), savedAt: new Date().toISOString() };
   writeFileSync(join(dir, "character.json"), JSON.stringify(record, null, 2) + "\n");
@@ -331,19 +342,21 @@ async function saveBrush({ job, lab, runInfo, root, env, signal, onStep, log, re
 
 // ---- versions and Undo: before a change is saved, the character as it was goes to <store>/_versions/<id>/<n>/ (the last 5 kept)
 const engineOf = (id, root) => (kit.humanCharacters(root).some((c) => c.id === id) ? kit.HUMAN_ENGINE : kit.getCharacter(id, root)?.group === "yours" ? "brush-kit" : null);
-/** Keep the character as it is now as a version: its n. */
+/** Keep the character as it is now as a version: its n. A character the app ships with no copy of the user's yet needs nothing kept: it stays in
+ *  bundle/, and Undo takes the user's copy away again (the version says "shipped"). */
 export function snapshot(id, label, root = APP_ROOT) {
   const engine = engineOf(id, root);
   if (!engine) return null;
   const vd = join(kit.versionsDir(root), id), n = (kit.characterVersions(id, root).at(-1)?.n ?? 0) + 1, d = join(vd, String(n));
+  const shipped = engine === kit.HUMAN_ENGINE && !existsSync(join(kit.humanDir(root), id, "character.json"));
   mkdirSync(d, { recursive: true });
-  if (engine === kit.HUMAN_ENGINE) cpSync(join(kit.humanDir(root), id), join(d, "human"), { recursive: true });
+  if (engine === kit.HUMAN_ENGINE) { if (!shipped) cpSync(join(kit.humanDir(root), id), join(d, "human"), { recursive: true }); }
   else {
     cpSync(join(kit.userDir(root), `${id}.json`), join(d, "user.json"));
     if (existsSync(join(kit.mediaRoot(root), id))) cpSync(join(kit.mediaRoot(root), id), join(d, "media"), { recursive: true, filter: (s) => !/[\\/]work([\\/]|$)/.test(s.slice(join(kit.mediaRoot(root), id).length)) });
   }
-  const rec = engine === kit.HUMAN_ENGINE ? readJson(join(kit.humanDir(root), id, "character.json")) : kit.getCharacter(id, root);
-  writeFileSync(join(d, "version.json"), JSON.stringify({ at: new Date().toISOString(), label, engine, version: rec?.version ?? null }, null, 2) + "\n");
+  const rec = engine === kit.HUMAN_ENGINE ? kit.humanRecord(id, root) : kit.getCharacter(id, root);
+  writeFileSync(join(d, "version.json"), JSON.stringify({ at: new Date().toISOString(), label, engine, version: rec?.version ?? null, ...(shipped ? { shipped: true } : {}) }, null, 2) + "\n");
   for (const v of kit.characterVersions(id, root).slice(0, -5)) rmSync(join(vd, String(v.n)), { recursive: true, force: true });
   return n;
 }
@@ -351,11 +364,13 @@ export function snapshot(id, label, root = APP_ROOT) {
 export function undo(id, root = APP_ROOT) {
   const v = kit.characterVersions(id, root).at(-1);
   if (!v) throw Object.assign(new Error("There is no earlier version to go back to"), { code: "NOT_FOUND" });
+  if (kit.userStoreInRepo(root)) throw Object.assign(new Error("The characters store is inside the app's repository: a user's characters are never kept there"), { code: "INVALID" });
   const d = join(kit.versionsDir(root), id, String(v.n));
-  if (existsSync(join(d, "human"))) { rmSync(join(kit.humanDir(root), id), { recursive: true, force: true }); cpSync(join(d, "human"), join(kit.humanDir(root), id), { recursive: true }); }
+  if (v.shipped) kit.removeFromStore(join(kit.humanDir(root), id), root);          // back to the app's own, read in place
+  else if (existsSync(join(d, "human"))) { kit.removeFromStore(join(kit.humanDir(root), id), root); cpSync(join(d, "human"), join(kit.humanDir(root), id), { recursive: true }); }
   else {
     cpSync(join(d, "user.json"), join(kit.userDir(root), `${id}.json`));
-    rmSync(join(kit.mediaRoot(root), id), { recursive: true, force: true });
+    kit.removeFromStore(join(kit.mediaRoot(root), id), root);
     if (existsSync(join(d, "media"))) cpSync(join(d, "media"), join(kit.mediaRoot(root), id), { recursive: true });
   }
   rmSync(d, { recursive: true, force: true });
@@ -364,7 +379,7 @@ export function undo(id, root = APP_ROOT) {
 }
 
 // ---- did a change happen: the definition (Brush) or the module's files (anidoodle) before and after, and what Claude says
-const META = new Set(["credit", "version", "description", "savedAt", "from", "runs", "group", "demo", "selectable", "kind", "ownStyle", "heightM", "heightBy", "heightNote"]);          // not the character itself
+const META = new Set(["credit", "version", "description", "savedAt", "savedFrom", "from", "runs", "group", "demo", "selectable", "kind", "ownStyle", "heightM", "heightBy", "heightNote"]);          // not the character itself
 function diffPaths(a, b, path = "", out = []) {
   if (JSON.stringify(a) === JSON.stringify(b)) return out;
   if (a && b && typeof a === "object" && typeof b === "object" && !Array.isArray(a) && !Array.isArray(b)) {
@@ -458,12 +473,13 @@ export function alignAbout(about, name) {
   return m && m[1] !== n ? n + a.slice(m[1].length) : a;
 }
 
-/** Delete one of the user's anidoodle characters (Mira and Theo, the author's, stay). */
+/** Delete one of the user's anidoodle characters. The user's copy of a character the app ships goes too, and the shipped one shows again; the
+ *  shipped one itself, in bundle/, stays. */
 export function deleteHuman(id, root = APP_ROOT) {
   const c = kit.humanCharacters(root).find((x) => x.id === id);
   if (!c) throw Object.assign(new Error("No such character"), { code: "NOT_FOUND" });
-  if (c.credit?.made === "as shipped") throw Object.assign(new Error(`${c.name} is anidoodle's own (as shipped): it stays`), { code: "INVALID" });
-  rmSync(join(kit.humanDir(root), id), { recursive: true, force: true }); rmSync(join(kit.humanDir(root), `.previous-${id}`), { recursive: true, force: true });
+  if (!existsSync(join(kit.humanDir(root), id, "character.json"))) throw Object.assign(new Error(`${c.name} is anidoodle's own (as shipped): it stays`), { code: "INVALID" });
+  kit.removeFromStore(join(kit.humanDir(root), id), root); kit.removeFromStore(join(kit.humanDir(root), `.previous-${id}`), root);
   kit.forgetHistory(id, root);
   return { deleted: id };
 }

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "hand-line-boil",
+  "type": "hyperframes:component",
+  "title": "Line Boil",
+  "description": "Hình vẽ được vẽ lại 12 lần mỗi giây, mỗi lần lệch một chút nên nét run rẩy như phim vẽ tay.",
+  "tags": [
+    "boil",
+    "hand-drawn",
+    "jitter",
+    "loop",
+    "loops-ambient",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "hand-line-boil.html",
+      "target": "compositions/components/hand-line-boil.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/hand-line-boil",
+    "author": "moworks",
+    "call": "MW.handLineBoil(q(\".lb\"), tl, 0, {});",
+    "function": "MW.handLineBoil",
+    "options": {
+      "fps": "drawings a second (12)",
+      "amp": "± px (6; 1.5 at UI size)",
+      "variants": "drawings it cycles through (3)",
+      "frequency": "of the noise (0.02)",
+      "seed": "(1)",
+      "duration": "s (4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Redraw at 12 fps (2 frames per drawing at 24 fps, ~83 ms), cycling 3 variants, each jittering the drawing +-1.5 px. Demo: a face circle r 50 from 41 points, radius jitter +-2 px re-seeded every 1/12 s (no fixed variants), eyes +-1 px. Params: fps (12) · amp (±1.5 px) · variants (3). An SVG displacement filter whose noise seed changes 12 times a second, cycling a few variants, so any drawing or text boils like hand animation.",
+    "titleVi": "Nét vẽ run 12 hình mỗi giây"
+  }
+}

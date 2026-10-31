@@ -1,0 +1,56 @@
+<!--
+  Pop Scale (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Bong bóng thoại phóng từ rất nhỏ lên 116 % rồi về đúng cỡ, hiện rõ trong 0.12 giây đầu.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionPopScale(q(".ps"), tl, 0.3, { exitAt: 1.8 });
+
+  Options (defaults in brackets):
+      - from: start scale (0.05)
+      - peak: (1.16)
+      - peakAt: share of the length at the peak (0.72), power2.out up, power2.inOut down
+      - duration: s (0.52)
+      - fade: s it takes to appear (0.12)
+      - origin: transform origin
+      - exitAt: s after the start to shrink to 0.6 and fade (null)
+      - exit: s (0.22)
+
+  Notes: Speech bubble (120×56, r 16, tail lower-left) scales about its centre 0.05 → 1.16 at 374 ms (power2.out) → 1 at 520 ms (power2.inOut); opacity 0 → 1 over the first 120 ms (linear); no rotation (recipe ease: easeOutBack). Exit: shrinks to 0.6 and fades, 220 ms power2.in. Params: duration (0.52 s) · from: cỡ đầu (0.05) · peak: đỉnh (1.16) · origin (giữa).
+-->
+
+<div class="st"><div class="ps-w"><div class="ps-a"></div><div class="ps">Chào bạn!</div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"from":0.05,"peak":1.16,"peakAt":0.72,"duration":0.52,"fade":0.12,"origin":"50% 50%","exitAt":null,"exit":0.22};
+  var run = function (el, tl, at, o) {
+        var p2 = gsap.parseEase("power2.out"), io = gsap.parseEase("power2.inOut"), pin = gsap.parseEase("power2.in"), tp = o.duration * o.peakAt; gsap.set(el, { transformOrigin: o.origin });
+        return MW.drive(tl, at, o.exitAt == null ? o.duration : o.exitAt + o.exit, function (t) {
+          var s = t < tp ? o.from + (o.peak - o.from) * p2(t / tp) : o.peak + (1 - o.peak) * io(Math.min(1, (t - tp) / (o.duration - tp))), a = Math.min(1, t / o.fade);
+          if (o.exitAt != null && t > o.exitAt) { var x = pin(Math.min(1, (t - o.exitAt) / o.exit)); s *= 1 - 0.4 * x; a *= 1 - x; }
+          gsap.set(el, { scale: s }); el.style.opacity = String(a);
+        });
+      };
+  MW.motionPopScale = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-jelly-emphasis",
+  "hash": "fdbb1d13345665a9",
+  "at": "2026-10-17T07:36:48.978Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-jelly-emphasis.mp4",
+    "poster": "previews/moworks__motion-jelly-emphasis.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "22d241553917b1fd3d6f90a71617e084cd07671c47d77fd7f6e084176bba8595",
+    "size": 7295,
+    "seconds": 30.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

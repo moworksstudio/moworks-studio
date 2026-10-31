@@ -1,0 +1,102 @@
+<!--
+  Magnetic Fluid Badge (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Một nam châm chữ U tiến lại gần, huy hiệu tròn như chất lỏng từ tính mọc gai nhọn về phía nam châm, rung nhẹ và lệch về phía đó; nam châm rời đi thì gai thu lại.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectFerroBadge(q(".gm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - count: the badge number
+      - accent: 
+      - loop: s (3.8)
+
+  Notes: Badge r24 (accent, number) with 18 spikes. A U-magnet moves x 300 → 226 (0.3-1.1 s power2.inOut), back at 2.7-3.4 s. Spike length = (2 + 34 × max(0, cos θ)³) × k, θ = angle from the magnet direction, k on a spring k140 d9 (1 from 0.55 s, 0 from 2.85 s); spikes (triangles, base ±0.17 rad) wobble ±8 %; the badge shifts 3 px toward the magnet and stretches scaleX 1.06 / scaleY 0.96 with k. Dashed field lines flow while near. Params: spikes (18) · length (2 + 34 cos³) · spring (k140 c9) · wobble (±8 %) · magnet path. Spike length = (2 + 34 × max(0, cos θ)³) × k, θ from the magnet's direction, k on springs k140 c9.
+-->
+
+<div class="gm"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.springTo = MW.springTo || function (k, c, keys) {
+    var sp = MW.spring(k, c);
+    return function (t) { var v = keys[0][1]; for (var i = 1; i < keys.length; i++) if (t >= keys[i][0]) v += (keys[i][1] - keys[i - 1][1]) * sp.at(t - keys[i][0]); return v; };
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  MW.span = MW.span || function (t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); };
+  MW.yAt = MW.yAt || function (pts, x) { if (x <= pts[0][0]) return pts[0][1]; for (var i = 1; i < pts.length; i++) if (x <= pts[i][0]) { var u = (x - pts[i - 1][0]) / ((pts[i][0] - pts[i - 1][0]) || 1); return pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * u; } return pts[pts.length - 1][1]; };
+  MW.polyToX = MW.polyToX || function (c, pts, x) { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) { if (pts[i][0] <= x) c.lineTo(pts[i][0], pts[i][1]); else { c.lineTo(x, MW.yAt(pts, x)); break; } } return [Math.min(x, pts[pts.length - 1][0]), MW.yAt(pts, Math.min(x, pts[pts.length - 1][0]))]; };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"count":"9","accent":"#8b7bff","loop":3.8};
+  var run = function (el, tl, at, o) {
+        var S = MW.stage320(el), c = S.ctx, io = gsap.parseEase("power2.inOut"), K = MW.springTo(140, 9, [[0, 0], [0.55, 1], [2.85, 0]]), bx = 130, by = 100;
+        return MW.drive(tl, at, o.loop, function (t) {
+          S.clear(); var mx = 300 - 74 * (io(MW.span(t, 0.3, 1.1)) - io(MW.span(t, 2.7, 3.4))), k = Math.max(0, K(t)), cx = bx + 3 * k;
+          if (k > 0.05) { c.save(); c.setLineDash([3, 4]); c.lineDashOffset = -t * 20; c.strokeStyle = "rgba(139,123,255," + (0.5 * Math.min(1, k)).toFixed(3) + ")"; c.lineWidth = 1; [-18, 0, 18].forEach(function (d) { c.beginPath(); c.moveTo(cx + 26, by + d * 0.4); c.quadraticCurveTo((cx + mx) / 2, by + d * 1.6, mx - 18, by + d * 0.9); c.stroke(); }); c.restore(); }
+          c.fillStyle = o.accent;
+          for (var i = 0; i < 18; i++) { var th = i / 18 * 2 * Math.PI, len = (2 + 34 * Math.pow(Math.max(0, Math.cos(th)), 3)) * k * (1 + 0.08 * Math.sin(t * 14 + i)); if (len < 0.5) continue;
+            c.beginPath(); c.moveTo(cx + 22 * Math.cos(th - 0.17), by + 22 * Math.sin(th - 0.17)); c.lineTo(cx + (24 + len) * Math.cos(th), by + (24 + len) * Math.sin(th)); c.lineTo(cx + 22 * Math.cos(th + 0.17), by + 22 * Math.sin(th + 0.17)); c.closePath(); c.fill(); }
+          c.beginPath(); c.ellipse(cx, by, 24 * (1 + 0.06 * k), 24 * (1 - 0.04 * k), 0, 0, 2 * Math.PI); c.fill(); MW.txt(c, o.count, cx, by + 0.5, 16, "#fff", 900);
+          c.lineWidth = 11; c.lineCap = "butt"; c.strokeStyle = "#c2c8d8"; c.beginPath(); c.arc(mx + 4, by, 16, Math.PI / 2, 3 * Math.PI / 2, true); c.stroke(); c.strokeStyle = "#ff5d8f"; c.beginPath(); c.moveTo(mx - 12, by - 16); c.lineTo(mx - 22, by - 16); c.stroke(); c.strokeStyle = "#3d9bff"; c.beginPath(); c.moveTo(mx - 12, by + 16); c.lineTo(mx - 22, by + 16); c.stroke();
+          c.strokeStyle = "#c2c8d8"; c.beginPath(); c.moveTo(mx + 4, by - 16); c.lineTo(mx - 12, by - 16); c.moveTo(mx + 4, by + 16); c.lineTo(mx - 12, by + 16); c.stroke();
+        });
+      };
+  MW.effectFerroBadge = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,53 @@
+<!--
+  Typewriter (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Chữ hiện từng ký tự một, không mờ dần, 12 ký tự mỗi giây như máy đánh chữ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textTypewriterSteps(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - per: s per character (0.083: 12 a second)
+      - fit: s a long line is fitted into (1.6)
+      - start: s (0.35)
+      - clearAt: s the line clears (2.95)
+
+  Notes: Chars appear one at a time with no fade (a hard step), 80 ms per char (12 cps; demo min(1/12 s, 1.6 s/n) so long lines fit 1.6 s), first char at 0.35 s; no caret. AE: Range Selector Start 0 → 100 %, Smoothness 0 %. Erase (recipe) runs 2–3× faster (≈30–40 ms per char, last char first); the demo instead clears the line at 2.95–3.05 s. Loop 3.2 s. Params: rate: ký tự mỗi giây (12) · erase: tốc độ xoá (nhanh gấp 2–3 lần) · caret: không.
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Ngày xửa ngày xưa, ở một ngôi làng nhỏ</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"per":0.083,"fit":1.6,"start":0.35,"clearAt":2.95};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var cells = function (el, text) { el.textContent = ""; var word = null; return gr(text).map(function (g) { var s = document.createElement("span"); s.textContent = g; s.style.display = "inline-block"; s.style.whiteSpace = "pre";
+    if (g === " ") { word = null; el.appendChild(s); } else { if (!word) { word = document.createElement("span"); word.style.display = "inline-block"; word.style.whiteSpace = "nowrap"; el.appendChild(word); } word.appendChild(s); } return s; }); };
+  var cs = cells(el, el.textContent), n = cs.length, per = Math.min(o.per, o.fit / Math.max(1, n));
+  return MW.drive(tl, at, o.clearAt + 0.1, function (t) { cs.forEach(function (c, i) { c.style.visibility = t >= o.start + i * per && t < o.clearAt ? "visible" : "hidden"; }); });
+  };
+  MW.textTypewriterSteps = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-letter-cascade-swap",
+  "type": "hyperframes:component",
+  "title": "Letter Cascade Swap",
+  "description": "Các ký tự của từ cũ rơi xuống và mờ đi, ký tự của từ mới rơi từ trên vào thế chỗ, nối đuôi nhau như thác.",
+  "tags": [
+    "swap",
+    "letters",
+    "cascade",
+    "drop",
+    "text-swap",
+    "smooth",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "text-letter-cascade-swap.html",
+      "target": "compositions/components/text-letter-cascade-swap.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-letter-cascade-swap",
+    "author": "moworks",
+    "call": "MW.textLetterCascadeSwap(q(\".lc\"), tl, 0, {});",
+    "function": "MW.textLetterCascadeSwap",
+    "options": {
+      "from": "first word",
+      "to": "second word",
+      "drop": "px (160)",
+      "stagger": "s (0.05, ≤ 0.5 s)",
+      "at": "s (0.4)",
+      "backAt": "s (2.0)",
+      "accent": "colour while falling in",
+      "seed": "tilts"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Two stacked split words. Old chars fall y 0 → +40 px and fade, 0.35 s easeInCubic (CSS cubic-bezier(.32,0,.67,0); labelled power3.in), 50 ms apart; demo adds a seeded tilt up to ±8.6°. New chars drop in from y −40 px → 0 with fade-in, 0.45 s easeOutCubic (cubic-bezier(.33,1,.68,1)), 50 ms apart, starting 0.15 s after the old (accent while moving). Stagger capped 0.5 s total. Demo swaps at 0.4 s and 2.0 s; loop 3.6 s. Params: to: từ mới · stagger (0.05 s) · drop (40 px) · out / in (0.35 s / 0.45 s) · delay từ mới (0.15 s).",
+    "titleVi": "Chữ cũ rơi, chữ mới thế chỗ"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-back-in-out",
+  "type": "hyperframes:component",
+  "title": "Back In-out",
+  "description": "Lùi lại lúc đầu và vượt quá lúc cuối; nổi bật nhưng không nên dùng nhiều.inOut(1.7)).",
+  "tags": [
+    "ease",
+    "overshoot",
+    "back",
+    "easing",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-back-in-out.html",
+      "target": "compositions/components/motion-ease-back-in-out.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-ease-back-in-out",
+    "author": "moworks",
+    "call": "MW.motionEaseBackInOut(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseBackInOut",
+    "options": {
+      "duration": "s (0.6)",
+      "ease": "the curve (back.inOut(1.7))",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Target dips −10.5 % (at 21 % of the time) and overshoots +10.5 % (at 79 %) before landing at 100 %, 600 ms, cubic-bezier(.68,−.6,.32,1.6) ≈ GSAP back.inOut(1.7). Rule: eye-catching, do not overuse. Small demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: duration (0.6 s) · ease (back.inOut(1.7) | custom .68,−.6,.32,1.6).",
+    "titleVi": "Back in-out (vượt cả hai đầu)"
+  }
+}

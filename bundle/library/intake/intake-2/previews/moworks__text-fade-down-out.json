@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-fade-down-out",
+  "hash": "df826a0b8278bf1c",
+  "at": "2026-10-17T11:31:26.301Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-fade-down-out.mp4",
+    "poster": "previews/moworks__text-fade-down-out.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ce325f011b08b30573d9fc789d2f047e4bcda9eecc46ea0f5c24b28e59bcf829",
+    "size": 12070,
+    "seconds": 25.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

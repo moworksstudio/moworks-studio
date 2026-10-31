@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "flow-step-domino",
+  "type": "hyperframes:block",
+  "title": "Event Sequence Domino",
+  "description": "Bốn ô bước lần lượt dựng đứng từ sàn, chạy màu nhấn, xong thì hiện dấu tích xanh và mũi tên vẽ sang ô kế tiếp.",
+  "tags": [
+    "steps",
+    "process",
+    "stagger",
+    "check",
+    "data-storytelling",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "flow-step-domino.html",
+      "target": "compositions/components/flow-step-domino.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/flow-step-domino",
+    "author": "moworks",
+    "call": "MW.flowStepDomino(q(\".gm\"), tl, 0, {});",
+    "function": "MW.flowStepDomino",
+    "options": {
+      "steps": "the step labels (4)",
+      "exitAt": "s the boxes fold down in reverse (3.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "4 step boxes 50 x 56 px, 70 px apart, on a floor line. Box i starts at 350 + 620 i ms: rises scaleY 0.08 -> 1 (bottom origin) over 320 ms back.out, accent fill while running; at +400 ms it resolves to the plain card and a green check badge pops (220 ms back.out) at its top-right; at +420 to +580 ms an arrow draws to the next box (easeOutCubic). Exit: boxes fold down in reverse, 50 ms apart. Params: steps (4) · interval (0.62 s) · rise (0.32 s).",
+    "titleVi": "Chuỗi bước dựng lên như domino"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-combo-counter",
+  "hash": "3f6556e26bd19556",
+  "at": "2026-10-17T11:15:45.493Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-combo-counter.mp4",
+    "poster": "previews/moworks__ui-combo-counter.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "05216ccf5ca7202e4e2af03f215af5d11adb92f078fc79d22bce15e94adcc325",
+    "size": 13905,
+    "seconds": 29.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/card-depth-flythrough",
+  "hash": "1fb6cca1e571edb7",
+  "at": "2026-10-17T11:26:40.004Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__card-depth-flythrough.mp4",
+    "poster": "previews/moworks__card-depth-flythrough.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "805cc3277ed68267a94d37bf69be5c55fbd49973e4cb9880a6be913fc04c2f73",
+    "size": 77807,
+    "seconds": 38.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

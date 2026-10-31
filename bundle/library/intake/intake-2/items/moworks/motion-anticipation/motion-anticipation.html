@@ -1,0 +1,58 @@
+<!--
+  Anticipation (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Trước cú di chuyển lớn, phần tử lùi nhẹ khoảng 8 px theo chiều ngược rồi mới lao đi.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionAnticipation(q(".an"), tl, 0.4, { backAt: 1.7 });
+
+  Options (defaults in brackets):
+      - pull: px back first (64; 10–20 % of the move)
+      - pullTime: s (0.35)
+      - distance: px (872)
+      - duration: s of the dash (0.3)
+      - squeeze: scaleX taken off in the pull (0.1)
+      - stretch: scaleX added in the dash (0.25)
+      - backAt: s after the start to go back (null)
+      - back: s (0.6)
+
+  Notes: Recipe: pull back ~8 px the opposite way in 100 ms (ease-out), then go to the target by 400 ms (expo.out); for a button, scale 0.95 → 1. Small demo: a square pulls back 16 px in 350 ms, then dashes 218 px in 300 ms (power2.inOut keys), scaleX −10 % during the pull-back and +25 % during the dash (scaleY = 1/scaleX, sine bumps). Rule: 10–20 % of the main move's length and amount. Params: pull (8 px) · pull_time (0.1 s) · duration (0.4 s) · ease đi (expo.out). The recipe: about 8 px back in 0.1 s, then to the target by 0.4 s expo.out; a button scales 0.95 → 1.
+-->
+
+<div class="fl"></div><div class="an-s"></div><div class="an"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"pull":64,"pullTime":0.35,"distance":872,"duration":0.3,"squeeze":0.1,"stretch":0.25,"backAt":null,"back":0.6};
+  var run = function (el, tl, at, o) {
+        var io = gsap.parseEase("power2.inOut"); gsap.set(el, { transformOrigin: "50% 100%" });
+        return MW.drive(tl, at, o.backAt == null ? o.pullTime + o.duration : o.backAt + o.back, function (t) {
+          var x, sx = 1;
+          if (t < o.pullTime) { var u = t / o.pullTime; x = -o.pull * io(u); sx = 1 - o.squeeze * Math.sin(Math.PI * u); }
+          else if (t < o.pullTime + o.duration) { var w = (t - o.pullTime) / o.duration; x = -o.pull + (o.distance + o.pull) * io(w); sx = 1 + o.stretch * Math.sin(Math.PI * w); }
+          else { x = o.distance; if (o.backAt != null && t > o.backAt) x = o.distance * (1 - io(Math.min(1, (t - o.backAt) / o.back))); }
+          gsap.set(el, { x: x, scaleX: sx, scaleY: 1 / sx });
+        });
+      };
+  MW.motionAnticipation = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

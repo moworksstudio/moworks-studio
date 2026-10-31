@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-confetti-rain",
+  "hash": "2329efc975babb52",
+  "at": "2026-10-17T10:41:05.919Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__effect-confetti-rain.mp4",
+    "poster": "previews/moworks__effect-confetti-rain.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f8c9deb93b40a29c903bf77a8644b3b623ff9b6c7c5a7a9190b97db4ab217140",
+    "size": 49033,
+    "seconds": 28.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

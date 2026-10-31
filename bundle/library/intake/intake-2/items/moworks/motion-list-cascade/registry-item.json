@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-list-cascade",
+  "type": "hyperframes:component",
+  "title": "Cascade List",
+  "description": "Bốn dòng từ trên rơi xuống, lún quá 3 px rồi về chỗ, mỗi dòng trễ 60 ms.",
+  "tags": [
+    "list",
+    "stagger",
+    "drop",
+    "list-grid",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "motion-list-cascade.html",
+      "target": "compositions/components/motion-list-cascade.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-list-cascade",
+    "author": "moworks",
+    "call": "MW.motionListCascade(q(\".lc\"), tl, 0.3, {});",
+    "function": "MW.motionListCascade",
+    "options": {
+      "items": "",
+      "from": "px (−80)",
+      "dip": "px it dips past (12)",
+      "stagger": "s (0.06)",
+      "cols": ""
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Four rows, 60 ms apart (820 ms in all): y −20 → +3 px in 384 ms power3.out, then +3 → 0 in 256 ms power2.inOut (640 ms each); opacity 0 → 1 over the first 400 ms (power2.out). A side rail of dots lights as each row lands (guide). Params: from (−20 px) · dip: lún quá (3 px) · stagger (60 ms) · each (0.64 s). 0.384 s power3.out past the slot, then 0.256 s power2.inOut back: 0.64 s each.",
+    "titleVi": "Danh sách rơi nhẹ xuống chỗ"
+  }
+}

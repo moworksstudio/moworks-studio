@@ -1,0 +1,65 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-tracking-inertia",
+  "type": "hyperframes:component",
+  "title": "Path With Tracking Inertia",
+  "description": "Dòng chữ chạy vào dọc đường cong và dừng gấp, các chữ phía sau dồn sát vào rồi giãn ra quá đà và rung tắt dần như có quán tính.",
+  "tags": [
+    "inertia",
+    "tracking",
+    "path",
+    "settle",
+    "text-path-shape",
+    "bouncy",
+    "crisp",
+    "path-shape"
+  ],
+  "files": [
+    {
+      "path": "text-tracking-inertia.html",
+      "target": "compositions/components/text-tracking-inertia.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-tracking-inertia",
+    "author": "moworks",
+    "call": "MW.textTrackingInertia(q(\".ti\"), tl, 0, {});",
+    "function": "MW.textTrackingInertia",
+    "options": {
+      "text": "",
+      "size": "px (130)",
+      "run": "px the head runs (2040)",
+      "duration": "s (0.9): half linear, half power1.out",
+      "start": "s (0.3)",
+      "amp": "em of tracking swing (0.25)",
+      "freq": "Hz (3)",
+      "decay": "per second (6)",
+      "curve": "the U path, y = curve × (x − centre)² (0.00012)",
+      "fadeAt": "s (3.4)",
+      "loop": "s (4.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Text on a shallow U path (y = 0.0007 × (x − centre)² px). Head runs 340 px to its stop 0.3–1.2 s with ease ½ linear + ½ power1.out (still moving at the stop). From the stop: per-gap tracking = −0.25 em × sin(2π × 3 × t) × e^(−6t), each char offset by that × its index from the end, so the trailing chars squeeze in, overshoot open and settle in ~1 s. Fade out 3.4–3.8 s. Loop 4.2 s. AE: inertia expression amp 0.05, freq 3, decay 6 on Tracking Amount. Params: quãng chạy (340 px) · thời gian chạy (0.9 s) · biên độ (0.25 em) · tần số (3) · độ tắt (6). From the stop the gap between letters swings −amp × sin(2π freq t) × e^(−decay t), more for the letters further back.",
+    "titleVi": "Chữ chạy rồi dừng, giãn chữ rung tắt"
+  }
+}

@@ -6,9 +6,17 @@
 import { cpSync, existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, readlinkSync, renameSync, rmSync, symlinkSync, utimesSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { randomBytes } from "node:crypto";
+import { tmpdir } from "node:os";
 
-/** runtime/stage of this install (MW_STAGE_DIR: tests). */
-export const stageRoot = (root) => resolve(process.env.MW_STAGE_DIR ?? join(root, "runtime", "stage"));
+/** The folder every test shares instead of the stage (made once per version, as films share it): the suite made its rules in the app's real
+ *  runtime/stage, 8 of the 11 sets seen on 30/10/2026 (prepareRules' root is the app's by default), and housekeeping would prune there. */
+export const TEST_STAGE = "mw-test-stage";
+// `node --test` marks each test process and what it starts (NODE_TEST_CONTEXT); a test file run by itself is named in its own arguments
+const inTest = () => !!process.env.NODE_TEST_CONTEXT || /\.test\.mjs$/.test(process.argv[1] ?? "");
+/** runtime/stage of this install. A stage made in a test never lands there: MW_STAGE_DIR when a test names its own, else the tests' shared
+ *  folder; a temporary work folder (MW_WORK_ROOT) has its stage inside it. */
+export const stageRoot = (root) => resolve(process.env.MW_STAGE_DIR ?? (inTest() ? join(tmpdir(), TEST_STAGE)
+  : process.env.MW_WORK_ROOT ? join(process.env.MW_WORK_ROOT, "stage") : join(root, "runtime", "stage")));
 /** A folder as Claude Code's permission rules write it: //d/Moworks Studio/app/runtime/stage (Windows' path in POSIX form, from the root). */
 export const rulePath = (p) => `/${String(p).replace(/\\/g, "/").replace(/^([A-Za-z]):/, (_m, d) => `/${d.toLowerCase()}`)}`;
 /** A shared folder: runtime/stage/<kind>/<name> (name carries the version: anidoodle@<commit>, a style's rules and their hash). */

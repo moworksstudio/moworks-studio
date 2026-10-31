@@ -1,0 +1,51 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-dot-merge",
+  "type": "hyperframes:block",
+  "title": "Data Cluster Merge",
+  "description": "Chín chấm nhóm A và bảy chấm nhóm B bay theo đường cong vào giữa, xếp thành hình hoa hướng dương mà vẫn giữ màu nhóm.",
+  "tags": [
+    "dots",
+    "merge",
+    "data",
+    "stagger",
+    "data-storytelling",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "data-dot-merge.html",
+      "target": "compositions/components/data-dot-merge.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/data-dot-merge",
+    "author": "moworks",
+    "call": "MW.dataDotMerge(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataDotMerge",
+    "options": {},
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Group A: 9 dots (r 5) in a 3 x 3 grid, 16 px pitch, left; group B: 7 dots in a hex cluster, right. Each dot flies to a sunflower spot around the centre (radius 8 sqrt(j + 0.5) px, angle j x 137.5 deg), 750 ms easeInOut, from 900 ms + 45 ms per dot, path bowed +-14 px (A up, B down). 'A 9' / 'B 7' fade out 700-1000; '9 + 7 = 16' + ring fade in 2000-2300. Dots keep group colours. Params: dots (9 + 7) · stagger (45 ms) · duration bay (0.75 s).",
+    "titleVi": "Hai cụm chấm gộp thành một"
+  }
+}

@@ -4,6 +4,7 @@
 //   GET /<key>/player.js            HF player (pinned version)
 //   GET /<key>/runtime.js           HF runtime (fallback for projects without an embedded runtime)
 //   GET /<key>/host.js              the host page script (picking, marks, commands from the UI)
+//   GET /<key>/split-text.js        words animated letter by letter as one line (read by host.js; the server's hand edits use the same file)
 //   GET /<key>/p/<id>/__preview     host page with the player
 //   GET /<key>/p/<id>/<file>        a project file (not .git, .claude, .moworks except its posters)
 import { createServer } from "node:http";
@@ -12,7 +13,7 @@ import { createReadStream, existsSync, statSync } from "node:fs";
 import { extname, join, normalize, resolve, sep } from "node:path";
 import { resolveRuntime } from "../version-manager/index.mjs";
 
-const HOST_JS = join(import.meta.dirname, "host.js");
+const HOST_JS = join(import.meta.dirname, "host.js"), SPLIT_JS = join(import.meta.dirname, "splitText.js");
 
 const MIME = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css", ".json": "application/json",
   ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp", ".gif": "image/gif", ".svg": "image/svg+xml",
@@ -39,7 +40,7 @@ function hostPage({ key, id, uiOrigin, width, height }) {
 <body data-ui="${uiOrigin}" data-w="${width}" data-h="${height}" data-src="${src}">
 <hyperframes-player id="p" src="${src}" runtime-src="/${key}/runtime.js" width="${width}" height="${height}" disable-click-to-play assets-loading-ui="none" shader-loading="none"></hyperframes-player>
 <div id="ov" tabindex="0" aria-label="Film"></div><div id="marks"></div>
-<script src="/${key}/host.js"></script></body></html>`;
+<script src="/${key}/split-text.js"></script><script src="/${key}/host.js"></script></body></html>`;
 }
 
 /** Start the preview origin. resolveProject(id) -> { dir, width, height } | null. uiOrigin: the UI's own origin (postMessage target). */
@@ -76,6 +77,7 @@ export function startPreviewServer({ resolveProject, uiOrigin, version = null, p
       return sendFile(parts[1] === "player.js" ? f.player : f.runtime);
     }
     if (parts[1] === "host.js") return sendFile(HOST_JS);
+    if (parts[1] === "split-text.js") return sendFile(SPLIT_JS);
     if (parts[1] === "p" && parts[2]) {
       const proj = resolveProject(parts[2]);
       if (!proj) return deny(404, "Project not found");

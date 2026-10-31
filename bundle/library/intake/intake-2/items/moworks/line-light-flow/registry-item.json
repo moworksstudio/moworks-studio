@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "line-light-flow",
+  "type": "hyperframes:component",
+  "title": "SVG Gradient Flow",
+  "description": "Một dải sáng đuôi tối dần, đầu trắng chạy dọc một đường đứng yên.",
+  "tags": [
+    "svg",
+    "trail",
+    "glow",
+    "line",
+    "svg-path",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "line-light-flow.html",
+      "target": "compositions/components/line-light-flow.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/line-light-flow",
+    "author": "moworks",
+    "call": "MW.lineLightFlow(q(\".lf\"), tl, 0, {});",
+    "function": "MW.lineLightFlow",
+    "options": {
+      "segments": "(8)",
+      "length": "of the path each (0.045)",
+      "duration": "s per pass, linear (2.2)",
+      "passes": "(1)",
+      "width": "stroke width (6)",
+      "tail": "colour at the tail",
+      "head": "at the head"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Path (pathLength 1) drawn faint, 4 px. 8 windows 0.045 long; window k ends 0.025 x (7 - k) behind the head; head travels 0 -> 1.24 linear over 2200 ms (enters and fully leaves). Colours step dark -> white along the band (#172541 ... #ffffff; canvas: accent windows at opacity (k + 1) / 8, head in ink with a round cap), 6 px wide. Params: segments (8) · length (0.045) · duration (2.2 s) · colors: đuôi / đầu.",
+    "titleVi": "Dòng sáng chạy dọc đường"
+  }
+}

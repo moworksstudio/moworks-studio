@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-perfect-dodge",
+  "type": "hyperframes:component",
+  "title": "Perfect Dodge",
+  "description": "Ngay trước khi đạn tới, nhân vật bật lên tránh, để lại ba bóng mờ ở chỗ cũ cho viên đạn xuyên qua; rồi đáp xuống bẹp nhẹ và chữ \"PERFECT\" bật ra.",
+  "tags": [
+    "dodge",
+    "afterimage",
+    "hop",
+    "squash",
+    "combat-hit-fx",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-perfect-dodge.html",
+      "target": "compositions/components/motion-perfect-dodge.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-perfect-dodge",
+    "author": "moworks",
+    "call": "MW.motionPerfectDodge(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionPerfectDodge",
+    "options": {
+      "dodgeAt": "s (0.72)",
+      "hop": "px (62, 180 ms expo.out)",
+      "landAt": "s (1.6)",
+      "outAt": "s the label leaves (2.2)",
+      "label": "",
+      "loop": "s (2.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. Body 24 x 40. Dodge at 0.72 s: hops up 62 px in 180 ms outExpo with a 15 % stretch for 160 ms; 3 ghost copies at the start spot (opacity 45 / 33 / 21 %, offset 3 px and slightly up the path) fade over 0.82-1.72 s. Bullet x 330 → 150 → 96 → −20 px at 0.25 / 0.8 / 1.2 / 1.5 s (linear), passing the ghosts. Falls 1.35-1.6 s in-quad, lands with an 18 % squash (180 ms half-sine). 'PERFECT' pops at 0.87 s (300 ms back.out), out 2.2-2.45 s. Params: dodgeAt: lúc né (0.72 s) · hop: độ cao (62 px / 0.18 s) · ghosts: số bóng (3) · landAt: lúc đáp (1.6 s). Three ghosts (45 / 33 / 21 %) stay at the start spot while the bullet slows through them (330 → 150 → 96 → −20 px); the body lands with an 18 % squash.",
+    "titleVi": "Né đòn hoàn hảo để lại bóng mờ"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-jelly-emphasis",
+  "type": "hyperframes:component",
+  "title": "Jelly Emphasis",
+  "description": "Khối dẹt ngang rồi cao dọc xen kẽ như miếng thạch rồi đứng yên, gốc ở đáy.",
+  "tags": [
+    "attention",
+    "jelly",
+    "squash",
+    "attention-emphasis",
+    "soft",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-jelly-emphasis.html",
+      "target": "compositions/components/motion-jelly-emphasis.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-jelly-emphasis",
+    "author": "moworks",
+    "call": "MW.motionJellyEmphasis(q(\".jel\"), tl, 0.5, { shadow: \".jsh\" });",
+    "function": "MW.motionJellyEmphasis",
+    "options": {
+      "shadow": "the contact shadow (its width follows scaleX)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Origin bottom centre; scaleX / scaleY keys 1/1 → 1.25/0.78 (260 ms) → 0.88/1.12 (430 ms) → 1.06/0.96 (590 ms) → 1/1 (760 ms), sine.inOut between keys; contact shadow width follows scaleX. Once. Params: keys (1.25/0.78 → 0.88/1.12 → 1.06/0.96) · duration (0.76 s) · origin (50 % 100 %).",
+    "titleVi": "Rung như thạch"
+  }
+}

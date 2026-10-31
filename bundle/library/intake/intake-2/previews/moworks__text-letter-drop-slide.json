@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-letter-drop-slide",
+  "hash": "e8e1106f1e940477",
+  "at": "2026-10-17T08:34:07.773Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-letter-drop-slide.mp4",
+    "poster": "previews/moworks__text-letter-drop-slide.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "027e129a81280c9a0645b6f1e5fdcc2cad2e26ce9826678857a24259dbd3f225",
+    "size": 25263,
+    "seconds": 29.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

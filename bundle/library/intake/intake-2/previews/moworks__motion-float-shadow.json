@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-float-shadow",
+  "hash": "0bc8456d595dc9a7",
+  "at": "2026-10-17T11:40:14.186Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-float-shadow.mp4",
+    "poster": "previews/moworks__motion-float-shadow.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c9a17910d443d20c97c00d6c3f03e25e2d042155d02f857e68ed240636caa67d",
+    "size": 15939,
+    "seconds": 34.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

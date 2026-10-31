@@ -4,14 +4,16 @@
 // check frames are compared with HF's own stills (hyperframes snapshot). The kit and HF are not modified.
 //
 //   aeExport(projectDir, { fps, outDir, runAe, check, estimateOnly, version, onEvent, signal, logFile, film })
-//     -> { status: "done" | "estimate" | "failed" | "cancelled", code?, message?, aep?, outDir, checks: [{ t, diff }], notes: [], estimate?, canvas? }
+//     -> { status: "done" | "estimate" | "failed" | "cancelled", code?, message?, aep?, outDir, checks: [{ t, diff, shot }], notes: [], estimate?, canvas?,
+//          layers?: { layers, of, sound, soundOf, converted, lost: [{ name, file, why }] }: what After Effects really built }
 //   gpu: a size check only, its page drawn on the GPU (the styles' AE badges: packages/style-ae)
 //   film: the rendered film (MP4), what a film drawn on a canvas only (or made as it plays) goes into AE as one video layer; without it NEEDS_FILM
 //   events: { type: "stage", stage: "page" | "reference" | "record" | "pictures" | "keys" | "ae" | "check" | "copy", done?, total? }
 //           { type: "log", line }
 import { spawn, spawnSync } from "node:child_process";
-import { createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
+import { placedShots, readShots } from "../hf-edit/shots.mjs";
 import { servePage } from "../hf-page/index.mjs";
 import { snapshotAtForeground } from "../hf-qa/cli.mjs";
 import { normalizeFps } from "../hf-render-worker/client.mjs";
@@ -30,14 +32,42 @@ export function filmDuration(projectDir) {
   return d;
 }
 
-/** The check times the port renders in AE: 25 %, 50 %, 85 % of the film (the kit's "auto"), or the given list; each on a frame of the
+/** The check times the port renders in AE: one frame in the middle of every shot (T29-21: 15, 30 and 51 s of a 60 s film said 0.91, 1.31 and 4.45 % while two other
+ *  shots were 7 % too big), 25 %, 50 %, 85 % of a film with no shots (the kit's "auto"), or the given list; each on a frame of the
  *  film's rate, so AE (which draws the frame that holds t) and HF's still show the same instant (a count-up at 8.5 s, 25 fps: AE drew
- *  frame 212 = 8.48 s, HF 8.50 s, and the numbers differed). */
-export function checkTimes(duration, check = "auto", fps = { num: 30, den: 1 }) {
+ *  frame 212 = 8.48 s, HF 8.50 s, and the numbers differed). shots: [{ start, duration }] by start. */
+export function checkTimes(duration, check = "auto", fps = { num: 30, den: 1 }, shots = null) {
   if (!check) return [];
   const f = fps.num / fps.den, onFrame = (t) => Math.round(Math.round(t * f) / f * 10000) / 10000;
-  const ts = check === "auto" ? [0.25, 0.5, 0.85].map((k) => duration * k) : (Array.isArray(check) ? check : String(check).split(",")).map(Number);
-  return ts.filter((t) => t >= 0 && t <= duration).map(onFrame);
+  const inShot = (s, i) => { const end = Math.min(Number(s.start) + Number(s.duration), shots[i + 1]?.start ?? Infinity, duration); return Number(s.start) + (end - Number(s.start)) / 2; };
+  const ts = check !== "auto" ? (Array.isArray(check) ? check : String(check).split(",")).map(Number)
+    : shots?.length ? shots.map(inShot) : [0.25, 0.5, 0.85].map((k) => duration * k);
+  return [...new Set(ts.filter((t) => t >= 0 && t <= duration).map(onFrame))];
+}
+
+/** The film's shots as the app counts them: [{ number, start, duration }] by start, [] for a film with none placed (a page the app cannot read as shots). */
+async function shotsOf(dir, version) {
+  try {
+    const { shots, root } = await readShots(dir, { version });
+    return placedShots(shots, root?.duration).filter((s) => s.start != null && Number(s.duration) > 0).map((s, i) => ({ number: s.number ?? i + 1, start: Number(s.start), duration: Number(s.duration) })).sort((a, b) => a.start - b.start);
+  } catch { return []; }
+}
+/** The shot a film second lies in (the later one where two overlap), or null. */
+export function shotAt(shots, t) {
+  let at = null;
+  for (const s of shots ?? []) if (t >= s.start - 1e-6 && t < s.start + s.duration - 1e-6) at = s.number;
+  return at;
+}
+
+/** What an export leaves behind goes (T29-23: 1.7 GB in the work folder beside the 1.6 GB handed over): the reference stills, and a film's folder from an export that
+ *  stopped or failed. Other films' folders once they are a day old: their exports are over (a port running now writes into its folder all the time). */
+export function sweepWork(work, name, { failed = false, now = Date.now() } = {}) {
+  if (failed) for (const d of ["footage", "audio"]) { try { rmSync(join(work, name, d), { recursive: true, force: true }); } catch { /* AE may hold a file: the next export clears it */ } }
+  let es = []; try { es = readdirSync(work, { withFileTypes: true }); } catch { return; }
+  for (const e of es) {
+    if (!e.isDirectory() || e.name === "_ref" || e.name === name) continue;
+    try { if (now - statSync(join(work, e.name)).mtimeMs > 86400000) rmSync(join(work, e.name), { recursive: true, force: true }); } catch { /* still in use */ }
+  }
 }
 
 /** The rate the recorder samples at and HF's page is served at: the film's rate times the whole number that comes nearest 120 a
@@ -105,6 +135,9 @@ const STAGES = [
   [/^\s*keyframes:/, "keys"], [/^\s*AE build:/, "ae"], [/^\s*check [\d.]+ s:/, "check"], [/^\s*copied to /, "copy"],
 ];
 
+/** A film's folder in the work root (port.py _where). */
+const workName = (dir) => basename(dir).replace(/[^\w-]+/g, "_").replace(/^_+|_+$/g, "") || "film";
+
 export async function aeExport(projectDir, { fps = 30, outDir = null, runAe = true, check = "auto", estimateOnly = false, version = null,
   onEvent = () => {}, signal = null, logFile = null, root = APP_ROOT, film = null, gpu = false } = {}) {
   const dir = resolve(projectDir);
@@ -120,17 +153,19 @@ export async function aeExport(projectDir, { fps = 30, outDir = null, runAe = tr
 
   const pins = loadPins(root);
   const rec = recordRate(rate);
-  let page = null;
+  let page = null, clean = null;
   try {
     emit({ type: "stage", stage: "page" });
     page = await servePage(dir, { version, fps: rec });
     const D = filmDuration(dir);
-    const times = estimateOnly || !runAe ? [] : checkTimes(D, check, rate);
+    const shots = estimateOnly || !runAe ? [] : await shotsOf(dir, version);
+    const times = estimateOnly || !runAe ? [] : checkTimes(D, check, rate, shots);
     const refDir = join(work, "_ref", basename(dir));
     if (times.length) {
       emit({ type: "stage", stage: "reference" });
       rmSync(refDir, { recursive: true, force: true });
-      const s = await snapshotAtForeground(dir, times, refDir, { version });
+      // about 4 s a still on a loaded machine: a film of many shots gets the time they take
+      const s = await snapshotAtForeground(dir, times, refDir, { version, timeoutMs: Math.max(300000, times.length * 15000) });
       if (s.exitCode !== 0) emit({ type: "log", line: `reference stills failed (exit ${s.exitCode}): ${s.stderrTail.join(" | ")}` });
     }
     const args = [PORT_PY, dir, "--url", page.url, "--fps", `${rate.num}/${rate.den}`, "--rate", `${rec.num}/${rec.den}`, "--out", out];
@@ -152,10 +187,13 @@ export async function aeExport(projectDir, { fps = 30, outDir = null, runAe = tr
         let i;
         while ((i = buf.indexOf("\n")) >= 0) {
           const line = buf.slice(0, i).replace(/\r$/, ""); buf = buf.slice(i + 1);
+          // what After Effects really built, for the dialog (the Log has the lines it comes from)
+          const built = /^AE-LAYERS (\{.*\})$/.exec(line); if (built) { result.layers = JSON.parse(built[1]); continue; }
           emit({ type: "log", line });
           for (const [re, stage] of STAGES) { const m = re.exec(line); if (m) { emit({ type: "stage", stage, ...(m[2] ? { done: +m[1], total: +m[2] } : {}) }); break; } }
           const est = /^ESTIMATE (\{.*\})$/.exec(line); if (est) result.estimate = JSON.parse(est[1]);
-          const ck = /^\s*check ([\d.]+) s: ([\d.]+)% of pixels/.exec(line); if (ck) result.checks.push({ t: +ck[1], diff: +ck[2] / 100 });
+          const ck = /^\s*check ([\d.]+) s: ([\d.]+)% of pixels/.exec(line); if (ck) result.checks.push({ t: +ck[1], diff: +ck[2] / 100, shot: shotAt(shots, +ck[1]) });
+          const none = /^\s*check ([\d.]+): missing frame/.exec(line); if (none) result.checks.push({ t: +none[1], diff: null, shot: shotAt(shots, +none[1]) });
           const nt = /^\s*note: (.*)$/.exec(line); if (nt) result.notes.push(nt[1]);
           if (/^\s*AE: .*ERROR|^\s+ERROR /.test(line)) result.message = line.trim();
         }
@@ -163,16 +201,19 @@ export async function aeExport(projectDir, { fps = 30, outDir = null, runAe = tr
       child.stdout.on("data", onData); child.stderr.on("data", onData);
       child.on("close", (c) => { signal?.removeEventListener("abort", onAbort); if (buf) onData("\n"); res(c); });
     });
-    if (signal?.aborted) return { ...result, status: "cancelled", code: "CANCELLED" };
+    if (signal?.aborted) { clean = "failed"; return { ...result, status: "cancelled", code: "CANCELLED" }; }
     if (estimateOnly) return code === 0 ? { ...result, status: "estimate" } : { ...result, code: "PORT_FAILED" };
     if (code === 4) return { ...result, code: "NEEDS_FILM", canvas: true, message: "After Effects gets this film as its rendered video. Render the film, then export again." };
-    const aep = join(out, `${basename(dir).replace(/[^\w-]+/g, "_").replace(/^_+|_+$/g, "") || "film"}.aep`);
-    if (code !== 0 || (runAe && !existsSync(aep))) return { ...result, code: code === 3 ? "AE_SCRIPT_ERROR" : "PORT_FAILED", message: result.message ?? `port exit ${code}` };
+    const aep = join(out, `${workName(dir)}.aep`);
+    if (code !== 0 || (runAe && !existsSync(aep))) { clean = "failed"; return { ...result, code: code === 3 ? "AE_SCRIPT_ERROR" : "PORT_FAILED", message: result.message ?? `port exit ${code}` }; }
+    if (runAe) clean = "done";
     return { ...result, status: "done", aep: runAe ? aep : null, ...(result.notes.some((n) => /one video layer \(the rendered film\)/.test(n)) ? { canvas: true } : {}) };
   } catch (e) {
+    clean = "failed";
     return { ...result, code: "PORT_FAILED", message: String(e?.message ?? e) };
   } finally {
     page?.close();
     log?.end();
+    if (clean && !estimateOnly && runAe) { try { rmSync(join(work, "_ref", basename(dir)), { recursive: true, force: true }); sweepWork(work, workName(dir), { failed: clean === "failed" }); } catch { /* the next export clears it */ } }
   }
 }

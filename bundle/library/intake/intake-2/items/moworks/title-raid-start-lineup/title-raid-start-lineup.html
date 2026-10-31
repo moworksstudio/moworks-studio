@@ -1,0 +1,71 @@
+<!--
+  Raid Start (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Bốn thẻ thành viên lần lượt lao vào xen kẽ từ trên và dưới bằng lò xo, mỗi thẻ hiện chữ "READY"; đủ đội thì cả hàng nhún một nhịp, tiêu đề đập từ to về cỡ và hai vạch kẻ chạy ra hai bên.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.titleRaidStartLineup(q(".rs"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - start: s (0.3)
+      - stagger: s (0.14), spring k260 d20, alternating from above and below
+      - goAt: s the title slams (1.25)
+      - outAt: s (2.4)
+
+  Notes: px @320x200. 4 cards 48 x 64 (r 8, coloured role strip), 64 px apart, arrive 140 ms apart from 0.3 s, alternating from 160 px above / below, by spring k260 d20; 'READY' fades in under each 300-450 ms after its start. At 1.25 s all cards hop 6 px (half-sine 1.2-1.45 s); the title scales 1.6 → 1 in 220 ms outExpo (opacity in ~110 ms); side rules extend 60 px outward (400 ms outExpo at 1.3 s). Out 2.4-2.7 s in-cubic. Params: cards: số thẻ (4) · stagger: cách nhau (0.14 s) · spring: lò xo (k260 d20) · goAt: lúc tiêu đề (1.25 s) · title: tiêu đề.
+-->
+
+<div class="gm rs"><div class="rs-row"><div class="rs-card"><i style="background:#ff5d6c"></i><b>Tank</b><div class="rs-ready">SẴN SÀNG</div></div><div class="rs-card"><i style="background:#3dd6f5"></i><b>Phép</b><div class="rs-ready">SẴN SÀNG</div></div><div class="rs-card"><i style="background:#3ddc84"></i><b>Hồi máu</b><div class="rs-ready">SẴN SÀNG</div></div><div class="rs-card"><i style="background:#ffd23d"></i><b>Cung</b><div class="rs-ready">SẴN SÀNG</div></div></div>
+<div class="rs-rule" style="left:120px;transform-origin:100% 50%"></div><div class="rs-rule" style="right:120px;transform-origin:0 50%"></div><div class="rs-title">BẮT ĐẦU ĐỘT KÍCH</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"start":0.3,"stagger":0.14,"goAt":1.25,"outAt":2.4};
+  var run = function (el, tl, at, o) {
+        var cards = Array.prototype.slice.call(el.querySelectorAll(".rs-card")), title = el.querySelector(".rs-title"), rules = el.querySelectorAll(".rs-rule"), sp = MW.spring(260, 20), ex = gsap.parseEase("expo.out"), pi = gsap.parseEase("power2.in");
+        return MW.drive(tl, at, o.outAt + 0.3, function (t) {
+          var f = 1 - pi(Math.max(0, Math.min(1, (t - o.outAt) / 0.3))), hop = t > 1.2 && t < 1.45 ? 30 * Math.sin(Math.PI * (t - 1.2) / 0.25) : 0;
+          cards.forEach(function (c, i) { var s0 = o.start + i * o.stagger, v = t >= s0 ? sp.at(t - s0) : 0, dir = i % 2 ? 1 : -1; gsap.set(c, { y: dir * 800 * (1 - v) - hop }); c.style.opacity = String((t >= s0 ? 1 : 0) * f);
+            var rd = c.querySelector(".rs-ready"); if (rd) rd.style.opacity = String(Math.max(0, Math.min(1, (t - s0 - 0.3) / 0.15))); });
+          var u = Math.max(0, Math.min(1, (t - o.goAt) / 0.22)); gsap.set(title, { scale: 1.6 - 0.6 * ex(u) }); title.style.opacity = String(Math.min(1, (t - o.goAt) / 0.11) * f * (t >= o.goAt ? 1 : 0));
+          rules.forEach(function (r, i) { var g = ex(Math.max(0, Math.min(1, (t - o.goAt - 0.05) / 0.4))); gsap.set(r, { scaleX: g }); r.style.opacity = String(f); });
+        });
+      };
+  MW.titleRaidStartLineup = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

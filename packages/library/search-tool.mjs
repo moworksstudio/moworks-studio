@@ -1,5 +1,5 @@
 // library_search, Claude's tool for the motion spec: one query over the whole Motion Library (HyperFrames registry, the
-// studio's store, Magic UI, Codrops, TakayuStudio, HyperFrames looks). The HyperFrames part keeps the order of `hyperframes catalog`
+// studio's store, Magic UI, Codrops, HyperFrames looks). The HyperFrames part keeps the order of `hyperframes catalog`
 // (HF's own search: by meaning when its on-device model is on, else by name, title, description and tags); every item is also scored by
 // how many of the query's words it carries (title, tags, then description), so a request in plain words still finds something.
 // Answers 5-10 items, each with its id for MOTION-PLAN.json (the app copies that item's code into the project), what it is in about 100

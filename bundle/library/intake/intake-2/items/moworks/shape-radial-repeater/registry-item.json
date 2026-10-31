@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "shape-radial-repeater",
+  "type": "hyperframes:component",
+  "title": "Radial Repeater",
+  "description": "Mười hai bản sao của một viên con nhộng xếp quanh tâm, thay nhau chạy ra vào lệch nhịp như vạn hoa, cả vòng xoay chậm.",
+  "tags": [
+    "repeater",
+    "radial",
+    "loop",
+    "shape",
+    "svg-path",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "shape-radial-repeater.html",
+      "target": "compositions/components/shape-radial-repeater.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/shape-radial-repeater",
+    "author": "moworks",
+    "call": "MW.shapeRadialRepeater(q(\".rr\"), tl, 0, {});",
+    "function": "MW.shapeRadialRepeater",
+    "options": {
+      "inner": "px (90)",
+      "outer": "px (190)",
+      "period": "s out and back (1.5)",
+      "offset": "s per copy (0.08)",
+      "spin": "degrees per second (23)",
+      "duration": "s (4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "12 copies of one shape (a 34 x 10 px pill) around a centre, copy i rotated i x 30 deg, the ring turning slowly (~23 deg/s). Each copy moves out from the centre 18 -> 38 px and back (sine ping-pong, 1.5 s period), copy i delayed i x 80 ms (recipe 60 ms), easeInOutSine; every third copy accent. Params: copies (12) · radius (18 → 38 px) · offset (80 ms) · period (1.5 s).",
+    "titleVi": "Lặp hình xoay quanh tâm"
+  }
+}

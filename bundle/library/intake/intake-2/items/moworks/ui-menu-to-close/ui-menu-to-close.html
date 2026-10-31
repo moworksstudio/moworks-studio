@@ -1,0 +1,76 @@
+<!--
+  Icon Morph (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Bấm nút, gạch giữa thu ngắn biến mất, hai gạch ngoài chụm vào giữa rồi xoay chéo ±45° thành dấu X; bấm lại thì về ba gạch.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiMenuToClose(q(".mc"), tl, 0, { cursor: ".ui-cursor" });
+
+  Options (defaults in brackets):
+      - bars: the three bars, top to bottom
+      - gap: px between bars (42)
+      - angle: degrees (45)
+      - duration: s (0.56, power2.inOut)
+      - ease: 
+      - clicks: [s open, s close]
+      - cursor: an optional cursor
+      - approach: [x, y] px the cursor comes from
+      - lead: s it arrives before a click
+
+  Notes: Round button r44; three bars 44 px long, 5 px, round caps. Over 560 ms power2.inOut (0.5-1.06 s): middle bar scaleX and opacity 1 → 0 in the first 40 %; outer bars move from ±14 px to the centre in the first 50 %, then rotate 0 → ±45° in the second 50 %. Reverse 1.6-2.16 s. Cursor presses at 0.45 and 1.55 s. Recipe at UI size: bars ±7 px. Params: duration (0.56 s) · gap (14 px) · angle (45°) · ease (power2.inOut). The middle bar shrinks away in the first 40 %; the outer bars meet in the first half and turn ±45° in the second.
+-->
+
+<div class="ui-wrap"><div class="bw"><div class="mc"><i></i><i></i><i></i></div><svg class="ui-cursor" viewBox="0 0 32 32" width="64" height="64"><path d="M6 3 L6 25 L12 19.5 L16 28.5 L20 26.8 L16 18 L24 18 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  var defaults = {"bars":".mc i","gap":42,"angle":45,"duration":0.56,"ease":"power2.inOut","clicks":[0.45,1.55],"cursor":null,"approach":[260,200],"lead":0.12};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var cur = o.cursor ? (host.querySelector(o.cursor) || document.querySelector(o.cursor)) : null, curKeys = null;
+  var cursorPlan = function (clicks) { if (!cur) return; var base = (cur.offsetParent || host).getBoundingClientRect(), k = [];
+    clicks.forEach(function (c, i) { var r = (c[4] || el).getBoundingClientRect(), x = r.left - base.left + r.width * c[1], y = r.top - base.top + r.height * c[2];
+      if (!i) k.push([0, x + o.approach[0], y + o.approach[1]]); k.push([Math.max(0.01, c[0] - o.lead), x, y]); k.push([c[0] + (c[3] || 0.12) + (c[5] ? 0 : 0.3), x, y]); });
+    var z = k[k.length - 1]; k.push([z[0] + 0.5, z[1] + o.approach[0] * 0.6, z[2] + o.approach[1] * 0.6]); curKeys = { k: k, c: clicks }; };
+  var cursorAt = function (t) { if (!cur || !curKeys) return; var p = MW.path(curKeys.k, t, "power2.inOut"), dn = 0; curKeys.c.forEach(function (c) { var u = t - c[0]; if (!c[5] && u >= 0 && u < (c[3] || 0.12)) dn = 1; });
+    gsap.set(cur, { x: p[0] - 12, y: p[1] - 6, scale: dn ? 0.86 : 1, transformOrigin: "20% 10%" }); };
+  var bars = Array.prototype.slice.call(el.querySelectorAll(o.bars)), io = gsap.parseEase(o.ease); cursorPlan(o.clicks.map(function (c) { return [c, 0.5, 0.5, 0.12]; }));
+  return MW.drive(tl, at, o.clicks[1] + 0.05 + o.duration + 0.6, function (t) {
+    var a = io(Math.max(0, Math.min(1, (t - o.clicks[0] - 0.05) / o.duration))), b = io(Math.max(0, Math.min(1, (t - o.clicks[1] - 0.05) / o.duration))), p = a - b;
+    var mid = 1 - Math.min(1, p / 0.4), move = Math.min(1, p / 0.5), rot = Math.max(0, (p - 0.5) / 0.5);
+    gsap.set(bars[1], { scaleX: mid }); bars[1].style.opacity = String(mid); gsap.set(bars[0], { y: -o.gap * (1 - move), rotation: o.angle * rot }); gsap.set(bars[2], { y: o.gap * (1 - move), rotation: -o.angle * rot });
+    cursorAt(t);
+  });
+  };
+  MW.uiMenuToClose = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

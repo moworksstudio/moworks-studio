@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-sine-loop",
+  "type": "hyperframes:component",
+  "title": "Sine In-out",
+  "description": "Đi tới rồi về theo sine.inOut, dùng cho chuyển động lặp trôi nổi, nhịp thở êm như mơ.inOut, yoyo).",
+  "tags": [
+    "ease",
+    "loop",
+    "sine",
+    "easing",
+    "smooth",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-sine-loop.html",
+      "target": "compositions/components/motion-ease-sine-loop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-ease-sine-loop",
+    "author": "moworks",
+    "call": "MW.motionEaseSineLoop(q(\".ez-b\"), tl, 0, { prop: \"x\", to: 780, half: 1.5 });",
+    "function": "MW.motionEaseSineLoop",
+    "options": {
+      "half": "s each way (2)",
+      "cycles": "there-and-back cycles (1)",
+      "prop": "(y)",
+      "from": "(0)",
+      "to": "(−120 px)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Target moves 0 → 100 % in 2000 ms sine.inOut and back to 0 by 4000 ms (yoyo), looping. Rule: floating loops and breathing, 2–4 s cycles; dreamy and calm. Small demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: half: nửa chu kỳ (2 s) · amount · repeat (yoyo).",
+    "titleVi": "Sine in-out (nhịp thở)"
+  }
+}

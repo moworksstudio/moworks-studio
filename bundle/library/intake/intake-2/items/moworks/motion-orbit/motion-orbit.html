@@ -1,0 +1,47 @@
+<!--
+  Orbit (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Một chấm bay vòng quanh tâm với bán kính không đổi và tốc độ góc đều.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionOrbit(q(".ob-d"), tl, 0, { duration: 2 });
+
+  Options (defaults in brackets):
+      - duration: s per lap, linear (1.1; the small demo 2.6)
+      - radius: px (215)
+      - direction: 1 clockwise, -1 the other way
+      - laps: (2)
+
+  Notes: A dot on an arm of radius 43 px circles a fixed centre: arm rotation 0 → 360° linear, constant radius, looping; small DOM demo 2600 ms per lap (motion_ms 1100); a faint circular guide and the centre dot stay still. Port as a wrapper rotating with the child offset by the radius. Params: duration: một vòng (1.1 s) · radius (43 px) · direction: chiều quay (thuận) · repeat.
+-->
+
+<div class="st"><div class="ob-g"></div><div class="ob-c"></div><div class="ob-d"></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":1.1,"radius":215,"direction":1,"laps":2};
+  var run = function (el, tl, at, o) {
+        return MW.drive(tl, at, o.duration * o.laps, function (t) { var a = o.direction * 2 * Math.PI * t / o.duration - Math.PI / 2; gsap.set(el, { x: o.radius * Math.cos(a), y: o.radius * Math.sin(a) }); });
+      };
+  MW.motionOrbit = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

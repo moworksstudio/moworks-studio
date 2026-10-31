@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-stagger-follow",
+  "hash": "0f6ff4383ecdaef2",
+  "at": "2026-10-17T11:03:00.430Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-stagger-follow.mp4",
+    "poster": "previews/moworks__motion-stagger-follow.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6af55bc4f330b1d270d778dff9b68bc9383c092de5c80e26c76dc8c79c02ea32",
+    "size": 11126,
+    "seconds": 25.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

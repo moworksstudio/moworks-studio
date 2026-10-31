@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "background-type-tunnel",
+  "type": "hyperframes:block",
+  "title": "Perspective Type Tunnel",
+  "description": "Bốn bản của cùng một chữ nối nhau từ sâu trong khung phóng to lao về phía người xem, càng gần càng mờ và chỉ còn nét viền, lặp không ngắt.",
+  "tags": [
+    "depth",
+    "loop",
+    "scale",
+    "outline",
+    "text-3d-depth",
+    "smooth",
+    "3d-depth"
+  ],
+  "files": [
+    {
+      "path": "background-type-tunnel.html",
+      "target": "compositions/components/background-type-tunnel.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/background-type-tunnel",
+    "author": "moworks",
+    "call": "MW.backgroundTypeTunnel(q(\".tt\"), tl, 0, {});",
+    "function": "MW.backgroundTypeTunnel",
+    "options": {
+      "word": "the word element",
+      "copies": "(4); one enters every loop ÷ 2 s",
+      "loop": "s (4.2): each copy crosses in 2 × loop",
+      "color": "fill and outline colour"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "4 copies of one word (34 px base) on a shared centre. Copy i has depth z = fract((i + 2t / 4.2) / 4): a copy enters every 2.1 s and crosses in 8.4 s. Scale = 0.3 × 22^z (0.3 → 6.6, exponential); opacity = min(1, 6z) × (1 − z)^1.8. While z < 0.4 the copy is filled accent; nearer copies are outline only (1.6 px on screen, opacity × 1.2). Draw far to near. Seamless loop (4.2 s demo). Params: số bản (4) · tỉ lệ (0.3 → 6.6) · chu kỳ (8.4 s mỗi bản) · chữ.",
+    "titleVi": "Đường hầm chữ lao về phía trước"
+  }
+}

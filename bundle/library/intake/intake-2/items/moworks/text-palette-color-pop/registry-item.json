@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-palette-color-pop",
+  "type": "hyperframes:component",
+  "title": "Colourful Text Cycle",
+  "description": "Mỗi ký tự lần lượt đổi sang một màu khác trong bảng năm màu, lúc đổi nhích lên, phóng nhẹ và nhoè thoáng qua.",
+  "tags": [
+    "color",
+    "palette",
+    "letters",
+    "pop",
+    "text-colour-light",
+    "bouncy",
+    "crisp",
+    "colour-light"
+  ],
+  "files": [
+    {
+      "path": "text-palette-color-pop.html",
+      "target": "compositions/components/text-palette-color-pop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-palette-color-pop",
+    "author": "moworks",
+    "call": "MW.textPaletteColorPop(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textPaletteColorPop",
+    "options": {
+      "palette": "five colours",
+      "switches": "s each change starts ([0.4, 1.9]; every 5 s in the source)",
+      "duration": "s per change (0.5, ease-in-out)",
+      "stagger": "s per letter (0.05)",
+      "cap": "s (0.9)",
+      "lift": "px at the peak (16)",
+      "seed": "start colours",
+      "loop": "s (3.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Aceternity UI: written from the idea only"
+    },
+    "thirdParty": [],
+    "notes": "Palette of 5 colours; each char gets a seeded start colour and switches to another seeded palette colour over 0.5 s (ease-in-out), char i delayed 0.05·i s (capped 0.9 s total). During a switch a sine pulse: y −4 px, scale 1.03, opacity −20 %, blur 5 px at the peak (CSS: −3 px, 1.01, 0.8, 5 px). Source cycle 5 s; the demo compresses it to switches at 0.4 s and 1.9 s, each char toggling between its two colours; loop 3.2 s. Params: palette: năm màu · interval: chu kỳ đổi (5 s) · duration (0.5 s) · stagger (0.05 s) · seed.",
+    "titleVi": "Ký tự đổi màu bảng màu, nảy nhẹ"
+  }
+}

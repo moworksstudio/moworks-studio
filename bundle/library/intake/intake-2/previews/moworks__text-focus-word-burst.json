@@ -1,0 +1,27 @@
+{
+  "uid": "in:moworks/text-focus-word-burst",
+  "hash": "097a5ca64086bb7b",
+  "at": "2026-10-17T09:12:29.587Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Menlo",
+      "Consolas"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-focus-word-burst.mp4",
+    "poster": "previews/moworks__text-focus-word-burst.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "67073b20373e0786c5fc21839dff32b982fccc63409a41d1a0df09aaf329ab49",
+    "size": 30938,
+    "seconds": 31.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

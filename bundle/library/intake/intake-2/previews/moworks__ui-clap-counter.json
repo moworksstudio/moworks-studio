@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-clap-counter",
+  "hash": "0701cb971b8b08b5",
+  "at": "2026-10-17T10:41:05.902Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-clap-counter.mp4",
+    "poster": "previews/moworks__ui-clap-counter.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3c3c8f4932269981dad940dc163bef6f1527e278654d38a4e31e327415e2e40b",
+    "size": 12302,
+    "seconds": 28.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

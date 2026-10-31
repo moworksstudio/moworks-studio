@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-conic-spin",
+  "type": "hyperframes:component",
+  "title": "Conic Gradient Spin",
+  "description": "Lòng chữ phủ dải màu hình nón ba màu xoay tròn quanh tâm khối chữ, mỗi vòng 4 giây.",
+  "tags": [
+    "gradient",
+    "conic",
+    "color",
+    "loop",
+    "text-colour-light",
+    "smooth",
+    "colour-light"
+  ],
+  "files": [
+    {
+      "path": "text-conic-spin.html",
+      "target": "compositions/components/text-conic-spin.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-conic-spin",
+    "author": "moworks",
+    "call": "MW.textConicSpin(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textConicSpin",
+    "options": {
+      "colors": "three colours (the first repeats at the end)",
+      "duration": "s per turn (4), linear",
+      "loops": "(1)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Conic-gradient fill (3 colours, first = last: stops 0 / 33 / 66 / 100 %) centred on the text box, clipped to the letters; start angle 0 → 360° over 4 s linear (from the top, clockwise), loop. Params: colors: ba màu (đầu = cuối) · duration: mỗi vòng (4 s).",
+    "titleVi": "Màu xoay tròn trong lòng chữ"
+  }
+}

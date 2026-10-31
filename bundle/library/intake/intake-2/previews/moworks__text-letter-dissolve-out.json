@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-letter-dissolve-out",
+  "hash": "f88c2a071ef48474",
+  "at": "2026-10-17T08:10:56.675Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-letter-dissolve-out.mp4",
+    "poster": "previews/moworks__text-letter-dissolve-out.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "da2eef21e6078ebe2a413c2ce555d38bb4c6d7207fcb3c0e00c08f7df2a4f5a1",
+    "size": 14989,
+    "seconds": 31.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

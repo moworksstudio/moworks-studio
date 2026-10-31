@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/hand-tsukkomi-slam",
+  "hash": "fe34b384c68a255f",
+  "at": "2026-10-17T10:12:36.706Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__hand-tsukkomi-slam.mp4",
+    "poster": "previews/moworks__hand-tsukkomi-slam.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "81514378c2008f46bac05950796ce02debde8b235d6dbdacd5491d0787a9da3d",
+    "size": 62617,
+    "seconds": 27.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

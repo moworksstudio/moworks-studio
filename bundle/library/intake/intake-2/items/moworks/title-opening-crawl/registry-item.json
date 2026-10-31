@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "title-opening-crawl",
+  "type": "hyperframes:block",
+  "title": "Perspective Opening Crawl",
+  "description": "Khối chữ vàng nằm trên một mặt phẳng ngả ra sau, trôi chậm từ dưới khung lên và nhỏ dần về đường chân trời, mờ đi trước khi chạm chân trời, trên nền sao.",
+  "tags": [
+    "crawl",
+    "perspective",
+    "credits",
+    "scroll",
+    "text-titles-film",
+    "smooth",
+    "heavy",
+    "titles-film"
+  ],
+  "files": [
+    {
+      "path": "title-opening-crawl.html",
+      "target": "compositions/components/title-opening-crawl.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/title-opening-crawl",
+    "author": "moworks",
+    "call": "MW.titleOpeningCrawl(q(\".oc\"), tl, 0, { duration: 9 });",
+    "function": "MW.titleOpeningCrawl",
+    "options": {
+      "tilt": "degrees the plane leans back (25)",
+      "perspective": "px (1200)",
+      "duration": "s for the whole text to pass (60 in a film; the demo 9)",
+      "plane": "the tilted plane (.oc-plane), holding the text"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Recipe: text block on a plane tilted rotateX 20–25° (perspective 400 px, origin 50 % 100 %), translateY 100 % → −200 % linear over 60 s or more. Demo: rows (22 px, yellow, 30 px apart, +16 px between paragraphs) rise from below the frame toward a horizon 15 % from the top, projected with scale = f / (f + depth) (f 110), stretched ×1.25 x / ×1.0 y; each row fades as its scale drops 0.33 → 0.13 near the horizon; 46 static star dots. Loop 6 s in the demo. Params: độ ngả (rotateX 20–25°) · phối cảnh (400 px) · tốc độ (60 s trở lên cho cả khối) · màu chữ (vàng).",
+    "titleVi": "Chữ chạy xa dần vào đường chân trời"
+  }
+}

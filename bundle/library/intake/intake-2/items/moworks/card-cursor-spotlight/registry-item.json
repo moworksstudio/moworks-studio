@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "card-cursor-spotlight",
+  "type": "hyperframes:block",
+  "title": "Card Spotlight",
+  "description": "Một quầng sáng màu nhấn nằm trong thẻ, bám theo con trỏ với độ trễ nhẹ, sáng lên khi con trỏ vào thẻ và tắt khi ra.",
+  "tags": [
+    "spotlight",
+    "glow",
+    "cursor",
+    "card",
+    "web-interaction",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "card-cursor-spotlight.html",
+      "target": "compositions/components/card-cursor-spotlight.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/card-cursor-spotlight",
+    "author": "moworks",
+    "call": "MW.cardCursorSpotlight(q(\".gm\"), tl, 0, {});",
+    "function": "MW.cardCursorSpotlight",
+    "options": {
+      "radius": "units (92)",
+      "opacity": "while the cursor is over the card (0.55)",
+      "lag": "s of smoothing (0.09)",
+      "path": "[[s, x, y], ...] cursor keys, sine.inOut legs",
+      "title": ""
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Card 180x132, radius 14. A radial accent glow (radius 92 px, soft falloff) clipped to the card follows the cursor with exponential smoothing τ = 90 ms; its opacity goes 0 → 55 % while the cursor is over the card and back when it leaves (same smoothing). Cursor path 3.4 s (sine.inOut legs): (296,184) hold to 0.3 s, (214,128) 0.8, (108,70) 1.4, (196,140) 2.0, (140,90) 2.5, (30,180) 3.0, back to start 3.4. Params: radius (92 px) · opacity (55 %) · lag (0.09 s) · path [[giây, x, y]].",
+    "titleVi": "Vầng sáng trong thẻ theo con trỏ"
+  }
+}

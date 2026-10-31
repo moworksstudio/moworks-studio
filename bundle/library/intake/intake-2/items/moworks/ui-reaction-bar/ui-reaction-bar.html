@@ -1,0 +1,116 @@
+<!--
+  Emoji Bar (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Con trỏ lướt trên thanh cảm xúc, biểu tượng đang trỏ nhô lên 16 px và to 1.4 lần bằng lò xo với nhãn tên bên trên, các biểu tượng khác mờ đi.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiReactionBar(q(".gm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - picks: [[s, icon or −1], ...]
+      - labels: 
+      - loop: s (2.8)
+
+  Notes: 5 icons 43 px apart in a pill 220x44. Selected icon: y −16 px and scale 1.4 on a spring k320 d22 (sum of springs); the others drop to opacity 0.45 while one is lifted; a light label pill 44x18 with dark text appears above it. Selection: icon 2 at 0.55 s, icon 4 at 1.4 s, none at 2.25 s. The cursor follows on a spring k120 c20. Params: lift (16 px) · scale (1.4) · spring (k320 c22) · dim (0.45) · picks [[giây, ô]]. The picked icon rises 16 units and grows 1.4× on springs k320 c22; the others dim to 0.45; the cursor follows on a softer spring (k120 c20).
+-->
+
+<div class="gm"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.noise = MW.noise || function (seed) {
+    var r = MW.rand(seed), v = []; for (var i = 0; i < 512; i++) v.push(r() * 2 - 1);
+    return function (t) { var i = Math.floor(t), f = t - i, a = v[((i % 512) + 512) % 512], b = v[(((i + 1) % 512) + 512) % 512], s = f * f * (3 - 2 * f); return a + (b - a) * s; };
+  };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.springTo = MW.springTo || function (k, c, keys) {
+    var sp = MW.spring(k, c);
+    return function (t) { var v = keys[0][1]; for (var i = 1; i < keys.length; i++) if (t >= keys[i][0]) v += (keys[i][1] - keys[i - 1][1]) * sp.at(t - keys[i][0]); return v; };
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  MW.span = MW.span || function (t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); };
+  MW.yAt = MW.yAt || function (pts, x) { if (x <= pts[0][0]) return pts[0][1]; for (var i = 1; i < pts.length; i++) if (x <= pts[i][0]) { var u = (x - pts[i - 1][0]) / ((pts[i][0] - pts[i - 1][0]) || 1); return pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * u; } return pts[pts.length - 1][1]; };
+  MW.polyToX = MW.polyToX || function (c, pts, x) { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) { if (pts[i][0] <= x) c.lineTo(pts[i][0], pts[i][1]); else { c.lineTo(x, MW.yAt(pts, x)); break; } } return [Math.min(x, pts[pts.length - 1][0]), MW.yAt(pts, Math.min(x, pts[pts.length - 1][0]))]; };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"picks":[[0.55,1],[1.4,3],[2.25,-1]],"labels":["Thích","Haha","Wow","Buồn","Giận"],"loop":2.8};
+  var run = function (el,tl,at,o
+  ) {
+  var S = MW.stage320(el), c = S.ctx, T = function (t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); }, p2o = gsap.parseEase("power2.out"), p2i = gsap.parseEase("power2.in"), p2io = gsap.parseEase("power2.inOut"), bo = gsap.parseEase("back.out(1.7)");
+  var cursorAt = function (keys, t, downs) { var p = MW.path(keys, t, "power2.inOut"), d = 0; (downs || []).forEach(function (q) { if (t >= q && t < q + 0.1) d = 1; }); MW.cursor(c, p[0], p[1], d ? 0.85 : 1); };
+  var heart = function (x, y, s) { c.beginPath(); c.moveTo(x, y + 9 * s); c.bezierCurveTo(x - 16 * s, y - 2 * s, x - 10 * s, y - 14 * s, x, y - 6 * s); c.bezierCurveTo(x + 10 * s, y - 14 * s, x + 16 * s, y - 2 * s, x, y + 9 * s); c.closePath(); };
+  var star = function (x, y, R, r) { c.beginPath(); for (var i = 0; i < 10; i++) { var a = -Math.PI / 2 + i * Math.PI / 5, q = i % 2 ? r : R; c.lineTo(x + q * Math.cos(a), y + q * Math.sin(a)); } c.closePath(); };
+  var card = function (x, y, w, h) { MW.rr(c, x, y, w, h, 14); c.fillStyle = "#151a24"; c.fill(); c.strokeStyle = "#262c3a"; c.lineWidth = 1; c.stroke(); };
+  var X = [74, 117, 160, 203, 246], keys = [[0, -1]].concat(o.picks), L = [0, 1, 2, 3, 4].map(function (i) { return MW.springTo(320, 22, keys.map(function (k) { return [k[0], k[1] === i ? 1 : 0]; })); }), CX = MW.springTo(120, 20, keys.map(function (k) { return [k[0], k[1] < 0 ? 300 : X[k[1]]]; }));
+  var face = function (i, x, y, s) { c.save(); c.translate(x, y); c.scale(s, s); if (i === 0) { heart(0, 1, 0.9); c.fillStyle = "#ff4f6d"; c.fill(); } else { c.fillStyle = i === 4 ? "#ff7a45" : "#ffd23d"; c.beginPath(); c.arc(0, 0, 13, 0, 2 * Math.PI); c.fill(); c.fillStyle = "#3a2400"; c.beginPath(); c.arc(-4.5, -3, 1.8, 0, 2 * Math.PI); c.arc(4.5, -3, 1.8, 0, 2 * Math.PI); c.fill();
+    c.strokeStyle = "#3a2400"; c.lineWidth = 1.8; c.beginPath(); if (i === 1) { c.arc(0, 2, 6, 0.1, Math.PI - 0.1); } else if (i === 2) { c.arc(0, 5, 3.2, 0, 2 * Math.PI); } else if (i === 3) { c.arc(0, 8, 5, Math.PI + 0.4, 2 * Math.PI - 0.4); } else { c.moveTo(-5, 6); c.lineTo(5, 6); } c.stroke(); if (i === 3) { c.fillStyle = "#3dd6f5"; c.beginPath(); c.arc(7, 2, 2, 0, 2 * Math.PI); c.fill(); } } c.restore(); };
+  return MW.drive(tl, at, o.loop, function (t) {
+    S.clear(); card(60, 40, 200, 60); c.fillStyle = "#2a3350"; MW.rr(c, 74, 52, 110, 6, 3); c.fill(); MW.rr(c, 74, 64, 80, 6, 3); c.fill();
+    MW.rr(c, 50, 120, 220, 44, 22); c.fillStyle = "#1b2130"; c.fill(); var any = 0; L.forEach(function (f) { any = Math.max(any, f(t)); });
+    X.forEach(function (x, i) { var l = Math.max(0, L[i](t)); c.globalAlpha = 1 - (1 - 0.45) * Math.max(0, Math.min(1, any - l)); face(i, x, 142 - 16 * l, 1 + 0.4 * l); c.globalAlpha = 1;
+      if (l > 0.3) { c.globalAlpha = Math.min(1, (l - 0.3) / 0.5); MW.rr(c, x - 22, 100 - 16 * l, 44, 18, 9); c.fillStyle = "#e8ebf3"; c.fill(); MW.txt(c, o.labels[i], x, 109.5 - 16 * l, 7, "#0b0d12", 800); c.globalAlpha = 1; } });
+    MW.cursor(c, CX(t), 152, 1);
+  });
+  };
+  MW.uiReactionBar = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

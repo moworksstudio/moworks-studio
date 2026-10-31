@@ -1,0 +1,53 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-dialog-backdrop",
+  "type": "hyperframes:block",
+  "title": "Top Layer Dialog",
+  "description": "Bấm Mở, hộp thoại trồi lên 18 px và hiện dần trong khi nền tối đi theo nhịp riêng chậm hơn; tiêu điểm nằm trên nút OK, bấm ra ngoài không có tác dụng.",
+  "tags": [
+    "dialog",
+    "modal",
+    "backdrop",
+    "focus",
+    "layout-navigation",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-dialog-backdrop.html",
+      "target": "compositions/components/ui-dialog-backdrop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-dialog-backdrop",
+    "author": "moworks",
+    "call": "MW.uiDialogBackdrop(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiDialogBackdrop",
+    "options": {
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "App window 260x160 with an Open button. Click at 0.3 s: dialog 150x84 r10 (title, two lines, Cancel + OK pills) fades 0 → 1 and rises y +18 → 0 over 0.4-1.02 s power2.out; backdrop 0 → 65 % linear over 0.4-1.15 s (its own rate). Focus ring on OK fades in 1.02-1.16 s. A click on the backdrop at 1.7 s does nothing (inert). Cancel at 2.12 s: dialog out 2.22-2.42 s power2.in, backdrop 2.22-2.52 s. Params: rise (18 px) · dialog (0.62 s, power2.out) · backdrop (65 %, 0.75 s, none) · close (0.2 s). The backdrop runs on its own linear rate; a click on it does nothing (the dialog is modal); focus sits on OK.",
+    "titleVi": "Hộp thoại nổi lên trên nền tối"
+  }
+}

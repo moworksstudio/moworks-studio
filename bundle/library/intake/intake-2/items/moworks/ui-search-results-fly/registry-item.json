@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-search-results-fly",
+  "type": "hyperframes:block",
+  "title": "Spatial Search Reveal",
+  "description": "Gõ từ khoá vào ô tìm, sáu thẻ kết quả bay ra từ chính ô tìm, lớn dần và rơi vào lưới theo thứ tự đọc bằng lò xo.",
+  "tags": [
+    "search",
+    "results",
+    "stagger",
+    "spring",
+    "spatial-ui-depth",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "ui-search-results-fly.html",
+      "target": "compositions/components/ui-search-results-fly.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-search-results-fly",
+    "author": "moworks",
+    "call": "MW.uiSearchResultsFly(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiSearchResultsFly",
+    "options": {
+      "query": "the typed words ('thiết kế')",
+      "closeAt": "s results fly back (3.15)",
+      "loop": "s (3.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Search field 220x30 r15 at the top, accent border while focused; 'design' types over 0.25-0.75 s with a blinking caret. Six result cards 68x44 r7 fly from the field centre to a 3x2 grid (84 / 52 px pitch) on springs k220 c22, starting 1.0 s + 0.07 s each (reading order); scale 0.3 → 1, opacity min(1, 2 × spring). Collapse back in reverse order from 3.15 s (+0.03 s each, 0.25 s power2.in). Params: type (0.5 s) · origin: ô tìm · spring (k220 c22) · each (0.07 s) · scale (0.3 → 1).",
+    "titleVi": "Kết quả bay ra từ ô tìm"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-anticipation",
+  "type": "hyperframes:component",
+  "title": "Anticipation",
+  "description": "Trước cú di chuyển lớn, phần tử lùi nhẹ khoảng 8 px theo chiều ngược rồi mới lao đi.",
+  "tags": [
+    "anticipation",
+    "move",
+    "principle",
+    "principles",
+    "bouncy",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-anticipation.html",
+      "target": "compositions/components/motion-anticipation.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-anticipation",
+    "author": "moworks",
+    "call": "MW.motionAnticipation(q(\".an\"), tl, 0.4, { backAt: 1.7 });",
+    "function": "MW.motionAnticipation",
+    "options": {
+      "pull": "px back first (64; 10–20 % of the move)",
+      "pullTime": "s (0.35)",
+      "distance": "px (872)",
+      "duration": "s of the dash (0.3)",
+      "squeeze": "scaleX taken off in the pull (0.1)",
+      "stretch": "scaleX added in the dash (0.25)",
+      "backAt": "s after the start to go back (null)",
+      "back": "s (0.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Recipe: pull back ~8 px the opposite way in 100 ms (ease-out), then go to the target by 400 ms (expo.out); for a button, scale 0.95 → 1. Small demo: a square pulls back 16 px in 350 ms, then dashes 218 px in 300 ms (power2.inOut keys), scaleX −10 % during the pull-back and +25 % during the dash (scaleY = 1/scaleX, sine bumps). Rule: 10–20 % of the main move's length and amount. Params: pull (8 px) · pull_time (0.1 s) · duration (0.4 s) · ease đi (expo.out). The recipe: about 8 px back in 0.1 s, then to the target by 0.4 s expo.out; a button scales 0.95 → 1.",
+    "titleVi": "Lấy đà ngược trước khi đi"
+  }
+}

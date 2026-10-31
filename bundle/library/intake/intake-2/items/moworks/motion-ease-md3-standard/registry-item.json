@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-md3-standard",
+  "type": "hyperframes:component",
+  "title": "Material 3 Standard",
+  "description": "Đường cong chuẩn của Material 3, mặc định cho giao diện sản phẩm và doanh nghiệp.",
+  "tags": [
+    "ease",
+    "material",
+    "ui",
+    "easing",
+    "smooth",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-md3-standard.html",
+      "target": "compositions/components/motion-ease-md3-standard.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-ease-md3-standard",
+    "author": "moworks",
+    "call": "MW.motionEaseMd3Standard(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseMd3Standard",
+    "options": {
+      "duration": "s (0.3)",
+      "ease": "the curve (md3)",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "cubic-bezier(.2, 0, 0, 1), 300 ms. The Material standard; default for corporate / product UI. Writable now as custom(M0,0 C .2,0 0,1 1,1); proposed alias md3.standard. Small demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: duration (0.3 s) · ease (custom .2,0,0,1).",
+    "titleVi": "Material 3 chuẩn"
+  }
+}

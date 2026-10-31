@@ -172,6 +172,19 @@ export async function stillSeconds(file, { version = null } = {}) {
   return out.length ? out : null;
 }
 
+/** The moments a film's card picture is looked for: the middle of its first shots, inside its first quarter, at most `max` of them, evenly. Never
+ *  later: a film's turn comes later, and a card must not give it away (T28-20: the richest frame of the whole film was ~96 s of 125 s, the word the
+ *  film builds up to). */
+export function earlyStills(shots, total = null, max = 4) {
+  const placed = (shots ?? []).filter((s) => s.start != null && s.duration);
+  if (!placed.length) return [];
+  const end = Number(total) || Math.max(...placed.map((s) => s.start + s.duration));
+  const mid = (s) => +(s.start + s.duration / 2).toFixed(3);
+  const early = placed.filter((s) => mid(s) <= end * 0.25);
+  const from = early.length ? early : placed.slice(0, 1);
+  return from.length <= max ? from.map(mid) : Array.from({ length: max }, (_, i) => mid(from[Math.round((i * (from.length - 1)) / (max - 1))]));
+}
+
 /** The shots on a time line: the mounted ones as they are; before the build, or in a film that is one page of code (no
  *  frame mounted), the storyboard's frames one after another by their planned length, marked `planned`, scaled to the film's length when
  *  it is known. The timeline, the self-check's stills and the sound effects read the same times. */

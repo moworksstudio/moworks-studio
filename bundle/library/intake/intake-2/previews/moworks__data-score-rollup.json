@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/data-score-rollup",
+  "hash": "8aefde47114bdf27",
+  "at": "2026-10-17T10:55:10.135Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__data-score-rollup.mp4",
+    "poster": "previews/moworks__data-score-rollup.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "209cf74ca7e70c51587e9583b874e810ffdcb4cb380f7de0efc0cb0252916502",
+    "size": 15019,
+    "seconds": 27.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

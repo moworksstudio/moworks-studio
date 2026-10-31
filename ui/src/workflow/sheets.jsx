@@ -117,7 +117,7 @@ export function ImportSheet({ projectId, project, onChanged }) {
   return <div className="import-sheet">
     <p className="secondary">{t("Files are copied into the project and sorted by kind. Claude is told in the chat what was added.")}</p>
     <ImportNow projectId={projectId}
-      onDone={(r) => { onChanged?.(); if (r.ok) toast(t("{n} file(s) copied into the project; Claude is told", { n: r.ok })); if (r.voice?.job) toast(t("Transcribing the voice-over…"));
+      onDone={(r) => { onChanged?.(); if (r.ok) toast(t("{n} file(s) copied into the project; Claude is told", { n: r.ok })); if (r.same) toast(t("{n} identical file(s) left out: already there", { n: r.same })); if (r.voice?.job) toast(t("Transcribing the voice-over…"));
         for (const a of r.archives ?? []) if (!a.unpacked) toast(a.error, "error"); }} />
   </div>;
 }

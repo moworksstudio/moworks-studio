@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-subtitle-reposition",
+  "type": "hyperframes:component",
+  "title": "Vertical Subtitle",
+  "description": "Khi chữ có sẵn trong hình chiếm phần dưới khung, phụ đề cắt sang chỗ khác không chuyển cảnh: tiếng Nhật thành cột dọc bên phải, tiếng Việt lên mép trên.",
+  "tags": [
+    "subtitle",
+    "placement",
+    "cut",
+    "vertical",
+    "text-japanese",
+    "crisp",
+    "japanese"
+  ],
+  "files": [
+    {
+      "path": "text-subtitle-reposition.html",
+      "target": "compositions/components/text-subtitle-reposition.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-subtitle-reposition",
+    "author": "moworks",
+    "call": "MW.textSubtitleReposition(q(\".sr\"), tl, 0, {});",
+    "function": "MW.textSubtitleReposition",
+    "options": {
+      "sub": "",
+      "burned": "text that is part of the picture",
+      "start": "s (0.3)",
+      "burnAt": "s it appears (1.4)",
+      "moveAt": "s the subtitle cuts to the top (1.95)",
+      "offAt": "s (3.75)",
+      "top": "px from the top when moved (70)",
+      "bottom": "px from the bottom (90)",
+      "loop": "s (4.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Subtitle (14 px, white, 3.5 px dark outline) at the bottom from 0.3 s. At 1.4 s burned-in text appears in the bottom band of the picture. At 1.95 s the subtitle cuts, no transition, to the alternative place: Japanese → vertical columns at the right edge (≤ 11 chars per column, ≤ 2 columns, ≤ 15 px, top 9 px, right 14 px); Latin set sideways in a column (for Vietnamese films: the top of the frame instead). Off at 3.75 s. Loop 4.2 s. Params: vị trí thay thế (phải dọc / trên) · tối đa (11 chữ × 2 cột) · cỡ chữ (15 px). A cut, no transition. Japanese moves to vertical columns at the right edge; for Vietnamese films, to the top of the frame.",
+    "titleVi": "Phụ đề tránh chữ trên hình, đổi chỗ"
+  }
+}

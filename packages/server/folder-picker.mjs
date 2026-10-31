@@ -2,6 +2,8 @@
 // modern Windows dialog (IFileOpenDialog with FOS_PICKFOLDERS, the one Explorer uses) through PowerShell, in front of the app window,
 // and answers with the chosen path or null. It never blocks the service: the dialog runs in its own process.
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
+import { dirname } from "node:path";
 
 const CS = `using System; using System.Runtime.InteropServices;
 public static class MwPick {
@@ -31,6 +33,13 @@ public static class MwPick {
   }
 }`;
 
+/** The folder itself or the nearest one above it that exists: the dialog falls back to Documents for a folder that does not exist yet. */
+export function nearestFolder(path) {
+  let d = String(path ?? "");
+  while (d && !existsSync(d)) { const up = dirname(d); if (up === d) return ""; d = up; }
+  return d;
+}
+
 /** Open the picker; resolves the chosen folder or null (cancelled). MW_PICK_FOLDER (tests) answers without a dialog. */
 export function pickFolder({ title = "", initial = "" } = {}) {
   if (process.env.MW_PICK_FOLDER !== undefined) return Promise.resolve(process.env.MW_PICK_FOLDER || null);
@@ -48,7 +57,7 @@ $f.Close()
 if ($p) { [Console]::Out.Write($p) }`;
   return new Promise((ok, no) => {
     const c = spawn("powershell.exe", ["-NoProfile", "-NonInteractive", "-STA", "-EncodedCommand", Buffer.from(script, "utf16le").toString("base64")],
-      { windowsHide: true, env: { ...process.env, MW_PICK_TITLE: String(title), MW_PICK_INITIAL: String(initial) } });
+      { windowsHide: true, env: { ...process.env, MW_PICK_TITLE: String(title), MW_PICK_INITIAL: nearestFolder(initial) } });
     let out = "", err = "";
     c.stdout.on("data", (d) => { out += d; }); c.stderr.on("data", (d) => { err += d; });
     const t = setTimeout(() => c.kill(), 15 * 60 * 1000);

@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/data-countdown-zoom",
+  "hash": "69e4ae5e57d96738",
+  "at": "2026-10-17T08:12:02.655Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__data-countdown-zoom.mp4",
+    "poster": "previews/moworks__data-countdown-zoom.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "919a7f38f1715a36ce20bfbd68f1da756f83e0ae3a0e1c7e8ef12fb1f1b5d972",
+    "size": 25402,
+    "seconds": 27.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

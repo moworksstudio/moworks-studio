@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/transition-hard-cut",
+  "hash": "291476cc81f44260",
+  "at": "2026-10-17T07:20:34.291Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__transition-hard-cut.mp4",
+    "poster": "previews/moworks__transition-hard-cut.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "86a54605b05b91e80dd379eb84eb5e8353098ca04d5d18d2038cb2b26083c769",
+    "size": 11841,
+    "seconds": 29.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

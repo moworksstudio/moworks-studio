@@ -1,0 +1,49 @@
+<!--
+  Extra-Bold Mincho Card (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Chuỗi thẻ đen chữ serif cực đậm bị nén ngang, cỡ to nhỏ xen kẽ hoặc xếp hình chữ L, cắt cứng rất nhanh vài khung một thẻ, chỉ thẻ cuối đứng đủ lâu để đọc.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textMinchoCutCards(q(".mc"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - cards: [[selector, from frame, to frame], ...] hard cuts
+      - fps: (24)
+      - loop: s (3)
+
+  Notes: 24 fps hard cuts, no easing; serif 900, white on black. Frames 0–5 blank; 6–11: first half of the text, 120 px, scaleX 0.62, centred; 12–15: second half, 54 px, scaleX 0.7, low right, ≤ 2 lines; 16–23: L layout: head 64 px scaleX 0.72 top-left + the last chars as a vertical column at the right (scaleX 0.78); 24–61: final card: first word 34 px scaleX 0.72 top-left over the rest at 66 px scaleX 0.66, centred; 62–71 blank. Loop 3 s. Params: nhịp cắt (6 / 4 / 8 / 38 khung ở 24 fps) · nén ngang (0.62–0.78) · kiểu chữ (serif 900). Hard cuts, no easing; only the last card stays long enough to read. Serif 900, condensed with scaleX 0.62–0.78.
+-->
+
+<div class="mc"><div class="mc-1"><b style="left:50%;top:50%;font-size:300px;transform:translate(-50%,-50%) scaleX(0.62)">MỘT NGÀY</b></div><div class="mc-2"><b style="right:180px;bottom:180px;font-size:140px;transform:scaleX(0.7);transform-origin:100% 100%">KHÔNG QUÊN</b></div>
+<div class="mc-3"><b style="left:140px;top:120px;font-size:170px;transform:scaleX(0.72);transform-origin:0 0">MỘT NGÀY KHÔNG</b><b style="right:200px;top:120px;font-size:150px;writing-mode:vertical-rl;text-orientation:upright;transform:scaleX(0.78)">QUÊN</b></div>
+<div class="mc-4"><b style="left:330px;top:330px;font-size:90px;transform:scaleX(0.72);transform-origin:0 0">MỘT</b><b style="left:50%;top:54%;font-size:176px;transform:translate(-50%,-50%) scaleX(0.66)">NGÀY KHÔNG QUÊN</b></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"cards":[[".mc-1",6,12],[".mc-2",12,16],[".mc-3",16,24],[".mc-4",24,62]],"fps":24,"loop":3};
+  var run = function (el, tl, at, o) {
+        var cards = o.cards.map(function (c) { return [el.querySelector(c[0]), c[1], c[2]]; });
+        return MW.drive(tl, at, o.loop, function (t) { var f = Math.floor(t * o.fps + 1e-6) % Math.round(o.loop * o.fps); cards.forEach(function (c) { if (c[0]) c[0].style.visibility = f >= c[1] && f < c[2] ? "visible" : "hidden"; }); });
+      };
+  MW.textMinchoCutCards = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

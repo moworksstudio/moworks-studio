@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-grid-spiral",
+  "type": "hyperframes:component",
+  "title": "Grid Spiral",
+  "description": "Chín ô bật ra lần lượt theo đường xoắn ốc từ ô giữa, thuận chiều kim đồng hồ.",
+  "tags": [
+    "grid",
+    "stagger",
+    "spiral",
+    "list-grid",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-grid-spiral.html",
+      "target": "compositions/components/motion-grid-spiral.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-grid-spiral",
+    "author": "moworks",
+    "call": "MW.motionGridSpiral(q(\".gs\"), tl, 0.3, {});",
+    "function": "MW.motionGridSpiral",
+    "options": {
+      "items": "",
+      "order": "tile indices in turn (a clockwise spiral from the centre)",
+      "step": "s (0.128)",
+      "duration": "s (0.32, back.out)",
+      "cols": ""
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "3×3 tiles appear in a clockwise spiral from the centre: row-major indices 4, 5, 8, 7, 6, 3, 0, 1, 2; each scales 0 → 1 in 320 ms back.out, starting 128 ms after the previous (whole run ≈1.35 s); the first tile in the accent colour. Params: order (4,5,8,7,6,3,0,1,2) · step (128 ms) · each (0.32 s) · ease (back.out).",
+    "titleVi": "Lưới hiện xoắn ốc từ tâm"
+  }
+}

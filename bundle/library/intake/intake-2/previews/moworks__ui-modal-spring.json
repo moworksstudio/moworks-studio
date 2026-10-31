@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-modal-spring",
+  "hash": "10266dd834624e91",
+  "at": "2026-10-17T08:18:45.814Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__ui-modal-spring.mp4",
+    "poster": "previews/moworks__ui-modal-spring.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b1f5974cd6cf89b33f0dac36e4f5ca47a7668172f7bc131e4f71b57ae05fdd2a",
+    "size": 18263,
+    "seconds": 16.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

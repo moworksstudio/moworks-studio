@@ -1,0 +1,27 @@
+{
+  "source": "Library intake (Phase 2F)",
+  "items": 895,
+  "authors": {
+    "Codrops": 34,
+    "Magic UI": 79,
+    "Moworks Studio": 782
+  },
+  "kinds": {
+    "motion": 651,
+    "block": 244
+  },
+  "previews": {
+    "rendered": 895,
+    "none": 0,
+    "failed": 0
+  },
+  "checks": {
+    "pass": 895,
+    "fail": 0
+  },
+  "vietnamese": {
+    "ok": 538,
+    "no-text": 357
+  },
+  "builtAt": "2026-10-30T15:58:21.029Z"
+}

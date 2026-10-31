@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-spring-framer-bouncy",
+  "type": "hyperframes:component",
+  "title": "Framer Motion bouncy",
+  "description": "Lò xo mạnh và nhanh, bật lại rõ (vượt 23 %), dừng sau khoảng 0.55 giây.",
+  "tags": [
+    "spring",
+    "bouncy",
+    "snappy",
+    "springs",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-spring-framer-bouncy.html",
+      "target": "compositions/components/motion-spring-framer-bouncy.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.95,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-spring-framer-bouncy",
+    "author": "moworks",
+    "call": "MW.motionSpringFramerBouncy(q(\".sp-b\"), tl, 0.4, { back: 1.70 });",
+    "function": "MW.motionSpringFramerBouncy",
+    "options": {
+      "stiffness": "",
+      "damping": "",
+      "mass": "",
+      "prop": "the property it drives: x | y | scale | rotation (x)",
+      "from": "(0)",
+      "to": "(560 px)",
+      "back": "s after the start to spring back (null)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after framer-motion"
+    },
+    "thirdParty": [],
+    "notes": "Target moves 0 → 1 on stiffness 400, damping 17, mass 1 (damping ratio 0.43): 22.9 % overshoot, within 1 % by ~550 ms. Kit form: springk(400, 17) over 0.55 s. Rule: a strong, fast spring with a clear rebound. Small demo: the target moves 102 px beside the response graph, with overshoot and settle readouts. Params: stiffness (400) · damping (17) · duration (0.55 s). A strong, fast spring (400 / 17, ratio 0.43): about 23 % past with a clear rebound, ~0.55 s.",
+    "titleVi": "Lò xo nảy mạnh kiểu Framer"
+  }
+}

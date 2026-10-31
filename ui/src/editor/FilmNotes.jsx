@@ -1,23 +1,28 @@
 // Notes pinned on the film: "Pin a note" (or N), then a click on the picture places a point and a drag draws a box; the
-// note becomes a line of the chat's message, "[0:03.4 · Shot 2] " with the caret after it, and goes with the chat's own Send: the frame and
+// note becomes a line of the chat's message, "[00:03:10 · Shot 2 · Note 1] " with the caret after it, and goes with the chat's own Send: the frame and
 // the place go with the message (task.media), one line a note. The Desk's own parts only: the point and the box in the
-// selection's colour over the picture, the chat's composer for the words.
+// selection's colour over the picture, the chat's composer for the words. Each note has its own number, on the picture and in its line: two
+// notes on one frame are two notes (T28-7: they shared a tag, so deleting one took both and the second went out with the first's words).
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { useT } from "../i18n.jsx";
 import { useThemeId } from "../theme.jsx";
 import { fmtTime } from "./Player.jsx";
 
-/** A pin's tag at the head of its line in the message: "[0:03.4 · Shot 2] ". */
-// a note's time in the player's own clock (minutes:seconds:frames at the film's rate)
-export const pinTag = (p) => `[${fmtTime(p.t, p.fps || 24)}${p.shot != null ? ` · Shot ${p.shot}` : ""}] `;
-/** The pins a message still holds (its line kept), each with the words of its line; a pin whose line was deleted is left out. */
+/** A pin's tag at the head of its line in the message: "[00:03:10 · Shot 2 · Note 1] ". */
+// a note's time in the player's own clock (minutes:seconds:frames at the film's rate); its number is the one on the picture
+export const pinTag = (p) => `[${fmtTime(p.t, p.fps || 24)}${p.shot != null ? ` · Shot ${p.shot}` : ""}${p.no != null ? ` · Note ${p.no}` : ""}] `;
+/** The number the next pin takes: one more than any still waiting, so no two share one and none changes when another goes. */
+export const nextPinNo = (pins) => Math.max(0, ...(pins ?? []).map((p) => p.no ?? 0)) + 1;
+/** The pins a message still holds (its line kept), each with the words of its own line; a pin whose line was deleted is left out. One line
+ *  answers one pin, also for an older pin with no number of its own. */
 export function notesOf(text, pins) {
-  const lines = String(text ?? "").split("\n");
+  const lines = String(text ?? "").split("\n"), used = new Set();
   return (pins ?? []).flatMap((p) => {
-    const tag = (p.tag ?? pinTag(p)).trim(), line = lines.find((l) => l.trim().startsWith(tag));
-    if (line == null) return [];
-    return [{ id: p.id, t: p.t, ...(p.box ? { box: p.box } : p.x != null ? { x: p.x, y: p.y } : {}), text: line.trim().slice(tag.length).trim() }];
+    const tag = (p.tag ?? pinTag(p)).trim(), at = lines.findIndex((l, i) => !used.has(i) && l.trim().startsWith(tag));
+    if (at < 0) return [];
+    used.add(at);
+    return [{ id: p.id, t: p.t, ...(p.box ? { box: p.box } : p.x != null ? { x: p.x, y: p.y } : {}), text: lines[at].trim().slice(tag.length).trim() }];
   });
 }
 
@@ -45,7 +50,7 @@ export function NotesLayer({ notes, time, pinning, aspect = 16 / 9, onPlace, onR
     onPlace(w < 0.02 && h < 0.02 ? { x: drag.x0, y: drag.y0 } : { box: { x: Math.min(drag.x, drag.x0), y: Math.min(drag.y, drag.y0), w, h } });
     setDrag(null);
   };
-  const here = (notes ?? []).map((n, i) => ({ n, no: i + 1 })).filter(({ n }) => Math.abs(n.t - time) < 0.25 && (n.box || n.x != null));
+  const here = (notes ?? []).map((n, i) => ({ n, no: n.no ?? i + 1 })).filter(({ n }) => Math.abs(n.t - time) < 0.25 && (n.box || n.x != null));
   const pct = (v) => `${v * 100}%`;
   return <div className={"fn-layer" + (pinning ? " pinning" : "")} aria-hidden={!pinning}>
     <div className="fn-pic" ref={pic} style={{ "--fn-ar": String(aspect) }} onPointerDown={down} onPointerMove={move} onPointerUp={up}

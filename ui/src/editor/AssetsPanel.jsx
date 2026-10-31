@@ -33,6 +33,14 @@ const groupOf = (a) => (a.status === "missing" ? "missing" : GROUP_OF[a.group] ?
 const kidOf = (a) => (["voiceover", "sfx", "music"].includes(a.group) ? a.group : audioFolder(a));
 // No file names on screen: a font family's files are one row with the family's name ("Be Vietnam Pro · 18 styles"),
 // as the server already does for the app's own fonts (`app`); "BeVietnamPro-BoldItalic.ttf" → "Be Vietnam Pro"
+/** The shots a file is in, sorted, runs of three or more joined: [{ from, to }] that reads "3–9, 12" (Test 30: "In shot 6,2,8,9,5,3,12,7…"). */
+export function runsOfShots(usedIn) {
+  const nums = [...new Set((usedIn ?? []).filter((n) => typeof n !== "boolean" && Number.isFinite(Number(n))).map(Number))].sort((a, b) => a - b);
+  const runs = [];
+  for (const n of nums) { const r = runs.at(-1); if (r && n === r.to + 1) r.to = n; else runs.push({ from: n, to: n }); }
+  return runs.flatMap((r) => (r.to === r.from + 1 ? [{ from: r.from, to: r.from }, { from: r.to, to: r.to }] : [r]));
+}
+export const shotRunText = (r) => (r.from === r.to ? String(r.from) : `${r.from}–${r.to}`);
 export const fontFamily = (name) => String(name ?? "").replace(/\.[a-z0-9]+$/i, "").replace(/\[.*$/, "").replace(/[-_](?!.*[-_]).*$/, "").replace(/[-_]/g, " ")
   .replace(/([a-z])([A-Z])/g, "$1 $2").replace(/\s+/g, " ").trim();
 export function fontRows(xs) {
@@ -148,7 +156,7 @@ function Row({ a, items, projectId, fileUrl, locked, time, length, onChanged, on
   ].filter(Boolean);
   // kind, length and size only (no side notes such as "on the timeline" or "from the app")
   const sub = [t(KIND[a.kind] ?? "File"), a.files > 1 ? t("{n} styles", { n: a.files }) : null, a.duration ? fmtDur(a.duration) : null, a.frames ? t("{n} frames", { n: a.frames }) : null, fmtSize(a.size)].filter(Boolean).join(" · ");
-  const shotsIn = (a.usedIn ?? []).filter((n) => Number.isFinite(Number(n)) && typeof n !== "boolean");
+  const shotRuns = runsOfShots(a.usedIn);
   // no paths on screen: the name, and the app's note when there is one
   return <li className={"as-row" + (a.status === "missing" ? " missing" : "") + (dragging ? " dragging" : "")} title={a.note ? `${a.name}\n${a.note}` : a.name} {...dragProps}>
     <span className={"as-thumb " + a.kind + (a.kind === "audio" ? " " + (folder ?? "audio") : "")} aria-hidden="true">
@@ -156,7 +164,8 @@ function Row({ a, items, projectId, fileUrl, locked, time, length, onChanged, on
     <span className="as-t">
       <span className="as-name">{a.name}{a.status === "new" && <span className="as-new">{t("New")}</span>}</span>
       <span className="as-sub">{a.status === "missing" ? t("Missing") : sub}</span>
-      {shotsIn.length > 0 && <span className="as-used">{t("In shot")} {shotsIn.map((n, i) => <button key={n} className="clink" onClick={() => onShot(Number(n))}>{n}{i < shotsIn.length - 1 ? "," : ""}</button>)}</span>}
+      {a.unread && <span className="as-unread">{t("Not read: {why}", { why: t(a.unread) })}</span>}
+      {shotRuns.length > 0 && <span className="as-used">{t("In shot")} {shotRuns.map((run, i) => <button key={run.from} className="clink" onClick={() => onShot(run.from)}>{shotRunText(run)}{i < shotRuns.length - 1 ? "," : ""}</button>)}</span>}
     </span>
     {busy ? <Loader2 size={14} className="spin as-busy" />
       : a.status === "missing" && !a.app ? <button className="btn sm" disabled={locked} onClick={() => setRelink(true)}>{t("Relink")}</button>
@@ -165,7 +174,7 @@ function Row({ a, items, projectId, fileUrl, locked, time, length, onChanged, on
     {del && <Dialog title={t("Delete {name}?", { name: a.name })} danger onClose={() => setDel(null)} footer={<>
       <button className="btn ghost" onClick={() => setDel(null)}>{t("Cancel")}</button>
       <button className="btn danger" onClick={async () => { const ok = await call("delete", del.inUse ? { force: true } : {}, t("Deleted: {name}", { name: a.name })); if (ok) setDel(null); }}>{t("Delete")}</button></>}>
-      <p>{del.inUse ? t("The film uses it in shot {list}: those shots will show a missing file until you relink or change them.", { list: (a.usedIn ?? []).join(", ") || "?" })
+      <p>{del.inUse ? t("The film uses it in shot {list}: those shots will show a missing file until you relink or change them.", { list: runsOfShots(a.usedIn).map(shotRunText).join(", ") || "?" })
         : t("The file is removed from the project folder.")}</p>
     </Dialog>}
   </li>;

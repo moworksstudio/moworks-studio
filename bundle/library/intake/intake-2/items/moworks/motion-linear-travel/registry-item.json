@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-linear-travel",
+  "type": "hyperframes:component",
+  "title": "Linear Travel",
+  "description": "Chấm tròn đi 180 px với tốc độ không đổi, khoảng cách giữa các khung đều nhau.",
+  "tags": [
+    "move",
+    "linear",
+    "movement",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-linear-travel.html",
+      "target": "compositions/components/motion-linear-travel.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-linear-travel",
+    "author": "moworks",
+    "call": "MW.motionLinearTravel(q(\".lt\"), tl, 0.2, {});",
+    "function": "MW.motionLinearTravel",
+    "options": {
+      "x": "px (1200)",
+      "duration": "s (0.8), ease none: equal spacing every frame",
+      "fadeIn": "s (0.2)",
+      "hold": "s (0.6)",
+      "fadeOut": "s (0.25)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Dot x 0 → 180 px (demo 200 px on a 320 px canvas) in 800 ms, ease none: equal spacing every frame. The 12 even ticks drawn as it passes and the speed graph are guides, not ported. Small demo: fade in 200 ms before, fade out 250 ms at the end of the 2200 ms loop. Use for spins, drifts, marquees. Params: duration (0.8 s) · x: quãng đi (180 px) · ease (none). For spins, drifts and marquees.",
+    "titleVi": "Di chuyển đều tốc"
+  }
+}

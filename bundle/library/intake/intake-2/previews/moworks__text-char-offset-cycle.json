@@ -1,0 +1,26 @@
+{
+  "uid": "in:moworks/text-char-offset-cycle",
+  "hash": "662af373d4c9e899",
+  "at": "2026-10-17T09:35:42.447Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "JetBrains Mono"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-char-offset-cycle.mp4",
+    "poster": "previews/moworks__text-char-offset-cycle.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "8de549a08308f1630de206b9c198057043b42fbe71313705419b65275710ac2a",
+    "size": 20102,
+    "seconds": 23.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-riso-misregister",
+  "hash": "0a777854cbaa61c6",
+  "at": "2026-10-17T10:50:12.439Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__effect-riso-misregister.mp4",
+    "poster": "previews/moworks__effect-riso-misregister.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "4aee3c87335e70e8bdddf7e80821d9cde0eeab07dd5f961abd8c0d5b7aa0f1db",
+    "size": 25339,
+    "seconds": 25.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -2,7 +2,8 @@
 // <hyperframes-player> and talks to the app's UI only by postMessage (checked against the UI's origin). A click on the frame picks the
 // element under the pointer with HF's runtime picker (window.__HF_PICKER_API, the one HF Studio uses), and the page draws the app's own
 // marks over the frame: the selection, the safe margins and a 3 x 3 grid. While the user types, the words and the style change in the
-// frame at once (the file is written by the app's server when the field is left).
+// frame at once (the file is written by the app's server when the field is left). Words animated letter by letter are one line: a click takes
+// the line, and what is typed goes into its letters (splitText.js, loaded before this script; the server writes the file the same way).
 // HF picker: https://github.com/heygen-com/hyperframes/blob/490ecafbc4d1fba3dd9246d516390d4a1a188089/packages/core/src/runtime/picker.ts
 (() => {
   const cfg = document.body.dataset;
@@ -11,6 +12,7 @@
   const p = document.getElementById("p");
   const ov = document.getElementById("ov");
   const marks = document.getElementById("marks");
+  const split = globalThis.__mwSplitText;
   const send = (type, data) => parent.postMessage({ source: "mw-preview", type, ...data }, UI);
   const STYLE_KEYS = ["font-family", "font-size", "font-weight", "color", "background-color", "opacity", "transform", "left", "top", "width", "height"];
   let selected = [];          // [{ el, info }]
@@ -155,16 +157,33 @@
     const computedStyles = {};
     if (cs) for (const k of STYLE_KEYS) computedStyles[k] = cs.getPropertyValue(k);
     const r = rectOf(el);
+    // the element named for Claude (never shown on screen: the UI says what it is in words)
     const label = el.id ? "#" + el.id : el.tagName.toLowerCase() + (el.classList.length ? "." + [...el.classList].filter((c) => !c.startsWith("__hf")).slice(0, 2).join(".") : "");
+    const line = lineOf(el);          // a line of letters reads as its words, however the letters are laid out or hidden at this moment
     return {
       hfId: anchor ? anchor.getAttribute("data-hf-id") : null, scriptMade: !own, file, tagName: el.tagName.toLowerCase(), id: el.id || null,
-      label, textContent: (el.innerText || el.textContent || "").replace(/\s+/g, " ").trim().slice(0, 400) || null,
+      label, textContent: (line ? split.read(line) : (el.innerText || el.textContent || "").replace(/\s+/g, " ").trim()).slice(0, 400) || null,
       leaf: el.children.length === 0, boundingBox: { x: r.left, y: r.top, width: r.width, height: r.height }, computedStyles, currentTime: p.currentTime,
     };
+  }
+  /** The line of letters an element holds: itself, or the only child it wraps ("<h1><span class=in>letters…"), when one is there. */
+  function lineOf(el) {
+    for (let x = el, i = 0; x && i < 4; x = x.children.length === 1 && !split.hasText(x) ? x.firstElementChild : null, i++) if (split.isRun(x)) return x;
+    return null;
+  }
+  /** A letter of a line stands for the whole line: the line itself, or (when the script made it) the nearest element around it that has an
+   *  HF id, so the words can be edited in the file. Alt + click still reaches the single letter. */
+  function wholeLine(el) {
+    const run = split.runAround(el);
+    if (!run) return el;
+    let x = run;
+    while (!x.getAttribute("data-hf-id") && x.parentElement && x.parentElement.children.length === 1 && !split.hasText(x.parentElement)) x = x.parentElement;
+    return x;
   }
   function pickAt(clientX, clientY, add, deeper) {
     const g = geom(), w = win(), d = doc();
     if (!g || !w || !d) return;
+    stopLooking();
     const api = w.__HF_PICKER_API;
     const cx = (clientX - g.x) / g.s, cy = (clientY - g.y) / g.s;
     if (cx < 0 || cy < 0 || cx > W || cy > H) return;
@@ -176,12 +195,13 @@
     const found = infos.map((i) => ({ i, el: resolve(d, i, cx, cy) })).filter((x) => x.el);
     const order = deeper ? [...found.filter((x) => !big(x.i)), ...found.filter((x) => big(x.i))] : found.filter((x) => !big(x.i));
     const pickN = deeper ? Math.min(order.length - 1, (selected.length ? order.findIndex((x) => x.el === selected[selected.length - 1].el) : -1) + 1) : 0;
-    const el = order[Math.max(0, pickN)]?.el ?? null;
-    if (!el) { if (!add) { selected = []; draw(); send("pick", { items: [] }); } return; }
+    const hit = order[Math.max(0, pickN)]?.el ?? null;
+    if (!hit) { if (!add) { selected = []; draw(); send("pick", { items: [] }); } return; }
+    const el = deeper ? hit : wholeLine(hit);
     if (add) { const i = selected.findIndex((s) => s.el === el); if (i >= 0) selected.splice(i, 1); else selected.push({ el }); }
     else selected = [{ el }];
     draw();
-    send("pick", { items: selected.map((s) => describe(s.el)), add: !!add });
+    send("pick", { items: selected.map((s) => describe(s.el)), add: !!add, user: true });
   }
   const safeQuery = (d, sel) => { try { return d.querySelector(sel); } catch { return null; } };
   const safeQueryAll = (d, sel) => { try { return [...d.querySelectorAll(sel)]; } catch { return []; } };
@@ -200,7 +220,7 @@
   /** The element's box as drawn: for words, the box of the words themselves (a heading's line is wider than its text). */
   function rectOf(el) {
     const d = doc();
-    if (d && el.children.length === 0 && (el.textContent || "").trim()) {
+    if (d && (el.children.length === 0 || lineOf(el)) && (el.textContent || "").trim()) {
       try { const rg = d.createRange(); rg.selectNodeContents(el); const r = rg.getBoundingClientRect(); if (r.width > 0 && r.height > 0) return r; } catch { /* the element's own box */ }
     }
     return el.getBoundingClientRect();
@@ -215,10 +235,26 @@
     return hits[0] || null;
   }
   /** After a reload the elements are new: find them again by their HF id. */
+  // HF mounts its scenes after "ready", so what was picked is looked for a little while; meanwhile nothing is drawn and the UI keeps its target (the
+  // edit card stays open, with its Reset). Once found the UI hears the words as they are now; an element that is gone clears the target.
+  let looking = [], lookT = null;
+  const stopLooking = () => { looking = []; clearTimeout(lookT); };
   function reselect() {
-    const d = doc(); if (!d) return;
-    selected = selected.map((s) => { const id = s.el.getAttribute && s.el.getAttribute("data-hf-id"); const all = byHf(d, id); const el = all.find(seen) || all[0]; return el ? { el } : null; }).filter(Boolean);
-    draw();
+    if (selected.length) looking = selected.map((s) => ({ id: s.el.getAttribute?.("data-hf-id"), file: fileOf(s.el) }));
+    selected = [];
+    clearTimeout(lookT);
+    if (!looking.length) return;
+    const until = performance.now() + 15000;
+    const look = () => {
+      const d = doc();
+      const found = d ? looking.map(({ id, file }) => { const all = byHf(d, id).filter((x) => fileOf(x) === file); return all.find(seen) || all[0] || null; }) : [];
+      if (!(d && found.every(Boolean)) && performance.now() < until) { lookT = setTimeout(look, 200); return; }
+      selected = found.filter(Boolean).map((el) => ({ el }));
+      looking = [];
+      draw();
+      send("pick", { items: selected.map((s) => describe(s.el)), add: false });
+    };
+    look();
   }
 
   ov.addEventListener("click", (e) => { if (e.detail > 1) return; pickAt(e.clientX, e.clientY, e.shiftKey, e.altKey); });
@@ -261,6 +297,13 @@
   addEventListener("resize", draw);
 
   // ---- the UI's commands ----
+  const fileOf = (el) => el.closest("[data-composition-src]")?.getAttribute("data-composition-src") ?? "index.html";
+  // a line of letters while it is typed in: what it was made of, kept so a line typed short or empty loses no letter (the film's next load reads the file)
+  const typed = new WeakMap();
+  const typeLine = (el, text) => {
+    if (!typed.has(el)) { const st = split.prepare(el); if (!st.kind) return false; typed.set(el, st); }
+    return split.write(el, text, typed.get(el));
+  };
   let stepT = null, stepWhen = 0;
   // HF builds each sub-composition's timeline when it has loaded; a seek before that lands on a frame without it (an empty ground, a shot
   // without its words). HF says the film is ready to draw any frame with window.__renderReady (its own snapshot waits for it,
@@ -316,19 +359,20 @@
     else if (m.type === "range") { p.rangeStart = m.start == null ? null : Number(m.start); p.rangeEnd = m.end == null ? null : Number(m.end); }
     else if (m.type === "marks") { safe = !!m.safe; grid = !!m.grid; draw(); }
     else if (m.type === "lock") { locked = !!m.locked; draw(); }
-    else if (m.type === "clear") { selected = []; draw(); }
+    else if (m.type === "clear") { stopLooking(); selected = []; draw(); }
     else if (m.type === "select") {         // the UI selects by HF id (a word in "Words on screen")
-      const d = doc(); const all = d ? byHf(d, m.hfId) : []; const el = all.find(seen) || all[0];
-      if (el) { selected = [{ el }]; draw(); send("pick", { items: [describe(el)], add: false }); }
+      // the same id may be in another scene's file: the one asked for, when the UI says which
+      const d = doc(); const all = d ? byHf(d, m.hfId).filter((x) => !m.file || fileOf(x) === m.file) : []; const el = all.find(seen) || all[0];
+      if (el) { stopLooking(); selected = [{ el }]; draw(); send("pick", { items: [describe(el)], add: false, user: true }); }
     }
+    else if (m.type === "describe") { if (selected.length) send("pick", { items: selected.map((s) => describe(s.el)), add: false }); }          // the words changed: the chat's target says the new ones
     else if (m.type === "live") {          // words or style shown at once, before the file is written
       const d = doc();
       // the copies in the picked element's own file (another file may hold an element with the same id; it is not the one edited)
-      const fileOf = (el) => el.closest("[data-composition-src]")?.getAttribute("data-composition-src") ?? "index.html";
-      const mine = selected.length ? fileOf(selected[selected.length - 1].el) : null;
+      const mine = selected.length ? fileOf(selected[selected.length - 1].el) : looking.at(-1)?.file ?? null;
       const all = (d ? byHf(d, m.hfId) : []).filter((el) => mine == null || fileOf(el) === mine);
       for (const el of all) {          // every copy of the element, so the one on screen changes as the user types
-        if (m.text != null) { const t = el.children.length === 1 ? el.firstElementChild : el; t.textContent = m.text; }
+        if (m.text != null && !typeLine(lineOf(el) ?? el, m.text)) { const t = el.children.length === 1 ? el.firstElementChild : el; t.textContent = m.text; }
         if (m.style) for (const k of Object.keys(m.style)) { if (m.style[k]) el.style.setProperty(k, m.style[k], "important"); else el.style.removeProperty(k); }
       }
       draw();

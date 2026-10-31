@@ -1,0 +1,51 @@
+<!--
+  Grid Spiral (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Chín ô bật ra lần lượt theo đường xoắn ốc từ ô giữa, thuận chiều kim đồng hồ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionGridSpiral(q(".gs"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - items: 
+      - order: tile indices in turn (a clockwise spiral from the centre)
+      - step: s (0.128)
+      - duration: s (0.32, back.out)
+      - cols: 
+
+  Notes: 3×3 tiles appear in a clockwise spiral from the centre: row-major indices 4, 5, 8, 7, 6, 3, 0, 1, 2; each scales 0 → 1 in 320 ms back.out, starting 128 ms after the previous (whole run ≈1.35 s); the first tile in the accent colour. Params: order (4,5,8,7,6,3,0,1,2) · step (128 ms) · each (0.32 s) · ease (back.out).
+-->
+
+<div class="st"><div class="gs" style="grid-template-columns:repeat(3,1fr)"><i style="background:#2f3a5c">1</i><i style="background:#2f3a5c">2</i><i style="background:#2f3a5c">3</i><i style="background:#2f3a5c">4</i><i style="background:#8b7bff">5</i><i style="background:#2f3a5c">6</i><i style="background:#2f3a5c">7</i><i style="background:#2f3a5c">8</i><i style="background:#2f3a5c">9</i></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"items":"i","order":[4,5,8,7,6,3,0,1,2],"step":0.128,"duration":0.32,"cols":0};
+  var run = function (el,tl,at,o
+  ) {
+  var it = Array.prototype.slice.call(el.querySelectorAll(o.items)), n = it.length, cols = o.cols || n;
+  var bo = gsap.parseEase("back.out(1.7)");
+  return MW.drive(tl, at, (o.order.length - 1) * o.step + o.duration, function (t) { o.order.forEach(function (idx, k) { var x = it[idx]; if (!x) return; var u = Math.max(0, Math.min(1, (t - k * o.step) / o.duration)); gsap.set(x, { scale: bo(u) }); x.style.opacity = u > 0 ? "1" : "0"; }); });
+  };
+  MW.motionGridSpiral = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

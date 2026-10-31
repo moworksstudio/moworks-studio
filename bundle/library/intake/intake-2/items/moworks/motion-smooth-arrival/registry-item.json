@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-smooth-arrival",
+  "type": "hyperframes:component",
+  "title": "Smooth Arrival",
+  "description": "Khối vuông đi 180 px, tăng tốc rồi giảm tốc êm, nhanh nhất ở giữa đường.",
+  "tags": [
+    "move",
+    "ease-in-out",
+    "movement",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-smooth-arrival.html",
+      "target": "compositions/components/motion-smooth-arrival.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-smooth-arrival",
+    "author": "moworks",
+    "call": "MW.motionSmoothArrival(q(\".sa\"), tl, 0.3, {});",
+    "function": "MW.motionSmoothArrival",
+    "options": {
+      "x": "px (1200)",
+      "duration": "s (0.76)",
+      "ease": "(power2.inOut: fastest mid-way)",
+      "fadeAt": "s it fades to reappear at the start (1.65)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Square x 0 → 180 px (demo 200) in 760 ms power2.inOut (easeInOutCubic, bezier .65,0,.35,1), fastest mid-way, between dashed start and end slots. Small demo: fades out 200 ms at 1950 ms and fades back in at the start (250 ms). The speed graph is a guide. Params: duration (0.76 s) · x (180 px) · ease (power2.inOut).",
+    "titleVi": "Đi êm, chậm đầu chậm cuối"
+  }
+}

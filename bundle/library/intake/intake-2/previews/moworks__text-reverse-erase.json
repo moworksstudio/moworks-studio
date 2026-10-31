@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-reverse-erase",
+  "hash": "b89cd2c6e2278612",
+  "at": "2026-10-17T11:31:56.571Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-reverse-erase.mp4",
+    "poster": "previews/moworks__text-reverse-erase.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "9d39d876903f67a3f886f158c6b57d0dd97de7173bf1e264a8b5c6675a5cd2d3",
+    "size": 13635,
+    "seconds": 21.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

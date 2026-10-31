@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-pose-vs-straight",
+  "type": "hyperframes:block",
+  "title": "Pose-to-pose vs Straight-ahead",
+  "description": "Bài học: so sánh đặt các tư thế chính rồi nội suy (cho UI, logo) với tính nối tiếp từng khung (cho hạt, chất lỏng).",
+  "tags": [
+    "lesson",
+    "keyframes",
+    "noise",
+    "principles",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-pose-vs-straight.html",
+      "target": "compositions/components/motion-pose-vs-straight.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-pose-vs-straight",
+    "author": "moworks",
+    "call": "MW.motionPoseVsStraight(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionPoseVsStraight",
+    "options": {
+      "move": "s per move between key poses (1), power2.inOut",
+      "wander": "[x, y] reach of the wandering dot ([75, 60])",
+      "rates": "noise rates a second ([1.3, 1.1])",
+      "trail": "s of trail (1.2)",
+      "seed": "the wander",
+      "loop": "s (6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Left: a dot eases between three marked key poses, 1000 ms per move power2.inOut (bezier .65,0,.35,1), looping 3 s. Right: a dot wanders on seeded smooth 1D noise (x ±75, y ±60 px; rates 1.3 / 1.1 per s) with a 1.2 s fading trail — the straight-ahead look. Kit port: the wander must stay a seeded pure function of time (no simulation state). Params: keys: các tư thế (3) · move (1 s) · wander: biên độ trôi (75 / 60 px) · seed. A lesson: key poses with in-betweens (UI, logos) against frame-by-frame motion (particles, liquids); the wander is seeded noise, a pure function of time.",
+    "titleVi": "Tư thế chính và vẽ nối tiếp"
+  }
+}

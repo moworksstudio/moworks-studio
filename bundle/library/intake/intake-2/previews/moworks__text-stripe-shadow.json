@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-stripe-shadow",
+  "hash": "64452612239f7cbd",
+  "at": "2026-10-17T10:31:33.332Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-stripe-shadow.mp4",
+    "poster": "previews/moworks__text-stripe-shadow.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "962334e83d48567c5f964a4e1f68e1fbc47497da531ac4e77d3c099a967e2ec4",
+    "size": 38744,
+    "seconds": 27.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

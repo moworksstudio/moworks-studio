@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/data-sankey",
+  "hash": "df9c4c4770e22cbf",
+  "at": "2026-10-17T08:25:03.131Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__data-sankey.mp4",
+    "poster": "previews/moworks__data-sankey.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "2580cf04ff7b09e7472cbe9f22bec7f44bad82484ba2a14d5f94ae7271367088",
+    "size": 21574,
+    "seconds": 31.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

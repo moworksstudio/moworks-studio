@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-pendulum-wobble",
+  "type": "hyperframes:component",
+  "title": "Pendulum Wobble",
+  "description": "Thẻ treo từ một điểm phía trên, lắc qua lại với biên độ nhỏ dần rồi đứng yên.",
+  "tags": [
+    "rotate",
+    "pendulum",
+    "damped",
+    "rotation",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "motion-pendulum-wobble.html",
+      "target": "compositions/components/motion-pendulum-wobble.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-pendulum-wobble",
+    "author": "moworks",
+    "call": "MW.motionPendulumWobble(q(\".pw-c\"), tl, 0.3, {});",
+    "function": "MW.motionPendulumWobble",
+    "options": {
+      "angles": "degrees at each key ([-27, 18, -11, 6, -2, 0])",
+      "times": "share of the length at each key ([0, .22, .42, .6, .76, .9])",
+      "duration": "s (2.2; the recipe 1 s)",
+      "pivot": "px above the top edge (70)",
+      "ease": "between keys (cubic-bezier(.45,.05,.2,1))"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Card hangs from a pivot 14 px above its top edge and swings −27° → 18° → −11° → 6° → −2° → 0° at 0 / 22 / 42 / 60 / 76 / 90 % of a 2200 ms loop (small DOM demo), each swing eased in-out (bezier .45,.05,.2,1), then rests. Recipe: 1000 ms, −28° → 18° (400 ms) → −8° (670 ms) → 0°, elastic.out. Params: duration (1 s) · from: góc đầu (−28°) · pivot: điểm treo (trên giữa) · swings: số lần lắc.",
+    "titleVi": "Lắc như con lắc, tắt dần"
+  }
+}

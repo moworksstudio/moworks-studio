@@ -13,6 +13,7 @@
 import { execFile, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { basename, join, relative, sep } from "node:path";
 import { promisify } from "node:util";
 import { remixAudio, render } from "../hf-render-worker/client.mjs";
@@ -27,6 +28,9 @@ import { capWebBitrate, smoothCopy } from "../hf-qa/webBitrate.mjs";
 const { projectFps } = projects;
 
 const DIR = [".moworks", "cache", "proxy"];
+/** Where a sound is mixed again: the computer's temp folder, not the film's. HF makes long-named folders inside it, and a film deep in the user's
+ *  folders went past Windows' 248 characters for a folder (ENOENT from mkdtemp: the new sound never mixed). */
+export const remixWorkDir = (hash) => join(tmpdir(), `mw-remix-${hash}`);
 const AUDIO_TAG = /<audio\b[^>]*>(?:[\s\S]*?<\/audio>)?/gi;
 const AUDIO_FILE = /\.(mp3|wav|m4a|aac|flac|ogg|opus)$/i;
 // HF's element ids, written into the film's HTML when the Editor opens it (not a film change; older films also carry the ones HF Studio
@@ -123,7 +127,8 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
   /** The quality a background render is made at: a Brush film's video-only render "high", every other film the export's "standard"
    *  (the file an export reuses is the export it would have made). */
   const qualityOf = (styleId) => (prerendered(styleId) ? "high" : "standard");
-  const view = (p) => {
+  // self: asked by the running job itself, which wants the film's state as if it were not there (it is what makes the status "rendering")
+  const view = (p, { self = false } = {}) => {
     const hasFilm = existsSync(join(p.path, "index.html")), codeFilm = isCodeFilm(p.meta?.style?.id) && hasFilm;
     if (!hasFilm) return { codeFilm: false, mode: null, status: "none", url: null, at: null, fps: null, job: null };
     let st = readState(p.path);
@@ -140,7 +145,7 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
     // whose only change is the empty line a sound taken out left is the same picture (drawn)
     const samePicture = st?.picture === parts.picture || (!!st?.drawn && st.drawn === parts.drawn);
     const picture = !!file && samePicture && (QUALITY_RANK[st.quality] ?? -1) >= QUALITY_RANK[qualityOf(p.meta?.style?.id)];
-    const status = running.has(p.id) && !smoothing.has(p.id) ? "rendering" : !file ? "none" : picture && st.sound === parts.sound ? "fresh" : "stale";
+    const status = running.has(p.id) && !smoothing.has(p.id) && !self ? "rendering" : !file ? "none" : picture && st.sound === parts.sound ? "fresh" : "stale";
     const job = smoothing.has(p.id) ? null : pub(running.get(p.id));          // the Smooth copy alone is quiet: nothing to wait for
     // the time left (or the whole render before it starts), from this film's last render or the style's usual cost per frame
     const perFrame = st?.msPerFrame ?? MS_PER_FRAME[pre ? "prerendered" : "preview"], frames = Math.round((filmSeconds(p.path) ?? st?.duration ?? 0) * fps);
@@ -179,7 +184,7 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
     const parts = filmParts(p.path, fps), hash = createHash("sha256").update(`${parts.picture}:${parts.sound}`).digest("hex").slice(0, 16);
     const dir = join(p.path, ...DIR), rel = `${DIR.join("/")}/${hash}.mp4`, out = join(p.path, ...rel.split("/")), src = join(p.path, ...st.file.split("/"));
     const tmp = out === src ? out.replace(/\.mp4$/, ".remix.mp4") : out, t0 = Date.now();
-    const res = await remixAudio({ projectDir: p.path, picture: src, outputPath: tmp, fps, duration: st.duration ?? filmSeconds(p.path), workDir: join(dir, "remix") },
+    const res = await remixAudio({ projectDir: p.path, picture: src, outputPath: tmp, fps, duration: st.duration ?? filmSeconds(p.path), workDir: remixWorkDir(hash) },
       { signal, root, background, ffmpeg: join(expandEnv(loadPins(root).ffmpeg.dir), "ffmpeg.exe") });
     if (res.type !== "done") throw Object.assign(new Error(res.message ?? "The new sound could not be mixed onto the film"), { code: res.type === "cancelled" ? "CANCELLED" : "REMIX_FAILED" });
     if (tmp !== out) renameSync(tmp, out);
@@ -225,7 +230,8 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
           refreshBridge(p.path);          // today's bridge, as an export does
           const fps = projectFps(fresh), parts = filmParts(p.path, fps), hash = filmHash(p.path, fps), dir = join(p.path, ...DIR), rel = `${DIR.join("/")}/${hash}.mp4`;
           mkdirSync(dir, { recursive: true });
-          const st0 = readState(p.path), now = view(fresh);
+          // (asked without `self` it read "rendering", never sound-only: every sound changed on a finished film rendered the whole film again)
+          const st0 = readState(p.path), now = view(fresh, { self: true });
           if (now.soundOnly && soundOnRoot(p.path)) {          // the picture is rendered: only its sound again
             j.update({ stage: "mixing the sound", waitingFor: null, progress: 50 });
             const next = await remixOnto(p, st0, fps, { signal: j.signal, background: true });

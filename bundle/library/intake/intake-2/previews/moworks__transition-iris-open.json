@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/transition-iris-open",
+  "hash": "205996f3925dbff6",
+  "at": "2026-10-17T07:21:04.262Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__transition-iris-open.mp4",
+    "poster": "previews/moworks__transition-iris-open.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "fccbcb5ee24f0a748d23a786700a5ca6a4a958e3a398cdef07d643a50f015d77",
+    "size": 14649,
+    "seconds": 27.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

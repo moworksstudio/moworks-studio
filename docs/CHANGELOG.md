@@ -3,6 +3,48 @@
 One entry per version, newest first. The version is the HyperFrames version the app runs (0.8.214 runs HyperFrames 0.8.214); fixes to the
 app alone on the same engine are 0.8.214.1, 0.8.214.2…
 
+## 0.8.214.3 (2026-10-31)
+
+Still on HyperFrames 0.8.214: sounds you pick yourself, captions you can change on the timeline, Brand Kits that read a whole folder, and an
+After Effects export that keeps every sound.
+
+### Sound
+- **Sounds button:** beside Motions in the Editor. Search the app's sounds and online ones, listen, and Add at the playhead. The file lands in the
+  film's assets and shows in the Assets tab at once. SFXMint is the online backup when Openverse is down.
+- **Hand edits stay:** a sound you move or take off stays that way when Claude changes the film, and its level follows the voice right after the move.
+- **Moving a sound is quick:** only the sound is mixed again, in seconds, with no new render of the picture.
+- **The right sound first:** named sounds from the storyboard keep their moment, the app looks online when it only has something close, and a shot
+  marked with no sound gets none. Effects stay under the voice, and Smooth sounds like the render.
+
+### Captions
+- **A Captions row on every timeline**, in both themes. Click a caption to jump there and change its words.
+- **Ask Claude for captions** in the Editor's chat. It times them to the voice even when the voice is cut, and avoids covering the film's subject.
+
+### Brand Kits and assets
+- **The whole folder:** a Brand Kit takes PDFs of any length, fonts, logos, ZIP, AI and PSD. What could not be read is named on the kit, and a PDF
+  with a password says so.
+- **Fonts and logos come along:** the kit's previews use its own fonts, and a film made with it gets its fonts and logos in its assets.
+- **Long PDFs in a project:** every page now reaches Claude, not only the first 40.
+- **Faster imports:** a folder of files makes one revision, a picture sequence stays out of the film's history, and a file already there is skipped.
+
+### After Effects
+- **Every sound arrives:** formats After Effects refuses are converted, with their volume changes as keyframes, and the voice has its own stem.
+- **True to the film:** shots keep their size, one frame of every shot is checked, the dialog names the shots that are off, and the size estimate is
+  honest.
+
+### Set up and New project
+- **Projects folder:** you choose only where projects go; `library` and `models` stay beside the app. **Set up later** is back.
+- **Length and Size** as After Effects writes them: click a number to retype it. **Choose** opens at the projects folder.
+- **Frame rate:** 24, 25, 30, 50 or 60.
+
+### Editor and Settings
+- **Claude's questions** are short lines with their choices as a bullet list, the suggested one first.
+- **On-screen words:** words animated letter by letter are one line to click and edit. Two notes pinned on one frame stay two.
+- **Review** sees every shot of a long film, and the SFX lane shows each sound on its own row.
+- **Characters and Brand Kits:** the app's stay apart from yours and are never mixed or lost in an update.
+- **Settings** are centred in both themes, and Voice-over moved to System.
+- **Length:** the Editor shows the length you set until the film is built.
+
 ## 0.8.214.2 (2026-10-30)
 
 Still on HyperFrames 0.8.214: a simpler setup, a clearer sound mix, and an easy way to remove the app.

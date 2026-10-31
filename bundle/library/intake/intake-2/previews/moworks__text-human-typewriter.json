@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-human-typewriter",
+  "hash": "d0073ac4176fd73c",
+  "at": "2026-10-17T09:35:15.504Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-human-typewriter.mp4",
+    "poster": "previews/moworks__text-human-typewriter.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "89dc9f5d501dd6ea5121743cf05c4cf55a503f3026443d22a90588ec8abbb0d8",
+    "size": 15137,
+    "seconds": 26.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

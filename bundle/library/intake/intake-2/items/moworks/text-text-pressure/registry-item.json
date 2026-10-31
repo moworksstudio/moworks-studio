@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-text-pressure",
+  "type": "hyperframes:component",
+  "title": "Text Pressure",
+  "description": "Ký tự gần con trỏ phình đậm và rộng ra, ký tự xa bị ép mảnh và hẹp lại, cả dòng vẫn giữ nguyên bề rộng như chịu áp lực.",
+  "tags": [
+    "variable-font",
+    "pressure",
+    "cursor",
+    "weight",
+    "text-variable-fonts",
+    "bouncy",
+    "soft",
+    "variable-fonts"
+  ],
+  "files": [
+    {
+      "path": "text-text-pressure.html",
+      "target": "compositions/components/text-text-pressure.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-text-pressure",
+    "author": "moworks",
+    "call": "MW.textTextPressure(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textTextPressure",
+    "options": {
+      "period": "s a sweep left → right → left (4), a cosine",
+      "over": "px past each end (70)",
+      "reach": "[min px, share of the line] of the falloff ([350, 0.45])",
+      "weight": "wght [far, near] ([100, 900])",
+      "squeeze": "[base, gain] of each letter's width (0.55 + 1.05 f)",
+      "cursor": "a pointer drawn on the path (optional)",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after react-bits (MIT + Commons Clause): written from the idea only, no react-bits code"
+    },
+    "thirdParty": [],
+    "notes": "A cursor sweeps left ↔ right across the line as a cosine every 4 s (amplitude half the line width + 14 px, small vertical bob). Per char f = smoothstep(1 − |dx| / md), md = max(70 px, 0.45 × line width) (horizontal distance); wght = 100 + 800f; width factor 0.55 + 1.05f (source wdth 5–200; RFlex 25–151); then all widths are rescaled so the line keeps its rest width (far letters condense); min font size 24 px. Loop 4 s. Params: path: đường đi con trỏ (trái ↔ phải, 4 s) · wght (100–900) · wdth (hẹp ↔ rộng) · falloff: tầm ảnh hưởng (0.45 bề rộng dòng). f = smoothstep(1 − |dx| / reach) per letter; widths are then rescaled so the line keeps its rest width (far letters condense), and wdth follows each letter's share.",
+    "titleVi": "Chữ phình theo con trỏ, giữ bề rộng"
+  }
+}

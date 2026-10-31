@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-modal-spring",
+  "type": "hyperframes:component",
+  "title": "Modal Enter / Exit",
+  "description": "Nền tối đi, hộp thoại trồi lên 16 px và phóng 0.96 lên 1 bằng lò xo; khi đóng biến mất rất nhanh.",
+  "tags": [
+    "modal",
+    "spring",
+    "dialog",
+    "backdrop",
+    "layout-navigation",
+    "smooth",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "ui-modal-spring.html",
+      "target": "compositions/components/ui-modal-spring.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-modal-spring",
+    "author": "moworks",
+    "call": "MW.uiModalSpring(q(\".ms\"), tl, 0.3, { backdrop: \".ms-bd\" });",
+    "function": "MW.uiModalSpring",
+    "options": {
+      "rise": "px (80)",
+      "closeAt": "s after opening (1.9)",
+      "closeEase": "expo.in (the recipe power3.in)",
+      "backdrop": "the dim layer",
+      "dim": "(0.65)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Background (4 columns) dims 0 → 65 % with k. Modal 180x112 r12: k = spring(k280, c28) from 0.3 s: opacity k, y +16 → 0 px × (1 − k), scale 0.96 + 0.04 k (≈ 400 ms to settle). Close at 2.2 s over 220 ms (demo easeInExpo; recipe easeInQuart = power3.in), k → 0. Params: spring (k280 c28) · rise (16 px) · scale (0.96) · close (0.22 s, expo.in) · backdrop (65 %).",
+    "titleVi": "Hộp thoại mở bằng lò xo, đóng nhanh"
+  }
+}

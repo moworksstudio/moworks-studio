@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-flip-words-blur",
+  "type": "hyperframes:component",
+  "title": "Flip Words",
+  "description": "Từ cũ phóng to gấp đôi, nhoè và bay chéo lên phải rồi tan, từ mới hiện từng ký tự từ vùng nhoè.",
+  "tags": [
+    "swap",
+    "blur",
+    "words",
+    "scale",
+    "text-swap",
+    "smooth",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "text-flip-words-blur.html",
+      "target": "compositions/components/text-flip-words-blur.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-flip-words-blur",
+    "author": "moworks",
+    "call": "MW.textFlipWordsBlur(q(\".fw\"), tl, 0, {});",
+    "function": "MW.textFlipWordsBlur",
+    "options": {
+      "words": "the words in turn",
+      "swaps": "s of each swap ([0.5, 2.7])",
+      "unit": "px per reference unit (4)",
+      "loop": "s (4.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Aceternity UI: written from the idea only"
+    },
+    "thirdParty": [],
+    "notes": "Words cycle every 3 s. Exit (old word whole): x +40, y −40 px, scale 1 → 2, blur 0 → 8 px, opacity 1 → 0, 0.45 s easeOutCubic (cubic-bezier(.33,1,.68,1)). Enter: each char of the new word opacity 0 → 1, y +10 → 0, blur 8 → 0 px over 0.2 s ease-out, delay = word index × 0.3 s + char index × 0.05 s (demo +0.1 s, compressed to fit 1 s); the word wrapper rises y 10 → 0 on a spring (k 100, c 10). Demo swaps at 0.5 s and 2.7 s; loop 4.4 s. Params: words: danh sách từ · interval (3 s) · exit: phóng / nhoè (2 lần / 8 px) · charDelay (0.05 s) · wordDelay (0.3 s).",
+    "titleVi": "Từ cũ nhoè bay đi, từ mới hiện"
+  }
+}

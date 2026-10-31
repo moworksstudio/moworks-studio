@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-toggle-morph",
+  "hash": "f9905b33aee86d27",
+  "at": "2026-10-17T10:06:17.002Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__ui-toggle-morph.mp4",
+    "poster": "previews/moworks__ui-toggle-morph.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "595c9893fb88d076cd49e9df51557211f21181aace1911661064508e1da3c5b5",
+    "size": 10117,
+    "seconds": 25.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

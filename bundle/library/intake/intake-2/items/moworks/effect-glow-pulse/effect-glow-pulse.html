@@ -1,0 +1,78 @@
+<!--
+  Glow Pulse (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Quầng sáng quanh phần tử mạnh lên rồi dịu đi theo nhịp 1.1 giây, phần tử cũng sáng và phồng nhẹ theo.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectGlowPulse(q(".gp-d"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - period: s per cycle (1.1)
+      - cycles: (3)
+      - glow: px of the glow, rest to peak ([32, 104])
+      - ring: px of the ring's border (30)
+      - color: glow colour
+
+  Notes: Looping glow on a 36 px accent dot, 1100 ms per cycle, each half eased in-out (runtime bezier .45,.05,.2,1; recipe sine.inOut): box-shadow blur 8 → 26 → 8 px (recipe 8 → 24, opacity 35 → 85 %), brightness 0.92 → 1.22, scale 0.98 → 1.03 (the target is not still). Behind it a 48 px ring with an 8 px accent border: scale 0.9 → 1.35, opacity 0.28 → 0.9, blur 5 → 10 px, same cycle. Params: period (1.1 s) · glow (8 → 26 px) · brightness (0.92 → 1.22) · scale (0.98 → 1.03) · color.
+-->
+
+<div class="gm gp"><div class="gp-d"></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"period":1.1,"cycles":3,"glow":[32,104],"ring":30,"color":"#8b7bff"};
+  var run = function (el, tl, at, o) {
+        var ring = document.createElement("div"), e = MW.ez("cubic-bezier(.45,.05,.2,1)"), host = el.parentNode;
+        if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        ring.style.cssText = "position:absolute;pointer-events:none;border-radius:50%;box-sizing:border-box;border:" + o.ring + "px solid " + o.color + ";"; host.insertBefore(ring, el);
+        return MW.drive(tl, at, o.period * o.cycles, function (t) {
+          var u = (t / o.period) % 1, k = u < 0.5 ? e(u * 2) : 1 - e((u - 0.5) * 2), R = el.offsetWidth * 4 / 3;
+          el.style.boxShadow = "0 0 " + (o.glow[0] + (o.glow[1] - o.glow[0]) * k) + "px " + o.color; el.style.filter = "brightness(" + (0.92 + 0.3 * k) + ")"; gsap.set(el, { scale: 0.98 + 0.05 * k });
+          ring.style.width = ring.style.height = R + "px"; ring.style.left = (el.offsetLeft + el.offsetWidth / 2 - R / 2) + "px"; ring.style.top = (el.offsetTop + el.offsetHeight / 2 - R / 2) + "px";
+          gsap.set(ring, { scale: 0.9 + 0.45 * k }); ring.style.opacity = String(0.28 + 0.62 * k); ring.style.filter = "blur(" + (5 + 5 * k) + "px)";
+        });
+      };
+  MW.effectGlowPulse = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

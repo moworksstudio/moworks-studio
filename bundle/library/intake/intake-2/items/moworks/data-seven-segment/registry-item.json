@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-seven-segment",
+  "type": "hyperframes:block",
+  "title": "Seven-segment Display",
+  "description": "Chữ số dựng từ bảy thanh đèn LED, đổi số thì chỉ các thanh khác nhau sáng tắt trong 60 ms, dấu hai chấm nhấp nháy mỗi giây.",
+  "tags": [
+    "digits",
+    "led",
+    "seven-segment",
+    "clock",
+    "text-numbers-data",
+    "crisp",
+    "numbers-data"
+  ],
+  "files": [
+    {
+      "path": "data-seven-segment.html",
+      "target": "compositions/components/data-seven-segment.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/data-seven-segment",
+    "author": "moworks",
+    "call": "MW.dataSevenSegment(q(\".ss-d\"), tl, 0, {});",
+    "function": "MW.dataSevenSegment",
+    "options": {
+      "from": "the shown value as hhmm (1234)",
+      "start": "s it starts counting (0.5)",
+      "every": "s per step (0.45)",
+      "fade": "s a segment changes (0.06)",
+      "off": "unlit opacity (0.08)",
+      "width": "px per digit (150)",
+      "color": "LED colour",
+      "format": "digit layout ('dd:dd')",
+      "powerOffAt": "s (3.4)",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Each digit = 7 hexagonal bar segments a–g (thickness 0.17 × digit width, height 1.8 × width, italic skew 0.08 ≈ 4.6°) + optional colon / dot; value → bitmask (0 abcdef, 1 bc, 2 abdeg, 3 abcdg, 4 bcfg, 5 acdfg, 6 acdefg, 7 abc, 8 all, 9 abcdfg, − g); on change only differing segments fade over 60 ms; unlit at 0.08 opacity, lit 1 with a soft glow (blur 8 px); colon blinks 1 Hz. Demo counts up 1 every 0.45 s from 0.5 s, power drops 3.4–3.62 s; loop 4 s. Params: value: số hiển thị (12:34) · fade: đổi thanh (0.06 s) · off: độ sáng thanh tắt (0.08) · colon: nhấp nháy (1 Hz) · color.",
+    "titleVi": "Số LED bảy đoạn"
+  }
+}

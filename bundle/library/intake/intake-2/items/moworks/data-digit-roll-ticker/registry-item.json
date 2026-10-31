@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-digit-roll-ticker",
+  "type": "hyperframes:block",
+  "title": "Number Ticker",
+  "description": "Số người theo dõi 120 tăng thành 128: chỉ chữ số hàng đơn vị cuộn lên trong ô cố định, chậm dần khi tới đích, rồi huy hiệu +8 xanh bật ra.",
+  "tags": [
+    "counter",
+    "roll",
+    "digits",
+    "number",
+    "feedback-reactions",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "data-digit-roll-ticker.html",
+      "target": "compositions/components/data-digit-roll-ticker.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.7,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/data-digit-roll-ticker",
+    "author": "moworks",
+    "call": "MW.dataDigitRollTicker(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataDigitRollTicker",
+    "options": {
+      "from": "(120)",
+      "to": "(128): only the ones digit rolls",
+      "label": "",
+      "accent": "the final digit",
+      "resetAt": "s (2.35)",
+      "loop": "s (2.7)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Three digit cells 34x50 r8, 36 px apart, 30 px digits. Only the ones digit rolls 0 → 8 over 0.3-1.5 s power2.out (40 px per step, clipped to its cell); the final digit turns accent; the other digits never move. A green '+8' badge pops 1.45-1.7 s back.out. Label FOLLOWERS below. Reset fade 2.35-2.62 s. Params: from (120) · to (128) · duration (1.2 s, power2.out) · cell (34x50) · badge (+8).",
+    "titleVi": "Chữ số hàng đơn vị cuộn lên"
+  }
+}

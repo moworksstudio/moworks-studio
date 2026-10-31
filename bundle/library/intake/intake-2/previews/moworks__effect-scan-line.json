@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-scan-line",
+  "hash": "aedfcacf82aeb594",
+  "at": "2026-10-17T08:35:05.979Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__effect-scan-line.mp4",
+    "poster": "previews/moworks__effect-scan-line.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f624dd27227615ef0e52d52fa38d7e984b83ce5ce34e8117184aabdf5e260eed",
+    "size": 20192,
+    "seconds": 26.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

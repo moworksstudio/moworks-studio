@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-press-feedback",
+  "hash": "388d02c4f6757d7e",
+  "at": "2026-10-17T07:36:48.952Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__ui-press-feedback.mp4",
+    "poster": "previews/moworks__ui-press-feedback.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "962a17e6d9dd33633135986ed9733bba79245b92009682d14fcc09ec8310bf05",
+    "size": 7073,
+    "seconds": 30,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

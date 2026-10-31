@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-moworks-follow-chain",
+  "type": "hyperframes:component",
+  "title": "Tail Follow-through",
+  "description": "Một chuỗi khớp như đuôi, tóc hay khăn lặp lại chuyển động của thân, trễ dần về phía ngọn, ngọn còn đung đưa khi thân đã dừng.",
+  "tags": [
+    "follow-through",
+    "chain",
+    "character",
+    "overlap",
+    "soft",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-moworks-follow-chain.html",
+      "target": "compositions/components/motion-moworks-follow-chain.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-moworks-follow-chain",
+    "author": "moworks",
+    "call": "MW.motionMoworksFollowChain(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionMoworksFollowChain",
+    "options": {
+      "joints": "(6)",
+      "delay": "s per joint (0.045)",
+      "distance": "units the body moves (80)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "A chain of 6 joints (tail, hair, scarf): joint i repeats the leader's motion delayed (i + 1) x 40-50 ms through a spring whose damping drops toward the tip (more overshoot at the end), plus a small wiggle growing toward the tip (~0.8 px x i). Segment thickness 8 px tapering 1 px per joint. Params: joints (6) · delay (40–50 ms / khớp) · wiggle (0.8 px / khớp). Each joint repeats the body's move later through a spring whose damping drops toward the tip, so the tip still swings after the body stops.",
+    "titleVi": "Đuôi, tóc trễ nhịp theo thân"
+  }
+}

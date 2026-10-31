@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-switch-squash",
+  "hash": "be679d712ac38b51",
+  "at": "2026-10-17T11:16:43.743Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-switch-squash.mp4",
+    "poster": "previews/moworks__ui-switch-squash.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "7fd83e4ed27bb2c65eda4d73e885bfd4806862e18384d91c15b1654805b74585",
+    "size": 11968,
+    "seconds": 28.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -139,11 +139,36 @@ export function castList(dir) {
   catch { return null; }
 }
 
+const wordsIn = (line) => String(line).normalize("NFC").toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [];
+/** A wording fix, or a change of brief? Claude changing BRIEF.md after a change the user asked for ("Mua 1 tặng 1" → "Mua một, tặng một": T29-14) made
+ *  the approved Storyboard and Motion Plan ask "Approve again". A fix: at most two lines changed, each still mostly the line it was, no heading,
+ *  no line added or dropped, and few words in all (6, or 15 % of a longer brief, at most 40). Anything more is a change of brief: it asks, as before. */
+export function smallBriefEdit(before, after) {
+  const lines = (t) => String(t).replace(/\r\n/g, "\n").split("\n").map((l) => l.trimEnd()).filter(Boolean);
+  const removed = lines(before), added = [];
+  for (const l of lines(after)) { const i = removed.indexOf(l); if (i >= 0) removed.splice(i, 1); else added.push(l); }
+  if (removed.length !== added.length || removed.length > 2 || [...removed, ...added].some((l) => /^\s*#/.test(l))) return false;
+  let changed = 0;
+  for (let i = 0; i < removed.length; i++) {
+    const was = wordsIn(removed[i]), pool = wordsIn(added[i]), all = pool.length;
+    let kept = 0;
+    for (const w of was) { const k = pool.indexOf(w); if (k >= 0) { pool.splice(k, 1); kept++; } }
+    if (kept < was.length * 0.6) return false;
+    changed += was.length - kept + all - kept;
+  }
+  return changed <= Math.max(6, Math.min(40, wordsIn(before).length * 0.15));
+}
+/** When the brief last really changed, in ms: BRIEF.md's date, or the date before a wording fix when the file is still that fix (pipeline.briefFix). */
+export function briefAt(dir, m = {}) {
+  const t = mtime(join(dir, "BRIEF.md")), fix = m.pipeline?.briefFix;
+  return t != null && fix?.mtime === t ? fix.at : t;
+}
+
 /** Everything the steps are judged on, read from the project folder and its metadata. */
 export function gatherFacts(project, { shots = [], head = null, jobs = [], runningTask = null, workAt = undefined, qaStale = undefined, lastTasks = {}, extra = {} } = {}) {
   const dir = project.path, m = project.meta ?? {};
   // the app's documents in docs/ (a film not moved yet: at the root)
-  const file = (rel) => { const f = docPath(dir, rel); const t = mtime(f); return t != null && statSync(f).size > 0 ? { at: t } : null; };
+  const file = (rel) => { const f = docPath(dir, rel); const t = mtime(f); return t != null && statSync(f).size > 0 ? { at: rel === "BRIEF.md" ? briefAt(dir, m) : t } : null; };
   const sbFile = join(dir, "STORYBOARD.md");
   const sbText = existsSync(sbFile) ? readFileSync(sbFile, "utf8") : null;
   const mp = plan.read(dir);
@@ -475,6 +500,11 @@ export function asksOwner(text) {
   const plain = tail.split(/\n|(?<=[.!…])\s+/).filter((x) => !/^\s*[*_>-]*\s*(nếu|if)\b/i.test(x)).join("\n");
   const owner = /(bạn|anh|chị)\s+(muốn|chọn|quyết|cho (tôi|mình|em) biết)|cần (bạn|anh|chị) (chọn|quyết|trả lời|xác nhận)|\b(which (one|option|way)|do you want|would you like|let me know which)\b/i;
   const points = (plain.match(/(^|\s)[*_]*\s*(\d+[.)]\s|cách (thứ )?(một|hai|ba|nhất|\d)\b|phương án\s*\d)/gi) ?? []).length + (plain.match(/·/g) ?? []).length;
+  // the choices as a bullet list at the very end, under words that put a choice to the user (a list of things done, in the middle or under other words, is no question)
+  const rows = tail.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  let k = rows.length;
+  while (k > 0 && /^[-*•]\s/.test(rows[k - 1])) k--;
+  if (rows.length - k >= 2 && owner.test(rows.slice(Math.max(0, k - 2), k).join("\n"))) return true;
   return owner.test(plain) && (points >= 2 || /(^|\s)hoặc\s/i.test(plain));
 }
 

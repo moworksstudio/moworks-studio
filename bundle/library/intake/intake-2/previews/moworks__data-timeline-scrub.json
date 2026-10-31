@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/data-timeline-scrub",
+  "hash": "2a5928d6674ac360",
+  "at": "2026-10-17T08:25:34.321Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__data-timeline-scrub.mp4",
+    "poster": "previews/moworks__data-timeline-scrub.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "92dcc8a28b2a720663454668c37b97bf7863a5d6f4b5bd47a8047b75a11f4a10",
+    "size": 17291,
+    "seconds": 31.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

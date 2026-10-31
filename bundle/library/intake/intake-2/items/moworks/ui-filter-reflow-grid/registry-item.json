@@ -1,0 +1,53 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-filter-reflow-grid",
+  "type": "hyperframes:block",
+  "title": "Filter Reflow",
+  "description": "Bấm bộ lọc, hai thẻ không khớp thu nhỏ biến mất, bốn thẻ còn lại bật lò xo dồn vào chỗ trống lần lượt và đổi màu nhấn.",
+  "tags": [
+    "filter",
+    "reflow",
+    "flip",
+    "spring",
+    "layout-navigation",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-filter-reflow-grid.html",
+      "target": "compositions/components/ui-filter-reflow-grid.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-filter-reflow-grid",
+    "author": "moworks",
+    "call": "MW.uiFilterReflowGrid(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiFilterReflowGrid",
+    "options": {
+      "loop": "s (3.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Grid 3x2 of tiles 56x40 r6 (slots x 64 + 68 col, y 70 + 52 row). Click FILTER chip 0.26-0.36 s (chip fills 0.3-0.42). Tiles 02 and 05 scale 1 → 0.7 and fade out 0.4-0.62 s (power2.in). Survivors 01, 03, 04, 06 move to slots 1-4 on spring k220 c22, starting 0.62 s + 0.04 s each, and turn accent. Reverse: click ALL 2.2 s, survivors spring back from 2.35 s (+0.04 s each), removed tiles return 2.6-2.9 s scale 0.7 → 1 back.out, fade in 0.15 s. Params: remove (0.22 s) · spring (k220 c22) · each (0.04 s) · slots: lưới 3x2.",
+    "titleVi": "Lọc lưới thẻ, thẻ còn lại dồn chỗ"
+  }
+}

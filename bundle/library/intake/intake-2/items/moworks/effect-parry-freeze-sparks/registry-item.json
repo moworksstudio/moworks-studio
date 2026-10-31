@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-parry-freeze-sparks",
+  "type": "hyperframes:component",
+  "title": "Parry Time Slice",
+  "description": "Hai lưỡi kiếm vung vào nhau, chạm nhau thì thời gian khựng 0.3 giây với hai vạch ngang và tia sáng bốn cánh; rồi hai lưỡi bật ra có rung, chín tia lửa xoè lên và rơi theo trọng lực.",
+  "tags": [
+    "hit-stop",
+    "sparks",
+    "gravity",
+    "deflect",
+    "game-impact-fx",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "effect-parry-freeze-sparks.html",
+      "target": "compositions/components/effect-parry-freeze-sparks.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-parry-freeze-sparks",
+    "author": "moworks",
+    "call": "MW.effectParryFreezeSparks(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectParryFreezeSparks",
+    "options": {
+      "contactAt": "s (0.62)",
+      "freeze": "s time stands still (0.3)",
+      "sparks": "sparks (9), fanning ±73° upward, 400 units/s² gravity",
+      "seed": "spark spread"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. Two blades (pivots 120 px apart) swing −0.35 → 0.785 rad (mirrored) to contact in 370 ms in-cubic (0.25-0.62 s); freeze 300 ms: two horizontal lines ±6 px grow to ±150 px in 120 ms outCubic, 4-point star spark r 18. Then they deflect to −0.62 rad in 450 ms outExpo with wobble 0.08 e^(−6t) sin(30t) rad; the star shrinks in 350 ms. 9 sparks fan upward ±73° (±6° seeded) at 90-150 px/s, y += 200·t² (400 px/s²), 6 px streaks, fading over 600 ms. Params: contactAt: lúc chạm (0.62 s) · freeze: khựng (0.3 s) · deflect: bật ra (0.45 s) · sparks: số tia (9) · gravity: trọng lực (400 px/s²).",
+    "titleVi": "Hai lưỡi kiếm chạm, khựng rồi toé lửa"
+  }
+}

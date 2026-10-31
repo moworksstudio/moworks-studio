@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-row-expand",
+  "type": "hyperframes:component",
+  "title": "Row Expand",
+  "description": "Mỗi dòng mở chiều cao từ một nét kẻ mảnh ở mép trên, hơi vượt rồi về, nội dung hiện sau.",
+  "tags": [
+    "list",
+    "stagger",
+    "expand",
+    "list-grid",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-row-expand.html",
+      "target": "compositions/components/motion-row-expand.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-row-expand",
+    "author": "moworks",
+    "call": "MW.motionRowExpand(q(\".re\"), tl, 0.3, {});",
+    "function": "MW.motionRowExpand",
+    "options": {
+      "items": "",
+      "from": "start height scale (0.08)",
+      "duration": "s (0.525)",
+      "stagger": "s (0.065)",
+      "ease": "(cubic-bezier(.34,1.56,.64,1): back.out)",
+      "cols": ""
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Four rows open downward from a 1.5 px line (origin top): height scale 0.08 → 1 with overshoot (back.out, CSS bezier .34,1.56,.64,1), each 525 ms, 65 ms apart (720 ms in all); the row box fades in over the first third of its move and its content (clipped) fades in over the second half. Params: from: chiều cao đầu (0.08) · stagger (65 ms) · each (0.525 s) · ease (back.out).",
+    "titleVi": "Dòng mở ra từ một nét kẻ"
+  }
+}

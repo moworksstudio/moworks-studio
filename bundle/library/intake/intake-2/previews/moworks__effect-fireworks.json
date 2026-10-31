@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-fireworks",
+  "hash": "21b6494945c694a0",
+  "at": "2026-10-17T09:12:00.239Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__effect-fireworks.mp4",
+    "poster": "previews/moworks__effect-fireworks.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "edff937f38ac64cb7e19c44d6153cf2e1e1b61bbd4a7a5c8432c64c740ea241f",
+    "size": 21525,
+    "seconds": 29.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

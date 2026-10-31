@@ -1,0 +1,53 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-calendar-heatmap",
+  "type": "hyperframes:block",
+  "title": "Calendar Density Sweep",
+  "description": "Lưới lịch một tháng hiện ra từng hàng tuần, mỗi ô nổi lên và đậm nhạt theo số lượng, cuối tuần nhạt hơn, nhãn tuần đang chạy đổi màu.",
+  "tags": [
+    "calendar",
+    "heatmap",
+    "grid",
+    "stagger",
+    "data-storytelling",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "data-calendar-heatmap.html",
+      "target": "compositions/components/data-calendar-heatmap.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/data-calendar-heatmap",
+    "author": "moworks",
+    "call": "MW.dataCalendarHeatmap(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataCalendarHeatmap",
+    "options": {
+      "seed": "the month's values"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "7 x 5 month grid (cells 30 x 21, pitch 33 x 25), day 1 in column 3, weekday header. Week row r reveals from 350 + 420 r ms; cells in a row 15 ms apart, each rises 8 px and fades in over 350 ms easeOutCubic; fill opacity 0.1 + 0.9 x value (weekends x 0.45); the active row label turns accent. 4-swatch legend. Fade 3600-3900. Params: grid (7 × 5) · interval tuần (0.42 s) · start: ngày 1 (cột 3).",
+    "titleVi": "Lịch nhiệt hiện dần từng tuần"
+  }
+}

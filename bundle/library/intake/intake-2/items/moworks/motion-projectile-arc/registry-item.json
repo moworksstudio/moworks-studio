@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-projectile-arc",
+  "type": "hyperframes:component",
+  "title": "Projectile (Physics2D)",
+  "description": "Vật bay theo đường parabol chỉ từ vận tốc đầu, góc ném và trọng lực.",
+  "tags": [
+    "physics",
+    "projectile",
+    "gravity",
+    "springs",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-projectile-arc.html",
+      "target": "compositions/components/motion-projectile-arc.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-projectile-arc",
+    "author": "moworks",
+    "call": "MW.motionProjectileArc(q(\".pa\"), tl, 0, {});",
+    "function": "MW.motionProjectileArc",
+    "options": {
+      "items": "",
+      "angles": "degrees per item ([60, 67, 74, 81, 88])",
+      "v": "px/s (1045)",
+      "g": "px/s² (1650)",
+      "xScale": "(0.9)",
+      "gap": "s between launches (0.08)",
+      "start": "s (0.3)",
+      "duration": "s (2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after GSAP"
+    },
+    "thirdParty": [],
+    "notes": "Projectile: x = v·cosθ·t, y = v·sinθ·t − ½·g·t² (recipe v 250 px/s, θ 80°, g 500 px/s²), a pure function of time. Small demo: five balls launched 80 ms apart at 60 / 67 / 74 / 81 / 88°, v 190, g 300 (x scaled 0.9), each hidden once it reaches the floor. For confetti and thrown objects. Params: velocity (250 px/s) · angle (80°) · gravity (500 px/s²). x = v cos θ t, y = v sin θ t − ½ g t²: a pure function of time; each item hides once it reaches the floor. For confetti and thrown objects.",
+    "titleVi": "Quỹ đạo ném xiên (parabol)"
+  }
+}

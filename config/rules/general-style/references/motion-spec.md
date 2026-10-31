@@ -25,7 +25,7 @@ as a chat table instead; in your reply give only a short summary and the questio
   lively". Turn every adjective of the brief into numbers (section 3).
 - `source` of each row:
   - `{ "kind": "library", "id": … }`: an item of the Motion Library (HyperFrames registry blocks and components, Magic UI, Codrops,
-    TakayuStudio, the studio's own motions). Find it with the app's **library_search** tool (the id it answers), or take the item the
+    the studio's own motions). Find it with the app's **library_search** tool (the id it answers), or take the item the
     owner named; never invent an id. When the owner approves the plan, the app copies every cited item into `.moworks/library/` for the build.
   - `{ "kind": "hf", "id": "motion.md#<section>" }`: a move HyperFrames' `hyperframes/references/motion.md` describes (its sections:
     motion craft, transitions with a cause, the right mechanism…), read in full before you build it.

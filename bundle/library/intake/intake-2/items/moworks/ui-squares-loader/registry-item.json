@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-squares-loader",
+  "type": "hyperframes:block",
+  "title": "Morphing Squares",
+  "description": "Ba ô vuông trên lưới 2×2 có một ô trống cùng trượt sang ô kế bên theo chiều kim đồng hồ mỗi 0.6 s, ô trống cũng xoay vòng.",
+  "tags": [
+    "loader",
+    "squares",
+    "grid",
+    "loop",
+    "loading-progress",
+    "smooth",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "ui-squares-loader.html",
+      "target": "compositions/components/ui-squares-loader.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-squares-loader",
+    "author": "moworks",
+    "call": "MW.uiSquaresLoader(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiSquaresLoader",
+    "options": {
+      "step": "s (0.6)",
+      "move": "s of each step spent moving (0.42, power2.inOut)",
+      "loop": "s (2.4: 4 steps)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "2×2 grid (28 px pitch), three squares 22x22 r4 (one accent) and one empty slot. Every 0.6 s all three move one slot clockwise at once over the first 70 % of the step (0.42 s power2.inOut), so the empty slot travels too; 4 steps = 2.4 s cycle. (Recipe and data say one square at a time.) Params: step (0.6 s, di chuyển 0.42 s) · cycle (2.4 s) · square (22 px, cách 28) · ease (power2.inOut). All three squares move one slot clockwise at once, so the empty slot travels too.",
+    "titleVi": "Ba ô vuông xoay vòng đổi chỗ"
+  }
+}

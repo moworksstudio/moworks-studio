@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-viscous-progress",
+  "type": "hyperframes:block",
+  "title": "Viscous Progress",
+  "description": "Thanh tiến độ có đầu tròn chạy trước bằng lò xo nhanh, phần thân như chất sệt đuổi theo chậm hơn với cổ nối kéo dài, đầu giãn ra khi tăng tốc.",
+  "tags": [
+    "progress",
+    "viscous",
+    "spring",
+    "liquid",
+    "material-surface-motion",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-viscous-progress.html",
+      "target": "compositions/components/ui-viscous-progress.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-viscous-progress",
+    "author": "moworks",
+    "call": "MW.uiViscousProgress(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiViscousProgress",
+    "options": {
+      "steps": "[[s, %], ...]",
+      "title": "",
+      "sub": "",
+      "accent": "",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Track 234x14 r7. Progress keys 0 → 28 % (0.4 s) → 50 % (1.0) → 64 % (1.5) → 100 % (2.0). Head circle r11 follows them on a sum of springs k220 c16 (may overshoot to 102 %); the filled body (14 px tall) follows the same keys on springs k70 c16 (lags); a liquid neck joins body end (r7) to head. Head scaleX = 1 + clamp(speed / 900 px/s, −0.2, 0.6), scaleY 1 / √scaleX. The % label rides the head and shows the body value. Fade 3.4-3.8 s. Params: steps [[giây, %]] · head (k220 c16) · body (k70 c16) · stretch (−0.2 → +0.6) · track (234x14). The head follows the steps on springs k220 c16 (it may overshoot), the body on springs k70 c16 (it lags), joined by a liquid neck; the head stretches with its speed.",
+    "titleVi": "Thanh tiến độ sệt như mật"
+  }
+}

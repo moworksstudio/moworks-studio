@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-house",
+  "type": "hyperframes:component",
+  "title": "Thin-peak (House curve)",
+  "description": "Dồn chậm, vụt qua giữa rồi đáp mềm; đường cong nền để tránh tốc độ đều đều.inOut).",
+  "tags": [
+    "ease",
+    "in-out",
+    "house",
+    "easing",
+    "smooth",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-house.html",
+      "target": "compositions/components/motion-ease-house.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-ease-house",
+    "author": "moworks",
+    "call": "MW.motionEaseHouse(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseHouse",
+    "options": {
+      "duration": "s (0.6)",
+      "ease": "the curve (house)",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Target moves 0 → 100 % on cubic-bezier(.83,0,.17,1) (≈ power4.inOut, quint in-out), 600 ms: a slow wind-up, a thin fast peak in the middle, a soft landing. Rule: the base curve against monotonous speed. Small demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: duration (0.6 s) · ease (custom .83,0,.17,1).",
+    "titleVi": "Đường cong đỉnh hẹp (house curve)"
+  }
+}

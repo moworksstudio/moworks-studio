@@ -12,9 +12,10 @@ import { Banner, Dialog, Panes } from "../components.jsx";
 import { clock, go, usePref, useData, useToast } from "../lib.jsx";
 import ErrorBoundary from "../ErrorBoundary.jsx";
 import ClaudePanel, { Question } from "../editor/ClaudePanel.jsx";
-import Player, { usePreview } from "../editor/Player.jsx";
-import Timeline from "../editor/Timeline.jsx";
+import Player, { friendlyLabel, usePreview } from "../editor/Player.jsx";
+import Timeline, { soundName } from "../editor/Timeline.jsx";
 import MotionDrawer from "../editor/MotionDrawer.jsx";
+import SoundDrawer from "../editor/SoundDrawer.jsx";
 import ShotList from "../editor/ShotList.jsx";
 import AssetsPanel, { placedSay, putOnTimeline, useAssets } from "../editor/AssetsPanel.jsx";
 import Versions from "../editor/Versions.jsx";
@@ -24,7 +25,7 @@ import { useThemeId } from "../theme.jsx";
 import Pipeline, { OPENS, currentStage } from "../workflow/Pipeline.jsx";
 import { SHEET_TITLES, Sheet, StageCtx } from "../workflow/stage.jsx";
 import MixSheet from "../workflow/MixSheet.jsx";
-import { NotesLayer, pinTag } from "../editor/FilmNotes.jsx";
+import { NotesLayer, nextPinNo, pinTag } from "../editor/FilmNotes.jsx";
 import { AnalysisSheet, BriefSheet, DocSheet, ImportSheet, QcReviewSheet } from "../workflow/sheets.jsx";
 import RenderSheet from "../workflow/RenderSheet.jsx";
 import LyricsSheet from "../workflow/LyricsSheet.jsx";
@@ -97,6 +98,12 @@ function contextOf(x) {
     css.length ? `Styles: ${css.join("; ")}` : null].filter(Boolean).join("\n");
 }
 
+/** The shot under the playhead: the last one started, within a frame (a seek to a shot can land on the frame before its start). */
+export const shotAtTime = (shots, time, fps = 30) => [...(shots ?? [])].reverse().find((s) => s.start != null && time >= s.start - 1 / (fps || 30) - 1e-3) ?? null;
+/** What the chat aims at while the film has moved on: a shot chosen before is the shot on screen now, an element only while its scene is. */
+export const movedTarget = (here, shot) => (shot && here && here.number !== shot.number ? here : shot);
+export const pickStale = (picked, here, shots) => !!picked?.length && !!here && shots?.some((s) => s.src === picked[0].file) && here.src !== picked[0].file;
+
 /** How The Studio lays a film out by its width / height: "tall" (9:16, 2:3), "square" (1:1, 4:5, 4:3), or undefined for a wide one. */
 export const filmShape = (ar) => (ar < 0.8 ? "tall" : ar < 1.5 ? "square" : undefined);
 
@@ -134,7 +141,7 @@ function ProjectStrip({ p, id, pipeline, myRender, busy, rendering, onSheet, onR
   const other = pipeline?.render?.running && pipeline.render.running.projectId !== id ? pipeline.render.running : null;
   const waiting = myRender?.stage === "waiting";
   const pct = typeof myRender?.progress === "number" ? Math.round(myRender.progress <= 1 ? myRender.progress * 100 : myRender.progress) : null;
-  // The film's own length (built: its root's; not built: its storyboard's), not the one New project set (40 s of a 47.5 s film)
+  // The film's own length: built, its root's; not built, its storyboard's when Claude timed it otherwise (47.5 s of a film set to 40 s), else the one the user set (T30-10)
   const len = (p?.built === false ? p?.plannedDuration : p?.duration) || m.targetDurationSec;
   const meta = [m.style?.title ? t(m.style.title) : null, ...designParts(m, t), m.format?.aspect ?? null, len ? clock(len) : null,
     m.format?.fps ? `${m.format.fps} fps` : null].filter(Boolean).join(" · ");
@@ -196,7 +203,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const [posters, setPosters] = useState(null);
   const [shot, setShot] = useState(null);
   const [range, setRange] = useState(null);
-  const [drawer, setDrawer] = useState(false);
+  const [drawer, setDrawer] = useState(null);          // the drawer in the timeline's place: "motions", "sounds" or none
   // a note pinned on the picture is a line in the chat's message ("[0:03.4 · Shot 2] …"), sent with the chat's own Send;
   // pins = the pinned places not sent yet; pinning = the next click on the picture places one
   const [pins, setPins] = useState([]);
@@ -270,7 +277,8 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     let alive = true, shown = false;
     setPrepared(false); setPrepareSlow(false);
     const slow = setTimeout(() => { shown = true; if (alive) setPrepareSlow(true); }, 3000);
-    post(`/api/projects/${id}/edit/prepare`).then((r) => { if (alive && shown && r?.changed) setFilmKey((k) => k + 1); }).catch(() => {})
+    // the ids just pinned are what the Captions row addresses its groups by: the timeline is read again
+    post(`/api/projects/${id}/edit/prepare`).then((r) => { if (alive && r?.changed) loadTimeline(); if (alive && shown && r?.changed) setFilmKey((k) => k + 1); }).catch(() => {})
       .finally(() => { clearTimeout(slow); if (alive) setPrepared(true); });
     return () => { alive = false; clearTimeout(slow); };
   }, [id]);
@@ -310,23 +318,42 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
 
   // the picked element(s) -> Claude's Selection target, and their shot
   const picked = pv.picked;
+  const here = p?.built === false ? null : shotAtTime(shots, pv.state.time, pv.state.fps), hereNo = here?.number ?? null, hereSrc = here?.src ?? null;
   const selection = useMemo(() => {
     if (!picked.length) return null;
     const key = picked.map((x) => `${x.file}#${x.hfId ?? x.label}`).join("|");
     if (key === dismissed) return null;
-    return { key, label: picked.length === 1 ? (picked[0].textContent ? `${picked[0].label} “${picked[0].textContent.slice(0, 24)}”` : picked[0].label) : t("{n} elements", { n: picked.length }),
+    // what the chat shows says what it is in words, never its tag, class or id; Claude gets those in the context
+    const named = (x) => (x.textContent ? `${t(friendlyLabel(x))} “${x.textContent.slice(0, 24)}”` : t(friendlyLabel(x)));
+    return { key, label: picked.length === 1 ? named(picked[0]) : t("{n} elements", { n: picked.length }),
       sourceFile: picked[0].file, context: picked.map(contextOf).join("\n\n") };
   }, [picked, dismissed, t]);
-  useEffect(() => { if (picked.length && shots) { const s = shots.find((x) => x.src === picked[0].file); if (s) setShot(s); } }, [picked]); // eslint-disable-line react-hooks/exhaustive-deps
+  // a scene mounted twice (a finale that gathers every step): the mount on screen, not the first
+  useEffect(() => { if (picked.length && shots) { const s = here?.src === picked[0].file ? here : shots.find((x) => x.src === picked[0].file); if (s) setShot(s); } }, [picked]); // eslint-disable-line react-hooks/exhaustive-deps
+  // the film moved to another shot: an element of the shot left behind is no longer what the chat aims at (T28-18: Send went to shot 1 from shot
+  // 23); a chosen shot becomes the one on screen once the film rests (the chat says it at once, `chatShot`; while it plays the Shots column stays,
+  // so a word being edited there is not taken away)
+  useEffect(() => {
+    if (pickStale(picked, here, shots)) { pv.send("clear"); pv.setPicked([]); }
+  }, [hereNo, hereSrc]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (pv.state.paused && shot && here && here.number !== shot.number) setShot(here); }, [hereNo, pv.state.paused]); // eslint-disable-line react-hooks/exhaustive-deps
+  const chatShot = movedTarget(here, shot);
 
   const refreshAll = () => { project.reload(); reloadPipeline(); loadTimeline(); reloadAssets(); };
   // a sound on the timeline moved, moved to another lane, or taken off: the film is loaded again where it was
+  // resolves once the film's own list is read again: the timeline holds a dropped sound where it was dropped until then
   const audioEdit = async (path, c, to) => {
+    const name = soundName(c);
     try {
-      await post(`/api/projects/${id}/edit/audio${path}`, { hfId: c.hfId, id: c.id, src: c.src, at: c.start, name: c.name, ...to });
-      toast(path ? t("Taken off the timeline: {name} (it stays in Assets)", { name: c.name }) : t("Moved: {name}", { name: c.name }));
-      filesChanged(true);
-    } catch (e) { toast(e.message, "error"); loadTimeline(); }
+      await post(`/api/projects/${id}/edit/audio${path}`, { hfId: c.hfId, id: c.id, src: c.src, at: c.start, name, ...to });
+      toast(path ? t("Taken off the timeline: {name} (it stays in Assets)", { name }) : t("Moved: {name}", { name }));
+      await filesChanged(true);
+    } catch (e) { toast(e.message, "error"); await loadTimeline(); }
+  };
+  // a caption's words changed on the timeline: the same hand edit as the Shots panel's words
+  const captionSave = async (file, hfId, text) => {
+    try { const r = await post(`/api/projects/${id}/edit/text`, { file, hfId, text }); toast(t("Words saved")); filesChanged(!!r.reload); }
+    catch (e) { toast(e.message, "error"); loadTimeline(); }
   };
   // a sound dragged from the Assets tab onto a lane: there, at the drop's time, then read again as "Put on the timeline" does
   const soundDrop = async (path, to) => {
@@ -335,16 +362,19 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     catch (e) { toast(e.message, "error"); }
   };
   const filesChanged = (structure = false) => {
-    loadTimeline(); reloadPipeline(); setVersion((v) => v + 1);
+    const read = loadTimeline();
+    reloadPipeline(); setVersion((v) => v + 1);
     if (structure) pv.send("reload");
+    pv.proxy?.refresh?.();          // the smooth preview says at once whether it is still the film's (a Reset brings it back)
     setTimeout(loadPosters, 1500);
+    return read;
   };
   // the film, its shots and the timeline are read at once; the ids pinned after (minutes on a busy server, T26-3) load the film once
   // more only when they changed its files
   const reloadFilm = async () => {
     pv.send("reload"); refreshAll(); setVersion((v) => v + 1); setTimeout(loadPosters, 1500);
     const r = await post(`/api/projects/${id}/edit/prepare`).catch(() => null);
-    if (r?.changed) pv.send("reload");
+    if (r?.changed) { pv.send("reload"); loadTimeline(); }
   };
   const appWork = pipeline?.appBusy?.jobId ?? pipeline?.appBusy?.key ?? null;
   const lastAppWork = useRef(null);
@@ -435,6 +465,13 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     return () => document.removeEventListener("click", click, true);
   }, [id]);
 
+  // a sound picked in the drawer: at the playhead, in the film's assets and on the timeline at once; the film reads it again where it was
+  const addSound = async (row, at) => {
+    const r = await post(`/api/projects/${id}/sfx/add`, { id: row.id, at });
+    toast(placedSay(t, row.title, r.at));
+    reloadAssets();
+    filesChanged(true);
+  };
   const pickMotion = async (card) => {
     try { const full = await get(`/api/library/item?uid=${encodeURIComponent(card.uid)}`); setMotionPick({ item: full, n: Date.now() }); setNarrowTab("claude"); }
     catch (e) { toast(e.message, "error"); }
@@ -521,7 +558,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const [aw, ah] = String(p?.meta?.format?.aspect ?? "16:9").split(":").map(Number);
   const placeNote = (place) => {
     const now = pv.state.time, fps = pv.state.fps || 24, at = Math.round(now * fps) / fps, sh = [...(shots ?? [])].reverse().find((s) => now >= (s.start ?? 0) - 1 / (pv.state.fps || 24))?.number ?? null;          // within a frame: a seek to a shot lands on the frame before its start
-    const pin = { id: `p${Date.now()}`, t: at, fps, shot: sh, ...place }, tag = pinTag(pin);
+    const no = nextPinNo(pins), pin = { id: `p${Date.now()}-${no}`, no, t: at, fps, shot: sh, ...place }, tag = pinTag(pin);
     setPins((x) => [...x, { ...pin, tag }]); setPinning(false); setNarrowTab("claude");
     setInject({ text: tag, append: true, n: Date.now() });          // a line of its own in the message, the caret after it
   };
@@ -539,7 +576,6 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
         <button type="button" className="btn sm" onClick={() => setOpened(true)}>{t("Open it as it is")}</button></>}</div></div> : null;
   const hsplit = <div className={"ed-hsplit" + (tlDrag ? " dragging" : "")} role="separator" aria-orientation="horizontal" aria-label={t("Resize the timeline")} title={t("Drag to make the timeline taller or shorter · double-click: as before")}
     onPointerDown={(e) => { e.preventDefault(); setTlDrag(true); }} onDoubleClick={() => setTlH(0)} />;
-  const drawerEl = <MotionDrawer projectId={id} shot={shot} target={selection?.label ?? shotTarget} targetText={selection ? picked.map((x) => x.textContent || x.label).join(" ") : null} onPick={pickMotion} onClose={() => setDrawer(false)} />;
   // Before the Build the starter's 3 s page is no timeline, but the voice-over made and transcribed is: its
   // words on NARRATION, the ruler as long as they run
   // Once the storyboard is approved its frames are the film's shots; before the build the SHOTS lane shows them where they
@@ -553,9 +589,17 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const timelineEl = <Timeline data={unbuilt ? voiceOnly : tl} posters={shotPosters} fps={p?.meta?.format?.fps || pv.state.fps || 30} time={unbuilt ? 0 : pv.state.time} duration={unbuilt ? p.plannedDuration ?? 0 : pv.state.duration} shot={shot} range={range} onRange={setRange}
     readOnly={pv.videoOnly}
     onSeek={(s) => pv.send("seek", { time: s })} onShot={(s) => { setShot(s); setDismissed(null); }}
-    locked={locked || pv.videoOnly} onAudioMove={(c, to) => audioEdit("", c, to)} onAudioRemove={(c) => audioEdit("/remove", c, {})} onSoundDrop={soundDrop} />;
+    locked={locked || pv.videoOnly} onAudioMove={(c, to) => audioEdit("", c, to)} onAudioRemove={(c) => audioEdit("/remove", c, {})} onSoundDrop={soundDrop}
+    onCaptionSave={captionSave} onCaptionLive={(hfId, text) => pv.send("live", { hfId, text })} />;
   // the playhead and the film's length as the timeline has them: "Put on the timeline" starts a sound there
   const tlTime = unbuilt ? 0 : pv.state.time, tlLength = Math.max((unbuilt ? p.plannedDuration : pv.state.duration) || 0, (unbuilt ? voiceOnly : tl)?.duration || 0);
+  // why Add is off, in words, when it is
+  const soundOff = unbuilt ? t("Sounds go on the film once it is built.") : rendering ? t("The film is rendering: add the sound when it finishes.") : locked ? t("The film is being changed: add the sound when that finishes.") : null;
+  const drawerEl = drawer === "sounds"
+    ? <SoundDrawer time={tlTime} duration={tlLength} clips={(tl?.audio ?? []).filter((c) => c.lane === "sfx")} off={soundOff} strip={!studio} onSeek={(s) => pv.send("seek", { time: s })} onAdd={addSound} onClose={() => setDrawer(null)} />
+    : <MotionDrawer projectId={id} shot={shot} target={selection?.label ?? shotTarget} targetText={selection ? picked.map((x) => x.textContent ?? "").join(" ") : null} onPick={pickMotion} onClose={() => setDrawer(null)} />;
+  // the button in the chat opens its drawer, or closes it; on a narrow window the drawer is in the Film tab
+  const toggleDrawer = (kind) => { setDrawer((d) => (d === kind ? null : kind)); if (kind === "sounds") setNarrowTab("film"); };
   const centerPane = <div className="ed-center" ref={centerRef}>
     {playerEl}
     {hsplit}
@@ -581,8 +625,8 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
       <Pipeline projectId={id} data={pipeline} starting={starting} onChanged={reloadPipeline} onOpen={openSheet} onAssets={showAssets} cast={p?.meta?.characters?.ids?.length > 0} music={!!p?.styleInfo?.music} warnings={qcWarnings} actions={actions} />
     </section>
   </div>;
-  const rightPane = <ClaudePanel projectId={id} fps={pv.state.fps || 24} selectedShot={shot} selection={selection} onClearTarget={() => { setDismissed(selection?.key ?? null); pv.send("clear"); pv.setPicked([]); setShot(null); }}
-    onChanged={onClaudeChanged} inject={inject} reloadKey={chatKey} motionPick={motionPick} onOpenMotions={() => setDrawer((d) => !d)} motionsOpen={drawer}
+  const rightPane = <ClaudePanel projectId={id} fps={pv.state.fps || 24} selectedShot={chatShot} selection={selection} onClearTarget={() => { setDismissed(selection?.key ?? null); pv.send("clear"); pv.setPicked([]); setShot(null); }}
+    onChanged={onClaudeChanged} inject={inject} reloadKey={chatKey} motionPick={motionPick} onOpenMotions={() => toggleDrawer("motions")} motionsOpen={drawer === "motions"} onOpenSounds={() => toggleDrawer("sounds")} soundsOpen={drawer === "sounds"}
     steps={pipeline?.steps} rendering={rendering} actions={actions} onWaiting={setAsking} stage={currentStage(pipeline?.stages)} interrupted={pipeline?.interrupted ?? null} onPlay={(path) => setViewer(path)} onOpenSheet={openSheet} checks={pipeline?.checks ?? null}
     waiting={pipeline?.stages?.find((s) => s.status === "waiting" && s.id !== "feedback") ?? null}
     pins={notesOn ? pins : null} onPinsSent={(ids) => setPins((x) => x.filter((p) => !ids.includes(p.id)))} onSeek={(s) => pv.send("seek", { time: s })} />;          // the chat's reminder card
@@ -656,12 +700,12 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
       <div className={"lt-film" + (sheet ? " away" : "")} aria-hidden={sheet ? "true" : undefined}>{playerEl}</div>
       {sheetEl}
       {ghost && <div key={ghost.n} className="lt-ghost" aria-hidden="true" dangerouslySetInnerHTML={{ __html: ghost.html }} />}
-      {drawer && <div className="lt-drawer">{drawerEl}</div>}
+      {drawer && !sheet && <div className="lt-drawer">{drawerEl}</div>}          {/* it belongs to the film: under a sheet laid on the table it waits */}
     </section>;
-    // the Motions drawer belongs to the film, so opening it lays the film back on the table first
-    const toggleMotions = () => { if (!drawer && sheetRef.current) switchSheet(null); setDrawer((d) => !d); };
-    const chat = <ClaudePanel projectId={id} fps={pv.state.fps || 24} selectedShot={shot} selection={selection} onClearTarget={() => { setDismissed(selection?.key ?? null); pv.send("clear"); pv.setPicked([]); setShot(null); }}
-      onChanged={onClaudeChanged} inject={inject} reloadKey={chatKey} motionPick={motionPick} onOpenMotions={toggleMotions} motionsOpen={drawer}
+    // the Motions and Sounds drawers belong to the film, so opening one lays the film back on the table first
+    const openDrawer = (kind) => { if (drawer !== kind && sheetRef.current) switchSheet(null); toggleDrawer(kind); };
+    const chat = <ClaudePanel projectId={id} fps={pv.state.fps || 24} selectedShot={chatShot} selection={selection} onClearTarget={() => { setDismissed(selection?.key ?? null); pv.send("clear"); pv.setPicked([]); setShot(null); }}
+      onChanged={onClaudeChanged} inject={inject} reloadKey={chatKey} motionPick={motionPick} onOpenMotions={() => openDrawer("motions")} motionsOpen={drawer === "motions"} onOpenSounds={() => openDrawer("sounds")} soundsOpen={drawer === "sounds"}
       steps={pipeline?.steps} rendering={rendering} actions={[]} onWaiting={setAsking} stage={currentStage(pipeline?.stages)} interrupted={pipeline?.interrupted ?? null} onPlay={(path) => setViewer(path)} onOpenSheet={openSheet} checks={pipeline?.checks ?? null}
       waiting={pipeline?.stages?.find((s) => s.status === "waiting" && s.id !== "feedback") ?? null}
       pins={notesOn ? pins : null} onPinsSent={(ids) => setPins((x) => x.filter((p) => !ids.includes(p.id)))} onSeek={(s) => pv.send("seek", { time: s })} />;

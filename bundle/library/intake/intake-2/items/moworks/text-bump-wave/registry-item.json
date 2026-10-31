@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-bump-wave",
+  "type": "hyperframes:component",
+  "title": "Falloff Bump Wave",
+  "description": "Một đỉnh sóng chạy dọc dòng chữ, ký tự nào nó đi qua phồng gấp đôi rồi xẹp lại, các ký tự bên cạnh dạt ra nhường chỗ.",
+  "tags": [
+    "emphasis",
+    "wave",
+    "scale",
+    "letters",
+    "text-emphasis",
+    "smooth",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "text-bump-wave.html",
+      "target": "compositions/components/text-bump-wave.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-bump-wave",
+    "author": "moworks",
+    "call": "MW.textBumpWave(q(\".tk-head\"), tl, 0.3, {});",
+    "function": "MW.textBumpWave",
+    "options": {
+      "sweep": "s the bump crosses the line (1.9)",
+      "width": "half-width, share of the line (0.25)",
+      "scale": "peak (2)",
+      "accent": "colour at the peak"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Chars pivot bottom centre. A bump (half-width 25 % of the line) sweeps linearly from −35 % to 135 % over 1.9 s (0.3–2.2 s); per char b = easeInOutCubic(1 − dist/0.25): scale 1 + b (peak 2), y −0.12 em·b, colour → accent by b; same-line chars pushed apart by 0.8·b·glyph width, line stays centred. CSS fallback: per char 1.2 s keys, 30 % = scale 2, y −0.12 em, rest 0 / 60–100 %, 70 ms stagger, ease (.65,0,.35,1). Loop 2.8 s. Params: sweep: thời gian quét (1.9 s) · width: nửa bề rộng sóng (25 %) · scale: phồng đỉnh (2) · lift (0.12 em).",
+    "titleVi": "Sóng phồng chạy dọc dòng chữ"
+  }
+}

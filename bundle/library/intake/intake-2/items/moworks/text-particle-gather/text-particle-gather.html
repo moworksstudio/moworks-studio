@@ -1,0 +1,87 @@
+<!--
+  Particle Text (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Hàng nghìn chấm nhỏ bay từ khắp khung về kết thành chữ, một con trỏ lướt qua đẩy các chấm dạt ra rồi chúng nảy về chỗ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textParticleGather(q(".pg"), tl, 0, {});
+
+  Asynchronous: the motion puts a promise in MW.pending (the text is sampled once its font has loaded). Register the composition's timeline only after
+  Promise.all(MW.pending) settles, as HyperFrames asks of builds that finish later.
+
+  Options (defaults in brackets):
+      - text: the word
+      - size: px (420)
+      - step: px between samples (12)
+      - radius: px the cursor pushes (152)
+      - push: px at most (136)
+      - omega: spring (10)
+      - zeta: (0.45)
+      - color: dot colour
+      - accent: pushed dots
+      - loop: s (5.4)
+      - seed: scatter
+
+  Notes: Points sampled from the text raster (80 px black, step ≈3 px, odd rows offset), drawn as 2 px squares. Gather: each flies from a seeded spot to its place in 0.9 s expo.out, start 0.2 + 0–0.35 s, opacity 0.35 → 1, ±0.4 px noise. Cursor crosses right → left 1.9–3.6 s on a ±30 px sine: points within 38 px are pushed out ((1 − d/38)², ≤ 34 px) through a spring (ω 10, ζ 0.45) and turn accent. Exit 4.55 s + 0–0.25 s: back to scatter 0.6 s power2.in. Loop 5.4 s. Params: bước lấy mẫu (3 px) · bán kính đẩy (38 px) · thời gian kết (0.9 s).
+-->
+
+<div class="pg"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  var defaults = {"text":"HẠT","size":420,"step":12,"radius":152,"push":136,"omega":10,"zeta":0.45,"color":"#e8ebf3","accent":"#a99bff","loop":5.4,"seed":2};
+  var run = function (el, tl, at, o) {
+        var cv = MW.canvas(el), c = cv.ctx, r = MW.rand(o.seed), pts = [], ex = gsap.parseEase("expo.out"), pi = gsap.parseEase("power2.in"), om = o.omega, z = o.zeta;
+        var sample = function () {
+          var off = document.createElement("canvas"); off.width = cv.w; off.height = cv.h; var x = off.getContext("2d"); x.font = "900 " + o.size + "px Inter, sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "#000"; x.fillText(o.text, cv.w / 2, cv.h / 2);
+          var d = x.getImageData(0, 0, cv.w, cv.h).data;
+          for (var yy = 0, row = 0; yy < cv.h; yy += o.step, row++) for (var xx = (row % 2) * o.step / 2; xx < cv.w; xx += o.step) if (d[(Math.floor(yy) * cv.w + Math.floor(xx)) * 4 + 3] > 128) pts.push({ x: xx, y: yy, sx: r() * cv.w, sy: r() * cv.h, t0: 0.2 + 0.35 * r(), ex: 4.55 + 0.25 * r(), n: r() * 6.28 });
+        };
+        MW.pending = MW.pending || []; MW.pending.push(document.fonts && document.fonts.load ? document.fonts.load("900 " + o.size + "px Inter").then(sample, sample) : Promise.resolve(sample()));
+        var cur = function (t) { var u = Math.max(0, Math.min(1, (t - 1.9) / 1.7)); return [cv.w + 100 - (cv.w + 200) * u, cv.h / 2 + 120 * Math.sin(u * 6)]; };
+        return MW.drive(tl, at, o.loop, function (t) {
+          c.clearRect(0, 0, cv.w, cv.h);
+          pts.forEach(function (p) {
+            var g = ex(Math.max(0, Math.min(1, (t - p.t0) / 0.9))), out = pi(Math.max(0, Math.min(1, (t - p.ex) / 0.6))), x = p.sx + (p.x - p.sx) * g, y = p.sy + (p.y - p.sy) * g, push = 0, ang = 0;
+            if (t > 1.9 && t < 4.2) { var s = 1.9, dx = 0, v = 0, dt = 1 / 60; for (; s < t; s += dt) { var cc = cur(s), dd = Math.hypot(p.x - cc[0], p.y - cc[1]), target = dd < o.radius ? Math.min(o.push, o.push * Math.pow(1 - dd / o.radius, 2) * 3) : 0; var a = om * om * (target - dx) - 2 * z * om * v; v += a * dt; dx += v * dt; } var c2 = cur(t); ang = Math.atan2(p.y - c2[1], p.x - c2[0]); push = dx; }
+            x += Math.cos(ang) * push + 1.6 * Math.sin(t * 3 + p.n); y += Math.sin(ang) * push + 1.6 * Math.cos(t * 3 + p.n);
+            x = x + (p.sx - x) * out; y = y + (p.sy - y) * out;
+            c.globalAlpha = 0.35 + 0.65 * g; c.fillStyle = push > 4 ? o.accent : o.color; c.fillRect(x - 4, y - 4, 8, 8);
+          });
+          c.globalAlpha = 1; if (t > 1.9 && t < 3.6) { var p2 = cur(t); c.save(); c.translate(p2[0], p2[1]); c.scale(4, 4); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.restore(); }
+        });
+      };
+  MW.textParticleGather = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

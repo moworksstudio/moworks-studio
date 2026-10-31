@@ -1,0 +1,114 @@
+<!--
+  Coin Collect (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Năm đồng xu nảy nhẹ rồi lần lượt bay theo đường cong vào ví, vừa bay vừa xoay và nhỏ lại; mỗi lần chạm ví thì ví bẹp nhẹ, số dư nhảy +5 và chữ "+5" bay lên.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionCoinCollect(q(".gm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - count: (5)
+      - first: s the first coin lands (0.9)
+      - stagger: s (0.26)
+      - flight: s (0.5, ease-in quad on a quadratic arc)
+      - step: per coin (5)
+      - from: (100)
+      - unit: 
+      - seed: (4)
+      - loop: s (3.3)
+
+  Notes: px @320x200. 5 coins (r 9) scattered; each hops up 4 px (140 ms half-sine) then flies to the wallet on a quadratic arc (control: midpoint x −24, 58 px above the higher end) in 500 ms in-quad, arrivals every 260 ms from 0.9 s; coin shrinks to 0.65 and spins (scaleX = |cos 9u|). Each arrival: wallet squash 280 ms (1.12 / 0.88 sine), counter 100 → 125 (+5) pops 1.22 in accent, '+5' rises 18 px in 400 ms outCubic, fades 160-340 ms. Reset 2.9-3.25 s. Params: target: id ví / đích · stagger: cách nhau (0.26 s) · flight: thời gian bay (0.5 s) · step: cộng mỗi lần (5) · from: số dư đầu (100).
+-->
+
+<div class="gm"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  MW.span = MW.span || function (t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); };
+  MW.yAt = MW.yAt || function (pts, x) { if (x <= pts[0][0]) return pts[0][1]; for (var i = 1; i < pts.length; i++) if (x <= pts[i][0]) { var u = (x - pts[i - 1][0]) / ((pts[i][0] - pts[i - 1][0]) || 1); return pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * u; } return pts[pts.length - 1][1]; };
+  MW.polyToX = MW.polyToX || function (c, pts, x) { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) { if (pts[i][0] <= x) c.lineTo(pts[i][0], pts[i][1]); else { c.lineTo(x, MW.yAt(pts, x)); break; } } return [Math.min(x, pts[pts.length - 1][0]), MW.yAt(pts, Math.min(x, pts[pts.length - 1][0]))]; };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"count":5,"first":0.9,"stagger":0.26,"flight":0.5,"step":5,"from":100,"unit":"XU","seed":4,"loop":3.3};
+  var run = function (el,tl,at,o
+  ) {
+  var S = MW.stage320(el), c = S.ctx, T = function (t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); }, oc = function (u) { return 1 - Math.pow(1 - u, 3); }, ic = function (u) { return u * u * u; }, iq = function (u) { return u * u; };
+  var p2io = gsap.parseEase("power2.inOut"), bo = gsap.parseEase("back.out(1.7)"), A = "#8b7bff", hs = function (t, a, d) { var u = (t - a) / d; return u > 0 && u < 1 ? Math.sin(Math.PI * u) : 0; };
+  var shake = function (t, a, d, amp, seed) { var u = (t - a) / d; if (u <= 0 || u >= 1) return 0; var r = MW.rand(seed + Math.floor(t * 60)); return (r() * 2 - 1) * amp * (1 - u); };
+  var fmt = function (n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, "."); };
+  var bolt = function (x, y, s, col) { c.fillStyle = col; c.beginPath(); c.moveTo(x + 3 * s, y - 9 * s); c.lineTo(x - 6 * s, y + 2 * s); c.lineTo(x, y + 2 * s); c.lineTo(x - 3 * s, y + 9 * s); c.lineTo(x + 6 * s, y - 2 * s); c.lineTo(x, y - 2 * s); c.closePath(); c.fill(); };
+  var bar = function (x, y, w, h, p, col) { MW.rr(c, x, y, w, h, 4); c.fillStyle = "#262c3a"; c.fill(); if (p > 0) { MW.rr(c, x, y, Math.max(2, w * p), h, 4); c.fillStyle = col; c.fill(); } };
+  var r = MW.rand(o.seed), C = []; for (var i = 0; i < o.count; i++) C.push([60 + r() * 120, 60 + r() * 90]); var W = [250, 150];
+  return MW.drive(tl, at, o.loop, function (t) {
+    S.clear(); var f = 1 - T(t, o.loop - 0.4, o.loop - 0.05), got = 0, sq = 0, pop = 0; c.globalAlpha = f;
+    C.forEach(function (p, i) { var arr = o.first + i * o.stagger, st = arr - o.flight, u = T(t, st, arr); if (t >= arr) { got++; sq = Math.max(sq, hs(t, arr, 0.28)); pop = Math.max(pop, hs(t, arr, 0.25)); var g = T(t, arr, arr + 0.4); if (g < 1) { c.globalAlpha = f * (g < 0.4 ? 1 : 1 - (g - 0.4) / 0.45); MW.txt(c, "+" + o.step, W[0], W[1] - 30 - 18 * oc(g), 9, "#ffd23d", 900); c.globalAlpha = f; } return; }
+      var hop = -4 * hs(t, st - 0.16, 0.14), q = iq(u), hy = Math.min(p[1], W[1]) - 58, cx = (p[0] + W[0]) / 2 - 24, x = (1 - q) * (1 - q) * p[0] + 2 * (1 - q) * q * cx + q * q * W[0], y = (1 - q) * (1 - q) * p[1] + 2 * (1 - q) * q * hy + q * q * W[1] + hop, s = 1 - 0.35 * q, sx = u > 0 ? Math.max(0.1, Math.abs(Math.cos(9 * u))) : 1;
+      c.save(); c.translate(x, y); c.scale(s * sx, s); c.fillStyle = "#ffc633"; c.beginPath(); c.arc(0, 0, 9, 0, 2 * Math.PI); c.fill(); c.strokeStyle = "#d99400"; c.lineWidth = 1.5; c.stroke(); c.restore(); });
+    c.save(); c.translate(W[0], W[1] + 14); c.scale(1 + 0.12 * sq, 1 - 0.12 * sq); MW.rr(c, -26, -32, 52, 32, 8); c.fillStyle = "#8a5a2b"; c.fill(); c.fillStyle = "#5c3a1a"; MW.rr(c, 6, -24, 22, 14, 5); c.fill(); c.restore();
+    c.save(); c.translate(250, 40); c.scale(1 + 0.22 * pop, 1 + 0.22 * pop); MW.txt(c, o.from + got * o.step + " " + o.unit, 0, 0, 12, pop > 0 ? A : "#e8ebf3", 900); c.restore(); c.globalAlpha = 1;
+  });
+  };
+  MW.motionCoinCollect = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

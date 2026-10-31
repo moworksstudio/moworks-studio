@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-expo-scale",
+  "type": "hyperframes:component",
+  "title": "ExpoScaleEase",
+  "description": "Phóng từ 1 lên 8 lần theo hàm mũ để mỗi lần gấp đôi tốn cùng thời gian, trông đều tốc thay vì chậm đầu nhanh cuối.",
+  "tags": [
+    "ease",
+    "zoom",
+    "log-space",
+    "easing",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-expo-scale.html",
+      "target": "compositions/components/motion-ease-expo-scale.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-ease-expo-scale",
+    "author": "moworks",
+    "call": "MW.motionEaseExpoScale(q(\".exp\"), tl, 0.5, {});",
+    "function": "MW.motionEaseExpoScale",
+    "options": {
+      "from": "start scale (1)",
+      "to": "end scale (8)",
+      "duration": "s (1.8)",
+      "inner": "ease of the progress (none)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after GSAP"
+    },
+    "thirdParty": [],
+    "notes": "Zoom scale 1 → 8 over 1800 ms interpolated in log space: scale(p) = start × (end / start)^p, p linear or eased, so every doubling takes the same time; as a 0→1 ease for a scale tween 1→8: e(p) = (8^p − 1) / 7. Proposed alias expoScale(start, end[, inner ease]). Small demo: linear vs exponential zoom side by side on a small square. Params: duration (1.8 s) · from (1) · to (8) · ease trong (none). Scale interpolated in log space, so every doubling takes the same time; as a 0-1 ease for a 1 → 8 scale: (8^p − 1) / 7.",
+    "titleVi": "Phóng to đều mắt (ExpoScale)"
+  }
+}

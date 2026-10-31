@@ -1,6 +1,6 @@
 // The Style Gallery's anidoodle previews: the author's drawing film of each medium rendered through
 // HyperFrames into <work>/library/anidoodle/anidoodle-<commit7>/previews/, then the poster and film of the author's rigged characters (Bit,
-// the cheetah) in the Characters library. Into the app's bundle afterwards:
+// the cheetah) in the Characters library, straight into bundle/library/characters/. Into the app's bundle afterwards (the characters only counted):
 //   node tools/make-bundle.mjs --only library-anidoodle,library-characters
 // Usage: node tools/anidoodle-previews.mjs [--only id,id] [--force] [--workers 2] [--plan]
 import { makeCharacterMedia, makePreviews, previewPlan } from "../packages/anidoodle-styles/previews.mjs";

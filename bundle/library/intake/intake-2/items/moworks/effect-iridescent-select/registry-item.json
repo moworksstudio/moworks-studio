@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-iridescent-select",
+  "type": "hyperframes:block",
+  "title": "Oil Slick Selection",
+  "description": "Chọn một dòng trong danh sách, một mảng mềm như vệt dầu loang nở ra quanh dòng đó, mép gợn chậm, bên trong là các dải màu óng ánh chảy chéo.",
+  "tags": [
+    "iridescent",
+    "selection",
+    "blob",
+    "gradient",
+    "material-surface-motion",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "effect-iridescent-select.html",
+      "target": "compositions/components/effect-iridescent-select.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-iridescent-select",
+    "author": "moworks",
+    "call": "MW.effectIridescentSelect(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectIridescentSelect",
+    "options": {
+      "rows": "the list rows",
+      "row": "index selected (1)",
+      "at": "s (0.55)",
+      "accent": "outline",
+      "seed": "edge noise",
+      "loop": "s (4.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "List card 144x128 r12 (rows 42 px apart). The selected row gets a superellipse blob (exponent 4) 124x32, growing from 80 % width / 60 % height on a spring k160 d14 at 0.55 s, edge noise ±5 / ±3.5 px drifting over the 4.2 s cycle, filled with diagonal bands in 5 colours (2 px lines, 8 px apart, slope 0.45, 5 px sine wobble) at 50 % flowing 40 px per 4.2 s; the same bands at 7 % over the card; 1.5 px accent outline. Out 3.55-3.95 s. Params: blob (124x32, k160 c14) · edge noise (±5 / ±3.5 px) · bands (5 màu, 2 px, cách 8 px) · flow (40 px / 4.2 s). A superellipse (exponent 4) grows on a spring k160 c14 with a slowly drifting edge; five-colour diagonal bands flow inside it at 50 % and over the card at 7 %.",
+    "titleVi": "Vùng chọn ánh dầu loang"
+  }
+}

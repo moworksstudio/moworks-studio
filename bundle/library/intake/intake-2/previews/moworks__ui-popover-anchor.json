@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-popover-anchor",
+  "hash": "6968e1182b122c3c",
+  "at": "2026-10-17T08:18:19.691Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__ui-popover-anchor.mp4",
+    "poster": "previews/moworks__ui-popover-anchor.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "aac5ae577bc7e2e2bc534fcab4b3be0958d156b0e5729129da1285483d36b003",
+    "size": 9438,
+    "seconds": 26.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

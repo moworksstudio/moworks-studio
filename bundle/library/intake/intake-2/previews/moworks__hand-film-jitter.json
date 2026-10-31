@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/hand-film-jitter",
+  "hash": "09a1ae718a79ee8b",
+  "at": "2026-10-17T08:03:56.651Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__hand-film-jitter.mp4",
+    "poster": "previews/moworks__hand-film-jitter.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a21c4034e5b9e96ecc07b0e9de5788937596d9093ba0912863545a2207f2ced8",
+    "size": 31416,
+    "seconds": 29.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

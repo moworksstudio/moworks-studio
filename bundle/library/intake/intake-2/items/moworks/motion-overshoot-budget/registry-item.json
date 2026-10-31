@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-overshoot-budget",
+  "type": "hyperframes:block",
+  "title": "Overshoot Budget",
+  "description": "Bài học: chọn mức vượt quá theo mục đích: lỗi và cao cấp 0 %, phản hồi 2–5 %, thành công 5–10 %, ăn mừng 15–25 %.",
+  "tags": [
+    "lesson",
+    "spring",
+    "overshoot",
+    "springs",
+    "bouncy",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-overshoot-budget.html",
+      "target": "compositions/components/motion-overshoot-budget.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-overshoot-budget",
+    "author": "moworks",
+    "call": "MW.motionOvershootBudget(q(\".ob\"), tl, 0.2, {});",
+    "function": "MW.motionOvershootBudget",
+    "options": {
+      "items": "",
+      "springs": "[[k, c], ...] per bar",
+      "dropAt": "s the bars drop again (1.9)",
+      "duration": "s (2.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Four bars rise 100 px side by side on springs labelled 0 / 3 / 8 / 20 % overshoot: k 300 c 34.6 · k 260 c 22 · k 220 c 15 · k 180 c 9 (these actually give 0 / 5.3 / 15.9 / 32.7 %). Budget: errors and premium 0 %, feedback 2–5 %, success 5–10 %, celebration 15–25 %; above 25 % reads as broken. Params: levels (0 / 3 / 8 / 20 %) · height (100 px). The budget: errors and premium 0 %, feedback 2–5 %, success 5–10 %, celebration 15–25 %; above 25 % reads as broken. Labelled 0 / 3 / 8 / 20 % elsewhere, these springs actually give 0 / 5.3 / 15.9 / 32.7 %.",
+    "titleVi": "Ngân sách vượt quá đích"
+  }
+}

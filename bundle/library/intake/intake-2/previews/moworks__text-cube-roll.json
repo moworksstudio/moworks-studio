@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-cube-roll",
+  "hash": "4b6194d04fe05bd1",
+  "at": "2026-10-17T08:43:57.059Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-cube-roll.mp4",
+    "poster": "previews/moworks__text-cube-roll.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "280d732635574098817969be49f9350a3d3fecd66f7eef2ffba1f4ec23773f60",
+    "size": 19436,
+    "seconds": 32.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

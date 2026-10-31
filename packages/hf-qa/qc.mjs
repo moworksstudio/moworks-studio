@@ -1,7 +1,8 @@
 // The pictures and findings of the QC review (moworks-qc): the app takes HyperFrames' stills of the film and lays them out
-// as three sheets per round (.moworks/qc/R<n>/): beats (one settled still per shot), cuts (a strip of 4 frames across every shot change)
-// and phone (every shot 360 px wide), and runs HyperFrames' full check (lint, script errors, layout at every transition seam, the frame
-// check, contrast, motion). Claude reads the sheets as sheets (one picture each, HF's advice: single stills cost the whole conversation again).
+// as three sheets per round (.moworks/qc/R<n>/; a long film takes more pages of each): beats (one settled still per shot), cuts (a strip of 4
+// frames across every shot change) and phone (every shot 360 px wide), and runs HyperFrames' full check (lint, script errors, layout at every
+// transition seam, the frame check, contrast, motion). Claude reads the sheets as sheets (one picture each, HF's advice: single stills cost
+// the whole conversation again).
 // Each round also measures the film's still stretches (stillness.mjs): Claude reads them in words.
 import { copyFileSync, mkdirSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { execFile } from "node:child_process";
@@ -17,14 +18,22 @@ import { dropDecorationContrast } from "./contrastDecor.mjs";
 
 const run = promisify(execFile);
 const r2 = (n) => Math.round(n * 100) / 100;
-const MAX_SHOTS = 24, MAX_CUTS = 16;
+// what one page of a sheet holds (the size the one sheet always had): a longer film takes more pages, never smaller pictures and never
+// fewer shots (T28-5: a 27-shot film lost its last 3 shots and 10 cuts, where the story turns, and scored 8/10). A page costs the Review
+// what its stills cost: a last page of 3 shots is one short row
+export const BEATS_PAGE = 24, CUTS_PAGE = 16;
+const pagesOf = (list, n) => Array.from({ length: Math.ceil(list.length / n) }, (_, i) => list.slice(i * n, (i + 1) * n));
+/** A page of a sheet, as res.sheets and the round's folder name it: beats, beats-2, beats-3… */
+const pageName = (kind, i) => (i ? `${kind}-${i + 1}` : kind);
+/** How many pages of sheets a film of n shots takes in a round: the first round opens them all. */
+export const sheetPages = (n) => (n > 0 ? 2 * Math.ceil(n / BEATS_PAGE) + Math.ceil(Math.max(0, n - 1) / CUTS_PAGE) : 0);
 
-/** The times to take: each shot at 60 % of its length (settled), and 4 frames across each cut. */
+/** The times to take: each shot at 60 % of its length (settled), and 4 frames across each cut. Every shot and every cut of the film. */
 export function qcTimes(shots, total) {
-  const ss = shots.filter((s) => s.duration > 0).sort((a, b) => a.start - b.start).slice(0, MAX_SHOTS);
+  const ss = shots.filter((s) => s.duration > 0).sort((a, b) => a.start - b.start);
   const end = total || (ss.length ? Math.max(...ss.map((s) => s.start + s.duration)) : 0);
   const beats = ss.map((s) => ({ shot: s.number, t: r2(s.start + s.duration * 0.6) }));
-  const cuts = ss.slice(1, MAX_CUTS + 1).map((s) => ({ shot: s.number, at: s.start,
+  const cuts = ss.slice(1).map((s) => ({ shot: s.number, at: s.start,
     ts: [-0.25, -0.08, 0.08, 0.25].map((d) => r2(Math.min(Math.max(0, s.start + d), Math.max(0, end - 0.02)))) }));
   return { beats, cuts };
 }
@@ -177,12 +186,24 @@ export async function qcRound(dir, { shots, total, signal = null, parallel = fal
     const byT = new Map(files.map((f) => [Number(/-at-([\d.]+)s\.png$/.exec(f)?.[1]), f]));          // HF names each still by its time
     const at = (t) => { const f = byT.get(t) ?? [...byT].find(([k]) => Math.abs(k - t) < 0.006)?.[1]; return f ? join(raw, f) : null; };
     if (r.exitCode !== 0 || files.length < times.length) part.failed.push(`snapshot: ${stillsFailure(r, files.length, times.length)}`);
-    const bs = beats.map((b) => at(b.t)).filter(Boolean), cs = cuts.flatMap((c) => c.ts.map(at)).filter(Boolean);
-    if (!bs.length) part.failed.push(`no stills matched (${files.slice(0, 3).join(", ")})`);
+    // what has its stills goes on the pages, and the answer lists only that: a cut with a frame missing would slide every row after it
+    part.beats = beats.filter((b) => at(b.t)); const whole = cuts.filter((c) => c.ts.every(at));
+    part.cuts = whole.map(({ shot, at: second }) => ({ shot, at: second }));
+    const missed = [...beats.filter((b) => !at(b.t)).map((b) => `shot ${b.shot} at ${b.t} s`), ...cuts.filter((c) => !c.ts.every(at)).map((c) => `the cut into shot ${c.shot} at ${c.at} s`)];
+    if (missed.length) part.failed.push(`not on the sheets: ${missed.join(", ")}: see them with film_frames, or name them as not seen`);
+    if (!part.beats.length) part.failed.push(`no stills matched (${files.slice(0, 3).join(", ")})`);
+    const sheet = async (kind, pages, opts) => {
+      for (const [i, stills] of pages.entries()) {
+        const name = pageName(kind, i), f = join(out, `${name}.jpg`);
+        await tile(stills, f, opts);
+        part.sheets[name] = rel(f);
+      }
+    };
+    const beatPages = pagesOf(part.beats.map((b) => at(b.t)), BEATS_PAGE);
     try {
-      if (bs.length) { await tile(bs, join(out, "beats.jpg"), { width: 480, cols: 4 }); part.sheets.beats = rel(join(out, "beats.jpg")); }
-      if (cs.length) { await tile(cs, join(out, "cuts.jpg"), { width: 400, cols: 4 }); part.sheets.cuts = rel(join(out, "cuts.jpg")); }
-      if (bs.length) { await tile(bs, join(out, "phone.jpg"), { width: 360, cols: 6 }); part.sheets.phone = rel(join(out, "phone.jpg")); }
+      await sheet("beats", beatPages, { width: 480, cols: 4 });
+      await sheet("cuts", pagesOf(whole, CUTS_PAGE).map((p) => p.flatMap((c) => c.ts.map(at))), { width: 400, cols: 4 });
+      await sheet("phone", beatPages, { width: 360, cols: 6 });
     } catch (e) { part.failed.push(`sheets: ${String(e.message).split("\n")[0]}`); }
     return part;
   };
@@ -215,6 +236,7 @@ export async function qcRound(dir, { shots, total, signal = null, parallel = fal
   }
   for (const part of done) {
     Object.assign(res.sheets, part.sheets ?? {});
+    if (part.beats) { res.beats = part.beats; res.cuts = part.cuts; }
     if (part.still) res.still = part.still;
     if (part.check) res.check = part.check;
     res.failed.push(...part.failed);
@@ -225,9 +247,12 @@ export async function qcRound(dir, { shots, total, signal = null, parallel = fal
 /** The round as Claude reads it (the MCP tool's answer). */
 export function qcText(r, freshEyes = null) {
   const lines = [`QC round ${r.round} (pictures in ${r.dir}/).`];
-  if (r.sheets.beats) lines.push(`- beats sheet ${r.sheets.beats}: one settled still per shot, left to right, top to bottom: ${r.beats.map((b) => `shot ${b.shot} @${b.t}s`).join(", ")}.`);
-  if (r.sheets.cuts) lines.push(`- cuts sheet ${r.sheets.cuts}: one row per shot change, 4 frames (-0.25, -0.08, +0.08, +0.25 s): ${r.cuts.map((c) => `into shot ${c.shot} at ${c.at}s`).join(", ")}.`);
-  if (r.sheets.phone) lines.push(`- phone sheet ${r.sheets.phone}: the beats at 360 px wide, 6 per row.`);
+  const beatPages = pagesOf(r.beats ?? [], BEATS_PAGE), cutPages = pagesOf(r.cuts ?? [], CUTS_PAGE);
+  const page = (i, n) => (n > 1 ? ` ${i + 1} of ${n}` : "");
+  beatPages.forEach((p, i) => { const s = r.sheets[pageName("beats", i)]; if (s) lines.push(`- beats sheet${page(i, beatPages.length)} ${s}: one settled still per shot, left to right, top to bottom: ${p.map((b) => `shot ${b.shot} @${b.t}s`).join(", ")}.`); });
+  cutPages.forEach((p, i) => { const s = r.sheets[pageName("cuts", i)]; if (s) lines.push(`- cuts sheet${page(i, cutPages.length)} ${s}: one row per shot change, 4 frames (-0.25, -0.08, +0.08, +0.25 s): ${p.map((c) => `into shot ${c.shot} at ${c.at}s`).join(", ")}.`); });
+  beatPages.forEach((p, i) => { const s = r.sheets[pageName("phone", i)]; if (s) lines.push(`- phone sheet${page(i, beatPages.length)} ${s}: the beats at 360 px wide, 6 per row${beatPages.length > 1 ? `: shots ${p[0].shot} to ${p.at(-1).shot}` : ""}.`); });
+  if (beatPages.length > 1 || cutPages.length > 1) lines.push("Every shot and every cut is on a page. A film this long takes several pages: open them all in the first round; in a later round open only the pages with a shot you changed, the others show what you saw already.");
   const f = r.check?.findings ?? {};
   for (const sec of ["lint", "runtime", "layout", "contrast", "motion"]) {
     const all = f[sec] ?? [], xs = all.filter((x) => x.severity !== "info");          // info lines are HF's notes, not problems
@@ -239,7 +264,42 @@ export function qcText(r, freshEyes = null) {
   if (r.still) lines.push("", ...stillLines(r.still));
   if (freshEyes) lines.push("", "Fresh eyes (a second look that saw only the beats and cuts sheets, nothing else about the film):", freshEyes);
   if (r.failed.length) lines.push("", `Could not make everything: ${r.failed.join("; ")}`);
-  lines.push("", "Open the sheets with Read (each is one picture), score the seven criteria, write the round to docs/QC-REVIEW.md, fix, and call qc_sheets again for the next round.");
+  lines.push("", "Open the sheets with Read (each is one picture), score the seven criteria, write the round to docs/QC-REVIEW.md, fix, and call qc_sheets again for the next round. To look closer at one moment, film_frames gives that frame whole, with its text, at the film's size.");
   return lines.join("\n");
+}
+
+// ---- one whole frame (T28-6: the Review had no tool for it, so it used `hyperframes keyframes --shot`, a motion debug view with guide lines
+// and no HTML text, concluded the app cannot capture text, and left 18 MB of pictures in capture/ at the film's root and in its history)
+/** The most frames one call takes: each picture is read into the whole conversation again. */
+export const FRAMES_AT_ONCE = 6;
+const FRAMES_KEEP = 2;          // this call's and the one before: the others are 2-3 MB a frame nobody reads again
+/** Whole frames of the film at the given seconds, drawn as the render draws them, every word included (HF's own stills at the film's size),
+ *  in .moworks/qc/frames/<n>/, out of git like the rest of .moworks/qc. { frames: [{ t, file }], asked, busy?, failed? }. */
+export async function filmFrames(dir, at, { total = null, signal = null, snap = snapshotAtAsync, pauseMs = 3000 } = {}) {
+  const last = total > 0 ? Math.max(0, total - 0.02) : Infinity;
+  const asked = [...new Set((Array.isArray(at) ? at : [at]).map(Number).filter((t) => Number.isFinite(t) && t >= 0).map((t) => r2(Math.min(t, last))))].sort((a, b) => a - b);
+  const times = asked.slice(0, FRAMES_AT_ONCE);
+  if (!times.length) return { frames: [], asked: 0, failed: "no second given" };
+  const base = join(dir, ".moworks", "qc", "frames");
+  mkdirSync(base, { recursive: true });
+  const taken = readdirSync(base).filter((x) => /^\d+$/.test(x)).map(Number).sort((a, b) => a - b);
+  for (const n of taken.slice(0, Math.max(0, taken.length - FRAMES_KEEP + 1))) rmSync(join(base, String(n)), { recursive: true, force: true });
+  const out = join(base, String((taken.at(-1) ?? 0) + 1));
+  mkdirSync(out, { recursive: true });
+  await freshFilm(dir);          // the film as Claude left it, as a QC round takes it
+  const stills = () => readdirSync(out).filter((f) => /^frame-.*\.png$/.test(f));
+  const r = await againIfBusy(() => snapOnceMore(snap, dir, times, out, { signal, idleMs: STILL_IDLE_MS }), () => !stills().length, { pauseMs });
+  if (r.busy) return { frames: [], asked: asked.length, busy: true };
+  const rel = (f) => relative(dir, join(out, f)).split(sep).join("/");
+  const frames = stills().sort().map((f) => ({ t: Number(/-at-([\d.]+)s\.png$/.exec(f)?.[1]), file: rel(f) }));
+  return { frames, asked: asked.length, ...(frames.length < times.length ? { failed: stillsFailure(r, frames.length, times.length) } : {}) };
+}
+/** What film_frames answers. */
+export function framesText(r) {
+  if (r.busy) return STILLS_BUSY;
+  if (!r.frames.length) return `No frame could be taken: ${r.failed ?? "HyperFrames gave no picture"}. Give the seconds, e.g. at: [12.5]; name what you could not see.`;
+  return [`The film's frames, whole, as the render draws them (all their text), at the film's size. Open with Read only those you need: each is one picture.`,
+    ...r.frames.map((f) => `- ${f.t} s: ${f.file}`),
+    ...(r.asked > r.frames.length ? [`${r.asked - r.frames.length} more asked and not taken${r.failed ? ` (${r.failed})` : ` (at most ${FRAMES_AT_ONCE} a call)`}.`] : [])].join("\n");
 }
 

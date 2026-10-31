@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-smear-stretch-in",
+  "hash": "3b31f5ba1d2cbeb5",
+  "at": "2026-10-17T11:41:42.435Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-smear-stretch-in.mp4",
+    "poster": "previews/moworks__text-smear-stretch-in.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c6fc5e07920684606e604fa97f0d998e62a882f1ac67ae7a6a8996bc9a024b57",
+    "size": 25193,
+    "seconds": 26.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

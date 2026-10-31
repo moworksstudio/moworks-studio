@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-parry-timing-ring",
+  "type": "hyperframes:component",
+  "title": "Parry Window",
+  "description": "Một vòng tròn co dần quanh khiên, đúng lúc vòng chạm vạch đích thì đỡ: loé vòng sáng, khiên giật nhẹ, hạt nổ, viên đạn bị bật ngược lên và chữ \"PARRY\" bật ra.",
+  "tags": [
+    "ring",
+    "timing",
+    "contract",
+    "impact",
+    "combat-hit-fx",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "effect-parry-timing-ring.html",
+      "target": "compositions/components/effect-parry-timing-ring.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-parry-timing-ring",
+    "author": "moworks",
+    "call": "MW.effectParryTimingRing(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectParryTimingRing",
+    "options": {
+      "from": "px of the timing ring (54)",
+      "to": "px of the target ring (16)",
+      "window": "s it shrinks, linear (0.7)",
+      "hitAt": "s (1.0)",
+      "push": "px (6)",
+      "label": "",
+      "loop": "s (2.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. Timing ring (stroke 2, accent) shrinks radius 54 → 16 linearly over 700 ms (0.3-1.0 s), opacity 0.3 → 1, onto a dashed target circle r 16. Contact at 1.0 s: flash ring 16 → 40 (stroke 3) in 350 ms outCubic; shield pushed 6 px (250 ms half-sine); 9-dot burst to 20 px (300 ms). The projectile comes in at ~269 px/s and leaves up-right at 420 px/s x, 90 px/s up (~1.6×; a label says ×2.4) for 600 ms; 'PARRY' pops 300 ms back.out. Params: from / to: bán kính vòng (54 → 16 px) · window: thời gian co (0.7 s) · hitAt: lúc chạm (1.0 s) · push: khiên giật (6 px). The projectile comes in at 269 px/s and is sent back at 420 px/s, 90 px/s up (about × 1.6).",
+    "titleVi": "Vòng canh nhịp đỡ đòn"
+  }
+}

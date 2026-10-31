@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-layered-extrude",
+  "type": "hyperframes:component",
+  "title": "Layered Depth Text",
+  "description": "Tiêu đề có 12 lớp bản sao xếp lùi phía sau tạo khối nổi, cả khối nghiêng theo đường đi của con trỏ và đuổi theo bằng lò xo.",
+  "tags": [
+    "3d",
+    "extrude",
+    "tilt",
+    "spring",
+    "text-3d-depth",
+    "soft",
+    "3d-depth"
+  ],
+  "files": [
+    {
+      "path": "text-layered-extrude.html",
+      "target": "compositions/components/text-layered-extrude.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-layered-extrude",
+    "author": "moworks",
+    "call": "MW.textLayeredExtrude(q(\".le h1\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.textLayeredExtrude",
+    "options": {
+      "layers": "copies behind (12)",
+      "tilt": "degrees at full lean (15)",
+      "k": "spring stiffness (120)",
+      "c": "damping (16)",
+      "unit": "px per reference unit (4)",
+      "accent": "the stack's colour",
+      "accent2": "every 4th copy",
+      "cursor": "the cursor the tilt follows"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after react-bits (MIT + Commons Clause): written from the idea only, no react-bits code"
+    },
+    "thirdParty": [],
+    "notes": "12 copies behind the headline: copy i offset by i × (0.55 + 3.2 × sin ry) px in x and i × (0.55 − 3.2 × sin rx) px in y, colour accent (every 4th copy second accent), opacity 0.95 (near) → 0.3 (far); front copy ink. Whole stack scales x by cos ry and y by cos rx. Tilt ±15° follows a cursor path (centre 0.4 s → right-up 1.0 s → left-down 1.9 s → right 2.7 s → centre 3.3 s, cubic-bezier(.65,0,.35,1)) through a spring k 120, c 16. Loop 4 s. Params: số lớp (12) · độ lệch mỗi lớp (0.55 px) · độ nghiêng (±15°) · lò xo (k 120, c 16).",
+    "titleVi": "Chữ nổi khối nhiều lớp, nghiêng theo chuột"
+  }
+}

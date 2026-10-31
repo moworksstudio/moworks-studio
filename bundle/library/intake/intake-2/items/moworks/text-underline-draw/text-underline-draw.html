@@ -1,0 +1,123 @@
+<!--
+  Underline Draw (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Một nét gạch chân mọc từ trái sang dưới chữ trong 0.4 giây, khi rút thì thu về phía bên phải.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textUnderlineDraw(q(".tk-head"), tl, 0.5, { exitAt: 1.6 });
+
+  Options (defaults in brackets):
+      - duration: s (0.4), in-out
+      - thickness: em (0.08)
+      - offset: em below the baseline (0.16)
+      - color: line colour
+      - exitAt: s after the start: it shrinks toward its right end in 0.35 s (null: stay)
+
+  Notes: Line under the text: 0.08 em thick (min 2 px), 0.16 em below the baseline (CSS bottom −0.12 em), round ends, accent; one line per text line. Draw: scaleX 0 → 1 from the left, 0.4 s cubic-bezier(.65,0,.35,1) (demo 0.5–0.9 s). Exit: origin flips to the right and the line shrinks toward its right end, 0.35 s same ease (demo 2.1–2.45 s). Loop 2.8 s. Params: duration (0.4 s) · thickness (0.08 em) · offset: cách chân chữ (0.16 em) · ease (cubic-bezier(.65,0,.35,1)).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Điều đáng nhớ</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.lines = MW.lines || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwLines) return el.__mwLines;
+    var s = MW.split(el, mode || "words"), out = [];
+    s.lines.forEach(function (ws) {
+      var d = document.createElement("span"); d.className = "mw-line"; d.style.display = "block";
+      ws[0].parentNode.insertBefore(d, ws[0]);
+      ws.forEach(function (w, i) { d.appendChild(w); if (i < ws.length - 1) d.appendChild(document.createTextNode(" ")); });
+      out.push(d);
+    });
+    Array.prototype.slice.call(el.childNodes).forEach(function (n) { if ((n.nodeType === 3 && !n.nodeValue.trim()) || n.nodeName === "BR") el.removeChild(n); });
+    el.__mwLines = { lines: out, chars: s.chars, words: s.words };
+    return el.__mwLines;
+  };
+  var defaults = {"duration":0.4,"thickness":0.08,"offset":0.16,"color":"#a99bff","exitAt":null};
+  var run = function (el, tl, at, o) {
+        var L = MW.lines(el, "words").lines, io = MW.ez("in-out"), lines = [];
+        L.forEach(function (l) { var s = document.createElement("span"); s.style.cssText = "display:inline-block;position:relative;"; while (l.firstChild) s.appendChild(l.firstChild); l.appendChild(s);
+          var u = document.createElement("span"); u.style.cssText = "position:absolute;left:0;right:0;height:max(2px," + o.thickness + "em);bottom:-" + (o.offset - 0.04) + "em;border-radius:999px;background:" + o.color + ";transform:scaleX(0);"; s.appendChild(u); lines.push(u); });
+        return MW.drive(tl, at, o.exitAt == null ? o.duration : o.exitAt + 0.35, function (t) {
+          var p = io(Math.max(0, Math.min(1, t / o.duration))), e = o.exitAt == null ? 0 : io(Math.max(0, Math.min(1, (t - o.exitAt) / 0.35)));
+          lines.forEach(function (u) { u.style.transformOrigin = e > 0 ? "100% 50%" : "0% 50%"; u.style.transform = "scaleX(" + (e > 0 ? 1 - e : p) + ")"; });
+        });
+      };
+  MW.textUnderlineDraw = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

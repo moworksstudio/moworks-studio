@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-head-turn",
+  "type": "hyperframes:component",
+  "title": "Head Turn",
+  "description": "Mắt liếc trước, đầu quay theo, thân xoay sau cùng, các nhịp chồng lên nhau một chút.",
+  "tags": [
+    "turn",
+    "overlap",
+    "character",
+    "rig",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-head-turn.html",
+      "target": "compositions/components/motion-head-turn.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-head-turn",
+    "author": "moworks",
+    "call": "MW.motionHeadTurn(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionHeadTurn",
+    "options": {
+      "eyes": "units (14, 0.15 s ease-out)",
+      "head": "units (12, 0.35 s)",
+      "body": "units (6, 0.45 s)",
+      "start": "s (0.4)",
+      "backAt": "s (1.9)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Eyes shift toward the look direction 0-250 ms, head turns / moves 100-450 ms, body follows 200-600 ms, easeInOutCubic (eyes easeOutCubic in the demo); return in the same order. 100 ms offsets = overlapping action. Demo (from 0.4 s): eyes 150 ms, 14 px; head 350 ms, 12 px; body 450 ms, 6 px; return 1.5 s later. Params: eyes (0–0.25 s) · head (0.1–0.45 s) · body (0.2–0.6 s). Eyes first, then the head 0.1 s later, then the body 0.1 s after that: overlapping action; it returns in the same order.",
+    "titleVi": "Quay đầu: mắt, đầu rồi thân"
+  }
+}

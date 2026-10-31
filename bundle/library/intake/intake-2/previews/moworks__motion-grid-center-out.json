@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-grid-center-out",
+  "hash": "7d464edbac4c1e92",
+  "at": "2026-10-17T10:56:06.293Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-grid-center-out.mp4",
+    "poster": "previews/moworks__motion-grid-center-out.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "d4333773c918e8035279065d0fff61c7647a99f98cba844b542407dd00d6a06e",
+    "size": 12124,
+    "seconds": 27.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

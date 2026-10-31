@@ -144,7 +144,7 @@ export default function Storyboard({ id, setCrumbs = () => {} }) {
       <button className="btn" onClick={() => setAsk(null)}>{t("Look again")}</button>
       <button className={"btn " + (ask === "approve" ? "ok" : "primary")} onClick={confirm[2]} disabled={busy}>{busy ? <Loader2 size={15} className="spin" /> : <Check size={15} />}{confirm[1]}</button></>}>
       {/* One sentence says what Claude does, how long and what it costs (normal text, not a warning); at most one short line under it */}
-      {ask === "approve" && <UsageHint projectId={id} line={stepLine(t, t("Claude writes the motion for {n} shots", { n: frames }), board?.estimates?.motion)} />}
+      {ask === "approve" && <UsageHint projectId={id} line={stepLine(t, t("Claude writes the motion for {n} shots", { n: frames }), board?.estimates?.motionFor?.[label] ?? board?.estimates?.motion)} />}
       {ask === "more" && <UsageHint projectId={id} line={stepLine(t, t("Claude makes Option {o}, unlike the ones you have", { o: nextLetter(options) }), board?.estimates?.option)}>
         <p className="hint">{draft.trim() ? t("Your feedback on Option {o} goes with it.", { o: label }) : t("Every option so far stays here.")}</p></UsageHint>}
       {ask === "revise" && option && <UsageHint projectId={id} line={stepLine(t, t("Claude makes Option {n} from your feedback", { n: nextRevision(options, option.letter ?? label[0]) }), board?.estimates?.feedback)}>

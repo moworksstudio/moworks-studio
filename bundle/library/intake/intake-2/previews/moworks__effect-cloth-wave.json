@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-cloth-wave",
+  "hash": "6ac79978243a2baf",
+  "at": "2026-10-17T10:13:32.164Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__effect-cloth-wave.mp4",
+    "poster": "previews/moworks__effect-cloth-wave.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b59c2fe6954f1fe25b16924d04c03adbce6eee9d5fc1c1808e09062c575b5d07",
+    "size": 40499,
+    "seconds": 27.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

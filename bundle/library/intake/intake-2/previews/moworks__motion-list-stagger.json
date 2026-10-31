@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-list-stagger",
+  "hash": "64c8bbc7947268b3",
+  "at": "2026-10-17T10:56:05.887Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-list-stagger.mp4",
+    "poster": "previews/moworks__motion-list-stagger.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "2aa0aabc357d029d3edb38f86b41a4bb86054d05c166f5c9cf4448d755a410f9",
+    "size": 8603,
+    "seconds": 26.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

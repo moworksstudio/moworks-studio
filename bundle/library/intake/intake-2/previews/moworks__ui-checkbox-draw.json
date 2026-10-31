@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-checkbox-draw",
+  "hash": "4452d8b4f656a86d",
+  "at": "2026-10-17T11:16:42.833Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-checkbox-draw.mp4",
+    "poster": "previews/moworks__ui-checkbox-draw.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "72d309a66bfedcafbf566494267a4ce447cd972b8a9a2b7d612a9d0545ee6da8",
+    "size": 8109,
+    "seconds": 27.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

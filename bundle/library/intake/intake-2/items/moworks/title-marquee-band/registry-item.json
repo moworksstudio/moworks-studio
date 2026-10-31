@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "title-marquee-band",
+  "type": "hyperframes:block",
+  "title": "Scroll Marquee",
+  "description": "Một dải màu chạy hết bề ngang với chữ lớn lặp lại xen dấu sao trôi sang trái đều đặn, nối liền không thấy chỗ lặp.",
+  "tags": [
+    "marquee",
+    "ticker",
+    "type",
+    "loop",
+    "web-scroll",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "title-marquee-band.html",
+      "target": "compositions/components/title-marquee-band.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/title-marquee-band",
+    "author": "moworks",
+    "call": "MW.titleMarqueeBand(q(\".mb\"), tl, 0, {});",
+    "function": "MW.titleMarqueeBand",
+    "options": {
+      "period": "s per unit width, linear (2.5): a seamless wrap",
+      "loops": "(2)",
+      "track": "the moving row (its first child is one unit)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Full-width accent band 44 px tall; repeating 'MOTION ✱ SCROLL ✱' in 800-weight 26 px type, gap 16 px, the star a 4-point star 16 px across (radius 8 / 3), dark background colour. Copies tile the band and move left by one unit width (sum of word widths + gaps) every 2.5 s, linear, seamless wrap. Thin grid lines 8 px above and below the band. Params: words (MOTION ✱ SCROLL ✱) · size (26 px) · speed (1 vòng / 2.5 s) · band (44 px).",
+    "titleVi": "Dải chữ lớn chạy ngang liên tục"
+  }
+}

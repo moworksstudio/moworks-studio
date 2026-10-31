@@ -1,0 +1,72 @@
+<!--
+  RGB Split Glitch (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Hai bản đỏ và xanh lơ của chữ lệch sang hai bên trong những dải ngang chạy lên xuống, giật từng đợt ngắn.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textRgbSplitGlitch(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - colors: [red, cyan]
+      - band: [min, max] % of the height ([6, 22])
+      - shift: [min, max] px ([16, 48])
+      - jitter: ± px (8)
+      - bursts: [[from, to] s, ...] ([[0.35, 1.05], [2.4, 2.78]])
+      - fps: updates a second (12)
+      - seed: (3)
+      - loop: s (3)
+
+  Notes: Two copies over the text, each clipped to a horizontal band. CSS: cyan copy (x −2 px, cyan shadow +5 px) on a 2 s cycle, red copy (x +2, red shadow −5 px) on 3 s; bands slide through 6 inset keys (20/50, 60/12, 43/40, 8/78, 70/6, 32/55 %), linear alternate-reverse. Canvas demo (12 fps): bursts only in 0.35–1.05 / 2.4–2.78 s on ~70 % of frames: red band in the upper half, cyan in the lower (6–22 % tall), shifted −/+4–12 px, screen blend; text jitters ±2 px. Loop 3 s. Params: offset: độ lệch (5–12 px) · band: chiều cao dải (6–22 %) · cycles: chu kỳ hai bản (2 s / 3 s) · seed. In a burst about 70 % of frames glitch: a red band in the upper half, a cyan band in the lower, shifted opposite ways.
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">LỖI TÍN HIỆU</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"colors":["#ff3060","#00e0ff"],"band":[6,22],"shift":[16,48],"jitter":8,"bursts":[[0.35,1.05],[2.4,2.78]],"fps":12,"seed":3,"loop":3};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var clone = function () { var g = el.cloneNode(true), br = el.getBoundingClientRect(); g.removeAttribute("id"); g.style.position = "absolute"; g.style.margin = "0"; g.style.pointerEvents = "none"; g.style.boxSizing = "border-box";
+    g.style.left = el.offsetLeft + "px"; g.style.top = el.offsetTop + "px"; g.style.width = (br.width + 0.5) + "px"; g.style.height = el.offsetHeight + "px"; host.insertBefore(g, el.nextSibling); return g; };
+  var raster = function (m) { var cs = getComputedStyle(el), W = el.offsetWidth + 2 * m, Hh = el.offsetHeight + 2 * m, cv = document.createElement("canvas"), off = document.createElement("canvas"); cv.width = off.width = W; cv.height = off.height = Hh;
+    cv.style.cssText = "position:absolute;pointer-events:none;left:" + (el.offsetLeft - m) + "px;top:" + (el.offsetTop - m) + "px;width:" + W + "px;height:" + Hh + "px;"; host.insertBefore(cv, el.nextSibling);
+    var g = off.getContext("2d"); g.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily; g.fillStyle = cs.color; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(el.textContent, W / 2, Hh / 2 + parseFloat(cs.fontSize) * 0.04);
+    el.style.visibility = "hidden"; return { cv: cv, c: cv.getContext("2d"), off: off, W: W, H: Hh, fs: parseFloat(cs.fontSize), font: g.font }; };
+  var R = clone(), C = clone(); [[R, o.colors[0]], [C, o.colors[1]]].forEach(function (q) { q[0].style.color = q[1]; q[0].style.webkitTextFillColor = q[1]; q[0].style.mixBlendMode = "screen"; q[0].style.opacity = "0"; });
+  var inBurst = function (t) { return o.bursts.some(function (b) { return t >= b[0] && t < b[1]; }); };
+  return MW.drive(tl, at, o.loop, function (t) {
+    var f = Math.floor(t * o.fps), r = MW.rand(o.seed * 991 + f * 7), on = inBurst(t) && r() < 0.7;
+    if (!on) { R.style.opacity = C.style.opacity = "0"; gsap.set(el, { x: 0, y: 0 }); return; }
+    var h1 = o.band[0] + r() * (o.band[1] - o.band[0]), t1 = r() * (50 - h1), h2 = o.band[0] + r() * (o.band[1] - o.band[0]), t2 = 50 + r() * (50 - h2), d1 = o.shift[0] + r() * (o.shift[1] - o.shift[0]), d2 = o.shift[0] + r() * (o.shift[1] - o.shift[0]);
+    R.style.clipPath = "inset(" + t1.toFixed(1) + "% 0 " + (100 - t1 - h1).toFixed(1) + "% 0)"; C.style.clipPath = "inset(" + t2.toFixed(1) + "% 0 " + (100 - t2 - h2).toFixed(1) + "% 0)"; gsap.set(R, { x: -d1 }); gsap.set(C, { x: d2 }); R.style.opacity = C.style.opacity = "1";
+    gsap.set(el, { x: (r() * 2 - 1) * o.jitter, y: (r() * 2 - 1) * o.jitter });
+  });
+  };
+  MW.textRgbSplitGlitch = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

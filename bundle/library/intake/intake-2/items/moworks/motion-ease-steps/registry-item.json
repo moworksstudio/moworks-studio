@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-steps",
+  "type": "hyperframes:component",
+  "title": "Steps / Posterize",
+  "description": "Giá trị nhảy theo từng nấc thay vì chạy mượt, kiểu stop-motion hay rớt khung.",
+  "tags": [
+    "ease",
+    "steps",
+    "stop-motion",
+    "easing",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-steps.html",
+      "target": "compositions/components/motion-ease-steps.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-ease-steps",
+    "author": "moworks",
+    "call": "MW.motionEaseSteps(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseSteps",
+    "options": {
+      "duration": "s (0.5)",
+      "ease": "the curve (steps)",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)",
+      "steps": "holds (6); the small demo's levels 0, 0.2 … 1, reaching 1 at 5/6 of the time"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Target moves 0 → 100 % in 6 equal holds, 500 ms (steps(6)): a stop-motion or dropped-frame feel. Note: the small demo's levels are 0, 0.2 … 1 (reaching 1 at 5/6 of the time); GSAP steps(6) gives 0 … 5/6, then 1 at the end. Small demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: duration (0.5 s) · steps (6).",
+    "titleVi": "Steps (giật nấc, posterize)"
+  }
+}

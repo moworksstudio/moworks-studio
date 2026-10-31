@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-decrypt-center",
+  "type": "hyperframes:component",
+  "title": "Decrypt From Center",
+  "description": "Các ký tự mật mã (màu khác, chữ mono) đổi mỗi 50 ms, rồi giải mã từ giữa dòng lan ra hai bên.",
+  "tags": [
+    "scramble",
+    "decrypt",
+    "center",
+    "per-frame",
+    "text-typing-decoding",
+    "crisp",
+    "typing-decoding"
+  ],
+  "files": [
+    {
+      "path": "text-decrypt-center.html",
+      "target": "compositions/components/text-decrypt-center.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-decrypt-center",
+    "author": "moworks",
+    "call": "MW.textDecryptCenter(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textDecryptCenter",
+    "options": {
+      "interval": "s between cipher redraws (0.05)",
+      "span": "s the reveal takes (1.2), 0.05-0.2 s per rank from the centre",
+      "start": "s (0.6)",
+      "backAt": "s the outer letters scramble again (2.95)",
+      "glyphs": "cipher symbols",
+      "cipher": "cipher colour",
+      "font": "font for the line (mono)",
+      "loop": "s (3.4)",
+      "seed": "cipher"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after react-bits (MIT + Commons Clause): written from the idea only, no react-bits code"
+    },
+    "thirdParty": [],
+    "notes": "Unrevealed chars show a cipher glyph (symbols !<>-_\\/[]{}=+*^?#%&$@; kanji set for CJK), mono weight 600, second colour (demo blue, 85 %), redrawn every 50 ms (seeded per char and tick). Chars lock from the line centre outward, symmetric pairs together: one rank per step, step = 1.2 s / ranks clamped 50–200 ms, from 0.6 s (react-bits: interval 50 ms, maxIterations 10, revealDirection center). Demo loop: outer chars scramble again first, 2.95–3.3 s; loop 3.4 s. Params: interval: nhịp đổi ký tự (0.05 s) · step: mỗi bậc từ giữa ra (0.05–0.2 s) · cipherColor: màu ký tự mật mã · glyphs: bộ ký hiệu.",
+    "titleVi": "Giải mã từ giữa dòng ra hai bên"
+  }
+}

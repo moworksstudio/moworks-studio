@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-fade-up-chars",
+  "hash": "0f57feade998b223",
+  "at": "2026-10-17T11:40:50.937Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-fade-up-chars.mp4",
+    "poster": "previews/moworks__text-fade-up-chars.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "48882d9623d4ace43b820faa452f702aacbcba8ee22fba601d33fe9102279b81",
+    "size": 13408,
+    "seconds": 27.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

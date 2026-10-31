@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/transition-inset-reveal",
+  "hash": "a1d1c9f548fb5aaf",
+  "at": "2026-10-17T07:21:03.829Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__transition-inset-reveal.mp4",
+    "poster": "previews/moworks__transition-inset-reveal.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "76b76d92fb72c4f663e47e99dd761c68f4adcf7df80ae9b73a252ce0f7d396ff",
+    "size": 14249,
+    "seconds": 28.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

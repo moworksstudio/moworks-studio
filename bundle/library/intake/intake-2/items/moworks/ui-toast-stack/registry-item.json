@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-toast-stack",
+  "type": "hyperframes:block",
+  "title": "Toast Stack",
+  "description": "Từng thông báo nhỏ trượt vào ở góc dưới, mỗi lần có cái mới thì các cái cũ bị đẩy lên một bậc bằng lò xo, cuối cùng lần lượt trượt ra.",
+  "tags": [
+    "toast",
+    "stack",
+    "spring",
+    "notification",
+    "loading-data",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "ui-toast-stack.html",
+      "target": "compositions/components/ui-toast-stack.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-toast-stack",
+    "author": "moworks",
+    "call": "MW.uiToastStack(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiToastStack",
+    "options": {
+      "times": "s each toast enters ([0.3, 0.95, 1.6])",
+      "step": "px older toasts move up (30)",
+      "stiffness": "(260)",
+      "damping": "(24)",
+      "slide": "px (40)",
+      "exitAt": "s, newest first 0.06 s apart (2.5)",
+      "labels": "",
+      "loop": "s (3.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Window 260x160; toasts 120x24 r6 (check circle r6, label, number) anchored 130 px from the right, 34 px above the bottom. Toast i enters at 0.3 / 0.95 / 1.6 s: from x +40 px to 0 on spring k260 c24, opacity min(1, 1.4 × spring). Each later insertion shifts older toasts up 30 px on the same spring. Exit from 2.5 s, newest first 0.06 s apart: x +40 px and fade over 0.28 s power2.in. Params: times ([0.3, 0.95, 1.6] s) · step (30 px) · spring (k260 c24) · slide (40 px).",
+    "titleVi": "Thông báo nhỏ xếp chồng"
+  }
+}

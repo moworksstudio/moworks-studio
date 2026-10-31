@@ -1,0 +1,51 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-horizontal-scrub",
+  "type": "hyperframes:block",
+  "title": "Horizontal Scrub",
+  "description": "Cuộn dọc kéo dải thẻ chạy ngang sang trái đều đặn, cuộn ngược thì dải chạy về đúng theo.",
+  "tags": [
+    "scroll",
+    "horizontal",
+    "cards",
+    "pan",
+    "web-scroll",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-horizontal-scrub.html",
+      "target": "compositions/components/ui-horizontal-scrub.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-horizontal-scrub",
+    "author": "moworks",
+    "call": "MW.uiHorizontalScrub(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiHorizontalScrub",
+    "options": {},
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Viewport 248x100; 5 cards 100x76 r10 every 112 px. Track x 0 → −324 px linear over 0.3-1.7 s, hold 0.4 s, back to 0 linear 2.1-3.5 s. A vertical scroll thumb at left (30 px in a 100 px rail) and a progress bar below move in sync. Params: travel (324 px) · duration (1.4 s) · hold (0.4 s) · ease (none).",
+    "titleVi": "Dải thẻ trượt ngang theo cuộn"
+  }
+}

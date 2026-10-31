@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-depth-zoom-in",
+  "type": "hyperframes:component",
+  "title": "Scroll Depth Zoom",
+  "description": "Một mặt phẳng nhỏ và tối phóng dần về đúng cỡ quanh tâm cố định, sáng lên khi tới nơi.",
+  "tags": [
+    "scale",
+    "depth",
+    "brightness",
+    "zoom",
+    "web-scroll",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "motion-depth-zoom-in.html",
+      "target": "compositions/components/motion-depth-zoom-in.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-depth-zoom-in",
+    "author": "moworks",
+    "call": "MW.motionDepthZoomIn(q(\".dz-c\"), tl, 0.3, { backAt: 2.3 });",
+    "function": "MW.motionDepthZoomIn",
+    "options": {
+      "from": "start scale (0.78)",
+      "duration": "s (1.2), in-out",
+      "backAt": "s after the start to go back (null)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Surface 224x134 r10 at centre: scale 0.78 → 1 around a fixed centre and brightness 0.7 → 1 (a 30 % dark overlay fades out) over 1.2 s (0.3-1.5 s) power2.inOut; a dashed final-size outline fades out as it lands. Demo reverses 2.6-3.2 s. Params: scale (0.78 → 1) · brightness (0.7 → 1) · duration (1.2 s) · ease (power2.inOut).",
+    "titleVi": "Mặt phẳng tiến lên từ chiều sâu"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-sheet-spring-dim",
+  "type": "hyperframes:block",
+  "title": "Spring Sheet",
+  "description": "Bấm Mở, bảng chi tiết bật lên từ đáy điện thoại, vượt nhẹ một lần rồi nằm yên, nền phía sau tối đi; đóng lại thì rơi xuống.",
+  "tags": [
+    "sheet",
+    "spring",
+    "bottom sheet",
+    "dim",
+    "navigation-overlays",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "ui-sheet-spring-dim.html",
+      "target": "compositions/components/ui-sheet-spring-dim.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-sheet-spring-dim",
+    "author": "moworks",
+    "call": "MW.uiSheetSpringDim(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiSheetSpringDim",
+    "options": {
+      "k": "spring stiffness (260)",
+      "c": "damping (20): about 8 % overshoot",
+      "rest": "the sheet's top at rest in the 320 frame (92)",
+      "dim": "(0.6)",
+      "openAt": "s (0.4)",
+      "closeAt": "s (2.1)",
+      "close": "s (0.3, power2.in)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Phone screen 100x184. Tap Open at 0.3 s; from 0.4 s a sheet 92x150 r14 (grabber, title, 3 lines, button) rises from below the screen (y 196) to its rest (y 92, 104 px up) on spring k260 c20 (≈ 8 % overshoot); the screen dims 0 → 60 % with the spring (clamped). Close 2.1-2.4 s power2.in back down, dim out with it. Params: spring (k260 c20, vọt ~8 %) · rest (cao 104 px) · dim (60 %) · close (0.3 s, power2.in).",
+    "titleVi": "Bảng chi tiết bật lên bằng lò xo"
+  }
+}

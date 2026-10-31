@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-wave-loop",
+  "type": "hyperframes:component",
+  "title": "Wave Loop",
+  "description": "Từng chữ cái nhô lên rồi hạ xuống nhịp nhàng, mỗi chữ trễ hơn chữ trước một chút nên một làn sóng chạy mãi qua dòng chữ.",
+  "tags": [
+    "wave",
+    "loop",
+    "letters",
+    "bob",
+    "text-loops-decoration",
+    "smooth",
+    "bouncy",
+    "loops-decoration"
+  ],
+  "files": [
+    {
+      "path": "text-wave-loop.html",
+      "target": "compositions/components/text-wave-loop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-wave-loop",
+    "author": "moworks",
+    "call": "MW.textWaveLoop(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textWaveLoop",
+    "options": {
+      "amp": "em (0.3)",
+      "period": "s (1.2)",
+      "delay": "s per letter (0.1)",
+      "tint": "letters near the crest take the accent",
+      "accent": "",
+      "loop": "s, seamless (2.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after splitting.js"
+    },
+    "thirdParty": [],
+    "notes": "Per char: y = −0.3 em × (0.5 − 0.5 cos(2π (t − 0.1 i) / 1.2)) (rise 0 → −0.3 em → 0 over 1.2 s, sine.inOut), delay 100 ms × i (≈0.5 rad per char; recipe 60–100 ms), repeating forever, so the crest travels left → right. Optional: chars near the crest (lift > 60 %) tint accent. Seamless loop 2.4 s. AE: amount 50 + 50 × sin(2πft + index × 0.5). Params: độ nhô (0.3 em) · chu kỳ (1.2 s) · trễ mỗi chữ (100 ms).",
+    "titleVi": "Chữ nhấp nhô thành làn sóng"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-marquee-loop",
+  "type": "hyperframes:component",
+  "title": "Marquee",
+  "description": "Hai bản của cùng một dải chữ nối đuôi nhau chạy ngang, hết một bản thì quay về nên không bao giờ đứt quãng.",
+  "tags": [
+    "marquee",
+    "ticker",
+    "loop",
+    "text",
+    "loops-ambient",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-marquee-loop.html",
+      "target": "compositions/components/motion-marquee-loop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-marquee-loop",
+    "author": "moworks",
+    "call": "MW.motionMarqueeLoop(q(\".mq\"), tl, 0, {});",
+    "function": "MW.motionMarqueeLoop",
+    "options": {
+      "period": "s per copy (3), linear",
+      "direction": "left | right",
+      "duration": "s (6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Two copies of the row side by side; x 0 -> -(one copy's width) linear over 3000 ms, then wrap (seamless). Demo: copy width 330 px on a 320 frame, items 'MOTION' and a star alternating every 82 px. Params: speed (1 bản / 3 s) · direction (trái) · gap. Apply to a band whose first child is one copy of the row; copies are added until the band is covered, and the row moves one copy's width per period, so it never breaks.",
+    "titleVi": "Dải chữ chạy vô tận"
+  }
+}

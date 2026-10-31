@@ -1,0 +1,69 @@
+<!--
+  Punctuation-Aware Pause (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Chữ hiện từng ký tự theo nhịp gõ, sau dấu phẩy thì ngừng ngắn, sau dấu chấm, chấm than, chấm hỏi thì ngừng lâu hơn, như người đang nói.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textPunctuationPauseType(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - per: s per character (0.06)
+      - comma: s added after a comma (0.2)
+      - stop: s after . ! ? (0.4)
+      - fit: s the line is compressed into if longer (1.9)
+      - rise: px (12)
+      - caret: px (10)
+      - start: s (0.35)
+      - exitAt: s (3.1)
+      - accent: 
+      - loop: s (3.6)
+
+  Notes: From 0.35 s, chars appear at 60 ms per char (recipe 40–60); +200 ms after '、 , ，' and +400 ms after '。 . ！ ! ？ ?' (recipe 100–200 / 250–400); closing quotes and brackets appear with the previous char and the pause comes after them; schedule compressed to 1.9 s if longer. Each char fades in over 60 ms rising 3 px. Accent caret 2.5 px after the last char: steady while typing, then blinks (0.5 s period, 55 % on). Exit 3.1–3.4 s. Loop 3.6 s. Params: nhịp ký tự (60 ms) · nghỉ sau dấu phẩy (200 ms) · nghỉ sau dấu chấm (400 ms). Closing quotes and brackets come with the character before them, and the pause falls after them.
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Khoan đã, nghe mình nói. Được chứ?</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"per":0.06,"comma":0.2,"stop":0.4,"fit":1.9,"rise":12,"caret":10,"start":0.35,"exitAt":3.1,"accent":"#8b7bff","loop":3.6};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var cells = function (el, text) { el.textContent = ""; var word = null; return gr(text).map(function (g) { var s = document.createElement("span"); s.textContent = g; s.style.display = "inline-block"; s.style.whiteSpace = "pre";
+    if (g === " ") { word = null; el.appendChild(s); } else { if (!word) { word = document.createElement("span"); word.style.display = "inline-block"; word.style.whiteSpace = "nowrap"; el.appendChild(word); } word.appendChild(s); } return s; }); };
+  var g = gr(el.textContent), cs = cells(el, el.textContent), T0 = [], t0 = 0, caret = document.createElement("span");
+  if (getComputedStyle(el).position === "static") el.style.position = "relative";
+  for (var i = 0; i < g.length; i++) { var close = /^[”’)\]»」』"]$/.test(g[i]); if (close && i) { T0.push(T0[i - 1]); } else { T0.push(t0); t0 += o.per; }
+    if (/^[、,，]$/.test(g[i])) t0 += o.comma; else if (/^[。.！!？?]$/.test(g[i])) t0 += o.stop; else if (close && i && /^[。.！!？?、,，]$/.test(g[i - 1])) {} }
+  var k = T0[T0.length - 1] > o.fit ? o.fit / T0[T0.length - 1] : 1;
+  caret.style.cssText = "position:absolute;width:" + o.caret + "px;background:" + o.accent + ";"; el.appendChild(caret);
+  return MW.drive(tl, at, o.loop, function (t) {
+    var last = null, end = o.start + T0[T0.length - 1] * k, x = Math.max(0, Math.min(1, (t - o.exitAt) / 0.3));
+    cs.forEach(function (c, i) { var u = Math.max(0, Math.min(1, (t - o.start - T0[i] * k) / 0.06)); c.style.opacity = String(u * (1 - x)); gsap.set(c, { y: o.rise * (1 - u) }); if (u > 0) last = c; });
+    var ref = last || cs[0]; caret.style.left = (last ? ref.offsetLeft + ref.offsetWidth + 6 : ref.offsetLeft) + "px"; caret.style.top = ref.offsetTop + ref.offsetHeight * 0.12 + "px"; caret.style.height = ref.offsetHeight * 0.76 + "px";
+    var typing = t < end + 0.06, blink = ((t - end) % 0.5) / 0.5 < 0.55; caret.style.opacity = String((t < o.start ? 0 : typing || blink ? 1 : 0) * (1 - x));
+  });
+  };
+  MW.textPunctuationPauseType = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

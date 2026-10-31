@@ -11,6 +11,7 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "
 import { join } from "node:path";
 import { docPath } from "../project-service/docs.mjs";
 import { ENDINGS } from "../hf-edit/ending.mjs";
+import { currentUid } from "../intake-library/renamed.mjs";
 
 export const FILE = "MOTION-PLAN.json";
 export const TYPES = ["entrance", "emphasis", "exit", "transition", "loop", "camera", "text", "other"];
@@ -53,7 +54,7 @@ export function cleanMotion(m) {
   const k = hfRef ? "hf" : m.source?.kind === "vocab" ? "library" : m.source ? (SOURCES.includes(m.source.kind) ? m.source.kind : "claude") : "manual";
   const sid = k === "claude" && m.source?.kind !== "claude" ? null          // a kind the app does not know: its id means nothing here
     : m.source?.kind === "vocab" && m.source.id && !/^vocab[/:]/.test(String(m.source.id)) ? `vocab/${m.source.id}` : m.source?.id;
-  const src = { kind: k, ...(sid ? { id: String(sid) } : {}), ...(m.source?.version ? { version: String(m.source.version) } : {}) };
+  const src = { kind: k, ...(sid ? { id: currentUid(String(sid)) } : {}), ...(m.source?.version ? { version: String(m.source.version) } : {}) };
   // what the user reads in the dialog: the element in words (`target` is a selector, never shown) and one plain sentence
   const name = String(m.name ?? "").trim().slice(0, 60), plain = String(m.plain ?? "").trim().slice(0, 300);
   const sound = String(m.sound ?? "").trim().toLowerCase().slice(0, 60);          // the row's own sound effect (SOUND_PROMPT), or "none"

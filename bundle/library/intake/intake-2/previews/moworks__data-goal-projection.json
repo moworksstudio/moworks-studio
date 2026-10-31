@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/data-goal-projection",
+  "hash": "cda0ee5090c47ebf",
+  "at": "2026-10-17T08:26:34.482Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__data-goal-projection.mp4",
+    "poster": "previews/moworks__data-goal-projection.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "83d5f97e1a258264b3a67914c654ee5eb85f075567180c1d0c6cf78aed685ccc",
+    "size": 16304,
+    "seconds": 26.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

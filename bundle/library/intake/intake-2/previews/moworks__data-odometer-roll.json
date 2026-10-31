@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/data-odometer-roll",
+  "hash": "c094ca5f2965f1e8",
+  "at": "2026-10-17T08:11:28.608Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__data-odometer-roll.mp4",
+    "poster": "previews/moworks__data-odometer-roll.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "fda2756f0c82c88938a23e1b6a0f8c04b6f5e3094df0b4d423d4a00b071567d4",
+    "size": 20164,
+    "seconds": 34.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

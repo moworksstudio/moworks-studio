@@ -1,0 +1,105 @@
+<!--
+  Jumping Dot (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Chấm chỉ báo dưới tab nhún xuống lấy đà, nhảy theo đường parabol sang tab mới, bẹp xuống khi chạm đất rồi rung tắt; vệt cung nét đứt mờ dần sau mỗi cú nhảy.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiHoppingDotIndicator(q(".gm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - moves: [[s, from, to], ...]
+      - labels: 
+      - accent: 
+      - loop: s (2.8)
+
+  Notes: Dot r6 under 3 tabs 72 px apart. Each move: 0.1 s take-off squash (scaleY −0.35, half sine), hop 0.42 s with x linear and y on a parabola (apex 26 px + 8 px per extra tab), scaleY + 0.18 × |1 − 2u| near take-off and landing, scaleX = 1 / scaleY; landing squash 0.35 × e^(−14 t) × sin(22 t) (half wave); a dashed arc ghost fades 0.6-0.9 s after the move starts. Moves at 0.3, 1.15, 2.0 s (the last spans two tabs). Params: hop (0.42 s) · apex (26 px + 8 px / tab) · squash (0.35) · moves [[giây, từ, tới]]. Take-off squash 0.1 s, a 0.42 s parabolic hop (apex 26 + 8 per extra tab), a damped landing squash, and a dashed arc ghost that fades.
+-->
+
+<div class="gm"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.springTo = MW.springTo || function (k, c, keys) {
+    var sp = MW.spring(k, c);
+    return function (t) { var v = keys[0][1]; for (var i = 1; i < keys.length; i++) if (t >= keys[i][0]) v += (keys[i][1] - keys[i - 1][1]) * sp.at(t - keys[i][0]); return v; };
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  MW.span = MW.span || function (t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); };
+  MW.yAt = MW.yAt || function (pts, x) { if (x <= pts[0][0]) return pts[0][1]; for (var i = 1; i < pts.length; i++) if (x <= pts[i][0]) { var u = (x - pts[i - 1][0]) / ((pts[i][0] - pts[i - 1][0]) || 1); return pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * u; } return pts[pts.length - 1][1]; };
+  MW.polyToX = MW.polyToX || function (c, pts, x) { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) { if (pts[i][0] <= x) c.lineTo(pts[i][0], pts[i][1]); else { c.lineTo(x, MW.yAt(pts, x)); break; } } return [Math.min(x, pts[pts.length - 1][0]), MW.yAt(pts, Math.min(x, pts[pts.length - 1][0]))]; };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"moves":[[0.3,0,1],[1.15,1,2],[2,2,0]],"labels":["Tất cả","Phim","Ảnh"],"accent":"#8b7bff","loop":2.8};
+  var run = function (el,tl,at,o
+  ) {
+  var S = MW.stage320(el), c = S.ctx, T = function (t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); }, p2o = gsap.parseEase("power2.out"), p2i = gsap.parseEase("power2.in"), p2io = gsap.parseEase("power2.inOut"), p1i = gsap.parseEase("power1.in"), bo = gsap.parseEase("back.out(1.7)");
+  var mix = function (a, b, f) { return gsap.utils.interpolate(a, b, Math.max(0, Math.min(1, f))); };
+  var cursorAt = function (keys, t, downs) { var p = MW.path(keys, t, "power2.inOut"), d = 0; (downs || []).forEach(function (q) { if (t >= q && t < q + 0.1) d = 1; }); MW.cursor(c, p[0], p[1], d ? 0.85 : 1); };
+  var tabs = function (labels, X, y, col) { labels.forEach(function (l, i) { MW.txt(c, l, X[i], y, 9, typeof col === "function" ? col(i) : col, 800); }); };
+  var X = [88, 160, 232], st = function (t) { var x = X[o.moves[0][1]], y = 0, sx = 1, sy = 1, ghost = null; o.moves.forEach(function (m) { var u = t - m[0]; if (u < 0) return; var a = X[m[1]], b = X[m[2]], tabsN = Math.abs(m[2] - m[1]), ap = 26 + 8 * (tabsN - 1);
+    if (u < 0.1) { x = a; sy = 1 - 0.35 * Math.sin(Math.PI * u / 0.1); } else if (u < 0.52) { var v = (u - 0.1) / 0.42; x = a + (b - a) * v; y = -ap * 4 * v * (1 - v); sy = 1 + 0.18 * Math.abs(1 - 2 * v); } else { x = b; var w = u - 0.52, d = 0.35 * Math.exp(-14 * w) * Math.sin(22 * w); sy = 1 - Math.max(0, d); }
+    if (u > 0.1 && u < 0.9) ghost = { a: a, b: b, ap: ap, f: u < 0.6 ? 1 : 1 - (u - 0.6) / 0.3 }; }); sx = 1 / sy; return { x: x, y: y, sx: sx, sy: sy, g: ghost }; };
+  return MW.drive(tl, at, o.loop, function (t) {
+    S.clear(); MW.rr(c, 40, 64, 240, 72, 16); c.fillStyle = "#151a24"; c.fill(); var s = st(t); tabs(o.labels, X, 92, function (i) { return Math.abs(s.x - X[i]) < 20 ? "#ffffff" : "#6c778b"; });
+    if (s.g) { c.save(); c.setLineDash([2, 3]); c.strokeStyle = "rgba(139,123,255," + (0.6 * s.g.f).toFixed(3) + ")"; c.lineWidth = 1; c.beginPath(); for (var k = 0; k <= 20; k++) { var v = k / 20, x = s.g.a + (s.g.b - s.g.a) * v, y = 118 - s.g.ap * 4 * v * (1 - v); if (!k) c.moveTo(x, y); else c.lineTo(x, y); } c.stroke(); c.restore(); }
+    c.save(); c.translate(s.x, 124 + s.y); c.scale(s.sx, s.sy); c.fillStyle = o.accent; c.beginPath(); c.arc(0, -6, 6, 0, 2 * Math.PI); c.fill(); c.restore();
+  });
+  };
+  MW.uiHoppingDotIndicator = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

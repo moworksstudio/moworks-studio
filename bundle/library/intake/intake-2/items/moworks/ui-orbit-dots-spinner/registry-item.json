@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-orbit-dots-spinner",
+  "type": "hyperframes:block",
+  "title": "Orbit Trail",
+  "description": "Một chấm đầu và năm chấm theo sau, mỗi chấm nhỏ và mờ hơn, cách nhau 20°, quay đều quanh một vòng mảnh.",
+  "tags": [
+    "spinner",
+    "orbit",
+    "dots",
+    "loop",
+    "loading-progress",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-orbit-dots-spinner.html",
+      "target": "compositions/components/ui-orbit-dots-spinner.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-orbit-dots-spinner",
+    "author": "moworks",
+    "call": "MW.uiOrbitDotsSpinner(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiOrbitDotsSpinner",
+    "options": {
+      "period": "s a turn (1.4), linear, clockwise from 12 o'clock",
+      "gap": "degrees between dots (20)",
+      "radius": "px (42)",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Thin ring r42 (1.5 px). Six dots on it: the head and 5 followers 20° behind each other, opacity 1 / .72 / .5 / .34 / .2 / .12, radius 6.5 / 5.6 / 4.9 / 4.3 / 3.7 / 3.2 px. The group rotates clockwise from 12 o'clock, linear, 1.4 s per turn. Params: period (1.4 s / vòng) · dots (6, cách 20°) · radius (42 px) · fade (1 → 0.12).",
+    "titleVi": "Chuỗi chấm quay vòng có đuôi"
+  }
+}

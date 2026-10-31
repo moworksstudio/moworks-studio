@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-lens-bulge",
+  "type": "hyperframes:block",
+  "title": "Cursor Bulge Lens",
+  "description": "Một vùng tròn dưới con trỏ phồng lên như giọt nước, phóng to và bẻ cong phần chữ bên dưới, có bóng đổ và vệt sáng, trượt dọc theo dòng chữ.",
+  "tags": [
+    "lens",
+    "magnify",
+    "distort",
+    "cursor",
+    "text-pointer",
+    "soft",
+    "pointer"
+  ],
+  "files": [
+    {
+      "path": "effect-lens-bulge.html",
+      "target": "compositions/components/effect-lens-bulge.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-lens-bulge",
+    "author": "moworks",
+    "call": "MW.effectLensBulge(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectLensBulge",
+    "options": {
+      "text": "",
+      "size": "px on the 320-wide frame (56)",
+      "radius": "px (50)",
+      "amount": "extra magnification at the centre (0.9)",
+      "pop": "s the lens swells or settles (0.35, power2.inOut)",
+      "rings": "(40)",
+      "loop": "s (3.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Codrops (MIT); a faithful port of Codrops' effects is in the Codrops collection"
+    },
+    "thirdParty": [],
+    "notes": "Demo (2D): text 68 px over a 10 px dot grid; a round lens r 50 px follows a scripted cursor (enters 0.35–1.0 s at 15 % into the text, slides to 15 % from its end by 2.6 s, exits 3.3 s). Ring r inside is magnified 1 + a × easeInOutCubic(1 − r/50) (40 rings), a 0 → 0.9 with a 0.35 s power2.inOut response; soft shadow offset (5, 7) px at 0.5, highlight 12 %, 1 px accent rim 45 %. Recipe (WebGL): 100 × 100 plane, r 3 units, z += easeInOutCubic(1 − d/3) × 1.0. Params: bán kính (50 px) · độ phóng giữa (×1.9) · thời gian bật (0.35 s). 2D: forty rings inside the lens, each drawing the scene magnified 1 + a × ease-in-out cubic(1 − r / radius), with a soft shadow, a highlight and a thin accent rim.",
+    "titleVi": "Thấu kính phồng, phóng to chữ"
+  }
+}

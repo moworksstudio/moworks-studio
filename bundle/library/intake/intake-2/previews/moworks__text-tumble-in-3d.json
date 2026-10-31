@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-tumble-in-3d",
+  "hash": "189bb3642213f54d",
+  "at": "2026-10-17T08:43:57.049Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-tumble-in-3d.mp4",
+    "poster": "previews/moworks__text-tumble-in-3d.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "1f42afdf8b194e9096e10f939af297b37c5741e18506129cf65df2b71ca7bf76",
+    "size": 17217,
+    "seconds": 30.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

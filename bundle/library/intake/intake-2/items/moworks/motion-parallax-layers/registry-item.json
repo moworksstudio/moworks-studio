@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-parallax-layers",
+  "type": "hyperframes:component",
+  "title": "Parallax Layers",
+  "description": "Ba lớp tiền cảnh, trung cảnh, hậu cảnh cùng trôi lên nhưng mỗi lớp một quãng khác nhau (40 / 25 / 10 px) để tạo chiều sâu.",
+  "tags": [
+    "parallax",
+    "depth",
+    "layers",
+    "drift",
+    "web-scroll",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-parallax-layers.html",
+      "target": "compositions/components/motion-parallax-layers.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-parallax-layers",
+    "author": "moworks",
+    "call": "MW.motionParallaxLayers(q(\".pl\"), tl, 0, {});",
+    "function": "MW.motionParallaxLayers",
+    "options": {
+      "duration": "s per pass, linear (1.2)",
+      "passes": "(3)",
+      "unit": "px per reference unit (5); each layer's travel in data-travel (40 / 25 / 10)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "3 layers, all start together, 1.2 s linear (mapped to scroll progress): front y +18 → −22 px (40 px), middle +11 → −14 (25 px), back +4 → −6 (10 px). Demo loops the pass. Params: ids: trước → sau · travel ([40, 25, 10] px) · duration (1.2 s) · ease (none).",
+    "titleVi": "Ba lớp thị sai trôi lệch tốc"
+  }
+}

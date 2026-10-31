@@ -14,7 +14,8 @@ function Book({ l, on, tag, onPick }) {
   return <button type="button" className="st-book" aria-pressed={on} onClick={() => onPick(l)} title={l.title}>
     <span className="st-bands" aria-hidden="true">{cs.length ? cs.map((c) => <i key={c} style={{ background: c }} />) : <i className="none" />}</span>
     <span className="st-spine">{l.title}</span>
-    <span className="st-foot">{l.status === "scanning" ? <Loader2 size={12} className="spin" aria-label={t("Scanning")} /> : l.status === "failed" ? <AlertTriangle size={12} aria-label={t("The scan did not finish.")} /> : tag}</span>
+    <span className="st-foot">{l.status === "scanning" ? <Loader2 size={12} className="spin" aria-label={t("Scanning")} /> : l.status === "failed" ? <AlertTriangle size={12} aria-label={t("The scan did not finish.")} />
+      : l.unread?.length > 0 ? <AlertTriangle size={12} aria-label={t("{n} file(s) not read", { n: l.unread.length })} /> : tag}</span>
   </button>;
 }
 

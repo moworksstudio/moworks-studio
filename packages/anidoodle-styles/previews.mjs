@@ -3,7 +3,8 @@
 // (finalize bundles it with the pinned engine, the bridge seeks window.FILM by HyperFrames' time), then encoded for the cards (see
 // ../library/preview-media.mjs) with a WebP poster of its last frame, the finished picture. A plate that is a still (two house styles) gets
 // its poster only. Files: <work>/library/anidoodle/anidoodle-<commit7>/previews/<id>.mp4 and .webp, outside git like the cards. The
-// author's rigged characters in the Characters library (Bit, the cheetah) get their poster and film the same way.
+// author's rigged characters in the Characters library (Bit, the cheetah) get their poster and film the same way, straight into the app's
+// bundle/library/characters/ (a maintainer's tool: the running app only reads that folder).
 // Credit: Alex Greenshpun (10x Company), https://github.com/alexgreensh/anidoodle at the pinned commit, Apache-2.0 with its NOTICE.
 import { createRequire } from "node:module";
 import { copyFileSync, existsSync, mkdirSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
@@ -16,7 +17,7 @@ import { encodePoster, encodeVideo, ffmpegExe } from "../library/preview-media.m
 import { finalize } from "../hf-edit/finalize.mjs";
 import { buildAnidoodle } from "../hf-edit/anidoodleBuild.mjs";
 import { anidoodleSource, readStyles, stageEngine, storeDir } from "./index.mjs";
-import { AUTHOR_RIGS, humanDir, seedAuthorCharacters } from "../character-kit/index.mjs";
+import { AUTHOR_RIGS, shippedHumanDir } from "../character-kit/index.mjs";
 
 const { build } = createRequire(import.meta.url)("esbuild");
 const nameOf = (rel) => String(rel ?? "").split("/").pop().replace(/\.ts$/, "");
@@ -132,12 +133,13 @@ async function renderPage(m, { root, store, work, workers, signal, render }) {
 }
 
 /** The Characters library's media of the author's rigged characters (Bit, the cheetah): poster.webp and walk.mp4 (the slot the library
- *  plays) in their store folder, from a medium's preview (Bit: the storybook plate, Bit waving) or from their own page (the cheetah's run). */
+ *  plays) in their folder of the app's bundle, from a medium's preview (Bit: the storybook plate, Bit waving) or from their own page (the
+ *  cheetah's run). */
 export async function makeCharacterMedia({ root = APP_ROOT, force = false, workers = 2, signal = null, render = renderJob } = {}) {
-  seedAuthorCharacters(root);
   const src = anidoodleSource(root), store = storeDir(root, src), work = join(store, "_render"), done = [];
   for (const a of AUTHOR_RIGS) {
-    const d = join(humanDir(root), a.id);
+    const d = join(shippedHumanDir(root), a.id);
+    mkdirSync(d, { recursive: true });
     if (!force && existsSync(join(d, "poster.webp"))) continue;
     if (a.media.from) {
       const pv = join(store, "previews", a.media.from);

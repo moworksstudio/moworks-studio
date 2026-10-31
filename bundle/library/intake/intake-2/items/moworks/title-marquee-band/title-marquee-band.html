@@ -1,0 +1,48 @@
+<!--
+  Scroll Marquee (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Một dải màu chạy hết bề ngang với chữ lớn lặp lại xen dấu sao trôi sang trái đều đặn, nối liền không thấy chỗ lặp.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.titleMarqueeBand(q(".mb"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - period: s per unit width, linear (2.5): a seamless wrap
+      - loops: (2)
+      - track: the moving row (its first child is one unit)
+
+  Notes: Full-width accent band 44 px tall; repeating 'MOTION ✱ SCROLL ✱' in 800-weight 26 px type, gap 16 px, the star a 4-point star 16 px across (radius 8 / 3), dark background colour. Copies tile the band and move left by one unit width (sum of word widths + gaps) every 2.5 s, linear, seamless wrap. Thin grid lines 8 px above and below the band. Params: words (MOTION ✱ SCROLL ✱) · size (26 px) · speed (1 vòng / 2.5 s) · band (44 px).
+-->
+
+<div class="mb"><div class="mb-t"><div class="mb-u"><span>CHUYỂN ĐỘNG</span><svg viewBox="-8 -8 16 16"><path d="M0 -8 L2.2 -2.2 L8 0 L2.2 2.2 L0 8 L-2.2 2.2 L-8 0 L-2.2 -2.2 Z" fill="#0b0d12"/></svg><span>CUỘN TRANG</span><svg viewBox="-8 -8 16 16"><path d="M0 -8 L2.2 -2.2 L8 0 L2.2 2.2 L0 8 L-2.2 2.2 L-8 0 L-2.2 -2.2 Z" fill="#0b0d12"/></svg></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"period":2.5,"loops":2,"track":".mb-t"};
+  var run = function (el, tl, at, o) {
+        var track = el.querySelector(o.track), unit = track.firstElementChild, w = 0;
+        var copies = 6; for (var i = 1; i < copies; i++) track.appendChild(unit.cloneNode(true));
+        return MW.drive(tl, at, o.period * o.loops, function (t) { if (!w) w = unit.offsetWidth; gsap.set(track, { x: -w * ((t / o.period) % 1) }); });
+      };
+  MW.titleMarqueeBand = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

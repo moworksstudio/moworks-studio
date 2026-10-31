@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-pixel-mosaic",
+  "type": "hyperframes:component",
+  "title": "Pixel Mosaic Resolve",
+  "description": "Chữ hoặc khối hình bị khảm ô vuông lớn rồi rõ dần qua sáu nấc 32 → 1 px, mỗi nấc 120 ms, không chuyển mượt.",
+  "tags": [
+    "pixelate",
+    "mosaic",
+    "steps",
+    "retro",
+    "text-distortion-glitch",
+    "crisp",
+    "distortion-glitch"
+  ],
+  "files": [
+    {
+      "path": "effect-pixel-mosaic.html",
+      "target": "compositions/components/effect-pixel-mosaic.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-pixel-mosaic",
+    "author": "moworks",
+    "call": "MW.effectPixelMosaic(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.effectPixelMosaic",
+    "options": {
+      "blocks": "block sizes in px, coarse to sharp ([96, 48, 24, 12, 6, 1])",
+      "start": "s it starts resolving (0.3)",
+      "step": "s per step (0.12), hard cuts",
+      "exitAt": "s it breaks up again (2.4)",
+      "exitStep": "s per step on the way out (0.08)",
+      "loop": "s (3.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Text (or box) pixelated with block size 32 → 16 → 8 → 4 → 2 → 1 px, 6 hard steps of 120 ms (hold keys, smoothing off); letterforms become legible in the last two steps; reverse for an exit. Demo: 32 px held until 0.3 s, resolved by 0.78 s; exit steps back up at 80 ms each from 2.4 s; loop 3.2 s. Params: steps: các cỡ ô (32 / 16 / 8 / 4 / 2 / 1 px) · step: mỗi nấc (0.12 s) · exit: mỗi nấc khi rời (0.08 s). The small demo's steps are 32 → 1 px on a small frame; here the blocks are scaled to large type. Letters read only in the last two steps.",
+    "titleVi": "Khảm điểm ảnh rõ dần theo nấc"
+  }
+}

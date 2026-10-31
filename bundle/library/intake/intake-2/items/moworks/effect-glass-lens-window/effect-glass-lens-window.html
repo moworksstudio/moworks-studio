@@ -1,0 +1,85 @@
+<!--
+  Glass Refraction Hover (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Một ô kính bo góc trượt qua nội dung, bên trong ô nội dung bị phóng to 1.4 lần nên các đường gãy ở mép kính, có vệt sáng chéo và viền màu nhấn.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectGlassLensWindow(q(".gm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - zoom: (1.4)
+      - ease: (power2.inOut)
+      - title: the card's heading
+      - accent: rim colour
+      - loop: s (4.2)
+
+  Notes: Rounded window 100x70 (radius 16) slides x 96 → 224 (0.4-1.8 s, power2.inOut) and back (2.6-3.8 s). Inside it the content is scaled 1.4× about the window centre, so lines break at the window edge; a 7 % light tint, a 22 % light diagonal streak (20 px wide band near the left edge), a 55 % light hairline 4 px under the top edge and a 1.5 px accent rim. The cursor rides on the window. Params: zoom (1.4×) · window (100x70, r16) · path [[giây, x]] · move (1.4 s, power2.inOut).
+-->
+
+<div class="gm"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  MW.span = MW.span || function (t, a, b) { return Math.max(0, Math.min(1, (t - a) / (b - a))); };
+  MW.yAt = MW.yAt || function (pts, x) { if (x <= pts[0][0]) return pts[0][1]; for (var i = 1; i < pts.length; i++) if (x <= pts[i][0]) { var u = (x - pts[i - 1][0]) / ((pts[i][0] - pts[i - 1][0]) || 1); return pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * u; } return pts[pts.length - 1][1]; };
+  MW.polyToX = MW.polyToX || function (c, pts, x) { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) { if (pts[i][0] <= x) c.lineTo(pts[i][0], pts[i][1]); else { c.lineTo(x, MW.yAt(pts, x)); break; } } return [Math.min(x, pts[pts.length - 1][0]), MW.yAt(pts, Math.min(x, pts[pts.length - 1][0]))]; };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"zoom":1.4,"ease":"power2.inOut","title":"Doanh thu quý","accent":"#8b7bff","loop":4.2};
+  var run = function (el, tl, at, o) {
+        var S = MW.stage320(el), c = S.ctx, io = gsap.parseEase(o.ease), wy = 92;
+        var content = function () { MW.rr(c, 40, 30, 240, 140, 14); c.fillStyle = "#151a24"; c.fill(); MW.txt(c, o.title, 56, 50, 11, "#e8ebf3", 800, "left"); c.fillStyle = "#3a4466"; [150, 120, 170].forEach(function (w, i) { MW.rr(c, 56, 64 + i * 10, w, 4, 2); c.fill(); });
+          [32, 48, 26, 58, 44, 70, 52].forEach(function (h, i) { c.fillStyle = i === 5 ? "#8b7bff" : "#2f3a5c"; MW.rr(c, 60 + i * 30, 158 - h, 18, h, 3); c.fill(); }); c.strokeStyle = "#262c3a"; c.lineWidth = 1; c.beginPath(); c.moveTo(56, 158.5); c.lineTo(266, 158.5); c.stroke(); };
+        return MW.drive(tl, at, o.loop, function (t) {
+          var x = 96 + 128 * (io(MW.span(t, 0.4, 1.8)) - io(MW.span(t, 2.6, 3.8))), L = x - 50, Tp = wy - 35;
+          S.clear(); content();
+          c.save(); MW.rr(c, L, Tp, 100, 70, 16); c.clip(); c.fillStyle = "#0b0d12"; c.fillRect(L, Tp, 100, 70); c.translate(x, wy); c.scale(o.zoom, o.zoom); c.translate(-x, -wy); content(); c.restore();
+          c.save(); MW.rr(c, L, Tp, 100, 70, 16); c.clip(); c.fillStyle = "rgba(255,255,255,0.07)"; c.fillRect(L, Tp, 100, 70);
+          c.fillStyle = "rgba(255,255,255,0.22)"; c.beginPath(); c.moveTo(L + 8, Tp + 70); c.lineTo(L + 28, Tp); c.lineTo(L + 48, Tp); c.lineTo(L + 28, Tp + 70); c.closePath(); c.fill();
+          c.fillStyle = "rgba(255,255,255,0.55)"; c.fillRect(L + 14, Tp + 4, 72, 0.8); c.restore();
+          c.strokeStyle = o.accent; c.lineWidth = 1.5; MW.rr(c, L, Tp, 100, 70, 16); c.stroke(); MW.cursor(c, x + 30, wy + 22, 0.9);
+        });
+      };
+  MW.effectGlassLensWindow = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

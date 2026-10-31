@@ -1,0 +1,26 @@
+{
+  "uid": "in:moworks/text-mincho-cut-cards",
+  "hash": "d32c612d4e1c9f59",
+  "at": "2026-10-17T10:21:37.786Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter",
+      "Playfair Display"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-mincho-cut-cards.mp4",
+    "poster": "previews/moworks__text-mincho-cut-cards.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f0153a3ab90ff66c1ad1cef7f299e98d86318097a27a6312c9ba4dedaa44a862",
+    "size": 15722,
+    "seconds": 21.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

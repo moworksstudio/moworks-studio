@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-spring-bounce",
+  "hash": "abd0d0cc822b996f",
+  "at": "2026-10-17T11:46:57.805Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-spring-bounce.mp4",
+    "poster": "previews/moworks__motion-spring-bounce.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6b91998a35ce22c62f45fb71f5c1bdf4c00322db496163fe176dd66874772c1d",
+    "size": 14121,
+    "seconds": 32.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

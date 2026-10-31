@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-spring-default",
+  "hash": "7e62e31fdef0b732",
+  "at": "2026-10-17T11:46:57.851Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-spring-default.mp4",
+    "poster": "previews/moworks__motion-spring-default.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "11ee27f3ead8fd68dd98d8e804bc54f20b33d1806599e58ab6535e796876a6aa",
+    "size": 12169,
+    "seconds": 32.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

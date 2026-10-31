@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-menu-to-close",
+  "type": "hyperframes:component",
+  "title": "Icon Morph",
+  "description": "Bấm nút, gạch giữa thu ngắn biến mất, hai gạch ngoài chụm vào giữa rồi xoay chéo ±45° thành dấu X; bấm lại thì về ba gạch.",
+  "tags": [
+    "menu",
+    "icon",
+    "morph",
+    "close",
+    "web-interaction",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-menu-to-close.html",
+      "target": "compositions/components/ui-menu-to-close.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-menu-to-close",
+    "author": "moworks",
+    "call": "MW.uiMenuToClose(q(\".mc\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.uiMenuToClose",
+    "options": {
+      "bars": "the three bars, top to bottom",
+      "gap": "px between bars (42)",
+      "angle": "degrees (45)",
+      "duration": "s (0.56, power2.inOut)",
+      "ease": "",
+      "clicks": "[s open, s close]",
+      "cursor": "an optional cursor",
+      "approach": "[x, y] px the cursor comes from",
+      "lead": "s it arrives before a click"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Round button r44; three bars 44 px long, 5 px, round caps. Over 560 ms power2.inOut (0.5-1.06 s): middle bar scaleX and opacity 1 → 0 in the first 40 %; outer bars move from ±14 px to the centre in the first 50 %, then rotate 0 → ±45° in the second 50 %. Reverse 1.6-2.16 s. Cursor presses at 0.45 and 1.55 s. Recipe at UI size: bars ±7 px. Params: duration (0.56 s) · gap (14 px) · angle (45°) · ease (power2.inOut). The middle bar shrinks away in the first 40 %; the outer bars meet in the first half and turn ±45° in the second.",
+    "titleVi": "Biểu tượng menu biến thành dấu X"
+  }
+}

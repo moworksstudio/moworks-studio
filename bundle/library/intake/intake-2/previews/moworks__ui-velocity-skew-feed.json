@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-velocity-skew-feed",
+  "hash": "c254635e728baa07",
+  "at": "2026-10-17T09:23:43.549Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-velocity-skew-feed.mp4",
+    "poster": "previews/moworks__ui-velocity-skew-feed.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "16bc9d026541d750a2b7acac2f7687051651ce42ddb516cdaa6f1f7ad22ca005",
+    "size": 18229,
+    "seconds": 27.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

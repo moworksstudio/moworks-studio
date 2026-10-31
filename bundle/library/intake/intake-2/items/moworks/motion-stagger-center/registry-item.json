@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-stagger-center",
+  "type": "hyperframes:component",
+  "title": "Stagger: From Center",
+  "description": "Các ô hiện lan ra từ tâm lưới như gợn sóng.",
+  "tags": [
+    "stagger",
+    "grid",
+    "center",
+    "timing-rhythm",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-stagger-center.html",
+      "target": "compositions/components/motion-stagger-center.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-stagger-center",
+    "author": "moworks",
+    "call": "MW.motionStaggerCenter(q(\".sc\"), tl, 0.3, {});",
+    "function": "MW.motionStaggerCenter",
+    "options": {
+      "from": "center",
+      "each": "s per tile of distance (0.07; 0.04 in the recipe)",
+      "cols": "tiles per row (8)",
+      "k": "spring stiffness (260)",
+      "c": "damping (20: about 8 % overshoot)",
+      "outAt": "s they fade (2.0)",
+      "spread": "",
+      "rowEach": "",
+      "seed": ""
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "8 × 4 grid of 24 px tiles (32 px pitch): each tile starts at its distance from the grid centre × 40 ms (recipe; small demo × 70 ms per cell), 400 ms power2.out each (demo: spring k 260, c 20). Rule: ripples for hero entrances and spreading reactions. Params: each (40 ms mỗi đơn vị khoảng cách) · duration (0.4 s) · from (center). A ripple from the middle: for hero entrances and spreading reactions.",
+    "titleVi": "So le lan từ tâm"
+  }
+}

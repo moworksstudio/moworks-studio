@@ -3,7 +3,6 @@ name: moworks-alive
 description: Moworks Studio's motion rule for every film style - the film is never still for more than 2 s, every held object keeps a smooth subtle movement, characters always move, text stays readable while the scene moves, the brief's motion words become real motion; minimum numbers per dynamic level. Read in the Motion Plan, the Build and the Review of every style.
 version: 1.0.0
 derived-from: Moworks Motion kit 2.0.4 (Moworks; commit 30b7dcb65808b2a5299ad6a3357280a12773395f) - engine/skill/moworks-motion/workflow/film.md L207-211 ("Dynamic level") and L240-241 ("A strong film keeps its always-on layers"), workflow/recipes.md L177 ("Nothing frozen except the final hold"), workflow/review.md L29 (criterion 3, motion); written from the idea for Moworks Studio.
-source: https://github.com/moworksstudio/moworks-motion-dev/blob/30b7dcb65808b2a5299ad6a3357280a12773395f/engine/skill/moworks-motion/workflow/film.md
 ---
 
 # The film is always alive (every film style)

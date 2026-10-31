@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-parallax-layers",
+  "hash": "555020ea52016f57",
+  "at": "2026-10-17T09:23:13.183Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-parallax-layers.mp4",
+    "poster": "previews/moworks__motion-parallax-layers.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "7f098301306331c221e87a7493f5b164bc92bdef25d7b104c3ba0b87a3f82fea",
+    "size": 15658,
+    "seconds": 27,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

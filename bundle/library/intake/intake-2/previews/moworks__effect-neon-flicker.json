@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-neon-flicker",
+  "hash": "ea993643edb9b240",
+  "at": "2026-10-17T08:34:37.675Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__effect-neon-flicker.mp4",
+    "poster": "previews/moworks__effect-neon-flicker.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "fe760f21ffd010d5e4d1196f95c88b625c2553bcb4ecd9f7acd137e7ac1e56b8",
+    "size": 14953,
+    "seconds": 28.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

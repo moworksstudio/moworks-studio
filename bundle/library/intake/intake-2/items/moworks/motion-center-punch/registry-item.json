@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-center-punch",
+  "type": "hyperframes:component",
+  "title": "Center Punch",
+  "description": "Huy hiệu phóng vụt lên 132 % rồi về đúng cỡ, mười tia ngắn bắn ra quanh nó.",
+  "tags": [
+    "pop",
+    "burst",
+    "scale",
+    "crisp",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-center-punch.html",
+      "target": "compositions/components/motion-center-punch.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-center-punch",
+    "author": "moworks",
+    "call": "MW.motionCenterPunch(q(\".cp\"), tl, 0.3, { exitAt: 1.8 });",
+    "function": "MW.motionCenterPunch",
+    "options": {
+      "from": "(0.18)",
+      "peak": "(1.32)",
+      "peakAt": "share of the length (0.62)",
+      "duration": "s (0.48)",
+      "rays": "(10)",
+      "rayR": "[from, to] px from the centre ([230, 310])",
+      "rayLen": "[from, to] px ([65, 15])",
+      "rayWidth": "px (12)",
+      "rayStart": "s (0.22)",
+      "rayEnd": "s (0.6)",
+      "accent": "",
+      "exitAt": "s after the start to shrink to 0.4 and fade (null)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Badge (r 34, star) scales 0.18 → 1.32 at 298 ms (power2.out) → 1 at 480 ms (power2.inOut), opacity in over 80 ms; 10 short rays burst outward from r 46 → 62 px, shrinking 13 → 3 px long and fading, from 220 to 600 ms (power2.out). Exit: shrink to 0.4 + fade, 250 ms power2.in. Params: duration (0.48 s) · from (0.18) · peak (1.32) · rays (10).",
+    "titleVi": "Đấm phóng ra giữa kèm tia"
+  }
+}

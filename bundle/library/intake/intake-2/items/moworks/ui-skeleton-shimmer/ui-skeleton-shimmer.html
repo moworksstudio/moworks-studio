@@ -1,0 +1,52 @@
+<!--
+  Skeleton Shimmer (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Thẻ khung xương xám đứng yên, một vệt sáng mềm nghiêng lướt ngang qua liên tục cho biết nội dung đang tải.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiSkeletonShimmer(q(".sk"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - band: share of the card's width (0.24)
+      - skew: degrees (−18)
+      - period: s a pass (1.2), linear
+      - peak: opacity at 45 % of the pass (0.75)
+      - light: white at the band's centre (0.36)
+      - blur: px (2)
+      - duration: s (3.6)
+
+  Notes: Skeleton card (dark #303b50, r7, overflow hidden) with an image block (27 % x 52 %) and two bars (7 px tall). Shimmer band 24 % of the card wide, full height, gradient transparent → white 36 % → transparent, blur 2 px, skewX −18°: translateX −160 % → +250 % of its width, opacity 0 → 0.75 (45 %) → 0, 1.2 s linear, repeating; clipped by the card. Params: band (24 % bề rộng thẻ) · skew (−18°) · duration (1.2 s / lượt) · peak (0.75) · ease (none). The band runs from −160 % to +250 % of its own width, clipped by the card.
+-->
+
+<div class="st"><div class="sk"><div class="im"></div><div class="tx"><i></i><i style="width:62%"></i></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"band":0.24,"skew":-18,"period":1.2,"peak":0.75,"light":0.36,"blur":2,"duration":3.6};
+  var run = function (el, tl, at, o) {
+        if (getComputedStyle(el).position === "static") el.style.position = "relative"; el.style.overflow = "hidden";
+        var b = document.createElement("div"), W = el.offsetWidth * o.band; b.style.cssText = "position:absolute;top:-10%;bottom:-10%;left:0;width:" + W + "px;pointer-events:none;filter:blur(" + o.blur + "px);background:linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255," + o.light + "), rgba(255,255,255,0));"; el.appendChild(b);
+        return MW.drive(tl, at, o.duration, function (t) { var p = (t / o.period) % 1; gsap.set(b, { x: W * (-1.6 + 4.1 * p), skewX: o.skew }); b.style.opacity = String(o.peak * (p < 0.45 ? p / 0.45 : (1 - p) / 0.55)); });
+      };
+  MW.uiSkeletonShimmer = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

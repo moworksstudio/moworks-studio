@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "background-swarm",
+  "type": "hyperframes:block",
+  "title": "Swarm",
+  "description": "Bốn mươi đốm sáng lượn quanh một tâm theo quỹ đạo nhiễu, cả bầy trôi chậm như đàn đom đóm.",
+  "tags": [
+    "swarm",
+    "particles",
+    "ambient",
+    "loop",
+    "smooth",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "background-swarm.html",
+      "target": "compositions/components/background-swarm.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/background-swarm",
+    "author": "moworks",
+    "call": "MW.backgroundSwarm(q(\".gm\"), tl, 0, {});",
+    "function": "MW.backgroundSwarm",
+    "options": {
+      "count": "(40)",
+      "duration": "s (6)",
+      "seed": "speeds and radii"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "40 dots (r 2.5) orbit a centre that drifts +-50 px in x (6 s) and +-20 px in y (3 s); dot i angle a = t x (0.6-1.4 rad/s, seeded) + i, radius 20 + smooth noise x 50 px; x = cos(a) r, y = sin(1.3 a) x 0.6 r (a Lissajous wobble); 1 in 5 accent. Make periods divide the loop length. Params: count (40) · radius (20–70 px) · drift (±50 / ±20 px) · seed.",
+    "titleVi": "Bầy đốm sáng lượn quanh tâm"
+  }
+}

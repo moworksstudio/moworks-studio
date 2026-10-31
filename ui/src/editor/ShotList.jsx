@@ -26,10 +26,10 @@ function Words({ projectId, shot, locked, send, onChanged, version }) {
   if (list === null) return <div className="skeleton" style={{ height: "1.6rem" }} />;
   if (!list.length) return <p className="sl-note">{t("This shot has no words to edit here. For words made by code, ask Claude.")}</p>;
   return <div className="sl-words">{list.map((x) => <input key={x.hfId} className={"input sm sl-word" + (x.edited ? " edited" : "")} value={vals[x.hfId] ?? ""} disabled={locked} aria-label={t("Words")}
-    onFocus={() => send("select", { hfId: x.hfId })}
+    onFocus={() => send("select", { hfId: x.hfId, file: shot.src })}
     onChange={(e) => { setVals((v) => ({ ...v, [x.hfId]: e.target.value })); send("live", { hfId: x.hfId, text: e.target.value }); }}
     onBlur={async (e) => { const v = e.target.value.trim(); if (!v || v === x.text) { send("live", { hfId: x.hfId, text: x.text }); setVals((o) => ({ ...o, [x.hfId]: x.text })); return; }
-      try { await post(`/api/projects/${projectId}/edit/text`, { file: shot.src, hfId: x.hfId, text: v }); toast(t("Words saved")); onChanged(); load(); } catch (er) { toast(er.message, "error"); load(); } }}
+      try { const r = await post(`/api/projects/${projectId}/edit/text`, { file: shot.src, hfId: x.hfId, text: v }); toast(t("Words saved")); onChanged(!!r.reload); send("describe"); load(); } catch (er) { toast(er.message, "error"); load(); } }}
     onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }} />)}</div>;
 }
 

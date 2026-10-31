@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-cover-flow",
+  "hash": "005879ddfa4cf59c",
+  "at": "2026-10-17T11:26:40.003Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-cover-flow.mp4",
+    "poster": "previews/moworks__motion-cover-flow.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "e3d61b07701f7bffc16236abfb2acb63816dd8fb6545b5e05d4b13672a708ee7",
+    "size": 37667,
+    "seconds": 39.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

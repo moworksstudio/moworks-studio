@@ -1,0 +1,64 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "hand-paper-cut-layers",
+  "type": "hyperframes:component",
+  "title": "Paper Cut / Stop-motion",
+  "description": "Các lớp giấy cắt bật lên có độ nảy, chuyển động giật bậc 12 hình mỗi giây và có bóng đổ cứng.",
+  "tags": [
+    "paper",
+    "stop-motion",
+    "stepped",
+    "shadow",
+    "texture-look",
+    "bouncy",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "hand-paper-cut-layers.html",
+      "target": "compositions/components/hand-paper-cut-layers.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/hand-paper-cut-layers",
+    "author": "moworks",
+    "call": "MW.handPaperCutLayers(q(\".pc\"), tl, 0, {});",
+    "function": "MW.handPaperCutLayers",
+    "options": {
+      "layers": "",
+      "fps": "time stepped to (12: on twos)",
+      "duration": "s per layer (0.3)",
+      "stagger": "s (0.3)",
+      "back": "back.out strength (2.2)",
+      "rise": "px (160)",
+      "jitter": "± px per step (4)",
+      "shadow": "[x, y] px hard shadow ([16, 24])",
+      "start": "s (0.2)",
+      "seed": "(2)",
+      "loop": "s (2.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Layers pop in on twos (12 fps): each 400 ms back.out(2.2), 80 ms apart (recipe). Demo: 3 paper strips (220 x 40, r 14) rise 40 px into place at 0.2 / 0.5 / 0.8 s over 300 ms back.out(2.2), time stepped to 12 fps, x jitter +-1 px per step, hard black shadow at 25 % offset +4 / +6 px. Params: fps (12) · duration mỗi lớp (0.4 s) · stagger (80 ms) · back (2.2).",
+    "titleVi": "Giấy cắt nhảy bậc kiểu stop-motion"
+  }
+}

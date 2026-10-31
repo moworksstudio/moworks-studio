@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-fireworks",
+  "type": "hyperframes:block",
+  "title": "Fireworks with Trails",
+  "description": "Một quả pháo bay lên, nổ thành 24 tia toả tròn, các hạt chậm dần, võng xuống theo trọng lực, kéo đuôi rồi tắt.",
+  "tags": [
+    "fireworks",
+    "particles",
+    "celebrate",
+    "trail",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "effect-fireworks.html",
+      "target": "compositions/components/effect-fireworks.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-fireworks",
+    "author": "moworks",
+    "call": "MW.effectFireworks(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectFireworks",
+    "options": {
+      "count": "particles (24)",
+      "radius": "units (70)",
+      "rise": "units the rocket climbs (120)",
+      "x": "(160)",
+      "y": "(190)",
+      "colors": "two colours"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Rocket dot rises 100-700 ms easeOutQuad (~120 px). Burst at the top: 24 particles at 15 deg steps, distance 70 px x (1 - e^(-2.5 t)), gravity sag 20 px x t^2, each with 5 trail copies 40 ms behind (opacity 1 - k/5, shrinking); fade over 1-2 s after the burst; 2 alternating colours. Params: count (24) · radius (70 px) · trail (5) · colors.",
+    "titleVi": "Pháo hoa nổ có vệt đuôi"
+  }
+}

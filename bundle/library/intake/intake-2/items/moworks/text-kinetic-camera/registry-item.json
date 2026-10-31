@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-kinetic-camera",
+  "type": "hyperframes:component",
+  "title": "Kinetic Camera Follow",
+  "description": "Các cụm chữ cỡ khác nhau được dàn trên một mặt lớn, có cụm xoay 90°; máy quay lia, xoay và zoom tới từng cụm đúng lúc nó bật ra, cuối cùng lùi ra cho thấy cả bố cục.",
+  "tags": [
+    "kinetic",
+    "camera",
+    "rotate",
+    "zoom",
+    "text-layout-reflow",
+    "crisp",
+    "heavy",
+    "layout-reflow"
+  ],
+  "files": [
+    {
+      "path": "text-kinetic-camera.html",
+      "target": "compositions/components/text-kinetic-camera.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-kinetic-camera",
+    "author": "moworks",
+    "call": "MW.textKineticCamera(q(\".kc\"), tl, 0, {});",
+    "function": "MW.textKineticCamera",
+    "options": {
+      "world": "the plane holding the phrases",
+      "start": "s the first phrase lands (0.3)",
+      "each": "s between phrases (0.85)",
+      "gap": "px (40)",
+      "fadeAt": "s (5.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Words in ≤ 4 phrases, sizes 44 / 30 / 56 / 36 px; odd phrases turned 90° and set right of the previous one, others below it (10 px gaps). Camera per phrase: centred on it, rotation −its angle, zoom min(220 / w, 70 / h, 3). Phrase i lands at 0.3 + 0.85 i s; the camera moves there in the 0.4 s before, cubic-bezier(.8,0,.2,1), zoom in log space; on landing it pops 0.5 → 1.08 → 1 (0 / 0.12 / 0.24 s, power1.out). Then a 0.55 s pull-back fits all; fade 5.2–5.6 s. Params: nhịp cụm (0.85 s) · thời gian lia (0.4 s) · cỡ chữ (44 · 30 · 56 · 36 px) · đường cong (.8,0,.2,1).",
+    "titleVi": "Máy quay lia, xoay, zoom theo cụm chữ"
+  }
+}

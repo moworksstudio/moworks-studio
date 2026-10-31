@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "shape-burst-lines",
+  "type": "hyperframes:component",
+  "title": "Radiating Burst Lines",
+  "description": "Mười hai tia thẳng bung ra quanh tâm lệch nhịp nhau rồi biến mất, để nhấn một chữ, một con số hay dấu chấm than.",
+  "tags": [
+    "burst",
+    "lines",
+    "emphasis",
+    "pop",
+    "svg-path",
+    "crisp",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "shape-burst-lines.html",
+      "target": "compositions/components/shape-burst-lines.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/shape-burst-lines",
+    "author": "moworks",
+    "call": "MW.shapeBurstLines(q(\".bl-s\"), tl, 0.4, {});",
+    "function": "MW.shapeBurstLines",
+    "options": {
+      "r0": "start radius (30)",
+      "r1": "end radius (80)",
+      "stagger": "s per line (0.02)",
+      "cx": "(160)",
+      "cy": "(100)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "12 straight 4 px strokes (butt caps in the demo) at 30 deg steps around a centre (behind a word, number or '!'). Line i starts at i x 20 ms (recipe 30 ms): its head extends from radius 30 to 80 px over 300 ms easeOutCubic, then its tail follows from 30 to 80 px over the next 300 ms easeInCubic, so each line flies out and vanishes; ~820 ms total. Params: count (12) · radius (30 → 80 px) · stagger (20 ms) · width (4 px). Call it on the SVG holding the 12 lines (one per 30°), behind a word, a number or '!'.",
+    "titleVi": "Tia nhấn bung ra quanh tâm"
+  }
+}

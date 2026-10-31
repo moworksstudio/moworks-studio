@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-tilt-reaction",
+  "type": "hyperframes:component",
+  "title": "Tilt Reaction",
+  "description": "Thẻ nghiêng 16° về phía bị bấm rồi bật về, hơi quá một chút, bóng đổ rộng ra theo góc nghiêng.",
+  "tags": [
+    "attention",
+    "tilt",
+    "react",
+    "rotation",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-tilt-reaction.html",
+      "target": "compositions/components/motion-tilt-reaction.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-tilt-reaction",
+    "author": "moworks",
+    "call": "MW.motionTiltReaction(q(\".tr-c\"), tl, 0, { shadow: \".tr-sh\", cursor: \".ui-cursor\" });",
+    "function": "MW.motionTiltReaction",
+    "options": {
+      "angle": "degrees (16)",
+      "duration": "s per reaction (0.48)",
+      "taps": "[[s, 'left' | 'right'], ...]",
+      "shadow": "contact shadow (widens 0.6 % a degree)",
+      "cursor": "an optional cursor that makes the taps"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Rotation about the centre after a press on one side (sign follows the side): 0 → 16° in 120 ms power2.out, → −3° by 300 ms, → 0 by 480 ms (power2.inOut segments); contact shadow widens with |angle| (+0.6 % per degree). Recipe variant: 0 → 18° (308 ms) → 0 (560 ms) back.out. Demo: the cursor taps the right side, then the left 1.1 s later. Params: angle: góc (16°) · side: bên bấm (trái | phải) · duration (0.48 s).",
+    "titleVi": "Nghiêng về phía bị bấm"
+  }
+}

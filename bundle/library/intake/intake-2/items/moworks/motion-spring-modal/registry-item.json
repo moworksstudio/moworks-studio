@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-spring-modal",
+  "type": "hyperframes:component",
+  "title": "Apple modal",
+  "description": "Lò xo hiện hộp thoại: vượt rất nhẹ (0.8 %) rồi nằm yên sau khoảng 0.26 giây.",
+  "tags": [
+    "spring",
+    "modal",
+    "ui",
+    "springs",
+    "smooth",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-spring-modal.html",
+      "target": "compositions/components/motion-spring-modal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.66,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-spring-modal",
+    "author": "moworks",
+    "call": "MW.motionSpringModal(q(\".sp-b\"), tl, 0.4, { back: 1.70 });",
+    "function": "MW.motionSpringModal",
+    "options": {
+      "stiffness": "",
+      "damping": "",
+      "mass": "",
+      "prop": "the property it drives: x | y | scale | rotation (x)",
+      "from": "(0)",
+      "to": "(560 px)",
+      "back": "s after the start to spring back (null)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Target moves 0 → 1 on stiffness 280, damping 28, mass 1 (damping ratio 0.84): 0.8 % overshoot, within 1 % by ~260 ms. Kit form: springk(280, 28) over 0.26 s. Rule: the modal-presentation spring, barely past then settled. Small demo: the target moves 102 px beside the response graph, with overshoot and settle readouts. Params: stiffness (280) · damping (28) · duration (0.26 s). The modal-presentation spring (280 / 28): barely past (0.8 %), settled by ~0.26 s.",
+    "titleVi": "Lò xo hộp thoại kiểu Apple"
+  }
+}

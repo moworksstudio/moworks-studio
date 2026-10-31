@@ -5,7 +5,8 @@
 // from the cuts and the motion plan, a sound on every action; their count, the list folded (one sound or one ambience bed taken out with
 // its ×, kept out on every placement), how many (every action, most, only the big ones) and the ambience on or off, place again or remove.
 // Levels: only the action that applies (the music ducked under the voice with HyperFrames' carve) and the last render's loudness, without
-// the studio-rule notice. The last placement's result is said under the count: the sounds left out and those on a close sound for now.
+// the studio-rule notice. The last placement's result is said under the count: the sounds left out and those on a stand-in. The sounds the
+// user added from the Editor's Sounds drawer are in the list too, each with its ×; placing again leaves them where they are.
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AlertTriangle, AudioLines, Check, Info, Loader2, Music, Pause, Play, RefreshCw, RotateCcw, ShieldCheck, Sparkles, Trash2, X } from "lucide-react";
 import { get, post } from "../api.js";
@@ -113,7 +114,9 @@ export default function MixSheet({ projectId, project, onChanged }) {
   const prefs = d.sfxPrefs ?? { density: "lively", ambience: true, skipped: 0 };
   const setPref = (body) => act("prefs", () => post(`/api/projects/${projectId}/mix/sfx/prefs`, body), () => setWaitSfx(true));
   const placing = !!busy || waitSfx;
-  const sounds = [...(d.ambience ?? []).map((x) => ({ ...x, bed: true })), ...d.sfx].sort((a, b) => a.start - b.start);
+  const added = d.added ?? [];
+  const sounds = [...(d.ambience ?? []).map((x) => ({ ...x, bed: true })), ...d.sfx, ...added.map((x) => ({ ...x, mine: true }))].sort((a, b) => a.start - b.start);
+  const takeOff = (x) => act("off" + x.id, () => post(`/api/projects/${projectId}/edit/audio/remove`, { id: x.id, src: x.file, name: x.name }), () => toast(t("Taken off the timeline: {name} (it stays in Assets)", { name: x.name })));
   const ownSong = !!project?.styleInfo?.music && !!d.music && !round;          // the film is built on the song the user gave: no stock tracks offered
   // The Mixkit licence only for a Mixkit track (or while Mixkit tracks are offered and none is placed), never the user's own file
   const mixkit = !ownSong && (d.music ? /mixkit/i.test(`${d.music.licence ?? ""} ${d.music.page ?? ""}`) : !!round);
@@ -158,16 +161,17 @@ export default function MixSheet({ projectId, project, onChanged }) {
       {ownSong && <p className="hint">{t("The film uses the song you gave. Another track would replace it.")}</p>}
     </section>
     <section className="panel">
-      <div className="panel-head"><h2><AudioLines size={16} /> {t("Sound effects")}</h2><span className="muted num">{d.sfx.length}</span>
+      <div className="panel-head"><h2><AudioLines size={16} /> {t("Sound effects")}</h2><span className="muted num">{d.sfx.length + added.length}</span>
         <span className="end mix-sfx-acts">
           <button className="btn ghost sm" disabled={!!busy || waitSfx} onClick={() => act("sfx", () => post(`/api/projects/${projectId}/mix/sfx`), () => setWaitSfx(true))}>
             {busy === "sfx" || waitSfx ? <Loader2 size={14} className="spin" /> : <Sparkles size={14} />}{d.sfx.length ? t("Place them again") : t("Place sound effects")}</button>
           {d.sfx.length > 0 && <button className="btn ghost sm" disabled={!!busy} onClick={() => act("clear", () => post(`/api/projects/${projectId}/mix/sfx/clear`))}><Trash2 size={14} />{t("Remove them")}</button>}</span></div>
-      <p className="secondary">{d.sfx.length ? t("Placed from the cuts and the Motion Plan.") : t("None placed yet.")}</p>
+      <p className="secondary">{d.sfx.length ? t("Placed from the cuts and the Motion Plan.") : t("None placed yet.")}{added.length > 0 && <> {added.length === 1 ? t("The one you added stays when they are placed again.") : t("The {n} you added stay when they are placed again.", { n: added.length })}</>}</p>
       {/* what the last placement could not do, said here too (Test 26: "Place them again" changed nothing and said nothing) */}
       {(d.sfxPlacing || waitSfx) && <p className="hint"><Loader2 size={12} className="spin" /> {t("Placing the sound effects…")}</p>}
       {left.length > 0 && <p className="hint warn"><AlertTriangle size={12} /> {t("Not placed: {names}. Press Place them again later, or ask Claude for other names.", { names: quoted(left) })}</p>}
-      {near.length > 0 && <p className="hint">{t("On a close sound for now: {names}.", { names: near.map((x) => (plain(x.as) ? `“${x.name}” (${plain(x.as)})` : `“${x.name}”`)).join(", ") })}</p>}
+      {/* said plainly, as the chat's note does: these are not the sound the film asks for */}
+      {near.length > 0 && <p className="hint">{t("Stand-ins, not the real sound: {names}. Press Place them again when the sound search is back, or add your own.", { names: `${near.slice(0, 10).map((x) => (plain(x.as) ? `“${x.name}” (${plain(x.as)})` : `“${x.name}”`)).join(", ")}${near.length > 10 ? ` ${t("and {n} more", { n: near.length - 10 })}` : ""}` })}</p>}
       <div className="row mix-density">
         <label className="hint" htmlFor="mix-density">{t("Sounds on")}</label>
         <select id="mix-density" className="select sm" value={prefs.density} disabled={placing} onChange={(e) => setPref({ density: e.target.value })}>
@@ -179,8 +183,8 @@ export default function MixSheet({ projectId, project, onChanged }) {
         {prefs.skipped > 0 && <button className="btn ghost sm end" disabled={placing} onClick={() => setPref({ unskip: true })}><RotateCcw size={14} />{t("Bring back {n} removed", { n: prefs.skipped })}</button>}
       </div>
       {sounds.length > 0 && <details className="mix-sfx-list" open={listOpen} onToggle={(e) => { const o = e.currentTarget.open; setListOpen(o); kept.set(projectId, { ...kept.get(projectId), list: o }); }}><summary>{t("Where they are")}</summary>
-        <ul className="plain mix-sfx">{sounds.map((x, i) => <li key={i}><span className="num">{x.start.toFixed(2)} s</span> {x.bed ? t("{name} (ambience)", { name: x.name }) : x.name}
-          {x.id && <button type="button" className="btn icon ghost mix-sfx-x" disabled={placing} onClick={() => setPref({ skip: x.id })}
+        <ul className="plain mix-sfx">{sounds.map((x, i) => <li key={i}><span className="num">{x.start.toFixed(2)} s</span> {x.bed ? t("{name} (ambience)", { name: x.name }) : x.mine ? t("{name} (you added it)", { name: x.name }) : x.name}
+          {x.id && <button type="button" className="btn icon ghost mix-sfx-x" disabled={placing} onClick={() => (x.mine ? takeOff(x) : setPref({ skip: x.id }))}
             aria-label={t("Take out {name} at {s} s", { name: x.name, s: x.start.toFixed(2) })} title={t("Take this sound out")}><X size={12} /></button>}</li>)}</ul></details>}
       {/* only a film whose voice is on the timeline (meta.voice.offTimeline once the user chose not to use it) */}
       {d.voice && !d.voice.offTimeline && !project?.meta?.voice?.offTimeline && d.music && <div className="row mix-duck"><button className="btn ghost sm" disabled={!!busy} onClick={() => act("carve", () => post(`/api/projects/${projectId}/mix/carve`), () => toast(t("The music now dips under the voice")))}>

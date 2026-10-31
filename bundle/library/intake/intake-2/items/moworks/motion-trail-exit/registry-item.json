@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-trail-exit",
+  "type": "hyperframes:component",
+  "title": "Trail Exit",
+  "description": "Phần tử lao sang phải và mờ đi, ba bản sao nhạt dần chạy trễ phía sau như vệt bóng.",
+  "tags": [
+    "exit",
+    "trail",
+    "echo",
+    "entrance-exit",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-trail-exit.html",
+      "target": "compositions/components/motion-trail-exit.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-trail-exit",
+    "author": "moworks",
+    "call": "MW.motionTrailExit(q(\".te\"), tl, 0.3, {});",
+    "function": "MW.motionTrailExit",
+    "options": {
+      "x": "px (1050)",
+      "duration": "s (0.52, ease-in quart)",
+      "copies": "(3)",
+      "delay": "s each (0.032)",
+      "weights": "opacity of each copy ([0.42, 0.24, 0.12])",
+      "fadeIn": "s it fades in first (0.25)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Exit to the right: main element x 0 → +175 px (recipe / readout; the demo moves 210 px on a 320 px canvas, ≈×6 at 1920) and opacity 1 → 0 in 520 ms power3.in (easeInQuart). Three copies under it run the same tween 32, 64 and 96 ms later at 0.42 / 0.24 / 0.12 of its opacity and vanish with it. Entrance before it: fade in 250 ms power2.out. Params: duration (0.52 s) · x: quãng lao (175 px) · copies (3) · delay: trễ mỗi bản (32 ms) · ease (power3.in).",
+    "titleVi": "Thoát ra kèm ba bóng mờ"
+  }
+}

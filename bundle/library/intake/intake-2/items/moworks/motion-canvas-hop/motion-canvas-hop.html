@@ -1,0 +1,62 @@
+<!--
+  Infinite Canvas Jump (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Trên một bảng vẽ vô tận, máy quay lùi ra cho thấy toàn cảnh, bay ngang từ khung A sang khung B rồi đẩy vào sát khung B, kèm bản đồ thu nhỏ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionCanvasHop(q(".cv"), tl, 0, { minimap: ".mm" });
+
+  Options (defaults in brackets):
+      - world: the canvas inside (.cw)
+      - from: [x, y] world px of frame A
+      - to: [x, y] of frame B (3120 px across, 660 down: 520 / 110 of the small demo × 6)
+      - zoom: zoom at both ends (2); 0.42 mid-way
+      - at: s (0.45)
+      - duration: s (1.8)
+      - minimap: the minimap (with a .vp viewport box)
+      - worldSize: [w, h] world px
+      - fadeAt: s (3.55)
+      - loop: s (3.9)
+
+  Notes: Canvas with frames A and B 520 px apart (110 px vertically), dotted grid and filler cards. The camera centre moves A to B over 1.8 s power2.inOut (0.45-2.25 s) while zoom = 2 × 0.21^(sin(π u)) (u = eased progress): 2× at both ends, 0.42× at the midpoint, so it pulls out, travels and pushes in. Optional minimap (78x38) with the viewport rectangle. Demo fades to dark 3.55-3.85 s to loop. Params: zoom (2× → 0.42× → 2×) · duration (1.8 s, power2.inOut) · from / to: khung A, khung B · minimap.
+-->
+
+<div class="gm cv"><div class="cw"><div class="fl" style="left:400px;top:400px"></div><div class="fl" style="left:1500px;top:300px"></div><div class="fl" style="left:2200px;top:1100px"></div><div class="fl" style="left:2800px;top:500px"></div><div class="fl" style="left:3400px;top:1900px"></div><div class="fl" style="left:1300px;top:1700px"></div><div class="fl" style="left:4300px;top:700px"></div><div class="fl" style="left:600px;top:1900px"></div>
+<div class="fr" style="left:900px;top:900px;background:linear-gradient(160deg,#3dd6f5,#1580b8)">Khung A</div><div class="fr" style="left:4020px;top:1560px;background:linear-gradient(160deg,#a693ff,#6a4cf0)">Khung B</div></div>
+<div class="mm"><b style="left:58.60000000000001px;top:64.60000000000001px;background:#3dd6f5"></b><b style="left:320.68px;top:120.04000000000002px;background:#8b7bff"></b><div class="vp"></div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"world":".cw","from":[900,900],"to":[4020,1560],"zoom":2,"at":0.45,"duration":1.8,"minimap":null,"worldSize":[5000,2500],"fadeAt":3.55,"loop":3.9};
+  var run = function (el, tl, at, o) {
+        var world = el.querySelector(o.world), mini = o.minimap ? el.querySelector(o.minimap) : null, vp = mini ? mini.querySelector(".vp") : null, io = gsap.parseEase("power2.inOut"), A = o.from, B = o.to;
+        return MW.drive(tl, at, o.loop, function (t) {
+          var W = el.offsetWidth, Hh = el.offsetHeight, u = io(Math.max(0, Math.min(1, (t - o.at) / o.duration))), z = o.zoom * Math.pow(0.21, Math.sin(Math.PI * u));
+          var cx = A[0] + (B[0] - A[0]) * u, cy = A[1] + (B[1] - A[1]) * u;
+          world.style.transformOrigin = "0 0"; world.style.transform = "translate(" + W / 2 + "px," + Hh / 2 + "px) scale(" + z + ") translate(" + (-cx) + "px," + (-cy) + "px)";
+          if (vp) { var mw = mini.offsetWidth / o.worldSize[0]; vp.style.left = (cx - W / z / 2) * mw + "px"; vp.style.top = (cy - Hh / z / 2) * mw + "px"; vp.style.width = W / z * mw + "px"; vp.style.height = Hh / z * mw + "px"; }
+          el.style.opacity = t > o.fadeAt ? String(Math.max(0, 1 - (t - o.fadeAt) / 0.3)) : "1";
+        });
+      };
+  MW.motionCanvasHop = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

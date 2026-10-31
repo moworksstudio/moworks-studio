@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/cursor-follow-trail",
+  "hash": "14a5e3b00bec6a30",
+  "at": "2026-10-17T10:05:53.554Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__cursor-follow-trail.mp4",
+    "poster": "previews/moworks__cursor-follow-trail.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ba8c4008530b7b890632a8e2289a6a69a19b9e8edff72eefa6fe82d98489376f",
+    "size": 11492,
+    "seconds": 26.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

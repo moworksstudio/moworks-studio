@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-queue-compress",
+  "hash": "74110ac2922d62bb",
+  "at": "2026-10-17T08:27:45.017Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-queue-compress.mp4",
+    "poster": "previews/moworks__motion-queue-compress.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "6cedc1d475cd96b0ad81a1058d4d1561ab711ff11be1a5a88236b390d237d1dd",
+    "size": 9696,
+    "seconds": 14.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

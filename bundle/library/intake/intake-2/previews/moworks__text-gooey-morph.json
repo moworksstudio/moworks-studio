@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-gooey-morph",
+  "hash": "c6528ed9eb9364b6",
+  "at": "2026-10-17T09:13:57.424Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__text-gooey-morph.mp4",
+    "poster": "previews/moworks__text-gooey-morph.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a87609466a5162c81daec33c94170df37b219c90cf112e9dec3fc098a2ef7414",
+    "size": 16772,
+    "seconds": 29.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

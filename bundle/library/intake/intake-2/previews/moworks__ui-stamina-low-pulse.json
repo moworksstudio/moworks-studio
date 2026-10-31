@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-stamina-low-pulse",
+  "hash": "c7923f41477ba3d8",
+  "at": "2026-10-17T10:55:10.140Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-stamina-low-pulse.mp4",
+    "poster": "previews/moworks__ui-stamina-low-pulse.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "acbf186ddf029a086ed2eb8676823b8e3f32eb746f025ed6ccd203cb6d94e009",
+    "size": 10537,
+    "seconds": 27.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

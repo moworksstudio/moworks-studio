@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-lock-unlock",
+  "hash": "567b5a7a6b64a539",
+  "at": "2026-10-17T10:34:27.374Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-lock-unlock.mp4",
+    "poster": "previews/moworks__ui-lock-unlock.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c28ad1215d3b2a22a49514f72b5758768605f92ba95867ea29fe4662a87d6d3a",
+    "size": 9707,
+    "seconds": 29.6,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

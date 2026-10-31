@@ -102,7 +102,7 @@ export default function DesignSteps({ style, value, onChange, brief = "" }) {
       footer={<button type="button" className="sgb-link" onClick={() => go("/looks")}><Upload size={13} />{t("Create a Brand Kit from a guideline")}</button>} />
     <p className="ds-from" aria-live="polite">{asked ? <><Lock size={12} /><span>{t("This style keeps its author's design. Claude will ask how to use your Brand Kit.")}</span>
         <button type="button" className="clink ds-drop" onClick={() => onChange({ look: "" })} title={t("Do not use this Brand Kit")}>{t("Remove")}</button></>
-      : locked ? <><Lock size={12} />{t("Design follows the film style. You can describe the Brand Kit in the Brief.")}</>
+      : locked ? <>{t("You can describe the Brand Kit in the Brief.")}</>
       : <>{look && <Swatches colors={look.swatches} />}<span>{summary}</span></>}</p>
     {/* a Vietnamese film (its brief) whose Brand Kit has a font without Vietnamese letters: one quiet line. A Brand Kit font is never
         swapped: Claude stops in Prepare and offers fonts that have them */}

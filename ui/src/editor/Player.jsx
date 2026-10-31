@@ -4,7 +4,7 @@
 // them, with the font, size and colour (shown at once, written when the field is left, one revision each; Reset puts back what Claude
 // wrote). Below the frame: one frame back / play / one frame on (PageUp / PageDown jump a shot), time and shot, then tools named
 // in words: View (safe margins, grid, still, full screen), Loop, the speed, Sound.
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Camera, ChevronDown, Eye, Grid3x3, Loader2, Lock, MapPin, Maximize, Pause, Play, Repeat, RotateCcw, Scan, Sparkles, StepBack, StepForward, Volume2, VolumeX, X } from "lucide-react";
 import { Menu } from "../components.jsx";
 import { get, post } from "../api.js";
@@ -48,6 +48,7 @@ export function usePreview(projectId) {
   const videoOnly = proxy?.mode === "prerendered";
   const video = useRef(null);
   const [picked, setPicked] = useState([]);         // described elements (host.js describe())
+  const [pickN, setPickN] = useState(0);            // counts the user's own picks (a click, a word in the Shots column): the same words picked again open their card again
   const [boxes, setBoxes] = useState({ boxes: [], frame: null });
   const frame = useRef(null);
   const keyHandler = useRef(null);
@@ -89,7 +90,7 @@ export function usePreview(projectId) {
       else if (d.type === "time") setState((s) => ({ ...s, time: d.time, paused: d.paused }));
       else if (d.type === "ended") setState((s) => ({ ...s, paused: true }));
       else if (d.type === "error") setState((s) => ({ ...s, error: d.message }));
-      else if (d.type === "pick") setPicked(d.items ?? []);
+      else if (d.type === "pick") { setPicked(d.items ?? []); if (d.user) setPickN((n) => n + 1); }
       else if (d.type === "boxes") setBoxes({ boxes: d.boxes ?? [], frame: d.frame });
       else if (d.type === "key") keyHandler.current?.(d);
       else if (d.type === "dblclick") dbl.current?.();
@@ -98,7 +99,7 @@ export function usePreview(projectId) {
     addEventListener("message", on);
     return () => removeEventListener("message", on);
   }, [info]);
-  return { info, state, picked, setPicked, boxes, frame, send, keyHandler, dbl, proxy, videoOnly, video, videoEvents };
+  return { info, state, picked, setPicked, pickN, boxes, frame, send, keyHandler, dbl, proxy, videoOnly, video, videoEvents };
 }
 
 /** Fonts for the edit card as one dropdown: the families this project uses, the font files the user added to it
@@ -157,13 +158,25 @@ function FontField({ projectId, value, onPick, onLive, disabled }) {
 }
 
 /** The card beside a picked element: its words (each line a field), font, size, colour, Reset. */
-// The card names what was picked in plain words, never a raw tag such as "tspan"; a name the film gave it stays
+// The card and the chat name what was picked in plain words, never a tag, a class or an id ("span.ch", "t-title"): those are for Claude
 const TAG_WORD = { text: "Text", tspan: "Text", textpath: "Text", p: "Text", span: "Text", h1: "Title", h2: "Title", h3: "Title", h4: "Title", h5: "Title", h6: "Title",
   label: "Text", li: "Text", a: "Text", strong: "Text", em: "Text", b: "Text", i: "Text", img: "Picture", image: "Picture", picture: "Picture", video: "Video",
   svg: "Shape", g: "Shape", path: "Shape", rect: "Shape", circle: "Shape", ellipse: "Shape", line: "Shape", polygon: "Shape", polyline: "Shape", use: "Shape",
   canvas: "Picture", div: "Box", section: "Box", article: "Box", main: "Box", header: "Box", footer: "Box", figure: "Box" };
-const friendlyLabel = (item) => { const l = String(item.label ?? "").trim(), k = l.toLowerCase();
-  return TAG_WORD[k] ? (item.textContent && TAG_WORD[k] === "Box" ? "Text" : TAG_WORD[k]) : l || (item.textContent ? "Text" : "Element"); };
+export const friendlyLabel = (item) => { const w = TAG_WORD[String(item.tagName ?? "").toLowerCase()];
+  return w && !(w === "Box" && item.textContent) ? w : item.textContent ? "Text" : "Element"; };
+
+/** Where the edit card sits in the stage: beside the picked element, on the film or in the letterbox around it; above or below a line too wide for
+ *  that; never past the stage's edges (T28-22: the card ran under the player and its hint was cut off). All in px, in the stage's own coordinates. */
+export function cardPlace([x, y, w, h], stageW, stageH, cardW, cardH, m = 8) {
+  const gap = 12, clampTop = (v) => Math.max(m, Math.min(v, stageH - cardH - m));
+  if (x + w + gap + cardW <= stageW - m) return { left: x + w + gap, top: clampTop(y) };
+  if (x - gap - cardW >= m) return { left: x - gap - cardW, top: clampTop(y) };
+  const left = Math.max(m, Math.min(x, stageW - cardW - m));
+  if (y + h + gap + cardH <= stageH - m) return { left, top: y + h + gap };
+  if (y - gap - cardH >= m) return { left, top: y - gap - cardH };
+  return { left, top: clampTop(y) };
+}
 
 /** A code film's word keeps the old card's font and size fields when its code allows them (What If);
  *  each is saved on its own (POST edit/code-style), the film is made again; what the code sets itself says why, and a film whose code
@@ -191,7 +204,7 @@ export function CodeStyle({ projectId, item, locked, onSaved }) {
     {why.map((w) => <p key={w} className="pe-hint">{t(w)}</p>)}</>;
 }
 
-function EditCard({ projectId, item, box, frameBox, locked, send, onSaved, onClose, onPin = null, shotNumber = null }) {
+function EditCard({ projectId, item, box, locked, send, onSaved, onClose, onPin = null, shotNumber = null }) {
   const t = useT();
   const toast = useToast();
   const [parts, setParts] = useState(null);
@@ -203,10 +216,10 @@ function EditCard({ projectId, item, box, frameBox, locked, send, onSaved, onClo
     get(`/api/projects/${projectId}/edit/parts?file=${encodeURIComponent(item.file)}&hf=${encodeURIComponent(item.hfId)}`)
       .then((r) => { setParts(r); setVals(Object.fromEntries(r.parts.map((x) => [x.hfId, x.text]))); }).catch(() => setParts({ found: false, parts: [] }));
   }, [projectId, item.file, item.hfId]);
-  useEffect(load, [load]);
+  useEffect(load, [load, item.textContent]);          // also when the words changed elsewhere (the Shots column): they, and the card's Reset, are read again
   const save = async (path, body, label, reload = false) => {          // reload: the film loads again (a new font is declared in it)
     setSaving(true);
-    try { const r = await post(`/api/projects/${projectId}/edit/${path}`, { file: item.file, hfId: item.hfId, ...body }); if (r.changed) onSaved(label, reload);
+    try { const r = await post(`/api/projects/${projectId}/edit/${path}`, { file: item.file, hfId: item.hfId, ...body }); if (r.changed) onSaved(label, reload || !!r.reload);
       if (r.fonts?.unresolved?.length) toast(t("Font not found: {f}", { f: r.fonts.unresolved.join(", ") }), "error");
       if (r.fonts?.local) toast(t("{f} was copied into the project from this PC. Check its licence before you send the project to anyone.", { f: r.fonts.local.family })); load(); }
     catch (e) { toast(e.message, "error"); load(); } finally { setSaving(false); }
@@ -220,14 +233,40 @@ function EditCard({ projectId, item, box, frameBox, locked, send, onSaved, onClo
   const needCode = !!parts && !editable;
   const [code, reloadCode] = useCodeTexts(projectId, null, needCode);
   const codeItem = needCode ? matchCodeText(code?.items, item.textContent, shotNumber) : null;
-  // the card sits right of the element, or left when there is no room, inside the frame
+  // the card's own size and the stage's, measured: it grows with its fields, and the stage with the window
+  const cardRef = useRef(null);
+  const [size, setSize] = useState(null);
+  useLayoutEffect(() => {
+    const el = cardRef.current, stage = el?.offsetParent;
+    if (!el || !stage) return undefined;
+    const read = () => setSize((s) => { const n = [el.offsetWidth, el.offsetHeight, stage.clientWidth, stage.clientHeight]; return s && s.every((v, i) => v === n[i]) ? s : n; });
+    read();
+    const ro = new ResizeObserver(read);
+    ro.observe(el); ro.observe(stage);
+    return () => ro.disconnect();
+  }, []);
   const style = useMemo(() => {
-    if (!box || !frameBox) return { right: 12, top: 12 };
-    const [x, y, w] = box, [fx, fy, fw] = frameBox;
-    const W = 288, right = x + w + 12 + W <= fx + fw;
-    return { left: right ? x + w + 12 : Math.max(fx + 8, x - W - 12), top: Math.max(fy + 8, y) };
-  }, [box, frameBox]);
-  return <div className="pe-card" style={style} role="dialog" aria-label={t("Edit the words")} onKeyDown={(e) => { if (e.key === "Escape") onClose(); }}>
+    if (!box || !size) return { right: 12, top: 12 };
+    const [cw, ch, sw, sh] = size;
+    return cardPlace(box, sw, sh, cw, ch);
+  }, [box, size]);
+  // Reset: every edited part of what was picked, each once (a word picked by itself is both the part and the element); the film on screen shows
+  // what came back at once, and loads again when a line's letters changed in number. Everything else reads the words again through onSaved.
+  const backToClaude = async () => {
+    setSaving(true);
+    try {
+      let any = false, reload = false;
+      for (const hfId of new Set([...parts.parts.filter((p) => p.edited).map((p) => p.hfId), ...(parts.edited ? [item.hfId] : [])])) {
+        const r = await post(`/api/projects/${projectId}/edit/reset`, { file: item.file, hfId });
+        if (!r.changed) continue;
+        any = true; reload = reload || !!r.reload;
+        send("live", { hfId, ...(r.text ? { text: r.text } : {}), style: r.style ?? {} });
+      }
+      if (any) onSaved(t("Back to what Claude wrote"), reload);
+      load();
+    } catch (e) { toast(e.message, "error"); load(); } finally { setSaving(false); }
+  };
+  return <div className="pe-card" ref={cardRef} style={style} role="dialog" aria-label={t("Edit the words")} onKeyDown={(e) => { if (e.key === "Escape") onClose(); }}>
     <div className="pe-head"><span className="lbl">{t(friendlyLabel(item))}</span>{saving && <Loader2 size={13} className="spin" />}
       <button className="btn ghost icon sm" onClick={onClose} aria-label={t("Close")}><X size={13} /></button></div>
     {locked && <p className="pe-note"><Lock size={12} />{t("Claude is changing the film: hand edits wait until it finishes.")}</p>}
@@ -253,10 +292,7 @@ function EditCard({ projectId, item, box, frameBox, locked, send, onSaved, onClo
               onChange={(e) => { const c = e.target.value; send("live", { hfId: item.hfId, style: { color: c } }); clearTimeout(colorT.current);
                 colorT.current = setTimeout(() => save("style", { style: { color: c } }, t("Colour changed")), 700); }} /></label>
           </div>
-          {(parts.edited || parts.parts.some((x) => x.edited)) && <button className="btn ghost sm pe-reset" disabled={locked} onClick={async () => {
-            for (const x of parts.parts.filter((p) => p.edited)) await post(`/api/projects/${projectId}/edit/reset`, { file: item.file, hfId: x.hfId }).catch(() => {});
-            if (parts.edited) await save("reset", {}, t("Back to what Claude wrote")); else { onSaved(t("Back to what Claude wrote")); load(); }
-          }}><RotateCcw size={13} />{t("Reset")}</button>}
+          {(parts.edited || parts.parts.some((x) => x.edited)) && <button className="btn ghost sm pe-reset" disabled={locked || saving} onClick={backToClaude}><RotateCcw size={13} />{t("Reset")}</button>}
           <p className="pe-hint">{t("Shown as you type; saved when you leave the field.")}</p></>}
   </div>;
 }
@@ -280,9 +316,10 @@ function useProxy(projectId) {
   const making = view?.status === "rendering" || !!view?.job;
   useEffect(() => { if (!view?.mode) return undefined; const h = setTimeout(() => setN((x) => x + 1), making ? 3000 : 20000); return () => clearTimeout(h); }, [view, making]);
   const update = useCallback(() => post(`/api/projects/${projectId}/preview-proxy`).then(setView), [projectId]);
+  const refresh = useCallback(() => setN((x) => x + 1), []);          // read again now: a Reset can make it fresh again
   // every film that has a page: its full-quality MP4 plays when it is fresh (the server's status: picture and sound as the
   // film is now); a stale one is never played
-  return useMemo(() => (view?.mode ? { ...view, update } : null), [view, update]);
+  return useMemo(() => (view?.mode ? { ...view, update, refresh } : null), [view, update, refresh]);
 }
 
 /** The smooth preview out of date with nothing making it (a change while it rendered, a render that failed, the app started again):
@@ -337,7 +374,7 @@ const SCALE_LEVEL = { 1: "full", 0.5: "half", 0.25: "quarter" };
 export default function Player({ projectId, pv, shots, shot, onShot, locked, range, onFilesChanged, planned = null, pinning = false, onPin = null, children }) {
   const t = useT();
   const toast = useToast();
-  const { info, state, picked, setPicked, boxes, frame, send, keyHandler, dbl } = pv;
+  const { info, state, picked, setPicked, pickN, boxes, frame, send, keyHandler, dbl } = pv;
   const [muted, setMuted] = usePref("editor:muted", false);
   const [rate, setRate] = usePref("editor:rate", 1);
   const [loop, setLoop] = usePref("editor:loop", false);
@@ -355,7 +392,7 @@ export default function Player({ projectId, pv, shots, shot, onShot, locked, ran
   const { proxy, videoOnly } = pv;
   useEffect(() => { if (state.ready && !videoOnly) send("proxy", { url: proxy?.url ?? null, fresh: proxy?.status === "fresh", duration: proxy?.duration ?? null }); },
     [state.ready, proxy?.url, proxy?.status, proxy?.duration, send]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { setCard(true); }, [picked[0]?.hfId, picked[0]?.label]);
+  useEffect(() => { setCard(true); }, [picked[0]?.hfId, picked[0]?.label, pickN]);
   const seek = (s) => send("seek", { time: Math.max(0, Math.min(state.duration || 0, s)) });
   const shotIdx = shots.findIndex((s) => state.time >= s.start - 1e-3 && state.time < s.start + (s.duration ?? 0) - 1e-3);
   const cur = shots[shotIdx] ?? null;
@@ -416,7 +453,7 @@ export default function Player({ projectId, pv, shots, shot, onShot, locked, ran
       {/* no title: the app's tooltip would show "Film" over the picture; the frame is named for screen readers */}
       {/* before the Build the page is the new project's 3 s starter; it is not shown as the film */}
       {planned !== null ? <div className="pv-wait pv-render" role="status"><span>{t("Not built yet: the film is made after you approve the Motion Plan")}
-        {planned > 0 ? ` · ${Math.floor(planned / 60)}:${String(Math.round(planned % 60)).padStart(2, "0")}` : ""}</span></div>
+        {planned > 0 ? ` · ${Math.floor(Math.round(planned) / 60)}:${String(Math.round(planned) % 60).padStart(2, "0")}` : ""}</span></div>
         : videoOnly ? <VideoStage pv={pv} />
         : info && <iframe ref={frame} className="pv-frame" aria-label={t("Film")} src={info.url} allow="autoplay; fullscreen" />}
       {loading && <div className="pv-wait pv-loading" role="status" aria-live="polite"><Loader2 size={18} className="spin" />
@@ -424,8 +461,8 @@ export default function Player({ projectId, pv, shots, shot, onShot, locked, ran
         {slow && <><span className="pv-wait-sub">{t("This is taking longer than usual: a file may be missing.")}</span>
           <button type="button" className="btn sm" onClick={() => setSkipWait(true)}>{t("Show the film")}</button></>}</div>}
       {state.error && <div className="pv-wait err">{state.error}</div>}
-      {one && card && <EditCard projectId={projectId} item={one} box={boxes.boxes.at(-1)} frameBox={boxes.frame} locked={locked} send={send}
-        onSaved={(label, reload) => { toast(label); onFilesChanged?.(reload); }} onClose={() => setCard(false)} onPin={onPin && !pinning ? onPin : null} shotNumber={cur?.number ?? null} />}
+      {one && card && <EditCard projectId={projectId} item={one} box={boxes.boxes.at(-1)} locked={locked} send={send}
+        onSaved={(label, reload) => { toast(label); onFilesChanged?.(reload); send("describe"); }} onClose={() => setCard(false)} onPin={onPin && !pinning ? onPin : null} shotNumber={cur?.number ?? null} />}
       {picked.length > 1 && <div className="pe-card multi" style={{ right: 12, top: 12 }}>{t("{n} elements selected for Claude", { n: picked.length })}
         <button className="btn ghost icon sm" onClick={() => { send("clear"); setPicked([]); }} aria-label={t("Clear the selection")}><X size={13} /></button></div>}
       {children}

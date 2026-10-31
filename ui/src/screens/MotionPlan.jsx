@@ -87,7 +87,7 @@ function FrameTile({ shot, still, count, changed, open, onOpen, says = "", noCam
 }
 
 /** The open frame's motion table, under its row. Edits stay here until Save (or a Library pick, which saves). */
-function ShotCard({ shot, motions, base, types, cardOf, projectId, onSaved, onDirty, onLibrary, showNums = false, says = "" }) {
+export function ShotCard({ shot, motions, base, types, cardOf, projectId, onSaved, onDirty, onLibrary, showNums = false, says = "" }) {
   const t = useT();
   const toast = useToast();
   const [rows, setRows] = useState(() => motions.map((m) => ({ ...m })));
@@ -122,12 +122,11 @@ function ShotCard({ shot, motions, base, types, cardOf, projectId, onSaved, onDi
       {rows.length > 0 && <div className="mo-line mo-head" aria-hidden="true"><span>{t("Element")}</span>{showNums && <span>{t("Timing")}</span>}<span>{t("What it does")}</span><span>{t("From")}</span><span /></div>}
       {rows.map((m, i) => <div key={m.id || i} className={"mo-row" + (base && changed(m, i) ? " changed" : "")}>
         <div className="mo-line">
-          {/* the element in words first (Claude's `name`, else one read off the selector); the selector itself is a technical field, with the timing
-              (no internal ids on screen) */}
-          <span className="mo-c mo-c-name"><b className="mo-target" title={showNums ? undefined : m.target}>{m.name || nameOf(m.target) || <span className="muted">{t("No target")}</span>}</b>
+          {/* the element in words (Claude's `name`, else one read off the selector); the selector itself never shows, not with the timing either
+              (T29-16: "#s01-…" in the Timing column; no internal ids on screen) */}
+          <span className="mo-c mo-c-name"><b className="mo-target">{m.name || nameOf(m.target) || <span className="muted">{t("No target")}</span>}</b>
             {base && changed(m, i) && <span className="mo-changed" title={t("Changed by you")} aria-label={t("Changed by you")} />}</span>
-          {showNums && <span className="mo-c mo-c-tech"><span className="chip">{t(m.type)}</span><span className="muted num mo-when">{Number(m.start ?? 0)} s · {m.duration ?? "?"} s{m.ease ? ` · ${m.ease}` : ""}</span>
-            {m.target && <code className="mo-sel" title={m.target}>{m.target}</code>}</span>}
+          {showNums && <span className="mo-c mo-c-tech"><span className="chip">{t(m.type)}</span><span className="muted num mo-when">{Number(m.start ?? 0)} s · {m.duration ?? "?"} s{m.ease ? ` · ${m.ease}` : ""}</span></span>}
           {/* what the user approves, in plain words first (Claude's `plain`), the technical notes after; one line, the
               whole of it on hover or a click */}
           {(() => { const what = m.plain || (m.source?.kind === "library" ? cardOf(m.source.id)?.desc || m.behavior : m.behavior);
@@ -139,7 +138,7 @@ function ShotCard({ shot, motions, base, types, cardOf, projectId, onSaved, onDi
             <button className="btn ghost icon sm" onClick={() => setEditing(editing === i ? null : i)} aria-expanded={editing === i} aria-label={t("Edit this motion")} title={t("Edit this motion")}><Pencil size={14} /></button></span>
         </div>
         {editing === i && <div className="mo-edit">
-          <label className="field"><span>{t("Target")}</span><input className={"input" + (!m.target ? " invalid" : "")} value={m.target} onChange={(e) => set(i, "target", e.target.value)} placeholder={t("e.g. Title")} /></label>
+          <label className="field"><span>{t("Target")}</span><input className={"input" + (!m.target ? " invalid" : "")} value={m.name || nameOf(m.target)} onChange={(e) => { const v = e.target.value; setRows((r) => r.map((x, j) => (j === i ? { ...x, target: v, name: v } : x))); setDirty(true); }} placeholder={t("e.g. Title")} /></label>
           <label className="field"><span>{t("Type")}</span><select className="select" value={m.type} onChange={(e) => set(i, "type", e.target.value)}>{types.map((x) => <option key={x} value={x}>{t(x)}</option>)}</select></label>
           <label className="field"><span>{t("Start (s)")}</span><input className="input num" type="number" step="0.1" min="0" value={m.start ?? 0} onChange={(e) => set(i, "start", e.target.value)} /></label>
           <label className="field"><span>{t("Length (s)")}</span><input className="input num" type="number" step="0.1" min="0.05" value={m.duration ?? ""} onChange={(e) => set(i, "duration", e.target.value)} /></label>

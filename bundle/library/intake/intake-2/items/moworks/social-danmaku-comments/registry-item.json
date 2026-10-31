@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "social-danmaku-comments",
+  "type": "hyperframes:block",
+  "title": "Danmaku Comment Scroll",
+  "description": "Các bình luận ngắn chạy ngang qua video từ phải sang trái trên nhiều làn, mỗi bình luận đi hết khung trong cùng một thời gian dù dài hay ngắn, chữ trắng viền tối.",
+  "tags": [
+    "comments",
+    "scroll",
+    "lanes",
+    "social",
+    "text-japanese",
+    "smooth",
+    "japanese"
+  ],
+  "files": [
+    {
+      "path": "social-danmaku-comments.html",
+      "target": "compositions/components/social-danmaku-comments.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/social-danmaku-comments",
+    "author": "moworks",
+    "call": "MW.socialDanmakuComments(q(\".dm\"), tl, 0, {});",
+    "function": "MW.socialDanmakuComments",
+    "options": {
+      "comments": "[[lane, text, s], ...] in one cycle",
+      "lanes": "(6)",
+      "cross": "s every comment takes to cross (3.5), whatever its length",
+      "cycle": "s (4)",
+      "loops": "(1)",
+      "size": "px (52)",
+      "accent": "the first comment"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Over the video area, 6 lanes (lane height = area height / 6 ≈ 1.7 em at 14 px). Each comment crosses right → left in a fixed 3.5 s whatever its length: x from the right edge to −its width, linear. Demo schedule: 10 slots (lane, comment, start) in a 4 s cycle, each lane's comments at least ~2 s apart (recipe: a lane takes a new one only after the previous tail has entered). Text bold, white with a 3 px dark outline under the fill; first comment accent. Params: thời gian băng qua (3.5 s) · số làn (6) · cỡ chữ (14 px) · danh sách bình luận.",
+    "titleVi": "Bình luận chạy ngang màn hình kiểu livestream"
+  }
+}

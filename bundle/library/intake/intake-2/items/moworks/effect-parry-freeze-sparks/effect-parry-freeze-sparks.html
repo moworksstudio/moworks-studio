@@ -1,0 +1,83 @@
+<!--
+  Parry Time Slice (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Hai lưỡi kiếm vung vào nhau, chạm nhau thì thời gian khựng 0.3 giây với hai vạch ngang và tia sáng bốn cánh; rồi hai lưỡi bật ra có rung, chín tia lửa xoè lên và rơi theo trọng lực.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectParryFreezeSparks(q(".gm"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - contactAt: s (0.62)
+      - freeze: s time stands still (0.3)
+      - sparks: sparks (9), fanning ±73° upward, 400 units/s² gravity
+      - seed: spark spread
+
+  Notes: px @320x200. Two blades (pivots 120 px apart) swing −0.35 → 0.785 rad (mirrored) to contact in 370 ms in-cubic (0.25-0.62 s); freeze 300 ms: two horizontal lines ±6 px grow to ±150 px in 120 ms outCubic, 4-point star spark r 18. Then they deflect to −0.62 rad in 450 ms outExpo with wobble 0.08 e^(−6t) sin(30t) rad; the star shrinks in 350 ms. 9 sparks fan upward ±73° (±6° seeded) at 90-150 px/s, y += 200·t² (400 px/s²), 6 px streaks, fading over 600 ms. Params: contactAt: lúc chạm (0.62 s) · freeze: khựng (0.3 s) · deflect: bật ra (0.45 s) · sparks: số tia (9) · gravity: trọng lực (400 px/s²).
+-->
+
+<div class="gm"><div class="lab" style="position:absolute;left:0;right:0;top:120px;text-align:center;font-size:120px;color:#fff;font-weight:900">ĐỠ</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.canvas = MW.canvas || function (host, w, h) {
+    host = MW.el(host);
+    var cv = document.createElement("canvas"); w = w || host.clientWidth || 1920; h = h || host.clientHeight || 1080;
+    cv.width = w; cv.height = h; cv.style.position = "absolute"; cv.style.left = "0"; cv.style.top = "0"; cv.style.width = w + "px"; cv.style.height = h + "px"; cv.style.pointerEvents = "none";
+    host.appendChild(cv);
+    return { cv: cv, ctx: cv.getContext("2d"), w: w, h: h };
+  };
+  MW.stage320 = MW.stage320 || function (host) {
+    host = MW.el(host); if (getComputedStyle(host).position === "static") host.style.position = "relative";
+    var c = MW.canvas(host), k = Math.min(c.w / 320, c.h / 200), ox = (c.w - 320 * k) / 2, oy = (c.h - 200 * k) / 2;
+    return { ctx: c.ctx, cv: c.cv, k: k, ox: ox, oy: oy, w: c.w, h: c.h,
+      clear: function () { c.ctx.setTransform(1, 0, 0, 1, 0, 0); c.ctx.clearRect(0, 0, c.w, c.h); c.ctx.setTransform(k, 0, 0, k, ox, oy); },
+      put: function (el, x, y) { el.style.position = "absolute"; el.style.left = (ox + x * k) + "px"; el.style.top = (oy + y * k) + "px"; gsap.set(el, { xPercent: -50, yPercent: -50 }); } };
+  };
+  var defaults = {"contactAt":0.62,"freeze":0.3,"sparks":9,"seed":2};
+  var run = function (el, tl, at, o) {
+        var S = MW.stage320(el), ctx = S.ctx, inn = gsap.parseEase("power2.in"), out = gsap.parseEase("power2.out"), ex = gsap.parseEase("expo.out"), r = MW.rand(o.seed), sp = [];
+        for (var i = 0; i < o.sparks; i++) sp.push({ a: -Math.PI / 2 + (-1.28 + 2.56 * i / (o.sparks - 1)) + (r() * 2 - 1) * 0.1, v: 90 + r() * 60 });
+        var c = o.contactAt, f = o.freeze;
+        var blade = function (px, ang, dir) { ctx.save(); ctx.translate(px, 150); ctx.rotate(dir * ang); ctx.fillStyle = "#c9d2ea"; ctx.fillRect(-3, -96, 6, 96); ctx.fillStyle = "#ffd23d"; ctx.fillRect(-10, -4, 20, 8); ctx.fillStyle = "#6a4cf0"; ctx.fillRect(-3, 0, 6, 20); ctx.restore(); };
+        return MW.drive(tl, at, c + f + 1.2, function (t) {
+          S.clear();
+          var ang = t < 0.25 ? -0.35 : t < c ? -0.35 + (0.785 + 0.35) * inn((t - 0.25) / (c - 0.25)) : t < c + f ? 0.785 : (function () { var d = t - c - f; return 0.785 + (-0.62 - 0.785) * ex(Math.min(1, d / 0.45)) + 0.08 * Math.exp(-6 * d) * Math.sin(30 * d); })();
+          blade(100, ang, 1); blade(220, ang, -1);
+          if (t >= c && t < c + f + 0.35) {
+            var d0 = t - c, g = out(Math.min(1, d0 / 0.12)), L = 6 + 144 * g, sc = t < c + f ? 1 : 1 - (t - c - f) / 0.35, cx = 160, cy = 150 - 96 * Math.cos(0.785) + 0;
+            ctx.strokeStyle = "#e8ebf3"; ctx.lineWidth = 1.5; ctx.globalAlpha = sc; [-6, 6].forEach(function (dy) { ctx.beginPath(); ctx.moveTo(cx - L, cy + dy); ctx.lineTo(cx + L, cy + dy); ctx.stroke(); });
+            ctx.fillStyle = "#ffd23d"; ctx.beginPath(); for (var j = 0; j < 8; j++) { var a = j * Math.PI / 4, rr = j % 2 ? 4 * sc : 18 * sc; ctx.lineTo(cx + rr * Math.cos(a), cy + rr * Math.sin(a)); } ctx.fill(); ctx.globalAlpha = 1;
+          }
+          var ds = t - c - f;
+          if (ds > 0 && ds < 0.6) sp.forEach(function (s) { var x = 160 + s.v * Math.cos(s.a) * ds, y = 82 + s.v * Math.sin(s.a) * ds + 200 * ds * ds, vx = s.v * Math.cos(s.a), vy = s.v * Math.sin(s.a) + 400 * ds, m = Math.hypot(vx, vy) || 1;
+            ctx.globalAlpha = 1 - ds / 0.6; ctx.strokeStyle = "#ffd23d"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - vx / m * 6, y - vy / m * 6); ctx.stroke(); });
+          ctx.globalAlpha = 1;
+        });
+      };
+  MW.effectParryFreezeSparks = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

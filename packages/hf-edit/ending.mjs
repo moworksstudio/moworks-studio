@@ -91,3 +91,16 @@ export function filmLength(meta, { dir = null, root } = {}) {
   const fade = content ? endFade(content, { endCard: e.kind === "endCard" }) : 0;
   return { content, fade, total: content ? r3(e.inside ? content : content + fade) : null, inside: e.inside, own: e.own, ...(e.asked ? { asked: e.asked, why: e.why } : {}) };
 }
+
+/** The length a film not built yet shows (the Editor's head, "Not built yet", the Projects card): the one the user set, as they typed it. A
+ *  storyboard timed to that length plus the ending's fade (the app asks Claude for that whole: every step's total above) is still that
+ *  film (0:56 for a 0:51 film, 1:05 for one the brief wants at exactly 1:00: T30-10, T29-17); a storyboard of another length is its own (Claude
+ *  timed it to the voice: 40 → 47.5 s). frames: the storyboard frames' seconds in all, 0 when it has none. */
+export function plannedLength(meta, { dir = null, root, frames = 0 } = {}) {
+  const L = filmLength(meta, { dir, root });
+  const sum = Number(frames) || 0;
+  if (!L.content) return sum || L.total;
+  if (!sum) return L.content;
+  const near = (x) => Math.abs(sum - x) < 0.5;
+  return [L.content, L.content + endFade(L.content), L.content + endFade(L.content, { endCard: true })].some(near) ? L.content : sum;
+}

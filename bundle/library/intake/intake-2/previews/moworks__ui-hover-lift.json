@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-hover-lift",
+  "hash": "5bfdd6245478e29e",
+  "at": "2026-10-17T10:05:49.961Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__ui-hover-lift.mp4",
+    "poster": "previews/moworks__ui-hover-lift.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "85b89afe7fae54162247c093538a5caff25e92f7a2ba04972df0a68809e3cf46",
+    "size": 10704,
+    "seconds": 27,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

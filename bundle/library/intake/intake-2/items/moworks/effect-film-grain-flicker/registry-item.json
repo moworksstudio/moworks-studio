@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-film-grain-flicker",
+  "type": "hyperframes:component",
+  "title": "Film Grain",
+  "description": "Một lớp nhiễu rất mờ đổi mẫu mỗi khung hình phủ lên hình, xoá cảm giác phẳng của đồ hoạ số.",
+  "tags": [
+    "grain",
+    "film",
+    "texture",
+    "overlay",
+    "texture-look",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "effect-film-grain-flicker.html",
+      "target": "compositions/components/effect-film-grain-flicker.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-film-grain-flicker",
+    "author": "moworks",
+    "call": "MW.effectFilmGrainFlicker(q(\".pic\"), tl, 0, {});",
+    "function": "MW.effectFilmGrainFlicker",
+    "options": {
+      "opacity": "(0.25 in the demo; 0.05–0.1 in a film)",
+      "count": "specks per 320 × 200 (900)",
+      "max": "specks at most (20000)",
+      "size": "px (4)",
+      "fps": "new grain a second (24)",
+      "seed": "(3)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "New noise every frame at 24 fps (~42 ms), 7 % opacity (5-10 %). Demo: 900 specks 1.4 px, half white half black, at 25 % opacity, re-seeded every 1/24 s over the art. Params: opacity (7 %) · fps (24) · size: cỡ hạt.",
+    "titleVi": "Hạt phim đổi mỗi khung"
+  }
+}

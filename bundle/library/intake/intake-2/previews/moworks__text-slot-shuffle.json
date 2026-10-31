@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-slot-shuffle",
+  "hash": "7bfdba6922d5ab47",
+  "at": "2026-10-17T09:35:41.344Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-slot-shuffle.mp4",
+    "poster": "previews/moworks__text-slot-shuffle.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c578d06a3d41ec055f5f2a0fc3c36fd0c0a3c0e8372fcda304cfe01f27d90b6f",
+    "size": 18558,
+    "seconds": 23.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

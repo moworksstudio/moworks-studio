@@ -1,0 +1,53 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-donut-bloom",
+  "type": "hyperframes:block",
+  "title": "Radial Budget Bloom",
+  "description": "Ba cung 50, 30, 20 lần lượt quét quanh vòng tròn, nhãn số bật ra ngoài mỗi cung và tổng ở giữa đếm lên 100.",
+  "tags": [
+    "donut",
+    "chart",
+    "budget",
+    "counter",
+    "data-storytelling",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "data-donut-bloom.html",
+      "target": "compositions/components/data-donut-bloom.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/data-donut-bloom",
+    "author": "moworks",
+    "call": "MW.dataDonutBloom(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataDonutBloom",
+    "options": {
+      "parts": "% (50 / 30 / 20)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Donut r 50, 18 px stroke on a grid-colour track, from 12 o'clock clockwise. Arcs sweep in order, easeInOut: 50 % (accent) 350-1150 ms, 30 % (second colour) 1250-1750, 20 % (yellow) 1850-2200; a 2 px background-colour separator at each start. Each value label pops back.out at r + 26 px from its arc's end - 50 to + 250 ms. Centre total counts with the arcs to 100, pops 1 -> 1.12 -> 1 over 2200-2500. Exit 3550-3900 ease-in: shrink to 0.94 + fade. Params: parts (50 / 30 / 20) · radius (50 px) · width (18 px).",
+    "titleVi": "Vòng donut ngân sách nở dần"
+  }
+}

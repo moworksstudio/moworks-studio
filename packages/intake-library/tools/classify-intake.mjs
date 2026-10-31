@@ -1,11 +1,11 @@
-// One-off reclassification of the intake (judged as an experienced motion designer would; Motion / Block need not be strict, new categories allowed). Reads the built catalog, the site's own
-// categories (takayu/specs.json) and the item files, applies the rules below and writes classification.json: { uid: { kind, category } }.
+// One-off reclassification of the intake (judged as an experienced motion designer would; Motion / Block need not be strict, new categories allowed). Reads the built catalog, the specs'
+// categories (moworks/specs.json) and the item files, applies the rules below and writes classification.json: { uid: { kind, category } }.
 // The app reads that file when it builds the store (index.mjs loadItems), so the user can edit one line to move one item.
 //   node packages/intake-library/tools/classify-intake.mjs [catalog.json]   (default: the intake store in use in the work folder's library)
 //
 // How an After Effects person files motion: by what you reach for it to DO (text reveal, transition, UI state, texture, camera …), not by
-// the site's own grouping. Kind: a Block is a piece that stands alone (a mockup, a chart, a HUD widget, a title card, a lesson); a Motion
-// is something you put on an element. The site's own labels stay unless the item clearly is the other thing.
+// the specs' own grouping. Kind: a Block is a piece that stands alone (a mockup, a chart, a HUD widget, a title card, a lesson); a Motion
+// is something you put on an element. The specs' own labels stay unless the item clearly is the other thing.
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -16,7 +16,7 @@ const catalogFile = process.argv[2] ?? (currentStore() ? join(currentStore().dir
 if (!catalogFile) { console.log("usage: node packages/intake-library/tools/classify-intake.mjs [catalog.json] (no intake store is built in the work folder)"); process.exit(1); }
 const storeDir = catalogFile.replace(/catalog\.json$/, "");
 const items = JSON.parse(readFileSync(catalogFile, "utf8")).items;
-const SPEC = new Map(JSON.parse(readFileSync(join(HERE, "takayu", "specs.json"), "utf8")).items.map((s) => [`in:takayu/${s.name.replace("/", "-")}`, s]));
+const SPEC = new Map(JSON.parse(readFileSync(join(HERE, "moworks", "specs.json"), "utf8")).items.map((s) => [`in:moworks/${s.name.replace("/", "-")}`, s]));
 
 const C = {
   TREVEAL: "Text · Reveal & entrance", TEXIT: "Text · Exit & swap", TKINETIC: "Text · Kinetic & glyph effects", TEMPH: "Text · Emphasis, colour & loops",
@@ -50,7 +50,7 @@ const MAGIC = {
 const GAME = new Set(["Game Impact FX", "Combat & Hit FX", "Game Cinematics", "Game HUD", "Progression & Quests", "Rewards & Loot"]);
 const gameCat = (sc) => sc === "Game HUD" || sc === "Progression & Quests" ? C.GHUD : sc === "Rewards & Loot" ? C.GLOOT : C.GIMPACT;
 
-function takayuCategory(s) {
+function ownCategory(s) {
   const g = s.name.split("/")[0], sc = s.category;
   if (s.lesson) return C.PRINC;
   if (g === "transition") return C.TRANS;
@@ -101,7 +101,7 @@ function takayuCategory(s) {
   return m[sc] ?? C.MOVE;
 }
 
-// kind: the site's label stays unless the item clearly is the other thing
+// kind: the spec's label stays unless the item clearly is the other thing
 const EFFECT_CATS = new Set([C.TREVEAL, C.TEXIT, C.TKINETIC, C.TEMPH, C.TJP, C.LIGHT, C.TEXTURE, C.PART, C.TEXTURE, C.MASKS, C.ATTN, C.MOVE, C.ENTER, C.TRANS, C.LINES, C.CURSOR, C.D3]);
 const WIDGET_CATS = new Set([C.GHUD, C.UILOAD, C.UIBTN, C.DATA, C.NUM, C.MOCK, C.MOCK, C.GLOOT]);
 const isScene = (it) => { try { return /stage320|MW\.canvas|getContext\("2d"\)/.test(readFileSync(join(storeDir, it.folder, it.file), "utf8")); } catch { return false; } };
@@ -111,7 +111,7 @@ for (const it of items) {
   let category;
   if (it.collection === "Codrops") category = it.id.includes("image-expand") ? C.TKINETIC : C.TREVEAL;
   else if (it.collection === "Magic UI") category = MAGIC[it.id.split("/").pop()];
-  else category = takayuCategory(SPEC.get(it.uid));
+  else category = ownCategory(SPEC.get(it.uid));
   if (!category) throw new Error(`no category for ${it.uid}`);
   let kind = it.kind;
   const scene = isScene(it);

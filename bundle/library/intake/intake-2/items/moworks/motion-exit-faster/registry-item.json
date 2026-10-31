@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-exit-faster",
+  "type": "hyperframes:block",
+  "title": "Exit Faster than Enter",
+  "description": "Bài học: cảnh thoát chỉ dài 65–75 % cảnh vào; vào thì ease-out, ra thì ease-in.",
+  "tags": [
+    "lesson",
+    "timing",
+    "exit",
+    "timing-rhythm",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-exit-faster.html",
+      "target": "compositions/components/motion-exit-faster.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-exit-faster",
+    "author": "moworks",
+    "call": "MW.motionExitFaster(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionExitFaster",
+    "options": {
+      "in": "s (0.3, expo.out)",
+      "out": "s (0.21, expo.in: 65–75 % of the entrance)",
+      "inAt": "s (0.3)",
+      "outAt": "s (1.5)",
+      "loop": "s (2.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "A block enters 210 px in 300 ms expo.out, holds, then exits 240 px in 210 ms expo.in. Rule: exits last 65–75 % of the entrance; entrance ease-out, exit ease-in; what leaves should not hold attention. Params: in (0.3 s ease-out) · out (0.21 s ease-in). What leaves should not hold attention.",
+    "titleVi": "Thoát nhanh hơn vào"
+  }
+}

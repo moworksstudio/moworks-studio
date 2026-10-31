@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-orbit-turntable",
+  "hash": "26ff9b7ac68a994e",
+  "at": "2026-10-17T07:37:52.062Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-orbit-turntable.mp4",
+    "poster": "previews/moworks__motion-orbit-turntable.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f14081592b3b2e376dbff8716c0585351a0a52cac3de1d408bca6d8fd69fd2c8",
+    "size": 37444,
+    "seconds": 33.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

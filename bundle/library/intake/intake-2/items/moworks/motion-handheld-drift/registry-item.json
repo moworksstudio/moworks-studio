@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-handheld-drift",
+  "type": "hyperframes:component",
+  "title": "Handheld Drift",
+  "description": "Cả khung trôi chậm không đều như máy quay cầm tay, biên độ rất nhỏ.",
+  "tags": [
+    "camera",
+    "handheld",
+    "drift",
+    "ambient",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "motion-handheld-drift.html",
+      "target": "compositions/components/motion-handheld-drift.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-handheld-drift",
+    "author": "moworks",
+    "call": "MW.motionHandheldDrift(q(\".tk-cam\"), tl, 0, { duration: 4 });",
+    "function": "MW.motionHandheldDrift",
+    "options": {
+      "duration": "s it drifts",
+      "amp": "px scale of the sines (9: x = 18 sin 1.7t + 9 sin 3.1t, y = 12 sin 2.3t + 6 sin 4.7t)",
+      "roll": "degrees (0.57)",
+      "overscan": "scale hiding the edges (1.05)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Full-frame group offset by a sum of sines: recipe x = sum a_i sin(2 pi t / T_i), T 1.7 / 2.9 / 4.3 s, amplitude 2-4 px. Demo: x = 6 sin(1.7 t) + 3 sin(3.1 t), y = 4 sin(2.3 t) + 2 sin(4.7 t) px, roll 0.01 sin(1.3 t) rad, scale 1.05 to hide the edges. Params: amp (2–4 px) · periods (1.7 / 2.9 / 4.3 s) · overscan (1.05).",
+    "titleVi": "Rung nhẹ như cầm máy tay"
+  }
+}

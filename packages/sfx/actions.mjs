@@ -2,7 +2,7 @@
 // lively mood"). What sound each action of the Motion Plan gets and when, how loud each family plays, how many sounds a second a film
 // carries, the place of a scene for its ambience bed, and the material a film style's sounds are made of. Pure: the placement
 // (auto.mjs) and Tech checks (G-SFX, hf-qa/sfxCover.mjs) read the same rules.
-import { familyOf, words } from "./library.mjs";
+import { familyOf, sustainedCue, words } from "./library.mjs";
 
 const r3 = (n) => Math.round(n * 1000) / 1000;
 const norm = (s) => String(s ?? "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/g, "d");
@@ -19,12 +19,17 @@ export const TYPING = /\btyping\b|\btyp(?:es|ed)\s+(?:out|in)\b|\btype-on\b|\bty
 // one hit, so its integrated loudness reads low) to HIT_OVER dB over the music between the words ("each hit sits 3-6 dB over the bed"),
 // its family a little louder or softer (LEVELS around LEVEL). Owner 30/10, after Tests 21-26: the music at a fixed 0.6 and never ducked
 // covered the voice, and the effects, set under the bed, could not be heard. Gains go up to HyperFrames' own ceiling, +12 dB (core
-// audioGain.ts MAX_AUDIO_GAIN_DB at 0.8.214: Studio's fader, the preview and the render all carry gain over unity).
+// audioGain.ts MAX_AUDIO_GAIN_DB at 0.8.214: Studio's fader, the preview and the render all carry gain over unity). An effect goes that high
+// only when its file has the room for it (HIT_PEAK): an effect's loudest 400 ms reads low (a 70 ms tick, a low wind K-weighting discounts) while
+// the library's files peak at about -4.5 dBFS, so without it +12 dB put single ticks at +7.5 dBFS and the stems at +8.5 dBFS (Test 28): the
+// render lowered the whole film 10 dB to keep them from clipping, and the master's limiter pulled the mix down around each one.
 export const VOICE_LUFS = -16, ALONE_LUFS = -16;          // the voice-over; the music of a film with no voice
 export const BED_UNDER = 4;             // the music between the words, dB under the voice
 export const MUSIC_DUCK = 0.25;         // the music while words are spoken (media-use audio-duck's default)
 export const HIT_OVER = 4;              // an effect's loudest moment, dB over the music between the words
 export const MAX_GAIN = Math.round(10 ** (12 / 20) * 100) / 100;          // +12 dB
+export const HIT_PEAK = -3;             // the loudest sample an effect's own gain may reach, dBFS (the film's whole mix: voicefit.mjs MIX_PEAK)
+export const EFFECTS_MARGIN_DB = 3, MUSIC_MARGIN_DB = 10;          // under a spoken word, how far under the voice (voicecheck.mjs, voicefit.mjs)
 // LEVELS: each family's place against the others (impact louder, click softer) and, for the ambience beds, their volume at the library's
 // loudness (loops -28 LUFS, brought up to it), moved with the film's mix (mixShift)
 export const LEVELS = Object.freeze({ click: 0.2, switch: 0.22, pop: 0.25, footstep: 0.25, cloth: 0.25, typing: 0.25, electronic: 0.25, whoosh: 0.3,
@@ -55,11 +60,14 @@ export function volumeFor(family, lufs = null, { shift = 0, voice = null, maxBoo
 }
 /** A sound effect's volume (0.02 to MAX_GAIN): its loudest 400 ms (`peak`, momentary LUFS; null: at REF_LUFS) brought HIT_OVER dB over
  *  the music between the words (`bed`, LUFS; with no music, where it would be), its family up to 4 dB louder or softer (LEVELS against
- *  LEVEL), and never more than 2 dB over the voice's own level (`voice`, LUFS): the effects sit in the pauses (afterWords). */
-export function hitVolume(family, peak = null, { bed = REF_BED, voice = null } = {}) {
+ *  LEVEL), never more than 2 dB over the voice's own level (`voice`, LUFS: the effects sit in the pauses, afterWords; under a word its own
+ *  lane holds it, voicefit.mjs), and never past the room its file has (`filePeak`, the file's loudest sample, dBFS: HIT_PEAK). */
+export function hitVolume(family, peak = null, { bed = REF_BED, voice = null, filePeak = null } = {}) {
   let target = bed + HIT_OVER + clamp(20 * Math.log10(levelOf(family) / LEVEL), -4, 4);
   if (Number.isFinite(voice)) target = Math.min(target, voice + 2);
-  return Math.round(clamp(10 ** ((target - (Number.isFinite(peak) ? peak : REF_LUFS)) / 20), 0.02, MAX_GAIN) * 100) / 100;
+  let gain = target - (Number.isFinite(peak) ? peak : REF_LUFS);
+  if (Number.isFinite(filePeak)) gain = Math.min(gain, HIT_PEAK - filePeak);
+  return Math.round(clamp(10 ** (gain / 20), 0.02, MAX_GAIN) * 100) / 100;
 }
 /** The levels of the voice-over and the music ({ voice, music }: each file's integrated LUFS, null when the film has none; words: whether
  *  the spoken words are known, so the music can duck under them): { voiceGain, musicGain, voice: the voice's level after its gain, bed: the
@@ -96,12 +104,17 @@ export function thin(cues, density = "lively") {
   const busy = (c) => [c.start, ...kept.map((k) => k.start).filter((t) => t <= c.start && t > c.start - 1)]
     .some((w) => 1 + kept.filter((k) => k.start >= w - 1e-6 && k.start < w + 1 - 1e-6).length > D.perSecond);
   const twin = (c) => kept.some((k) => Math.abs(k.start - c.start) < SAME_MOMENT_S && (k.name === c.name || (!!k.family && k.family === c.family)));
-  for (const c of [...cues].sort((a, b) => p(a) - p(b) || Number(!!a.small) - Number(!!b.small) || a.start - b.start)) {
-    const why = twin(c) ? "same moment"
+  // a cue the user moved by hand comes first and stays (auto.mjs planCues); where it was (`left`) holds its moment against what was the same action there: a motion's own
+  // sound under a named bell must not ring where the user took the bell from
+  const left = cues.filter((c) => c.left);
+  for (const c of cues.filter((x) => !x.left).sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned) || p(a) - p(b) || Number(!!a.small) - Number(!!b.small) || a.start - b.start)) {
+    const why = c.pinned ? null : twin(c) ? "same moment"
       : p(c) === PRIO.named ? null
+      // the storyboard names this shot's footsteps: they are its walk (Test 28: 19 automatic steps between "old man footstep wood")
+      : c.auto && c.family === "footstep" && kept.some((k) => p(k) === PRIO.named && k.family === "footstep" && k.shot === c.shot) ? "named"
       : c.small && !D.small ? "small"
       : c.small && kept.some((k) => Math.abs(k.start - c.start) < D.smallGap - 1e-6) ? "small"
-      : kept.some((k) => p(k) < p(c) && Math.abs(k.start - c.start) < D.same) ? "same moment"
+      : [...kept, ...left].some((k) => p(k) < p(c) && Math.abs(k.start - c.start) < D.same) ? "same moment"
       : kept.some((k) => k.family && k.family === c.family && Math.abs(k.start - c.start) < D.sameFamily - 1e-6) ? "same family"
       : busy(c) ? "busy" : null;
     if (why) thinned.push({ ...c, why }); else kept.push(c);
@@ -151,8 +164,16 @@ const PLACES = [
   [new RegExp(L("night|nighttime|midnight|evening|dusk|đêm|ban đêm|buổi tối"), "iu"), "night crickets", "grass"],
   [new RegExp(L("desert|mountain|cliff|hilltop|prairie|windy|wind|sa mạc|núi|gió"), "iu"), "mild wind", "gravel"],
   [new RegExp(L("snow|snowy|winter|tuyết|mùa đông"), "iu"), "mild wind", "snow"],
-  [new RegExp(L("room|kitchen|office|bedroom|living room|house|apartment|indoors?|interior|hallway|corridor|workshop|phòng|căn bếp|nhà bếp|văn phòng|căn nhà"), "iu"), "room tone", "wood"],
+  [new RegExp(L("room|kitchen|office|bedroom|living room|house|apartment|indoors?|interior|hallway|corridor|workshop|attic|loft|staircase|stairs|cellar|phòng|căn bếp|nhà bếp|văn phòng|căn nhà|gác mái"), "iu"), "room tone", "wood"],
 ];
+// Indoors the time of day is no place (Test 28: "quiet house evening" was crickets and grass underfoot, "quiet house dawn" morning birds). Not
+// when the words stand outside the house (a rooftop at dawn) or name what is heard from inside it ("attic morning birds").
+const INDOOR = new RegExp(L("room|kitchen|office|bedroom|living room|house|home|apartment|indoors?|interior|hallway|corridor|workshop|attic|loft|staircase|stairs|cellar|garage|bathroom|phòng|căn bếp|nhà bếp|văn phòng|căn nhà|trong nhà|gác mái"), "iu");
+const OUTSIDE = new RegExp(L("rooftop|roof|terrace|balcony|yard|courtyard|porch|garden|outside|outdoors?|mái nhà|sân|vườn|ngoài trời"), "iu");
+const TIME_OF_DAY = new RegExp(L("morning|dawn|sunrise|noon|afternoon|evening|dusk|sunset|night|nighttime|midnight|buổi sáng|bình minh|buổi chiều|buổi tối|ban đêm|đêm"), "giu");
+const HEARD = new RegExp(L("birds?|birdsong|crickets?|cicadas?|insects?|frogs?|chim|dế|ve sầu|ếch"), "iu");
+/** A place's words without the time of day when they say indoors and name no outdoor sound; else as they are. */
+const indoorText = (text) => (INDOOR.test(text) && !OUTSIDE.test(text) && !HEARD.test(text) ? text.replace(TIME_OF_DAY, " ").replace(/\s+/g, " ").trim() : text);
 const SURFACES = [[/\b(wood|wooden|floorboards?|plank)\b/, "wood"], [/\b(street|road|pavement|concrete|stone|sidewalk|asphalt|tiles?)\b/, "concrete"],
   [/\b(grass|lawn|meadow|field)\b/, "grass"], [/\b(gravel|path|sand|dirt)\b/, "gravel"], [/\b(snow|snowy)\b/, "snow"], [/\b(carpet|rug)\b/, "carpet soft"],
   [/\b(wet|puddles?|rain)\b/, "wet"]];
@@ -161,9 +182,14 @@ const SURFACES = [[/\b(wood|wooden|floorboards?|plank)\b/, "wood"], [/\b(street|
 export function placeOf(shot) {
   const own = String(shot?.ambience ?? "").trim();
   if (/^(none|no|off|silence|-)$/i.test(own)) return { none: true };
-  if (own) { const p = PLACES.find(([re]) => re.test(own)); return { query: own.toLowerCase(), surface: p?.[2] ?? null, from: "ambience" }; }
+  if (own) {
+    const text = indoorText(own), bare = HEARD.test(own) && INDOOR.test(own) ? own.replace(TIME_OF_DAY, " ") : text;
+    const p = PLACES.find(([re]) => re.test(bare));
+    // the house itself is its room tone (no loop is tagged "house"); what is named from inside it keeps its own words, on the room's floor
+    return { query: text !== own && p?.[1] === "room tone" ? "room tone" : own.toLowerCase(), surface: p?.[2] ?? null, from: "ambience" };
+  }
   for (const from of ["location", "sound", "title", "scene"]) {
-    const text = String(shot?.[from] ?? "");
+    const text = indoorText(String(shot?.[from] ?? ""));
     const p = text && PLACES.find(([re]) => re.test(text));
     if (p) return { query: p[1], surface: p[2], from };
   }
@@ -182,6 +208,7 @@ const MATERIALS = [[/\b(wood|wooden|table|desk|crate|plank|log|shelf|chair|door)
   [/\b(pillow|cushion|cloth|bag|sack|soft|feather|paper|book|card)\b/, "soft"], [/\b(body|person|character|man|woman|girl|boy|kid|child|hero|he|she|figure|punch|fist|kick)\b/, "body"]];
 const materialOf = (t) => MATERIALS.find(([re]) => re.test(t))?.[1] ?? null;
 const IMPACT_NAME = { wood: "impact wood", metal: "impact metal", glass: "impact glass", stone: "impact stone", plate: "plate clink", soft: "soft thud", body: "body thud" };
+const LONG_ROLL_S = 0.8, LONG_SLIDE_S = 1.5;          // how long a row must last for its roll or its slide to be heard as one
 const WHOOSHY = /\b(fl(y|ies|ying|ew)|swoop(s|ing)?|zoom(s|ing)?|whip(s|ped|ping)?|sweep(s|ing)?|spin(s|ning)?|swipe(s|d)?|dash(es|ing)?|zip(s|ping)?|rush(es|ing)?|shoots? (across|past|by|up|in|out)|slid(e|es|ing)|glid(e|es|ing)|soar(s|ing)?|swing(s|ing)?|throw(s|n)?|toss(es|ed)?|hurl(s|ed)?|launch(es|ed)?|fling(s)?|streak(s|ing)?|whirl(s|ing)?|twirl(s|ing)?|flick(s|ed)?)\b|bay vào|lướt/i;
 
 /** One motion row's sound: { name, family, at: "start" | "end", small, hold, steps } or null (a loop, the camera, a row nothing says
@@ -193,13 +220,14 @@ export function motionSound(m, ctx = {}) {
   if (!ctx.auto && own) {
     if (/^(none|no|silent|silence|-)$/i.test(own)) return { none: true };
     const family = familyOf(own);
-    return { name: own.toLowerCase(), family, at: family === "impact" && LANDS.test(textOf(m)) ? "end" : "start", small: SMALL.test(textOf(m)) || m.type === "emphasis", plan: true };
+    const lasts = sustainedCue(own);          // a roll, a pour: as long as its row, from its start
+    return { name: own.toLowerCase(), family, at: family === "impact" && !lasts && LANDS.test(textOf(m)) ? "end" : "start", small: SMALL.test(textOf(m)) || m.type === "emphasis", plan: true, ...(lasts ? { hold: true } : {}) };
   }
   const type = m?.type ?? "other", raw = textOf(m).toLowerCase(), plain = norm(raw).replace(NOT_LANDS, " "), ws = new Set(words(raw));
   if (type === "loop") return null;
   if (type === "camera") return /\b(whip|swish pan|crash zoom|snap zoom)\b/.test(plain) && allow("whoosh") ? { name: "whoosh", family: "whoosh", at: "start", small: false } : null;
   const small = SMALL.test(raw) || type === "emphasis" || ((type === "entrance" || type === "exit") && FADE_ONLY.test(raw) && !WHOOSHY.test(raw));
-  const hit = verbSound({ raw, plain, ws, type, ctx });
+  const hit = verbSound({ raw, plain, ws, type, ctx, dur: Number(m?.duration) || 0 });
   if (hit && allow(hit.family)) return { at: "start", small, ...hit };
   // what the row's type says when no word names its sound (or the style or the owner keeps that family out)
   const fall = type === "entrance" ? { name: "pop", family: "pop" } : type === "text" ? { name: "soft pop", family: "pop" }
@@ -212,7 +240,7 @@ export function motionSound(m, ctx = {}) {
 const textOf = (m) => `${m?.behavior ?? ""} ${m?.name ?? ""} ${m?.plain ?? ""} ${String(m?.target ?? "").replace(/[#.[\]=_-]+/g, " ")}`;
 
 /** The family and name a row's own words give, or null. */
-function verbSound({ raw, plain, ws, type, ctx }) {
+function verbSound({ raw, plain, ws, type, ctx, dur = 0 }) {
   if (TYPING.test(raw)) return { family: "typing", name: "typing", hold: true };
   if (any(ws, "pour splash drip spill dive plunge dunk bubble ripple") || (ws.has("fill") && /\b(water|tea|coffee|milk|juice|liquid|cup|glass|mug)\b/.test(plain)) || /\bwater (drop|drops|falls)\b/.test(plain))
     return { family: "water", name: any(ws, "pour fill") ? "water pour" : ws.has("drip") || /water drop/.test(plain) ? "water drip" : any(ws, "dive plunge dunk") ? "water splash"
@@ -259,6 +287,9 @@ function verbSound({ raw, plain, ws, type, ctx }) {
     return { family: "paper", name: /\b(drops?|lands?|plac|puts?|deals?|stacks?)/.test(plain) ? "card place" : /shuffl/.test(plain) ? "card shuffle" : "paper slide" };
   if (STEPS.test(raw) || (/\b(run(s|ning)?|ran|chạy)\b/i.test(raw) && LIVING.test(plain)))
     return { family: "footstep", name: `footstep ${SURFACES.find(([re]) => re.test(plain))?.[1] ?? ctx.surface ?? "wood"}`, steps: true };
+  // a thing that rolls, a long slide: a sound that lasts, never one tick (Test 28); a short one stays the swish or the thud below
+  if (dur >= LONG_ROLL_S && /\b(roll(s|ing)|rumbl(e|es|ing))\b/.test(plain)) return { family: "impact", name: `${materialOf(plain) ? `${materialOf(plain)} ` : ""}rolling`, hold: true };
+  if (dur >= LONG_SLIDE_S && type !== "text" && /\b(slid(e|es|ing)|glid(e|es|ing))\b/.test(plain)) return { family: "whoosh", name: "sliding", hold: true };
   if (LANDS.test(plain) || /\b(hit(s|ting)?|bump(s|ed)?|knock(s|ed|ing)?|punch(es|ed)?|collid\w*|shatter\w*|stamp(s|ed)?|impact|strikes?|thump(s|ed)?|clunk|clang|bang(s)?|thunk|smack(s|ed)?)\b/.test(plain)) {
     const mat = materialOf(plain);
     if (mat) return { family: "impact", name: IMPACT_NAME[mat], end: LANDS.test(plain) };
@@ -341,6 +372,8 @@ export function tiles(bed, loopS, xf = XFADE) {
   return Array.from({ length: n }, (_, k) => ({ start: r3(bed.start + k * step), duration: r3(k === n - 1 ? len - k * step : step + xf),
     fadeIn: k ? xf : bed.fadeIn, fadeOut: k === n - 1 ? bed.fadeOut : xf }));
 }
+/** A lane the app wrote keeps its signature beside it (data-mw-duck), so a lane the user changed in Studio stays theirs. */
+export const sig = (s) => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) | 0; return (h >>> 0).toString(36); };
 /** The spoken spans (words closer than 0.6 s merged), film seconds. */
 export function speechSpans(words, gap = 0.6) {
   const out = [];
@@ -357,7 +390,26 @@ export function duckLane(clip, spans, { duck = DUCK, attack = 0.15, release = 0.
   const a = clip.start, b = clip.start + clip.duration;
   const inside = (spans ?? []).filter((s) => s.end > a && s.start < b);
   if (!inside.length) return null;
-  const env = inside.flatMap((s) => [[s.start - attack, 1], [s.start, duck], [s.end, duck], [s.end + release, 1]]);
+  return envelopeLane(clip, inside.flatMap((s) => [[s.start - attack, 1], [s.start, s.duck ?? duck], [s.end, s.duck ?? duck], [s.end + release, 1]]));
+}
+/** An effect's own lane under the words it sounds on (voicefit.mjs): dips [{ start, end, gain }] in film seconds, by start; flat inside each
+ *  word, so the word hears exactly that gain; back to full in a pause long enough, else straight on to the next word's gain. null with no dip. */
+export function dipLane(clip, dips, { attack = 0.05, release = 0.1 } = {}) {
+  if (!dips?.length) return null;
+  const env = [[dips[0].start - attack, 1]];
+  dips.forEach((d, i) => {
+    const prev = dips[i - 1], next = dips[i + 1], turn = 0.01;          // two words with no pause: the turn inside the one that may be louder
+    const from = prev && d.start - prev.end < turn * 1.2 ? (prev.gain < d.gain ? prev.end + turn : Math.max(d.start, prev.end + 0.001)) : d.start;
+    const to = next && next.start - d.end < turn * 1.2 && next.gain < d.gain ? d.end - turn : d.end;
+    env.push([from, d.gain], [to, d.gain]);
+    if (!next) env.push([d.end + release, 1]);
+    else if (next.start - d.end >= attack + release) env.push([d.end + release, 1], [next.start - attack, 1]);
+  });
+  return envelopeLane(clip, env);
+}
+/** An envelope [[film second, value]], by time, as HF's volume lane in the clip's own seconds. */
+function envelopeLane(clip, env) {
+  const a = clip.start, b = clip.start + clip.duration;
   const at = (t) => {
     if (t <= env[0][0]) return env[0][1];
     for (let i = 1; i < env.length; i++) if (t <= env[i][0]) { const [t0, v0] = env[i - 1], [t1, v1] = env[i]; return t1 > t0 ? v0 + ((v1 - v0) * (t - t0)) / (t1 - t0) : v1; }

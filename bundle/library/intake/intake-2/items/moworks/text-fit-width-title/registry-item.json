@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-fit-width-title",
+  "type": "hyperframes:component",
+  "title": "Fit-to-width Title",
+  "description": "Cỡ chữ tiêu đề luôn được tính lại để dòng chữ vừa khít bề rộng khung (trừ lề), có giới hạn cỡ tối đa; khung hẹp lại thì chữ nhỏ theo.",
+  "tags": [
+    "fit",
+    "layout",
+    "title",
+    "resize",
+    "text-layout-reflow",
+    "crisp",
+    "layout-reflow"
+  ],
+  "files": [
+    {
+      "path": "text-fit-width-title.html",
+      "target": "compositions/components/text-fit-width-title.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-fit-width-title",
+    "author": "moworks",
+    "call": "MW.textFitWidthTitle(q(\".fw h1\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.textFitWidthTitle",
+    "options": {
+      "pad": "px each side (70)",
+      "cap": "largest font size, px (460)",
+      "wide": "card px (1400)",
+      "narrow": "px (750)",
+      "card": "the box it fits (the title's parent)",
+      "cursor": "the cursor dragging the corner",
+      "loop": "s (4.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Remotion"
+    },
+    "thirdParty": [],
+    "notes": "fontSize = min(cap, size × (frame width − 2 × padding) ÷ measured width), measured after the font loads; one line, no wrap; re-measure whenever the text or box changes. Demo: card width 280 → 150 px (0.4–1.2 s) and back (2.2–3.0 s), cubic-bezier(.65,0,.35,1), padding 14 px, cap 92 px, the title refitting every frame; a cursor drags the card's corner. Loop 4.2 s. Params: lề (14 px mỗi bên) · cỡ tối đa (92 px) · bề rộng khung. fontSize = min(cap, size × (box width − 2 × pad) ÷ measured width), re-measured every frame; one line.",
+    "titleVi": "Tiêu đề tự co giãn vừa khung"
+  }
+}

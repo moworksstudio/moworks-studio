@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-long-shadow",
+  "hash": "ee7b31ee3c85b686",
+  "at": "2026-10-17T10:31:33.283Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-long-shadow.mp4",
+    "poster": "previews/moworks__text-long-shadow.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "0bfdabc83f974bcdfcf34c3412ce857f9fe743d686cb0a2f5f8bc6e049643ae5",
+    "size": 14300,
+    "seconds": 27.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

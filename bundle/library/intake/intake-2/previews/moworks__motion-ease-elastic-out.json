@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-ease-elastic-out",
+  "hash": "b40da2772b097fcd",
+  "at": "2026-10-17T09:01:52.755Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-ease-elastic-out.mp4",
+    "poster": "previews/moworks__motion-ease-elastic-out.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "36d5ae6a69aae86440e764551af695d33f7a75f6e60f4c59bb288974a9ed4416",
+    "size": 8996,
+    "seconds": 26.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

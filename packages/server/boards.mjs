@@ -8,18 +8,18 @@ import * as projects from "../project-service/index.mjs";
 import { docPath } from "../project-service/docs.mjs";
 import { rememberAssets } from "../project-service/assets.mjs";
 import { currentOptions, firstRoundOf, isOption, listRounds, makeRevision, optionLabel, optionName, ownerRounds, parseFeedback, recordPick, roundPdf, takeStills } from "../hf-edit/boards.mjs";
-import { CHECK_ARGS_PLAIN, checkFindings, qcRound, qcText } from "../hf-qa/qc.mjs";
+import { CHECK_ARGS_PLAIN, checkFindings, filmFrames, framesText, qcRound, qcText } from "../hf-qa/qc.mjs";
 import { runHfJsonAsync, STILLS_BUSY } from "../hf-qa/cli.mjs";
 import { placedShots, readShots, untimedFrames } from "../hf-edit/shots.mjs";
 import { effectiveSettings, freshEyes, styleSound } from "../agent/index.mjs";
 import { filmKind } from "../agent/reads.mjs";
 import { librarySearch, searchText } from "../library/search-tool.mjs";
-import { HF_SKILL, needsWeb, runScript, scriptText } from "../hf-edit/hf-scripts.mjs";
+import { HF_SKILL, debugArgs, needsWeb, runScript, scriptText } from "../hf-edit/hf-scripts.mjs";
 import { runPy } from "../setup/python.mjs";
 import { creditMusic, optionsText, readOptions, saveOptions } from "../sfx/music.mjs";
 import { planEpisode, planText } from "../what-if-plan/index.mjs";
 import { autoSfx, whooshAllowed } from "../sfx/auto.mjs";
-import { cuesChanged, mount, mountAmbience, placedNote, readState, unmuteAll, writeCredits } from "../sfx/index.mjs";
+import { addedNow, cuesChanged, mount, mountAmbience, mountedNow, placedNote, readState, unmuteAll, writeCredits } from "../sfx/index.mjs";
 import { DEFAULT_DENSITY, DENSITIES, prefsText, readPrefs, updatePrefs } from "../sfx/prefs.mjs";
 import * as plan from "../motion-plan/index.mjs";
 import { snapStop, stopContext } from "../sfx/stop-snap.mjs";
@@ -43,17 +43,25 @@ const OPTION_TASK = /^Make one (more )?storyboard option/, FEEDBACK_TASK = /^The
 // the storyboard timed again to a voice that came while it was drawn (autopilot's transcriptLanded) is a revision's work, not an option's
 const VOICE_TASK = /^The voice-over came while you drew the storyboard/;
 const isRevision = (t) => FEEDBACK_TASK.test(String(t.text ?? "")) || VOICE_TASK.test(String(t.text ?? ""));
-export function boardEstimates(tasks, styleId = null) {
+export function boardEstimates(tasks, styleId = null, { shots = null } = {}) {
   const median = (xs) => { const v = [...xs].sort((a, b) => a - b); return v.length ? (v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2) : null; };
   const ms = (t) => Number(t.durationMs ?? t.usage?.durationMs) || 0, usd = (t) => Number(t.usage?.costUsd) || 0;
   const options = [], revisions = [], motions = [];
+  // a step's task and the chat turns that answer its question are one run, and one that only asked (it changed nothing) is no run yet
+  // (T28-13: a Storyboard that stopped after 1.4 min to ask counted as an option of this film, and the 23.7 min after the answer said "1-2 min")
+  const runs = [], asked = (t) => !!t.changed && !t.changed.length;
   for (const t of tasks ?? []) {
+    const prev = runs.at(-1);
+    if (t.continues && prev?.step === t.continues) { prev.ms += ms(t); prev.usd += usd(t); prev.status = t.status; prev.onlyAsked = asked(t); continue; }
+    runs.push({ ...t, ms: ms(t), usd: usd(t), onlyAsked: asked(t) });
+  }
+  for (const t of runs) {
     if (t.status !== "done") continue;
     // an option: Make another, or the step's first option in any engine's own words (What If: "Make the storyboard as the what-if-style pack says")
-    if (t.step === "storyboard" && (OPTION_TASK.test(String(t.text ?? "")) || !isRevision(t)) && ms(t) > 60000) options.push({ ms: ms(t), usd: usd(t) });
-    else if (t.step === "storyboard" && isRevision(t)) revisions.push({ ms: ms(t), usd: usd(t) });
-    else if (t.label === "Storyboard · revision" && revisions.length) { const r0 = revisions.at(-1); r0.ms += ms(t); r0.usd += usd(t); }
-    else if (t.step === "motionSpec") motions.push({ ms: ms(t), usd: usd(t) });          // what Approve storyboard starts
+    if (t.step === "storyboard" && (OPTION_TASK.test(String(t.text ?? "")) || !isRevision(t))) { if (t.ms > 60000 && !t.onlyAsked) options.push({ ms: t.ms, usd: t.usd }); }
+    else if (t.step === "storyboard") revisions.push({ ms: t.ms, usd: t.usd });
+    else if (t.label === "Storyboard · revision" && revisions.length) { const r0 = revisions.at(-1); r0.ms += t.ms; r0.usd += t.usd; }
+    else if (t.step === "motionSpec") motions.push({ ms: t.ms, usd: t.usd });          // what Approve storyboard starts
   }
   const ani = /^anidoodle-/.test(String(styleId ?? ""));
   const one = (list, usual) => {
@@ -70,17 +78,31 @@ export function boardEstimates(tasks, styleId = null) {
   // film 25.1 min, $6.47; the Motion Plan 3.3-11.5 min, 4.7 in the middle, $0.90-1.76, $1.28 on average): "about 10 min" and "about
   // $1.20" were given for a 39.6 min storyboard and a $1.70 Motion Plan (T23-11)
   return { option: one(options, ani ? { minutes: 25, costUsd: 6.5 } : { minutes: 22, costUsd: 4.4 }), feedback: one(revisions, { minutes: 5, costUsd: 1 }),
-    motion: one(motions, { minutes: 5, costUsd: 1.3, costHigh: 1.8 }) };
+    motion: one(motions, motionUsual(shots)) };
+}
+/** What a Motion Plan usually takes: it grows with the film's shots (the runs' reports: 6 shots 4.7 min $1.00, 8 4.0-7.7 $0.98-1.44, 10-12
+ *  3.4-5.3 $0.90-1.24, 27 8.8 $2.54, 30 9.1 $2.58; "about $1.30" for 27 shots was half the cost, T28-13). Without a count, the middle. */
+function motionUsual(shots) {
+  const n = Number(shots);
+  if (!(n > 0)) return { minutes: 5, costUsd: 1.3, costHigh: 1.8 };
+  return { minutes: Math.round(3 + 0.2 * n), costUsd: Math.round((0.4 + 0.075 * n) * 100) / 100 };
 }
 
 /** the running Storyboard or Motion Plan task's time (12 min of "Drawing the storyboard" with no time said, while the Build said
  *  "about N min left"): { stage, minutes, high, startedAt } from the same estimates the dialogs' confirms give, null for any other task. */
-export function runningEstimate(task, tasks, styleId = null) {
+export function runningEstimate(task, tasks, styleId = null, { shots = null } = {}) {
   const step = task?.step ?? task?.continues;          // the answer to its question goes on with the step
   if (!task || task.status !== "running" || !["storyboard", "motionSpec"].includes(step)) return null;
-  const e = boardEstimates(tasks, styleId);
-  const est = step === "motionSpec" ? e.motion : isRevision(task) ? e.feedback : e.option;
+  const e = boardEstimates(tasks, styleId, { shots });
+  // the answer's own words say nothing of what it goes on with: the step's task it answers does
+  const head = task.step ? task : [...(tasks ?? [])].filter((x) => x.step && String(x.createdAt ?? "") <= String(task.createdAt ?? "")).at(-1) ?? task;
+  const est = step === "motionSpec" ? e.motion : isRevision(head) ? e.feedback : e.option;
   return { stage: step === "motionSpec" ? "motion" : "storyboard", minutes: est.minutes, high: est.high, startedAt: task.createdAt ?? null };
+}
+/** The frames of the storyboard option the owner approved, for the Motion Plan's time; null without one. */
+export function approvedFrames(p) {
+  const o = p?.meta?.approvals?.storyboard?.option;
+  try { return (o && currentOptions(p.path).find((x) => x.option === o)?.frames?.length) || null; } catch { return null; }
 }
 
 /** The words after a running stage's line: "about 6 min left" down to its estimate, then "taking longer than usual · 34 min so far"; the
@@ -140,8 +162,10 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       taking: takingOf(p.id),          // with frames: { done, total } while the stills are taken
       // the last take was stopped twice (the computer is busy): { message, at }, said with a Retry, until a take works
       stillsBusy: takingOf(p.id) ? null : stillsBusy.get(p.id) ?? null,
-      // what the confirm of Make another option and of Feedback says: { option, feedback }: { minutes, costUsd, basis, runs }
-      estimates: boardEstimates(ctx.agent?.list?.(p.id) ?? [], p.meta?.style?.id) };
+      // what the confirm of Make another option and of Feedback says: { option, feedback }: { minutes, costUsd, basis, runs }; the Motion Plan
+      // grows with the option's frames: motionFor, by option
+      estimates: (() => { const tasks = ctx.agent?.list?.(p.id) ?? [], styleId = p.meta?.style?.id;
+        return { ...boardEstimates(tasks, styleId), motionFor: Object.fromEntries(currentOptions(p.path).map((o) => [o.option, boardEstimates(tasks, styleId, { shots: o.frames.length }).motion])) }; })() };
   };
   /** The draft the dialog shows: the newest one. A draft holds every option on disk (A, B, and C, D after "Make two
    *  more"), so nothing is lost; Claude's other drafts and the stills the dialog took again of the same options stay on disk only. While
@@ -309,7 +333,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
   };
   /** The plan's musicStop as the music step will apply it (for Claude's words before the app places the music). */
   const planStop = (p) => { const mp = plan.read(p.path); return mp.exists && !mp.error && mp.plan.musicStop > 0 && planStopAllowed(p, mp.plan) && p.meta?.music?.stopAt == null && !p.meta?.music?.toEnd ? snapped(p, mp.plan.musicStop).at : null; };
-  ctx.mix = { useOption, placeSfx, stopFromPlan, cuesAgain };
+  ctx.mix = { useOption, placeSfx, stopFromPlan, cuesAgain, change: mixChange };
   // the app tools (Agent.callTool)
   const tools = {
     psd_layers: async ({ project, args }) => {
@@ -361,7 +385,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       // the project's HF skills, the entry skill and media-use (carve); runScript runs only its allow-listed scripts from them
       const skills = [...new Set([...(project.meta?.style?.rules ?? []).filter((r) => r.kind === "hf-skill").map((r) => r.name), HF_SKILL, "media-use"])];
       const r = await runScript(project.path, { name, args: list, skills, root, signal: ctx.stopping.signal });
-      return scriptText(r, list);
+      return scriptText(r, debugArgs(name, list));
     },
     library_search: async ({ args }) => {
       const q = String(args.query ?? "").trim();
@@ -435,7 +459,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       let fresh = null;
       if (!task.freshEyesDone && res.sheets.beats) {          // the first round of this task: a second look that knows nothing else
         task.freshEyesDone = true;
-        fresh = await freshEyes({ dir: project.path, sheets: [res.sheets.beats, res.sheets.cuts].filter(Boolean), root });
+        fresh = await freshEyes({ dir: project.path, sheets: Object.entries(res.sheets).filter(([k]) => /^(beats|cuts)(-\d+)?$/.test(k)).map(([, v]) => v), root });
       }
       projects.updateMeta(project.id, (m) => { m.lastQc = { round: res.round, at: new Date().toISOString(), counts: res.check?.counts ?? null, sheets: res.sheets, freshEyes: fresh }; }, root);
       // an anidoodle film: every frame drawn, every pose inside its joint limits (a run pose once left them and
@@ -443,6 +467,11 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       const pose = poseText(await poseCheck(project.path));
       // a Vietnamese film's words on screen written without their marks (Test 24: the Review never saw "NHAT KY · TRAM HON GIO")
       return [qcText(res, fresh), pose, glyphText(codeGlyphs(project.path)), viMarksText(viMarks(project.path))].filter(Boolean).join("\n\n");
+    },
+    // one moment of the film, whole, with its text: what the sheets are too small for (T28-6)
+    film_frames: async ({ project, args = {} }) => {
+      const { root: comp } = await readShots(project.path);
+      return framesText(await filmFrames(project.path, args.at, { total: comp?.duration ?? null, signal: ctx.stopping.signal }));
     },
   };
 
@@ -523,7 +552,10 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       // repeat: a song shorter than the film plays again after itself (tracks.mjs musicLoop); `short` when far shorter, said to the owner
       return { music: m.music ? { ...m.music, url: url(id, m.music.file), repeat: musicRepeats(p.path) } : null, voice: m.voice?.file ? { file: m.voice.file, saved: m.voice.transcript?.status === "saved", used: !m.voice.offTimeline } : null,          // used: false once the user chose not to use it
         options: rounds.map((r0) => ({ ...r0, tracks: r0.tracks.map((t) => ({ ...t, url: url(id, t.file), current: m.music?.option === t.file || m.music?.file === t.file })) })),
-        sfx: (sfx.mounted ?? []).map((x) => ({ name: x.name, start: x.start, file: x.file, auto: !!x.auto, id: x.id ?? null })), loudness: m.lastExport?.loudness ?? null, carved: m.carve ?? null,
+        // where each sound is now: moved by hand, it is there; taken off, it is not listed (T29-7)
+        sfx: mountedNow(p.path).map((x) => ({ name: x.name, start: x.start, file: x.file, auto: !!x.auto, id: x.id ?? null })), loudness: m.lastExport?.loudness ?? null, carved: m.carve ?? null,
+        // the sounds the user added from the Sounds drawer: placing again never touches them, each comes off with its ×
+        added: addedNow(p.path).map((x) => ({ id: x.id, name: x.title, start: x.start, file: x.file })),
         // the scenes' ambience beds (one row a bed, however many clips its loop takes), and the owner's sound choices
         ambience: [...new Map((sfx.ambience?.placed ?? []).map((x) => [x.key, x])).values()].map((x) => ({ id: x.key, name: String(x.name ?? "").replace(/^ambience:\s*/, ""),
           start: Math.min(...sfx.ambience.placed.filter((y) => y.key === x.key).map((y) => y.start)) })),

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-stagger-diagonal",
+  "type": "hyperframes:component",
+  "title": "Stagger: Grid Diagonal",
+  "description": "Sóng xuất hiện chạy chéo từ góc trên trái của lưới.",
+  "tags": [
+    "stagger",
+    "grid",
+    "diagonal",
+    "timing-rhythm",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-stagger-diagonal.html",
+      "target": "compositions/components/motion-stagger-diagonal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-stagger-diagonal",
+    "author": "moworks",
+    "call": "MW.motionStaggerDiagonal(q(\".sd\"), tl, 0.3, {});",
+    "function": "MW.motionStaggerDiagonal",
+    "options": {
+      "from": "diagonal",
+      "each": "s per step of row + column (0.05; 0.03 in the recipe)",
+      "cols": "tiles per row (8)",
+      "k": "spring stiffness (260)",
+      "c": "damping (20: about 8 % overshoot)",
+      "outAt": "s they fade (2.0)",
+      "spread": "",
+      "rowEach": "",
+      "seed": ""
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "8 × 4 grid of 24 px tiles (32 px pitch): start = (row + col) × 30 ms (recipe; small demo × 50 ms), 400 ms power2.out each (demo: spring k 260, c 20); grid [4, 8] from [0, 0]. Params: each (30 ms) · duration (0.4 s) · grid (8 × 4) · from ([0, 0]).",
+    "titleVi": "So le chéo trên lưới"
+  }
+}

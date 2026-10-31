@@ -1,0 +1,53 @@
+<!--
+  Anticipated Move (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Khối lùi 25 px lấy đà rồi lao tới 135 px, co lại khi lùi và giãn dài theo tốc độ khi lao.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionAnticipationMove(q(".am"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - pull: px back first (−150)
+      - pullTime: s (0.148, power1.out)
+      - x: px it reaches (810)
+      - duration: s in all (0.82, power2.inOut after the pull)
+      - stretch: at most (0.28)
+      - speedFull: px a second for the full stretch (2500)
+      - fadeAt: s (1.8)
+
+  Notes: x keys 0 → −25 px at 148 ms (power1.out) → +135 px at 820 ms (power2.inOut) (demo px −33 / +180); the recipe's one-curve version is back.inOut(1.7). Block on a floor, origin bottom: scaleX dips 12 % during the pull-back (sine bump over 200 ms) and stretches with speed up to +28 % (scaleY = 1/scaleX). Small demo: fades out at 1800 ms and reappears at the start. Params: duration (0.82 s) · pull: quãng lùi (25 px) · x: quãng đi (135 px) · stretch: giãn theo tốc độ (0.28).
+-->
+
+<div class="fl"></div><div class="am"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"pull":-150,"pullTime":0.148,"x":810,"duration":0.82,"stretch":0.28,"speedFull":2500,"fadeAt":1.8};
+  var run = function (el, tl, at, o) {
+        var p1 = gsap.parseEase("power1.out"), io = gsap.parseEase("power2.inOut"), a = o.pullTime; gsap.set(el, { transformOrigin: "50% 100%" });
+        var X = function (t) { if (t <= 0) return 0; if (t < a) return o.pull * p1(t / a); return o.pull + (o.x - o.pull) * io(Math.min(1, (t - a) / (o.duration - a))); };
+        return MW.drive(tl, at, o.fadeAt + 0.45, function (t) { var x = X(t), v = (X(t + 0.005) - X(t - 0.005)) / 0.01, sx = 1 - 0.12 * (t > 0 && t < 0.2 ? Math.sin(Math.PI * t / 0.2) : 0) + Math.min(o.stretch, Math.max(0, v) / o.speedFull * o.stretch), f = Math.max(0, Math.min(1, (t - o.fadeAt) / 0.2)), back = Math.max(0, Math.min(1, (t - o.fadeAt - 0.2) / 0.25));
+          gsap.set(el, { x: back > 0 ? 0 : x, scaleX: back > 0 ? 1 : sx, scaleY: back > 0 ? 1 : 1 / sx }); el.style.opacity = String(back > 0 ? back : 1 - f); });
+      };
+  MW.motionAnticipationMove = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

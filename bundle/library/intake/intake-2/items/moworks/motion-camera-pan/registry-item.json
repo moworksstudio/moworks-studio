@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-camera-pan",
+  "type": "hyperframes:component",
+  "title": "Pan",
+  "description": "Máy quay chỉ xoay hướng nên mọi lớp dịch đúng cùng một lượng, khác hẳn truck.",
+  "tags": [
+    "camera",
+    "pan",
+    "flat",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-camera-pan.html",
+      "target": "compositions/components/motion-camera-pan.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-camera-pan",
+    "author": "moworks",
+    "call": "MW.motionCameraPan(q(\".tk-cam\"), tl, 0.3, { duration: 2.6 });",
+    "function": "MW.motionCameraPan",
+    "options": {
+      "duration": "s (2; the small demo 2.6)",
+      "distance": "px every layer travels, centred (360)",
+      "angle": "degrees instead: the box turns (≤ 6; 0 = shift)",
+      "layers": "selector of the layers",
+      "ease": "sine.inOut"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "The camera turns, it does not move: every layer shifts by the same amount (no parallax), or the scene's inner box turns rotateY 0 -> 6 deg at most, 2000 ms easeInOutSine. Demo: all layers translate together 120 px (x -60 -> +60) over 2.6 s ease-in-out, beside the truck demo for comparison. Params: duration (2 s) · angle (≤ 6°) · ease (sine.inOut).",
+    "titleVi": "Máy quay lia, không có thị sai"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-spring-heavy",
+  "type": "hyperframes:component",
+  "title": "Heavy",
+  "description": "Lò xo cho vật lớn, nặng: vượt nhẹ 4 % và đáp chậm trong khoảng 0.93 giây.",
+  "tags": [
+    "spring",
+    "heavy",
+    "large",
+    "springs"
+  ],
+  "files": [
+    {
+      "path": "motion-spring-heavy.html",
+      "target": "compositions/components/motion-spring-heavy.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.56,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-spring-heavy",
+    "author": "moworks",
+    "call": "MW.motionSpringHeavy(q(\".sp-b\"), tl, 0.4, { back: 1.93 });",
+    "function": "MW.motionSpringHeavy",
+    "options": {
+      "stiffness": "",
+      "damping": "",
+      "mass": "",
+      "prop": "the property it drives: x | y | scale | rotation (x)",
+      "from": "(0)",
+      "to": "(560 px)",
+      "back": "s after the start to spring back (null)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Target moves 0 → 1 on a spring, stiffness 80, damping 16, mass 1.6 (damping ratio 0.71): 4.3 % overshoot, within 1 % by ~930 ms. Kit form: springk(50, 10) over 0.93 s. Rule: large cards and full-screen objects; a slow landing. Small demo: the target moves 102 px beside the response graph, with overshoot and settle readouts. Params: stiffness (80) · damping (16) · mass (1.6) · duration (0.93 s). Ratio 0.71: about 4 % past and a slow landing (~0.93 s), for large cards and full-screen objects.",
+    "titleVi": "Lò xo nặng (vật lớn)"
+  }
+}

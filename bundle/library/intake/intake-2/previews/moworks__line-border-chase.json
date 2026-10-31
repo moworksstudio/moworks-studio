@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/line-border-chase",
+  "hash": "f7f8cd1f1b13e52b",
+  "at": "2026-10-17T07:36:03.008Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__line-border-chase.mp4",
+    "poster": "previews/moworks__line-border-chase.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "dfa3cabb9ec0169ae37ed3ad094c0274bab28ae82ee16ae52928f4e33cd0debb",
+    "size": 10065,
+    "seconds": 45.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

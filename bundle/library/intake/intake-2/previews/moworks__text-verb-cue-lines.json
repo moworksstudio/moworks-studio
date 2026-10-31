@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-verb-cue-lines",
+  "hash": "3e7b8873826d50cc",
+  "at": "2026-10-17T11:40:46.794Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-verb-cue-lines.mp4",
+    "poster": "previews/moworks__text-verb-cue-lines.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "91c91c059e9f70c1b846491f9d3b7f398440e5fc100c90913c77cae269180607",
+    "size": 18719,
+    "seconds": 28.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

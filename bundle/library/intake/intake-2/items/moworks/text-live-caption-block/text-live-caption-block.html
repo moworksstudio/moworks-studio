@@ -1,0 +1,47 @@
+<!--
+  Live Caption Block (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Phụ đề trực tiếp kiểu Nhật: mỗi khối hai dòng hiện trên nền tối rồi bị thay nguyên khối bằng khối tiếp theo bằng một nhát cắt, không cuộn.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textLiveCaptionBlock(q(".lw"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - times: [[in, out], ...] per block ([[0.3, 2.6], [2.6, 4.9]]); a block's time ≈ its characters ÷ 270 × 60 s
+      - blocks: selector of the blocks
+      - loop: s (5.4)
+
+  Notes: 2-line block (≤ 30 chars per line, 17 px bold) on an opaque dark box 268 × 50 px (radius 3) near the bottom. Blocks are replaced wholesale on a hard cut, no scroll or fade: demo 0.3–2.6 s and 2.6–4.9 s. Pacing: about 270 chars per minute measured on live TV (film guideline 240 per minute), so a block's time = its chars / 270 × 60 s. Optional LIVE tag (red dot + mono label) top-left. Loop 5.4 s. Params: tối đa (2 dòng × 30 ký tự) · nhịp (≈ 240–270 ký tự/phút) · nền (hộp tối).
+-->
+
+<div class="ft"></div><div class="lw"><div class="live"><b></b>TRỰC TIẾP</div><div class="lb">Đội tuyển đã về tới sân bay<br>trong vòng tay người hâm mộ</div><div class="lb">Hàng nghìn người đã chờ<br>từ sáng sớm để đón đội</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"times":[[0.3,2.6],[2.6,4.9]],"blocks":".lb","loop":5.4};
+  var run = function (el, tl, at, o) {
+        var blocks = Array.prototype.slice.call(el.querySelectorAll(o.blocks));
+        return MW.drive(tl, at, o.loop, function (t) { blocks.forEach(function (b, i) { var w = o.times[i]; b.style.visibility = t >= w[0] && t < w[1] ? "visible" : "hidden"; }); });
+      };
+  MW.textLiveCaptionBlock = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

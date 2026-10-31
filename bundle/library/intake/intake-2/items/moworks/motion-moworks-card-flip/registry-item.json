@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-moworks-card-flip",
+  "type": "hyperframes:component",
+  "title": "Card Flip",
+  "description": "Thẻ lật quanh trục dọc 180° để lộ mặt sau, phồng nhẹ giữa chừng; mặt quay đi được ẩn nên không bao giờ thấy chữ bị lật ngược, rồi lật về.",
+  "tags": [
+    "flip",
+    "card",
+    "3d",
+    "two-sided",
+    "navigation-overlays",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "motion-moworks-card-flip.html",
+      "target": "compositions/components/motion-moworks-card-flip.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.9,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-moworks-card-flip",
+    "author": "moworks",
+    "call": "MW.motionMoworksCardFlip(q(\".kf\"), tl, 0.4, {});",
+    "function": "MW.motionMoworksCardFlip",
+    "options": {
+      "duration": "s per flip (0.7)",
+      "hold": "s on the back (0.65)",
+      "bulge": "scaleY added mid-flip (0.06)",
+      "ease": "(power2.inOut)",
+      "perspective": "px (1600)",
+      "returns": "flip back after the hold",
+      "front": "",
+      "back": ""
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Card 110x70 r8 with front (accent, 'FRONT', chip, number) and back (dark, stripe, 'BACK', 'DETAILS') faces. rotationY 0 → 180° over 0.7 s power2.inOut (0.4-1.1 s), back over 1.75-2.45 s after a hold; scaleY 1 + 0.06 × sin(angle) mid-flip; the face turned away is hidden (backface hidden, no mirrored text). AE: a 3D layer with two faces. (The demo also shows a wrong mirrored copy for comparison.) Params: duration (0.7 s, power2.inOut) · hold (0.65 s) · bulge (6 %) · faces: trước / sau. The face turned away is hidden, so the text is never seen mirrored.",
+    "titleVi": "Lật thẻ hai mặt"
+  }
+}

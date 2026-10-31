@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-list-alternate",
+  "hash": "28211befd9ff7a53",
+  "at": "2026-10-17T10:56:05.307Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-list-alternate.mp4",
+    "poster": "previews/moworks__motion-list-alternate.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "257fba44c0568913dcda2e0c78810d9ae7e9a5496c1e36aefa9efd8ca26b2f0f",
+    "size": 7855,
+    "seconds": 25.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

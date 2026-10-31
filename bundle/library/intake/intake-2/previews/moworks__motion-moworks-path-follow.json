@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-moworks-path-follow",
+  "hash": "759c09a3d270710a",
+  "at": "2026-10-17T11:03:00.248Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-moworks-path-follow.mp4",
+    "poster": "previews/moworks__motion-moworks-path-follow.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "bf66b6d152a112827d57f51f4d16952218c36f844ab42f4a7b2c6b5422a85b77",
+    "size": 7533,
+    "seconds": 24.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

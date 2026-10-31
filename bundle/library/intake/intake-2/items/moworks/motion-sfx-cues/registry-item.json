@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-sfx-cues",
+  "type": "hyperframes:block",
+  "title": "SFX Cues on the Grid",
+  "description": "Mỗi tiếng click, pop, thump, whoosh được đặt đúng khung đỉnh của chuyển động hoặc đúng phách đo được.sfx`.",
+  "tags": [
+    "sfx",
+    "sound",
+    "beat",
+    "sync",
+    "sound-sync",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-sfx-cues.html",
+      "target": "compositions/components/motion-sfx-cues.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-sfx-cues",
+    "author": "moworks",
+    "call": "MW.motionSfxCues(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionSfxCues",
+    "options": {
+      "cues": "[[s, sound], ...] (click, pop, thump, whoosh)",
+      "beat": "s between ruler ticks (0.25)",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Each motion's peak frame = the sound's onset (within +-1 frame; the kit puts the attack one frame after the picture). Demo: a 4 s beat ruler with cues click 0.5 s, pop 1.0, thump 2.0, whoosh 2.75, pop 3.5; at each cue a ring pulses 8 -> 28 px decaying e^(-8 t) (motion 120 ms easeOutExpo). Params: sounds (click / pop / thump / whoosh) · at: phách hoặc đỉnh. Each motion's peak frame is the sound's onset (within ±1 frame). In a Moworks film, write these as the app's sfx cues; this block only shows where they land.",
+    "titleVi": "Đặt tiếng động đúng phách"
+  }
+}

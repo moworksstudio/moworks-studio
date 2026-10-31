@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-horizontal-scrub",
+  "hash": "1fff81647d56ec3d",
+  "at": "2026-10-17T09:23:14.127Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-horizontal-scrub.mp4",
+    "poster": "previews/moworks__ui-horizontal-scrub.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c9a7a290f61f277e7889fc1cf1c8db20d7224d8bbd7c8038f9a1a0f3c804fbb5",
+    "size": 21208,
+    "seconds": 26.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

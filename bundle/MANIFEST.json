@@ -1,7 +1,7 @@
 {
   "about": "What Moworks Studio ships with the repository instead of downloading (audit 60 §6). Made by tools/make-bundle.mjs.",
-  "made": "2026-10-29T20:23:20.228Z",
-  "bytes": 370261698,
+  "made": "2026-10-30T15:58:40.615Z",
+  "bytes": 369603806,
   "parts": [
     {
       "name": "fonts",
@@ -86,9 +86,9 @@
     },
     {
       "name": "library-intake",
-      "path": "library/intake/intake-1",
+      "path": "library/intake/intake-2",
       "files": 5456,
-      "bytes": 39070032,
+      "bytes": 38412140,
       "source": "built by Moworks Studio (intake)",
       "commit": null,
       "licence": "as each item's source (credit in its catalog)"

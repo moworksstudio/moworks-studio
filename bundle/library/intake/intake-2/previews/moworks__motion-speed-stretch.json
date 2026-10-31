@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-speed-stretch",
+  "hash": "4610c628e2358faf",
+  "at": "2026-10-17T09:38:35.657Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-speed-stretch.mp4",
+    "poster": "previews/moworks__motion-speed-stretch.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ae315de498315ada058f7f2e794073680188fa8b5c85fbb090b08521c30fe32b",
+    "size": 10303,
+    "seconds": 28.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

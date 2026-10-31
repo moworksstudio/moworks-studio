@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-hop-sequence",
+  "type": "hyperframes:component",
+  "title": "Sequential Hop",
+  "description": "Các chữ cái lần lượt từ trái sang nhún, nhảy lên một cú rồi bẹp nhẹ khi chạm đất, chữ đang nhảy đổi màu nhấn, lặp theo chu kỳ.",
+  "tags": [
+    "hop",
+    "loop",
+    "letters",
+    "squash",
+    "text-loops-decoration",
+    "bouncy",
+    "crisp",
+    "loops-decoration"
+  ],
+  "files": [
+    {
+      "path": "text-hop-sequence.html",
+      "target": "compositions/components/text-hop-sequence.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-hop-sequence",
+    "author": "moworks",
+    "call": "MW.textHopSequence(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textHopSequence",
+    "options": {
+      "height": "em (0.4)",
+      "hop": "s (0.4)",
+      "each": "s between letters (0.1)",
+      "cap": "s all hops start within (1.5)",
+      "start": "s (0.2)",
+      "accent": "the hopping letter",
+      "cycle": "s (2.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Cycle 2.4 s. Char i hops at 0.2 s + 0.1 s × i (capped at 1.5 s total): 0.1 s crouch before (sx 1.05, sy 0.93 at peak), then a 0.4 s parabolic hop y = −0.4 em × 4u(1 − u) (power1.out up, power1.in down), then a 0.12 s landing squash peaking sx 1.1 / sy 0.86; origin at the baseline. The hopping char is accent; a floor shadow shrinks and fades with height. Params: độ cao (0.4 em) · thời gian nhảy (0.4 s) · trễ mỗi chữ (0.1 s) · chu kỳ (2.4 s).",
+    "titleVi": "Từng chữ lần lượt nhảy lên"
+  }
+}

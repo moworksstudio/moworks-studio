@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-scale-breathe",
+  "type": "hyperframes:component",
+  "title": "Wiggly Scale Breathe",
+  "description": "Mỗi chữ cái phồng to rồi xẹp nhỏ nhẹ nhàng theo nhịp và pha riêng của nó, cả dòng như đang thở lộn xộn mà vẫn mềm mại.",
+  "tags": [
+    "breathe",
+    "loop",
+    "scale",
+    "letters",
+    "text-loops-decoration",
+    "soft",
+    "smooth",
+    "loops-decoration"
+  ],
+  "files": [
+    {
+      "path": "text-scale-breathe.html",
+      "target": "compositions/components/text-scale-breathe.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-scale-breathe",
+    "author": "moworks",
+    "call": "MW.textScaleBreathe(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textScaleBreathe",
+    "options": {
+      "amp": "± scale (0.12)",
+      "freqs": "[Hz, Hz] each letter takes one ([0.5, 0.75])",
+      "spacing": "em (0.08)",
+      "accent": "tint above 1.07",
+      "seed": "(3)",
+      "loop": "s, seamless (4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Per char (letter spacing 0.08 em): uniform scale 1 + 0.12 × sin(2π f t + φ), f seeded as 0.5 or 0.75 Hz (period 2 s or 1.33 s), φ seeded phase; origin about 0.15 em below the glyph centre. Chars above 1.07 tint toward accent (up to 80 %). Seamless loop 4 s. Params: biên độ (±12 %) · nhịp (0.5 hoặc 0.75 Hz) · giãn chữ (0.08 em).",
+    "titleVi": "Từng chữ phồng xẹp theo nhịp riêng"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-glitch-cut",
+  "type": "hyperframes:component",
+  "title": "Glitch",
+  "description": "Vài khung quanh điểm cắt bị xé thành lát ngang lệch, trộn hai cảnh và lệch màu RGB, ngoài ra sạch.",
+  "tags": [
+    "glitch",
+    "rgb",
+    "slices",
+    "digital",
+    "transitions",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "transition-glitch-cut.html",
+      "target": "compositions/components/transition-glitch-cut.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/transition-glitch-cut",
+    "author": "moworks",
+    "call": "MW.transitionGlitchCut(q(\".tk-b\"), tl, 1.5, { duration: 0.4 });",
+    "function": "MW.transitionGlitchCut",
+    "options": {
+      "duration": "s of the glitch window around the cut (0.2: 0.1 either side)",
+      "slices": "horizontal slices, new each frame (6)",
+      "minH": "px (30)",
+      "maxH": "px (120)",
+      "amp": "px of sideways shift (±90)",
+      "split": "px of the red offset (16)",
+      "seed": "the glitch pattern"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Only around the cut (recipe 100 ms either side; demo the middle 40 % of the transition): 6 horizontal slices re-seeded ~40 times per transition, 6-24 px tall, x +-30 px, alternately showing scene A or B; a full-frame red overlay at 35 % offset 4 px (RGB split; recipe 4-8 px, 3-5 slices). Cut at the midpoint; clean frames outside the window. Params: duration (0.2 s) · slices (3–5) · amp (4–8 px).",
+    "titleVi": "Chuyển cảnh nhiễu glitch"
+  }
+}

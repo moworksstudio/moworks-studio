@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-ink-ripple",
+  "hash": "606c7c775a4e5a38",
+  "at": "2026-10-17T10:05:50.095Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__ui-ink-ripple.mp4",
+    "poster": "previews/moworks__ui-ink-ripple.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "2afa3caa0a4a4e0af3ed5dca459e23b2ccb4b9836227fe93bb4b18a2c62010e5",
+    "size": 5895,
+    "seconds": 26.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-typing-dots-glow",
+  "hash": "2e1a1537e3d5d7d1",
+  "at": "2026-10-17T11:15:14.533Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-typing-dots-glow.mp4",
+    "poster": "previews/moworks__ui-typing-dots-glow.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c82af6e545b354c8b8dfb3afbe69ed51c26c95b51f0b640e3a655df9924c5be0",
+    "size": 8640,
+    "seconds": 30.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

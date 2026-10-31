@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-typewriter-steps",
+  "type": "hyperframes:component",
+  "title": "Typewriter",
+  "description": "Chữ hiện từng ký tự một, không mờ dần, 12 ký tự mỗi giây như máy đánh chữ.",
+  "tags": [
+    "typing",
+    "type-on",
+    "steps",
+    "text-typing-decoding",
+    "crisp",
+    "typing-decoding"
+  ],
+  "files": [
+    {
+      "path": "text-typewriter-steps.html",
+      "target": "compositions/components/text-typewriter-steps.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-typewriter-steps",
+    "author": "moworks",
+    "call": "MW.textTypewriterSteps(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textTypewriterSteps",
+    "options": {
+      "per": "s per character (0.083: 12 a second)",
+      "fit": "s a long line is fitted into (1.6)",
+      "start": "s (0.35)",
+      "clearAt": "s the line clears (2.95)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Chars appear one at a time with no fade (a hard step), 80 ms per char (12 cps; demo min(1/12 s, 1.6 s/n) so long lines fit 1.6 s), first char at 0.35 s; no caret. AE: Range Selector Start 0 → 100 %, Smoothness 0 %. Erase (recipe) runs 2–3× faster (≈30–40 ms per char, last char first); the demo instead clears the line at 2.95–3.05 s. Loop 3.2 s. Params: rate: ký tự mỗi giây (12) · erase: tốc độ xoá (nhanh gấp 2–3 lần) · caret: không.",
+    "titleVi": "Gõ chữ từng ký tự, không mờ dần"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/data-donut-bloom",
+  "hash": "4b98db7733969e0c",
+  "at": "2026-10-17T08:26:06.885Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__data-donut-bloom.mp4",
+    "poster": "previews/moworks__data-donut-bloom.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3c31a971f946950d557fe06154b1697924e7648bbbf52d216af97a05f3fbbc06",
+    "size": 18972,
+    "seconds": 27.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

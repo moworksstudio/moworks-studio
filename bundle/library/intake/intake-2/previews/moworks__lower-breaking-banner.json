@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/lower-breaking-banner",
+  "hash": "04ee566d94ffa6d7",
+  "at": "2026-10-17T10:12:06.029Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__lower-breaking-banner.mp4",
+    "poster": "previews/moworks__lower-breaking-banner.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "f5e6b2e2bccc834453a87f5897b26fec21d272e96bb4cd409afdf75b3483a0ca",
+    "size": 17592,
+    "seconds": 30.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -3,13 +3,14 @@
 // voice, stages, activity). New projects are made by hf-edit's scaffold (HF's own storyboard parser); existing HF folders can be opened.
 // The list lives in runtime/state/projects.json (paths only); a folder that has moved shows as "missing", never recreated or dropped.
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, statSync, writeFileSync } from "node:fs";
+import { open as openFile } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { randomBytes } from "node:crypto";
 import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
 import { scaffold } from "../hf-edit/scaffold.mjs";
 import { isStarterPage } from "../hf-edit/shots.mjs";
-import { filmLength } from "../hf-edit/ending.mjs";
-import { APP_OWN, LAYOUT_VERSION, appSounds, migrateLayout } from "./layout.mjs";
+import { plannedLength } from "../hf-edit/ending.mjs";
+import { APP_OWN, LAYOUT_VERSION, appSounds, kitFiles, migrateLayout } from "./layout.mjs";
 import { showInExplorer } from "./explorer.mjs";
 import { designChoice, keepAskedKit, writeDesign } from "./design.mjs";
 import { styleFpsRule } from "../style-catalog/fps.mjs";
@@ -101,10 +102,10 @@ function summary(entry) {
     id: entry.id, path: dir, missing: false,
     title: m.title ?? entry.title ?? basename(dir),
     style: m.style ? { id: m.style.id, title: m.style.title } : null,
-    // a film not built yet is as long as New project planned it (the 3 s starter said 0:03 on a 40 s film's card), with the ending's fade after it
-    aspect: m.format?.aspect ?? null, width: r.width, height: r.height, duration: r.starter && m.targetDurationSec ? filmLength(m, { dir }).total : r.duration, scenes: r.scenes,
+    // a film not built yet is as long as New project planned it (the 3 s starter said 0:03 on a 40 s film's card); the ending's fade is no part of what the user set (T30-10)
+    aspect: m.format?.aspect ?? null, width: r.width, height: r.height, duration: r.starter && m.targetDurationSec ? plannedLength(m, { dir }) : r.duration, scenes: r.scenes,
     // before the Build the root is the 3 s starter: the Editor can say "not built yet" with the planned length, not a white 3 s film
-    built: r.starter === undefined ? null : !r.starter, ...(r.starter ? { plannedDuration: filmLength(m, { dir }).total } : {}),
+    built: r.starter === undefined ? null : !r.starter, ...(r.starter ? { plannedDuration: plannedLength(m, { dir }) } : {}),
     status: statusOf(m, dir), stage: currentStage(m), progress: m.pipelineSummary ? { done: m.pipelineSummary.done, total: m.pipelineSummary.total, needsYou: m.pipelineSummary.needsYou ?? 0, unit: m.pipelineSummary.unit ?? "steps" } : null,
     thumbnail: m.thumbnail?.file ?? null,
     updatedAt: m.updatedAt ?? st.mtime.toISOString(), openedAt: entry.openedAt ?? null,
@@ -188,9 +189,9 @@ export const WINDOWS_RESERVED = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
 // ---- the film's frame rate: chosen in New project; HyperFrames reads it from the root composition's
 // data-fps (its player steps and its render default follow it), so the app writes it there and renders at it.
 // 24 · 25 · 30 · 60 for every style, the author's rate by default, else 30 (style-catalog styleFormat)
-export const FPS_CHOICES = [24, 25, 30, 60];
+export const FPS_CHOICES = [24, 25, 30, 50, 60];
 // a style may hold its films to its own rates (Brush cartoon 24, 25 or 30, 24 by default, never 50 / 60): { allowed, default }
-const ANY_FPS = [24, 25, 30, 60];
+const ANY_FPS = [24, 25, 30, 50, 60];
 /** The rate a style allows nearest to `fps` (its default when none is given); `fps` itself when the style has no rule. */
 export function fitFps(fps, rule) {
   const n = Number(fps) > 0 ? Number(fps) : null;
@@ -276,7 +277,7 @@ export function checkProjectInput(input, root = APP_ROOT) {
   const stem = slugify(input.folderName || title);
   if (WINDOWS_RESERVED.test(stem)) throw Object.assign(new Error(`“${stem.toUpperCase()}” is a name Windows keeps for itself: choose another project name`), { code: "INVALID" });
   if (lengthSeconds(input.durationSec, input.fps) > MAX_DURATION_SEC) throw Object.assign(new Error("The longest film is 60:00"), { code: "INVALID" });
-  if (input.fps != null && !ANY_FPS.includes(Number(input.fps))) throw Object.assign(new Error("Frame rate: 24, 25, 30 or 60"), { code: "INVALID" });
+  if (input.fps != null && !ANY_FPS.includes(Number(input.fps))) throw Object.assign(new Error("Frame rate: 24, 25, 30, 50 or 60"), { code: "INVALID" });
   const base = input.location ? resolve(String(input.location)) : defaultLocation(root);      // any folder; default from Settings
   if (input.location && (!existsSync(base) || !statSync(base).isDirectory())) throw Object.assign(new Error(`Folder not found: ${base}`), { code: "NOT_FOUND" });
   return { title, base };
@@ -296,7 +297,7 @@ export async function createProject(input, { root = APP_ROOT, scaffoldFn = scaff
   if (!input.style?.id) throw Object.assign(new Error("Choose a style"), { code: "INVALID" });
   // a style's own rates: { allowed, default } from the style's config
   const fpsRule = (() => { try { return styleFpsRule(input.style.id, root); } catch { return null; } })();
-  if (!fpsRule?.allowed?.length && input.fps != null && !FPS_CHOICES.includes(Number(input.fps))) throw Object.assign(new Error("Frame rate: 24, 25, 30 or 60"), { code: "INVALID" });
+  if (!fpsRule?.allowed?.length && input.fps != null && !FPS_CHOICES.includes(Number(input.fps))) throw Object.assign(new Error("Frame rate: 24, 25, 30, 50 or 60"), { code: "INVALID" });
   // the style's sizes and rate: a typed size only where the style draws any size; the author's rate when none is given
   const size = sizeOf(input);
   const form = await (async () => { try { const { formatOf } = await import("../style-catalog/index.mjs"); return formatOf(input.style.id, root); } catch { return null; } })();
@@ -559,7 +560,7 @@ const EXT = {
   images: /\.(png|jpe?g|webp|gif|avif|bmp|tiff?|heic|svg|exr)$/i,
   video: /\.(mp4|mov|webm|m4v|mkv|avi)$/i,
   audio: /\.(mp3|wav|m4a|flac|ogg|aac|opus)$/i,
-  fonts: /\.(ttf|otf|woff2?)$/i,
+  fonts: /\.(ttf|otf|woff2?|eot)$/i,
 };
 export const AUDIO_ROLES = ["voiceover", "music", "sfx"];
 export const MAX_ASSET_BYTES = 4 * 1024 ** 3;
@@ -601,19 +602,42 @@ export function assetDestination(dir, name, role = null) {
   const dot = clean.lastIndexOf(".");
   const base = dot > 0 ? clean.slice(0, dot) : clean, ext = dot > 0 ? clean.slice(dot) : "";
   let dest = join(folder, clean);
-  for (let i = 2; existsSync(dest) || existsSync(dest + ".part"); i++) dest = join(folder, `${base} (${i})${ext}`);
-  return { ...c, path: dest, rel: relative(dir, dest).split(sep).join("/") };
+  // the files that took this name before it: the same file imported again is one of them (sameFileThere)
+  const before = [];
+  for (let i = 2; existsSync(dest) || existsSync(dest + ".part"); i++) { before.push(dest); dest = join(folder, `${base} (${i})${ext}`); }
+  return { ...c, path: dest, rel: relative(dir, dest).split(sep).join("/"), before };
+}
+
+/** Do two files hold the same bytes? Sizes first, then a megabyte at a time, off the server's thread. */
+export async function sameBytes(a, b) {
+  let x, y;
+  try {
+    if (statSync(a).size !== statSync(b).size) return false;
+    [x, y] = [await openFile(a, "r"), await openFile(b, "r")];
+    const m = Buffer.alloc(1 << 20), n = Buffer.alloc(1 << 20);
+    for (;;) {
+      const [{ bytesRead: i }, { bytesRead: j }] = await Promise.all([x.read(m, 0, m.length, null), y.read(n, 0, n.length, null)]);
+      if (i !== j || m.compare(n, 0, j, 0, i) !== 0) return false;
+      if (i === 0) return true;
+    }
+  } catch { return false; } finally { await x?.close().catch(() => {}); await y?.close().catch(() => {}); }
+}
+/** The file in the place of `dest` (assetDestination) with the same bytes as `file`, or null: a zip and its unpacked folder imported together
+ *  gave dozens of byte-identical "(2)" (T30-14). The same name with other bytes is another file: it keeps its number. Returns its project path. */
+export async function sameFileThere(dir, dest, file) {
+  for (const f of dest.before ?? []) if (await sameBytes(f, file)) return relative(dir, f).split(sep).join("/");
+  return null;
 }
 
 /** What the project holds, for Claude and the Editor: counts per folder and the file names (sources/ included). */
 export function inventory(dir) {
   const out = { assets: {}, sources: [], total: 0 };
   const walk = (d, fn) => { if (!existsSync(d)) return; for (const n of readdirSync(d)) { if (/^desktop\.ini$/i.test(n)) continue; const f = join(d, n), s = statSync(f); if (s.isDirectory()) walk(f, fn); else fn(f, s); } };
-  const placed = appSounds(dir);
+  const placed = appSounds(dir), kit = kitFiles(dir);
   walk(join(dir, "assets"), (f, s) => {
     const rel = relative(dir, f).split(sep).join("/");
-    // the app's own copies (GSAP, fonts it embeds, sounds it placed)
-    if (APP_OWN.test(rel) || /^assets\/sfx\//.test(rel) || placed.has(rel)) return;
+    // the app's own copies (GSAP, fonts it embeds, sounds it placed, the Brand Kit's logos and fonts: Claude is told of those apart)
+    if (APP_OWN.test(rel) || /^assets\/sfx\//.test(rel) || placed.has(rel) || kit.has(rel)) return;
     if (isDesignPath(rel)) { out.sources.push({ path: rel, size: s.size }); out.total++; return; }          // reference files, like sources/
     const parts = rel.split("/");
     const folder = parts[1] === "1_design" ? `1_design/${parts[2]}` : parts[1] ?? "";

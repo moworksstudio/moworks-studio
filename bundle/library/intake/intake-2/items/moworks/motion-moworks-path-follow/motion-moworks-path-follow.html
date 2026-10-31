@@ -1,0 +1,52 @@
+<!--
+  Path Follow (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Mũi tên chạy dọc đường cong và luôn xoay theo tiếp tuyến, phần đường đã đi hiện màu.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionMoworksPathFollow(q(".pf"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - to: [x, y] px ([1080, 0])
+      - control: [x, y] px ([540, −840])
+      - duration: s (1.0)
+      - ease: (sine.inOut)
+      - rotate: turn with the tangent
+      - trail: an SVG path on the same curve that draws behind it
+      - hold: s (0.6)
+
+  Notes: Arrow rides an arc and turns to its tangent (θ = atan2(dy, dx) from the same progress). Recipe: 1000 ms sine.inOut, x 0 → 90 → 180, y 0 → −70 → 0, rotation −28° → 0 → +28°. Small demo: the steeper arc of arc-travel (−50° → +50°) at constant speed in 2200 ms; the travelled part draws as a 2 px accent line, the rest dashed. Params: duration (1 s) · path: đường SVG · rotate: xoay theo hướng (true) · ease (sine.inOut).
+-->
+
+<svg class="pf-g" viewBox="0 0 1920 1080"><path d="M380 740 Q920 -100 1460 740" fill="none" stroke="#3a4466" stroke-width="4" stroke-dasharray="14 14"/><path class="pf-t" d="M380 740 Q920 -100 1460 740" fill="none" stroke="#8b7bff" stroke-width="8"/></svg><div class="pf"><svg viewBox="-12 -12 24 24" width="120" height="120"><path d="M-10 -7 L11 0 L-10 7 L-5 0 Z" fill="#ffd23d"/></svg></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"to":[1080,0],"control":[540,-840],"duration":1,"ease":"sine.inOut","rotate":true,"trail":".pf-t","hold":0.6};
+  var run = function (el, tl, at, o) {
+        var e = gsap.parseEase(o.ease), tr = o.trail ? document.querySelector(o.trail) : null, L = tr ? tr.getTotalLength() : 0; if (tr) { tr.style.strokeDasharray = L + " " + L; tr.style.strokeDashoffset = String(L); }
+        return MW.drive(tl, at, o.duration + o.hold, function (t) { var u = e(Math.max(0, Math.min(1, t / o.duration))), b = 2 * (1 - u) * u, q = u * u, dx = 2 * (1 - u) * o.control[0] + 2 * u * (o.to[0] - o.control[0]), dy = 2 * (1 - u) * o.control[1] + 2 * u * (o.to[1] - o.control[1]);
+          gsap.set(el, { x: b * o.control[0] + q * o.to[0], y: b * o.control[1] + q * o.to[1], rotation: o.rotate ? Math.atan2(dy, dx) * 180 / Math.PI : 0 }); if (tr) tr.style.strokeDashoffset = String(L * (1 - u)); });
+      };
+  MW.motionMoworksPathFollow = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

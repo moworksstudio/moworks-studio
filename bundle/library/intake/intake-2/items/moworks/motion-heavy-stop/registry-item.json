@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-heavy-stop",
+  "type": "hyperframes:component",
+  "title": "Heavy Stop",
+  "description": "Khối lao tới, bẹp dọc theo hướng đi lúc chạm, nhún tắt dần và bụi bay lên như vật nặng.",
+  "tags": [
+    "move",
+    "squash",
+    "impact",
+    "weight",
+    "movement",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "motion-heavy-stop.html",
+      "target": "compositions/components/motion-heavy-stop.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-heavy-stop",
+    "author": "moworks",
+    "call": "MW.motionHeavyStop(q(\".hs\"), tl, 0.3, {});",
+    "function": "MW.motionHeavyStop",
+    "options": {
+      "x": "px (1092)",
+      "over": "px of overshoot (42)",
+      "squash": "(0.18)",
+      "dust": "(6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "x 0 → 182 px in 462 ms power3.out (easeOutQuart), back to 175 by 680 ms power2.inOut (7 px overshoot) (recipe values; demo 202 / 195 px). From 320 ms the block squashes along the travel (ease-in) to scaleX 0.82 / scaleY 1.18 at arrival, then a damped wobble k = e^(−11 t)·cos(26 t) back to 1/1 (scale 1 ∓ 0.18 k, t in s after arrival). Pivot: bottom leading corner (100 % 100 %), at a stop line. 6 dust dots puff over 550 ms from 400 ms. Params: duration (0.68 s) · x (182 px) · overshoot (7 px) · squash (0.18) · dust: số hạt bụi (6). 0.462 s power3.out to the line, then back the overshoot by 0.68 s; squashed along the travel at arrival, then a damped wobble e^(−11 t) cos 26 t; the pivot is the bottom leading corner.",
+    "titleVi": "Dừng nặng, bẹp vào vạch"
+  }
+}

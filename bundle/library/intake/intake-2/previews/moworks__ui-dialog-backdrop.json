@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-dialog-backdrop",
+  "hash": "9c9d726d8f313373",
+  "at": "2026-10-17T08:18:28.404Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-dialog-backdrop.mp4",
+    "poster": "previews/moworks__ui-dialog-backdrop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3fa18c4720d24031738b123a2424e4e7522657fbd0d5a9cc242b33c5de4a43cb",
+    "size": 25332,
+    "seconds": 23.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-overshoot",
+  "type": "hyperframes:component",
+  "title": "Overshoot",
+  "description": "Khối đi tới 108 % quãng đường rồi lùi về đúng đích.",
+  "tags": [
+    "move",
+    "overshoot",
+    "bounce-reaction",
+    "crisp",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-overshoot.html",
+      "target": "compositions/components/motion-overshoot.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-overshoot",
+    "author": "moworks",
+    "call": "MW.motionOvershoot(q(\".os\"), tl, 0.3, { backAt: 1.5 });",
+    "function": "MW.motionOvershoot",
+    "options": {
+      "distance": "px (880)",
+      "over": "share past the end (0.08)",
+      "duration": "s (0.6): 72 % power2.out out, the rest power2.inOut back",
+      "backAt": "s after the start to return (null)",
+      "back": "s (0.4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Square x 0 → 108 % of the distance in 430 ms power2.out, back to 100 % by 600 ms (170 ms power2.inOut) — the back.out look as two keys; demo distance 176 px. Return 400 ms power2.inOut. Params: duration (0.6 s) · overshoot (8 %) · x: quãng đi.",
+    "titleVi": "Vượt quá đích rồi lùi về"
+  }
+}

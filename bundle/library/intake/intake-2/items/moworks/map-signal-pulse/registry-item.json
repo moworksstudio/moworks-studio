@@ -1,0 +1,53 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "map-signal-pulse",
+  "type": "hyperframes:block",
+  "title": "Live Signal Pulse Map",
+  "description": "Trên bản đồ cố định, năm điểm lần lượt bật chấm và phát hai vòng sóng, thanh thời gian bên dưới sáng theo từng lần phát.",
+  "tags": [
+    "map",
+    "pulse",
+    "rings",
+    "live",
+    "data-storytelling",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "map-signal-pulse.html",
+      "target": "compositions/components/map-signal-pulse.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/map-signal-pulse",
+    "author": "moworks",
+    "call": "MW.mapSignalPulse(q(\".gm\"), tl, 0, {});",
+    "function": "MW.mapSignalPulse",
+    "options": {
+      "places": "[[x, y, name], ...] in 320 units (5)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Fixed map; 5 points fire at 400 / 800 / 1200 / 1600 / 2000 ms. Each: dot pops (scale 0 -> 1, 300 ms back.out), two rings radius 4 -> 30 px over 900 ms easeOutCubic, the second 220 ms later, opacity 0.9 -> 0. Optional time rail below with a dot per fire lighting as passed. Fade out 3600-3900. Params: points (5) · interval (0.4 s) · rings (4 → 30 px, 0.9 s).",
+    "titleVi": "Bản đồ các điểm phát tín hiệu"
+  }
+}

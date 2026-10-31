@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-domino-chain",
+  "hash": "7015f0a6894a09c8",
+  "at": "2026-10-17T09:34:17.248Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-domino-chain.mp4",
+    "poster": "previews/moworks__motion-domino-chain.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b9b783b8259a90d8e7b40b37ab9273a0d8a2c597020c73479fa7566f857f1fbd",
+    "size": 16474,
+    "seconds": 28.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

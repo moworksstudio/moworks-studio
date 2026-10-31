@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "background-embers",
+  "type": "hyperframes:block",
+  "title": "Rising Embers",
+  "description": "Các đốm tàn lửa bay lên từ dưới, lắc ngang nhẹ, nhỏ dần và tắt, đổi từ vàng sang đỏ.",
+  "tags": [
+    "embers",
+    "particles",
+    "rise",
+    "loop",
+    "soft",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "background-embers.html",
+      "target": "compositions/components/background-embers.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/background-embers",
+    "author": "moworks",
+    "call": "MW.backgroundEmbers(q(\".gm\"), tl, 0, {});",
+    "function": "MW.backgroundEmbers",
+    "options": {
+      "count": "(36)",
+      "life": "s each ember lives (3), a seamless loop",
+      "loops": "(1)",
+      "seed": "spots and phases"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "36 particles, 3 s life each with a seeded phase: y bottom -> top linear (200 px on a 200 px frame), x seeded across the middle 60 %, sway +-10 px (sin(9 p + i)), radius 4.5 -> 0.5 px and opacity 1 -> 0 over the life, warm yellow for the first 40 % then accent red; seamless 3 s loop. Params: count (36) · life (3 s) · sway (±10 px) · seed.",
+    "titleVi": "Tàn lửa bay lên"
+  }
+}

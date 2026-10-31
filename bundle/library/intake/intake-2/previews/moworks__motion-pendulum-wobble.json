@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-pendulum-wobble",
+  "hash": "608a81808d4f1891",
+  "at": "2026-10-17T09:32:47.228Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-pendulum-wobble.mp4",
+    "poster": "previews/moworks__motion-pendulum-wobble.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "3903387e7caf15b5c3217dec33e3bf88117999768b83a87309ca2b5694f5d22d",
+    "size": 21393,
+    "seconds": 30,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

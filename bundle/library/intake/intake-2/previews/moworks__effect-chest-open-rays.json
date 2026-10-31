@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-chest-open-rays",
+  "hash": "1e1cdf8987572f1f",
+  "at": "2026-10-17T10:24:03.152Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__effect-chest-open-rays.mp4",
+    "poster": "previews/moworks__effect-chest-open-rays.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "baa73b823729f4921f2af94c3b3dbfdbe317d532e2dc944cad43dd7846ad3ce8",
+    "size": 15089,
+    "seconds": 29.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

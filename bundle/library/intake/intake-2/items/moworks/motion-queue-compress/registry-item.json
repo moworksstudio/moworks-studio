@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-queue-compress",
+  "type": "hyperframes:component",
+  "title": "Live Queue Compression",
+  "description": "Ô đầu hàng chạy thanh xử lý, xong thì xanh lên, bay lên và mờ đi, sau đó các ô còn lại lần lượt dồn lên bằng lò xo.",
+  "tags": [
+    "queue",
+    "reorder",
+    "spring",
+    "list",
+    "data-storytelling",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-queue-compress.html",
+      "target": "compositions/components/motion-queue-compress.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-queue-compress",
+    "author": "moworks",
+    "call": "MW.motionQueueCompress(q(\".q\"), tl, 0, { counter: \".qcnt\" });",
+    "function": "MW.motionQueueCompress",
+    "options": {
+      "items": "selector of the queue cards, first first",
+      "pitch": "px between slots (320)",
+      "lift": "px the done card rises (200)",
+      "counter": "the counter"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "4 slots (50 x 44, 64 px pitch). Item 01: progress bar fills 400-1100 ms easeInOut, turns green at 1100; exits 1300-1600 ms ease-in cubic, y -40 px + fade. Then items 02-04 each shift one slot left on a spring (stiffness 240, damping 24), starting 1650 + 60 i ms; counter n = 4 -> 3 at 1600 ms. Order matters: the exit finishes before the shift starts. Params: process (0.7 s) · exit (0.3 s) · spring (240 / 24) · stagger (60 ms). Order matters: the finished card has left before the others move up.",
+    "titleVi": "Hàng đợi dồn lên sau khi xong việc"
+  }
+}

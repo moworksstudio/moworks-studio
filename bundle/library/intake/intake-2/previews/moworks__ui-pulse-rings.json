@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-pulse-rings",
+  "hash": "698d221d4fd42c54",
+  "at": "2026-10-17T11:15:44.670Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-pulse-rings.mp4",
+    "poster": "previews/moworks__ui-pulse-rings.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "1a1cef770f33f336dd2063ffd071839c445e79f9de1b7f7919f9144b532a640f",
+    "size": 24843,
+    "seconds": 29.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

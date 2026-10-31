@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-slow-tracking-expand",
+  "type": "hyperframes:component",
+  "title": "Slow Tracking Expand",
+  "description": "Tiêu đề đứng giữa khung, các chữ giãn ra rất chậm và đều suốt nhiều giây rồi mờ đi ở cuối, kiểu mở đầu phim.",
+  "tags": [
+    "tracking",
+    "title",
+    "slow",
+    "cinematic",
+    "text-titles-film",
+    "heavy",
+    "smooth",
+    "titles-film"
+  ],
+  "files": [
+    {
+      "path": "text-slow-tracking-expand.html",
+      "target": "compositions/components/text-slow-tracking-expand.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-slow-tracking-expand",
+    "author": "moworks",
+    "call": "MW.textSlowTrackingExpand(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textSlowTrackingExpand",
+    "options": {
+      "spread": "extra spacing per gap at the end, em (0.3; a film title 0.15)",
+      "start": "s (0.2)",
+      "duration": "s, linear (4.95)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Per-gap extra spacing 0 → 0.3 em (demo; recipe letter-spacing 0 → 0.15 em, AE tracking +30), spreading from the line centre, linear over 0.2–5.15 s. Opacity in 0.2–0.7 s sine.out, out 4.6–5.15 s (cubic-bezier .65,0,.35,1). Text 44 px. Loop 5.6 s. Params: độ giãn cuối (0.15–0.3 em) · thời gian (5 s, đều) · mờ cuối (0.5 s).",
+    "titleVi": "Chữ giãn ra rất chậm, đều"
+  }
+}

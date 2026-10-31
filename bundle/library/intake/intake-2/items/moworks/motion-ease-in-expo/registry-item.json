@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-in-expo",
+  "type": "hyperframes:component",
+  "title": "Ease-in Expo",
+  "description": "Bắt đầu chậm rồi tăng tốc mạnh và rời khung; dùng cho cảnh thoát.in).",
+  "tags": [
+    "ease",
+    "exit",
+    "expo",
+    "easing",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-in-expo.html",
+      "target": "compositions/components/motion-ease-in-expo.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-ease-in-expo",
+    "author": "moworks",
+    "call": "MW.motionEaseInExpo(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseInExpo",
+    "options": {
+      "duration": "s (0.25)",
+      "ease": "the curve (cubic-bezier(.7,0,.84,0))",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Target moves 0 → 100 % on cubic-bezier(.7,0,.84,0), 250 ms (200–300 ms). Rule: exits accelerate away and last 65–75 % of the entrance. GSAP expo.in is close; exact: custom(M0,0 C .7,0 .84,0 1,1). Small demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: duration (0.25 s; 0.2–0.3) · ease (custom .7,0,.84,0).",
+    "titleVi": "Ease-in expo (tăng tốc rời đi)"
+  }
+}

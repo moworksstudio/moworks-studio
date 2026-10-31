@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-shield-recharge-ring",
+  "type": "hyperframes:block",
+  "title": "Shield Recharge Sweep",
+  "description": "Vòng màu quét quanh biểu tượng khiên theo chiều kim đồng hồ từ đỉnh, có chấm sáng ở đầu và số phần trăm chạy theo; đủ một vòng thì khiên đổ màu bằng lò xo, loé một vòng sáng và hiện chữ \"ACTIVE\".",
+  "tags": [
+    "ring",
+    "progress",
+    "spring",
+    "pop",
+    "game-impact-fx",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "ui-shield-recharge-ring.html",
+      "target": "compositions/components/ui-shield-recharge-ring.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-shield-recharge-ring",
+    "author": "moworks",
+    "call": "MW.uiShieldRechargeRing(q(\".shr\"), tl, 0, {});",
+    "function": "MW.uiShieldRechargeRing",
+    "options": {
+      "start": "s (0.4)",
+      "sweep": "s for one turn, linear (1.6)",
+      "label": "text when full",
+      "outAt": "s (3.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. Grey ring r 50, stroke 5; an accent arc (round cap) sweeps clockwise from 12 o'clock linearly over 1.6 s (0.4-2.0 s) with a light dot r 4 at its head; percent readout 0 → 100. Dashed shield outline in the centre. At 2.0 s the shield fills accent by spring k300 d13 from 0; flash ring r 50 → 70 (stroke 5 → 0.5) fading 500 ms outCubic; 'ACTIVE' replaces the readout. Out 3.6-3.95 s inOut. Params: sweep: thời gian quét (1.6 s) · start: lúc bắt đầu (0.4 s) · pop: lò xo khiên (k300 d13) · label: nhãn khi xong (\"ACTIVE\").",
+    "titleVi": "Vòng nạp khiên quét một vòng"
+  }
+}

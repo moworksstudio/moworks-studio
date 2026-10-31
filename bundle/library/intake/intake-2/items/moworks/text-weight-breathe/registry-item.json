@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-weight-breathe",
+  "type": "hyperframes:component",
+  "title": "Weight Breathe",
+  "description": "Cả từ chậm rãi đi từ nét rất mảnh tới rất đậm rồi ngược lại, 3 giây mỗi chiều, như đang hít thở.",
+  "tags": [
+    "variable-font",
+    "weight",
+    "breathe",
+    "loop",
+    "text-variable-fonts",
+    "soft",
+    "smooth",
+    "variable-fonts"
+  ],
+  "files": [
+    {
+      "path": "text-weight-breathe.html",
+      "target": "compositions/components/text-weight-breathe.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-weight-breathe",
+    "author": "moworks",
+    "call": "MW.textWeightBreathe(q(\".tk-head\"), tl, 0, { ring: \".br\" });",
+    "function": "MW.textWeightBreathe",
+    "options": {
+      "from": "wght (100)",
+      "to": "wght (900)",
+      "half": "s each way (3, a cosine: sine.inOut)",
+      "ring": "an element that breathes with it (optional)",
+      "loop": "s (6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Whole word wght 100 → 900 over 3 s sine.inOut, then 900 → 100 over 3 s, repeat (yoyo); positions fixed (glyphs grow in place). Demo: wght = 100 + 800 × (1 − cos(2πt/6))/2 with a breathing ring behind; loop 6 s. CSS: 3 s ease-in-out alternate infinite. Params: from, to: độ đậm (100 ↔ 900) · duration: mỗi chiều (3 s) · ease (sine.inOut).",
+    "titleVi": "Nét chữ thở đậm nhạt"
+  }
+}

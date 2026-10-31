@@ -1,0 +1,52 @@
+<!--
+  Loading Dots (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Chữ đứng yên, ba chấm phía sau lần lượt sáng lên và nhô nhẹ rồi mờ xuống, nối nhau như đang chờ tải.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textLoadingDots(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - radius: em (0.09)
+      - gap: em between dots (0.3)
+      - cycle: s (1.2)
+      - delay: s between dots (0.2)
+      - lift: em (0.22)
+      - accent: the middle dot
+      - loop: s, seamless (2.4)
+
+  Notes: Word still (trailing dots in the text removed). Three round dots (radius 0.09 em, 0.3 em apart, starting 0.7 gap after the last char, middle one accent). Dot k: v = sin(π ph / 0.6) for ph < 0.6 of a 1.2 s cycle, else 0, with delay 0.2 k s; opacity 0.2 + 0.8 v, lift v × 0.22 em (recipe −25 %). Seamless loop 2.4 s. Params: chu kỳ (1.2 s) · trễ (0 / 0.2 / 0.4 s) · độ trong (0.2 ↔ 1) · độ nhô (0.22 em).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Đang tải...</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"radius":0.09,"gap":0.3,"cycle":1.2,"delay":0.2,"lift":0.22,"accent":"#a99bff","loop":2.4};
+  var run = function (el, tl, at, o) {
+        el.textContent = el.textContent.replace(/[.…]+\s*$/, ""); var D = [], fs = parseFloat(getComputedStyle(el).fontSize);
+        for (var i = 0; i < 3; i++) { var d = document.createElement("span"); d.style.cssText = "display:inline-block;border-radius:50%;vertical-align:baseline;width:" + 2 * o.radius + "em;height:" + 2 * o.radius + "em;margin-left:" + (i ? o.gap - 2 * o.radius : o.gap * 0.7) + "em;background:" + (i === 1 ? o.accent : "currentColor") + ";"; el.appendChild(d); D.push(d); }
+        return MW.drive(tl, at, o.loop, function (t) { D.forEach(function (d, k) { var ph = (((t - o.delay * k) % o.cycle) + o.cycle) % o.cycle, v = ph < 0.6 * o.cycle ? Math.sin(Math.PI * ph / (0.6 * o.cycle)) : 0; d.style.opacity = String(0.2 + 0.8 * v); gsap.set(d, { y: -o.lift * fs * v }); }); });
+      };
+  MW.textLoadingDots = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,69 @@
+<!--
+  Depth Lens (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Một kính lúp tròn có tay cầm lướt trên nội dung, bên trong kính chính nội dung đó hiện to gấp đôi, dừng ở từng điểm cần soi.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectMagnifier(q(".mp"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - zoom: × inside the lens (2)
+      - radius: px (190)
+      - rim: px (8)
+      - fill: the lens' plain fill
+      - path: [[s, x, y], ...] in the content's 320-wide units
+      - loop: s (4.2)
+
+  Notes: Round lens r36 over the content: inside it the same content scaled 2× about the lens centre (grid 16 → 32 px), on a plain fill. Lens moves (92,92) → (196,124) at 0.3-1.0 s, to (236,72) at 1.9-2.6 s, back by 3.4-4.1 s, power2.inOut. 2 px accent rim, 12 px handle (4 px, round cap) at 45°, a '2×' pill 30x13 above. Params: zoom (2×) · radius (36 px) · path [[giây, x, y]] · move (0.7 s, power2.inOut) · rim (2 px).
+-->
+
+<div class="gm"><div class="mp"><i style="left:300px;top:320px;background:#3dd6f5"></i><span style="left:334px;top:316px">Ga Hà Nội</span><i style="left:700px;top:520px;background:#ffd23d"></i><span style="left:734px;top:516px">Hồ Gươm</span><i style="left:1010px;top:300px;background:#ff5d8f"></i><span style="left:1044px;top:296px">Phố cổ</span><i style="left:1210px;top:400px;background:#3ddc84"></i><span style="left:1244px;top:396px">Cầu Long Biên</span><i style="left:500px;top:700px;background:#8b7bff"></i><span style="left:534px;top:696px">Văn Miếu</span><i style="left:1300px;top:700px;background:#ffb547"></i><span style="left:1334px;top:696px">Nhà hát lớn</span></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  var defaults = {"zoom":2,"radius":190,"rim":8,"fill":"#10131d","path":[[0,92,92],[0.3,92,92],[1,196,124],[1.9,196,124],[2.6,236,72],[3.4,236,72],[4.1,92,92]],"loop":4.2};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, lens = document.createElement("div"), inner = el.cloneNode(true), handle = document.createElement("div"), pill = document.createElement("div"), R = o.radius;
+        if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        lens.style.cssText = "position:absolute;width:" + 2 * R + "px;height:" + 2 * R + "px;border-radius:50%;overflow:hidden;z-index:6;box-shadow:0 0 0 " + o.rim + "px #8b7bff, 0 20px 50px rgba(0,0,0,0.5);background:" + o.fill + ";";
+        inner.removeAttribute("id"); inner.style.position = "absolute"; inner.style.left = "0"; inner.style.top = "0"; inner.style.margin = "0"; inner.style.transformOrigin = "0 0"; lens.appendChild(inner); host.appendChild(lens);
+        handle.style.cssText = "position:absolute;width:" + R * 0.7 + "px;height:" + o.rim * 4 + "px;border-radius:" + o.rim * 2 + "px;background:#8b7bff;z-index:5;transform-origin:0 50%;transform:rotate(45deg);"; host.appendChild(handle);
+        pill.style.cssText = "position:absolute;z-index:7;padding:6px 18px;border-radius:20px;background:#8b7bff;color:#fff;font:800 28px Inter,sans-serif;"; pill.textContent = o.zoom + "×"; host.appendChild(pill);
+        return MW.drive(tl, at, o.loop, function (t) {
+          var k = el.offsetWidth / 320, p = MW.path(o.path, t), x = el.offsetLeft + p[0] * k, y = el.offsetTop + p[1] * k;
+          lens.style.left = (x - R) + "px"; lens.style.top = (y - R) + "px";
+          gsap.set(inner, { x: -(p[0] * k * o.zoom - R), y: -(p[1] * k * o.zoom - R), scale: o.zoom });
+          handle.style.left = (x + R * 0.68) + "px"; handle.style.top = (y + R * 0.68 - o.rim * 2) + "px"; pill.style.left = (x - 36) + "px"; pill.style.top = (y - R - 64) + "px";
+        });
+      };
+  MW.effectMagnifier = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

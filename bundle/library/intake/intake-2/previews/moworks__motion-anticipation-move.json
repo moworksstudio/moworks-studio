@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-anticipation-move",
+  "hash": "f110f85616b06ed9",
+  "at": "2026-10-17T11:03:00.807Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-anticipation-move.mp4",
+    "poster": "previews/moworks__motion-anticipation-move.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "7b779895a1976b6b42e971fe6270e044b00a6247849ae6e85afe0583d7d0ef2a",
+    "size": 7279,
+    "seconds": 25.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

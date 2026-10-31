@@ -98,14 +98,15 @@ function signature(dir) {
   walk(dir);
   return h.digest("hex");
 }
-/** Back up the user's characters (library/characters) as one archive if they changed since the last backup. Returns { written, size?,
- *  files?, skipped? }. */
+const hasFiles = (d) => readdirSync(d, { withFileTypes: true }).some((e) => e.isFile() || (e.isDirectory() && hasFiles(join(d, e.name))));
+/** Back up the user's characters (library/characters, which holds nothing of the app's) as one archive if they changed since the last backup.
+ *  A folder with no file in it is nothing to keep: the archive there stays. Returns { written, size?, files?, skipped? }. */
 export function backupCharacters(root = APP_ROOT) {
   const base = backupRoot(root);
   if (!base) return { written: false, skipped: "no backup folder configured" };
   if (!existsSync(join(base, ".."))) return { written: false, skipped: `backup drive not reachable: ${base}` };
   const src = charactersRoot(root);
-  if (!existsSync(src) || !readdirSync(src).length) return { written: false, skipped: "no characters yet" };
+  if (!existsSync(src) || !hasFiles(src)) return { written: false, skipped: "no characters yet" };
   mkdirSync(base, { recursive: true });
   const f = join(base, "index.json"), dest = join(base, "characters.tar"), sig = signature(src);
   const prev = readJson(f, {}).characters;

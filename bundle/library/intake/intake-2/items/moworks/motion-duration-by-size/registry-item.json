@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-duration-by-size",
+  "type": "hyperframes:block",
+  "title": "Duration by Size",
+  "description": "Bài học: vật càng lớn chạy càng lâu; công tắc 150 ms, hộp thoại 350 ms, vai chính 700 ms.",
+  "tags": [
+    "lesson",
+    "timing",
+    "size",
+    "timing-rhythm",
+    "heavy",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-duration-by-size.html",
+      "target": "compositions/components/motion-duration-by-size.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-duration-by-size",
+    "author": "moworks",
+    "call": "MW.motionDurationBySize(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionDurationBySize",
+    "options": {
+      "durations": "s for small / medium / large ([0.15, 0.35, 0.7])",
+      "start": "s (0.3)",
+      "outAt": "s (2.0)",
+      "loop": "s (2.5)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Three squares (28 / 60 / 108 px) pop scale 0 → 1 together from 300 ms in 150 / 350 / 700 ms expo.out, labelled; they shrink away in 200 ms at 2000 ms. Rule: micro 100–200 ms, panels and modals 200–400 ms, full-screen / hero 400–800 ms; one duration for all makes big things look light. Params: small (0.15 s) · medium (0.35 s) · large (0.7 s). Rule: micro 0.1–0.2 s, panels and modals 0.2–0.4 s, full-screen or hero 0.4–0.8 s; one duration for all makes big things look light.",
+    "titleVi": "Thời lượng theo kích thước"
+  }
+}

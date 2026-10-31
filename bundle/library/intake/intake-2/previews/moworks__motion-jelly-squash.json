@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-jelly-squash",
+  "hash": "c2ff8ee255c78534",
+  "at": "2026-10-17T09:50:54.919Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-jelly-squash.mp4",
+    "poster": "previews/moworks__motion-jelly-squash.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "ed68baeb799850dd9aa4dbc4b366df9962f2d222267335b9d332fca9aa5a21c9",
+    "size": 8104,
+    "seconds": 23,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-indeterminate-bar",
+  "type": "hyperframes:block",
+  "title": "Indeterminate Bar",
+  "description": "Một đoạn thanh màu chạy từ trái sang phải trong rãnh, đầu lao trước đuôi đuổi sau nên đoạn thanh giãn ra rồi co lại, lặp liên tục.",
+  "tags": [
+    "loader",
+    "bar",
+    "indeterminate",
+    "loop",
+    "loading-progress",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-indeterminate-bar.html",
+      "target": "compositions/components/ui-indeterminate-bar.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-indeterminate-bar",
+    "author": "moworks",
+    "call": "MW.uiIndeterminateBar(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiIndeterminateBar",
+    "options": {
+      "period": "s (1.8)",
+      "lag": "of the cycle the tail trails (0.4)",
+      "title": "",
+      "sub": "",
+      "loop": "s (3.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Track 220x8 r4, clipped. Per 1.8 s cycle p: head = power2.inOut(clamp(1.4 p)), tail = power2.inOut(clamp(1.4 p − 0.4)); the accent bar spans tail → head (+6 px), so it stretches while the head leads and shrinks as the tail catches up; both reach the right end and the cycle restarts empty. Recipe: x −30 % → 130 %, 1.8 s ease-in-out. Params: period (1.8 s) · head / tail (lệch 0.4 chu kỳ) · ease (power2.inOut) · track (220x8). head = power2.inOut(clamp(1.4 p)), tail = power2.inOut(clamp(1.4 p − 0.4)); the bar spans tail → head, so it stretches and shrinks.",
+    "titleVi": "Thanh tải không xác định"
+  }
+}

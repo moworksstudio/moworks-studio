@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-caret-typewriter",
+  "type": "hyperframes:component",
+  "title": "Typewriter With Caret",
+  "description": "Chữ mono gõ ra từng ký tự 70 ms một, con trỏ đứng yên khi gõ rồi nhấp nháy 0.75 giây một nhịp khi dừng.",
+  "tags": [
+    "typing",
+    "caret",
+    "mono",
+    "text-typing-decoding",
+    "crisp",
+    "typing-decoding"
+  ],
+  "files": [
+    {
+      "path": "text-caret-typewriter.html",
+      "target": "compositions/components/text-caret-typewriter.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.75,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-caret-typewriter",
+    "author": "moworks",
+    "call": "MW.textCaretTypewriter(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textCaretTypewriter",
+    "options": {
+      "per": "s per character (0.07)",
+      "fit": "s at most (1.5)",
+      "start": "s (0.4)",
+      "caret": "em wide (0.12)",
+      "blink": "s per blink when idle (0.75, step)",
+      "clearAt": "s (3.45)",
+      "accent": "caret colour"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Mono text (demo 34 px, weight 600). Chars appear one per 70 ms (steps(N): width 0 → N ch over N × 70 ms; demo capped 1.5 s total) from 0.4 s. Caret: accent bar 0.12 em wide (demo 3 px), 1 em tall, 3 px after the last char; solid while typing, then blinks with a 0.75 s period, step-end (0.375 s on / off). Full-width CJK counts as 2 ch. Demo clears at 3.45 s; loop 3.75 s. Params: rate: mỗi ký tự (0.07 s) · caret: bề rộng (0.12 em) · blink: chu kỳ nhấp nháy (0.75 s).",
+    "titleVi": "Gõ chữ có con trỏ nhấp nháy"
+  }
+}

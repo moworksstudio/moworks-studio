@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-shine-sweep",
+  "hash": "c231aa7bebab3868",
+  "at": "2026-10-17T10:31:05.841Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-shine-sweep.mp4",
+    "poster": "previews/moworks__text-shine-sweep.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "e8874f4f8134d40c0cd364adb1de8f4767395ad7809aab2c88a2f427ab53a010",
+    "size": 10447,
+    "seconds": 27.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

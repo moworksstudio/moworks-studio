@@ -1,0 +1,55 @@
+<!--
+  Bloom Reveal (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Biểu tượng hiện ra trong ánh loá: sáng chói, nhoè và có quầng lớn, rồi dịu dần về rõ nét.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectBloomReveal(q(".br-t"), tl, 0.5, {});
+
+  Options (defaults in brackets):
+      - duration: s (0.78), power3.out
+      - blur: px at the start (12)
+      - unit: px per reference unit for the halo (5)
+      - color: halo colour
+
+  Notes: Logo / icon reveal 780 ms power3.out (easeOutQuart): scale 0.82 → 1, brightness 3 → 1 (exposure +2), blur 4 → 0 px; an additive halo (two discs, radius 30 + 0.8 g and 44 + g px, opacity 0.9·g/38 and 0.6·g/38, blur g/2) with glow g 38 → 8 (at 540 ms) → 0 (780 ms) fading with it. Params: duration (0.78 s) · exposure (+2) · glow (38 → 8 → 0) · scale đầu (0.82).
+-->
+
+<div class="gm br"><div class="br-t"></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.78,"blur":12,"unit":5,"color":"#d6ccff"};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, q4 = gsap.parseEase("power3.out"), halos = [];
+        if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        [[30, 0.8, 0.9], [44, 1, 0.6]].forEach(function (h) { var d = document.createElement("div"); d.style.cssText = "position:absolute;border-radius:50%;pointer-events:none;mix-blend-mode:plus-lighter;background:radial-gradient(circle, " + o.color + ", rgba(0,0,0,0) 70%);"; host.insertBefore(d, el); halos.push({ d: d, r: h[0], k: h[1], a: h[2] }); });
+        return MW.drive(tl, at, o.duration, function (t) {
+          var u = t / o.duration, p = q4(u), g = t < 0.54 / 0.78 * o.duration ? 38 - 30 * (t / (0.54 / 0.78 * o.duration)) : 8 * (1 - (t - 0.54 / 0.78 * o.duration) / (0.24 / 0.78 * o.duration));
+          if (t <= 0) g = 38; g = Math.max(0, g);
+          gsap.set(el, { scale: 0.82 + 0.18 * p }); el.style.filter = "brightness(" + (3 - 2 * p) + ") blur(" + (o.blur * (1 - p)) + "px)"; el.style.opacity = t > 0 ? "1" : "0";
+          halos.forEach(function (h) { var R = (h.r + h.k * g) * o.unit; h.d.style.width = h.d.style.height = 2 * R + "px"; h.d.style.left = (el.offsetLeft + el.offsetWidth / 2 - R) + "px"; h.d.style.top = (el.offsetTop + el.offsetHeight / 2 - R) + "px"; h.d.style.opacity = t > 0 ? String(h.a * g / 38) : "0"; h.d.style.filter = "blur(" + g / 2 * o.unit / 2 + "px)"; });
+        });
+      };
+  MW.effectBloomReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

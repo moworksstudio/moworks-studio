@@ -5,8 +5,9 @@
 //   styles/    lemo-opuscar, mg-styles-15, anidoodle, ClaudeAnimationBase, motion-prompt, what-if-animation: the run-time files at each
 //              pinned commit, PINNED; the gallery stills re-encoded at 960 px under their own names (JPEG stays JPEG, WebP stays WebP),
 //              no demo films, no audio
-//   library/   the built stores (Blocks, intake, Looks, Vocabulary, tiles, anidoodle cards, the Clawd demo media at the shipped size, the
-//              Lemo-Opuscar fonts' Vietnamese check) and What If's demo film (made in the app, kept as it is)
+//   library/   the built stores (Blocks, intake, Looks, Vocabulary, tiles, anidoodle cards, the Lemo-Opuscar fonts' Vietnamese check), What
+//              If's demo film (made in the app, kept as it is) and the app's own characters (bundle/library/characters: the app reads them
+//              there, so they are their own source; only counted, or copied into another outDir)
 //   sfx/       the offline sound effects (made by tools/make-sfx-library.mjs from CC0 / public-domain packs; kept as they are, counted)
 //   MANIFEST.json  every part: files, bytes, source, commit, licence
 // Usage: node tools/make-bundle.mjs [outDir] [--only part,part]   (default app/bundle; each part's folder is replaced, a part whose pinned
@@ -59,7 +60,6 @@ function copyPart(name, from, to, { keep = () => true, recode = () => null, sour
     const d = join(to, ...(how === "still-to-webp" ? r.replace(/\.jpe?g$/i, ".webp") : r).split("/"));
     mkdirSync(dirname(d), { recursive: true });
     if (how === "still-webp" || how === "still-to-webp") ff(["-i", s, "-vf", "scale='min(960,iw)':-2", "-c:v", "libwebp", "-quality", "75", d]);
-    else if (how === "film") ff(["-i", s, "-vf", "scale='min(640,iw)':-2,fps=24", "-c:v", "libx264", "-crf", "30", "-preset", "slow", "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-an", d]);
     else cpSync(s, d);
     bytes += statSync(d).size;
   }
@@ -154,11 +154,10 @@ const aniStore = `anidoodle-${pins.anidoodle.commit.slice(0, 7)}`;
 copyPart("library-anidoodle", join(lib, "anidoodle"), join(OUT, "library", "anidoodle"), {
   keep: (r) => new RegExp(`^${aniStore}/(cards|previews)/[A-Za-z0-9]+\\.(jpg|webp|mp4)$`).test(r),
   source: "anidoodle cards cut from the author's style sheet, and previews rendered from the author's drawing films", licence: "Apache-2.0" });
-copyPart("library-characters", join(lib, "characters"), join(OUT, "library", "characters"), {
-  // the kit's demo (Clawd; the sample Pip was removed) and anidoodle's own characters as shipped: never the
-  // user's characters (user/, their anidoodle humans)
-  keep: (r) => /^clawd\//.test(r) || /^anidoodle-human\/(mira|theo|bit|cheetah)\//.test(r),
-  recode: (r) => r.endsWith(".mp4") ? "film" : null,
+// the app's own characters are read from here, so this folder is their source, never the work library (it holds only the user's): the kit's
+// demo (Clawd; tools/clawd-demo.mjs remakes its media) and anidoodle's own as shipped (tools/anidoodle-previews.mjs); never a user's character
+copyPart("library-characters", join(APP_ROOT, "bundle", "library", "characters"), join(OUT, "library", "characters"), {
+  keep: (r) => /^(clawd|moworks-[a-z0-9-]+)\//.test(r) || /^anidoodle-human\/(mira|theo|bit|cheetah|moworks-[a-z0-9-]+)\//.test(r),
   source: "the Character page's demo media (Clawd: the kit's demo, a demo of the layer only, never in a film)", licence: "ClaudeAnimationBase MIT (Clawd is Anthropic's mascot); anidoodle Apache-2.0" });
 // What If's demo film: made in the app, not from a pinned source, so it is only kept and counted (packages/what-if-styles DEMO)
 copyPart("library-what-if", join(OUT, "library", "what-if"), join(OUT, "library", "what-if"), {

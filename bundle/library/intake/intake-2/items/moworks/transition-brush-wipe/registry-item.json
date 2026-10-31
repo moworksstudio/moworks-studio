@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "transition-brush-wipe",
+  "type": "hyperframes:component",
+  "title": "Brush Wipe",
+  "description": "Năm vệt cọ dày lần lượt quét ngang từ trái sang, chồng lên nhau tô lộ cảnh mới.",
+  "tags": [
+    "brush",
+    "wipe",
+    "hand-drawn",
+    "transitions",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "transition-brush-wipe.html",
+      "target": "compositions/components/transition-brush-wipe.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/transition-brush-wipe",
+    "author": "moworks",
+    "call": "MW.transitionBrushWipe(q(\".tk-b\"), tl, 1.2, {});",
+    "function": "MW.transitionBrushWipe",
+    "options": {
+      "strokes": "bands (5)",
+      "stagger": "s between bands (0.06)",
+      "each": "s each band's edge crosses the frame (0.36)",
+      "slant": "px the top edge rises toward the lead (30)",
+      "ease": "power2.out (cubic); the small demo eases in-out",
+      "from": "the outgoing scene"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "5 bands (each ~1/4 of frame height at a 1/5 pitch, so they overlap ~5 %), leading edge vertical, top edge slanting up ~6 px; band i starts at i x 60 ms and its leading edge runs from just left of the frame to past the right edge over 360 ms easeOutCubic (demo ease-in-out); together they mask in the incoming scene; 600 ms total. Straight polygon edges in the demo; ragged dry-brush ends are optional. Params: strokes (5) · stagger (60 ms) · duration mỗi vệt (0.36 s).",
+    "titleVi": "Quét cọ lộ cảnh mới"
+  }
+}

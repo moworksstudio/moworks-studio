@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-star-rating-tap",
+  "type": "hyperframes:block",
+  "title": "Star Rating",
+  "description": "Bấm vào ngôi sao thứ tư, bốn ngôi sao lần lượt sáng màu nhấn, mỗi ngôi phồng 1.25 rồi về, nhãn hiện 4 / 5.",
+  "tags": [
+    "rating",
+    "stars",
+    "stagger",
+    "pop",
+    "feedback-reactions",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-star-rating-tap.html",
+      "target": "compositions/components/ui-star-rating-tap.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-star-rating-tap",
+    "author": "moworks",
+    "call": "MW.uiStarRatingTap(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiStarRatingTap",
+    "options": {
+      "rating": "(4)",
+      "click": "s (0.68)",
+      "outAt": "s (2.3)",
+      "title": "",
+      "accent": "",
+      "loop": "s (2.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Five stars (outer 16 / inner 7 px, 40 px apart), grey. Click on star 4 at 0.68-0.8 s; stars 1-4 light in turn from 0.78 s + 0.08 s each: scale 0.3 → 1 over 0.28 s back.out plus a 0.25 half-sine bump (peak ≈ 1.25). Label '4 / 5' updates as they light. Out 2.3-2.5 s. Params: rating (4) · each (0.08 s) · pop (0.28 s, back.out, tối đa 1.25) · stars (5). The stars light in turn, 0.08 s apart: 0.3 → 1 (back.out) plus a half-sine bump to about 1.25.",
+    "titleVi": "Bấm sao, các sao sáng lần lượt"
+  }
+}

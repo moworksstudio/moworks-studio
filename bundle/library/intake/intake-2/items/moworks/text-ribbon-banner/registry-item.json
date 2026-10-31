@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-ribbon-banner",
+  "type": "hyperframes:component",
+  "title": "Headline Ribbon Wrap",
+  "description": "Một dải màu bung từ giữa ra sau tiêu đề, chữ trồi lên trong dải, rồi hai đuôi ruy băng gấp lật ra hai bên như băng rôn.",
+  "tags": [
+    "banner",
+    "ribbon",
+    "reveal",
+    "title",
+    "text-titles-film",
+    "smooth",
+    "titles-film"
+  ],
+  "files": [
+    {
+      "path": "text-ribbon-banner.html",
+      "target": "compositions/components/text-ribbon-banner.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-ribbon-banner",
+    "author": "moworks",
+    "call": "MW.textRibbonBanner(q(\".rb\"), tl, 0, {});",
+    "function": "MW.textRibbonBanner",
+    "options": {
+      "rise": "px the text rises inside the band (110)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Band 200 × 36 px (radius 2) scaleX 0 → 1 from the centre 0.3–0.9 s expo.out. Text (18 px, paper colour) rises 22 px and fades in inside the band (clipped) 0.65–1.05 s power2.out. Tails unfold behind both band ends 1.05–1.5 s back.out(1.7): 44 px long, 9 px lower than the band, V-notch 12 px, 60 % opacity; fold triangle 14 px wide at 35 %. Exit: tails 3.25–3.5 s, text 3.4–3.6 s (power2.in), band 3.55–3.9 s expo.in. Loop 4.2 s. Params: dải (200 × 36 px) · đuôi (44 px, thấp 9 px) · thời gian bung (0.6 s). Markup: .rb-band holding .rb-text, and two .rb-tail (left, right) behind the band's ends.",
+    "titleVi": "Ruy băng ôm tiêu đề, gấp đuôi"
+  }
+}

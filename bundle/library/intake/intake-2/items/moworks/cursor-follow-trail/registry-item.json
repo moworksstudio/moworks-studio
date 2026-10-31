@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "cursor-follow-trail",
+  "type": "hyperframes:block",
+  "title": "Cursor Follow",
+  "description": "Bốn chấm nhỏ dần đuổi theo con trỏ, mỗi chấm bám chậm hơn chấm trước nên tạo thành một vệt mềm phía sau.",
+  "tags": [
+    "cursor",
+    "trail",
+    "follow",
+    "lerp",
+    "web-interaction",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "cursor-follow-trail.html",
+      "target": "compositions/components/cursor-follow-trail.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/cursor-follow-trail",
+    "author": "moworks",
+    "call": "MW.cursorFollowTrail(q(\".gm\"), tl, 0, {});",
+    "function": "MW.cursorFollowTrail",
+    "options": {
+      "lerps": "share of the gap each dot closes per 60 fps frame",
+      "radii": "units",
+      "alphas": "",
+      "points": "cursor stops in the 320 frame",
+      "move": "s per move (0.5, power2.inOut)",
+      "every": "s per stop (0.75)",
+      "accent": ""
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "4 dots follow a cursor; every 60 fps frame dot k moves toward the cursor by 0.32 / 0.22 / 0.14 / 0.09 of the gap (iterate about 150 frames back from the current frame, interpolate the fraction, so it stays a function of time). Radii 10 / 8 / 6.4 / 5 px, opacity 1 / .78 / .58 / .42. Cursor visits (70,62) (252,70) (216,146) (90,138), each move 0.5 s power2.inOut every 0.75 s, 3 s loop. Real cursor drawn on top. Params: lerps ([0.32, 0.22, 0.14, 0.09]) · radii ([10, 8, 6.4, 5] px) · path [[x, y]] · move (0.5 s mỗi 0.75 s). Each frame iterates the chase from 150 frames back, so it stays a function of time.",
+    "titleVi": "Chuỗi chấm đuổi theo con trỏ"
+  }
+}

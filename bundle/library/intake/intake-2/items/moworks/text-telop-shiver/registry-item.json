@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-telop-shiver",
+  "type": "hyperframes:component",
+  "title": "Shaking Telop",
+  "description": "Chữ telop viền màu đứng giữa khung nhưng từng chữ cái run lệch và xoay nhẹ liên tục theo nhịp riêng, các chữ cạnh nhau hơi giống nhau, như đang run sợ hay phấn khích.",
+  "tags": [
+    "shake",
+    "jitter",
+    "telop",
+    "letters",
+    "text-broadcast-telop",
+    "crisp",
+    "broadcast-telop"
+  ],
+  "files": [
+    {
+      "path": "text-telop-shiver.html",
+      "target": "compositions/components/text-telop-shiver.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-telop-shiver",
+    "author": "moworks",
+    "call": "MW.textTelopShiver(q(\".ts\"), tl, 0.3, {});",
+    "function": "MW.textTelopShiver",
+    "options": {
+      "amp": "± px (12)",
+      "rot": "± degrees (3)",
+      "rate": "noise units a second (10), sampled at 24 fps",
+      "phase": "noise offset between neighbours (2.59: about 30 % alike)",
+      "offAt": "s (2.4)",
+      "seed": "(5)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Per char, updated on a 24 fps grid: x, y offset (±3 px, recipe 2–6) and rotation (±3°) from smooth value noise running at 10 units / s; neighbours' noise phases differ by 0.7 × 3.7 units (≈30 % correlation). Telop style: heavy text (spacing 0.03 em), ink fill, second-accent outer stroke 0.3 em, dark offset (2, 2) px shadow. Fades in 0.3–0.42 s, off at 2.7 s. Loop 3 s. Params: độ lệch (±3 px) · độ xoay (±3°) · nhịp nhiễu (10 / s, cập nhật 24 fps) · tương quan (30 %).",
+    "titleVi": "Telop từng chữ run rẩy"
+  }
+}

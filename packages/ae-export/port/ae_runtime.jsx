@@ -8,8 +8,12 @@
     LOG.push(s);
     try { var p = new File(DATA.log + ".progress"); p.encoding = "UTF-8"; p.open("a"); p.writeln(((new Date().getTime() - T0) / 1000).toFixed(1) + " s  " + s); p.close(); } catch (e) {}
   }
+  // the layers After Effects did not build (a file it refuses): port.py says them on the dialog and in AE-PORT.md, one comp\tlayer\tfile\twhy a line
+  var FAILED = [];
+  function failed(c, s, e) { FAILED.push([c.name, s.name, s.src || "", String(e).replace(/[\t\r\n]+/g, " ")].join("\t")); }
   function finish(ok) {
     log((ok ? "OK" : "FAILED") + " in " + ((new Date().getTime() - T0) / 1000).toFixed(1) + " s");
+    var ff = new File(DATA.log + ".failed"); ff.encoding = "UTF-8"; ff.open("w"); ff.write(FAILED.join("\n")); ff.close();
     var f = new File(DATA.log); f.encoding = "UTF-8"; f.open("w"); f.write(LOG.join("\n")); f.close();
     var d = new File(DATA.done); d.encoding = "UTF-8"; d.open("w"); d.write(LOG.join("\n")); d.close();
   }
@@ -255,7 +259,7 @@
         L = makeLayer(comp, s); made[s.name] = L;
         if (s.shape) shape(L, s.shape);
         if (s.text) textStyle(L, s.text);
-      } catch (e0) { log("make " + c.name + " > " + s.name + ": " + e0.toString() + " (line " + e0.line + ")"); }
+      } catch (e0) { log("make " + c.name + " > " + s.name + ": " + e0.toString() + " (line " + e0.line + ")"); failed(c, s, e0.toString()); }
       DONE++;                                           // progress for the kit (port.py shows it while AE builds)
       if (DONE % 20 === 0) log("layers " + DONE + "/" + TOTAL);
     }
@@ -279,7 +283,7 @@
         var PP = s.paths || {};                           // per-layer property paths (fill keys of a shape) over the shared ones
         for (k in sets) if (sets.hasOwnProperty(k)) applySet(L, PP[k] || DATA.paths[k], sets[k]);
         var keys = s.keys || {};
-        for (k in keys) if (keys.hasOwnProperty(k)) { try { setKeys(prop(L, PP[k] || DATA.paths[k]), keys[k]); } catch (ek) { log("keys " + c.name + " > " + s.name + " > " + k + ": " + ek.toString()); } }
+        for (k in keys) if (keys.hasOwnProperty(k)) { try { setKeys(prop(L, PP[k] || DATA.paths[k]), keys[k]); } catch (ek) { log("keys " + c.name + " > " + s.name + " > " + k + ": " + ek.toString()); if (k === "audio") failed(c, s, ek.toString()); } }
         if (s.textKeys) textKeys(L, s.textKeys);
         if (s.pathKeys) pathKeys(L, s.pathKeys);
         if (s.bezKeys) bezKeys(L, s.bezKeys);
@@ -292,7 +296,7 @@
         if (s.collapse) L.collapseTransformation = true;  // a precomp holding a blend mode: it keeps blending with the layers below
         if (s.inPoint !== undefined) L.inPoint = Math.max(s.inPoint, L.startTime);
         if (s.outPoint !== undefined) L.outPoint = s.outPoint;
-      } catch (err) { log("layer " + c.name + " > " + s.name + ": " + err.toString() + " (line " + err.line + ")"); }
+      } catch (err) { log("layer " + c.name + " > " + s.name + ": " + err.toString() + " (line " + err.line + ")"); if (s.paths && s.paths.audio) failed(c, s, err.toString()); }
       if (DATA.timing) log("  " + s.name);
     }
     for (i = 0; i < list.length; i++) {

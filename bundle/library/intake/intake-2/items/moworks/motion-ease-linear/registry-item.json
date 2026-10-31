@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ease-linear",
+  "type": "hyperframes:component",
+  "title": "Linear",
+  "description": "Phần tử đi với tốc độ không đổi từ đầu đến cuối, chỉ hợp cho xoay, trôi, chữ chạy.",
+  "tags": [
+    "ease",
+    "linear",
+    "easing",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-ease-linear.html",
+      "target": "compositions/components/motion-ease-linear.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-ease-linear",
+    "author": "moworks",
+    "call": "MW.motionEaseLinear(q(\".ez-b\"), tl, 0.5, { duration: 1.2, graph: \".ez-g\" });",
+    "function": "MW.motionEaseLinear",
+    "options": {
+      "duration": "s (1.2)",
+      "ease": "the curve (none)",
+      "prop": "the property moved (x)",
+      "from": "start value (0)",
+      "to": "end value (780 px here)",
+      "graph": "a canvas to draw the curve on (a teaching guide; none by default)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Target moves 0 → 100 % at constant speed (ease none), 1200 ms. Rule: only for motion with no start or end — spins, drifts, clock hands, marquees. Small demo: 1200 ms across 114 px beside the curve graph and a 12-frame spacing ruler (guides, not ported). Params: duration (1.2 s) · prop: thuộc tính (x) · amount: quãng (100 %).",
+    "titleVi": "Đường cong đều tốc (linear)"
+  }
+}

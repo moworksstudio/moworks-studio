@@ -1,0 +1,59 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-stat-card",
+  "type": "hyperframes:block",
+  "title": "Stat Card",
+  "description": "Một con số lớn đếm lên và thanh so sánh dài ra cùng một nhịp, dùng số liệu làm bằng chứng.",
+  "tags": [
+    "stat",
+    "counter",
+    "bar",
+    "proof",
+    "data-storytelling",
+    "crisp",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "data-stat-card.html",
+      "target": "compositions/components/data-stat-card.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/data-stat-card",
+    "author": "moworks",
+    "call": "MW.dataStatCard(q(\".sc\"), tl, 0, {});",
+    "function": "MW.dataStatCard",
+    "options": {
+      "value": "% (40)",
+      "bar": "% the bar fills (80)",
+      "start": "s (0.3)",
+      "duration": "s (1.1), expo.out, one curve for both",
+      "number": "the number",
+      "fill": "the bar's fill"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Card (200 x 120): '+N%' counts 0 -> 40 and a comparison bar (152 px track) fills 0 -> 80 % in sync, one easeOutExpo over 900 ms (recipe: number 600-1200 ms; demo 1.1 s from 0.3 s). Number in the accent, mono, weight 600. Params: value (+40 %) · duration (0.9 s) · ease (expo.out).",
+    "titleVi": "Thẻ số lớn đếm lên kèm thanh"
+  }
+}

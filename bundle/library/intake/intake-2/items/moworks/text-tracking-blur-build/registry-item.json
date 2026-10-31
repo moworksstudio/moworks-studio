@@ -1,0 +1,66 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-tracking-blur-build",
+  "type": "hyperframes:component",
+  "title": "Blur + Tracking Build",
+  "description": "Dòng chữ giãn rộng và nhoè 20 px từ từ khép lại và rõ nét trong 2 giây, kiểu tiêu đề phim.",
+  "tags": [
+    "reveal",
+    "blur",
+    "letter-spacing",
+    "cinematic",
+    "text-blur-focus",
+    "smooth",
+    "heavy",
+    "blur-focus"
+  ],
+  "files": [
+    {
+      "path": "text-tracking-blur-build.html",
+      "target": "compositions/components/text-tracking-blur-build.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-tracking-blur-build",
+    "author": "moworks",
+    "call": "MW.textTrackingBlurBuild(q(\".tk-head\"), tl, 0, { tracking: \"fill\" });",
+    "function": "MW.textTrackingBlurBuild",
+    "options": {
+      "tracking": "em of extra spacing at the start (0.5), or 'fill' to spread to the frame width",
+      "max": "em at most with 'fill' (0.9)",
+      "width": "px to fill (0: the window)",
+      "duration": "s the spacing closes over (2.1)",
+      "ease": "(cubic-bezier(.33,1,.68,1))",
+      "fade": "s per letter (0.6)",
+      "unblur": "s per letter (1.7)",
+      "spread": "s the letters start within (0.25)",
+      "blur": "px (20)",
+      "start": "s (0.3)",
+      "exitAt": "s (3.4)",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Line letter-spacing +0.5 em → 0 over 2 s easeOutCubic (CSS cubic-bezier(.33,1,.68,1); labelled power3.out; demo spreads to fill the frame width, max 0.9 em, over 2.1 s); meanwhile each char fades in and un-blurs 20 → 0 px over 1.5 s, chars 50 ms apart left → right (demo: fade 0.6 s, blur 1.7 s, starts spread over 0.25 s). AE: Tracking +50 → 0, Blur 20 → 0, Ramp Up, Ease Low 50 %. Demo framed in 2.39:1 letterbox bars; exit fade 3.4–3.8 s; loop 4 s. Params: tracking: giãn đầu (0.5 em) · duration (2 s) · blur (20 px) · stagger (0.05 s).",
+    "titleVi": "Giãn chữ khép lại và lấy nét"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-center-out-reveal",
+  "type": "hyperframes:component",
+  "title": "Center-Out Reveal",
+  "description": "Các ký tự hiện ra từ giữa lan đều sang hai bên, mỗi ký tự phóng nhẹ từ 0.86 lần.",
+  "tags": [
+    "reveal",
+    "letters",
+    "center",
+    "fade",
+    "text-reveal",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "text-center-out-reveal.html",
+      "target": "compositions/components/text-center-out-reveal.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-center-out-reveal",
+    "author": "moworks",
+    "call": "MW.textCenterOutReveal(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textCenterOutReveal",
+    "options": {
+      "from": "scale (0.86)",
+      "duration": "s (0.45)",
+      "stagger": "s per step from the centre (0.06)",
+      "cap": "s the outermost starts by (0.5)",
+      "ease": "(ease-out cubic)",
+      "start": "s (0.3)",
+      "outAt": "s (2.65)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Split chars; delay = |i − centre| × 30 ms (demo up to 120 ms, capped so the outermost starts by 0.8 s), from 0.3 s. Each char opacity 0 → 1 and scale 0.86 → 1 over 0.45 s easeOutCubic (cubic-bezier(.215,.61,.355,1)); a symmetric build outward from the middle. Loop exit: fade 2.65–2.95 s inCubic; loop 3 s. Params: duration (0.45 s) · stagger: từ giữa ra (0.03 s) · scale đầu (0.86) · ease (easeOutCubic).",
+    "titleVi": "Ký tự hiện từ giữa ra hai bên"
+  }
+}

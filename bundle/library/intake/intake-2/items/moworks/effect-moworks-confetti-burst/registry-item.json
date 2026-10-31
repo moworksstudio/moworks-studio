@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-moworks-confetti-burst",
+  "type": "hyperframes:block",
+  "title": "Confetti",
+  "description": "Bốn mươi mảnh giấy màu bắn lên từ một điểm, rơi theo trọng lực, lắc ngang và lật mặt khi xoay.",
+  "tags": [
+    "confetti",
+    "particles",
+    "celebrate",
+    "gravity",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "effect-moworks-confetti-burst.html",
+      "target": "compositions/components/effect-moworks-confetti-burst.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-moworks-confetti-burst",
+    "author": "moworks",
+    "call": "MW.effectMoworksConfettiBurst(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectMoworksConfettiBurst",
+    "options": {
+      "count": "(40)",
+      "gravity": "units/s² (320)",
+      "x": "launch point, of 320 (160)",
+      "y": "of 200 (196)",
+      "duration": "s (2)",
+      "colors": "the 4 colours",
+      "seed": "pieces"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "40 pieces 8 x 5 px, 4 colours, launched from one point: x speed +-80 px/s, y speed -140 to -260 px/s, gravity 320 px/s^2, side flutter 8 px at 6 rad/s, spin 4-10 rad/s with scaleX = cos(spin) flip; launch 300 ms ease-out then fall 1700 ms; seeded. Params: count (40) · gravity (320 px/s²) · x, y: điểm bắn · seed.",
+    "titleVi": "Pháo giấy bắn lên rồi rơi"
+  }
+}

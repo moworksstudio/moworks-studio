@@ -8,7 +8,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node
 import { join } from "node:path";
 import { docPath, writeDoc } from "../project-service/docs.mjs";
 import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
-import { HUMAN_ENGINE, humanCharacters, humanDir, ownRig } from "./index.mjs";
+import { HUMAN_ENGINE, humanCharacters, humanFolder, ownRig } from "./index.mjs";
 import { humanHandOf } from "../style-catalog/hands.mjs";
 
 /** The hand of a film's style when it draws anidoodle's people (config/anidoodle-pipeline.json humanHands), else null. */
@@ -25,7 +25,7 @@ export function useHumans(projectDir, ids, { styleId = null, root = APP_ROOT } =
     const c = lib.find((x) => x.id === String(id));
     if (!c) throw Object.assign(new Error(`No anidoodle character "${id}"`), { code: "NOT_FOUND" });
     if (out.some((x) => x.id === c.id)) continue;
-    const shipped = c.credit?.made === "as shipped", store = join(humanDir(root), c.id);
+    const shipped = c.credit?.made === "as shipped", store = humanFolder(c.id, root);          // the user's, or the app's in bundle/ (only read)
     let entry;
     if (shipped && c.rig) {
       // the author's rigged characters (Bit, the cheetah): their own rig and hand in the staged engine, no human gate
@@ -51,7 +51,7 @@ export function useHumans(projectDir, ids, { styleId = null, root = APP_ROOT } =
     out.push({ id: c.id, name: c.name, about: c.about ?? "", engine: HUMAN_ENGINE, hand: own, filmHand: hand, needsPalette: !c.rig && !!(hand && own !== hand && !(c.hands ?? []).includes(hand)),
       // in a hand it already has (or the author's rig as shipped) it needs no redraw, only its gate
       ownStyle: !!c.rig || !(hand && own !== hand && !(c.hands ?? []).includes(hand)),
-      ...entry, made: shipped ? "as shipped" : "written from the idea", credit: c.credit ?? null, from: { library: "anidoodle", at: new Date().toISOString() } });
+      ...entry, made: shipped ? "as shipped" : c.credit?.made === "adapted" ? "adapted" : "written from the idea", credit: c.credit ?? null, from: { library: "anidoodle", at: new Date().toISOString() } });
     added.push(c.id);
   }
   writeDoc(projectDir, HUMANS_FILE, JSON.stringify({ characters: out }, null, 2) + "\n");

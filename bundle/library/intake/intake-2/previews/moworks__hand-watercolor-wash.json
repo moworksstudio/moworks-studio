@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/hand-watercolor-wash",
+  "hash": "f75c531985ee8dea",
+  "at": "2026-10-17T10:42:02.670Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__hand-watercolor-wash.mp4",
+    "poster": "previews/moworks__hand-watercolor-wash.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "87774ecd76a9e38053f1ee1b914385a918abe97e150e94f56cd5108d0c7b801d",
+    "size": 47260,
+    "seconds": 30.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -33,7 +33,13 @@ export function appSounds(dir) {
     return new Set(Object.values(st.sounds ?? {}).filter((s) => s?.file && s.source !== "owner").flatMap((s) => [s.file, ...(s.variants ?? []).map((v) => v.file)]));
   } catch { return new Set(); }
 }
-const MEDIA = /\.(png|jpe?g|webp|gif|avif|bmp|tiff?|heic|svg|exr|mp4|mov|webm|m4v|mkv|avi|mp3|wav|m4a|flac|ogg|aac|opus|ttf|otf|woff2?|psd|psb|pptx?|key|pdf|ai|eps|sketch|fig|xd|indd|docx?)$/i;
+/** What the app copied into a new film from its Brand Kit (never one of the user's added files): { id, title, version, at, logos: [path],
+ *  fonts: [{ family, vi, files: [path] }] }, or null. */
+export const KIT_FILES = ".moworks/brand-kit-files.json";
+export function kitFilesOf(dir) { try { return JSON.parse(readFileSync(join(dir, ...KIT_FILES.split("/")), "utf8")); } catch { return null; } }
+/** The same as a set of project paths. */
+export function kitFiles(dir) { const k = kitFilesOf(dir); return new Set(k ? [...(k.logos ?? []), ...(k.fonts ?? []).flatMap((f) => f.files ?? [])] : []); }
+const MEDIA =/\.(png|jpe?g|webp|gif|avif|bmp|tiff?|heic|svg|exr|mp4|mov|webm|m4v|mkv|avi|mp3|wav|m4a|flac|ogg|aac|opus|ttf|otf|woff2?|eot|psd|psb|pptx?|key|pdf|ai|eps|sketch|fig|xd|indd|docx?)$/i;
 const IN_PLACE = /^assets\/(_app\/|1_design\/|2_footage\/|3_audio\/(voiceover|sfx|music)\/)/;
 // older folder → new folder, the rest of the path kept (most specific first)
 const RULES = [

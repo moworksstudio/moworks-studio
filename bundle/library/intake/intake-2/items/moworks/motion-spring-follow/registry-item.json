@@ -1,0 +1,60 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-spring-follow",
+  "type": "hyperframes:component",
+  "title": "Spring Follow",
+  "description": "Chấm dẫn đầu nhảy tới đích bằng lò xo, ba chấm sau đi theo trễ dần, nối bằng một đường mảnh.",
+  "tags": [
+    "spring",
+    "follow",
+    "stagger",
+    "bounce-reaction",
+    "soft",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-spring-follow.html",
+      "target": "compositions/components/motion-spring-follow.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-spring-follow",
+    "author": "moworks",
+    "call": "MW.motionSpringFollow(q(\".sf\"), tl, 0.2, {});",
+    "function": "MW.motionSpringFollow",
+    "options": {
+      "dots": "leader first",
+      "k": "spring stiffness (80)",
+      "c": "damping (10): about 12 % overshoot",
+      "delay": "s between followers (0.07)",
+      "distance": "px (900)",
+      "alphas": "followers' opacity",
+      "backAt": "s it all goes back (1.6)",
+      "line": "link colour"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Leader dot x 0 → 180 px on a spring (k 80, c 10, m 1: 12 % overshoot, within 1 % by ~950 ms); three followers on the same spring start 70 / 140 / 210 ms later (opacity 0.82 / 0.64 / 0.46), a thin line linking all four; back to 0 the same way at 1600 ms. Recipe variant: followers 5× stiffer on a damped link, peaks 196 → 193 → 190 → 188, settle 1.4 s. Params: spring (k 80, c 10) · followers: số chấm theo (3) · delay (70 ms) · x (180 px).",
+    "titleVi": "Chuỗi lò xo đuổi theo nhau"
+  }
+}

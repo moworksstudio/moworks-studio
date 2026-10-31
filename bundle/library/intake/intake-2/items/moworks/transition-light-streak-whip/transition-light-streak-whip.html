@@ -1,0 +1,57 @@
+<!--
+  Light-streak Whip (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Một dải sáng mờ lướt ngang khung thật nhanh, cắt cảnh đúng lúc dải ở giữa khung.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.transitionLightStreakWhip(q(".tk-b"), tl, 1.2, { duration: 0.5 });
+
+  Options (defaults in brackets):
+      - duration: s (0.35; 0.3-0.4)
+      - ease: power3.in
+      - from: the outgoing scene; the cut happens as the band's centre crosses the frame's
+
+  Notes: Soft white band (6 stacked layers at 25 % opacity, widths about 28 % to 84 % of frame width) travels from -40 % to 140 % of width in 350 ms power3.in; cut to the incoming scene when the band centre crosses the frame centre. Recipe 0.3-0.4 s. Params: duration (0.35 s) · ease (power3.in) · width (28–84 %).
+-->
+
+<section class="tk-scene tk-a"><div class="tk-mark circle"></div><div class="tk-sc-text"><div class="tk-sc-letter">A</div><div class="tk-sc-cap">Cảnh mở đầu</div></div></section>
+<section class="tk-scene tk-b"><div class="tk-mark square"></div><div class="tk-sc-text"><div class="tk-sc-letter">B</div><div class="tk-sc-cap">Cảnh tiếp theo</div></div></section>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"duration":0.35,"ease":"power3.in","from":null};
+  var run = function (el, tl, at, o) {
+        var out = o.from ? MW.el(o.from) : el.previousElementSibling, root = el.parentNode, W = el.offsetWidth, ease = gsap.parseEase(o.ease), bands = [];
+        for (var k = 0; k < 6; k++) {
+          var b = document.createElement("div"), w = (0.28 + (0.84 - 0.28) * k / 5) * W;
+          b.style.cssText = "position:absolute;top:0;bottom:0;pointer-events:none;z-index:6;width:" + w + "px;opacity:0.25;background:linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.95) 50%, rgba(255,255,255,0));";
+          root.appendChild(b); bands.push({ b: b, w: w });
+        }
+        return MW.drive(tl, at, o.duration, function (t) {
+          var u = t / o.duration, cx = -0.4 * W + 1.8 * W * ease(u), on = u > 0 && u < 1;
+          bands.forEach(function (x) { x.b.style.left = (cx - x.w / 2) + "px"; x.b.style.visibility = on ? "visible" : "hidden"; });
+          var cut = cx >= W / 2; el.style.visibility = cut && u > 0 ? "visible" : "hidden"; if (out) out.style.visibility = cut && u > 0 ? "hidden" : "visible";
+        });
+      };
+  MW.transitionLightStreakWhip = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

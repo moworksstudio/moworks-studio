@@ -1,0 +1,59 @@
+<!--
+  Width Reveal (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Thanh màu giãn ngang từ mép trái, vượt 8 % rồi về, thanh phụ theo sau 80 ms và chữ hiện ra.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionWidthReveal(q(".wr"), tl, 0.3, { exitAt: 1.9 });
+
+  Options (defaults in brackets):
+      - bars: the bars, in order
+      - label: the label over them
+      - from: (0.04)
+      - peak: (1.08)
+      - peakAt: share of the length (0.78), power3.out up, power2.inOut back
+      - duration: s (0.65)
+      - delay: s between bars (0.08)
+      - labelAt: s (0.52, fades in 0.2 s)
+      - exitAt: s after the start to shrink back (null)
+
+  Notes: Bar (origin left edge) scaleX 0.04 → 1.08 at 507 ms (power3.out) → 1 at 650 ms (power2.inOut); a second, thinner bar repeats it 80 ms later; the label fades in over 200 ms from 520 ms. Exit: both scaleX → 0 in 350 ms power2.in. Params: duration (0.65 s) · from (0.04) · peak (1.08) · origin (mép trái) · delay thanh 2 (80 ms).
+-->
+
+<div class="st"><div class="wr"><div class="wr-a"></div><div class="wr-b"></div><div class="wr-l">RA MẮT</div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"bars":[".wr-a",".wr-b"],"label":".wr-l","from":0.04,"peak":1.08,"peakAt":0.78,"duration":0.65,"delay":0.08,"labelAt":0.52,"exitAt":null};
+  var run = function (el, tl, at, o) {
+        var bars = o.bars.map(function (s) { return el.querySelector(s); }).filter(Boolean), lb = o.label ? el.querySelector(o.label) : null, p3 = gsap.parseEase("power3.out"), io = gsap.parseEase("power2.inOut"), pin = gsap.parseEase("power2.in"), tp = o.duration * o.peakAt;
+        bars.forEach(function (b) { gsap.set(b, { transformOrigin: "0% 50%" }); });
+        var S = function (t) { if (t <= 0) return o.from; return t < tp ? o.from + (o.peak - o.from) * p3(t / tp) : o.peak + (1 - o.peak) * io(Math.min(1, (t - tp) / (o.duration - tp))); };
+        return MW.drive(tl, at, o.exitAt == null ? Math.max(o.duration + o.delay * (bars.length - 1), o.labelAt + 0.2) : o.exitAt + 0.35, function (t) {
+          var x = o.exitAt != null && t > o.exitAt ? pin(Math.min(1, (t - o.exitAt) / 0.35)) : 0;
+          bars.forEach(function (b, i) { var tt = t - i * o.delay; gsap.set(b, { scaleX: S(tt) * (1 - x) }); b.style.opacity = tt > 0 ? "1" : "0"; });
+          if (lb) lb.style.opacity = String(Math.max(0, Math.min(1, (t - o.labelAt) / 0.2)) * (1 - x));
+        });
+      };
+  MW.motionWidthReveal = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

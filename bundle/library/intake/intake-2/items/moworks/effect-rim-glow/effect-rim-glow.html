@@ -1,0 +1,55 @@
+<!--
+  Rim Glow (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Viền của một hình tối sáng lên dày rồi mỏng theo nhịp 1 giây, bên trong vẫn tối.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.effectRimGlow(q(".rg-d"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - stroke: px, rest to peak ([8, 16])
+      - glow: px ([40, 88]), drawn at 0.8 ×
+      - period: s (1)
+      - cycles: (3)
+      - color: rim colour
+
+  Notes: Looping rim light on a dark silhouette (r 50 disc): stroke 2 → 4 → 2 px and outer glow 10 → 22 → 10 (drawn as a shadow blur of 0.8× that: 8 → 17.6 px), 1000 ms per cycle (sine ping-pong, 500 ms each way); a 1 px outer ring at radius + stroke and up to 50 % opacity follows the peak; the inside stays dark. Params: stroke (2 → 4 px) · glow (10 → 22) · period (1 s) · color.
+-->
+
+<div class="gm rg"><i style="left:0px;top:0px"></i><i style="left:421px;top:257px"></i><i style="left:842px;top:514px"></i><i style="left:1263px;top:771px"></i><i style="left:1684px;top:1028px"></i><i style="left:185px;top:205px"></i><i style="left:606px;top:462px"></i><i style="left:1027px;top:719px"></i><i style="left:1448px;top:976px"></i><i style="left:1869px;top:153px"></i><i style="left:370px;top:410px"></i><i style="left:791px;top:667px"></i><i style="left:1212px;top:924px"></i><i style="left:1633px;top:101px"></i><i style="left:134px;top:358px"></i><i style="left:555px;top:615px"></i><i style="left:976px;top:872px"></i><i style="left:1397px;top:49px"></i><i style="left:1818px;top:306px"></i><i style="left:319px;top:563px"></i><i style="left:740px;top:820px"></i><i style="left:1161px;top:1077px"></i><i style="left:1582px;top:254px"></i><i style="left:83px;top:511px"></i><i style="left:504px;top:768px"></i><i style="left:925px;top:1025px"></i><i style="left:1346px;top:202px"></i><i style="left:1767px;top:459px"></i><i style="left:268px;top:716px"></i><i style="left:689px;top:973px"></i><i style="left:1110px;top:150px"></i><i style="left:1531px;top:407px"></i><i style="left:32px;top:664px"></i><i style="left:453px;top:921px"></i><i style="left:874px;top:98px"></i><i style="left:1295px;top:355px"></i><i style="left:1716px;top:612px"></i><i style="left:217px;top:869px"></i><i style="left:638px;top:46px"></i><i style="left:1059px;top:303px"></i><div class="rg-d"></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"stroke":[8,16],"glow":[40,88],"period":1,"cycles":3,"color":"#8b7bff"};
+  var run = function (el, tl, at, o) {
+        var host = el.parentNode, ring = document.createElement("div");
+        if (getComputedStyle(host).position === "static") host.style.position = "relative";
+        ring.style.cssText = "position:absolute;border-radius:50%;pointer-events:none;box-sizing:border-box;border:4px solid " + o.color + ";"; host.appendChild(ring);
+        return MW.drive(tl, at, o.period * o.cycles, function (t) {
+          var k = 0.5 - 0.5 * Math.cos(2 * Math.PI * t / o.period), sw = o.stroke[0] + (o.stroke[1] - o.stroke[0]) * k, gl = (o.glow[0] + (o.glow[1] - o.glow[0]) * k) * 0.8;
+          el.style.boxShadow = "0 0 0 " + sw + "px " + o.color + ", 0 0 " + gl + "px " + sw + "px " + o.color;
+          var R = el.offsetWidth / 2 + sw + 14; ring.style.width = ring.style.height = 2 * R + "px"; ring.style.left = (el.offsetLeft + el.offsetWidth / 2 - R) + "px"; ring.style.top = (el.offsetTop + el.offsetHeight / 2 - R) + "px"; ring.style.opacity = String(0.5 * k);
+        });
+      };
+  MW.effectRimGlow = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

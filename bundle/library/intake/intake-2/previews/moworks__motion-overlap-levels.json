@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-overlap-levels",
+  "hash": "53f584377c0830d6",
+  "at": "2026-10-17T10:50:11.488Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-overlap-levels.mp4",
+    "poster": "previews/moworks__motion-overlap-levels.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "489a137fbe5fd16c878c01b4c3c8710be0ca132426c07f936b13d7bd130f8589",
+    "size": 14145,
+    "seconds": 27.1,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

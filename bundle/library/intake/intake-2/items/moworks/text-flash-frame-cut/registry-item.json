@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-flash-frame-cut",
+  "type": "hyperframes:block",
+  "title": "Flash-Frame Card Cut",
+  "description": "Các thẻ chữ ngắn thay nhau bằng nhát cắt đúng phách, mỗi nhát cắt có ba khung chớp trắng tắt dần, chữ phóng rất chậm trong lúc đứng.",
+  "tags": [
+    "cut",
+    "flash",
+    "title-card",
+    "beat",
+    "text-titles-film",
+    "crisp",
+    "titles-film"
+  ],
+  "files": [
+    {
+      "path": "text-flash-frame-cut.html",
+      "target": "compositions/components/text-flash-frame-cut.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-flash-frame-cut",
+    "author": "moworks",
+    "call": "MW.textFlashFrameCut(q(\".fc\"), tl, 0, {});",
+    "function": "MW.textFlashFrameCut",
+    "options": {
+      "duration": "s for all the cards (4.2)",
+      "cards": "selector of the cards (shown one by one, hard cuts)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Phrases as cards (demo 3, 42 px, last one accent), each on screen 4.2 s / n, hard cut between them (on the beat). Each card scales 1 → 1.05 linearly while shown. On every cut a full-frame white flash: 100 % / 55 % / 20 % on the first three 24 fps frames, then 0 (rule: ≤ 3 flashes per second). Loop 4.2 s. Params: số thẻ (3) · thời lượng thẻ (1.4 s) · chớp (100 / 55 / 20 % trong 3 khung).",
+    "titleVi": "Cắt thẻ chữ có chớp trắng"
+  }
+}

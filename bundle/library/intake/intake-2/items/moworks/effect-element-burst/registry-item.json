@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-element-burst",
+  "type": "hyperframes:component",
+  "title": "Elemental Affinity Burst",
+  "description": "Hai quả cầu hai màu quay quanh tâm và xoáy vào trong để tụ lực, rồi nổ: hai mươi hạt xen kẽ hai màu bắn toả tròn có vệt kéo, vòng sóng nở ra và ngôi sao giữa nảy lò xo.",
+  "tags": [
+    "burst",
+    "particles",
+    "charge",
+    "radial",
+    "game-impact-fx",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "effect-element-burst.html",
+      "target": "compositions/components/effect-element-burst.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-element-burst",
+    "author": "moworks",
+    "call": "MW.effectElementBurst(q(\".gm\"), tl, 0, {});",
+    "function": "MW.effectElementBurst",
+    "options": {
+      "chargeAt": "s (0.2)",
+      "burstAt": "s (0.65)",
+      "colors": "the two elements' colours (ice, fire)",
+      "outAt": "s (3.5)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200. Charge 0.2-0.65 s: two orbs (r 4, two colours) orbit the centre at 9 rad/s, radius 36 → 6 in-quad (vertical × 0.7); centre star grows 8 → 14, spinning 2 rad/s. Burst at 0.65 s: 20 dots alternating the 2 colours fly to 62-88 px (vertical × 0.82) over 900 ms outCubic, size 4.5 → 2.5, with fading streaks behind; dots stay until 3.5 s; ring r 10 → 50 (stroke 3) in 400 ms outCubic; centre star 1.6 → 1 spring k300 d14. Out 3.5-3.9 s in-cubic. Params: chargeAt: lúc tụ (0.2 s) · burstAt: lúc nổ (0.65 s) · colors: hai màu (băng / lửa) · particles: số hạt (20, 62-88 px) · ring: vòng sóng (10 → 50 px).",
+    "titleVi": "Nổ hạt hai màu nguyên tố"
+  }
+}

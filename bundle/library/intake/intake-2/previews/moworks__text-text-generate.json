@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-text-generate",
+  "hash": "6e878d7cb92171c2",
+  "at": "2026-10-17T09:39:03.962Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-text-generate.mp4",
+    "poster": "previews/moworks__text-text-generate.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "a637c6339863b7e3c78bfb756bfd8ade94a5d90cd1686b8f9308786c2ce48e8c",
+    "size": 19707,
+    "seconds": 26.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-weight-pulse",
+  "type": "hyperframes:component",
+  "title": "Variable Font Pulse",
+  "description": "Nét chữ phình từ mảnh sang đậm rồi về mảnh, khoảng cách chữ co lại bù trừ để cả từ không đổi bề rộng.",
+  "tags": [
+    "variable-font",
+    "weight",
+    "tracking",
+    "loop",
+    "text-variable-fonts",
+    "bouncy",
+    "variable-fonts"
+  ],
+  "files": [
+    {
+      "path": "text-weight-pulse.html",
+      "target": "compositions/components/text-weight-pulse.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-weight-pulse",
+    "author": "moworks",
+    "call": "MW.textWeightPulse(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textWeightPulse",
+    "options": {
+      "from": "wght (200)",
+      "to": "wght (900)",
+      "start": "s (0.3)",
+      "duration": "s each way (1.2)",
+      "hold": "s at the peak (0.8)",
+      "tight": "em of tracking at the peak (0.02)",
+      "keepWidth": "loosen the tracking as the strokes thin, so the word keeps its width",
+      "ease": "(cubic-bezier(.65,0,.35,1))",
+      "loop": "s (4.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "One word (40 px). wght 200 → 900 over 0.3–1.5 s, hold to 2.3 s, 900 → 200 over 2.3–3.5 s, hold to 4.2 s (loop); ease cubic-bezier(.65,0,.35,1). Tracking moves the other way, 8 px → 0.8 px (0.2 → 0.02 em), so the word width stays constant (the demo fakes weight with a 0–6 px stroke on a 200 face: tracking = 8 − 1.2 × stroke). Params: from, to: độ đậm (200 → 900) · duration: mỗi chiều (1.2 s) · hold: giữ ở đỉnh (0.8 s) · keepWidth: bù giãn chữ để giữ bề rộng (bật). Needs a variable font with a wght axis. The word's width is measured at nine weights first, and the tracking at each frame makes up the difference.",
+    "titleVi": "Nét chữ phình xẹp, giữ nguyên bề rộng"
+  }
+}

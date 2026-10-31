@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "line-marching-dashes",
+  "type": "hyperframes:component",
+  "title": "Marching Dashes",
+  "description": "Nét đứt chạy đều quanh một khung hay dọc một đường như vùng chọn, đường nối đang hoạt động.",
+  "tags": [
+    "dashes",
+    "loop",
+    "line",
+    "flow",
+    "svg-path",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "line-marching-dashes.html",
+      "target": "compositions/components/line-marching-dashes.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/line-marching-dashes",
+    "author": "moworks",
+    "call": "MW.lineMarchingDashes(q(\".md\"), tl, 0, {});",
+    "function": "MW.lineMarchingDashes",
+    "options": {
+      "dash": "(10)",
+      "gap": "(8)",
+      "period": "s per dash period, linear (1)",
+      "duration": "s (3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Dashed stroke, dash 10 / gap 8 px; lineDashOffset decreases linearly by one dash period (18 px) every 1000 ms (recipe; the demo runs 36 px / s), looping seamlessly. Demo on a rounded rect 180 x 100 (r 12, 3 px stroke) and a baseline. Params: dash (10 px) · gap (8 px) · speed (1 chu kỳ / 1 s).",
+    "titleVi": "Nét đứt chạy vòng (kiến bò)"
+  }
+}

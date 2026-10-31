@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/transition-cover-wipe",
+  "hash": "d9ba906434afbf10",
+  "at": "2026-10-17T08:17:58.965Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__transition-cover-wipe.mp4",
+    "poster": "previews/moworks__transition-cover-wipe.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "55b27a0c78d7cde0a3fa4bb5755bae974758751713c1339a2cb9175c9a932b0b",
+    "size": 11973,
+    "seconds": 29.4,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

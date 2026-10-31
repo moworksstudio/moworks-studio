@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-sparkles",
+  "type": "hyperframes:component",
+  "title": "Sparkles Text",
+  "description": "Mười ngôi sao bốn cánh nhỏ liên tục loé lên, xoay và tắt ở những chỗ khác nhau trên và quanh dòng chữ, mỗi sao một nhịp riêng.",
+  "tags": [
+    "sparkle",
+    "twinkle",
+    "loop",
+    "stars",
+    "text-loops-decoration",
+    "bouncy",
+    "soft",
+    "loops-decoration"
+  ],
+  "files": [
+    {
+      "path": "text-sparkles.html",
+      "target": "compositions/components/text-sparkles.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-sparkles",
+    "author": "moworks",
+    "call": "MW.textSparkles(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textSparkles",
+    "options": {
+      "count": "(10)",
+      "life": "s per sparkle (0.8)",
+      "periods": "s, each star takes one ([1, 1.333, 2])",
+      "size": "[min, max] radius in em ([0.12, 0.26])",
+      "pad": "px around the text (56)",
+      "below": "px below it (40)",
+      "colors": "",
+      "seed": "(5)",
+      "loop": "s, seamless (4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Magic UI (MIT); a faithful port is in the Magic UI collection"
+    },
+    "thirdParty": [],
+    "notes": "10 four-point stars (concave sides, control at 0.16 r), colours cycling accent / yellow / ink. Each star has a seeded period of 1, 1.33 or 2 s and seeded offset; in each period it lives 0.8 s at a new seeded spot inside the text box widened 14 px (10 px below): size = radius (0.12–0.26 em) × sin(πu), opacity = sin(πu), rotation 75° → 150° linear over its life. Seamless loop 4 s. Params: số sao (10) · đời sao (0.8 s) · cỡ (0.12–0.26 em bán kính) · xoay (75° → 150°).",
+    "titleVi": "Ngôi sao lấp lánh quanh chữ"
+  }
+}

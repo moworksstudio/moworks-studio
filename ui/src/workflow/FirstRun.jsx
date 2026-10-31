@@ -1,16 +1,17 @@
 // First run: the look, then "Set up Moworks Studio": the projects folder and one Install for every component the app needs to make
 // films (HyperFrames and its Chrome, FFmpeg and Python 3.12 with winget, the Python components, the speech-to-text model; what came
 // with the app is only copied). No list of parts, versions or sources on screen (owner 30/10): one line, one progress. Only on a
-// computer without winget are FFmpeg and Python the user's own steps, shown while missing with the line to copy. The dialog stays until the app has what it needs: what it needs is installed, not skipped.
+// computer without winget are FFmpeg and Python the user's own steps, shown while missing with the line to copy. "Set up later" hides
+// the dialog for this session (no internet, or a film to finish); it comes back at the next start until the app has what it needs.
 // Optional extras (Whisper on an NVIDIA card) are no part of it: Settings › System offers them, beside the same one line and the
 // open-source licences.
-// Data: GET /api/setup/first-run; POST /api/setup/first-run (a job: stage "<id>: <line>", progress 0-100), /api/setup/work-folder;
+// Data: GET /api/setup/first-run; POST /api/setup/first-run (a job: stage "<id>: <line>", progress 0-100); PATCH /api/storage/location;
 // GET / DELETE /api/setup/whisper-gpu.
 // The very first start asks which look the app wears, The Desk (the default) or The Studio, before anything else; once answered it
 // never asks again (theme.jsx themeAsked); Settings › General changes it.
 import { useEffect, useRef, useState } from "react";
 import { Check, Copy, Cpu, Download, Loader2, Trash2, User } from "lucide-react";
-import { del, get, post, watchJob } from "../api.js";
+import { del, get, patch, post, watchJob } from "../api.js";
 import { StatusIcon } from "../components.jsx";
 import { useData, useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
@@ -27,6 +28,7 @@ const plain = (s) => String(s).replace(/\s*\([^)]*\.(?:json|md)\b[^)]*\)/g, "");
 const DOING = { library: "Copying the library", assets: "Copying fonts and code libraries", "hf-skills": "Copying HyperFrames' skills", "hf-runtime": "Downloading the engine",
   ffmpeg: "Installing FFmpeg", python: "Installing Python and its components", speech: "Downloading the speech-to-text model", "whisper-gpu": "Downloading the graphics-card part" };
 const doing = (id) => DOING[id] ?? (String(id ?? "").startsWith("style-") ? "Copying the film styles" : "Setting up");
+const LATER = "mw-first-run-later";
 const needed = (d) => d.items.filter((it) => !it.ready && it.from !== "yours" && !it.optional);
 const yours = (d) => d.items.filter((it) => it.from === "yours" && it.id !== "work" && !it.ready);
 
@@ -154,18 +156,19 @@ function ThemeAsk({ onDone }) {
 export default function FirstRun() {
   const q = useData(() => get("/api/setup/first-run").catch(() => null), []);
   const [lookAsked, setLookAsked] = useState(themeAsked);
+  const [later, setLater] = useState(() => { try { return sessionStorage.getItem(LATER) === "1"; } catch { return false; } });
   if (!lookAsked && THEMES_SHOWN.length > 1) return <ThemeAsk onDone={() => setLookAsked(true)} />;
-  if (!q.data || q.data.ready) return null;
-  return <SetUp d={q.data} reload={q.reload} />;
+  if (!q.data || q.data.ready || later) return null;
+  return <SetUp d={q.data} reload={q.reload} onLater={() => { try { sessionStorage.setItem(LATER, "1"); } catch { /* private */ } setLater(true); }} />;
 }
 
 /** "Set up Moworks Studio": 1 the projects folder, 2 the components in one line, the user's own steps while missing; Install. */
-function SetUp({ d, reload }) {
+function SetUp({ d, reload, onLater }) {
   const t = useT();
   const toast = useToast();
   const { job, start } = useSetupJob(reload);
   const work = d.items.find((it) => it.id === "work");
-  const setWork = async (path) => { try { await post("/api/setup/work-folder", { path }); reload(); } catch (e) { toast(e.message, "error"); } };
+  const setWork = async (path) => { try { await patch("/api/storage/location", { path }); reload(); } catch (e) { toast(e.message, "error"); } };
   const need = needed(d).length > 0;
   return <div className="overlay fr-overlay">
     <div className="dialog fr-dialog" role="dialog" aria-modal="true" aria-labelledby="fr-h">
@@ -181,7 +184,8 @@ function SetUp({ d, reload }) {
             <YourSteps d={d} /></li>
         </ol>
       </div>
-      <div className="dialog-foot"><span className="hint">{t("Optional extras are in Settings › System.")}</span><span className="spacer" />
+      <div className="dialog-foot"><span className="hint">{t("Also in Settings › System.")}</span><span className="spacer" />
+        {!job && <button className="btn" onClick={onLater}>{t("Set up later")}</button>}
         {job ? <button className="btn primary" disabled><Loader2 size={14} className="spin" />{t("Installing…")}</button>
           : need ? <button className="btn primary" onClick={() => start()}><Download size={14} />{d.mb > 0 ? t("Install ({size})", { size: mb(d.mb) }) : t("Install")}</button>
             : <button className="btn" onClick={reload}>{t("Check again")}</button>}</div>

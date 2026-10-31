@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-drag-lift",
+  "type": "hyperframes:block",
+  "title": "Drag Pickup",
+  "description": "Con trỏ nhấn giữ, thẻ nhấc lên phóng nhẹ 1.045 và bóng đổ sâu hơn, được kéo đi rồi thả về, đặt xuống trong 0.18 s.",
+  "tags": [
+    "drag",
+    "lift",
+    "shadow",
+    "spring",
+    "gesture-mobile",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-drag-lift.html",
+      "target": "compositions/components/motion-drag-lift.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-drag-lift",
+    "author": "moworks",
+    "call": "MW.motionDragLift(q(\".gm\"), tl, 0, {});",
+    "function": "MW.motionDragLift",
+    "options": {
+      "tile": "index of the tile picked up (1)",
+      "grab": "s (0.5, spring k420 c30)",
+      "release": "s (1.8, 0.18 s power2.out)",
+      "loop": "s (2.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Grid card 240x140 with six tiles 60x48 r10 (74 / 62 px pitch); the accent tile is grabbed at 0.5 s: lift L = spring(k420, c30): scale 1 + 0.045 L, shadow blur 8 → 28 px, offset y 2 → 12 px, opacity 0.55 → 0.7; a dashed ghost stays at its slot. Held, it is dragged +26, −10 px (0.6-1.05 s power2.inOut) and back (1.05-1.55 s). Release at 1.8 s: L → 0 over 180 ms power2.out. Params: lift (1.045) · shadow (8 → 28 px) · spring (k420 c30) · settle (0.18 s). Lifted: scale 1 + 0.045 L, shadow blur 8 → 28, offset 2 → 12; a dashed ghost keeps its slot.",
+    "titleVi": "Nhấc thẻ lên khi bắt đầu kéo"
+  }
+}

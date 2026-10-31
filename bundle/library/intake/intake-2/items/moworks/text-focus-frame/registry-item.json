@@ -1,0 +1,65 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-focus-frame",
+  "type": "hyperframes:component",
+  "title": "True Focus",
+  "description": "Khung bốn góc màu nhấn di chuyển từ từ này sang từ khác; từ trong khung rõ nét, các từ còn lại nhoè 5 px và mờ đi.",
+  "tags": [
+    "focus",
+    "blur",
+    "frame",
+    "words",
+    "text-blur-focus",
+    "crisp",
+    "smooth",
+    "blur-focus"
+  ],
+  "files": [
+    {
+      "path": "text-focus-frame.html",
+      "target": "compositions/components/text-focus-frame.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-focus-frame",
+    "author": "moworks",
+    "call": "MW.textFocusFrame(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textFocusFrame",
+    "options": {
+      "blur": "px on the other words (10)",
+      "dim": "their opacity (0.6)",
+      "move": "s the frame takes to the next word (0.5)",
+      "per": "s per word, move and hold (1.5)",
+      "cycles": "(1)",
+      "corner": "em per corner (0.35)",
+      "stroke": "em (0.09)",
+      "padX": "em (0.27)",
+      "padY": "em (0.13)",
+      "ease": "(cubic-bezier(.65,0,.35,1))",
+      "accent": ""
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after react-bits (MIT + Commons Clause): written from the idea only, no react-bits code"
+    },
+    "thirdParty": [],
+    "notes": "Words blurred 5 px at 60 % opacity, the active word sharp 100 %. A frame of four 9 px corner brackets (2.5 px accent, padding 7 px left/right, 3.5 px top/bottom) moves and resizes from the previous word box to the next in 0.5 s (CSS ease; demo cubic-bezier(.65,0,.35,1)) while the two words cross blur / opacity over the same 0.5 s; hold 1 s per word, then on to the next, cycling (demo 4.5 s split evenly between the words). Params: blur: các từ ngoài khung (5 px) · move (0.5 s) · hold: dừng mỗi từ (1 s) · corner (9 px, 2.5 px).",
+    "titleVi": "Khung lấy nét nhảy từ từ sang từ"
+  }
+}

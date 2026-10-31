@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-clip-wipe-on",
+  "type": "hyperframes:component",
+  "title": "Scroll Clip Write-on",
+  "description": "Cả khối chữ được lộ ra bằng một mép cắt chạy từ trái sang phải, có vạch màu nhấn chạy theo mép, bên dưới là bóng chữ rất nhạt.",
+  "tags": [
+    "wipe",
+    "clip",
+    "reveal",
+    "edge",
+    "text-scroll",
+    "smooth",
+    "crisp",
+    "scroll"
+  ],
+  "files": [
+    {
+      "path": "text-clip-wipe-on.html",
+      "target": "compositions/components/text-clip-wipe-on.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-clip-wipe-on",
+    "author": "moworks",
+    "call": "MW.textClipWipeOn(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textClipWipeOn",
+    "options": {
+      "ghost": "opacity of the ghost text (0.07)",
+      "line": "px of the accent edge (6)",
+      "color": "edge colour"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Text block (36 px, left-aligned, up to 3 lines) shown at 7 % as a ghost; a clip rect from 2 px left of the text grows to full width + 4 px, 4 px above and below the text box (keep −0.4 em / −0.3 em room for Vietnamese marks). Scroll stand-in s 0 → 1 over 0.3–2.3 s cubic-bezier(.65,0,.35,1); the wipe maps s 0.3 → 0.7 linearly, so it runs ≈1.14–1.46 s. An accent 2 px vertical line rides the wipe edge, 4 px past the box. Reverse 2.95–3.4 s. Loop 3.6 s. Params: thời gian quét (0.32 s) · hướng (trái → phải) · bóng chữ nền (7 %) · vạch mép (2 px).",
+    "titleVi": "Chữ hiện theo vệt quét ngang"
+  }
+}

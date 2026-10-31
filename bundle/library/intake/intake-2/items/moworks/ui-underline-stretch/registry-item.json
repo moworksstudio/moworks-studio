@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-underline-stretch",
+  "type": "hyperframes:block",
+  "title": "Sliding Underline",
+  "description": "Gạch chân dưới tab chạy sang tab mới: mép trước đi trước, mép sau đuổi theo sau 0.09 s nên vạch giãn ra rồi thu về đúng bề rộng.",
+  "tags": [
+    "tabs",
+    "underline",
+    "stretch",
+    "indicator",
+    "selection-controls",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "ui-underline-stretch.html",
+      "target": "compositions/components/ui-underline-stretch.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-underline-stretch",
+    "author": "moworks",
+    "call": "MW.uiUnderlineStretch(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiUnderlineStretch",
+    "options": {
+      "moves": "[[s, from tab, to tab], ...]",
+      "labels": "",
+      "accent": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Tabs HOME / WORK / SAVE at x 88 / 160 / 232 on a 240x64 card; underline 44x3 r1.5. Each move: the edge on the travel side moves over 0.26 s power2.out, the other edge over 0.34 s power2.inOut starting 0.09 s later. Moves at 0.3 s (1→2), 1.15 s (2→3), 2.0 s (3→1). Labels brighten as the underline centre comes within 50 px; a faint outline marks the target while moving. Params: lead (0.26 s, power2.out) · trail (0.34 s, trễ 0.09 s) · width (44 px) · moves [[giây, từ, tới]]. The edge on the travel side leads (0.26 s, power2.out); the other follows 0.09 s later (0.34 s, power2.inOut), so the line stretches and settles.",
+    "titleVi": "Gạch chân tab trượt co giãn"
+  }
+}

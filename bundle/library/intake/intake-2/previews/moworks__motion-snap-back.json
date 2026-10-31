@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-snap-back",
+  "hash": "a5a0c63175397027",
+  "at": "2026-10-17T10:13:35.131Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__motion-snap-back.mp4",
+    "poster": "previews/moworks__motion-snap-back.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c317c95e8d5f76df51dd13dcd2a15bb6bdb7cdaf3f228ef348bd56286571774f",
+    "size": 7867,
+    "seconds": 23.5,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

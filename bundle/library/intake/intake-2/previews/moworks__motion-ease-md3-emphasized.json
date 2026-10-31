@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-ease-md3-emphasized",
+  "hash": "0ef770763d4bbaa1",
+  "at": "2026-10-17T09:01:27.535Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-ease-md3-emphasized.mp4",
+    "poster": "previews/moworks__motion-ease-md3-emphasized.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "84cf251947a2061e15c44e2251fe9ac4746fe43af4ecbc4174c17c52cbeb4a6c",
+    "size": 9626,
+    "seconds": 25.2,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

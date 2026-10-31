@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-equalizer-bars",
+  "type": "hyperframes:block",
+  "title": "Equalizer Bars",
+  "description": "Bảy cột âm thanh mọc từ đáy nhảy lên xuống mỗi cột một nhịp riêng, vạch đỉnh mỗi cột rơi xuống chậm hơn cột, lặp liền mạch.",
+  "tags": [
+    "equalizer",
+    "audio",
+    "bars",
+    "loop",
+    "loading-progress",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "data-equalizer-bars.html",
+      "target": "compositions/components/data-equalizer-bars.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/data-equalizer-bars",
+    "author": "moworks",
+    "call": "MW.dataEqualizerBars(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataEqualizerBars",
+    "options": {
+      "fall": "px a second² the peak caps fall (260)",
+      "title": "",
+      "song": "",
+      "loop": "s (2.8): the bar waves repeat over it"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "7 bars 10 px wide r3, 18 px apart, anchored at the bottom. Height of bar i = 8 + 72 × (0.6 a + 0.4 b) × (0.55 + 0.45 sin(π (i + 0.5) / 7)), with a = 0.5 + 0.5 sin(2π (2 + i mod 3) t / 2.8 + 1.7 i), b = 0.5 + 0.5 sin(2π (1 + 2i mod 4) t / 2.8 + 0.9 i) (seamless 2.8 s loop). Peak cap: a 2 px line 4 px above max over the last 0.6 s of h(t − d) − 260 d². Params: bars (7 × 10 px, cách 18 px) · height (8-80 px) · loop (2.8 s) · peak fall (260 px/s²). Bar i: 8 + 72 (0.6 a + 0.4 b)(0.55 + 0.45 sin(π (i + 0.5) / 7)) with two sines of whole cycles per loop, so it loops seamlessly; the cap is the max of h(t − d) − 260 d² over the last 0.6 s.",
+    "titleVi": "Cột cân bằng âm nhảy, đỉnh rơi chậm"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-grid-wave",
+  "type": "hyperframes:component",
+  "title": "Grid Wave",
+  "description": "Lưới 3×3 ô trồi lên và phóng từ 78 % về đủ cỡ, lan theo đường chéo từ góc trên trái.",
+  "tags": [
+    "grid",
+    "stagger",
+    "wave",
+    "list-grid",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "motion-grid-wave.html",
+      "target": "compositions/components/motion-grid-wave.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-grid-wave",
+    "author": "moworks",
+    "call": "MW.motionGridWave(q(\".gw\"), tl, 0.3, {});",
+    "function": "MW.motionGridWave",
+    "options": {
+      "items": "",
+      "cols": "(3)",
+      "y": "px (72)",
+      "from": "start scale (0.78)",
+      "step": "s per diagonal step (0.055)",
+      "duration": "s (0.68, power2.out)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "3×3 tiles (36 px, 8 px gap): y +18 → 0 px, scale 0.78 → 1, opacity in over the first 55 % — each 680 ms power2.out, starting (row + col) × 55 ms (900 ms in all). A faint shadow bar under each tile fades in with it; the sweeping guide line is not ported. Params: y (18 px) · scale đầu (0.78) · step: trễ mỗi bậc chéo (55 ms) · each (0.68 s).",
+    "titleVi": "Lưới hiện theo sóng chéo"
+  }
+}

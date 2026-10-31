@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-hopping-dot-indicator",
+  "hash": "2b38f69d8ec47a83",
+  "at": "2026-10-17T10:34:56.998Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-hopping-dot-indicator.mp4",
+    "poster": "previews/moworks__ui-hopping-dot-indicator.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "fa970511d017bc5ad2ed7660750f62f241a0669ca1188a192fbc0f348771204b",
+    "size": 9979,
+    "seconds": 27.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

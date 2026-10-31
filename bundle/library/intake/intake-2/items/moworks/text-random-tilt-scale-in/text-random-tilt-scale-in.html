@@ -1,0 +1,119 @@
+<!--
+  Random Tilt Scale In (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Từng ký tự nhỏ, nghiêng ngẫu nhiên đứng thẳng dậy và lớn về đúng cỡ.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textRandomTiltScaleIn(q(".tk-head"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - tilt: ± degrees, seeded (20)
+      - from: scale (0.6)
+      - duration: s (0.9, power4.out)
+      - stagger: s (0.08)
+      - cap: s (0.7)
+      - ease: 
+      - seed: (6)
+      - start: s (0.3)
+      - outAt: s (2.65)
+      - loop: s (3)
+
+  Notes: Split chars; each from scale 0.6 and a seeded rotation within ±20° → 1, 0°, opacity full by 40 % (×2.5), 0.9 s power4.out (easeOutQuint), stagger 80 ms (demo capped 0.7 s total), from 0.3 s. Loop exit: fade 2.65–2.95 s inCubic; loop 3 s. Params: duration (0.9 s) · stagger (0.08 s) · scale đầu (0.6) · tilt: góc nghiêng ngẫu nhiên (±20°) · ease (power4.out).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Đứng thẳng dậy</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.rand = MW.rand || function (seed) {
+    var a = typeof seed === "string" ? MW.hash(seed) : (seed >>> 0) || 1;
+    return function () { a = (a + 0x6d2b79f5) >>> 0; var t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  };
+  MW.hash = MW.hash || function (s) { var h = 2166136261; s = String(s); for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.bezier = MW.bezier || function (x1, y1, x2, y2) {
+    var cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    var X = function (t) { return ((ax * t + bx) * t + cx) * t; }, Y = function (t) { return ((ay * t + by) * t + cy) * t; }, dX = function (t) { return (3 * ax * t + 2 * bx) * t + cx; };
+    return function (p) {
+      if (p <= 0) return 0; if (p >= 1) return 1;
+      var t = p, i, d;
+      for (i = 0; i < 8; i++) { d = X(t) - p; if (Math.abs(d) < 1e-6) return Y(t); var s = dX(t); if (Math.abs(s) < 1e-6) break; t -= d / s; }
+      var lo = 0, hi = 1; t = p;
+      for (i = 0; i < 40; i++) { d = X(t); if (Math.abs(d - p) < 1e-6) break; if (d < p) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return Y(t);
+    };
+  };
+  MW.CSS_EASE = { ease: [0.25, 0.1, 0.25, 1], easeIn: [0.42, 0, 1, 1], easeOut: [0, 0, 0.58, 1], easeInOut: [0.42, 0, 0.58, 1] };
+  MW.EASES = MW.EASES || { "css-ease": [0.25, 0.1, 0.25, 1], "css-in": [0.42, 0, 1, 1], "css-out": [0, 0, 0.58, 1], "css-in-out": [0.42, 0, 0.58, 1],
+    md3: [0.2, 0, 0, 1], "md3-emph": [0.05, 0.7, 0.1, 1], "md3-acc": [0.3, 0, 1, 1], "md3-dec": [0, 0, 0, 1], whip: [0.9, 0, 0.1, 1], glide: [0.4, 0, 0.2, 1],
+    house: [0.83, 0, 0.17, 1], "in-out": [0.65, 0, 0.35, 1] };
+  MW.ez = MW.ez || function (name) {
+    if (typeof name === "function") return name;
+    var b = MW.EASES[name]; if (b) return MW.bezier(b[0], b[1], b[2], b[3]);
+    var m = /^cubic-bezier\(([^)]+)\)$/.exec(name || ""); if (m) { var v = m[1].split(",").map(Number); return MW.bezier(v[0], v[1], v[2], v[3]); }
+    return gsap.parseEase(name || "none");
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"tilt":20,"from":0.6,"duration":0.9,"stagger":0.08,"cap":0.7,"ease":"power4.out","seed":6,"start":0.3,"outAt":2.65,"loop":3};
+  var run = function (el,tl,at,o
+  ) {
+  var split = function (mode) { return MW.split(el, mode)[mode]; }, pin = function (u) { return Math.max(0, Math.min(1, u)); }, fs = parseFloat(getComputedStyle(el).fontSize), ic = function (u) { return u * u * u; };
+  var cap = function (st, total, n) { return n > 1 ? Math.min(st, total / (n - 1)) : 0; }, fade = function (t, a, d) { return 1 - ic(pin((t - a) / d)); };
+  var lines = function (sel) { return Array.prototype.slice.call(el.querySelectorAll(sel)); }, mask = function (ln) { var w = document.createElement("span"); w.style.display = "inline-block"; while (ln.firstChild) w.appendChild(ln.firstChild); ln.appendChild(w); ln.style.overflow = "hidden"; ln.style.padding = "0.2em 0.1em 0.1em"; ln.style.margin = "-0.2em -0.1em -0.1em"; return w; };
+  var shuffle = function (n, seed) { var r = MW.rand(seed), a = []; for (var i = 0; i < n; i++) a.push(i); for (var i = n - 1; i > 0; i--) { var j = Math.floor(r() * (i + 1)), x = a[i]; a[i] = a[j]; a[j] = x; } var rank = []; a.forEach(function (q, k) { rank[q] = k; }); return rank; };
+  var ch = split("chars"), r = MW.rand(o.seed), R = ch.map(function () { return (r() * 2 - 1) * o.tilt; }), st = cap(o.stagger, o.cap, ch.length), e = gsap.parseEase(o.ease);
+  return MW.drive(tl, at, o.loop, function (t) { var f = fade(t, o.outAt, 0.3); ch.forEach(function (c, i) { var u = pin((t - o.start - i * st) / o.duration), p = e(u); gsap.set(c, { scale: o.from + (1 - o.from) * p, rotation: R[i] * (1 - p) }); c.style.opacity = String(pin(2.5 * u) * f); }); });
+  };
+  MW.textRandomTiltScaleIn = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

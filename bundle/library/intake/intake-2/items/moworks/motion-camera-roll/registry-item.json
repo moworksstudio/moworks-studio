@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-camera-roll",
+  "type": "hyperframes:component",
+  "title": "Roll",
+  "description": "Cả khung nghiêng chưa tới 1° trong tích tắc khi có cú va rồi về thẳng.",
+  "tags": [
+    "camera",
+    "roll",
+    "impact",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "motion-camera-roll.html",
+      "target": "compositions/components/motion-camera-roll.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-camera-roll",
+    "author": "moworks",
+    "call": "MW.motionCameraRoll(q(\".tk-cam\"), tl, h, { angle: i % 2 ? -2.5 : 2.5 });",
+    "function": "MW.motionCameraRoll",
+    "options": {
+      "angle": "degrees at the hit (0.9)",
+      "attack": "s to reach it (0.06)",
+      "decay": "s back to level, ease-out cubic (0.24)",
+      "overscan": "scale that hides the edges (1.04)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Hit accent: the whole frame rotates 0 -> 0.9 deg in 60 ms and back to 0 by 300 ms ease-out (easeOutCubic). Demo exaggerates it as a continuous roll of +-4.6 deg (0.08 rad) on a 3 s sine. Params: angle (0.9°) · attack (60 ms) · decay (0.24 s). Call it once per hit. The demo exaggerates the angle (2.5°) so the roll reads on a small preview, as the small demo does.",
+    "titleVi": "Khung nghiêng nhẹ khi va chạm"
+  }
+}

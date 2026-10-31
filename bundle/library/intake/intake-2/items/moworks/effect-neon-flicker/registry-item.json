@@ -1,0 +1,54 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-neon-flicker",
+  "type": "hyperframes:component",
+  "title": "Neon Flicker",
+  "description": "Biển neon bật lên chập chờn theo từng nấc sáng tối không đều rồi sáng ổn định.",
+  "tags": [
+    "neon",
+    "flicker",
+    "light",
+    "light-glow",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "effect-neon-flicker.html",
+      "target": "compositions/components/effect-neon-flicker.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-neon-flicker",
+    "author": "moworks",
+    "call": "MW.effectNeonFlicker(q(\".nf\"), tl, 0.4, {});",
+    "function": "MW.effectNeonFlicker",
+    "options": {
+      "duration": "s it takes to come on (0.9): held steps 20 / 100 / 35 / 100 / 55 / 100 %",
+      "lit": "the lit layer (the dim tube stays under it)",
+      "wash": "the soft glow behind"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Neon sign turns on over 900 ms: opacity holds in steps (no tween) at 20 % from 0, 100 % from 9 %, 35 % from 14 %, 100 % from 22 %, 55 % from 31 %, 100 % from 42 % on. Lit tube = 3 px stroke with a 16 px glow (the frame outline lights with the text) plus a soft radial wash (16 % opacity) behind; the unlit tube stays visible as a dim outline. Params: duration (0.9 s) · steps: các nấc (20 / 100 / 35 / 100 / 55 / 100 %) · glow (16 px) · color.",
+    "titleVi": "Đèn neon chập chờn rồi sáng hẳn"
+  }
+}

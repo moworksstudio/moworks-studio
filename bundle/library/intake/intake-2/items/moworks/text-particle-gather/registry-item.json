@@ -1,0 +1,65 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-particle-gather",
+  "type": "hyperframes:block",
+  "title": "Particle Text",
+  "description": "Hàng nghìn chấm nhỏ bay từ khắp khung về kết thành chữ, một con trỏ lướt qua đẩy các chấm dạt ra rồi chúng nảy về chỗ.",
+  "tags": [
+    "particles",
+    "gather",
+    "repel",
+    "cursor",
+    "text-glyph-physics",
+    "smooth",
+    "soft",
+    "glyph-physics"
+  ],
+  "files": [
+    {
+      "path": "text-particle-gather.html",
+      "target": "compositions/components/text-particle-gather.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-particle-gather",
+    "author": "moworks",
+    "call": "MW.textParticleGather(q(\".pg\"), tl, 0, {});",
+    "function": "MW.textParticleGather",
+    "options": {
+      "text": "the word",
+      "size": "px (420)",
+      "step": "px between samples (12)",
+      "radius": "px the cursor pushes (152)",
+      "push": "px at most (136)",
+      "omega": "spring (10)",
+      "zeta": "(0.45)",
+      "color": "dot colour",
+      "accent": "pushed dots",
+      "loop": "s (5.4)",
+      "seed": "scatter"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after react-bits (MIT + Commons Clause): written from the idea only, no react-bits code"
+    },
+    "thirdParty": [],
+    "notes": "Points sampled from the text raster (80 px black, step ≈3 px, odd rows offset), drawn as 2 px squares. Gather: each flies from a seeded spot to its place in 0.9 s expo.out, start 0.2 + 0–0.35 s, opacity 0.35 → 1, ±0.4 px noise. Cursor crosses right → left 1.9–3.6 s on a ±30 px sine: points within 38 px are pushed out ((1 − d/38)², ≤ 34 px) through a spring (ω 10, ζ 0.45) and turn accent. Exit 4.55 s + 0–0.25 s: back to scatter 0.6 s power2.in. Loop 5.4 s. Params: bước lấy mẫu (3 px) · bán kính đẩy (38 px) · thời gian kết (0.9 s).",
+    "titleVi": "Chữ kết từ hạt, dạt theo con trỏ"
+  }
+}

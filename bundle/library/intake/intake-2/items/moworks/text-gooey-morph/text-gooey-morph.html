@@ -1,0 +1,59 @@
+<!--
+  Gooey Morphing Text (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Từ này tan chảy như chất lỏng rồi kết lại thành từ kia (nhoè cộng ngưỡng alpha), mỗi lần đổi 1.5 giây, nghỉ 0.5 giây.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textGooeyMorph(q(".gmo"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - words: the pair
+      - morph: s (1.5)
+      - at: s (0.3)
+      - backAt: s it morphs back (2.6)
+      - maxBlur: px (18)
+
+  Notes: Two words stacked. Over 1.5 s (linear fraction f 0 → 1): new word opacity f^0.4, blur min(8/f − 8, 100) px; old word the same with 1 − f. The pair goes through an alpha threshold (feColorMatrix alpha ×255 −140; demo: alpha < 130 → 0, > 150 → 255, linear between), so the blurred shapes merge like liquid. Cooldown 0.5 s between morphs. Demo: A → B 0.3–1.8 s, back 2.6–4.1 s (blur capped 18 px); loop 4.6 s. Params: morph: thời gian đổi (1.5 s) · cooldown: nghỉ giữa hai lần (0.5 s) · words: danh sách từ. Liquid look: the two blurred words pass through an alpha threshold (feColorMatrix alpha × 255 − 140).
+-->
+
+<div class="sw"><div class="gmo" style="font-size:260px;font-weight:900;color:#a99bff;width:1200px;height:340px"></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"words":["Lửa","Nước"],"morph":1.5,"at":0.3,"backAt":2.6,"maxBlur":18};
+  var run = function (el,tl,at,o
+  ) {
+  var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+  var gr = function (s) { s = String(s).normalize("NFC"); if (!seg) return Array.from(s); var out = [], it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; };
+  var NS = "http://www.w3.org/2000/svg", id = "mwgm" + Math.round(at * 1000), svg = document.createElementNS(NS, "svg"), f = document.createElementNS(NS, "filter"), cm = document.createElementNS(NS, "feColorMatrix");
+  svg.setAttribute("width", "0"); svg.setAttribute("height", "0"); svg.style.position = "absolute"; f.setAttribute("id", id); cm.setAttribute("values", "1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 255 -140"); f.appendChild(cm); svg.appendChild(f); el.appendChild(svg);
+  var words = o.words, a = document.createElement("span"), b = document.createElement("span"); el.style.position = "relative"; el.style.filter = "url(#" + id + ")";
+  [a, b].forEach(function (s, i) { s.textContent = words[i]; s.style.cssText = "position:absolute;left:50%;top:0;transform:translateX(-50%);white-space:nowrap;"; el.appendChild(s); });
+  var blur = function (f2) { return f2 <= 0 ? 100 : Math.min(o.maxBlur, 8 / f2 - 8); };
+  return MW.drive(tl, at, o.backAt + o.morph + 0.5, function (t) {
+    var f1 = Math.max(0, Math.min(1, (t - o.at) / o.morph)), f2 = Math.max(0, Math.min(1, (t - o.backAt) / o.morph)), fb = f1 - f2;
+    b.style.opacity = String(Math.pow(fb, 0.4)); b.style.filter = fb >= 1 ? "" : "blur(" + blur(fb) + "px)"; a.style.opacity = String(Math.pow(1 - fb, 0.4)); a.style.filter = fb <= 0 ? "" : "blur(" + blur(1 - fb) + "px)";
+  });
+  };
+  MW.textGooeyMorph = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

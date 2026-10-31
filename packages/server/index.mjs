@@ -6,20 +6,21 @@
 // environment, and with the session token it could call any API.
 import { createServer } from "node:http";
 import { createHash, randomBytes } from "node:crypto";
-import { createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { pipeline as streamPipeline } from "node:stream/promises";
 import { extname, join, normalize, resolve, sep } from "node:path";
 import { APP_ROOT, GPU_CHOICES, renderSettings, saveRenderSettings } from "../version-manager/index.mjs";
 import * as projects from "../project-service/index.mjs";
 import { docPath } from "../project-service/docs.mjs";
 import { styleTraits } from "../style-catalog/traits.mjs";
-import { filmLength } from "../hf-edit/ending.mjs";
+import { filmLength, plannedLength } from "../hf-edit/ending.mjs";
 import { getStyle, listStyles, selection, styleDesign, styleList, stylePipeline, warmCatalog } from "../style-catalog/index.mjs";
 import { thumbFile } from "../style-catalog/thumbs.mjs";
 import { runtimeStatusAsync } from "../system-status/index.mjs";
 import { cachedCheck } from "./checkCache.mjs";
 import { showInExplorer } from "../project-service/explorer.mjs";
-import { placedShots, readShots } from "../hf-edit/shots.mjs";
+import { ARCHIVE } from "../project-service/archive.mjs";
+import { earlyStills, placedShots, readShots } from "../hf-edit/shots.mjs";
 import { finalize } from "../hf-edit/finalize.mjs";
 import { viCatalog } from "../hf-edit/googleFontsVi.mjs";
 // a character demo's stills off the server's thread, at the priority the sync snapshotAt had (T27-3)
@@ -53,10 +54,11 @@ import { createJobs } from "./jobs.mjs";
 import { plainMessage } from "./plainError.mjs";
 import { RESUME, createAutopilot, createRenderQueue, estimateMinutes, estimateNow, hasCast, isFinished, reviewRounds } from "./autopilot.mjs";
 import { productionRoutes } from "./production.mjs";
-import { boardRoutes, etaWords, runningEstimate, stillsBehind } from "./boards.mjs";
-import { readState as readSfxState } from "../sfx/index.mjs";
+import { approvedFrames, boardRoutes, etaWords, runningEstimate, stillsBehind } from "./boards.mjs";
+import { localFile as localSoundFile, readState as readSfxState } from "../sfx/index.mjs";
 import { editorRoutes } from "./editor.mjs";
 import { assetRoutes } from "./assets.mjs";
+import { soundRoutes } from "./sounds.mjs";
 import { characterRoutes } from "./characters.mjs";
 import { proxyRoutes } from "./proxy.mjs";
 import { styleAeRoutes } from "./styleAe.mjs";
@@ -105,7 +107,7 @@ export function tidyPreviews(root = APP_ROOT) {
 }
 
 const MIME = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png",
-  ".jpg": "image/jpeg", ".webp": "image/webp", ".mp4": "video/mp4", ".ttf": "font/ttf", ".woff2": "font/woff2", ".json": "application/json", ".ico": "image/x-icon", ".txt": "text/plain" };
+  ".jpg": "image/jpeg", ".webp": "image/webp", ".mp4": "video/mp4", ".ogg": "audio/ogg", ".mp3": "audio/mpeg", ".ttf": "font/ttf", ".woff2": "font/woff2", ".json": "application/json", ".ico": "image/x-icon", ".txt": "text/plain" };
 
 class HttpError extends Error { constructor(status, code, message) { super(message); this.status = status; this.code = code; } }
 const STATUS = { NOT_FOUND: 404, INVALID: 400, BUSY: 409, RENDERING: 409, CONFLICT: 409, NO_CLAUDE: 503, CLAUDE_SIGNED_OUT: 412, STEP_BLOCKED: 409, MODEL_MISSING: 409, AE_NOT_RUNNING: 409, TOO_LARGE: 413,
@@ -233,33 +235,57 @@ function posterJobs(root, previewBase, stopSignal = null) {
   };
 }
 
-/** Project thumbnails: once a film has built shots, HF stills at the middle of up to 5 shots, and the one with the most detail
- *  (the largest PNG: flat frames compress small) becomes the card's picture. Made again only when the film's pictures changed (a new
- *  revision of compositions / index.html / assets, the Editor's element ids left out); one project at a time, in the background, never per
- *  keystroke: asked for when the project list is read and after a Claude task. */
+/** Project thumbnails: once a film is built, HF stills at the middle of its first shots (earlyStills: its first quarter, so a card never gives away
+ *  the film's turn), and the one with the most detail (the largest PNG: flat frames compress small) becomes the card's picture. Before the Build
+ *  the page is the new project's title card, which is no picture of the film: the card shows the storyboard's first panel once there is one, else
+ *  nothing (T28-20). Made again only when the film's pictures changed (a new revision of compositions / index.html / assets, the Editor's element
+ *  ids left out) or this rule did; one project at a time, in the background, never per keystroke: asked for when the project list is read and
+ *  after a Claude task. */
+const THUMB_RULE = 2;
 function thumbnailJobs(root, enabled, stopSignal = null) {
   const queue = [], queued = new Set();
   let busy = false;
+  const firstPanel = (p) => {
+    const opt = p.meta?.approvals?.storyboard?.option, rounds = [...listRounds(p.path)].reverse();
+    const o = (isOption(opt) ? rounds.map((r) => r.options.find((x) => x.option === opt && x.stills.length)).find(Boolean) : null) ?? rounds.flatMap((r) => [...r.options].reverse()).find((x) => x.stills.length);
+    return o?.stills[0] ?? null;
+  };
   const work = async (id) => {
     const p = projects.getProject(id, root);
     if (!p || p.missing || !existsSync(join(p.path, ".git"))) return;
     const workRev = await rev.lastWorkRevAsync(p.path);
-    if (!workRev || p.meta?.thumbnail?.rev === workRev) return;
+    if (!workRev) return;
+    const was = p.meta?.thumbnail;
+    if (was?.rev === workRev && was?.rule === THUMB_RULE) return;
     const { shots, root: comp } = await readShots(p.path).catch(() => ({ shots: [] }));
     if (pipe.isStarter(shots)) return;
-    const placed = placedShots(shots, comp?.duration).filter((s) => s.duration);          // a one-page code film: its planned shots
-    if (!placed.length) return;
-    const pick = placed.length <= 5 ? placed : [0, 1, 2, 3, 4].map((i) => placed[Math.round((i * (placed.length - 1)) / 4)]);
-    const dir = join(p.path, ".moworks", "cache", "posters", "thumb-work");
+    const posters = join(p.path, ".moworks", "cache", "posters");
+    const name = (ext = "png") => `thumb-${workRev.slice(0, 12)}.${ext}`;
+    const clearOld = () => { if (existsSync(posters)) for (const old of readdirSync(posters).filter((f) => /^thumb-[0-9a-f]+\.(png|jpe?g|webp)$/.test(f))) rmSync(join(posters, old), { force: true }); };
+    const set = (file, rev0 = workRev) => projects.updateMeta(id, (m) => { m.thumbnail = file ? { file, rev: rev0, rule: THUMB_RULE, at: new Date().toISOString() } : null; }, root);
+    if (comp?.starter) {
+      const still = firstPanel(p), stamp = still ? `${workRev}:${still}` : null;
+      if (!still) { if (was?.file) { clearOld(); set(null); } return; }
+      if (was?.rev === stamp && was?.rule === THUMB_RULE) return;
+      const src = join(p.path, ...still.split("/"));
+      if (!existsSync(src)) return;
+      clearOld(); mkdirSync(posters, { recursive: true });
+      const file = name((/\.(png|jpe?g|webp)$/i.exec(still)?.[1] ?? "png").toLowerCase());
+      copyFileSync(src, join(posters, file));
+      set(file, stamp);
+      return;
+    }
+    const times = earlyStills(placedShots(shots, comp?.duration), comp?.duration);          // a one-page code film: its planned shots
+    if (!times.length) return;
+    const dir = join(posters, "thumb-work");
     rmSync(dir, { recursive: true, force: true }); mkdirSync(dir, { recursive: true });
-    await snapshotAtAsync(p.path, pick.map((s) => +(s.start + s.duration / 2).toFixed(3)), dir, { signal: stopSignal });
+    await snapshotAtAsync(p.path, times, dir, { signal: stopSignal });
     const best = readdirSync(dir).filter((f) => f.endsWith(".png")).map((f) => ({ f, size: statSync(join(dir, f)).size })).sort((a, b) => b.size - a.size)[0];
     if (!best) return;
-    const file = `thumb-${workRev.slice(0, 12)}.png`, posters = join(p.path, ".moworks", "cache", "posters");
-    for (const old of readdirSync(posters).filter((f) => /^thumb-[0-9a-f]+\.png$/.test(f))) rmSync(join(posters, old), { force: true });
-    renameSync(join(dir, best.f), join(posters, file));
+    clearOld();
+    renameSync(join(dir, best.f), join(posters, name()));
     rmSync(dir, { recursive: true, force: true });
-    projects.updateMeta(id, (m) => { m.thumbnail = { file, rev: workRev, at: new Date().toISOString() }; }, root);
+    set(name());
   };
   const next = async () => {
     if (busy || !queue.length) return;
@@ -393,7 +419,6 @@ export function routes(ctx) {
     r("GET", "/setup/first-run", async (_p, _b, q) => ({ ...(await ctx.checks.firstRun.get({ fresh: q.get("fresh") === "1" })), bundle: firstRun.bundleManifest(root) })),
     r("POST", "/setup/first-run", (_p, b) => ctx.jobs.start("first-run", { title: "Setting up Moworks Studio" }, async (job) =>
       firstRun.firstRunAll({ root, ids: Array.isArray(b.ids) ? b.ids.map(String) : null, signal: job.signal, onProgress: ({ id, stage, progress }) => job.update({ stage: `${id}: ${stage}`, progress }) }))),
-    r("POST", "/setup/work-folder", (_p, b) => firstRun.setWorkFolder(b.path, root)),
     // Whisper on the graphics card. GET: the card, the pack (name, source, size, licence), installed or not, `ask` (asked once on
     // a computer past its first run), the device Whisper uses and the last run's. POST { answer: yes | no }: yes installs it (a job)
     r("GET", "/setup/whisper-gpu", () => cuda.gpuState(root)),
@@ -421,15 +446,15 @@ export function routes(ctx) {
       importing: false, blocksJob: ctx.jobs.list({ kind: "blocks-import" })[0] ?? null,
       previewJob: ctx.jobs.list({ kind: "blocks-previews" })[0] ?? null, looksJob: ctx.jobs.list({ kind: "looks-import" })[0] ?? null })),
     r("GET", "/library/item", (_p, _b, q) => { const it = library.getItem(q.get("uid") ?? "", root); if (!it) throw new HttpError(404, "NOT_FOUND", "Library item not found"); return it; }),
-    // Library intake (Magic UI, Codrops, TakayuStudio written as HyperFrames components; built and rendered by its cli.mjs):
+    // Library intake (Magic UI, Codrops, the studio's own, written as HyperFrames components; built and rendered by its cli.mjs):
     // delete for good (cards with deletable: true); restore puts it back: built again, its preview rendered again
     r("POST", "/library/intake/delete", (_p, b) => { const r0 = intake.deleteItem(String(b?.uid ?? ""), root); library.reload(); return r0; }),
     r("GET", "/library/intake/deleted", () => ({ items: intake.deletedList(root) })),
     r("POST", "/library/intake/restore", async (_p, b) => {
-      const uid = String(b?.uid ?? ""), r0 = intake.restoreItem(uid, root);
+      const r0 = intake.restoreItem(String(b?.uid ?? ""), root);
       await intake.buildStore({ root }); intake.reloadItems(); library.reload();
       const job = ctx.jobs.start("intake-previews", { title: "Rendering the restored item's preview" }, async (j) => {
-        const res = await renderIntakePreviews({ root, only: [uid], signal: j.signal }); library.reload(); return res;
+        const res = await renderIntakePreviews({ root, only: [r0.uid], signal: j.signal }); library.reload(); return res;
       });
       return { ...r0, job };
     }),
@@ -459,8 +484,10 @@ export function routes(ctx) {
     // a character's demo media through HyperFrames, also called by the Character creator after it saves a Brush character
     ...(() => { ctx.characterDemo = (id, { signal = null } = {}) => characterKit.renderDemo(id, { root, signal, finalize, snapshotAt, render: (j, o) => renderFilm(j, { ...o, root }), encodePoster }); return []; })(),
     r("POST", "/characters/([a-z0-9-]+)/demo", ([id]) => {
-      const c = characterKit.getCharacter(id);
+      const c = characterKit.getCharacter(id, root);
       if (!c) throw new HttpError(404, "NOT_FOUND", "No such character");
+      // the app's own come with it: their media are never written into the user's folder (a maintainer's tool remakes them: tools/clawd-demo.mjs)
+      if (c.group !== "yours") throw new HttpError(400, "INVALID", `${c.name} comes with the app`);
       return ctx.jobs.start("character-demo", { title: `Drawing ${c.name}'s demo`, key: id }, async (job) => characterKit.renderDemo(id, { root, signal: job.signal,
         finalize, snapshotAt, render: (j, o) => renderFilm(j, { ...o, root }), encodePoster, onProgress: ({ stage, progress }) => job.update({ stage, progress }) }));
     }),
@@ -551,13 +578,14 @@ export function routes(ctx) {
       // the film's whole length: New project's content and the ending's fade after it (house rules §9), what the music must cover
       p.length = filmLength(p.meta, { dir: p.path, root });
       // a film not built yet is as long as its storyboard's frames (Claude timed them to the voice: 40 → 47.5 s), placed as the
-      // timeline places them; the length New project set stands only while the storyboard is the starter's placeholder
+      // timeline places them; the length New project set stands while the storyboard is the starter's placeholder, or the frames add up to
+      // that length and the ending's fade after it (hf-edit/ending.mjs plannedLength)
       if (p.built === false) {
         try {
           const s = await readShots(p.path);
           const frames = pipe.isStarter(s.shots) ? [] : placedShots(s.shots);
           const sec = frames.length ? Math.round(Math.max(...frames.map((x) => x.start + x.duration)) * 1000) / 1000 : 0;
-          if (sec > 0) return { ...p, plannedDuration: sec, duration: sec };
+          if (sec > 0) { const len = plannedLength(p.meta, { dir: p.path, root, frames: sec }); return { ...p, plannedDuration: len, duration: len }; }
         } catch { /* the storyboard cannot be read: the planned length stands */ }
       }
       return p;
@@ -691,7 +719,8 @@ export function routes(ctx) {
       const stages = pipe.stagesOf(state, facts);
       // the Storyboard and the Motion Plan say their time left while Claude works on them, as the Build does
       const runId = ctx.agent.running.get(id), tasks = runId ? ctx.agent.list(id) : [];
-      const stepEta = runningEstimate(tasks.find((x) => x.id === runId), tasks, p.meta?.style?.id);
+      const runTask = tasks.find((x) => x.id === runId);
+      const stepEta = runningEstimate(runTask, tasks, p.meta?.style?.id, { shots: (runTask?.step ?? runTask?.continues) === "motionSpec" ? approvedFrames(p) : null });
       const etaStage = stepEta && stages.find((x) => x.id === stepEta.stage && x.status === "running" && x.line);
       if (etaStage) etaStage.line = `${etaStage.line} · ${etaWords(stepEta)}`;
       const building = stages.find((x) => x.id === "build");
@@ -950,6 +979,13 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
     }
     // static UI: files under ui/dist, everything else -> index.html (single-page app)
     if (req.method !== "GET" && req.method !== "HEAD") return send(405, { error: { code: "METHOD", message: "Method not allowed" } });
+    if (url.pathname.startsWith("/media/sfx/")) {          // the sounds that ship with the app, to listen to in the Sounds drawer: looked up by name, never a path from the request
+      const [kind, name] = url.pathname.slice("/media/sfx/".length).split("/");
+      const f = name && localSoundFile(kind, decodeURIComponent(name), root);
+      if (!f || !existsSync(f)) return send(404, { error: { code: "NOT_FOUND", message: "No such file" } });
+      res.writeHead(200, { "Content-Type": MIME[extname(f).toLowerCase()] ?? "application/octet-stream", "Cache-Control": "public, max-age=86400", "X-Content-Type-Options": "nosniff", "Content-Length": statSync(f).size });
+      return res.end(req.method === "HEAD" ? undefined : readFileSync(f));
+    }
     if (url.pathname.startsWith("/media/blocks/") || url.pathname.startsWith("/media/looks/") || url.pathname.startsWith("/media/intake/")) {   // Blocks, Looks and intake previews (the app's own stores)
       const prefix = ["/media/blocks/", "/media/looks/", "/media/intake/"].find((x) => url.pathname.startsWith(x));
       const store = prefix === "/media/looks/" ? looks : prefix === "/media/intake/" ? intake : blocks;
@@ -1022,7 +1058,7 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
     const pv = "http://127.0.0.1:*";
     res.writeHead(200, { "Content-Type": MIME[extname(file)] ?? "application/octet-stream", "Cache-Control": file.endsWith("index.html") ? "no-store" : "public, max-age=3600",
       "X-Content-Type-Options": "nosniff",
-      "Content-Security-Policy": `default-src 'self'; img-src 'self' data: blob: ${pv}; media-src 'self' blob: ${pv} https://cdn.freesound.org ${VOICE_SAMPLES}; frame-src ${pv}; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; frame-ancestors 'none'` });
+      "Content-Security-Policy": `default-src 'self'; img-src 'self' data: blob: ${pv}; media-src 'self' blob: ${pv} https://cdn.freesound.org https://sfxmint.com ${VOICE_SAMPLES}; frame-src ${pv}; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; frame-ancestors 'none'` });
     res.end(req.method === "HEAD" ? undefined : readFileSync(file));
   });
   await new Promise((ok) => server.listen(port, "127.0.0.1", ok));
@@ -1077,6 +1113,7 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
   ctx.table.push(...editorRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject, HttpError }).routes);
   const assets = assetRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject, HttpError });
   ctx.table.push(...assets.routes);
+  ctx.table.push(...soundRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject, HttpError }).routes);          // the Editor's Sounds drawer
   const chars = characterRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject, HttpError });
   ctx.table.push(...chars.routes);
   ctx.table.push(...proxyRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject }).routes);          // a code film's smooth preview
@@ -1118,6 +1155,8 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
     const limit = async function* (src) { for await (const c of src) { n += c.length; if (n > customLooks.MAX_FILE) throw new HttpError(413, "TOO_LARGE", "The file is over 500 MB"); yield c; } };
     try { await streamPipeline(req, limit, createWriteStream(dest + ".part")); } catch (e) { rmSync(dest + ".part", { force: true }); throw e; }
     renameSync(dest + ".part", dest);
+    // an archive is unpacked, as in a project's Assets; what is in it joins the kit, what is not taken is listed on the kit's panel
+    if (ARCHIVE.test(dest)) return customLooks.publicLook(await customLooks.addArchive(id, dest, root));
     return customLooks.publicLook(customLooks.fileAdded(id, dest, root));
   }];
   ctx.raw = [presence, lookFile, ...prod.raw, ...boards.raw];
@@ -1128,7 +1167,14 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
   ctx.autopilot = createAutopilot(ctx);          // the pipeline runs itself between the user's gates
   if (autoBackup) setTimeout(() => ctx.backups.all(), 5000).unref();
   if (housekeeping) setTimeout(() => { import("./housekeeping.mjs").then((h) => h.housekeep(root, { log: console.log })).catch((e) => console.error(`[housekeeping] ${e.message}`)); }, 20000).unref();
-  if (autoLibrary) { try { firstRun.libraryFromBundle(root); } catch (e) { console.error(`[library] from the bundle: ${e.message}`); } }          // a new computer's library
+  // the films' folder beside the app is there from the first start: Choose… opens at it, and the user can see where films go
+  try { mkdirSync(projects.projectsRoot(root), { recursive: true }); } catch { /* the first film makes it */ }
+  if (autoLibrary) {          // a new computer's library
+    try {
+      const { characters: c } = firstRun.libraryFromBundle(root);
+      if (c?.removed.length || c?.kept.length) console.log(`[library] the app's characters left in the user's folder: removed ${c.removed.join(", ") || "none"}; kept (changed or unknown) ${c.kept.join(", ") || "none"}`);
+    } catch (e) { console.error(`[library] from the bundle: ${e.message}`); }
+  }
   // the style catalog is built once in the background, so the Style Gallery's first load reads it from memory
   // and its tiles' thumbnails after it, one at a time (with the other background imports: not in tests)
   // built in a worker (1.6 s on the server's thread held the app window's first page: a white window)
@@ -1155,7 +1201,8 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
     // the preview and the server stop side by side (one after the other, Exit took 17-27 s)
     await Promise.all([within(ctx.preview.close(), 3000),
       within(new Promise((r) => { server.close(() => r()); server.closeAllConnections?.(); }), 3000),
-      within(rev.settled(), 5000)]);          // a film's commit asked for before is let finish (git runs beside the server's thread: T22-5)
+      // a film's commit asked for before is let finish (git runs beside the server's thread: T22-5), and the files of an import still waiting for theirs
+      within(Promise.resolve(ctx.flushAssetCommits?.()).catch(() => {}).then(() => rev.settled()), 5000)]);
   };
   /** What Exit (or closing the window) stops, per project: Claude tasks, background jobs (render, transcription with its Whisper model,
    *  checks, Export to AE, downloads). */

@@ -33,7 +33,7 @@ Check each one and install what is missing, before `Moworks Studio.bat` (add `--
 ## 2. Clone and start
 
 Clone into a folder of its own, on a local disk (not Google Drive, OneDrive or Dropbox: their sync locks files while films render).
-The folder that holds `app` becomes the app's work folder (projects, library, downloads), unless the user picks another at first start.
+The app keeps `library` and `models` beside `app`. Films go in `projects` beside it too, unless the user picks another folder for them at first start.
 
 ```bat
 mkdir "%USERPROFILE%\Moworks Studio"

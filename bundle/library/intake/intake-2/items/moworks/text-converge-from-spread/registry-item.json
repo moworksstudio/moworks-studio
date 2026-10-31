@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-converge-from-spread",
+  "type": "hyperframes:component",
+  "title": "Converge From Spread",
+  "description": "Các ký tự đứng cách xa nhau rồi dồn về giữa, ký tự ở giữa về trước, hai đầu về sau.",
+  "tags": [
+    "reveal",
+    "letters",
+    "converge",
+    "center",
+    "text-reveal",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "text-converge-from-spread.html",
+      "target": "compositions/components/text-converge-from-spread.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.5,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-converge-from-spread",
+    "author": "moworks",
+    "call": "MW.textConvergeFromSpread(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textConvergeFromSpread",
+    "options": {
+      "spread": "em per step from the centre (1.5)",
+      "duration": "s (1, power1.inOut)",
+      "stagger": "s from the centre out (0.08)",
+      "cap": "s (0.6)",
+      "ease": "",
+      "dim": "opacity when spread (0.35)",
+      "start": "s (0.3)",
+      "outAt": "s (2.6)",
+      "outDuration": "s (0.65)",
+      "outStagger": "s, edges first (0.04)",
+      "loop": "s (3.5)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after Codrops (MIT); a faithful port of Codrops' effects is in the Codrops collection"
+    },
+    "thirdParty": [],
+    "notes": "Split chars; char i starts at x = 150 px × (i − n/2) (demo 1.5 em × (i − (n−1)/2)) and moves to 0 over 1 s power1.inOut, stagger 80 ms from the centre outward (demo capped 0.6 s total), from 0.3 s; demo opacity 0.35 → 1. Loop exit: chars spread out again, edges first, 0.65 s, 40 ms apart, from 2.6 s; loop 3.5 s. Clip to the text box. Params: spread: khoảng cách đầu mỗi bậc (150 px) · duration (1 s) · stagger: từ giữa ra (0.08 s) · ease (power1.inOut).",
+    "titleVi": "Ký tự từ xa dồn về giữa"
+  }
+}

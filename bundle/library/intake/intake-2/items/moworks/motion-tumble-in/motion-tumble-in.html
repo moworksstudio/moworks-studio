@@ -1,0 +1,52 @@
+<!--
+  Tumble In (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Khối vuông lăn vào từ trái, góc thấp nhất luôn chạm sàn, đi tới trước rồi xoay nốt về thẳng.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionTumbleIn(q(".ti"), tl, 0.3, {});
+
+  Options (defaults in brackets):
+      - x: px it rolls in from the left (875)
+      - from: start angle (−180°)
+      - settle: angle when it stops moving (−24°)
+      - move: s of travel (0.672), power2.out
+      - duration: s (0.82)
+
+  Notes: Square (40 px) rolls in on a floor: x 0 → 175 px (demo 190) in 672 ms power2.out; rotation −180° → −24° over the same 672 ms (power1.out), then −24° → 0 in 148 ms power2.out (done at 820 ms). Its lowest corner stays on the floor: lift = half-size × (|cos θ| + |sin θ|). A dashed slot marks the end. Params: duration (0.82 s) · x (175 px) · rotation đầu (−180°) · move: thời gian đi (0.67 s). Its lowest corner stays on the floor: lift = half the size × (|cos θ| + |sin θ|) − half the size.
+-->
+
+<div class="fl"></div><div class="ti-s"></div><div class="ti"></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"x":875,"from":-180,"settle":-24,"move":0.672,"duration":0.82};
+  var run = function (el, tl, at, o) {
+        var p2 = gsap.parseEase("power2.out"), p1 = gsap.parseEase("power1.out"), h = el.offsetHeight / 2;
+        return MW.drive(tl, at, o.duration, function (t) {
+          var m = Math.min(1, t / o.move), x = -o.x * (1 - p2(m)), r = t < o.move ? o.from + (o.settle - o.from) * p1(m) : o.settle * (1 - p2(Math.min(1, (t - o.move) / (o.duration - o.move))));
+          var th = r * Math.PI / 180; gsap.set(el, { x: x, y: -(h * (Math.abs(Math.cos(th)) + Math.abs(Math.sin(th))) - h), rotation: r });
+        });
+      };
+  MW.motionTumbleIn = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

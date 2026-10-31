@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-clip-open",
+  "type": "hyperframes:component",
+  "title": "Image Clip Scrub",
+  "description": "Ảnh đứng yên, khung nhìn mở rộng từ một khe hẹp giữa ảnh ra đủ khung, góc bo nhỏ dần, như mở cửa sổ.",
+  "tags": [
+    "reveal",
+    "clip",
+    "window",
+    "picture",
+    "web-scroll",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-clip-open.html",
+      "target": "compositions/components/motion-clip-open.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-clip-open",
+    "author": "moworks",
+    "call": "MW.motionClipOpen(q(\".co-p\"), tl, 0.4, { closeAt: 2.2 });",
+    "function": "MW.motionClipOpen",
+    "options": {
+      "insetY": "% at the start, top and bottom (12)",
+      "insetX": "% left and right (42)",
+      "radius": "[start, end] px ([110, 30])",
+      "duration": "s (1.2), in-out",
+      "closeAt": "s after the start to close in 0.5 s (null)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "The picture stays fixed (240x136 in the demo); its clip-path inset goes from 12 % (top / bottom) and 42 % (left / right) to 0, corner radius 22 → 6 px, 1.2 s power2.inOut (easeInOutCubic). Optional close: the reverse in 0.5 s. The image itself does not scale or move. Small arrows at the side edges show the opening while it moves. Params: inset (12 % / 42 % → 0) · radius (22 → 6 px) · duration (1.2 s) · ease (power2.inOut).",
+    "titleVi": "Ảnh mở cửa sổ từ khe hẹp"
+  }
+}

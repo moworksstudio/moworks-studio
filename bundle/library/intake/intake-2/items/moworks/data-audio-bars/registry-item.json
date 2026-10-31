@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "data-audio-bars",
+  "type": "hyperframes:block",
+  "title": "Audio Bars",
+  "description": "Mỗi cột là một dải tần, nhảy lên nhanh và rơi chậm hơn, cột trầm to và chậm, cột cao nhỏ và nhanh.",
+  "tags": [
+    "audio",
+    "bars",
+    "visualizer",
+    "music",
+    "sound-sync",
+    "crisp",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "data-audio-bars.html",
+      "target": "compositions/components/data-audio-bars.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/data-audio-bars",
+    "author": "moworks",
+    "call": "MW.dataAudioBars(q(\".gm\"), tl, 0, {});",
+    "function": "MW.dataAudioBars",
+    "options": {
+      "bars": "(24)",
+      "width": "px (7)",
+      "pitch": "px (11)",
+      "max": "px (120)",
+      "beat": "s (0.5)",
+      "low": "bass bars in the accent (6)",
+      "seed": "(2)",
+      "loop": "s (4)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Bars per frequency band: rise ~100 ms ease-out, decay over 300-500 ms; bass big and slow, treble small and fast. Demo: 24 bars (7 px, 11 px pitch, max 120 px): v = (1 - f) x 0.7 x e^(-5 x beat phase) + noise(t x (3 + 10 f)) x 0.4 x (0.3 + f), a beat every 0.5 s, the 6 lowest bars in the accent. Params: bars (24) · rise (0.1 s) · fall (0.3–0.5 s). v = (1 − f) 0.7 e^(−5 · beat phase) + noise(t (3 + 10 f)) 0.4 (0.3 + f): bass big and slow on the beat, treble small and fast.",
+    "titleVi": "Cột âm thanh nhảy theo nhạc"
+  }
+}

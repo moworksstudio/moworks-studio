@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/motion-ease-sine-loop",
+  "hash": "9a94ce32afc5f7b5",
+  "at": "2026-10-17T09:01:52.737Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__motion-ease-sine-loop.mp4",
+    "poster": "previews/moworks__motion-ease-sine-loop.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "cf937508379154048799a7080fd171245c44f1d2daedda7e309775a716129aeb",
+    "size": 7691,
+    "seconds": 26,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

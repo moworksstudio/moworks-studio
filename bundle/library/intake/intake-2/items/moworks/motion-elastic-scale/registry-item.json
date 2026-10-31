@@ -1,0 +1,53 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-elastic-scale",
+  "type": "hyperframes:component",
+  "title": "Elastic Scale",
+  "description": "Vòng tròn phóng lên 120 % rồi nảy qua lại 92 % và 106 % trước khi đứng yên.",
+  "tags": [
+    "entrance",
+    "scale",
+    "elastic",
+    "bouncy"
+  ],
+  "files": [
+    {
+      "path": "motion-elastic-scale.html",
+      "target": "compositions/components/motion-elastic-scale.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-elastic-scale",
+    "author": "moworks",
+    "call": "MW.motionElasticScale(q(\".es\"), tl, 0.3, { exitAt: 1.9 });",
+    "function": "MW.motionElasticScale",
+    "options": {
+      "keys": "[[s, scale], ...]: power2.out to the first peak, sine.inOut between the rest",
+      "exitAt": "s after the start to shrink to 0.5 and fade (null)",
+      "exit": "s (0.25)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Circle scales about its centre by keys: 0.1 → 1.2 at 405 ms (power2.out) → 0.92 at 612 → 1.06 at 756 → 1 at 900 ms (sine.inOut between keys): an elastic.out look with shrinking rebounds. The curve graph is a guide. Exit: shrink to 0.5 + fade, 250 ms power2.in. Params: duration (0.9 s) · from (0.1) · keys: các đỉnh nảy (1.2 / 0.92 / 1.06).",
+    "titleVi": "Phóng to đàn hồi, nảy nhỏ dần"
+  }
+}

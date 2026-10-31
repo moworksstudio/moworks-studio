@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/ui-like-burst",
+  "hash": "834134eb9c2a0bb1",
+  "at": "2026-10-17T10:34:27.359Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__ui-like-burst.mp4",
+    "poster": "previews/moworks__ui-like-burst.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "9fbc9b8ba7fa35afea6ae205dcfcca8f7a3fbb39fc9b11611afe22f003c3a776",
+    "size": 12607,
+    "seconds": 29.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

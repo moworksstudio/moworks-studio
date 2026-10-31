@@ -1,0 +1,92 @@
+<!--
+  Masked Character Rise (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Từng ký tự trồi lên khỏi mặt nạ của dòng, nối nhau rất sát, rồi lại thoát lên trên khi rời cảnh.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.textCharMaskRise(q(".tk-head"), tl, 0.3, { exit: 2.2 });
+
+  Options (defaults in brackets):
+      - duration: s per character (0.5), ease-out cubic
+      - stagger: s (0.035, capped so the line takes ≤ 0.9 s)
+      - exit: s after the start to leave upward (null: stay)
+
+  Notes: Split chars inside a per-line overflow-clip mask (baseline − 0.98 em to + 0.3 em). Each char y +100 % (one mask height) → 0, 0.5 s easeOutCubic (CSS cubic-bezier(.215,.61,.355,1); labelled power3.out), stagger 14–35 ms (demo min(35 ms, 0.9 s/(n−1))) from 0.3 s. Exit: chars continue up to −100 %, 0.4 s easeInCubic, same stagger (demo from 2.5 s); loop 3.6 s. Params: duration (0.5 s) · stagger (0.014–0.035 s) · ease (easeOutCubic) · exit: thoát lên trên (0.4 s).
+-->
+
+<div class="tk-stage"><div><h1 class="tk-head ">Chuyển động có chủ đích</h1></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.split = MW.split || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwSplit) return el.__mwSplit;
+    var seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("vi", { granularity: "grapheme" }) : null;
+    var graphemes = function (s) { if (seg) { var out = []; var it = seg.segment(s)[Symbol.iterator](), r; while (!(r = it.next()).done) out.push(r.value.segment); return out; } return Array.from(s); };
+    var res = { chars: [], words: [], lines: [] };
+    var walk = function (node) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var k = 0; k < kids.length; k++) {
+        var n = kids[k];
+        if (n.nodeType === 1) { if (n.tagName === "BR") continue; walk(n); continue; }
+        if (n.nodeType !== 3) continue;
+        var text = n.nodeValue.normalize("NFC"), frag = document.createDocumentFragment();
+        var parts = text.split(/(\s+)/);
+        for (var p = 0; p < parts.length; p++) {
+          var part = parts[p];
+          if (!part) continue;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); continue; }
+          var w = document.createElement("span");
+          w.className = "mw-w"; w.style.display = "inline-block"; w.style.whiteSpace = "nowrap";
+          if (mode === "words") w.textContent = part;
+          else { var gs = graphemes(part); for (var g = 0; g < gs.length; g++) { var c = document.createElement("span"); c.className = "mw-ch"; c.style.display = "inline-block"; c.textContent = gs[g]; w.appendChild(c); res.chars.push(c); } }
+          res.words.push(w); frag.appendChild(w);
+        }
+        node.replaceChild(frag, n);
+      }
+    };
+    walk(el);
+    var top = null, line = null;
+    for (var i = 0; i < res.words.length; i++) { var y = res.words[i].offsetTop; if (top === null || Math.abs(y - top) > 2) { top = y; line = []; res.lines.push(line); } line.push(res.words[i]); }
+    el.__mwSplit = res;
+    return res;
+  };
+  MW.lines = MW.lines || function (el, mode) {
+    el = MW.el(el);
+    if (el.__mwLines) return el.__mwLines;
+    var s = MW.split(el, mode || "words"), out = [];
+    s.lines.forEach(function (ws) {
+      var d = document.createElement("span"); d.className = "mw-line"; d.style.display = "block";
+      ws[0].parentNode.insertBefore(d, ws[0]);
+      ws.forEach(function (w, i) { d.appendChild(w); if (i < ws.length - 1) d.appendChild(document.createTextNode(" ")); });
+      out.push(d);
+    });
+    Array.prototype.slice.call(el.childNodes).forEach(function (n) { if ((n.nodeType === 3 && !n.nodeValue.trim()) || n.nodeName === "BR") el.removeChild(n); });
+    el.__mwLines = { lines: out, chars: s.chars, words: s.words };
+    return el.__mwLines;
+  };
+  var defaults = {"duration":0.5,"stagger":0.035,"exit":null};
+  var run = function (el, tl, at, o) {
+        var S = MW.lines(el, "chars"), n = S.chars.length, st = Math.min(o.stagger, 0.9 / Math.max(1, n - 1));
+        S.lines.forEach(function (l) { l.style.overflow = "hidden"; l.style.padding = "0.22em 0.08em"; l.style.margin = "-0.22em -0.08em"; });
+        S.chars.forEach(function (c, i) { tl.fromTo(c, { yPercent: 135 }, { yPercent: 0, duration: o.duration, ease: "power2.out", immediateRender: true }, at + i * st); });
+        if (o.exit != null) S.chars.forEach(function (c, i) { tl.to(c, { yPercent: -135, duration: 0.4, ease: "power2.in", immediateRender: false }, at + o.exit + i * st); });
+        return at + o.duration + (n - 1) * st;
+      };
+  MW.textCharMaskRise = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

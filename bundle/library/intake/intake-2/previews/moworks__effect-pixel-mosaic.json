@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-pixel-mosaic",
+  "hash": "2ca82e8dea653ab2",
+  "at": "2026-10-17T10:38:09.549Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__effect-pixel-mosaic.mp4",
+    "poster": "previews/moworks__effect-pixel-mosaic.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "bb73be241c310a5d449dc42625b70889c7379a8eab29a20e6da60b6336660696",
+    "size": 13793,
+    "seconds": 19.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

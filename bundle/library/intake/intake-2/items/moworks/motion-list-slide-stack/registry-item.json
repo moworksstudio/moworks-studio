@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-list-slide-stack",
+  "type": "hyperframes:component",
+  "title": "List Slide Stack",
+  "description": "Bốn dòng trồi từ dưới lên vào đúng khe của mình trong một mặt nạ, mỗi dòng trễ 82 ms.",
+  "tags": [
+    "list",
+    "stagger",
+    "rise",
+    "mask",
+    "list-grid",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-list-slide-stack.html",
+      "target": "compositions/components/motion-list-slide-stack.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 1.9,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-list-slide-stack",
+    "author": "moworks",
+    "call": "MW.motionListSlideStack(q(\".ss\"), tl, 0.3, {});",
+    "function": "MW.motionListSlideStack",
+    "options": {
+      "items": "",
+      "y": "px (192)",
+      "stagger": "s (0.082)",
+      "duration": "s (0.654, power2.out)",
+      "cols": ""
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Four rows rise into their slots inside one mask: y +48 → 0 px, opacity in over the first half, each 654 ms power2.out, 82 ms apart (900 ms in all); dashed slot outlines show the targets (the recipe also nudges earlier rows +18 → 0; not in the demo). Params: y (48 px) · stagger (82 ms) · each (0.654 s) · ease (power2.out). The rows rise into their slots inside one mask (the container clips them).",
+    "titleVi": "Dòng trồi lên vào khe"
+  }
+}

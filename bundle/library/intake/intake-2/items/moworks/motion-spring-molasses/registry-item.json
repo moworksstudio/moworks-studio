@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-spring-molasses",
+  "type": "hyperframes:component",
+  "title": "react-spring molasses",
+  "description": "Lò xo rất đặc, chậm rãi như mật đường, không vượt đích, mất gần 2 giây mới tới.",
+  "tags": [
+    "spring",
+    "slow",
+    "heavy",
+    "springs",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "motion-spring-molasses.html",
+      "target": "compositions/components/motion-spring-molasses.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 5.58,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-spring-molasses",
+    "author": "moworks",
+    "call": "MW.motionSpringMolasses(q(\".sp-b\"), tl, 0.4, { back: 2.94 });",
+    "function": "MW.motionSpringMolasses",
+    "options": {
+      "stiffness": "",
+      "damping": "",
+      "mass": "",
+      "prop": "the property it drives: x | y | scale | rotation (x)",
+      "from": "(0)",
+      "to": "(560 px)",
+      "back": "s after the start to spring back (null)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after react-spring"
+    },
+    "thirdParty": [],
+    "notes": "Target moves 0 → 1 on tension 280, friction 120, mass 1 (heavily over-damped, damping ratio 3.59): no overshoot, within 1 % by ~1940 ms. Kit form: springk(280, 120) over 1.94 s. Rule: sticky like syrup, slow. Small demo: the target moves 102 px beside the response graph, with overshoot and settle readouts. Params: tension (280) · friction (120) · duration (1.94 s). react-spring's molasses (280 / 120): heavily over-damped, no overshoot, nearly 2 s to arrive.",
+    "titleVi": "Lò xo sệt như mật"
+  }
+}

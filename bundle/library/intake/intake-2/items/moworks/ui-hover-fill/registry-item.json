@@ -1,0 +1,63 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-hover-fill",
+  "type": "hyperframes:component",
+  "title": "Button Fill Hover",
+  "description": "Con trỏ đi vào nút viền, màu nhấn loang tròn ra từ đúng điểm vào và chữ đổi màu bên trong vùng màu; con trỏ rời đi thì vùng màu thu về điểm ra.",
+  "tags": [
+    "hover",
+    "fill",
+    "button",
+    "cursor",
+    "web-interaction",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "ui-hover-fill.html",
+      "target": "compositions/components/ui-hover-fill.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-hover-fill",
+    "author": "moworks",
+    "call": "MW.uiHoverFill(q(\".hf\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.uiHoverFill",
+    "options": {
+      "radius": "px (680)",
+      "grow": "s (0.62, power2.out)",
+      "shrink": "s (0.44, power2.in)",
+      "enter": "s the cursor enters (0.56)",
+      "leave": "s it leaves (1.86)",
+      "path": "[[s, x, y], ...] cursor keys in the 320 frame, the button at its centre",
+      "unit": "px per reference unit (4)",
+      "label": "",
+      "accent": "",
+      "ink": "label colour inside the fill",
+      "cursor": "an optional cursor"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Outlined pill 140x48 r24 (1.5 px accent border, accent label). Origin = cursor at entry (0.56 s): an accent circle grows to radius 170 px (≈ 420 %) over 0.58-1.2 s power2.out, clipped to the button; label drawn twice (accent outside, dark inside the circle). Leave 1.86 s: shrinks to 0 at the exit point in 440 ms power2.in. Cursor (power2.inOut): (100,186) to 0.2 s, (122,120) 0.6, (146,106) 0.9, (150,104) 1.7, (252,60) 2.05, (266,176) 2.3, start 2.6. Params: radius (170 px) · in (0.62 s, power2.out) · out (0.44 s, power2.in) · point: điểm vào / ra.",
+    "titleVi": "Nút tô màu từ điểm con trỏ vào"
+  }
+}

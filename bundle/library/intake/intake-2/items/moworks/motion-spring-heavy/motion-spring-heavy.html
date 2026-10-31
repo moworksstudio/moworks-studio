@@ -1,0 +1,68 @@
+<!--
+  Heavy (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Lò xo cho vật lớn, nặng: vượt nhẹ 4 % và đáp chậm trong khoảng 0.93 giây.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionSpringHeavy(q(".sp-b"), tl, 0.4, { back: 1.93 });
+
+  Options (defaults in brackets):
+      - stiffness: 
+      - damping: 
+      - mass: 
+      - prop: the property it drives: x | y | scale | rotation (x)
+      - from: (0)
+      - to: (560 px)
+      - back: s after the start to spring back (null)
+
+  Notes: Target moves 0 → 1 on a spring, stiffness 80, damping 16, mass 1.6 (damping ratio 0.71): 4.3 % overshoot, within 1 % by ~930 ms. Kit form: springk(50, 10) over 0.93 s. Rule: large cards and full-screen objects; a slow landing. Small demo: the target moves 102 px beside the response graph, with overshoot and settle readouts. Params: stiffness (80) · damping (16) · mass (1.6) · duration (0.93 s). Ratio 0.71: about 4 % past and a slow landing (~0.93 s), for large cards and full-screen objects.
+-->
+
+<div class="sp-tr"></div><div class="sp-tg"></div><div class="sp-b"></div><svg class="sp-g" viewBox="0 0 640 300"><line x1="0" y1="80" x2="640" y2="80" stroke="#5a6378" stroke-width="2" stroke-dasharray="8 8"/><line x1="0" y1="270" x2="640" y2="270" stroke="#2a3142" stroke-width="2"/><polyline points="0.0,270.0 6.4,269.1 12.8,266.6 19.2,262.8 25.6,257.8 32.0,251.8 38.4,245.0 44.8,237.7 51.2,229.8 57.6,221.7 64.0,213.3 70.4,204.7 76.8,196.2 83.2,187.7 89.6,179.4 96.0,171.2 102.4,163.3 108.8,155.6 115.2,148.3 121.6,141.2 128.0,134.6 134.4,128.3 140.8,122.4 147.2,116.9 153.6,111.8 160.0,107.0 166.4,102.6 172.8,98.6 179.2,95.0 185.6,91.6 192.0,88.6 198.4,86.0 204.8,83.6 211.2,81.5 217.6,79.6 224.0,78.0 230.4,76.6 236.8,75.5 243.2,74.5 249.6,73.7 256.0,73.1 262.4,72.6 268.8,72.2 275.2,72.0 281.6,71.8 288.0,71.8 294.4,71.8 300.8,71.9 307.2,72.1 313.6,72.3 320.0,72.6 326.4,72.9 332.8,73.2 339.2,73.5 345.6,73.9 352.0,74.2 358.4,74.6 364.8,75.0 371.2,75.3 377.6,75.7 384.0,76.0 390.4,76.4 396.8,76.7 403.2,77.0 409.6,77.3 416.0,77.6 422.4,77.9 428.8,78.2 435.2,78.4 441.6,78.6 448.0,78.8 454.4,79.0 460.8,79.2 467.2,79.3 473.6,79.5 480.0,79.6 486.4,79.7 492.8,79.8 499.2,79.9 505.6,80.0 512.0,80.1 518.4,80.1 524.8,80.2 531.2,80.2 537.6,80.3 544.0,80.3 550.4,80.3 556.8,80.3 563.2,80.3 569.6,80.4 576.0,80.4 582.4,80.4 588.8,80.3 595.2,80.3 601.6,80.3 608.0,80.3 614.4,80.3 620.8,80.3 627.2,80.3 633.6,80.3 640.0,80.3" fill="none" stroke="#8b7bff" stroke-width="5" stroke-linejoin="round"/><line class="sp-mk" x1="0" y1="0" x2="0" y2="290" stroke="#e8ebf3" stroke-width="2"/></svg>
+<div class="sp-l"><b>4,3 %</b><span>vượt đích</span><b>~0,93 s</b><span>tới đích (trong 1 %)</span><span style="margin-top:30px">k 80 · c 16 · m 1.6</span></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.spring = MW.spring || function (stiffness, damping, mass, from, to) {
+    var k = stiffness || 100, c = damping == null ? 10 : damping, m = mass || 1, w0 = Math.sqrt(k / m), z = c / (2 * Math.sqrt(k * m));
+    var x = function (t) {
+      if (z < 1) { var wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + (z * w0 / wd) * Math.sin(wd * t)); }
+      if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+      var q = Math.sqrt(z * z - 1), r1 = -w0 * (z - q), r2 = -w0 * (z + q), A = r2 / (r2 - r1), B = -r1 / (r2 - r1);
+      return 1 - (A * Math.exp(r1 * t) + B * Math.exp(r2 * t));
+    };
+    var T = 0, dt = 1 / 240; for (var t = 0; t < 30; t += dt) if (Math.abs(1 - x(t)) > 0.001) T = t;
+    T = Math.max(dt, T + dt);
+    return { duration: T, ease: function (p) { return p >= 1 ? 1 : x(p * T); }, at: x };
+  };
+  MW.springDB = MW.springDB || function (duration, bounce) {
+    var z = 1 - (bounce == null ? 0.25 : bounce), w = Math.log(1000) / (Math.max(0.05, z) * (duration || 0.8));
+    return MW.spring(w * w, 2 * z * w, 1);
+  };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"stiffness":80,"damping":16,"mass":1.6,"prop":"x","from":0,"to":560,"back":null};
+  var run = function (el, tl, at, o) {
+    var s = MW.spring(o.stiffness, o.damping, o.mass), T0 = s.duration;
+    return MW.drive(tl, at, o.back == null ? T0 : o.back + T0, function (t) { var v = s.at(Math.max(0, t)) - (o.back != null && t > o.back ? s.at(t - o.back) : 0), q = {}; q[o.prop] = o.from + (o.to - o.from) * v; gsap.set(el, q); });
+  };
+  MW.motionSpringHeavy = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

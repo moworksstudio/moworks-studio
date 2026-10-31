@@ -1,0 +1,58 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-hit-confirm-reticle",
+  "type": "hyperframes:component",
+  "title": "Hit Confirm",
+  "description": "Tâm ngắm đứng yên; lúc trúng, bốn góc lao vào tâm bằng lò xo rất nhanh, chân góc co lại và nét chéo mọc ra thành dấu X đổi màu nhấn, mục tiêu loé và rung nhẹ, nhãn \"HIT\" hiện.",
+  "tags": [
+    "reticle",
+    "lock",
+    "spring",
+    "impact",
+    "combat-hit-fx",
+    "heavy"
+  ],
+  "files": [
+    {
+      "path": "ui-hit-confirm-reticle.html",
+      "target": "compositions/components/ui-hit-confirm-reticle.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-hit-confirm-reticle",
+    "author": "moworks",
+    "call": "MW.uiHitConfirmReticle(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiHitConfirmReticle",
+    "options": {
+      "hitAt": "s (0.75)",
+      "from": "px of the corners (26)",
+      "to": "px (13)",
+      "releaseAt": "s (1.5, 0.3 s ease-out cubic)",
+      "label": "",
+      "loop": "s (2.2)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "px @320x200, reticle drawn ×1.5. Hit at 0.75 s, h = spring k700 d34 (~120 ms): four corners at 45° move radius 26 → 13 while their two 9 px legs shrink to 0 and 8 px diagonal strokes (2.5 px) grow inward, forming an X; colour light ink → accent past h 0.5; dashed circle r 26.5 fades in (80 % × h). Target flashes 70 % → 0 in 150 ms and shakes ±2 px 200 ms; 'HIT' label in 80 ms. Release 1.5-1.8 s outCubic (reverse). Params: hitAt: lúc trúng (0.75 s) · from / to: bán kính góc (26 → 13 px) · spring: lò xo (k700 d34) · releaseAt: lúc nhả (1.5 s). On a spring k700 d34 the four 45° corners close in, their legs shrink and diagonal strokes grow inward into an X that turns accent past halfway; drawn × 1.5.",
+    "titleVi": "Tâm ngắm khép thành dấu X khi trúng"
+  }
+}

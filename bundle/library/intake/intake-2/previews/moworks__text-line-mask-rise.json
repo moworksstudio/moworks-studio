@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-line-mask-rise",
+  "hash": "2696ad025f0bf038",
+  "at": "2026-10-17T07:40:14.793Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-line-mask-rise.mp4",
+    "poster": "previews/moworks__text-line-mask-rise.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "93bbea0655cf29a7baa26633004386cd4ccf2e5d65280ecfa55bee4fba05d322",
+    "size": 19525,
+    "seconds": 27.8,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

@@ -343,13 +343,45 @@ export function settingsChanged(fields, values, defaults) {
   return out;
 }
 
+// a whole word, in Vietnamese too (\\b does not know its letters)
+const word = (w) => new RegExp(`(?<![\\p{L}\\p{M}])(?:${w})(?![\\p{L}\\p{M}])`, "iu");
+const VOICE_WORD = word("giọng(?: đọc| kể| nói)?|người đọc|người kể|người dẫn|dẫn chuyện|lời đọc|lời kể|lời bình|lồng tiếng|thuyết minh|narrators?|narration|narrated|voice(?:[- ]?over)?s?|read by");
+const WANT = { female: word("nữ|phụ nữ|cô gái|bé gái|female|woman|women|girl|lady"), male: word("nam|đàn ông|chàng trai|bé trai|male|man|men|boy|guy"),
+  old: word("già|lớn tuổi|cao tuổi|old|elderly"), middle: word("trung niên|middle[- _]aged|mature"), young: word("trẻ|thanh niên|young|youthful|cô gái|chàng trai|girl|boy") };
+// "nam" there is the south or the country, not a man; so is "giọng Nam", with its capital
+const notMale = (s) => s.replace(new RegExp(word("miền nam|nam bộ|sài gòn|phương nam|việt nam").source, "giu"), " ").replace(/(?<=giọng )Nam(?![\p{L}\p{M}])/giu, (m) => (m === "Nam" ? " " : m));
+/** What the brief asks of the voice-over's voice: { gender: "female" | "male" | null, age: "young" | "middle" | "old" | null }, read only from the
+ *  sentences that speak of the voice (a film about an old man read by a young woman), and from the line under a heading that does. */
+export function voiceAsked(text) {
+  const lines = String(text ?? "").normalize("NFC").split(/\r?\n/);
+  const about = [];
+  lines.forEach((l, i) => {
+    const heading = /^\s*(#+\s|.{0,40}:\s*$)/.test(l) && VOICE_WORD.test(l);
+    if (heading) { const next = lines.slice(i + 1).find((x) => x.trim()); if (next) about.push(next.split(/(?<=[.!?])\s/)[0]); }
+    for (const s of l.split(/(?<=[.!?])\s/)) if (VOICE_WORD.test(s)) about.push(s);
+  });
+  const said = notMale(about.join(" \n "));
+  const f = WANT.female.test(said), m = WANT.male.test(said);
+  return { gender: f && !m ? "female" : m && !f ? "male" : null, age: WANT.old.test(said) ? "old" : WANT.middle.test(said) ? "middle" : WANT.young.test(said) ? "young" : null };
+}
+/** The first voice that fits what the brief asks, among those that read the film's language (the service's labels and the voice's name say what
+ *  it is); null when none does or the brief asks nothing. */
+export function voiceFor(voices, asked, lang = "vi") {
+  if (!asked?.gender && !asked?.age) return null;
+  const speaks = SPEAKS[lang], usable = voices.filter((v) => v.usable !== false);
+  const ones = usable.some((v) => speaks?.test(`${v.labels ?? ""} ${v.name ?? ""}`)) ? usable.filter((v) => speaks.test(`${v.labels ?? ""} ${v.name ?? ""}`)) : usable;
+  const says = (v, w) => WANT[w].test(notMale(`${String(v.labels ?? "").replace(/_/g, " ")} ${v.name ?? ""}`));
+  const fits = ones.filter((v) => !asked.gender || says(v, asked.gender));
+  return fits.find((v) => asked.age && says(v, asked.age)) ?? (asked.gender ? fits[0] : null) ?? null;
+}
 /** The voice the box opens on: the voice the user chose last on this screen, when this service lists it; else the one they chose last
  *  for this service; else the one the film's voice-over was read with, when it came from this service and the service still lists it;
- *  else the first usable voice. chosen: { last, [provider]: { voiceId } } (chosenOf). */
-export function pickVoice(voices, provider, current, chosen = null) {
+ *  else one that fits what the brief asks (T28-17: a man's voice when the brief said a young woman); else the first usable voice. chosen:
+ *  { last, [provider]: { voiceId } } (chosenOf). asked: voiceAsked(the brief), lang: the film's language. */
+export function pickVoice(voices, provider, current, chosen = null, asked = null, lang = "vi") {
   const has = (vid) => (vid ? voices.find((v) => v.id === vid) ?? null : null);
   const own = current?.source === provider ? has(current.voiceId) : null;
-  return (has(chosen?.last) ?? has(chosen?.[provider]?.voiceId) ?? own ?? voices.find((v) => v.usable !== false) ?? voices[0])?.id ?? "";
+  return (has(chosen?.last) ?? has(chosen?.[provider]?.voiceId) ?? own ?? voiceFor(voices, asked, lang) ?? voices.find((v) => v.usable !== false) ?? voices[0])?.id ?? "";
 }
 // T22-3: switching the source card (ElevenLabs, then another card, then ElevenLabs again) built the panel afresh and the chosen voice went
 // back to the first one, "Minh Trung". What the user chose for this film is kept for the app session: the voice they picked last, and per
@@ -397,7 +429,7 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
       if (!alive) return;
       // A provider's names can carry stray spaces (" Minh Trung - Narration"); the menu, the confirm and the saved name use them trimmed
       const voices = voiceOrder((r.voices ?? []).map((v) => ({ ...v, name: String(v.name ?? "").trim() })), projectLanguage(brief, language));
-      setList({ ...r, voices }); setVoiceId(pickVoice(voices, provider, current, kept));
+      setList({ ...r, voices }); setVoiceId(pickVoice(voices, provider, current, kept, voiceAsked(brief?.text), projectLanguage(brief, language)));
       // The model chosen here before, then the one the film's voice-over was made with, then the server's pick
       const before = r.models.find((m) => m.id === kept[provider]?.model)?.id ?? null;
       const same = current?.source === provider ? r.models.find((m) => m.id === current.model)?.id : null;
@@ -409,7 +441,7 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
     });
     return () => { alive = false; clearTimeout(again); };
   }, [provider, keySaved, attempt]); // eslint-disable-line react-hooks/exhaustive-deps
-  if (!keySaved) return <section className="panel"><Banner kind="warning" action={<button className="btn sm" onClick={() => go("/settings/general")}>{t("Add key")}</button>}>{t("Add your {name} key in Settings › General › Voice-over to choose a voice.", { name })}</Banner></section>;
+  if (!keySaved) return <section className="panel"><Banner kind="warning" action={<button className="btn sm" onClick={() => go("/settings/runtime")}>{t("Add key")}</button>}>{t("Add your {name} key in Settings › General › Voice-over to choose a voice.", { name })}</Banner></section>;
   const voice = list?.voices.find((x) => x.id === voiceId);
   // the voice settings are left at the service's defaults: only what the user changed is sent
   const fields = list?.settings ?? [];

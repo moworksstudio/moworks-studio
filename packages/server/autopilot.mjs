@@ -46,12 +46,14 @@ function buildTimesFile(root) { return join(process.env.MW_STATE_DIR ?? join(roo
 // Test 24's 110 s Lemo canvas film (ASCII / CRT) took 35.6 min (Build 11.5, Review 14.2), against "about 68-102" from 18 + 0.45 a second
 // and "110 min left" on the page: a Lemo or mg film's time hardly grows with its length (34 s 44 min, 105 s 65, 110 s 36), so its rate is
 // flatter, 24 + 0.2 a second (110 s: 46-69), and each film above still falls in its range
+// a HyperFrames film past a minute grows far slower too (build-times.json: 105 s 81 min, 120 s 82 against "112-168", T28-13): 0.3 a second past 60 s
 const RATES = [[/^anidoodle-/, [26, 0.56]], [/^brush-cartoon$/, [15, 0.9]], [/^(lemo-|mg-)/, [24, 0.2]], [/^what-if$/, [10, 0.6]]];
-const HIGH = 1.5;
+const HIGH = 1.5, LONG_FILM = 60, PAST_A_MINUTE = 0.3;
 export function estimateMinutes(shots, root, { seconds = null, styleId = null } = {}) {
   const sec = Number(seconds) > 0 ? Number(seconds) : Math.max(1, Number(shots) || 1) * 4;
-  const [base, perSec] = RATES.find(([re]) => re.test(String(styleId ?? "")))?.[1] ?? [16, 0.8];
-  const minutes = Math.max(3, Math.min(240, Math.round(base + perSec * sec)));
+  const own = RATES.find(([re]) => re.test(String(styleId ?? "")))?.[1];
+  const raw = own ? own[0] + own[1] * sec : 16 + 0.8 * Math.min(sec, LONG_FILM) + PAST_A_MINUTE * Math.max(0, sec - LONG_FILM);
+  const minutes = Math.max(3, Math.min(240, Math.round(raw)));
   // a range (a slower or shared computer takes longer), and what it covers, for the confirm's words
   return { minutes, high: Math.round(minutes * HIGH), covers: "build, review, music and checks", basis: "length" };
 }
@@ -384,7 +386,7 @@ export function createAutopilot(ctx) {
     const lines = gap.left.map((l) => `"${l.length > 90 ? `${l.slice(0, 90)}…` : l}"`).join("; ");
     if (!fix) {
       const t = await ctx.agent.start(id, { scope: { kind: "project" }, step: "brief",
-        text: `The app's check: the owner wrote the voice-over's script in the brief (${gap.total} lines), and docs/VOICEOVER.md leaves out or changes ${gap.left.length} of them: ${lines}. The owner's script is read word for word (moworks-studio §2b). Write the whole script into docs/VOICEOVER.md as the owner wrote it, every line in its order, and correct what BRIEF.md and docs/NOTES.md say about it. If the film needs the script changed, do not change it: ask the owner in one message with the choices (the whole script as written first), and stop.` }).catch(() => null);
+        text: `The app's check: the owner wrote the voice-over's script in the brief (${gap.total} lines), and docs/VOICEOVER.md leaves out or changes ${gap.left.length} of them: ${lines}. The owner's script is read word for word (moworks-studio §2b). Write the whole script into docs/VOICEOVER.md as the owner wrote it, every line in its order, and correct what BRIEF.md and docs/NOTES.md say about it. If the film needs the script changed, do not change it: ask the owner in one message with the choices as a bullet list (the whole script as written first), and stop.` }).catch(() => null);
       if (t?.id) { meta(id, (m) => { (m.pipeline ??= {}).scriptFix = { at: now(), brief: briefAt, taskId: t.id, left: gap.left.length }; }); return t; }
       return null;
     }
@@ -645,7 +647,7 @@ export function createAutopilot(ctx) {
     }
     if (sb?.status === "done") {
       return ctx.agent.start(id, { scope: { kind: "project" }, by: "app",
-        text: `The voice-over came after the storyboard was approved: it is ${len} (transcript.json has its words and times). Compare it with the approved STORYBOARD.md's frame times and length${set ? ` (the film is set to ${set} s in New project)` : ""}. If they fit, say so in one line and change nothing.${long ? ` ${voiceFitText(p.meta)}` : ""} If they do not, stop and ask as moworks-studio §2b says, with the choices (keep the voice and time the storyboard to it, make the voice again on the Voice screen, or keep both as they are), and change nothing yet.` }).catch(() => null);
+        text: `The voice-over came after the storyboard was approved: it is ${len} (transcript.json has its words and times). Compare it with the approved STORYBOARD.md's frame times and length${set ? ` (the film is set to ${set} s in New project)` : ""}. If they fit, say so in one line and change nothing.${long ? ` ${voiceFitText(p.meta)}` : ""} If they do not, stop and ask as moworks-studio §2b says, with these choices as a bullet list: keep the voice and time the storyboard to it, make the voice again on the Voice screen, or keep both as they are. Change nothing yet.` }).catch(() => null);
     }
     return ctx.agent.start(id, { scope: { kind: "project" }, step: "brief",
       text: "The voice-over's words have just been transcribed (transcript.json), after Prepare ran. Check them against BRIEF.md: their language, what they are about and their length. Anything that does not fit the brief or this film (another language, another topic or product, too long or too short) is a conflict: stop and ask as moworks-studio §2b says (keep the voice-over, use it only in part, or make the film without it). When it fits, say so in one line and change nothing." + (long ? ` ${voiceFitText(p.meta)}` : "") })

@@ -1,0 +1,88 @@
+<!--
+  Border Draw (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Nhấn Tab, một viền màu nhấn tự vẽ một vòng quanh nút từ giữa cạnh trên theo chiều kim đồng hồ, khép lại thì loé nhẹ ra ngoài.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.uiFocusRingDraw(q(".fr"), tl, 0, {});
+
+  Options (defaults in brackets):
+      - offset: px outside the button (20)
+      - stroke: px (8)
+      - draw: s (0.8, power2.inOut), clockwise from the top centre
+      - drawAt: s (0.45)
+      - outAt: s (2.25, 0.25 s power2.in)
+      - flash: px the closing flash grows (24)
+      - dot: px radius of the drawing head (9)
+      - accent: 
+      - key: a key cap pressed first
+      - keyAt: s (0.3)
+      - cursor: an optional cursor that makes the clicks
+      - approach: [x, y] px the cursor comes from
+      - lead: s it arrives before a click
+
+  Notes: Button 140x44 r12 (dark fill, light label). Focus ring offset 5 px (150x54, r17), one 2.5 px accent stroke starting at the top centre, clockwise, 0 → 100 % of the perimeter over 0.45-1.25 s (800 ms) power2.inOut, a 4 px head dot while drawing. On closing a copy flashes outward 6 px and fades over 0.3 s. Out 2.25-2.5 s power2.in. Trigger: a Tab key cap pressed at 0.3-0.45 s. Params: offset (5 px) · draw (0.8 s, power2.inOut) · stroke (2.5 px) · flash (6 px, 0.3 s).
+-->
+
+<div class="ui-wrap"><div class="bw"><div class="b fr" style="background:#1b2130;color:#e8ebf3;border-radius:48px">Gửi bài</div><div class="fr-k">Tab</div></div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  MW.rr = MW.rr || function (c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };
+  MW.txt = MW.txt || function (c, s, x, y, size, color, weight, align) { c.font = (weight || 700) + " " + size + "px Inter, sans-serif"; c.fillStyle = color || "#e8ebf3"; c.textAlign = align || "center"; c.textBaseline = "middle"; c.fillText(s, x, y); };
+  MW.cursor = MW.cursor || function (c, x, y, s) { s = s || 1; c.save(); c.translate(x, y); c.scale(s, s); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, 16); c.lineTo(4, 12.5); c.lineTo(6.5, 18); c.lineTo(9, 17); c.lineTo(6.5, 11.5); c.lineTo(11.5, 11.5); c.closePath(); c.fillStyle = "#fff"; c.fill(); c.lineWidth = 1; c.strokeStyle = "#111"; c.stroke(); c.restore(); };
+  MW.path = MW.path || function (keys, t, ease) {
+    var e = typeof ease === "function" ? ease : gsap.parseEase(ease || "power2.inOut");
+    if (t <= keys[0][0]) return [keys[0][1], keys[0][2]];
+    for (var i = 1; i < keys.length; i++) if (t <= keys[i][0]) { var a = keys[i - 1], b = keys[i], u = e((t - a[0]) / ((b[0] - a[0]) || 1)); return [a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+    var z = keys[keys.length - 1]; return [z[1], z[2]];
+  };
+  var defaults = {"offset":20,"stroke":8,"draw":0.8,"drawAt":0.45,"outAt":2.25,"flash":24,"dot":9,"accent":"#8b7bff","key":".fr-k","keyAt":0.3,"cursor":null,"approach":[260,200],"lead":0.12};
+  var run = function (el,tl,at,o
+  ) {
+  var host = el.parentNode; if (getComputedStyle(host).position === "static") host.style.position = "relative";
+  var cur = o.cursor ? (host.querySelector(o.cursor) || document.querySelector(o.cursor)) : null, curKeys = null;
+  var cursorPlan = function (clicks) { if (!cur) return; var base = (cur.offsetParent || host).getBoundingClientRect(), k = [];
+    clicks.forEach(function (c, i) { var r = (c[4] || el).getBoundingClientRect(), x = r.left - base.left + r.width * c[1], y = r.top - base.top + r.height * c[2];
+      if (!i) k.push([0, x + o.approach[0], y + o.approach[1]]); k.push([Math.max(0.01, c[0] - o.lead), x, y]); k.push([c[0] + (c[3] || 0.12) + 0.3, x, y]); });
+    var z = k[k.length - 1]; k.push([z[0] + 0.5, z[1] + o.approach[0] * 0.6, z[2] + o.approach[1] * 0.6]); curKeys = { k: k, c: clicks }; };
+  var cursorAt = function (t) { if (!cur || !curKeys) return; var p = MW.path(curKeys.k, t, "power2.inOut"), dn = 0; curKeys.c.forEach(function (c) { var u = t - c[0]; if (u >= 0 && u < (c[3] || 0.12)) dn = 1; });
+    gsap.set(cur, { x: p[0] - 12, y: p[1] - 6, scale: dn ? 0.86 : 1, transformOrigin: "20% 10%" }); };
+  var key = o.key ? host.querySelector(o.key) : null, io = gsap.parseEase("power2.inOut"), pin = gsap.parseEase("power2.in"), p2 = gsap.parseEase("power2.out"), ns = "http://www.w3.org/2000/svg", rad = parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0;
+  var L = el.offsetLeft - o.offset, Tp = el.offsetTop - o.offset, W = el.offsetWidth + 2 * o.offset, Hh = el.offsetHeight + 2 * o.offset, R = Math.min(rad + o.offset, W / 2, Hh / 2);
+  var rp = function (x, y, w, h, r) { return "M" + (x + w / 2) + " " + y + " H" + (x + w - r) + " A" + r + " " + r + " 0 0 1 " + (x + w) + " " + (y + r) + " V" + (y + h - r) + " A" + r + " " + r + " 0 0 1 " + (x + w - r) + " " + (y + h) + " H" + (x + r) + " A" + r + " " + r + " 0 0 1 " + x + " " + (y + h - r) + " V" + (y + r) + " A" + r + " " + r + " 0 0 1 " + (x + r) + " " + y + " Z"; };
+  var svg = document.createElementNS(ns, "svg"), ring = document.createElementNS(ns, "path"), fl = document.createElementNS(ns, "path"), dot = document.createElementNS(ns, "circle");
+  svg.setAttribute("width", host.clientWidth); svg.setAttribute("height", host.clientHeight); svg.style.cssText = "position:absolute;left:0;top:0;overflow:visible;pointer-events:none;"; ring.setAttribute("d", rp(L, Tp, W, Hh, R));
+  [ring, fl].forEach(function (p) { p.setAttribute("fill", "none"); p.setAttribute("stroke", o.accent); p.setAttribute("stroke-width", o.stroke); p.setAttribute("stroke-linecap", "round"); svg.appendChild(p); }); dot.setAttribute("r", o.dot); dot.setAttribute("fill", o.accent); svg.appendChild(dot); host.appendChild(svg);
+  var PL = ring.getTotalLength(); ring.style.strokeDasharray = PL + " " + PL;
+  return MW.drive(tl, at, o.outAt + 0.35, function (t) {
+    var p = io(Math.max(0, Math.min(1, (t - o.drawAt) / o.draw))), x = pin(Math.max(0, Math.min(1, (t - o.outAt) / 0.25))), f = Math.max(0, Math.min(1, (t - o.drawAt - o.draw) / 0.3)), d = o.flash * p2(f);
+    ring.style.strokeDashoffset = String(PL * (1 - p)); ring.style.opacity = String((p > 0 ? 1 : 0) * (1 - x));
+    if (p > 0 && p < 1) { var q = ring.getPointAtLength(PL * p); dot.setAttribute("cx", q.x); dot.setAttribute("cy", q.y); dot.style.opacity = "1"; } else dot.style.opacity = "0";
+    fl.setAttribute("d", rp(L - d, Tp - d, W + 2 * d, Hh + 2 * d, R + d)); fl.style.opacity = f > 0 && f < 1 ? String(1 - f) : "0";
+    if (key) { var k = t > o.keyAt && t < o.keyAt + 0.15 ? 1 : 0; gsap.set(key, { y: 8 * k }); key.style.filter = k ? "brightness(0.75)" : ""; }
+    cursorAt(t);
+  });
+  };
+  MW.uiFocusRingDraw = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

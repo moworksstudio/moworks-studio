@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-pixelate",
+  "type": "hyperframes:component",
+  "title": "Pixelate",
+  "description": "Hình bị vẽ thô thành các khối pixel lớn rồi mịn dần từng bậc tới rõ nét, kiểu game cổ.",
+  "tags": [
+    "pixelate",
+    "retro",
+    "steps",
+    "resolve",
+    "texture-look",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "effect-pixelate.html",
+      "target": "compositions/components/effect-pixelate.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-pixelate",
+    "author": "moworks",
+    "call": "MW.effectPixelate(q(\".px\"), tl, 0, {});",
+    "function": "MW.effectPixelate",
+    "options": {
+      "max": "pixels across at the coarsest (32)",
+      "min": "pixels across at the finest (4)",
+      "period": "s for a there-and-back (3), stepping through whole numbers",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Picture drawn at low resolution and scaled up without smoothing: block size 32 -> 16 -> 8 -> 4 -> 1 px, 120 ms per step (steps, no tween), 600 ms total; reverse for an exit. Demo: the low-res width steps through every integer 32 -> 4 -> 32 pixels across the frame (blocks 10 -> 80 px on 320) on a 3 s |sine| yoyo. Params: steps (32 → 16 → 8 → 4 → 1 px) · duration mỗi bậc (0.12 s). An SVG filter samples one pixel per block and dilates it, so the picture is pixelated without smoothing; the small demo's steps are 32 → 16 → 8 → 4 → 1 px at 0.12 s each.",
+    "titleVi": "Vỡ hạt pixel rồi rõ dần"
+  }
+}

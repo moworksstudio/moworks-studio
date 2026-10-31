@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-roll-up-caption",
+  "hash": "b0cb433487ecc4ad",
+  "at": "2026-10-17T08:56:21.032Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__text-roll-up-caption.mp4",
+    "poster": "previews/moworks__text-roll-up-caption.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "b6c8c685efb2cab5720c6a0f6a2c3e334e9671ff1d4f3c297f653ad47cace811",
+    "size": 25939,
+    "seconds": 35.3,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

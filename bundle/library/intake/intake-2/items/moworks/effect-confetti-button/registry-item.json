@@ -1,0 +1,71 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "effect-confetti-button",
+  "type": "hyperframes:block",
+  "title": "Confetti Burst",
+  "description": "Bấm HOÀN TẤT, nút tô màu nảy nhẹ đổi thành dấu tích XONG, viền loé ra và 28 mảnh pháo giấy bung lên rồi rơi theo trọng lực.",
+  "tags": [
+    "confetti",
+    "success",
+    "burst",
+    "button",
+    "ui-buttons",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "effect-confetti-button.html",
+      "target": "compositions/components/effect-confetti-button.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/effect-confetti-button",
+    "author": "moworks",
+    "call": "MW.effectConfettiButton(q(\".cf\"), tl, 0, { cursor: \".ui-cursor\" });",
+    "function": "MW.effectConfettiButton",
+    "options": {
+      "press": "s (0.62)",
+      "pieces": "(28)",
+      "speed": "[min, max] px a second ([440, 800]), with drag: x = v (1 − e^(−1.8 s)) / 1.8",
+      "spread": "± px from the centre (200)",
+      "gravity": "px added as gravity × s² (360)",
+      "wobble": "± px (16)",
+      "size": "[w, h] px ([32, 20])",
+      "fadeStart": "s after the launch (1.0)",
+      "fadeEnd": "(1.5)",
+      "seed": "(61)",
+      "flash": "px the outline flash grows (40)",
+      "colors": "",
+      "accent": "",
+      "ink": "label colour when filled",
+      "label": "the label",
+      "doneHtml": "the label when done",
+      "cursor": "an optional cursor that makes the clicks",
+      "approach": "[x, y] px the cursor comes from",
+      "lead": "s it arrives before a click"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Pill 140x44 outlined; at 0.62 s it fills accent, label COMPLETE → ✓ DONE, pop 1 → 1.1 → 1 (half sine, 0.22 s); an outline flash grows 10 px and fades over 0.3 s. 28 pieces 8x5 r1 (accent / blue / yellow / green), seeded: x0 = centre ± 50 px, angle up ± 75°, speed 110-200 px/s with drag (x = v (1 − e^(−1.8 s)) / 1.8), gravity y += 90 s², x wobble ±4 px, flip scaleX = cos(5-13 rad/s), spin 2 rad/s; fade 1.0-1.5 s after launch. Params: at (0.62 s) · pieces (28) · speed (110-200 px/s) · gravity (180 px/s²) · seed (61).",
+    "titleVi": "Nút hoàn tất bắn pháo giấy"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-ken-burns-drift",
+  "type": "hyperframes:component",
+  "title": "Ken Burns",
+  "description": "Ảnh tĩnh phóng to thật chậm và trôi nhẹ sang ngang để có sức sống.",
+  "tags": [
+    "ken-burns",
+    "photo",
+    "zoom",
+    "pan",
+    "camera",
+    "smooth",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "motion-ken-burns-drift.html",
+      "target": "compositions/components/motion-ken-burns-drift.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-ken-burns-drift",
+    "author": "moworks",
+    "call": "MW.motionKenBurnsDrift(q(\".kb\"), tl, 0, { scale: 1.12 });",
+    "function": "MW.motionKenBurnsDrift",
+    "options": {
+      "duration": "s (4), linear",
+      "scale": "end scale (1.1; the small demo 1.12)",
+      "x": "px drift (−60; −20 on the small frame)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Still picture: scale 1 -> 1.1 and translateX 0 -> -20 px over 4000 ms linear (whole picture, no depth). Demo: 1 -> 1.12 with a 20 px drift over 4 s. Params: duration (4 s) · scale (1 → 1.1) · x (−20 px).",
+    "titleVi": "Ảnh tĩnh phóng và trôi chậm"
+  }
+}

@@ -1,0 +1,55 @@
+<!--
+  Counter-motion (Moworks Studio, the studio's own, written here).
+  Source: Moworks Studio.
+  Vai chính vào từ trái trong khi nền chạy ngược sang phải một đoạn ngắn, cú vào trông mạnh hơn.
+
+  Paste the markup, CSS and script into a composition. The motion adds its tweens to the composition's paused GSAP timeline
+  (window.__timelines[...]), so seeking, rendering and HyperFrames Studio stay exact. GSAP is the film's own (assets/vendor).
+
+    MW.motionCounterMotion(q(".cm"), tl, 0.3, { exitAt: 1.9 });
+
+  Options (defaults in brackets):
+      - hero: 
+      - bg: the background layer
+      - heroX: px it enters from (−800)
+      - bgX: px the background moves the other way (200: 20–30 % of the hero)
+      - duration: s (0.8)
+      - ease: (expo.out; the recipe power2.out)
+      - exitAt: s after the start to reverse (null)
+      - exit: s (0.4, power2.in)
+
+  Notes: Hero card enters x −160 → 0 px while the background (diagonal stripes) moves the opposite way 0 → +40 px, both on one 800 ms curve (recipe power2.out; small demo expo.out); background at 20–30 % of the hero's travel. Exit: both reverse in 400 ms power2.in. Params: hero x (−160 px) · bg x (+40 px) · duration (0.8 s) · ease (power2.out).
+-->
+
+<div class="cm"><div class="cm-bg"></div><div class="cm-h">RA MẮT</div></div>
+
+<style>
+
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var MW = (window.MW = window.MW || {});
+  MW.el = MW.el || function (x) { return typeof x === "string" ? document.querySelector(x) : x; };
+  MW.drive = MW.drive || function (tl, at, dur, fn) {
+    var s = { t: 0 }; fn(0);
+    tl.fromTo(s, { t: 0 }, { t: dur, duration: dur, ease: "none", immediateRender: false, onUpdate: function () { fn(s.t); } }, at);
+    return at + dur;
+  };
+  var defaults = {"hero":".cm-h","bg":".cm-bg","heroX":-800,"bgX":200,"duration":0.8,"ease":"expo.out","exitAt":null,"exit":0.4};
+  var run = function (el, tl, at, o) {
+        var hero = el.querySelector(o.hero), bg = el.querySelector(o.bg), e = gsap.parseEase(o.ease), pin = gsap.parseEase("power2.in");
+        return MW.drive(tl, at, o.exitAt == null ? o.duration : o.exitAt + o.exit, function (t) {
+          var p = e(Math.min(1, t / o.duration)); if (o.exitAt != null && t > o.exitAt) p = 1 - pin(Math.min(1, (t - o.exitAt) / o.exit));
+          gsap.set(hero, { x: o.heroX * (1 - p) }); hero.style.opacity = String(Math.min(1, p * 3)); gsap.set(bg, { x: o.bgX * p });
+        });
+      };
+  MW.motionCounterMotion = function (el, tl, at, options) {
+    var o = {}, k;
+    for (k in defaults) o[k] = defaults[k];
+    for (k in options || {}) o[k] = options[k];
+    return run(MW.el(el), tl, at || 0, o);
+  };
+})();
+</script>

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-split-flap-board",
+  "type": "hyperframes:component",
+  "title": "Split-flap Board",
+  "description": "Bảng lật kiểu nhà ga: mỗi ô chữ lật qua vài ký tự trung gian rồi dừng đúng ký tự đích, các ô bắt đầu cách nhau 0.06 giây.",
+  "tags": [
+    "swap",
+    "split-flap",
+    "flip",
+    "board",
+    "text-swap",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "text-split-flap-board.html",
+      "target": "compositions/components/text-split-flap-board.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.2,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-split-flap-board",
+    "author": "moworks",
+    "call": "MW.textSplitFlapBoard(q(\".sf\"), tl, 0, {});",
+    "function": "MW.textSplitFlapBoard",
+    "options": {
+      "text": "the board line",
+      "flip": "s per flip (0.085)",
+      "stagger": "s between cells (0.06, ≤ 1 s)",
+      "start": "s (0.3)",
+      "blankAt": "s the board clears (3.4; 0.03 s per cell)",
+      "gap": "px (10)",
+      "perspective": "px (1600)",
+      "card": "flap colour",
+      "seed": "passing characters"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after react-bits (MIT + Commons Clause): written from the idea only, no react-bits code"
+    },
+    "thirdParty": [],
+    "notes": "One card cell per char (≤12 per row, height 1.32 × width, 3 px gap). Each cell starts blank, flips through 3–6 seeded chars of the target's class (A–Z, 0–9, kana), then the target; one flip = top flap rotateX 0 → −90° (ease-in), then the next bottom flap 90° → 0 (ease-out), 85 ms (CSS 85 + 85 ms), perspective 400 px, falling flap darkens to 70 %. Cells start 60 ms apart (capped 1 s) from 0.3 s. Blank again at 3.4 s + 30 ms per cell; loop 4.2 s. Params: flip: mỗi lần lật (0.085 s) · stagger: giữa các ô (0.06 s) · steps: số ký tự trung gian (3–6) · seed.",
+    "titleVi": "Bảng lật chữ kiểu nhà ga"
+  }
+}

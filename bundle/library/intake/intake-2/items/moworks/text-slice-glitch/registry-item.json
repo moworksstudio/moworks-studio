@@ -1,0 +1,62 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-slice-glitch",
+  "type": "hyperframes:component",
+  "title": "Slice Displacement",
+  "description": "Chữ bị cắt thành 6–8 lát ngang, vài lát giật lệch sang ngang tới 24 px trong 1–3 khung rồi trở lại.",
+  "tags": [
+    "glitch",
+    "slices",
+    "displacement",
+    "text-distortion-glitch",
+    "crisp",
+    "distortion-glitch"
+  ],
+  "files": [
+    {
+      "path": "text-slice-glitch.html",
+      "target": "compositions/components/text-slice-glitch.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-slice-glitch",
+    "author": "moworks",
+    "call": "MW.textSliceGlitch(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textSliceGlitch",
+    "options": {
+      "slices": "(7)",
+      "offset": "± px (96)",
+      "step": "s per update (0.067: 15 a second)",
+      "group": "updates per burst decision (4)",
+      "chance": "a group bursts above this seed (0.25)",
+      "ghost": "opacity of the clean text underneath (0.18)",
+      "bursts": "[[from, to] s, ...]",
+      "accent": "the most shifted slice",
+      "seed": "(5)",
+      "loop": "s (3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "6–8 horizontal slices (cut positions jittered ±35 % per burst); in a burst (1–3 frames at 15 fps updates, 50–80 ms) slices with seed > 0.45 shift x by a seeded ±24 px; 18 % ghost of the clean text underneath; bursts only in set windows (e.g. 0.3–1.15 s and 2.25–2.75 s). Demo: 7 slices, steps of 67 ms in groups of 4 (burst if seed > 0.25), the most-shifted slice turns accent; loop 3 s. CSS fallback: 4 band copies, 2.4 s steps, jolt −18 / +11 px at 90 / 92 %. Params: slices: số lát (6–8) · offset: độ lệch (±24 px) · burst: 1–3 khung · rate (15 lần/giây) · seed.",
+    "titleVi": "Chữ cắt lát xô lệch"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "motion-breathing-scale",
+  "type": "hyperframes:component",
+  "title": "Breathing Scale",
+  "description": "Khối phồng lên 106 % rồi xẹp về 94 % theo nhịp 1.2 giây, lặp mãi như đang chờ.",
+  "tags": [
+    "loop",
+    "scale",
+    "idle",
+    "soft"
+  ],
+  "files": [
+    {
+      "path": "motion-breathing-scale.html",
+      "target": "compositions/components/motion-breathing-scale.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/motion-breathing-scale",
+    "author": "moworks",
+    "call": "MW.motionBreathingScale(q(\".bs\"), tl, 0, {});",
+    "function": "MW.motionBreathingScale",
+    "options": {
+      "period": "s per breath (1.2)",
+      "min": "(0.94)",
+      "max": "(1.06)",
+      "ease": "each half (cubic-bezier(.45,.05,.2,1))",
+      "cycles": "(3)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Square, origin centre: scale 0.94 → 1.06 (600 ms) → 0.94 (600 ms), each half eased in-out (runtime bezier .45,.05,.2,1; recipe easeInOutSine), looping every 1200 ms; a faint rest-size guide stays behind it. Params: period: chu kỳ (1.2 s) · min, max (0.94 / 1.06) · origin (giữa).",
+    "titleVi": "Thở phồng xẹp đều"
+  }
+}

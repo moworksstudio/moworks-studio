@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/line-chart-line-draw",
+  "hash": "289abaa89f8ef9bc",
+  "at": "2026-10-17T11:27:13.398Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__line-chart-line-draw.mp4",
+    "poster": "previews/moworks__line-chart-line-draw.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "53488fd8d24b1a1a685583d271938f7ca12c42943cbb8528b5d7762e35ca2fea",
+    "size": 7935,
+    "seconds": 26.7,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

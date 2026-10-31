@@ -1,0 +1,57 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "ui-segment-tint",
+  "type": "hyperframes:block",
+  "title": "Tint Shift",
+  "description": "Đổi khoảng thời gian 1D / 1W / 1M / 1Y không có gì chạy: ô cũ nhạt đi, ô mới hiện nền màu nhấn nhạt, viền, chữ màu và chấm dưới, biểu đồ nhỏ đổi chiều cao cột theo.",
+  "tags": [
+    "segmented",
+    "tint",
+    "state",
+    "no travel",
+    "selection-controls",
+    "crisp"
+  ],
+  "files": [
+    {
+      "path": "ui-segment-tint.html",
+      "target": "compositions/components/ui-segment-tint.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 2.8,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/ui-segment-tint",
+    "author": "moworks",
+    "call": "MW.uiSegmentTint(q(\".gm\"), tl, 0, {});",
+    "function": "MW.uiSegmentTint",
+    "options": {
+      "changes": "[[s, from, to], ...]",
+      "duration": "s per change (0.22, power2.out): a crossfade, nothing moves",
+      "labels": "",
+      "accent": "",
+      "loop": "s (2.8)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Segmented bar 232x48 r12 with options 1D / 1W / 1M / 1Y at x 76 / 132 / 188 / 244. Selected option: 48x36 r9 accent fill at 22 %, 1.5 px accent outline, accent label, a 2 px dot under the label. A change crossfades old → new over 0.22 s power2.out, nothing moves. Changes at 0.3 s (1D → 1M), 1.15 s (1M → 1W), 2.0 s (1W → 1D). A 7-bar mini chart below blends its bar heights with the same weights. Params: duration (0.22 s, power2.out) · tint (22 %) · options (4) · moves [[giây, từ, tới]].",
+    "titleVi": "Đổi lựa chọn chỉ bằng sắc màu"
+  }
+}

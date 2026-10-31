@@ -1,0 +1,55 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "line-signature-write",
+  "type": "hyperframes:component",
+  "title": "Signature Stroke",
+  "description": "Ba nét của chữ ký được viết theo thứ tự: chữ cái đầu, phần nối rồi gạch chân, nét viết xong vẫn giữ lại.",
+  "tags": [
+    "signature",
+    "handwritten",
+    "draw",
+    "stroke",
+    "svg-path",
+    "smooth"
+  ],
+  "files": [
+    {
+      "path": "line-signature-write.html",
+      "target": "compositions/components/line-signature-write.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 3.4,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/line-signature-write",
+    "author": "moworks",
+    "call": "MW.lineSignatureWrite(q(\".sgs\"), tl, 0, {});",
+    "function": "MW.lineSignatureWrite",
+    "options": {
+      "windows": "[from, to] s per stroke, in writing order",
+      "pen": "the pen dot",
+      "fadeAt": "s (2.9)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": null
+    },
+    "thirdParty": [],
+    "notes": "Three paths, pathLength 1, dashoffset 1 -> 0 in writing order, ease-in-out: initial 0.25-0.9 s, connected letters 0.85-1.6 s, underline 1.55-2.05 s (recipe: 8-34 %, 32-64 %, 62-84 % of the loop); strokes overlap slightly and stay drawn; 4.5 px strokes, underline 3 px in the second colour; a small pen dot rides the active tip. All fade 2.9-3.25 s. Params: strokes (3) · windows: giờ từng nét · width (4.5 / 3 px).",
+    "titleVi": "Chữ ký viết lần lượt từng nét"
+  }
+}

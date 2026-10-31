@@ -1,0 +1,61 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/registry-item.json",
+  "name": "text-hover-word-lift",
+  "type": "hyperframes:component",
+  "title": "Hover Word Lift",
+  "description": "Con trỏ lần lượt dừng trên từng từ của câu, từ đang được trỏ nhấc nhẹ lên bằng lò xo, đổi màu nhấn và có gạch chân, rời đi thì hạ xuống.",
+  "tags": [
+    "words",
+    "lift",
+    "spring",
+    "hover",
+    "text-pointer",
+    "bouncy",
+    "pointer"
+  ],
+  "files": [
+    {
+      "path": "text-hover-word-lift.html",
+      "target": "compositions/components/text-hover-word-lift.html",
+      "type": "hyperframes:snippet"
+    }
+  ],
+  "variables": [],
+  "duration": 4.6,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "moworks": {
+    "uid": "in:moworks/text-hover-word-lift",
+    "author": "moworks",
+    "call": "MW.textHoverWordLift(q(\".tk-head\"), tl, 0, {});",
+    "function": "MW.textHoverWordLift",
+    "options": {
+      "lift": "em (0.2)",
+      "stiffness": "(400)",
+      "damping": "(26): ζ ≈ 0.65, ~0.3 s",
+      "from": "s the first word is visited (0.9)",
+      "to": "s the last (3.5)",
+      "accent": "",
+      "cursor": "",
+      "loop": "s (4.6)"
+    },
+    "credit": {
+      "author": "Moworks Studio",
+      "collection": "Moworks Studio",
+      "link": null,
+      "commit": null,
+      "read": null,
+      "licence": "the studio's own",
+      "notice": null,
+      "made": "written here",
+      "madeNote": "the studio's own motion, written here",
+      "sourceText": "Moworks Studio",
+      "upstream": "after motion"
+    },
+    "thirdParty": [],
+    "notes": "Sentence 34 px, up to 3 lines. Scripted cursor visits each word centre in order, evenly from 0.9 s to 3.5 s, resting ±min(0.18, 1.3 / n) s on each, then exits by 4.0 s. The hovered word rises 0 → −7 px (recipe −6) on a spring k 400, c 26 (ζ≈0.65, settles ~0.3 s) and back when left; colour tints to accent and a 1.5 px accent underline fades in, both by lift / 7. Loop 4.6 s. Params: độ nhấc (7 px) · lò xo (k 400, c 26) · nhịp ghé mỗi từ. The pointer rests ± min(0.18, 1.3 / n) s on each word in turn; the hovered word lifts on the spring, tints and gets a fading underline.",
+    "titleVi": "Từ dưới con trỏ nhấc lên"
+  }
+}

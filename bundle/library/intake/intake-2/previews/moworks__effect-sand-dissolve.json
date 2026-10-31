@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/effect-sand-dissolve",
+  "hash": "8d81e0aaf58233a6",
+  "at": "2026-10-17T09:58:26.443Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "no-text",
+  "preview": {
+    "video": "previews/moworks__effect-sand-dissolve.mp4",
+    "poster": "previews/moworks__effect-sand-dissolve.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "5961be5de2f148da03eb649b339aeaadff0635cb5901000f0ff9ccebd5a30b92",
+    "size": 21565,
+    "seconds": 31.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}

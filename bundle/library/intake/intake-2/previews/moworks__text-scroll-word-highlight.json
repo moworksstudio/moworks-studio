@@ -1,0 +1,25 @@
+{
+  "uid": "in:moworks/text-scroll-word-highlight",
+  "hash": "7d1da26554b958e1",
+  "at": "2026-10-17T08:33:37.843Z",
+  "check": {
+    "pass": true,
+    "failures": [],
+    "findings": [],
+    "fonts": [
+      "Inter"
+    ],
+    "unresolvedFonts": []
+  },
+  "vi": "ok",
+  "preview": {
+    "video": "previews/moworks__text-scroll-word-highlight.mp4",
+    "poster": "previews/moworks__text-scroll-word-highlight.webp",
+    "method": "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)",
+    "hfVersion": "0.8.163",
+    "sha256": "c75446d8a7f253178e4e67ff0004e3f9c5ff4b146435281826b2e1612aec24f5",
+    "size": 24864,
+    "seconds": 29.9,
+    "encode": "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72"
+  }
+}
