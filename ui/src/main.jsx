@@ -4,6 +4,7 @@ import "./app.css";
 import "./editor.css";
 import "./library.css";
 import "./production.css";
+import "./brandkit.css";
 import App from "./App.jsx";
 import { LangProvider } from "./i18n.jsx";
 import { applyStored } from "./theme.jsx";

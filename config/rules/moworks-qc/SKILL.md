@@ -1,11 +1,15 @@
 ---
 name: moworks-qc
-description: Moworks Studio quality review, for every video style - after the build, look at stills of the film like a strict director, score it on seven criteria, fix until every score is 8 or more, with HyperFrames' check folded in.
-version: 1.2.0
+description: Moworks Studio quality review, for every video style - after Version 1, when the owner asks for it, look at stills of the film like a strict director, score it on seven criteria, fix until every score is 8 or more (or fix hard mistakes only), with HyperFrames' check folded in.
+version: 1.3.0
 derived-from: Moworks Motion kit 2.0.4 (commit 30b7dcb, MIT, Moworks) - engine/skill/moworks-motion/workflow/review.md, rewritten for Moworks Studio. Folds in the layout and contrast findings of HyperFrames' check (Apache-2.0, 0.8.214 at 4719543), read as shipped. Criterion 6 (Brand / design) keeps the checklist of HyperFrames' design adherence at 0.8.163 (Apache-2.0, as shipped: https://github.com/heygen-com/hyperframes/blob/490ecafbc4d1fba3dd9246d516390d4a1a188089/skills/hyperframes-creative/references/design-adherence.md); HF retired that file in 0.8.185, so the studio keeps it as its own rule.
 ---
 
-# Moworks QC: the review before the owner sees the film
+# Moworks QC: the review after Version 1
+
+The owner has watched Version 1: the film built, with its music and sound effects, rendered. It stays in Versions, and the owner goes back to it if your fixes make the film
+worse, so **keep what works in it**: a fix never flattens a mood or a look the film has on purpose. The app ran this Review because the owner asked: either the whole of it
+("Fix mistakes and improve it") or §6 alone ("Fix mistakes only": the app says which).
 
 **Only for the QC step** (the app names it in the pipeline) and when the owner asks you to look the film over. In every other step, the
 style's own skill decides. This file never changes how a film is designed or built: in a HyperFrames style, the HyperFrames skill still
@@ -116,8 +120,9 @@ Only a matter of taste or one only the owner can decide may end the Review under
 **Score only what you have seen after your last change** (three fixes of the last round were never looked at): when a
 round ends with a fix, call qc_sheets once more before you write the final score, fix nothing in that look, and score it; a fix you could
 not see again is named in the review as unchecked, never counted as done. Seconds the sheets or the check did not reach (the check ran
-out of time, a sheet is missing): look at them with film_frames, and name the ones you still could not see. Sync before the
-music is placed: score it on the voice-over and the cuts the film has, and say the music comes after; never leave it unscored for that.
+out of time, a sheet is missing): look at them with film_frames, and name the ones you still could not see. The music and the sound effects are on the film
+already (the app placed them before Version 1): score Sync on the voice-over, the cuts and the music's beats as they are now. Leave the sound's `<audio>` tags alone:
+when a fix of yours moves a shot, the app places the sound effects again for the new times and keeps the owner's own moves.
 A score you cannot raise without the owner (sync when you cannot hear the song, a colour only they can approve): ask them right away, with
 the seconds to check, instead of stopping quietly.
 **Never promise a later check** ("the 31.5 s cut may fall into 'Hôm', check by ear in the Final Mix", and no step did): no later
@@ -144,3 +149,15 @@ film scored 8/10). Only what you saw and meant: a real fault is fixed, never kep
 With the first round, qc_sheets hands the beats and cuts sheets to a second, read-only look that knows nothing else about the film and
 adds its answer: one sentence on what the film tells and the 3 worst problems it sees. If its sentence is not the film's promise, the story does
 not read yet: fix that first. Its 3 problems join your first round.
+
+## 6. Fix mistakes only
+
+The owner chose this after watching Version 1: they like the film and want its errors gone, nothing else. Call **qc_sheets**, read the sheets and the check's answer, and fix only:
+- text over text, or text cut by the frame or by another element;
+- text that cannot be read: too small for a phone, too little contrast, held too short to read;
+- a wrong word: a typo, a Vietnamese word without its marks, a figure or a name that differs from the brief, the script or the owner's files;
+- a break of the Brand Kit: every line of `frame.md`'s `## Guideline checklist` as §2 says, with `docs/BRAND-CHECK.json`.
+
+Nothing of taste, and no score: no motion, colour, timing or layout that is not one of these errors. Use the smallest change, and call qc_sheets once more to see it. No error
+found: change nothing and say so. An error only the owner can decide: ask them (moworks-studio §2b).
+Write what you found to `docs/QC-REVIEW.md` (each error with its seconds, what you changed), and to `docs/QC-REVIEW.json`: `{"mode": "mistakes", "rounds": [{"round": 1, "worst": [{"at": 3.2, "text": "…"}], "changed": "…"}]}`, with no scores and no `Final score` line. Your reply ends with one short line.

@@ -1,24 +1,26 @@
 // Look: the design systems a film can wear, as one list. HyperFrames' 13 frame presets and the user's own
 // Looks, each made by uploading a brand guideline (a file or a folder) that the app scans into a frame.md in HF's frame-preset format
 // ("Acme guideline" → "Acme Look"). A Look fixes colours, fonts and components; the composition of each shot stays free.
-// Laid out like the Style Gallery: the source in a filter column (HyperFrames, Yours, later others), a grid of Looks
-// 3-4 rows a page, the Look in hand beside it. Data: the server's /api/looks.
-import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, Check, FolderOpen, History, Loader2, Pencil, Plus, Search, SlidersHorizontal, Trash2, Upload, X } from "lucide-react";
-import { del, get, patch, post, upload, watchJob } from "../api.js";
-import { BackButton, Banner, Dialog, NoPreview, Pager, useGalleryGrid } from "../components.jsx";
-import { ago, go, useData, usePref, useToast } from "../lib.jsx";
+// Laid out like the Style Gallery: the source in a filter column (HyperFrames, Yours, later others) and a grid of Looks
+// 3-4 rows a page; a click opens the kit's own page (BrandKit.jsx). Data: the server's /api/looks.
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { AlertTriangle, BookOpen, Check, FolderOpen, Loader2, Plus, Search, SlidersHorizontal, Upload, X } from "lucide-react";
+import { get, patch, post, upload, watchJob } from "../api.js";
+import { BackButton, Banner, Dialog, Pager, useGalleryGrid } from "../components.jsx";
+import { ago, go, madeOn, sameNameLabels, useData, usePref, useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
-import { CreditLine } from "./StyleGallery.jsx";
 import { useThemeId } from "../theme.jsx";
 import SwatchBooks from "../studio/SwatchBooks.jsx";
+
+// a kit's own page (colours, fonts, layout, rules, the guideline's pages): loaded when one is opened
+const BrandKit = lazy(() => import("./BrandKit.jsx"));
 
 // the sources a Look comes from, in this order; a source the server names later shows by its own name
 const SOURCES = { hf: ["HyperFrames", "HF"], yours: ["Yours", "YOU"] };
 const sourceOf = (l) => l.group ?? "hf";
 // the same lists as packages/looks-library/custom.mjs (ACCEPT, MAX_FILES, SYSTEM_FILE)
 const OK_FILES = /\.(pdf|pptx|png|jpe?g|webp|gif|svg|ttf|otf|woff2?|zip|rar|7z|ai|psd|psb)$/i;
-const ACCEPT_ATTR = ".pdf,.pptx,.png,.jpg,.jpeg,.webp,.gif,.svg,.ttf,.otf,.woff,.woff2,.zip,.rar,.7z,.ai,.psd,.psb";
+export const ACCEPT_ATTR = ".pdf,.pptx,.png,.jpg,.jpeg,.webp,.gif,.svg,.ttf,.otf,.woff,.woff2,.zip,.rar,.7z,.ai,.psd,.psb";
 const MAX_FILES = 300;
 const SYSTEM_FILE = /^(desktop\.ini|thumbs\.db|ehthumbs\.db|\.ds_store|\._.*|~\$.*)$/i;
 const baseName = (n) => n.replace(/\.[^.]+$/, "").toLowerCase();
@@ -96,15 +98,15 @@ function Fonts({ fonts }) {
   return <p className="tech-tags">{fonts.map((f) => <span key={f.family} className="tech">{f.family}</span>)}</p>;
 }
 
-function LookCard({ l, on, onPick }) {
+function LookCard({ l, made, onPick }) {
   const t = useT();
-  return <button type="button" className={"sgb-card lk-card" + (on ? " on" : "")} aria-pressed={on} onClick={() => onPick(l)}>
+  return <button type="button" className="sgb-card lk-card" onClick={() => onPick(l)}>
     <span className="shot">{l.preview?.image ? <img src={l.preview.image} alt="" loading="lazy" /> : <span className="lk-noimg"><Swatches colors={l.swatches} big /></span>}
       {l.status === "scanning" && <span className="mark"><Loader2 size={11} className="spin" />{t("Scanning")}</span>}
       {(l.status === "failed" || (l.status === "ready" && l.unread?.length > 0)) && <span className="mark warn" title={l.unread?.length ? t("{n} file(s) not read", { n: l.unread.length }) : undefined}><AlertTriangle size={11} /></span>}
-      {on && <span className="chk"><Check size={13} /></span>}</span>
+      </span>
     <span className="nm">{l.title}</span>
-    <span className="by"><span className="au-tag">{SOURCES[sourceOf(l)]?.[1] ?? sourceOf(l).slice(0, 4).toUpperCase()}</span><Swatches colors={l.swatches} /></span>
+    <span className="by"><span className="au-tag">{SOURCES[sourceOf(l)]?.[1] ?? sourceOf(l).slice(0, 4).toUpperCase()}</span>{made ? <span className="cat">{made}</span> : <Swatches colors={l.swatches} />}</span>
   </button>;
 }
 
@@ -130,112 +132,38 @@ export function lookSummary(desc) {
   return first.replace(/\s*\b(?:(?:from|in|of|see|per)\s+)?[\w'’-]+\.(md|json|html?|css|js|txt|pdf)\b/gi, "").replace(/\s*\(\s*\)/g, "").replace(/\s+([.,])/g, "$1").trim();
 }
 
-/** The Look in hand: stills, description, colours, fonts, versions, actions, credit. */
-function LookDetails({ id, onChanged, onDeleted, askLocked = false }) {
+/** The Studio's book on the table: what it is at a glance; the book opens on its own page. */
+function KitOnTable({ id }) {
   const t = useT();
-  const toast = useToast();
   const d = useData(() => get(`/api/looks/${id}`), [id]);
-  const [edit, setEdit] = useState(false);
-  const [ask, setAsk] = useState(false);
-  const [scan, setScan] = useState(null);           // a scan run again from here: { stage, progress }
-  const [lockedOpen, setLockedOpen] = useState(askLocked);          // the scan stopped on a password: the popup, once per stop
-  const addMore = useRef(null);
   if (d.error) return <Banner kind="error">{d.error.message}</Banner>;
   const l = d.data;
   if (!l) return <div className="skeleton" style={{ height: "20rem" }} />;
-  const locked = (l.unread ?? []).filter((x) => x.password).map((x) => x.name);
-  const restore = async (v) => { try { await post(`/api/looks/${id}/versions/${v}/restore`); toast(t("Version {v} restored", { v })); d.reload(); onChanged(); } catch (e) { toast(e.message, "error"); } };
-  // a failed or draft Look scans again with the files it has (e.g. after Claude is signed in)
-  const rescan = async (body) => {
-    setLockedOpen(false);
-    try {
-      const r = await post(`/api/looks/${id}/scan`, body); const j = r.job ?? r; setScan(j);
-      watchJob(j.id, (x) => { if (!x) return; setScan(x); if (x.status !== "running") { setScan(null); d.reload(); onChanged(); if (x.status === "failed") toast(x.error?.message ?? t("The scan did not finish."), "error"); if (x.result?.stopped === "locked") setLockedOpen(true); } }, 1200);
-    } catch (e) { toast(e.message, "error"); }
-  };
-  const remove = async () => { try { await del(`/api/looks/${id}`); toast(t("Deleted “{title}”", { title: l.title })); onDeleted(); } catch (e) { toast(e.message, "error"); } };
-  const removeFile = async (name) => { try { await del(`/api/looks/${id}/files?name=${encodeURIComponent(name)}`); d.reload(); onChanged(); } catch (e) { toast(e.message, "error"); } };
-  // a readable copy of what the kit could not read: the files go in, then the scan runs again and makes the next version. A copy takes the place
-  // of its locked file, by name or else in the order picked, so the locked one does not stop the next scan
-  const addFiles = async (list) => {
-    setLockedOpen(false);
-    try {
-      const picked = [...list], same = locked.filter((n) => picked.some((f) => f.name === n));
-      const gone = [...same, ...locked.filter((n) => !same.includes(n)).slice(0, Math.max(0, picked.length - same.length))];
-      setScan({ stage: t("Adding the files") });
-      for (const n of gone) await del(`/api/looks/${id}/files?name=${encodeURIComponent(n)}`);
-      const { take, leftOut } = sortPicked(picked, (l.files ?? []).filter((f) => !gone.includes(f.name)));
-      if (leftOut.length) await patch(`/api/looks/${id}`, { leftOut });
-      if (take.length) {
-        for (const x of take) await upload(`/api/looks/${id}/files`, new File([x.file], x.name));
-        await rescan();
-      } else { setScan(null); d.reload(); onChanged(); }
-    } catch (e) { setScan(null); toast(e.message, "error"); }
-  };
   const stills = l.stills?.length ? l.stills : l.preview?.image ? [l.preview.image] : [];
   return <>
     <div className="sgb-big">{stills[0] ? <img src={stills[0]} alt="" /> : <span className="lk-noimg"><Swatches colors={l.swatches} big /></span>}</div>
     {stills.length > 1 && <div className="lk-stills">{stills.slice(1, 5).map((s) => <img key={s} src={s} alt="" loading="lazy" />)}</div>}
     <div className="sgb-head"><h2 className="sgb-title">{l.title}</h2>
-      <p className="sgb-sub"><span className="au-tag">{l.group === "yours" ? t("Yours") : "HF"}</span>{typeof l.version === "number" && <span>{t("version {v}", { v: l.version })}</span>}
+      <p className="sgb-sub"><span className="au-tag">{l.group === "yours" ? t("Yours") : "HF"}</span>{l.createdAt && <span>{t("made {date}", { date: madeOn(l.createdAt) })}</span>}
         {l.updatedAt && <span>{ago(l.updatedAt)}</span>}</p></div>
     {lookSummary(l.description) && <p className="sgb-desc">{lookSummary(l.description)}</p>}
-    {l.status === "failed" && <p className="warn-note"><AlertTriangle size={13} />{t(l.error ?? "The scan did not finish. Upload the guideline again or try another file.")}</p>}
-    {l.editable && l.status === "ready" && l.gaps?.length > 0 && <div className="warn-note lk-unread" role="status"><AlertTriangle size={13} /><div className="lk-unread-in">
-      <p className="lk-unread-t">{t("Films cannot be fully checked against this kit yet")}</p>
-      <p>{t("Scan it again to add: {what}", { what: l.gaps.join("; ") })}</p>
-      <button type="button" className="btn sm" onClick={() => rescan()} disabled={!!scan}><Upload size={14} />{t("Scan again")}</button>
-    </div></div>}
-    {l.unread?.length > 0 && <UnreadFiles look={l} onRemove={removeFile} onAdd={addFiles} busy={!!scan || l.status === "scanning"} />}
-    {scan ? <p className="lk-stage"><Loader2 size={14} className="spin" />{scan.stage ? t(scan.stage) : t("Reading the guideline…")}{scan.progress != null ? ` · ${scan.progress}%` : ""}</p>
-      : l.editable && ["failed", "draft"].includes(l.status) && l.files?.length > 0 && <div className="sgb-acts"><button className="btn" onClick={() => rescan()}><Upload size={14} />{t("Scan again")}</button></div>}
+    {(l.status === "failed" || l.unread?.length > 0 || (l.editable && l.status === "ready" && l.gaps?.length > 0)) && <p className="warn-note"><AlertTriangle size={13} />{t("This kit needs a look: open it.")}</p>}
     <Swatches colors={l.swatches} big />
     <Fonts fonts={l.fonts} />
     <div className="sgb-acts">
-      <button className="btn primary" onClick={() => go(`/new?look=${encodeURIComponent(id)}`)} disabled={l.status !== "ready"}><Plus size={15} />{t("Use in a new project")}</button>
-      {l.editable && <button className="btn" onClick={() => setEdit(true)}><Pencil size={14} />{t("Edit")}</button>}
-      {/* the list of what was not read has its own: with nothing on it (or the locked file just taken off), a copy still has a way in */}
-      {l.editable && !l.unread?.length && <><button className="btn" onClick={() => addMore.current?.click()} disabled={!!scan || l.status === "scanning"} title={t("Add files and scan again")}><Plus size={14} />{t("Add files")}</button>
-        <input ref={addMore} type="file" multiple hidden accept={ACCEPT_ATTR} onChange={(e) => { addFiles([...e.target.files]); e.target.value = ""; }} /></>}
-      {l.editable && <button className="btn ghost" onClick={() => setAsk(true)}><Trash2 size={14} />{t("Delete")}</button>}
+      <button className="btn primary" onClick={() => go(`/looks/${id}`)}><BookOpen size={15} />{t("Open this Brand Kit")}</button>
+      <button className="btn" onClick={() => go(`/new?look=${encodeURIComponent(id)}`)} disabled={l.status !== "ready"}><Plus size={15} />{t("Use in a new project")}</button>
     </div>
-    {lockedOpen && locked.length > 0 && !scan && <LockedDialog names={locked} canGoOn={(l.files ?? []).some((f) => !locked.includes(f.name))} onAdd={addFiles} onGoOn={() => rescan({ withoutLocked: true })} onClose={() => setLockedOpen(false)} />}
-    {l.versions?.length > 1 && <details className="lk-versions"><summary><History size={13} />{t("Versions")} <span className="num">{l.versions.length}</span></summary>
-      <ul className="plain">{[...l.versions].reverse().map((x) => <li key={x.v}><b>v{x.v}</b><span className="muted">{ago(x.at)}{x.note ? ` · ${x.note}` : ""}</span>
-        {x.v !== l.version && <button className="btn ghost sm" onClick={() => restore(x.v)}>{t("Restore")}</button>}</li>)}</ul></details>}
-    {l.group !== "yours" && l.source?.credit && <CreditLine author={l.source.credit.author} licence={l.source.credit.licence} link={l.source.credit.link} commit={l.source.credit.commit} made={l.source.credit.made} />}
-    {edit && <EditLook look={l} onClose={() => setEdit(false)} onSaved={() => { setEdit(false); d.reload(); onChanged(); }} />}
-    {ask && <Dialog title={t("Delete “{title}”?", { title: l.title })} danger onClose={() => setAsk(false)} footer={<><span className="spacer" />
-      <button className="btn" onClick={() => setAsk(false)}>{t("Cancel")}</button><button className="btn danger" onClick={remove}><Trash2 size={14} />{t("Delete")}</button></>}>
-      {/* one idea a line, the loss in red */}
-      <div className="dlg-lines"><p className="dlg-warn">{t("“{title}” leaves your Brand Kits.", { title: l.title })}</p><p>{t("Projects already made with it keep their copy.")}</p></div></Dialog>}
   </>;
 }
 
-/** Edit the user's Look: its name and its frame.md; saving makes a new version. */
-function EditLook({ look, onClose, onSaved }) {
+/** Make a Look from a guideline: a name, the files (or a folder), then the scan with its stages. from: a kit of the user's: this is its new version, a kit of its own of the
+ *  same name (the name can change); new files are scanned, with what is kept of the old kit's; no new files make a plain copy, with no Claude run. */
+export function CreateLook({ onClose, onDone, from = null }) {
   const t = useT();
   const toast = useToast();
-  const [title, setTitle] = useState(look.title);
-  const [frame, setFrame] = useState(look.frame ?? "");
-  const [busy, setBusy] = useState(false);
-  const save = async () => {
-    setBusy(true);
-    try { await patch(`/api/looks/${look.id}`, { title: title.trim(), frame }); toast(t("Saved as a new version")); onSaved(); }
-    catch (e) { toast(e.message, "error"); } finally { setBusy(false); }
-  };
-  return <Dialog wide title={t("Edit “{title}”", { title: look.title })} onClose={onClose} footer={<><span className="hint">{t("Saving keeps the old version; projects made with it keep theirs.")}</span><span className="spacer" />
-    <button className="btn" onClick={onClose}>{t("Cancel")}</button><button className="btn primary" onClick={save} disabled={busy || !title.trim()}><Check size={14} />{t("Save")}</button></>}>
-    <label className="field"><span className="label">{t("Name")}</span><input className="input" value={title} onChange={(e) => setTitle(e.target.value)} /></label>
-    <label className="field"><span className="label">{t("Design spec")}</span><textarea className="textarea lk-frame" value={frame} onChange={(e) => setFrame(e.target.value)} spellCheck={false} /></label>
-  </Dialog>;
-}
-
-/** Make a Look from a guideline: a name, the files (or a folder), then the scan with its stages. */
-function CreateLook({ onClose, onDone }) {
-  const t = useT();
-  const toast = useToast();
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(from?.title ?? "");
+  const [keepAssets, setKeepAssets] = useState(true), [keepGuide, setKeepGuide] = useState(false);
   const [files, setFiles] = useState([]);           // [{ file, name, progress, status }]
   const [left, setLeft] = useState([]);             // the names of what was picked and not taken
   const [phase, setPhase] = useState(null);         // null | "uploading" | "scanning"
@@ -251,7 +179,15 @@ function CreateLook({ onClose, onDone }) {
   const start = async () => {
     setErr(null); setPhase("uploading");
     try {
-      const l = await post("/api/looks", { title: title.trim(), leftOut: left });
+      if (from && !files.length) {
+        const c = await post(`/api/looks/${from.id}/new-version`, { title: title.trim(), keep: "all" });
+        toast(t("New version made. The one before stays as it was."));
+        onDone(c.id);
+        return;
+      }
+      const l = from ? await post(`/api/looks/${from.id}/new-version`, { title: title.trim(), blank: true, keep: keepAssets && keepGuide ? "all" : keepAssets ? "assets" : keepGuide ? "guideline" : "none" })
+        : await post("/api/looks", { title: title.trim(), leftOut: left });
+      if (from && left.length) await patch(`/api/looks/${l.id}`, { leftOut: left });
       for (let i = 0; i < files.length; i++) {
         setFiles((xs) => xs.map((x, j) => (j === i ? { ...x, status: "uploading" } : x)));
         await upload(`/api/looks/${l.id}/files`, new File([files[i].file], files[i].name), (p) => setFiles((xs) => xs.map((x, j) => (j === i ? { ...x, progress: p } : x))));
@@ -269,10 +205,12 @@ function CreateLook({ onClose, onDone }) {
       }, 1200);
     } catch (e) { setErr(e.message); setPhase(null); }
   };
-  const can = !phase && title.trim() && files.length > 0;
-  return <Dialog wide title={t("Create a Brand Kit from a guideline")} onClose={() => (phase ? null : onClose())} footer={<><span className="hint">{t("Claude reads the guideline and makes the Brand Kit. Check it before use.")}</span><span className="spacer" />
+  const can = !phase && title.trim() && (from || files.length > 0);
+  const old = from?.files ?? [], oldGuide = old.filter((f) => ["pdf", "pptx"].includes(f.kind)).length, oldAssets = old.length - oldGuide;
+  return <Dialog wide title={from ? t("New version of “{title}”", { title: from.title }) : t("Create a Brand Kit from a guideline")} onClose={() => (phase ? null : onClose())} footer={<><span className="hint">{from && !files.length ? t("No new files: a plain copy to change by hand.") : t("Claude reads the guideline and makes the Brand Kit. Check it before use.")}</span><span className="spacer" />
     <button className="btn" onClick={onClose} disabled={!!phase}>{t("Cancel")}</button>
-    <button className="btn primary" onClick={start} disabled={!can}>{phase ? <Loader2 size={14} className="spin" /> : <Upload size={14} />}{t("Make the Brand Kit")}</button></>}>
+    <button className="btn primary" onClick={start} disabled={!can}>{phase ? <Loader2 size={14} className="spin" /> : <Upload size={14} />}{from ? t("Make the new version") : t("Make the Brand Kit")}</button></>}>
+    {from && <p className="bk-keepnote">{t("“{title}” stays as it is, and films can still use it.", { title: from.title })}</p>}
     <label className="field"><span className="label">{t("Name")}</span><input className="input" spellCheck={false} value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("e.g. Moworks")} disabled={!!phase} autoFocus /></label>
     <div className={"dropzone lk-drop" + (phase ? " busy" : "")} onDragOver={(e) => e.preventDefault()} onDrop={phase ? undefined : onDrop}>
       <Upload size={20} /><div style={{ flex: 1, minWidth: 0 }}><div className="drop-t">{t("Drop the guideline here: files or a folder")}</div>
@@ -286,6 +224,9 @@ function CreateLook({ onClose, onDone }) {
       <span className="bar"><span style={{ transform: `scaleX(${x.progress})` }} /></span>
       {!phase && <button type="button" className="btn ghost icon sm" onClick={() => setFiles((xs) => xs.filter((_, j) => j !== i))} aria-label={t("Remove")}><X size={13} /></button>}</li>)}</ul>}
     <LeftOut names={left} />
+    {from && files.length > 0 && old.length > 0 && <div className="bk-keep">
+      {oldAssets > 0 && <label className="bk-check"><input type="checkbox" checked={keepAssets} disabled={!!phase} onChange={(e) => setKeepAssets(e.target.checked)} />{t("Keep its fonts and logos ({n} files)", { n: oldAssets })}</label>}
+      {oldGuide > 0 && <label className="bk-check"><input type="checkbox" checked={keepGuide} disabled={!!phase} onChange={(e) => setKeepGuide(e.target.checked)} />{t("Keep its old guideline too ({n} files)", { n: oldGuide })}</label>}</div>}
     {phase === "scanning" && <p className="lk-stage"><Loader2 size={14} className="spin" />{job?.stage ? t(job.stage) : t("Reading the guideline…")}{job?.progress != null ? ` · ${job.progress}%` : ""}</p>}
     {err && <Banner kind="error">{err}</Banner>}
   </Dialog>;
@@ -293,7 +234,7 @@ function CreateLook({ onClose, onDone }) {
 
 function Box({ on }) { return <span className="sgb-box" aria-hidden="true">{on && <Check size={11} />}</span>; }
 
-export default function Looks() {
+export default function Looks({ kitId = null }) {
   const t = useT();
   const studio = useThemeId() === "studio";
   const q = useData(() => get("/api/looks"), []);
@@ -302,14 +243,15 @@ export default function Looks() {
   const [qs, setQs] = useState("");
   const [make, setMake] = useState(false);
   const [askLocked, setAskLocked] = useState(null);          // the kit just made whose scan stopped on a password
-  const created = (id, locked = false) => { setMake(false); setCur(id); setAskLocked(locked ? id : null); if (locked && matchMedia("(max-width: 1100px)").matches) setPanel("style"); q.reload(); };
-  const [panel, setPanel] = useState(null);          // narrow window: "filters" or "style" (the Look) over the grid
+  const created = (id, locked = false) => { setMake(false); setCur(id); setAskLocked(locked ? id : null); q.reload(); go(`/looks/${id}`); };
+  const [panel, setPanel] = useState(null);          // narrow window: "filters" over the grid
   const looks = q.data?.looks ?? [];
   useEffect(() => { if (!looks.some((l) => l.status === "scanning")) return undefined; const h = setInterval(q.reload, 3000); return () => clearInterval(h); }, [looks]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!panel) return undefined; const esc = (e) => { if (e.key === "Escape") setPanel(null); }; addEventListener("keydown", esc); return () => removeEventListener("keydown", esc); }, [panel]);
   // the sources with Looks in them (an empty "Yours" stays out of the column), HyperFrames first
   const sources = useMemo(() => { const n = new Map(); for (const l of looks) n.set(sourceOf(l), (n.get(sourceOf(l)) ?? 0) + 1);
     return [...n].sort((a, b) => (Object.keys(SOURCES).indexOf(a[0]) + 1 || 99) - (Object.keys(SOURCES).indexOf(b[0]) + 1 || 99)); }, [looks]);
+  const same = useMemo(() => sameNameLabels(looks), [looks]);
   const on = src.filter((s) => sources.some(([x]) => x === s));
   const list = useMemo(() => looks.filter((l) => (!on.length || on.includes(sourceOf(l)))
     && (!qs || qs.toLowerCase().split(/\s+/).every((w) => [l.title, l.description, ...(l.fonts ?? []).map((f) => f.family)].join(" ").toLowerCase().includes(w)))), [looks, on.join(), qs]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -319,21 +261,23 @@ export default function Looks() {
   const [pg, setPg] = useState(0);
   useEffect(() => { setPg(0); }, [on.join(), qs]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { setPg(Math.max(0, Math.floor(list.findIndex((l) => l.id === sel?.id) / size))); }, [size, !!q.data]); // eslint-disable-line react-hooks/exhaustive-deps
-  const pick = (l) => { setCur(l.id); if (matchMedia("(max-width: 1100px)").matches) setPanel("style"); };
+  const pick = (l) => { setCur(l.id); go(`/looks/${l.id}`); };
   const label = (s) => t(SOURCES[s]?.[0] ?? s);
   const pills = [...on.map((s) => [label(s), () => setSrc(on.filter((x) => x !== s))]), ...(qs ? [[`“${qs}”`, () => setQs("")]] : [])];
   const clear = () => { setSrc([]); setQs(""); };
+  if (kitId) return <Suspense fallback={<div className={studio ? "st-room" : "page"}><div className="skeleton" style={{ height: "24rem" }} /></div>}>
+    <BrandKit key={kitId} id={kitId} askLocked={askLocked === kitId} onChanged={q.reload} onCreated={created} onDeleted={() => { setCur(null); q.reload(); }} /></Suspense>;
   // The Studio: the same state and data, as swatch books on shelves by source (studio/SwatchBooks.jsx)
-  if (studio) return <SwatchBooks looks={looks} list={list} sources={sources} on={on} setSrc={setSrc} qs={qs} setQs={setQs} sel={sel} onPick={(l) => setCur(l.id)} label={label}
+  if (studio) return <SwatchBooks looks={looks} list={list} sources={sources} on={on} setSrc={setSrc} qs={qs} setQs={setQs} sel={sel} onPick={(l) => setCur(l.id)} onOpen={(l) => go(`/looks/${l.id}`)} madeOf={(l) => same.get(l.id)} label={label}
     tagOf={(s) => SOURCES[s]?.[1] ?? s.slice(0, 4).toUpperCase()} error={q.error} loading={!q.data && !q.error} onReload={q.reload} onCreate={() => setMake(true)}
-    details={(l) => <LookDetails id={l.id} askLocked={askLocked === l.id} onChanged={q.reload} onDeleted={() => { setCur(null); q.reload(); }} />}
+    details={(l) => <KitOnTable id={l.id} />}
     dialogs={make && <CreateLook onClose={() => setMake(false)} onDone={created} />} />;
   return <div className="page lk-page gal-page">
     <div className="page-head"><div><BackButton /><h1>{t("Brand Kits")}</h1><p className="lead">{t("A brand's colours, fonts and components, worn by a whole film. Make one from a brand guideline.")}</p></div>
       <div className="actions"><button className="btn primary" onClick={() => setMake(true)}><Upload size={15} />{t("Create a Brand Kit from a guideline")}</button></div></div>
     {q.error?.status === 404 ? <div className="empty"><p>{t("Brand Kits are not available on this computer yet.")}</p></div>
       : q.error && <Banner kind="error" action={<button className="btn sm" onClick={q.reload}>{t("Retry")}</button>}>{q.error.message}</Banner>}
-    {!q.data && !q.error ? <div className="sgb-layout"><div className="skeleton" /><div className="skeleton" /><div className="skeleton" /></div> : q.data && <div className={"sgb-layout" + (panel ? " panel-" + panel : "")}>
+    {!q.data && !q.error ? <div className="sgb-layout lk-layout"><div className="skeleton" /><div className="skeleton" /></div> : q.data && <div className={"sgb-layout lk-layout" + (panel ? " panel-" + panel : "")}>
       {panel && <div className="sgb-scrim" onClick={() => setPanel(null)} />}
       <aside className="sgb-facets" aria-label={t("Filters")}>
         <div className="search"><Search size={14} /><input className="input" placeholder={t("Search Brand Kits")} value={qs} onChange={(e) => setQs(e.target.value)} aria-label={t("Search Brand Kits")} /></div>
@@ -350,13 +294,9 @@ export default function Looks() {
           {pills.length > 0 && <button type="button" className="btn ghost sm" onClick={clear}>{t("Clear filters")}</button>}
         </div>
         {list.length === 0 && <div className="empty"><p>{t("No Brand Kit matches.")}</p>{pills.length > 0 && <button className="btn" onClick={clear}>{t("Clear filters")}</button>}</div>}
-        <div className="sgb-grid" ref={grid.ref} style={grid.style}>{list.slice(pg * size, (pg + 1) * size).map((l) => <LookCard key={l.id} l={l} on={sel?.id === l.id} onPick={pick} />)}</div>
+        <div className="sgb-grid" ref={grid.ref} style={grid.style}>{list.slice(pg * size, (pg + 1) * size).map((l) => <LookCard key={l.id} l={l} made={same.get(l.id)} onPick={pick} />)}</div>
         <Pager keep page={pg} size={size} total={list.length} onPage={setPg} />
       </section>
-      <aside className="sgb-insp" aria-label={sel ? sel.title : t("Brand Kit")}>
-        {panel === "style" && <BackButton className="insp" onClick={() => setPanel(null)} />}
-        {sel ? <div className="insp-in" key={sel.id}><LookDetails id={sel.id} askLocked={askLocked === sel.id} onChanged={q.reload} onDeleted={() => { setCur(null); q.reload(); }} /></div> : <p className="hint">{t("Choose a Brand Kit to see it here.")}</p>}
-      </aside>
     </div>}
     {make && <CreateLook onClose={() => setMake(false)} onDone={created} />}
   </div>;

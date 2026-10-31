@@ -1090,3 +1090,9 @@ input[inputmode="numeric"], .num, time, .pager-count, .pager-nums { font-variant
 /* a project card a little more compact (its text, not its 16:9 frame), so a 1920 window holds three whole rows */
 :root:not([data-theme="studio"]) .project-grid > .project-card .card-body { padding-top: var(--sp-2); padding-bottom: 0.25rem; gap: 0.25rem; }
 :root:not([data-theme="studio"]) .project-grid > .project-card .card-foot { min-height: 2.25rem; padding-top: 0.375rem; }
+
+/* a film's new version, said on another screen: one line with its Open, no jump */
+.vnotices { position: fixed; right: 1rem; top: 3.5rem; z-index: 60; display: flex; flex-direction: column; gap: 0.5rem; max-width: min(26rem, calc(100vw - 2rem)); }
+.vnotice { display: flex; align-items: center; gap: 0.5rem; padding: 0.625rem 0.75rem; border: 1px solid var(--border); border-radius: var(--radius, 0.5rem); background: var(--surface-1); color: var(--text-primary); font-size: var(--fs-meta); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28); }
+.vnotice .t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.125rem; }
+.vnotice .t b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

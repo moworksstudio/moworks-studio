@@ -205,7 +205,7 @@ export default function MotionPlan({ id, setCrumbs = () => {} }) {
   const est = pipe.data?.estimateIfApproved?.minutes ? pipe.data.estimateIfApproved : pipe.data?.estimate?.minutes ? pipe.data.estimate : null;
   const approve = async () => {
     setBusy(true);
-    try { const r = await post(`/api/projects/${id}/motion-plan/approve`); setAsk(false); toast(r?.estimate?.minutes ? t("Motion Plan approved. Building the film, about {n} minutes.", { n: minutesOf(r.estimate) }) : t("Motion Plan approved")); mp.reload(); pipe.reload(); project.reload(); stage.close(); }
+    try { const r = await post(`/api/projects/${id}/motion-plan/approve`); setAsk(false); toast(r?.estimate?.minutes ? t("Motion Plan approved. Version 1 is ready in about {n} minutes.", { n: minutesOf(r.estimate) }) : t("Motion Plan approved")); mp.reload(); pipe.reload(); project.reload(); stage.close(); }
     catch (e) { toast(e.message, "error"); setAsk(false); } finally { setBusy(false); }
   };
   // a frame's picture: the built shot's poster, else the approved storyboard option's still for that frame
@@ -272,8 +272,8 @@ export default function MotionPlan({ id, setCrumbs = () => {} }) {
     {ask && <Dialog title={t("Approve the Motion Plan for {n} shots?", { n: shots.length })} onClose={() => setAsk(false)} footer={<><span className="spacer" />
       <button className="btn" onClick={() => setAsk(false)}>{t("Look again")}</button>
       <button className="btn ok" onClick={approve} disabled={busy}>{busy ? <Loader2 size={15} className="spin" /> : <Check size={15} />}{t("Approve and build")}</button></>}>
-      {/* What happens and how long in one line (the server's covers: "build, review, music and checks"), what the film used so far */}
-      <UsageHint projectId={id} used line={est ? t("{what}: about {n} min.", { what: est.covers ? cap(t(est.covers)) : t("Building the film"), n: minutesOf(est) })
+      {/* What happens and how long in one line (the server's covers: "making the film, its sound and Version 1") */}
+      <UsageHint line={est ? t("{what}: about {n} min.", { what: est.covers ? cap(t(est.covers)) : t("Building the film"), n: minutesOf(est) })
         : t("Claude builds and reviews the film.")} /></Dialog>}
   </div>;
 }

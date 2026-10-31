@@ -911,7 +911,7 @@ ol.plain.conversation, .conversation { padding: var(--sp-3); gap: 0.875rem; }
 /* a waiting stage's line wraps so it can be read whole */
 .pl-stage.waiting .pl-line { white-space: normal; }
 
-/* a stage's line wraps to a second line instead of an ellipsis ("Ready to render · Music: …") */
+/* a stage's line wraps to a second line instead of an ellipsis (two lines at most: the words are written for it) */
 .pl-line, .pl-line.pl-go { white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
 /* lanes keep a modest height instead of filling the panel, and the music lane has room below it */
 .tl-body { --tl-h-shots: clamp(2.75rem, calc(var(--tl-lanes) * 0.3), 3.5rem); --tl-h-voice: clamp(1.75rem, calc(var(--tl-lanes) * 0.16), 2.125rem);
@@ -947,9 +947,27 @@ ol.plain.conversation, .conversation { padding: var(--sp-3); gap: 0.875rem; }
 .pe-row.code-style { grid-template-columns: minmax(0, 1fr) 4.25rem; }
 /* Build and review's four parts on The Desk, in the Prepare row's link style; a part done carries a green check, one at
    work the yellow spinner (status colours), Build itself is a state */
-.pl-subs .pl-sub { display: inline-flex; align-items: center; gap: 0.25rem; }
+/* the steps of Build and review in one row: only the one that runs stands out */
+.pl-subs:not(.more) { flex-wrap: nowrap; white-space: nowrap; overflow: hidden; gap: 0.5rem; }
+.pl-subs .pl-sub { display: inline-flex; align-items: center; gap: 0.25rem; flex: none; }
 .pl-subs span.pl-sub { font-size: var(--fs-dense); color: var(--text-secondary); }
-.pl-subs .pl-sub.done > svg { color: var(--state-done); }
+:root:not([data-theme="studio"]) .pl-subs .clink.pl-sub:not(:disabled):not(.running) { color: var(--text-secondary); }
+.pl-subs .pl-sub.running, :root:not([data-theme="studio"]) .pl-subs .clink.pl-sub.running:not(:disabled) { color: var(--state-run); font-weight: var(--strong-weight); }
 .pl-subs .pl-sub.running > svg { color: var(--state-run); }
 .pl-subs .pl-sub b { font-weight: var(--strong-weight); }
 .pl-subs .pl-sub .pl-warn { color: var(--status-stop); font-weight: var(--strong-weight); }          /* "Tech checks · 5 warnings" */
+
+/* the card after Version 1, above the chat's buttons: the one question, its three answers each with its time; what runs and what waits for a press */
+.cpanel.cver { display: flex; flex: none; flex-direction: column; align-items: stretch; gap: 0.5rem; padding: 0.625rem 0.75rem; min-width: 0; font-size: var(--fs-meta); }
+.cpanel.cver.run { flex-direction: row; align-items: center; }
+.cver .t { flex: 1; min-width: 0; }
+.cver-q { font-size: var(--fs-control); }
+.cver-acts { display: flex; flex-direction: column; gap: 0.375rem; min-width: 0; }
+.cver-acts.row { flex-direction: row; flex-wrap: wrap; }
+.cver-acts:not(.row) .btn { width: 100%; max-width: 100%; height: auto; min-height: 1.875rem; justify-content: space-between; padding-block: 0.25rem; text-align: left; white-space: normal; }
+.cver-acts small { font-size: var(--fs-dense); opacity: 0.75; font-weight: 400; margin-left: 0.5rem; white-space: nowrap; }
+.cver-brand { margin: 0; color: var(--status-stop); }
+/* a narrow window: the row keeps what opens and what runs (Build and Version 1 are said by the stage's line) */
+.ed-pipe { container-type: inline-size; }
+@container (max-width: 270px) { .pl-subs:not(.more) span.pl-sub:not(.running) { display: none; } }
+.pl-subs.full span.pl-sub:not(.running) { display: none; }          /* a score and a count take their room */

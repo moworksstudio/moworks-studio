@@ -31,12 +31,11 @@ const SUGGEST = {
   prepare: ["Read the brief and tell me what is missing", "Which files will you use in each shot?", "Check the voice-over words for mistakes", "What is the next step?"],
   storyboard: ["Tell me the idea behind the storyboard","Make the opening shot stronger", "Add one more shot before the ending", "What is the next step?"],
   motion: ["Make the motion calmer", "Make the moves between shots smoother", "Which shot has too much motion?", "What is the next step?"],
-  build: ["How far along is the build?", "What did the review find?", "Fix what scored lowest in the review", "Make the words easier to read on a phone"],
+  build: ["How far along is the film?", "What is the next step?"],
   finalMix: ["Pick music that fits the mood", "Add sound effects on the shot changes", "Make the music quieter under the voice", "What is the next step?"],
   feedback: ["Watch the film and fix what is off", "Make the pace a little faster", "Make the words easier to read on a phone", "Make the ending stronger"],
 };
 const fmtTok = (n) => (n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${Math.round(n / 1e3)}k` : String(n));
-const fmtUsd = (x) => (x == null ? "" : x < 0.01 ? "<$0.01" : `$${x.toFixed(2)}`);
 const secs = (ms) => { const s = Math.round(ms / 1000); return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`; };
 const changedOf = (task) => (task.changed ?? []).filter((c) => !c.path.startsWith(".moworks/"));     // the app's own records are not Claude's edits
 // Claude Code's sign-in refresh racing another Claude process: said once, in plain words, with a Try again
@@ -268,8 +267,7 @@ function ModelChip({ projectId, info, choices, onSaved, disabled, task = null })
   const now = task?.settings?.effort ?? runs;
   const effLine = runs ? t("Effort: {e} · Motion Plan: {m}", { e: effName(runs).toLowerCase(), m: effName("medium").toLowerCase() }) : null;
   const set = async (k, v) => { try { onSaved(await patch(`/api/projects/${projectId}/settings`, { [k]: v })); } catch (e) { toast(e.message, "error"); } };
-  const usage = u?.tasks ? t("This project so far: {n} tasks, {tok} tokens, at API list price {usd} (your plan does not bill this)",
-    { n: u.tasks, tok: fmtTok((u.input ?? 0) + (u.cacheWrite ?? 0) + (u.cacheRead ?? 0) + (u.output ?? 0)), usd: u.costUsd != null ? `≈ ${fmtUsd(u.costUsd)}` : "" }) : t("Model and effort for this project");
+  const usage = u?.tasks ? t("This project so far: {n} tasks, {tok} tokens", { n: u.tasks, tok: fmtTok((u.input ?? 0) + (u.cacheWrite ?? 0) + (u.cacheRead ?? 0) + (u.output ?? 0)) }) : t("Model and effort for this project");
   return <span className="cmodel" ref={box}>
     <button className="cmodel-chip" onClick={() => setOpen((x) => !x)} disabled={disabled} aria-expanded={open}
       title={now !== runs ? t("This step runs at {e} effort", { e: effName(now).toLowerCase() }) : usage}>
@@ -285,16 +283,15 @@ function ModelChip({ projectId, info, choices, onSaved, disabled, task = null })
   </span>;
 }
 
-/** The film is done: one green block once the build, the self-check, the music, the sound effects and the checks
- *  have all finished (the server's note `event: "film-done"`, one per build), with the self-check's score card from its `qc`. */
+/** Version 1: one green block once the build, the music, the sound effects and its render have all finished (the server's note `event: "film-done"`, one per build). */
 const CRITERIA = [["hook", "Hook"], ["phone", "Read on a phone"], ["motion", "Motion"], ["variety", "Variety"], ["composition", "Composition"], ["brand", "Brand"], ["sync", "Sync"]];
 export function FilmDone({ n }) {
   const t = useT();
   const qc = n.qc ?? {};
   // the film is handed over: no score here; the server's own words when it sends them
   return <li className="cdone" role="status">
-    <div className="cdone-head"><Check size={16} /><b>{n.vars?.n ? t("The film is done (version {n})", { n: n.vars.n }) : t("The film is done")}</b></div>
-    <p>{/^The film is ready/.test(n.text ?? "") ? t(n.text, n.vars) : t("Watch it: change the music or the sound effects in the Final Mix, and send your notes on the picture here.")}</p>
+    <div className="cdone-head"><Check size={16} /><b>{n.vars?.n ? t("Version {n} is ready", { n: n.vars.n }) : t("The film is ready")}</b></div>
+    <p>{/^Version/.test(n.text ?? "") ? t("Watch it, with sound.") : /^The film is ready/.test(n.text ?? "") ? t(n.text, n.vars) : t("Watch it: change the music or the sound effects in the Final Mix, and send your notes on the picture here.")}</p>
   </li>;
 }
 
@@ -340,7 +337,7 @@ const NOTE_WORDS = {
   "Build waits: the characters' gate still fails after Claude's fix{why}: tell Claude in the chat what to do.": "The build waits: some character checks still fail after Claude's fix{why}. Tell Claude in the chat what to do.",
   "Claude is reading your brief and files to prepare the film. Please wait a moment.": "Claude is reading your brief and files to prepare the film. This takes a few minutes; the line under it shows what it is doing.",
   // a wait card says what to do in one short line; its button opens the place
-  "The Motion Plan is ready for you: under each frame, the motion Claude proposes. Change what you like, then press Approve and build at the end of the Motion Plan dialog: the film is then built, reviewed, given music and checked without another click.": "Motion Plan ready: check it, then Approve and build.",
+  "The Motion Plan is ready for you: under each frame, the motion Claude proposes. Change what you like, then press Approve and build at the end of the Motion Plan dialog: the film is then built, given its sound and rendered as Version 1 without another click.": "Motion Plan ready: check it, then Approve and build.",
   "{label} is ready for you in the Storyboard dialog: approve it, give feedback on it, or make another option.": "{label} ready: approve it, give feedback, or make another option.",
   "The new characters are ready and passed their checks. Look at them in the Characters dialog and approve them: you approve once.": "New characters ready and checked: look at them, then approve.",
   "Claude needs your choice before it goes on: read its message and answer in the chat.": "Claude needs your choice: answer its message in the chat.",
@@ -363,6 +360,46 @@ function WaitCard({ stage, onOpen }) {
   return <li className="cnote warn" role="status"><Hand size={13} />
     <span className="t">{/^Waiting for you/.test(stage.line ?? "") ? line : t("Waiting for you: {what}", { what: line })}</span>
     {opens && onOpen && <button type="button" className="btn sm" onClick={() => onOpen(opens[0])}>{t(opens[1])}</button>}</li>;
+}
+
+/** After Version 1: the one question with its three buttons, then what runs and what waits for a press (GET /pipeline's version1.card). Time only, never money. */
+const rangeText = (e) => (e?.high > e?.minutes ? `${e.minutes}–${e.high}` : String(e?.minutes ?? ""));
+export function VersionCard({ projectId, v, toast, onChanged }) {
+  const t = useT();
+  const [busy, setBusy] = useState(null);
+  const card = v?.card;
+  if (!card) return null;
+  const go = async (key, path, body = {}) => {
+    setBusy(key);
+    try { await post(`/api/projects/${projectId}/version1/${path}`, body); onChanged?.(); }
+    catch (e) { toast?.(e.message, "error"); } finally { setBusy(null); }
+  };
+  const btn = (key, label, path, body = {}, cls = "") => <button type="button" className={"btn sm " + cls} disabled={!!busy} onClick={() => go(key, path, body)}>{busy === key && <Loader2 size={12} className="spin" />}{label}</button>;
+  const brand = <p className="cver-brand" role="note">{t("Moworks Studio has not checked this film against your brand guideline. Please check it yourself before you send it.")}</p>;
+  const keepFirst = btn("keep", t("Keep Version {n}", { n: card.n }), "keep");
+  if (card.kind === "ask") return <section className="cpanel cver" aria-label={t("Version {n}", { n: card.n })}>
+    <b className="cver-q">{t("Should Claude check your film?")}</b>
+    <div className="cver-acts">
+      <button type="button" className="btn sm" disabled={!!busy} onClick={() => go("mistakes", "choice", { choice: "mistakes" })}>{busy === "mistakes" && <Loader2 size={12} className="spin" />}{t("Fix mistakes only")}{v.times?.mistakes && <small className="num">{t("about {n} min", { n: rangeText(v.times.mistakes) })}</small>}</button>
+      <button type="button" className="btn sm" disabled={!!busy} onClick={() => go("improve", "choice", { choice: "improve" })}>{busy === "improve" && <Loader2 size={12} className="spin" />}{t("Fix mistakes and improve it")}{v.times?.improve && <small className="num">{t("about {n} min", { n: rangeText(v.times.improve) })}</small>}</button>
+      <button type="button" className="btn sm primary" disabled={!!busy} onClick={() => go("none", "choice", { choice: "none" })}>{busy === "none" && <Loader2 size={12} className="spin" />}{t("No, I'm happy with it")}</button>
+    </div></section>;
+  if (card.kind === "preparing") return <section className="cpanel cver run" role="status"><Loader2 size={13} className="spin" />
+    <span className="t">{t("Preparing Version {n}. Please wait...", { n: card.n })}</span>{btn("stop", t("Stop"), "stop")}</section>;
+  if (card.kind === "working") return <section className="cpanel cver run" role="status"><Loader2 size={13} className="spin" />
+    <span className="t">{card.stopping ? t("Stopping…") : t("Claude is checking your film. Version {n} stays here until you choose.", { n: card.n })}</span>
+    {!card.stopping && btn("stop", t("Stop"), "stop")}</section>;
+  if (card.kind === "stopped") return <section className="cpanel cver" role="status"><span className="t">{t("Stopped. Version {n} is safe.", { n: card.n })}</span>
+    <div className="cver-acts row">{btn("continue", t("Continue"), "continue", {}, "primary")}{keepFirst}</div></section>;
+  if (card.kind === "render-ask") return <section className="cpanel cver" role="status"><b className="cver-q">{t("Claude changed your film. Render Version {n} now?", { n: card.next.n })}</b>
+    {v.renderTime && <span className="hint num">{t("About {n} min: a 3D film takes longer to render.", { n: rangeText(v.renderTime) })}</span>}
+    <div className="cver-acts row">{btn("yes", t("Render now"), "render", { yes: true }, "primary")}{btn("no", t("Later"), "render", { yes: false })}</div></section>;
+  if (card.kind === "rendering") return <section className="cpanel cver run" role="status"><Loader2 size={13} className="spin" />
+    <span className="t">{t("Preparing Version {n}. Please wait...", { n: card.next.n })}</span>{btn("stop", t("Stop"), "stop")}</section>;
+  if (card.kind === "ready") return <section className="cpanel cver" role="status"><b className="cver-q">{card.next.render === "done" ? t("Version {n} is ready.", { n: card.next.n }) : t("Version {n} is saved. It is not rendered yet.", { n: card.next.n })}</b>
+    <div className="cver-acts row">{btn("open", t("Open Version {n}", { n: card.next.n }), "open", {}, "primary")}{keepFirst}</div></section>;
+  if (card.kind === "export" && card.brand) return <section className="cpanel cver warn" role="status">{brand}</section>;
+  return null;
 }
 
 /** Each project's last chat, for this app session: shown at once when the Editor opens again. */
@@ -429,7 +466,7 @@ function Note({ n, projectId, toast, onPlay = null, onFix = null, onDetails = nu
   </li>;
 }
 
-export default function ClaudePanel({ projectId, selectedShot, onClearTarget, onChanged, prefill, selection = null, inject = null, reloadKey = 0, motionPick = null,
+export default function ClaudePanel({ projectId, selectedShot, onClearTarget, onChanged, prefill, selection = null, inject = null, reloadKey = 0, motionPick = null, version1 = null, onVersionChanged = null,
   onOpenMotions = null, motionsOpen = false, onOpenSounds = null, soundsOpen = false, steps = null, rendering = false, actions = [], onWaiting = null, stage = null, interrupted = null, onPlay = null, onOpenSheet = null, checks = null,
   waiting = null, pins = null, onPinsSent = null, onSeek = null, fps = 24 }) {
   const t = useT();
@@ -599,11 +636,10 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
       <section className="cpanel chist" aria-label={t("Conversation")}>
       <div className="claude-head">
         {studio && <span className="st-who"><i aria-hidden="true" /><b>{t("Conversation")}</b></span>}
-        {/* the project's usage in words, always shown: tasks, tokens, API-equivalent cost (the plan does not bill it) */}
-        {runInfo?.usage?.tasks > 0 && <span className="cusage-head num" title={t("Tasks · tokens · cost at API list price (your plan does not bill this)")}>
+        {/* the project's usage in words, always shown: tasks and tokens; the app says time, never money (owner 31/10) */}
+        {runInfo?.usage?.tasks > 0 && <span className="cusage-head num" title={t("Tasks · tokens")}>
           {[runInfo.usage.tasks === 1 ? t("1 task") : t("{n} tasks", { n: runInfo.usage.tasks }),
-            fmtTok((runInfo.usage.input ?? 0) + (runInfo.usage.cacheWrite ?? 0) + (runInfo.usage.cacheRead ?? 0) + (runInfo.usage.output ?? 0)),
-            runInfo.usage.costUsd != null ? `≈ ${fmtUsd(runInfo.usage.costUsd)}` : null].filter(Boolean).join(" · ")}</span>}
+            fmtTok((runInfo.usage.input ?? 0) + (runInfo.usage.cacheWrite ?? 0) + (runInfo.usage.cacheRead ?? 0) + (runInfo.usage.output ?? 0))].filter(Boolean).join(" · ")}</span>}
         <span className="gap" />
         <ModelChip projectId={projectId} info={runInfo} choices={choices} disabled={!!running} task={running ? tasks?.find((x) => x.id === running) : null} onSaved={(r) => setRunInfo((x) => ({ ...x, ...r }))} />
       </div>
@@ -620,6 +656,7 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
       </ol>
       {err && !signedOut && <div style={{ padding: "0 12px 12px" }}><Banner kind="error">{err}</Banner></div>}
       </section>
+      <VersionCard projectId={projectId} v={version1} toast={toast} onChanged={onVersionChanged} />
       {/* the dialogs the user opens most, anchored above the input so they never scroll away */}
       {actions.length > 0 && <section className="cpanel cacts" aria-label={t("Open")}>{actions.map((a) =>
         <button key={a.key} className={"btn sm cact" + (a.att ? " att" : "")} disabled={a.off} title={a.title} onClick={a.onClick}>{a.icon}{a.label}</button>)}</section>}

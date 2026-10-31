@@ -20,7 +20,7 @@ import { fontMap } from "../hf-edit/finalize.mjs";
 import { familyKey } from "../hf-edit/localFonts.mjs";
 import { googleHasVietnamese, WINDOWS_VI } from "../blocks-library/index.mjs";
 import { encodePosterAsync, PREVIEW } from "../library/preview-media.mjs";
-import { customMedia, customSlug, frameText, getCustom } from "./custom.mjs";
+import { customMedia, customSlug, fontMedia, frameText, getCustom } from "./custom.mjs";
 export { placeKit } from "./custom.mjs";
 
 const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
@@ -199,11 +199,43 @@ export function stageForProject(projectDir, id, root = APP_ROOT) {
   return { item: l, files };
 }
 
+const framesAsked = new Map();          // one capture a kit at a time: a second look at the page waits for the first
+/** HyperFrames' own frames of a preset, each 16:9 frame of its frame-showcase.html as a picture: the kit's layouts as its author drew them. Captured with the pinned Chromium the
+ *  first time the kit's page is opened and kept in the store. Returns the pictures' addresses; none when the store is not built or the browser cannot run. */
+export function showcaseFrames(id, root = APP_ROOT) {
+  const l = getItem(id, root), st = currentStore(root);
+  if (!l || !st) return Promise.resolve([]);
+  const dir = join(st.dir, "frames", l.name), urls = (names) => names.sort((a, b) => parseInt(a, 10) - parseInt(b, 10)).map((n) => `/media/looks/frames/${l.name}/${n}`);
+  if (existsSync(join(dir, "done"))) return Promise.resolve(urls(readdirSync(dir).filter((n) => n.endsWith(".webp"))));
+  if (framesAsked.has(id)) return framesAsked.get(id);
+  const job = (async () => {
+    const src = source(root), browser = await puppeteerOf(root).launch({ executablePath: resolveRuntime(null, root).chromium, headless: true, args: ["--hide-scrollbars", "--force-color-profile=srgb"] });
+    const names = [];
+    try {
+      const page = await browser.newPage();
+      await page.setViewport({ width: 1920, height: 1080, deviceScaleFactor: 1 });
+      await page.goto(pathToFileURL(join(src.dir, l.folder, "frame-showcase.html")).href, { waitUntil: "networkidle0", timeout: 45000 }).catch(() => {});
+      await page.evaluate(() => document.fonts?.ready);
+      rmSync(dir, { recursive: true, force: true }); mkdirSync(dir, { recursive: true });
+      let n = 0;
+      for (const el of (await page.$$(".frame")).slice(0, 16)) {
+        await el.scrollIntoView(); await el.screenshot({ path: join(dir, `${++n}.webp`), type: "webp", quality: 82 });
+        names.push(`${n}.webp`);
+      }
+      if (n) writeFileSync(join(dir, "done"), "");
+    } finally { await browser.close().catch(() => {}); }
+    return urls(names);
+  })().catch((e) => { console.error(`[brand kit] frames of ${id}: ${e.message}`); return []; }).finally(() => framesAsked.delete(id));
+  framesAsked.set(id, job);
+  return job;
+}
+
 /** A preview file of the store, contained in it. */
 export function mediaFile(rel, root = APP_ROOT) {
   if (rel.startsWith("custom/")) return customMedia(rel, root);
+  if (/^(appfont|webfont)\//.test(rel)) return fontMedia(rel, root);
   const st = currentStore(root);
-  if (!st || !/^previews\/[\w.-]+$/.test(rel)) return null;
+  if (!st || !/^(previews\/[\w.-]+|frames\/[a-z0-9-]+\/\d+\.webp)$/.test(rel)) return null;
   const f = resolve(st.dir, rel);
   return f.startsWith(resolve(st.dir) + sep) && existsSync(f) ? f : null;
 }

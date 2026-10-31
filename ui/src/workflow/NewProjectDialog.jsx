@@ -464,6 +464,7 @@ export default function NewProjectDialog({ onClose }) {
               {rule.locked && <span className="np2-desc"><Lock size={11} /> {t("Follows film style: this style draws at 1920 × 1080 only.")}</span>}
               {!rule.locked && !rule.typed && <span className="np2-desc">{t("This style takes the four sizes in the list for now.")}</span>}
               {(rule.slowAt ? d.fps === rule.slowAt : authorOf(style ?? {}) === "alexgreensh" && d.fps === "60") && <span className="np2-desc">{t("At {fps} fps the film takes about {x}× longer to render.", { fps: d.fps, x: rule.slower ?? 2 })}</span>}
+              {(style?.dim === "3D" || style?.id === "hf-3d") && <span className="np2-desc">{t("A 3D film takes longer to make and to render.")}</span>}
               {sizeBad && d.width > 0 && d.height > 0 && <span className="np2-err" role="alert">{t("Use even numbers, at least 320 and the long side at most 3840.")}</span>}
               {(seconds == null || seconds > MAX_SECONDS || (touched && !(seconds >= 5))) ? <span className="np2-err" id="np-len-d" role="alert">{seconds == null ? t("Hours:minutes:seconds:frames, e.g. 0:00:15:00") : seconds > MAX_SECONDS ? t("The longest film is 1:00:00:00.") : t("The shortest film is 0:00:05:00.")}</span>
                 : lenBack && lenBack === d.length && <span className="np2-err" id="np-len-d" role="alert">{t("That was no length, so it is back to {len}.", { len: lenBack })}</span>}          {/* no hint line under it */}

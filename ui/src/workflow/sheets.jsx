@@ -177,8 +177,12 @@ export function QcReviewSheet({ projectId }) {
   const s = qcSummary(q.data.text);
   const n = s?.score != null ? Number(String(s.score).replace(",", ".")) : null;
   const off = (s?.low.length ?? 0) + (s?.left.length ?? 0);
+  // "Fix mistakes only" gives no score: what it found, as Claude wrote it
+  const found = q.data.mode === "mistakes" ? q.data.rounds ?? [] : null;
   return <div className="qc-review">
-    {!s ? <Banner kind="info">{t("No review yet. It appears after the Review step.")}</Banner>
+    {found ? <><Banner kind="success">{found.some((r) => r.worst?.length) ? t("Claude checked your film for mistakes and fixed what it found.") : t("Claude checked your film for mistakes and found none.")}</Banner>
+      {found.some((r) => r.worst?.length) && <ul className="plain qc-off">{found.flatMap((r) => r.worst ?? []).map((w, i) => <li key={i}>{w.at != null && <span className="num qc-n">{w.at} s</span>}<span>{w.text}</span></li>)}</ul>}</>
+      : !s ? <Banner kind="info">{t("No review yet. It appears after the Review step.")}</Banner>
       : <Banner kind={n == null ? "info" : n < 8 ? "error" : off ? "warning" : "success"}>
         {n == null ? t("Claude is still reviewing the film.") : <><b>{t("Final score {n}/10", { n: s.score })}</b>{" "}
           {n < 8 ? t("Below the bar of 8.") : off ? t("Good to go; Claude left a few small things as they are.") : t("Nothing left to fix.")}</>}</Banner>}

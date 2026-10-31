@@ -176,7 +176,7 @@ function Director() {
   const save = async (k, v) => { try { await patch("/api/agent/settings", { [k]: v }); toast(t("Saved")); reload(); } catch (e) { toast(e.message, "error"); } };
   if (!data) return <Waiting rows={5} label={t("Loading…")} />;
   return <section className="section"><div className="panel settings-compact">
-    <Row icon={<Brain size={16} />} title={t("Model")} desc={t("For every project that does not pick its own.")} more={t("Each reply in the chat shows the model, the time and what it would cost at API prices.")}>
+    <Row icon={<Brain size={16} />} title={t("Model")} desc={t("For every project that does not pick its own.")} more={t("Each reply in the chat shows the model and the time.")}>
       <select className="select" value={data.model} onChange={(e) => save("model", e.target.value)} aria-label={t("Model")}>{data.models.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
     </Row>
     {/* High is the default, as in New project; only the Motion Plan runs at Medium, the other steps at High at least */}

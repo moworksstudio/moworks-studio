@@ -7,7 +7,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown, Lock, Upload } from "lucide-react";
 import { get } from "../api.js";
-import { go } from "../lib.jsx";
+import { go, sameNameLabels } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 
 function Swatches({ colors }) {
@@ -86,8 +86,9 @@ export default function DesignSteps({ style, value, onChange, brief = "" }) {
   }, []);
   const locked = style?.design ? style.design !== "open" : !style?.look;          // design "open" | "author"
   const short = (s) => String(s ?? "").replace(/\s+/g, " ").slice(0, 90);
+  const same = sameNameLabels(looks);
   const lookGroups = [
-    { label: t("Your Brand Kits"), items: looks.filter((l) => l.group === "yours").map((l) => ({ id: l.id, title: l.title, sub: short(l.description), swatches: l.swatches, vi: l.vi, fonts: l.fonts })) },
+    { label: t("Your Brand Kits"), items: looks.filter((l) => l.group === "yours").map((l) => ({ id: l.id, title: same.has(l.id) ? `${l.title} · ${same.get(l.id)}` : l.title, sub: short(l.description), swatches: l.swatches, vi: l.vi, fonts: l.fonts })) },
     { label: "HyperFrames", items: looks.filter((l) => l.group === "hf").map((l) => ({ id: l.id, title: l.title, sub: "", swatches: l.swatches, vi: l.vi, fonts: l.fonts })) },
   ];
   const look = lookGroups.flatMap((g) => g.items).find((x) => x.id === value.look);

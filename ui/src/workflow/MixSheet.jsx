@@ -127,15 +127,16 @@ export default function MixSheet({ projectId, project, onChanged }) {
   return <div className="mix" ref={root}>
     {/* Final Mix hands the film over: no score, no Tech checks; a change asked in the chat is rebuilt and rendered by itself */}
     {/* Not "ready" while something stops the render or Claude waits for an answer */}
-    {/* the same rule as the Pipeline: ready only when nothing blocks and the Final Mix row is done ("Ready to render") */}
+    {/* the same rule as the Pipeline: ready only when nothing blocks and the Final Mix row is done ("Your film is ready to export.") */}
     {(() => { const ck = pipe.data?.checks, blocking = ck?.pass === false ? ck.blocking ?? 0 : 0;
       const waits = pipe.data?.stages?.some((s) => s.status === "waiting") || !!pipe.data?.question;
       const mixRow = pipe.data?.stages?.find((s) => s.id === "finalMix");
       return blocking > 0 || waits || (mixRow && mixRow.status !== "done")
         ? <p className="hint">{blocking > 0 ? t("The film is not ready yet: {n} problem(s) to fix before the render. Claude asks you in the chat; you can already listen and change the music or the sound effects here.", { n: blocking })
+          : pipe.data?.version1?.card?.kind === "ask" ? t("Version {n} is ready. Change the music or the sound effects here if you like, then answer the question in the chat.", { n: pipe.data.version1.n })
           : waits ? t("The film is not ready yet: Claude waits for your answer in the chat. You can already listen and change the music or the sound effects here.")
           : t("The film is not ready yet: it is still being made. You can already listen and change the music or the sound effects here.")}</p>
-        : <p className="hint">{t("Your film is ready. Change the music or sound effects here; for the picture, ask Claude in the chat.")}</p>; })()}
+        : <p className="hint">{t("Your film is ready to export. Change the music or sound effects here; for the picture, ask Claude in the chat.")}</p>; })()}
     <section className="panel">
       {/* the Mixkit licence once, as an ⓘ by the heading (Render keeps its own line where the file is written) */}
       <div className="panel-head"><h2><Music size={16} /> {t("Music")}{mixkit && <Info size={14} className="mix-info" tabIndex={0} role="img" aria-label={t(MIXKIT)} title={t(MIXKIT)} />}</h2>

@@ -124,7 +124,50 @@
    "action": {
     "kind": "claude",
     "label": "Build",
-    "prompt": "Build the film of the approved storyboard to the approved Motion Plan as the what-if-style pack says (the author's step 6): bring each shot of whatif/shots.tsx to life from its key pose, keep whatif/episode.tsx in step with the plan (a changed edit or fx: call whatif_plan again, never edit timeline.json by hand), and write index.html as the pack §2 says (the app bundles the episode with the pinned engine and drives it), timed to the voice-over when there is one. Write no sound effects or music: the app adds them after your Review. Keep every element on screen, the background, the camera and every character moving between the moves, as the studio's moworks-alive rule says (nothing still for more than 2 s except the final end card). Check references/traps.md before inventing a fix, and leave no console.error in the film."
+    "prompt": "Build the film of the approved storyboard to the approved Motion Plan as the what-if-style pack says (the author's step 6): bring each shot of whatif/shots.tsx to life from its key pose, keep whatif/episode.tsx in step with the plan (a changed edit or fx: call whatif_plan again, never edit timeline.json by hand), and write index.html as the pack §2 says (the app bundles the episode with the pinned engine and drives it), timed to the voice-over when there is one. Write no sound effects or music: the app adds them right after your Build. Keep every element on screen, the background, the camera and every character moving between the moves, as the studio's moworks-alive rule says (nothing still for more than 2 s except the final end card). Check references/traps.md before inventing a fix, and leave no console.error in the film."
+   },
+   "stage": 4
+  },
+  {
+   "id": "sound",
+   "stage": 4,
+   "title": "Music and sound effects",
+   "what": "Claude picks the music; the app places it and the sound effects",
+   "needs": [
+    "build"
+   ],
+   "done": {
+    "kind": "mark",
+    "auto": true
+   },
+   "skippable": true,
+   "skipLabel": "No music",
+   "action": {
+    "kind": "claude",
+    "label": "Find music",
+    "prompt": "Find three music tracks on mixkit.co that fit the episode's mood and length (the genre's: references/sound.md, its music bed; none of the author's sounds), and hand them to the app with the music_options tool (title, artist, its page on mixkit.co and the direct https://assets.mixkit.co/… .mp3 link). When your turn ends, the app places the first track and the sound effects, one per visible action; the owner can change both in the Final Mix. When the film already has a music track of the owner's, or the web is off for this project, say so in one line and change nothing."
+   },
+   "review": {
+    "kind": "dialog",
+    "dialog": "mix",
+    "label": "Open"
+   }
+  },
+  {
+   "id": "firstVersion",
+   "title": "Version 1",
+   "what": "The app renders the film with its sound and hands it to you as Version 1",
+   "needs": [
+    "build",
+    "sound"
+   ],
+   "done": {
+    "kind": "firstVersion"
+   },
+   "action": {
+    "kind": "job",
+    "job": "firstVersion",
+    "label": "Run"
    },
    "stage": 4
   },
@@ -133,7 +176,9 @@
    "title": "Review",
    "what": "Claude looks at stills of the film like a strict director: seven scores, fixes, until every score is 8 or more",
    "needs": [
-    "build"
+    "build",
+    "sound",
+    "firstVersion"
    ],
    "done": {
     "kind": "review",
@@ -153,32 +198,6 @@
    },
    "stage": 4,
    "firstOnly": true
-  },
-  {
-   "id": "sound",
-   "stage": 4,
-   "title": "Music and sound effects",
-   "what": "Claude picks the music; the app places it and the sound effects",
-   "needs": [
-    "build",
-    "qcReview"
-   ],
-   "done": {
-    "kind": "mark",
-    "auto": true
-   },
-   "skippable": true,
-   "skipLabel": "No music",
-   "action": {
-    "kind": "claude",
-    "label": "Find music",
-    "prompt": "Find three music tracks on mixkit.co that fit the episode's mood and length (the genre's: references/sound.md, its music bed; none of the author's sounds), and hand them to the app with the music_options tool (title, artist, its page on mixkit.co and the direct https://assets.mixkit.co/… .mp3 link). When your turn ends, the app places the first track and the sound effects, one per visible action; the owner can change both in the Final Mix. When the film already has a music track of the owner's, or the web is off for this project, say so in one line and change nothing."
-   },
-   "review": {
-    "kind": "dialog",
-    "dialog": "mix",
-    "label": "Open"
-   }
   },
   {
    "id": "checks",

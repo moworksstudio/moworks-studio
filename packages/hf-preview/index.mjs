@@ -6,7 +6,7 @@
 //   GET /<key>/host.js              the host page script (picking, marks, commands from the UI)
 //   GET /<key>/split-text.js        words animated letter by letter as one line (read by host.js; the server's hand edits use the same file)
 //   GET /<key>/p/<id>/__preview     host page with the player
-//   GET /<key>/p/<id>/<file>        a project file (not .git, .claude, .moworks except its posters)
+//   GET /<key>/p/<id>/<file>        a project file (not .git, .claude, .moworks except its posters and its kept versions)
 import { createServer } from "node:http";
 import { randomBytes } from "node:crypto";
 import { createReadStream, existsSync, statSync } from "node:fs";
@@ -88,7 +88,7 @@ export function startPreviewServer({ resolveProject, uiOrigin, version = null, p
       }
       const rel = normalize(parts.slice(3).join("/"));
       const top = rel.split(/[\\/]/)[0];
-      const postersOnly = top === ".moworks" && /^\.moworks\/(cache\/(posters|proxy|music-options)|qc)\//.test(rel.replace(/\\/g, "/"));          // posters, a code film's preview proxy, the QC sheets, the music to listen to
+      const postersOnly = top === ".moworks" && /^\.moworks\/(cache\/(posters|proxy|music-options|versions)|qc)\//.test(rel.replace(/\\/g, "/"));          // posters, a code film's preview proxy, the QC sheets, the music to listen to
       if (!rel || [".git", ".claude"].includes(top) || (top === ".moworks" && !postersOnly)) return deny(403, "Forbidden");
       const file = resolve(proj.dir, rel);
       if (!file.startsWith(resolve(proj.dir) + sep)) return deny(403, "Forbidden");

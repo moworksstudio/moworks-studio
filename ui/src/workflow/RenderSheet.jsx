@@ -115,6 +115,7 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
   const [form, setForm] = useState(null);
   const mix = useData(() => get(`/api/projects/${projectId}/mix`), [projectId]);          // the music's licence (a Mixkit track is online-only)
   const film = useData(() => get(`/api/projects/${projectId}`), [projectId]);          // its length and aspect, for the line under the fields
+  const pipe = useData(() => get(`/api/projects/${projectId}/pipeline`), [projectId]);          // a Brand Kit film nobody checked; a new version the user has not opened
   const framesSince = useRef(null);          // when the frames began, for the time left
   const [now, setNow] = useState(() => new Date());          // the minute the name preview shows
   useEffect(() => { const h = setInterval(() => setNow(new Date()), 20000); return () => clearInterval(h); }, []);
@@ -159,6 +160,8 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
           <option value="kit">{t("Standard, for web and social (recommended)")}</option><option value="loud">{t("Louder, when the client asks")}</option><option value="off">{t("Keep the mix as it is")}</option></select></label>}
       </div>
       {mix.data?.music?.licence && /mixkit/i.test(mix.data.music.licence) && <Banner kind="warning">{t("Mixkit music is for online use only (YouTube, social, websites, online ads). For TV, radio, cinema, DVD or games, use broadcast-licensed music.")}</Banner>}
+      {pipe.data?.version1?.card?.brand && <Banner kind="warning">{t("Moworks Studio has not checked this film against your brand guideline. Please check it yourself before you send it.")}</Banner>}
+      {pipe.data?.version1?.holding && pipe.data.version1.next && <p className="hint">{t("Render makes Version {n}, the newest. To render Version {k}, open it in Versions first.", { n: pipe.data.version1.next.n, k: pipe.data.version1.n })}</p>}
       <p className="hint num render-spec">{specLine(d, { aspect: film.data?.aspect ?? film.data?.meta?.format?.aspect, duration: film.data?.duration ?? film.data?.meta?.targetDurationSec }, form.format)}</p>
       <div className="row"><span className="spacer" />
         {running ? <button className="btn" onClick={stop}><Square size={14} />{t("Stop")}</button>

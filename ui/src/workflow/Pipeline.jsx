@@ -32,6 +32,8 @@ export function currentStage(stages) {
   return (stages.find((x) => x.status !== "done" && x.id !== "finalMix") ?? stages.at(-1)).id;
 }
 
+// the time left says the same as "Please wait...", in one line (owner 31/10)
+const noWait = (x) => String(x).replace(/\.? Please wait\.\.\.$/, "");
 // the server's stage lines with "(s)", in their singular and plural
 const PLURAL = { "Motion Plan approved for {n} shot(s)": ["Motion Plan approved for 1 shot", "Motion Plan approved for {n} shots"],
   "Brief ready · {n} file(s)": ["Brief ready · 1 file", "Brief ready · {n} files"] };
@@ -75,7 +77,8 @@ export default function Pipeline({ projectId, data, starting = false, onOpen, on
     const app = data?.appBusy?.stage === s0.id && !NOW.has(s0.status) ? data.appBusy : null;
     const s = app ? { ...s0, status: "running", line: app.key, lineVars: app.vars } : s0;
     const now = NOW.has(s.status);
-    const off = running && s.n <= 3 && !NEVER_LOCKED.has(s.open);          // the user changes stages 1-3 only after pressing Stop in the chat
+    // the user changes stages 1-3 only after pressing Stop in the chat; the Final Mix is shut while Claude checks the film, and its line says why
+    const off = (running && s.n <= 3 && !NEVER_LOCKED.has(s.open)) || (s.id === "finalMix" && data?.version1?.card?.kind === "working");
     const opens = OPENS[s.open];
     // "6 shots" / "1 shot", never the machine-like "shot(s)" of the server's line
     const plural = PLURAL[s.line];
@@ -84,17 +87,18 @@ export default function Pipeline({ projectId, data, starting = false, onOpen, on
     const checking = data?.steps?.some((x) => x.id === "checks" && x.status === "running");
     if (s.id === "build" && s.status === "running" && !app && !checking && data?.estimate?.minutes) {
       const since = data.estimate.startedAt ?? data.build?.startedAt;
-      line = `${line} · ${etaLeft(t, { minutes: stageMinutes(data.estimate), startedAt: since })}`;
+      line = `${noWait(line)} · ${etaLeft(t, { minutes: stageMinutes(data.estimate), startedAt: since })}`;
     }
     // the Storyboard and the Motion Plan: the server's line ends with its time left; the time is worked out again from its estimate
     const eta = data?.stepEstimate;
     if (eta?.minutes && s.id === eta.stage && s.status === "running" && !app) {
       const base = String(s.line ?? "").replace(/ · (?:about \d+ min(?: left)?|taking longer than usual(?: · \d+ min so far)?)$/, "");
-      line = `${tr(base, s.lineVars)} · ${etaLeft(t, eta)}`;
+      line = `${noWait(tr(base, s.lineVars))} · ${etaLeft(t, eta)}`;
     }
     const stopped = s.status === "stopped" || s.status === "failed";
     // a stage that waits for the user says what for, on its own line ("Waiting for you: Characters to approve")
-    if (s.status === "waiting" && line && !/^Waiting for you/.test(s.line ?? "")) line = t("Waiting for you: {what}", { what: line });
+    // (the one question after Version 1 says what to do itself)
+    if (s.status === "waiting" && line && !s.choice && !/^Waiting for you/.test(s.line ?? "")) line = t("Waiting for you: {what}", { what: line });
     const k = s.status === "redo" && !off ? data?.steps?.find((x) => s.steps?.includes(x.id) && x.status === "redo" && x.canKeep) : null;
     return { s, now, off, opens, line, stopped, k };
   };
@@ -109,11 +113,12 @@ export default function Pipeline({ projectId, data, starting = false, onOpen, on
       {stages?.map((s0) => {
         const { s, now, off, opens, line: line0, stopped, k } = view(s0);
         // the Review link carries the score, so the Build row's "Review 6/10" is not said twice
-        const line = s.id === "build" && s.line === "Review {score}/10" && data?.qc?.final != null ? "" : line0;
-        return <li key={s.id} className={"pl-stage " + s.status + (now ? " now" : "")}>
+        // (Prepare done: its links are its one line)
+        const line = (s.id === "build" && s.line === "Review {score}/10" && data?.qc?.final != null) || (s.id === "prepare" && s.status === "done") ? "" : line0;
+        return <li key={s.id} className={"pl-stage " + s.status + (now ? " now" : "")} title={off && s.n === 3 && s.status !== "todo" ? t("Press Stop in the chat to change this") : undefined}>
           <span className="pl-no num" aria-hidden="true">{s.status === "done" ? <Check size={12} /> : s.status === "running" ? <Loader2 size={12} className="spin" /> : s.n}</span>
           <span className="pl-name">{t(s.title)}</span>
-          {/* Final Mix is the hand-over, not an optional step: no "Optional" tag (its line says "After the build") */}
+          {/* Final Mix is the hand-over, not an optional step: no "Optional" tag */}
           <span className="pl-tag">{s.status !== "waiting" && STATUS_WORD[s.status] ? t(STATUS_WORD[s.status]) : ""}</span>
           {/* a stage with a dialog opens it from its line ("Approve again" could not be clicked) */}
           {line && (opens && !off && s.id !== "prepare" ? <button className="pl-line pl-go" title={t(opens[1])} onClick={() => onOpen(opens[0])}>{line}</button>
@@ -127,16 +132,17 @@ export default function Pipeline({ projectId, data, starting = false, onOpen, on
           {/* Build and review shows its four parts as The Studio's station 04 does, in The Desk's own links: Build (the
               film in the middle, so a state, not a link), Review with its score, Music and sound effects, Tech checks; a Music / Lyrics film adds
               its lyrics and its music map */}
-          {s.id === "build" && <span className="pl-links pl-subs">{(s.steps?.length ? s.steps.filter((x) => SUB[x]) : Object.keys(SUB)).map((id) => {
+          {s.id === "build" && <span className={"pl-links pl-subs" + (music ? " more" : "") + (data?.qc?.final != null || warnings > 0 ? " full" : "")}>{(s.steps?.length ? s.steps.filter((x) => SUB[x]) : Object.keys(SUB)).map((id) => {
             const st = data?.steps?.find((x) => x.id === id)?.status ?? null;
-            const mark = st === "running" ? <Loader2 size={11} className="spin" /> : st === "done" ? <Check size={11} /> : null;
-            if (id === "build") return <span key={id} className={"pl-sub" + (st ? " " + st : "")}>{mark}{t(SUB[id])}</span>;
+            // one row: only the step that runs stands out
+            const mark = st === "running" ? <Loader2 size={11} className="spin" /> : null;
+            if (id === "build" || id === "firstVersion") return <span key={id} className={"pl-sub" + (st ? " " + st : "")} title={t(SUB[id])}>{mark}{t(SUB_SHORT[id] ?? SUB[id])}</span>;
             const open = id === "qcReview" ? (data?.qc ? () => onOpen("qc-review") : null)
-              : id === "sound" ? (actions?.find((a) => a.key === "mix")?.off === false || st === "done" ? () => onOpen("mix") : null) : () => onOpen("qa");
+              : id === "sound" ? (actions?.find((a) => a.key === "mix")?.off === false || st === "done" ? () => onOpen("mix") : null) : data?.checks?.at || st === "running" ? () => onOpen("qa") : null;
             return <button key={id} type="button" className={"clink pl-sub" + (st ? " " + st : "")} disabled={!open} onClick={open ?? undefined}
-              title={!open ? t("Opens once {step} is done", { step: t("Build") }) : undefined}>{mark}{t(SUB[id])}
+              title={!open ? (id === "qcReview" || id === "checks" ? t("Runs only if you ask Claude to check your film") : t("Opens once {step} is done", { step: t("Build") })) : id === "checks" && warnings > 0 ? `${t(SUB[id])} · ${warnWords(t, warnings)}` : t(SUB[id])}>{mark}{t(SUB_SHORT[id] ?? SUB[id])}
               {id === "qcReview" && data?.qc?.final != null && <b className="num">{` ${data.qc.final}/10`}</b>}
-              {id === "checks" && warnings > 0 && <span className="pl-warn num">{" · " + warnWords(t, warnings)}</span>}</button>;
+              {id === "checks" && warnings > 0 && <span className="pl-warn num">{` ${warnings}`}</span>}</button>;
           })}
             {music && <><button className="clink" onClick={() => onOpen("lyrics")}>{t("Lyrics")}</button>
               <button className="clink" onClick={() => onOpen("music-map")}>{t("Music map")}</button></>}</span>}
@@ -145,8 +151,6 @@ export default function Pipeline({ projectId, data, starting = false, onOpen, on
           {stopped && !running && <span className="pl-acts"><button className="btn sm" disabled={resuming} onClick={resume}>{resuming ? <Loader2 size={13} className="spin" /> : null}{t("Continue")}</button></span>}
           {k && <span className="pl-acts"><button className="btn sm" disabled={!!keeping} onClick={() => keep(k.id)}>{keeping === k.id ? <Loader2 size={13} className="spin" /> : null}{t("Keep it as it is")}</button>
             {opens && <button className="btn sm primary" onClick={() => onOpen(opens[0])}>{t("Approve again")}</button>}</span>}
-          {/* only once the Motion Plan is made or being made, never on a stage not reached yet */}
-          {off && s.n === 3 && s.status !== "todo" && <span className="pl-hint">{t("Press Stop in the chat to change this")}</span>}
         </li>;
       })}
     </ol>
@@ -158,7 +162,9 @@ export default function Pipeline({ projectId, data, starting = false, onOpen, on
 // whose sheet lies on the light table is lifted and lit by the lamp. A station opens its sheet on the table (Build and review: the film
 // itself); every action of the column above is here: Waiting for you, Continue, Keep it as it is / Approve again, Run checks again, the
 // Prepare links, "Press Stop in the chat to change this" and the brief that changed after the build.
-const SUB = { build: "Build", qcReview: "Review", sound: "Music and sound effects", checks: "Tech checks" };
+const SUB = { build: "Build", sound: "Music and sound effects", firstVersion: "Version 1", qcReview: "Review", checks: "Tech checks" };
+// The Desk's column holds them in one row: the whole name on hover
+const SUB_SHORT = { sound: "Sound", checks: "Checks" };
 /** The time left of a running step, as the server's etaWords says it (packages/server/boards.mjs), from now: "about N min left" down
  *  to its estimate, then "taking longer than usual · N min so far". The time left never grows (T26-4: past the middle it jumped to the
  *  time to the slowest, and the Build's went past the top of the range its confirm gave). Both themes' Pipeline say it. */
@@ -190,7 +196,7 @@ function StudioLine({ data, stages, view, running, hasCast, here, actions, onOpe
     {stages?.map((s0) => {
       const { s, now, off, opens, line: line0, stopped, k } = view(s0);
       // the Review pill carries the score: the Build row's "Review 6/10" is not said twice
-      const line = s.id === "build" && s.line === "Review {score}/10" && data?.qc?.final != null ? "" : line0;
+      const line = (s.id === "build" && s.line === "Review {score}/10" && data?.qc?.final != null) || (s.id === "prepare" && s.status === "done") ? "" : line0;
       // A Storyboard waiting for the voice-over or the lyrics opens that dialog, not its own sheet
       const act = NEVER_LOCKED.has(s.open) ? null : actions?.find((a) => a.key === ACTION_OF[s.id]) ?? null;
       // what the station opens, and whether it may now (the same gates as the Desk's links and the chat's bar)
@@ -202,10 +208,10 @@ function StudioLine({ data, stages, view, running, hasCast, here, actions, onOpe
       const subs = s.id === "build" ? (s.steps?.length ? s.steps.filter((x) => SUB[x]) : Object.keys(SUB)) : [];
       const pill = (id) => {
         const st = stepOf(id)?.status ?? null;
-        const open = id === "build" ? () => onPlayer?.() : id === "qcReview" ? (data?.qc ? () => onOpen("qc-review") : null)
-          : id === "sound" ? (actions?.find((a) => a.key === "mix")?.off === false || st === "done" ? () => onOpen("mix") : null) : () => onOpen("qa");
+        const open = id === "build" || id === "firstVersion" ? () => onPlayer?.() : id === "qcReview" ? (data?.qc ? () => onOpen("qc-review") : null)
+          : id === "sound" ? (actions?.find((a) => a.key === "mix")?.off === false || st === "done" ? () => onOpen("mix") : null) : data?.checks?.at || st === "running" ? () => onOpen("qa") : null;
         return <button key={id} type="button" className={"sp-pill" + (st ? " " + st : "")} disabled={!open} onClick={open ?? undefined}
-          title={!open ? t("Opens once {step} is done", { step: t("Build") }) : undefined}>
+          title={!open ? (id === "qcReview" || id === "checks" ? t("Runs only if you ask Claude to check your film") : t("Opens once {step} is done", { step: t("Build") })) : undefined}>
           {st === "running" ? <Loader2 size={11} className="spin" /> : st === "done" ? <Check size={11} /> : null}{t(SUB[id])}
           {id === "qcReview" && data?.qc?.final != null && <b className="num">{` ${data.qc.final}/10`}</b>}
           {id === "checks" && warnings > 0 && <span className="sp-warn num">{" · " + warnWords(t, warnings)}</span>}</button>;
@@ -214,14 +220,14 @@ function StudioLine({ data, stages, view, running, hasCast, here, actions, onOpe
       // buttons inside keep theirs, and the head stays the control for the keyboard
       const card = go && !go.off ? (e) => { if (!e.target.closest("button, a, input, select, summary, label")) go.on(); } : undefined;
       return <div key={s.id} className={`sp-st ${mat} ${s.status}` + (here === s.id ? " here" : "") + (act?.att ? " att" : "") + (card ? " go" : "")} aria-current={here === s.id ? "step" : undefined}
-        onClick={card}>
+        title={off && s.n === 3 && s.status !== "todo" ? t("Press Stop in the chat to change this") : undefined} onClick={card}>
         <button type="button" className="sp-head" disabled={!go || go.off} title={go?.title} onClick={go?.on}>
           <span className="sp-mark" aria-hidden="true">{s.status === "done" ? <Check size={10} /> : s.status === "running" ? <Loader2 size={10} className="spin" /> : null}</span>
           <span className="sp-no num">{String(s.n).padStart(2, "0")}</span><span className="sp-name">{t(s.title)}</span>
           {s.status !== "waiting" && STATUS_WORD[s.status] && <span className="sp-tag">{t(STATUS_WORD[s.status])}</span>}</button>
         {line && (s.id !== "build" && go && !go.off ? <button type="button" className={"sp-text" + (s.status === "waiting" ? " wait" : "")} title={line} onClick={go.on}>{line}</button>
           : <span className={"sp-text" + (s.status === "waiting" ? " wait" : "")} title={line}>{line}</span>)}
-        {(subs.length > 0 || (s.id === "prepare" && (s.status === "done" || now)) || k || (stopped && !running) || (s.id === "build" && blocked && !running) || (off && s.n === 3 && s.status !== "todo")) && <span className="sp-acts">
+        {(subs.length > 0 || (s.id === "prepare" && (s.status === "done" || now)) || k || (stopped && !running) || (s.id === "build" && blocked && !running)) && <span className="sp-acts">
           {subs.map(pill)}
           {s.id === "build" && music && <>
             <button type="button" className="sp-pill" onClick={() => onOpen("lyrics")}>{t("Lyrics")}</button>
@@ -237,7 +243,6 @@ function StudioLine({ data, stages, view, running, hasCast, here, actions, onOpe
           {stopped && !running && <button type="button" className="btn sm" disabled={resuming} onClick={resume}>{resuming ? <Loader2 size={13} className="spin" /> : null}{t("Continue")}</button>}
           {k && <><button type="button" className="btn sm" disabled={!!keeping} onClick={() => keep(k.id)}>{keeping === k.id ? <Loader2 size={13} className="spin" /> : null}{t("Keep it as it is")}</button>
             {opens && <button type="button" className="btn sm primary" onClick={() => onOpen(opens[0])}>{t("Approve again")}</button>}</>}
-          {off && s.n === 3 && s.status !== "todo" && <span className="sp-hint">{t("Press Stop in the chat to change this")}</span>}
         </span>}
       </div>;
     })}

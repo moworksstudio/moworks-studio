@@ -361,6 +361,7 @@ export function VideoStage({ pv }) {
     {proxy?.url && <video ref={video} className="pv-frame pv-video" src={proxy.url} preload="auto" playsInline aria-label={t("Film")} {...videoEvents} />}
     {!proxy?.url && <div className="pv-wait pv-render" role="status">{job ? <Loader2 size={18} className="spin" /> : null}<span>{line}</span>
       {job?.progress != null && <span className="pv-prog" aria-hidden="true"><i style={{ transform: `scaleX(${job.progress / 100})` }} /></span>}</div>}
+    {proxy?.held && <div className="pv-update old" role="status">{t("You are watching Version {n}", { n: proxy.held.n })}</div>}
     {proxy?.url && job && <div className="pv-update" role="status"><Loader2 size={12} className="spin" />{t("Updating the preview")}{job.progress != null ? ` · ${job.progress}%` : ""}</div>}
     {proxy?.url && !job && proxy.status === "stale" && <div className="pv-update old" role="status">{t("Older version")}{proxy.update && <UpdateProxy proxy={proxy} className="btn ghost sm" label="Update" />}</div>}
   </>;
@@ -478,7 +479,7 @@ export default function Player({ projectId, pv, shots, shot, onShot, locked, ran
       {onPin && <button className={"btn ghost sm pv-lb" + (pinning ? " on" : "")} aria-pressed={pinning} onClick={onPin} title={t("Pin a note at this moment (N)")}>
         <MapPin size={14} /><span className="lbl">{t("Pin a note")}</span></button>}
       {/* every tool here says what it is in words; the view aids, the still and full screen sit in one "View" menu */}
-      {videoOnly && <span className="pv-lb pv-only" title={t("This film is drawn by code, so it plays from its render. On the timeline, click a shot to jump to it.")}>{t("Rendered preview")}</span>}
+      {videoOnly && <span className="pv-lb pv-only" title={proxy?.held ? t("This version plays from its render until you open the new one.") : t("This film is drawn by code, so it plays from its render. On the timeline, click a shot to jump to it.")}>{t("Rendered preview")}</span>}
       {!videoOnly && <Menu label={t("Viewing aids")} trigger={<span className="pv-lb"><Eye size={14} /><span className="lbl">{t("Viewing aids")}</span><ChevronDown size={12} /></span>} items={[
         { label: `${safe ? "✓ " : ""}${t("Safe margins")}`, icon: <Scan size={14} />, onSelect: () => setSafe(!safe) },
         { label: `${grid ? "✓ " : ""}${t("Grid 3 × 3")}`, icon: <Grid3x3 size={14} />, onSelect: () => setGrid(!grid) },

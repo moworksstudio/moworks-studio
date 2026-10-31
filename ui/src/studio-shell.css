@@ -700,3 +700,18 @@
 [data-theme="studio"] .st-box::before { color: var(--plank-ink-2); text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55); }
 /* the Motion Plan's "Film style" / "HF formula" tags were the light pencil on paper; on paper they take the pencil's ink */
 [data-theme="studio"] :is(.sheet, .lt-sheet, .dialog, .np-dialog, .studio-paper) .src-tag:is(.k-hf, .k-style) { color: var(--pencil-ink); background: var(--pencil-soft); }
+
+/* A Brand Kit's own page: the book open on the table. Its tabs are paper tabs on the left of the sheet; the sheet scrolls inside the room. */
+[data-theme="studio"] .st-kitbook .st-head { align-items: center; }
+[data-theme="studio"] .st-kitbook .st-head h1 { overflow-wrap: anywhere; }
+[data-theme="studio"] .st-kitbook .st-head .back-btn { align-self: center; }
+[data-theme="studio"] .st-kitbook .st-aside { max-width: 44ch; }
+[data-theme="studio"] .bk-sheet { flex: 1; min-height: 0; overflow-y: auto; padding: clamp(1rem, 2vw, 2rem); display: flex; flex-direction: column; gap: 0.75rem; }
+[data-theme="studio"] .bk-sheet > .bk-body { flex: 1 0 auto; }
+[data-theme="studio"] .bk-sheet .bk-nav .rail-item { color: var(--ink-2); border-radius: var(--st-r-sm); }
+[data-theme="studio"] .bk-sheet .bk-nav .rail-item.active { background: var(--paper-chip, #E9DFC9); color: var(--ink); box-shadow: inset 2px 0 0 var(--registration); }
+[data-theme="studio"] .bk-sheet .bk-nav .rail-item.active svg { color: var(--registration-ink, #B5321B); }
+[data-theme="studio"] .bk-sheet .bk-savebar { background: var(--paper-white, #FFFDF7); border-color: var(--paper-edge, #CDBFA5); backdrop-filter: none; box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.25); }
+[data-theme="studio"] .bk-sheet .bk-ref { color: var(--pencil-ink, #255C95); text-decoration-color: var(--pencil-light, #8DB9E2); }
+[data-theme="studio"] .bk-sheet .bk-inferred { color: var(--paper-run, #A87406); background: rgba(217, 154, 22, 0.14); }
+[data-theme="studio"] .bk-sheet .bk-tok { background: var(--paper-2, #EFE8D9); }

@@ -55,6 +55,19 @@ export function useFirstVisit(key) {
 
 /* ---------- formatting (the interface is English: i18n.jsx) ---------- */
 export const locale = () => "en-GB";
+/** The day a kit was made, as a person writes it. */
+export const madeOn = (iso) => (iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "");
+/** How the user's kits of one name read apart (they may share one: each new version of a brand's kit does): id → the day it was made, with the time when two share that too. */
+export function sameNameLabels(looks) {
+  const groups = new Map(), out = new Map();
+  for (const l of looks ?? []) if (l.group === "yours") { const k = String(l.title).trim().toLowerCase(); groups.set(k, [...(groups.get(k) ?? []), l]); }
+  for (const g of groups.values()) {
+    if (g.length < 2) continue;
+    for (const l of g) out.set(l.id, g.filter((x) => madeOn(x.createdAt) === madeOn(l.createdAt)).length > 1 ? `${madeOn(l.createdAt)}, ${new Date(l.createdAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}` : madeOn(l.createdAt));
+  }
+  return out;
+}
+
 export function ago(iso) {
   if (!iso) return "";
   const s = (Date.now() - new Date(iso).getTime()) / 1000;

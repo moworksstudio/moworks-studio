@@ -26,7 +26,12 @@ import { checklistOf } from "../project-service/design.mjs";
 import { familyKey, fontSlug, listLocalFonts, readFaces, useLocalFont } from "../hf-edit/localFonts.mjs";
 import { runPy } from "../setup/python.mjs";
 import { encodePoster } from "../library/preview-media.mjs";
-import { currentStore, ffmpegExe, hfLookDir, items as hfItems, LOOK_GUIDE, puppeteerOf, storeRoot, vietnameseCheck } from "./index.mjs";
+import { fontMap } from "../hf-edit/finalize.mjs";
+import { fetchGoogleFamily, slug as googleSlug } from "../hf-edit/googleFonts.mjs";
+import { fontsDir } from "../offline-assets/index.mjs";
+import { roles } from "./frame-doc.mjs";
+import { currentStore, ffmpegExe, getItem, hfLookDir, items as hfItems, LOOK_GUIDE, puppeteerOf, storeRoot, vietnameseCheck } from "./index.mjs";
+export { roles };
 
 // the same list as OK_FILES in ui/src/screens/Looks.jsx
 export const ACCEPT = /\.(pdf|pptx|png|jpe?g|webp|gif|svg|ttf|otf|woff2?|zip|rar|7z|ai|psd|psb)$/i;
@@ -85,6 +90,8 @@ export function customLooks(root = APP_ROOT) {
 export function getCustom(id, root = APP_ROOT) { const s = customSlug(id); return s ? readJson(join(dirOf(s, root), "look.json"), null) : null; }
 function must(id, root) { const m = getCustom(id, root); if (!m) throw err("NOT_FOUND", "Brand Kit not found"); return m; }
 
+/** A name as the eye reads it: no case, no marks, no punctuation ("Acme Brand" = "acme-brand!"). */
+const nameKey = (t) => String(t ?? "").replace(/[đĐ]/g, "d").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 export function createLook({ title, leftOut } = {}, root = APP_ROOT) {
   const t = String(title ?? "").trim().replace(/\s+/g, " ").slice(0, 80);
   if (!t) throw err("INVALID", "Name the Brand Kit");
@@ -306,6 +313,9 @@ export function kitGaps(md, guideline = []) {
   return out;
 }
 
+/** A copy of one of HyperFrames' kits has no guideline to check a film against: it lacks nothing a scan could add. */
+const gapsOf = (m, text) => (m.basedOn ? [] : kitGaps(text, m.guideline ?? []));
+
 /** The kit's guideline into a film: its text, its sheets and its pages, each file hard-linked where it can be (a kit's hundreds of pages cost a film nothing
  *  on the same drive, and a later scan of the kit leaves the film's own as they were), with the list Claude starts from. */
 function placeGuideline(m, filmDir, root) {
@@ -488,11 +498,11 @@ function readingMd({ reading, unread, fonts, logos }) {
 /** What a film made with the kit is checked against: said whole in the scan's prompt and in its second go. Sections beyond HF's format (a film reads frame.md as
  *  prose; kitGaps looks for these headings). */
 const KIT_NEEDS = [
-  "Every film made with this kit is checked against this file, so it holds all that a film can break. Give each rule its source at the end of its line: the file's short name and the page, \"(Foldables p. 66)\". Add these sections after the example's, with exactly these headings:",
+  "Every film made with this kit is checked against this file, so it holds all that a film can break. Give each rule its source at the end of its line: the file's short name and the page, \"(Guidelines p. 66)\". Add these sections after the example's, with exactly these headings:",
   "## Crop limits: how far the guideline lets each thing leave the frame or be cut, product, person, logo, type and background apart, from its words and from its figures (open those pages). Say what stays whole, what may go and down to which line; where the guideline's figures draw a line without a number, say which page to measure on. If it never says, write that it does not and that a crop of the product is then a question for the owner.",
   "## Guideline motion: every motion, timing or sound rule the guideline itself gives: animated versions of its visuals with their frames in order, type moves, logo moves and holds, transitions it allows or forbids. A film's other motion is free. If it gives none, write that it gives none.",
   "## Guideline map: one line per topic the guideline covers, leading to its pages: \"- Logo on film: <file name without its extension> pp. 20-24\". Every PDF in READING.md appears by that exact name, also when it adds nothing for films (say so).",
-  "## Guideline checklist: every rule a film can break, one per line, numbered in one run from G1, each a yes-or-no question's worth that can be seen in a frame, a shot, the sound or the script: \"- G12 [product] The device stays whole inside the Red Zone. (Foldables p. 66)\". The tag is one of text, colour, type, logo, product, layout, motion, sound, legal, end. Every don't is a line; every required line of legal text, every logo rule and every crop limit is a line. Keep it short and whole: nothing the guideline forbids is left out, nothing it does not say is added.",
+  "## Guideline checklist: every rule a film can break, one per line, numbered in one run from G1, each a yes-or-no question's worth that can be seen in a frame, a shot, the sound or the script: \"- G12 [product] The device stays whole inside the safe zone. (Guidelines p. 66)\". The tag is one of text, colour, type, logo, product, layout, motion, sound, legal, end. Every don't is a line; every required line of legal text, every logo rule and every crop limit is a line. Keep it short and whole: nothing the guideline forbids is left out, nothing it does not say is added.",
 ];
 
 /** The Claude run that writes work/FRAME.md from what the app made readable (cwd: the Look's folder; Read and Write only, nothing outside
@@ -588,7 +598,7 @@ export async function scanLook(id, { root = APP_ROOT, onProgress = () => {}, wri
     if (example) cpSync(join(hf, example.file), join(work, "example-FRAME.md"));
     if (existsSync(join(hf, ...LOOK_GUIDE.split("/")))) cpSync(join(hf, ...LOOK_GUIDE.split("/")), join(work, "look.md"));
     onProgress({ stage: "Writing the Brand Kit", progress: 30 });
-    m.guideline = read.guideline; saveMeta(m, root);
+    m.guideline = read.guideline; delete m.basedOn; saveMeta(m, root);          // scanned, a copy of HyperFrames' kit is the guideline's now
     const asked = { dir, work, look: m, hints, inputs, unread, fonts, logos, root, signal };
     let text = await writer(asked);
     // what a film needs is looked for here, not left to the first go (a kit once came without its crop limits): asked for once more
@@ -620,7 +630,7 @@ export async function saveVersion(id, text, { root = APP_ROOT, note = "", by = "
   if (stills) { try { shots = await drawStills(p, m.title, join(vd, "stills"), root, own); } catch (e) { stillsError = String(e?.message ?? e).slice(0, 200); } }
   onProgress({ stage: "Vietnamese check", progress: 90 });
   const vi = await vietnameseCheck(p.fonts, { ...(google ? { google } : {}), own });
-  m.gaps = kitGaps(t, m.guideline ?? []);
+  m.gaps = gapsOf(m, t);
   Object.assign(m, { version: v, swatches: uniq(p.colors.map((c) => c.hex)).slice(0, 5), fonts: p.fonts, vi, description: p.description.slice(0, 300),
     stills: shots.map((n) => `v${v}/stills/${n}`), status: scanning ? m.status : "ready", error: stillsError && `Stills: ${stillsError}` });
   m.versions.push({ v, at: now(), by, note: String(note).slice(0, 200) });
@@ -651,17 +661,6 @@ export function frameText(m, root = APP_ROOT, v = m?.version) {
 }
 
 // ---- stills: three 16:9 frames drawn from the tokens (title, colours, type with Vietnamese), captured with the pinned Chromium
-const lum = (hex) => { const n = parseInt(hex.slice(1), 16), c = [n >> 16, (n >> 8) & 255, n & 255].map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
-const sat = (hex) => { const n = parseInt(hex.slice(1), 16), c = [n >> 16, (n >> 8) & 255, n & 255]; return (Math.max(...c) - Math.min(...c)) / 255; };
-/** Which token is the ground, the ink and the accent (by name first, then by lightness and saturation). */
-export function roles(colors) {
-  const by = (re) => colors.find((c) => re.test(c.name))?.hex;
-  const sorted = [...colors].sort((a, b) => lum(b.hex) - lum(a.hex));
-  const bg = by(/^(paper|background|bg|ground|canvas|base|surface|white|light)/i) ?? sorted[0]?.hex ?? "#FFFFFF";
-  const ink = by(/^(ink|text|fg|foreground|black|dark|primary-text)/i) ?? sorted.at(-1)?.hex ?? "#111111";
-  const rest = colors.filter((c) => c.hex !== bg && c.hex !== ink).sort((a, b) => sat(b.hex) - sat(a.hex));
-  return { bg, ink, accent: by(/^(accent|brand|primary|highlight)/i) ?? rest[0]?.hex ?? ink };
-}
 const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const FACE_FORMAT = { ".ttf": ["font/ttf", "truetype"], ".otf": ["font/otf", "opentype"], ".woff": ["font/woff", "woff"], ".woff2": ["font/woff2", "woff2"] };
 /** @font-face rules with the font inside the page (the stills are drawn from a page with no folder of its own), for a family the kit has. */
@@ -727,14 +726,14 @@ export function wholeText(text, max = 600) {
   return end > max / 3 ? `${head.slice(0, end + 1)} …` : `${head.slice(0, head.lastIndexOf(" ") > 0 ? head.lastIndexOf(" ") : max).trimEnd()}…`;
 }
 export function publicLook(m, root = APP_ROOT) {
-  return { id: m.id, title: m.title, group: "yours", description: wholeText(m.description), swatches: m.swatches ?? [],
+  return { id: m.id, title: m.title, group: "yours", createdAt: m.createdAt ?? null, madeFrom: m.madeFrom ?? null, description: wholeText(m.description), swatches: m.swatches ?? [],
     preview: { image: m.stills?.[0] ? media(m.slug, m.stills[0]) : null, video: null }, fonts: fontRows(m.vi, m.fonts), vi: m.vi?.status ?? null,
     version: m.version, updatedAt: m.updatedAt, editable: true, status: m.status, error: m.error ?? null,
     // what the kit holds without having read it: named on its panel, a kit made before this list has none
     unread: [...(m.unread ?? []), ...(m.leftOut ?? [])], stopped: m.stopped ?? null,
     // a kit made before these sections has no list: what it lacks is read from its text
-    gaps: m.gaps ?? (m.version ? kitGaps(frameText(m, root), m.guideline ?? []) : []), checks: m.version ? checklistOf(frameText(m, root)).length : 0,
-    source: { kind: "guideline", files: (m.files ?? []).map((f) => f.name), credit: OWNER } };
+    gaps: m.gaps ?? (m.version ? gapsOf(m, frameText(m, root)) : []), checks: m.version ? checklistOf(frameText(m, root)).length : 0,
+    source: { kind: m.basedOn ? "hf-copy" : "guideline", files: (m.files ?? []).map((f) => f.name), credit: m.basedOn?.credit ?? OWNER, basedOn: m.basedOn ? { id: m.basedOn.id, title: m.basedOn.title } : null } };
 }
 export function hfLook(l, root = APP_ROOT) {
   const st = currentStore(root);
@@ -749,16 +748,114 @@ export function apiLooks(root = APP_ROOT) {
 export function apiLook(id, root = APP_ROOT) {
   const m = getCustom(id, root);
   if (m) return { ...publicLook(m, root), frame: frameText(m, root), stills: (m.stills ?? []).map((r) => media(m.slug, r)), versions: m.versions,
-    files: m.files };
+    files: m.files, logos: logosOf(m, root), guideline: guidelineOf(m, root), frames: m.basedOn?.id ?? null };
   const l = hfItems(root).find((x) => x.id === id);
   if (!l) throw err("NOT_FOUND", "Brand Kit not found");
   let frame = null; try { frame = readFileSync(join(hfLookDir(root), l.file), "utf8"); } catch { /* the clone is missing */ }
-  return { ...hfLook(l, root), frame, stills: l.preview?.poster ? [`/media/looks/${l.preview.poster}`] : [], versions: [], files: [] };
+  return { ...hfLook(l, root), frame, stills: l.preview?.poster ? [`/media/looks/${l.preview.poster}`] : [], versions: [], files: [], logos: [], guideline: [], frames: l.id };
 }
 
-/** A still of a custom Look, contained in the store. */
+/** What a Brand Kit's page shows and a font it draws with: a still, a logo or font file the user gave (nothing else in that folder), a logo the scan
+ *  made, a page of a guideline as read, all contained in the store. */
+const KIT_MEDIA = [/^custom\/[a-z0-9-]+\/v\d+\/stills\/\d+\.webp$/, /^custom\/[a-z0-9-]+\/files\/[^/\\]+\.(png|jpe?g|webp|gif|svg|ttf|otf|woff2?)$/i,
+  /^custom\/[a-z0-9-]+\/derived\/[^/\\]+\.png$/i, /^custom\/[a-z0-9-]+\/work\/(pdf|ai)-\d+\/pages\/page-\d+\.jpg$/];
 export function customMedia(rel, root = APP_ROOT) {
-  if (!/^custom\/[a-z0-9-]+\/v\d+\/stills\/\d+\.webp$/.test(rel)) return null;
+  if (!KIT_MEDIA.some((re) => re.test(rel))) return null;
   const base = resolve(customRoot(root)), f = resolve(storeRoot(root), rel);
-  return f.startsWith(base + sep) && existsSync(f) ? f : null;
+  return f.startsWith(base + sep) && existsSync(f) && statSync(f).isFile() ? f : null;
+}
+/** The fonts the Brand Kit page draws with, served by name: "appfont/<a bundled font's file>", "webfont/<family slug>/<file>" (the app's own cache of a Google family). */
+export function fontMedia(rel, root = APP_ROOT) {
+  const app = /^appfont\/(.+\.(?:ttf|otf|woff2?))$/i.exec(rel)?.[1], web = /^webfont\/([a-z0-9-]+)\/([\w.-]+\.(?:ttf|otf|woff2?))$/i.exec(rel);
+  const dir = app ? fontsDir(root) : join(APP_ROOT, "runtime", "fonts", "google"), f = app ? resolve(dir, app) : web ? resolve(dir, web[1], web[2]) : null;
+  return f && f.startsWith(resolve(dir) + sep) && existsSync(f) ? f : null;
+}
+
+// ---- the Brand Kit page
+const fileUrl = (slug, folder, name) => media(slug, `${folder}/${encodeURIComponent(name)}`);
+/** The kit's logos and pictures as the page shows them: each artwork once, as a film gets them. */
+function logosOf(m, root) {
+  return kitLogos(m, root).map((x) => ({ name: x.name, url: fileUrl(m.slug, basename(join(x.file, "..")), x.name) }));
+}
+/** The kit's PDFs as read, each with where its pages are: a topic or a rule's source opens the page it names. */
+function guidelineOf(m, root) {
+  return (m.guideline ?? []).map((g) => ({ name: g.name, pages: g.pages, pagesAt: existsSync(join(dirOf(m.slug, root), ...g.sub.split("/"), "pages")) ? media(m.slug, `${g.sub}/pages/`) : null }));
+}
+const FACE = { ".ttf": "truetype", ".otf": "opentype", ".woff": "woff", ".woff2": "woff2" };
+/** The page's own name for a font it draws with, so a kit's font never takes the place of one the app's own screens use. */
+const pageFamily = (family) => `BK ${String(family).replace(/["'\\]/g, "")}`;
+const faceCss = (family, url, weight, italic) => `@font-face { font-family: "${pageFamily(family)}"; src: url("${url}") format("${FACE[extname(url.split("?")[0]).toLowerCase()] ?? "truetype"}"); font-weight: ${weight}; font-style: ${italic ? "italic" : "normal"}; font-display: swap; }`;
+const viAsked = new Map();          // one answer a family while the app runs: opening a page asks Google nothing twice
+/** The fonts a kit's page draws with: { css, families: [{ family, via: kit | app | google | null, vi, weights }], choices: { kit, app } }. A family comes
+ *  from the kit's files, else the fonts the app bundles, else the app's one-time Google Fonts download (hf-edit/googleFonts.mjs, the same cache a film's build uses);
+ *  via null: not on this computer and not to be had, the page says so and draws a stand-in. */
+export async function kitFontFaces({ id, families = [] } = {}, { root = APP_ROOT, google = fetchGoogleFamily, viGoogle = undefined } = {}) {
+  const m = getCustom(id, root), own = m ? kitFonts(m, root) : [], app = fontMap(), appKeys = Object.keys(app);
+  const wanted = uniq(families.map((f) => String(f ?? "").trim()).filter(Boolean)).slice(0, 24), css = [], rows = [];
+  for (const family of wanted) {
+    const mine = own.find((x) => familyKey(x.family) === familyKey(family)), inApp = appKeys.find((k) => k.toLowerCase() === family.toLowerCase());
+    if (mine) {
+      for (const x of mine.files) css.push(faceCss(family, fileUrl(m.slug, "files", basename(x.file)), x.weight, x.italic));
+      rows.push({ family, via: "kit", weights: uniq(mine.files.map((x) => String(x.weight))) });
+    } else if (inApp) {
+      for (const x of app[inApp]) css.push(faceCss(family, `/media/looks/appfont/${x.file.split("/").map(encodeURIComponent).join("/")}`, Array.isArray(x.weight) ? x.weight.join(" ") : x.weight, x.style === "italic"));
+      rows.push({ family, via: "app", weights: uniq(app[inApp].map((x) => (Array.isArray(x.weight) ? (x.weight[0] === x.weight[1] ? String(x.weight[0]) : x.weight.join("–")) : String(x.weight)))) });
+    } else {
+      let got = null;
+      try { got = await google(family, { fetchImpl: (u, o) => fetch(u, { ...o, signal: AbortSignal.timeout(8000) }) }); } catch { /* offline: a stand-in, and the page says so */ }
+      if (got?.css) {
+        const at = `/media/looks/webfont/${googleSlug(family)}/`;
+        css.push(got.css.replace(/\/\*[^*]*\*\/\s*/g, "").replace(/font-family:\s*'[^']*'/g, `font-family: "${pageFamily(family)}"`).replace(/__DIR__\//g, at));
+        rows.push({ family, via: "google", weights: uniq([...got.css.matchAll(/font-weight:\s*([\d ]+);/g)].map((x) => x[1].trim().replace(" ", "–"))).sort((a, b) => parseInt(a, 10) - parseInt(b, 10)) });
+      } else rows.push({ family, via: null, weights: [] });
+    }
+  }
+  const vi = await vietnameseCheck(wanted, { own, cache: viAsked, ...(viGoogle ? { google: viGoogle } : {}) }).catch(() => ({ families: [] }));
+  for (const r of rows) r.vi = vi.families.find((x) => x.family === r.family)?.vi ?? null;
+  return { css: css.join("\n"), families: rows, choices: { kit: own.map((f) => f.family), app: appKeys } };
+}
+
+/** A new version of a kit: a kit of its own, by default of the same name, with its own id, files and history, so the one before stays as it is and films can still
+ *  be made with it (a brand changes its guideline several times a year). keep: the files that come along: "all", "assets" (fonts, logos, pictures), "guideline" (PDF, PPTX) or
+ *  "none". blank: the new guideline is about to be added and scanned, so no text yet. Else it starts as a copy: frame, the changes not saved on the old one, or its current text, with
+ *  what the scan made readable (the guideline's pages). */
+export async function newVersion(id, { title = null, frame = null, keep = "all", blank = false } = {}, { root = APP_ROOT, stills = true, google = undefined } = {}) {
+  const from = must(id, root);
+  if (from.status === "scanning") throw err("BUSY", "The Brand Kit is being scanned");
+  const text = blank ? null : frame ?? frameText(from, root);
+  if (!blank && !text) throw err("INVALID", "This Brand Kit has nothing to copy yet");
+  const made = createLook({ title: String(title ?? "").trim() || from.title }, root), a = dirOf(from.slug, root), b = dirOf(made.slug, root);
+  try {
+    const paper = (f) => ["pdf", "pptx"].includes(f.kind);
+    made.files = (from.files ?? []).filter((f) => keep === "all" || (keep === "assets" && !paper(f)) || (keep === "guideline" && paper(f))).filter((f) => existsSync(join(a, "files", f.name)));
+    for (const f of made.files) copyFileSync(join(a, "files", f.name), join(b, "files", f.name));
+    made.madeFrom = { id: from.id, title: from.title, version: from.version, createdAt: from.createdAt ?? null };
+    if (from.basedOn) made.basedOn = from.basedOn;
+    if (!blank) {
+      for (const n of ["work", "derived"]) if (existsSync(join(a, n))) cpSync(join(a, n), join(b, n), { recursive: true });
+      Object.assign(made, { guideline: from.guideline ?? [], unread: from.unread ?? [], leftOut: from.leftOut ?? [] });
+    }
+    saveMeta(made, root);
+    if (blank) return made;
+    const m = await saveVersion(made.id, text, { root, note: `new version of the kit made ${String(from.createdAt ?? "").slice(0, 10)}`, by: "new-version", stills, google });
+    m.status = "ready";
+    return saveMeta(m, root);
+  } catch (e) { rmSync(b, { recursive: true, force: true }); throw e; }
+}
+
+/** One of HyperFrames' kits as the user's own, to change: HyperFrames' own stays as shipped. Its first version is HF's text; the credit stays with it. */
+export async function copyLook(id, { root = APP_ROOT, stills = true, google = undefined } = {}) {
+  const l = getItem(id, root);
+  if (!l) throw err("NOT_FOUND", "Brand Kit not found");
+  const text = readFileSync(join(hfLookDir(root), l.file), "utf8");
+  const names = new Set(customLooks(root).map((x) => nameKey(x.title)));
+  let title = `${l.title} copy`;
+  for (let i = 2; names.has(nameKey(title)); i++) title = `${l.title} copy ${i}`;
+  const made = createLook({ title }, root);
+  try {
+    saveMeta(Object.assign(made, { basedOn: { id: l.id, title: l.title, credit: { ...l.credit, made: "adapted", madeNote: `the user's copy of HyperFrames' frame preset ${l.title}, changed in the app` } } }), root);
+    const m = await saveVersion(made.id, text, { root, note: `copied from HyperFrames' ${l.title}`, by: "copy", stills, google });
+    m.status = "ready";
+    return saveMeta(m, root);
+  } catch (e) { rmSync(dirOf(made.slug, root), { recursive: true, force: true }); throw e; }
 }

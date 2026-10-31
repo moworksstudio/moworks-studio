@@ -12,7 +12,7 @@ import { execFile } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import { VARIANT_KEY, cueKey, cuesOf, handMoves, mount, mountAmbience, patchState, readState, resolveCues, setVolumes, sfxNone, slug, useLibrarySound, useOwnerSound, writeCredits } from "./index.mjs";
+import { VARIANT_KEY, cueKey, cuesOf, handMoves, mount, mountAmbience, patchState, readState, resolveCues, setVolumes, sfxNone, slug, timeKey, useLibrarySound, useOwnerSound, writeCredits } from "./index.mjs";
 import { BED_UNDER, DENSITY, REF_BED, TYPING, ambienceBeds, boostOf, duckLane, hitVolume, motionCues, mixShift, placeOf, speechSpans, styleHint, thin, tiles, volumeFor } from "./actions.mjs";
 import { levelTracks, loudnessOf } from "./mixlevels.mjs";
 import { fitEffects } from "./voicefit.mjs";
@@ -283,7 +283,7 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   const filmEnd = ends.length ? Math.max(...ends) : null;
   const note = (extra) => patchState(dir, (st) => { st.policy = { density: policy.density, whoosh, silent: policy.silent, ambience: policy.ambience, style }; Object.assign(st, extra); });
   if (policy.silent) {          // the owner, the style, the brief or the song asks for no sound effects: none of the app's own
-    mount(dir, [], { cueKey: cueKey(shots ?? []), left: { missing: [], near: [] } });
+    mount(dir, [], { cueKey: cueKey(shots ?? []), times: timeKey(shots ?? []), left: { missing: [], near: [] } });
     mountAmbience(dir, []);
     note({ thinned: [] });
     writeCredits(dir);
@@ -326,7 +326,7 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   }
   const near = (res.near ?? []).filter((x) => cues.some((c) => c.name === x.name));          // what the film plays, not a name thinned away
   const endFade = filmEnd ? endFadeOf(dir, filmEnd) : 0;         // the ending's fade: the beds and the sounds in it fade with the film
-  const placed = mount(dir, cues, { filmEnd, endFade, cueKey: cueKey(shots ?? []), left: { missing: res.missing, near } });
+  const placed = mount(dir, cues, { filmEnd, endFade, cueKey: cueKey(shots ?? []), times: timeKey(shots ?? []), left: { missing: res.missing, near } });
   const beds = policy.ambience ? await placeAmbience(dir, shots, { prefs, filmEnd, endFade, words, shift: lv?.shift ?? 0, root: opts.root }) : (mountAmbience(dir, []), []);
   // every effect under the voice where a word is spoken, and the whole mix under the master's ceiling: nothing later has to fix them
   const fitted = await fitEffects(dir, { root: opts.root }).catch(() => null);

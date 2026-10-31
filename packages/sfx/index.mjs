@@ -552,7 +552,7 @@ const OURS_ALWAYS = new Set(["id", "src", "data-mw-cue", "data-mw-at"]);        
  * set, its volume, and, while the plan has not moved that cue, its timing. A cue the user moved stays as far off its place as they moved it and keeps its file; one they took
  * off stays off.
  */
-export function mount(dir, cues, { filmEnd = null, endFade = 0, cueKey: key = undefined, left = undefined } = {}) {
+export function mount(dir, cues, { filmEnd = null, endFade = 0, cueKey: key = undefined, times = undefined, left = undefined } = {}) {
   const st = readState(dir), f = join(dir, "index.html");
   let html = readFileSync(f, "utf8");
   // a 181 s "film-projector" clip went into a 40 s film from 0 s and covered the whole SFX lane. A clip plays at most
@@ -647,6 +647,7 @@ export function mount(dir, cues, { filmEnd = null, endFade = 0, cueKey: key = un
   delete st.fit;          // the lanes went with the old placement: fitted again (voicefit.mjs)
   st.placedAt = new Date().toISOString();          // the Editor reads the Final Mix again when this changes (GET /pipeline's sfx)
   if (key !== undefined) st.cueKey = key;          // the storyboard's named cues this placement was made from
+  if (times !== undefined) st.times = times;          // where the shots stood when it was made (timeKey)
   if (left !== undefined) st.left = left;          // { missing, near }: named sounds left out or on a stand-in (GET /mix)
   saveState(dir, st);
   return placed;
@@ -656,6 +657,13 @@ export function mount(dir, cues, { filmEnd = null, endFade = 0, cueKey: key = un
  *  ("2:ambience=rain"): what a placement was made from (a chat change of either places the sounds again). */
 export const cueKey = (shots) => [...cuesOf(shots).map((c) => `${c.shot}:${c.name}@${c.offset}`),
   ...shots.filter((s) => String(s.ambience ?? "").trim()).map((s) => `${s.number}:ambience=${String(s.ambience).trim().toLowerCase()}`)].sort().join("|");
+/** Where every shot starts and how long it lasts: a Review that moved a shot leaves the sounds placed for the film as it was (timesChanged). */
+export const timeKey = (shots) => (shots ?? []).filter((s) => s.start != null).map((s) => `${s.number}:${Number(s.start).toFixed(2)}+${Number(s.duration ?? 0).toFixed(2)}`).join("|");
+/** Did a shot move or change its length since the sounds were last placed? false while none were placed, or for a placement from before this was kept. */
+export function timesChanged(dir, shots) {
+  const st = readState(dir);
+  return !!st.mounted && st.times != null && st.times !== timeKey(shots);
+}
 /** Did the storyboard's named cues change since the sounds were last placed? false while none were ever placed (the Final Mix places
  *  them first). A placement from before cueKey was kept counts as changed once. */
 export function cuesChanged(dir, shots) {

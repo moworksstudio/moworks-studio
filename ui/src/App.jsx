@@ -2,8 +2,8 @@
 // opens in the Editor; its stages are sheets there, so their old addresses open the Editor with that sheet.
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, LayoutGrid, Library as LibraryIcon, PanelLeftClose, PanelLeftOpen, Settings as Gear, Palette, Smile, Sparkles,
-  XCircle } from "lucide-react";
-import { get, holdPresence, setBusy } from "./api.js";
+  X, XCircle } from "lucide-react";
+import { get, holdPresence, post, setBusy } from "./api.js";
 import { ToastProvider, go, usePref, useRoute } from "./lib.jsx";
 import { tr, useT } from "./i18n.jsx";
 import ErrorBoundary from "./ErrorBoundary.jsx";          // one broken screen shows a message, not a blank app
@@ -73,14 +73,30 @@ const busyTip = (tasks, jobs, st, t) => {
   return [pick.project ? `${pick.project}: ${name}` : name, pick.progress != null ? `${pick.progress}%` : "", more > 0 ? t("{n} more running", { n: more }) : ""].filter(Boolean).join(" · ");
 };
 
+/** A film's new version, for whoever is on another screen: one line with its Open, no jump (owner 31/10). On that film's own Editor it is passed over: the Editor takes the user to the version. */
+export function VersionNotices({ notices, path, onSeen }) {
+  const t = useT();
+  const here = (n) => path.split("?")[0].startsWith(`/projects/${n.projectId}`);
+  useEffect(() => { for (const n of notices) if (here(n)) onSeen(n); }, [notices, path]); // eslint-disable-line react-hooks/exhaustive-deps
+  const shown = notices.filter((n) => !here(n));
+  if (!shown.length) return null;
+  return <div className="vnotices" role="status" aria-live="polite">{shown.slice(-3).map((n) => <div key={n.id} className="vnotice">
+    <span className="t"><b>{n.title}</b>{t(n.text, n.vars)}</span>
+    <a className="btn sm primary" href={`#/projects/${n.projectId}`} onClick={() => onSeen(n)}>{t("Open")}</a>
+    <button type="button" className="btn ghost icon sm" onClick={() => onSeen(n)} aria-label={t("Close")}><X size={14} /></button></div>)}</div>;
+}
+
 function TopBar({ crumbs, collapsed, setCollapsed, studio = false, path = "", update = null }) {
   const t = useT();
   const [running, setRunning] = useState([]);
+  const [notices, setNotices] = useState([]);
+  const seen = (n) => { setNotices((x) => x.filter((y) => y.id !== n.id)); post(`/api/notices/${n.id}/seen`).catch(() => {}); };
   const [bg, setBg] = useState([]);
   const [srv, setSrv] = useState(null);          // the server's one word, the rule that counts
+  const [hot, setHot] = useState(false);         // the computer has been very busy for minutes while the app works
   useEffect(() => {
     let alive = true;
-    const tick = async () => { try { const r = await get("/api/tasks/running"); if (alive) { setRunning(r.tasks); setBg(r.jobs ?? []); setSrv(r.state ?? null); setBusy(r.tasks.length + (r.jobs ?? []).length > 0); } } catch { /* offline shows elsewhere */ } if (alive) setTimeout(tick, 4000); };
+    const tick = async () => { try { const r = await get("/api/tasks/running"); if (alive) { setRunning(r.tasks); setBg(r.jobs ?? []); setSrv(r.state ?? null); setHot(!!r.machineBusy); setNotices(r.notices ?? []); setBusy(r.tasks.length + (r.jobs ?? []).length > 0); } } catch { /* offline shows elsewhere */ } if (alive) setTimeout(tick, 4000); };
     tick(); return () => { alive = false; };
   }, []);
   return (
@@ -94,6 +110,8 @@ function TopBar({ crumbs, collapsed, setCollapsed, studio = false, path = "", up
       <div className="topbar-spacer" />
       <div className="topbar-slot" id="topbar-slot" />
       <UpdateLine notice={update} />
+      {hot && <div className="upd-notice studio-paper" role="status" title={t("Closing other apps or waiting for other films to finish will help.")}>
+        <span className="dot warning" aria-hidden="true" /><span className="upd-say">{t("This computer is very busy, so this will take longer")}</span></div>}
       <span className="sr-only" role="status" aria-live="polite">{running?.length ? t("Claude is working on {title}", { title: running[0].title }) : bg.length ? `${(bg[0].label ?? bg[0].title)}${bg[0].progress != null ? ` · ${bg[0].progress}%` : ""}` : t("Nothing is running")}</span>
       {/* one chip, four words (Idle, Working, Downloading, Updating); what runs and how far only on hover, one short line */}
       {(() => { const st = srv ?? busyState(running ?? [], bg); const tip = busyTip(running ?? [], bg, st, t);
@@ -105,6 +123,7 @@ function TopBar({ crumbs, collapsed, setCollapsed, studio = false, path = "", up
         aria-label={update?.ready ? `${t("Settings")} · ${t("A new version is ready")}` : t("Settings")} title={t("Settings")}
         aria-current={path.startsWith("/settings") ? "page" : undefined}><Gear size={18} /><UpdateDot on={!!update?.ready} /></a>}
       <ExitButton />
+      <VersionNotices notices={notices} path={path} onSeen={seen} />
     </header>
   );
 }
@@ -144,7 +163,7 @@ export function Shell({ update: firstUpdate = null } = {}) {
   if (seg[0] === "new") screen = <><Projects /><NewProjectDialog onClose={() => go("/projects")} /></>;
   else if (seg[0] === "projects" && seg[1]) screen = <Editor id={seg[1]} setCrumbs={setCrumbs} open={SHEETS[seg[2]] ?? null} />;
   else if (seg[0] === "styles") screen = <StyleGallery />;
-  else if (seg[0] === "looks") screen = <Looks />;
+  else if (seg[0] === "looks") screen = <Looks kitId={seg.slice(1).join("/") || null} />;
   else if (seg[0] === "characters") screen = <Characters />;
   else if (seg[0] === "library") screen = <Library />;
   else if (seg[0] === "settings") screen = <Settings section={seg[1] ?? "general"} claude={claude?.status ?? { loggedIn: false }} onRecheckClaude={() => claude?.refresh(true)} updateReady={update.ready} />;

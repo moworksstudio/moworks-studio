@@ -12,22 +12,25 @@
 // audio mix is put onto the rendered picture (remix.mjs) in seconds. An HTML film still plays live in the Editor.
 import { execFile, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, linkSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, join, relative, sep } from "node:path";
 import { promisify } from "node:util";
 import { remixAudio, render } from "../hf-render-worker/client.mjs";
-import { isCodeFilm } from "../pipeline/index.mjs";
+import { isCodeFilm, reviewPending } from "../pipeline/index.mjs";
 import { expandEnv, loadPins, renderSettings } from "../version-manager/index.mjs";
 import * as projects from "../project-service/index.mjs";
 import { docPath } from "../project-service/docs.mjs";
 import { refreshBridge } from "../hf-edit/lemoPage.mjs";
 import { fitMusicToFilm } from "../hf-edit/tracks.mjs";
+import { levelTracks } from "../sfx/mixlevels.mjs";
 import { capWebBitrate, smoothCopy } from "../hf-qa/webBitrate.mjs";
 
 const { projectFps } = projects;
 
 const DIR = [".moworks", "cache", "proxy"];
+/** Where a version's render is kept: a Version the user can go back to with nothing to render again (a 3D film may take an hour). */
+const VERSIONS = [".moworks", "cache", "versions"];
 /** Where a sound is mixed again: the computer's temp folder, not the film's. HF makes long-named folders inside it, and a film deep in the user's
  *  folders went past Windows' 248 characters for a folder (ENOENT from mkdtemp: the new sound never mixed). */
 export const remixWorkDir = (hash) => join(tmpdir(), `mw-remix-${hash}`);
@@ -120,6 +123,14 @@ const filmSeconds = (dir) => {
 export function proxyRoutes(ctx, { r, P, mustProject }) {
   const root = ctx.root, running = new Map(), smoothing = new Set();          // smoothing: jobs that only make the Smooth copy
   const again = new Set();          // films asked for again while their job ran
+  const waiters = new Map();          // what waits for a film's job to end (Version 1, a new version): (ok, error) => …
+  /** A film's job ended: whoever waits for it is told. With nobody waiting, a film with no Version 1 yet goes on from there (its step may have found this job running). */
+  const settle = (id, ok, err) => {
+    const fns = waiters.get(id) ?? [];
+    waiters.delete(id);
+    for (const fn of fns) { try { fn(ok, err); } catch { /* the next read says it */ } }
+    if (!fns.length) { const m = projects.getProject(id, root)?.meta; if (m && !finished(m) && !m.pipeline?.version1) setTimeout(() => { ctx.autopilot?.advance?.(id)?.catch?.(() => {}); }, 0); }
+  };
   const url = (id, rel) => `${ctx.preview.base}/p/${id}/${rel}`;
   // the job as the app shows it (its record, not a handle): id, stage, progress, what it waits for
   const pub = (j) => { const r = j && (ctx.jobs.get?.(j.id) ?? j); return r ? { id: r.id, kind: r.kind, status: r.status, stage: r.stage, progress: r.progress ?? null, waitingFor: r.waitingFor ?? null } : null; };
@@ -201,25 +212,30 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
    *  render slot, so Render and the chat stay free: it waits while an export runs or Claude changes the film, and stops (to start again
    *  later) when either begins. Light: BG_WORKERS capture workers at below-normal priority. `asked`: the user's Update, which waits
    *  for Claude instead of starting nothing. */
-  const make = (p, { asked = false } = {}) => {
+  const make = (p, { asked = false, onEnd = null, level = false } = {}) => {
+    // while a Review the user asked for runs, and until a 3D film's new version is answered, no render starts by itself
+    const v1 = p.meta?.pipeline?.version1;
+    if (!asked && (reviewPending(v1) || ["ask", "later"].includes(v1?.next?.render))) return null;
     const v = view(p);
+    const wait = (job) => { if (job && onEnd) waiters.set(p.id, [...(waiters.get(p.id) ?? []), onEnd]); return job; };
     // asked again while one runs (the Final Mix changed the sound during it): that file is of the film as it was when it began, so the
     // film is looked at again once it ends (T25-3: the render ended stale, with no job, and the Editor said "Updating…" for good)
-    if (running.has(p.id)) { again.add(p.id); return running.get(p.id); }
+    if (running.has(p.id)) { again.add(p.id); return wait(running.get(p.id)); }
     if (v.status === "fresh" && v.needsSmooth) {          // a render made before the Smooth copy existed: only the copy
       const job = ctx.jobs.start("preview-proxy", { projectId: p.id, title: "Smooth preview" }, async (j) => {
-        let ok = false;
+        let ok = false, err = null;
         try { j.update({ stage: "smooth preview", progress: 50 }); const st = await withSmooth(p, readState(p.path), { signal: j.signal }); ok = true; return { hash: st.hash, file: st.file, smooth: st.smooth?.file ?? null }; }
-        finally { running.delete(p.id); smoothing.delete(p.id); lookAgain(p.id, ok); }
+        catch (e) { err = e; throw e; }
+        finally { running.delete(p.id); smoothing.delete(p.id); lookAgain(p.id, ok); settle(p.id, ok, err); }
       });
       running.set(p.id, job); smoothing.add(p.id);          // the render stays fresh and plays meanwhile
-      return job;
+      return wait(job);
     }
     if (!existsSync(join(p.path, "index.html")) || v.status === "fresh") return null;
     if (!asked && ctx.agent?.running?.has(p.id)) return null;
     const pre = prerendered(p.meta?.style?.id), quality = qualityOf(p.meta?.style?.id);
     const job = ctx.jobs.start("preview-proxy", { projectId: p.id, title: pre || !v.codeFilm ? "Rendering the film" : "Smooth preview" }, async (j) => {
-      let ok = false;
+      let ok = false, err = null;
       try {
         for (let attempt = 0; ; attempt++) {
           for (let b = blocker(p); b && !j.signal.aborted; b = blocker(p)) { j.update({ stage: "waiting", waitingFor: b }); await pause(2000, j.signal); }
@@ -227,6 +243,8 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
           const fresh = projects.getProject(p.id, root) ?? p;
           projects.keepRootFps(fresh);          // the film's data-fps on its root, as an export does (so the export finds this file fresh)
           fitMusicToFilm(p.path);          // the music fitted to the film's end, as an export does
+          // a version's render: the levels as an export sets them, so its Tech checks and its Render find the film as this file has it
+          if (level) await levelTracks(p.path, { root }).catch(() => null);
           refreshBridge(p.path);          // today's bridge, as an export does
           const fps = projectFps(fresh), parts = filmParts(p.path, fps), hash = filmHash(p.path, fps), dir = join(p.path, ...DIR), rel = `${DIR.join("/")}/${hash}.mp4`;
           mkdirSync(dir, { recursive: true });
@@ -264,10 +282,10 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
           ok = true;
           return { hash, file: rel, ...facts };
         }
-      } finally { running.delete(p.id); lookAgain(p.id, ok); }
+      } catch (e) { err = e; throw e; } finally { running.delete(p.id); lookAgain(p.id, ok); settle(p.id, ok, err); }
     });
     running.set(p.id, job);
-    return job;
+    return wait(job);
   };
   /** A job that ended well while the film was changed again: made again now when it is not fresh (the sound mixed again in seconds when
    *  only the sound changed). Not after a stop or a failure: the next change, or the Editor's Update, asks again. */
@@ -277,7 +295,50 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
   };
   // the pipeline calls this when a film is built and when it is finished, and again after a change to a finished film (the autopilot); nothing else starts
   // it: not opening the project, not the Editor's polls
-  ctx.previewProxy = (projectId) => { try { const p = mustProject(projectId, root); return make(p); } catch { return null; } };
+  ctx.previewProxy = (projectId, opts = {}) => {
+    try { const p = mustProject(projectId, root); return make(p, opts); }
+    catch (e) { if (opts.onEnd) { setTimeout(() => opts.onEnd(false, e), 0); return { id: null, failed: true }; } return null; }
+  };
+  /** Is the film's render the film as it is now, picture and sound? */
+  ctx.filmRendered = (projectId) => { try { return view(mustProject(projectId, root), { self: true }).status === "fresh"; } catch { return false; } };
+  const versionFile = (dir, id, ext) => join(dir, ...VERSIONS, `${id}${ext}`);
+  /** The film's render as this version's own: a second name of the same file, which outlives the render's cache (only the newest stays there). */
+  ctx.keepVersionFile = (p, v) => {
+    const st = readState(p.path);
+    if (!st?.file || !existsSync(join(p.path, ...st.file.split("/")))) return null;
+    mkdirSync(join(p.path, ...VERSIONS), { recursive: true });
+    const keep = (rel, ext) => { const to = versionFile(p.path, v.id, ext); rmSync(to, { force: true }); try { linkSync(join(p.path, ...rel.split("/")), to); } catch { copyFileSync(join(p.path, ...rel.split("/")), to); } };
+    keep(st.file, ".mp4");
+    const smooth = st.smooth?.of === st.hash && st.smooth.file && existsSync(join(p.path, ...st.smooth.file.split("/")));
+    if (smooth) keep(st.smooth.file, ".smooth.mp4");
+    writeFileSync(versionFile(p.path, v.id, ".json"), JSON.stringify({ ...st, smoothKept: !!smooth }, null, 2) + "\n");
+    return versionFile(p.path, v.id, ".mp4");
+  };
+  /** A version opened again: its own render back in the cache, when it is the film as the version left it (its picture and sound hashes). */
+  ctx.restoreVersionFile = (p, v) => {
+    let st = null; try { st = JSON.parse(readFileSync(versionFile(p.path, v.id, ".json"), "utf8")); } catch { return false; }
+    const file = versionFile(p.path, v.id, ".mp4");
+    if (!existsSync(file)) return false;
+    const parts = filmParts(p.path, st.fps ?? projectFps(p));
+    if (parts.picture !== st.picture || parts.sound !== st.sound) return false;
+    const dir = join(p.path, ...DIR);
+    mkdirSync(dir, { recursive: true });
+    const put = (from, rel) => { const to = join(p.path, ...rel.split("/")); rmSync(to, { force: true }); try { linkSync(from, to); } catch { copyFileSync(from, to); } };
+    put(file, st.file);
+    if (st.smoothKept && st.smooth?.file) put(versionFile(p.path, v.id, ".smooth.mp4"), st.smooth.file);
+    writeState(p.path, st);
+    return true;
+  };
+  /** While a Review runs and until the user presses Open, the Editor plays the version they were watching: its kept render, as a plain video. null: the film as it is. */
+  const heldView = (p) => {
+    const v1 = p.meta?.pipeline?.version1;
+    if (!v1?.holding || !v1.version) return null;
+    let st = null; try { st = JSON.parse(readFileSync(versionFile(p.path, v1.version, ".json"), "utf8")); } catch { return null; }
+    const ext = st.smoothKept ? ".smooth.mp4" : ".mp4";
+    if (!existsSync(versionFile(p.path, v1.version, ext))) return null;
+    return { codeFilm: isCodeFilm(p.meta?.style?.id), mode: "prerendered", videoOnly: true, held: { version: v1.version, n: v1.n ?? 1 }, quality: st.quality, status: "fresh", soundOnly: false,
+      url: url(p.id, `${VERSIONS.join("/")}/${v1.version}${ext}`), at: st.at ?? null, fps: st.fps, duration: st.duration ?? null, audio: st.audio ?? false, job: null, hash: st.hash ?? null, etaMinutes: null, waitsFor: null, needsSmooth: false };
+  };
   /** What an export that reused the film's render says about it: when it was made, how long it took, on the GPU or the CPU, and
    *  whether its sound was mixed again. */
   ctx.preRenderInfo = (p) => { const st = readState(p.path); return st ? { at: st.at ?? null, ms: st.ms ?? null, gpu: st.gpu ?? null, workers: st.workers ?? null, remixed: st.remixed ?? null } : null; };
@@ -296,7 +357,7 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
     return join(p.path, ...next.file.split("/"));
   };
   const routes = [
-    r("GET", `/projects/${P}/preview-proxy`, ([id]) => view(mustProject(id, root))),
+    r("GET", `/projects/${P}/preview-proxy`, ([id]) => { const p = mustProject(id, root); return heldView(p) ?? view(p); }),
     // the Editor's Update on a preview that is out of date: made now, after Claude's change when Claude is at work (the job waits for it)
     r("POST", `/projects/${P}/preview-proxy`, ([id]) => { const p = mustProject(id, root); const job = make(p, { asked: true }); return { ...view(p), job: pub(job) }; }),
   ];

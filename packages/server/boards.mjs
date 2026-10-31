@@ -20,7 +20,7 @@ import { runPy } from "../setup/python.mjs";
 import { creditMusic, optionsText, readOptions, saveOptions } from "../sfx/music.mjs";
 import { planEpisode, planText } from "../what-if-plan/index.mjs";
 import { autoSfx, whooshAllowed } from "../sfx/auto.mjs";
-import { addedNow, cuesChanged, mount, mountAmbience, mountedNow, placedNote, readState, unmuteAll, writeCredits } from "../sfx/index.mjs";
+import { addedNow, cuesChanged, mount, mountAmbience, mountedNow, placedNote, readState, timesChanged, unmuteAll, writeCredits } from "../sfx/index.mjs";
 import { DEFAULT_DENSITY, DENSITIES, prefsText, readPrefs, updatePrefs } from "../sfx/prefs.mjs";
 import * as plan from "../motion-plan/index.mjs";
 import { snapStop, stopContext } from "../sfx/stop-snap.mjs";
@@ -249,6 +249,11 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     return lines.join("\n");
   };
 
+  /** The sound stays as it is while Claude checks the film, or the app would place it under Claude's changes (owner 31/10, #694-#698). */
+  const mixOpen = (id) => {
+    if (pipe.reviewPending(projects.getProject(id, root)?.meta?.pipeline?.version1) && (ctx.agent.running.has(id) || ctx.jobs.list({ projectId: id }).some((j) => j.status === "running" && j.kind === "qa")))
+      throw new HttpError(409, "MIX_SHUT", "Claude is checking your film. The Final Mix opens again when it finishes.");
+  };
   // a Final Mix change: the work before it is committed on its own, the change as a sound-only revision (the picture's checks hold)
   const mixChange = async (p, what, fn) => {
     try { await rev.saveAsync(p.path, "Changes before the Final Mix"); } catch { /* revisions optional */ }
@@ -317,6 +322,18 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     const job = await ended;
     return job.status === "done" ? job.result : null;
   };
+  /** A Review or its fix moved a shot: the sound effects placed again for the film as it is now, the user's own moves kept (autoSfx: handMoves). Resolves once
+   *  they are placed; null when no shot moved. */
+  const timesAgain = async (p) => {
+    const { shots, root: comp } = await readShots(p.path).catch(() => ({ shots: [] }));
+    if (!timesChanged(p.path, placedShots(shots, comp?.duration))) return null;
+    let end;
+    const ended = new Promise((r) => { end = r; });
+    try { ctx.jobs.start("mix-sfx", { projectId: p.id, title: "Sound effects", onEnd: (j) => end(j) }, async (job) => { job.update({ stage: "placing sound effects" }); return placeSfx(p, job.signal); }); }
+    catch (e) { if (e.code === "BUSY") return null; throw e; }
+    const job = await ended;
+    return job.status === "done" ? job.result : null;
+  };
   /** The plan's musicStop, once the music is on the timeline (the app once put the music on after Claude's music step and it played
    *  all 40 s past the plan's stop at 26.5 s, so Claude told the user to set it in the Final Mix), unless a stop
    *  is set already or someone chose "play to the end". Its second, or null. */
@@ -334,7 +351,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
   };
   /** The plan's musicStop as the music step will apply it (for Claude's words before the app places the music). */
   const planStop = (p) => { const mp = plan.read(p.path); return mp.exists && !mp.error && mp.plan.musicStop > 0 && planStopAllowed(p, mp.plan) && p.meta?.music?.stopAt == null && !p.meta?.music?.toEnd ? snapped(p, mp.plan.musicStop).at : null; };
-  ctx.mix = { useOption, placeSfx, stopFromPlan, cuesAgain, change: mixChange };
+  ctx.mix = { useOption, placeSfx, stopFromPlan, cuesAgain, timesAgain, change: mixChange };
   // the app tools (Agent.callTool)
   const tools = {
     psd_layers: async ({ project, args }) => {
@@ -542,8 +559,8 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     r("GET", `/projects/${P}/qc`, ([id]) => {
       const p = mustProject(id, root);
       const f = docPath(p.path, "QC-REVIEW.md");
-      const last = p.meta?.lastQc ?? null;
-      return { text: existsSync(f) ? readFileSync(f, "utf8") : "", at: existsSync(f) ? statSync(f).mtime.toISOString() : null, last, brand: pipe.brandCheck(p.path),
+      const last = p.meta?.lastQc ?? null, card = pipe.reviewCard(p.path);
+      return { mode: card?.mode ?? null, rounds: card?.rounds ?? [], text: existsSync(f) ? readFileSync(f, "utf8") : "", at: existsSync(f) ? statSync(f).mtime.toISOString() : null, last, brand: pipe.brandCheck(p.path),
         sheetUrls: last?.sheets ? Object.fromEntries(Object.entries(last.sheets).map(([k, v]) => [k, url(id, v)])) : {} };
     }),
     // the Final Mix dialog
@@ -567,6 +584,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
         sfxPlacing: ctx.jobs.list({ kind: "mix-sfx" }).some((j) => j.projectId === id && j.status === "running") };
     }),
     r("POST", `/projects/${P}/mix/music`, async ([id], b) => {
+      mixOpen(id);
       const p = mustProject(id, root);
       const track = readOptions(p.path).rounds.flatMap((r0) => r0.tracks).find((t) => t.file === b.file);
       if (!track) throw new HttpError(404, "NOT_FOUND", "Not one of the music options");
@@ -574,12 +592,14 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     }),
     // stop the music at a second (the twist), or { at: null } to play it to its end again
     r("POST", `/projects/${P}/mix/music/stop`, ([id], b) => {
+      mixOpen(id);
       const p = mustProject(id, root);
       if (!p.meta?.music?.file) throw new HttpError(400, "INVALID", "No music on the timeline yet");
       const at = b.at == null || b.at === "" ? null : Number(b.at);
       return musicStop(p, at);
     }),
     r("POST", `/projects/${P}/mix/sfx`, ([id]) => {
+      mixOpen(id);
       const p = mustProject(id, root);
       return { job: ctx.jobs.start("mix-sfx", { projectId: id, title: "Sound effects" }, async (job) => {
         job.update({ stage: "placing sound effects" });
@@ -590,6 +610,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     // the owner's sound choices from the Final Mix: one sound taken out (skip: its id), all of them back (unskip: true), the density, the
     // ambience on or off; kept in .moworks/sfx-prefs.json, and the sounds placed again at once with them
     r("POST", `/projects/${P}/mix/sfx/prefs`, ([id], b) => {
+      mixOpen(id);
       const p = mustProject(id, root);
       const patch = {};
       if (typeof b.skip === "string" && b.skip.trim()) patch.skip = [b.skip.trim()];
@@ -603,8 +624,9 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
         return placeSfx(p, job.signal);
       }) };
     }),
-    r("POST", `/projects/${P}/mix/sfx/clear`, ([id]) => { const p = mustProject(id, root); return mixChange(p, "sound effects removed", () => { mount(p.path, [], { left: { missing: [], near: [] } }); mountAmbience(p.path, []); writeCredits(p.path); return { placed: 0 }; }); }),
+    r("POST", `/projects/${P}/mix/sfx/clear`, ([id]) => { mixOpen(id); const p = mustProject(id, root); return mixChange(p, "sound effects removed", () => { mount(p.path, [], { left: { missing: [], near: [] } }); mountAmbience(p.path, []); writeCredits(p.path); return { placed: 0 }; }); }),
     r("POST", `/projects/${P}/mix/carve`, async ([id]) => {
+      mixOpen(id);
       const p = mustProject(id, root);
       if (!p.meta?.music?.file || !p.meta?.voice?.file) throw new HttpError(400, "INVALID", "The carve needs a voice-over and a music track on the timeline");
       return mixChange(p, "music under the voice (carve)", async () => {

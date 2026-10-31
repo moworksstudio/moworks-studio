@@ -41,7 +41,7 @@ import "../workflow.css";
 
 // the columns' first proportions, as the user drew them (shots and pipeline ~14 %, Claude ~19 % of the width);
 // "editor4": widths saved before are not reused; a double-click on a splitter comes back to these
-const PANES = { left: 0.14, right: 0.19 };
+const PANES = { left: 0.18, right: 0.19 };          // the Pipeline's column holds its lines and the steps' one row (owner 31/10, #698)
 // The Studio: the station a sheet on the light table belongs to (lifted and lit on the rail); no sheet = Build and review, the film
 const HERE = { brief: "prepare", character: "prepare", voice: "prepare", assets: "prepare", analysis: "prepare", doc: "prepare", storyboard: "storyboard",
   "motion-plan": "motion", "qc-review": "build", qa: "build", lyrics: "build", "music-map": "build", mix: "finalMix" };
@@ -50,7 +50,7 @@ const HERE = { brief: "prepare", character: "prepare", voice: "prepare", assets:
 const STUDIO_HINTS = { brief: "Prepare: the brief, the files read, the design", character: "Prepare: who acts in this film",
   storyboard: "Claude makes one storyboard from the brief; you approve it or ask for another before anything is built",
   "motion-plan": "how each shot moves: what comes in, how it moves and how strongly", ae: "an After Effects project of this film", render: "the film as a file",
-  "qc-review": "Claude looks at stills of the film like a strict director: seven scores, fixes, until every score is 8 or more", qa: "last of this stage, quiet" };
+  "qc-review": "What Claude found and changed in your film", qa: "The app's own checks of the film" };
 
 /** The pipeline, read again every 3 s while something runs (Claude, a render anywhere), else every 8 s. */
 function usePipeline(id) {
@@ -161,7 +161,7 @@ function ProjectStrip({ p, id, pipeline, myRender, busy, rendering, onSheet, onR
   if (studio) {
     const ws = pipeline?.stages?.find((s) => s.status === "waiting" && s.id !== "feedback");
     const wline = ws?.line ? t(ws.line, Object.fromEntries(Object.entries(ws.lineVars ?? {}).map(([k, v]) => [k, typeof v === "string" ? t(v) : v]))) : null;
-    const wait = !state && wline ? (/^Waiting for you/.test(ws.line) ? wline : t("Waiting for you: {what}", { what: wline })) : null;
+    const wait = !state && wline ? (ws.choice || /^Waiting for you/.test(ws.line) ? wline : t("Waiting for you: {what}", { what: wline })) : null;
     return <div className="ed-strip st-slate">
       {back}
       <span className="st-clap" aria-hidden="true" />
@@ -409,6 +409,22 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   useEffect(() => {
     if (lastVoice.current !== voiceStamp) { lastVoice.current = voiceStamp; loadTimeline(); }
   }, [voiceStamp]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Version 1 (or a later version) is ready and the user is on this film: the player goes back to its start, the film whole in front of them; an open dialog stays open
+  const versionN = pipeline?.version1?.card?.kind === "ask" ? pipeline.version1.at : null;
+  const lastVersion = useRef(null);
+  useEffect(() => {
+    if (lastVersion.current === versionN) return;
+    const was = lastVersion.current; lastVersion.current = versionN;
+    if (versionN && was === null && pipeline?.autopilot) { project.reload(); loadTimeline(); pv.send("seek", { time: 0 }); setNarrowTab("film"); pv.proxy?.refresh?.(); }
+  }, [versionN]); // eslint-disable-line react-hooks/exhaustive-deps
+  // the player holds the version the user watches while Claude changes the film; when that ends (Open, or Keep), the film as it is loads, by the user's press alone
+  const holding = !!pipeline?.version1?.holding;
+  const wasHolding = useRef(holding);
+  useEffect(() => {
+    const was = wasHolding.current; wasHolding.current = holding;
+    pv.proxy?.refresh?.();
+    if (was && !holding) reloadFilm();
+  }, [holding]); // eslint-disable-line react-hooks/exhaustive-deps
   const onClaudeChanged = async (changed) => { reloadPipeline(); reloadAssets(); if (changed) await reloadFilm(); };
   const stage = useMemo(() => ({
     projectId: id,
@@ -537,8 +553,10 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   // every stage the film has gets its button; one not reached yet is shown, off, with what it waits for
   const act = (key, label, icon, kind, s, gate = true, after = null) => {
     const notYet = !!after && (!s || s.status === "todo");
-    return { key, label: t(label), icon, onClick: () => openSheet(kind), att: s?.status === "waiting" || s?.status === "redo",
-      off: notYet || (gate && off && s?.status !== "waiting"), title: notYet ? t("Opens once {step} is done", { step: t(after) }) : gate && off ? t("Press Stop in the chat to change this") : undefined };
+    // the Final Mix is shut while Claude checks the film, and says why
+    const shut = key === "mix" && pipeline?.version1?.card?.kind === "working";
+    return { key, label: t(label), icon, onClick: () => openSheet(kind), att: !shut && (s?.status === "waiting" || s?.status === "redo"),
+      off: notYet || shut || (gate && off && s?.status !== "waiting"), title: shut ? t("Claude is checking your film. The Final Mix opens again when it finishes.") : notYet ? t("Opens once {step} is done", { step: t(after) }) : gate && off ? t("Press Stop in the chat to change this") : undefined };
   };
   const chr = pipeline?.steps?.find((x) => x.id === "character");          // a step inside the Storyboard stage, not a stage
   const actions = [
@@ -546,7 +564,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     st.storyboard && act("sb", "Storyboard", <LayoutList size={14} />, "storyboard", st.storyboard, false, "Prepare"),          // opens while Claude works, to look
     st.motion && act("mo", "Motion Plan", <Library size={14} />, "motion-plan", st.motion, true, "Storyboard"),
     // no Tech checks button: the checks run in the background; a real failure is one card in the chat, its Details open them
-    st.finalMix && act("mix", "Final Mix", <Sliders size={14} />, "mix", st.build?.status === "done" ? { ...st.finalMix, status: st.finalMix.status === "todo" ? "ready" : st.finalMix.status } : st.finalMix, false, "Build and review"),
+    st.finalMix && act("mix", "Final Mix", <Sliders size={14} />, "mix", st.build?.status === "done" || pipeline?.finished ? { ...st.finalMix, status: st.finalMix.status === "todo" ? "ready" : st.finalMix.status } : st.finalMix, false, "Version 1"),
   ].filter(Boolean);
   const showAssets = () => { setLeftTab("assets"); setNarrowTab("left"); reloadAssets(); };
   // Until the Build the page is the 3 s starter: no white film, no 3 s timeline, shots "Not built"
@@ -625,7 +643,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
       <Pipeline projectId={id} data={pipeline} starting={starting} onChanged={reloadPipeline} onOpen={openSheet} onAssets={showAssets} cast={p?.meta?.characters?.ids?.length > 0} music={!!p?.styleInfo?.music} warnings={qcWarnings} actions={actions} />
     </section>
   </div>;
-  const rightPane = <ClaudePanel projectId={id} fps={pv.state.fps || 24} selectedShot={chatShot} selection={selection} onClearTarget={() => { setDismissed(selection?.key ?? null); pv.send("clear"); pv.setPicked([]); setShot(null); }}
+  const rightPane = <ClaudePanel projectId={id} version1={pipeline?.version1 ?? null} onVersionChanged={reloadPipeline} fps={pv.state.fps || 24} selectedShot={chatShot} selection={selection} onClearTarget={() => { setDismissed(selection?.key ?? null); pv.send("clear"); pv.setPicked([]); setShot(null); }}
     onChanged={onClaudeChanged} inject={inject} reloadKey={chatKey} motionPick={motionPick} onOpenMotions={() => toggleDrawer("motions")} motionsOpen={drawer === "motions"} onOpenSounds={() => toggleDrawer("sounds")} soundsOpen={drawer === "sounds"}
     steps={pipeline?.steps} rendering={rendering} actions={actions} onWaiting={setAsking} stage={currentStage(pipeline?.stages)} interrupted={pipeline?.interrupted ?? null} onPlay={(path) => setViewer(path)} onOpenSheet={openSheet} checks={pipeline?.checks ?? null}
     waiting={pipeline?.stages?.find((s) => s.status === "waiting" && s.id !== "feedback") ?? null}
@@ -704,7 +722,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     </section>;
     // the Motions and Sounds drawers belong to the film, so opening one lays the film back on the table first
     const openDrawer = (kind) => { if (drawer !== kind && sheetRef.current) switchSheet(null); toggleDrawer(kind); };
-    const chat = <ClaudePanel projectId={id} fps={pv.state.fps || 24} selectedShot={chatShot} selection={selection} onClearTarget={() => { setDismissed(selection?.key ?? null); pv.send("clear"); pv.setPicked([]); setShot(null); }}
+    const chat = <ClaudePanel projectId={id} version1={pipeline?.version1 ?? null} onVersionChanged={reloadPipeline} fps={pv.state.fps || 24} selectedShot={chatShot} selection={selection} onClearTarget={() => { setDismissed(selection?.key ?? null); pv.send("clear"); pv.setPicked([]); setShot(null); }}
       onChanged={onClaudeChanged} inject={inject} reloadKey={chatKey} motionPick={motionPick} onOpenMotions={() => openDrawer("motions")} motionsOpen={drawer === "motions"} onOpenSounds={() => openDrawer("sounds")} soundsOpen={drawer === "sounds"}
       steps={pipeline?.steps} rendering={rendering} actions={[]} onWaiting={setAsking} stage={currentStage(pipeline?.stages)} interrupted={pipeline?.interrupted ?? null} onPlay={(path) => setViewer(path)} onOpenSheet={openSheet} checks={pipeline?.checks ?? null}
       waiting={pipeline?.stages?.find((s) => s.status === "waiting" && s.id !== "feedback") ?? null}
@@ -733,6 +751,6 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     <div className="ed-narrow" style={{ display: narrowTab === "film" ? "flex" : "none" }}>{centerPane}</div>
     <div className="ed-narrow" style={{ display: narrowTab === "claude" ? "flex" : "none" }}>{rightPane}</div>
     {sheetEl}{askBar}{leaveDialog}{viewerEl}</div>;
-  return <div className="ed" data-zone="editor" data-shape={shape} style={deskStyle}>{strip}{openingEl}<div className="ed-body"><Panes id="editor4" defaults={PANES} left={<ErrorBoundary name={t("Shots & pipeline")}>{leftPane}</ErrorBoundary>} center={<ErrorBoundary name={t("Film")}>{centerPane}</ErrorBoundary>}
+  return <div className="ed" data-zone="editor" data-shape={shape} style={deskStyle}>{strip}{openingEl}<div className="ed-body"><Panes id="editor5" defaults={PANES} left={<ErrorBoundary name={t("Shots & pipeline")}>{leftPane}</ErrorBoundary>} center={<ErrorBoundary name={t("Film")}>{centerPane}</ErrorBoundary>}
     right={<ErrorBoundary name="Claude">{rightPane}</ErrorBoundary>} /></div>{sheetEl}{askBar}{leaveDialog}{viewerEl}</div>;
 }

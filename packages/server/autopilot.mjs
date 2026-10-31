@@ -1,10 +1,11 @@
 // The pipeline runs itself: when a step's Claude task or job ends well, the app starts the next step that
 // is ready, and stops only at the two gates (storyboard, motion), when Claude asks, when the user pressed Stop, or on a failure. It writes
-// the milestone lines to the chat (notes of kind "pipeline", English keys translated by the Editor), keeps the Review to the first build,
-// after the self-check has Claude pick the music (the app takes the first of the three tracks and places the sound effects), then runs the
-// checks without showing them unless they fail (Claude fixes a failure once); only when they pass is the film done, said once in the chat
-// with the self-check's scores. Render: one at a time in the whole app, and a project being rendered
-// is not edited.
+// the milestone lines to the chat (notes of kind "pipeline", English keys translated by the Editor). After the Build Claude picks the music (the
+// app takes the first of the three tracks and places the sound effects), then the film is rendered whole: only then is it Version 1, said once
+// in the chat (owner 31/10, #694-#698: a film without sound is not a whole film, and a self-fix can make it worse). The app then asks one question
+// and runs nothing of Claude's until it is answered: Fix mistakes only, Fix mistakes and improve it (the Review and the checks run, Claude fixes a
+// failure once, a changed film is rendered again as a new version), or No (the film is ready to export). Version 1 stays in Versions; a new version
+// loads only when the user presses. Render: one at a time in the whole app, and a project being rendered is not edited.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import * as projects from "../project-service/index.mjs";
@@ -49,19 +50,35 @@ function buildTimesFile(root) { return join(process.env.MW_STATE_DIR ?? join(roo
 // flatter, 24 + 0.2 a second (110 s: 46-69), and each film above still falls in its range
 // a HyperFrames film past a minute grows far slower too (build-times.json: 105 s 81 min, 120 s 82 against "112-168", T28-13): 0.3 a second past 60 s
 const RATES = [[/^anidoodle-/, [26, 0.56]], [/^brush-cartoon$/, [15, 0.9]], [/^(lemo-|mg-)/, [24, 0.2]], [/^what-if$/, [10, 0.6]]];
-const HIGH = 1.5, LONG_FILM = 60, PAST_A_MINUTE = 0.3;
-export function estimateMinutes(shots, root, { seconds = null, styleId = null } = {}) {
+const HIGH = 1.5, LONG_FILM = 60, PAST_A_MINUTE = 0.3, TO_VERSION_1 = 0.62;
+export function estimateMinutes(shots, root, { seconds = null, styleId = null, three = false } = {}) {
   const sec = Number(seconds) > 0 ? Number(seconds) : Math.max(1, Number(shots) || 1) * 4;
   const own = RATES.find(([re]) => re.test(String(styleId ?? "")))?.[1];
   const raw = own ? own[0] + own[1] * sec : 16 + 0.8 * Math.min(sec, LONG_FILM) + PAST_A_MINUTE * Math.max(0, sec - LONG_FILM);
-  const minutes = Math.max(3, Math.min(240, Math.round(raw)));
+  // the rates above were fitted on the whole old stage (Build, Review, music, checks); Version 1 is the Build and the music of them, then its render
+  const render = renderMinutes(sec, { styleId, three });
+  const minutes = Math.max(3, Math.min(240, Math.round(raw * TO_VERSION_1 + render)));
   // a range (a slower or shared computer takes longer), and what it covers, for the confirm's words
-  return { minutes, high: Math.round(minutes * HIGH), covers: "build, review, music and checks", basis: "length" };
+  return { minutes, high: Math.round(minutes * HIGH), covers: "making the film, its sound and Version 1", basis: "length" };
+}
+/** The whole render of a film, in minutes, with the background render's two capture workers: a film drawn slowly (Brush, 3D) as measured for a
+ *  pre-render, every other as a preview (packages/server/proxy.mjs). Test 32's 165 s film took 66 min on a computer running three films at once; the
+ *  range's top and "taking longer than usual" cover that. */
+export function renderMinutes(seconds, { styleId = null, three = false, fps = 30 } = {}) {
+  const slow = three || styleId === "brush-cartoon";
+  return (Number(seconds) || 0) * (Number(fps) || 30) * (slow ? 700 : 250) / 60000;
+}
+/** What the question after Version 1 says each answer takes (time only, owner 31/10 #698): the Review's rounds, its checks, and when the film changed its
+ *  render again, which is why the top of the range holds it. { mistakes: { minutes, high }, improve: { minutes, high } } */
+export function reviewEstimates(seconds, { styleId = null, three = false, fps = 30 } = {}) {
+  const render = renderMinutes(seconds, { styleId, three, fps });
+  const one = (rounds) => ({ minutes: Math.round(REVIEW_ROUND * rounds + AFTER_REVIEW.checks), high: Math.round((REVIEW_ROUND * (rounds + 1) + AFTER_REVIEW.checks) * HIGH + render) });
+  return { mistakes: one(1), improve: one(LIKELY_ROUNDS) };
 }
 /** the estimate while the stage runs. Past the planned time the Editor's "about N min left" stood at "about 1 min left" for an
  *  hour (a Review took 1 h 40 min). Once the elapsed time reaches the plan, the whole is worked out again from what is done: the
- *  stage's steps weigh as measured (build 11.6, Review 6.7, music 2, checks 1.5 min), a running step counts half done. */
-const SHARES = { build: 0.53, qcReview: 0.31, sound: 0.09, checks: 0.07 };
+ *  stage's steps weigh as measured (build 11.6, music 2 min, the render of a 30 s film 4 min), a running step counts half done. */
+const SHARES = { build: 0.66, sound: 0.11, firstVersion: 0.23 };
 // The Review's time per round and the steps after it, from the films of Tests 17-24 (tasks.json, the run reports): the Review took
 // 6.9-56.8 min in 2-4 rounds, 6.7 min a round in the middle (3.5-14.2), 2 rounds in the middle (3 of 8 films had 3 or 4); the music task
 // 2-4.8 min and its mix about 3; the checks 2-13 min. Test 23's countdown said "5 min left" and then "39 min" at its Review's third round
@@ -83,18 +100,20 @@ export function reviewRounds(task) {
 }
 /** review: the running Review's rounds (reviewRounds). Once the Build is done the stage's time left is worked out from the steps left
  *  (the Review by its rounds, the music and the checks as measured), a range that holds a likely second round, never from the plan. */
-export function estimateNow(est, steps, { startedAt = null, now = Date.now(), review = null } = {}) {
+export function estimateNow(est, steps, { startedAt = null, now = Date.now(), review = null, render = 4 } = {}) {
   if (!est?.minutes || !startedAt) return est;
   const elapsed = (now - Date.parse(startedAt)) / 60000;
   const st = Object.fromEntries((steps ?? []).map((s) => [s.id, s.status]));
-  const over = (id) => st[id] == null || st[id] === "done" || st[id] === "skipped";
-  if (st.build === "done" && ["qcReview", "sound", "checks"].some((id) => st[id] != null)) {
+  // the Review and its checks count only once the user asked for them: until then they wait, and take no time
+  const over = (id) => st[id] == null || st[id] === "done" || st[id] === "skipped" || st[id] === "needs-you" || (["qcReview", "checks"].includes(id) && st[id] === "blocked" && st.qcReview !== "ready" && st.qcReview !== "running");
+  if (st.build === "done" && ["qcReview", "sound", "firstVersion", "checks"].some((id) => st[id] != null)) {
     let low = 0, high = 0;
     if (!over("qcReview")) {
       const r = st.qcReview === "running" ? reviewLeft(review, now) : { low: REVIEW_ROUND * LIKELY_ROUNDS, high: REVIEW_ROUND * (LIKELY_ROUNDS + 1) };
       low += r.low; high += r.high;
     }
-    for (const id of ["sound", "checks"]) if (!over(id)) { const m = AFTER_REVIEW[id] / (st[id] === "running" ? 2 : 1); low += m; high += m * HIGH; }
+    const takes = { ...AFTER_REVIEW, firstVersion: render };
+    for (const id of ["sound", "firstVersion", "checks"]) if (!over(id)) { const m = takes[id] / (st[id] === "running" ? 2 : 1); low += m; high += m * HIGH; }
     if (low > 0) return { ...est, minutes: Math.max(1, Math.round(elapsed + low)), high: Math.round(elapsed + high), planned: est.minutes, recomputed: true, basis: "steps" };
   }
   if (!(elapsed >= est.minutes - 1)) return est;
@@ -116,7 +135,9 @@ function recordBuild(root, shots, minutes, extra = {}) {
 }
 
 /** The prompt a step runs with: the way of working's own prompt when the step has one (General: keep, reference), else its prompt. */
-export const stepPrompt = (s, facts, vars) => pipe.fill(s.action?.prompts?.[facts?.way] ?? s.action?.prompt ?? "", vars);
+export const stepPrompt = (s, facts, vars) => pipe.fill(s.id === "qcReview" && facts?.version1?.choice === "mistakes" ? MISTAKES_PROMPT : s.action?.prompts?.[facts?.way] ?? s.action?.prompt ?? "", vars);
+/** The Review of "Fix mistakes only" (owner 31/10, #696), the same for every style: hard errors, nothing of taste. */
+export const MISTAKES_PROMPT = "The owner watched Version 1 with its sound and chose \"Fix mistakes only\": run the Review as \"Fix mistakes only\" in the Moworks QC file named in your rules says. Call the app's qc_sheets tool, read the sheets, and fix only hard errors, each with the smallest change: text over text, text that cannot be read, a wrong word (a typo, a wrong figure or name, a word that differs from the brief or the script), and a break of the Brand Kit. Change nothing else: no score, no taste, no motion, colour, timing or layout that is not one of these errors. Call qc_sheets once more after a fix to see it. Write what you found and changed to docs/QC-REVIEW.md and docs/QC-REVIEW.json as the QC file says, with no scores, and end your reply with one short line.";
 
 /** The lead of a step's prompt when the user approved a storyboard option from the Storyboard dialog. The Motion
  *  Plan's lead said "pose its frames in the project as the starting layouts" while its prompt says "write only MOTION-PLAN.json: no
@@ -130,7 +151,7 @@ export function optionLead(stepId, option) {
 }
 
 /** The names of the versions: an English key for the Editor's t() with its number. */
-const VERSION_KEYS = { build: "Build {n}", edit: "Edit {n}", render: "Render {n}", "before-redo": "Before redo {n}" };
+const VERSION_KEYS = { version: "Version {n}", build: "Build {n}", edit: "Edit {n}", render: "Render {n}", "before-redo": "Before redo {n}" };
 
 export function createAutopilot(ctx) {
   const { root } = ctx;
@@ -186,6 +207,9 @@ export function createAutopilot(ctx) {
     if (ctx.renders.isRendering(id)) throw Object.assign(new Error("The film is being rendered: wait until the render finishes"), { code: "RENDERING" });
     await saveVersion(id, "before-redo");
     const at = await rev.restoreTreeAsync(p.path, v.rev, `Opened version: ${v.name}`);
+    // the version's own render comes back with it (no render again for a film that may have taken an hour); the player follows the film again
+    try { ctx.restoreVersionFile?.(projects.getProject(id, root) ?? p, v); } catch { /* the next render makes it */ }
+    meta(id, (m) => { const x = m.pipeline?.version1; if (x) delete x.holding; });
     return { opened: v, revision: at };
   }
 
@@ -197,6 +221,7 @@ export function createAutopilot(ctx) {
     if (!fromAuto) meta(id, (m) => { if (m.pipeline?.autoRun) delete m.pipeline.autoRun; (m.pipeline ??= {}).ownerGo = { at: now(), step: s.id }; });
     const { p, facts } = await ctx.pipelineOf(id);
     if (s.action?.kind === "job" && s.action.job === "qa") return { job: ctx.startQa(p, { onEnd: () => afterQa(id).catch(() => {}) }) };
+    if (s.action?.kind === "job" && s.action.job === "firstVersion") return { job: await makeFirstVersion(id) };
     // Prepare ran while the voice-over was still being transcribed (97 %) and could not say the voice was English and off
     // topic. It waits for the words; the transcription's end starts it (transcriptLanded)
     if (s.id === "brief" && facts.voice?.transcribing) {
@@ -287,12 +312,132 @@ export function createAutopilot(ctx) {
     waitCard(p, /^lyrics/.test(w) ? "lyrics" : "voice", text);
   }
 
-  /** The film has not had its Review since its storyboard was approved, and none was tried: the stage that follows a build is still to run. */
+  /** The film has no Version 1 since its storyboard was approved: the stage that follows a build is still to run. */
   function firstPassLeft(id, m) {
-    if (isFinished(m) || !m?.approvals?.storyboard?.at) return false;
-    const since = m.approvals.storyboard.at;
-    if (m.pipeline?.reviewed?.at && m.pipeline.reviewed.at >= since) return false;
-    return !ctx.agent.list?.(id)?.some((t) => t.step === "qcReview" && t.createdAt >= since);
+    return !isFinished(m) && !!m?.approvals?.storyboard?.at && !m.pipeline?.version1?.at;
+  }
+
+  /** The render that makes Version 1: the film as it is now, with its sound. A render already fresh (nothing changed since the last one) is Version 1 at once. */
+  async function makeFirstVersion(id) {
+    meta(id, (m) => { if (m.pipeline?.firstVersionFail) delete m.pipeline.firstVersionFail; });
+    const job = ctx.previewProxy?.(id, { asked: true, level: true, onEnd: (ok, e) => { firstVersionEnded(id, ok, e).catch(() => {}); } }) ?? null;
+    if (!job) { await finished(id); await advance(id); }
+    return job;
+  }
+  /** Version 1's render ended: handed over when it holds the film as it is now; else (the film changed while it ran) made again. */
+  async function firstVersionEnded(id, ok, e) {
+    const p = projects.getProject(id, root);
+    if (!p || p.missing || p.meta?.pipeline?.version1?.at) return null;
+    if (!ok) {
+      const stopped = e?.code === "CANCELLED";
+      meta(id, (m) => { (m.pipeline ??= {}).firstVersionFail = { at: now(), stopped, why: String(e?.message ?? "").slice(0, 200) }; });
+      if (!stopped) { try { projects.addNote(p.path, { kind: "pipeline", status: "warning", text: "Version 1 could not be rendered: {why}", vars: { why: String(e?.message ?? "the render failed").slice(0, 200) } }); } catch { /* notes are best effort */ } }
+      return null;
+    }
+    if (ctx.filmRendered && !ctx.filmRendered(id)) return advance(id);
+    await finished(id);
+    return advance(id);
+  }
+
+  /** The answer to the one question after Version 1: "mistakes", "improve" or "none". by: "owner" (a button), "chat" (the user wrote in the chat instead). */
+  async function chooseReview(id, choice, { by = "owner" } = {}) {
+    if (!["mistakes", "improve", "none"].includes(choice)) throw Object.assign(new Error("Choose mistakes, improve or none"), { code: "INVALID" });
+    const p = projects.getProject(id, root);
+    const v1 = p?.meta?.pipeline?.version1;
+    if (!v1?.at) throw Object.assign(new Error("The film has no Version 1 yet"), { code: "NOT_READY" });
+    if (v1.choice) return { choice: v1.choice, already: true };
+    if (ctx.agent.running.has(id)) throw Object.assign(new Error("Claude is still working on this project. Stop it or wait for it to finish."), { code: "BUSY" });
+    const review = choice !== "none";
+    const est = review ? reviewEstimates(p.meta?.targetDurationSec ?? 60, { styleId: p.meta?.style?.id, three: !!ctx.threeFilm?.(p), fps: p.meta?.format?.fps })[choice] : null;
+    meta(id, (m) => {
+      const pl = (m.pipeline ??= {}), x = pl.version1;
+      x.choice = choice; x.choiceAt = now(); x.by = by;
+      // the countdown of the Pipeline starts again here: the time the film waited for this answer is nobody's work
+      if (review) { x.holding = !!x.version; delete pl.autoFix; delete pl.autoRun; pl.ownerGo = { at: x.choiceAt, step: "qcReview" }; pl.build = { ...pl.build, startedAt: x.choiceAt, estimate: { ...est, covers: "checking your film", basis: "steps" }, recorded: true }; }
+    });
+    if (!review) { note(p, "Your film is ready to export."); return { choice }; }
+    note(p, choice === "mistakes" ? "Claude is checking your film for mistakes. Please wait. Version 1 stays in Versions." : "Claude is checking your film and improving it. Please wait. Version 1 stays in Versions.");
+    return { choice, ...(await advance(id) ?? {}) };
+  }
+  /** The user wrote in the chat instead of pressing a button: the question is taken as "No, I'm happy with it" (owner 31/10), and a new version waiting for a press is the film they go on with. */
+  function chatInstead(id) {
+    const p = projects.getProject(id, root), x = p?.meta?.pipeline?.version1;
+    if (!x?.at || ctx.agent.running.has(id)) return;
+    if (!x.choice) meta(id, (m) => { const y = m.pipeline.version1; y.choice = "none"; y.choiceAt = now(); y.by = "chat"; });
+    else if (x.holding && x.next) meta(id, (m) => { delete m.pipeline.version1.holding; });
+  }
+  /** The Review and its checks have ended: nothing changed, the film stays as it is; else the film is kept as a new version and rendered, a 3D film only after asking. */
+  async function closeReview(id, { checksFailed = false } = {}) {
+    const p = projects.getProject(id, root), x = p?.meta?.pipeline?.version1;
+    if (!pipe.reviewPending(x) || x.stoppedAt || ctx.agent.running.has(id)) return null;
+    if (ctx.jobs?.list?.({ projectId: id }).some((j) => j.status === "running" && ["mix", "mix-sfx", "qa"].includes(j.kind))) return null;
+    const { state } = await ctx.pipelineOf(id);
+    const st = (s0) => state.find((y) => y.id === s0)?.status;
+    if (!["done", "skipped"].includes(st("qcReview")) || !(["done", "skipped"].includes(st("checks")) || checksFailed)) return null;
+    meta(id, (m) => { m.pipeline.version1.closed = now(); });
+    const same = ctx.filmRendered ? ctx.filmRendered(id) : !(x.rev && await rev.changedSinceAsync(p.path, x.rev));
+    if (same) {
+      meta(id, (m) => { delete m.pipeline.version1.holding; });
+      note(p, "Claude checked your film and changed nothing. Your film is ready to export.");
+      notify(id, "Claude checked your film and changed nothing.");
+      return { changed: false };
+    }
+    const v = await saveVersion(id, "version"), three = !!ctx.threeFilm?.(projects.getProject(id, root) ?? p);
+    const next = { version: v?.id ?? null, n: v?.n ?? (x.n ?? 1) + 1, at: now(), render: three ? "ask" : "running" };
+    meta(id, (m) => { m.pipeline.version1.next = next; });
+    if (three) { notify(id, "Claude changed your film. Render Version {n} now?", { n: next.n }); return { changed: true, ask: true }; }
+    renderNext(id);
+    return { changed: true };
+  }
+  /** The new version's render; when it ends the user is told, and the film they watch stays until they press. */
+  function renderNext(id) {
+    const job = ctx.previewProxy?.(id, { asked: true, level: true, onEnd: (ok, e) => { nextRendered(id, ok, e); } }) ?? null;
+    if (!job) nextRendered(id, true);
+    return job;
+  }
+  function nextRendered(id, ok, e = null) {
+    const p = projects.getProject(id, root), next = p?.meta?.pipeline?.version1?.next;
+    if (!next) return;
+    meta(id, (m) => { m.pipeline.version1.next.render = ok ? "done" : e?.code === "CANCELLED" ? "stopped" : "failed"; });
+    if (ok && next.version) { try { ctx.keepVersionFile?.(p, { id: next.version }); } catch { /* it stays in Versions, rendered again when opened */ } }
+    if (!ok) return;
+    note(p, "Version {n} is ready. Press Open Version {n} to watch it. Version 1 stays in Versions.", { n: next.n });
+    notify(id, "Version {n} is ready.", { n: next.n });
+  }
+  /** The 3D film's answer: render the new version now, or later. */
+  function renderAnswer(id, yes) {
+    const p = projects.getProject(id, root), next = p?.meta?.pipeline?.version1?.next;
+    if (next?.render !== "ask") throw Object.assign(new Error("Nothing waits for this answer"), { code: "NOT_READY" });
+    meta(id, (m) => { m.pipeline.version1.next.render = yes ? "running" : "later"; });
+    if (yes) renderNext(id);
+    return { render: yes ? "running" : "later" };
+  }
+  /** The new version is opened: the player follows the film again. */
+  function openNext(id) { meta(id, (m) => { const x = m.pipeline?.version1; if (x) { delete x.holding; if (x.next) x.next.opened = now(); } }); return { opened: true }; }
+  /** Keep Version 1: the film goes back to it, the Review's work kept as a version of its own; the question is answered, nothing more runs. */
+  async function keepFirst(id) {
+    const p = projects.getProject(id, root), x = p?.meta?.pipeline?.version1;
+    if (!x?.version) throw Object.assign(new Error("The film has no Version 1 yet"), { code: "NOT_READY" });
+    const out = await openVersion(id, x.version);
+    meta(id, (m) => { const y = m.pipeline.version1; y.choice = "none"; y.choiceAt = now(); y.by = "keep"; y.closed = now(); delete y.next; delete y.holding; delete y.stoppedAt; });
+    return out;
+  }
+  /** The card's Stop: whatever runs for this version now (Claude's task, the checks, the render). */
+  async function stopVersion(id) {
+    const tid = ctx.agent.running.get(id);
+    meta(id, (m) => { const x = m.pipeline?.version1; if (x && !x.closed) x.stoppedAt = now(); });
+    if (tid) await ctx.agent.cancel(tid);
+    for (const j of ctx.jobs?.list?.({ projectId: id }) ?? []) if (j.status === "running" && ["qa", "mix-sfx", "preview-proxy"].includes(j.kind)) { try { ctx.jobs.cancel(j.id); } catch { /* it ended */ } }
+    return { stopped: true };
+  }
+  /** The card's Continue, after Stop: the Review (or its checks) goes on from where it stopped. */
+  async function continueVersion(id) {
+    meta(id, (m) => { const x = m.pipeline?.version1; if (x) delete x.stoppedAt; });
+    return (await resume(id)) ?? { idle: true };
+  }
+  /** One line for whoever is on another screen, with its Open (App's notice); the Editor of this film takes the user to the version itself. */
+  function notify(id, text, vars = {}) {
+    try { const p = projects.getProject(id, root); ctx.notices?.add?.({ projectId: id, title: p?.title ?? "", text, vars }); } catch { /* the Pipeline says it too */ }
   }
 
   /** Run the next step that is ready, if any. Safe to call at any time; does nothing while Claude works or the project renders. */
@@ -307,11 +452,13 @@ export function createAutopilot(ctx) {
       // after a chat turn only while the film is not built yet (the user answered Claude's question); the feedback loop runs nothing. A film built
       // by a chat turn (Test 33: "build it" typed after the build never started) still has its first Review ahead: stage 4 goes on (T33-6)
       if (afterChat && ["done", "redo"].includes(state.find((x) => x.id === "build")?.status) && !firstPassLeft(id, p.meta)) return null;
+      // Stop on a Review: nothing goes on until Continue
+      if (p.meta?.pipeline?.version1?.stoppedAt) return null;
       s = pipe.nextAuto(state);
-      if (!s) { voiceCard(p, state); return null; }
+      if (!s) { voiceCard(p, state); inFlight.delete(id); await closeReview(id); return null; }
       // once the film is done the checks are not run again by themselves (a change in the Final Mix or the chat): the render runs its own
-      // quick check; a new build clears `finished` and the stage runs to the end again
-      if (s.id === "checks" && isFinished(p.meta)) return null;
+      // quick check; a new build clears `finished` and the stage runs to the end again; a Review the user asked for brings its own checks
+      if (s.id === "checks" && isFinished(p.meta) && !pipe.reviewPending(p.meta?.pipeline?.version1)) return null;
       // the motion is rewritten once per new storyboard approval (if Claude changed nothing, the user sees it as it is)
       if (s.id === "motionSpec" && s.status === "redo" && p.meta?.pipeline?.motionRedoFor && p.meta.pipeline.motionRedoFor === p.meta?.approvals?.storyboard?.at) return null;
       // the same step started by the autopilot twice in a row and still not done: no third run by itself (Build ran 6 times,
@@ -348,15 +495,19 @@ export function createAutopilot(ctx) {
       const at = state.findIndex((s) => s.id === "checks");
       // (a step still to run or running; a step waiting for the user, e.g. a Review under 8, does not hold it, as in the autopilot's own run)
       if (state.slice(0, Math.max(0, at)).some((s) => !s.hidden && ["ready", "running", "redo", "blocked"].includes(s.status))) return advance(id);
-      await finished(id); return advance(id);
+      if (!p.meta?.pipeline?.version1?.at) await finished(id);
+      return advance(id);
     }
     if (!qa) return;
     // said in plain words, with no "Tech checks" to open (the checks run in the background)
-    if (p.meta?.pipeline?.autoFix) { note(p, "{n} problem(s) would still stop the render after Claude's fix: tell Claude in the chat what to do.", { n: qa.blocking ?? 0 }); return; }
+    if (p.meta?.pipeline?.autoFix) { note(p, "{n} problem(s) would still stop the render after Claude's fix: tell Claude in the chat what to do.", { n: qa.blocking ?? 0 }); await closeReview(id, { checksFailed: true }); return; }
     meta(id, (m) => { (m.pipeline ??= {}).autoFix = { at: now() }; });
     return ctx.agent.start(id, { text: "The app's checks found blocking issues in the film (Tech checks dialog, .moworks/cache/qa/last.json). Fix every blocking issue with the smallest change, without changing the approved layouts or motion; say in one line what you fixed.", scope: { kind: "project" }, step: "checks" })
       .catch((e) => stepNotStarted(id, { id: "checks", title: "Checks" }, e));
   }
+
+  /** A change that moved the film's shots: the sound effects follow them (ctx.mix.timesAgain: nothing when no shot moved, the user's hand moves kept). */
+  async function soundsAgain(p) { try { await ctx.mix?.timesAgain?.(p); } catch { /* the Final Mix's Place them again */ } }
 
   /** The music step's task ended: the first of Claude's three tracks goes on the timeline (unless the film has the user's track), the
    *  app places the sound effects; the checks come next (advance). */
@@ -380,32 +531,34 @@ export function createAutopilot(ctx) {
     await ended;
   }
 
-  /** Stage 4 is over (built, self-checked, music and sound effects placed, checks passed): the film is done. Said once per build, as one
-   *  chat event the Editor shows green with a tick (a note of kind "pipeline", event "film-done", the self-check's score card in `qc`). */
+  /** Version 1: built, with its music and sound effects, rendered. Said once per build, as one chat event the Editor shows green with a tick (a note of
+   *  kind "pipeline", event "film-done"), with a notice for whoever is on another screen; the one question follows it. */
   async function finished(id) {
     const p = projects.getProject(id, root);
     if (!p || p.missing || p.meta?.pipeline?.finished) return null;
     const qc = pipe.reviewCard(p.path);
     const score = qc?.final ?? null;
-    // marked at once: checks that pass again while the version is committed (off the server's thread) hand the film over only once
-    meta(id, (x) => { const pl = (x.pipeline ??= {}); pl.delivered ??= { at: now(), score }; pl.finished = { at: now(), score, version: null }; });
-    const v = await saveVersion(id, "build");
+    // marked at once: a render that ends again while the version is committed (off the server's thread) hands the film over only once
+    meta(id, (x) => { const pl = (x.pipeline ??= {}); pl.delivered ??= { at: now(), score }; pl.finished = { at: now(), score, version: null }; pl.version1 = { at: now(), choice: null }; });
+    const v = await saveVersion(id, "version");
     const m = p.meta ?? {};
-    if (v) meta(id, (x) => { if (x.pipeline?.finished) x.pipeline.finished.version = v.id; });
-    const n = v?.n ?? ((m.versions ?? []).filter((x) => x.kind === "build").length || 1);
+    const n = v?.n ?? ((m.versions ?? []).filter((x) => x.kind === "version").length || 1);
+    meta(id, (x) => {
+      if (x.pipeline?.finished && v) x.pipeline.finished.version = v.id;
+      if (x.pipeline?.version1) Object.assign(x.pipeline.version1, { n, ...(v ? { version: v.id, rev: v.rev } : {}) });
+    });
+    // its render is kept beside the version: Version 1 stays easy to go back to, with nothing to render again
+    if (v) { try { ctx.keepVersionFile?.(projects.getProject(id, root) ?? p, v); } catch { /* opening it renders it again */ } }
     const say = () => {
       try {
-        // the hand-over: no score and no Tech checks in its words; the Review's card stays in `qc`
+        // the hand-over: no score and no Tech checks in its words
         projects.addNote(p.path, { kind: "pipeline", event: "film-done", status: "done", version: v?.id ?? null, qc,
-          text: "The film is ready (version {n}). Watch it, change the music or the sound effects in the Final Mix if you like, and press Render. A change you ask for here is built and made ready to render again by itself.",
+          text: "Version {n} is ready. Watch it, with sound.",
           vars: { n, score } });
       } catch { /* notes are best effort */ }
     };
-    // a code film's preview (a Brush film's one full render) starts here, once, as a quiet background job the
-    // Editor shows; the film is handed over at once, not after it
-    // every style's film gets its pre-render; the preview service decides what it makes for each style
-    try { ctx.previewProxy?.(id); } catch { /* the Editor plays the page live */ }
     say();
+    notify(id, "Version {n} is ready. Watch it, with sound.", { n });
     const b = m.pipeline?.build;
     if (b?.startedAt && !b.recorded) {
       const minutes = (Date.now() - Date.parse(b.startedAt)) / 60000;
@@ -442,7 +595,7 @@ export function createAutopilot(ctx) {
     // the files Claude wrote into assets/ are the app's own, never files "the user added" (T22-2)
     const wrote = (task.changed ?? []).map((c) => String(c?.path ?? c).replace(/\\/g, "/")).filter((x) => /^(assets|sources)\//.test(x));
     if (wrote.length) { try { rememberAssets(p.path, wrote); } catch { /* the Assets tab shows them as new once */ } }
-    if (task.status === "cancelled") { if (task.step) note(p, "Stopped. What was done is saved. Change what you need, then write “continue” in the chat."); return; }
+    if (task.status === "cancelled") { if (task.step) note(p, "Stopped. What was done is saved. Press Continue to go on."); return; }
     if (task.status !== "done") return;
     const step = task.step;
     // the owner said yes to the product's search in a run that began with the web off or asking: the next conversation has the web
@@ -468,6 +621,8 @@ export function createAutopilot(ctx) {
     }
     if (p.meta?.pipeline?.buildFix) meta(id, (m) => { delete m.pipeline.buildFix; });          // it compiles again: a later error gets its fix
     if (!step) {          // a chat turn: in the feedback loop, each round of changes is a version
+      // the user answered the Review's question in the chat, and the Review ended: it counts as the Review's end
+      if (task.continues === "qcReview" && !pipe.asksOwner(task.resultText)) { meta(id, (m) => { (m.pipeline ??= {}).reviewed = { at: now(), taskId: task.id }; }); await soundsAgain(p); }
       // Claude changed a frame's `- sfx:` cues in the chat: the sounds are placed again now, as its rules promise ("after your turn the
       // app finds each sound"), before the version, the preview and the checks take the film (Test 20 waited for "Place them again")
       if (storyboardChanged(task.changed)) { try { await ctx.mix?.cuesAgain?.(p); } catch { /* the Final Mix's Place them again */ } }
@@ -499,11 +654,8 @@ export function createAutopilot(ctx) {
       const w = pipe.chosenWay(p.path);
       if (w && p.meta?.style?.id === "general" && p.meta?.way?.by !== "owner") meta(id, (m) => { m.way = { id: w, at: now(), by: "claude" }; });
     }
-    // a build (the first, or again after a new motion): stage 4 runs to the end again and says when the film is done
-    if (step === "build") meta(id, (m) => { if (m.pipeline) { delete m.pipeline.autoFix; m.pipeline.finished = null; } });
-    // a code film's preview starts as soon as it is built (a heavy film should play smoothly before it is handed
-    // over): the background job waits while Claude's Review changes the film and then renders it as it is; finished() asks again (fresh: no-op)
-    if (step === "build") { try { ctx.previewProxy?.(id); } catch { /* the Editor plays the page live */ } }
+    // a build (the first, or again after a new motion): stage 4 runs to the end again, its Version 1 and its question too
+    if (step === "build") meta(id, (m) => { if (m.pipeline) { delete m.pipeline.autoFix; m.pipeline.finished = null; delete m.pipeline.version1; delete m.pipeline.firstVersionFail; } });
     // the Review's pictures were stopped twice on a busy computer and no round of this task had them (T26-5): the Review is not done (no
     // score from nothing, the film does not go on as reviewed); the chat says it with a Retry that runs the Review again
     if (step === "qcReview" && task.stillsBusy && !task.qcSheetsOk) {
@@ -519,6 +671,8 @@ export function createAutopilot(ctx) {
       }
     }
     if (step === "qcReview") meta(id, (m) => { (m.pipeline ??= {}).reviewed = { at: now(), taskId: task.id }; });
+    // the sound is on the film before the Review now: a Review or a fix that moved a shot has its sounds placed again, the user's own moves kept
+    if (step === "qcReview" || step === "checks") await soundsAgain(p);
     if (step === "checks") { const fresh = projects.getProject(id, root); ctx.startQa(fresh, { onEnd: () => afterQa(id).catch(() => {}) }); return; }
     if (step === "sound") await afterSound(id);
     // the stills of the options as Claude left them, taken now: the Storyboard dialog opens with pictures, not on its own capture
@@ -563,7 +717,7 @@ export function createAutopilot(ctx) {
           text: `The app's check: shot(s) ${miss.join(", ")} of docs/MOTION-PLAN.json have no camera row. Add one row of type "camera" to each (a push, a drift, an orbit or a dolly, with its numbers, as moworks-alive says: the camera moves on every hold), with its name and plain words; change nothing else in the plan, then stop for my approval in the Motion dialog.` }).catch(() => null);
         if (t?.id) { meta(id, (m) => { (m.pipeline ??= {}).cameraFix = { at: now(), taskId: t.id, shots: miss }; }); return null; }
       }
-      waitCard(p, "motion-plan", "The Motion Plan is ready for you: under each frame, the motion Claude proposes. Change what you like, then press Approve and build at the end of the Motion Plan dialog: the film is then built, reviewed, given music and checked without another click.");
+      waitCard(p, "motion-plan", "The Motion Plan is ready for you: under each frame, the motion Claude proposes. Change what you like, then press Approve and build at the end of the Motion Plan dialog: the film is then built, given its sound and rendered as Version 1 without another click.");
     }
     return advance(id);
   }
@@ -579,9 +733,9 @@ export function createAutopilot(ctx) {
     const p = projects.getProject(id, root);
     const mp = plan.read(p.path);
     const shots = mp.exists && !mp.error ? mp.plan.shots.length : 1;
-    const est = estimateMinutes(shots, root, { seconds: p.meta?.targetDurationSec, styleId: p.meta?.style?.id });
+    const est = estimateMinutes(shots, root, { seconds: p.meta?.targetDurationSec, styleId: p.meta?.style?.id, three: !!ctx.threeFilm?.(p) });
     meta(id, (m) => { (m.pipeline ??= {}).build = { startedAt: now(), shots, estimate: est }; });
-    note(p, "Storyboard and Motion Plan approved. Please wait while Moworks Studio builds the film, about {min} minutes.", { min: est.minutes });
+    note(p, "Storyboard and Motion Plan approved. Making your film, with its sound. Version 1 is ready in about {min} minutes. Please wait...", { min: est.minutes });
     advance(id);
     return est;
   }
@@ -590,7 +744,7 @@ export function createAutopilot(ctx) {
   async function resume(id, extra = "") {
     if (ctx.agent.running.has(id)) throw Object.assign(new Error("Claude is still working on this project. Stop it or wait for it to finish."), { code: "BUSY" });
     const { state, facts, p } = await ctx.pipelineOf(id);
-    meta(id, (m) => { if (m.pipeline) delete m.pipeline.autoRun; });          // the user's Continue: the autopilot may run the step again
+    meta(id, (m) => { if (m.pipeline) { delete m.pipeline.autoRun; delete m.pipeline.firstVersionFail; } });          // the user's Continue: the autopilot may run the step again; Version 1's render goes again
     // a built film whose storyboard or motion a chat turn changed (before the feedback loop kept the approvals) waits for a
     // Build again that nobody asked for: Continue keeps them as they are now, and the film goes on from where it is, without a new build
     if (p.meta?.pipeline?.ran?.build && state.some((x) => ["storyboard", "motionSpec"].includes(x.id) && x.status === "redo" && x.reason?.key === "Changed since approval")) {
@@ -661,7 +815,8 @@ export function createAutopilot(ctx) {
   async function resumeOnOpen(id) {
     if (ctx.agent.running.has(id) || ctx.agent.interrupted(id)) return null;
     const { p, state } = await ctx.pipelineOf(id);
-    if (isFinished(p.meta)) return null;          // opening a finished film starts nothing
+    // opening a finished film starts nothing, but for a Review the user asked for and that did not end
+    if (isFinished(p.meta) && !pipe.reviewPending(p.meta?.pipeline?.version1)) return null;
     const s = pipe.nextAuto(state);
     if (!s) return null;
     if (s.action?.kind === "claude") {
@@ -713,7 +868,8 @@ export function createAutopilot(ctx) {
     return transcriptLanded(id);
   }
 
-  return { startStep, advance, afterQa, finished, taskEnded, transcriptLanded, voiceCheckDue, storyboardApproved, motionApproved, resume, saveVersion, openVersion, briefChanged, filesAdded, resumeOnOpen };
+  return { startStep, advance, afterQa, finished, taskEnded, transcriptLanded, voiceCheckDue, storyboardApproved, motionApproved, resume, saveVersion, openVersion, briefChanged, filesAdded, resumeOnOpen,
+    chooseReview, chatInstead, renderAnswer, openNext, keepFirst, stopVersion, continueVersion };
 }
 
 /** Did a task change a storyboard option's own files (boards/<option>/…, not the rounds' copies)? */

@@ -51,8 +51,9 @@ import { readNewPdfs, scanAssets } from "../project-service/scan.mjs";
 import { isOption, listRounds, nextLetter, ownerRoundOf, ownerRounds, pendingRevision, recordPick } from "../hf-edit/boards.mjs";
 import { spawn } from "node:child_process";
 import { createJobs } from "./jobs.mjs";
+import { busyWatch } from "../system-status/busy.mjs";
 import { plainMessage } from "./plainError.mjs";
-import { RESUME, createAutopilot, createRenderQueue, estimateMinutes, estimateNow, hasCast, isFinished, reviewRounds } from "./autopilot.mjs";
+import { RESUME, createAutopilot, createRenderQueue, estimateMinutes, estimateNow, hasCast, isFinished, renderMinutes, reviewEstimates, reviewRounds } from "./autopilot.mjs";
 import { productionRoutes } from "./production.mjs";
 import { approvedFrames, boardRoutes, etaWords, runningEstimate, stillsBehind } from "./boards.mjs";
 import { localFile as localSoundFile, readState as readSfxState } from "../sfx/index.mjs";
@@ -108,7 +109,7 @@ export function tidyPreviews(root = APP_ROOT) {
 }
 
 const MIME = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png",
-  ".jpg": "image/jpeg", ".webp": "image/webp", ".mp4": "video/mp4", ".ogg": "audio/ogg", ".mp3": "audio/mpeg", ".ttf": "font/ttf", ".woff2": "font/woff2", ".json": "application/json", ".ico": "image/x-icon", ".txt": "text/plain" };
+  ".jpg": "image/jpeg", ".webp": "image/webp", ".mp4": "video/mp4", ".ogg": "audio/ogg", ".mp3": "audio/mpeg", ".ttf": "font/ttf", ".otf": "font/otf", ".woff": "font/woff", ".woff2": "font/woff2", ".jpeg": "image/jpeg", ".gif": "image/gif", ".json": "application/json", ".ico": "image/x-icon", ".txt": "text/plain" };
 
 class HttpError extends Error { constructor(status, code, message) { super(message); this.status = status; this.code = code; } }
 const STATUS = { NOT_FOUND: 404, INVALID: 400, BUSY: 409, RENDERING: 409, CONFLICT: 409, NO_CLAUDE: 503, CLAUDE_SIGNED_OUT: 412, STEP_BLOCKED: 409, MODEL_MISSING: 409, AE_NOT_RUNNING: 409, TOO_LARGE: 413,
@@ -333,6 +334,12 @@ export function routes(ctx) {
     return { p, steps, state, facts };
   };
   ctx.pipelineOf = pipelineOf;
+  /** A film made in 3D: its render may take an hour, so a new version asks first (owner 31/10). The style says so, or the film's page loads Three.js. */
+  ctx.threeFilm = (p) => {
+    const s = p?.meta?.style?.id ? getStyle(p.meta.style.id, root) : null;
+    if (s?.dim === "3D" || s?.id === "hf-3d") return true;
+    try { return /\bthree(\.module)?(\.min)?\.m?js\b|\bTHREE\./.test(readFileSync(join(p.path, "index.html"), "utf8")); } catch { return false; }
+  };
   /** The films whose pipeline was read since the app started: the autopilot goes on once for each. */
   const resumedOnOpen = new Set();
   /** The earlier step whose change asks this approved step to be done again (redo with canKeep), by its title, else null. */
@@ -471,8 +478,12 @@ export function routes(ctx) {
     // Looks HF's frame presets and the user's own Looks in one list; a user's Look is made from a guideline
     // (create, upload its files, scan: a job) and kept with versions
     r("GET", "/looks", () => customLooks.apiLooks(root)),
+    r("POST", "/looks/fonts", (_p, b) => customLooks.kitFontFaces(b, { root })),
     r("GET", "/looks/((?:frame|custom)/[a-z0-9-]+)", ([id]) => customLooks.apiLook(id, root)),
-    r("POST", "/looks", (_p, b) => customLooks.publicLook(customLooks.createLook(b, root))),
+    r("GET", "/looks/(frame/[a-z0-9-]+)/frames", async ([id]) => ({ frames: await looks.showcaseFrames(id, root) })),
+    r("POST", "/looks/(frame/[a-z0-9-]+)/copy", async ([id]) => customLooks.publicLook(await customLooks.copyLook(id, { root }), root)),
+    r("POST", "/looks", (_p, b) => customLooks.publicLook(customLooks.createLook(b, root), root)),
+    r("POST", "/looks/(custom/[a-z0-9-]+)/new-version", async ([id], b) => customLooks.publicLook(await customLooks.newVersion(id, b, { root }), root)),
     r("POST", "/looks/(custom/[a-z0-9-]+)/scan", ([id], b) => {
       const m = customLooks.getCustom(id, root);
       if (!m) throw new HttpError(404, "NOT_FOUND", "Brand Kit not found");
@@ -745,20 +756,20 @@ export function routes(ctx) {
         // with the build's start, for "about N min left"
         // worked out again from the steps left once the Build is done, the Review by its rounds (T23-11), and past the plan
         estimate: building && building.status !== "done" && p.meta?.pipeline?.build?.estimate
-          ? { ...estimateNow(p.meta.pipeline.build.estimate, state, { startedAt: p.meta.pipeline.build.startedAt,
+          ? { ...estimateNow(p.meta.pipeline.build.estimate, state, { startedAt: p.meta.pipeline.build.startedAt, render: renderMinutes(p.meta?.targetDurationSec ?? 60, { styleId: p.meta?.style?.id, three: ctx.threeFilm(p), fps: p.meta?.format?.fps }),
             review: (() => { const t = tasks.find((x) => x.id === runId); return (t?.step ?? t?.continues) === "qcReview" ? reviewRounds(t) : null; })() }),
           startedAt: p.meta.pipeline.build.startedAt ?? null } : null,
         // the app's own work between two steps (the music and sound effects after Claude's music task, ~3 min that looked idle)
         // the last task was stopped by Exit and nothing ran since: the Editor offers to run it again (POST …/tasks/<id>/again)
         interrupted: ctx.agent.interrupted(id),
-        appBusy: (() => { const j = ctx.jobs.list({ kind: "mix" }).find((x) => x.projectId === id && x.status === "running"); if (j) return { stage: "build", key: "Placing the music and sound effects", jobId: j.id };
+        appBusy: (() => { const j = ctx.jobs.list({ kind: "mix" }).find((x) => x.projectId === id && x.status === "running"); if (j) return { stage: "build", key: "Adding sound. Please wait...", jobId: j.id };
           // the sound effects placed again (the Final Mix's Place, or after a chat turn changed the storyboard's cues)
-          const fx = ctx.jobs.list({ kind: "mix-sfx" }).find((x) => x.projectId === id && x.status === "running"); if (fx) return { stage: "finalMix", key: "Placing the sound effects", jobId: fx.id };
+          const fx = ctx.jobs.list({ kind: "mix-sfx" }).find((x) => x.projectId === id && x.status === "running"); if (fx) return { stage: "finalMix", key: "Placing the sound effects. Please wait...", jobId: fx.id };
           // the app reads the user's files (audio, decks, PSD) before Prepare
-          const sc = ctx.jobs.list({ kind: "scan" }).find((x) => x.projectId === id && x.status === "running"); if (sc) return { stage: "prepare", key: "Reading your files", jobId: sc.id };
+          const sc = ctx.jobs.list({ kind: "scan" }).find((x) => x.projectId === id && x.status === "running"); if (sc) return { stage: "prepare", key: "Reading your files. Please wait...", jobId: sc.id };
           // the voice being made or transcribed is the app at work too; when it ends the Editor loads the timeline again (NARRATION)
-          const tts = ctx.jobs.list({ kind: "tts" }).find((x) => x.projectId === id && x.status === "running"); if (tts) return { stage: "prepare", key: "Making the voice-over", jobId: tts.id };
-          const tr = ctx.jobs.list({ kind: "transcribe" }).find((x) => x.projectId === id && x.status === "running"); return tr ? { stage: "prepare", key: "Transcribing the voice-over", jobId: tr.id } : null; })(),
+          const tts = ctx.jobs.list({ kind: "tts" }).find((x) => x.projectId === id && x.status === "running"); if (tts) return { stage: "prepare", key: "Making the voice-over. Please wait...", jobId: tts.id };
+          const tr = ctx.jobs.list({ kind: "transcribe" }).find((x) => x.projectId === id && x.status === "running"); return tr ? { stage: "prepare", key: "Transcribing the voice-over. Please wait...", jobId: tr.id } : null; })(),
         // the film is done (stage 4 ran to the end) and the self-check's score card
         finished: isFinished(p.meta) ? (p.meta.pipeline.finished ?? p.meta.pipeline.delivered) : null, qc: pipe.reviewCard(p.path),
         // the background checks for the Editor's one card: what would stop the render, and whether Claude is fixing it now
@@ -768,7 +779,18 @@ export function routes(ctx) {
           notChecked: pipe.qaNotChecked(p.meta?.lastQa, p.path),          // checks that could not run: no pass and no warning (T21-5)
           fixing: !!p.meta?.pipeline?.autoFix && ctx.agent.running.has(id), tried: !!p.meta?.pipeline?.autoFix && !ctx.agent.running.has(id) },
         // what the Motion dialog's confirm says before the approval: the same estimate for the plan's shots as it is now
-        estimateIfApproved: facts.motionShots ? estimateMinutes(facts.motionShots, root, { seconds: p.meta?.targetDurationSec, styleId: p.meta?.style?.id }) : null,
+        estimateIfApproved: facts.motionShots ? estimateMinutes(facts.motionShots, root, { seconds: p.meta?.targetDurationSec, styleId: p.meta?.style?.id, three: ctx.threeFilm(p) }) : null,
+        // Version 1 and the one question after it: what the chat's card shows, with the time each answer takes
+        version1: (() => {
+          const card = pipe.versionCard(p.meta, state, { claudeBusy: ctx.agent.running.has(id), rendering: ctx.jobs.list({ projectId: id }).some((j) => j.kind === "preview-proxy" && j.status === "running") });
+          const v1 = p.meta?.pipeline?.version1;
+          // its render, with its Stop
+          if (!v1?.at) return state.find((x) => x.id === "firstVersion")?.status === "running" ? { n: 1, choice: null, holding: false, next: null, card: { kind: "preparing", n: 1 } } : null;
+          const seconds = Number(p.meta?.targetDurationSec) || 60, three = ctx.threeFilm(p), fps = p.meta?.format?.fps;
+          return { at: v1.at, n: v1.n ?? 1, choice: v1.choice ?? null, by: v1.by ?? null, holding: !!v1.holding, next: v1.next ?? null, card,
+            times: card?.kind === "ask" ? reviewEstimates(seconds, { styleId: p.meta?.style?.id, three, fps }) : null,
+            renderTime: card?.kind === "render-ask" ? (() => { const m = Math.max(1, Math.round(renderMinutes(seconds, { styleId: p.meta?.style?.id, three, fps }))); return { minutes: m, high: Math.round(m * 1.5) }; })() : null };
+        })(),
         question: p.meta?.pipeline?.briefChanged ? { kind: "brief-changed", at: p.meta.pipeline.briefChanged.at }
           : asking ? { kind: p.meta?.style?.id === "general" && existsSync(docPath(p.path, "ASSETS.md")) && !pipe.chosenWay(p.path) ? "way" : "missing" }
           // Claude's question in the chat is open (a font to choose, a revision's notes): the user answers there
@@ -803,6 +825,15 @@ export function routes(ctx) {
       if (!out) throw new HttpError(409, "NOT_STARTED", `Nothing could start for “${s.title ?? stepId}”. Try again, or ask Claude in the chat.`);
       return out;
     }),
+    // the one question after Version 1, and what follows it (the chat's Version card)
+    r("POST", `/projects/${P}/version1/choice`, async ([id], b) => { mustProject(id, root); return ctx.autopilot.chooseReview(id, String(b.choice ?? "")); }),
+    r("POST", `/projects/${P}/version1/render`, ([id], b) => { mustProject(id, root); return ctx.autopilot.renderAnswer(id, !!b.yes); }),
+    r("POST", `/projects/${P}/version1/open`, ([id]) => { mustProject(id, root); return ctx.autopilot.openNext(id); }),
+    r("POST", `/projects/${P}/version1/keep`, ([id]) => { mustProject(id, root); return ctx.autopilot.keepFirst(id); }),
+    r("POST", `/projects/${P}/version1/stop`, ([id]) => { mustProject(id, root); return ctx.autopilot.stopVersion(id); }),
+    r("POST", `/projects/${P}/version1/continue`, ([id]) => { mustProject(id, root); return ctx.autopilot.continueVersion(id); }),
+    // the notice of another film's version, seen
+    r("POST", "/notices/([0-9a-f]+)/seen", ([nid]) => ({ ok: ctx.notices.seen(nid) })),
     // carry on a step the user stopped (the chat's "continue" does the same)
     r("POST", `/projects/${P}/pipeline/resume`, async ([id], b) => (await ctx.autopilot.resume(id, String(b.text ?? ""))) ?? { idle: true }),
     // named versions: made when the film is first built, after each round of changes, at each render, before a redo
@@ -915,6 +946,8 @@ export function routes(ctx) {
       const out = projects.updateMeta(id, (m) => { m.settings = next; }, root);
       return { own: out.meta.settings ?? {}, settings: effectiveSettings(out.meta, root) }; }),
     r("POST", `/projects/${P}/tasks`, async ([id], b) => {
+      // a message instead of a button after Version 1: the question is taken as answered, and nothing of the Review runs (owner 31/10)
+      ctx.autopilot.chatInstead(id);
       // the user's answer after Prepare asked about a Google Slides link it could not read ("done, it is shared now"): read them again first
       { const p0 = projects.getProject(id, root); if (Object.values(p0?.meta?.links ?? {}).some((v) => !v?.ok)) { try { await ctx.slidesFromBrief?.(p0); } catch { /* Claude is told what still fails */ } } }
       // a PDF added since the last scan is read before Claude answers, so a password on it reaches Claude and its row in Assets
@@ -936,10 +969,10 @@ export function routes(ctx) {
       return answered(await ctx.agent.start(id, { text: b.text, scope: b.scope, ...(rv ? { label: "Storyboard · revision" } : {}), ...(continues ? { continues } : {}) }));
     }),
     // the status button's one word (state: idle | working | downloading | updating) with what it is about (job title)
-    r("GET", "/tasks/running", () => appState({ tasks: [...ctx.agent.running.entries()].map(([projectId, taskId]) => {
+    r("GET", "/tasks/running", () => ({ notices: ctx.notices?.list() ?? [], ...appState({ machineBusy: !!ctx.machine?.busy() && (ctx.agent.running.size > 0 || ctx.jobs.running().length > 0), tasks: [...ctx.agent.running.entries()].map(([projectId, taskId]) => {
       const t = ctx.agent.get(taskId); return { projectId, taskId, kind: "claude", stage: t?.stage ?? null, title: projects.getProject(projectId, root)?.title ?? "" }; }),
       jobs: ctx.jobs.running().map((j) => ({ id: j.id, kind: j.kind, projectId: j.projectId, title: j.title, stage: j.stage, progress: j.progress,
-        project: j.projectId ? projects.getProject(j.projectId, root)?.title ?? "" : null })) })),
+        project: j.projectId ? projects.getProject(j.projectId, root)?.title ?? "" : null })) }) })),
     r("GET", `/tasks/${T}`, ([tid]) => { const t = ctx.agent.get(tid); if (!t) throw new HttpError(404, "NOT_FOUND", "Task not found"); return t; }),
     r("POST", `/tasks/${T}/cancel`, ([tid]) => ctx.agent.cancel(tid)),
     // a task Exit stopped, run again as it was ("Resume / Send again")
@@ -953,7 +986,14 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
   onExit = null, onRestart = null, onWindowGone = null, windowGraceMs = Number(process.env.MW_WINDOW_GRACE_MS ?? 10000), thumbnails = false,
   updateCheck = false, housekeeping = false } = {}) {          // updateCheck: the app checks for its own new version by itself (the launcher; never in tests)
   // housekeeping: old logs, old work folders and unused HyperFrames versions cleaned once at start (the launcher; never in tests)
-  const ctx = { root, preview: null, onExit, onRestart, lastSeen: Date.now() };
+  const ctx = { root, preview: null, onExit, onRestart, lastSeen: Date.now(), machine: busyWatch() };
+  // a film's new version, said on whatever screen the user is on, once (App's notice with its Open); kept while the app runs, the Pipeline says it after that
+  const notices = [];
+  ctx.notices = {
+    add: (n) => { notices.push({ id: randomBytes(6).toString("hex"), at: new Date().toISOString(), ...n }); if (notices.length > 20) notices.splice(0, notices.length - 20); },
+    list: () => notices.slice(),
+    seen: (id) => { const i = notices.findIndex((n) => n.id === id); if (i >= 0) notices.splice(i, 1); return i >= 0; },
+  };
   const agentToken = randomBytes(24).toString("hex");          // Claude Code's (AGENT_API only)
   const server = createServer(async (req, res) => {
     const addr = server.address();

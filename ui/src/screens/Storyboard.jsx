@@ -144,10 +144,10 @@ export default function Storyboard({ id, setCrumbs = () => {} }) {
       <button className="btn" onClick={() => setAsk(null)}>{t("Look again")}</button>
       <button className={"btn " + (ask === "approve" ? "ok" : "primary")} onClick={confirm[2]} disabled={busy}>{busy ? <Loader2 size={15} className="spin" /> : <Check size={15} />}{confirm[1]}</button></>}>
       {/* One sentence says what Claude does, how long and what it costs (normal text, not a warning); at most one short line under it */}
-      {ask === "approve" && <UsageHint projectId={id} line={stepLine(t, t("Claude writes the motion for {n} shots", { n: frames }), board?.estimates?.motionFor?.[label] ?? board?.estimates?.motion)} />}
-      {ask === "more" && <UsageHint projectId={id} line={stepLine(t, t("Claude makes Option {o}, unlike the ones you have", { o: nextLetter(options) }), board?.estimates?.option)}>
+      {ask === "approve" && <UsageHint line={stepLine(t, t("Claude writes the motion for {n} shots", { n: frames }), board?.estimates?.motionFor?.[label] ?? board?.estimates?.motion)} />}
+      {ask === "more" && <UsageHint line={stepLine(t, t("Claude makes Option {o}, unlike the ones you have", { o: nextLetter(options) }), board?.estimates?.option)}>
         <p className="hint">{draft.trim() ? t("Your feedback on Option {o} goes with it.", { o: label }) : t("Every option so far stays here.")}</p></UsageHint>}
-      {ask === "revise" && option && <UsageHint projectId={id} line={stepLine(t, t("Claude makes Option {n} from your feedback", { n: nextRevision(options, option.letter ?? label[0]) }), board?.estimates?.feedback)}>
+      {ask === "revise" && option && <UsageHint line={stepLine(t, t("Claude makes Option {n} from your feedback", { n: nextRevision(options, option.letter ?? label[0]) }), board?.estimates?.feedback)}>
         <p className="hint">{panelNotes > 0 ? (panelNotes === 1 ? t("Only the panel with a note is drawn again.") : t("Only the {n} panels with a note are drawn again.", { n: panelNotes })) : t("Claude says first which panels it changes.")}</p></UsageHint>}
       </Dialog>}
   </div>;

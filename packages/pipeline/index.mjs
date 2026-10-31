@@ -203,6 +203,8 @@ export function gatherFacts(project, { shots = [], head = null, jobs = [], runni
     qa: qaFacts(m.lastQa, dir), head, qaStale, qaRunning: running("qa"),
     // the film handed over (the autopilot's finished, else delivered; a new build clears finished): the feedback loop
     finished: !!(m.pipeline?.finished !== undefined ? m.pipeline.finished : m.pipeline?.delivered),
+    // Version 1 and the one question after it (owner 31/10, #694-#698); firstVersionFail: its render failed or was stopped
+    version1: m.pipeline?.version1 ?? null, firstVersionFail: m.pipeline?.firstVersionFail ?? null, previewRunning: running("preview-proxy"),
     castEmpty: castList(dir)?.length === 0,
     // humanHand: an anidoodle medium whose hand draws the author's human characters: its films get a Character step
     flags: { characters: !!m.flags?.characters, assets: (() => { const a = assetFacts(dir); return a.count + a.sources > 0; })(), humanHand: !!humanHandOf(m.style?.id),
@@ -267,7 +269,7 @@ export function reviewCard(dir) {
   });
   const final = md?.score ?? num(j?.final) ?? rounds.at(-1)?.low ?? null;
   if (final == null && !rounds.length) return null;
-  return { final, pass: final != null && final >= 8, at: md?.at ? new Date(md.at).toISOString() : null, criteria: QC_CRITERIA, rounds, brand: brandCheck(dir) };
+  return { final, pass: final != null && final >= 8, at: md?.at ? new Date(md.at).toISOString() : null, criteria: QC_CRITERIA, rounds, brand: brandCheck(dir), mode: j?.mode ?? null };
 }
 
 /** The ways of working of General Style: free, keep, reference. Older projects
@@ -365,6 +367,8 @@ export function judge(done, f, id = null) {
       const r = f.review;
       // a film of a Brand Kit passes only with every rule of the kit's checklist gone through and none left broken
       const open = (f.brand?.failed.length ?? 0) + (f.brand?.missing.length ?? 0);
+      // "Fix mistakes only" gives no scores: it is done when its task ended (reviewed); a broken Brand Kit rule is said here
+      if (f.version1?.choice === "mistakes") return open ? { met: false, partial: true, why: { key: "{n} Brand Kit rule(s) not checked or broken: read QC-REVIEW.md", vars: { n: open } } } : { met: false };
       if (r?.score != null && r.score >= 8 && open) return { met: false, partial: true, why: { key: "{n} Brand Kit rule(s) not checked or broken: read QC-REVIEW.md", vars: { n: open } } };
       if (r?.score != null && r.score >= 8) return { met: true, at: r.at };
       if (r?.score != null) return { met: false, partial: true, why: { key: "Final score {n}/10: read QC-REVIEW.md", vars: { n: r.score } } };
@@ -374,6 +378,12 @@ export function judge(done, f, id = null) {
     case "built":          // a film whose source does not compile is not built (its older bundle would play and render)
       if (f.buildError) return { met: false, failed: true, why: { key: "The film's code does not compile" } };
       return { met: f.built.ok, at: f.built.at };
+    case "firstVersion": {          // rendered with its sound and handed over; a film handed over before this step existed counts as past it
+      if (f.version1?.at) return { met: true, at: time(f.version1.at) };
+      if (f.finished) return { met: true, at: null };
+      if (f.firstVersionFail) return { met: false, failed: true, why: { key: f.firstVersionFail.stopped ? "Stopped: press Continue to make Version 1" : "Version 1 could not be rendered: press Continue to try again" } };
+      return { met: false };
+    }
     case "qa": {
       const q = f.qa;
       if (!q) return { met: false };
@@ -387,7 +397,14 @@ export function judge(done, f, id = null) {
   }
 }
 
-const isRunning = (step, f) => f.runningStep === step.id || (step.done?.kind === "qa" && f.qaRunning) || (["voice", "audioIn"].includes(step.done?.kind) && f.voice.transcribing);
+const isRunning = (step, f) => f.runningStep === step.id || (step.done?.kind === "qa" && f.qaRunning) || (["voice", "audioIn"].includes(step.done?.kind) && f.voice.transcribing)
+  || (step.done?.kind === "firstVersion" && f.previewRunning && !f.version1?.at && !f.finished);
+/** What the user chose after Version 1 that has Claude look at the film. */
+export const REVIEW_CHOICES = ["mistakes", "improve"];
+/** The steps that wait for the user's answer after Version 1: nothing of Claude's runs before it. */
+const AFTER_CHOICE = new Set(["qcReview", "checks"]);
+/** Chosen a Review and not closed yet: the Review, its checks and what follows them still run. */
+export const reviewPending = (v1) => !!v1 && REVIEW_CHOICES.includes(v1.choice) && !v1.closed;
 
 /** The state of every step, in order: [{ ...step, status, reason, doneAt, visible }]. */
 export function computePipeline(steps, f) {
@@ -400,19 +417,32 @@ export function computePipeline(steps, f) {
     by.set(step.id, s); out.push(s);
     if (!visible) { s.status = "done"; s.hidden = true; continue; }
     if (step.quiet) s.hiddenInList = true;          // shown only when it fails (set again below)
-    // the QC review runs on the first build, and again after a newer storyboard approval
-    const again = step.firstOnly && f.reviewedAt != null && f.storyboardAt != null && f.storyboardAt > f.reviewedAt;
+    // after Version 1 the app asks one question and runs nothing of Claude's until it is answered; "No" skips the Review and its checks. A film
+    // handed over before this flow (finished, with no version1) goes on as it was
+    const v1 = f.version1, gated = AFTER_CHOICE.has(step.id) && !isRunning(step, f) && steps.some((x) => x.id === "firstVersion") && !(f.finished && !v1);
+    if (gated && !v1?.at) { s.status = "blocked"; s.reason = { key: "After Version 1" }; continue; }
+    if (gated && !v1.choice) {
+      if (step.id === "qcReview") { s.status = "needs-you"; s.asksChoice = true; s.reason = { key: "Version {v} is ready. Watch it, with sound.", vars: { v: v1.n ?? 1 } }; }
+      else { s.status = "blocked"; s.reason = { key: "After Version 1" }; }
+      continue;
+    }
+    if (gated && v1.choice === "none") { s.status = "skipped"; s.doneAt = time(v1.choiceAt); s.reason = { key: "You chose not to check it" }; continue; }
+    // the QC review runs on the first build, and again after a newer storyboard approval, or after a new choice since its last run
+    const choiceAt = REVIEW_CHOICES.includes(v1?.choice) ? time(v1.choiceAt) : null;
+    const again = step.firstOnly && f.reviewedAt != null && ((f.storyboardAt != null && f.storyboardAt > f.reviewedAt) || (choiceAt != null && choiceAt > f.reviewedAt));
     if (step.firstOnly && f.reviewedAt != null && !again && !isRunning(step, f)) {
       s.status = "done"; s.doneAt = f.reviewedAt; s.reason = f.review?.score != null ? { key: "Review {n}/10", vars: { n: f.review.score } } : null; continue;
     }
-    const j = again ? { met: false } : judge(step.done, f, step.id);
+    // the checks that go with a Review look at the film as the Review left it (an older pass does not count, whatever the film's revision)
+    const checksDue = step.id === "checks" && reviewPending(v1) && !(f.qa?.at && f.reviewedAt != null && time(f.qa.at) >= f.reviewedAt);
+    const j = again || checksDue ? { met: false } : judge(step.done, f, step.id);
     const needs = (step.needs ?? []).map((id) => by.get(id)).filter((x) => x && x.visible);
     const after = (step.after ?? []).map((id) => by.get(id)).filter((x) => x && x.visible);
     // an optional step (the Final Mix) opens on what was done once: a later change there does not lock it
     const unmet = needs.filter((x) => !SATISFIED.has(x.status) && !(step.optional && x.status === "redo"));
     const missing = unmet.filter((x) => x.status !== "redo");        // never done: a built film is not "built" for this step yet
     const skip = step.skippable ? f.skips[step.id] : null;
-    if (isRunning(step, f)) { s.status = "running"; s.reason = { key: step.done?.kind === "qa" ? "Tech checks are running" : step.done?.kind === "voice" ? "Transcribing" : "Claude is working on it" }; }
+    if (isRunning(step, f)) { s.status = "running"; s.reason = { key: step.done?.kind === "qa" ? "Tech checks are running" : step.done?.kind === "voice" ? "Transcribing" : step.done?.kind === "firstVersion" ? "Preparing Version 1. Please wait..." : "Claude is working on it" }; }
     else if (skip && !j.met) { s.status = "skipped"; s.doneAt = time(skip.at); s.reason = { key: step.skipLabel ?? "Skipped" }; }
     else if (j.met) {
       // done at the latest of: its own result, the end of the Claude task that made it (that task may touch an earlier step's file too,
@@ -428,7 +458,8 @@ export function computePipeline(steps, f) {
       const moved = !source && step.id !== "character" && [...needs, ...after].filter((x) => x.id !== "character").find((x) => x.status === "redo" || (x.doneAt != null && s.doneAt != null && x.doneAt > s.doneAt + 1000));
       // the music stays when the picture changes (the user changes it in the Final Mix), and once the film is handed
       // over the background checks (quiet) run again before a render on their own: neither turns "redo" for a change the user made
-      const stays = (step.id === "sound" && !j.changed) || (step.quiet && f.finished);
+      // Version 1 stays what it was, whatever changes the film after it
+      const stays = (step.id === "sound" && !j.changed) || (step.quiet && f.finished) || step.done?.kind === "firstVersion";
       if (step.done?.kind === "built" && missing.length) { s.status = "blocked"; s.doneAt = null; s.reason = { key: "Finish “{step}” first", vars: { step: missing[0].title } }; }
       else if ((j.changed || moved) && stays) { s.status = "done"; s.stale = true; }
       else if (j.changed) { s.status = "redo"; s.reason = j.why; }
@@ -535,7 +566,8 @@ export const STAGES = [
   // the Final Mix is the hand-over (A6): no score, no Tech checks shown; Render is a button, not a row
   { n: 4, id: "build", title: "Build and review" }, { n: 5, id: "finalMix", title: "Final Mix" },
 ];
-/** The Pipeline lines of the waits for the user, also the chat's reminder cards (autopilot). */
+/** Every line of the Pipeline is for someone who knows nothing yet: where the film is and what to do, one line at best, two at most (owner 31/10, #697, #698).
+ *  The Pipeline lines of the waits for the user, also the chat's reminder cards (autopilot). */
 export const WAITING = {
   character: "Waiting for you: approve the new characters", storyboard: "Waiting for you: approve the storyboard",
   motion: "Waiting for you: Approve and build in the Motion Plan", asking: "Waiting for you: answer Claude in the chat",
@@ -565,12 +597,13 @@ export function stagesOf(state, f = {}) {
     else if (stopped) row.status = "stopped";
     else if (failed) row.status = "failed";
     // while Claude works (a chat turn: no step of its own runs), the stage that waits for the user shows that Claude is at work
-    else if ((asking || waiting) && f.claudeBusy && !busyShown) { row.status = "running"; row.line = "Claude is working on it"; busyShown = true; continue; }
+    else if ((asking || waiting) && f.claudeBusy && !busyShown) { row.status = "running"; row.line = "Claude is working. Please wait..."; busyShown = true; continue; }
     else if (asking || waiting) row.status = "waiting";
     else if (redo) row.status = "redo";
     else if (xs.every((s) => ok(s) || (s.optional && s.status !== "running") || (st.id === "build" && s.status === "redo") || s === quietFail)) row.status = st.id === "finalMix" && !xs.some(ok) ? "todo" : "done";
     else row.status = "todo";
-    const sub = { build: "Building", qcReview: "Review", checks: "Checking the film", sound: "Music and sound effects" };
+    const sub = { build: "Making your film. Please wait...", sound: "Adding sound. Please wait...", firstVersion: "Preparing Version 1. Please wait...",
+      qcReview: "Checking your film. Please wait...", checks: "Last checks. Please wait..." };
     switch (st.id) {
       case "prepare": {
         row.open = "brief";
@@ -579,11 +612,11 @@ export function stagesOf(state, f = {}) {
         const cast = xs.find((s) => s.id === "character" && !ok(s));
         if (cast && !(running && running.id !== "character") && !(asking && asking.id !== "character")) {
           row.open = "character";
-          row.line = running?.id === "character" ? "Making the characters" : cast.asking ? WAITING.asking : waiting?.id === "character" ? WAITING.character
+          row.line = running?.id === "character" ? "Making the characters. Please wait..." : cast.asking ? WAITING.asking : waiting?.id === "character" ? WAITING.character
             : cast.status === "redo" ? "Changed since approval: approve again" : null;
           break;
         }
-        row.line = running ? "Preparing the film" : asking ? WAITING.asking : row.status === "done" ? "Brief ready · {n} file(s)" : null;
+        row.line = running ? "Reading your brief. Please wait..." : asking ? WAITING.asking : row.status === "done" ? "Brief ready · {n} file(s)" : null;
       }
         break;
       case "storyboard":
@@ -593,26 +626,28 @@ export function stagesOf(state, f = {}) {
           const w = xs.find((s) => s.voiceWait).voiceWait;
           row.open = /^lyrics/.test(w) ? "lyrics" : "voice";
           if (VOICE_WAITS[w]) { row.status = "waiting"; row.line = VOICE_WAITS[w]; }
-          else { row.status = "running"; row.line = w === "lyricsTiming" ? "Timing the lyrics" : "Timing the voice-over's words"; }
+          else { row.status = "running"; row.line = w === "lyricsTiming" ? "Timing the lyrics. Please wait..." : "Timing the voice-over's words. Please wait..."; }
           break;
         }
-        row.line = running ? "Drawing the storyboard" : row.status === "done" ? (f.storyboardPick ? "Storyboard {name} approved" : "Storyboard approved")
+        row.line = running ? "Drawing the storyboard. Please wait..." : row.status === "done" ? (f.storyboardPick ? "Storyboard {name} approved" : "Storyboard approved")
           : row.status === "redo" ? redoLine : asking ? WAITING.asking : waiting ? WAITING.storyboard : null;
         row.lineVars = { name: f.storyboardPick ?? "", step: redo?.reason?.vars?.step ?? "" };
         break;
       case "motion":
         row.open = "motion-plan";
-        row.line = running ? "Writing the Motion Plan" : row.status === "done" ? "Motion Plan approved for {n} shot(s)" : row.status === "redo" ? redoLine
+        row.line = running ? "Writing the Motion Plan. Please wait..." : row.status === "done" ? "Motion Plan approved for {n} shot(s)" : row.status === "redo" ? redoLine
           : asking ? WAITING.asking : waiting ? WAITING.motion : null;
         row.lineVars = { n: f.motionShots ?? 0, step: redo?.reason?.vars?.step ?? "" };
         break;
       case "build":
         // problems that stop the render and Claude's question about them in the chat: a wait for the user
         if (!running && f.chatAsked && (quietFail || failed || row.status === "done")) { row.status = "waiting"; row.line = WAITING.asking; break; }
-        row.line = running ? sub[running.id] ?? "Building" : asking ? WAITING.asking : failed?.id === "build" && f.buildError ? "The film's code does not compile"
-          : failed ? "{n} blocking issue(s) at the last check" : quietFail ? "{n} problem(s) to fix before the render"
-          : row.status === "done" ? (f.review?.score != null ? "Review {score}/10" : "Built") : null;
-        row.lineVars = { n: f.qa?.blocking ?? 0, score: f.review?.score ?? "" };
+        // the one question after Version 1: the card in the chat holds its buttons, the row says what to do first
+        if (!running && xs.some((s) => s.asksChoice)) { row.status = "waiting"; row.choice = true; row.line = "Version {v} is ready. Watch it, with sound."; row.lineVars = { v: f.version1?.n ?? 1 }; break; }
+        row.line = running ? sub[running.id] ?? "Claude is working. Please wait..." : asking ? WAITING.asking : failed?.id === "build" && f.buildError ? "The film's code does not compile"
+          : failed?.id === "firstVersion" ? failed.reason?.key : failed ? "{n} blocking issue(s) at the last check" : quietFail ? "{n} problem(s) to fix before the render"
+          : row.status === "done" ? (f.qa && !f.qa.pass && f.qa.blocking > 0 ? "{n} problem(s) to fix before the render" : f.version1?.choice === "none" || f.review?.score == null ? "Version {v} is ready. Watch it, with sound." : "Review {score}/10") : null;
+        row.lineVars = { n: f.qa?.blocking ?? 0, score: f.review?.score ?? "", v: f.version1?.next?.opened ? f.version1.next.n : f.version1?.n ?? 1 };
         break;
       case "finalMix":
         // the hand-over: the film is ready to render once stage 4 ran to the end; the music is said, never a score
@@ -621,14 +656,38 @@ export function stagesOf(state, f = {}) {
         const ready = f.finished && out[3]?.status === "done" && !(f.qa && !f.qa.pass && f.qa.blocking > 0) && !f.chatAsked;
         if (ready) row.status = "done";
         // before that the music and the sound effects are made inside Build and review: the row only says when it opens
-        row.line = ready ? (f.music ? "Ready to render · Music: {title}" : "Ready to render") : "After the build";
-        row.lineVars = { title: f.musicTitle ?? (f.music ? f.music.split("/").pop() : "") };
+        // while Claude changes the film the Final Mix is shut, and says why; while the question waits it can be opened
+        row.line = ready ? "Your film is ready to export." : reviewPending(f.version1) && (f.claudeBusy || f.qaRunning) ? "Shut until Claude finishes." : f.finished ? "Open it to change the sound." : "Please wait...";
+        row.lineVars = {};
         break;
     }
-    if (stopped && !running) row.line = "Stopped: write “continue” in the chat";
+    if (stopped && !running) row.line = "Stopped: press Continue to go on";
     if (row.line?.startsWith("Waiting for you: ")) row.lineVars = { ...row.lineVars, what: row.line.slice(17) };          // the UI's short form
   }
   return out;
+}
+
+/** What the chat's Version card shows now, from the film's version1 and its steps: null (nothing to say), or { kind, n, next }. kind: ask (the one
+ *  question), working (the Review or its checks run: Stop), stopped (Continue, Keep Version 1), render-ask (a 3D film changed: render again?),
+ *  rendering (the new version being rendered: Stop), ready (a new version waits for a press: Open it, Keep Version 1), export (nothing runs: the film
+ *  is ready to export; with brand, the app did not check it against the guideline). */
+export function versionCard(m, state, { claudeBusy = false, rendering = false } = {}) {
+  const v1 = m?.pipeline?.version1;
+  if (!v1?.at) return null;
+  const n = v1.n ?? 1, next = v1.next ?? null, brand = !!m?.look?.id;
+  if (!v1.choice) return v1.n ? { kind: "ask", n } : null;          // (n: its version is saved, the answer can hold it)
+  if (v1.choice === "none") return claudeBusy ? null : { kind: "export", n, brand, by: v1.by ?? null };
+  const st = (id) => state?.find((x) => x.id === id);
+  if (v1.next?.render === "stopped" && v1.holding) return { kind: "ready", n, next };
+  if (!v1.closed) {
+    if (v1.stoppedAt || st("qcReview")?.stopped || st("checks")?.stopped) return claudeBusy ? { kind: "working", n, stopping: true } : { kind: "stopped", n };
+    if (st("qcReview")?.asking && !claudeBusy) return null;          // Claude asked in the chat: the wait card says so
+    return { kind: "working", n };
+  }
+  if (next?.render === "ask") return { kind: "render-ask", n, next };
+  if (next?.render === "running" && rendering) return { kind: "rendering", n, next };
+  if (next && v1.holding) return { kind: "ready", n, next };
+  return claudeBusy ? null : { kind: "export", n, brand: false, by: null };
 }
 
 /** The next step the app starts by itself (autopilot): the first step that is ready, has nothing waiting before it, and is

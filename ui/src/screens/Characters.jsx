@@ -57,7 +57,6 @@ const TAG = { yours: "Yours", app: "Moworks", demo: "Demo only", anidoodle: "Aut
 const LIB = [["yours", "Yours"], ["app", "Moworks"], ["anidoodle", "From the author"], ["demo", "Demo"]];
 const range = (r, unit) => (Array.isArray(r) ? (r[0] === r[1] ? `${r[0]}${unit}` : `${r[0]}–${r[1]}${unit}`) : r != null ? `${r}${unit}` : "");
 /** A cost range in dollars: "$7–$11", "$0.30–$1.50" (the chosen style's own, from the server's measured runs). */
-const usd = (r) => { const f = (n) => `$${Number(n) < 10 && Number(n) % 1 ? Number(n).toFixed(2) : Math.round(Number(n))}`; return Array.isArray(r) ? (r[0] === r[1] ? f(r[0]) : `${f(r[0])}–${f(r[1])}`) : r != null ? f(r) : ""; };
 const readImage = (file) => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = no; r.readAsDataURL(file); });
 const picOf = (c) => c.media?.poster ?? c.media?.views ?? c.media?.sheet ?? null;
 
@@ -110,7 +109,7 @@ function RunHistory({ c, onUndone, onClose }) {
     <ol className="plain ch-hist">{h.map((x, i) => <li key={i}><span className="muted">{ago(x.at)}</span>
       <b>{t(x.kind === "undo" ? "Undo" : OUT[x.outcome] ?? (x.kind === "create" ? "Made" : "Changed"))}</b>
       {x.text && x.kind !== "undo" && <span className="ch-hist-t" title={x.text}>{x.text}</span>}
-      <span className="muted num">{x.minutes != null ? `${Math.max(1, Math.round(x.minutes))} min` : ""}{x.costUsd != null ? ` · ${usd(x.costUsd)}` : ""}</span></li>)}</ol>
+      <span className="muted num">{x.minutes != null ? `${Math.max(1, Math.round(x.minutes))} min` : ""}</span></li>)}</ol>
   </Dialog>;
 }
 
@@ -134,14 +133,14 @@ function CharacterDetails({ c, job, onRedraw, onDeleted, onChange, onReload }) {
   const v = m.madeAt ? `?v=${encodeURIComponent(m.madeAt)}` : "";
   const g = groupOf(c);
   const media = mediaOf(c, t);
-  const runs = c.history ?? [], spent = runs.reduce((n, x) => n + (Number(x.costUsd) || 0), 0);
+  const runs = c.history ?? [];
   return <>
     <div className="sgb-big ch-reel">{m.clip ? <video key={m.clip + v} src={m.clip + v} poster={m.poster ? m.poster + v : undefined} controls muted loop playsInline preload="metadata" />
       : picOf(c) ? <img src={picOf(c) + v} alt="" /> : <span className="lk-noimg ch-none"><Swatches colors={c.colors} /><small>{t("No sheets yet")}</small></span>}
       {job && <span className="ch-drawing"><Loader2 size={16} className="spin" />{job.stage ? t(job.stage) : t("Drawing…")}{job.progress != null ? ` · ${job.progress}%` : ""}</span>}</div>
     <div className="sgb-head"><h2 className="sgb-title">{c.name}</h2>
       <p className="sgb-sub"><AuthorName a={authorOfChar(c)} count={false} className="ch-au" /><span className={"ch-tag k-" + g}>{t(TAG[g] ?? g)}</span>{m.madeAt && <span>{t("drawn {when}", { when: ago(m.madeAt) })}</span>}
-        {runs.length > 0 && <button type="button" className="clink ch-hist-link" onClick={() => setHist(true)}><History size={12} />{t("History")} <span className="num">{runs.length}{spent ? ` · ${usd(spent)}` : ""}</span></button>}</p></div>
+        {runs.length > 0 && <button type="button" className="clink ch-hist-link" onClick={() => setHist(true)}><History size={12} />{t("History")} <span className="num">{runs.length}</span></button>}</p></div>
     {c.label && <p className="warn-note"><AlertTriangle size={13} />{t(c.label)}</p>}
     {c.about && <p className="sgb-desc ch-about" title={aboutOf(c)}>{t(aboutOf(c))}</p>}
     <Swatches colors={c.colors} />
@@ -202,7 +201,7 @@ function StyleGrid({ styles, value, onPick }) {
     {styles.map((x) => { const id = `${x.engine}:${x.hand}`, on = value === id;
       return <button key={id} type="button" role="radio" aria-checked={on} className={"cc-style" + (on ? " on" : "")} onClick={() => onPick(id)} title={x.example ? t(x.example) : undefined}>
         <span className="cc-pic">{x.thumb ? <img src={x.thumb} alt="" loading="lazy" /> : <span className="cc-noimg">{x.engine === "brush-kit" ? "Brush" : x.hand}</span>}{on && <span className="chk"><Check size={12} /></span>}</span>
-        <span className="cc-nm">{t(x.label)}</span><span className="cc-est num">{range(x.estimate?.minutes, " min")}{x.estimate?.usd != null ? ` · ${usd(x.estimate.usd)}` : ""}</span></button>; })}
+        <span className="cc-nm">{t(x.label)}</span><span className="cc-est num">{range(x.estimate?.minutes, " min")}</span></button>; })}
     {(() => { const credit = styles.find((x) => x.thumbCredit)?.thumbCredit; return credit ? <p className="credit-line cc-credit">{t("Pictures: {credit}", { credit })}</p> : null; })()}
   </div>;
 }
@@ -214,7 +213,7 @@ function ChangeResult({ r, onUndo, onClose }) {
   const changed = r.outcome === "changed" || r.outcome === "partly";
   return <div className={"cc-result " + (changed ? (r.outcome === "partly" ? "partly" : "ok") : "none")} role="status">
     <div className="cc-result-h"><b>{changed ? t("{name} changed", { name: r.name }) : t("{name} was not changed", { name: r.name })}</b>
-      {r.run && <span className="muted num">{t("{min} min, {usd}", { min: Math.max(1, Math.round(r.run.minutes ?? 0)), usd: usd(r.run.costUsd) })}</span>}
+      {r.run && <span className="muted num">{t("{min} min", { min: Math.max(1, Math.round(r.run.minutes ?? 0)) })}</span>}
       <span className="spacer" />
       {changed && <button type="button" className="btn sm" disabled={busy} onClick={async () => { setBusy(true); try { await onUndo(); } finally { setBusy(false); } }}>{busy ? <Loader2 size={13} className="spin" /> : <RotateCcw size={13} />}{t("Undo")}</button>}
       <button type="button" className="btn ghost icon sm" onClick={onClose} aria-label={t("Close")}><X size={14} /></button></div>
@@ -263,7 +262,7 @@ function CreateDialog({ styles, changing, onClose, onStarted }) {
     ? <>{err && <span className="state-line stop"><AlertTriangle size={14} />{t(err)}</span>}<span className="spacer" />
       <button className="btn" onClick={() => setConfirm(false)} disabled={busy}>{t("Back")}</button>
       <button className="btn primary" onClick={start} disabled={busy}>{busy ? <Loader2 size={15} className="spin" /> : <Sparkles size={15} />}{changing ? t("Edit with Claude") : t("Create with Claude")}</button></>
-    : <>{est && <span className="hint">{t("About {min} · about {usd}", { min: range(est.minutes, " min"), usd: usd(est.usd) })}</span>}<span className="spacer" />
+    : <>{est && <span className="hint">{t("About {min}", { min: range(est.minutes, " min") })}</span>}<span className="spacer" />
       <button className="btn" onClick={onClose}>{t("Cancel")}</button>
       <button className="btn primary" onClick={() => setConfirm(true)} disabled={!desc.trim() || (!changing && !st)}>{changing ? t("Edit") : t("Create")}</button></>;
   return <Dialog wide title={title} onClose={busy ? undefined : onClose} footer={footer}>
@@ -274,7 +273,7 @@ function CreateDialog({ styles, changing, onClose, onStarted }) {
         {!changing && <><dt>{t("Type")}</dt><dd>{t(RIGS.find(([k]) => k === rig)?.[1] ?? rig)}</dd><dt>{t("Drawing style")}</dt><dd>{t(st.label)}</dd></>}
         <dt>{changing ? t("What to change") : t("Brief")}</dt><dd className="cc-confirm-brief">{desc.trim()}</dd>
         {image && <><dt>{t("Reference")}</dt><dd>{image.name}</dd></>}
-        {est && <><dt>{t("Time")}</dt><dd><b>{t("about {min}", { min: range(est.minutes, " min") })}</b></dd><dt>{t("Cost")}</dt><dd><b>{t("about {usd}", { usd: usd(est.usd) })}</b> <span className="muted">{t("of your plan's usage")}</span></dd></>}
+        {est && <><dt>{t("Time")}</dt><dd><b>{t("about {min}", { min: range(est.minutes, " min") })}</b></dd></>}
       </dl>
       <p className="hint">{t("Claude works on it in the background; the Characters page shows how far it is. You can keep working.")}</p>
     </div>
@@ -377,7 +376,7 @@ export default function Characters() {
       if (x.status === "done") {
         const id = x.result?.id ?? x.characterId ?? r.changing, runInfo = x.result?.run;
         if (r.changing) setResult({ ...x.result, id: r.changing, name: x.result?.name ?? r.name });
-        else toast(t("“{name}” is in your characters", { name: x.result?.name ?? r.name ?? "" }) + (runInfo ? ` · ${t("{min} min, {usd}", { min: Math.max(1, Math.round(runInfo.minutes ?? 0)), usd: usd(runInfo.costUsd) })}` : ""));
+        else toast(t("“{name}” is in your characters", { name: x.result?.name ?? r.name ?? "" }) + (runInfo ? ` · ${t("{min} min", { min: Math.max(1, Math.round(runInfo.minutes ?? 0)) })}` : ""));
         if (id) { setCur(id); setFresh(id); setPg(0); }
       } else if (x.status === "failed") toast(x.error?.message ?? t("Claude could not finish the character."), "error");
     }, 2000);

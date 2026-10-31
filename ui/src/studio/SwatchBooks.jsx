@@ -1,17 +1,17 @@
 // The Studio's Brand Kits: swatch books on a shelf, each kit a book.
 // Every Brand Kit is a swatch book standing on a shelf by source (HyperFrames, Yours): its spine carries its colours as bands and its name
-// written down the spine; a scan in progress shows on the spine. A click opens the book on the light table on the left with The Desk's
-// details (stills, colours, fonts, Use in a new project, Edit, Delete, Scan again, Versions with Restore, credit). "Create a Brand Kit
-// from a guideline" opens The Desk's dialog on paper. The state and the data are The Desk's (screens/Looks.jsx passes them in).
+// written down the spine; a scan in progress shows on the spine. A click lays the book on the light table on the left, at a glance; a double click, or
+// its Open button, opens the kit's own page (screens/BrandKit.jsx). "Create a Brand Kit from a guideline" opens The Desk's dialog on paper. The state and the data are
+// The Desk's (screens/Looks.jsx passes them in).
 import { AlertTriangle, Loader2, Search, Upload, X } from "lucide-react";
 import { Banner } from "../components.jsx";
 import { useT } from "../i18n.jsx";
 
 /** One Brand Kit as a book's spine: its colours as bands, its name down the spine, its source at the foot. */
-function Book({ l, on, tag, onPick }) {
+function Book({ l, on, tag, made, onPick, onOpen }) {
   const t = useT();
   const cs = (l.swatches ?? []).slice(0, 5);
-  return <button type="button" className="st-book" aria-pressed={on} onClick={() => onPick(l)} title={l.title}>
+  return <button type="button" className="st-book" aria-pressed={on} onClick={() => onPick(l)} onDoubleClick={() => onOpen(l)} title={made ? `${l.title}, ${made}` : l.title}>
     <span className="st-bands" aria-hidden="true">{cs.length ? cs.map((c) => <i key={c} style={{ background: c }} />) : <i className="none" />}</span>
     <span className="st-spine">{l.title}</span>
     <span className="st-foot">{l.status === "scanning" ? <Loader2 size={12} className="spin" aria-label={t("Scanning")} /> : l.status === "failed" ? <AlertTriangle size={12} aria-label={t("The scan did not finish.")} />
@@ -19,7 +19,7 @@ function Book({ l, on, tag, onPick }) {
   </button>;
 }
 
-export default function SwatchBooks({ looks, list, sources, on, setSrc, qs, setQs, sel, onPick, label, tagOf, error, loading, onReload, onCreate, details, dialogs }) {
+export default function SwatchBooks({ looks, list, sources, on, setSrc, qs, setQs, sel, onPick, onOpen, madeOf = () => null, label, tagOf, error, loading, onReload, onCreate, details, dialogs }) {
   const t = useT();
   const shelves = sources.map(([s]) => [s, list.filter((l) => (l.group ?? "hf") === s)]).filter(([, ls]) => ls.length);
   // the user's own shelf stands even before the first kit, with a line on how one is made
@@ -46,7 +46,7 @@ export default function SwatchBooks({ looks, list, sources, on, setSrc, qs, setQ
           {shelves.length === 0 ? <div className="st-empty"><p className="st-hand">{t("No Brand Kit matches.")}</p>{(qs || on.length > 0) && <button className="btn" onClick={() => { setSrc([]); setQs(""); }}>{t("Clear filters")}</button>}</div>
             : <div className="st-shelves">{shelves.map(([s, ls]) => <div key={s} className="st-shelf">
               <div className="st-crate-head"><span className="st-shelf-name">{label(s)}</span><span className="au-tag">{tagOf(s)}</span><span className="st-label">{ls.length}</span></div>
-              <div className="st-box st-bookbox" data-name={label(s)}><div className="st-books">{ls.map((l) => <Book key={l.id} l={l} on={sel?.id === l.id} tag={tagOf(s)} onPick={onPick} />)}</div></div>
+              <div className="st-box st-bookbox" data-name={label(s)}><div className="st-books">{ls.map((l) => <Book key={l.id} l={l} on={sel?.id === l.id} tag={tagOf(s)} made={madeOf(l)} onPick={onPick} onOpen={onOpen} />)}</div></div>
             </div>)}
               {yoursEmpty && <div className="st-shelf st-shelf-empty"><div className="st-crate-head"><span className="st-shelf-name">{label("yours")}</span><span className="au-tag">{tagOf("yours")}</span></div>
                 <div className="st-box st-bookbox" data-name={label("yours")}><div className="st-books"><button type="button" className="st-hand st-linkish" onClick={onCreate}>{t("room for your first kit: make one from a brand guideline")}</button></div></div></div>}</div>}
