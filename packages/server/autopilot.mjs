@@ -62,11 +62,11 @@ export function estimateMinutes(shots, root, { seconds = null, styleId = null, t
   // a range (a slower or shared computer takes longer), and what it covers, for the confirm's words
   return { minutes, high: Math.round(minutes * HIGH), covers: "making the film, its sound and Version 1", basis: "length" };
 }
-/** The whole render of a film, in minutes, with the background render's two capture workers: a film drawn slowly (Brush, 3D) as measured for a
- *  pre-render, every other as a preview (packages/server/proxy.mjs). Test 32's 165 s film took 66 min on a computer running three films at once; the
- *  range's top and "taking longer than usual" cover that. */
+/** The whole render of a film, in minutes, with the background render's two capture workers: Brush as measured for a pre-render, every other as a preview
+ *  (packages/server/proxy.mjs). A 3D film counts as any other: Test 32's 165 s film took 4.3 min on an idle computer with a graphics card (48 ms a frame, Test 28 74), against
+ *  66 min with three films running at once; the range's top and "taking longer than usual" cover a busy one. */
 export function renderMinutes(seconds, { styleId = null, three = false, fps = 30 } = {}) {
-  const slow = three || styleId === "brush-cartoon";
+  const slow = styleId === "brush-cartoon";
   return (Number(seconds) || 0) * (Number(fps) || 30) * (slow ? 700 : 250) / 60000;
 }
 /** What the question after Version 1 says each answer takes (time only, owner 31/10 #698): the Review's rounds, its checks, and when the film changed its
