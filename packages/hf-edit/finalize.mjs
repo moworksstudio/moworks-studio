@@ -13,6 +13,7 @@
 //            composition or one of the film's own scripts becomes the app's local copy; Google Fonts stylesheet links go, R-FONTS declares
 //            the families instead (packages/hf-edit/vendorLibs.mjs)
 //  R-ANIDOODLE an anidoodle film or board (anidoodle/page.ts, boards/X/page.ts) is bundled with the pinned engine (anidoodleBuild.mjs)
+//  R-MAP     a Map Explainer film or board gets the shared engine, its map data and face and the voice's words beside the page (map-explainer)
 //  R-WHATIF  a What If film (whatif/episode.tsx) is bundled with the pinned engine, the author's React and the app's stand-in for Remotion
 //            (whatIfBuild.mjs); the Google faces it asks for are named in index.html so R-FONTS installs them
 //  R-LEMO    a code-film page (lemo, mg-styles-15, anidoodle: render(t) / renderAt(t) / window.FILM) gets the bridge to HyperFrames' timeline,
@@ -32,6 +33,7 @@ import { rewriteRemoteLibs, rewriteScripts, scriptFiles, threeIn, vendorInto, wi
 import { lemoBoard, lemoFilm } from "./lemoPage.mjs";
 import { buildAnidoodle } from "./anidoodleBuild.mjs";
 import { buildWhatIf } from "./whatIfBuild.mjs";
+import { loadsMapEngine, placeEngine as placeMapEngine } from "../map-explainer/index.mjs";
 import { clawdIn, refreshFilmKit } from "../character-kit/index.mjs";
 import { familyKey, projectFonts } from "./localFonts.mjs";
 
@@ -122,10 +124,16 @@ export function familyStacks(html) {
     ...[...html.matchAll(/\sstyle="([^"]*)"/gi)].map((m) => m[1]),
     ...[...html.matchAll(/\sstyle='([^']*)'/gi)].map((m) => m[1]),
   ].join(";\n");          // an inline style often has no trailing ';'
-  for (const m of css.matchAll(/font-family\s*:\s*([^;}]+)/gi)) {
-    const fams = m[1].split(",").map((raw) => raw.replace(/&quot;|&#39;/g, "").trim().replace(/^['"]|['"]$/g, "").replace(/[\s)'"]+$/g, "").trim())
+  const push = (value) => {
+    const fams = value.split(",").map((raw) => raw.replace(/&quot;|&#39;/g, "").trim().replace(/^['"]|['"]$/g, "").replace(/[\s)'"]+$/g, "").trim())
       .filter((f) => f && !GENERIC.has(f.toLowerCase()) && !f.startsWith("var(") && !f.startsWith("-") && !/^BlinkMacSystemFont$/i.test(f));
     if (fams.length) stacks.push(fams);
+  };
+  for (const m of css.matchAll(/font-family\s*:\s*([^;}]+)/gi)) push(m[1]);
+  // the `font:` shorthand names its families after the size and line height ("700 54px/1.3 Oswald, sans-serif"); left out, the page plays in a fallback face until HF's render fetches the real one
+  for (const m of css.matchAll(/(?:^|[;{\s])font\s*:\s*([^;}]+)/gi)) {
+    const s = /(?:^|\s)[\d.]+(?:px|r?em|%|pt|vw|vh|vmin|vmax|ch|ex)(?:\s*\/\s*[\d.]+[a-z%]*)?\s+(.+)$/i.exec(m[1].trim());
+    if (s) push(s[1]);
   }
   return stacks;
 }
@@ -276,6 +284,8 @@ export async function finalize(projectDir, { version = null, googleFonts = true,
   // R-WHATIF: the same for a What If film, and its faces named in the page for R-FONTS below
   const wi = await buildWhatIf(projectDir);
   if (wi) { report.whatIf = wi; whatIfFaces(projectDir, wi.families); }
+  // R-MAP: the Map Explainer engine beside the page; the words of the voice written again, so a new voice re-times the film
+  try { if (loadsMapEngine(readFileSync(join(projectDir, "index.html"), "utf8"))) { const m = placeMapEngine(projectDir); if (m.length) report.map = { files: m }; } } catch (e) { if (e.code !== "ENOENT") throw e; }
   // R-CAST: a Brush cartoon film (or board) gets the character kit and cast.js (from CHARACTERS.json) where its page loads them
   const cast = refreshFilmKit(projectDir);
   if (cast) report.cast = { pages: cast.pages, files: cast.files.length };
@@ -394,6 +404,8 @@ export async function boardFonts(projectDir, file, { version = null, googleFonts
     if (wi) { report.whatIf = wi; whatIfFaces(projectDir, wi.families, file); }
   }
   const html = readFileSync(path, "utf8");
+  // R-MAP for a Map Explainer board: the engine inside the board's own folder, HF's web root for its stills
+  if (loadsMapEngine(html)) { const m = placeMapEngine(projectDir, dirname(path)); if (m.length) report.map = { files: m }; }
   const up = "../".repeat(file.split("/").length - 1);
   // R-LEMO for a lemo style's board (its scripts inside its own folder), then R-VENDOR + R-THREE: a board is its own document, so its
   // paths and its import map lead back to the project root

@@ -17,6 +17,7 @@
 //   G-VI-MARKS   a Vietnamese film's on-screen text written without its marks ("NHAT KY" for "NHẬT KÝ"; viMarks.mjs)    warning
 //   G-SFX        a visible motion of the Motion Plan with no sound within 0.3 s once the sound effects are placed, unless the
 //                owner, the brief or the style asks for silence (house rules §7b; sfxCover.mjs)                        warning
+//   G-SYNC       a move of the Motion Plan that names a spoken word and does not land on it, or a word not said in its shot (wordSync.mjs)    warning
 //   G-LYRIC      a lyrics video's sung words: missing on screen, or shown clearly off their sung time (lyricSync.mjs)              warning
 //   G-SEQ-CRAWL, G-SEQ-JUMP, G-SEQ-PRODUCT  a film's image sequence: a crawl or a hold, a jump, the product cut by the frame (sequence.mjs)  warnings
 import { execFileSync } from "node:child_process";
@@ -39,6 +40,7 @@ import { gateViMarks } from "./viMarks.mjs";
 import { gateSfx } from "./sfxCover.mjs";
 import { gateSequence } from "./sequence.mjs";
 import { gateSung } from "./lyricSync.mjs";
+import { gateSync } from "./wordSync.mjs";
 
 const BASES = "aăâeêioôơuưyAĂÂEÊIOÔƠUƯY";
 const TONES = ["", "̀", "́", "̉", "̃", "̣"];
@@ -263,6 +265,7 @@ export async function runGates(projectDir, { workDir, blank = true, onStep = () 
     ["The film's drawing rules", async () => [gateContract(projectDir), await gatePose(projectDir)]],
     ["The voice against the sound", async () => [await gateVoice(projectDir)]],          // a warning; nothing without a voice-over
     ["A sound on every action", async () => [await gateSfx(projectDir)]],          // a warning; nothing before the sound effects are placed
+    ["The moves on their words", async () => [await gateSync(projectDir)]],          // a warning; nothing when no row names a word
     ["The image sequence", () => gateSequence(projectDir)],          // warnings; nothing without a sequence
     ["The sung words", async () => [await gateSung(projectDir)]],          // a warning; nothing without timed lyrics
     ...(blank && workDir ? [["Blank scenes", () => [gateBlank(projectDir, workDir)]]] : []),

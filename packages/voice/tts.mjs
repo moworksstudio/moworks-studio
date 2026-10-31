@@ -1,7 +1,7 @@
 // Text-to-speech providers: ElevenLabs (its key comes from the secret store and is sent only to its own API; errors never echo it; a voice-over
 // costs the user credits, so it runs only on an explicit request from the Voice screen) and Kokoro, the free voice on this computer (kokoro.mjs).
 import { createHash } from "node:crypto";
-import { createWriteStream, mkdirSync } from "node:fs";
+import { createWriteStream, mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
@@ -9,6 +9,7 @@ import * as kokoro from "./kokoro.mjs";
 
 const EL = "https://api.elevenlabs.io";
 const TIMEOUT = 20000;
+const NO_TIMES = new Set([400, 404, 405, 422]);          // the way with times refused for this model or plan: the plain way reads it, with no times
 
 async function call(url, init = {}, timeout = TIMEOUT) {
   const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), timeout);
@@ -166,9 +167,17 @@ export const PROVIDERS = {
     async generate(key, { voiceId, text, model = "eleven_multilingual_v2", out, signal, settings = null }) {
       // only the settings the user set on the Voice screen go; none sent, ElevenLabs uses its own
       const vs = voiceSettings("elevenlabs", settings);
-      const r = await call(`${EL}/v1/text-to-speech/${encodeURIComponent(voiceId)}?output_format=mp3_44100_128`,
-        { method: "POST", headers: { "xi-api-key": key, "Content-Type": "application/json", Accept: "audio/mpeg" }, body: JSON.stringify({ text, model_id: model, ...(vs ? { voice_settings: vs } : {}) }), signal }, 300000);
+      const body = JSON.stringify({ text, model_id: model, ...(vs ? { voice_settings: vs } : {}) }), voice = `${EL}/v1/text-to-speech/${encodeURIComponent(voiceId)}`;
       mkdirSync(dirname(out), { recursive: true });
+      // the audio and the time of every character it read (written from Showhow's voice.py, Sirio Berati, MIT): the film is timed to these (transcript.mjs exactTimes)
+      try {
+        const t = await call(`${voice}/with-timestamps?output_format=mp3_44100_128`, { method: "POST", headers: { "xi-api-key": key, "Content-Type": "application/json", Accept: "application/json" }, body, signal }, 300000);
+        const j = await t.json().catch(() => null);
+        if (!j?.audio_base64) throw Object.assign(new Error("The service answered without the audio"), { code: "PROVIDER", status: 502 });
+        writeFileSync(out, Buffer.from(j.audio_base64, "base64"));
+        return { file: out, format: "mp3", alignment: j.alignment ?? null };
+      } catch (e) { if (!NO_TIMES.has(e.status)) throw e; }
+      const r = await call(`${voice}?output_format=mp3_44100_128`, { method: "POST", headers: { "xi-api-key": key, "Content-Type": "application/json", Accept: "audio/mpeg" }, body, signal }, 300000);
       await pipeline(Readable.fromWeb(r.body), createWriteStream(out));
       return { file: out, format: "mp3" };
     },

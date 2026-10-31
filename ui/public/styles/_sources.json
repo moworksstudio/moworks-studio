@@ -1,4 +1,16 @@
 {
+ "map-explainer": {
+  "file": "styles/map-explainer.jpg",
+  "bytes": 93271,
+  "size": [
+   960,
+   540
+  ],
+  "author": "Moworks Studio",
+  "licence": "the app's own",
+  "item": "Test 33 · Map Explainer (Bir Tawil), 27.5 s",
+  "made": "a frame of the film made in this style, as a 960 px JPEG"
+ },
  "general": {
   "file": "styles/general.jpg",
   "block": "glass-shard-title",

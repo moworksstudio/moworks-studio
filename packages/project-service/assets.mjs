@@ -11,7 +11,7 @@ import { filmLength } from "../hf-edit/ending.mjs";
 
 const posix = (p) => p.split(sep).join("/");
 const IMAGE = /\.(png|jpe?g|webp|gif|avif|bmp|tiff?|heic|svg|exr)$/i, VIDEO = /\.(mp4|mov|webm|m4v|mkv|avi)$/i, AUDIO = /\.(mp3|wav|m4a|flac|ogg|aac|opus)$/i, FONT = /\.(ttf|otf|woff2?|eot)$/i;
-const HIDDEN = /^assets\/(_app\/(vendor|psd)|vendor|psd)\//;          // the app's own copies (GSAP) and the layers it exports for Claude
+const HIDDEN = /^assets\/(_app\/(vendor|psd|map)|vendor|psd)\//;      // the app's own copies (GSAP, the map engine) and the layers it exports for Claude
 // the fonts the app embeds (Google Fonts subsets, the bundled set): one row per family, not dozens of subset files
 const APP_FONT = /^assets\/(?:_app\/)?fonts\/(google|kit|bundled)\/(?:([^/]+)\/)?/;
 

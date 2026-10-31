@@ -25,6 +25,14 @@ export async function extractAudio(video, out, root = APP_ROOT) {
   return out;
 }
 
+/** The quiet parts of a voice-over: [[from, to]] in seconds, under -30 dB for 0.08 s or more. The level is measured: on Vietnamese takes of eleven_v3 and eleven_v4 it
+ *  finds every pause and no gap inside a word (at -40 dB eleven_v3's breaths hide its pauses; at -25 dB the gaps between syllables show). */
+export async function quietParts(file, root = APP_ROOT) {
+  const { stderr } = await run(bin("ffmpeg", root), ["-hide_banner", "-nostats", "-i", file, "-af", "silencedetect=noise=-30dB:d=0.08", "-f", "null", "-"], { windowsHide: true, maxBuffer: 1 << 24 });
+  const ends = [...stderr.matchAll(/silence_end: ([\d.]+)/g)].map((m) => Number(m[1]));
+  return [...stderr.matchAll(/silence_start: ([\d.]+)/g)].map((m, i) => [Number(m[1]), ends[i]]).filter(([, to]) => to != null);
+}
+
 /** n peak values in 0..1 across the file (mono, 8 kHz decode). */
 export async function peaks(file, n = 600, root = APP_ROOT) {
   const { stdout } = await run(bin("ffmpeg", root), ["-v", "error", "-i", file, "-ac", "1", "-ar", "8000", "-f", "s16le", "-"],

@@ -15,6 +15,7 @@ import * as pipe from "../pipeline/index.mjs";
 import * as plan from "../motion-plan/index.mjs";
 import { firstRoundOf, isOption, listRounds, newestRevision, optionIds, optionLabel, ownerRounds, pendingRevision } from "../hf-edit/boards.mjs";
 import * as rev from "../revisions/index.mjs";
+import { musicOnFilm } from "../hf-edit/tracks.mjs";
 import { readOptions } from "../sfx/music.mjs";
 import { characterNeedsWork } from "../character-kit/index.mjs";
 import { voiceFit, voiceFitText } from "../agent/voice-fit.mjs";
@@ -515,7 +516,7 @@ export function createAutopilot(ctx) {
     const p = projects.getProject(id, root);
     if (!p || p.missing) return;
     const work = async () => {
-      if (!p.meta?.music?.file) {
+      if (!musicOnFilm(p.path, p.meta)) {
         const round = readOptions(p.path).rounds.at(-1);
         const track = round?.tracks?.[0];
         if (track) await ctx.mix.useOption(p, track).catch(() => null);

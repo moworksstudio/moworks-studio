@@ -21,6 +21,8 @@ as a chat table instead; in your reply give only a short summary and the questio
 - `type`: entrance · emphasis · exit · transition · loop · camera · text · other. One row per move; the hold and the exit are rows too.
 - `start` / `duration`: seconds within the shot. A voiced film: each piece enters on the word that names it (its time from
   `transcript.json`), mostly in the back half of its beat, never all in the first quarter.
+- `on` (a voiced film): the spoken word or short phrase a move starts or lands on, as written in `transcript.json`; left out for a row that lands on no word. The app checks each one against the
+  voice (`G-SYNC`, within about 3 frames), so a voice made again shows which moves to retime.
 - `behavior`: concrete moves, never adjectives: "the word SALE stamps from 1.6x to 1x, back.out, 0.25 s, on beat 9", not "the text comes in
   lively". Turn every adjective of the brief into numbers (section 3).
 - `source` of each row:

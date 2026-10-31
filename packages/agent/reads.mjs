@@ -36,6 +36,13 @@ const GENERAL = {
   sound: [R("general-style", "references", "sound.md")],
   chat: [R("general-style", "SKILL.md")],
 };
+// The Map Explainer style: its own pack in every step, over General's table (its engine and worked example are in .moworks/library/map-explainer)
+const MAP_PACK = R("map-explainer", "SKILL.md"), MAP_ENGINE = ".moworks/library/map-explainer/mapfilm.js";
+const MAP = {
+  brief: [MAP_PACK, ...GENERAL.brief], storyboard: [MAP_PACK, MAP_ENGINE, ".moworks/library/map-explainer/example/film.js", ...GENERAL.storyboard],
+  motionSpec: [MAP_PACK, ...GENERAL.motionSpec], build: [MAP_PACK, MAP_ENGINE, ".moworks/library/map-explainer/example/f3.html", ...GENERAL.build],
+  qcReview: GENERAL.qcReview, checks: GENERAL.checks, sound: GENERAL.sound, chat: [MAP_PACK, ...GENERAL.chat],
+};
 // A Lemo-Opuscar style: its STYLE.md (.moworks/rules/lemo-<slug>) and the app's lemo-opuscar pack in every step, HF's
 // mandatory reads for what the step writes, and from the build on the style's demo (staged in .moworks/library/lemo/<slug>/): never
 // before, Lemo-Opuscar's own rule (the treatment first)
@@ -156,6 +163,7 @@ export function requiredReads(dir, { styleId, first = [], step = null } = {}) {
   const ani = /^anidoodle-([A-Za-z0-9]+)$/.exec(String(styleId ?? ""))?.[1];
   let list;
   if (styleId === "general") list = GENERAL[key] ?? GENERAL.chat;
+  else if (styleId === "map-explainer") list = MAP[key] ?? MAP.chat;
   else if (lemo) { const t = LEMO(lemo); list = t[key] ?? t.chat; }
   else if (mg) { const t = MG(mg); list = t[key] ?? t.chat; }
   else if (ani) { const t = ANIDOODLE(ani); list = [...(t[key] ?? t.chat), ...(ANIDOODLE_MORE(dir)[key] ?? [])]; }

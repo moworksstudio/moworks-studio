@@ -406,6 +406,12 @@ function KokoroInstall({ size, onDone }) {
   </div></section>;
 }
 
+/** The script's first two sentences or lines, as the server reads them for a sample (packages/voice/script.mjs firstLines). */
+const firstLines = (text) => {
+  const two = (String(text ?? "").normalize("NFC").trim().match(/[^.!?…\n]+(?:[.!?…]+|\n+|$)/g) ?? []).slice(0, 2).join("").trim();
+  return two.length <= 240 ? two : two.slice(0, 240).replace(/\s+\S*$/, "").trim();
+};
+
 function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", onJob, running, current = null, ownScript = null, nudge = 0 }) {
   const t = useT();
   const toast = useToast();
@@ -431,6 +437,10 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
   // (an idea brief that carries its narration)
   const ownWords = brief?.mode === "script" || draftInBrief(draft, brief?.text);
   const [ask, setAsk] = useState(false);
+  const [sample, setSample] = useState(null);          // blob URL of the voice on the script's first lines
+  const [sampling, setSampling] = useState(false);
+  useEffect(() => () => { if (sample) URL.revokeObjectURL(sample); }, [sample]);
+  useEffect(() => { setSample(null); }, [voiceId, model]);
   const [vs, setVs] = useState({});                   // the voice settings shown: the chosen voice's defaults until the user changes one
   const defaultsOf = (id_) => { const v = list?.voices.find((x) => x.id === id_); return { ...(list?.defaultSettings ?? {}), ...(v?.defaultSettings ?? {}) }; };
   useEffect(() => { setVs(defaultsOf(voiceId)); }, [voiceId, list]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -465,6 +475,14 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
     try { onJob(await post(`/api/projects/${id}/voice/tts`, { provider, voiceId, voiceName: voice?.name, model, text, ...(changedText ? { settings: changed } : {}) })); toast(t("{name} is reading the script…", { name })); }
     catch (e) { toast(e.message, "error"); }
   };
+  const sampleWords = firstLines(text);
+  const hearSample = async () => {
+    setSampling(true);
+    try {
+      const r = await post(`/api/projects/${id}/voice/tts/sample`, { provider, voiceId, model, text, ...(changedText ? { settings: changed } : {}) });
+      setSample(await blobUrl(`/api/projects/${id}/voice/sample/${r.sample}`));
+    } catch (e) { toast(e.message, "error"); } finally { setSampling(false); }
+  };
   // no "{name} voice" heading: the source card picked above already says it
   return <section className="panel vo-tts-panel" aria-label={t("{name} voice", { name })}>
     {err && <Banner kind="error" action={<button className="btn sm" onClick={retry}><RefreshCw size={13} />{t("Retry")}</button>}>{err.message}</Banner>}
@@ -478,6 +496,12 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
           {list.models.length > 1 && <label className="field"><span>{t("Model")}</span><select className="select" value={model} onChange={(e) => setModel(e.target.value)}>
             {list.models.map((m) => <option key={m.id} value={m.id}>{m.name}{m.vietnamese ? " · " + t("Vietnamese") : ""}</option>)}</select></label>}</>}
         {voice?.preview && <audio controls src={voice.preview} preload="none" style={{ width: "100%" }} aria-label={t("Voice sample")} />}
+        {/* the chosen voice on the script's own first lines; what it costs is said before the click */}
+        {list && <div className="vo-sample" style={{ display: "grid", gap: "0.3333rem" }}>
+          <button className="btn sm" style={{ justifySelf: "start" }} onClick={hearSample} disabled={!sampleWords || !voiceId || sampling || !!running}>{sampling ? <Loader2 size={13} className="spin" /> : <Play size={13} />}{t("Hear your first lines")}</button>
+          {sampleWords && !local && <span className="hint">{t("{n} characters from your {name} credit", { n: sampleWords.length.toLocaleString(locale()), name })}</span>}
+          {sample && <audio controls autoPlay src={sample} style={{ width: "100%" }} aria-label={t("Your first lines")} />}
+        </div>}
         {/* the settings in one row of narrow fields, what each does on hover (ⓘ) */}
         {fields.length > 0 && <details className="diag vo-settings">
           <summary>{t("Voice settings")}{changedText ? ` · ${changedText}` : ` · ${t("{name}'s defaults", { name })}`}</summary>

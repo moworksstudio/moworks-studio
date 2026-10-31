@@ -1,7 +1,7 @@
 ---
 name: moworks-qc
 description: Moworks Studio quality review, for every video style - after Version 1, when the owner asks for it, look at stills of the film like a strict director, score it on seven criteria, fix until every score is 8 or more (or fix hard mistakes only), with HyperFrames' check folded in.
-version: 1.3.0
+version: 1.3.1
 derived-from: Moworks Motion kit 2.0.4 (commit 30b7dcb, MIT, Moworks) - engine/skill/moworks-motion/workflow/review.md, rewritten for Moworks Studio. Folds in the layout and contrast findings of HyperFrames' check (Apache-2.0, 0.8.214 at 4719543), read as shipped. Criterion 6 (Brand / design) keeps the checklist of HyperFrames' design adherence at 0.8.163 (Apache-2.0, as shipped: https://github.com/heygen-com/hyperframes/blob/490ecafbc4d1fba3dd9246d516390d4a1a188089/skills/hyperframes-creative/references/design-adherence.md); HF retired that file in 0.8.185, so the studio keeps it as its own rule.
 ---
 
@@ -51,7 +51,8 @@ guide lines and no HTML text, so a word missing from it says nothing about the f
    `docs/BRAND-CHECK.json`: `{"rows": [{"id": "G12", "result": "pass", "at": "12.4, 31.0", "how": "device whole at the push-in's closest frame"}]}`, one row for each line. `result`: `pass` (you looked, say where),
    `na` (nothing in this film it could apply to, say why), `approved` (the owner allowed this break, say when, in `how`), or `fail`. A `fail` is fixed in this round; one you cannot fix without the owner: ask (moworks-studio §2b). Any `fail`: brand 6 at most.
    The app reads the file: the Review does not pass with a line unchecked or failed. Passing a line you did not look at is a false report.
-7. **Sync:** moves land ON the words / beats they belong to.
+7. **Sync:** moves land ON the words / beats they belong to. Stills cannot show this: with a voice-over, score it from the qc_sheets answer's "Moves on words" block, the Motion Plan's `on` rows against the
+   voice. A move off its word, or a word not said in its shot: fix it in this round, in the film and in the plan; rows that name no word when they land on one: name them.
 
 ## 2b. What caps a score (the rule stands, however good the rest looks)
 
@@ -84,6 +85,7 @@ A cap is a fault to fix in this round, not a taste. The film passes only when it
   (redrawn, recoloured, stretched, cropped, given an effect, put in a card or badge, text added around it, or breathing so much it distorts:
   moworks-studio §3); a piece of text off the film's design (moworks-studio §2); a jump at a loop or a cut; a shot that looks like its library demo; an out move that starts before its in
   move ends; anything the owner complained about earlier (in `docs/NOTES.md`).
+- In a film that shows how something real works: a thing that loses its support and stays up, a thing that appears or vanishes with no cause the film shows, a chain of events a stranger could not retell from the pictures, a label over a number (moworks-studio §6 point 7). Never a reason for a tamer move.
 - In a Vietnamese film: every mark of every Vietnamese word on every sheet, read letter by letter, the small texts too (status strips,
   inverted bars, labels, pills, captions): a word written without its marks, or marks cut off by a band, a mask or a line-height, breaks
   moworks-studio §4 → write it with its marks, give the band room for them. The app's check names on-screen text written without marks

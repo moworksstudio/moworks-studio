@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob: 'unsafe-inline' 'unsafe-eval'">
+<meta name="viewport" content="width=1920, height=1080" />
+<script src="assets/_app/vendor/gsap.min.js"></script>
+<script src="assets/_app/map/words.js"></script>
+<script src="assets/_app/map/mapfilm.js"></script>
+<script src="lib/film.js"></script>
+<style>body { margin: 0; background: #0B1E31; } #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #0B1E31; }</style>
+<style>@font-face { font-family: "Special Elite VN"; src: url("assets/_app/map/fonts/SpecialEliteVN-Regular.ttf"); font-weight: 400; font-style: normal; font-display: block; }</style>
+<style id="map-film">
+  [data-composition-src] { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+  .frame { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+  .frame canvas.map, .frame canvas.ink { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+  canvas.map { z-index: 1; } canvas.ink { z-index: 2; }
+  /* Only as big as the typed number it scribbles out; it floats with the card, around the card's centre. */
+  .frame canvas.ink2 { position: absolute; left: 270px; top: 450px; width: 260px; height: 380px; z-index: 8; transform-origin: 270px 80px; }
+  .world { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 3; transform-origin: 960px 540px; }
+
+  /* Paper, grain and the warm vignette lie over everything, the words too. */
+  .fx { position: absolute; left: -24px; top: -24px; width: 1968px; height: 1128px; pointer-events: none; }
+  .fx-paper { z-index: 40; background-image: var(--paper); background-size: 1024px 1024px; mix-blend-mode: multiply; }
+  .fx-grain { z-index: 41; background-image: var(--grain); background-size: 512px 512px; mix-blend-mode: overlay; opacity: .07; }
+  .fx-vig { z-index: 42; background: radial-gradient(ellipse at 50% 48%, rgba(70,38,12,0) 52%, rgba(70,38,12,.42) 100%); }
+  .fade { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 50; background: #0B1E31; opacity: 0; pointer-events: none; }
+
+  /* Map labels */
+  .lbl { position: absolute; left: 0; top: 0; z-index: 3; transform: translate(-50%,-50%); scale: var(--ls, 1); white-space: nowrap;
+         font: 700 34px/1.3 "Cormorant Garamond", serif; letter-spacing: 10px; color: #3B2A1A; }
+  .lbl.sea { color: #2F5560; letter-spacing: 14px; font-size: 32px; }
+  .lbl.big { font-size: 42px; letter-spacing: 14px; }
+  .on-sat .lbl { color: #FBF3E0; font-size: 42px; letter-spacing: 12px; -webkit-text-stroke: 7px rgba(29,24,18,.82); paint-order: stroke fill; }
+  .on-sat .lbl.sea { color: #BFE0E4; font-size: 34px; }
+
+  /* Paper tag */
+  .tag { position: absolute; z-index: 5; background: #F3E9D2; padding: 14px 30px 16px 40px; box-shadow: 5px 8px 14px rgba(20,12,6,.5); }
+  .tag::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 16px; background: var(--bar, #D9291D); }
+  .tag .tape, .leadtape { position: absolute; left: 50%; top: -20px; width: 120px; height: 36px; margin-left: -60px; background: rgba(232,214,160,.78); box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+  .tag .tape { transform: rotate(-3deg); }
+  .leadtape { z-index: 6; margin-left: 0; transform-origin: 0 50%; }
+  .tag b { display: block; font: 700 54px/1.3 "Oswald", sans-serif; color: #1D1812; white-space: nowrap; }
+  .tag span { display: block; font: 400 28px/1.4 "Special Elite VN", "IBM Plex Mono", monospace; color: #3D3224; white-space: nowrap; }
+  .tag.black { background: #15120E; padding: 18px 40px 22px 44px; }
+  .tag.black b { font-size: 124px; line-height: 1.2; color: #F7EFD9; font-variant-numeric: tabular-nums; }
+  .tag.black span { color: #E9DDC2; }
+
+  /* Handwriting */
+  .hand { position: absolute; z-index: 7; font: 400 96px/1.2 "Sedgwick Ave Display", cursive; color: #D9291D; white-space: nowrap;
+          -webkit-text-stroke: 10px #F6EEDC; paint-order: stroke fill; }
+
+  /* Torn strips with a yellow highlighter swipe */
+  .stripw { position: absolute; z-index: 5; filter: drop-shadow(4px 7px 6px rgba(20,12,6,.5)); transform-origin: 0 50%; }
+  .strip { background: #F1E7CF; padding: 10px 46px 12px; font: 700 56px/1.4 "Oswald", sans-serif; color: #1D1812; white-space: nowrap;
+           clip-path: polygon(0 6%, 1.6% 0, 99% 2%, 100% 12%, 98.8% 26%, 100% 40%, 98.9% 55%, 100% 70%, 99% 86%, 100% 100%, 1.2% 98%, 0 88%, 1.2% 72%, 0 56%, 1.4% 40%, 0 24%); }
+  .strip .smp { display: inline-block; width: 74px; height: 0; margin-right: 22px; vertical-align: .28em; border-top: 6px dashed #7A5A3C; }
+  .strip .smp.red { border-top: 8px solid #D9291D; border-radius: 4px; }
+  .hl { position: relative; display: inline-block; z-index: 0; isolation: isolate; }
+  .hl::before { content: ""; position: absolute; z-index: -1; left: -.16em; right: -.16em; top: .02em; bottom: .02em; background: #F5E04A; transform-origin: 0 50%; transform: scaleX(var(--hl, 1));
+                clip-path: polygon(0 12%, 30% 4%, 62% 8%, 100% 2%, 99% 90%, 70% 97%, 34% 92%, 1% 99%); }
+
+  /* Tear-off calendar */
+  .cal { position: absolute; z-index: 5; width: 300px; height: 340px; background: #F6EEDC; box-shadow: 6px 10px 16px rgba(20,12,6,.5); text-align: center; transform-origin: 50% 0; }
+  .cal .head { height: 74px; background: #B5271D; font: 700 38px/74px "Oswald", sans-serif; color: #F6EEDC; letter-spacing: 6px; }
+  .cal .rings { position: absolute; left: 44px; right: 44px; top: -14px; height: 30px; display: flex; justify-content: space-between; }
+  .cal .rings i { width: 16px; height: 30px; border-radius: 8px; background: #2C2620; }
+  .cal .year { font: 700 128px/1.6 "Oswald", sans-serif; color: #1D1812; }
+  .flip { position: absolute; left: 0; top: 74px; width: 300px; height: 266px; background: #F6EEDC; text-align: center; }
+
+  /* Tracker card */
+  .track { position: absolute; z-index: 5; width: 430px; background: #F3E9D2; padding: 16px 28px 18px; box-shadow: 5px 8px 14px rgba(20,12,6,.5); }
+  .track .row { border-top: 3px dashed #7A5A3C; padding: 6px 0 4px; }
+  .track .row:first-child { border-top: 0; padding-top: 0; }
+  .track em { display: block; font: 400 28px/1.35 "Special Elite VN", "IBM Plex Mono", monospace; font-style: normal; color: #3D3224; }
+  .track b { display: block; font: 700 54px/1.3 "Oswald", sans-serif; color: #1D1812; }
+
+  /* Rubber stamp on its own sheet */
+  .sheet { position: absolute; z-index: 5; background: #F1E7CF; box-shadow: 5px 8px 14px rgba(20,12,6,.5); display: flex; align-items: center; justify-content: center; }
+  .stamp { border: 10px solid #C8241A; outline: 4px solid #C8241A; outline-offset: 5px; padding: 0 26px; font: 700 128px/1.25 "Oswald", sans-serif; color: #C8241A; letter-spacing: 6px; }
+
+  /* Small strip naming what is illustrative */
+  .small { position: absolute; z-index: 5; background: #F3E9D2; padding: 2px 14px 4px; font: 400 28px/1.4 "Special Elite VN", "IBM Plex Mono", monospace; color: #3D3224; box-shadow: 3px 4px 8px rgba(20,12,6,.45); white-space: nowrap; }
+
+  /* Lat/long readout and the note that the ground is drawn */
+  .readout { position: absolute; z-index: 6; left: 96px; bottom: 54px; background: #15120E; padding: 6px 18px 8px; font: 400 28px/1.4 "Special Elite VN", "IBM Plex Mono", monospace; color: #F3E9D2; white-space: nowrap; }
+  .drawn { position: absolute; z-index: 6; right: 96px; bottom: 54px; background: rgba(21,18,14,.72); padding: 4px 12px 6px; font: 400 24px/1.4 "Special Elite VN", "IBM Plex Mono", monospace; color: #F3E9D2; white-space: nowrap; }
+
+  .drawn.credit { font-size: 20px; padding: 3px 10px 4px; }
+
+  /* End card */
+  .card { position: absolute; z-index: 5; left: 190px; top: 150px; width: 700px; height: 760px; background: #F6EEDC; box-shadow: 8px 12px 22px rgba(20,12,6,.5); box-sizing: border-box; padding: 54px 50px 0 66px; }
+  .card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 22px; background: #D9291D; }
+  .card .tape { position: absolute; left: 50%; top: -24px; width: 170px; height: 46px; margin-left: -85px; background: rgba(232,214,160,.8); transform: rotate(2deg); }
+  .card h2 { margin: 0; font: 700 84px/1.3 "Oswald", sans-serif; color: #1D1812; white-space: nowrap; }
+  .card p { margin: 6px 0 0; font: 400 32px/1.4 "Special Elite VN", "IBM Plex Mono", monospace; color: #3D3224; white-space: nowrap; }
+  .card .was { position: absolute; left: 96px; top: 300px; font: 700 330px/1.2 "Oswald", sans-serif; color: #3A3026; }
+  .card .now { position: absolute; left: 340px; top: 250px; z-index: 9; font: 400 430px/1.1 "Sedgwick Ave Display", cursive; color: #D9291D;
+               -webkit-mask-image: conic-gradient(from -20deg, #000 var(--a, 100%), transparent var(--a, 100%)); mask-image: conic-gradient(from -20deg, #000 var(--a, 100%), transparent var(--a, 100%)); }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="45" data-width="1920" data-height="1080" data-no-timeline data-fps="30">
+  <!-- one per shot, in film order; the app adds the voice, music and sound -->
+  <div id="f1" data-composition-id="f1" data-composition-src="compositions/f1.html" data-start="0" data-duration="4.5" data-track-index="1" data-track-kind="graphics"></div>
+</div>
+</body>
+</html>

@@ -398,7 +398,7 @@ export default function NewProjectDialog({ onClose }) {
   const sampleNow = isSample(d.brief) && !!d.brief.trim();
   const replaceSample = (text) => setD((x) => ({ ...x, brief: text }));
   // Choosing a style loads its sample brief: straight away when the box is empty or still holds a sample, else one question.
-  // An adapted sample's credit (lemo's, from DEMO.md) rides on the Sample brief button (no credit line under the box).
+  // A sample's credit (lemo's, from STYLE.md) rides on the Sample brief button (no credit line under the box).
   const credit = sampleOf(d.styleId, d.sampleKind)?.credit;
   function isSample(text) { return !text.trim() || ALL_SAMPLES.some((s) => text === s.en || text === s.vi); }
   const chooseStyle = (id) => {

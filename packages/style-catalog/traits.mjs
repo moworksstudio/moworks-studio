@@ -24,7 +24,7 @@ export function styleTraits(id, root = APP_ROOT) {
   let styles = [];
   try { styles = JSON.parse(readFileSync(join(root, "config", "styles.json"), "utf8")).styles ?? []; } catch { /* no catalog: nothing special */ }
   const s = id ? styles.find((x) => x.id === id) : null;
-  const hf = s?.id === "general" || s?.rules?.kind === "hf-skill";
+  const hf = s?.rules?.kind === "moworks" || s?.rules?.kind === "hf-skill";
   return { music: s?.category === MUSIC, filmBoards: hf, ownEnding: !!id && !hf };          // the authors' styles live in the library, not in styles.json
 }
 

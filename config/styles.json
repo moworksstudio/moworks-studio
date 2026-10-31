@@ -285,6 +285,56 @@
       ]
     },
     {
+      "id": "map-explainer",
+      "title": "Map Explainer",
+      "description": "A 30-45 s map story in one continuous camera: real satellite ground, a vintage paper map, red marker on top, paper tags and stamps, every move on a word of the voice.",
+      "category": "Explainer",
+      "tags": [
+        "map",
+        "explainer",
+        "paper",
+        "one camera"
+      ],
+      "aspects": [
+        "16:9"
+      ],
+      "sizeLocked": true,
+      "rules": {
+        "kind": "moworks",
+        "files": [
+          "config/rules/map-explainer/SKILL.md",
+          "config/rules/general-style/SKILL.md"
+        ],
+        "uses": [
+          "hyperframes",
+          "hyperframes-cli",
+          "media-use"
+        ],
+        "readFirst": [
+          "map-explainer",
+          "general-style"
+        ]
+      },
+      "pipelineFrom": "general",
+      "intendedUse": "A short map story: a place, border, island, route or line on the map with one surprising fact, in the Johnny Harris / RealLifeLore look.",
+      "preview": {
+        "image": "/styles/map-explainer.jpg",
+        "placeholder": false,
+        "label": "Preview: Bir Tawil, a film made in this style",
+        "credit": "Moworks Studio · a frame of that film"
+      },
+      "look": false,
+      "dim": "2D",
+      "renderer": "canvas",
+      "credit": {
+        "author": "Moworks Studio",
+        "link": "https://github.com/moworksstudio/moworks-studio/tree/main/config/rules/map-explainer",
+        "licence": "the app's own rules; world-atlas ISC, Natural Earth public domain, Special Elite Apache-2.0; a film's satellite ground: EOxCloudless 2016, CC BY 4.0, credited in the film",
+        "made": "written from the idea",
+        "madeNote": "written from the owner's prompt; the engine generalised from the Test 33 film; real ground fetched per film from EOX's 2016 layer, or drawn in code without the internet"
+      }
+    },
+    {
       "id": "hf-explainer",
       "title": "Explainers, tutorials and \"how it works\"",
       "description": "One idea the viewer understands by the end. The spine is one concrete example worked through, start to finish, not a tour of facts. Usually 30–90 s.",

@@ -92,7 +92,7 @@ const LEMO_PACK = "config/rules/lemo-opuscar/SKILL.md";
 const LEMO_ASPECTS = ["16:9", "9:16", "1:1", "4:5"];          // 1920×1080 by default; other sizes laid out from the frame (TECHNIQUE §2)
 const readPipeline = (root, file, id) => { try { const j = JSON.parse(readFileSync(join(root, "config", file), "utf8")); return (id ? (Array.isArray(j.styles) ? j.styles.find((s) => s.id === id)?.pipeline : j.styles?.[id]) : j.pipeline) ?? []; } catch { return []; } };
 /** A config/styles.json style's pipeline: its own, or its shared file's (config/hf-pipeline.json: the style's own steps, else the shared ones). */
-const ownPipeline = (root, s) => s.pipeline ?? (s.rules?.pipeline ? (readPipeline(root, s.rules.pipeline, s.id).length ? readPipeline(root, s.rules.pipeline, s.id) : readPipeline(root, s.rules.pipeline)) : []);
+const ownPipeline = (root, s) => s.pipeline ?? (s.pipelineFrom ? readJsonCfg(root, "styles.json")?.styles?.find((x) => x.id === s.pipelineFrom)?.pipeline ?? [] : null) ?? (s.rules?.pipeline ? (readPipeline(root, s.rules.pipeline, s.id).length ? readPipeline(root, s.rules.pipeline, s.id) : readPipeline(root, s.rules.pipeline)) : []);
 
 /** A Lemo-Opuscar style's own frame rate: the author's "1920×1080 at 24 fps by default; an output frame
  *  rate set in the style wins" (DIRECTOR.md L14); the rate its demo film was made at, as its DEMO.md says the output ("1920×1080, 60 fps",
@@ -387,7 +387,7 @@ export function styleFormat(s) {
   presets.sort((a, b) => (b.own ? 1 : 0) - (a.own ? 1 : 0));
   return {
     fps: { default: author && choices.includes(author) ? author : choices.includes(30) ? 30 : choices[0], choices, ...(ani ? { slowAt: 60, slower: 2.5 } : {}) },
-    sizes: { presets, custom: !brush && !wi, ...(brush ? { locked: true } : {}), aspects, ...(own ? { author: [own.w, own.h] } : {}) },
+    sizes: { presets, custom: !brush && !wi && !s?.sizeLocked, ...(brush || s?.sizeLocked ? { locked: true } : {}), aspects, ...(own ? { author: [own.w, own.h] } : {}) },
   };
 }
 export function formatOf(id, root = APP_ROOT) { const s = getStyle(id, root); return s ? styleFormat(s) : null;

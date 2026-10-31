@@ -17,6 +17,7 @@ import { freshFilm } from "../hf-edit/codeFilm.mjs";
 import { dropDecorationContrast } from "./contrastDecor.mjs";
 import { filmSequences, measureProduct, sequenceLines, sequenceReport } from "./sequence.mjs";
 import { sungLines, sungReport } from "./lyricSync.mjs";
+import { syncLines, syncReport } from "./wordSync.mjs";
 import { isLyricVideo } from "../style-catalog/traits.mjs";
 
 const run = promisify(execFile);
@@ -237,7 +238,11 @@ export async function qcRound(dir, { shots, total, signal = null, parallel = fal
     try { return { sung: await sungReport(dir, { signal: partSignal }), failed: [] }; }
     catch (e) { if (signal?.aborted) throw e; return { failed: [`sung words: ${String(e.message).split(/\r?\n/)[0]}`] }; }
   };
-  const parts = [pictures, stretches, checked, sequence, sung];
+  const sync = async () => {
+    try { return { sync: await syncReport(dir), failed: [] }; }
+    catch (e) { return { failed: [`moves on words: ${String(e.message).split(/\r?\n/)[0]}`] }; }
+  };
+  const parts = [pictures, stretches, checked, sequence, sung, sync];
   let done;
   if (parallel) {
     // every part runs to its end; a part that threw rejects the round as the serial run would (the first in serial order)
@@ -257,6 +262,7 @@ export async function qcRound(dir, { shots, total, signal = null, parallel = fal
     if (part.check) res.check = part.check;
     if (part.sequence) res.sequence = part.sequence;
     if (part.sung) res.sung = part.sung;
+    if (part.sync) res.sync = part.sync;
     res.failed.push(...part.failed);
   }
   return res;
@@ -282,6 +288,7 @@ export function qcText(r, freshEyes = null) {
   if (r.still) lines.push("", ...stillLines(r.still));
   if (r.sequence) lines.push("", ...sequenceLines(r.sequence.report, r.sequence.product));
   if (r.sung) lines.push("", ...sungLines(r.sung));
+  if (r.sync) lines.push("", ...syncLines(r.sync));
   if (freshEyes) lines.push("", "Fresh eyes (a second look that saw only the beats and cuts sheets, nothing else about the film):", freshEyes);
   if (r.failed.length) lines.push("", `Could not make everything: ${r.failed.join("; ")}`);
   lines.push("", "Open the sheets with Read (each is one picture), score the seven criteria, write the round to docs/QC-REVIEW.md, fix, and call qc_sheets again for the next round. To look closer at one moment, film_frames gives that frame whole, with its text, at the film's size.");

@@ -3,6 +3,13 @@ import { readFileSync } from "node:fs";
 import { docPath } from "../project-service/docs.mjs";
 
 export const SCRIPT_FILE = "VOICEOVER.md";
+/** What a sample reads: the script's first two sentences or lines, 240 characters at most, cut at a word (the idea of Showhow's audition, Sirio Berati, MIT). */
+export function firstLines(text, { max = 240 } = {}) {
+  const s = String(text ?? "").normalize("NFC").trim();
+  const parts = s.match(/[^.!?…\n]+(?:[.!?…]+|\n+|$)/g) ?? [];
+  const two = parts.slice(0, 2).join("").trim();
+  return two.length <= max ? two : two.slice(0, max).replace(/\s+\S*$/, "").trim();
+}
 export function scriptDraft(dir) {
   const read = (f) => { try { return readFileSync(docPath(dir, f), "utf8").replace(/^﻿/, ""); } catch { return ""; } };
   const own = read(SCRIPT_FILE).split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !/^#/.test(l)).map((l) => l.replace(/^(\d+[.)]|[-*•])\s+/, ""));

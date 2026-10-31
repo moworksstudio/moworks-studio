@@ -8,6 +8,8 @@ import * as projects from "../project-service/index.mjs";
 import { listAssets, referencedFiles, rememberAssets, rewriteRefs } from "../project-service/assets.mjs";
 import { unlockPdf } from "../project-service/scan.mjs";
 import { readShots } from "../hf-edit/shots.mjs";
+import { fetchImagery, imageryCredit } from "../map-explainer/index.mjs";
+import { docPath } from "../project-service/docs.mjs";
 import { audioKind, laneOfFile, placeClip, placeTrack, removeRepeats, trackClips } from "../hf-edit/tracks.mjs";
 import { ADDED, muteMounted, readState as readSfx, writeCredits } from "../sfx/index.mjs";
 import { placeAdded } from "../sfx/added.mjs";
@@ -188,6 +190,18 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
       soundTakenOff(p, { id: "el-voice", src: p.meta.voice.file }, root);
       await commit(p, `Voice-over off the timeline: ${p.meta.voice.file} (kept in the assets)`);
       return `The voice-over ${basename(p.meta.voice.file)} is off the timeline (the file stays in the assets): the film has no narration.`;
+    },
+    // The Map Explainer style's real ground. No network or no answer: the owner is told, on a card and through Claude, and the film keeps the drawn ground.
+    map_imagery: async ({ project, args }) => {
+      const views = Array.isArray(args?.views) ? args.views : [];
+      if (ctx.renders?.isRendering(project.id)) return "The film is being rendered: try again when it finishes.";
+      const r = await fetchImagery(project.path, { views, center: Number(args?.center) || 0 });
+      if (!r.ok) {
+        try { projects.addNote(project.path, { kind: "imagery", status: "warning", text: `The satellite pictures could not be fetched (${r.reason}). Check the internet connection: this film uses the ground drawn in code until they come.` }); } catch { /* notes are best effort */ }
+        return `The satellite pictures could not be fetched: ${r.reason}. The film uses the ground the engine draws, with its "drawn" corner note. Tell the owner this in your reply, in plain words, and that it needs the internet to use the real pictures.`;
+      }
+      try { imageryCredit(docPath(project.path, "CREDITS.md")); } catch { /* the page's own corner line still carries it */ }
+      return r.reused ? "The satellite pictures for these views are already in the film." : `Fetched ${r.levels} satellite mosaic(s), ${Math.round(r.bytes / 1e6)} MB. The engine lays them out by itself and writes EOX's credit in the corner note of each close shot: keep a .drawn note in those shots.`;
     },
     copy_to_assets: async ({ project, args }) => {
       const from = normalize(String(args.from ?? "").replace(/\\/g, "/")).split(sep).join("/");

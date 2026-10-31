@@ -5,7 +5,7 @@ import { stampBase, stampParts } from "../render-names/index.mjs";
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { copyFileSync, createReadStream, createWriteStream, existsSync, linkSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { basename, extname, join, resolve, sep } from "node:path";
+import { basename, dirname, extname, join, resolve, sep } from "node:path";
 import { pipeline } from "node:stream/promises";
 import * as projects from "../project-service/index.mjs";
 import { docPath } from "../project-service/docs.mjs";
@@ -32,11 +32,11 @@ import * as secrets from "../secrets/index.mjs";
 import { PROVIDERS, clearVoiceLists, filmVietnamese, isVietnamese, pickModel, retryOnce, ttsFailedText, voiceList, voiceSettings } from "../voice/tts.mjs";
 import * as kokoro from "../voice/kokoro.mjs";
 import { plainMessage } from "./plainError.mjs";
-import { AUDIO_TYPES, MAX_BYTES, extractAudio, peaks, probe } from "../voice/audio.mjs";
+import { AUDIO_TYPES, MAX_BYTES, extractAudio, peaks, probe, quietParts } from "../voice/audio.mjs";
 import * as asr from "../voice/asr.mjs";
 import * as transcript from "../voice/transcript.mjs";
 import * as lyrics from "../voice/lyrics.mjs";
-import { briefScript, scriptDraft, scriptGap } from "../voice/script.mjs";
+import { briefScript, firstLines, scriptDraft, scriptGap } from "../voice/script.mjs";
 import { MASTER, loudness, masterLoudness } from "../hf-qa/loudness.mjs";
 import { capWebBitrate } from "../hf-qa/webBitrate.mjs";
 import { analyseBeats, fitMusicToFilm, musicRepeats, musicUsed, placeTrack } from "../hf-edit/tracks.mjs";
@@ -206,6 +206,7 @@ export const CHECKS = {
   "G-HF-MOTION": { title: "Motion", explain: "The moves the Motion Plan asks for are in the film.", kind: "deterministic" },
   "G-BLANK": { title: "Empty-looking scenes", explain: "Takes a few stills of each scene and flags a scene whose stills are all flat. A heuristic: it can miss or misjudge.", kind: "heuristic" },
   "G-END": { title: "The ending", explain: "Compares a still half a second before the end with the last frame: a film whose picture is still full and lit on its last frame stops dead. The picture should fade out with the music (or after the end card). In a style whose author's ending the Motion Plan names and plays, a dark screen, a dot or a held end card ends the film too.", kind: "deterministic" },
+  "G-SYNC": { title: "Moves on their words", explain: "A move of the Motion Plan that names a spoken word starts or lands on it, within about 3 frames, and the word is said in that shot. A warning, never a block.", kind: "deterministic" },
   "G-LYRIC": { title: "The sung words", explain: "In a lyrics video: each word sung is on screen, with the count sung, and shows around its sung time (the times are a draft, so only clear misses are named). A warning, never a block.", kind: "deterministic" },
   "G-SEQ-CRAWL": { title: "Image sequence: smooth turns", explain: "A product sequence turning under 1 picture a film frame, or one picture held where the product is mid-turn: it looks like it stutters. A warning, never a block.", kind: "deterministic" },
   "G-SEQ-JUMP": { title: "Image sequence: no sudden jump", explain: "One film frame that skips far more pictures than the frames around it, where the two pictures differ. Fast turns are fine; a cut of the film is fine. A warning, never a block.", kind: "deterministic" },
@@ -328,14 +329,40 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
           vars: { pct: Math.round(read.match * 100) } });
         return { segments: result.segments.length, language: result.language, device: result.device, words: 0, script: { match: read.match } };
       }
+      // words with nothing heard for them: the voice left out a line, so the film is not timed to it until the user has listened (Whisper's words alone say "9 of 10 the same")
+      if (read?.skipped.length) {
+        note(p, { kind: "voice", status: "warning", text: "The voice-over seems to leave out: {words}. Listen to it: make it again if the words are missing, or send the words from Transcript if they are there",
+          vars: { words: read.skipped.map((x) => `“${x.text}”`).join(", ").slice(0, 300) } });
+        return { segments: result.segments.length, language: result.language, device: result.device, words: 0, script: { match: read.match, skipped: read.skipped } };
+      }
+      // the words' times from the service that read them, when it gave them; else Whisper's
+      const aligned = read ? transcript.readAlignment(p.path, t.audio) : null;
+      const exact = aligned ? transcript.exactTimes(read.segments, aligned, await quietParts(file, root).catch(() => [])) : null;
+      if (aligned && !exact) job.log("The service's times are not for these words: Whisper's times are used");
       // the app uses Whisper's words at once: saved and on the timeline; the user corrects them in the
       // transcript dialog and sends them again when needed
-      const words = await saveTranscript(projects.getProject(p.id, root), read ? read.segments : t.segments);
+      const words = await saveTranscript(projects.getProject(p.id, root), exact ?? (read ? read.segments : t.segments));
       note(p, { kind: "voice", text: read && read.changed + read.missed ? "Transcript ready: {n} words, the film is timed to them; {k} word(s) taken from the script the voice was read from"
         : "Transcript ready: {n} words, the film is timed to them; open Transcript to correct them", vars: { n: words, k: read ? read.changed + read.missed : 0 } });
       return { segments: result.segments.length, language: result.language, device: result.device, words, ...(read ? { script: { match: read.match, changed: read.changed, missed: read.missed } } : {}) };
     });
   }
+
+  /** The checks before a voice service reads anything: { provider, key, local }. */
+  function readingAsked(p, b) {
+    const provider = PROVIDERS[b.provider] ? b.provider : null;
+    if (!provider) throw err("INVALID", "Choose ElevenLabs or Kokoro");
+    const local = !!PROVIDERS[provider].local;
+    const key = local ? null : secrets.getSecret(provider, root);
+    if (!key && !local) throw err("INVALID", `Add the ${PROVIDERS[provider].title} key in Settings first`);
+    if (local) {
+      if (!kokoro.packStatus(root).installed) throw err("MODEL_MISSING", "The free voice is not installed yet: install it on the Voice screen");
+      // a film in Vietnamese, or Vietnamese words in a film whose language is not set yet (an English film may quote a Vietnamese name)
+      if (filmVietnamese(p.meta) || (!p.meta?.language?.id && isVietnamese(String(b.text ?? "")))) throw err("INVALID", "Kokoro has no Vietnamese voice: choose ElevenLabs or upload a recording");
+    }
+    return { provider, key, local };
+  }
+  const sampleFile = (p, hash) => join(p.path, ".moworks", "cache", "voice-samples", `${hash}.mp3`);
 
   /** All the gates (the blank-scene stills included) in a child process; Stop kills it. */
   const checkTimeFile = (p) => join(p.path, ".moworks", "cache", "qa", "check-time.json");
@@ -816,6 +843,14 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       renameSync(dest + ".part", dest);
       return useVoice(p, dest, info, { source: "upload", size: n });
     }],
+    // a sample of a voice on the script's first lines (Voice screen), out of the film's files
+    ["GET", new RegExp(`^/api/projects/${P}/voice/sample/([a-f0-9]{24})$`), async ([id, hash], req, q, res) => {
+      const f = sampleFile(mustProject(id, root), hash);
+      if (!existsSync(f)) throw new HttpError(404, "NOT_FOUND", "No such sample");
+      res.writeHead(200, { "Content-Type": "audio/mpeg", "Content-Length": statSync(f).size, "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" });
+      await pipeline(createReadStream(f), res);
+      return null;
+    }],
     // the audio itself, for the player and the waveform (fetched with the token, played from a blob)
     ["GET", new RegExp(`^/api/projects/${P}/voice/audio$`), async ([id], req, q, res) => {
       const p = mustProject(id, root);
@@ -956,21 +991,28 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
         return r;
       });
     }),
+    // a voice on the script's first lines, to hear it before paying for the whole take (only on the user's click; the same words, voice and settings are never paid for twice)
+    r("POST", `/projects/${P}/voice/tts/sample`, async ([id], b) => {
+      const p = mustProject(id, root);
+      const { provider, key } = readingAsked(p, b);
+      const text = firstLines(b.text);
+      if (!text) throw err("INVALID", "Write the script to be read");
+      const settings = voiceSettings(provider, b.settings ?? null);
+      const model = provider === "elevenlabs" ? pickModel(await retryOnce(() => PROVIDERS.elevenlabs.models(key)), { text, asked: b.model ?? null, lang: p.meta?.language?.id ?? null }) : b.model ?? null;
+      if (provider === "elevenlabs" && !model) throw err("INVALID", "This ElevenLabs account has no model that reads Vietnamese");
+      const sample = createHash("sha256").update(JSON.stringify([provider, b.voiceId, model, settings, text])).digest("hex").slice(0, 24), out = sampleFile(p, sample);
+      if (existsSync(out)) return { sample, chars: text.length, again: true };
+      mkdirSync(dirname(out), { recursive: true });
+      try { await PROVIDERS[provider].generate(key, { voiceId: b.voiceId, model: model ?? undefined, text, out, settings, lang: p.meta?.language?.id ?? null, root }); }
+      catch (e) { rmSync(out, { force: true }); throw e; }
+      return { sample, chars: text.length };
+    }),
     r("POST", `/projects/${P}/voice/tts`, ([id], b) => {
       const p = mustProject(id, root);
-      const provider = PROVIDERS[b.provider] ? b.provider : null;
-      if (!provider) throw err("INVALID", "Choose ElevenLabs or Kokoro");
+      const { provider, key, local } = readingAsked(p, b);
       const text = String(b.text ?? "").normalize("NFC").trim();
       if (!text) throw err("INVALID", "Write the script to be read");
       if (text.length > 20000) throw err("INVALID", "The script is too long for one request (20,000 characters)");
-      const local = !!PROVIDERS[provider].local;
-      const key = local ? null : secrets.getSecret(provider, root);
-      if (!key && !local) throw err("INVALID", `Add the ${PROVIDERS[provider].title} key in Settings first`);
-      if (local) {
-        if (!kokoro.packStatus(root).installed) throw err("MODEL_MISSING", "The free voice is not installed yet: install it on the Voice screen");
-        // a film in Vietnamese, or Vietnamese words in a film whose language is not set yet (an English film may quote a Vietnamese name)
-        if (filmVietnamese(p.meta) || (!p.meta?.language?.id && isVietnamese(text))) throw err("INVALID", "Kokoro has no Vietnamese voice: choose ElevenLabs or upload a recording");
-      }
       // only what the user set on the Voice screen (none: the service's defaults); `speed` alone is the older shape
       const settings = voiceSettings(provider, b.settings ?? (b.speed != null ? { speed: b.speed } : null));
       // Test 24: the first voice-over failed while the computer was loaded (the server did not answer for about 30 s) and the step went
@@ -983,7 +1025,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
         const out = join(p.path, "assets", "3_audio", "voiceover", `${provider}-${new Date().toISOString().replace(/[:.]/g, "-")}.mp3`);
         rememberAssets(p.path, [relativeTo(p.path, out)]);          // the app's own file, before it is written: never one "the user added" (T22-2)
         const again =(what) => (e) => job.log(`${what} failed, trying once more: ${plainMessage(e)}`);
-        let model = b.model ?? null;
+        let model = b.model ?? null, made = null;
         try {
           // Vietnamese text is read by a model that reads Vietnamese, never eleven_multilingual_v2 by default
           if (provider === "elevenlabs") {
@@ -991,7 +1033,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
             if (!model) throw err("INVALID", "This ElevenLabs account has no model that reads Vietnamese");
             job.update({ model });
           }
-          await retryOnce(() => PROVIDERS[provider].generate(key, { voiceId: b.voiceId, model: model ?? undefined, text, out, signal: job.signal, settings, lang: p.meta?.language?.id ?? null, root,
+          made = await retryOnce(() => PROVIDERS[provider].generate(key, { voiceId: b.voiceId, model: model ?? undefined, text, out, signal: job.signal, settings, lang: p.meta?.language?.id ?? null, root,
             onProgress: ({ part }) => job.update({ progress: Math.floor(part * 100) }) }),
             { signal: job.signal, onRetry: again("reading the script") });
         } catch (e) {
@@ -1007,6 +1049,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
         }
         const info = await probe(out, root);
         const rel = relativeTo(p.path, out);
+        transcript.saveAlignment(p.path, rel, made?.alignment ?? null);
         meta(id, (m) => { m.voice = { source: provider, file: rel, name: basename(out), size: statSync(out).size, info, voiceId: b.voiceId ?? null, voiceName: b.voiceName ?? null,
           model: model ?? null, settings, script: text, addedAt: new Date().toISOString(), transcript: { status: "pending" } };
           (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "voice", text: `Voice-over generated with ${PROVIDERS[provider].title}` }); });

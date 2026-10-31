@@ -576,7 +576,7 @@ export const sequenceOf = (name) => { const m = /^(.*?)[\s._-]*(\d{3,})\.(png|jp
 export function audioFolder(name, role = null) {
   if (AUDIO_ROLES.includes(role)) return role;
   const n = String(name ?? "").normalize("NFC").toLowerCase();
-  if (/(^|[^a-z])(vo|voice|voiceover|voice-over|narration|narrator|giong|giọng|thoai|thoại|loi ?doc|lời ?đọc|doc ?loi|đọc ?lời)([^a-z]|$)/.test(n)) return "voiceover";
+  if (/(^|[^a-z])(vo|voice|voiceover|voice-over|narration|narrator|elevenlabs|kokoro|giong|giọng|thoai|thoại|loi ?doc|lời ?đọc|doc ?loi|đọc ?lời)([^a-z]|$)/.test(n)) return "voiceover";
   if (/(sfx|whoosh|swoosh|swish|click|pop|ding|impact|riser|hit|boom|transition|ui ?sound)/.test(n)) return "sfx";
   return "music";
 }

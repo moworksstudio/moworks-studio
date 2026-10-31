@@ -1,25 +1,26 @@
-// The sample brief behind the Sample brief button in New project (one per style). For a user who does not know what a brief is: it shows one that fits the chosen style. Loading a sample also sets the dialog's own
-// fields to the sample's values (`fields`: length, aspect ratio and frame rate, 30 fps when a sample says none; the Brand Kit goes back to
-// free), because what the dialog asks is not repeated in the text.
-// Sources: the "general" sample is the sample prompt shared as an image ("From idea to app with Claude Code"; author unknown), kept as written (Three.js, materials, scene timings, SF Pro, the finish) with only what the dialog
+// The sample brief behind the Sample brief button in New project (one per style). For a user who does not know what a brief is: it shows one that fits the chosen style. Its `fields` (length, aspect ratio and
+// frame rate) are what the sample was written for: the dialog shows them under Format, with one button to take them; the boxes never change by themselves.
+// Sources: the "general" sample is the sample prompt shared as an image ("From idea to app with Claude Code"; author unknown), kept as written (Three.js, materials, scene timings, the finish; its SF Pro, which the app does not have, became Inter: #172, owner 01/11) with only what the dialog
 // chooses taken out: the length (15 seconds), the size (1920x1080), the frame rate (60 fps) and the render method (the app renders); its
 // fields put 0:15, 16:9 and 60 fps back in the dialog. Its Vietnamese is a full translation. The others are written for this app from each
 // style's own inputs (config/styles.json).
 // Two languages, the same content; the words inside the film stay English in both, as in the original.
-// The 66 Lemo-Opuscar styles ("lemo-<slug>") have theirs in briefSampleLemo.js, adapted from each style's DEMO.md, with credit;
-// the 15 mg-styles-15 styles ("mg-<id>") in briefSampleMg.js, adapted from each style's prompt, and the 32 anidoodle media
+// The 66 Lemo-Opuscar styles ("lemo-<slug>") have theirs in briefSampleLemo.js, written from each style's STYLE.md, with credit;
+// the 15 mg-styles-15 styles ("mg-<id>") in briefSampleMg.js, written from each style's prompt, and the 35 anidoodle media
 // ("anidoodle-<id>") in briefSampleAnidoodle.js, written from each medium's reference.
 import { LEMO_BRIEF_SAMPLES } from "./briefSampleLemo.js";
 import { MG_BRIEF_SAMPLES } from "./briefSampleMg.js";
 import { ANIDOODLE_BRIEF_SAMPLES, ANIDOODLE_KIND_SAMPLES } from "./briefSampleAnidoodle.js";
 import { BRUSH_BRIEF_SAMPLES } from "./briefSampleBrush.js";
 
+const WI_CREDIT = { text: "Written from the What If formula of What If animation by FreshStack, MIT", link: "https://github.com/kelano86/what-if-animation/blob/3725a22d2d101320cae5b7d761af8d75120c4987/references/formula.md" };
+
 const OWN_SAMPLES = {
   general: {
     fields: { length: "0:15", aspect: "16:9", fps: 60 },
     vi: `Làm một phim motion graphics giải thích bằng Three.js, phong cách glassmorphism, tên "From idea to app with Claude Code".
 
-Không gian: một khoảng tối được chiếu sáng bởi một vòm lớn với các mảng gradient mềm màu tím, cam, xanh dương và hồng. Các tấm panel là kính mờ (MeshPhysicalMaterial có transmission, roughness khoảng 0.4, tấm khối đùn bo góc). Mỗi panel có một canvas texture trên mặt, vẽ lại mỗi khung hình cho phần giao diện: viền trắng và chữ trắng font SF Pro. Màu nhấn #ff8a4c.
+Không gian: một khoảng tối được chiếu sáng bởi một vòm lớn với các mảng gradient mềm màu tím, cam, xanh dương và hồng. Các tấm panel là kính mờ (MeshPhysicalMaterial có transmission, roughness khoảng 0.4, tấm khối đùn bo góc). Mỗi panel có một canvas texture trên mặt, vẽ lại mỗi khung hình cho phần giao diện: viền trắng và chữ trắng font Inter. Màu nhấn #ff8a4c.
 
 Máy quay bay qua 4 cảnh đặt ở các vị trí 3D khác nhau. Nó trôi chậm trong mỗi cảnh và lướt nhanh giữa các cảnh (expo ease). Mỗi cảnh có một nhãn lớn: "STEP 0X" màu cam phía trên một chữ trắng lớn.
 
@@ -34,7 +35,7 @@ Xuyên suốt: một ống phát sáng chạy theo đường cong CatmullRom n�
 Hoàn thiện: render target HDR có MSAA, bloom nhẹ (chỉ ở chỗ sáng), tone mapping trung tính, và một lượt cuối có chút lệch màu (chromatic aberration), vignette và hạt phim. Giữ mọi chữ nằm trong khung và dễ đọc, và kiểm tra ảnh tĩnh của từng cảnh trước khi render cả đoạn.`,
     en: `Make a motion-graphics explainer in Three.js, glassmorphism style, titled "From idea to app with Claude Code".
 
-World: a dark space lit by a big dome with soft violet, orange, blue and pink gradient blobs. Panels are frosted glass (MeshPhysicalMaterial with transmission and roughness around 0.4, rounded extruded slabs). Each panel has a canvas texture on its face, redrawn every frame for the UI: a white border and white text in SF Pro. Accent colour #ff8a4c.
+World: a dark space lit by a big dome with soft violet, orange, blue and pink gradient blobs. Panels are frosted glass (MeshPhysicalMaterial with transmission and roughness around 0.4, rounded extruded slabs). Each panel has a canvas texture on its face, redrawn every frame for the UI: a white border and white text in Inter. Accent colour #ff8a4c.
 
 The camera flies through 4 scenes placed at different 3D positions. It drifts slowly within each scene and whips quickly between them (expo ease). Each scene has a big label: "STEP 0X" in orange above a large white word.
 
@@ -50,60 +51,60 @@ Finish: HDR render target with MSAA, subtle bloom (bright highlights only), neut
   },
   "hf-explainer": {
     fields: { length: "1:00", aspect: "16:9" },
-    vi: `Chủ đề: giải thích vì sao ngủ đủ giấc giúp nhớ bài tốt hơn.
+    vi: `Chủ đề: vì sao một đêm ngủ đủ giúp nhớ bài tốt hơn.
 Người xem: sinh viên và dân văn phòng trẻ, chưa biết gì về khoa học giấc ngủ.
-Thông điệp: bộ não sắp xếp lại ký ức trong lúc ngủ, nên thức khuya học bài là học dở.
+Thông điệp: bộ não sắp xếp ký ức trong lúc ngủ, nên thức trắng đêm là học dở.
 
-Ba ý chính, mỗi ý một cảnh:
-1. Ban ngày, não thu thông tin như một chiếc hộp thư đầy.
-2. Khi ngủ, não phân loại: giữ cái quan trọng, bỏ cái thừa.
-3. Thiếu ngủ thì hộp thư vẫn đầy, ký ức không được giữ lại.
+Một ví dụ từ đầu tới cuối: Linh thi lúc 8 giờ sáng và nửa đêm còn 40 trang. Đi theo một mốc năm cô đọc ở trang 12 suốt đêm ấy.
+1. Ban ngày, mốc năm ấy rơi vào một hộp thư nhỏ đầy ắp trong đầu, cạnh mọi thứ cô thấy trong ngày.
+2. Nếu Linh ngủ, hộp thư được phân loại: mốc năm được cất đi, phần thừa bị bỏ. Một sơ đồ lớn dần, thêm một phần mỗi khi giọng đọc nhắc tới.
+3. Nếu Linh thức, hộp thư vẫn đầy và mốc năm trôi mất. Trở lại Linh trong phòng thi: một câu cô biết, một câu không.
 
-Giọng điệu: thân thiện, rõ ràng, như người bạn giải thích. Hình: chữ lớn, hình khối đơn giản, không có người thật. Kết bằng một lời khuyên: ngủ trước khi thi.`,
-    en: `Topic: explain why enough sleep helps you remember what you study.
+Giọng điệu: thân thiện, rõ ràng, như người bạn giải thích, chuyển động vui. Chỉ nói điều nghiên cứu về giấc ngủ thật sự nói, ghi lại nguồn. Kết bằng một câu: ngủ trước khi thi.`,
+    en: `Topic: why a night's sleep helps you remember what you studied.
 Audience: students and young office workers who know nothing about sleep science.
-Message: the brain re-sorts memories while you sleep, so late-night cramming works against you.
+Message: the brain sorts memories while you sleep, so an all-nighter works against you.
 
-Three ideas, one scene each:
-1. By day, the brain collects information like an overflowing inbox.
-2. During sleep, it sorts: keeps what matters, drops the rest.
-3. Without sleep the inbox stays full and nothing is kept.
+One example from start to finish: Linh has an exam at 8 am and 40 pages left at midnight. Follow one date she reads on page 12 through the night.
+1. By day that date lands in a small overflowing inbox in her head, beside everything else she saw today.
+2. If she sleeps, the inbox gets sorted: the date is filed away and the rest is dropped. One diagram grows, one part each time the voice names it.
+3. If she stays up, the inbox stays full and the date slips out. Back to Linh at the exam: one answer she knows, one she does not.
 
-Tone: friendly and clear, like a friend explaining. Visuals: big type, simple shapes, no real people. End with one piece of advice: sleep before the exam.`,
+Tone: friendly and clear, like a friend explaining, with playful moves. Say only what sleep research really says, and note the source. End on one line: sleep before the exam.`,
   },
   "hf-launch": {
     fields: { length: "0:45", aspect: "16:9" },
-    vi: `Sản phẩm: ứng dụng quản lý chi tiêu "Xu" cho người trẻ, vừa ra bản mới có tính năng chia hoá đơn nhóm.
+    vi: `Sản phẩm: "Xu", một ứng dụng quản lý chi tiêu tự đặt ra cho người trẻ, vừa ra bản mới có tính năng chia hoá đơn nhóm. Đây không phải sản phẩm thật: vẽ màn hình của nó, ghi nhãn "Example", và đừng tìm trên web.
 Người xem: người 20-30 tuổi hay đi ăn chung và ngại đòi tiền bạn.
 
 Vấn đề: chia tiền thủ công rất mệt và dễ gây khó chịu.
 Giải pháp: quét hoá đơn, chọn ai ăn gì, app tính sẵn và gửi nhắc nhẹ nhàng.
 Ba điểm nổi bật: quét hoá đơn, chia theo món, nhắc không gượng.
 
-Giọng điệu: vui, nhẹ, không phô trương. Màu theo thương hiệu (xanh lá và trắng). Kết bằng lời kêu gọi "Tải Xu miễn phí".`,
-    en: `Product: the budgeting app "Xu" for young people, newly released with a group bill-splitting feature.
+Giọng điệu: vui, nhẹ, chuyển động táo bạo. Màu theo thương hiệu (xanh lá và trắng). Kết bằng lời kêu gọi "Tải Xu miễn phí".`,
+    en: `Product: "Xu", a made-up budgeting app for young people, newly released with a group bill-splitting feature. It is not a real product: draw its screens, label them "Example", and do not search the web for it.
 Audience: 20 to 30 year-olds who eat out in groups and dread chasing friends for money.
 
 Problem: splitting by hand is tiring and awkward.
 Solution: scan the receipt, pick who had what, the app does the maths and sends a gentle reminder.
 Three highlights: scan the receipt, split by item, reminders without awkwardness.
 
-Tone: light and playful, never showy. Brand colours (green and white). End on the call to action "Get Xu free".`,
+Tone: light and playful, with bold moves. Brand colours (green and white). End on the call to action "Get Xu free".`,
   },
   "hf-music": {
-    fields: { length: "3:00", aspect: "16:9" },
-    vi: `Bài nhạc: bài của tôi, thêm vào ở phần Tư liệu; lời bài hát dán ở bước Lời bài hát.
+    fields: { length: "3:00", aspect: "16:9", fps: 60 },
+    vi: `Bài nhạc: bài của tôi, thêm vào ở phần Tư liệu; lời bài hát dán ở bước Lời bài hát. Phim dài đúng bằng bài hát.
 Tâm trạng: ấm áp, hơi hoài niệm, nhịp vừa. Đoạn điệp khúc bùng lên.
 
-Hình ảnh: video lời bài hát. Chữ là nhân vật chính: mỗi câu hát hiện đúng lúc được hát, từ nhấn mạnh to hơn. Nền là những mảng màu mềm chuyển theo đoạn nhạc: đoạn đầu lạnh và tối, điệp khúc sáng và ấm.
+Hình ảnh: video lời bài hát. Chữ được hát là nhân vật chính: mỗi chữ đáp đúng lúc được hát, chữ hát lại là một khoảnh khắc mới, có cỡ, màu và cách xuất hiện riêng. Ít nhất 3 giây một thế giới mới: đoạn đầu lạnh và tối, điệp khúc sáng và ấm, và điệp khúc trở về một sân khấu lớn dần mỗi lần. Một vật nhỏ, chiếc diều giấy, đi qua mọi thế giới, được chuyền từ cảnh này sang cảnh khác.
 
-Nhịp: cắt cảnh theo nhịp trống, điệp khúc có chuyển động nhanh hơn. Tên bài và nghệ sĩ hiện ở đầu, nhỏ và kín đáo. Tránh hình minh hoạ theo nghĩa đen của lời; ưu tiên màu, chữ và chuyển động.`,
-    en: `Track: my song, added in Assets; the lyrics are pasted in the Lyrics step.
+Nhịp: đổi cảnh theo ô nhịp và phách mạnh, chuyển động đáp đúng các cú nhấn, điệp khúc nhanh hơn. Tên bài và nghệ sĩ chỉ hiện ở đoạn dạo đầu, trước chữ hát đầu tiên. Chỉ có bài hát: không tiếng động, không âm nền.`,
+    en: `Track: my song, added in Assets; the lyrics are pasted in the Lyrics step. The film runs as long as the song.
 Mood: warm, a little nostalgic, mid tempo. The chorus lifts.
 
-Visuals: a lyric video. The type is the star: each line appears exactly when it is sung, stressed words larger. The ground is soft colour fields that change with the sections: verses cool and dark, chorus bright and warm.
+Visuals: a lyric video. The sung words are the star: each word lands on its sung time, and a word sung again is a new moment, with its own size, colour and entrance. A new world at least every 3 seconds: the verses cool and dark, the chorus bright and warm, and the chorus comes home to one stage that grows bigger each time. One small thing, a paper kite, travels through every world, passed from shot to shot.
 
-Rhythm: cut on the drums; the chorus moves faster. Song title and artist at the start, small and discreet. Avoid literal illustrations of the words; lean on colour, type and motion.`,
+Rhythm: shots change on bars and downbeats, the moves land on the hits, the chorus runs faster. Song title and artist only over the intro, before the first sung word. The song alone: no sound effects, no ambience.`,
   },
   "hf-data": {
     fields: { length: "0:40", aspect: "16:9" },
@@ -111,18 +112,18 @@ Rhythm: cut on the drums; the chorus moves faster. Song title and artist at the 
 Người xem: người sống trong khu phố, chưa từng nghe về thư viện hạt giống.
 Thông điệp: một ngăn kéo hạt giống nhỏ đã thành một mùa vụ chung của cả phố.
 
-Từng con số một, mỗi số một cảnh: 1 tủ ngăn kéo cũ ở góc thư viện; 214 gói hạt được mượn; 68 gói được trả lại sau mùa (nhiều hơn số đã mượn của tháng đầu); 31 loại rau; 1 bữa cơm chung cuối năm.
+Từng con số một, mỗi số một cảnh: 1 tủ ngăn kéo cũ ở góc thư viện; 214 gói hạt được mượn; 68 gói được trả lại sau mùa, đầy hạt để dành từ vụ thu hoạch; 31 loại rau; 1 bữa cơm chung cuối năm.
 Mỗi con số là thứ lớn nhất trên màn hình và biến thành vật thật: 214 gói hạt xếp thành một luống, 31 loại rau mọc thành một vườn nhỏ.
 
-Phong cách: giấy kraft, mực xanh lá đậm, chữ số to và rõ. Không giọng đọc; chữ ngắn đi kèm từng con số. Các con số là số tự viết cho phim này.`,
+Phong cách: giấy kraft, mực xanh lá đậm, chữ số to và rõ. Không giọng đọc; chữ ngắn đi kèm từng con số. Thư viện và các con số là tự đặt ra cho phim này, nên có một dòng nhỏ trên màn hình ghi "Example".`,
     en: `Topic: a neighbourhood library that lends seeds instead of books, and its first year in numbers.
 Audience: people living nearby who have never heard of a seed library.
 Message: one small drawer of seeds became a harvest the whole street shares.
 
-One number at a time, one scene each: 1 old card-catalogue drawer in the corner of the library; 214 seed packets borrowed; 68 packets returned after the season (more than the first month lent); 31 kinds of vegetable; 1 shared dinner at the end of the year.
+One number at a time, one scene each: 1 old card-catalogue drawer in the corner of the library; 214 seed packets borrowed; 68 packets came back after the season, filled with seed saved from the harvest; 31 kinds of vegetable; 1 shared dinner at the end of the year.
 Each number is the biggest thing on screen and becomes a real thing: 214 packets lined up into a garden bed, 31 kinds sprouting into a small garden.
 
-Style: kraft paper, deep green ink, large clear figures. No voice-over; a short line of text with each number. The numbers are made up for this film.`,
+Style: kraft paper, deep green ink, large clear figures. No voice-over; a short line of text with each number. The library and its numbers are made up for this film, so a small line on screen says "Example".`,
   },
   "hf-vertical": {
     fields: { length: "0:20", aspect: "9:16" },
@@ -159,26 +160,51 @@ The character gives each cut a cause: Dusty tries, fails and finds its own way. 
   },
   slideshow: {
     fields: { length: "1:00", aspect: "16:9" },
-    vi: `Chủ đề: tổng kết quý 3 của studio cho khách hàng.
-Gồm 6 slide, mỗi slide một ý và một ảnh:
-1. Tiêu đề: "Quý 3 trong một phút".
-2. Số liệu chính: 12 dự án hoàn thành.
-3. Dự án nổi bật: ảnh và hai dòng mô tả.
-4. Lời khen của khách: một câu ngắn.
-5. Điều học được: ba gạch đầu dòng.
-6. Quý tới: ba mục tiêu và lời cảm ơn.
+    vi: `Chủ đề: câu chuyện ảnh về một món ăn gia truyền: nồi canh cá của bà tôi, trong sáu tấm hình.
+Gồm 6 slide, mỗi slide một hình và một dòng ngắn:
+1. Tiêu đề: "Một nồi canh, ba thế hệ".
+2. Căn bếp của bà, nơi mọi chuyện bắt đầu.
+3. Trang công thức viết tay, có vết ố ở góc.
+4. Mẹ tôi đổi một nguyên liệu.
+5. Tôi nấu hỏng lần đầu.
+6. Cả nhà bên bàn ăn, và dòng cuối: "Vẫn chưa ngon bằng của bà."
 
-Phong cách: sạch, nhiều khoảng trắng, một màu nhấn. Chữ ngắn, tối đa hai dòng mỗi slide. Ảnh lấy từ phần Tư liệu. Chuyển slide nhẹ nhàng, không loè loẹt.`,
-    en: `Topic: the studio's Q3 recap for clients.
-Six slides, one idea and one picture each:
-1. Title: "Q3 in one minute".
-2. Key number: 12 projects delivered.
-3. Featured project: a picture and two lines.
-4. A client's praise: one short sentence.
-5. What we learned: three bullets.
-6. Next quarter: three goals and a thank-you.
+Hình: sáu tấm ảnh của tôi, thêm vào ở phần Tư liệu. Chưa có ảnh thì vẽ sáu cảnh đơn giản và ghi nhãn "Example" trên mỗi cảnh.
+Phong cách: ấm áp, chữ to, tối đa hai dòng mỗi slide. Hình nào cũng luôn chuyển động (đẩy chậm, trôi nhẹ, hình và chữ lệch lớp), và mỗi lần đổi slide đi ra từ chính hình trước: lật trang, làn hơi quét qua khung, chiếc thìa băng ngang màn hình. Nhạc ấm, không giọng đọc.`,
+    en: `Topic: a photo story of one family recipe: my grandmother's fish soup, in six pictures.
+Six slides, one picture and one short line each:
+1. Title: "One pot, three generations".
+2. Her kitchen, where it began.
+3. The handwritten page, with a stain on the corner.
+4. My mother changing one ingredient.
+5. Me getting it wrong the first time.
+6. All of us at the table, and the last line: "Still not as good as hers."
 
-Style: clean, plenty of white space, one accent colour. Short text, two lines at most per slide. Pictures come from Assets. Gentle slide changes, nothing flashy.`,
+Pictures: my own six photos, added in Assets. No photos yet: draw six simple scenes and label each "Example".
+Style: warm, big type, two lines at most per slide. Every picture keeps moving (a slow push, a drift, parallax between picture and words), and each slide change comes out of the picture before it: a page turn, steam wiping the frame, a spoon crossing the screen. Warm music, no voice-over.`,
+  },
+  // the What If film style's own (it draws the author's stick figures in a lit room, 1920 x 1080); our own premise, no channel's episode
+  "what-if": {
+    fields: { length: "0:20", aspect: "16:9", fps: 30 }, credit: WI_CREDIT,
+    vi: `Chủ đề: Nếu bạn tàng hình được, nhưng chỉ khi đang nín thở thì sao?
+Mở đầu bằng ba cảnh thử nhanh, mỗi lần đều nói từ của năng lực ("Nín."): bạn vượt hàng dài nhất phố, bạn lấy miếng bánh cuối ngay trước mũi em trai, bạn đứng ngay sau lưng bạn thân khi họ đang nói về bạn.
+Thẻ tiêu đề: NẾU BẠN CÓ THỂ / BIẾN MẤT TRONG MỘT HƠI?
+Cú ngoặt: một sự thật có con số về việc mắt tàng hình thật ra thấy được gì, vì mắt chỉ nhìn thấy nhờ giữ lại ánh sáng (tìm và ghi nguồn; không có nguồn thì không dùng số), rồi: "Đó là thật." và "Vậy giờ bạn đang thấy gì?"
+Ngôi thứ hai, mỗi câu 3 đến 8 chữ, mỗi câu một hình, khoảng 20 giây.`,
+    en: `Topic: What if you could turn invisible, but only while you hold your breath?
+Cold open, three quick demos, the power's word every time ("Hold."): you skip the longest queue in town, you take the last slice of cake from under your brother's nose, you stand right behind your best friend while they talk about you.
+Title card: WHAT IF YOU COULD / VANISH ON ONE BREATH?
+The turn: one true fact with a number about what an invisible eye could really see, since an eye only sees by catching light (find it and cite the source; no source, no number), then: "That's real." and "So what do you see right now?"
+Second person, lines of 3 to 8 words, each line one picture, about 20 seconds.`,
+  },
+  "map-explainer": {
+    fields: { length: "0:40", aspect: "16:9", fps: 30 },
+    vi: `Một câu chuyện bản đồ về hai hòn đảo Diomede ở eo biển Bering. Hai đảo cách nhau chưa tới 4 km, nhưng đường đổi ngày đi qua giữa: đảo này thuộc Nga, đảo kia thuộc Mỹ, và đứng ở đảo này nhìn được sang ngày mai.
+
+Mở bằng câu: "From this island, you can see tomorrow." Kể ngắn, dí dỏm, tiếng Anh. Kiểm mọi dữ kiện trước khi viết lời, và cho tôi đọc lời trước khi làm giọng.`,
+    en: `A map story about the two Diomede islands in the Bering Strait. They sit less than 4 km apart, but the date line runs between them: one is Russian, one is American, and from one you can look across at tomorrow.
+
+Open on the line: "From this island, you can see tomorrow." Short, dry and funny, in English. Check every fact before you write the script, and show me the script before you make the voice.`,
   },
 };
 
@@ -187,7 +213,6 @@ export const BRIEF_SAMPLES = { ...OWN_SAMPLES, ...LEMO_BRIEF_SAMPLES, ...MG_BRIE
 // The What If film kind's two samples, any style: one for a style that draws characters, one for the others.
 // Our own premises, written from the seven-beat formula of What If animation (FreshStack, MIT; kelano86/what-if-animation at 3725a22);
 // no channel's episode. The twist's fact is left for Claude to find and cite (rules/what-if §3).
-const WI_CREDIT = { text: "Written from the What If formula of What If animation by FreshStack, MIT", link: "https://github.com/kelano86/what-if-animation/blob/3725a22d2d101320cae5b7d761af8d75120c4987/references/formula.md" };
 export const WHAT_IF_SAMPLES = {
   characters: { fields: { length: "0:20" }, credit: WI_CREDIT,
     en: `Topic: What if you could talk to animals?

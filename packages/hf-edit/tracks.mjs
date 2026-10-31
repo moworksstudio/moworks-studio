@@ -8,6 +8,7 @@ import { join, resolve } from "node:path";
 import { runHf } from "../hf-qa/cli.mjs";
 import { endFade, fadeOfTotal, filmEnding, filmLength } from "./ending.mjs";
 import { isStarterPage } from "./shots.mjs";
+import { isSongFilm } from "../style-catalog/traits.mjs";
 import { MUSIC_DUCK, duckLane, sig, speechSpans } from "../sfx/actions.mjs";
 
 const ROLES = { voice: { id: "el-voice", role: "voiceover", track: 10, volume: 1 }, music: { id: "el-music", role: "music", track: 11, volume: 0.6 } };
@@ -28,21 +29,24 @@ const r2 = (n) => Math.round(n * 100) / 100;
 const metaOf = (dir) => { try { return JSON.parse(readFileSync(join(dir, ".moworks", "project.json"), "utf8")); } catch { return {}; } };
 // the ending as the app applies it (ending.mjs filmEnding): an author's ending the plan only claims is the house fade, at its usual length
 const endingOf = (dir) => {
-  const e = filmEnding(metaOf(dir), { dir });
-  return { endCard: e.kind === "endCard", inside: e.inside, fade: Number(e.fade) > 0 ? Number(e.fade) : null };
+  const m = metaOf(dir), e = filmEnding(m, { dir });
+  // a plan's `fade: 0` is no fade, not "the house's" (T35-3: 5 s of the song faded away under its last word)
+  return { endCard: e.kind === "endCard", inside: e.inside, fade: Number(e.fade) > 0 ? Number(e.fade) : e.fade === 0 ? 0 : null, songFilm: isSongFilm(m, { dir }) };
 };
 /** Fit the music's first clip (`a`, changed in place) to the film; a song shorter than the film plays again after itself to the film's end
  *  (musicLoop). Returns the attributes of the clips that play it again ([] when none), or null when the music is left as it is. */
-function fitMusic(a, film, { endCard = false, inside = false, fade = null } = {}, beats = null) {
+function fitMusic(a, film, { endCard = false, inside = false, fade = null, songFilm = false } = {}, beats = null) {
   if (a["data-mw-stop"] != null || a["data-fade-out"] == null) return null;
   if (a["data-mw-fit"] != null && a["data-mw-fit"] !== `${a["data-duration"]} ${a["data-fade-out"]}`) return null;          // the user's own
   const start = Number(a["data-start"]) || 0, from = Number(a["data-media-start"]) || 0, song = Number(a["data-mw-track"]) || 0;
   const plays = Math.max(0.1, (song || Number(a["data-duration"]) || 0) - from);
   const len = film > start ? Math.min(plays, film - start) : plays;
   const toEnd = film > 0 && start + len >= film - 0.05;
-  const ending = fade ?? (film ? fadeOfTotal(film, { endCard, inside }) : endFade(len, { endCard }));          // the plan's own fade first
+  // a film made for its song: a song that plays to its own end ends by itself (owner: the song is what is heard, #710); one cut short by the film still fades
+  const ownEnd = songFilm && song > 0 && from + len >= song - 0.5;
+  const ending = ownEnd ? 0 : fade ?? (film ? fadeOfTotal(film, { endCard, inside }) : endFade(len, { endCard }));          // the plan's own fade first
   // the song ends before the film: it plays again after itself, so the picture and the music end together (T22-9)
-  const loop = !toEnd && film > start && song > 0 ? musicLoop({ song, from, start, end: film, beats }) : null;
+  const loop = !toEnd && !(ownEnd && film - start - len < 2) && film > start && song > 0 ? musicLoop({ song, from, start, end: film, beats }) : null;
   if (loop) {
     a["data-duration"] = String(loop.clips[0].duration);
     a["data-fade-out"] = String(MUSIC_XF);
@@ -180,8 +184,20 @@ const KIND_ID = { voice: /^el-voice(?:-[\w-]+)?$/, music: /^el-music(?:-[\w-]+)?
  *  lane HyperFrames' timeline puts it on), else its id. a: the tag's attributes, or { id, role }. */
 export function audioKind(a) {
   const role = a?.role ?? a?.["data-timeline-role"] ?? null, id = String(a?.id ?? "");
-  if (role) return role === ROLES.voice.role ? "voice" : role === ROLES.music.role ? "music" : null;
+  // Claude may write role "voice" (T36-2: the app then took a film with a voice for one with none, and the music played over the words); any other role with an el-voice or el-music id goes by its id
+  const r = String(role ?? "").toLowerCase();
+  if (r === ROLES.voice.role || r === "voice") return "voice";
+  if (r === ROLES.music.role) return "music";
+  if (r === "sfx") return null;          // a clip moved to another lane is that lane's
+  if (r && !KIND_ID.voice.test(id) && !KIND_ID.music.test(id)) return null;
   return KIND_ID.voice.test(id) ? "voice" : KIND_ID.music.test(id) ? "music" : null;
+}
+/** The film's music as the timeline has it: the file meta.music names, if it is on the timeline as music; null otherwise. A voice first put on the music lane and moved by Claude left its name
+ *  there, and the film then never got the music it was promised (T36-4). */
+export function musicOnFilm(dir, meta) {
+  const f = meta?.music?.file;
+  if (!f) return null;
+  try { return trackClips(readFileSync(join(dir, "index.html"), "utf8"), "music").some((c) => c.src === f) ? f : null; } catch { return null; }
 }
 /** The clips of the voice-over ("voice") or the music ("music") in index.html, by start: [{ id, hfId, src, start, mediaStart, duration,
  *  volume, fadeIn, fadeOut }] (duration null when the clip names none). */
@@ -340,8 +356,8 @@ export function placeTrack(dir, { kind, src, duration, start = null }) {
  *  film's end), else the song from 0 for the film's length; null when neither the film's length nor the track's is known. */
 export function musicUsed(dir, { trackDuration = null } = {}) {
   let html = ""; try { html = readFileSync(join(dir, "index.html"), "utf8"); } catch { return null; }
-  const rootTag = /<[a-z]+\b[^>]*\bdata-composition-id="[^"]*"[^>]*>/i.exec(html)?.[0] ?? "";
-  const film = Number(attrsOf(rootTag)["data-duration"]) || null;
+  // the film's length as the app knows it: before the Build the page is the empty starter, 3 s long (T35-1: 87 sung words timed into 0-3 s)
+  const film = filmOf(html, dir) || null;
   const tag = new RegExp(`<audio\\b[^>]*\\bid="${ROLES.music.id}"[^>]*>`, "i").exec(html)?.[0];
   const a = tag ? attrsOf(tag) : {};
   const from = Number(a["data-media-start"]) || 0, at = Number(a["data-start"]) || 0, len = Number(a["data-duration"]) || null;

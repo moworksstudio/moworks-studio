@@ -1,7 +1,7 @@
 // The project's voice-over transcript for review: segments with word timings in .moworks/voice/transcript.json (kept in
 // the project's revisions), and HyperFrames' transcript.json (word level) written from it through HF's own import. Editing text keeps the
 // timing: same number of words -> each word keeps its time; otherwise the words are spread over the segment's own start..end.
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { importTranscript } from "../hf-audio/index.mjs";
 
@@ -35,7 +35,9 @@ export function wordsFor(seg) {
 
 // ---- the words of a voice-over the app made from a script (ElevenLabs read the typed script word for word, Whisper heard
 // four words wrong, "một nhìn", "tiết" for Tia, "nuốt tua", "thác truyền hình", and the app still said "Words checked") ----
+const SKIP_RUN = 4;          // so many words in a row with nothing heard for them: not read
 const key = (w) => nfc(w).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+export const wordKey = key;
 /** The script's words against Whisper's (a word alignment: equal, changed, missing or extra), each script word given Whisper's times (a
  *  changed word keeps its heard word's times; a word Whisper missed shares the time between its neighbours). Returns { segments, changed,
  *  missed, extra, match } (match: the share of the script's words Whisper heard the same); segments: Whisper's, each word now the script's. */
@@ -86,6 +88,15 @@ export function fromScript(segments, script) {
     }
     i = j;
   }
+  // a line the voice did not read (the idea of Showhow's check of the last line, Sirio Berati, MIT; its author: the model occasionally skips it). A word heard wrong
+  // counts as read, so a Whisper that mishears Vietnamese never says this: only words with nothing heard for them, a run of them, or most of the last sentence
+  const lastSentence = said.reduce((at, w, i) => (i < n - 1 && /[.!?…]$/.test(w) ? i + 1 : at), 0), skipped = [];
+  for (let i = 0; i < words.length;) {
+    if (!words[i].guessed || words[i].spread) { i++; continue; }
+    let j = i; while (j < words.length && words[j].guessed && !words[j].spread) j++;
+    if (j - i >= SKIP_RUN || (j === n && j - i >= 2 && (j - i) * 2 >= n - lastSentence)) skipped.push({ text: said.slice(i, j).join(" "), end: j === n });
+    i = j;
+  }
   // spread the words that share one gap over it
   for (let i = 0; i < words.length;) {
     if (words[i].spread) { i++; continue; }
@@ -96,7 +107,53 @@ export function fromScript(segments, script) {
     const ws = words.filter((w) => w.seg === si).map(({ text, start, end }) => ({ text, start: round(start), end: round(end), p: null }));
     return ws.length ? { ...s, start: Math.min(s.start, ws[0].start), end: Math.max(s.end, ws.at(-1).end), text: ws.map((w) => w.text).join(" "), words: ws } : null;
   }).filter(Boolean);
-  return { segments: out, changed, missed, extra, match: same / n };
+  return { segments: out, changed, missed, extra, match: same / n, skipped };
+}
+
+// ---- the times a service gave with the audio (ElevenLabs: every character, from its own reading)
+const ALIGN = ".moworks/voice/alignment.json";
+/** Keep them for the file they came with; none: forget the old ones. */
+export function saveAlignment(dir, file, alignment) {
+  const f = join(dir, ...ALIGN.split("/"));
+  if (!alignment) { rmSync(f, { force: true }); return; }
+  mkdirSync(join(f, ".."), { recursive: true });
+  writeFileSync(f, JSON.stringify({ file, alignment }) + "\n");
+}
+export function readAlignment(dir, file) {
+  try { const j = JSON.parse(readFileSync(join(dir, ...ALIGN.split("/")), "utf8")); return j.file === file ? j.alignment : null; } catch { return null; }
+}
+/** The characters' times as words: [{ text, start, end }]. */
+export function alignedWords(a) {
+  const out = [];
+  let cur = null;
+  (a?.characters ?? []).forEach((c, i) => {
+    if (/\s/.test(c)) { cur = null; return; }
+    if (!cur) out.push(cur = { text: c, start: a.character_start_times_seconds[i], end: a.character_end_times_seconds[i] });
+    else { cur.text += c; cur.end = a.character_end_times_seconds[i]; }
+  });
+  return out.filter((w) => key(w.text));
+}
+/** Times out of what the audio says is quiet. Measured on a Vietnamese take: eleven_v4 runs a word's end through the pause after it (0.38 s), eleven_v3 starts a sentence inside
+ *  the pause before it (0.37 s). A word wholly inside a quiet part keeps its times. */
+export function clampToQuiet(words, quiet = []) {
+  return words.map((w) => {
+    let { start, end } = w;
+    for (const [a, b] of quiet) {
+      if (a <= start && start < b && b < end) start = b;
+      if (a < end && end <= b && a > start) end = a;
+    }
+    return { ...w, start, end };
+  });
+}
+/** The segments of fromScript at the service's times: null when they are not the same words. */
+export function exactTimes(segments, alignment, quiet = []) {
+  const said = clampToQuiet(alignedWords(alignment), quiet), all = (segments ?? []).flatMap((s) => s.words ?? []);
+  if (!said.length || said.length !== all.length || all.some((w, i) => key(w.text) !== key(said[i].text))) return null;
+  let i = 0;
+  return segments.map((s) => {
+    const ws = (s.words ?? []).map((w) => { const x = said[i++]; return { ...w, start: round(x.start), end: round(x.end) }; });
+    return ws.length ? { ...s, start: ws[0].start, end: ws.at(-1).end, words: ws } : s;
+  });
 }
 
 /** Store a fresh engine result (status "review": not yet saved by the user). */

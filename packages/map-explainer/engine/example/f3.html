@@ -1,0 +1,27 @@
+<!-- Worked example: the key number's shot. Study it, never copy its words. -->
+<template id="f3-template">
+  <div data-composition-id="f3" data-width="1920" data-height="1080" class="frame on-sat">
+    <canvas class="map" width="1920" height="1080"></canvas>
+    <canvas class="ink" width="1920" height="1080"></canvas>
+    <div class="world">
+      <div data-k="black" class="tag black" style="--bar:#D9291D;left:230px;top:92px"><i class="tape"></i><b data-k="num">2.060 km²</b><span data-k="num2">diện tích Bir Tawil</span></div>
+      <div data-k="hand" class="hand" style="left:1150px;top:748px;font-size:104px">O nước đòi</div>
+      <div class="readout">21°52′12″N 33°41′24″E</div>
+      <div class="drawn" data-layout-ignore>Bản đồ vẽ minh hoạ</div>
+    </div>
+    <div class="fx fx-paper" data-layout-ignore></div>
+    <div class="fx fx-grain" data-layout-ignore></div>
+    <div class="fx fx-vig" data-layout-ignore></div>
+    <script>
+      (function () {
+        var M = window.MAPFILM, W = M.W, s = M.shot('f3', W('hai'), W('năm') - W('hai')), q = s.q;
+        s.corner();
+        s.pop(q('black'), .1, 4, -1.5).type(q('num2'), W('vuông')).drift(q('black'), s.start + 1.6, s.end, 0, 8, .5, 4.9);
+        // The number counts up, then stands; its box keeps the width of the last string.
+        s.count(q('num'), 2060, s.start + .2, 1.4, function (n) { return (n >= 1000 ? Math.floor(n / 1000) + '.' + ('00' + (n % 1000)).slice(-3) : String(n)) + ' km²'; });
+        s.write(q('hand'), s.w('không', 3), M.E('đòi') - W('không', 3), -3).boil(q('hand'), M.E('đòi'), s.end, 2).drift(q('hand'), M.E('đòi'), s.end, 8, 4, 0, 4.1);
+        window.__timelines['f3'] = s.done();
+      })();
+    </script>
+  </div>
+</template>

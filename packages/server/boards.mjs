@@ -29,7 +29,7 @@ import * as rev from "../revisions/index.mjs";
 import { poseCheck, poseText } from "../anidoodle-styles/posecheck.mjs";
 import { codeGlyphs, glyphText } from "../hf-qa/codeGlyphs.mjs";
 import { viMarks, viMarksText } from "../hf-qa/viMarks.mjs";
-import { musicRepeats, stopMusic, trackClips } from "../hf-edit/tracks.mjs";
+import { musicOnFilm, musicRepeats, stopMusic, trackClips } from "../hf-edit/tracks.mjs";
 import { voiceCheck, voiceText } from "../sfx/voicecheck.mjs";
 import { gpuShort } from "./proxy.mjs";
 import { styleNevers } from "../style-catalog/index.mjs";
@@ -377,15 +377,16 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       // tracks found before the build, for a film
       // with no music yet, put track 1 on the timeline now (the user plays it on the Editor's MUSIC lane and the Music map; the beat map
       // and the lyrics need it); the others wait in the Final Mix
-      const early = !step && round.tracks.length && !now0?.meta?.music?.file && !(now0?.meta?.pipeline?.ran?.build || now0?.meta?.pipeline?.finished || now0?.meta?.pipeline?.delivered);
+      const noMusic = !now0 || !musicOnFilm(now0.path, now0.meta);
+      const early = !step && round.tracks.length && noMusic && !(now0?.meta?.pipeline?.ran?.build || now0?.meta?.pipeline?.finished || now0?.meta?.pipeline?.delivered);
       let placedNow = false;
       let stopAt = null;
       if (early) { try { await ctx.mix.useOption(now0, round.tracks[0]); placedNow = true; stopAt = await stopFromPlan(now0); } catch { /* they wait in the Final Mix */ } }
-      else if (step && !now0?.meta?.music?.file) stopAt = planStop(now0);
+      else if (step && noMusic) stopAt = planStop(now0);
       if (round.tracks.length) projects.addNote(project.path, placedNow
         ? { kind: "music", text: "\"{title}\" is the film's music now, on the timeline; the other track(s) wait in the Final Mix", vars: { title: round.tracks[0].title } }
         : { kind: "music", text: "{n} music track(s) to listen to in the Final Mix", vars: { n: round.tracks.length } });
-      return optionsText(round, { placeMusic: step && !now0?.meta?.music?.file, placeSfx: step, placedNow, stopAt });
+      return optionsText(round, { placeMusic: step && noMusic, placeSfx: step, placedNow, stopAt });
     },
     hf_script: async ({ task, project, args }) => {
       const name = String(args.script ?? "");

@@ -1,0 +1,39 @@
+<!-- Worked example: the end card, its number scribbled out and the punchline in marker. Study it, never copy its words. -->
+<template id="f12-template">
+  <div data-composition-id="f12" data-width="1920" data-height="1080" class="frame on-paper">
+    <canvas class="map" width="1920" height="1080"></canvas>
+    <canvas class="ink" width="1920" height="1080"></canvas>
+    <div class="world">
+      <div data-k="l4" class="lbl big">AI CẬP</div>
+      <div data-k="l5" class="lbl big">SUDAN</div>
+      <div data-k="hand" class="hand" style="left:1060px;top:462px;font-size:88px">Bir Tawil</div>
+      <div data-k="card" class="card" data-layout-allow-overlap><i class="tape"></i>
+        <h2>SỐ NƯỚC NHẬN</h2><p data-k="sub">Bir Tawil · 2.060 km²</p>
+        <div data-k="was" class="was" data-layout-allow-occlusion data-layout-allow-overlap>1</div><div data-k="now" class="now" data-layout-allow-occlusion>O</div>
+      </div>
+      <canvas class="ink2" data-k="ink2" width="260" height="380" data-layout-allow-overlap data-layout-allow-occlusion></canvas>
+    </div>
+    <div class="fx fx-paper" data-layout-ignore></div>
+    <div class="fx fx-grain" data-layout-ignore></div>
+    <div class="fx fx-vig" data-layout-ignore></div>
+    <div data-k="fade" class="fade" data-layout-ignore></div>
+    <script>
+      (function () {
+        var M = window.MAPFILM, W = M.W, E = M.E, start = W('số', 1), s = M.shot('f12', start, 45 - start), q = s.q, tl = s.tl;
+        s.label(q('l4'), [29.5, 27], [30.5, 27.3], start, start + .7).label(q('l5'), [30, 16], [30.5, 16], start, start + .7);
+        s.boil(q('hand'), start + .35, 45, 7).drift(q('hand'), start + .35, 45, 12, 10, 0, 4.8);
+        // The card lands; the number is scribbled out on "vẫn"; the real 0 comes out on "không". Sedgwick's digit 0 has a slash: the capital O stands in.
+        var card = q('card');
+        s.pop(card, .05, 4, -2).type(q('sub'), W('nhận', 4), .02);
+        s.drift(card, start + .5, 45, 8, 12, .6, 5.7).drift(q('ink2'), start + .5, 45, 8, 12, .6, 5.7);
+        s.scribble(q('ink2'), W('vẫn'), .5, 79);
+        tl.fromTo(q('was'), { opacity: 1 }, { opacity: .55, duration: .5, ease: 'power2.in', immediateRender: false }, s.w('vẫn'));
+        tl.fromTo(q('now'), { '--a': '0%' }, { '--a': '100%', duration: E('không', 7) - W('không', 7) + .22, ease: 'power1.inOut' }, s.w('không', 7));
+        s.boil(q('now'), W('không', 7) + .38, 45, 8);
+        // The end card's fade: picture and music go down together, inside the last seconds of the film.
+        tl.fromTo(q('fade'), { opacity: 0 }, { opacity: 1, duration: 2.5, ease: 'power1.in' }, 45 - start - 2.5);
+        window.__timelines['f12'] = s.done();
+      })();
+    </script>
+  </div>
+</template>

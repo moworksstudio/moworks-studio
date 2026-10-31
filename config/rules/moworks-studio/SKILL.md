@@ -1,7 +1,7 @@
 ---
 name: moworks-studio
 description: Moworks Studio's house rules for every film style, read first in every step - the five rules of every film (collisions, readable text, determinism, truth, logos), the guideline or Brand Kit on every piece of text, the client's logo used as given, Vietnamese text, hand-drawn styles under a Brand Kit, character acting, a sound on every action, text over a canvas film, and how every film ends. Adds only what HyperFrames and the style leave open.
-version: 1.3.21
+version: 1.3.23
 derived-from: Moworks Motion kit 2.0.4 (Moworks; commit 30b7dcb65808b2a5299ad6a3357280a12773395f) - engine/skill/moworks-motion/SKILL.md step 3 ("Brand") and "Rules in every film" 1-5, workflow/characters.md sections 2, 3 ("Faces", "Hands") and 6 ("Collisions and physics"), brands/other.md; written from the idea for Moworks Studio. HyperFrames (Apache-2.0, 0.8.214 at 4719543) read as shipped where cited. Owner rules 24/10/2026 (#345, #346); the ending, owner 29/10/2026; the docs/ folder, owner 30/10/2026.
 ---
 
@@ -180,6 +180,14 @@ applied to motion graphics, line art, ink or paper styles. With the board stills
 6. **Sounds named:** HyperFrames' `- sound:` line describes a frame's sound in words; the app places effects only from short names. A
    frame whose sound has effects (a bell, water, a click) also gets `- sfx:` with short English names (`- sfx: bell, water drip`), and
    a frame with a place gets `- ambience:` (§7b: a sound on every action).
+7. **It makes sense, in a film that shows how something real works** (an explainer, a product, a process, a story in the real world; from Showhow's "it must make sense three ways", Sirio Berati, MIT,
+   https://github.com/sirioberati/showhow/tree/c5ce0e63eb5a08807627a2e30a45f0e03abb86e0/skill/SKILL.md):
+   - **Physical:** what loses its support falls the full distance, starting slowly; nothing appears or vanishes with no cause the film shows; sizes and weights stay believable.
+   - **Story:** one chain of cause and effect on things already seen, that a stranger could retell from the pictures alone.
+   - **The eye:** one main thing to follow at a time, where the eye already is; what the voice names is whole and readable in the frame; no label over a number.
+
+   This is about what the film claims, not how lively it is. A style's own world (a cartoon, floating graphics, a surreal film) keeps its logic, the always-on drift of moworks-alive stays, and
+   no move is made tamer for it (moworks-alive rule 8).
 
 The Review scores these under its own criteria (moworks-qc: Composition, Motion, Sync); moworks-alive keeps the still-stretch numbers.
 
@@ -189,6 +197,8 @@ code; a change of what a frame says or shows is the owner's to approve (§2b). T
 step; only the owner's own requests in the chat change them.
 
 ## 7. Sound under a voice-over
+
+**A level the owner asks for:** change only the track's `data-volume`. Never write `data-mw-gain`, `data-mw-fit` or `data-mw-duck`: they are the app's mark of what it set, and a level that differs from the mark stays as the owner's. Written together, the app takes it for its own and sets it back at the next check, and the owner has been told it is done (T36-3). Name a voice `data-timeline-role="voiceover"`, and when you move a sound from one lane to another use the app's tools, not the file.
 
 Only when the film has a voice-over with its reviewed transcript (transcript.json, word timings). Written from What If animation's
 `references/sound.md` (FreshStack, MIT):

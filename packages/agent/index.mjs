@@ -33,6 +33,7 @@ import { mgSlug, ruleText as mgRuleText, stageDemo as stageMgDemo } from "../mg-
 import { anidoodleId, ruleText as anidoodleRuleText, stageEngine as stageAnidoodle } from "../anidoodle-styles/index.mjs";
 import { readCast, ruleText as brushRuleText, stageGuide as stageBrushGuide } from "../character-kit/index.mjs";
 import { stageEngine as stageWhatIf, whatIfSource } from "../what-if-styles/index.mjs";
+import { MAP_STYLE_ID, placeEngine as placeMapEngine, stageGuide as stageMapGuide } from "../map-explainer/index.mjs";
 import { status as secretsStatus } from "../secrets/index.mjs";
 import { filmVietnamese } from "../voice/tts.mjs";
 import { packStatus as kokoroStatus } from "../voice/kokoro.mjs";
@@ -251,6 +252,9 @@ export const APP_TOOLS = {
   hf_script: { description: "Runs one of the HyperFrames scripts the app allows (carve: the voiceover carve on the music bed; locate: find a point in an image, its `auto` mode goes online) or an allowed hyperframes CLI command (capture, beats, audio, normalize-audio, timeline, compositions, info, lint, validate, inspect, keyframes, media-treatment, add, catalog), as HyperFrames ships it, in the project folder. Other skill scripts are not run: the app makes the voice-over, the music and the sound mix itself. capture, add, catalog and locate auto follow the project's web setting. keyframes --shot draws one element's motion as a debug picture, kept in .moworks/cache/debug/ whatever path you give. Returns its output.",
     inputSchema: { type: "object", properties: { script: { type: "string", description: "The script name (\"carve\") or \"hyperframes <command>\"" },
       args: { type: "array", items: { type: "string" }, description: "Its arguments, paths relative to the project folder" } }, required: ["script"] } },
+  map_imagery: { description: "Map Explainer films only. Fetches the real satellite ground for the camera (Sentinel-2 cloudless 2016 by EOX) into the film and its boards: call it once the camera's views are known, and again if they change. Says what it fetched, or that it could not: then the film keeps the ground the engine draws, and you tell the owner so in your reply.",
+    inputSchema: { type: "object", properties: { center: { type: "number", description: "The film's map centre (film.js `center`), 0 by default" },
+      views: { type: "array", items: { type: "array", items: { type: "number" } }, description: "Every view of the camera, [lon, lat, z]: its start and each key" } }, required: ["views"] } },
   copy_to_assets: { description: "Copies a file that is already in the project (a picture from the app's scan in .moworks/scan, a page or clip captured in capture/, a reference file) into assets/, where the film may use it. You cannot copy pictures or video yourself: use this. Without a folder the app sorts it (assets/1_design/images, 2_footage, 3_audio…). Returns the new path.",
     inputSchema: { type: "object", properties: { from: { type: "string", description: "The file's path in the project, e.g. .moworks/scan/deck-pptx/media/image3.png" },
       folder: { type: "string", description: "Optional folder under assets/, e.g. assets/1_design/images/pptx" }, name: { type: "string", description: "Optional new file name" } }, required: ["from"] } },
@@ -959,6 +963,10 @@ export class Agent {
       // the What If animation style: the pinned engine, its settings, the two worked episodes and the cast sheet, from the first step
       if (meta.style?.id === "what-if") {
         try { if (stageWhatIf(dir, this.root).files.length) this.event(task, { kind: "status", text: "What If engine staged" }); } catch { /* the rules are enough */ }
+      }
+      // the Map Explainer style: the shared engine, the page to start from and the worked example, from the first step; the engine beside the film's page too, so a Build can see its frames before the app's finish
+      if (meta.style?.id === MAP_STYLE_ID) {
+        try { if (stageMapGuide(dir).files.length) this.event(task, { kind: "status", text: "map engine staged" }); placeMapEngine(dir); } catch { /* the rules are enough */ }
       }
       // the Brush cartoon style: the character kit (its guide, the layer's code, an example definition; never clawd.js) from the first step
       if (meta.style?.id === "brush-cartoon") {
