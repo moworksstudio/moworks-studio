@@ -57,6 +57,7 @@ function Track({ x, pick, player, busy, onUse }) {
     <div className="mix-t">
       <div className="mix-line"><b>{x.title}</b>{x.artist && <span className="muted">· {x.artist}</span>}{length && <span className="muted num">· {length}</span>}
         {pick && <span className="tag">{t("Claude's pick")}</span>}</div>
+      {x.quietFor > 0 && <div className="hint">{t("Starts very quietly: the music comes in at about {time}", { time: mmss(x.quietFor) })}</div>}
       <div className="mix-bar" role="slider" aria-label={t("Position in {title}", { title: x.title })} aria-valuemin={0} aria-valuemax={Math.round(player.dur)} aria-valuenow={mine ? Math.round(player.time) : 0} tabIndex={mine ? 0 : -1}
         onClick={(e) => { const r = e.currentTarget.getBoundingClientRect(); player.seek(x.url, Math.min(1, Math.max(0, (e.clientX - r.left) / r.width))); }}>
         <span style={{ width: mine && player.dur ? `${(player.time / player.dur) * 100}%` : "0%" }} /></div>

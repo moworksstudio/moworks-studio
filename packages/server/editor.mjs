@@ -287,6 +287,27 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
         return { changed: out.changed };
       } catch (e) { fail(e); }
     })),
+    // several sounds taken off at once (a box drawn on the timeline): one revision. One gone already is no failure
+    r("POST", `/projects/${P}/edit/audio/remove-many`, ([id], b) => inTurn(id, async () => {
+      const p = mustProject(id, root); busySound(id);
+      const clips = Array.isArray(b.clips) ? b.clips.slice(0, 500) : [];
+      if (!clips.length) throw new HttpError(400, "INVALID", "No sound was named");
+      try {
+        let removed = 0;
+        const out = await ctx.mix.change(p, `${clips.length} sounds taken off the timeline`, async () => {
+          const { soundTakenOff } = await import("./assets.mjs");
+          for (const c of clips) {
+            let x;
+            try { x = await hand.removeAudio(p.path, { hfId: c.hfId, id: c.id, src: c.src, start: c.at }); } catch (e) { if (e.code === "NOT_FOUND") continue; throw e; }
+            removed++;
+            try { soundTakenOff(p, { id: x.was.id ?? c.id, src: x.was.src ?? c.src, cue: x.was["data-mw-cue"] ?? null }, root); } catch { /* the edit stands */ }
+          }
+          return { changed: removed > 0 };
+        });
+        ctx.backupProject?.(id);
+        return { changed: out.changed, removed };
+      } catch (e) { fail(e); }
+    })),
     // every motion and block of the library, small cards for the Editor's motion drawer (looks stay apart: they are a whole video's look)
     r("GET", "/editor/motions", () => ({ items: library.all(root).filter((x) => x.kind !== "look" && x.kind !== "vocab").map((x) => ({ uid: x.uid, kind: x.kind, title: x.title, author: x.author,
       category: x.category, desc: (x.desc ?? "").slice(0, 160), poster: x.poster, video: x.video, vi: x.vi, tags: (x.tags ?? []).slice(0, 8) })) })),

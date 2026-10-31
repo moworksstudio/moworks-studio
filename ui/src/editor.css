@@ -92,7 +92,7 @@ ol.plain.conversation, .conversation { flex: 1; overflow-y: auto; overflow-x: hi
   background: color-mix(in srgb, var(--surface-1, #111) 92%, transparent); backdrop-filter: blur(4px); animation: fade-in 200ms var(--ease-out) both; }
 /* the page under the card waits quietly: no second loading line shows through it */
 .ed:has(> .ed-opening) .pv-wait { visibility: hidden; }
-.ed-opening-card { width: min(20rem, calc(100% - 2rem)); padding: 1.25rem 1.5rem; display: grid; justify-items: center; gap: 0.6rem; text-align: center; cursor: default; }
+.ed-opening-card { width: max-content; max-width: calc(100% - 2rem); padding: 1.25rem 1.5rem; display: grid; justify-items: center; gap: 0.6rem; text-align: center; cursor: default; }
 .ed-opening-card .hint { margin: 0; }
 .ed-narrow { flex: 1; min-height: 0; flex-direction: column; }
 .ed-tabs { background: var(--surface-1); }
@@ -691,6 +691,7 @@ ol.plain.conversation, .conversation { padding: var(--sp-3); gap: 0.875rem; }
 .tl-aclip.locked { cursor: default; }
 .tl-aclip.moving { cursor: grabbing; opacity: 0.85; z-index: 3; box-shadow: 0 4px 12px var(--shade); }
 .tl-aclip.sel { box-shadow: 0 0 0 2px var(--text-primary); z-index: 2; }
+.tl-marquee { position: absolute; z-index: 5; pointer-events: none; border: 1px solid var(--text-primary); border-radius: var(--r-xs); background: color-mix(in srgb, var(--text-primary) 10%, transparent); }
 .tl-aclip.voice { background: color-mix(in oklab, var(--tl-voice) 22%, transparent); border: 1px solid color-mix(in oklab, var(--tl-voice) 55%, transparent); }
 /* each sound on its HF track, a row of its own; a hairline at each end keeps two that touch apart. A bed lies lighter under the effects */
 .tl-aclip.sfx { top: calc(1px + var(--row, 0) * (100% - 2px) / var(--sfx-rows, 1)); bottom: auto; height: calc((100% - 2px) / var(--sfx-rows, 1) - 1px); border-radius: 2px; background: var(--tl-sfx);

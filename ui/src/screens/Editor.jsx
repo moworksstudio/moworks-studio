@@ -350,6 +350,14 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
       await filesChanged(true);
     } catch (e) { toast(e.message, "error"); await loadTimeline(); }
   };
+  // several sounds at once, from a box drawn on the timeline: one change, one undo
+  const audioRemoveMany = async (clips) => {
+    try {
+      const r = await post(`/api/projects/${id}/edit/audio/remove-many`, { clips: clips.map((c) => ({ hfId: c.hfId, id: c.id, src: c.src, at: c.start })) });
+      toast(t("{n} sounds taken off the timeline (they stay in Assets)", { n: r.removed }));
+      await filesChanged(true);
+    } catch (e) { toast(e.message, "error"); await loadTimeline(); }
+  };
   // a caption's words changed on the timeline: the same hand edit as the Shots panel's words
   const captionSave = async (file, hfId, text) => {
     try { const r = await post(`/api/projects/${id}/edit/text`, { file, hfId, text }); toast(t("Words saved")); filesChanged(!!r.reload); }
@@ -607,7 +615,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const timelineEl = <Timeline data={unbuilt ? voiceOnly : tl} posters={shotPosters} fps={p?.meta?.format?.fps || pv.state.fps || 30} time={unbuilt ? 0 : pv.state.time} duration={unbuilt ? p.plannedDuration ?? 0 : pv.state.duration} shot={shot} range={range} onRange={setRange}
     readOnly={pv.videoOnly}
     onSeek={(s) => pv.send("seek", { time: s })} onShot={(s) => { setShot(s); setDismissed(null); }}
-    locked={locked || pv.videoOnly} onAudioMove={(c, to) => audioEdit("", c, to)} onAudioRemove={(c) => audioEdit("/remove", c, {})} onSoundDrop={soundDrop}
+    locked={locked || pv.videoOnly} onAudioMove={(c, to) => audioEdit("", c, to)} onAudioRemove={(c) => audioEdit("/remove", c, {})} onAudioRemoveMany={audioRemoveMany} onAskClaude={stage.askClaude} onSoundDrop={soundDrop}
     onCaptionSave={captionSave} onCaptionLive={(hfId, text) => pv.send("live", { hfId, text })} />;
   // the playhead and the film's length as the timeline has them: "Put on the timeline" starts a sound there
   const tlTime = unbuilt ? 0 : pv.state.time, tlLength = Math.max((unbuilt ? p.plannedDuration : pv.state.duration) || 0, (unbuilt ? voiceOnly : tl)?.duration || 0);

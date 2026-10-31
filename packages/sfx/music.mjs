@@ -8,7 +8,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { docPath } from "../project-service/docs.mjs";
-import { probe } from "../voice/audio.mjs";
+import { peaks, probe } from "../voice/audio.mjs";
 import { slug } from "./index.mjs";
 
 export const LICENCE = { name: "Mixkit Stock Music Free License", url: "https://mixkit.co/license/#musicFree",
@@ -18,6 +18,15 @@ const MAX = 40 * 1024 * 1024;
 const file = (dir) => join(dir, ".moworks", "music-options.json");
 export const OPTIONS_DIR = ".moworks/cache/music-options";
 export const readOptions = (dir) => { try { return JSON.parse(readFileSync(file(dir), "utf8")); } catch { return { rounds: [] }; } };
+
+const QUIET_PEAK = 0.1, QUIET_FOR = 5;          // under -20 dB of the track's loudest, for 5 s or more
+/** How many seconds a track stays so quiet at its start that it sounds like nothing plays (owner 31/10: Fragments of Bangkok, 17 s, heard as silence; Echoes 11 s; Delirium and the other
+ *  tracks measured, 0). `levels`: its peaks, one a second, 0..1 of its loudest. */
+export function quietOpening(levels = []) {
+  const n = levels.findIndex((v) => v >= QUIET_PEAK);
+  const s = n < 0 ? 0 : n;
+  return s >= QUIET_FOR ? s : 0;
+}
 
 /** Download up to 3 tracks: [{ title, artist?, page?, url }] → the new round { id, at, tracks: [{ …, file, duration }], failed }. */
 export async function saveOptions(dir, tracks, { fetchImpl = fetch, signal = null, root } = {}) {
@@ -39,7 +48,9 @@ export async function saveOptions(dir, tracks, { fetchImpl = fetch, signal = nul
       writeFileSync(join(dir, ...name.split("/")), buf);
       let duration = null;
       try { duration = (await probe(join(dir, ...name.split("/")), root)).duration; } catch { /* still listenable */ }
-      out.tracks.push({ title: String(t.title ?? "").slice(0, 120), artist: String(t.artist ?? "").slice(0, 120) || null, page: /^https:\/\//.test(t.page ?? "") ? t.page : null, url, file: name, duration, licence: LICENCE.name, licenceUrl: LICENCE.url });
+      let quietFor = 0;
+      try { if (duration) quietFor = quietOpening(await peaks(join(dir, ...name.split("/")), Math.round(duration), root)); } catch { /* no word on it */ }
+      out.tracks.push({ title: String(t.title ?? "").slice(0, 120), artist: String(t.artist ?? "").slice(0, 120) || null, page: /^https:\/\//.test(t.page ?? "") ? t.page : null, url, file: name, duration, ...(quietFor ? { quietFor } : {}), licence: LICENCE.name, licenceUrl: LICENCE.url });
     } catch (e) { if (signal?.aborted) throw e; out.failed.push({ title: t?.title ?? url, why: e.message }); }
   }
   st.rounds.push(out);
