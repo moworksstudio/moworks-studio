@@ -11,6 +11,13 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { APP_ROOT } from "../version-manager/index.mjs";
 
+/** The numbered rules of a Brand Kit's "## Guideline checklist" (its lines "- G12 [product] ..."): [{ id, rule }]; what a film of that kit is checked
+ *  against at the Review. Here because the kit's scan and the pipeline both read it. */
+export function checklistOf(md) {
+  const part = /^## Guideline checklist[ \t]*\n([\s\S]*?)(?=^## |(?![\s\S]))/m.exec(String(md ?? "").replace(/\r\n/g, "\n"))?.[1] ?? "";
+  return [...part.matchAll(/^[ \t]*[-*|][ \t]*\**(G\d+)\**[ \t|:.-]*(.*)$/gm)].map((m) => ({ id: m[1], rule: m[2].trim() }));
+}
+
 const pick = (x) => (x?.id ? { id: String(x.id), ...(x.title ? { title: String(x.title) } : {}) } : null);
 
 /** What the project takes from the dialog. A style that turns design off (catalog `look: false`: Slideshow and the author styles, whose
@@ -57,6 +64,7 @@ export async function keepAskedKit(dir, choice, { root = APP_ROOT, now = new Dat
     // its logos and fonts wait beside the spec: "only its logo" is one of Prepare's choices
     let placed = null; try { placed = lib.placeKit(kit.id, dir, { root, now, asked: true }); } catch (e) { console.error(`[brand kit] logos and fonts not copied: ${e.message}`); }
     if (placed?.logos.length || placed?.fonts.length) out.files = { logos: placed.logos, fonts: placed.fonts };
+    if (placed?.guideline) (out.files ??= {}).guideline = placed.guideline;
   }
   return out;
 }

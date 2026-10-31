@@ -1,7 +1,7 @@
-// The quiet notice of a new version, as Claude Desktop has it. The service checks by itself (a minute after it starts, then every six
+// The notice of a new version, an easy-to-see button as Claude Desktop and Viber have it (owner 31/10). The service checks by itself (a minute after it starts, then every six
 // hours) and GET /api/app/update answers from that check without asking GitHub. When a new version is ready: a dot on Settings (the
 // rail's item in The Desk, the gear on the peg bar in The Studio, and the Update section inside Settings) and one slim line in the top
-// bar, "A new version is ready · Update". Update opens Settings › Update with the check's answer already there. "Later" hides the line
+// bar, "A new version is ready" and a solid Update button. Update opens Settings › Update with the check's answer already there. "Later" hides the line
 // until a newer version (the version put off is kept per viewer); the dot stays, the quiet way back to it. The first start after an
 // update says once "Updated to the version of {date}". No hash or path is shown: a version is its date and subject.
 import { useEffect, useState } from "react";
@@ -67,8 +67,8 @@ export function UpdateLine({ notice }) {
   if (notice?.show === "ready") {
     return <div className="upd-notice studio-paper" role="status">
       <span className="dot ok" aria-hidden="true" />
-      <span className="upd-say">{t("A new version is ready")}</span><span className="upd-sep" aria-hidden="true">·</span>
-      <a className="upd-go" href="#/settings/update" title={notice.info?.latest?.date ? t("The version of {date}", { date: versionDay(notice.info.latest.date) }) : undefined}>{t("Update")}</a>
+      <span className="upd-say">{t("A new version is ready")}</span>
+      <a className="btn primary sm upd-go" href="#/settings/update" title={notice.info?.latest?.date ? t("The version of {date}", { date: versionDay(notice.info.latest.date) }) : undefined}>{t("Update")}</a>
       <button type="button" className="upd-later" onClick={notice.later} title={t("Hide this until the next new version")}>{t("Later")}</button>
     </div>;
   }

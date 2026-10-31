@@ -9,10 +9,11 @@ const err = (code, message) => Object.assign(new Error(message), { code });
 /** Claude Code's own words when a task ran without a valid sign-in (print mode). */
 export const SIGNED_OUT_TEXT = /please run \/login|not logged in|invalid api key|oauth token (has )?expired|authentication_error/i;
 
-export function claudeService(root) {
+export function claudeService(root, { statusOf = claudeStatusAsync } = {}) {
   let cache = null, reading = null, login = null;
 
-  const read = () => (reading ??= claudeStatusAsync(root).then((v) => { cache = { at: Date.now(), value: v }; return v; }).finally(() => { reading = null; }));
+  // no answer in time is no news of a sign-out: the last known state stands; with none, the task itself reports a real sign-in failure (signedOutSeen)
+  const read = () => (reading ??= statusOf(root).then((got) => { const v = got.unknown ? { ...got, ...cache?.value, loggedIn: cache?.value?.loggedIn ?? true, unknown: true } : got; cache = { at: Date.now(), value: v }; return v; }).finally(() => { reading = null; }));
   const loginState = () => (login ? { running: login.exitCode === undefined, url: login.l.url, startedAt: login.startedAt, exitCode: login.exitCode ?? null,
     error: login.exitCode && login.exitCode !== 0 && !login.cancelled ? String(login.l.output ?? "").split(/\r?\n/).filter(Boolean).slice(-2).join(" ").slice(0, 300) : null } : null);
 

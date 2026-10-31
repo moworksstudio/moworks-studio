@@ -1,7 +1,7 @@
 ---
 name: moworks-alive
 description: Moworks Studio's motion rule for every film style - the film is never still for more than 2 s, every held object keeps a smooth subtle movement, characters always move, text stays readable while the scene moves, the brief's motion words become real motion; minimum numbers per dynamic level. Read in the Motion Plan, the Build and the Review of every style.
-version: 1.0.0
+version: 1.2.0
 derived-from: Moworks Motion kit 2.0.4 (Moworks; commit 30b7dcb65808b2a5299ad6a3357280a12773395f) - engine/skill/moworks-motion/workflow/film.md L207-211 ("Dynamic level") and L240-241 ("A strong film keeps its always-on layers"), workflow/recipes.md L177 ("Nothing frozen except the final hold"), workflow/review.md L29 (criterion 3, motion); written from the idea for Moworks Studio.
 ---
 
@@ -35,6 +35,18 @@ still hold, this rule wins, except for the final logo hold.
    (2-4 %) runs over the whole drawing; the finished picture may hold at the end as the end card. No float or drift is added to marks
    still being drawn.
 
+8. **Only what is forbidden is off limits (owner 31/10, every film style).** A guideline, a film style or the owner may forbid a move: that move is not done (a kit that forbids glitch and
+   split forbids those two, and leaves every other effect in the library). What is not forbidden is allowed: never swap a move for a tamer one to be safe, and never read a rule wider than it
+   is written. Fonts, sizes, colours, logos, end tags, legal lines and the product's picture stay as the Brand Kit says; the motion around them is free. Be bold: the owner tones it down at the
+   Motion Plan if it is too much, so that is the place to offer more, not less.
+9. **Look for the livelier move in the Motion Library, every shot, in every film style (owner 31/10).** A style with its own moves uses them first and goes past them with the library, redrawn in its hand; a style's own bans hold. Lively means what suits the film: dread in a horror film, not a bounce. The library holds hundreds of effects; the search is how the film gets past the first idea. For each shot ask
+   it twice: what the shot needs, and what would make it more fun and more alive (kinetic type, a surprising transition, depth and parallax, particles, a playful bounce, 3D or Three.js where
+   a shot earns it). Compare what comes back and take the one that serves this film best, in the film style's own hand. The film draws on many items: about one new item a shot, and no item the hero of more than two shots
+   (Test 31 searched 100 times and used 14 items, one of them 29 times: the film felt flat).
+10. **Living details made for this film (owner 31/10).** Every film carries small things that make it fun, drawn in its own look and colours: stickers, an icon for each feature, chat bubbles,
+   rings and bursts on the hits, particles, little words that play with the subject. Think of them in the Storyboard, from what is funny or charming in the subject and its words; a brief that asks for a sober film keeps them quiet, not absent.
+   Text you add holds to moworks-studio §2c: nothing invented is presented as a fact.
+
 ## 2. The minimum numbers, by dynamic level
 
 At 1920 px across; scale them to the frame. The hero's move stays the biggest of its shot; the always-on motion is smaller than the
@@ -42,6 +54,7 @@ hero's, never smaller than this.
 
 | | light | strong (the studio's default) |
 |---|---|---|
+| The shot's hero move | clear at a glance | big and felt: it travels 25 % of the frame or more, or scales by 30 % or more, or turns 30° or more, with a snap or an overshoot; never only a fade or a small slide (a logo stays as moworks-studio §3) |
 | A held object | drifts 6-10 px or more over its hold, or rotates 2-3° | drifts 15-20 px or more (up to about 60), or rotates 5-8° |
 | A slow push on a hold (scale) | 2 % | 4-8 % |
 | Background, always-on layers | a slow drift or zoom, 2 % or more over the shot | always moving and covering the frame: a drifting pattern or gradient, 30-60 particles, parallax 1.0 / 0.5 / 0.2 |
@@ -55,7 +68,8 @@ never pulses as one; a loop that repeats visibly inside one shot is a fault.
 
 ## 3. In each step
 
-- **Motion Plan:** each shot has a `loop` (or `camera`) row for every element held on screen, for the background and for the camera,
+- **Storyboard:** the frames name the living details and the lively moves they will use (rules 9 and 10).
+- **Motion Plan:** the searches of rule 9 come first. Each shot has a `loop` (or `camera`) row for every element held on screen, for the background and for the camera,
   with its numbers (amplitude in px, ° or %, and period), and an idle row for every character. A hold longer than 2 s without such rows
   is not finished. The shot's plain words (`says`) say how alive it is ("kính trôi rõ và xoay chậm quanh bà; máy quay lượn 15°").
 - **Build:** build every hold row; the always-on motion runs from the element's entrance to its exit on the shot's own timeline, as a
@@ -64,3 +78,9 @@ never pulses as one; a loop that repeats visibly inside one shot is a fault.
   the sheets and the app's still-stretch check when the app gives it. A still stretch over 2 s other than the end logo hold, a held object
   or a character with no idle motion, a camera frozen behind text, or a motion word of the brief not done: Motion 6 at most; a film that
   reads as a slideshow: 5 at most. Fix it in the round.
+
+## 4. Two more files in this folder
+
+- **A lyrics video** (the app says when a film is one): `lyric-video.md`, stricter than the numbers above: a new world every 3 s, nothing still over 0.5 s, every montage word
+  its own, one product through the film, every sung word on its sung time.
+- **A film with an image sequence:** `sequence.md`: read its poses, play it with the app's player, never blend two pictures.

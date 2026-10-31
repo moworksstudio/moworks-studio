@@ -31,7 +31,7 @@ export function playerFiles(version = null) {
 function hostPage({ key, id, uiOrigin, width, height }) {
   const src = `/${key}/p/${id}/index.html`;
   return `<!doctype html><html><head><meta charset="utf-8"><title>Preview</title>
-<style>html,body{margin:0;height:100%;background:#050504;overflow:hidden}hyperframes-player{display:block;width:100%;height:100%}
+<style>html,body{margin:0;height:100%;background:#2b2b2d;overflow:hidden}hyperframes-player{display:block;width:100%;height:100%;background:#2b2b2d}
 #ov{position:fixed;inset:0;cursor:default}#marks{position:fixed;inset:0;pointer-events:none}
 #marks div{position:absolute;box-sizing:border-box}#marks .sel{border:2px solid #E4602A;box-shadow:0 0 0 1px rgba(0,0,0,.45)}
 #marks .sel.locked{border-style:dashed;border-color:#A8A298}#marks .safe{border:1px dashed rgba(255,255,255,.75);mix-blend-mode:difference}#marks .safe.title{border-style:dotted}

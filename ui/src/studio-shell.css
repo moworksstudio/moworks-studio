@@ -541,14 +541,13 @@
 [data-theme="studio"] .peg-gear.on { color: var(--room-ink); border-color: var(--room-line); }
 [data-theme="studio"] .peg-gear.on svg { color: var(--lamp); }
 /* a new version of the app: a small green dot on the gear, and a slip of paper pinned to the peg bar, written by hand,
-   "A new version is ready · Update" (Update, its one action, in registration ink); it drops onto the bar like a sheet onto the pegs */
+   "A new version is ready", and Update, its one action, stamped solid in registration ink; it drops onto the bar like a sheet onto the pegs */
 [data-theme="studio"] .peg-gear .upd-dot { background: var(--done-on-room); box-shadow: 0 0 0 2px #1E1A15, 0 0 0.4rem rgba(143, 211, 166, 0.55); }
 [data-theme="studio"] .upd-notice { height: auto; gap: 0.4rem; padding: 0.15rem 0.2rem 0.2rem 0.65rem; color: var(--ink-2); background: var(--paper);
   border-radius: var(--st-r-xs); font: 1.1rem / 1.25 var(--font-studio-hand); transform: rotate(-1.2deg);
   box-shadow: 0 0.15rem 0.45rem rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6); animation: st-slip 300ms var(--settle) both; }
 [data-theme="studio"] .upd-notice .dot.ok { background: var(--state-done); box-shadow: none; }
-[data-theme="studio"] .upd-notice .upd-sep { color: var(--ink-3); }
-[data-theme="studio"] .upd-notice .upd-go { color: var(--registration-ink); font-weight: inherit; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--registration-ink) 45%, transparent); text-underline-offset: 3px; }
+[data-theme="studio"] .upd-notice .upd-go { color: var(--paper); background: var(--registration-ink); border-color: var(--registration-ink); font-family: inherit; }
 [data-theme="studio"] .upd-notice .upd-later { color: var(--ink-3); padding: 0 0.4rem; }
 [data-theme="studio"] .upd-notice.done > svg { color: var(--state-done); }
 [data-theme="studio"] .settings-nav .upd-dot { background: var(--done-on-room); }          /* the Update section's dot: on the room, light green; on its paper tab, the paper's */

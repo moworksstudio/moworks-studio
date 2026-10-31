@@ -76,6 +76,7 @@ const KEY = "mw-draft:new-project-2";
 const KEY_V = 6;          // 6: a size in pixels; 5: length is a timecode, settings hold real values
 const DEFAULTS = { model: "opus", effort: "high", web: "on" };          // the user's defaults for a new project
 // a new film starts at 15 s
+const LYRIC_BRIEF = /lyric|karaoke|lời bài hát|lời ca|phụ đề bài hát/i, NO_LYRICS = /(?:\bno\b|\bwithout\b|không(?: có| chạy| dùng| cần)?|bỏ)\s+(?:the\s+|any\s+|chữ\s+|phần\s+)*(?:lyric|karaoke|lời)/i;
 const blank = { v: KEY_V, title: "", folderName: "", styleId: "general", look: "", characters: [], length: "0:00:15:00", width: 1920, height: 1080, fps: "30", brief: "", answers: {},
   model: DEFAULTS.model, effort: DEFAULTS.effort, mode: "global", web: DEFAULTS.web, voice: "global" };
 const WEB = { ask: "Ask first", on: "On", off: "Off" };
@@ -288,7 +289,17 @@ export default function NewProjectDialog({ onClose }) {
   const sizeBad = !(d.width >= MIN_SIDE && d.height >= MIN_SIDE) || Math.max(d.width, d.height) > MAX_SIDE || d.width % 2 !== 0 || d.height % 2 !== 0;
   const cast = castRule(style);
   const seconds = fromTimecode(d.length, d.fps);
-  const setFps = (e) => { const fps = e.target.value; setFieldsSet(true); setD((x) => { const s = fromTimecode(x.length, x.fps); return { ...x, fps, length: s == null ? x.length : toTimecode(s, fps) }; }); };
+  // a brief that asks for the song's lyrics: a lyrics video, 60 fps by default until the owner picks a rate (the app's test: style-catalog/traits.mjs isLyricVideo)
+  const fpsPicked = useRef(false), lyricAuto = useRef(false);
+  useEffect(() => {
+    if (fpsPicked.current || !fpsList.includes("60")) return;
+    const lyric = LYRIC_BRIEF.test(d.brief) && !NO_LYRICS.test(d.brief);
+    if (lyric === lyricAuto.current || (lyric && d.fps === "60")) { lyricAuto.current = lyric; return; }
+    lyricAuto.current = lyric;
+    const fps = lyric ? "60" : rule.fpsDefault;
+    setD((x) => { const s = fromTimecode(x.length, x.fps); return { ...x, fps, length: s == null ? x.length : toTimecode(s, fps) }; });
+  }, [d.brief]); // eslint-disable-line react-hooks/exhaustive-deps
+  const setFps = (e) => { const fps = e.target.value; fpsPicked.current = true; setFieldsSet(true); setD((x) => { const s = fromTimecode(x.length, x.fps); return { ...x, fps, length: s == null ? x.length : toTimecode(s, fps) }; }); };
   // the minimum to create: a name, a save folder, an available style, a length, and a signed-in Claude. The first thing
   // missing is told next to the button, so a disabled Create never looks like a hang.
   const folder = slug(d.title);                 // the folder comes from the name (the Folder name field went)

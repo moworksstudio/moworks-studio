@@ -378,7 +378,9 @@
       draw();
     }
     else if (m.type === "reload") {          // the files changed: load the film again where it was
-      resumeAt = p.currentTime || 0;
+      // while the smooth preview plays or a scrub waits, the live player still sits where it was: the film's time is the video's
+      resumeAt = onProxy ? vid.currentTime : scrub ? scrub.t : p.currentTime || 0;
+      if (onProxy) proxyStop({ live: false });
       send("assets", { ready: false });          // its pictures and fonts load again
       srcN += 1;
       p.setAttribute("src", cfg.src + "?v=" + srcN);

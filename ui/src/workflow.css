@@ -25,6 +25,9 @@
 /* ---- New project dialog (screenshot/88-90) */
 .np-dialog { width: min(48rem, 100%); max-height: calc(100vh - 2 * var(--sp-4)); display: flex; flex-direction: column; }
 .np-modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2); }
+.fr-choice { display: flex; align-items: flex-start; gap: 0.5rem; margin-top: 0.75rem; cursor: pointer; font-size: var(--fs-meta); line-height: 1.45; color: var(--text-muted); }
+.fr-choice b { color: var(--text-primary); font-weight: var(--strong-weight); }
+.fr-choice input { margin-top: 0.15rem; flex: none; accent-color: var(--accent); }
 .np-modes .radio-card { text-align: left; color: inherit; }
 .np-modes .radio-card .d { font-size: var(--fs-meta); color: var(--text-muted); }
 .np-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
@@ -687,21 +690,19 @@ ul.pick-list { width: min(30rem, 80vw); }
 .upd-log summary { cursor: pointer; font-size: var(--fs-meta); color: var(--text-secondary); }
 .upd-log pre, .upd-cmd { margin: 0.5rem 0 0; padding: 0.75rem; max-height: 20rem; overflow: auto; border-radius: var(--r-md); background: var(--surface-1); border: 1px solid var(--border); font-size: var(--fs-code); white-space: pre-wrap; }
 .upd-wait { margin-bottom: 0.5rem; }
-/* ---- the app's own update notice (UpdateNotice.jsx): one quiet line in the top bar, never a modal, and a dot on the way to Settings */
+/* ---- the app's own update notice (UpdateNotice.jsx): one line in the top bar with a solid Update button, never a modal, and a dot on the way to Settings */
 .upd-notice { display: inline-flex; align-items: center; gap: 0.5rem; flex: none; height: var(--ctl-compact); padding: 0 0.125rem 0 0.25rem;
   font-size: var(--fs-meta); color: var(--text-secondary); white-space: nowrap; animation: upd-in 220ms var(--ease-out) both; }
-.upd-notice .upd-sep { color: var(--text-muted); }
-.upd-notice .upd-go { color: var(--accent-ink); font-weight: var(--strong-weight); text-decoration: none; border-radius: var(--r-xs); }
+.upd-notice .upd-go { flex: none; text-decoration: none; }
 .upd-notice .upd-later { height: 100%; padding: 0 0.5rem; border: 0; border-radius: var(--r-pill); background: transparent; color: var(--text-muted); font: inherit; cursor: pointer;
   display: inline-flex; align-items: center; transition: color var(--t-hover) var(--ease-out); }
 .upd-notice .upd-later.icon { padding: 0 0.375rem; }
 .upd-notice.done > svg { color: var(--state-done); }
 @keyframes upd-in { from { opacity: 0; transform: translateY(-0.25rem); } }
 @media (hover: hover) and (pointer: fine) {
-  .upd-notice .upd-go:hover { text-decoration: underline; text-underline-offset: 3px; }
   .upd-notice .upd-later:hover { color: var(--text-primary); }
 }
-@media (max-width: 900px) { .upd-notice:not(.done) .upd-say, .upd-notice:not(.done) .upd-sep { display: none; } }
+@media (max-width: 900px) { .upd-notice:not(.done) .upd-say { display: none; } }
 .upd-dot { display: block; flex: none; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--status-ok); }
 :root:not([data-theme]) .upd-dot { box-shadow: 0 0 0.5rem rgba(74, 222, 128, 0.6); }
 .rail-item .upd-dot { margin-left: auto; }

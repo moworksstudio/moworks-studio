@@ -325,6 +325,29 @@ def music_scan(file, out):
         tt = float(t[idx])
         if all(abs(tt - u) > 6 for u in used): used.append(tt); peaks.append(round(tt, 2))
         if len(peaks) >= 4: break
+    # what a lyrics video's beat map adds to HyperFrames' beats (packages/hf-edit/beatMap.mjs): the strongest attacks, the low band's attacks, the sections
+    oe = librosa.onset.onset_strength(y=y, sr=sr)
+    fr = librosa.onset.onset_detect(onset_envelope=oe, sr=sr, units="frames")
+    ot = librosa.frames_to_time(fr, sr=sr); os_ = oe[fr] if len(fr) else np.array([])
+    hits = sorted(round(float(x), 3) for x, s in zip(ot, os_) if s > float(np.mean(os_) + 1.2 * np.std(os_))) if len(fr) else []
+    from scipy.signal import butter, sosfilt
+    low = sosfilt(butter(4, 150, btype="low", fs=sr, output="sos"), y)
+    lo = librosa.onset.onset_strength(y=np.asarray(low, dtype=np.float32), sr=sr)
+    lf = librosa.onset.onset_detect(onset_envelope=lo, sr=sr, units="frames")
+    kicks = [round(float(x), 3) for x, s in zip(librosa.frames_to_time(lf, sr=sr), lo[lf] if len(lf) else []) if s > float(np.median(lo[lf]))] if len(lf) else []
+    sections = []
+    try:
+        k = max(2, min(12, int(round(dur / 12))))
+        mf = librosa.util.sync(librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13), librosa.time_to_frames(beats, sr=sr)) if len(beats) >= 2 * k else None
+        if mf is not None:
+            cuts = librosa.segment.agglomerative(mf, k)
+            edges = [0.0] + [float(beats[min(int(c), len(beats) - 1)]) for c in cuts if c > 0] + [dur]
+            edges = sorted(set(round(e, 3) for e in edges))
+            level = [float(np.mean(rms[(t >= a) & (t < b)])) if np.any((t >= a) & (t < b)) else 0.0 for a, b in zip(edges, edges[1:])]
+            top = max(level) or 1.0
+            sections = [{"start": a, "end": b, "energy": "loud" if v > 0.75 * top else "medium" if v > 0.45 * top else "quiet"} for a, b, v in zip(edges, edges[1:], level)]
+    except Exception: sections = []
+    (out / "ANALYSIS.json").write_text(json.dumps({"duration": round(dur, 3), "bpm": round(tempo, 1), "beat_times": [round(float(b), 3) for b in beats], "hits": hits, "kicks": kicks, "sections": sections, "loudest": sorted(peaks)}), encoding="utf-8")
     info = {"ok": True, "kind": "music", "duration": round(dur, 2), "bpm": round(tempo, 1), "beats": len(beats),
             "first_beats": [round(float(b), 3) for b in beats[:16]], "bar_starts": [round(float(b), 3) for b in beats[::4][:24]], "loudest": sorted(peaks)}
     md = [f"# {Path(file).name}", "", f"{info['duration']} s, about {info['bpm']} BPM, {info['beats']} beats (librosa; a guide, the film's timing uses HyperFrames' beats).",

@@ -79,6 +79,7 @@ pre.log { max-height: 17.3333rem; overflow: auto; white-space: pre-wrap; font-si
 .sheet-overlay > .sheet.narrow:has(> .sheet-body > .vo-page) { width: min(84rem, calc(100vw - 2 * var(--sp-5))); height: min(54rem, calc(100vh - 2 * var(--sp-7)));
   max-height: calc(100vh - 2 * var(--sp-7)); }
 /* the source cards as designed (name, a one-line description in small print, the key's chip) */
+.vo-src .radio-card:disabled { opacity: 0.5; cursor: not-allowed; }          /* Kokoro on a film in Vietnamese */
 .vo-src .radio-card .d { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .vo-src .radio-card { min-height: 6.5rem; }          /* as large as with the chip on its own line */
 .vo-src .radio-card .t .chip { margin-left: auto; flex: none; font-weight: normal; }

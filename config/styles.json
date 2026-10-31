@@ -133,7 +133,7 @@
           "action": {
             "kind": "claude",
             "label": "Write",
-            "prompt": "Write the Motion Plan for every shot of the approved plan into docs/MOTION-PLAN.json (the motion plan format in your instructions): concrete numbers, not adjectives, and a source for every row: a Motion Library item, a move HyperFrames' motion.md describes (source kind \"hf\", id \"motion.md#<section>\"), or new. Before you write a new move for a shot, call library_search once for that shot. Give every held element, the background, the camera and every character its always-on row with numbers (moworks-alive §2), each shot its \"says\" line in my language (what moves and how strongly, words I can judge) and the plan its \"approving\" line. Write only docs/MOTION-PLAN.json: no composition and no index.html (the Build writes the film once). Then stop for my approval in the Motion Plan dialog."
+            "prompt": "Write the Motion Plan for every shot of the approved plan into docs/MOTION-PLAN.json (the motion plan format in your instructions): concrete numbers, not adjectives, and a source for every row: a Motion Library item, a move HyperFrames' motion.md describes (source kind \"hf\", id \"motion.md#<section>\"), or new. Before you write a new move for a shot, call library_search twice for that shot: for what it needs, and for what would make it more fun and alive. Only what is forbidden is off limits (moworks-alive rules 8 to 10). Give every held element, the background, the camera and every character its always-on row with numbers (moworks-alive §2), each shot its \"says\" line in my language (what moves and how strongly, words I can judge) and the plan its \"approving\" line. Write only docs/MOTION-PLAN.json: no composition and no index.html (the Build writes the film once). Then stop for my approval in the Motion Plan dialog."
           },
           "review": {
             "kind": "dialog",
@@ -344,6 +344,7 @@
     },
     {
       "id": "hf-music",
+      "fps": { "default": 60, "_about": "a lyrics video defaults to 60 fps (owner 31/10/2026, kit-luat-soi-dong.md); the owner can still change it" },
       "title": "Music videos and films cut to a track",
       "description": "The song is the structure: song structure becomes edit structure.",
       "category": "Music / Lyrics",

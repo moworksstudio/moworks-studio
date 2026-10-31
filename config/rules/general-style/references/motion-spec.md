@@ -46,10 +46,10 @@ move only after its in move on the same property has ended. Then **stop** until 
 
 ## 2. Library first, then your own
 
-Design the film first (the look, every shot's composition, the motion language). Then, for each shot, call **library_search once** before
-you write any new move for it, and take an item only where it saves real work: chart / counter / map engines, device and app chrome, code windows, 3D, captions, springs, a transition you would write the same
-way, a block that already is the shot. A library item is restyled to the film, never a whole scene as it ships, and one library block is
-never the main beat of two shots. What the owner named or picked from the library is used exactly.
+Design the film first (the look, every shot's composition, the motion language). Then, for each shot, call **library_search twice** before
+you write any new move for it: once for what the shot needs (chart / counter / map engines, device and app chrome, code windows, captions, springs, a block that already is the shot), once for what
+would make it more fun and alive (moworks-alive rule 9). Use the library's effects freely and often: take what makes the film better, not only what saves work, and write a new move only where the library has nothing as good (each shot still has one move of its own). A library item is restyled to the film, never a whole scene as it ships, and one library block is
+never the main beat of more than two shots. Only what a guideline, the film style or the owner forbids is off limits (moworks-alive rule 8). What the owner named or picked from the library is used exactly.
 
 ## 3. The numbers
 

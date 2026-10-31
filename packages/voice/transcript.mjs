@@ -62,16 +62,34 @@ export function fromScript(segments, script) {
   const words = [];          // { text, start, end, seg }
   pairs.forEach(([si, hi], k) => {
     if (si == null) { extra++; return; }
-    if (hi != null) { const h = heard[hi]; if (key(said[si]) === key(h.text)) same++; else changed++; words.push({ text: said[si], start: h.start, end: h.end, seg: h.seg }); return; }
+    if (hi != null) { const h = heard[hi]; const eq = key(said[si]) === key(h.text); if (eq) same++; else changed++; words.push({ text: said[si], start: h.start, end: h.end, seg: h.seg, heardOther: !eq }); return; }
     missed++;
     // missed: between the heard words around it
     const prev = [...pairs.slice(0, k)].reverse().find((p) => p[1] != null), next = pairs.slice(k + 1).find((p) => p[1] != null);
     const a = prev ? heard[prev[1]].end : heard[0].start, b = next ? heard[next[1]].start : heard[m - 1].end;
     words.push({ text: said[si], start: a, end: Math.max(a + 0.05, b), seg: (prev ? heard[prev[1]] : heard[0]).seg, guessed: true });
   });
+  // a number the script spells out and Whisper hears as one ("nineteen eighty-seven" for "1987", "two hundred and twelve" for "212"): one heard word stands
+  // for several, the others "missed" with no gap to sit in; all of them share that word's time by their length, in order, never before the word they follow
+  const TOUCH = 0.01;          // no time between two heard words
+  for (let i = 0; i < words.length;) {
+    if (!words[i].guessed) { i++; continue; }
+    let j = i; while (words[j]?.guessed) j++;
+    const prev = words[i - 1], next = words[j];
+    const list = next?.heardOther && next.start - words[i].start <= TOUCH ? words.slice(i, j + 1)
+      : prev?.heardOther && next && next.start - prev.end <= TOUCH ? words.slice(i - 1, j) : null;
+    if (list) {
+      const from = list[0] === prev ? prev.start : words[i].start, to = list.at(-1) === next ? next.end : prev.end;
+      const weight = list.map((w) => Math.max(1, key(w.text).length)), all = weight.reduce((x, y) => x + y, 0);
+      let t = from;
+      list.forEach((w, k) => { w.start = round(t); t += ((to - from) * weight[k]) / all; w.end = round(t); w.spread = true; });
+    }
+    i = j;
+  }
   // spread the words that share one gap over it
   for (let i = 0; i < words.length;) {
-    let j = i; while (j < words.length && words[j].guessed && words[j].start === words[i].start) j++;
+    if (words[i].spread) { i++; continue; }
+    let j = i; while (j < words.length && words[j].guessed && !words[j].spread && words[j].start === words[i].start) j++;
     if (j > i) { const a = words[i].start, b = words[i].end, d = (b - a) / (j - i); for (let k = i; k < j; k++) { words[k].start = round(a + d * (k - i)); words[k].end = round(a + d * (k - i + 1)); } i = j; } else i++;
   }
   const out = segments.map((s, si) => {

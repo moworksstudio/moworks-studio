@@ -1,4 +1,4 @@
-// Secret store for service keys (ElevenLabs, Fish Audio): values are encrypted with Windows DPAPI for the signed-in user
+// Secret store for service keys (ElevenLabs): values are encrypted with Windows DPAPI for the signed-in user
 // (only this Windows account on this PC can read them) and kept in <state>/secrets.json. Values never go to the browser, logs, project
 // files or render processes; the API reports only whether a key is saved and when. PowerShell does the DPAPI call; the value travels on
 // stdin, never on a command line.
@@ -7,7 +7,8 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "
 import { join } from "node:path";
 import { APP_ROOT } from "../version-manager/index.mjs";
 
-export const NAMES = ["elevenlabs", "fishaudio"];
+// a key saved for a service the app no longer has stays in the file, unread
+export const NAMES = ["elevenlabs"];
 const file = (root) => join(process.env.MW_STATE_DIR ?? join(root, "runtime", "state"), "secrets.json");
 const read = (root) => { try { return JSON.parse(readFileSync(file(root), "utf8")); } catch { return {}; } };
 function write(root, data) {

@@ -74,7 +74,7 @@ Màu: xám = cài đặt · cam = Claude và app thực hiện · xanh dương =
 |---|---|---|
 | **Brief** | New project: tiêu đề, film style, Brand Kit, nhân vật, định dạng (khổ hình, số khung hình mỗi giây, độ dài), model Claude và mức effort, brief và chất liệu của bạn | viết và chọn |
 | **Prepare** | Claude đọc brief và chất liệu, viết `BRIEF.md`. Khi brief và style mâu thuẫn (style phim câm mà có lời đọc, khổ 4:3 so với 4:5…), Claude dừng lại hỏi, kèm các phương án và đề xuất | trả lời |
-| **Lời đọc** *(tuỳ chọn)* | ElevenLabs (hoặc Fish Audio) đọc kịch bản; Whisper canh thời gian từng chữ để shot rơi đúng lời (tải thêm tuỳ chọn, app đề xuất ở lần đầu) | chọn giọng |
+| **Lời đọc** *(tuỳ chọn)* | ElevenLabs, hoặc Kokoro miễn phí ngay trên máy (không có tiếng Việt), đọc kịch bản; Whisper canh thời gian từng chữ để shot rơi đúng lời (tải thêm tuỳ chọn, app đề xuất ở lần đầu) | chọn giọng |
 | **Storyboard** | Một phương án storyboard vẽ thành bảng, từng shot, ghi lý do của từng shot (thêm phương án khi bạn yêu cầu) | duyệt hoặc góp ý |
 | **Motion Plan** | Chuyển động của từng shot bằng số: thời điểm, quãng đường, ease, mốc âm thanh. Hộp duyệt cho biết thời gian dựng và lượng dùng Claude ước tính | duyệt và dựng |
 | **Build** | Claude dựng phim bằng code, từng shot; mỗi shot được lint và kiểm tra ngay khi xong | theo dõi |
@@ -201,7 +201,7 @@ Mọi style còn theo hai bộ luật chung của app: **phim luôn sống độ
 | **Git** | [Git for Windows](https://git-scm.com/download/win) |
 | **Claude Code** | App Claude desktop đã có sẵn, hoặc [bản native](https://claude.com/claude-code); cần tài khoản Claude có Claude Code, đăng nhập ngay trong app |
 | **Python và FFmpeg** | Python 3.12 và FFmpeg 9.0. App tự cài khi còn thiếu (qua winget, chỉ cho tài khoản của bạn) |
-| *Tuỳ chọn* | API key ElevenLabs hoặc Fish Audio để làm lời đọc · After Effects để port AE · card đồ hoạ NVIDIA (từ 4 GB) để chép lời nhanh hơn |
+| *Tuỳ chọn* | API key ElevenLabs để làm lời đọc, hoặc giọng miễn phí Kokoro (khoảng 375 MB, chọn lúc cài đầu tiên hoặc trong Settings › System; không có tiếng Việt) · After Effects để port AE · card đồ hoạ NVIDIA (từ 4 GB) để chép lời nhanh hơn |
 
 ## Bắt đầu nhanh
 
@@ -322,7 +322,7 @@ Các giới hạn đã biết nằm ở [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
 
 ## Quyền riêng tư
 
-- **Key nằm lại trên máy.** Key dịch vụ (ElevenLabs, Fish Audio) được mã hoá bằng Windows DPAPI cho tài khoản Windows của bạn. Key không
+- **Key nằm lại trên máy.** Key dịch vụ (ElevenLabs) được mã hoá bằng Windows DPAPI cho tài khoản Windows của bạn. Key không
   bao giờ tới trình duyệt, nhật ký, file dự án hay tiến trình render.
 - **Claude** chạy qua Claude Code bằng tài khoản của chính bạn; app không bao giờ xử lý mật khẩu của bạn.
 - **Dự án nằm trên máy.** Brief, chất liệu và phim nằm trong thư mục dự án. Claude đọc chúng qua Claude Code để làm việc; ngoài ra không gì

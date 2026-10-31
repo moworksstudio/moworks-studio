@@ -4,7 +4,7 @@
 //   PSD / PSB: the layer tree, a picture of the whole file and of each artboard / top-level group, every text layer with font, size, colour;
 //   PowerPoint: each slide's texts, notes and pictures, and the slides as pictures when PowerPoint is on this computer;
 //   PDF / AI: the whole document, every page's text and every page on numbered sheets (intake.py pdf, as a Brand Kit reads it), each page
-//   ready for a closer look;  pictures: size; numbered pictures in one folder: one image sequence with a sheet.
+//   ready for a closer look;  pictures: size; numbered pictures in one folder: one image sequence with a sheet and its poses (tools/intake/poses.py).
 // Everything lands in .moworks/scan/ (INDEX.md for Claude, index.json for the app), redone only for files that changed.
 import { execFile, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -12,7 +12,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, wri
 import { extname, join } from "node:path";
 import { promisify } from "node:util";
 import { expandEnv, loadPins, APP_ROOT } from "../version-manager/index.mjs";
-import { styleTraits } from "../style-catalog/traits.mjs";
+import { isLyricVideo } from "../style-catalog/traits.mjs";
 import { inventory } from "./index.mjs";
 import { runPy } from "../setup/python.mjs";
 
@@ -77,9 +77,11 @@ async function wordsOf(file, outDir, root, { song = false } = {}) {
   const ok = (m) => m.installed && m.runtime.ok, all = asr.models(root);
   const card = all.find((m) => m.id === settings.defaultModel && ok(m)) || all.find(ok);
   if (!card) return { skipped: "no speech model installed (Settings > System)" };
-  const r = await asr.transcribe(file, { model: card.id, language: settings.language ?? "vi", song, workDir: join(outDir, "asr"), root });
+  // a song's language is left to Whisper: a mixed song heard 0 words in Vietnamese song mode and part of it with the language open (Test 30)
+  const r = await asr.transcribe(file, { model: card.id, language: song ? "auto" : settings.language ?? "vi", song, workDir: join(outDir, "asr"), root });
   rmSync(join(outDir, "asr"), { recursive: true, force: true });
   const segs = (r.segments ?? []).filter((s) => String(s.text ?? "").trim());
+  if (song) writeFileSync(join(outDir, "sung.json"), JSON.stringify({ language: r.language ?? null, words: segs.reduce((n, s) => n + String(s.text).trim().split(/\s+/).length, 0), segments: segs.map((s) => ({ start: s.start, end: s.end, text: String(s.text).trim() })) }));
   const mmss = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
   const words = segs.reduce((n, s) => n + String(s.text).trim().split(/\s+/).length, 0);
   const md = [song ? `Sung words as ${card.short} heard them over the music (${r.language ?? settings.language}): partial and rough, lines it could not hear are missing; ask the owner for the lyrics when the exact words matter.`
@@ -127,6 +129,8 @@ const isPdf = (path) => PDF.has(extname(path).toLowerCase());
 const scanned = (dir) => { try { return JSON.parse(readFileSync(join(dir, ".moworks", "scan", "index.json"), "utf8")).items; } catch { return []; } };
 /** The PDFs with a password the scan found: the paths Claude cannot read, for its prompt. */
 export const lockedPdfs = (dir) => scanned(dir).filter((x) => x.password).map((x) => x.path);
+/** The film's image sequences, with what the scan read of them. */
+export const scannedSequences = (dir) => { try { return JSON.parse(readFileSync(join(dir, ".moworks", "scan", "index.json"), "utf8")).sequences ?? []; } catch { return []; } };
 /** The songs of a film set to its lyrics whose words Whisper could not hear: the owner is told, and gives them in the Lyrics dialog. */
 export const unheardSongs = (dir) => scanned(dir).filter((x) => x.wordsUnheard).map((x) => x.path);
 /** A locked PDF, with the password the owner gave in the chat: read whole, as any PDF is, into the scan; the password goes to that one reading and
@@ -165,18 +169,34 @@ export async function readNewPdfs(ctx, project, root = APP_ROOT) {
   });
 }
 
+/** A sequence's poses (rest poses, slow points, portals, the product's box, a numbered sheet): read once, again only when its pictures change. { md, sheet, rests, json, found, slow, portals, sig } or { error }. */
+async function sequencePoses(dir, group, name, oldSeqs, root) {
+  const sig = `${group.length}:${group.reduce((n, x) => n + x.size, 0)}:${group.at(-1).path}`;
+  const was = oldSeqs.find((s) => s.first === group[0].path)?.poses;
+  if (was?.sig === sig && was.json && existsSync(join(dir, ...was.json.split("/")))) return was;
+  const sub = `.moworks/scan/${name}.poses`, abs = join(dir, ...sub.split("/"));
+  mkdirSync(abs, { recursive: true });
+  const list = join(abs, "list.txt");
+  writeFileSync(list, group.map((x) => `${x.n}\t${join(dir, ...x.path.split("/"))}`).join("\n") + "\n");
+  const m = await runPy(root, "tools/intake/poses.py", [list, abs], { timeoutMs: 15 * 60 * 1000 });
+  rmSync(list, { force: true });
+  if (!m.ok) return { error: m.error ?? "it could not be read" };
+  const of = (x) => (x ? `${sub}/${x}` : null);
+  return { sig, md: of(m.md), sheet: of(m.sheet), rests: of(m.restsSheet), json: of(m.json), found: m.rests, slow: m.slow, portals: m.portals };
+}
+
 /** Scan the project's files; returns { items, changed }. Never throws for one bad file: its entry says what failed. only: the paths to read now; the others keep what they have. */
 export async function scanAssets(dir, { root = APP_ROOT, words = true, only = null } = {}) {
   const out = join(dir, ".moworks", "scan");
   mkdirSync(out, { recursive: true });
   const indexFile = join(out, "index.json");
-  let old = {};
-  try { old = Object.fromEntries(JSON.parse(readFileSync(indexFile, "utf8")).items.map((x) => [x.path, x])); } catch { /* first scan */ }
+  let old = {}, oldSeqs = [];
+  try { const was = JSON.parse(readFileSync(indexFile, "utf8")); old = Object.fromEntries(was.items.map((x) => [x.path, x])); oldSeqs = was.sequences ?? []; } catch { /* first scan */ }
   const inv = inventory(dir);
   const files = [...Object.values(inv.assets).flat(), ...inv.sources];
   // a film made to a song's lyrics (a Music / Lyrics style, or a brief that asks for its lyrics on screen): its songs are read for words
   let pj = {}; try { pj = JSON.parse(readFileSync(join(dir, ".moworks", "project.json"), "utf8")); } catch { /* an imported folder */ }
-  const lyricFilm = styleTraits(pj.style?.id, root).music || /lyric|karaoke|lời bài hát|lời ca|phụ đề bài hát/i.test(String(pj.brief?.text ?? ""));
+  const lyricFilm = isLyricVideo(pj, { dir, root });
   const items = [];
   let changed = 0;
   for (const f of files) {
@@ -218,6 +238,7 @@ export async function scanAssets(dir, { root = APP_ROOT, words = true, only = nu
             // SUNG_MIN words, or under SUNG_PER_MIN a minute (sung lyrics run 60-150 a minute), it heard fragments: the user gives the lyrics
             const w = await wordsOf(abs, subAbs, root, { song: true }).catch((e) => ({ skipped: e.message }));
             const perMin = w.words != null && it.duration ? w.words / (it.duration / 60) : 0;
+            if (w.words != null) it.sungFile = rel("sung.json");          // the Lyrics dialog shows it, little or not, to correct against the real lyrics
             if (w.words != null && w.words >= SUNG_MIN && perMin >= SUNG_PER_MIN) Object.assign(it, { words: w.words, wordsFile: rel("words.md") });
             else {
               if (w.words != null) { rmSync(join(subAbs, "words.md"), { force: true }); it.wordsUnheard = true; }
@@ -266,7 +287,7 @@ export async function scanAssets(dir, { root = APP_ROOT, words = true, only = nu
     const pick = g.length <= 12 ? g : Array.from({ length: 12 }, (_, i) => g[Math.round(i * (g.length - 1) / 11)]);
     await pictureSheet(pick.map((x) => join(dir, ...x.path.split("/"))), join(dir, ...sheet.split("/")), root).catch(() => {});
     seqs.push({ v: SCAN_V, kind: "sequence", path: folder, count: g.length, first: g[0].path, last: g.at(-1).path, width: g[0].width, height: g[0].height,
-      sheet: existsSync(join(dir, ...sheet.split("/"))) ? sheet : null, members: g.map((x) => x.path) });
+      sheet: existsSync(join(dir, ...sheet.split("/"))) ? sheet : null, members: g.map((x) => x.path), poses: await sequencePoses(dir, g, slug(folder + g[0].path.split("/").pop()), oldSeqs, root) });
   }
   writeIndex(out, items, seqs);
   return { items, sequences: seqs, changed };
@@ -278,7 +299,7 @@ const line = (x) => {
     case "video": return `- ${x.path}: video, ${x.duration ?? "?"} s, ${dims}${x.fps ? ` @ ${x.fps} fps` : ""}${x.audio ? ", with sound" : ", no sound"}${x.cuts ? `. Cuts at (s): ${x.cuts.length ? x.cuts.join(", ") : "none found (one shot, or soft transitions)"}` : ""}${x.sheet ? `. Contact sheet (6 frames over the clip): ${x.sheet}` : ""}${x.wordsFile ? `. Its speech written out (${x.words} words): ${x.wordsFile}` : x.wordsNote ? `. Speech not written out: ${x.wordsNote}` : ""}`;
     case "audio": return `- ${x.path}: audio, ${x.duration ?? "?"} s${x.bpm ? `, about ${x.bpm} BPM; tempo, bar starts, loudest passages: ${x.md}` : ""}${x.wordsFile ? `; words heard (${x.words}, rough: sung words): ${x.wordsFile}` : x.wordsNote ? `; ${x.wordsNote}` : ""}`;
     case "image": return `- ${x.path}: picture${dims ? `, ${dims}` : ""} (open it)`;
-    case "sequence": return `- ${x.path}: ${x.count} numbered pictures (${x.first.split("/").pop()} … ${x.last.split("/").pop()}${dims ? `, ${dims}` : ""}), an image sequence or a set of frames${x.sheet ? `; sheet of up to 12 of them: ${x.sheet}` : ""}`;
+    case "sequence": return `- ${x.path}: ${x.count} numbered pictures (${x.first.split("/").pop()} … ${x.last.split("/").pop()}${dims ? `, ${dims}` : ""}), an image sequence or a set of frames${x.sheet ? `; sheet of up to 12 of them: ${x.sheet}` : ""}${x.poses?.md ? `. Read before you use it: ${x.poses.md} (${x.poses.found} rest poses, ${x.poses.portals} portals, the product's box), with its numbered sheet ${x.poses.sheet}${x.poses.rests ? ` and its rest poses ${x.poses.rests}` : ""}. Play it only with the app's player (.moworks/rules/moworks-alive/sequence.md)` : x.poses?.error ? `. Its poses could not be read: ${x.poses.error}` : ""}`;
     case "psd": return `- ${x.path}: Photoshop file ${dims}, ${x.artboards ? `${x.artboards} artboard(s)` : `${x.frames ?? 0} top-level group frame(s)`}, ${x.texts ?? 0} text layer(s), fonts: ${(x.fonts ?? []).join(", ") || "none"}. Read ${x.md} (layer tree, texts with font / size / colour, frame pictures)${x.composite ? `; the whole file: ${x.composite}` : ""}. For a keep-design rebuild, the app's psd_layers tool exports a frame's layers`;
     case "pptx": return `- ${x.path}: PowerPoint, ${x.slides ?? "?"} slide(s)${x.md ? `: texts, notes, pictures in ${x.md}` : ""}${x.sheet ? `; slide pictures (PowerPoint): ${x.sheet}, each in ${x.slidesDir}/` : ""}`;
     case "pdf": {

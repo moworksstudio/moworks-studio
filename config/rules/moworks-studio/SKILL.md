@@ -1,7 +1,7 @@
 ---
 name: moworks-studio
 description: Moworks Studio's house rules for every film style, read first in every step - the five rules of every film (collisions, readable text, determinism, truth, logos), the guideline or Brand Kit on every piece of text, the client's logo used as given, Vietnamese text, hand-drawn styles under a Brand Kit, character acting, a sound on every action, text over a canvas film, and how every film ends. Adds only what HyperFrames and the style leave open.
-version: 1.3.14
+version: 1.3.21
 derived-from: Moworks Motion kit 2.0.4 (Moworks; commit 30b7dcb65808b2a5299ad6a3357280a12773395f) - engine/skill/moworks-motion/SKILL.md step 3 ("Brand") and "Rules in every film" 1-5, workflow/characters.md sections 2, 3 ("Faces", "Hands") and 6 ("Collisions and physics"), brands/other.md; written from the idea for Moworks Studio. HyperFrames (Apache-2.0, 0.8.214 at 4719543) read as shipped where cited. Owner rules 24/10/2026 (#345, #346); the ending, owner 29/10/2026; the docs/ folder, owner 30/10/2026.
 ---
 
@@ -38,7 +38,8 @@ never write a second copy at the root.
   sizes, weights, colours, case, logo use, grid and margins), not only the main layout: a label, a caption, a number, an end card.
   Precedence: the **Brand Kit** (`frame.md`); with no Brand Kit, a guideline in the owner's files takes that
   place; then the design the brief describes; what is still open is yours.
-- In motion the design binds only its logo and end-card rules; all other motion is free, text included, while it stays readable.
+- In motion the design binds its logo and end-card rules and what its `## Guideline motion` says; all other motion is free, text included, while it stays readable. Only what is forbidden is off limits, and every film looks for its livelier moves (moworks-alive rules 8 to 10).
+- **Every film in every style is bold and fun (owner 31/10), read in every step.** The Storyboard plans each frame with a lively move and living details made for this film (stickers, an icon per feature, bubbles, bursts on the hits, playful words), in the style's own hand. The Motion Plan, in every style, calls `library_search` twice for each shot before writing its moves: for what it needs, and for what would make it more fun and alive. A style with its own moves uses them first and goes past them with the library, cited as source kind `library`. Only what a guideline, the style or the owner forbids is off limits; the owner tones it down at the Motion Plan. The numbers are in moworks-alive rules 8 to 10.
 - **A film style with its author's design** (every style but General Style and HyperFrames' seven film types, whose design the owner
   picks in New project: Explainers, tutorials and "how it works"; Launch, promo and feature films; Music videos and films cut to a
   track; Numbers, charts and data stories; Vertical and social clips (9:16); 3D, simulations and generative pieces; Characters,
@@ -48,6 +49,15 @@ never write a second copy at the root.
   shape is made stay the author's; never redraw the author's marks as flat vector to fit a brand). In the Editor, apply a Brand Kit to
   such a film only when the owner asks, and say first what it will change. The logo (section 3), Vietnamese text and the one approval
   hold for every style.
+
+### 2d. A Brand Kit's guideline, checked rule by rule
+
+When `frame.md` has a `## Guideline checklist` (G1, G2...), every film is held to every line, in every step, and its `## Crop limits` and `## Guideline motion` bind:
+
+- **Storyboard:** name in the shot the rules it leans on (a product shot: its crop line). A shot idea that breaks a line is changed before the owner sees it, or asked about (§2b), never left for later.
+- **Motion Plan and Build:** a move is checked at its worst frame, not at its rest, against what `## Crop limits` says of a moving product: a guideline's own animated visual may let a product cross the frame edge while it travels, and a crop it does not show is a question for the owner, even for a moment.
+- **A rule that points to a page, or a case `frame.md` does not settle:** open that page (`.moworks/library/guideline/GUIDELINE.md` lists them) and go by what it shows. Still unsettled: ask.
+- **Review:** `moworks-qc` §2 item 6 goes through the list.
 
 ### 2b. A conflict or a missing thing: stop, say it, offer the choices, wait
 
@@ -81,6 +91,9 @@ This is the one rule for every conflict and every gap, in every step and every s
   every frame unless the owner chose otherwise among these choices; a removal written in frame.md, docs/NOTES.md or the code without the owner's
   choice (an earlier step's own reading of a note) is not a choice: ask with these choices before you build, and keep the mark until the
   owner answers.
+- **Also what counts:** a lyrics video with no lyrics yet, or a song the app could not hear, when the brief does not say to go without them: ask for them in the Lyrics dialog, and offer
+  what Whisper heard as a draft, or a film with no sung words (never fit words to the beats by guess; timing is the app's); a word whose marks you know only from a file name (a
+  file name has no marks: "GAP MO" can be "Gập Mở" or "Gấp Mở"): ask how it is written, never guess the marks (a film wrote "GẤP" for the song's "Gập").
 - **What to do:** write nothing that depends on it. In one message, list every point (what each side says, in plain words), and for each
   ask one short question on its own line with its two or three choices as a bullet list under it, one choice a line, your suggestion
   first, never inside the question's sentence, however the rules above list them:
@@ -95,6 +108,17 @@ This is the one rule for every conflict and every gap, in every step and every s
   owner, never "follow X and say so in one line".
 - **After the answer:** follow what the owner chose for each point (write it in docs/ASSETS.md or docs/NOTES.md so later steps keep it), then go
   on. No answer yet: nothing moves; New project's fields stand only until they choose.
+
+### 2c. A product's features from the web: only after the owner's yes (owner 31/10)
+
+When the owner brings a product for a product showcase or launch (a named product in the brief, its pictures or a render in the files), this is yours to raise: the owner need not ask for it.
+
+- **Prepare asks, once,** in the step's one message, as §2b writes a question: may the app search the web for this product's features, to use as text and supers in the Storyboard and the Motion Plan? Yes (your suggestion) ·
+  No, only what I gave. Skip it when the brief already answers, or the owner gave a full sheet of the features and says it is all. Pass their answer to the app's `product_research` tool. A film that shows no product says `not-product`, once, when you need to search for anything else.
+- **Never search for the product before the yes,** whatever the project's web setting says; the app stops the search. No: the film works from what was given, and you write no feature or figure they did not give.
+- **Yes: search,** the maker's own website first (the product's own page, its specs page, then its press releases; a brand's site for the film's market when it has one), then well-known reviews for what the maker does not say; never rumours or leaks. Nothing official found (a product not out yet): say so in one line and work from what was given. Write `docs/RESEARCH.md`, one row a fact: `| Fact, as the film could say it | Figure | Source (full link) | Read on (date) | Use it? |`. A fact with no source you can name is no fact: leave it out. Two sources that disagree: both rows, and ask.
+- **Use, without being asked:** a product film's Storyboard carries supers of the product's strongest features from those rows (a brief that sets its own text keeps it), written short, for the film, in the Brand Kit's type, each at the shot that shows that feature. The text and the supers of the Storyboard and the Motion Plan come from those rows or from the owner's files, and every figure on screen is traceable to one (moworks-studio rule 4). The Storyboard's message names which facts it uses, so the owner sees them when approving.
+- **A Brand Kit's rules:** its rules on claims, names, trademarks and disclaimers win over a source: what they forbid is not shown, and a claim they require (a disclaimer, "Image simulated") goes with it. A kit's "never invent a figure" forbids made-up ones: a row with its source is not invented, and it needs no placeholder once the owner has approved the Storyboard that shows it.
 
 ## 3. The client's logo
 
@@ -188,7 +212,9 @@ mood"):
 - **Every visible action gets a sound:** an entrance, an exit, a landing or an impact, a step, an open or a close, a pour, a page, a press,
   a glow or an appearance, a transition. **Every scene that has a place gets a quiet ambience bed:** a room, a street, rain, the sea, a
   forest, the night.
-- **The only exceptions:** the brief or the owner asks for silence or for fewer sounds; the film style's own sound section says otherwise
+- **A film made for its song** (a lyrics or music video): no sound effects and no ambience, the song is what is heard (owner 31/10). Write `none` on every line below; only the
+  owner's own word brings a sound in, through `sfx_prefs`, and then few, under the song.
+- **The other exceptions:** the brief or the owner asks for silence or for fewer sounds; the film style's own sound section says otherwise
   (it wins: an ASCII / CRT style's relays, keys and printer, never a whoosh); or the action is too small to hear (a blink, a breath, a sway).
 - **In the style's material:** paper and wood for crafted styles (paper, cut-out, clay, stop-motion), synth and electronic for CRT, terminal
   and tech, soft and organic for gouache and watercolour, cartoon for rubber-hose. Name the sounds that way ("paper slide", "wood thud",
@@ -251,6 +277,7 @@ ends with a short fade under the end card); this adds the fade:
 - **Only when the brief or the owner asks for exactly or at most that length** ("exactly 60 s", "no longer than 60 s", a platform's
   limit) is the fade inside the set length: the Motion Plan's `ending.inside` is `true` (`false` otherwise, the default), and the whole
   film is the set length.
+- **A Brand Kit whose guideline sets the ending** (a `[end]` line in `frame.md`'s checklist, as an end tag): play it exactly as the guideline says, with no fade of the picture on it or after it, and write the Motion Plan's `ending` as an author's ending below, naming the guideline's end tag (owner 31/10). The music may fade within it.
 - **A style whose author gives its own ending** (Lemo's end cards, What If's last beat, a drawing that holds as its own end card): keep
   that ending as shipped and add nothing after it; the app fades the music within that ending. **Name it and play it:** the Motion Plan's
   `ending.author` says what the author's ending is, concrete (the screen powers down to a dot, the cursor stops and the screen holds, the
@@ -267,6 +294,19 @@ ends with a short fade under the end card); this adds the fade:
   or a held end card ends the film too.
 
 ## 10. Subtitles: plain, like YouTube's, and the owner can change them (owner 31/10)
+
+**Two different things, never mixed up (owner 31/10):**
+
+| | Subtitle | Super (big text) |
+|---|---|---|
+| What it is | The words being spoken, as spoken, timed to the voice | The film's own words: a title, a headline, a keyword, a number, a lower third, an end line, a lyric in a lyric video |
+| The owner calls it | subtitle, phụ đề, sub, "caption the voice" | super, text, chữ, chữ lớn, chữ to, title, tiêu đề, headline |
+| Look | This section, the same in every film | The film's design (§2): big, styled, placed and moved freely |
+| Where it lives | The captions composition, listed in the Editor's Captions row | The shot it belongs to, never the captions composition |
+
+A request about one changes that one only: "more text" or "a bigger title" adds no subtitle, "add subtitles" adds no super and does not restyle the supers, and a super is never turned
+into a subtitle or shrunk to one to make room. A film may have both. The word "caption" alone, or a
+request that fits both: decide from what it points at (spoken words: a subtitle; words of the film's own: a super); if that does not settle it, ask in one line before changing anything.
 
 Subtitles or captions of the voice are not part of the film's design: they look the same in every film and every style, whatever §2 or the
 style's own rules say of other text. Only the owner's own words can ask for a styled caption (karaoke, popping words); a lyric video's lyrics and

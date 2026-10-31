@@ -327,11 +327,24 @@ export async function finalize(projectDir, { version = null, googleFonts = true,
       }
       html = withMotionPath(projectDir, html, report);
       html = withoutStarterFlag(html, report);
+      html = withSequencePlayer(projectDir, html, [...texts.values()].some((x) => /\bdata-mw-sequence=/.test(x.html)), report);
     }
     if (html !== before) { writeFileSync(path, html); report.files.push(file); }
   }
   declareInRoot(projectDir, report);
   return report;
+}
+
+/** R-SEQUENCE: a film with an element with data-mw-sequence gets the app's image sequence player (hf-edit/seq-player.js), as assets/_app/vendor/mw-sequence.js, kept up to date, and
+ *  its tag in the root document; Claude writes the element only (config/rules/moworks-alive/sequence.md). */
+export function withSequencePlayer(projectDir, html, used, report = {}) {
+  if (!used) return html;
+  mkdirSync(join(projectDir, "assets", "_app", "vendor"), { recursive: true });
+  copyFileSync(join(import.meta.dirname, "seq-player.js"), join(projectDir, "assets", "_app", "vendor", "mw-sequence.js"));
+  if (html.includes("mw-sequence.js")) return html;
+  report.sequencePlayer = true;
+  const tag = `<script src="assets/_app/vendor/mw-sequence.js"></script>`;
+  return /<\/body>/i.test(html) ? html.replace(/<\/body>/i, `${tag}\n</body>`) : `${html}\n${tag}\n`;
 }
 
 /** The scaffold's data-no-timeline stays on the root of the film the Build writes. HF wants it on a root that registers

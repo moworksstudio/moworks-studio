@@ -41,7 +41,9 @@ print(json.dumps(out))`;
 
 const noPython = () => ({ python: null, ready: false, components: COMPONENTS.map((c) => ({ ...c, ok: false, error: "Python not found" })), missing: COMPONENTS.map((c) => c.pip) });
 const PROBE = { encoding: "utf8", windowsHide: true, timeout: 120000 };
-function statusOf(exe, stdout, stderr) {
+/** A check out of time says nothing of the libraries, only of a busy computer (asr.mjs importAnswer): they stand as present, so Set up never reopens for it. */
+export function statusOf(exe, stdout, stderr, timedOut = false) {
+  if (timedOut) return { python: exe, ready: true, unverified: true, components: COMPONENTS.map((c) => ({ ...c, ok: true, unverified: true })), missing: [] };
   let got = {};
   try { got = JSON.parse((stdout ?? "").trim().split(/\r?\n/).pop()); } catch { /* reported below */ }
   const components = COMPONENTS.map((c) => ({ ...c, ...(got[c.module] ?? { ok: false, error: (stderr ?? "").trim().split(/\r?\n/).pop() || "could not check" }) }));
@@ -53,15 +55,15 @@ export function status(root = APP_ROOT) {
   const exe = pythonExe(root);
   if (!exe) return noPython();
   const r = spawnSync(exe, ["-I", "-c", probeCode(COMPONENTS.map((c) => c.module))], { ...PROBE, env: env(root) });
-  return statusOf(exe, r.stdout, r.stderr);
+  return statusOf(exe, r.stdout, r.stderr, r.error?.code === "ETIMEDOUT");
 }
 /** status() without holding the caller's event loop: importing the components takes seconds (librosa, playwright), and the server's
  *  setup jobs ask for it (T27-3). */
 export async function statusAsync(root = APP_ROOT) {
   const exe = pythonExe(root);
   if (!exe) return noPython();
-  const r = await new Promise((ok) => execFile(exe, ["-I", "-c", probeCode(COMPONENTS.map((c) => c.module))], { ...PROBE, env: env(root) }, (_e, stdout, stderr) => ok({ stdout, stderr })));
-  return statusOf(exe, r.stdout, r.stderr);
+  const r = await new Promise((ok) => execFile(exe, ["-I", "-c", probeCode(COMPONENTS.map((c) => c.module))], { ...PROBE, env: env(root) }, (e, stdout, stderr) => ok({ stdout, stderr, timedOut: !!e?.killed })));
+  return statusOf(exe, r.stdout, r.stderr, r.timedOut);
 }
 
 /** pip install the missing ones into runtime/python-libs (a download: the user starts it from Settings › System). { installed, log }. */

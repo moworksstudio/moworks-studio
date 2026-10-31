@@ -75,7 +75,7 @@ Colours: grey = set-up · orange = Claude and the app · blue = you write, choos
 |---|---|---|
 | **Brief** | New project: title, film style, Brand Kit, characters, format (size, frame rate, length), Claude model and effort, the brief and your assets | write and choose |
 | **Prepare** | Claude reads the brief and your assets and writes `BRIEF.md`. When the brief and the style disagree (a silent-film style with a voice-over, 4:3 against 4:5…), it stops and asks, with options and a recommendation | answer |
-| **Voice-over** *(optional)* | ElevenLabs (or Fish Audio) speaks the script; Whisper times every word so shots land on the words (an optional download, offered the first time) | pick a voice |
+| **Voice-over** *(optional)* | ElevenLabs, or Kokoro for free on this computer (no Vietnamese), speaks the script; Whisper times every word so shots land on the words (an optional download, offered the first time) | pick a voice |
 | **Storyboard** | One storyboard option drawn as a board, shot by shot, with the reason for each shot (another option on request) | approve or comment |
 | **Motion Plan** | Every shot's motion in numbers: timings, distances, easings, sound cues. The approval dialog shows the estimated build time and Claude usage | approve and build |
 | **Build** | Claude builds the film in code, shot by shot; every shot is linted and checked as it lands | watch |
@@ -201,7 +201,7 @@ named under each still.
 | **Git** | [Git for Windows](https://git-scm.com/download/win) |
 | **Claude Code** | The Claude desktop app includes it, or the [native install](https://claude.com/claude-code); you need a Claude account that includes Claude Code, and you sign in inside the app |
 | **Python and FFmpeg** | Python 3.12 and FFmpeg 9.0. The app installs them for you when they are missing (with winget, for your user only) |
-| *Optional* | An ElevenLabs or Fish Audio API key for voice-overs · After Effects for the AE port · an NVIDIA graphics card (4 GB or more) to transcribe voice-overs faster |
+| *Optional* | An ElevenLabs API key for voice-overs, or the free Kokoro voice (about 375 MB, a choice at first run or in Settings › System; no Vietnamese) · After Effects for the AE port · an NVIDIA graphics card (4 GB or more) to transcribe voice-overs faster |
 
 ## Quick start
 
@@ -321,7 +321,7 @@ The known limitations are listed in [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
 
 ## Privacy
 
-- **Keys stay on this computer.** Service keys (ElevenLabs, Fish Audio) are encrypted with Windows DPAPI for your Windows account. They
+- **Keys stay on this computer.** Service keys (ElevenLabs) are encrypted with Windows DPAPI for your Windows account. They
   never reach the browser, the logs, project files or render processes.
 - **Claude** runs through Claude Code under your own account; the app never handles your password.
 - **Projects stay local.** Briefs, assets and films live in your projects folder. Claude reads them through Claude Code to do the work;

@@ -68,6 +68,7 @@ import * as hfSkills from "../setup/hf-skills.mjs";
 import * as pySetup from "../setup/python.mjs";
 import * as firstRun from "../setup/first-run.mjs";
 import * as cuda from "../voice/cuda.mjs";
+import * as kokoro from "../voice/kokoro.mjs";
 import { claudeService } from "./claude.mjs";
 import { pickFolder } from "./folder-picker.mjs";
 import { gitKind, isDrivePath, moveGitOutAsync } from "../revisions/drive.mjs";
@@ -418,7 +419,7 @@ export function routes(ctx) {
     // off the server's thread; the last list at once while it is checked again (?fresh=1 waits)
     r("GET", "/setup/first-run", async (_p, _b, q) => ({ ...(await ctx.checks.firstRun.get({ fresh: q.get("fresh") === "1" })), bundle: firstRun.bundleManifest(root) })),
     r("POST", "/setup/first-run", (_p, b) => ctx.jobs.start("first-run", { title: "Setting up Moworks Studio" }, async (job) =>
-      firstRun.firstRunAll({ root, ids: Array.isArray(b.ids) ? b.ids.map(String) : null, signal: job.signal, onProgress: ({ id, stage, progress }) => job.update({ stage: `${id}: ${stage}`, progress }) }))),
+      firstRun.firstRunAll({ root, ids: Array.isArray(b.ids) ? b.ids.map(String) : null, extras: Array.isArray(b.extras) ? b.extras.map(String) : [], signal: job.signal, onProgress: ({ id, stage, progress }) => job.update({ stage: `${id}: ${stage}`, progress }) }))),
     // Whisper on the graphics card. GET: the card, the pack (name, source, size, licence), installed or not, `ask` (asked once on
     // a computer past its first run), the device Whisper uses and the last run's. POST { answer: yes | no }: yes installs it (a job)
     r("GET", "/setup/whisper-gpu", () => cuda.gpuState(root)),
@@ -431,6 +432,11 @@ export function routes(ctx) {
         firstRun.firstRunAll({ root, ids: [cuda.PACK.id], signal: job.signal, onProgress: ({ id, stage, progress }) => job.update({ stage: `${id}: ${stage}`, progress }) }));
     }),
     r("DELETE", "/setup/whisper-gpu", () => ({ pack: cuda.remove(root) })),
+    // the free voice's Remove (its Install is POST /setup/first-run { ids: ["kokoro"] }); a voice-over being read holds it
+    r("DELETE", "/setup/kokoro", () => {
+      if (ctx.jobs.running().some((j) => j.kind === "tts")) throw new HttpError(409, "BUSY", "A voice-over is being read: wait until it ends");
+      return { pack: kokoro.remove(root) };
+    }),
     r("POST", "/setup/style-source/(lemo|mgStyles|anidoodle|characterKit|whatIf)", ([key]) => ctx.jobs.start("style-source", { title: `Style source ${key}`, key }, async (job) =>
       firstRun.fetchStyleSource(key, { root, onLine: (l) => job.update({ stage: l }) }))),
     r("POST", "/setup/python", () => ctx.jobs.start("setup-python", { title: "Python components" }, async (job) => {
@@ -1128,6 +1134,18 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
       const p = projects.setLanguage(project.id, args.language, "claude", root);
       return `The film's language is now ${p.meta.language.id === "en" ? "English" : "Vietnamese"}: the voice-over, its transcript and every word on screen.`;
     },
+    product_research: ({ project, args }) => {
+      const answer = args.answer;
+      if (!["yes", "no", "not-product"].includes(answer)) throw Object.assign(new Error("yes, no or not-product"), { code: "INVALID" });
+      const had = effectiveSettings(project.meta, root).web;
+      projects.updateMeta(project.id, (m) => {
+        m.research = { answer, ...(args.product ? { product: String(args.product).slice(0, 200) } : {}), at: new Date().toISOString() };
+        // the yes opens the web for this project; a run that began with it off or asking takes the next conversation to see it, and the app starts that by itself
+        if (answer === "yes" && had !== "on") { (m.settings ??= {}).web = "on"; m.research.restart = true; }
+      }, root);
+      if (answer === "yes") return had === "on" ? "Recorded: the web is open for this project's product. Search now, write docs/RESEARCH.md as moworks-studio §2c says, then go on with this step." : "Recorded: the web opens for this project in your next turn. Say so to the owner in one line and end your turn; the app goes on with the search by itself.";
+      return answer === "no" ? "Recorded: the film works from what the owner gave." : "Recorded: this film shows no product.";
+    },
     project_format: ({ project, args }) => {
       const p = projects.setOutputFormat(project.id, { aspect: args.aspect, fps: args.fps, durationSec: args.durationSec, by: "claude" }, root);
       const f = p.meta.format ?? {};
@@ -1227,6 +1245,6 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
     server.closeAllConnections?.();
     await close();
   };
-  return { server, port: p, token, url: `${uiOrigin}/?t=${token}`, preview: ctx.preview, agent: ctx.agent, jobs: ctx.jobs, close, shutdown: ctx.shutdown,
+  return { server, port: p, token, url: `${uiOrigin}/?t=${token}`, preview: ctx.preview, agent: ctx.agent, jobs: ctx.jobs, songArrived: ctx.songArrived, close, shutdown: ctx.shutdown,
     lastSeen: () => ctx.lastSeen, busy: () => ctx.running().length > 0 };
 }

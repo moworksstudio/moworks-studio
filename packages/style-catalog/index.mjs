@@ -376,7 +376,7 @@ const PRESET = { "16:9": [1920, 1080], "9:16": [1080, 1920], "1:1": [1080, 1080]
 export function styleFormat(s) {
   const id = String(s?.id ?? ""), rule = s?.fps?.allowed?.length ? s.fps : styleFpsRule(id);
   const ani = !!anidoodleId(id), brush = id === BRUSH_ID, wi = id === WHAT_IF_ID;
-  const author = Number(s?.mg?.fps) || Number(s?.lemo?.fps) || Number(s?.anidoodle?.fps) || (rule?.default ?? null);          // anidoodle: the medium's own
+  const author = Number(s?.mg?.fps) || Number(s?.lemo?.fps) || Number(s?.anidoodle?.fps) || (rule?.default ?? null) || Number(s?.fps?.default) || null;          // anidoodle: the medium's own; a default with no rule: the Music style's 60
   const choices = rule?.allowed?.length ? rule.allowed.map(Number) : FPS;
   const aspects = [...(s?.aspects ?? ["16:9", "9:16", "1:1", "4:5"])];
   // the author's own size: an MG style's, or the frame an anidoodle medium is drawn in (Hand embroidery 1080 × 1080, T26-2)

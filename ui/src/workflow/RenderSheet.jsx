@@ -16,7 +16,7 @@ export const CHECK_WORDS = { "G-HF-LINT": "Composition files", "G-HF-SCRIPT": "S
   "G-FONT": "A font that is not on this computer", "G-GLYPH": "A font without Vietnamese letters",
   "G-GLYPH-CODE": "A font without Vietnamese letters in the film's code", "G-VI-MARKS": "Vietnamese written without its marks", "G-BLANK": "Scenes that look empty",
   "G-HF-LAYOUT": "Layout: text overlapping, hidden or cut", "G-HF-CONTRAST": "Contrast too low to read", "G-HF-MOTION": "Motion",
-  "G-VOICE": "Effects or music over the voice", "G-SFX": "Actions with no sound" };          // warnings, never a block
+  "G-VOICE": "Effects or music over the voice", "G-SFX": "Actions with no sound", "G-LYRIC": "Sung words off their time", "G-SEQ-CRAWL": "A sequence that crawls", "G-SEQ-JUMP": "A sequence that jumps", "G-SEQ-PRODUCT": "A product cut by the frame" };          // warnings, never a block
 /** A check that did not run says so instead of reporting the film. G-HF-SCRIPT's skippedReason: "deadline" (ran
  *  out of time, no error found before it stopped), "lint" (HF skipped its browser stages after a lint error), "failed" (HF's browser
  *  check did not run); G-HF-LAYOUT / -CONTRAST / -MOTION carry notChecked when HF never ran them: "Not checked", not a pass or a problem. */

@@ -3,10 +3,10 @@
 // with the app is only copied). No list of parts, versions or sources on screen (owner 30/10): one line, one progress. Only on a
 // computer without winget are FFmpeg and Python the user's own steps, shown while missing with the line to copy. "Set up later" hides
 // the dialog for this session (no internet, or a film to finish); it comes back at the next start until the app has what it needs.
-// Optional extras (Whisper on an NVIDIA card) are no part of it: Settings › System offers them, beside the same one line and the
-// open-source licences.
+// One choice beside that line: the free voice (Kokoro), on by default. It is optional, so a computer without it stays ready. Other optional
+// extras (Whisper on an NVIDIA card) are no part of it: Settings › System offers them all, beside the same one line and the open-source licences.
 // Data: GET /api/setup/first-run; POST /api/setup/first-run (a job: stage "<id>: <line>", progress 0-100); PATCH /api/storage/location;
-// GET / DELETE /api/setup/whisper-gpu.
+// GET / DELETE /api/setup/whisper-gpu; DELETE /api/setup/kokoro.
 // The very first start asks which look the app wears, The Desk (the default) or The Studio, before anything else; once answered it
 // never asks again (theme.jsx themeAsked); Settings › General changes it.
 import { useEffect, useRef, useState } from "react";
@@ -26,22 +26,23 @@ const links = (src) => [].concat(src ?? []).flatMap((x) => String(x).split(" · 
 const plain = (s) => String(s).replace(/\s*\([^)]*\.(?:json|md)\b[^)]*\)/g, "");
 /** What the progress line says while a part is set up. */
 const DOING = { library: "Copying the library", assets: "Copying fonts and code libraries", "hf-skills": "Copying HyperFrames' skills", "hf-runtime": "Downloading the engine",
-  ffmpeg: "Installing FFmpeg", python: "Installing Python and its components", speech: "Downloading the speech-to-text model", "whisper-gpu": "Downloading the graphics-card part" };
+  ffmpeg: "Installing FFmpeg", python: "Installing Python and its components", speech: "Downloading the speech-to-text model", "whisper-gpu": "Downloading the graphics-card part", kokoro: "Downloading the free voice" };
 const doing = (id) => DOING[id] ?? (String(id ?? "").startsWith("style-") ? "Copying the film styles" : "Setting up");
 const LATER = "mw-first-run-later";
 const needed = (d) => d.items.filter((it) => !it.ready && it.from !== "yours" && !it.optional);
 const yours = (d) => d.items.filter((it) => it.from === "yours" && it.id !== "work" && !it.ready);
 
-/** The setup job: start it (every missing part, or only `ids`) and follow its stage and progress; `after` once it ends. */
+/** The setup job: start it (every missing part, or only `ids`; `extras`: optional items chosen beside them) and follow its stage and progress; `after` once it ends. */
 export function useSetupJob(after) {
   const t = useT();
   const toast = useToast();
   const [job, setJob] = useState(null);
-  const start = async (ids = null) => {
+  const start = async (ids = null, extras = []) => {
     try {
-      const r = await post("/api/setup/first-run", ids ? { ids } : {}); const j = r.job ?? r; setJob(j);
+      const r = await post("/api/setup/first-run", { ...(ids ? { ids } : {}), ...(extras.length ? { extras } : {}) }); const j = r.job ?? r; setJob(j);
       watchJob(j.id, (x) => { if (!x) return; setJob(x.status === "running" ? x : null);
-        if (x.status !== "running") { after?.(); if (x.status === "failed") toast(x.error?.message ?? t("The download stopped."), "error"); } }, 1000);
+        if (x.status !== "running") { after?.(); if (x.status === "failed") toast(x.error?.message ?? t("The download stopped."), "error");
+          if (x.result?.skipped?.length) toast(t("The free voice could not be installed. Settings › System can try again."), "error"); } }, 1000);
     } catch (e) { toast(e.message, "error"); }
   };
   return { job, start };
@@ -49,7 +50,7 @@ export function useSetupJob(after) {
 
 /** The components as one line: what is left to download, or "all ready" (and the size on disk), or the running install's bar.
  *  `label`: the line names itself (Settings; the setup dialog's step title already does). */
-export function ComponentsLine({ d, job, label = false, size = null, problems = 0, action = null }) {
+export function ComponentsLine({ d, job, label = false, size = null, problems = 0, action = null, plusMb = 0 }) {
   const t = useT();
   const need = needed(d);
   const id = job?.stage ? String(job.stage).split(":")[0].trim() : null;
@@ -59,7 +60,7 @@ export function ComponentsLine({ d, job, label = false, size = null, problems = 
     {label && <b>{t("Components")}</b>}
     {job ? <><span className="fr-bar" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}><i style={{ width: `${pct}%` }} /></span>
       <span className="muted num">{pct}% · {t(doing(id))}</span></>
-      : <span className="muted num">{need.length ? (d.mb > 0 ? t("{size} to download", { size: mb(d.mb) }) : t("Not set up yet"))
+      : <span className="muted num">{need.length ? (d.mb + plusMb > 0 ? t("{size} to download", { size: mb(d.mb + plusMb) }) : t("Not set up yet"))
         : [problems ? t("{n} need attention", { n: problems }) : t("All ready"), size].filter(Boolean).join(" · ")}</span>}
     {action && <><span className="spacer" />{action}</>}
   </div>;
@@ -77,7 +78,7 @@ export function YourSteps({ d }) {
       {it.command && <div className="fr-cmd"><code className="mono">{it.command}</code><button type="button" className="btn ghost sm" onClick={() => copy(it.command)}><Copy size={13} />{t("Copy")}</button></div>}</div></li>)}</ul>;
 }
 
-/** Settings › System's optional extras (today: Whisper on an NVIDIA card, offered only on such a computer): download or remove each. */
+/** Settings › System's optional extras (the free voice; Whisper on an NVIDIA card, offered only on such a computer): download or remove each. */
 export function Extras({ d, reload }) {
   const t = useT();
   const toast = useToast();
@@ -85,16 +86,19 @@ export function Extras({ d, reload }) {
   const { job, start } = useSetupJob(() => { reload(); gpu.reload(); });
   const list = d.items.filter((it) => it.optional);
   if (!list.length) return null;
-  const drop = async () => { try { await del("/api/setup/whisper-gpu"); toast(t("Whisper runs on the CPU again")); reload(); gpu.reload(); } catch (e) { toast(e.message, "error"); } };
+  const drop = async (id) => { try {
+    if (id === "kokoro") { await del("/api/setup/kokoro"); toast(t("The free voice is removed")); } else { await del("/api/setup/whisper-gpu"); toast(t("Whisper runs on the CPU again")); }
+    reload(); gpu.reload(); } catch (e) { toast(e.message, "error"); } };
+  const jobId = job?.stage ? String(job.stage).split(":")[0].trim() : null;
   return <div className="panel">
     <div className="panel-head"><h2>{t("Optional")}</h2></div>
     {list.map((it) => <div key={it.id} className="fr-extra">
       <div className="fr-comp">
         <StatusIcon status={it.ready ? "ok" : "neutral"} size={15} /><b>{it.id === "whisper-gpu" ? t("Whisper on the graphics card") : t(it.title)}</b>
-        {job ? <><span className="fr-bar"><i style={{ width: `${job.progress ?? 0}%` }} /></span><span className="muted num">{job.progress ?? 0}%</span></>
+        {job && jobId === it.id ? <><span className="fr-bar"><i style={{ width: `${job.progress ?? 0}%` }} /></span><span className="muted num">{job.progress ?? 0}%</span></>
           : <span className="muted">{t(it.what)}</span>}
         <span className="spacer" />
-        {!job && (it.ready ? it.id === "whisper-gpu" && <button type="button" className="btn ghost sm" onClick={drop}><Trash2 size={13} />{t("Remove")}</button>
+        {!job && (it.ready ? <button type="button" className="btn ghost sm" onClick={() => drop(it.id)}><Trash2 size={13} />{t("Remove")}</button>
           : <button type="button" className="btn sm" onClick={() => start([it.id])}><Download size={13} />{t("Download ({size})", { size: mb(it.mb) })}</button>)}
       </div>
       {it.id === "whisper-gpu" && gpu.data && <WhereWhisper d={gpu.data} />}
@@ -170,6 +174,10 @@ function SetUp({ d, reload, onLater }) {
   const work = d.items.find((it) => it.id === "work");
   const setWork = async (path) => { try { await patch("/api/storage/location", { path }); reload(); } catch (e) { toast(e.message, "error"); } };
   const need = needed(d).length > 0;
+  // the free voice: one choice beside the components, on until the user turns it off; only while there is an Install to go with it
+  const voice = d.items.find((it) => it.id === "kokoro" && !it.ready);
+  const [freeVoice, setFreeVoice] = useState(true);
+  const extraMb = voice && freeVoice ? voice.mb : 0, total = d.mb + extraMb;
   return <div className="overlay fr-overlay">
     <div className="dialog fr-dialog" role="dialog" aria-modal="true" aria-labelledby="fr-h">
       <div className="dialog-head"><h2 id="fr-h">{t("Set up Moworks Studio")}</h2></div>
@@ -180,14 +188,16 @@ function SetUp({ d, reload, onLater }) {
             <FolderField value={work?.path ?? ""} title={t("Projects folder")} onChange={(path) => setWork(path)} /></li>
           <li className="fr-step"><div className="fr-step-h"><span className="np2-n">2</span><b>{t("Components")}</b></div>
             <p className="fr-what">{t("Everything the app needs to make films, installed in one go.")}</p>
-            <ComponentsLine d={d} job={job} />
-            <YourSteps d={d} /></li>
+            <ComponentsLine d={d} job={job} plusMb={extraMb} />
+            <YourSteps d={d} />
+            {voice && need && <label className="fr-choice"><input type="checkbox" checked={freeVoice} disabled={!!job} onChange={(e) => setFreeVoice(e.target.checked)} />
+              <span><b>{t("Free voice (Kokoro)")}</b>{" "}{t("A voice model that reads your script on this computer, free, with no account. About {size}. No Vietnamese.", { size: mb(voice.mb) })}</span></label>}</li>
         </ol>
       </div>
       <div className="dialog-foot"><span className="hint">{t("Also in Settings › System.")}</span><span className="spacer" />
         {!job && <button className="btn" onClick={onLater}>{t("Set up later")}</button>}
         {job ? <button className="btn primary" disabled><Loader2 size={14} className="spin" />{t("Installing…")}</button>
-          : need ? <button className="btn primary" onClick={() => start()}><Download size={14} />{d.mb > 0 ? t("Install ({size})", { size: mb(d.mb) }) : t("Install")}</button>
+          : need ? <button className="btn primary" onClick={() => start(null, voice && freeVoice ? [voice.id] : [])}><Download size={14} />{total > 0 ? t("Install ({size})", { size: mb(total) }) : t("Install")}</button>
             : <button className="btn" onClick={reload}>{t("Check again")}</button>}</div>
     </div>
   </div>;

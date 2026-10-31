@@ -1,7 +1,7 @@
 ---
 name: moworks-qc
 description: Moworks Studio quality review, for every video style - after the build, look at stills of the film like a strict director, score it on seven criteria, fix until every score is 8 or more, with HyperFrames' check folded in.
-version: 1.1.2
+version: 1.2.0
 derived-from: Moworks Motion kit 2.0.4 (commit 30b7dcb, MIT, Moworks) - engine/skill/moworks-motion/workflow/review.md, rewritten for Moworks Studio. Folds in the layout and contrast findings of HyperFrames' check (Apache-2.0, 0.8.214 at 4719543), read as shipped. Criterion 6 (Brand / design) keeps the checklist of HyperFrames' design adherence at 0.8.163 (Apache-2.0, as shipped: https://github.com/heygen-com/hyperframes/blob/490ecafbc4d1fba3dd9246d516390d4a1a188089/skills/hyperframes-creative/references/design-adherence.md); HF retired that file in 0.8.185, so the studio keeps it as its own rule.
 ---
 
@@ -43,12 +43,37 @@ guide lines and no HTML text, so a word missing from it says nothing about the f
 5. **Composition:** the main super and the hero near the centre (a tendency, never forced), the rest floating free; balance, margins.
 6. **Brand / design:** the film's design spec (`frame.md`, a Brand Kit chosen in the project; `design.md`; the design the brief describes; with no Brand Kit, the guideline's rules), held strictly (HyperFrames' design adherence at 0.8.163, kept as the studio's own rule):
    every colour from its palette, its fonts and weights, its corners, spacing and depth, none of its "don'ts"; the owner's frames in keep design (2 px).
+   **When `frame.md` has a `## Guideline checklist`, go through every line, each round, on the sheets and with film_frames at the moment that would break it**, and write
+   `docs/BRAND-CHECK.json`: `{"rows": [{"id": "G12", "result": "pass", "at": "12.4, 31.0", "how": "device whole at the push-in's closest frame"}]}`, one row for each line. `result`: `pass` (you looked, say where),
+   `na` (nothing in this film it could apply to, say why), `approved` (the owner allowed this break, say when, in `how`), or `fail`. A `fail` is fixed in this round; one you cannot fix without the owner: ask (moworks-studio §2b). Any `fail`: brand 6 at most.
+   The app reads the file: the Review does not pass with a line unchecked or failed. Passing a line you did not look at is a false report.
 7. **Sync:** moves land ON the words / beats they belong to.
+
+## 2b. What caps a score (the rule stands, however good the rest looks)
+
+Any film with an image sequence (`.moworks/rules/moworks-alive/sequence.md`), from the qc_sheets answer's "Image sequence" block:
+- a **crawl** (under 1 picture a film frame outside a rest pose, or one picture held too long): Motion 6 at most;
+- two pictures of a sequence seen together (a dissolve, a stack): Motion 6 at most; a hand-written player: replace it with the app's;
+- the product cut by the frame outside a marked close-up: Composition 6 at most.
+
+Any film (`.moworks/rules/moworks-alive/SKILL.md` rules 8 to 10):
+- **no living detail** (no sticker, icon, bubble, burst or playful word made for this film; a film that only moves its text and pictures): Motion 7 at most;
+- **a few effects again and again** (one library item the hero of more than two shots, or far fewer items than shots in docs/MOTION-PLAN.json): Variety 7 at most;
+- never change a move to a tamer one because a rule might mean it: a rule forbids only what it says. Take out what a line really forbids, and keep the energy with another effect from the library.
+
+A lyrics video (`.moworks/rules/moworks-alive/lyric-video.md`; the app says when a film is one):
+- **a repeated layout formula** (the same staging in two shots in a row, or in more than two shots of the film; read the beats sheet for it): Variety 6 at most;
+- **a long flat ground** (one flat colour for more than 2 s): Motion 6 at most;
+- **text off its sung time** (the qc_sheets answer's "Sung words" block: a word that shows late or early, a word missing, a repeated word with the wrong count): Sync 6 at most;
+- nothing new for more than 3 s, or a held element still for more than 0.5 s: Motion 6 at most.
+
+A cap is a fault to fix in this round, not a taste. The film passes only when it is gone or the owner chose it.
 
 ## 3. Hunt for these
 
 - Every **layout and contrast finding of HyperFrames' check**: fix each one before you say the film is done (an exception only where the
   design itself layers them, e.g. big type under a product that every letter still reads over; say why in the review file).
+- A figure or a feature on screen that is neither in the owner's files nor a row of `docs/RESEARCH.md` (moworks-studio §2c) → take it out: an unsourced claim keeps Brand at 6 at most.
 - A main super and product pushed far off-centre for no reason; sung words entering on the beat instead of on their sung time; text running
   into text during a change; objects gliding evenly instead of easing; a title alone on a gradient; text that goes soft when it scales;
   a shot where nothing happens; anything still for more than 2 s (moworks-alive); a logo that is not the given file whole and clear

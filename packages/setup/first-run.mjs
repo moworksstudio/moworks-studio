@@ -3,7 +3,7 @@
 // (offline-assets), HyperFrames' skills and registry (read from bundle/hf in place), the style sources (read from bundle/styles in
 // place), the app's characters (read from bundle/library/characters in place) and the built library stores (copied into the work folder's library, one folder per pin, checked at every start). The rest is downloaded at the pinned versions:
 // HyperFrames' runtime and its Chrome, the Python components, the speech-to-text model, and any style source that is not bundled (a thin
-// git checkout at the pinned commit: no history, no demo films, no audio).
+// git checkout at the pinned commit: no history, no demo films, no audio). Optional items (the free voice, Whisper on the card) are the user's choice.
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
@@ -17,6 +17,7 @@ import * as winget from "./winget.mjs";
 import { installRuntime, runtimeReady } from "../hf-setup/index.mjs";
 import { migrateShippedCopies } from "../character-kit/index.mjs";
 import * as cuda from "../voice/cuda.mjs";
+import * as kokoro from "../voice/kokoro.mjs";
 import * as asr from "../voice/asr.mjs";
 import * as blocks from "../blocks-library/index.mjs";
 import * as looks from "../looks-library/index.mjs";
@@ -193,6 +194,7 @@ function itemDirs(id, root) {
   if (id === "python") return [py.pyLibs(root)];
   if (id === "speech") { const m = speechModel(root); return m ? [m.path] : []; }
   if (id === cuda.PACK.id) return [cuda.packDir(root)];
+  if (id === kokoro.PACK.id) return [kokoro.packDir(root)];
   if (id === "ffmpeg") return [dirname(expandEnv(pins.ffmpeg.dir))];
   return [];
 }
@@ -237,6 +239,11 @@ export function firstRunItems(root = APP_ROOT, { sizes = false } = {}) {
     mb: (sm.installed ? 0 : Math.round(sm.size / MB)) + (sm.runtime.ok ? 0 : ENGINE_MB), ready: sm.installed && sm.runtime.ok,
     author: sm.author, licence: sm.licence, source: sm.source, label: sm.label });
   let ff = false; try { checkFfmpeg(root); ff = true; } catch { /* not found */ }
+  // the free voice: a choice on the first-run screen, on by default, never something the app needs: optional, so a computer without it stays
+  // ready and an update never reopens Set up for it
+  const kk = kokoro.packStatus(root);
+  items.push({ id: kokoro.PACK.id, title: kokoro.PACK.title, what: kokoro.PACK.what, version: kokoro.PACK.version, mb: kk.installed ? 0 : kokoro.PACK.mb,
+    from: "download", ready: kk.installed, optional: true, source: kokoro.PACK.source, licence: kokoro.PACK.licence, author: kokoro.PACK.author, label: kokoro.PACK.label });
   // Whisper on the graphics card, offered only on a computer with an NVIDIA card strong enough; optional: never in "Download all"
   // (the user says yes to it on its own), and the app runs without it (Whisper on the CPU)
   const g = cuda.gpuState(root);
@@ -262,12 +269,14 @@ export async function firstRunItemsAsync(root = APP_ROOT, { sizes = true } = {})
     w.once("exit", (code) => { if (code !== 0) no(new Error(`The first-run checks stopped (${code})`)); });
   });
 }
-/** Get every missing item (or only `ids`), in order. onProgress({ id, stage }). Returns the list again. */
-export async function firstRunAll({ root = APP_ROOT, ids = null, onProgress = () => {}, signal = null } = {}) {
-  const want = (id) => !ids || ids.includes(id), done = [];          // an optional item only when asked by its id
+/** Get every missing item (or only `ids`), in order; `extras`: the optional items the user chose beside them (the first-run screen's free voice).
+ *  An extra that fails never fails the rest: it comes back in `skipped`, and Settings › System can try again. onProgress({ id, stage }). Returns the list again. */
+export async function firstRunAll({ root = APP_ROOT, ids = null, extras = [], onProgress = () => {}, signal = null } = {}) {
+  const chosen = (id) => !!ids?.includes(id) || extras.includes(id);
+  const want = (id) => !ids || chosen(id), done = [], skipped = [];          // an optional item only when asked by its id
   // one progress for the whole run (0-100): each missing item weighs its download (a copy from the bundle weighs a little)
   const before = await firstRunItemsAsync(root, { sizes: false }).catch(() => ({ items: [] }));
-  const weight = Object.fromEntries(before.items.filter((i) => !i.ready && i.from !== "yours" && want(i.id) && (!i.optional || ids?.includes(i.id))).map((i) => [i.id, Math.max(i.mb, 5)]));
+  const weight = Object.fromEntries(before.items.filter((i) => !i.ready && i.from !== "yours" && want(i.id) && (!i.optional || chosen(i.id))).map((i) => [i.id, Math.max(i.mb, 5)]));
   const total = Object.values(weight).reduce((a, b) => a + b, 0) || 1;
   let passed = 0;
   const pct = (id, part = 0) => Math.min(99, Math.floor((100 * (passed + (weight[id] ?? 0) * part)) / total));
@@ -309,7 +318,12 @@ export async function firstRunAll({ root = APP_ROOT, ids = null, onProgress = ()
   });
   if (ids?.includes(cuda.PACK.id) && cuda.eligible(cuda.detectGpu()))
     await step(cuda.PACK.id, async () => { if (!cuda.packStatus(root).installed) await cuda.install(root, { signal, onLine: (l) => onProgress({ id: cuda.PACK.id, stage: l }) }); });
+  // the free voice last: everything the app needs is in by then. Its pip needs Python, which the run above brought
+  if (chosen(kokoro.PACK.id)) {
+    try { await step(kokoro.PACK.id, async () => { if (!kokoro.packStatus(root).installed) await kokoro.install(root, { signal, onProgress: ({ part, stage }) => onProgress({ id: kokoro.PACK.id, stage, part }) }); }); }
+    catch (e) { if (e.code === "CANCELLED" || signal?.aborted || ids?.includes(kokoro.PACK.id)) throw e; skipped.push({ id: kokoro.PACK.id, message: String(e?.message ?? e) }); }
+  }
   // the list again off the server's thread (its checks, Python's imports among them, took seconds there)
-  return { done, ...(await firstRunItemsAsync(root, { sizes: false })) };
+  return { done, skipped, ...(await firstRunItemsAsync(root, { sizes: false })) };
 }
 export const bundleManifest = (root = APP_ROOT) => readJson(join(bundleDir(root), "MANIFEST.json"), null);

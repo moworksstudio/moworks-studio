@@ -24,6 +24,7 @@ You cannot hear: measure every step (the app gives you beat maps, levels and cue
 
 ## 3. Sound effects
 
+- **A film made for its song (a lyrics or music video) has none:** the song is what is heard (owner 31/10; the house rules §7b).
 - A sound on every action (the house rules §7b, owner 30/10): a whoosh for movement, pop for things appearing, click for clicks, typing
   for typing, riser into a reveal, impact on a slam, footsteps, doors, pages; and a quiet ambience bed under every scene with a place. The
   app picks them by what happens on screen, from its own offline library of CC0 sounds first, then Freesound through Openverse (CC0 /
@@ -34,8 +35,9 @@ You cannot hear: measure every step (the app gives you beat maps, levels and cue
 
 ## 4. Levels
 
-- The voice is the loudest thing; the music drops under it (HyperFrames' voiceover carve on the bed when a voice plays over music; a plain
-  duck to about 25 % otherwise); with a sound on every action the effects sit under the music and the voice, each kind at its own level
+- The voice is the loudest thing; the music drops 10 dB under it and holds there through a pause under 2 s, so it never rises and falls at each
+  breath, then comes back up over 1 s after a longer one. This holds in every film and the app writes it (owner 31/10, chosen by ear): never a lane of your own for it unless the
+  owner asks. With a sound on every action the effects sit under the music and the voice, each kind at its own level
   (an impact over a click), a small move quieter, the ambience lowest (the app sets them).
 - The master: **-16 LUFS, true peak at most -1 dBTP** (the app's render masters and measures it); louder (-14 LUFS)
   only when the client asks.

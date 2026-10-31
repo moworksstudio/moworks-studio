@@ -1,4 +1,4 @@
-// Service keys for ElevenLabs and Fish Audio: enter, replace, clear and test. The backend keeps the key encrypted
+// The service key for ElevenLabs: enter, replace, clear and test. The backend keeps the key encrypted
 // for this Windows account; the browser only ever sees "saved" and when.
 import { useState } from "react";
 import { KeyRound, Loader2, PlugZap, Trash2 } from "lucide-react";
@@ -9,7 +9,6 @@ import { useT } from "../i18n.jsx";
 
 const ABOUT = {
   elevenlabs: { where: "elevenlabs.io › Profile › API Keys", note: "A voice-over uses your ElevenLabs characters." },
-  fishaudio: { where: "fish.audio › API › API Keys", note: "A voice-over uses your Fish Audio credit." },
 };
 
 export default function Keys({ data, reload }) {

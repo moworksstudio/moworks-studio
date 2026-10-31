@@ -8,7 +8,7 @@ import { existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSyn
 import { join } from "node:path";
 
 export const DOC_DIR = "docs";
-export const DOC_NAMES = ["NOTES.md", "ASSETS.md", "CREDITS.md", "QC-REVIEW.md", "QC-REVIEW.json", "VOICEOVER.md", "CHARACTERS.json", "MOTION-PLAN.json"];
+export const DOC_NAMES = ["NOTES.md", "ASSETS.md", "CREDITS.md", "QC-REVIEW.md", "QC-REVIEW.json", "BRAND-CHECK.json", "VOICEOVER.md", "CHARACTERS.json", "MOTION-PLAN.json", "BEATMAP.md", "BEATMAP.json", "RESEARCH.md"];
 /** Where a document goes, as a project path ("docs/NOTES.md"); the name unchanged when it is not one of the app's documents. */
 export const docRel = (name) => (DOC_NAMES.includes(name) ? `${DOC_DIR}/${name}` : name);
 

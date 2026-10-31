@@ -2,6 +2,7 @@
 // the PDF), and the two app tools Claude calls through the MCP channel: board_stills (stills of the boards it wrote) and qc_sheets (one Review
 // round: sheets + HyperFrames' full check, with a fresh-eyes look on the first round of a task), and the Final Mix: music
 // options from Mixkit, sound effects placed by the app, the music ducked under the voice with HyperFrames' carve.
+import { isSongFilm } from "../style-catalog/traits.mjs";
 import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, statSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { basename, extname, join, resolve, sep } from "node:path";
 import * as projects from "../project-service/index.mjs";
@@ -423,6 +424,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       if (typeof args.ambience === "boolean") patch.ambience = args.ambience;
       if (DENSITIES.includes(args.density)) patch.density = args.density;
       if (args.restore === true) patch.unskip = true;
+      if (patch.on?.length && isSongFilm(null, { dir: project.path, root })) patch.songSounds = true;
       if (!Object.keys(patch).length) return `Nothing changed. The film's sound choices: ${prefsText(readPrefs(project.path))}.`;
       const prefs = updatePrefs(project.path, patch);
       if (!readState(project.path).placedAt) return `Saved: ${prefsText(prefs)}. The app follows them when it places the sound effects (the Final Mix).`;
@@ -541,7 +543,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       const p = mustProject(id, root);
       const f = docPath(p.path, "QC-REVIEW.md");
       const last = p.meta?.lastQc ?? null;
-      return { text: existsSync(f) ? readFileSync(f, "utf8") : "", at: existsSync(f) ? statSync(f).mtime.toISOString() : null, last,
+      return { text: existsSync(f) ? readFileSync(f, "utf8") : "", at: existsSync(f) ? statSync(f).mtime.toISOString() : null, last, brand: pipe.brandCheck(p.path),
         sheetUrls: last?.sheets ? Object.fromEntries(Object.entries(last.sheets).map(([k, v]) => [k, url(id, v)])) : {} };
     }),
     // the Final Mix dialog

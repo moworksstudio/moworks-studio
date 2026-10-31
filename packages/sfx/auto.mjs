@@ -18,6 +18,7 @@ import { levelTracks, loudnessOf } from "./mixlevels.mjs";
 import { fitEffects } from "./voicefit.mjs";
 import { SUSTAINED_MIN_S, familyOf, findAmbience, pickVariant, sustainedCue } from "./library.mjs";
 import { DEFAULT_DENSITY, briefOf, isOff, readPrefs, soundPolicy } from "./prefs.mjs";
+import { isSongFilm } from "../style-catalog/traits.mjs";
 import { fadeOfTotal, planEnding } from "../hf-edit/ending.mjs";
 import { filmWords, trackClips } from "../hf-edit/tracks.mjs";
 import { ffmpegExe } from "../library/preview-media.mjs";
@@ -275,13 +276,13 @@ async function placeAmbience(dir, shots, { prefs = {}, filmEnd = null, endFade =
 export async function autoSfx(dir, shots, plan, opts = {}) {
   await levelTracks(dir, { root: opts.root, fit: false }).catch(() => null);          // the voice and the music at their levels first: the effects sit against them
   const prefs = readPrefs(dir), palette = opts.palette ?? "";
-  const policy = soundPolicy({ prefs, brief: briefOf(dir), palette });
+  const policy = soundPolicy({ prefs, brief: briefOf(dir), palette, song: isSongFilm(null, { dir, root: opts.root }) });
   const style = opts.style ?? styleHint({ palette, id: opts.styleId, title: opts.styleTitle });
   const words = spokenWords(dir), whoosh = opts.whoosh !== false && !isOff(prefs, { family: "whoosh" });
   const ends = (shots ?? []).map((s) => Number(s.start) + Number(s.duration)).filter((x) => Number.isFinite(x) && x > 0);
   const filmEnd = ends.length ? Math.max(...ends) : null;
   const note = (extra) => patchState(dir, (st) => { st.policy = { density: policy.density, whoosh, silent: policy.silent, ambience: policy.ambience, style }; Object.assign(st, extra); });
-  if (policy.silent) {          // the owner, the style or the brief asks for no sound effects: none of the app's own
+  if (policy.silent) {          // the owner, the style, the brief or the song asks for no sound effects: none of the app's own
     mount(dir, [], { cueKey: cueKey(shots ?? []), left: { missing: [], near: [] } });
     mountAmbience(dir, []);
     note({ thinned: [] });

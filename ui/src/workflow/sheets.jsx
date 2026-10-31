@@ -185,6 +185,9 @@ export function QcReviewSheet({ projectId }) {
     {off > 0 && <ul className="plain qc-off">
       {s.low.map(([what, v]) => <li key={what}><span className="num qc-n">{v}/10</span><span>{t(what)}</span></li>)}
       {s.left.map((l) => <li key={l}><span>{l}</span></li>)}</ul>}
+    {q.data.brand && (q.data.brand.failed.length + q.data.brand.missing.length > 0
+      ? <Banner kind="error">{t("Brand Kit: {done} of {total} rules checked and kept. Broken or not checked: {ids}.", { done: q.data.brand.done, total: q.data.brand.total, ids: [...q.data.brand.failed, ...q.data.brand.missing].join(", ") })}</Banner>
+      : <Banner kind="success">{t("Brand Kit: all {total} rules checked and kept.", { total: q.data.brand.total })}</Banner>)}
     <div className="row"><button className="btn sm" onClick={() => stage.askClaude(t("About the review: "))}><Bot size={14} />{t("Ask Claude")}</button></div>
   </div>;
 }

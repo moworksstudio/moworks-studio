@@ -4,7 +4,7 @@
 import { execFile, spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createReadStream, createWriteStream, existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
@@ -34,14 +34,18 @@ export const python = (root = APP_ROOT) => expandEnv(loadPins(root).python.exe);
 
 const runtimeCache = new Map();
 /** Whether the engine's Python modules import (a yes for the app's run, a no for a minute). */
+/** The answer of an import check. Out of time says nothing of the module, only of a busy computer: it stands as ready and is asked again (T33-8: Set up
+ *  reopened with "70 MB to download" on a film at 100 % CPU, everything installed); a missing module fails at once. */
+export const importAnswer = (r) => (r?.status === 0 ? { ok: true } : r?.error?.code === "ETIMEDOUT" ? { ok: true, unverified: true }
+  : { ok: false, message: r ? (r.stderr ?? "").trim().split(/\r?\n/).pop() : "Python not found" });
 function runtimeOk(m, root) {
   const c = runtimeCache.get(m.id);
   if (c && (c.value.ok || Date.now() - c.at < 60000)) return c.value;          // a module that imports keeps importing for the app's run
   // the app's own component folder first, as the transcription script has it (whisper_transcribe.py)
   const code = ["import os, sys", "p = os.environ.get('MW_PYLIBS')", "if p and os.path.isdir(p): sys.path.insert(0, p)", ...m.runtime.python.map((x) => `import ${x}`)].join("\n");
   const r = existsSync(python(root)) ? spawnSync(python(root), ["-I", "-c", code], { encoding: "utf8", env: { ...process.env, MW_PYLIBS: pyLibs(root) }, windowsHide: true, timeout: 60000 }) : null;
-  const value = r?.status === 0 ? { ok: true } : { ok: false, message: r ? (r.stderr ?? "").trim().split(/\r?\n/).pop() : "Python not found" };
-  runtimeCache.set(m.id, { at: Date.now(), value });
+  const value = importAnswer(r);
+  if (!value.unverified) runtimeCache.set(m.id, { at: Date.now(), value });
   return value;
 }
 
@@ -63,6 +67,25 @@ async function sha256(file) {
   return h.digest("hex");
 }
 
+/** One pinned file { url, size, sha256 } into `dest`, its size and SHA-256 checked before it takes the name; one already there and correct is
+ *  kept. onBytes(n): the bytes of this file so far. */
+export async function downloadChecked(f, dest, { signal, onBytes = () => {} } = {}) {
+  const name = basename(dest);
+  if (existsSync(dest) && statSync(dest).size === f.size && (await sha256(dest)) === f.sha256) { onBytes(f.size); return dest; }
+  const part = dest + ".partial";
+  rmSync(part, { force: true });
+  let counted = 0;
+  const count = async function* (src) { for await (const chunk of src) { if (signal?.aborted) throw Object.assign(new Error("Cancelled"), { code: "CANCELLED" }); counted += chunk.length; onBytes(counted); yield chunk; } };
+  let r;
+  try { r = await fetch(f.url, { signal }); } catch (e) { throw Object.assign(new Error(signal?.aborted ? "Cancelled" : `Could not reach ${new URL(f.url).host}: ${e.message}`), { code: signal?.aborted ? "CANCELLED" : "DOWNLOAD" }); }
+  if (!r.ok) throw Object.assign(new Error(`Download failed (${r.status}) for ${name}`), { code: "DOWNLOAD" });
+  await pipeline(Readable.fromWeb(r.body), count, createWriteStream(part));
+  const got = await sha256(part);
+  if (statSync(part).size !== f.size || got !== f.sha256) { rmSync(part, { force: true }); throw Object.assign(new Error(`${name} does not match its checksum; nothing was kept`), { code: "CHECKSUM" }); }
+  renameSync(part, dest);
+  return dest;
+}
+
 /** Install one model: download its files from their pinned URLs, then its engine when missing; progress { done, total } in bytes. Files
  *  already there and correct are kept, so Install on an installed model only adds the engine. */
 export async function install(id, { onProgress = () => {}, signal, root = APP_ROOT } = {}) {
@@ -73,19 +96,7 @@ export async function install(id, { onProgress = () => {}, signal, root = APP_RO
   const total = m.files.reduce((n, f) => n + f.size, 0);
   let done = 0;
   for (const f of m.files) {
-    const dest = join(dir, f.to);
-    if (existsSync(dest) && statSync(dest).size === f.size && (await sha256(dest)) === f.sha256) { done += f.size; onProgress({ done, total, file: f.to }); continue; }
-    const part = dest + ".partial";
-    rmSync(part, { force: true });
-    let counted = 0;
-    const count = async function* (src) { for await (const chunk of src) { if (signal?.aborted) throw Object.assign(new Error("Cancelled"), { code: "CANCELLED" }); counted += chunk.length; onProgress({ done: done + counted, total, file: f.to }); yield chunk; } };
-    let r;
-    try { r = await fetch(f.url, { signal }); } catch (e) { throw Object.assign(new Error(signal?.aborted ? "Cancelled" : `Could not reach ${new URL(f.url).host}: ${e.message}`), { code: signal?.aborted ? "CANCELLED" : "DOWNLOAD" }); }
-    if (!r.ok) throw Object.assign(new Error(`Download failed (${r.status}) for ${f.to}`), { code: "DOWNLOAD" });
-    await pipeline(Readable.fromWeb(r.body), count, createWriteStream(part));
-    const got = await sha256(part);
-    if (statSync(part).size !== f.size || got !== f.sha256) { rmSync(part, { force: true }); throw Object.assign(new Error(`${f.to} does not match its checksum; nothing was kept`), { code: "CHECKSUM" }); }
-    renameSync(part, dest);
+    await downloadChecked(f, join(dir, f.to), { signal, onBytes: (n) => onProgress({ done: done + n, total, file: f.to }) });
     done += f.size;
   }
   // the engine (faster-whisper, pinned) with pip into the app's Python components, when it does not import yet; without Python: NO_PYTHON
@@ -177,7 +188,7 @@ export async function transcribe(audioFile, { model: id, language = "vi", prompt
   const { gpu, device, env: cudaEnv } = whisperDevice(root);
   const code = await new Promise((resolve) => {
     const child = spawn(python(root), ["-I", script, target, input, "--language", language, "--device", device, ...(hint ? ["--prompt-file", promptFile] : []), ...(song ? ["--song"] : [])], {
-      env: { ...process.env, PYTHONIOENCODING: "utf-8", PYTHONUTF8: "1", HF_HUB_OFFLINE: "1", ELEVENLABS_API_KEY: "", FISH_API_KEY: "", MW_PYLIBS: pyLibs(root), ...cudaEnv }, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
+      env: { ...process.env, PYTHONIOENCODING: "utf-8", PYTHONUTF8: "1", HF_HUB_OFFLINE: "1", ELEVENLABS_API_KEY: "", MW_PYLIBS: pyLibs(root), ...cudaEnv }, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
     const kill = () => spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], { windowsHide: true });
     signal?.addEventListener("abort", kill, { once: true });
     let buf = "", err = "";

@@ -4,7 +4,8 @@
 //   { off: ["whoosh", "footstep", "all"…],   families or sound names the film never gets ("all": no sound effects at all)
 //     ambience: true | false,                  false: no ambience beds
 //     density: "low" | "normal" | "lively",    how many sounds a second (default lively: owner 30/10, a sound on every action)
-//     skip: ["<cue id>"…] }                    single sounds taken out in the Final Mix, kept out when the sounds are placed again
+//     skip: ["<cue id>"…],                     single sounds taken out in the Final Mix, kept out when the sounds are placed again
+//     songSounds: true }                       a film made for its song has none, until the owner asks for some ("on")
 // And what else asks for silence or fewer sounds: the brief, and the film style's own sound section (which wins over the house rule).
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -24,13 +25,14 @@ export function cleanPrefs(p = {}) {
   if (DENSITIES.includes(p?.density)) out.density = p.density;
   const skip = list(p?.skip);
   if (skip.length) out.skip = skip;
+  if (p?.songSounds === true) out.songSounds = true;
   return out;
 }
 export function readPrefs(dir) {
   try { return cleanPrefs(JSON.parse(readFileSync(prefsFile(dir), "utf8"))); } catch { return {}; }
 }
 /** Change the prefs. patch: off / on (families or names to turn off, or on again; on: ["all"] turns every one on again), ambience,
- *  density, skip (cue ids to take out), unskip (ids to bring back, or true for all). Returns the prefs written. */
+ *  density, skip (cue ids to take out), unskip (ids to bring back, or true for all), songSounds (the owner asked for sounds in a film made for its song). Returns the prefs written. */
 export function updatePrefs(dir, patch = {}) {
   const cur = readPrefs(dir), on = new Set(list(patch.on));
   let off = [...new Set([...(cur.off ?? []), ...list(patch.off)])].filter((o) => !on.has(o) && !on.has("all"));
@@ -40,7 +42,7 @@ export function updatePrefs(dir, patch = {}) {
   if (patch.unskip === true) skip = [];
   else if (Array.isArray(patch.unskip)) { const u = new Set(list(patch.unskip)); skip = skip.filter((s) => !u.has(s)); }
   const next = cleanPrefs({ off, skip, ambience: typeof patch.ambience === "boolean" ? patch.ambience : cur.ambience,
-    density: DENSITIES.includes(patch.density) ? patch.density : cur.density });
+    density: DENSITIES.includes(patch.density) ? patch.density : cur.density, songSounds: list(patch.off).includes("all") ? false : patch.songSounds ?? cur.songSounds });
   mkdirSync(join(dir, ".moworks"), { recursive: true });
   writeFileSync(prefsFile(dir) + ".tmp", JSON.stringify({ ...next, at: new Date().toISOString() }, null, 2) + "\n");
   renameSync(prefsFile(dir) + ".tmp", prefsFile(dir));
@@ -79,11 +81,12 @@ export function isOff(prefs, { name = "", family = null } = {}) {
 const SILENT = /\b(no|without|zero)\s+(sound[\s-]*effects?|sfx|foley)\b|\bsilent\s+(film|movie|piece|video)\b|\bsound[\s-]*effects?\s*:\s*none\b|không\s+(có\s+)?(hiệu ứng âm thanh|sfx|sound[\s-]*effects?)|phim câm/i;
 const FEWER = /\b(few(er)?|minimal|sparse|sparing(ly)?)\s+(sound[\s-]*effects?|sfx|sounds|foley)\b|\b(sound[\s-]*effects?|sfx|foley)\s+(sparingly|only on (the )?(key|big|main))|ít\s+(hiệu ứng|âm thanh|sfx|sound)/i;
 const NO_AMBIENCE = /\bno\s+(ambien(ce|t)|room tone|background (sound|noise)s?)\b|không\s+(có\s+)?(âm thanh nền|tiếng nền|ambience)/i;
-/** What the film's sound effects follow: { silent: null | "owner" | "style" | "brief", density, ambience }. The owner's prefs first, then
- *  the style's sound section, then the brief; otherwise every action sounds (lively) with ambience under every place. */
-export function soundPolicy({ prefs = {}, brief = "", palette = "" } = {}) {
-  const silent = (prefs.off ?? []).includes("all") ? "owner" : SILENT.test(palette) ? "style" : SILENT.test(brief) ? "brief" : null;
-  const density = prefs.density ?? (FEWER.test(palette) || FEWER.test(brief) ? "low" : DEFAULT_DENSITY);
+/** What the film's sound effects follow: { silent: null | "owner" | "style" | "brief" | "song", density, ambience }. The owner's prefs first, then
+ *  the style's sound section, then the brief, then a film made for its song (`song`: none, and few if the owner asks for some); otherwise every
+ *  action sounds (lively) with ambience under every place. */
+export function soundPolicy({ prefs = {}, brief = "", palette = "", song = false } = {}) {
+  const silent = (prefs.off ?? []).includes("all") ? "owner" : SILENT.test(palette) ? "style" : SILENT.test(brief) ? "brief" : song && !prefs.songSounds ? "song" : null;
+  const density = prefs.density ?? (song || FEWER.test(palette) || FEWER.test(brief) ? "low" : DEFAULT_DENSITY);
   const ambience = typeof prefs.ambience === "boolean" ? prefs.ambience : !silent && !NO_AMBIENCE.test(palette) && !NO_AMBIENCE.test(brief);
   return { silent, density, ambience };
 }

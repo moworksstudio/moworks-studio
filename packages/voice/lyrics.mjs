@@ -28,6 +28,16 @@ export function read(dir) {
   return { text, timed: timed ? { ...timed, words: undefined, stale } : null, words: timed?.words ?? [] };
 }
 
+/** What Whisper heard of the track when the scan tried the song: { text, words, language, unheard } (one sung stretch a line, a draft to correct) or null when it has not tried. */
+export function heardDraft(dir, track) {
+  const items = readJson(at(dir, ".moworks/scan/index.json"), null)?.items ?? [];
+  const it = items.find((x) => x.path === track) ?? (track ? null : items.find((x) => x.sungFile));
+  if (!it?.sungFile) return null;
+  const j = readJson(at(dir, it.sungFile), null);
+  if (!j) return null;
+  return { track: it.path, text: j.segments.map((s) => s.text.trim()).filter(Boolean).join("\n"), words: j.words, language: j.language ?? null, unheard: !!it.wordsUnheard };
+}
+
 /** Save the user's lyrics (pasted, or read from a .txt / .lrc / .srt file in the browser). Time codes of .lrc / .srt become line marks. */
 export function save(dir, text) {
   const clean = fromSubtitles(String(text ?? "").normalize("NFC").replace(/\r\n?/g, "\n")).trim();
@@ -52,13 +62,20 @@ const mmss = (t) => `${Math.floor(t / 60)}:${(t % 60).toFixed(2).padStart(5, "0"
 
 /** The table the user checks by ear and Claude reads for the music map. */
 export function timedMarkdown(track, r) {
-  const lines = [];
-  for (const w of r.words) (lines[w.line - 1] ??= []).push(w);
+  const main = r.words.filter((w) => w.layer !== "backing");
+  const lines2 = [];
+  for (const w of main) (lines2[w.line - 1] ??= []).push(w);
+  const backing = r.words.filter((w) => w.layer === "backing");
   return [`# Lyrics with times (${track})`, "",
-    `Timed by the app (Whisper turbo heard ${r.heard} of ${r.words.length} words; the others are placed on the song's attacks). ` +
+    `Timed by the app (Whisper turbo heard ${r.heard} of ${main.length} words; the others are placed on the song's attacks, so their times are a guess). ` +
     "A draft: listen and fix a line that is off (or mark a line's start as \"[0:17.5] line\" in the lyrics and time them again).", "",
-    "| Line | Starts | Lyrics | Heard |", "|---|---|---|---|",
-    ...lines.filter(Boolean).map((ws, i) => `| ${i + 1} | ${mmss(ws[0].start)} | ${ws.map((w) => w.text).join(" ").replace(/\|/g, "/")} | ${ws.filter((w) => w.sure === "heard").length}/${ws.length} |`)].join("\n") + "\n";
+    "| Line | Starts | Lyrics | Heard | First word's n |", "|---|---|---|---|---|",
+    ...lines2.filter(Boolean).map((ws, i) => `| ${i + 1} | ${mmss(ws[0].start)} | ${ws.map((w) => w.text).join(" ").replace(/\|/g, "/")} | ${ws.filter((w) => w.sure === "heard").length}/${ws.length} | ${ws[0].n ?? ""} |`),
+    ...(r.window ? ["", `Seconds of the song; the film plays it from ${r.window.start} s to ${r.window.end} s.`] : []),
+    ...(backing.length ? ["", `Backing vocals, a layer of their own (\"layer\": \"backing\" in .moworks/lyrics/words.json): ${backing.map((w) => w.text).join(" ")}.`] : []),
+    ...(r.repeats?.length ? ["", "**Repeated words, the count sung against the text** (the film keeps the owner's text and says so to them; never fit it quietly):",
+      ...r.repeats.map((x) => `- Line ${x.line}: "${x.word}" is written ${x.text} times; Whisper heard ${x.heard} (${x.attacks} attacks in that stretch).`)] : []),
+    "", "Each word's own time and its number n are in .moworks/lyrics/words.json: mark its element with data-lyric=\"n\"."].join("\n") + "\n";
 }
 
 /** Time the lyrics to the track with Whisper Turbo (a background job: on the graphics card when the CUDA pack is in, else about 8 minutes
@@ -84,6 +101,7 @@ export async function align(dir, { track, workDir, signal, onEvent = () => {}, r
   const wav = await asr.toWav(at(dir, track), join(workDir, "song-voice.wav"), { song: true, from, to, root });     // what Whisper hears
   const plain = await asr.toWav(at(dir, track), join(workDir, "song.wav"), { from, to, root });                     // beats and attacks, kick included
   const lyr = join(workDir, "lyrics.txt");
+  // the language is left to Whisper: on a mixed Vietnamese and English song, set to Vietnamese it heard 10 of 25 words and put the first lines at 0 s; left open, 13 of 25, each near where it is sung
   writeFileSync(lyr, shiftMarks(text, from));
   const script = join(root, "tools", "asr", "align_lyrics.py");
   const out = {};
@@ -91,7 +109,7 @@ export async function align(dir, { track, workDir, signal, onEvent = () => {}, r
   // the graphics card when NVIDIA's CUDA libraries are installed, as the voice-over's transcription (28 min on the CPU)
   const { gpu, device, env: cudaEnv } = asr.whisperDevice(root);
   const code = await new Promise((resolve) => {
-    const child = spawn(asr.python(root), ["-I", script, card.path, wav, lyr, "--rhythm-audio", plain, "--language", asr.voiceSettings(root).language ?? "vi", "--device", device], {
+    const child = spawn(asr.python(root), ["-I", script, card.path, wav, lyr, "--rhythm-audio", plain, "--language", "auto", "--device", device], {
       env: { ...process.env, PYTHONIOENCODING: "utf-8", PYTHONUTF8: "1", HF_HUB_OFFLINE: "1", MW_PYLIBS: pyLibs(root), ...cudaEnv }, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
     const kill = () => spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], { windowsHide: true });
     signal?.addEventListener("abort", kill, { once: true });
@@ -112,8 +130,9 @@ export async function align(dir, { track, workDir, signal, onEvent = () => {}, r
   asr.recordWhisperRun(gpu, out.info?.device ?? null, errText.split(/\r?\n/), root);
   if (code !== 0 || !out.words) throw err("ASR_FAILED", `The lyrics could not be timed: ${errText.split(/\r?\n/).filter(Boolean).slice(-1)[0] ?? `exit ${code}`}`);
   const r3 = (n) => Math.round(n * 1000) / 1000;
-  const words = out.words.map((w) => ({ text: String(w.text).normalize("NFC"), start: r3(w.start + from), end: r3(w.end + from), line: w.line, sure: w.sure }));
-  const result = { at: new Date().toISOString(), track, model: id, lines: out.lines, heard: out.heard, placed: out.placed, dropped: out.dropped, words,
+  const words = out.words.map((w, i) => ({ n: i + 1, text: String(w.text).normalize("NFC"), start: r3(w.start + from), end: r3(w.end + from), line: w.line, sure: w.sure }));
+  const backing = (out.backing ?? []).map((w, i) => ({ n: words.length + i + 1, text: String(w.text).normalize("NFC"), start: r3(w.start + from), end: r3(w.end + from), line: w.line, sure: w.sure, layer: "backing" }));
+  const result = { at: new Date().toISOString(), track, model: id, lines: out.lines, heard: out.heard, placed: out.placed, dropped: out.dropped, repeats: out.repeats ?? [], words: [...words, ...backing],
     ...(to ? { window: { start: from, end: to } } : {}) };
   const wf = at(dir, WORDS);
   mkdirSync(join(wf, ".."), { recursive: true });
@@ -122,7 +141,7 @@ export async function align(dir, { track, workDir, signal, onEvent = () => {}, r
   let hf = null;
   if (transcript.read(dir)?.status !== "saved") {             // a saved voice-over transcript keeps HyperFrames' transcript.json
     const hw = join(workDir, "lyrics-words.json");
-    writeFileSync(hw, JSON.stringify(words.map(({ text: t, start, end }) => ({ text: t, start, end }))));
+    writeFileSync(hw, JSON.stringify(words.map(({ text: t, start, end }) => ({ text: t, start, end }))));          // the main line only; backing vocals stay out of HF's transcript
     const r = await importTranscript(dir, hw);
     hf = { ok: r.ok, words: r.words };
   }

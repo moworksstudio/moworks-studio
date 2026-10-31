@@ -159,7 +159,7 @@ export function appMade(dir, meta = {}) {
   if (meta?.voice?.file && meta.voice.source && meta.voice.source !== "upload") out.add(meta.voice.file);
   if (meta?.music?.file && meta.music.option) out.add(meta.music.file);          // one of Claude's three tracks, copied in by the app
   const vo = join(dir, "assets", "3_audio", "voiceover");
-  if (existsSync(vo)) for (const n of readdirSync(vo)) if (/^(elevenlabs|fishaudio)-\d{4}-\d{2}-\d{2}T[\d-]+Z?\.mp3$/i.test(n)) out.add(`assets/3_audio/voiceover/${n}`);
+  if (existsSync(vo)) for (const n of readdirSync(vo)) if (/^(elevenlabs|kokoro|fishaudio)-\d{4}-\d{2}-\d{2}T[\d-]+Z?\.mp3$/i.test(n)) out.add(`assets/3_audio/voiceover/${n}`);
   return out;
 }
 

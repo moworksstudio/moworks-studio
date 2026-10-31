@@ -14,6 +14,7 @@ import { APP_OWN, LAYOUT_VERSION, appSounds, kitFiles, migrateLayout } from "./l
 import { showInExplorer } from "./explorer.mjs";
 import { designChoice, keepAskedKit, writeDesign } from "./design.mjs";
 import { styleFpsRule } from "../style-catalog/fps.mjs";
+import { isLyricVideo } from "../style-catalog/traits.mjs";
 export { A as LAYOUT, APP_OWN, LAYOUT_VERSION } from "./layout.mjs";
 
 export const ASPECTS = { "16:9": [1920, 1080], "9:16": [1080, 1920], "1:1": [1080, 1080], "4:5": [1080, 1350] };
@@ -309,7 +310,9 @@ export async function createProject(input, { root = APP_ROOT, scaffoldFn = scaff
   const pins = loadPins(root);
   const registryRoot = expandEnv(pins.hyperframes.registryRoot ?? "");
   await scaffoldFn(dir, starterStoryboard({ title, aspect: size.aspect, durationSec, width: size.width, height: size.height }), { registryRoot });
-  const fps = fpsRule?.allowed?.length ? fitFps(input.fps ?? form?.fps.default, fpsRule) : FPS_CHOICES.includes(Number(input.fps)) ? Number(input.fps) : form?.fps.default ?? 30;
+  // no rate given: a lyrics video defaults to 60 fps (the Music style by its own config; a brief that asks for lyrics in another style here)
+  const wanted = input.fps ?? (isLyricVideo({ style: input.style, brief: { text: input.brief } }, { root }) ? 60 : null);
+  const fps = fpsRule?.allowed?.length ? fitFps(wanted ?? form?.fps.default, fpsRule) : FPS_CHOICES.includes(Number(wanted)) ? Number(wanted) : form?.fps.default ?? 30;
   setRootFps(dir, fps);          // HF's player and render read the film's rate here
   if (size.custom) setRootAttrs(dir, { "data-width": size.width, "data-height": size.height });
   const m = readJson(metaFile(dir), {});

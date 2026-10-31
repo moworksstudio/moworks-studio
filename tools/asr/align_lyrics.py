@@ -8,8 +8,10 @@
 #   3. the words in between ("placed") go on the song's attacks (librosa onsets) inside the sung time of their gap, a run of the same word
 #      on consecutive beats; prompted words where nothing is sung are dropped (Whisper "hears" its prompt over an instrumental).
 # Lyrics text: one sung line per line, repeats written out; "[17.5] line" or "[0:17.5] line" marks a rough section start (a script table's
-# times), "#" headings and blank lines are skipped. Prints JSON lines: info, then {"type": "words", "words": [...], "lines": n,
-# "heard": n, "placed": n, "dropped": n}.
+# times), "#" headings and blank lines are skipped. Words in parentheses are backing vocals: a layer of their own, sung over the main line, so they stay out of its
+# order; each takes a heard time near its place, or the attacks after the main word before it, and is marked "layer": "backing".
+# A run of the same word keeps its count in the text; when Whisper heard another count in that stretch, "repeats" says so (never fitted quietly). Prints JSON lines: info, then
+# {"type": "words", "words": [...], "lines": n, "heard": n, "placed": n, "dropped": n, "repeats": [{line, word, text, heard, attacks}]}.
 # Usage: python -I align_lyrics.py <model dir> <audio 16 kHz mono WAV> <lyrics.txt> [--rhythm-audio plain.wav] [--language vi|auto]
 #        [--device auto|cpu|cuda]
 import argparse
@@ -29,16 +31,82 @@ MARK = re.compile(r"^\[(?:(\d+):)?(\d+(?:[.,]\d+)?)\]\s*")
 WHISPER_LAG = 0.08   # kit: Whisper's word starts land about 80 ms after the sung attack
 
 
+def tokens(s):
+    """a line's words as (word, backing?): what stands inside parentheses is backing vocals"""
+    out = []
+    for part in re.split(r"(\([^)]*\))", s):
+        back = part.startswith("(") and part.endswith(")")
+        out += [(w.strip("()"), back) for w in part.split() if re.search(r"\w", w)]
+    return out
+
+
 def lyric_lines(text):
+    """the sung lines: each a list of main words, backing vocals left out (backing_after has them); a line of backing vocals alone is no line of the main order"""
+    return [[w for w, b in t if not b] for t in _lines(text) if any(not b for _, b in t)]
+
+
+def _lines(text):
     out = []
     for raw in text.splitlines():
         s = MARK.sub("", raw.strip())
         if not s or s.startswith("#") or set(s) <= set("-|: "):
             continue
         s = re.sub(r"^(?:[-*•]\s+|\d+[.)]\s+)", "", s)
-        words = [w for w in s.split() if re.search(r"\w", w)]
-        if words:
-            out.append(words)
+        t = tokens(s)
+        if t:
+            out.append(t)
+    return out
+
+
+def backing_of(text):
+    """the backing words in order, each with the number of main words sung before it: [(word, main words before)]"""
+    out, n = [], 0
+    for t in _lines(text):
+        for w, b in t:
+            if b:
+                out.append((w, n))
+            else:
+                n += 1
+    return out
+
+
+def place_backing(text, words, H, onsets, eighth, dur):
+    """backing words go after the main word they follow: on a word heard within 2 s of there, else on the next attacks, an eighth apart at most"""
+    out, used = [], set()
+    for w, before in backing_of(text):
+        anchor = words[before - 1]["end"] if before > 0 else (words[0]["start"] if words else 0.0)
+        if out and out[-1]["after"] == before:
+            anchor = max(anchor, out[-1]["start"] + 0.12)
+        best = None
+        for i, h in enumerate(H):
+            if i not in used and key(h["text"]) == key(w) and abs(h["start"] - anchor) <= 2.0 and (best is None or abs(h["start"] - anchor) < abs(H[best]["start"] - anchor)):
+                best = i
+        if best is not None:
+            used.add(best)
+            t, sure = max(0.0, H[best]["start"] - WHISPER_LAG), "heard"
+        else:
+            ons = [o for o in onsets if anchor <= o <= anchor + eighth * 1.6]
+            t, sure = (ons[0] if ons else anchor), "placed"
+        out.append({"text": w, "line": words[before - 1]["line"] if before > 0 else 1, "start": round(min(t, dur), 3), "end": round(min(t + eighth * 2, dur), 3), "sure": sure, "layer": "backing", "after": before})
+    return out
+
+
+def repeats_of(words, H, onsets):
+    """runs of the same word (3 or more) whose count Whisper heard differently in their stretch: never fitted quietly, the owner is told"""
+    out, i, n = [], 0, len(words)
+    while i < n:
+        j = i
+        while j + 1 < n and key(words[j + 1]["text"]) == key(words[i]["text"]):
+            j += 1
+        if j - i + 1 >= 3:
+            a = words[i - 1]["end"] if i > 0 else max(0.0, words[i]["start"] - 0.5)
+            b = words[j + 1]["start"] if j + 1 < n else words[j]["end"] + 0.5
+            k = key(words[i]["text"])
+            heard = sum(1 for h in H if a - 0.1 <= h["start"] <= b + 0.1 and key(h["text"]) == k)
+            attacks = sum(1 for o in onsets if a - 0.1 <= o <= b + 0.1)
+            if heard and heard != j - i + 1:
+                out.append({"line": words[i]["line"], "word": words[i]["text"], "text": j - i + 1, "heard": heard, "attacks": attacks})
+        i = j + 1
     return out
 
 
@@ -297,7 +365,7 @@ def align(model, y, text, lang, y_rhythm=None):
     # Turbo heard 0/86 words without the prompt and 32/86 with it)
     marks = section_marks(text)
     marks.setdefault(1, 0.0)
-    dropped, info = 0, None
+    dropped, info, allH = 0, None, []
     m = sorted(marks.items())
     for k, (ln, t) in enumerate(m):
         ln2 = m[k + 1][0] if k + 1 < len(m) else len(lines) + 1
@@ -307,6 +375,7 @@ def align(model, y, text, lang, y_rhythm=None):
         Hk, info, vk = heard(model, y, lang, " ".join(" ".join(lines[i - 1]) for i in range(ln, ln2)), (a, bb))
         Hk, nd = echo_filter([h for h in Hk if a <= h["start"] <= bb], onsets, vk)
         dropped += nd
+        allH += Hk
         for i, j in anchors(sub, Hk):     # Whisper's lag taken off first, so the words placed between keep their order
             sub[i].update(start=round(max(0.0, Hk[j]["start"] - WHISPER_LAG), 3), end=Hk[j]["end"], sure="heard")
         end = m[k + 1][1] if k + 1 < len(m) else dur
@@ -319,7 +388,9 @@ def align(model, y, text, lang, y_rhythm=None):
     for k, w in enumerate(words):        # each word ends after it starts and not after the next one starts
         nxt = words[k + 1]["start"] if k + 1 < len(words) else w["start"] + 0.5
         w["end"] = round(min(max(w["end"], w["start"] + 0.05), nxt), 3)
-    return words, info, len(lines), dropped
+    repeats = repeats_of(words, allH, onsets)
+    backing = place_backing(text, words, allH, onsets, eighth, dur)
+    return words, info, len(lines), dropped, repeats, backing
 
 
 def main():
@@ -341,11 +412,11 @@ def main():
         text = f.read()
     model, device = load(a.model, a.device)
     y = wav(a.audio)
-    words, info, nlines, dropped = align(model, y, text, None if a.language == "auto" else a.language,
-                                         wav(a.rhythm_audio) if a.rhythm_audio else None)
+    words, info, nlines, dropped, repeats, backing = align(model, y, text, None if a.language == "auto" else a.language,
+                                                           wav(a.rhythm_audio) if a.rhythm_audio else None)
     emit({"type": "info", "language": info.language, "probability": round(info.language_probability, 3), "duration": round(len(y) / SR, 3), "device": device})
-    emit({"type": "words", "words": words, "lines": nlines, "heard": sum(w["sure"] == "heard" for w in words),
-          "placed": sum(w["sure"] == "placed" for w in words), "dropped": dropped})
+    emit({"type": "words", "words": words, "backing": backing, "lines": nlines, "heard": sum(w["sure"] == "heard" for w in words),
+          "placed": sum(w["sure"] == "placed" for w in words), "dropped": dropped, "repeats": repeats})
 
 
 if __name__ == "__main__":

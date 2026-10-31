@@ -181,6 +181,11 @@ function LookDetails({ id, onChanged, onDeleted, askLocked = false }) {
         {l.updatedAt && <span>{ago(l.updatedAt)}</span>}</p></div>
     {lookSummary(l.description) && <p className="sgb-desc">{lookSummary(l.description)}</p>}
     {l.status === "failed" && <p className="warn-note"><AlertTriangle size={13} />{t(l.error ?? "The scan did not finish. Upload the guideline again or try another file.")}</p>}
+    {l.editable && l.status === "ready" && l.gaps?.length > 0 && <div className="warn-note lk-unread" role="status"><AlertTriangle size={13} /><div className="lk-unread-in">
+      <p className="lk-unread-t">{t("Films cannot be fully checked against this kit yet")}</p>
+      <p>{t("Scan it again to add: {what}", { what: l.gaps.join("; ") })}</p>
+      <button type="button" className="btn sm" onClick={() => rescan()} disabled={!!scan}><Upload size={14} />{t("Scan again")}</button>
+    </div></div>}
     {l.unread?.length > 0 && <UnreadFiles look={l} onRemove={removeFile} onAdd={addFiles} busy={!!scan || l.status === "scanning"} />}
     {scan ? <p className="lk-stage"><Loader2 size={14} className="spin" />{scan.stage ? t(scan.stage) : t("Reading the guideline…")}{scan.progress != null ? ` · ${scan.progress}%` : ""}</p>
       : l.editable && ["failed", "draft"].includes(l.status) && l.files?.length > 0 && <div className="sgb-acts"><button className="btn" onClick={() => rescan()}><Upload size={14} />{t("Scan again")}</button></div>}

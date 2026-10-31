@@ -69,6 +69,11 @@ export const validate = (dir, opts) => runHfJson("validate", dir, [], opts);
 export const historyBusy = (text) => /history is open in another process/i.test(String(text ?? ""));
 /** How long a QC still run may go without a new still before it ends; a still normally comes every 2-3 s on a loaded machine. */
 export const STILL_IDLE_MS = 120000;
+/** Before the first still the film is loading, which is no sign of a hung run: a film whose script builds a map took about 100 s at 100 % CPU, then its stills came
+ *  in seconds (Test 33, T33-9: stopped at 120 s with none, twice, "the computer is busy"). */
+export const STILL_LOAD_MS = 300000;
+/** How long a run may go with no new still, by how many it has made. */
+export const stillWaitMs = (made, idleMs) => (made > 0 ? idleMs : Math.max(idleMs, STILL_LOAD_MS));
 /** `run()` once more when it gave nothing (`empty(result)`) while HF's history was held, after `pauseMs`; only when it ended within
  *  `quickMs` (the lock or a run ended for no new still, never a long one), so a retry never doubles a long wait. At most once. */
 export async function againIfBusy(run, empty, { pauseMs = 3000, quickMs = STILL_IDLE_MS + 30000, now = Date.now } = {}) {
@@ -102,7 +107,7 @@ export function snapshotAtAsync(projectDir, times, outDir, { version = null, sig
     const watch = idleMs ? setInterval(() => {
       let n = 0;
       try { n = readdirSync(outDir).filter((f) => /^frame-.*\.png$/i.test(f)).length; } catch { /* not made yet */ }
-      if (n !== seen) { seen = n; since = Date.now(); } else if (Date.now() - since >= idleMs) { idle = true; clearInterval(watch); kill(); }
+      if (n !== seen) { seen = n; since = Date.now(); } else if (Date.now() - since >= stillWaitMs(n, idleMs)) { idle = true; clearInterval(watch); kill(); }
     }, Math.min(5000, idleMs)) : null;
     signal?.addEventListener("abort", kill, { once: true });
     c.on("close", (code) => {
@@ -114,9 +119,9 @@ export function snapshotAtAsync(projectDir, times, outDir, { version = null, sig
 
 // ---- stills on a busy computer (T25: the Storyboard's board_stills hung about 11.5 min, twice, and came back empty; T26-5: the Review's
 // first qc_sheets ran 11.5 min and gave no picture, and the round went on as if it had)
-/** How long one still run may take before it is stopped: 2 min for HF to start its browser and load the film, and 10 s for each
+/** How long one still run may take before it is stopped: STILL_LOAD_MS for HF to start its browser and load the film, and 10 s for each
  *  still asked, at most 15 min (it was 5 min for any number of stills). */
-export const stillsTimeoutMs = (count) => Math.min(15 * 60000, 2 * 60000 + Math.max(1, Number(count) || 1) * 10000);
+export const stillsTimeoutMs = (count) => Math.min(15 * 60000, STILL_LOAD_MS + Math.max(1, Number(count) || 1) * 10000);
 /** What the user and Claude read when the stills were stopped twice: the film is not at fault, the computer was too busy. */
 export const STILLS_BUSY = "The pictures could not be taken (the computer is busy). Try again.";
 /** A still run that was stopped before it finished: its time limit ran out (`timedOut`), no new still came for a while (`idle`), or

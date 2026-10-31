@@ -64,7 +64,7 @@ function Track({ x, pick, player, busy, onUse }) {
     {mine && <span className="muted num mix-time">{mmss(player.time)}</span>}
     {x.current ? <span className="state-badge ok mix-act mix-sel"><ShieldCheck size={15} />{t("Selected")}</span>
       : onUse && <button className="btn sm mix-act" disabled={!!busy} onClick={onUse}>
-      {busy === "use" + x.file ? <Loader2 size={14} className="spin" /> : <Check size={14} />}{t("Use this")}</button>}
+      {busy === "use" + x.file ? <Loader2 size={14} className="spin" /> : <Check size={14} />}{busy === "use" + x.file ? t("Adding the music…") : t("Use this")}</button>}
   </li>;
 }
 

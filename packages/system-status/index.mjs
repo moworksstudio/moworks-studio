@@ -74,25 +74,28 @@ const parseStatus = (exe, version, stdout) => {
     subscriptionType: s.subscriptionType ?? null, email: s.email ?? null, orgName: s.orgName ?? null };
 };
 
-/** Run one Claude Code command without blocking the server; resolves { code, stdout, stderr } (a timeout ends it). */
+/** Run one Claude Code command without blocking the server; resolves { code, stdout, stderr, timedOut } (a timeout ends it). */
 function runClaude(exe, args, timeout = 20000) {
   return new Promise((ok) => {
     const c = spawn(exe, args, { windowsHide: true, env: claudeEnv(), stdio: ["ignore", "pipe", "pipe"] });
     let stdout = "", stderr = "";
-    const h = setTimeout(() => c.kill(), timeout);
+    let timedOut = false;
+    const h = setTimeout(() => { timedOut = true; c.kill(); }, timeout);
     c.stdout.on("data", (d) => { stdout += d; }); c.stderr.on("data", (d) => { stderr += d; });
-    c.on("error", (e) => { clearTimeout(h); ok({ code: -1, stdout, stderr: String(e.message) }); });
-    c.on("close", (code) => { clearTimeout(h); ok({ code, stdout, stderr }); });
+    c.on("error", (e) => { clearTimeout(h); ok({ code: -1, stdout, stderr: String(e.message), timedOut }); });
+    c.on("close", (code) => { clearTimeout(h); ok({ code, stdout, stderr, timedOut }); });
   });
 }
 
 /** Sign-in state of Claude Code (its own `auth status`), without blocking the server's event loop (the server's chip and the agent's
- *  sign-in check): { installed, path, version, loggedIn, authMethod, subscriptionType, email }. */
+ *  sign-in check): { installed, path, version, loggedIn, authMethod, subscriptionType, email }. A busy computer can keep `auth status` past its time
+ *  (Test 33, at 100 % CPU): that says nothing about the sign-in, so it is asked once more with longer, and then `unknown: true`, for the caller to keep what it knew. */
 export async function claudeStatusAsync(root = APP_ROOT) {
   const exe = findClaude(root);
   if (!exe) return { installed: false, loggedIn: false };
-  const [v, a] = await Promise.all([runClaude(exe, ["--version"]), runClaude(exe, ["auth", "status"])]);
-  return parseStatus(exe, v.stdout.trim().split(/\s/)[0] || null, a.stdout);
+  const [v, first] = await Promise.all([runClaude(exe, ["--version"]), runClaude(exe, ["auth", "status"])]);
+  const a = first.timedOut ? await runClaude(exe, ["auth", "status"], 60000) : first;
+  return { ...parseStatus(exe, v.stdout.trim().split(/\s/)[0] || null, a.stdout), ...(a.timedOut ? { unknown: true } : {}) };
 }
 
 /** `claude auth login`: Claude Code opens the browser to sign in and waits for it; the app never sees a password. Returns the

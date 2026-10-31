@@ -2,18 +2,19 @@
 // Look the HyperFrames way: a FRAME.md in HF's frame-preset format (YAML tokens + prose; HyperFrames' references/look.md, "The project's design spec"),
 // preview stills drawn from its tokens, the Vietnamese check of its fonts, kept with versions. Stored in <work>/library/looks/custom/<slug>/:
 //   look.json  { id, slug, title, status, version, versions, files, swatches, fonts, vi, description, stills, error, createdAt, updatedAt,
-//                unread: [{ name, reason }] (what the last scan could not read), leftOut: [{ name, reason }] (what was picked and not taken) }
+//                unread: [{ name, reason }] (what the last scan could not read), leftOut: [{ name, reason }] (what was picked and not taken),
+//                guideline: [{ name, pages, sub, text, sheets }] (the PDFs as read), gaps: [what the current FRAME.md lacks for a film] }
 //   files/     what the user uploaded, as uploaded (an archive unpacked)
 //   derived/   a logo that came only as AI or PSD, as a picture a film can show
-//   work/      what the scan made readable (each PDF's whole text, contact sheets and pages through tools/intake/intake.py; a PPTX's theme,
+//   work/      what the scan made readable, kept for films to open (each PDF's whole text, contact sheets and pages through tools/intake/intake.py; a PPTX's theme,
 //              text and pictures; the colour and font hints; READING.md, the list Claude reads) and the copy of HF's format
 //   v<N>/      FRAME.md and stills/ of version N (a version is never changed: an edit or a restore makes the next one)
 // The FRAME.md is written by a short Claude run that reads what the app made readable, beside one HF frame preset as the example of the
 // format; the app reads its tokens back for the swatches, fonts and stills. The Look is the film's design: the project's frame.md is a
-// plain copy of the current version (lookFrame in ./index.mjs), and the film gets its own copy of the kit's logos and fonts (placeKit).
+// plain copy of the current version (lookFrame in ./index.mjs), and the film gets its own copy of the kit's logos, fonts and guideline (placeKit).
 import { execFileSync, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, cpSync, existsSync, linkSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { basename, extname, join, resolve, sep } from "node:path";
 import { inflateRawSync } from "node:zlib";
 import { APP_ROOT, resolveRuntime } from "../version-manager/index.mjs";
@@ -21,6 +22,7 @@ import { claudeEnv, findClaude } from "../system-status/index.mjs";
 import { safeFileName } from "../project-service/index.mjs";
 import { ARCHIVE, MAX_UNPACK_BYTES, MAX_UNPACK_FILES, PROGRAM, unpackArchive } from "../project-service/archive.mjs";
 import { KIT_FILES } from "../project-service/layout.mjs";
+import { checklistOf } from "../project-service/design.mjs";
 import { familyKey, fontSlug, listLocalFonts, readFaces, useLocalFont } from "../hf-edit/localFonts.mjs";
 import { runPy } from "../setup/python.mjs";
 import { encodePoster } from "../library/preview-media.mjs";
@@ -283,6 +285,44 @@ export function kitLogos(m, root = APP_ROOT) {
 /** Where a film's copy of the kit's logos goes; the fonts go in assets/1_design/fonts/<family>/, as a font the user adds. */
 export const KIT_LOGOS = "assets/1_design/images/brand-kit";
 const ASKED_DIR = ".moworks/brand-kit";
+/** Where a film's copy of the guideline goes (never served by the preview, not in the film's history), and its list of what is there. */
+export const KIT_GUIDELINE = ".moworks/library/guideline";
+const GUIDELINE_FILE = "GUIDELINE.md";
+const MIN_CHECKS = 10;          // a guideline's rules on fewer lines than this were not gone through
+
+/** What a Brand Kit's FRAME.md lacks for a film to be checked against its guideline (owner 31/10: the kit holds enough to check every film):
+ *  the kit's scan asks Claude once more for these, and the kit's panel names what is still missing. guideline: the PDFs read. */
+export function kitGaps(md, guideline = []) {
+  const t = String(md ?? "").replace(/\r\n/g, "\n"), has = (h) => new RegExp(`^## ${h}[ \\t]*$`, "m").test(t), out = [];
+  if (!has("Crop limits")) out.push("Crop limits");
+  if (!has("Guideline motion")) out.push("Guideline motion");
+  if (guideline.length && !has("Guideline map")) out.push("Guideline map");
+  else if (guideline.length) {
+    const map = (/^## Guideline map[ \t]*\n([\s\S]*?)(?=^## |(?![\s\S]))/m.exec(t)?.[1] ?? "").toLowerCase();
+    const left = guideline.filter((g) => !map.includes(baseOf(g.name)));
+    if (left.length) out.push(`Guideline map: ${left.map((g) => g.name).join(", ")}`);
+  }
+  if (checklistOf(t).length < MIN_CHECKS) out.push("Guideline checklist");
+  return out;
+}
+
+/** The kit's guideline into a film: its text, its sheets and its pages, each file hard-linked where it can be (a kit's hundreds of pages cost a film nothing
+ *  on the same drive, and a later scan of the kit leaves the film's own as they were), with the list Claude starts from. */
+function placeGuideline(m, filmDir, root) {
+  const dir = dirOf(m.slug, root), base = join(filmDir, ...KIT_GUIDELINE.split("/")), lines = [];
+  const put = (from, to) => { mkdirSync(join(to, ".."), { recursive: true }); try { linkSync(from, to); } catch { copyFileSync(from, to); } };
+  for (const g of m.guideline ?? []) {
+    const from = join(dir, ...g.sub.split("/")), name = basename(g.sub);
+    if (!existsSync(from)) continue;
+    const tree = (d, rel = "") => { for (const e of readdirSync(d, { withFileTypes: true })) { if (e.isDirectory()) tree(join(d, e.name), `${rel}${e.name}/`); else put(join(d, e.name), join(base, name, ...`${rel}${e.name}`.split("/"))); } };
+    tree(from);
+    const at = (x) => `${KIT_GUIDELINE}/${name}/${basename(x)}`, paged = existsSync(join(from, "pages"));
+    lines.push(`- ${g.name}, ${g.pages} page(s): ${g.text.length ? `its whole text: ${g.text.map(at).join(", ")}` : "no text in it, its words are only in its pictures"}; every page small and numbered on sheets: ${g.sheets.map(at).join(", ")}${paged ? `; one page closer: ${KIT_GUIDELINE}/${name}/pages/page-NNN.jpg (NNN: its number in three digits)` : ""}.`);
+  }
+  if (!lines.length) return null;
+  writeFileSync(join(base, GUIDELINE_FILE), ["# The guideline behind this film's Brand Kit", "", "The owner's guideline as the kit read it. frame.md's page numbers lead here.", "", ...lines, ""].join("\n"));
+  return `${KIT_GUIDELINE}/${GUIDELINE_FILE}`;
+}
 
 /** Copy the kit's logos and fonts into a new film, once, when the film is made: the film keeps these copies, so a kit changed or deleted
  *  later never changes it. The fonts FRAME.md names (all of them when it names none it has), declared in index.html; recorded in KIT_FILES,
@@ -294,7 +334,7 @@ export function placeKit(id, filmDir, { root = APP_ROOT, now: at = now(), asked 
   if (!m) return null;
   const want = new Set(parseFrame(frameText(m, root) ?? "").fonts.map(familyKey));
   const all = kitFonts(m, root), named = all.filter((f) => want.has(familyKey(f.family)));
-  const out = { id: m.id, title: m.title, version: m.version, at, logos: [], fonts: [] };
+  const out = { id: m.id, title: m.title, version: m.version, at, logos: [], fonts: [], guideline: null };
   const logoDir = asked ? `${ASKED_DIR}/logos` : KIT_LOGOS;
   for (const l of kitLogos(m, root)) {
     mkdirSync(join(filmDir, ...logoDir.split("/")), { recursive: true });
@@ -310,7 +350,8 @@ export function placeKit(id, filmDir, { root = APP_ROOT, now: at = now(), asked 
     } else names = useLocalFont(filmDir, f.family, { dir: join(dirOf(m.slug, root), "files") })?.files ?? [];
     out.fonts.push({ family: f.family, vi: f.vi, files: names.map((n) => `${rel}/${n}`) });
   }
-  if (!asked && (out.logos.length || out.fonts.length)) {
+  try { out.guideline = placeGuideline(m, filmDir, root); } catch (e) { console.error(`[brand kit] guideline not copied: ${e.message}`); }
+  if (!asked && (out.logos.length || out.fonts.length || out.guideline)) {
     mkdirSync(join(filmDir, ".moworks"), { recursive: true });
     writeFileSync(join(filmDir, ...KIT_FILES.split("/")), JSON.stringify(out, null, 1) + "\n");
   }
@@ -318,13 +359,13 @@ export function placeKit(id, filmDir, { root = APP_ROOT, now: at = now(), asked 
 }
 
 // ---- the scan
-/** What each file is for Claude, read once: { hints, inputs, reading, unread, pageDirs }. inputs: the paths Claude reads; reading: the same as
+/** What each file is for Claude, read once: { hints, inputs, reading, unread, guideline }. inputs: the paths Claude reads; reading: the same as
  *  lines of READING.md, said per file; unread: [{ name, reason }]. A PDF goes through tools/intake/intake.py (Read stops at 20 MB and a
  *  long PDF is many reads): its whole text, a contact sheet of every page, each page ready for a closer look. A password is found here,
  *  before Claude is asked for anything. An artwork in several formats is read in one of them (AI and PSD need not be opened when the same name
  *  came as a picture); the same bytes under two names are read once. */
 async function readFiles(m, dir, root, { signal = null, onProgress = () => {} } = {}) {
-  const hints = { colours: [], fonts: [], pptx: [] }, inputs = [], reading = [], unread = [], pageDirs = [];
+  const hints = { colours: [], fonts: [], pptx: [] }, inputs = [], reading = [], unread = [], guideline = [];
   const files = m.files.filter((f) => existsSync(join(dir, "files", f.name)));
   const INTAKE = "tools/intake/intake.py";
   const fail = (f, reason, more = {}) => unread.push({ name: f.name, reason, ...more });
@@ -371,7 +412,7 @@ async function readFiles(m, dir, root, { signal = null, onProgress = () => {} } 
       if (!r.ok) { fail(f, why(r, f), r.password ? { password: true } : {}); continue; }
       const texts = r.chars ? r.text.map((x) => `${sub}/${x}`) : [], sheets = r.sheets.map((x) => `${sub}/${x}`);
       inputs.push(...texts, ...sheets);
-      pageDirs.push(join(abs, "pages"));
+      if (f.kind === "pdf") guideline.push({ name: f.name, pages: r.pages, sub, text: texts, sheets });
       reading.push(`- ${f.name}, ${f.kind === "ai" ? "Illustrator file" : "PDF"}, ${r.pages} page(s): ${texts.length ? `its whole text: ${texts.join(", ")}` : "no text in it, its words are only in its pictures: open the pages that matter"}; every page small and numbered on sheets: ${sheets.join(", ")}; one page closer: ${sub}/pages/page-NNN.jpg (NNN: its number in three digits).`);
       if (r.logo) made(join(abs, r.logo), f);
     } else if (f.kind === "psd") {
@@ -424,7 +465,7 @@ async function readFiles(m, dir, root, { signal = null, onProgress = () => {} } 
       reading.push(`- ${onSheets.length} more pictures, each with its name, on sheets: ${sheets.join(", ")}.`);
     } else for (const p of onSheets) unread.push({ name: basename(p), reason: why(r, { kind: "image" }) });
   }
-  return { hints, inputs, reading, unread, pageDirs };
+  return { hints, inputs, reading, unread, guideline };
 }
 /** The first bytes say it is a PNG, JPEG, GIF or WebP (a damaged or empty file would stop nothing until Claude tries to open it). */
 function isPicture(p) {
@@ -444,34 +485,50 @@ function readingMd({ reading, unread, fonts, logos }) {
     ...(unread.length ? ["# Not read", "", "The owner gave these and the app could not read or did not take them:", "", ...unread.map((x) => `- ${x.name}: ${x.reason}`), ""] : [])].join("\n");
 }
 
+/** What a film made with the kit is checked against: said whole in the scan's prompt and in its second go. Sections beyond HF's format (a film reads frame.md as
+ *  prose; kitGaps looks for these headings). */
+const KIT_NEEDS = [
+  "Every film made with this kit is checked against this file, so it holds all that a film can break. Give each rule its source at the end of its line: the file's short name and the page, \"(Foldables p. 66)\". Add these sections after the example's, with exactly these headings:",
+  "## Crop limits: how far the guideline lets each thing leave the frame or be cut, product, person, logo, type and background apart, from its words and from its figures (open those pages). Say what stays whole, what may go and down to which line; where the guideline's figures draw a line without a number, say which page to measure on. If it never says, write that it does not and that a crop of the product is then a question for the owner.",
+  "## Guideline motion: every motion, timing or sound rule the guideline itself gives: animated versions of its visuals with their frames in order, type moves, logo moves and holds, transitions it allows or forbids. A film's other motion is free. If it gives none, write that it gives none.",
+  "## Guideline map: one line per topic the guideline covers, leading to its pages: \"- Logo on film: <file name without its extension> pp. 20-24\". Every PDF in READING.md appears by that exact name, also when it adds nothing for films (say so).",
+  "## Guideline checklist: every rule a film can break, one per line, numbered in one run from G1, each a yes-or-no question's worth that can be seen in a frame, a shot, the sound or the script: \"- G12 [product] The device stays whole inside the Red Zone. (Foldables p. 66)\". The tag is one of text, colour, type, logo, product, layout, motion, sound, legal, end. Every don't is a line; every required line of legal text, every logo rule and every crop limit is a line. Keep it short and whole: nothing the guideline forbids is left out, nothing it does not say is added.",
+];
+
 /** The Claude run that writes work/FRAME.md from what the app made readable (cwd: the Look's folder; Read and Write only, nothing outside
  *  it). Returns the text, or throws with Claude's own answer. What the run took (time, turns, tokens, cost) stays in work/claude-run.json. */
-export async function claudeWriter({ dir, look, root = APP_ROOT, model = "claude-opus-5-5", effort = "medium", signal = null, timeoutMs = 20 * 60 * 1000 }) {
+export async function claudeWriter({ dir, look, root = APP_ROOT, model = "claude-opus-5-5", effort = "medium", signal = null, timeoutMs = 20 * 60 * 1000, fix = null }) {
   const exe = findClaude(root);
   if (!exe) throw err("NO_CLAUDE", "Claude Code is not installed or not signed in");
   const env = claudeEnv();
   for (const k of Object.keys(env)) if (/^ANTHROPIC_(API_KEY|AUTH_TOKEN|BASE_URL)$/i.test(k)) delete env[k];
-  const prompt = [
+  const prompt = fix ? [
+    `work/FRAME.md is the Brand Kit "${look.title}", written from a brand guideline, and it lacks what a film needs: ${fix.join("; ")}.`,
+    "Read work/FRAME.md and work/READING.md, then the guideline's parts you need, and add only that. Keep all the rest word for word.",
+    ...KIT_NEEDS,
+    "Write only work/FRAME.md. Reply with one line: what you added.",
+  ].join("\n") : [
     `You turn a brand guideline into a Brand Kit (a HyperFrames look) named "${look.title}".`,
     "1. Read work/look.md (how HyperFrames uses a design spec: \"The project's design spec\") and work/example-FRAME.md (one of HyperFrames' frame presets: the format to follow).",
     "2. Read work/READING.md: the guideline as the app made it readable, file by file. Then read all it lists, every text part and every sheet, several in one go. The original PDFs are too big to open: use these.",
-    "   A PDF's text parts hold all its words. Its sheets show every page small and numbered: look at them for colours, gradients, type and layout. Open a page closer only where a page sets a rule its text does not fully give (a gradient, a lockup, a logo position, an end card): up to 30 pages in all.",
+    "   A PDF's text parts hold all its words. Its sheets show every page small and numbered: look at them for colours, gradients, type and layout. Open a page closer where a page sets a rule its text does not fully give (a gradient, a lockup, a logo position, an end card, how far a product may be cropped, the frames of an animated visual): up to 40 pages in all.",
     "   work/hints.json lists the colours and fonts the app found in the files (a PPTX's theme, the main colours of the pictures): a hint only; the guideline itself wins.",
     `3. Write work/FRAME.md in exactly the example's format: the YAML front matter (version, name "${look.title} — Frame (video / frame layer)", description, unit, principle,`,
     "   colors as named hex tokens, typography with the exact font family names, then spacing, rounded and the other token groups the example has, where the",
     "   guideline gives them), then the prose sections in the example's order (the atoms, composition, logo use, do and don't).",
     "Rules: take every colour, font, size ratio, logo rule and layout rule from the guideline and keep its names for them: a gradient with its exact colour stops, a glow, a special display type are tokens or rules too. Where the guideline is silent, choose what fits it and",
-    "mark that token or line with \"# inferred\". Motion is out of scope, as in the example. Never copy the example's colours, fonts or wording. Films may be in Vietnamese.",
+    "mark that token or line with \"# inferred\". Never copy the example's colours, fonts or wording. Films may be in Vietnamese.",
     "Fonts: when READING.md lists font files, typography uses exactly those family names (the guideline's own name for a font may be written differently: write the name in that list); choose among them as the guideline says, for screens where it tells screen and print apart. A font READING.md does not list: name it as the guideline does, never swap it.",
     "Logos: in the logo section, name the file to use for each case by its file name from READING.md's list; say when one file holds several versions.",
     "Never write that a font, a logo or a file was not in the folder, was not supplied or is missing: READING.md says what the owner gave. Its \"Not read\" list is what the app could not read: where a rule may be in one of those files, say so by name and mark what you chose \"# inferred\"; it was given, it was not read.",
     "The description says what the brand looks like and names no file: the owner reads it on the kit's panel.",
+    ...KIT_NEEDS,
     "Write only work/FRAME.md. Reply with one line: what you took from which file.",
   ].join("\n");
   const args = ["-p", "--output-format", "json", "--restricted", "--tools", "Read,Write", "--permission-mode", "acceptEdits", "--permission-prompts", "none", "--strict-mcp-config",
     "--disable-slash-commands", "--model", model, "--effort", effort, "--no-session-persistence"];
   const out = join(dir, "work", "FRAME.md");
-  rmSync(out, { force: true });
+  if (!fix) rmSync(out, { force: true });
   const run = () => new Promise((ok, no) => {
     const c = spawn(exe, args, { cwd: dir, env, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
     let o = "";
@@ -484,7 +541,7 @@ export async function claudeWriter({ dir, look, root = APP_ROOT, model = "claude
       clearTimeout(t);
       try {
         const j = JSON.parse(o);
-        try { writeFileSync(join(dir, "work", "claude-run.json"), JSON.stringify({ model, effort, ms: j.duration_ms, turns: j.num_turns, costUsd: j.total_cost_usd, usage: j.usage }, null, 1) + "\n"); } catch { /* only a record */ }
+        try { writeFileSync(join(dir, "work", fix ? "claude-run-more.json" : "claude-run.json"), JSON.stringify({ model, effort, ms: j.duration_ms, turns: j.num_turns, costUsd: j.total_cost_usd, usage: j.usage }, null, 1) + "\n"); } catch { /* only a record */ }
         ok(String(j.result ?? "").trim());
       } catch { ok(o.slice(-300)); }
     });
@@ -531,8 +588,12 @@ export async function scanLook(id, { root = APP_ROOT, onProgress = () => {}, wri
     if (example) cpSync(join(hf, example.file), join(work, "example-FRAME.md"));
     if (existsSync(join(hf, ...LOOK_GUIDE.split("/")))) cpSync(join(hf, ...LOOK_GUIDE.split("/")), join(work, "look.md"));
     onProgress({ stage: "Writing the Brand Kit", progress: 30 });
-    const text = await writer({ dir, work, look: m, hints, inputs, unread, fonts, logos, root, signal });
-    for (const d of read.pageDirs) rmSync(d, { recursive: true, force: true });          // the page pictures were for this run; the text and the sheets stay
+    m.guideline = read.guideline; saveMeta(m, root);
+    const asked = { dir, work, look: m, hints, inputs, unread, fonts, logos, root, signal };
+    let text = await writer(asked);
+    // what a film needs is looked for here, not left to the first go (a kit once came without its crop limits): asked for once more
+    const gaps = kitGaps(text, read.guideline);
+    if (gaps.length) { onProgress({ stage: "Writing the Brand Kit", progress: 60 }); text = await writer({ ...asked, fix: gaps }); }
     m = await saveVersion(id, text, { root, note: `scanned from ${m.files.length} file(s)`, by: "scan", stills, google, onProgress, scanning: true });
     m.status = "ready";
     return saveMeta(m, root);
@@ -559,6 +620,7 @@ export async function saveVersion(id, text, { root = APP_ROOT, note = "", by = "
   if (stills) { try { shots = await drawStills(p, m.title, join(vd, "stills"), root, own); } catch (e) { stillsError = String(e?.message ?? e).slice(0, 200); } }
   onProgress({ stage: "Vietnamese check", progress: 90 });
   const vi = await vietnameseCheck(p.fonts, { ...(google ? { google } : {}), own });
+  m.gaps = kitGaps(t, m.guideline ?? []);
   Object.assign(m, { version: v, swatches: uniq(p.colors.map((c) => c.hex)).slice(0, 5), fonts: p.fonts, vi, description: p.description.slice(0, 300),
     stills: shots.map((n) => `v${v}/stills/${n}`), status: scanning ? m.status : "ready", error: stillsError && `Stills: ${stillsError}` });
   m.versions.push({ v, at: now(), by, note: String(note).slice(0, 200) });
@@ -664,12 +726,14 @@ export function wholeText(text, max = 600) {
   const head = t.slice(0, max), end = Math.max(head.lastIndexOf(". "), head.lastIndexOf("! "), head.lastIndexOf("? "));
   return end > max / 3 ? `${head.slice(0, end + 1)} …` : `${head.slice(0, head.lastIndexOf(" ") > 0 ? head.lastIndexOf(" ") : max).trimEnd()}…`;
 }
-export function publicLook(m) {
+export function publicLook(m, root = APP_ROOT) {
   return { id: m.id, title: m.title, group: "yours", description: wholeText(m.description), swatches: m.swatches ?? [],
     preview: { image: m.stills?.[0] ? media(m.slug, m.stills[0]) : null, video: null }, fonts: fontRows(m.vi, m.fonts), vi: m.vi?.status ?? null,
     version: m.version, updatedAt: m.updatedAt, editable: true, status: m.status, error: m.error ?? null,
     // what the kit holds without having read it: named on its panel, a kit made before this list has none
     unread: [...(m.unread ?? []), ...(m.leftOut ?? [])], stopped: m.stopped ?? null,
+    // a kit made before these sections has no list: what it lacks is read from its text
+    gaps: m.gaps ?? (m.version ? kitGaps(frameText(m, root), m.guideline ?? []) : []), checks: m.version ? checklistOf(frameText(m, root)).length : 0,
     source: { kind: "guideline", files: (m.files ?? []).map((f) => f.name), credit: OWNER } };
 }
 export function hfLook(l, root = APP_ROOT) {
@@ -680,11 +744,11 @@ export function hfLook(l, root = APP_ROOT) {
     status: "ready", error: null, source: { kind: "hf-preset", files: [l.file], credit: l.credit } };
 }
 export function apiLooks(root = APP_ROOT) {
-  return { free: FREE, looks: [...customLooks(root).map(publicLook), ...hfItems(root).map((l) => hfLook(l, root))] };
+  return { free: FREE, looks: [...customLooks(root).map((m) => publicLook(m, root)), ...hfItems(root).map((l) => hfLook(l, root))] };
 }
 export function apiLook(id, root = APP_ROOT) {
   const m = getCustom(id, root);
-  if (m) return { ...publicLook(m), frame: frameText(m, root), stills: (m.stills ?? []).map((r) => media(m.slug, r)), versions: m.versions,
+  if (m) return { ...publicLook(m, root), frame: frameText(m, root), stills: (m.stills ?? []).map((r) => media(m.slug, r)), versions: m.versions,
     files: m.files };
   const l = hfItems(root).find((x) => x.id === id);
   if (!l) throw err("NOT_FOUND", "Brand Kit not found");

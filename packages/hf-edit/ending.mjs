@@ -5,6 +5,7 @@
 // and inside it only when the brief asks for exactly or at most that length (MOTION-PLAN.json's ending.inside) or the style's author gives
 // its own ending (inside that ending, nothing added). An author's ending stands only when the plan names it and its last shot plays it
 // (resolveEnding); one the plan only claims is the house fade (T24-12: the picture stayed lit to its last frame and cut, the music faded).
+import { checklistOf } from "../project-service/design.mjs";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { docPath } from "../project-service/docs.mjs";
@@ -72,10 +73,17 @@ export function planEnding(dir, { ownEnding = false } = {}) {
   return resolveEnding(plan, { ownEnding });
 }
 
+/** A Brand Kit whose guideline sets how a film ends (a line tagged [end] in its checklist) ends the film as an author's ending does: nothing is
+ *  added after it and the picture does not fade over it (owner 31/10: Test 31 faded a client's end tag for 1 s). */
+export function kitEnding(dir) {
+  if (!dir) return false;
+  try { return checklistOf(readFileSync(join(dir, "frame.md"), "utf8")).some((x) => /^\[end\]/i.test(x.rule)); } catch { return false; }
+}
+
 /** How the film ends: the plan's ending as the app applies it, with { own, inside }: own when the author's ending stands (before the plan
  *  says how the film ends, when the style's author has one), inside when nothing is added after the set length. */
 export function filmEnding(meta, { dir = null, root } = {}) {
-  const ownEnding = styleTraits(meta?.style?.id, root).ownEnding;
+  const ownEnding = styleTraits(meta?.style?.id, root).ownEnding || kitEnding(dir);
   const e = dir ? planEnding(dir, { ownEnding }) : {};
   const own = e.kind ? e.kind === "author" : ownEnding;
   return { ...e, own, inside: own || e.inside === true };

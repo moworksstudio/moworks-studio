@@ -1,4 +1,4 @@
-// Production routes: voice-over (upload, transcription first, transcript review, ElevenLabs / Fish
+// Production routes: voice-over (upload, transcription first, transcript review, ElevenLabs / Kokoro
 // Audio), service keys, speech-to-text models, Export Video, QA and Export to AE. Long work runs as background jobs (jobs.mjs); nothing here
 // blocks the server's event loop on HyperFrames, FFmpeg or After Effects (child processes or the render worker).
 import { stampBase, stampParts } from "../render-names/index.mjs";
@@ -10,6 +10,8 @@ import { pipeline } from "node:stream/promises";
 import * as projects from "../project-service/index.mjs";
 import { docPath } from "../project-service/docs.mjs";
 import { musicSrc, readBeats } from "../hf-edit/beats.mjs";
+import { beatMapTrack, writeBeatMap } from "../hf-edit/beatMap.mjs";
+import { isLyricVideo } from "../style-catalog/traits.mjs";
 import { showInExplorer } from "../project-service/explorer.mjs";
 import { rememberAssets } from "../project-service/assets.mjs";
 import { ARCHIVE, archiveMessage, unpackArchive } from "../project-service/archive.mjs";
@@ -27,7 +29,8 @@ import { render } from "../hf-render-worker/client.mjs";
 import { chooseGpu } from "../hf-render-worker/gpu.mjs";
 import { aeRunningAsync, canvasCount, plainLog } from "../ae-export/index.mjs";
 import * as secrets from "../secrets/index.mjs";
-import { PROVIDERS, clearVoiceLists, pickModel, retryOnce, ttsFailedText, voiceList, voiceSettings } from "../voice/tts.mjs";
+import { PROVIDERS, clearVoiceLists, filmVietnamese, isVietnamese, pickModel, retryOnce, ttsFailedText, voiceList, voiceSettings } from "../voice/tts.mjs";
+import * as kokoro from "../voice/kokoro.mjs";
 import { plainMessage } from "./plainError.mjs";
 import { AUDIO_TYPES, MAX_BYTES, extractAudio, peaks, probe } from "../voice/audio.mjs";
 import * as asr from "../voice/asr.mjs";
@@ -203,6 +206,10 @@ export const CHECKS = {
   "G-HF-MOTION": { title: "Motion", explain: "The moves the Motion Plan asks for are in the film.", kind: "deterministic" },
   "G-BLANK": { title: "Empty-looking scenes", explain: "Takes a few stills of each scene and flags a scene whose stills are all flat. A heuristic: it can miss or misjudge.", kind: "heuristic" },
   "G-END": { title: "The ending", explain: "Compares a still half a second before the end with the last frame: a film whose picture is still full and lit on its last frame stops dead. The picture should fade out with the music (or after the end card). In a style whose author's ending the Motion Plan names and plays, a dark screen, a dot or a held end card ends the film too.", kind: "deterministic" },
+  "G-LYRIC": { title: "The sung words", explain: "In a lyrics video: each word sung is on screen, with the count sung, and shows around its sung time (the times are a draft, so only clear misses are named). A warning, never a block.", kind: "deterministic" },
+  "G-SEQ-CRAWL": { title: "Image sequence: smooth turns", explain: "A product sequence turning under 1 picture a film frame, or one picture held where the product is mid-turn: it looks like it stutters. A warning, never a block.", kind: "deterministic" },
+  "G-SEQ-JUMP": { title: "Image sequence: no sudden jump", explain: "One film frame that skips far more pictures than the frames around it, where the two pictures differ. Fast turns are fine; a cut of the film is fine. A warning, never a block.", kind: "deterministic" },
+  "G-SEQ-PRODUCT": { title: "Image sequence: the whole product in the frame", explain: "Reads where the product is on screen every 0.2 s: the frame must not cut it, outside a shot marked as a close-up. A warning, never a block.", kind: "deterministic" },
   "G-STILL": { title: "Still stretches", explain: "Takes a still every 0.25 s and flags where the film's objects hold still for more than 2 s (the final hold excepted): the film should never look like a slideshow. A drift of a few pixels or a slight tilt counts as still. A heuristic: it can misjudge.", kind: "heuristic" },
 };
 
@@ -290,7 +297,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     const all = asr.models(root);
     const ready = (m) => m && m.installed && m.runtime.ok;
     // no model asked for: the default when it is ready, else any ready one (Turbo is the only model)
-    const id = model ?? (ready(all.find((m) => m.id === s.defaultModel)) ? s.defaultModel : all.find(ready)?.id ?? s.defaultModel), lang = language ?? p.meta?.language?.id ?? s.language;          // Whisper's "Spoken in" follows the film's language
+    const id = model ?? (ready(all.find((m) => m.id === s.defaultModel)) ? s.defaultModel : all.find(ready)?.id ?? s.defaultModel), lang = language ?? (p.meta?.voice?.source === "kokoro" ? kokoro.whisperLanguage(p.meta.voice.voiceId) : null) ?? p.meta?.language?.id ?? s.language;          // Whisper's "Spoken in" follows the film's language; a Kokoro voice-over is in its voice's own (a film with no language set yet read an English voice as Vietnamese and heard nothing)
     const file = audioPath(p);
     if (!file || !existsSync(file)) throw err("INVALID", "Add the voice-over audio first");
     const card = all.find((m) => m.id === id);
@@ -313,9 +320,9 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       meta(p.id, (m) => { m.voice.transcript = { status: "review", model: id, language: result.language, at: t.createdAt, segments: t.segments.length };
         (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "voice", text: `Transcript ready (${card.short}, ${result.segments.length} segments)` }); });
       await commit(p, "Voice-over transcribed");
-      // a voice-over the app read from a script (ElevenLabs, Fish Audio) says that script word for word: its words are the
-      // script's, at Whisper's times; when what was heard is far from the script (another take, an edited file) the user checks them
-      const v0 = voiceOf(p), read = ["elevenlabs", "fishaudio"].includes(v0?.source) && v0?.script && v0.file === t.audio ? transcript.fromScript(t.segments, v0.script) : null;
+      // a voice-over the app read from a script (ElevenLabs, Kokoro; a film made earlier with Fish Audio too) says that script word for word: its
+      // words are the script's, at Whisper's times; when what was heard is far from the script (another take, an edited file) the user checks them
+      const v0 = voiceOf(p), read = ["elevenlabs", "kokoro", "fishaudio"].includes(v0?.source) && v0?.script && v0.file === t.audio ? transcript.fromScript(t.segments, v0.script) : null;
       if (read && read.match < 0.6) {
         note(p, { kind: "voice", status: "warning", text: "The words heard differ from the script the voice was read from ({pct}% the same): check them in Transcript before the film is timed to them",
           vars: { pct: Math.round(read.match * 100) } });
@@ -389,7 +396,20 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "music", text: `Music on the timeline: ${basename(rel)}` }); });
     note(p, { kind: "voice", text: beats.ok ? "Music on the timeline, beats measured: {file}" : "Music on the timeline: {file}", vars: { file: basename(rel) } });
     repeatNote(p);
+    if (isLyricVideo(projects.getProject(p.id, root)?.meta, { dir: p.path, root })) await writeBeatMap(p.path, rel, { root, fps: projects.projectFps(p) }).catch(() => false);
     return { file: rel, beats: beats.ok ? beats.file : null, beatsError: beats.ok ? null : beats.message };
+  };
+  /** A lyrics video's song, however it came in (a folder of assets has no role): on the timeline with its beats measured (HyperFrames reads the beats of the track in the film),
+   *  and its beat map written, before the steps that plan the film. One song in the music folder only: with more, the owner says which (Prepare). Nothing to do when the map is there. */
+  ctx.songArrived = async (p0) => {
+    const p = projects.getProject(p0.id, root) ?? p0;
+    if (!isLyricVideo(p.meta, { dir: p.path, root })) return;
+    const placed = p.meta?.music?.file && existsSync(join(p.path, ...p.meta.music.file.split("/"))) ? p.meta.music.file : null;
+    const songs = placed ? [placed] : ["assets/3_audio/music", "assets/audio"].flatMap((rel) => { const d = join(p.path, ...rel.split("/")); return existsSync(d) ? readdirSync(d).filter((x) => AUDIO_EXT.test(x)).map((x) => `${rel}/${x}`) : []; });
+    if (songs.length !== 1) return;
+    const inFilm = await musicSrc(p.path).catch(() => null);
+    if (!placed && !inFilm) await placeMusic(p, songs[0], await probe(join(p.path, ...songs[0].split("/")), root));
+    if (beatMapTrack(p.path) !== (inFilm ?? songs[0])) await writeBeatMap(p.path, inFilm ?? songs[0], { root, fps: projects.projectFps(p) }).catch(() => false);
   };
   /** A song far shorter than the film plays again after itself to the film's end (tracks.mjs musicLoop, T22-9): said once in the chat, its
    *  Final Mix button there to pick a longer one (the Final Mix says it too). */
@@ -810,18 +830,18 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   const routes = [
     // ---- service keys and speech-to-text settings (Settings › System › Voice-over; the speech models in Settings › System)
     r("GET", "/voice/settings", () => ({ settings: asr.voiceSettings(root), models: asr.models(root), modelsRoot: asr.modelsRoot(root), keys: secrets.status(root),
-      providers: Object.entries(PROVIDERS).map(([id, x]) => ({ id, title: x.title })), jobs: jobs.list({ kind: "model-install" }).slice(0, 5) })),
+      providers: Object.entries(PROVIDERS).filter(([, x]) => !x.local).map(([id, x]) => ({ id, title: x.title })), jobs: jobs.list({ kind: "model-install" }).slice(0, 5) })),
     r("PATCH", "/voice/settings", (_p, b) => ({ settings: asr.saveVoiceSettings(b, root) })),
-    r("PUT", "/voice/keys/(elevenlabs|fishaudio)", ([name], b) => { clearVoiceLists(name); return secrets.setSecret(name, b.value, root); }),
-    r("POST", "/voice/keys/(elevenlabs|fishaudio)/clear", ([name]) => { clearVoiceLists(name); return secrets.clearSecret(name, root); }),
-    r("POST", "/voice/keys/(elevenlabs|fishaudio)/test", async ([name]) => {
+    r("PUT", "/voice/keys/(elevenlabs)", ([name], b) => { clearVoiceLists(name); return secrets.setSecret(name, b.value, root); }),
+    r("POST", "/voice/keys/(elevenlabs)/clear", ([name]) => { clearVoiceLists(name); return secrets.clearSecret(name, root); }),
+    r("POST", "/voice/keys/(elevenlabs)/test", async ([name]) => {
       const key = secrets.getSecret(name, root);
       if (!key) throw err("INVALID", "Save the key first");
       return PROVIDERS[name].test(key);
     }),
-    r("GET", "/voice/providers/(elevenlabs|fishaudio)/voices", async ([name], _b, q) => {
-      const key = secrets.getSecret(name, root);
-      if (!key) throw err("INVALID", `Add the ${PROVIDERS[name].title} key in Settings first`);
+    r("GET", "/voice/providers/(elevenlabs|kokoro)/voices", async ([name], _b, q) => {
+      const key = PROVIDERS[name].local ? null : secrets.getSecret(name, root);
+      if (!key && !PROVIDERS[name].local) throw err("INVALID", `Add the ${PROVIDERS[name].title} key in Settings first`);
       // read at once with 45 s a call and kept 10 min per service and language (T25: a busy computer's 25 s failure); ?lang= the film's
       // language, ?fresh=1 reads it again
       return voiceList(name, key, { q: q.get("q") ?? "", lang: q.get("lang") === "en" ? "en" : "vi", fresh: q.get("fresh") === "1" });
@@ -847,13 +867,15 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       return { voice: p.meta?.voice ?? null, hints: hintsFor(p), transcript: t, hfTranscript: existsSync(join(p.path, "transcript.json")), settings: asr.voiceSettings(root),
         models: asr.models(root).map(({ id: mid, short, installed, runtime, isDefault, languages }) => ({ id: mid, short, installed, ready: installed && runtime.ok, isDefault, languages })),
         keys: secrets.status(root), jobs: jobs.list({ projectId: id }).filter((j) => ["transcribe", "tts"].includes(j.kind)).slice(0, 3),
+        // the free voice: on this computer or not, its download, and whether this film can use it (it has no Vietnamese)
+        kokoro: { installed: kokoro.packStatus(root).installed, mb: kokoro.PACK.mb, blocked: filmVietnamese(p.meta) },
         scriptDraft: scriptDraft(p.path),          // the words Claude wrote to read, for the Script box ({ text, from } or null)
         // the owner's own script in the brief and the lines of it the words to read leave out (Test 24: 9 of 12 went in)
         ownScript: (() => { const lines = briefScript(p.meta?.brief?.text); return lines.length >= 2 ? { text: lines.join("\n"), leftOut: scriptGap(p.path, p.meta?.brief?.text)?.left.length ?? 0 } : null; })() };
     }),
     r("PATCH", `/projects/${P}/voice`, ([id], b) => {
       mustProject(id, root);
-      const source = ["upload", "elevenlabs", "fishaudio", "none"].includes(b.source) ? b.source : null;
+      const source = ["upload", "elevenlabs", "kokoro", "none"].includes(b.source) ? b.source : null;
       if (!source) throw err("INVALID", "Unknown voice-over source");
       // the user's own "No voice-over" (noVoice, never a source a new project starts with) lets the Storyboard go on without one
       const out = meta(id, (m) => { const { noVoice, ...v } = m.voice ?? {}; m.voice = { ...v, source, ...(source === "none" ? { file: null, noVoice: { at: new Date().toISOString() } } : {}) }; }).meta.voice;
@@ -894,7 +916,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       const map = b ? { source: "hyperframes beats", audio: { title: tr.title, duration_sec: tr.duration }, tempo: { bpm: b.bpm, n_beats: b.times.length },
         beats: b.times.map((time, i) => ({ time, strength: b.strengths[i] })) } : null;
       const lines = [];
-      for (const w of lyrics.read(p.path).words) {
+      for (const w of lyrics.read(p.path).words.filter((x) => x.layer !== "backing")) {
         const l = (lines[w.line - 1] ??= { line: w.line, text: "", start: w.start, end: w.end, heard: 0, words: 0 });
         Object.assign(l, { text: `${l.text} ${w.text}`.trim(), end: w.end, heard: l.heard + (w.sure === "heard" ? 1 : 0), words: l.words + 1 });
       }
@@ -906,7 +928,8 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       const p = mustProject(id, root);
       const job = jobs.running().find((j) => j.kind === "lyrics" && j.projectId === id) ?? null;
       // gpu: Whisper runs on the graphics card here (the CUDA pack is in), so the sheet says the right wait
-      return { ...lyrics.read(p.path), track: musicTrack(p), job: job?.id ?? null, gpu: asr.whisperDevice(root).gpu };
+      const track = musicTrack(p);
+      return { ...lyrics.read(p.path), track, heard: lyrics.heardDraft(p.path, track), job: job?.id ?? null, gpu: asr.whisperDevice(root).gpu };
     }),
     r("PUT", `/projects/${P}/lyrics`, async ([id], b) => {
       const p = mustProject(id, root);
@@ -936,12 +959,18 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     r("POST", `/projects/${P}/voice/tts`, ([id], b) => {
       const p = mustProject(id, root);
       const provider = PROVIDERS[b.provider] ? b.provider : null;
-      if (!provider) throw err("INVALID", "Choose ElevenLabs or Fish Audio");
+      if (!provider) throw err("INVALID", "Choose ElevenLabs or Kokoro");
       const text = String(b.text ?? "").normalize("NFC").trim();
       if (!text) throw err("INVALID", "Write the script to be read");
       if (text.length > 20000) throw err("INVALID", "The script is too long for one request (20,000 characters)");
-      const key = secrets.getSecret(provider, root);
-      if (!key) throw err("INVALID", `Add the ${PROVIDERS[provider].title} key in Settings first`);
+      const local = !!PROVIDERS[provider].local;
+      const key = local ? null : secrets.getSecret(provider, root);
+      if (!key && !local) throw err("INVALID", `Add the ${PROVIDERS[provider].title} key in Settings first`);
+      if (local) {
+        if (!kokoro.packStatus(root).installed) throw err("MODEL_MISSING", "The free voice is not installed yet: install it on the Voice screen");
+        // a film in Vietnamese, or Vietnamese words in a film whose language is not set yet (an English film may quote a Vietnamese name)
+        if (filmVietnamese(p.meta) || (!p.meta?.language?.id && isVietnamese(text))) throw err("INVALID", "Kokoro has no Vietnamese voice: choose ElevenLabs or upload a recording");
+      }
       // only what the user set on the Voice screen (none: the service's defaults); `speed` alone is the older shape
       const settings = voiceSettings(provider, b.settings ?? (b.speed != null ? { speed: b.speed } : null));
       // Test 24: the first voice-over failed while the computer was loaded (the server did not answer for about 30 s) and the step went
@@ -962,10 +991,12 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
             if (!model) throw err("INVALID", "This ElevenLabs account has no model that reads Vietnamese");
             job.update({ model });
           }
-          await retryOnce(() => PROVIDERS[provider].generate(key, { voiceId: b.voiceId, model: model ?? undefined, text, out, signal: job.signal, settings, lang: p.meta?.language?.id ?? null }),
+          await retryOnce(() => PROVIDERS[provider].generate(key, { voiceId: b.voiceId, model: model ?? undefined, text, out, signal: job.signal, settings, lang: p.meta?.language?.id ?? null, root,
+            onProgress: ({ part }) => job.update({ progress: Math.floor(part * 100) }) }),
             { signal: job.signal, onRetry: again("reading the script") });
         } catch (e) {
           rmSync(out, { force: true });          // no half-written file left behind
+          if (e.detail) job.log(String(e.detail));
           if (!job.signal.aborted) {
             const said = ttsFailedText({ message: plainMessage(e) }, title);
             meta(id, (m) => { m.voice = { ...(m.voice ?? {}), ttsFailed: { at: new Date().toISOString(), message: said } }; });

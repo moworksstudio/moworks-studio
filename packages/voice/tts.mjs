@@ -1,14 +1,13 @@
-// Text-to-speech providers (voice-over is uploaded audio, ElevenLabs or Fish Audio; no local voice). The key comes from the
-// secret store and is sent only to the provider's own API; errors never echo it. Generation costs the user credits: it runs only on an
-// explicit request from the Voice screen.
+// Text-to-speech providers: ElevenLabs (its key comes from the secret store and is sent only to its own API; errors never echo it; a voice-over
+// costs the user credits, so it runs only on an explicit request from the Voice screen) and Kokoro, the free voice on this computer (kokoro.mjs).
 import { createHash } from "node:crypto";
 import { createWriteStream, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
+import * as kokoro from "./kokoro.mjs";
 
 const EL = "https://api.elevenlabs.io";
-const FISH = "https://api.fish.audio";
 const TIMEOUT = 20000;
 
 async function call(url, init = {}, timeout = TIMEOUT) {
@@ -75,6 +74,9 @@ export function usableOn(v, sub) {
 
 /** Vietnamese text: a letter only Vietnamese writes. */
 export const isVietnamese = (text) => /[ăâđêôơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]/i.test(String(text ?? ""));
+/** A film in Vietnamese: its language when it has one, else its brief's letters (Prepare has not asked yet). Kokoro has no Vietnamese voice
+ *  (hexgrad's VOICES.md), so such a film's Voice screen greys it and Claude never offers it. */
+export const filmVietnamese = (meta) => (meta?.language?.id ? meta.language.id === "vi" : isVietnamese(meta?.brief?.text));
 /** ElevenLabs models that read Vietnamese, best first (an account's eleven_multilingual_v2 may list no Vietnamese; /v1/models names
  *  eleven_v3, eleven_v4… with a vi language). */
 export const EL_VI_ORDER = ["eleven_v3", "eleven_v4", "eleven_v4_turbo", "eleven_turbo_v2_5", "eleven_flash_v2_5", "eleven_v3_conversational"];
@@ -99,13 +101,8 @@ export const SETTINGS = {
     { id: "style", label: "Style exaggeration", type: "number", min: 0, max: 1, step: 0.01 },
     { id: "use_speaker_boost", label: "Speaker boost", type: "boolean" },
   ],
-  fishaudio: [
-    { id: "speed", label: "Speed", type: "number", min: 0.5, max: 2, step: 0.01, default: 1 },
-    { id: "volume", label: "Volume (dB)", type: "number", step: 0.5, default: 0 },          // the reference gives no range
-    { id: "temperature", label: "Temperature", type: "number", min: 0, max: 1, step: 0.01, default: 0.7 },
-    { id: "top_p", label: "Top P", type: "number", min: 0, max: 1, step: 0.01, default: 0.7 },
-    { id: "normalize", label: "Normalize text", type: "boolean", default: true },
-  ],
+  // kokoro-onnx refuses a speed outside 0.5-2 (its _prepare, 0.6.1)
+  kokoro: [{ id: "speed", label: "Speed", type: "number", min: 0.5, max: 2, step: 0.01, default: 1 }],
 };
 /** The known settings of a service's answer, by their own names (unknown keys and nulls dropped). */
 function pickSettings(provider, raw) {
@@ -176,31 +173,15 @@ export const PROVIDERS = {
       return { file: out, format: "mp3" };
     },
   },
-  fishaudio: {
-    title: "Fish Audio",
-    async test(key) {
-      await call(`${FISH}/model?self=true&page_size=1`, { headers: { Authorization: `Bearer ${key}` } });
-      return { ok: true, account: null, credits: null };
-    },
-    async voices(key, { q = "", timeout = TIMEOUT } = {}) {
-      const h = { headers: { Authorization: `Bearer ${key}` } };
-      const [own, pub] = await Promise.all([call(`${FISH}/model?self=true&page_size=50`, h, timeout).then((r) => r.json()),
-        call(`${FISH}/model?language=vi&sort_by=score&page_size=40${q ? `&title=${encodeURIComponent(q)}` : ""}`, h, timeout).then((r) => r.json())]);
-      const map = (v, mine) => ({ id: v._id, name: v.title, labels: [(v.languages ?? []).join("/"), v.author?.nickname].filter(Boolean).join(" · "), preview: v.samples?.[0]?.audio ?? null, own: mine });
-      return [...(own.items ?? []).map((v) => map(v, true)), ...(pub.items ?? []).map((v) => map(v, false))];
-    },
-    async models() { return [{ id: "s2.1-pro", name: "S2.1 Pro (default)" }, { id: "s1", name: "S1" }, { id: "s2-pro", name: "S2 Pro" }]; },
-    /** Fish Audio has no settings endpoint: its documented defaults (docs.fish.audio, TTS request body, read 26/10/2026). */
-    async defaultSettings() { return Object.fromEntries(SETTINGS.fishaudio.map((f) => [f.id, f.default])); },
-    async generate(key, { voiceId, text, model = "s2.1-pro", out, signal, settings = null, lang = null }) {
-      const vs = voiceSettings("fishaudio", settings) ?? {};
-      const { speed, volume, ...rest } = vs;
-      const prosody = speed != null || volume != null ? { ...(speed != null ? { speed } : {}), ...(volume != null ? { volume } : {}) } : null;
-      const r = await call(`${FISH}/v1/tts`, { method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", model },
-        body: JSON.stringify({ text, reference_id: voiceId || undefined, format: "mp3", mp3_bitrate: 128, language: lang === "en" ? "en" : "vi", ...rest, ...(prosody ? { prosody } : {}) }), signal }, 300000);
-      mkdirSync(dirname(out), { recursive: true });
-      await pipeline(Readable.fromWeb(r.body), createWriteStream(out));
-      return { file: out, format: "mp3" };
+  // no key, no service: the free voice on this computer (kokoro.mjs), read through HyperFrames' own tts; `local`: nothing to pay, no key to save
+  kokoro: {
+    title: "Kokoro", local: true,
+    async test() { return { ok: true, account: null, credits: null }; },
+    async voices() { return kokoro.VOICES.map((v) => ({ id: v.id, name: v.name, labels: [v.gender, v.lang, v.grade ? `quality ${v.grade}` : null].filter(Boolean).join(", "), preview: null, own: false })); },
+    async models() { return [{ id: "kokoro-v1.0", name: "Kokoro v1.0" }]; },
+    async defaultSettings() { return Object.fromEntries(SETTINGS.kokoro.map((f) => [f.id, f.default])); },
+    async generate(_key, { voiceId, text, out, signal, settings = null, root, onProgress }) {
+      return kokoro.speak(root, { voice: voiceId, text, out, signal, onProgress, speed: voiceSettings("kokoro", settings)?.speed ?? 1 });
     },
   },
 };

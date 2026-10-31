@@ -9,6 +9,7 @@ import { placedShots, readShots } from "../hf-edit/shots.mjs";
 import { read as readPlan } from "../motion-plan/index.mjs";
 import { readState, sfxNone } from "../sfx/index.mjs";
 import { briefOf, isOff, readPrefs, soundPolicy } from "../sfx/prefs.mjs";
+import { isSongFilm } from "../style-catalog/traits.mjs";
 import { motionCues, placeOf } from "../sfx/actions.mjs";
 import { whooshInto } from "../sfx/auto.mjs";
 
@@ -20,7 +21,7 @@ const r2 = (n) => Math.round(n * 100) / 100;
 export function sfxCover(dir, shots, plan) {
   const st = readState(dir);
   if (!st.placedAt) return { ran: false, findings: [] };
-  const prefs = readPrefs(dir), policy = soundPolicy({ prefs, brief: briefOf(dir) });
+  const prefs = readPrefs(dir), policy = soundPolicy({ prefs, brief: briefOf(dir), song: isSongFilm(null, { dir }) });
   const silent = policy.silent ?? st.policy?.silent ?? null;
   if (silent) return { ran: false, why: silent, findings: [] };
   if (!plan?.shots?.length) return { ran: false, findings: [] };
@@ -62,7 +63,7 @@ export async function gateSfx(projectDir) {
   try { const r = await readShots(projectDir); shots = placedShots(r.shots, r.root?.duration); }
   catch (e) { return { id: "G-SFX", blocking: false, pass: false, notChecked: true, findings: [{ severity: "warning", code: "not_checked", message: `The sound check could not run: ${String(e.message ?? e).split("\n")[0]}` }] }; }
   const r = sfxCover(projectDir, shots, mp.plan);
-  if (!r.ran) return r.why ? { id: "G-SFX", blocking: false, pass: true, findings: [], skipped: r.why === "owner" ? "The owner asked for no sound effects" : r.why === "style" ? "The film style asks for no sound effects" : "The brief asks for no sound effects" } : null;
+  if (!r.ran) return r.why ? { id: "G-SFX", blocking: false, pass: true, findings: [], skipped: r.why === "owner" ? "The owner asked for no sound effects" : r.why === "style" ? "The film style asks for no sound effects" : r.why === "song" ? "A film made for its song has no sound effects" : "The brief asks for no sound effects" } : null;
   // each finding's own sentence is what Tech checks shows (`plain`; Tests 25 and 26 read "Something here may look wrong" for each, while
   // Render named the motion and its sound); no kind code, so the shots are never merged under one motion's words
   return { id: "G-SFX", blocking: false, pass: r.findings.length === 0, warnings: r.findings.length,

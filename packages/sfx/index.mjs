@@ -527,6 +527,7 @@ export function placedNote(res) {
   const near = heard.filter((x) => !x.lasting), lasting = heard.filter((x) => x.lasting);
   const some = (xs, max = 10) => (xs.length > max ? `${xs.slice(0, max).join(", ")} and ${xs.length - max} more` : xs.join(", "));
   const failed = (res.missing ?? []).filter((m) => (res.failed ?? []).includes(m)), none = (res.missing ?? []).filter((m) => !failed.includes(m));
+  if (res.silent === "song") return { text: "No sound effects placed: this film is made for its song, so the song is what is heard. Tell Claude if you want some." };
   if (res.silent) return { text: "No sound effects placed: {why} asks for none", vars: { why: res.silent === "owner" ? "your choice" : res.silent === "style" ? "the film style's sound" : "the brief" } };
   const names = res.names ?? [], shown = names.length > 12 ? `${names.slice(0, 12).join(", ")} and ${names.length - 12} more` : names.join(", ");
   const parts = [`Sound effects placed by the app: {n} ({names})${res.ambience ? ", with an ambience bed under {beds} place(s)" : ""}`];

@@ -135,6 +135,21 @@ const VERSION_KEYS = { build: "Build {n}", edit: "Edit {n}", render: "Render {n}
 export function createAutopilot(ctx) {
   const { root } = ctx;
   const inFlight = new Set();
+  // a step that could not start (a busy computer, Test 33: Approve and build, then 17 minutes of nothing): tried again by itself, then said with a Retry
+  const startTries = new Map();
+  const START_TRIES = ctx.startTries ?? 3, START_WAIT = ctx.startWait ?? 60000;
+  function stepNotStarted(id, s, e) {
+    const signedOut = ["CLAUDE_SIGNED_OUT", "NO_CLAUDE"].includes(e?.code), n = (startTries.get(id) ?? 0) + 1;
+    if (!signedOut && n <= START_TRIES) {
+      startTries.set(id, n);
+      setTimeout(() => { advance(id).catch?.(() => null); }, START_WAIT).unref?.();
+      return { error: e.message, retrying: n };
+    }
+    startTries.delete(id);
+    const p = projects.getProject(id, root);
+    try { if (p && !p.missing) projects.addNote(p.path, { kind: "pipeline", status: "warning", text: signedOut ? e.message : "The step \"{step}\" could not start: {why}. The app tried again and stopped; press Retry when the computer is less busy.", vars: { step: s?.title ?? s?.id ?? "next", why: String(e?.message ?? e).slice(0, 200) }, ...(s?.id ? { retry: s.id } : {}) }); } catch { /* notes are best effort */ }
+    return { error: e.message };
+  }
   const note = (p, text, vars = {}) => { try { projects.addNote(p.path, { kind: "pipeline", text, vars }); } catch { /* notes are best effort */ } };
   // a reminder card: `open` names the dialog the card's button opens (character | storyboard | motion-plan)
   const waitCard = (p, open, text, vars = {}) => { try { projects.addNote(p.path, { kind: "waiting", open, text, vars }); } catch { /* notes are best effort */ } };
@@ -247,6 +262,8 @@ export function createAutopilot(ctx) {
         try { projects.addNote(p.path, { kind: "lyrics", status: "warning", open: "lyrics", text: "The app could not hear this song's words. If the film should follow them, paste them in the Lyrics dialog." }); } catch { /* notes are best effort */ }
       }
     }
+    // a lyrics video's song: on the timeline and its beat map written (a song added later comes in here too)
+    if (["brief", "storyboard", "motionSpec", "build"].includes(s.id)) { try { await ctx.songArrived?.(p); } catch { /* the step asks about what is missing */ } }
     if (s.id === "brief" && kickoff) {          // the brief is the chat's first message, then the app's line
       const brief = String(p.meta?.brief?.text ?? "").trim();
       if (brief) { try { projects.addNote(p.path, { kind: "brief", text: brief.slice(0, projects.BRIEF_MAX) }); } catch { /* notes are best effort */ } }          // whole, as Claude reads it
@@ -270,17 +287,27 @@ export function createAutopilot(ctx) {
     waitCard(p, /^lyrics/.test(w) ? "lyrics" : "voice", text);
   }
 
+  /** The film has not had its Review since its storyboard was approved, and none was tried: the stage that follows a build is still to run. */
+  function firstPassLeft(id, m) {
+    if (isFinished(m) || !m?.approvals?.storyboard?.at) return false;
+    const since = m.approvals.storyboard.at;
+    if (m.pipeline?.reviewed?.at && m.pipeline.reviewed.at >= since) return false;
+    return !ctx.agent.list?.(id)?.some((t) => t.step === "qcReview" && t.createdAt >= since);
+  }
+
   /** Run the next step that is ready, if any. Safe to call at any time; does nothing while Claude works or the project renders. */
   async function advance(id, { afterChat = false } = {}) {
     if (inFlight.has(id)) return null;
     inFlight.add(id);
+    let s = null, before;
     try {
       if (ctx.agent.running.has(id) || ctx.renders.isRendering(id)) return null;
       const { p, state } = await ctx.pipelineOf(id);
       if (p.meta?.pipeline?.autopilot === false) return null;          // off for this project (a test, or the user's choice later)
-      // after a chat turn only while the film is not built yet (the user answered Claude's question); the feedback loop runs nothing
-      if (afterChat && ["done", "redo"].includes(state.find((x) => x.id === "build")?.status)) return null;
-      const s = pipe.nextAuto(state);
+      // after a chat turn only while the film is not built yet (the user answered Claude's question); the feedback loop runs nothing. A film built
+      // by a chat turn (Test 33: "build it" typed after the build never started) still has its first Review ahead: stage 4 goes on (T33-6)
+      if (afterChat && ["done", "redo"].includes(state.find((x) => x.id === "build")?.status) && !firstPassLeft(id, p.meta)) return null;
+      s = pipe.nextAuto(state);
       if (!s) { voiceCard(p, state); return null; }
       // once the film is done the checks are not run again by themselves (a change in the Final Mix or the chat): the render runs its own
       // quick check; a new build clears `finished` and the stage runs to the end again
@@ -298,10 +325,15 @@ export function createAutopilot(ctx) {
         }
         return null;
       }
-      if (s.action?.kind === "claude") meta(id, (m) => { const pl = (m.pipeline ??= {}); pl.autoRun = { step: s.id, n: pl.autoRun?.step === s.id ? (pl.autoRun.n ?? 0) + 1 : 1, at: now() }; });
-      return await startStep(id, s, { fromAuto: true });
-    } catch (e) { return { error: e.message }; }
-    finally { inFlight.delete(id); }
+      if (s.action?.kind === "claude") { before = { run: last ?? null }; meta(id, (m) => { const pl = (m.pipeline ??= {}); pl.autoRun = { step: s.id, n: pl.autoRun?.step === s.id ? (pl.autoRun.n ?? 0) + 1 : 1, at: now() }; }); }
+      const started = await startStep(id, s, { fromAuto: true });
+      startTries.delete(id);
+      return started;
+    } catch (e) {
+      // it never ran, so it does not count as a run
+      if (before) meta(id, (m) => { if (m.pipeline) { if (before.run) m.pipeline.autoRun = before.run; else delete m.pipeline.autoRun; } });
+      return stepNotStarted(id, s, e);
+    } finally { inFlight.delete(id); }
   }
 
   /** The checks ended, the last of stage 4: when they pass the film is done; a failure is fixed by Claude once per build, then the user sees it. */
@@ -323,7 +355,7 @@ export function createAutopilot(ctx) {
     if (p.meta?.pipeline?.autoFix) { note(p, "{n} problem(s) would still stop the render after Claude's fix: tell Claude in the chat what to do.", { n: qa.blocking ?? 0 }); return; }
     meta(id, (m) => { (m.pipeline ??= {}).autoFix = { at: now() }; });
     return ctx.agent.start(id, { text: "The app's checks found blocking issues in the film (Tech checks dialog, .moworks/cache/qa/last.json). Fix every blocking issue with the smallest change, without changing the approved layouts or motion; say in one line what you fixed.", scope: { kind: "project" }, step: "checks" })
-      .catch(() => null);
+      .catch((e) => stepNotStarted(id, { id: "checks", title: "Checks" }, e));
   }
 
   /** The music step's task ended: the first of Claude's three tracks goes on the timeline (unless the film has the user's track), the
@@ -413,6 +445,11 @@ export function createAutopilot(ctx) {
     if (task.status === "cancelled") { if (task.step) note(p, "Stopped. What was done is saved. Change what you need, then write “continue” in the chat."); return; }
     if (task.status !== "done") return;
     const step = task.step;
+    // the owner said yes to the product's search in a run that began with the web off or asking: the next conversation has the web
+    if (p.meta?.research?.restart) {
+      meta(id, (m) => { delete m.research.restart; });
+      return ctx.agent.start(id, { by: "app", text: "The owner said yes to searching the web for the product, and the web is open now. Search as moworks-studio §2c says, write docs/RESEARCH.md, then go on with what you were doing.", scope: { kind: "project" }, ...(step ? { step } : {}) });
+    }
     // the film's source does not compile, so its older bundle would play and render. Claude fixes it once, with the
     // compiler's words; if the same error is still there, the user is told once, and nothing else runs on the broken film
     const be = p.meta?.pipeline?.buildError;
@@ -472,6 +509,14 @@ export function createAutopilot(ctx) {
     if (step === "qcReview" && task.stillsBusy && !task.qcSheetsOk) {
       try { projects.addNote(p.path, { kind: "review", status: "warning", text: STILLS_BUSY, retry: "qcReview" }); } catch { /* notes are best effort */ }
       return null;
+    }
+    // a film of a Brand Kit: a rule of the kit's checklist not gone through, or left broken, stops here; the chat says it with a Retry (owner 31/10)
+    if (step === "qcReview") {
+      const b = pipe.brandCheck(p.path), open = b ? b.failed.length + b.missing.length : 0;
+      if (open) {
+        try { projects.addNote(p.path, { kind: "review", status: "warning", text: `The Review left ${open} Brand Kit rule(s) not checked or broken: ${[...b.failed, ...b.missing].slice(0, 12).join(", ")}.`, retry: "qcReview" }); } catch { /* notes are best effort */ }
+        return null;
+      }
     }
     if (step === "qcReview") meta(id, (m) => { (m.pipeline ??= {}).reviewed = { at: now(), taskId: task.id }; });
     if (step === "checks") { const fresh = projects.getProject(id, root); ctx.startQa(fresh, { onEnd: () => afterQa(id).catch(() => {}) }); return; }

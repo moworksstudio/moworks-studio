@@ -15,6 +15,9 @@ import { ffmpegExe } from "../library/preview-media.mjs";
 import { measureStills, stillLines } from "./stillness.mjs";
 import { freshFilm } from "../hf-edit/codeFilm.mjs";
 import { dropDecorationContrast } from "./contrastDecor.mjs";
+import { filmSequences, measureProduct, sequenceLines, sequenceReport } from "./sequence.mjs";
+import { sungLines, sungReport } from "./lyricSync.mjs";
+import { isLyricVideo } from "../style-catalog/traits.mjs";
 
 const run = promisify(execFile);
 const r2 = (n) => Math.round(n * 100) / 100;
@@ -145,6 +148,9 @@ export function dynamicOf(dir) {
   try { return JSON.parse(readFileSync(docPath(dir, "MOTION-PLAN.json"), "utf8")).dynamic ?? null; } catch { return null; }
 }
 
+/** A lyrics video's quota: nothing still for more than 0.5 s (moworks-alive/lyric-video.md §1). */
+const LYRIC_STILL = 0.5;
+const lyricFilm = (dir) => { try { return isLyricVideo(JSON.parse(readFileSync(join(dir, ".moworks", "project.json"), "utf8")), { dir }); } catch { return false; } };
 /** The pictures stopped twice (STILLS_BUSY): the round is said as busy, with no sheet and no check, never as a round that worked; its
  *  folder goes (the next round takes its number). */
 const busyRound = (res, out) => { rmSync(out, { recursive: true, force: true }); return { ...res, sheets: {}, busy: true, failed: [...res.failed, STILLS_BUSY] }; };
@@ -209,7 +215,7 @@ export async function qcRound(dir, { shots, total, signal = null, parallel = fal
   };
   const stretches = async () => {
     if (!(total > 0)) return { failed: [] };
-    try { return { still: await measureStills(dir, { shots, total, dynamic: dynamicOf(dir), signal: partSignal, workDir: join(out, "still"), snap, pauseMs }), failed: [] }; }
+    try { return { still: await measureStills(dir, { shots, total, dynamic: dynamicOf(dir), nearLimit: lyricFilm(dir) ? LYRIC_STILL : null, signal: partSignal, workDir: join(out, "still"), snap, pauseMs }), failed: [] }; }
     catch (e) { if (signal?.aborted) throw e; return { failed: [`still stretches: ${String(e.message).split(/\r?\n/)[0]}`] }; }
   };
   const checked = async () => {
@@ -221,7 +227,17 @@ export async function qcRound(dir, { shots, total, signal = null, parallel = fal
     return { check: { ok: !!c.json?.ok, findings, counts: Object.fromEntries(Object.entries(findings).map(([k, v]) => [k, { errors: v.filter((x) => x.severity === "error").length, warnings: v.filter((x) => x.severity === "warning").length }])) },
       failed: c.json ? [] : [`check: no result (exit ${c.exitCode}) ${c.stderrTail.join(" ").slice(0, 200)}`] };
   };
-  const parts = [pictures, stretches, checked];
+  const sequence = async () => {
+    const report = sequenceReport(dir);
+    if (!report) return { failed: [] };
+    try { return { sequence: { report, product: await measureProduct(dir, filmSequences(dir), { signal: partSignal }) }, failed: [] }; }
+    catch (e) { if (signal?.aborted) throw e; return { sequence: { report, product: { cut: [], failed: String(e.message).split(/\r?\n/)[0] } }, failed: [] }; }
+  };
+  const sung = async () => {
+    try { return { sung: await sungReport(dir, { signal: partSignal }), failed: [] }; }
+    catch (e) { if (signal?.aborted) throw e; return { failed: [`sung words: ${String(e.message).split(/\r?\n/)[0]}`] }; }
+  };
+  const parts = [pictures, stretches, checked, sequence, sung];
   let done;
   if (parallel) {
     // every part runs to its end; a part that threw rejects the round as the serial run would (the first in serial order)
@@ -239,6 +255,8 @@ export async function qcRound(dir, { shots, total, signal = null, parallel = fal
     if (part.beats) { res.beats = part.beats; res.cuts = part.cuts; }
     if (part.still) res.still = part.still;
     if (part.check) res.check = part.check;
+    if (part.sequence) res.sequence = part.sequence;
+    if (part.sung) res.sung = part.sung;
     res.failed.push(...part.failed);
   }
   return res;
@@ -262,6 +280,8 @@ export function qcText(r, freshEyes = null) {
     if (xs.length > 25) lines.push(`  - … ${xs.length - 25} more`);
   }
   if (r.still) lines.push("", ...stillLines(r.still));
+  if (r.sequence) lines.push("", ...sequenceLines(r.sequence.report, r.sequence.product));
+  if (r.sung) lines.push("", ...sungLines(r.sung));
   if (freshEyes) lines.push("", "Fresh eyes (a second look that saw only the beats and cuts sheets, nothing else about the film):", freshEyes);
   if (r.failed.length) lines.push("", `Could not make everything: ${r.failed.join("; ")}`);
   lines.push("", "Open the sheets with Read (each is one picture), score the seven criteria, write the round to docs/QC-REVIEW.md, fix, and call qc_sheets again for the next round. To look closer at one moment, film_frames gives that frame whole, with its text, at the film's size.");

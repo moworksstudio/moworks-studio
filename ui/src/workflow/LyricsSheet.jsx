@@ -21,7 +21,8 @@ export default function LyricsSheet({ projectId, onChanged }) {
   const [job, setJob] = useState(null);
   const file = useRef(null);
   useEffect(() => {
-    if (q.data && text == null) setText(q.data.text);
+    // no lyrics yet and Whisper tried the song: what it heard, as a draft to correct; nothing is saved until the owner saves or times it
+    if (q.data && text == null) setText(q.data.text || q.data.heard?.text || "");
     if (q.data?.job && q.data.job !== job?.id) follow({ id: q.data.job, status: "running" });
   }, [q.data]); // eslint-disable-line react-hooks/exhaustive-deps
   const follow = (j) => {
@@ -37,6 +38,7 @@ export default function LyricsSheet({ projectId, onChanged }) {
   if (!q.data || text == null) return <div className="skeleton" style={{ height: "16rem" }} />;
   const running = job?.status === "running";
   const dirty = text !== q.data.text;
+  const draft = !q.data.text && q.data.heard;
   const save = async () => {
     setBusy(true);
     try { await put(`/api/projects/${projectId}/lyrics`, { text }); q.reload(); onChanged?.(); toast(t("Lyrics saved")); }
@@ -55,15 +57,18 @@ export default function LyricsSheet({ projectId, onChanged }) {
     setText((await f.text()).replace(/^﻿/, ""));
   };
   const lines = [];
-  for (const w of q.data.words) (lines[w.line - 1] ??= []).push(w);
+  for (const w of q.data.words) if (w.layer !== "backing") (lines[w.line - 1] ??= []).push(w);
+  const backing = q.data.words.filter((w) => w.layer === "backing");
   const tm = q.data.timed;
   return <div className="sheet-cols lyrics">
     <section className="panel">
       <div className="panel-head"><h2>{t("The song's lyrics")}</h2>{q.data.track && <span className="muted end">{q.data.track.split("/").pop()}</span>}</div>
-      <Banner kind="info">{t("Speech-to-text hears only part of a sung line. Paste the lyrics and the app times every word to the song.")}</Banner>
+      {draft ? <Banner kind={draft.unheard ? "warning" : "info"}>{draft.unheard ? t("Whisper could hardly hear this song ({n} words). Paste the real lyrics below: the app then times every word to the song.", { n: draft.words })
+          : t("This is what Whisper heard of the song ({n} words), as a draft: it will have wrong and missing words. Correct it against the real lyrics, then time them.", { n: draft.words })}</Banner>
+        : <Banner kind="info">{t("Speech-to-text hears only part of a sung line. Paste the lyrics and the app times every word to the song.")}</Banner>}
       {!q.data.track && <Banner kind="warning">{t("Add the music track first (the Music step).")}</Banner>}
       <textarea className="textarea lyrics-text" value={text} onChange={(e) => setText(e.target.value)} disabled={running} spellCheck={false}
-        placeholder={t("One sung line per line, repeats written out (la la la). A rough start time helps a long song: [0:17.5] Here we go")}
+        placeholder={t("One sung line per line, repeats written out (la la la), backing vocals in (parentheses). A rough start time helps a long song: [0:17.5] Here we go")}
         aria-label={t("The song's lyrics")} />
       <div className="row">
         <input ref={file} type="file" accept=".txt,.lrc,.srt,text/plain" hidden onChange={open} />
@@ -82,9 +87,11 @@ export default function LyricsSheet({ projectId, onChanged }) {
       {!tm ? <Banner kind="info">{t("Not timed yet.")}</Banner> : <>
         {tm.stale && <Banner kind="warning">{t("The lyrics changed after they were timed: time them again.")}</Banner>}
         <p className="secondary num">{t("Whisper turbo heard {h} of {n} words; the others are placed on the song's attacks. A draft: listen and fix a line that is off.", { h: tm.heard, n: tm.heard + tm.placed })}</p>
+        {tm.repeats?.map((x) => <Banner key={`${x.line}-${x.word}`} kind="warning">{t("Line {l}: \"{w}\" is written {a} times and Whisper heard {b}. The film keeps your count: listen, and change the text if the song says otherwise.", { l: x.line, w: x.word, a: x.text, b: x.heard })}</Banner>)}
         <table className="mp-table lyrics-times"><thead><tr><th>#</th><th>{t("Starts")}</th><th>{t("Line")}</th><th>{t("Heard")}</th></tr></thead>
           <tbody>{lines.filter(Boolean).map((ws, i) => <tr key={i}><td className="num muted">{i + 1}</td><td className="num">{mmss(ws[0].start)}</td>
             <td>{ws.map((w) => w.text).join(" ")}</td><td className="num muted">{ws.filter((w) => w.sure === "heard").length}/{ws.length}</td></tr>)}</tbody></table>
+        {backing.length > 0 && <p className="hint">{t("Backing vocals, a layer of their own: {w}", { w: backing.map((w) => w.text).join(" ") })}</p>}
       </>}
       <div className="row"><button className="btn sm" onClick={() => stage.askClaude(t("About the lyrics and their times: "))}><Bot size={14} />{t("Ask Claude")}</button></div>
     </section>

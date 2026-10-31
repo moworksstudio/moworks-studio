@@ -1,24 +1,25 @@
 // Words dialog: the words of the voice the film is timed to. Any audio file of the project can be
 // transcribed (Whisper); the user checks the words, edits them and presses Send again: Claude reads the new words and moves the timings.
-// The transcript is saved as HyperFrames' transcript.json (word timings). Editing text keeps the timing; there is no recording, local voice
-// or voice-gap editing. Where the voice comes from (an upload, ElevenLabs, Fish Audio) is folded under "Other ways".
+// The transcript is saved as HyperFrames' transcript.json (word timings). Editing text keeps the timing; there is no recording
+// or voice-gap editing. Where the voice comes from (an upload, ElevenLabs, Kokoro on this computer) is folded under "Other ways".
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, AudioLines, Bot, Check, ChevronDown, FileAudio, Info, Loader2, Mic2, Pause, Play, RefreshCw, Save, Search, Settings2, Sparkles, Square, Upload, X } from "lucide-react";
+import { AlertTriangle, AudioLines, Bot, Check, ChevronDown, Download, FileAudio, Info, Loader2, Mic2, Pause, Play, RefreshCw, Save, Search, Settings2, Sparkles, Square, Upload, X } from "lucide-react";
 import { api, blobUrl, get, patch, post, upload, watchJob } from "../api.js";
 import { Banner, Dialog, StatusIcon } from "../components.jsx";
 import { ago, clock, go, locale, useData, useToast, words } from "../lib.jsx";
 import { tr, useT } from "../i18n.jsx";
 import { useCloseGuard, useStage } from "../workflow/stage.jsx";
+import { mb, useSetupJob } from "../workflow/FirstRun.jsx";
 
 // labels are English keys for t
 const SOURCES = [["upload", "Upload audio", Upload, "Your own recording"], ["elevenlabs", "ElevenLabs", Sparkles, "Reads your script"],
-  ["fishaudio", "Fish Audio", Sparkles, "Reads your script"], ["none", "No voice-over", X, "Go on without a voice"]];          // The Storyboard starts at once
+  ["kokoro", "Kokoro", Sparkles, "Free, on this computer"], ["none", "No voice-over", X, "Go on without a voice"]];          // The Storyboard starts at once
 const tc = (s) => { const m = Math.floor(s / 60), r = s - m * 60; return `${m}:${r.toFixed(1).padStart(4, "0")}`; };
 const ACCEPT = ".mp3,.wav,.m4a,.aac,.flac,.ogg,.opus";
 // no file names in the UI: a voice-over the app made shows its service and when it was made, in the computer's time;
-// a recording the user added keeps their own name without its extension
-const MADE = /^(elevenlabs|fishaudio)-(\d{4}-\d\d-\d\d)T(\d\d)-(\d\d)-(\d\d)-(\d{3})Z\.[a-z0-9]+$/i;
-const SERVICE = { elevenlabs: "ElevenLabs", fishaudio: "Fish Audio" };
+// a recording the user added keeps their own name without its extension. Fish Audio is gone from the app; films made with it still say so
+const MADE = /^(elevenlabs|kokoro|fishaudio)-(\d{4}-\d\d-\d\d)T(\d\d)-(\d\d)-(\d\d)-(\d{3})Z\.[a-z0-9]+$/i;
+const SERVICE = { elevenlabs: "ElevenLabs", kokoro: "Kokoro", fishaudio: "Fish Audio", fish: "Fish Audio" };
 // The film's own voice-over also says whose voice it is ("ElevenLabs voice-over · Viên · 27 Oct, 23:49")
 export function audioLabel(name, voiceName = null) {
   const m = MADE.exec(name ?? "");
@@ -31,11 +32,12 @@ export function audioLabel(name, voiceName = null) {
 
 /** The source the screen shows as chosen. A new project has none until the user picks one, and "No voice-over" is
  *  only the user's own choice (`noVoice`), never a default; with none chosen the service whose key is saved is offered (ElevenLabs
- *  first, shown, not saved), else nothing. Older projects saved "fish". */
-export function shownSource(voice, keys) {
+ *  first, shown, not saved), then the free voice when it is on this computer and can read the film, else nothing. Older projects saved "fish"
+ *  or "fishaudio": their voice-over stays, with no card chosen. */
+export function shownSource(voice, keys, kokoro = null) {
   const s = voice?.source === "fish" ? "fishaudio" : voice?.source ?? null;
   if (s && (s !== "none" || voice?.noVoice)) return s;
-  return ["elevenlabs", "fishaudio"].find((k) => keys?.[k]?.saved) ?? null;
+  return keys?.elevenlabs?.saved ? "elevenlabs" : kokoro?.installed && !kokoro.blocked ? "kokoro" : null;
 }
 
 function Waveform({ peaks, duration, time, onSeek }) {
@@ -120,7 +122,7 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
 
   const d = v.data, voice = d?.voice, tr = d?.transcript;
   useCloseGuard(dirty);                           // closing the dialog with unsaved words asks first
-  const source = shownSource(voice ?? project.data?.meta?.voice, d?.keys);
+  const source = shownSource(voice ?? project.data?.meta?.voice, d?.keys, d?.kokoro);
   useEffect(() => { if (tr) { setSegs(tr.segments.map((s) => ({ ...s }))); setDirty(false); } else setSegs(null); }, [tr?.createdAt, tr?.savedAt]); // eslint-disable-line react-hooks/exhaustive-deps
   // a first transcription detects the language instead of assuming Vietnamese
   useEffect(() => { if (d && !model) { setModel(d.settings.defaultModel); setLang(["vi", "en"].includes(d.transcript?.language) ? d.transcript.language : d.transcript ? d.settings.language : "auto"); } if (d && hints == null) setHints(d.hints ?? ""); }, [d]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -183,14 +185,15 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
           title={t("Choose where the voice-over comes from, then check its words: Claude times the film to them.")} /></div>
       {/* Until the film's voice is read, the cards wait as skeletons (none looked chosen while the sheet loaded) */}
       {!d && !project.data ? <div className="radio-cards four" aria-busy="true">{SOURCES.map(([k]) => <span key={k} className="radio-card skeleton" aria-hidden="true" />)}</div>
-      : <div className="radio-cards four">{SOURCES.map(([k, l, Icon, desc]) => (
-        // the chosen card clicked again reads its voice list again when that failed (T23-5)
-        <button key={k} className="radio-card" aria-pressed={source === k} aria-label={`${t(l)}: ${t(desc)}`} onClick={() => { if (k === source) setNudge((n) => n + 1); setSource(k); }}>
+      : <div className="radio-cards four">{SOURCES.map(([k, l, Icon, desc0]) => { const noVi = k === "kokoro" && !!d?.kokoro?.blocked, desc = noVi ? "No Vietnamese voice" : desc0; return (
+        // the chosen card clicked again reads its voice list again when that failed (T23-5); Kokoro greyed on a film in Vietnamese
+        <button key={k} className="radio-card" disabled={noVi} title={noVi ? t("Kokoro has no Vietnamese voice.") : undefined} aria-pressed={source === k} aria-label={`${t(l)}: ${t(desc)}`} onClick={() => { if (k === source) setNudge((n) => n + 1); setSource(k); }}>
           {/* the cards as designed, their one-line description in small print */}
           {/* the key's chip in the card's top-right corner, on the name's line */}
-          <span className="t"><Icon size={15} />{t(l)}{(k === "elevenlabs" || k === "fishaudio") && d && <span className={"chip" + (d.keys[k].saved ? " teal" : "")}>{d.keys[k].saved ? t("Key saved") : t("No key yet")}</span>}</span>
+          <span className="t"><Icon size={15} />{t(l)}{k === "elevenlabs" && d && <span className={"chip" + (d.keys[k].saved ? " teal" : "")}>{d.keys[k].saved ? t("Key saved") : t("No key yet")}</span>}
+            {k === "kokoro" && d && !noVi && !d.kokoro.installed && <span className="chip">{t("Not installed")}</span>}</span>
           <span className="d">{t(desc)}</span>
-        </button>))}</div>}
+        </button>); })}</div>}
     </section>
 
     {source === "upload" && <section className="panel" aria-label={t("Audio file")}>
@@ -204,7 +207,9 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
       </div> : null}
     </section>}
 
-    {(source === "elevenlabs" || source === "fishaudio") && d && <TtsPanel id={id} provider={source} keySaved={d.keys[source].saved} brief={project.data?.meta?.brief} draft={d.scriptDraft?.text ?? ""} language={d.settings.language} onJob={follow} running={running}
+    {source === "kokoro" && d && d.kokoro.blocked && <section className="panel"><p className="secondary">{t("Kokoro has no Vietnamese voice. Choose ElevenLabs or upload a recording.")}</p></section>}
+    {source === "kokoro" && d && !d.kokoro.blocked && !d.kokoro.installed && <KokoroInstall size={d.kokoro.mb} onDone={() => { v.reload(); }} />}
+    {(source === "elevenlabs" || (source === "kokoro" && d?.kokoro.installed && !d.kokoro.blocked)) && d && <TtsPanel id={id} provider={source} keySaved={source === "kokoro" || d.keys[source].saved} brief={project.data?.meta?.brief} draft={d.scriptDraft?.text ?? ""} language={d.settings.language} onJob={follow} running={running}
       current={voice ?? project.data?.meta?.voice} ownScript={d.ownScript} nudge={nudge} />}
     <AudioFiles id={id} voiceFile={voice?.file} voiceName={voice?.voiceName} onJob={follow} running={running} focus={path}
       stamp={`${voice?.transcript?.status ?? ""}|${voice?.transcript?.at ?? ""}|${voice?.transcript?.savedAt ?? ""}|${running?.id ?? ""}`} />
@@ -218,7 +223,7 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
         {peaks.length ? <Waveform peaks={peaks} duration={voice.info?.duration ?? 0} time={time} onSeek={(t) => seek(t)} /> : <div className="waveform skeleton" />}
       </div>
       {audio && <audio ref={player} src={audio} preload="auto" onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => setPlaying(false)} />}
-      {voice.source !== "upload" && voice.script && <details className="diag"><summary>{t("Script read by {who}", { who: voice.source === "elevenlabs" ? "ElevenLabs" : "Fish Audio" })}{voice.voiceName?.trim() ? ` (${voice.voiceName.trim()})` : ""}</summary><p className="secondary" style={{ whiteSpace: "pre-wrap" }}>{voice.script}</p></details>}
+      {voice.source !== "upload" && voice.script && <details className="diag"><summary>{t("Script read by {who}", { who: SERVICE[voice.source] ?? voice.source })}{voice.voiceName?.trim() ? ` (${voice.voiceName.trim()})` : ""}</summary><p className="secondary" style={{ whiteSpace: "pre-wrap" }}>{voice.script}</p></details>}
     </section>}
 
     {voice?.file && source !== "none" && <section className="panel" aria-label={t("Transcription")}>
@@ -317,17 +322,13 @@ function VoicePick({ voices, value, onChange }) {
   </div>;
 }
 
-/** Each voice setting in plain words (ElevenLabs' and Fish Audio's, by the ids the server's GET voices gives). */
+/** Each voice setting in plain words (by the ids the server's GET voices gives). */
 const SETTING_HINTS = {
   speed: "How fast the voice reads; 1 is its normal pace.",
   stability: "Higher reads evenly; lower gives more feeling, and each take differs more.",
   similarity_boost: "How closely it keeps to the original voice.",
   style: "Plays up the voice's own manner; 0 is the steadiest.",
   use_speaker_boost: "Sounds more like the speaker; takes a little longer to make.",
-  volume: "Louder or softer, in decibels.",
-  temperature: "Higher varies the reading more.",
-  top_p: "Lower keeps the reading closer to the usual sound of the voice.",
-  normalize: "Reads numbers and dates as words.",
 };
 /** A setting's name on the screen when the service's is too long for one line (no label runs onto two lines); its ⓘ gives the
  *  full name and what it does. "Style" is ElevenLabs' own field name. */
@@ -393,10 +394,22 @@ export const chosenOf = (projectId) => { if (!CHOSEN.has(projectId)) CHOSEN.set(
 // them again. A failed read is tried once more by itself after a few seconds, and Retry or a click on the chosen card reads them again.
 const VOICES_RETRY_MS = 4000;
 
+/** The Voice screen's free voice when it is not on this computer yet: what it is in one line and its Install, in place of an error. */
+function KokoroInstall({ size, onDone }) {
+  const t = useT();
+  const { job, start } = useSetupJob(onDone);
+  return <section className="panel"><div className="fr-comp">
+    {job ? <><Loader2 size={15} className="spin fr-comp-ic" /><span className="fr-bar" role="progressbar" aria-valuenow={job.progress ?? 0} aria-valuemin={0} aria-valuemax={100}><i style={{ width: `${job.progress ?? 0}%` }} /></span>
+      <span className="muted num">{job.progress ?? 0}% · {t("Downloading the free voice")}</span></>
+      : <><Info size={15} className="fr-comp-ic" aria-hidden="true" /><span className="muted">{t("Kokoro reads your script on this computer, free, with no account. No Vietnamese.")}</span><span className="spacer" />
+        <button className="btn primary sm" onClick={() => start(["kokoro"])}><Download size={14} />{t("Install ({size})", { size: mb(size) })}</button></>}
+  </div></section>;
+}
+
 function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", onJob, running, current = null, ownScript = null, nudge = 0 }) {
   const t = useT();
   const toast = useToast();
-  const name = provider === "elevenlabs" ? "ElevenLabs" : "Fish Audio";
+  const name = SERVICE[provider], local = provider === "kokoro";          // on this computer: nothing to pay, nothing to confirm
   const kept = chosenOf(id);
   const [list, setList] = useState(null);
   const [err, setErr] = useState(null);
@@ -462,8 +475,8 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
     <div className="vo-tts">
       <div className="vo-tts-l">
         {list && <><div className="field"><span id="vo-voice-l">{t("Voice")}</span><VoicePick voices={list.voices} value={voiceId} onChange={chooseVoice} /></div>
-          <label className="field"><span>{t("Model")}</span><select className="select" value={model} onChange={(e) => setModel(e.target.value)}>
-            {list.models.map((m) => <option key={m.id} value={m.id}>{m.name}{m.vietnamese ? " · " + t("Vietnamese") : ""}</option>)}</select></label></>}
+          {list.models.length > 1 && <label className="field"><span>{t("Model")}</span><select className="select" value={model} onChange={(e) => setModel(e.target.value)}>
+            {list.models.map((m) => <option key={m.id} value={m.id}>{m.name}{m.vietnamese ? " · " + t("Vietnamese") : ""}</option>)}</select></label>}</>}
         {voice?.preview && <audio controls src={voice.preview} preload="none" style={{ width: "100%" }} aria-label={t("Voice sample")} />}
         {/* the settings in one row of narrow fields, what each does on hover (ⓘ) */}
         {fields.length > 0 && <details className="diag vo-settings">
@@ -484,7 +497,7 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
           {" "}<button type="button" className="clink" onClick={() => setText(ownScript.text)}>{t("Use your script")}</button></p>
           : draft && !ownWords && text === draft && <p className="hint"><Bot size={12} /> {t("Claude's draft: edit it before you make the voice-over")}</p>}
         <div className="vo-go"><span className="muted num">{t("{n} characters", { n: text.length.toLocaleString(locale()) })}</span><span className="spacer" />
-          <button className="btn primary" onClick={() => setAsk(true)} disabled={!text.trim() || !voiceId || !!running}>{running?.kind === "tts" ? <Loader2 size={15} className="spin" /> : <Sparkles size={15} />}{t("Create voice-over")}</button></div>
+          <button className="btn primary" onClick={() => (local ? generate() : setAsk(true))} disabled={!text.trim() || !voiceId || !!running}>{running?.kind === "tts" ? <Loader2 size={15} className="spin" /> : <Sparkles size={15} />}{t("Create voice-over")}</button></div>
         {running?.kind === "tts" && <p className="hint">{t("{name} is reading the script. Transcription starts when the audio arrives.", { name })}</p>}
       </div>
     </div>

@@ -11,6 +11,7 @@ import { join } from "node:path";
 import { docRelIn } from "../project-service/docs.mjs";
 import { APP_ROOT } from "../version-manager/index.mjs";
 import { HF_SKILL } from "../hf-edit/hf-scripts.mjs";
+import { isLyricVideo } from "../style-catalog/traits.mjs";
 
 const R = (...p) => `.moworks/rules/${p.join("/")}`;
 // HyperFrames' knowledge (skills/hyperframes at the pinned commit): the entry with the contract, and the references each step writes from
@@ -178,6 +179,18 @@ export function requiredReads(dir, { styleId, first = [], step = null } = {}) {
   if (["motionSpec", "build", "qcReview"].includes(key)) list = [...list, R("moworks-alive", "SKILL.md")];
   // the motion vocabulary: the names of the film packs, read in the Motion Plan only; library_search kind "vocab" answers with their numbers
   if (key === "motionSpec") list = [...list, R("motion-vocab", "SKILL.md")];
+  // a lyrics video, whatever its film style: the energy and song rules, and the song's data once the app has it (the beat map, the timed words)
+  if (isLyricVideo(readJson(join(dir, ".moworks", "project.json"), {}), { dir }) && ["storyboard", "motionSpec", "build", "qcReview"].includes(key)) {
+    list = [...list, R("moworks-alive", "lyric-video.md")];
+    if (key !== "qcReview") list = [...list, "docs/BEATMAP.md", "LYRICS-TIMED.md"];
+  }
+  // a film with an image sequence, in any style: the sequence's rules and what the scan read of it
+  if (["storyboard", "motionSpec", "build", "qcReview"].includes(key)) {
+    const seqs = readJson(join(dir, ".moworks", "scan", "index.json"), {})?.sequences ?? [];
+    if (seqs.length) list = [...list, R("moworks-alive", "sequence.md"), ...seqs.map((s) => s.poses?.md).filter(Boolean)];
+  }
+  // the product's facts from the web, once the owner said yes and Claude wrote them
+  if (["storyboard", "motionSpec", "build", "qcReview"].includes(key)) list = [...list, "docs/RESEARCH.md"];
   // the studio's house rules: every step of every style, first, before the style's own
   // a film kind every style offers (What If): its rule in the steps it names
   const kind = filmKind(dir);

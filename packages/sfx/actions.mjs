@@ -14,7 +14,7 @@ export const TYPING = /\btyping\b|\btyp(?:es|ed)\s+(?:out|in)\b|\btype-on\b|\bty
 
 // ---- Levels, the HyperFrames way (its skills at the pinned commit, Apache-2.0: hyperframes/references/sound.md §4-5, media-use's
 // bgm.md, tts.md and scripts/lib/duck.mjs). The voice-over is brought to about -16 LUFS (a mix of -16 to -14 LUFS for social); the music
-// sits 4 dB under it between the words and is ducked to a quarter (-12 dB: about -31 LUFS under a -16 voice) while they are spoken; a
+// sits 4 dB under it between the words and is ducked 10 dB (about -30 LUFS under a -16 voice) while they are spoken; a
 // film with no voice has its music at -16 LUFS. Each effect is set by its loudest 400 ms (momentary LUFS: an effect is mostly silence round
 // one hit, so its integrated loudness reads low) to HIT_OVER dB over the music between the words ("each hit sits 3-6 dB over the bed"),
 // its family a little louder or softer (LEVELS around LEVEL). Owner 30/10, after Tests 21-26: the music at a fixed 0.6 and never ducked
@@ -25,7 +25,7 @@ export const TYPING = /\btyping\b|\btyp(?:es|ed)\s+(?:out|in)\b|\btype-on\b|\bty
 // render lowered the whole film 10 dB to keep them from clipping, and the master's limiter pulled the mix down around each one.
 export const VOICE_LUFS = -16, ALONE_LUFS = -16;          // the voice-over; the music of a film with no voice
 export const BED_UNDER = 4;             // the music between the words, dB under the voice
-export const MUSIC_DUCK = 0.25;         // the music while words are spoken (media-use audio-duck's default)
+export const MUSIC_DUCK = 0.316;        // the music while words are spoken, -10 dB (media-use audio-duck's default is 0.25; owner 31/10: 2 dB less, the music held under long speech was too low)
 export const HIT_OVER = 4;              // an effect's loudest moment, dB over the music between the words
 export const MAX_GAIN = Math.round(10 ** (12 / 20) * 100) / 100;          // +12 dB
 export const HIT_PEAK = -3;             // the loudest sample an effect's own gain may reach, dBFS (the film's whole mix: voicefit.mjs MIX_PEAK)
@@ -374,8 +374,11 @@ export function tiles(bed, loopS, xf = XFADE) {
 }
 /** A lane the app wrote keeps its signature beside it (data-mw-duck), so a lane the user changed in Studio stays theirs. */
 export const sig = (s) => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) | 0; return (h >>> 0).toString(36); };
-/** The spoken spans (words closer than 0.6 s merged), film seconds. */
-export function speechSpans(words, gap = 0.6) {
+// Owner 31/10: at 0.6 s the music rose and fell at every breath of the voice (Test 29: 14 times in 55 s). It holds through a pause under this,
+// and rises slowly after a longer one.
+export const SPEECH_GAP = 2, DUCK_RELEASE = 1;
+/** The spoken spans (words closer than SPEECH_GAP merged), film seconds. */
+export function speechSpans(words, gap = SPEECH_GAP) {
   const out = [];
   for (const w of [...(words ?? [])].sort((a, b) => a.start - b.start)) {
     const prev = out.at(-1);
@@ -384,9 +387,9 @@ export function speechSpans(words, gap = 0.6) {
   return out;
 }
 /** The volume lane of a clip that ducks under the spans (clip-local seconds, HF's data-automation: full level before each span, `duck`
- *  from its first word to its last, back up after), or null when no word falls in it. The spans are 0.6 s apart at least (speechSpans),
+ *  from its first word to its last, back up after), or null when no word falls in it. The spans are SPEECH_GAP apart at least (speechSpans),
  *  more than an attack and a release, so the envelope never folds back. */
-export function duckLane(clip, spans, { duck = DUCK, attack = 0.15, release = 0.4 } = {}) {
+export function duckLane(clip, spans, { duck = DUCK, attack = 0.15, release = DUCK_RELEASE } = {}) {
   const a = clip.start, b = clip.start + clip.duration;
   const inside = (spans ?? []).filter((s) => s.end > a && s.start < b);
   if (!inside.length) return null;

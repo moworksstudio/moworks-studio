@@ -17,6 +17,7 @@ import { join, relative, sep } from "node:path";
 import { lookAt } from "../hf-qa/look.mjs";
 import * as plan from "../motion-plan/index.mjs";
 import { appSounds } from "../project-service/layout.mjs";
+import { checklistOf } from "../project-service/design.mjs";
 import { docPath } from "../project-service/docs.mjs";
 import { humanHandOf } from "../style-catalog/hands.mjs";
 import { scriptDraft } from "../voice/script.mjs";
@@ -213,7 +214,7 @@ export function gatherFacts(project, { shots = [], head = null, jobs = [], runni
     reviewedAt: time(m.pipeline?.reviewed?.at), storyboardAt: time(m.approvals?.storyboard?.at),
     lastTasks,
     music: m.music?.file ?? null,
-    review: reviewScore(dir),
+    review: reviewScore(dir), brand: brandCheck(dir),
     boards: existsSync(join(dir, "boards", "rounds")),
     approvalFile: (name, rel) => { const t = file(rel); return t ? { at: t.at, hash: sha(readFileSync(docPath(dir, rel))) } : null; },
     // a chat turn answering a step's question is that step at work
@@ -231,6 +232,20 @@ export function reviewScore(dir) {
     const xs = [...readFileSync(f, "utf8").matchAll(/Final score:\s*\**\s*(\d+(?:[.,]\d+)?)\s*\/\s*10/gi)];
     return { score: xs.length ? Number(xs.at(-1)[1].replace(",", ".")) : null, at: mtime(f) };
   } catch { return null; }
+}
+
+/** The film against its Brand Kit's guideline: docs/BRAND-CHECK.json as the Review writes it, { rows: [{ id: "G12", result: "pass" | "na" | "approved" | "fail", at, how }] },
+ *  against frame.md's "## Guideline checklist": { total, done, failed: [ids], missing: [ids] }; null when the film has no such list (no kit,
+ *  or a kit made before it). */
+export function brandCheck(dir) {
+  let list = [];
+  try { list = checklistOf(readFileSync(join(dir, "frame.md"), "utf8")); } catch { return null; }
+  if (!list.length) return null;
+  let rows = [];
+  try { rows = JSON.parse(readFileSync(docPath(dir, "BRAND-CHECK.json"), "utf8")).rows ?? []; } catch { /* no check yet: every rule is missing */ }
+  const by = new Map((Array.isArray(rows) ? rows : []).map((x) => [String(x?.id), String(x?.result ?? "").toLowerCase()]));
+  const failed = list.filter((x) => by.get(x.id) === "fail").map((x) => x.id), missing = list.filter((x) => !["pass", "na", "approved", "fail"].includes(by.get(x.id))).map((x) => x.id);
+  return { total: list.length, done: list.length - failed.length - missing.length, failed, missing };
 }
 
 /** The seven criteria of the QC review, in order. */
@@ -252,7 +267,7 @@ export function reviewCard(dir) {
   });
   const final = md?.score ?? num(j?.final) ?? rounds.at(-1)?.low ?? null;
   if (final == null && !rounds.length) return null;
-  return { final, pass: final != null && final >= 8, at: md?.at ? new Date(md.at).toISOString() : null, criteria: QC_CRITERIA, rounds };
+  return { final, pass: final != null && final >= 8, at: md?.at ? new Date(md.at).toISOString() : null, criteria: QC_CRITERIA, rounds, brand: brandCheck(dir) };
 }
 
 /** The ways of working of General Style: free, keep, reference. Older projects
@@ -348,6 +363,9 @@ export function judge(done, f, id = null) {
     }
     case "review": {      // the QC review: every score 8 or more (the lowest is the final score); under 8 after the rounds: the user reads why
       const r = f.review;
+      // a film of a Brand Kit passes only with every rule of the kit's checklist gone through and none left broken
+      const open = (f.brand?.failed.length ?? 0) + (f.brand?.missing.length ?? 0);
+      if (r?.score != null && r.score >= 8 && open) return { met: false, partial: true, why: { key: "{n} Brand Kit rule(s) not checked or broken: read QC-REVIEW.md", vars: { n: open } } };
       if (r?.score != null && r.score >= 8) return { met: true, at: r.at };
       if (r?.score != null) return { met: false, partial: true, why: { key: "Final score {n}/10: read QC-REVIEW.md", vars: { n: r.score } } };
       if (f.ran[id]) return { met: false, failed: true, why: { key: "Claude finished but {file} has no final score: run it again", vars: { file: "QC-REVIEW.md" } } };
