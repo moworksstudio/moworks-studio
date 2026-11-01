@@ -8,8 +8,8 @@
   <img src="https://img.shields.io/badge/version-0.8.214.3-1d3fd8" alt="version 0.8.214.3">
   <img src="https://img.shields.io/badge/Claude-Opus_5.5_·_Sonnet_5.5-d97757" alt="Claude Opus 5.5 and Sonnet 5.5">
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-555" alt="Windows 10 | 11">
-  <img src="https://img.shields.io/badge/film_styles-126_from_7_authors-0a7" alt="126 film styles from 7 authors">
-  <img src="https://img.shields.io/badge/library-895_motions_·_448_blocks_·_168_terms-0a7" alt="Motion Library: 895 motions, 448 blocks, 168 motion terms">
+  <img src="https://img.shields.io/badge/film_styles-127_from_7_authors-0a7" alt="127 film styles from 7 authors">
+  <img src="https://img.shields.io/badge/library-889_motions_·_454_blocks_·_168_terms-0a7" alt="Motion Library: 889 motions, 454 blocks, 168 motion terms">
   <img src="https://img.shields.io/badge/export-MP4_·_MOV_·_WebM_·_After_Effects-8a2be2" alt="MP4, MOV, WebM and After Effects">
 </p>
 
@@ -29,9 +29,9 @@
 <p align="center"><sub>Demo films made in the app. Top: a lamp launch (Launch · style by HeyGen) · an alarm clock (Character · style by HeyGen) · a sundial (Explainer · style by HeyGen).<br>Bottom: a garden in numbers (Data · style by HeyGen) · a bus stop (Isometric Picture Book · style by Lemomo) · a neon city (Music video · style by HeyGen). More in <a href="#made-in-the-app">Made in the app</a>.</sub></p>
 
 Moworks Studio is a desktop application for making motion-graphic films with Claude. You write a brief and add your material (artwork,
-PSD, deck, pictures, music, a voice-over script) and choose one of 126 film styles. Claude plans the film, draws a storyboard for you to
-approve and writes a Motion Plan in numbers; then the app builds the film shot by shot in code, reviews and scores it, mixes music and
-sound effects, runs technical checks and renders the film as MP4, MOV or WebM. Films in most styles can also be exported to After
+PSD, deck, pictures, music, a voice-over script) and choose one of 127 film styles. Claude plans the film, draws a storyboard for you to
+approve and writes a Motion Plan in numbers; then the app builds the film shot by shot in code, adds music and sound effects and gives you
+Version 1 to watch. Claude reviews and fixes it if you choose, technical checks run, and the film renders as MP4, MOV or WebM. Films in most styles can also be exported to After
 Effects as editable layers.
 
 **Change the film on the picture itself.** In the Editor, click any words in the frame to edit them on the spot, with their font, size
@@ -67,7 +67,7 @@ mixes the sound and renders. Rendering uses the open-source HyperFrames engine a
 Every film style follows the same pipeline. Each step leaves a file in the project, and nothing moves on until its step is done or you
 skip it.
 
-<p align="center"><img src="images/diagram-workflow.en.png" width="560" alt="Workflow: Set up once (1 Install, 2 First run) → Plan (3 New project, 4 Prepare, 5 Storyboard you approve, 6 Motion Plan you approve) → Build (7 Build and Review, 8 Final Mix) → Output (9 Render, MP4 or Port to After Effects)"></p>
+<p align="center"><img src="images/diagram-workflow.en.png" width="560" alt="Workflow: Set up once (1 Install, 2 First run) → Plan (3 New project, 4 Prepare, 5 Storyboard you approve, 6 Motion Plan you approve) → Build (7 Production, 8 Review and checks) → Output (9 Render, MP4 or Port to After Effects)"></p>
 
 Colours: grey = set-up · orange = Claude and the app · blue = you write, choose or approve · green = output.
 
@@ -75,18 +75,19 @@ Colours: grey = set-up · orange = Claude and the app · blue = you write, choos
 |---|---|---|
 | **Brief** | New project: title, film style, Brand Kit, characters, format (size, frame rate, length), Claude model and effort, the brief and your assets | write and choose |
 | **Prepare** | Claude reads the brief and your assets and writes `BRIEF.md`. When the brief and the style disagree (a silent-film style with a voice-over, 4:3 against 4:5…), it stops and asks, with options and a recommendation | answer |
-| **Voice-over** *(optional)* | ElevenLabs, or Kokoro for free on this computer (no Vietnamese), speaks the script; Whisper times every word so shots land on the words (an optional download, offered the first time) | pick a voice |
+| **Voice-over** *(optional)* | ElevenLabs, or Kokoro for free on this computer (no Vietnamese), speaks the script; Whisper times every word so shots land on the words | pick a voice |
 | **Storyboard** | One storyboard option drawn as a board, shot by shot, with the reason for each shot (another option on request) | approve or comment |
-| **Motion Plan** | Every shot's motion in numbers: timings, distances, easings, sound cues. The approval dialog shows the estimated build time and Claude usage | approve and build |
-| **Build** | Claude builds the film in code, shot by shot; every shot is linted and checked as it lands | watch |
-| **Review** | Claude watches its own film, scores it out of 10 and fixes what it finds, in rounds | read the score |
-| **Final Mix** | Music (three free Mixkit tracks to choose from, or your own) and sound effects placed on the picture, mixed to −16 LUFS | choose |
-| **Tech checks** | Contrast, text overlap, still frames, loudness and file checks, in plain words | read |
+| **Motion Plan** | Every shot's motion in numbers: timings, distances, easings, sound cues. The approval dialog shows the estimated build time | approve and build |
+| **Production** | Claude builds the film in code, shot by shot; every shot is linted and checked as it lands. Music (three free Mixkit tracks to choose from, or your own) and sound effects are placed on the picture and mixed to −16 LUFS. You get **Version 1**, rendered, to watch | watch |
+| **Review and checks** | One question: **Fix mistakes only**, **Fix mistakes and improve it** (Claude watches its own film, scores it out of 10 and fixes what it finds, in rounds) or **No, I'm happy with it**. Tech checks report contrast, text overlap, still frames, loudness and files in plain words | choose and read |
 | **Render** | MP4 (H.264: Standard for web and social, or High), MOV (QuickTime) or WebM, plus a Smooth preview copy for playback in the Editor | render |
 | **After Effects** | **Port to After Effects** builds an AE project with real text and shape layers where the style allows it | port |
 
 The **Editor** plays the film frame by frame as it will render, with the shots and the pipeline on the left, the timeline below the picture
 and Claude in a chat column on the right. Click an element in the film to make it Claude's target, or edit its words by hand.
+
+On the timeline, Narration, SFX and Music each have a level you hear as you drag it, and **Ctrl+Z** brings back a sound you just moved or
+took off. **Music & Sound** changes the music and the effects, and **Balance the sound again** puts every level back by the app's rules.
 
 <p align="center"><img src="images/desk-editor.jpg" alt="The Editor (The Desk): shots and pipeline on the left, the film in the player, the timeline, and Claude's account of each step on the right"><br><sub>The Editor (The Desk): shots and pipeline on the left, the film in the player, the timeline, and Claude's account of each step on the right</sub></p>
 
@@ -117,7 +118,7 @@ The app has two complete themes with the same features; the first start asks whi
 <td width="50%" valign="top"><img src="images/studio-new-project.jpg" alt="The Studio · New project"><br><sub>The Studio · New project</sub></td>
 </tr>
 <tr>
-<td width="50%" valign="top"><img src="images/desk-film-styles.jpg" alt="The Desk · Film Styles, 126 styles by author"><br><sub>The Desk · Film Styles, 126 styles by author</sub></td>
+<td width="50%" valign="top"><img src="images/desk-film-styles.jpg" alt="The Desk · Film Styles, by author"><br><sub>The Desk · Film Styles, by author</sub></td>
 <td width="50%" valign="top"><img src="images/studio-film-styles.jpg" alt="The Studio · Film Styles as crates by author"><br><sub>The Studio · Film Styles as crates by author</sub></td>
 </tr>
 </table>
@@ -130,6 +131,7 @@ licence and the exact source commit. Third-party style files are used as their a
 | Set | Author | Styles | Licence | Source |
 |---|---|---|---|---|
 | **General Style** | Moworks | 1 | the app's own rules | rewritten for the app from the Moworks Motion kit's process |
+| **Map Explainer** | Moworks | 1: a paper map and the real ground under one continuous camera, a red marker on top | the app's own rules, map data from [Natural Earth](https://www.naturalearthdata.com) and [world-atlas](https://github.com/topojson/world-atlas/tree/v2.0.2), satellite pictures from [EOX](https://cloudless.eox.at) (CC BY 4.0) | made for the app; every source in [THIRD-PARTY.md](THIRD-PARTY.md) |
 | **HyperFrames** | HeyGen | 8: Slideshow and the seven film types of HyperFrames' skill (Explainer, Launch, Music video, Data, Vertical, 3D, Character) | Apache-2.0 | [heygen-com/hyperframes @ `4719543`](https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/skills) (v0.8.214) |
 | **Lemo-Opuscar** | Lemomo (LemoLab) | 66 code-built film styles (cinema eras, documentary, editorial, data…; Memphis Diorama contributed by EianLu) | MIT; demo stills CC BY 4.0 | [lemomo-ai/lemo-opuscar @ `ea34ff9`](https://github.com/lemomo-ai/lemo-opuscar/tree/ea34ff9546f675f9fd65a3c84e869a1da7471ad7) |
 | **mg-styles-15** | Vincentwei1021 | 14 motion-design styles (the Blender-based 3D style is not offered) | MIT | [Vincentwei1021/mg-styles-15 @ `49052d8`](https://github.com/Vincentwei1021/mg-styles-15/tree/49052d80bfaf9fa8412cc9710530e5e95a3b8d8c) |
@@ -181,9 +183,9 @@ named under each still.
 | **Projects** | Your films, newest first; each opens in the Editor |
 | **Brand Kits** | A brand's colours, fonts and components, worn by a whole film. HyperFrames' 13 frame presets ship ready to use; make your own from a brand's whole folder (PDF, PowerPoint, pictures, fonts, AI, PSD, ZIP) and check it before use; a film made with it gets its logos and fonts |
 | **Film Styles** | The gallery above, with demo films, credits and AE badges |
-| **Motion Library** | The studio's own library of Motions (895), Blocks (448 blocks and components) and Vocabulary (168 motion terms), arranged by type and category. The licences of the sources it draws on are in [THIRD-PARTY.md](THIRD-PARTY.md) |
+| **Motion Library** | The studio's own library of Motions (889), Blocks (454 blocks and components) and Vocabulary (168 motion terms), arranged by type and category. The licences of the sources it draws on are in [THIRD-PARTY.md](THIRD-PARTY.md) |
 | **Characters** | The project's characters: drawn with the Character maker, or from the Anidoodle author's own character rigs |
-| **Settings** | General (Claude account, projects folder, appearance, voice-over, render), Director (Claude model and effort), System (components and health), Update (and Uninstall) |
+| **Settings** | General (Claude account, projects folder, appearance, render), Director (Claude model and effort), System (components, voice-over, backups and health), Update (and Uninstall) |
 
 <table>
 <tr>
@@ -256,15 +258,16 @@ A 30-second film, from brief to MP4:
 2. **Prepare.** Claude reads everything and may stop with a question ("The style is a silent film; keep the voice-over or use title
    cards?"). Answer in the chat; Claude writes `BRIEF.md`.
 3. **Voice-over.** The Voice screen opens with the script filled in. Choose a voice and generate it; Whisper times the words automatically
-   (an optional download of about 1.7 GB, offered the first time) and the storyboard starts on its own.
+   and the storyboard starts on its own.
 4. **Storyboard.** Read the board. Comment on a panel (`@Panel_3: make the runner smaller`) or approve.
-5. **Motion Plan.** Check the timings and motion of every shot. **Approve and build** shows the estimated time and usage.
-6. **Build, Review, Final Mix, Tech checks** run one after the other. The pipeline shows what is running and the time left; the chat shows
-   what Claude is doing.
-7. **Play** the film in the Editor. Ask Claude for changes in the chat (click an element first to point at it), or edit its words by hand.
-8. **Render** an MP4, and **Port to After Effects** if the style's badge allows it.
+5. **Motion Plan.** Check the timings and motion of every shot. **Approve and build** shows the estimated time.
+6. **Production** runs by itself: the build, the music and sound, then Version 1. The pipeline shows what is running and the time left; the
+   chat shows what Claude is doing.
+7. **Watch Version 1** and answer one question: should Claude fix mistakes, also improve the film, or leave it as it is?
+8. **Play** the film in the Editor. Ask Claude for changes in the chat (click an element first to point at it), or edit its words by hand.
+9. **Render** an MP4, and **Port to After Effects** if the style's badge allows it.
 
-<p align="center"><img src="images/studio-editor.jpg" alt="A finished film in the Editor (The Studio): the five steps along the top, Claude's notes from Review and Final Mix on the right"><br><sub>A finished film in the Editor (The Studio): the five steps along the top, Claude's notes from Review and Final Mix on the right</sub></p>
+<p align="center"><img src="images/studio-editor.jpg" alt="A finished film in the Editor (The Studio): the steps along the top, Claude's notes on the right"><br><sub>A finished film in the Editor (The Studio): the steps along the top, Claude's notes on the right</sub></p>
 
 As a reference, a 34-second film in a Lemo-Opuscar style took 1 h 17 min from Create to the finished MP4, of which 44 minutes from
 **Approve and build**; Claude usage for the whole film was worth about US$13 at API prices.
@@ -328,7 +331,7 @@ The known limitations are listed in [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
   nothing else uploads them.
 - **App backup:** off unless a backup folder (`storage.backupRoot`) is set in this computer's local settings.
 - **No telemetry.** HyperFrames telemetry and update checks are turned off; the app sends no usage data. Network access is limited to the
-  services you use (Claude, the voice service, Mixkit and Openverse when you ask for music or sound effects, and component downloads).
+  services you use (Claude, the voice service, Mixkit and Openverse when you ask for music or sound effects, EOX for a Map Explainer film's satellite pictures, and component downloads).
 
 ## For developers
 
