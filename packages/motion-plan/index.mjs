@@ -83,7 +83,12 @@ export const SOUND_PROMPT = `Sound on every action (the studio's house rules): e
 
 /** The shots whose motion has no camera row (the Motion Plan runs at medium effort, which left a shot without one in
  *  trial runs; moworks-alive: the camera moves on every hold). Shot numbers, in order. */
-export const missingCamera = (plan) => (plan?.shots ?? []).filter((s) => !(s.motions ?? []).some((m) => m.type === "camera")).map((s) => s.shot);
+export const missingCamera = (plan) => {
+  const shots = plan?.shots ?? [];
+  // an end tag the guideline holds still (the plan's ending: the author's, no fade) has no camera: a row of 16 px on a black ground only passed the check (T35-11)
+  const held = plan?.ending?.kind === "author" && Number(plan?.ending?.fade) === 0 ? shots.at(-1) : null;
+  return shots.filter((s) => s !== held && !(s.motions ?? []).some((m) => m.type === "camera")).map((s) => s.shot);
+};
 
 /** A shot's plain words for the user, next to its numbers; absent when Claude wrote none. */
 const says = (s) => (typeof s?.says === "string" && s.says.trim() ? { says: s.says.trim().slice(0, 400) } : {});

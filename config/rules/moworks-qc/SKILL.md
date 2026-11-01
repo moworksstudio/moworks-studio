@@ -1,7 +1,7 @@
 ---
 name: moworks-qc
 description: Moworks Studio quality review, for every video style - after Version 1, when the owner asks for it, look at stills of the film like a strict director, score it on seven criteria, fix until every score is 8 or more (or fix hard mistakes only), with HyperFrames' check folded in.
-version: 1.3.1
+version: 1.3.2
 derived-from: Moworks Motion kit 2.0.4 (commit 30b7dcb, MIT, Moworks) - engine/skill/moworks-motion/workflow/review.md, rewritten for Moworks Studio. Folds in the layout and contrast findings of HyperFrames' check (Apache-2.0, 0.8.214 at 4719543), read as shipped. Criterion 6 (Brand / design) keeps the checklist of HyperFrames' design adherence at 0.8.163 (Apache-2.0, as shipped: https://github.com/heygen-com/hyperframes/blob/490ecafbc4d1fba3dd9246d516390d4a1a188089/skills/hyperframes-creative/references/design-adherence.md); HF retired that file in 0.8.185, so the studio keeps it as its own rule.
 ---
 
@@ -60,6 +60,9 @@ Any film with an image sequence (`.moworks/rules/moworks-alive/sequence.md`), fr
 - a **crawl** (under 1 picture a film frame outside a rest pose, or one picture held too long): Motion 6 at most;
 - two pictures of a sequence seen together (a dissolve, a stack): Motion 6 at most; a hand-written player: replace it with the app's;
 - the product cut by the frame outside a marked close-up: Composition 6 at most.
+
+A film with a voice-over, from the qc_sheets answer's "The voice against the music and the effects" block:
+- **words the music or the effects cover**: Sync 6 at most; lower the music or the effect in this round, or name it for the owner. Never score Sync over 7 with this block not measured.
 
 Any film (`.moworks/rules/moworks-alive/SKILL.md` rules 8 to 10):
 - **no living detail** (no sticker, icon, bubble, burst or playful word made for this film; a film that only moves its text and pictures): Motion 7 at most;
@@ -127,11 +130,11 @@ already (the app placed them before Version 1): score Sync on the voice-over, th
 when a fix of yours moves a shot, the app places the sound effects again for the new times and keeps the owner's own moves.
 A score you cannot raise without the owner (sync when you cannot hear the song, a colour only they can approve): ask them right away, with
 the seconds to check, instead of stopping quietly.
-**Never promise a later check** ("the 31.5 s cut may fall into 'Hôm', check by ear in the Final Mix", and no step did): no later
+**Never promise a later check** ("the 31.5 s cut may fall into 'Hôm', check by ear in Music & Sound", and no step did): no later
 step reads your doubts again. Check it now with what you have (a cut or a music stop against the voice: transcript.json's word times
 against the music's data-mw-stop or the cut's second; voice_check for the levels), fix it in this round (the music_stop tool moves a stop
 into the nearest pause by itself), or name it in the review as unchecked, with its seconds, for the owner. Never "I will check it later",
-"listen again in the Final Mix" or "the next step will".
+"listen again in Music & Sound" or "the next step will".
 
 Write every round to `docs/QC-REVIEW.md`: round · the seven scores · the three worst problems (seconds) · what you changed. End the file with
 one line `Final score: N/10`, N the lowest of the last seven scores (the app reads it: 8 or more passes the step). Write the same rounds

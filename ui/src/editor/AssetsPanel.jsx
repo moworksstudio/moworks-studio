@@ -130,10 +130,10 @@ function Row({ a, items, projectId, fileUrl, locked, time, length, onChanged, on
     finally { setBusy(null); }
   };
   const reveal = () => post(`/api/projects/${projectId}/files/reveal`, { path: a.path }).catch((e) => toast(e.message, "error"));
-  // at the playhead, on the lane its folder gives
-  const place = async () => {
+  // at the playhead, on the lane the menu names
+  const place = async (lane) => {
     setBusy("timeline");
-    try { const r = await putOnTimeline(projectId, a.path, { start: fitStart(time, a.duration, length) }); toast(placedSay(t, a.name, r.at)); onChanged(true); }
+    try { const r = await putOnTimeline(projectId, a.path, { start: fitStart(time, a.duration, length), lane }); toast(placedSay(t, a.name, r.at)); onChanged(true); }
     catch (e) { toast(e.message, "error"); }
     finally { setBusy(null); }
   };
@@ -145,7 +145,7 @@ function Row({ a, items, projectId, fileUrl, locked, time, length, onChanged, on
   const folder = kidOf(a);
   const showIt = { label: t("Show in Explorer"), icon: <FolderOpen size={14} />, onSelect: reveal };
   const menu = [
-    a.kind === "audio" && !a.onTimeline && { label: t("Put on the timeline"), icon: <Clapperboard size={14} />, onSelect: place },
+    ...(a.kind === "audio" ? AUDIO_KIDS.filter(([k]) => !(a.onTimeline && k === folder)).map(([k, l]) => ({ label: t("Add to {track} track", { track: t(l) }), icon: <Clapperboard size={14} />, onSelect: () => place(k) })) : []),
     sound && { label: a.transcript === "saved" || a.transcript === "review" ? t("Open the words") : t("Transcribe"), icon: <AudioLines size={14} />,
       onSelect: async () => { if (a.transcript !== "saved" && a.transcript !== "review") { if (!(await call("transcribe", {}))) return; } onTranscript(a.path); } },
     ...(a.kind === "audio" && !a.app ? AUDIO_FOLDERS.filter(([k]) => k !== folder).map(([k, l]) => ({ label: t("Move to: {where}", { where: t(l) }), onSelect: () => call("move", { folder: k }, t("Moved to {where}", { where: t(l) })) })) : []),

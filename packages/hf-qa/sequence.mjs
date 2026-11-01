@@ -16,7 +16,8 @@ export const SEQ = { crawlRunS: 0.12, holdS: 0.1, jumpMin: 4, jumpOver: 3, sameD
 const r2 = (n) => Math.round(n * 100) / 100;
 const readJson = (f, d = null) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
 const unescape = (s) => s.replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
-const attr = (tag, name) => { const m = new RegExp(`\\b${name}=(?:"([^"]*)"|'([^']*)')`).exec(tag); return m ? unescape(m[1] ?? m[2]) : null; };
+// not "\\b": the film's id was read from data-hf-id, the product's poses were never found, and the check measured the whole picture, transparent margin too (T31-6, T35-7)
+const attr = (tag, name) => { const m = new RegExp(`(?<![-\\w])${name}=(?:"([^"]*)"|'([^']*)')`).exec(tag); return m ? unescape(m[1] ?? m[2]) : null; };
 
 /** Every data-mw-sequence element of the film's files: [{ id, file, start, duration, o }] (a broken one with `broken`). */
 export function filmSequences(dir) {
@@ -52,6 +53,9 @@ export function pictureDiff(p, a, b) {
   return d / (n * 255);
 }
 const inRest = (rests, f) => rests?.some(([a, b]) => f >= a - 1 && f <= b + 1);
+const inRange = (r, f) => { const [a, b = a] = String(r).split("-").map(Number); return f >= a && f <= b; };
+/** Two pictures of one portal of POSES.md: the scan says they show the same picture, so a jump between them is a cut no one sees (T35-7: 19 such "jumps"). */
+export const samePortal = (poses, a, b) => !!poses?.portals?.some((p) => p.some((r) => inRange(r, a)) && p.some((r) => inRange(r, b)));
 
 /** The sequence frame by film frame: the numbers of Test 30's measure and the runs that break the rules. cuts: the film's shot starts (a jump there is a cut). */
 export function measureSequence(seq, { fps = 30, poses = null, cuts = [] } = {}) {
@@ -88,8 +92,9 @@ export function measureSequence(seq, { fps = 30, poses = null, cuts = [] } = {})
     if (d < SEQ.jumpMin || d <= SEQ.jumpOver * before || d <= SEQ.jumpOver * after) continue;
     const T = snap(t0 + i / fps, fps);
     if (cuts.some((c) => Math.abs(c - T) <= 1.5 / fps)) continue;          // a cut of the film: the hero's jump is the cut's
+    if (samePortal(poses, pics[i - 1], pics[i])) continue;                 // a portal
     const diff = pictureDiff(poses, pics[i - 1], pics[i]);
-    if (diff != null && diff < SEQ.sameDiff) continue;                     // a portal
+    if (diff != null && diff < SEQ.sameDiff) continue;                     // two pictures that look the same
     out.jumps.push({ at: r2(T), a: pics[i - 1], b: pics[i], ...(diff != null ? { diff: r2(diff * 100) } : {}) });
   }
   return out;

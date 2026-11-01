@@ -32,7 +32,7 @@ Never bend the topic toward the style's demo film.
 | Motion ✋ | cue map, shot list | `docs/MOTION-PLAN.json`: per shot the framing, the camera move (at least four different moves across the film, each with a reason), the native move, durations, eases; source `{"kind": "style", "id": "STYLE.md §<n> <move>"}` |
 | Build | produce | §3. The demo source is staged into `.moworks/library/lemo/<slug>/` now: read `DEMO.md` and the code **for techniques only** (a brush engine, a rig, a shader, a post pass), never its story, arc, shots, props or timeline |
 | QC | self-check, "not the demo again" | the Moworks Review (moworks-qc), plus: compare with `DEMO.md`: structure, opening, signature shot, camera path, score shape, ending; **at least four of the six differ**. The failures Lemo-Opuscar sees most: subject too small or against the edge, too dark, colour on the same colour, subtitles over the subject, a gag too fast, blank frames in transitions, an effect that stops tracking its subject |
-| Sound / Final Mix | score, foley, mix | **the app's** music and sound effects only (no Kokoro, no sampler, no Python mix); pick by the style's sound section (instruments, foley materials, the silences) |
+| Sound / Music & Sound | score, foley, mix | **the app's** music and sound effects only (no Kokoro, no sampler, no Python mix); pick by the style's sound section (instruments, foley materials, the silences) |
 
 ## 3a. Styles cut from real material (Edit & Documentary, Evidence Films)
 

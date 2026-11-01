@@ -17,6 +17,9 @@ import { freshFilm } from "../hf-edit/codeFilm.mjs";
 import { dropDecorationContrast } from "./contrastDecor.mjs";
 import { filmSequences, measureProduct, sequenceLines, sequenceReport } from "./sequence.mjs";
 import { sungLines, sungReport } from "./lyricSync.mjs";
+import { voiceCheck, voiceLines } from "../sfx/voicecheck.mjs";
+import { beatTimes, trackClips } from "../hf-edit/tracks.mjs";
+import { ensureSequencePlayer, htmlFiles } from "../hf-edit/finalize.mjs";
 import { syncLines, syncReport } from "./wordSync.mjs";
 import { isLyricVideo } from "../style-catalog/traits.mjs";
 
@@ -161,7 +164,26 @@ const busyRound = (res, out) => { rmSync(out, { recursive: true, force: true });
  *  when the graphics card is short of memory (each part is a Chrome). The result is assembled in the serial order either way.
  *  The pictures stopped twice on a busy computer: { …, busy: true, sheets: {} } at once, the other parts ended (onRetry() before the
  *  second try). */
+/** How many of the film's cuts sit on the song's beats (within 50 ms), for a lyrics video: { on, cuts }; null with no beats. Told to the Review (T31-9: "cuts on the beat map" stood beside 19 of 33). */
+export function cutsOnBeat(starts, beats) {
+  if (!beats?.length) return null;
+  const cuts = (starts ?? []).filter((t) => t > 0.05);
+  return { on: cuts.filter((t) => beats.some((b) => Math.abs(b - t) <= 0.05)).length, cuts: cuts.length };
+}
+/** The elements the film took out of the check for text under an object: { n, product } (product: the sequence's own element is one). */
+export function occlusionReport(dir) {
+  let n = 0, product = false;
+  for (const f of htmlFiles(dir)) for (const m of readFileSync(join(dir, f), "utf8").matchAll(/<[a-z][^<>]*\bdata-layout-allow-occlusion\b[^<>]*>/gi)) { n++; if (/\bdata-mw-sequence=/.test(m[0])) product = true; }
+  return { n, product };
+}
+/** The block of the Review's answer (T31-7: 40 warnings became 2 by taking the phone out of the check, and a word stayed under it). */
+export function occlusionLines(o) {
+  if (!o?.n) return [];
+  return [`Text under an object is not checked on ${o.n} element(s) (data-layout-allow-occlusion, moworks-studio §6b). Each needs its reason in docs/NOTES.md and a look at it on the sheets.${o.product ? " One of them is the product: take the attribute off it, so the check sees text under the product." : ""}`];
+}
+
 export async function qcRound(dir, { shots, total, signal = null, parallel = false, snap = snapshotAtAsync, hf = runHfJsonAsync, decor = dropDecorationContrast, pauseMs = 3000, onRetry = () => {} } = {}) {
+  try { ensureSequencePlayer(dir); } catch { /* the look goes on */ }
   const base = join(dir, ".moworks", "qc");
   mkdirSync(base, { recursive: true });
   pruneQcRaw(dir, { keep: 0 });          // the earlier rounds' raw stills: this round is the newest now (their sheets stay)
@@ -235,14 +257,23 @@ export async function qcRound(dir, { shots, total, signal = null, parallel = fal
     catch (e) { if (signal?.aborted) throw e; return { sequence: { report, product: { cut: [], failed: String(e.message).split(/\r?\n/)[0] } }, failed: [] }; }
   };
   const sung = async () => {
-    try { return { sung: await sungReport(dir, { signal: partSignal }), failed: [] }; }
+    try {
+      const sung = await sungReport(dir, { signal: partSignal });
+      const song = sung ? trackClips(readFileSync(join(dir, "index.html"), "utf8"), "music")[0]?.src : null;
+      return { sung, cutBeats: song ? cutsOnBeat((shots ?? []).map((s) => s.start), beatTimes(dir, song)) : null, failed: [] };
+    }
     catch (e) { if (signal?.aborted) throw e; return { failed: [`sung words: ${String(e.message).split(/\r?\n/)[0]}`] }; }
   };
   const sync = async () => {
     try { return { sync: await syncReport(dir), failed: [] }; }
     catch (e) { return { failed: [`moves on words: ${String(e.message).split(/\r?\n/)[0]}`] }; }
   };
-  const parts = [pictures, stretches, checked, sequence, sung, sync];
+  // the music and the effects against the voice, measured on the film's own mix: a Review scored 8/10 with the music 4.5 dB over the voice and said it could not measure it (T36-6)
+  const voice = async () => {
+    try { const v = await voiceCheck(dir); return { ...(v.ran ? { voice: v } : {}), failed: [] }; }
+    catch (e) { return { voice: { ran: true, error: String(e.message).split(/\r?\n/)[0], masked: [], words: 0 }, failed: [] }; }
+  };
+  const parts = [pictures, stretches, checked, sequence, sung, sync, voice];
   let done;
   if (parallel) {
     // every part runs to its end; a part that threw rejects the round as the serial run would (the first in serial order)
@@ -262,7 +293,10 @@ export async function qcRound(dir, { shots, total, signal = null, parallel = fal
     if (part.check) res.check = part.check;
     if (part.sequence) res.sequence = part.sequence;
     if (part.sung) res.sung = part.sung;
+    if (part.cutBeats) res.cutBeats = part.cutBeats;
     if (part.sync) res.sync = part.sync;
+    if (part.voice) res.voice = part.voice;
+    try { res.occlusion = occlusionReport(dir); } catch { /* the block only */ }
     res.failed.push(...part.failed);
   }
   return res;
@@ -288,7 +322,10 @@ export function qcText(r, freshEyes = null) {
   if (r.still) lines.push("", ...stillLines(r.still));
   if (r.sequence) lines.push("", ...sequenceLines(r.sequence.report, r.sequence.product));
   if (r.sung) lines.push("", ...sungLines(r.sung));
+  if (r.cutBeats) lines.push("", `Cuts on the song's beats: ${r.cutBeats.on} of ${r.cutBeats.cuts} within 50 ms (the app's count). Say this number when you score Sync, not "on the beat map".`);
   if (r.sync) lines.push("", ...syncLines(r.sync));
+  if (r.voice) lines.push("", ...voiceLines(r.voice));
+  try { const o = r.occlusion ?? (r.projectDir ? occlusionReport(r.projectDir) : null); if (o?.n) lines.push("", ...occlusionLines(o)); } catch { /* the block only */ }
   if (freshEyes) lines.push("", "Fresh eyes (a second look that saw only the beats and cuts sheets, nothing else about the film):", freshEyes);
   if (r.failed.length) lines.push("", `Could not make everything: ${r.failed.join("; ")}`);
   lines.push("", "Open the sheets with Read (each is one picture), score the seven criteria, write the round to docs/QC-REVIEW.md, fix, and call qc_sheets again for the next round. To look closer at one moment, film_frames gives that frame whole, with its text, at the film's size.");
@@ -303,6 +340,7 @@ const FRAMES_KEEP = 2;          // this call's and the one before: the others ar
 /** Whole frames of the film at the given seconds, drawn as the render draws them, every word included (HF's own stills at the film's size),
  *  in .moworks/qc/frames/<n>/, out of git like the rest of .moworks/qc. { frames: [{ t, file }], asked, busy?, failed? }. */
 export async function filmFrames(dir, at, { total = null, signal = null, snap = snapshotAtAsync, pauseMs = 3000 } = {}) {
+  try { ensureSequencePlayer(dir); } catch { /* the look goes on */ }
   const last = total > 0 ? Math.max(0, total - 0.02) : Infinity;
   const asked = [...new Set((Array.isArray(at) ? at : [at]).map(Number).filter((t) => Number.isFinite(t) && t >= 0).map((t) => r2(Math.min(t, last))))].sort((a, b) => a - b);
   const times = asked.slice(0, FRAMES_AT_ONCE);

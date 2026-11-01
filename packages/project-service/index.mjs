@@ -661,6 +661,11 @@ export function addNote(dir, note) {
   const last = notes.at(-1);
   if (note.kind === "assets" && last?.kind === "assets" && Date.now() - Date.parse(last.updatedAt ?? last.at) < 60000) {
     last.files = [...new Set([...(last.files ?? []), ...(note.files ?? [])])].slice(0, 500); last.updatedAt = now;
+  // the sounds placed again: the same line, the new words (T32-14: five long lists in one round of changes)
+  } else if (note.kind === "sfx" && last?.kind === "sfx") {
+    Object.assign(last, { text: note.text, vars: note.vars, status: note.status, updatedAt: now });
+    if (!note.status) delete last.status;
+    if (!note.vars) delete last.vars;
   } else notes.push({ id: randomBytes(4).toString("hex"), at: now, ...note });
   writeJson(notesFile(dir), { notes: notes.slice(-300) });
   return notes.at(-1);

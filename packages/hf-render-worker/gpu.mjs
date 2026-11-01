@@ -53,6 +53,12 @@ async function testFrame(projectDir, at, dir, mode, { version, signal }) {
  *   found none), "gpu" (the test frame is fine),
  *   "test-failed" / "test-blank" (fell back to the CPU for this render: fellBack true, the caller tells the user).
  */
+/** A test frame that gave no answer and no error ran out of time on a busy computer: that says nothing of the card, so HF's probe decides; the render fell to the CPU,
+ *  58 min against 38, and no one said why (T32-4). One that failed with its words: the CPU, said to the user. */
+export function afterFailedTest(gpu, at = null) {
+  if (!String(gpu?.error ?? "").trim()) return { mode: "auto", reason: "test-unfinished", fellBack: false, renderer: gpu?.renderer ?? null, at };
+  return { mode: "software", reason: "test-failed", fellBack: true, renderer: gpu.renderer, at, error: gpu.error };
+}
 export async function chooseGpu(projectDir, { root = APP_ROOT, version = null, signal = null, workDir = null } = {}) {
   const t0 = Date.now();
   const done = (x) => { const out = { ...x, ms: Date.now() - t0 }; try { saveRenderSettings({ lastCheck: { at: new Date().toISOString(), ...out } }, root); } catch { /* best effort */ } return out; };
@@ -61,7 +67,7 @@ export async function chooseGpu(projectDir, { root = APP_ROOT, version = null, s
   const at = middle(projectDir), base = workDir ?? join(projectDir, ".moworks", "cache", "gpu-check");
   const gpu = await testFrame(projectDir, at, join(base, "gpu"), "auto", { version, signal });
   if (gpu.chose === "software") return done({ mode: "software", reason: "no-gpu", fellBack: false, renderer: gpu.renderer, at });
-  if (!gpu.ok) return done({ mode: "software", reason: "test-failed", fellBack: true, renderer: gpu.renderer, at, error: gpu.error });
+  if (!gpu.ok) return done(afterFailedTest(gpu, at));
   if (gpu.std >= FLAT) return done({ mode: "hardware", reason: "gpu", fellBack: false, renderer: gpu.renderer, at, std: gpu.std });
   const cpu = await testFrame(projectDir, at, join(base, "cpu"), "software", { version, signal });
   if (cpu.ok && cpu.std < FLAT) return done({ mode: "hardware", reason: "gpu", fellBack: false, renderer: gpu.renderer, at, std: gpu.std, flatOnCpuToo: true });

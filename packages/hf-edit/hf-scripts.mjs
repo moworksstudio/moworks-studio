@@ -94,7 +94,7 @@ export async function runScript(dir, { name, args: asked = [], skills = [], root
     cmd = process.execPath; argv = [cliEntry(rt.dir), cliName, ...args]; shown = `hyperframes ${cliName}`;
   } else {
     const base = scriptBase(name), allowed = SCRIPTS[base];
-    if (!allowed) throw Object.assign(new Error(`The app does not run "${base}" for Claude: the voice-over, the music and the sound mix are the app's own work (Voice, Final Mix); the scripts it runs are ${Object.keys(SCRIPTS).join(", ")}`), { code: "INVALID" });
+    if (!allowed) throw Object.assign(new Error(`The app does not run "${base}" for Claude: the voice-over, the music and the sound mix are the app's own work (Voice, Music & Sound); the scripts it runs are ${Object.keys(SCRIPTS).join(", ")}`), { code: "INVALID" });
     const s = listScripts(skills.includes(allowed.skill) ? [allowed.skill] : [], root).find((x) => x.name === base);
     if (!s) throw Object.assign(new Error(`No script "${base}" in this project's skills (${skills.join(", ") || "none"})`), { code: "NOT_FOUND" });
     if (s.kind === "python") {

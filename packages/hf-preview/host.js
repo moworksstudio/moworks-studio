@@ -69,18 +69,58 @@
   let proxy = null, onProxy = false, vidHide = null, vidLast = 0;
   const placeVid = () => { const g = geom(); if (g) Object.assign(vid.style, { left: `${g.x}px`, top: `${g.y}px`, width: `${g.w}px`, height: `${g.h}px` }); };
   const hideVid = () => { clearTimeout(vidHide); vid.style.display = "none"; };
+  // The sound lanes as files of their own beside the preview's picture (server: stems): the video plays muted, each lane through a gain of its own, so a fader is heard at once with no new
+  // mix. The video leads: a lane that drifts a little is eased back by its rate, one that is far off is moved.
+  let stems = null;          // { key, master, els: { lane: <audio> }, ctx, gains: { lane: GainNode }, out: GainNode, want: { lane: gain } }
+  const stemsOff = () => { if (!stems) return; Object.values(stems.els).forEach((a) => { a.pause(); a.removeAttribute("src"); a.load(); }); stems.ctx?.close?.().catch?.(() => {}); stems = null; };
+  const stemsSet = (s, levels) => {
+    if (!s) return stemsOff();
+    const want = Object.fromEntries(Object.entries(levels ?? {}).map(([l, db]) => [l, 10 ** (Number(db) / 20)]));
+    if (stems?.key === s.key) { for (const [l, g] of Object.entries(want)) { stems.want[l] = g; if (stems.gains?.[l]) stems.gains[l].gain.value = g; } return; }
+    stemsOff();
+    const els = Object.fromEntries(Object.entries(s.urls).map(([l, u]) => { const a = new Audio(); a.preload = "auto"; a.src = u; return [l, a]; }));
+    stems = { key: s.key, master: Number(s.master) || 1, els, want, ctx: null, gains: null, out: null };
+  };
+  const stemsWire = () => {
+    if (stems.ctx) return;
+    const ctx = new AudioContext(), out = ctx.createGain(), limit = ctx.createDynamicsCompressor();
+    out.gain.value = stems.master;
+    limit.threshold.value = -1; limit.knee.value = 0; limit.ratio.value = 20; limit.attack.value = 0.003; limit.release.value = 0.1;
+    out.connect(limit); limit.connect(ctx.destination);
+    stems.gains = Object.fromEntries(Object.entries(stems.els).map(([l, a]) => { const g = ctx.createGain(); g.gain.value = stems.want[l] ?? 1; ctx.createMediaElementSource(a).connect(g); g.connect(out); return [l, g]; }));
+    Object.assign(stems, { ctx, out });
+  };
+  const stemsPlay = () => {
+    if (!stems) return;
+    stemsWire(); stems.ctx.resume().catch(() => {});
+    for (const a of Object.values(stems.els)) { a.currentTime = vid.currentTime; a.playbackRate = vid.playbackRate; a.muted = !!p.muted; a.play().catch(() => {}); }
+  };
+  const stemsPause = () => { if (stems) Object.values(stems.els).forEach((a) => a.pause()); };
+  let stemsAt = 0;
+  const stemsFollow = (now) => {
+    if (!stems || now - stemsAt < 250) return;
+    stemsAt = now;
+    for (const a of Object.values(stems.els)) {
+      const d = a.currentTime - vid.currentTime;
+      if (Math.abs(d) > 0.12) { a.currentTime = vid.currentTime; a.playbackRate = vid.playbackRate; } else a.playbackRate = vid.playbackRate * (1 - Math.max(-0.03, Math.min(0.03, d * 0.5)));
+    }
+  };
+  vid.addEventListener("waiting", () => { if (onProxy) stemsPause(); });
+  vid.addEventListener("playing", () => { if (onProxy) stemsPlay(); });
+
   const proxyPlay = () => {
     const end = proxy.duration || p.duration || 0, start = p.rangeStart ?? 0;
     let t = p.currentTime || 0;
     if (end && t >= end - 0.05) t = start;
     clearTimeout(vidHide);
-    vid.currentTime = t; vid.playbackRate = p.playbackRate || 1; vid.muted = !!p.muted;
+    vid.currentTime = t; vid.playbackRate = p.playbackRate || 1; vid.muted = !!p.muted || !!stems;
     onProxy = true; placeVid(); vid.style.display = "block";
-    vid.play().then(() => send("time", { time: vid.currentTime, paused: false })).catch(() => { onProxy = false; hideVid(); p.play(); });
+    stemsPlay();
+    vid.play().then(() => send("time", { time: vid.currentTime, paused: false })).catch(() => { onProxy = false; stemsPause(); hideVid(); p.play(); });
   };
   const proxyStop = ({ live = true } = {}) => {
     if (!onProxy) return null;
-    onProxy = false; vid.pause();
+    onProxy = false; vid.pause(); stemsPause();
     const t = vid.currentTime;
     if (live) { p.seek(t); settle(t); clearTimeout(vidHide); vidHide = setTimeout(hideVid, 2500); } else hideVid();
     send("time", { time: t, paused: true });
@@ -89,6 +129,7 @@
   const followVid = (now) => {
     if (vid.style.display !== "none") placeVid();
     if (!onProxy) return;
+    stemsFollow(now);
     const t = vid.currentTime, end = p.rangeEnd ?? null;
     if (end != null && t >= end) { if (p.loop) vid.currentTime = p.rangeStart ?? 0; else { proxyStop(); return; } }
     if (now - vidLast > 40) { vidLast = now; send("time", { time: vid.currentTime, paused: false }); }
@@ -100,7 +141,7 @@
   const SCRUB_MS = 250;
   let scrub = null;          // { t, timer }: the time shown from the preview, not yet drawn live
   const scrubTo = (t) => {
-    if (onProxy) { onProxy = false; vid.pause(); }
+    if (onProxy) { onProxy = false; vid.pause(); stemsPause(); }
     clearTimeout(vidHide); clearTimeout(scrub?.timer);
     vid.currentTime = Math.min(t, (vid.duration || proxy.duration || t + 1) - 0.001);
     placeVid(); vid.style.display = "block";
@@ -124,7 +165,48 @@
   });
 
   // ---- playback events ----
+  // ---- a lane's fader: heard as it moves. The Smooth preview is one mixed sound, so the film plays live until the new mix is ready. HF's live film has the lanes as
+  // the render does (its audio group buses, core audioGroups): the level goes on the group element here, on this page only. Its bus reads that when the sound is
+  // scheduled again, so the first move pauses and plays the film at once, and that schedule shows which gain is the bus's: every later move sets it directly, with
+  // no stop. (HF gives no call for this; if the gain is not found, a move is heard at the next pause and play.)
+  const laneOf = (el) => {
+    const role = el.getAttribute("data-timeline-role"), id = el.id ?? "";
+    return role === "voiceover" || role === "voice" ? "voice" : role === "music" ? "music" : role ? "sfx" : /^el-voice/.test(id) ? "voice" : /^el-music/.test(id) ? "music" : "sfx";
+  };
+  let buses = {}, hunting = null;
+  /** While the sound is scheduled again, the gain that takes this exact value is the lane's bus. */
+  const findBus = (lane, mark, done) => {
+    const w = win(), P = w?.AudioParam?.prototype, d0 = P && Object.getOwnPropertyDescriptor(P, "value");
+    if (!d0) return done();
+    const off = () => { clearTimeout(end); try { Object.defineProperty(P, "value", d0); } catch { /* the composition is reloading */ } done(); };
+    Object.defineProperty(P, "value", { configurable: true, get() { return d0.get.call(this); }, set(v) { d0.set.call(this, v); if (Math.abs(v - mark) < 1e-6) { buses[lane] = this; off(); } } });
+    const end = setTimeout(off, 1500);
+  };
+  const setLane = (lane, gain, { start = false } = {}) => {
+    const d = doc(); if (!d) return;
+    if (hunting?.lane === lane) { hunting.want = gain; return; }
+    const id = `mw-lane-${lane}`, level = (x) => String(Math.round(x * 10000) / 10000);
+    let g = d.getElementById(id);
+    if (!g) { g = d.createElement("hf-audio-group"); g.id = id; (d.querySelector("[data-composition-id]") ?? d.body).append(g); }
+    g.setAttribute("data-volume", level(gain));
+    if (buses[lane]) { buses[lane].value = gain; return; }
+    d.querySelectorAll("audio").forEach((el) => { if (laneOf(el) === lane && !el.hasAttribute("data-audio-group")) el.setAttribute("data-audio-group", id); });
+    if (hunting || (p.paused && !start)) { if (start) p.play(); return; }          // nothing to hear yet: the next play reads the level
+    const mark = Math.round(gain * 0.99987 * 1e6) / 1e6;
+    hunting = { lane, want: gain };
+    g.setAttribute("data-volume", String(mark));
+    findBus(lane, mark, () => {
+      const want = hunting?.want ?? gain;
+      hunting = null;
+      g.setAttribute("data-volume", level(want));
+      if (buses[lane]) buses[lane].value = want;
+      else if (!p.paused) { p.pause(); p.play(); }
+    });
+    if (start) p.play(); else { p.pause(); p.play(); }
+  };
+
   p.addEventListener("ready", () => {
+    buses = {}; hunting = null;
     send("ready", { duration: p.duration, width: p.compositionWidth || W, height: p.compositionHeight || H, fps: Number(p._runtimeFps) || null });
     applyQuality(qLevel === "auto" ? 1 : LEVEL[qLevel]);
     if (resumeAt != null) { p.seek(resumeAt); settle(resumeAt); resumeAt = null; }
@@ -324,7 +406,7 @@
     if (e.origin !== UI || !e.data || e.data.source !== "mw-ui") return;
     const m = e.data;
     // every command but another seek works on the live frame: a scrub waiting to be drawn is drawn first
-    if (scrub && m.type !== "seek" && !["mute", "rate", "loop", "range", "marks", "lock", "quality", "proxy"].includes(m.type)) scrubLive({ hide: m.type !== "play" });
+    if (scrub && m.type !== "seek" && !["mute", "rate", "loop", "range", "marks", "lock", "quality", "proxy", "lane"].includes(m.type)) scrubLive({ hide: m.type !== "play" });
     if (m.type === "play") { if (proxy) proxyPlay(); else p.play(); }
     else if (m.type === "pause") { if (onProxy) proxyStop(); else p.pause(); }
     else if (m.type === "proxy") {          // the UI's view of the smooth preview: its URL while it is fresh, else none
@@ -333,6 +415,7 @@
       if (!next && scrub) scrubLive({ hide: true });
       if (next && vid.getAttribute("src") !== next.url) { if (scrub) scrubLive({ hide: true }); vid.src = next.url; }
       proxy = next;
+      stemsSet(next ? m.stems : null, m.levels);
     }
     else if (m.type === "seek") {
       const t = Math.max(0, +m.time || 0);
@@ -353,8 +436,17 @@
       hideVid(); fullAgain();
       p.seek(t); settle(t); stepT = t; stepWhen = performance.now(); send("time", { time: t, paused: true });
     }
-    else if (m.type === "mute") { p.muted = !!m.muted; vid.muted = !!m.muted; }
-    else if (m.type === "rate") { p.playbackRate = Number(m.rate) || 1; vid.playbackRate = p.playbackRate; }
+    else if (m.type === "lane" && stems && proxy) {
+      stems.want[m.lane] = Number(m.gain) || 0;
+      if (stems.gains?.[m.lane]) stems.gains[m.lane].gain.value = stems.want[m.lane];
+    }
+    else if (m.type === "lane") {
+      const playing = !!proxy && onProxy;
+      if (proxy) { const t = proxyStop({ live: false }); proxy = null; if (playing) p.seek(t); }
+      setLane(m.lane, Number(m.gain) || 1, { start: playing });
+    }
+    else if (m.type === "mute") { p.muted = !!m.muted; vid.muted = !!m.muted || !!stems; if (stems) Object.values(stems.els).forEach((a) => { a.muted = !!m.muted; }); }
+    else if (m.type === "rate") { p.playbackRate = Number(m.rate) || 1; vid.playbackRate = p.playbackRate; if (stems) Object.values(stems.els).forEach((a) => { a.playbackRate = p.playbackRate; }); }
     else if (m.type === "loop") p.loop = !!m.loop;
     else if (m.type === "range") { p.rangeStart = m.start == null ? null : Number(m.start); p.rangeEnd = m.end == null ? null : Number(m.end); }
     else if (m.type === "marks") { safe = !!m.safe; grid = !!m.grid; draw(); }

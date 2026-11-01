@@ -5,5 +5,5 @@ import { runGates } from "./gates.mjs";
 
 const [dir, flag, workDir] = process.argv.slice(2);
 const onStep = (done, total, what) => process.stderr.write(`STEP ${done} ${total} ${what ?? ""}\n`);
-const r = await runGates(dir, flag === "--blank" ? { workDir, blank: true, onStep } : { blank: false, onStep });
+const r = await runGates(dir, flag === "--blank" ? { workDir, blank: true, onStep } : { blank: false, onStep, soundOnly: flag === "--sound-only" });
 process.stdout.write(JSON.stringify(r));

@@ -5,7 +5,6 @@
 //   music's duck) flat inside each word it sounds on and full again in the pauses, so a long wind keeps blowing between the words;
 // - the whole mix stays under MIX_PEAK, so HF's assemble never lowers the whole film to save a peak (its true-peak step, -1 dBFS) and the
 //   master stays linear: the Editor's Smooth preview and the final MP4 are the same mix at about the same level.
-// Where a song runs so loud that the usual duck leaves a word within MUSIC_MARGIN_DB, that spoken span ducks deeper (a song with 17 LU of range).
 // The film is heard as HF's render mixes it (engine audioMixer at the pinned version): each clip its part of its file, 48 kHz stereo, its
 // data-volume times its lane, its linear edge fades, at its place. What the app wrote keeps a signature (data-mw-duck) and the level it
 // started from (sfx.json mounted[].base), so each fit starts again from the placement's levels; a level or a lane the user set in Studio stays
@@ -18,7 +17,7 @@ import { promisify } from "node:util";
 import { ffmpegExe } from "../library/preview-media.mjs";
 import { readMounts } from "../hf-edit/shots.mjs";
 import { audioKind, duckMusic, filmWords } from "../hf-edit/tracks.mjs";
-import { EFFECTS_MARGIN_DB, MAX_GAIN, MUSIC_DUCK, MUSIC_MARGIN_DB, dipLane, sig, speechSpans } from "./actions.mjs";
+import { EFFECTS_MARGIN_DB, MAX_GAIN, dipLane, sig } from "./actions.mjs";
 import { patchState, readState } from "./index.mjs";
 
 const run = promisify(execFile);
@@ -118,7 +117,7 @@ const attrsOf = (tag) => Object.fromEntries([...tag.matchAll(/([a-zA-Z_:][-a-zA-
 const audioLine = (a) => `<audio ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}>`;
 
 /** Fit the app's placed effects to the voice and the mix (above), the music's duck first. The music's lanes are as tracks.mjs duckMusic wrote
- *  them just now (the callers run it first). Returns { fitted, laned, lowered, deeper, peakDb } or { fitted: 0, skipped }. */
+ *  them just now (the callers run it first). Returns { fitted, laned, lowered, peakDb } or { fitted: 0, skipped }. */
 export async function fitEffects(dir, { root } = {}) {
   const f = join(dir, "index.html");
   let html; try { html = readFileSync(f, "utf8"); } catch { return { fitted: 0, skipped: "no page" }; }
@@ -149,19 +148,10 @@ export async function fitEffects(dir, { root } = {}) {
   const voiceStem = voice.length ? renderStem(voice, total, pcms) : null;
   await breathe();
 
-  // ---- the music: a spoken span where a word has it within its margin ducks that much deeper (all of the span: a lane never pumps inside a phrase)
-  const deep = [];
+  // ---- the music: the usual duck, written afresh. No span goes deeper for its weakest word (owner 01/11, Test 36: one quiet word took 6 dB off a poem read without a pause, all 138 s; a lane's fader is the user's)
   if (voiceStem && songs.length && words.length) {
-    const relane = () => { for (const c of readMounts(dir).audio.filter((x) => audioKind(x) === "music")) { const was = songs.find((x) => x.src === c.src && x.start === c.start); if (was) was.lane = c.lane; } };
-    duckMusic(dir, { deep: [] });          // from the usual duck, whatever the last fit added
-    relane();
-    const song = renderStem(songs, total, pcms);
-    const over = (w) => { const v = powerOf(voiceStem, w.start, w.end); return v < 1e-6 ? 0 : 10 * Math.log10(Math.max(1e-12, powerOf(song, w.start, w.end))) - (10 * Math.log10(v) - (MUSIC_MARGIN_DB + 0.5)); };
-    for (const s of speechSpans(words)) {
-      const most = Math.max(...words.filter((w) => w.start >= s.start && w.end <= s.end).map(over));
-      if (most > 0) deep.push({ start: s.start, duck: Math.round(MUSIC_DUCK * 10 ** (-most / 20) * 1000) / 1000 });
-    }
-    if (deep.length) { duckMusic(dir, { deep }); relane(); }
+    duckMusic(dir);
+    for (const c of readMounts(dir).audio.filter((x) => audioKind(x) === "music")) { const was = songs.find((x) => x.src === c.src && x.start === c.start); if (was) was.lane = c.lane; }
     html = readFileSync(f, "utf8");
   }
 
@@ -247,7 +237,7 @@ export async function fitEffects(dir, { root } = {}) {
   patchState(dir, (x) => {
     for (const [i, m] of (x.mounted ?? []).entries()) { const c = done.get(`el-sfx-${i}`); if (c) { m.base = c.base; m.volume = Math.min(MAX_GAIN, Math.max(0.005, r3(c.base * c.fit))); } }
     for (const m of x.added ?? []) { const c = done.get(m.id); if (c && c.clip.src === m.file) { m.base = c.base; m.volume = Math.min(MAX_GAIN, Math.max(0.005, r3(c.base * c.fit))); } }
-    x.fit = { key, at: new Date().toISOString(), ...(deep.length ? { deep } : {}) };
+    x.fit = { key, at: new Date().toISOString() };
   });
-  return { fitted: clips.length, laned: clips.filter((c) => c.lane).length, lowered: clips.filter((c) => c.fit < 0.999).length, deeper: deep.length, peakDb: Math.round(20 * Math.log10(Math.max(peak, 1e-6)) * 10) / 10 };
+  return { fitted: clips.length, laned: clips.filter((c) => c.lane).length, lowered: clips.filter((c) => c.fit < 0.999).length, peakDb: Math.round(20 * Math.log10(Math.max(peak, 1e-6)) * 10) / 10 };
 }

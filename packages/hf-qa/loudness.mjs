@@ -30,10 +30,14 @@ export async function loudness(file, { root, target = TARGET } = {}) {
  *  fed back, linear when it can stay linear): -16 LUFS / true peak -1 dBTP, or -14 LUFS when the client asks. (The retired kit's -4 dBTP
  *  ceiling made a peaky mix land quieter: -17.2 LUFS on one film.) The video stream is
  *  copied untouched; the file is replaced only when the new one is written. Returns { applied, target, measured } or { silent: true }. */
+/** The range the master's loudnorm may keep: the film's own, at least the rule's, at most 20 (loudnorm's top). */
+export const keptRange = (measured, rule) => Math.min(20, Math.max(rule, Math.ceil(Number(measured) || 0)));
 export const MASTER = { kit: { lufs: -16, tp: -1, lra: 11 }, loud: { lufs: -14, tp: -1, lra: 11 } };
 export async function masterLoudness(file, { target = MASTER.kit, root } = {}) {
   const ff = ffmpegExe(root);
-  const af = (I, tp) => `loudnorm=I=${I}:TP=${tp}:LRA=${target.lra}`;
+  // a range of its own stays: a film with silences has its quiet parts raised less (T32-8: a film's opening went from -23 to -16.5 dB)
+  let lra = target.lra;
+  const af = (I, tp) => `loudnorm=I=${I}:TP=${tp}:LRA=${lra}`;
   let first;
   try { first = await run(ff, ["-hide_banner", "-nostats", "-i", file, "-map", "0:a:0?", "-af", `${af(target.lufs, target.tp)}:print_format=json`, "-f", "null", "-"], { windowsHide: true, maxBuffer: 64 << 20, timeout: 600000 }); }
   catch (e) { first = { stderr: e.stderr ?? "" }; }
@@ -41,6 +45,7 @@ export async function masterLoudness(file, { target = MASTER.kit, root } = {}) {
   if (!js) return { silent: true };
   const m = JSON.parse(js[0]);
   if (!Number.isFinite(Number(m.input_i)) || Number(m.input_i) < -70) return { silent: true };
+  lra = keptRange(m.input_lra, target.lra);
   // Closed loop (a linear pass left a spiky mix at -17.3 LUFS with peaks at -3.9 dBTP, the AAC re-encode adding to them). Each attempt is
   // written from the untouched source, then measured as the user's file will be; the next one corrects the loudness it missed and leaves
   // more headroom when the peak went over. The first is HyperFrames' linear two-pass; the others let loudnorm limit (dynamic) so a peaky mix

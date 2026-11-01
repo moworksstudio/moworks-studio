@@ -16,6 +16,7 @@ import * as plan from "../motion-plan/index.mjs";
 import { firstRoundOf, isOption, listRounds, newestRevision, optionIds, optionLabel, ownerRounds, pendingRevision } from "../hf-edit/boards.mjs";
 import * as rev from "../revisions/index.mjs";
 import { musicOnFilm } from "../hf-edit/tracks.mjs";
+import { isSongFilm } from "../style-catalog/traits.mjs";
 import { readOptions } from "../sfx/music.mjs";
 import { characterNeedsWork } from "../character-kit/index.mjs";
 import { voiceFit, voiceFitText } from "../agent/voice-fit.mjs";
@@ -71,10 +72,12 @@ export function renderMinutes(seconds, { styleId = null, three = false, fps = 30
 }
 /** What the question after Version 1 says each answer takes (time only, owner 31/10 #698): the Review's rounds, its checks, and when the film changed its
  *  render again, which is why the top of the range holds it. { mistakes: { minutes, high }, improve: { minutes, high } } */
-export function reviewEstimates(seconds, { styleId = null, three = false, fps = 30 } = {}) {
+export function reviewEstimates(seconds, { styleId = null, three = false, fps = 30, sequence = false } = {}) {
   const render = renderMinutes(seconds, { styleId, three, fps });
-  const one = (rounds) => ({ minutes: Math.round(REVIEW_ROUND * rounds + AFTER_REVIEW.checks), high: Math.round((REVIEW_ROUND * (rounds + 1) + AFTER_REVIEW.checks) * HIGH + render) });
-  return { mistakes: one(1), improve: one(LIKELY_ROUNDS) };
+  // a film at 60 fps or with an image sequence has a round about twice as long and more of them: Tests 31 and 35 took 65-72 min against "18-50" (T35-4, T31-11)
+  const heavy = sequence || Number(fps) >= 50, round = heavy ? REVIEW_ROUND * 2 : REVIEW_ROUND;
+  const one = (rounds) => ({ minutes: Math.round(round * rounds + AFTER_REVIEW.checks), high: Math.round((round * (rounds + 1) + AFTER_REVIEW.checks) * HIGH + render) });
+  return { mistakes: one(1), improve: one(heavy ? LIKELY_ROUNDS + 1 : LIKELY_ROUNDS) };
 }
 /** the estimate while the stage runs. Past the planned time the Editor's "about N min left" stood at "about 1 min left" for an
  *  hour (a Review took 1 h 40 min). Once the elapsed time reaches the plan, the whole is worked out again from what is done: the
@@ -84,7 +87,8 @@ const SHARES = { build: 0.66, sound: 0.11, firstVersion: 0.23 };
 // 6.9-56.8 min in 2-4 rounds, 6.7 min a round in the middle (3.5-14.2), 2 rounds in the middle (3 of 8 films had 3 or 4); the music task
 // 2-4.8 min and its mix about 3; the checks 2-13 min. Test 23's countdown said "5 min left" and then "39 min" at its Review's third round
 // (the plan ran out and the rest was worked out from shares, T23-11)
-export const REVIEW_ROUND = 7, LIKELY_ROUNDS = 2, AFTER_REVIEW = { sound: 6, checks: 4 };
+// The checks after a Review of Tests 31-36: 10-36 min on a busy computer, 2-13 before: 10 (T35-4)
+export const REVIEW_ROUND = 7, LIKELY_ROUNDS = 2, AFTER_REVIEW = { sound: 6, checks: 10 };
 /** The running Review's time left from its rounds (each qc_sheets call starts one; review: { startedAt, rounds, roundAt }): the rest of
  *  the round under way and a likely second round, and as the range's top one round more. A round that starts moves it by a round at most. */
 export function reviewLeft(review, now = Date.now()) {
@@ -126,6 +130,9 @@ export function estimateNow(est, steps, { startedAt = null, now = Date.now(), re
   const minutes = Math.round(elapsed / Math.min(0.95, Math.max(0.1, done)));
   return { ...est, minutes: Math.max(minutes, Math.ceil(elapsed) + 2), planned: est.minutes, recomputed: true };
 }
+
+/** Does the film play an image sequence? (the scan found one) */
+export function filmHasSequence(dir) { return !!readJson(join(dir, ".moworks", "scan", "index.json"), {})?.sequences?.length; }
 
 function recordBuild(root, shots, minutes, extra = {}) {
   const f = buildTimesFile(root);
@@ -215,7 +222,7 @@ export function createAutopilot(ctx) {
   }
 
   /** Start a step's own work: a job (the checks) or a Claude task with the step's prompt (the way's own prompt for General), or with
-   *  the user's own words (`text`), a dialog's step too (the Final Mix's music request). */
+   *  the user's own words (`text`), a dialog's step too (Music & Sound's music request). */
   async function startStep(id, s, { text = null, kickoff = false, fromAuto = false } = {}) {
     // a step the user starts (the pipeline's Run, Continue) is counted afresh by the autopilot's repeat limit
     // and the user's go is kept: what the autopilot may go on with after a restart, even if the step was refused just now
@@ -223,6 +230,12 @@ export function createAutopilot(ctx) {
     const { p, facts } = await ctx.pipelineOf(id);
     if (s.action?.kind === "job" && s.action.job === "qa") return { job: ctx.startQa(p, { onEnd: () => afterQa(id).catch(() => {}) }) };
     if (s.action?.kind === "job" && s.action.job === "firstVersion") return { job: await makeFirstVersion(id) };
+    // a film made for its song has its music: no one looks for three more (T35-12)
+    if (s.id === "sound" && isSongFilm(p.meta, { dir: p.path, root }) && musicOnFilm(p.path, p.meta)) {
+      meta(id, (m) => { ((m.pipeline ??= {}).skips ??= {}).sound = { at: now(), why: "The film's song is its music" }; });
+      await afterSound(id);
+      return advance(id);
+    }
     // Prepare ran while the voice-over was still being transcribed (97 %) and could not say the voice was English and off
     // topic. It waits for the words; the transcription's end starts it (transcriptLanded)
     if (s.id === "brief" && facts.voice?.transcribing) {
@@ -251,7 +264,7 @@ export function createAutopilot(ctx) {
       }
       if (p.meta?.pipeline?.gateFix) meta(id, (m) => { delete m.pipeline.gateFix; });
     }
-    // a step that opens in a dialog runs Claude only with the user's own words: the Final Mix's "Ask Claude for 3 new tracks" sent its
+    // a step that opens in a dialog runs Claude only with the user's own words: Music & Sound's "Ask Claude for 3 new tracks" sent its
     // request and nothing started, the answer null while the dialog said Claude was looking (T25-2)
     if (s.action?.kind !== "claude" && !text) return null;
     // a step that comes back after the film was delivered: the film as it is is kept as a version first
@@ -349,7 +362,7 @@ export function createAutopilot(ctx) {
     if (v1.choice) return { choice: v1.choice, already: true };
     if (ctx.agent.running.has(id)) throw Object.assign(new Error("Claude is still working on this project. Stop it or wait for it to finish."), { code: "BUSY" });
     const review = choice !== "none";
-    const est = review ? reviewEstimates(p.meta?.targetDurationSec ?? 60, { styleId: p.meta?.style?.id, three: !!ctx.threeFilm?.(p), fps: p.meta?.format?.fps })[choice] : null;
+    const est = review ? reviewEstimates(p.meta?.targetDurationSec ?? 60, { styleId: p.meta?.style?.id, three: !!ctx.threeFilm?.(p), fps: p.meta?.format?.fps, sequence: filmHasSequence(p.path) })[choice] : null;
     meta(id, (m) => {
       const pl = (m.pipeline ??= {}), x = pl.version1;
       x.choice = choice; x.choiceAt = now(); x.by = by;
@@ -457,7 +470,7 @@ export function createAutopilot(ctx) {
       if (p.meta?.pipeline?.version1?.stoppedAt) return null;
       s = pipe.nextAuto(state);
       if (!s) { voiceCard(p, state); inFlight.delete(id); await closeReview(id); return null; }
-      // once the film is done the checks are not run again by themselves (a change in the Final Mix or the chat): the render runs its own
+      // once the film is done the checks are not run again by themselves (a change in Music & Sound or the chat): the render runs its own
       // quick check; a new build clears `finished` and the stage runs to the end again; a Review the user asked for brings its own checks
       if (s.id === "checks" && isFinished(p.meta) && !pipe.reviewPending(p.meta?.pipeline?.version1)) return null;
       // the motion is rewritten once per new storyboard approval (if Claude changed nothing, the user sees it as it is)
@@ -508,7 +521,7 @@ export function createAutopilot(ctx) {
   }
 
   /** A change that moved the film's shots: the sound effects follow them (ctx.mix.timesAgain: nothing when no shot moved, the user's hand moves kept). */
-  async function soundsAgain(p) { try { await ctx.mix?.timesAgain?.(p); } catch { /* the Final Mix's Place them again */ } }
+  async function soundsAgain(p) { try { await ctx.mix?.timesAgain?.(p); } catch { /* Music & Sound's Place them again */ } }
 
   /** The music step's task ended: the first of Claude's three tracks goes on the timeline (unless the film has the user's track), the
    *  app places the sound effects; the checks come next (advance). */
@@ -621,12 +634,18 @@ export function createAutopilot(ctx) {
       return;
     }
     if (p.meta?.pipeline?.buildFix) meta(id, (m) => { delete m.pipeline.buildFix; });          // it compiles again: a later error gets its fix
+    // the Review run from the chat, its pictures stopped on a busy computer: Claude says "press Retry", so there is a Retry (T33-7)
+    if (!step && task.stillsBusy && !task.qcSheetsOk) { try { projects.addNote(p.path, { kind: "review", status: "warning", text: STILLS_BUSY, retry: "qcReview" }); } catch { /* notes are best effort */ } }
+    // the film changed by the chat after its Review: the score stands for the film before it, and says so (T32-10)
+    if (!step && p.meta?.pipeline?.reviewed && !p.meta.pipeline.reviewed.changedAfter && (task.changed ?? []).some((c) => /^(index\.html|compositions\/)/.test(String(c?.path ?? c).replace(/\\/g, "/")))) {
+      meta(id, (m) => { m.pipeline.reviewed.changedAfter = now(); });
+    }
     if (!step) {          // a chat turn: in the feedback loop, each round of changes is a version
       // the user answered the Review's question in the chat, and the Review ended: it counts as the Review's end
       if (task.continues === "qcReview" && !pipe.asksOwner(task.resultText)) { meta(id, (m) => { (m.pipeline ??= {}).reviewed = { at: now(), taskId: task.id }; }); await soundsAgain(p); }
       // Claude changed a frame's `- sfx:` cues in the chat: the sounds are placed again now, as its rules promise ("after your turn the
       // app finds each sound"), before the version, the preview and the checks take the film (Test 20 waited for "Place them again")
-      if (storyboardChanged(task.changed)) { try { await ctx.mix?.cuesAgain?.(p); } catch { /* the Final Mix's Place them again */ } }
+      if (storyboardChanged(task.changed)) { try { await ctx.mix?.cuesAgain?.(p); } catch { /* Music & Sound's Place them again */ } }
       if (p.meta?.pipeline?.delivered && task.changed?.length) await saveVersion(id, "edit");
       // a finished code film changed by the chat: its preview is made again, once, now (never on open)
       if (isFinished(p.meta) && task.changed?.length) { try { ctx.previewProxy?.(id); } catch { /* next change */ } }

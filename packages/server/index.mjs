@@ -53,7 +53,7 @@ import { spawn } from "node:child_process";
 import { createJobs } from "./jobs.mjs";
 import { busyWatch } from "../system-status/busy.mjs";
 import { plainMessage } from "./plainError.mjs";
-import { RESUME, createAutopilot, createRenderQueue, estimateMinutes, estimateNow, hasCast, isFinished, renderMinutes, reviewEstimates, reviewRounds } from "./autopilot.mjs";
+import { RESUME, createAutopilot, createRenderQueue, estimateMinutes, estimateNow, filmHasSequence, hasCast, isFinished, renderMinutes, reviewEstimates, reviewRounds } from "./autopilot.mjs";
 import { productionRoutes } from "./production.mjs";
 import { approvedFrames, boardRoutes, etaWords, runningEstimate, stillsBehind } from "./boards.mjs";
 import { localFile as localSoundFile, readState as readSfxState } from "../sfx/index.mjs";
@@ -763,8 +763,8 @@ export function routes(ctx) {
         // the last task was stopped by Exit and nothing ran since: the Editor offers to run it again (POST …/tasks/<id>/again)
         interrupted: ctx.agent.interrupted(id),
         appBusy: (() => { const j = ctx.jobs.list({ kind: "mix" }).find((x) => x.projectId === id && x.status === "running"); if (j) return { stage: "build", key: "Adding sound. Please wait...", jobId: j.id };
-          // the sound effects placed again (the Final Mix's Place, or after a chat turn changed the storyboard's cues)
-          const fx = ctx.jobs.list({ kind: "mix-sfx" }).find((x) => x.projectId === id && x.status === "running"); if (fx) return { stage: "finalMix", key: "Placing the sound effects. Please wait...", jobId: fx.id };
+          // the sound effects placed again (Music & Sound's Place, or after a chat turn changed the storyboard's cues)
+          const fx = ctx.jobs.list({ kind: "mix-sfx" }).find((x) => x.projectId === id && x.status === "running"); if (fx) return { stage: "build", key: "Placing the sound effects. Please wait...", jobId: fx.id };
           // the app reads the user's files (audio, decks, PSD) before Prepare
           const sc = ctx.jobs.list({ kind: "scan" }).find((x) => x.projectId === id && x.status === "running"); if (sc) return { stage: "prepare", key: "Reading your files. Please wait...", jobId: sc.id };
           // the voice being made or transcribed is the app at work too; when it ends the Editor loads the timeline again (NARRATION)
@@ -788,14 +788,14 @@ export function routes(ctx) {
           if (!v1?.at) return state.find((x) => x.id === "firstVersion")?.status === "running" ? { n: 1, choice: null, holding: false, next: null, card: { kind: "preparing", n: 1 } } : null;
           const seconds = Number(p.meta?.targetDurationSec) || 60, three = ctx.threeFilm(p), fps = p.meta?.format?.fps;
           return { at: v1.at, n: v1.n ?? 1, choice: v1.choice ?? null, by: v1.by ?? null, holding: !!v1.holding, next: v1.next ?? null, card,
-            times: card?.kind === "ask" ? reviewEstimates(seconds, { styleId: p.meta?.style?.id, three, fps }) : null,
+            times: card?.kind === "ask" ? reviewEstimates(seconds, { styleId: p.meta?.style?.id, three, fps, sequence: filmHasSequence(p.path) }) : null,
             renderTime: card?.kind === "render-ask" ? (() => { const m = Math.max(1, Math.round(renderMinutes(seconds, { styleId: p.meta?.style?.id, three, fps }))); return { minutes: m, high: Math.round(m * 1.5) }; })() : null };
         })(),
         question: p.meta?.pipeline?.briefChanged ? { kind: "brief-changed", at: p.meta.pipeline.briefChanged.at }
           : asking ? { kind: p.meta?.style?.id === "general" && existsSync(docPath(p.path, "ASSETS.md")) && !pipe.chosenWay(p.path) ? "way" : "missing" }
           // Claude's question in the chat is open (a font to choose, a revision's notes): the user answers there
           : facts.chatAsked || facts.revisionAsked ? { kind: "chat" } : null,
-        // the sound effects as last placed: the Editor reads the Final Mix and the timeline again when `at` changes (the dialog showed
+        // the sound effects as last placed: the Editor reads Music & Sound and the timeline again when `at` changes (the dialog showed
         // 26 after only 6 were left: it read them once, 4 s after Place, while the placement still searched)
         sfx: (() => { const s = readSfxState(p.path); return { placed: (s.mounted ?? []).length, at: s.placedAt ?? null }; })(),
         render: ctx.renders.status() };
@@ -817,11 +817,11 @@ export function routes(ctx) {
         setTimeout(() => ctx.autopilot.advance(id).catch(() => {}), 0);
         return { alreadyDone: true, step: stepId, next: pipe.nextAuto(state)?.id ?? null };
       }
-      // the Final Mix asks Claude for music on mixkit.co: with the web off for this project Claude could only say it cannot
+      // Music & Sound asks Claude for music on mixkit.co: with the web off for this project Claude could only say it cannot
       if (stepId === "finalMix" && effectiveSettings(p.meta ?? {}, root).web === "off")
         throw new HttpError(409, "WEB_OFF", "The web is off for this project, so Claude cannot look for music on Mixkit. Turn the web on for this project, then ask again.");
       const out = await ctx.autopilot.startStep(id, s, { text: String(b.text ?? "").trim() || null, kickoff: !!b.kickoff });
-      // never an empty answer the Editor reads as started (T25-2: 200 null, and the Final Mix said "Claude is looking on Mixkit")
+      // never an empty answer the Editor reads as started (T25-2: 200 null, and Music & Sound said "Claude is looking on Mixkit")
       if (!out) throw new HttpError(409, "NOT_STARTED", `Nothing could start for “${s.title ?? stepId}”. Try again, or ask Claude in the chat.`);
       return out;
     }),

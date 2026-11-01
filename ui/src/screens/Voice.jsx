@@ -57,7 +57,8 @@ function Waveform({ peaks, duration, time, onSeek }) {
 /** Every audio file of the project and where its words stand; any of them can be transcribed (it then becomes the voice the film is timed to). */
 // `stamp` (the voice-over's words: their state, when they were made and saved, the running job) reads the files again when
 // the transcription ends: the list stayed on "Not transcribed" until the screen was opened again
-function AudioFiles({ id, voiceFile, voiceName = null, onJob, running, focus = null, stamp = "" }) {
+// only a voice read from a script is compared word by word; one the user brought is what Whisper heard, saved (T36-11: "Words checked" with 12 words wrong)
+function AudioFiles({ id, voiceFile, voiceName = null, voiceTyped = false, onJob, running, focus = null, stamp = "" }) {
   const t = useT();
   const toast = useToast();
   const q = useData(() => get(`/api/projects/${id}/assets`).catch(() => null), [id, voiceFile, stamp]);
@@ -88,7 +89,7 @@ function AudioFiles({ id, voiceFile, voiceName = null, onJob, running, focus = n
         <span className="vo-name"><b>{audioLabel(x.name, now ? voiceName : null)}</b><span className="muted">{(x.folder ?? "").split("/").pop()}</span></span>
         {x.duration != null && <span className="muted num">{clock(x.duration)}</span>}
         {now && <span className="chip teal">{t("The film follows this voice")}</span>}
-        <span className={"chip" + (st === "saved" ? " teal" : st === "review" ? " amber" : "")}>{st === "saved" ? t("Words checked") : st === "review" ? t("Needs your check") : t("Not transcribed")}</span>
+        <span className={"chip" + (st === "saved" ? " teal" : st === "review" ? " amber" : "")}>{st === "saved" ? t(voiceTyped ? "Words checked" : "Words saved") : st === "review" ? t("Needs your check") : t("Not transcribed")}</span>
         {(st === "none" || !now) && <button className="btn sm" onClick={() => go_(x)} disabled={!!busy || !!running}>{busy === x.path ? <Loader2 size={14} className="spin" /> : <Mic2 size={14} />}{st === "none" ? t("Transcribe") : t("Use this voice")}</button>}
       </li>;
     })}</ul>
@@ -211,7 +212,7 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
     {source === "kokoro" && d && !d.kokoro.blocked && !d.kokoro.installed && <KokoroInstall size={d.kokoro.mb} onDone={() => { v.reload(); }} />}
     {(source === "elevenlabs" || (source === "kokoro" && d?.kokoro.installed && !d.kokoro.blocked)) && d && <TtsPanel id={id} provider={source} keySaved={source === "kokoro" || d.keys[source].saved} brief={project.data?.meta?.brief} draft={d.scriptDraft?.text ?? ""} language={d.settings.language} onJob={follow} running={running}
       current={voice ?? project.data?.meta?.voice} ownScript={d.ownScript} nudge={nudge} />}
-    <AudioFiles id={id} voiceFile={voice?.file} voiceName={voice?.voiceName} onJob={follow} running={running} focus={path}
+    <AudioFiles id={id} voiceFile={voice?.file} voiceName={voice?.voiceName} voiceTyped={!!voice?.script} onJob={follow} running={running} focus={path}
       stamp={`${voice?.transcript?.status ?? ""}|${voice?.transcript?.at ?? ""}|${voice?.transcript?.savedAt ?? ""}|${running?.id ?? ""}`} />
 
     {voice?.file && source !== "none" && <section className="panel" aria-label={t("Voice-over audio")}>
@@ -382,7 +383,9 @@ export function voiceFor(voices, asked, lang = "vi") {
 export function pickVoice(voices, provider, current, chosen = null, asked = null, lang = "vi") {
   const has = (vid) => (vid ? voices.find((v) => v.id === vid) ?? null : null);
   const own = current?.source === provider ? has(current.voiceId) : null;
-  return (has(chosen?.last) ?? has(chosen?.[provider]?.voiceId) ?? own ?? voiceFor(voices, asked, lang) ?? voices.find((v) => v.usable !== false) ?? voices[0])?.id ?? "";
+  // T33-1: a list not in the language's order must not open on another language's voice either
+  const speaks = voices.find((v) => v.usable !== false && SPEAKS[lang]?.test(`${v.labels ?? ""} ${v.name ?? ""}`));
+  return (has(chosen?.last) ?? has(chosen?.[provider]?.voiceId) ?? own ?? voiceFor(voices, asked, lang) ?? speaks ?? voices.find((v) => v.usable !== false) ?? voices[0])?.id ?? "";
 }
 // T22-3: switching the source card (ElevenLabs, then another card, then ElevenLabs again) built the panel afresh and the chosen voice went
 // back to the first one, "Minh Trung". What the user chose for this film is kept for the app session: the voice they picked last, and per

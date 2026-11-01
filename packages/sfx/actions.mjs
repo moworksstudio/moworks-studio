@@ -29,7 +29,7 @@ export const MUSIC_DUCK = 0.316;        // the music while words are spoken, -10
 export const HIT_OVER = 4;              // an effect's loudest moment, dB over the music between the words
 export const MAX_GAIN = Math.round(10 ** (12 / 20) * 100) / 100;          // +12 dB
 export const HIT_PEAK = -3;             // the loudest sample an effect's own gain may reach, dBFS (the film's whole mix: voicefit.mjs MIX_PEAK)
-export const EFFECTS_MARGIN_DB = 3, MUSIC_MARGIN_DB = 10;          // under a spoken word, how far under the voice (voicecheck.mjs, voicefit.mjs)
+export const EFFECTS_MARGIN_DB = 3, MUSIC_MARGIN_DB = 3;          // under a spoken word, how far under the voice (voicecheck.mjs, voicefit.mjs)
 // LEVELS: each family's place against the others (impact louder, click softer) and, for the ambience beds, their volume at the library's
 // loudness (loops -28 LUFS, brought up to it), moved with the film's mix (mixShift)
 export const LEVELS = Object.freeze({ click: 0.2, switch: 0.22, pop: 0.25, footstep: 0.25, cloth: 0.25, typing: 0.25, electronic: 0.25, whoosh: 0.3,

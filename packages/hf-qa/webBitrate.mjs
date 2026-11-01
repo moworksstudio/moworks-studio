@@ -56,6 +56,20 @@ export async function capWebBitrate(file, { root, signal = null } = {}) {
  *  1.1 s at a cut in one film and 0.42 s in another, each time until the next keyframe of the render (HF places them at scene changes, up
  *  to 5 s apart): the player's decoder lost its place at the cut and came back at a keyframe. Only the Editor plays this copy; Render
  *  hands over the render itself. crf 18 with the web ceiling, x264's own keyframes at cuts kept, -bf 0 as HF's encoder; the sound copied. Returns { size, mbps, gop }. */
+/** The Smooth copy with a new sound: its own picture copied as it is and the sound of `sound` (the render with the sound mixed again), no encode: a second or two, against 28 s for a 138 s film. */
+export async function smoothWithSound(smooth, sound, out, { root, signal = null } = {}) {
+  const tmp = out.replace(/(\.[^.]+)$/, ".part$1");
+  try {
+    await run(ffmpegExe(root), ["-v", "error", "-y", "-i", smooth, "-i", sound, "-map", "0:v:0", "-map", "1:a:0", "-c", "copy", "-movflags", "+faststart", tmp], { windowsHide: true, maxBuffer: 16 << 20, timeout: 300000, signal: signal ?? undefined });
+    renameSync(tmp, out);
+  } catch (e) {
+    rmSync(tmp, { force: true });
+    throw e;
+  }
+  const q = await probe(out, root);
+  return { size: q.size, mbps: Math.round(q.mbps * 10) / 10, gop: Math.max(1, Math.round(q.fps)) };
+}
+
 export async function smoothCopy(src, out, { root, signal = null } = {}) {
   const p = await probe(src, root);
   const gop = Math.max(1, Math.round(p.fps));

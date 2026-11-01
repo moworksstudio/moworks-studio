@@ -4,7 +4,7 @@
 // Only problems show: blocking issues, warnings, checks that could
 // not run and a visual hint that flagged something (with its shot, time and stills); nothing wrong is one line.
 import { useEffect, useState } from "react";
-import { AlertTriangle, Bot, Eye, Film, Loader2, ShieldCheck, XCircle } from "lucide-react";
+import { AlertTriangle, Bot, ChevronDown, ChevronRight, Eye, Film, Loader2, ShieldCheck, XCircle } from "lucide-react";
 import { get, post, watchJob } from "../api.js";
 import { Banner } from "../components.jsx";
 import { ago, clock, go, useData, useToast } from "../lib.jsx";
@@ -32,6 +32,7 @@ export default function Qa({ id, setCrumbs = () => {} }) {
   const project = useData(() => get(`/api/projects/${id}`), [id]);
   const qa = useData(() => get(`/api/projects/${id}/qa`), [id]);
   const [job, setJob] = useState(null);
+  const [opened, setOpened] = useState({});          // the kinds of finding the user opened or closed
   useEffect(() => { setCrumbs(project.data ? [t("Projects"), project.data.title, t("Tech checks")] : null); }, [project.data, t]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { const j = qa.data?.job; if (j?.status === "running" && j.id !== job?.id) follow(j); }, [qa.data]); // eslint-disable-line react-hooks/exhaustive-deps
   const follow = (j) => { setJob(j); watchJob(j.id, (x) => { if (!x) return; setJob(x); if (x.status !== "running") { qa.reload(); if (x.status === "failed") toast(x.error?.message, "error"); } }, 1200); };
@@ -51,21 +52,24 @@ export default function Qa({ id, setCrumbs = () => {} }) {
   const flaggedShots = new Set(visual.flatMap((c) => c.items.map((f) => f.shot)).filter(Boolean));
   const stills = (r?.stills ?? []).filter((s) => flaggedShots.has(s.shot));
 
-  const Finding = ({ c, f }) => <li className="finding">
+  // plain calls, not components: declared in here they were new components at each render (about 5 a second under the Editor), the buttons were replaced under the pointer and a click was lost
+  const finding = (c, f, i) => <li key={i} className="finding">
     <span className="where num">{f.shot ? t("Shot {n}", { n: f.shot }) : t("Film")}</span>
     <span className="what">{f.from != null && f.to != null && <span className="num muted">{f.from.toFixed(1)}–{f.to.toFixed(1)} s · </span>}{say(f, c)}
       {f.count > 1 && <span className="num muted"> · {t("{n} places", { n: f.count })}</span>}</span>
     <span className="acts">{f.shot && <button className="btn ghost sm" onClick={() => stage.close()}><Film size={13} />{t("Open shot")}</button>}
       <button className="btn ghost sm" onClick={() => fix(c, f)}><Bot size={13} />{t("Fix with Claude")}</button></span></li>;
   // the header counts the lines below it; no "Exact" / "Hint" tag, the group's name says which it is
-  const Group = ({ title, icon, items, children }) => items.length === 0 ? null : <section className="panel qa-group" aria-label={title}>
+  const group = ({ title, icon, items, children = null }) => items.length === 0 ? null : <section className="panel qa-group" aria-label={title}>
     <div className="panel-head">{icon}<h2>{title}</h2><span className="muted end num">{items.reduce((n, c) => n + (c.notSeen ? 1 : c.items.length || 1), 0)}</span></div>
-    {items.map((c) => <div key={c.id} className="qa-check">
-      <div className="qa-check-head"><b>{scriptTimedOut(c) ? checkLabel(c, t) : c.title}</b></div>
+    {items.map((c) => { const open = opened[c.id] ?? (!!c.blocking && !c.pass); return <div key={c.id} className="qa-check">
+      {/* one line a kind, closed: a blocking kind stays open so it is not missed (owner 01/11: 75 lines of warnings were too many to read) */}
+      <button type="button" className="qa-check-head qa-fold" aria-expanded={open} onClick={() => setOpened((x) => ({ ...x, [c.id]: !open }))}>
+        {open ? <ChevronDown size={14} /> : <ChevronRight size={14} />}<b>{scriptTimedOut(c) ? checkLabel(c, t) : c.title}</b>{!c.notSeen && c.items.length > 0 && <span className="muted end num">{c.items.length}</span>}</button>
       {/* a check that could not run says why in its own plain words when the server gives them (`why`: the pose check ran out of time) */}
-      <p className="hint">{c.notSeen ? (scriptTimedOut(c) ? t("No script error was found before the check stopped.") : c.why ? t(c.why) : notCheckedWhy(c, t)) : c.explain}</p>
-      {!c.notSeen && c.items.length > 0 && <ul className="plain">{c.items.slice(0, 20).map((f, i) => <Finding key={i} c={c} f={f} />)}</ul>}
-    </div>)}
+      {open && <p className="hint">{c.notSeen ? (scriptTimedOut(c) ? t("No script error was found before the check stopped.") : c.why ? t(c.why) : notCheckedWhy(c, t)) : c.explain}</p>}
+      {open && !c.notSeen && c.items.length > 0 && <ul className="plain">{c.items.map((f, i) => finding(c, f, i))}</ul>}
+    </div>; })}
     {children}
   </section>;
 
@@ -85,13 +89,12 @@ export default function Qa({ id, setCrumbs = () => {} }) {
           : problems === 1 ? t("1 thing to look at; it does not stop the render.") : problems ? t("{n} things to look at; they do not stop the render.", { n: problems })
           : skipped.length ? t("No problems found in what was checked.") : t("No problems found.")}
         <span className="muted"> {t("Checked {ago}.", { ago: ago(r.at) })}{qa.data.changedSince && !r.pass ? " " + t("The project changed since; run them again.") : ""}</span></Banner>
-      <Group title={t("Blocking")} icon={<XCircle size={16} color="var(--danger)" />} items={blocking} />
-      <Group title={t("Warnings")} icon={<AlertTriangle size={16} color="var(--status-stop)" />} items={warnings} />
-      <Group title={t("Not checked")} icon={<Eye size={16} />} items={skipped.map((c) => ({ ...c, notSeen: true }))} />
-      <Group title={t("Visual review")} icon={<Eye size={16} />} items={visual}>
-        {stills.length > 0 && <div className="contact-sheet">{stills.map((s) => <button key={s.path} className="still" onClick={() => stage.close()} title={t("Shot {n} at {time}", { n: s.shot, time: clock(s.t) })}>
-            <img src={s.url} alt={t("Shot {n} at {time}", { n: s.shot, time: `${s.t} s` })} loading="lazy" /><span className="num">{t("Shot {n}", { n: s.shot })} · {s.t.toFixed(2)} s</span></button>)}</div>}
-      </Group>
+      {group({ title: t("Blocking"), icon: <XCircle size={16} color="var(--danger)" />, items: blocking })}
+      {group({ title: t("Warnings"), icon: <AlertTriangle size={16} color="var(--status-stop)" />, items: warnings })}
+      {group({ title: t("Not checked"), icon: <Eye size={16} />, items: skipped.map((c) => ({ ...c, notSeen: true })) })}
+      {group({ title: t("Visual review"), icon: <Eye size={16} />, items: visual, children:
+        stills.length > 0 && <div className="contact-sheet">{stills.map((s) => <button key={s.path} className="still" onClick={() => stage.close()} title={t("Shot {n} at {time}", { n: s.shot, time: clock(s.t) })}>
+            <img src={s.url} alt={t("Shot {n} at {time}", { n: s.shot, time: `${s.t} s` })} loading="lazy" /><span className="num">{t("Shot {n}", { n: s.shot })} · {s.t.toFixed(2)} s</span></button>)}</div> })}
     </>}
   </div>;
 }

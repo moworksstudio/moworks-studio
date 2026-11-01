@@ -282,7 +282,9 @@ export default function NewProjectDialog({ onClose }) {
     const fresh = lastStyle.current !== style.id; lastStyle.current = style.id;
     setD((x) => {
       const fps = fresh || !rule.fps.includes(x.fps) ? rule.fpsDefault : x.fps, sec = fromTimecode(x.length, x.fps);
-      return { ...x, ...sizeForStyle(x, rule, fresh), fps, length: sec == null ? x.length : toTimecode(sec, fps) };
+      // a style that says its own length, on a film whose length nobody chose yet (T34-3: 15 s for a style of 30-45 s)
+      const own = fresh && Number(style.defaultLength) > 0 && x.length === blank.length ? Number(style.defaultLength) : null;
+      return { ...x, ...sizeForStyle(x, rule, fresh), fps, length: own != null ? toTimecode(own, fps) : sec == null ? x.length : toTimecode(sec, fps) };
     });
   }, [style?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const aspect = aspectOf(d.width, d.height);

@@ -313,10 +313,13 @@ function useProxy(projectId) {
     get(`/api/projects/${projectId}/preview-proxy`).then((v) => alive && setView(v)).catch(() => {});
     return () => { alive = false; };
   }, [projectId, n]);
-  const making = view?.status === "rendering" || !!view?.job;
+  const making = view?.status === "rendering" || !!view?.job || !!view?.needsStems;
   useEffect(() => { if (!view?.mode) return undefined; const h = setTimeout(() => setN((x) => x + 1), making ? 3000 : 20000); return () => clearTimeout(h); }, [view, making]);
   const update = useCallback(() => post(`/api/projects/${projectId}/preview-proxy`).then(setView), [projectId]);
   const refresh = useCallback(() => setN((x) => x + 1), []);          // read again now: a Reset can make it fresh again
+  // the film's sound lanes as files of their own: asked for once the film has its file (a fader then needs no new mix)
+  const stemsFor = view?.needsStems && !view?.job ? view.heard : null;
+  useEffect(() => { if (stemsFor) post(`/api/projects/${projectId}/preview-proxy/stems`).catch(() => {}); }, [stemsFor, projectId]);
   // every film that has a page: its full-quality MP4 plays when it is fresh (the server's status: picture and sound as the
   // film is now); a stale one is never played
   return useMemo(() => (view?.mode ? { ...view, update, refresh } : null), [view, update, refresh]);
@@ -337,7 +340,7 @@ export function UpdateProxy({ proxy, className = "btn ghost sm pv-lb pv-smooth",
  *  Update when nothing does. */
 export function SmoothLabel({ proxy }) {
   const t = useT();
-  if (proxy.status === "fresh") return <span className="pv-lb pv-smooth on" title={t("While the film plays you see its smooth preview; paused, the film itself")}><Sparkles size={14} /><span className="lbl">{t("Smooth")}</span></span>;
+  if (proxy.status === "fresh" || (proxy.stems && !proxy.job)) return <span className="pv-lb pv-smooth on" title={t("While the film plays you see its smooth preview; paused, the film itself")}><Sparkles size={14} /><span className="lbl">{t("Smooth")}</span></span>;
   if (proxy.job && (proxy.status === "stale" || proxy.url))
     return <span className="pv-lb pv-smooth" role="status" title={t("The film changed since its smooth preview: it plays live until the new one is ready")}><Loader2 size={14} className="spin" />
       <span className="lbl">{proxy.job.stage === "waiting" ? t("Smooth preview waits for {title}", { title: proxy.job.waitingFor ?? "" })
@@ -345,6 +348,7 @@ export function SmoothLabel({ proxy }) {
   if (proxy.job) return <span className="pv-lb pv-smooth" role="status" title={t("The app is making a smooth preview of this film: it plays live meanwhile")}><Loader2 size={14} className="spin" /><span className="lbl">{proxy.job.stage === "waiting" ? t("Smooth preview waits for {title}", { title: proxy.job.waitingFor ?? "" })
     : proxy.job.progress != null ? t("Smooth preview {n}%", { n: proxy.job.progress }) : t("Smooth preview…")}</span></span>;
   if (proxy.status === "stale" && proxy.update) return <UpdateProxy proxy={proxy} />;
+  if (proxy.interrupted && proxy.update && !proxy.job) return <UpdateProxy proxy={proxy} label="Make the smooth preview" />;          // the app closed while it was made (T32-6)
   return null;
 }
 
@@ -363,7 +367,7 @@ export function VideoStage({ pv }) {
       {job?.progress != null && <span className="pv-prog" aria-hidden="true"><i style={{ transform: `scaleX(${job.progress / 100})` }} /></span>}</div>}
     {proxy?.held && <div className="pv-update old" role="status">{t("You are watching Version {n}", { n: proxy.held.n })}</div>}
     {proxy?.url && job && <div className="pv-update" role="status"><Loader2 size={12} className="spin" />{t("Updating the preview")}{job.progress != null ? ` · ${job.progress}%` : ""}</div>}
-    {proxy?.url && !job && proxy.status === "stale" && <div className="pv-update old" role="status">{t("Older version")}{proxy.update && <UpdateProxy proxy={proxy} className="btn ghost sm" label="Update" />}</div>}
+    {proxy?.url && !job && proxy.status === "stale" && !proxy.stems && <div className="pv-update old" role="status">{t("Older version")}{proxy.update && <UpdateProxy proxy={proxy} className="btn ghost sm" label="Update" />}</div>}
   </>;
 }
 
@@ -391,8 +395,8 @@ export default function Player({ projectId, pv, shots, shot, onShot, locked, ran
   useEffect(() => { send("lock", { locked: !!locked }); }, [locked, send]);
   useEffect(() => { if (state.ready) send("quality", { level: quality }); }, [state.ready, quality, send]);
   const { proxy, videoOnly } = pv;
-  useEffect(() => { if (state.ready && !videoOnly) send("proxy", { url: proxy?.url ?? null, fresh: proxy?.status === "fresh", duration: proxy?.duration ?? null }); },
-    [state.ready, proxy?.url, proxy?.status, proxy?.duration, send]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (state.ready && !videoOnly) send("proxy", { url: proxy?.url ?? null, fresh: proxy?.status === "fresh" || !!proxy?.stems, duration: proxy?.duration ?? null, stems: proxy?.stems ?? null, levels: proxy?.levels ?? null }); },
+    [state.ready, proxy?.url, proxy?.status, proxy?.duration, proxy?.stems?.key, send]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { setCard(true); }, [picked[0]?.hfId, picked[0]?.label, pickN]);
   const seek = (s) => send("seek", { time: Math.max(0, Math.min(state.duration || 0, s)) });
   const shotIdx = shots.findIndex((s) => state.time >= s.start - 1e-3 && state.time < s.start + (s.duration ?? 0) - 1e-3);
@@ -459,7 +463,7 @@ export default function Player({ projectId, pv, shots, shot, onShot, locked, ran
         : info && <iframe ref={frame} className="pv-frame" aria-label={t("Film")} src={info.url} allow="autoplay; fullscreen" />}
       {loading && <div className="pv-wait pv-loading" role="status" aria-live="polite"><Loader2 size={18} className="spin" />
         <span>{t("The film is loading. Please wait.")}</span>
-        {slow && <><span className="pv-wait-sub">{t("This is taking longer than usual: a file may be missing.")}</span>
+        {slow && <><span className="pv-wait-sub">{t("This is taking longer than usual. A long film takes a few minutes on a busy computer.")}</span>
           <button type="button" className="btn sm" onClick={() => setSkipWait(true)}>{t("Show the film")}</button></>}</div>}
       {state.error && <div className="pv-wait err">{state.error}</div>}
       {one && card && <EditCard projectId={projectId} item={one} box={boxes.boxes.at(-1)} locked={locked} send={send}

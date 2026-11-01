@@ -1,7 +1,7 @@
-// Music for the Final Mix: Claude looks on mixkit.co for tracks that fit the brief (the web, asked first per
+// Music for Music & Sound: Claude looks on mixkit.co for tracks that fit the brief (the web, asked first per
 // project) and hands the app three; the app downloads them into the project's cache (.moworks/cache/music-options/R<n>/: made again on
 // demand, out of the history and out of sight; audio/music-options/ before layout 3), measures them, and the user
-// listens in the Final Mix dialog, picks one (the app puts it on the timeline, measures its beats, credits it) or asks for three others.
+// listens in Music & Sound dialog, picks one (the app puts it on the timeline, measures its beats, credits it) or asks for three others.
 // Only Mixkit's own hosts are downloaded from. Mixkit's free music (mixkit.co/free-stock-music, read 18/10/2026): royalty free, online use
 // (YouTube, social, websites, podcasts, online ads), attribution appreciated not required; NOT in CDs, DVDs, video games or TV & radio
 // broadcasts. The app says so wherever a track is chosen and in the credit.
@@ -76,14 +76,14 @@ export function creditMusic(dir, track) {
  *  Claude told the user to choose; now Claude is told what the film will have, so its words and the film agree. */
 export function optionsText(round, { placeMusic = false, placeSfx = false, placedNow = false, stopAt = null } = {}) {
   const sfx = placeSfx ? " and places the sound effects" : "";
-  // the Motion Plan's stop at the twist is the app's to apply; Claude says it, never sends the user to the Final Mix for it
+  // the Motion Plan's stop at the twist is the app's to apply; Claude says it, never sends the user to Music & Sound for it
   const stop = stopAt ? ` It stops the music at ${stopAt} s, as the Motion Plan says: say so; never ask the owner to set it.` : "";
   const end = !round.tracks.length ? "None could be saved: give direct https://assets.mixkit.co/… .mp3 links (the preview link on each track page)."
-    // before the build the Final Mix is closed: track 1 is on the timeline already; never send the user to the Final Mix to listen first
-    : placedNow ? `Track 1 ("${round.tracks[0].title}") is on the timeline now as the film's music, its beats measured: the owner plays it on the Editor's MUSIC lane or in the Music map. Say that plainly. The other tracks wait in the Final Mix, which opens after the build: the owner can switch there, or ask you now for three others. Do not say the owner listens in the Final Mix before the build.${stop}`
-    : placeMusic ? `Stop here. When your turn ends the app puts track 1 ("${round.tracks[0].title}") on the timeline as the film's music${sfx}. Say that plainly: track 1 is the film's music now${placeSfx ? " and the app adds the sound effects" : ""}; the owner can listen to the others and change it in the Final Mix, or ask for three others. Do not ask the owner to choose first.${stop}`
-    : `Stop here. The film keeps the music it has${placeSfx ? "; when your turn ends the app places the sound effects" : ""}. Say that plainly: the owner listens to these in the Final Mix and picks one there if they want it instead, or asks for three others.`;
-  return [`Round ${round.id}: ${round.tracks.length} track(s) saved${placedNow ? "" : " for the owner to listen to in the Final Mix dialog"}.`,
+    // before the build Music & Sound is closed: track 1 is on the timeline already; never send the user to Music & Sound to listen first
+    : placedNow ? `Track 1 ("${round.tracks[0].title}") is on the timeline now as the film's music, its beats measured: the owner plays it on the Editor's MUSIC lane or in the Music map. Say that plainly. The other tracks wait in Music & Sound, which opens after the build: the owner can switch there, or ask you now for three others. Do not say the owner listens in Music & Sound before the build.${stop}`
+    : placeMusic ? `Stop here. When your turn ends the app puts track 1 ("${round.tracks[0].title}") on the timeline as the film's music${sfx}. Say that plainly: track 1 is the film's music now${placeSfx ? " and the app adds the sound effects" : ""}; the owner can listen to the others and change it in Music & Sound, or ask for three others. Do not ask the owner to choose first.${stop}`
+    : `Stop here. The film keeps the music it has${placeSfx ? "; when your turn ends the app places the sound effects" : ""}. Say that plainly: the owner listens to these in Music & Sound and picks one there if they want it instead, or asks for three others.`;
+  return [`Round ${round.id}: ${round.tracks.length} track(s) saved${placedNow ? "" : " for the owner to listen to in Music & Sound dialog"}.`,
     ...round.tracks.map((t, i) => `${i + 1}. "${t.title}"${t.artist ? ` by ${t.artist}` : ""}: ${t.file}, ${t.duration ?? "?"} s`),
     ...round.failed.map((f) => `- not saved: ${f.title} (${f.why})`), end].join("\n");
 }

@@ -340,6 +340,44 @@ def repair(words, dur, t0=0.0):
     return words
 
 
+MIN_WORD = 0.12
+
+
+def hold_section(sub, mark, end, eighth):
+    """a line the user marked starts on its mark, whatever was heard (T31-2, T35-2: a line marked 5.8 came out at 9.34), and every word of the
+    section stays before the next mark. Words bunched under MIN_WORD apart (4 words in 0.15 s) are spread: their own run first, up to the next
+    word that stays; the whole section when there is no room for them"""
+    if not sub:
+        return sub
+    if mark is not None:
+        sub[0]["start"] = round(mark, 3)
+        if sub[0].get("sure") != "heard":
+            sub[0]["sure"] = "marked"
+    first = sub[0]["start"]
+    room = max(end - first, MIN_WORD * len(sub))
+    limit = first + room
+    n, i = len(sub), 1
+    while i < n:
+        if sub[i]["start"] - sub[i - 1]["start"] >= MIN_WORD and sub[i]["start"] < limit:
+            i += 1
+            continue
+        j = i
+        while j < n and (sub[j]["start"] - sub[j - 1]["start"] < MIN_WORD or sub[j]["start"] >= limit):
+            j += 1
+        a, b = sub[i - 1]["start"], sub[j]["start"] if j < n else min(limit, sub[i - 1]["start"] + (j - i + 1) * max(eighth, MIN_WORD))
+        if (b - a) / (j - i + 1) < MIN_WORD:          # no room before the next word: the whole section, evenly
+            for q in range(n):
+                sub[q]["start"] = round(first + room * q / n, 3)
+            break
+        for q, k in enumerate(range(i, j)):
+            sub[k]["start"] = round(a + (b - a) * (q + 1) / (j - i + 1), 3)
+        i = j
+    for k in range(n):
+        nxt = sub[k + 1]["start"] if k + 1 < n else limit
+        sub[k]["end"] = round(min(max(sub[k].get("end", 0), sub[k]["start"] + 0.05), max(nxt, sub[k]["start"] + 0.05)), 3)
+    return sub
+
+
 def rhythm(y):
     """onsets (attacks) and beats with librosa"""
     import librosa
@@ -363,7 +401,8 @@ def align(model, y, text, lang, y_rhythm=None):
     # each section alone: its window, its own lines as Whisper's prompt, its words matched and placed inside it. With no marks the whole
     # song is one section, so the lyrics are always the prompt (the kit prompted only with sections; on a long megamix test,
     # Turbo heard 0/86 words without the prompt and 32/86 with it)
-    marks = section_marks(text)
+    own = section_marks(text)          # what the user wrote: it holds (hold_section); line 1's 0 s below is only where the search starts
+    marks = dict(own)
     marks.setdefault(1, 0.0)
     dropped, info, allH = 0, None, []
     m = sorted(marks.items())
@@ -373,13 +412,16 @@ def align(model, y, text, lang, y_rhythm=None):
         idx = [i for i, w in enumerate(words) if ln <= w["line"] < ln2]
         sub = [words[i] for i in idx]
         Hk, info, vk = heard(model, y, lang, " ".join(" ".join(lines[i - 1]) for i in range(ln, ln2)), (a, bb))
-        Hk, nd = echo_filter([h for h in Hk if a <= h["start"] <= bb], onsets, vk)
+        # with marks, a word is heard between its own two marks only: a word heard a second past the next mark was the next line's
+        lo, hi = (max(0.0, t - 0.35) if ln in own else a), (m[k + 1][1] if k + 1 < len(m) and m[k + 1][0] in own else bb)
+        Hk, nd = echo_filter([h for h in Hk if lo <= h["start"] < hi], onsets, vk)
         dropped += nd
         allH += Hk
         for i, j in anchors(sub, Hk):     # Whisper's lag taken off first, so the words placed between keep their order
             sub[i].update(start=round(max(0.0, Hk[j]["start"] - WHISPER_LAG), 3), end=Hk[j]["end"], sure="heard")
         end = m[k + 1][1] if k + 1 < len(m) else dur
         sub = place(sub, onsets, end, eighth, vk, max(0.0, t - 0.5), beats)
+        sub = hold_section(sub, t if ln in own else None, end, eighth)
         for i, w in zip(idx, sub):
             words[i] = w
     for k in range(1, len(words)):       # in order: never at or before the word sung before it

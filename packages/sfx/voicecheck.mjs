@@ -48,6 +48,12 @@ export function voiceText(r) {
     ...r.masked.slice(0, 30).map((x) => `- "${x.word}" at ${x.at} s: the ${x.by} (${x.by === "effects" ? x.effectsDb : x.musicDb} dB) against the voice (${x.voiceDb} dB)`)].join("\n");
 }
 
+/** The Review's block (moworks-qc §2b): the mix as measured, so the score never stands on "I cannot hear it". */
+export function voiceLines(r) {
+  if (r.error) return [`The voice against the music and the effects: not measured (${r.error}). Name it as unchecked in the review; Sync stays at 7 at most.`];
+  return [`The voice against the music and the effects (the app's measure of the mix; words the sound covers keep Sync at 6 at most): ${voiceText(r)}`];
+}
+
 /** G-VOICE for the gates: a warning, never a block; null when there is no voice-over to check. */
 export async function gateVoice(projectDir) {
   const r = await voiceCheck(projectDir).catch((err) => ({ ran: true, error: String(err.message ?? err).split("\n")[0], masked: [] }));

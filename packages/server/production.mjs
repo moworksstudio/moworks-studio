@@ -42,8 +42,10 @@ import { capWebBitrate } from "../hf-qa/webBitrate.mjs";
 import { analyseBeats, fitMusicToFilm, musicRepeats, musicUsed, placeTrack } from "../hf-edit/tracks.mjs";
 import { levelTracks } from "../sfx/mixlevels.mjs";
 import { refreshBridge } from "../hf-edit/lemoPage.mjs";
+import { applyLanes } from "../sfx/lanes.mjs";
 import { resolveRuntime } from "../version-manager/index.mjs";
-import { filmHash } from "./proxy.mjs";
+import { filmHash, filmParts } from "./proxy.mjs";
+import { withSoundChecks } from "../hf-qa/gates.mjs";
 import { freshFilm } from "../hf-edit/codeFilm.mjs";
 import { fetchSlides, saveSlides, slidesLinks } from "./slides.mjs";
 
@@ -367,8 +369,8 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   /** All the gates (the blank-scene stills included) in a child process; Stop kills it. */
   const checkTimeFile = (p) => join(p.path, ".moworks", "cache", "qa", "check-time.json");
   // span: the job's progress from..to across the parts (the Tech checks job: its own bar moves with them)
-  const gatesChild = (p, job, { blank = true, span = null } = {}) => new Promise((ok, no) => {
-    const c = spawn(process.execPath, [join(root, "packages", "hf-qa", "gates-cli.mjs"), p.path, ...(blank ? ["--blank", workDir(p, "gates")] : [])], { windowsHide: true });
+  const gatesChild = (p, job, { blank = true, span = null, soundOnly = false } = {}) => new Promise((ok, no) => {
+    const c = spawn(process.execPath, [join(root, "packages", "hf-qa", "gates-cli.mjs"), p.path, ...(soundOnly ? ["--sound-only"] : blank ? ["--blank", workDir(p, "gates")] : [])], { windowsHide: true });
     // each part of the checks as it starts ("STEP done total what" on stderr), so the render's quick check moves. A part can take
     // minutes with nothing to count (HF's check of the film: 2 % for 4 min), so the job also says since when the checks and this part run
     // and how long this film's checks took the last time (`checkExpectSec`, null the first time): the bar can follow the clock
@@ -439,13 +441,13 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     if (beatMapTrack(p.path) !== (inFilm ?? songs[0])) await writeBeatMap(p.path, inFilm ?? songs[0], { root, fps: projects.projectFps(p) }).catch(() => false);
   };
   /** A song far shorter than the film plays again after itself to the film's end (tracks.mjs musicLoop, T22-9): said once in the chat, its
-   *  Final Mix button there to pick a longer one (the Final Mix says it too). */
+   *  Music & Sound button there to pick a longer one (Music & Sound says it too). */
   const repeatNote = (p) => {
     const r = musicRepeats(p.path);
     const cur = projects.getProject(p.id, root)?.meta?.music;
     if (!r?.short || !cur || cur.repeatNoted === r.from) return;
     meta(p.id, (m) => { if (m.music) m.music.repeatNoted = r.from; });
-    note(p, { kind: "music", status: "warning", open: "mix", text: "The song is shorter than the film; it repeats from {at}. Pick a longer track in the Final Mix if you hear the repeat.", vars: { at: r.at } });
+    note(p, { kind: "music", status: "warning", open: "mix", text: "The song is shorter than the film; it repeats from {at}. Pick a longer track in Music & Sound if you hear the repeat.", vars: { at: r.at } });
   };
 
   // ---- Render (top bar): a quick check first (render-breaking issues only), then the HF render worker
@@ -473,6 +475,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       await levelTracks(p.path, { root }).catch(() => null);          // the voice and the music at their levels, the music ducked under the words
       repeatNote(p);
       refreshBridge(p.path);          // a code film built before a bridge change gets today's bridge
+      applyLanes(p.path);
       await commit(p, "Changes before render");
       job.update({ stage: "checks", revision: await rev.headAsync(p.path) });
       const gates = await gatesFor(p, job, { blank: false }).catch((e) => {          // Tech checks' results when the film is unchanged
@@ -565,9 +568,19 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       const revision = (await rev.headAsync(p.path)) ?? "none";
       job.update({ stage: "checks", progress: 10 });
       // Tech checks run every time they are asked for, and keep their results for a Render of the same film
-      const key = gateHash(p.path, projects.projectFps(projects.getProject(p.id, root) ?? p), root);
+      const fps0 = projects.projectFps(projects.getProject(p.id, root) ?? p), key = gateHash(p.path, fps0, root), picture = filmParts(p.path, fps0).picture, code = checksCode(root);
+      // only the sound changed: the picture's checks stand, the sound's run (T32-7: 10 minutes for a chair louder, the picture's hash the same)
+      const was = readJson(checkedFile(p.path), null), lastReport = readJson(workDir(p, "qa", "last.json"), null);
+      if (was?.picture === picture && was?.code === code && was?.gates?.gates && lastReport?.checks?.length) {
+        const fresh = await gatesChild(p, job, { soundOnly: true, span: [10, 90] });
+        const report = { ...lastReport, at: new Date().toISOString(), revision, soundOnly: true, checks: withSoundChecks(lastReport.checks, fresh.gates.map((g) => ({ ...g, ...(CHECKS[g.id] ?? { title: g.id, explain: "", kind: "deterministic" }) }))) };
+        try { writeJson(checkedFile(p.path), { ...was, key, at: report.at, gates: { ...was.gates, gates: withSoundChecks(was.gates.gates, fresh.gates) } }); } catch { /* best effort */ }
+        writeJson(workDir(p, "qa", "last.json"), report);
+        meta(p.id, (m) => { m.lastQa = { at: report.at, pass: report.pass, revision, blocking: report.blockingFailures.length }; });
+        return { pass: report.pass, blocking: report.blockingFailures.length, soundOnly: true };
+      }
       const gates = await gatesChild(p, job, { span: [10, 60] });          // the top bar's "Running checks 10%" stood ~10 min
-      try { writeJson(checkedFile(p.path), { key, blank: true, at: new Date().toISOString(), gates }); } catch { /* best effort */ }
+      try { writeJson(checkedFile(p.path), { key, blank: true, at: new Date().toISOString(), gates, picture, code }); } catch { /* best effort */ }
       job.update({ stage: "contact sheet", progress: 60 });
       const { shots, root: comp } = await readShots(p.path);
       const placed = shots.filter((s) => s.start != null && s.duration);
@@ -964,7 +977,10 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       const job = jobs.running().find((j) => j.kind === "lyrics" && j.projectId === id) ?? null;
       // gpu: Whisper runs on the graphics card here (the CUDA pack is in), so the sheet says the right wait
       const track = musicTrack(p);
-      return { ...lyrics.read(p.path), track, heard: lyrics.heardDraft(p.path, track), job: job?.id ?? null, gpu: asr.whisperDevice(root).gpu };
+      const read = lyrics.read(p.path);
+      // the song fixed after the timing: the table speaks of a part the film no longer plays (T31-1)
+      if (read.timed && lyrics.windowChanged(read.timed, musicUsed(p.path))) read.timed.windowOld = true;
+      return { ...read, track, heard: lyrics.heardDraft(p.path, track), job: job?.id ?? null, gpu: asr.whisperDevice(root).gpu };
     }),
     r("PUT", `/projects/${P}/lyrics`, async ([id], b) => {
       const p = mustProject(id, root);

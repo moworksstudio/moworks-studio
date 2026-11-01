@@ -253,12 +253,20 @@ export async function gateBuild(projectDir) {
   return { id: "G-BUILD", blocking: true, pass: !r.error, findings: r.error ? [{ code: "build_error", message: `The film's code does not compile: ${r.error}` }] : [] };
 }
 
+/** The checks that read the sound: all a film needs when only its sound changed (T32-7). */
+export const SOUND_GATES = new Set(["G-VOICE", "G-SFX"]);
+/** The last checks with the sound's in place of theirs. */
+export const withSoundChecks = (last, fresh) => [...last.filter((c) => !SOUND_GATES.has(c.id)), ...fresh.filter(Boolean)];
+
 /** Run every gate. Returns { pass, blockingFailures, gates }. `blank: false` skips the (slower) blank-scene snapshots. onStep(done, total,
  *  what) before each part, so a render's "quick check" moves (it stood at 3 % for 4 min), and again when HF's check runs once more. HF's
  *  check stopped twice (a busy machine): { pass: false, busy: true, message: CHECK_BUSY, blockingFailures: [] } at once, no gate blamed.
  *  `hfCheck`: the HF part (tests). */
-export async function runGates(projectDir, { workDir, blank = true, onStep = () => {}, hfCheck = gatesFromHfCheck } = {}) {
-  const parts = [
+export async function runGates(projectDir, { workDir, blank = true, onStep = () => {}, hfCheck = gatesFromHfCheck, soundOnly = false } = {}) {
+  const parts = soundOnly ? [
+    ["The voice against the sound", async () => [await gateVoice(projectDir)]],
+    ["A sound on every action", async () => [await gateSfx(projectDir)]],
+  ] : [
     ["Building the film's code", async () => [await gateBuild(projectDir)]],          // first: the checks below look at the film as its source is now
     ["HyperFrames' check of the film", (again) => hfCheck(projectDir, { onRetry: () => again("HyperFrames' check of the film, once more (the computer is busy)") })],
     ["Files and fonts", async () => [gateRemote(projectDir), ...(await gateFonts(projectDir)), gateCodeGlyphs(projectDir), gateViMarks(projectDir)]],

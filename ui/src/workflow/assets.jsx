@@ -39,6 +39,29 @@ async function filesFromDrop(dt) {
 }
 
 let seq = 0;
+const SEQ_NAME = /^(.*?)(\d{2,})(\.[a-z0-9]+)$/i;
+const SEQ_MIN = 12;
+/** The list's rows: a numbered picture sequence of a folder is one row, not 641 rows with 641 ✕ (T35-13); a file that failed keeps its own row. [{ x } | { seq: { name, items, size } }] */
+export function assetRows(items) {
+  const groups = new Map();
+  for (const x of items) {
+    const m = SEQ_NAME.exec(x.file.name);
+    if (!m || x.status === "error" || x.status === "warn") continue;
+    const k = `${String(x.file.webkitRelativePath ?? "").split("/").slice(0, -1).join("/")}|${m[1]}|${m[3].toLowerCase()}`;
+    (groups.get(k) ?? groups.set(k, []).get(k)).push(x);
+  }
+  const inSeq = new Map();
+  for (const g of groups.values()) if (g.length >= SEQ_MIN) for (const x of g) inSeq.set(x.id, g);
+  const out = [], done = new Set();
+  for (const x of items) {
+    const g = inSeq.get(x.id);
+    if (!g) { out.push({ x }); continue; }
+    if (done.has(g)) continue;
+    done.add(g);
+    out.push({ seq: { name: `${g[0].file.name} … ${g.at(-1).file.name}`, items: g, size: g.reduce((a, y) => a + y.file.size, 0) } });
+  }
+  return out;
+}
 /** The pick / drop area and the list. items: [{ id, file, progress?, status?, error? }]; onAdd(files), onRemove(id).
  *  hint: a compact picker's one line about what it takes, inside the drop zone under its row (New project). */
 export function AssetPicker({ items, onAdd, onRemove, busy = false, compact = false, hint = null }) {
@@ -66,7 +89,17 @@ export function AssetPicker({ items, onAdd, onRemove, busy = false, compact = fa
       <input ref={fileRef} type="file" multiple hidden onChange={(e) => { add(e.target.files ?? []); e.target.value = ""; }} />
       <input ref={dirRef} type="file" multiple hidden webkitdirectory="" directory="" onChange={(e) => { add(e.target.files ?? []); e.target.value = ""; }} />
     </div>
-    {items.length > 0 && <ul className="plain asset-list">{items.map((x) => {
+    {items.length > 0 && <ul className="plain asset-list">{assetRows(items).map(({ x, seq: g }) => {
+      if (g) {
+        const done = g.items.filter((y) => y.status === "done").length, going = g.items.some((y) => y.status === "uploading"), I = ICON[kindOf(g.items[0].file.name)];
+        return <li key={g.items[0].id} className={done === g.items.length ? "done" : ""}>
+          <I size={15} className="k" />
+          <span className="n" title={g.name}>{g.name}</span>
+          <span className="muted num s">{t("{n} pictures", { n: g.items.length })} · {size(g.size)}</span>
+          {going ? <span className="prog"><span style={{ width: `${Math.round((done / g.items.length) * 100)}%` }} /></span>
+            : !busy && <button type="button" className="btn ghost icon sm" onClick={() => g.items.forEach((y) => onRemove(y.id))} aria-label={t("Remove {name}", { name: g.name })}><X size={14} /></button>}
+        </li>;
+      }
       const k = kindOf(x.file.name), I = ICON[k];
       return <li key={x.id} className={x.status ?? ""}>
         <I size={15} className="k" />

@@ -22,9 +22,10 @@ import { expandEnv, loadPins, renderSettings } from "../version-manager/index.mj
 import * as projects from "../project-service/index.mjs";
 import { docPath } from "../project-service/docs.mjs";
 import { refreshBridge } from "../hf-edit/lemoPage.mjs";
+import { applyLanes, readLanes } from "../sfx/lanes.mjs";
 import { fitMusicToFilm } from "../hf-edit/tracks.mjs";
 import { levelTracks } from "../sfx/mixlevels.mjs";
-import { capWebBitrate, smoothCopy } from "../hf-qa/webBitrate.mjs";
+import { capWebBitrate, smoothCopy, smoothWithSound } from "../hf-qa/webBitrate.mjs";
 
 const { projectFps } = projects;
 
@@ -34,8 +35,10 @@ const VERSIONS = [".moworks", "cache", "versions"];
 /** Where a sound is mixed again: the computer's temp folder, not the film's. HF makes long-named folders inside it, and a film deep in the user's
  *  folders went past Windows' 248 characters for a folder (ENOENT from mkdtemp: the new sound never mixed). */
 export const remixWorkDir = (hash) => join(tmpdir(), `mw-remix-${hash}`);
-const AUDIO_TAG = /<audio\b[^>]*>(?:[\s\S]*?<\/audio>)?/gi;
+const AUDIO_TAG = /<(audio|hf-audio-group)\b[^>]*>(?:[\s\S]*?<\/\1>)?/gi;
 const AUDIO_FILE = /\.(mp3|wav|m4a|aac|flac|ogg|opus)$/i;
+// a lane's fader on the page: part of the sound, but no part of what each lane's own file holds (`heard`)
+const LANE_TAGS = /<hf-audio-group\b[^>]*\bid="mw-lane-[^>]*>\s*<\/hf-audio-group>|\s+data-audio-group="mw-lane-[^"]*"/g;
 // HF's element ids, written into the film's HTML when the Editor opens it (not a film change; older films also carry the ones HF Studio
 // wrote). Opening the Editor stamped them on every element and <audio>, and the film's render and pre-render went stale with nothing drawn or heard changed.
 const STUDIO_ID = /\s+data-hf-id="[^"]*"/g;
@@ -44,14 +47,14 @@ const drawnText = (s) => s.split(/\r?\n/).map((l) => l.trimEnd()).filter(Boolean
 /** The film's files, hashed in two parts: the picture (index.html and the compositions without their <audio> tags,
  *  CHARACTERS.json, every asset but sound files: names, sizes and dates) at its fps, and the sound (every <audio> tag and the sound files
  *  under assets/ and audio/). HF's element ids count in neither. `drawn`: the picture once more with the pages' blank lines left out. The
- *  Final Mix taking a sound out leaves its tag's line empty, so the picture read as changed: a full render (3 min) for a sound alone,
+ *  Music & Sound taking a sound out leaves its tag's line empty, so the picture read as changed: a full render (3 min) for a sound alone,
  *  never the sound mixed again onto the picture (T25-3). `picture` stays as it was: the checks' hash and an export's reuse read it. */
 export function filmParts(dir, fps, { stamps = false } = {}) {
-  const pic = createHash("sha256"), snd = createHash("sha256"), drw = createHash("sha256");
+  const pic = createHash("sha256"), snd = createHash("sha256"), drw = createHash("sha256"), hrd = createHash("sha256");
   const both = (x) => { pic.update(x); drw.update(x); };
   const page = (s) => { pic.update(s); drw.update(drawnText(s)); };
   both(`fps:${fps}`);
-  const text = (p) => { const s0 = readFileSync(p, "utf8"), s = stamps ? s0 : s0.replace(STUDIO_ID, ""); snd.update((s.match(AUDIO_TAG) ?? []).join("\n")); return s.replace(AUDIO_TAG, ""); };
+  const text = (p) => { const s0 = readFileSync(p, "utf8"), s = stamps ? s0 : s0.replace(STUDIO_ID, ""); const tags = s.match(AUDIO_TAG) ?? []; snd.update(tags.join("\n")); hrd.update(tags.map((x) => x.replace(LANE_TAGS, "")).filter(Boolean).join("\n")); return s.replace(AUDIO_TAG, ""); };
   const walk = (d, deep, only = null) => {
     if (!existsSync(d)) return;
     for (const n of readdirSync(d).sort()) {
@@ -59,7 +62,7 @@ export function filmParts(dir, fps, { stamps = false } = {}) {
       if (s.isDirectory()) { if (!n.startsWith(".") && n !== "_app" && n !== "rounds") walk(p, deep, only); continue; }
       const sound = AUDIO_FILE.test(n);
       if (only === "sound" && !sound) continue;
-      const add = sound ? (x) => snd.update(x) : both;
+      const add = sound ? (x) => { snd.update(x); hrd.update(x); } : both;
       add(rel);
       if (deep && /\.html?$/i.test(n)) page(text(p));
       else if (deep && /\.(js|mjs|json|css|ts)$/i.test(n)) add(readFileSync(p)); else add(`${s.size}:${Math.floor(s.mtimeMs)}`);
@@ -70,9 +73,9 @@ export function filmParts(dir, fps, { stamps = false } = {}) {
   walk(join(dir, "compositions"), true);
   walk(join(dir, "assets"), false);
   walk(join(dir, "audio"), false, "sound");
-  return { picture: pic.digest("hex").slice(0, 16), sound: snd.digest("hex").slice(0, 16), drawn: drw.digest("hex").slice(0, 16) };
+  return { picture: pic.digest("hex").slice(0, 16), sound: snd.digest("hex").slice(0, 16), drawn: drw.digest("hex").slice(0, 16), heard: hrd.digest("hex").slice(0, 16) };
 }
-/** Whether every sound of the film sits on its root page (where the Final Mix places music, voice and effects): only then can the sound
+/** Whether every sound of the film sits on its root page (where Music & Sound places music, voice and effects): only then can the sound
  *  be mixed again onto a rendered picture (remix.mjs); a sound inside a sub-composition sends the film to a full render. */
 export function soundOnRoot(dir) {
   const walk = (d) => existsSync(d) && readdirSync(d).some((n) => { const p = join(d, n); return statSync(p).isDirectory() ? walk(p) : /\.html?$/i.test(n) && /<(audio|video)\b/i.test(readFileSync(p, "utf8")); });
@@ -168,22 +171,44 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
       etaMinutes: status === "fresh" || left == null ? null : Math.max(1, Math.round(left / 60000)),
       // before the film is finished there is nothing to render yet: the Editor says the video comes once the film is built
       waitsFor: status === "none" && !job && !finished(p.meta) ? "film" : null,
-      needsSmooth: !!file && !smooth && (pre || codeFilm) };
+      // a finished film with no file and nothing making one: the app closed while it was made (T32-6); said, with a button
+      interrupted: status === "none" && !job && finished(p.meta),
+      needsSmooth: !!file && !smooth && (pre || codeFilm),
+      // the picture is the film's and its lanes' files hold what it plays: the Editor plays these, a fader needs no new mix
+      ...(() => {
+        const made = !pre && picture && st?.audio !== false ? stemsState(p.path) : null, ok = made?.heard === parts.heard && Object.values(made.files ?? {}).every((f) => existsSync(join(p.path, ...STEMS, f)));
+        return { stems: ok ? { key: made.heard, master: made.master, urls: Object.fromEntries(Object.entries(made.files).map(([l, f]) => [l, url(p.id, [...STEMS, f].join("/"))])) } : null,
+          levels: ok ? readLanes(p.path) : null, needsStems: !pre && !!file && picture && !ok, heard: parts.heard };
+      })() };
   };
   // what a background render gives way to: another film's export (the app's one render at a time) and Claude changing this film. An
   // export of this film waits for this render instead and takes its file (preRendered below), so the two never wait on each other.
   const blocker = (p) => { if (ctx.agent?.running?.has(p.id)) return "Claude"; const x = ctx.renders?.status?.().running; return x && x.projectId !== p.id ? x.title : null; };
   const pause = (ms, signal) => new Promise((ok) => { const t = setTimeout(ok, ms); signal?.addEventListener("abort", () => { clearTimeout(t); ok(); }, { once: true }); });
   const writeState = (dir, st) => writeFileSync(stateFile(dir), JSON.stringify(st, null, 2) + "\n");
+  // ---- the film's sound lanes as files of their own, beside the Smooth copy's picture (owner 01/11): the Editor plays the picture with them and moves a lane's level as it plays, with no
+  // new mix; only the export mixes again. Made once the film has its file, again when a clip changes (`heard`), never for a fader.
+  const STEMS = [...DIR, "stems"];
+  const stemsState = (dir) => { try { return JSON.parse(readFileSync(join(dir, ...STEMS, "stems.json"), "utf8")); } catch { return null; } };
+  const makeStems = async (p, st, heard, { signal = null } = {}) => {
+    const dir = join(p.path, ...STEMS), old = existsSync(dir) ? readdirSync(dir) : [];
+    const res = await remixAudio({ projectDir: p.path, stemsDir: dir, stem: heard, fps: st.fps, duration: st.duration ?? filmSeconds(p.path), workDir: remixWorkDir(`s${heard}`) },
+      { signal, root, background: true, ffmpeg: join(expandEnv(loadPins(root).ffmpeg.dir), "ffmpeg.exe") });
+    if (res.type !== "done") throw Object.assign(new Error(res.message ?? "The sound lanes could not be made"), { code: "STEMS_FAILED" });
+    writeFileSync(join(dir, "stems.json"), JSON.stringify({ heard, files: res.files, master: res.master }, null, 2) + "\n");
+    for (const f of old) if (!f.startsWith(heard) && f !== "stems.json") rmSync(join(dir, f), { force: true });
+  };
   const keepOnly = (dir, ...names) => { for (const f of readdirSync(dir)) if (f.endsWith(".mp4") && !names.includes(f)) rmSync(join(dir, f), { force: true }); };
   /** The Editor's Smooth copy of the film's render, a keyframe every second, for a film the Editor plays from
    *  its render (a code film, a Brush film); kept beside the render as <hash>.smooth.mp4. The state with it, or as it was when it fails. */
-  const withSmooth = async (p, st, { signal = null } = {}) => {
+  const withSmooth = async (p, st, { signal = null, from = null } = {}) => {
     const pre = prerendered(p.meta?.style?.id), codeFilm = isCodeFilm(p.meta?.style?.id);
     if (!pre && !codeFilm) return st;
     const rel = `${DIR.join("/")}/${st.hash}.smooth.mp4`;
     try {
-      const r = await smoothCopy(join(p.path, ...st.file.split("/")), join(p.path, ...rel.split("/")), { root, signal });
+      // only the sound changed: the last copy's picture stays, with the new sound (the copy's encode took 28 s of the 42 s a sound change took, Test 36)
+      const copy = () => smoothCopy(join(p.path, ...st.file.split("/")), join(p.path, ...rel.split("/")), { root, signal });
+      const r = from ? await smoothWithSound(from, join(p.path, ...st.file.split("/")), join(p.path, ...rel.split("/")), { root, signal }).catch(copy) : await copy();
       const next = { ...st, smooth: { of: st.hash, file: rel, size: r.size, mbps: r.mbps, gop: r.gop } };
       writeState(p.path, next);
       keepOnly(join(p.path, ...DIR), basename(st.file), basename(rel));
@@ -191,7 +216,7 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
     } catch { return st; }
   };
   /** The film's sound mixed again onto the rendered picture: the film's new file, its state written. Seconds, not a render. */
-  const remixOnto = async (p, st, fps, { signal = null, background = false } = {}) => {
+  const remixOnto = async (p, st, fps, { signal = null, background = false, keep = null } = {}) => {
     const parts = filmParts(p.path, fps), hash = createHash("sha256").update(`${parts.picture}:${parts.sound}`).digest("hex").slice(0, 16);
     const dir = join(p.path, ...DIR), rel = `${DIR.join("/")}/${hash}.mp4`, out = join(p.path, ...rel.split("/")), src = join(p.path, ...st.file.split("/"));
     const tmp = out === src ? out.replace(/\.mp4$/, ".remix.mp4") : out, t0 = Date.now();
@@ -199,7 +224,7 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
       { signal, root, background, ffmpeg: join(expandEnv(loadPins(root).ffmpeg.dir), "ffmpeg.exe") });
     if (res.type !== "done") throw Object.assign(new Error(res.message ?? "The new sound could not be mixed onto the film"), { code: res.type === "cancelled" ? "CANCELLED" : "REMIX_FAILED" });
     if (tmp !== out) renameSync(tmp, out);
-    keepOnly(dir, basename(out));
+    keepOnly(dir, basename(out), ...(keep ? [basename(keep)] : []));
     const facts = await probe(out, root).catch(() => ({ duration: st.duration ?? null, audio: res.tracks > 0 }));
     // the picture as it reads now (only a blank line may differ: soundOnly), so the file is the film's now
     const next = { ...st, hash, file: rel, picture: parts.picture, drawn: parts.drawn, sound: parts.sound, at: new Date().toISOString(), remixed: { at: new Date().toISOString(), ms: Date.now() - t0, tracks: res.tracks }, ...facts };
@@ -218,7 +243,7 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
     if (!asked && (reviewPending(v1) || ["ask", "later"].includes(v1?.next?.render))) return null;
     const v = view(p);
     const wait = (job) => { if (job && onEnd) waiters.set(p.id, [...(waiters.get(p.id) ?? []), onEnd]); return job; };
-    // asked again while one runs (the Final Mix changed the sound during it): that file is of the film as it was when it began, so the
+    // asked again while one runs (Music & Sound changed the sound during it): that file is of the film as it was when it began, so the
     // film is looked at again once it ends (T25-3: the render ended stale, with no job, and the Editor said "Updating…" for good)
     if (running.has(p.id)) { again.add(p.id); return wait(running.get(p.id)); }
     if (v.status === "fresh" && v.needsSmooth) {          // a render made before the Smooth copy existed: only the copy
@@ -246,14 +271,16 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
           // a version's render: the levels as an export sets them, so its Tech checks and its Render find the film as this file has it
           if (level) await levelTracks(p.path, { root }).catch(() => null);
           refreshBridge(p.path);          // today's bridge, as an export does
+          applyLanes(p.path);          // a clip placed since the lane's fader moved joins its lane
           const fps = projectFps(fresh), parts = filmParts(p.path, fps), hash = filmHash(p.path, fps), dir = join(p.path, ...DIR), rel = `${DIR.join("/")}/${hash}.mp4`;
           mkdirSync(dir, { recursive: true });
           // (asked without `self` it read "rendering", never sound-only: every sound changed on a finished film rendered the whole film again)
           const st0 = readState(p.path), now = view(fresh, { self: true });
           if (now.soundOnly && soundOnRoot(p.path)) {          // the picture is rendered: only its sound again
             j.update({ stage: "mixing the sound", waitingFor: null, progress: 50 });
-            const next = await remixOnto(p, st0, fps, { signal: j.signal, background: true });
-            await withSmooth(fresh, next, { signal: j.signal });          // the new sound in the Smooth copy too
+            const was = st0.smooth?.of === st0.hash && st0.smooth.file ? join(p.path, ...st0.smooth.file.split("/")) : null, from = was && existsSync(was) ? was : null;
+            const next = await remixOnto(p, st0, fps, { signal: j.signal, background: true, keep: from });
+            await withSmooth(fresh, next, { signal: j.signal, from });          // the new sound in the Smooth copy too
             ok = true;
             return { hash: next.hash, file: next.file, remixed: true };
           }
@@ -299,6 +326,8 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
     try { const p = mustProject(projectId, root); return make(p, opts); }
     catch (e) { if (opts.onEnd) { setTimeout(() => opts.onEnd(false, e), 0); return { id: null, failed: true }; } return null; }
   };
+  /** Are the film's lanes files of their own now? A fader then needs no new mix. */
+  ctx.stemsReady = (projectId) => { try { return !!view(mustProject(projectId, root)).stems; } catch { return false; } };
   /** Is the film's render the film as it is now, picture and sound? */
   ctx.filmRendered = (projectId) => { try { return view(mustProject(projectId, root), { self: true }).status === "fresh"; } catch { return false; } };
   const versionFile = (dir, id, ext) => join(dir, ...VERSIONS, `${id}${ext}`);
@@ -360,6 +389,19 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
     r("GET", `/projects/${P}/preview-proxy`, ([id]) => { const p = mustProject(id, root); return heldView(p) ?? view(p); }),
     // the Editor's Update on a preview that is out of date: made now, after Claude's change when Claude is at work (the job waits for it)
     r("POST", `/projects/${P}/preview-proxy`, ([id]) => { const p = mustProject(id, root); const job = make(p, { asked: true }); return { ...view(p), job: pub(job) }; }),
+    // the Editor, on a film whose lanes are not files yet: quietly, as the Smooth copy alone; the film stays as it is and plays meanwhile
+    r("POST", `/projects/${P}/preview-proxy/stems`, ([id]) => {
+      const p = mustProject(id, root), v = view(p);
+      if (!heldView(p) && v.needsStems && !running.has(p.id) && !ctx.agent?.running?.has(p.id) && !ctx.renders?.status?.().running) {
+        const job = ctx.jobs.start("preview-proxy", { projectId: p.id, title: "Smooth preview" }, async (j) => {
+          let ok = false;
+          try { await makeStems(p, readState(p.path), v.heard, { signal: j.signal }); ok = true; return { stems: true }; }
+          finally { running.delete(p.id); smoothing.delete(p.id); lookAgain(p.id, ok); }
+        });
+        running.set(p.id, job); smoothing.add(p.id);
+      }
+      return view(p);
+    }),
   ];
   return { routes };
 }

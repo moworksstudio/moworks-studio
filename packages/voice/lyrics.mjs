@@ -46,6 +46,13 @@ export function save(dir, text) {
   return read(dir);
 }
 
+/** The song's part the film plays now against the part that was timed: a song fixed after the timing leaves the table saying a part it no longer plays (T31-1). */
+export function windowChanged(timed, used) {
+  const w = timed?.window;
+  if (!w || !used) return false;
+  return Math.abs((w.start ?? 0) - (used.start ?? 0)) > 0.5 || Math.abs((w.end ?? 0) - (used.end ?? 0)) > 0.5;
+}
+
 /** .lrc "[01:02.50] line" stays (the aligner reads [m:ss] marks); .srt blocks become "[s] line" for each cue's first line. */
 export function fromSubtitles(text) {
   text = text.replace(/^\[[a-z]+:[^\]\n]*\]\s*$/gim, "");                 // .lrc tags: [ar: …], [ti: …], [length: …]

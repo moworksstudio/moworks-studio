@@ -86,6 +86,7 @@ export default function LyricsSheet({ projectId, onChanged }) {
       <div className="panel-head"><h2>{t("Times")}</h2>{tm && <span className="muted end">{ago(tm.at)}</span>}</div>
       {!tm ? <Banner kind="info">{t("Not timed yet.")}</Banner> : <>
         {tm.stale && <Banner kind="warning">{t("The lyrics changed after they were timed: time them again.")}</Banner>}
+        {tm.windowOld && !tm.stale && <Banner kind="warning">{t("The film plays another part of the song now: time the lyrics again.")}</Banner>}
         <p className="secondary num">{t("Whisper turbo heard {h} of {n} words; the others are placed on the song's attacks. A draft: listen and fix a line that is off.", { h: tm.heard, n: tm.heard + tm.placed })}</p>
         {tm.repeats?.map((x) => <Banner key={`${x.line}-${x.word}`} kind="warning">{t("Line {l}: \"{w}\" is written {a} times and Whisper heard {b}. The film keeps your count: listen, and change the text if the song says otherwise.", { l: x.line, w: x.word, a: x.text, b: x.heard })}</Banner>)}
         <table className="mp-table lyrics-times"><thead><tr><th>#</th><th>{t("Starts")}</th><th>{t("Line")}</th><th>{t("Heard")}</th></tr></thead>

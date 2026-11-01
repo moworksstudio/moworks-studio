@@ -135,8 +135,20 @@ function dropSampleHooks(dir) {
   const h = gitDirOf(dir) && join(gitDirOf(dir), "hooks");
   try { for (const n of readdirSync(h)) if (n.endsWith(".sample")) rmSync(join(h, n), { force: true }); } catch { /* no hooks folder */ }
 }
+// git's gc keeps what nothing refers to in a pack of its own for two weeks. A film whose picture sequence was added once and then left out kept 606 MB there while its
+// history was 51 MB (T35-14). Past CRUFT_MAX that pack goes: nothing a commit or the index holds is in it.
+const CRUFT_MAX = 50 << 20;
+function cruftPacks(dir) {
+  const packs = join(gitDirOf(dir) ?? join(dir, ".git"), "objects", "pack");
+  try { return readdirSync(packs).filter((n) => n.endsWith(".mtimes")).map((n) => statSync(join(packs, n.replace(/\.mtimes$/, ".pack"))).size); } catch { return []; }
+}
+function* dropUnreachableOp(dir, { max = CRUFT_MAX } = {}) {
+  if (!cruftPacks(dir).some((size) => size > max)) return false;
+  try { yield ["gc", "-q", "--prune=now"]; return true; } catch { return false; }
+}
 function* packOp(dir) {
   dropSampleHooks(dir);
+  yield* dropUnreachableOp(dir);
   try {
     const loose = Number(/^count:\s*(\d+)/m.exec(yield ["count-objects", "-v"])?.[1] ?? 0);
     if (loose < PACK_AT) return false;
@@ -242,6 +254,7 @@ export const [isDirty, isDirtyAsync] = forms(dirtyOp, { read: true });
 /** Commit everything that changed; returns the new revision, or the current one when nothing changed. */
 /** Pack the history's loose objects when there are PACK_AT or more (done after every commit; also once when an older film opens). */
 export const [pack, packAsync] = forms(packOp);
+export const [dropUnreachable, dropUnreachableAsync] = forms(dropUnreachableOp);
 export const [commitAll, commitAllAsync] = forms(commitAllOp);
 /** ensureRepo, then commitAll, in one turn of the project's queue: the server's usual "record this change". Returns the revision. */
 export const [save, saveAsync] = forms(saveOp);
@@ -252,14 +265,14 @@ export const [revert, revertAsync] = forms(revertOp);
 
 /** The revision HyperFrames Studio makes when it opens a film (it writes its element ids, nothing the film shows changes). */
 export const STUDIO_IDS = "Opened in HyperFrames Studio (element ids)";
-/** The revisions of the Final Mix (music, sound effects, levels): sound only, so the picture's checks still hold. */
+/** The revisions of Music & Sound (music, sound effects, levels): sound only, so the picture's checks still hold. */
 export const SOUND_MIX = "Final Mix (sound only)";
 
 /** When the film's own work last changed under a path (ms), leaving out Studio's element-id revisions; uncommitted changes count now. */
 export const [lastWorkChange, lastWorkChangeAsync] = forms(lastWorkChangeOp, { read: true });
 /** The last revision that changed the film's pictures (compositions, index.html, assets), leaving out Studio's element-id revisions. */
 export const [lastWorkRev, lastWorkRevAsync] = forms(lastWorkRevOp, { read: true });
-/** Did the film change since this revision? Studio's element-id revisions, the Final Mix's sound-only revisions and the app's own records
+/** Did the film change since this revision? Studio's element-id revisions, Music & Sound's sound-only revisions and the app's own records
  *  (.moworks/) do not count, so a check stays valid when Studio opens the film, the sound is mixed or the app writes its notes. */
 export const [changedSince, changedSinceAsync] = forms(changedSinceOp, { read: true });
 /** Put the project's files back as they were at a revision (a named version), as a new revision: what was there is

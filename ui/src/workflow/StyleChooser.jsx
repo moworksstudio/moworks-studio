@@ -95,7 +95,7 @@ export function StyleChooser({ value, styles, authors, onClose, onPick }) {
       </div>
       <div className="scx-body">
         <div className="scx-grid" role="radiogroup" aria-label={t("Film styles")}>
-          {list.length === 0 && <p className="hint">{t("No film style matches.")}</p>}
+          {list.length === 0 && <p className="hint">{t("No film style matches.")}{tab !== "all" && q && <> <button type="button" className="clink" onClick={() => goTab("all")}>{t("Search all authors")}</button></>}</p>}
           {list.map((s) => <StyleTile key={s.id} s={s} author={A[authorOf(s)]} on={cur?.id === s.id} onPick={(x) => setSel(x.id)} role="radio" showAuthor={tab === "all"} />)}
         </div>
         {cur && <aside className="scx-preview"><StyleDetails s={cur} author={A[authorOf(cur)]} actions={<DemoLink s={cur} className="btn sm" />} /></aside>}

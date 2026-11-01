@@ -287,6 +287,7 @@
     {
       "id": "map-explainer",
       "title": "Map Explainer",
+      "defaultLength": 40,
       "description": "A 30-45 s map story in one continuous camera: real satellite ground, a vintage paper map, red marker on top, paper tags and stamps, every move on a word of the voice.",
       "category": "Explainer",
       "tags": [

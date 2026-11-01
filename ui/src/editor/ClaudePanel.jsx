@@ -32,10 +32,10 @@ const SUGGEST = {
   storyboard: ["Tell me the idea behind the storyboard","Make the opening shot stronger", "Add one more shot before the ending", "What is the next step?"],
   motion: ["Make the motion calmer", "Make the moves between shots smoother", "Which shot has too much motion?", "What is the next step?"],
   build: ["How far along is the film?", "What is the next step?"],
-  finalMix: ["Pick music that fits the mood", "Add sound effects on the shot changes", "Make the music quieter under the voice", "What is the next step?"],
   feedback: ["Watch the film and fix what is off", "Make the pace a little faster", "Make the words easier to read on a phone", "Make the ending stronger"],
 };
 const fmtTok = (n) => (n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${Math.round(n / 1e3)}k` : String(n));
+const fmtUsd = (x) => (x == null ? "" : x < 0.01 ? "<$0.01" : `$${x.toFixed(2)}`);
 const secs = (ms) => { const s = Math.round(ms / 1000); return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`; };
 const changedOf = (task) => (task.changed ?? []).filter((c) => !c.path.startsWith(".moworks/"));     // the app's own records are not Claude's edits
 // Claude Code's sign-in refresh racing another Claude process: said once, in plain words, with a Try again
@@ -267,7 +267,8 @@ function ModelChip({ projectId, info, choices, onSaved, disabled, task = null })
   const now = task?.settings?.effort ?? runs;
   const effLine = runs ? t("Effort: {e} · Motion Plan: {m}", { e: effName(runs).toLowerCase(), m: effName("medium").toLowerCase() }) : null;
   const set = async (k, v) => { try { onSaved(await patch(`/api/projects/${projectId}/settings`, { [k]: v })); } catch (e) { toast(e.message, "error"); } };
-  const usage = u?.tasks ? t("This project so far: {n} tasks, {tok} tokens", { n: u.tasks, tok: fmtTok((u.input ?? 0) + (u.cacheWrite ?? 0) + (u.cacheRead ?? 0) + (u.output ?? 0)) }) : t("Model and effort for this project");
+  const usage = u?.tasks ? t("This project so far: {n} tasks, {tok} tokens, at API list price {usd} (your plan does not bill this)",
+    { n: u.tasks, tok: fmtTok((u.input ?? 0) + (u.cacheWrite ?? 0) + (u.cacheRead ?? 0) + (u.output ?? 0)), usd: u.costUsd != null ? `≈ ${fmtUsd(u.costUsd)}` : "" }) : t("Model and effort for this project");
   return <span className="cmodel" ref={box}>
     <button className="cmodel-chip" onClick={() => setOpen((x) => !x)} disabled={disabled} aria-expanded={open}
       title={now !== runs ? t("This step runs at {e} effort", { e: effName(now).toLowerCase() }) : usage}>
@@ -291,7 +292,7 @@ export function FilmDone({ n }) {
   // the film is handed over: no score here; the server's own words when it sends them
   return <li className="cdone" role="status">
     <div className="cdone-head"><Check size={16} /><b>{n.vars?.n ? t("Version {n} is ready", { n: n.vars.n }) : t("The film is ready")}</b></div>
-    <p>{/^Version/.test(n.text ?? "") ? t("Watch it, with sound.") : /^The film is ready/.test(n.text ?? "") ? t(n.text, n.vars) : t("Watch it: change the music or the sound effects in the Final Mix, and send your notes on the picture here.")}</p>
+    <p>{/^Version/.test(n.text ?? "") ? t("Watch it, with sound.") : /^The film is ready/.test(n.text ?? "") ? t(n.text, n.vars) : t("Watch it: change the music or the sound effects in Music & Sound, and send your notes on the picture here.")}</p>
   </li>;
 }
 
@@ -396,7 +397,7 @@ export function VersionCard({ projectId, v, toast, onChanged }) {
     <div className="cver-acts row">{btn("yes", t("Render now"), "render", { yes: true }, "primary")}{btn("no", t("Later"), "render", { yes: false })}</div></section>;
   if (card.kind === "rendering") return <section className="cpanel cver run" role="status"><Loader2 size={13} className="spin" />
     <span className="t">{t("Preparing Version {n}. Please wait...", { n: card.next.n })}</span>{btn("stop", t("Stop"), "stop")}</section>;
-  if (card.kind === "ready") return <section className="cpanel cver" role="status"><b className="cver-q">{card.next.render === "done" ? t("Version {n} is ready.", { n: card.next.n }) : t("Version {n} is saved. It is not rendered yet.", { n: card.next.n })}</b>
+  if (card.kind === "ready") return <section className="cpanel cver" role="status"><b className="cver-q">{card.rendered ? t("Version {n} is ready.", { n: card.next.n }) : t("Version {n} is saved. It is not rendered yet.", { n: card.next.n })}</b>
     <div className="cver-acts row">{btn("open", t("Open Version {n}", { n: card.next.n }), "open", {}, "primary")}{keepFirst}</div></section>;
   if (card.kind === "export" && card.brand) return <section className="cpanel cver warn" role="status">{brand}</section>;
   return null;
@@ -615,7 +616,7 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
       else { setText((cur) => cur || next.text); setErr(e.message); }
     });
   }, [wait, queue.length]); // eslint-disable-line react-hooks/exhaustive-deps
-  // a question Claude waits on is shown over an open sheet too (the Final Mix once hid the web permission for 15 minutes)
+  // a question Claude waits on is shown over an open sheet too (Music & Sound once hid the web permission for 15 minutes)
   const asking = tasks?.find((x) => x.status === "running" && x.permission);
   useEffect(() => { onWaiting?.(asking ? { taskId: asking.id, q: asking.permission } : null); }, [asking?.id, asking?.permission?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const stop = async () => { try { await post(`/api/tasks/${running}/cancel`); toast(t("Stopping Claude…")); } catch (e) { toast(e.message, "error"); } };
@@ -636,10 +637,11 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
       <section className="cpanel chist" aria-label={t("Conversation")}>
       <div className="claude-head">
         {studio && <span className="st-who"><i aria-hidden="true" /><b>{t("Conversation")}</b></span>}
-        {/* the project's usage in words, always shown: tasks and tokens; the app says time, never money (owner 31/10) */}
-        {runInfo?.usage?.tasks > 0 && <span className="cusage-head num" title={t("Tasks · tokens")}>
+        {/* the project's usage in words, always shown: tasks, tokens, API-equivalent cost (the plan does not bill it). Owner 01/11: only the steps' boxes say no money, this line stays */}
+        {runInfo?.usage?.tasks > 0 && <span className="cusage-head num" title={t("Tasks · tokens · cost at API list price (your plan does not bill this)")}>
           {[runInfo.usage.tasks === 1 ? t("1 task") : t("{n} tasks", { n: runInfo.usage.tasks }),
-            fmtTok((runInfo.usage.input ?? 0) + (runInfo.usage.cacheWrite ?? 0) + (runInfo.usage.cacheRead ?? 0) + (runInfo.usage.output ?? 0))].filter(Boolean).join(" · ")}</span>}
+            fmtTok((runInfo.usage.input ?? 0) + (runInfo.usage.cacheWrite ?? 0) + (runInfo.usage.cacheRead ?? 0) + (runInfo.usage.output ?? 0)),
+            runInfo.usage.costUsd != null ? `≈ ${fmtUsd(runInfo.usage.costUsd)}` : null].filter(Boolean).join(" · ")}</span>}
         <span className="gap" />
         <ModelChip projectId={projectId} info={runInfo} choices={choices} disabled={!!running} task={running ? tasks?.find((x) => x.id === running) : null} onSaved={(r) => setRunInfo((x) => ({ ...x, ...r }))} />
       </div>

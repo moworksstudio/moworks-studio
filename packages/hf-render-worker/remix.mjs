@@ -1,6 +1,6 @@
 // The film's sound mixed again onto a picture already rendered, so an audio-only change re-mixes onto the
 // existing picture. Child process (client.mjs remixAudio): HyperFrames' own pieces, as its render runs them: collectRenderMedia on the
-// root page (where the Final Mix places every track; the caller sends a film with sound inside a sub-composition to a full render),
+// root page (where Music & Sound places every track; the caller sends a film with sound inside a sub-composition to a full render),
 // processCompositionAudio with the page's master chain and the engine's config, the mix padded or trimmed to the picture's length as HF's
 // assemble does (its AAC, 192k), and muxVideoWithAudio onto the picture's own video stream (copied, never re-encoded). The app's loudness
 // master runs after, as for every export.
@@ -17,7 +17,7 @@ const ac = new AbortController();
 process.on("message", async (msg) => {
   if (msg?.type === "cancel") { ac.abort(); return; }
   if (msg?.type !== "start") return;
-  try { send({ type: "done", ...(await remix(msg)) }); } catch (e) { send({ type: ac.signal.aborted ? "cancelled" : "failed", message: String(e?.message ?? e).slice(0, 600) }); process.exitCode = 2; }
+  try { send({ type: "done", ...(await (msg.stemsDir ? stems(msg) : remix(msg))) }); } catch (e) { send({ type: ac.signal.aborted ? "cancelled" : "failed", message: String(e?.message ?? e).slice(0, 600) }); process.exitCode = 2; }
   if (process.send) process.send({ type: "bye" }, () => process.disconnect?.()); else process.disconnect?.();
 });
 
@@ -59,6 +59,40 @@ async function padTrimAndPeak(ffmpeg, mixed, out, target, workDir) {
     measured = fixed;
   }
   throw new Error("the sound's true peak could not be brought under -1 dBFS");
+}
+
+/** The clip's lane, as the timeline shows it. */
+const laneOf = (tag) => {
+  const role = /\bdata-timeline-role="([^"]*)"/.exec(tag)?.[1], id = /(?:^|\s)id="([^"]*)"/.exec(tag)?.[1] ?? "";
+  return role === "voiceover" || role === "voice" ? "voice" : role === "music" ? "music" : role ? "sfx" : /^el-voice/.test(id) ? "voice" : /^el-music/.test(id) ? "music" : "sfx";
+};
+/** Each sound lane as a file of its own, with no lane fader in it (the Editor plays them beside the Smooth copy's picture and moves their levels as it plays): HF's mix of
+ *  that lane's clips, the film's length. master: what the Editor lowers them by for the loudest of them to stay under full scale, as the render's peak step does (a limiter there holds the sum). */
+async function stems({ runtimeDir, ffmpeg, projectDir, stemsDir, stem, duration, workDir }) {
+  const mod = (p) => import(pathToFileURL(join(runtimeDir, "node_modules", "@hyperframes", p, "dist", "index.js")).href);
+  const [producer, engine] = await Promise.all([mod("producer"), mod("engine")]);
+  rmSync(workDir, { recursive: true, force: true }); mkdirSync(workDir, { recursive: true }); mkdirSync(stemsDir, { recursive: true });
+  try {
+    const html = readFileSync(join(projectDir, "index.html"), "utf8").replace(/\s+data-audio-group="mw-lane-[^"]*"/g, "").replace(/<hf-audio-group\b[^>]*\bid="mw-lane-[^>]*>\s*<\/hf-audio-group>/g, "");
+    const lanes = new Map((html.match(/<audio\b[^>]*>/gi) ?? []).map((t) => [/(?:^|\s)id="([^"]*)"/.exec(t)?.[1], laneOf(t)]));
+    const { audios } = producer.collectRenderMedia(html), cfg = engine.resolveConfig();
+    const files = {};
+    let loudest = 0;
+    for (const lane of ["voice", "sfx", "music"]) {
+      const clips = audios.filter((a) => (lanes.get(a.id) ?? "sfx") === lane);
+      if (!clips.length) continue;
+      const w = join(workDir, lane); mkdirSync(w, { recursive: true });
+      const mixed = join(w, engine.MIXED_AUDIO_FILENAME);
+      const mix = await engine.processCompositionAudio(clips, projectDir, join(w, "work"), mixed, duration, ac.signal, { ffmpegProcessTimeout: cfg.ffmpegProcessTimeout, audioGain: cfg.audioGain }, projectDir);
+      if (!mix.success) throw new Error(mix.error ?? "the sound could not be mixed");
+      const name = `${stem}.${lane}.m4a`;
+      await ff(ffmpeg, ["-i", mixed, "-af", `apad,atrim=0:${Number(duration).toFixed(6)}`, "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", join(stemsDir, name)]);
+      const top = await truePeak(ffmpeg, join(stemsDir, name));          // read with no ceiling: a voice at +6 dB goes over full scale here, and only the page lowers it
+      if (Number.isFinite(top)) loudest = Math.max(loudest, 10 ** (top / 20));
+      files[lane] = name;
+    }
+    return { files, master: Math.round(Math.min(1, 0.89 / Math.max(loudest, 1e-3)) * 1000) / 1000 };
+  } finally { rmSync(workDir, { recursive: true, force: true }); }
 }
 
 async function remix({ runtimeDir, ffmpeg, projectDir, picture, out, fps, duration, workDir }) {

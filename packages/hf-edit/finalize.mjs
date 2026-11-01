@@ -309,6 +309,7 @@ export async function finalize(projectDir, { version = null, googleFonts = true,
   for (const file of files) {
     const path = join(projectDir, file);
     let { before, html } = texts.get(file);
+    html = spacedTags(html);
     const isRoot = file === "index.html";
     if (isRoot) html = withThreeMap(html, three);
     html = await applyFonts(projectDir, file, html, report, hf.fontAliases, { googleFonts });
@@ -343,6 +344,21 @@ export async function finalize(projectDir, { version = null, googleFonts = true,
   }
   declareInRoot(projectDir, report);
   return report;
+}
+
+/** Two attributes with no space between them (class="clip cap"data-start="3", an edit's slip, T29-27): a browser reads them, HTML does not allow them, and HF's check says nothing. Tags only, never a script or a style. */
+export function spacedTags(html) {
+  const parts = String(html).split(/(<(?:script|style)\b[\s\S]*?<\/(?:script|style)>)/i);
+  return parts.map((p, i) => (i % 2 ? p : p.replace(/<[a-z][^<>]*>/gi, (tag) => tag.replace(/("[^"]*")(?=[a-zA-Z_:][\w:.-]*=)/g, "$1 ")))).join("");
+}
+
+/** The film's player in its root before a look at the film: a Build's stills came without the product, because the player only came with finalize (T35-8). */
+export function ensureSequencePlayer(projectDir) {
+  const f = join(projectDir, "index.html");
+  let html; try { html = readFileSync(f, "utf8"); } catch { return false; }
+  if (html.includes("mw-sequence.js") || !htmlFiles(projectDir).some((x) => /\bdata-mw-sequence=/.test(readFileSync(join(projectDir, x), "utf8")))) return false;
+  writeFileSync(f, withSequencePlayer(projectDir, html, true));
+  return true;
 }
 
 /** R-SEQUENCE: a film with an element with data-mw-sequence gets the app's image sequence player (hf-edit/seq-player.js), as assets/_app/vendor/mw-sequence.js, kept up to date, and

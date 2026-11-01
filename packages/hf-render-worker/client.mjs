@@ -148,7 +148,7 @@ export function remixAudio(job, { signal = null, root = APP_ROOT, version = null
       signal?.removeEventListener?.("abort", cancel);
       done(final ?? { type: signal?.aborted ? "cancelled" : "failed", message: `remix exited with ${code} ${err.split(/\r?\n/).slice(-3).join(" ")}` });
     });
-    child.send({ type: "start", runtimeDir: rt.dir, ffmpeg, projectDir: resolve(job.projectDir), picture: resolve(job.picture), out: resolve(job.outputPath),
-      fps: job.fps, duration: job.duration, workDir: resolve(job.workDir) });
+    child.send({ type: "start", runtimeDir: rt.dir, ffmpeg, projectDir: resolve(job.projectDir), workDir: resolve(job.workDir), fps: job.fps, duration: job.duration,
+      ...(job.stemsDir ? { stemsDir: resolve(job.stemsDir), stem: job.stem } : { picture: resolve(job.picture), out: resolve(job.outputPath) }) });
   });
 }

@@ -2,6 +2,7 @@
 // HyperFrames' source mutation (packages/hf-edit/handEdit.mjs), the timeline the Editor draws (shots, voice-over lines, sound effects,
 // music with its waveform), a still of the frame on screen saved into the project, and the font lists of the edit card.
 // Nothing here edits while Claude works on the same project (409 CLAUDE_BUSY): the user's edit and Claude's would cross.
+import { readLanes } from "../sfx/lanes.mjs";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -247,6 +248,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
         shots: mounted.map((x) => ({ number: x.number, index: x.index, title: x.title, start: x.start, duration: x.duration, src: x.src, mountId: x.mountId,
           rate: rates[x.src] ?? 1, ...(x.planned ? { planned: true } : {}) })),
         voice: tr?.segments?.length && !p.meta?.voice?.offTimeline ? transcript.onFilm(tr.segments, voiceClips) : [],
+        levels: readLanes(p.path),
         audio: clips.map((c) => ({ id: c.id, hfId: c.hfId, src: c.src, start: c.start, duration: c.duration, lane: laneOf(c), track: c.track, name: (c.src ?? "").split("/").pop(), title: titles.get(c.src) ?? null, effect: effect(c) })),
         sfx: clips.filter((c) => !c.role && /\/sfx\//.test(c.src ?? "")).map((c) => ({ start: c.start, duration: c.duration, name: (c.src ?? "").split("/").pop().replace(/\.[^.]+$/, "") })),
         music: music ? { start: music.start, duration: music.duration, name: (music.src ?? "").split("/").pop(), peaks: musicPeaks } : null,
@@ -259,7 +261,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
       const p = mustProject(id, root); busySound(id);
       const what = `sound ${b.name ?? b.id ?? b.hfId ?? ""}${b.start != null ? ` at ${r3(b.start)} s` : ""}${b.lane ? ` on ${b.lane}` : ""}`.replace(/\s+/g, " ").trim();
       try {
-        // a sound-only revision, as the Final Mix's: the picture's checks hold, and a finished film gets the new sound mixed onto its render in seconds
+        // a sound-only revision, as Music & Sound's: the picture's checks hold, and a finished film gets the new sound mixed onto its render in seconds
         const { changed } = await ctx.mix.change(p, what, async () => {
           // the sound is named by its HF id or id, else by its src and its present start (`at`); `start` is where it goes
           const out = await hand.setAudio(p.path, { hfId: b.hfId, id: b.id, src: b.src, start: b.at }, { start: b.start ?? null, lane: b.lane ?? null });

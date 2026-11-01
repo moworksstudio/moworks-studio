@@ -13,7 +13,12 @@ import { useThemeId } from "../theme.jsx";
 import SwatchBooks from "../studio/SwatchBooks.jsx";
 
 // a kit's own page (colours, fonts, layout, rules, the guideline's pages): loaded when one is opened
-const BrandKit = lazy(() => import("./BrandKit.jsx"));
+// (a page left open across a new build or an update asks for a file that build no longer has: the page is read again once, and the kit opens)
+const CHUNK_RETRY = "mw-chunk-retry";
+const BrandKit = lazy(() => import("./BrandKit.jsx").then((m) => { try { sessionStorage.removeItem(CHUNK_RETRY); } catch { /* no storage */ } return m; }, (e) => {
+  try { if (!sessionStorage.getItem(CHUNK_RETRY)) { sessionStorage.setItem(CHUNK_RETRY, "1"); location.reload(); return new Promise(() => {}); } } catch { /* no storage */ }
+  throw e;
+}));
 
 // the sources a Look comes from, in this order; a source the server names later shows by its own name
 const SOURCES = { hf: ["HyperFrames", "HF"], yours: ["Yours", "YOU"] };

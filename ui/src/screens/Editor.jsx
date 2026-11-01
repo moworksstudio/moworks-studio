@@ -44,7 +44,7 @@ import "../workflow.css";
 const PANES = { left: 0.18, right: 0.19 };          // the Pipeline's column holds its lines and the steps' one row (owner 31/10, #698)
 // The Studio: the station a sheet on the light table belongs to (lifted and lit on the rail); no sheet = Build and review, the film
 const HERE = { brief: "prepare", character: "prepare", voice: "prepare", assets: "prepare", analysis: "prepare", doc: "prepare", storyboard: "storyboard",
-  "motion-plan": "motion", "qc-review": "build", qa: "build", lyrics: "build", "music-map": "build", mix: "finalMix" };
+  "motion-plan": "motion", "qc-review": "review", qa: "review", lyrics: "build", "music-map": "build", mix: "build" };
 // While the Storyboard waits for the voice-over or the lyrics (pipeline.voiceWait), their sheet is the Storyboard's, station 02
 // The Studio: the pencilled line beside a sheet's title, as the concept writes it
 const STUDIO_HINTS = { brief: "Prepare: the brief, the files read, the design", character: "Prepare: who acts in this film",
@@ -342,6 +342,11 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const refreshAll = () => { project.reload(); reloadPipeline(); loadTimeline(); reloadAssets(); };
   // a sound on the timeline moved, moved to another lane, or taken off: the film is loaded again where it was
   // resolves once the film's own list is read again: the timeline holds a dropped sound where it was dropped until then
+  // a lane's fader let go: kept in the film, the app mixes the sound again by itself (the film plays live meanwhile)
+  const levelSet = async (lane, db) => {
+    try { await post(`/api/projects/${id}/mix/lanes`, { lane, db }); loadTimeline(); pv.proxy?.refresh?.(); }
+    catch (e) { toast(e.message, "error"); loadTimeline(); }
+  };
   const audioEdit = async (path, c, to) => {
     const name = soundName(c);
     try {
@@ -390,8 +395,8 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     if (lastAppWork.current && !appWork) { project.reload(); loadTimeline(); reloadAssets(); pv.send("reload"); setTimeout(loadPosters, 1500); }
     lastAppWork.current = appWork;
   }, [appWork]); // eslint-disable-line react-hooks/exhaustive-deps
-  // the sound effects placed again (the Final Mix's Place, or by the app after Claude changed the storyboard's cues): the SFX lane and the
-  // Final Mix read them again (the dialog showed 26 after only 6 were left: it read them once, 4 s after Place, while the app still searched)
+  // the sound effects placed again (Music & Sound's Place, or by the app after Claude changed the storyboard's cues): the SFX lane and the
+  // Music & Sound read them again (the dialog showed 26 after only 6 were left: it read them once, 4 s after Place, while the app still searched)
   const sfxAt = pipeline?.sfx?.at ?? null;
   const lastSfx = useRef(sfxAt);
   useEffect(() => {          // the film plays the new sounds too (not on the first read of the pipeline)
@@ -555,16 +560,16 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const qcWarnings = pipeline?.checks?.warnings ?? tl?.qc?.filter((q) => !q.blocking).length ?? 0;
   const shotTarget = shot ? t("Shot {n}", { n: shot.number }) + (shot.title ? ` · ${shot.title}` : "") : null;
   // the dialogs the user opens most, in one place above the chat input: Storyboard and Motion once their stage has
-  // started, the Final Mix once the film is built, Checks when the build failed; lit when the stage waits for the user
+  // started, Music & Sound once the film is built, Checks when the build failed; lit when the stage waits for the user
   const st = Object.fromEntries((pipeline?.stages ?? []).map((x) => [x.id, x]));
   const off = !!(pipeline?.autopilot?.running || pipeline?.claudeBusy);
   // every stage the film has gets its button; one not reached yet is shown, off, with what it waits for
   const act = (key, label, icon, kind, s, gate = true, after = null) => {
     const notYet = !!after && (!s || s.status === "todo");
-    // the Final Mix is shut while Claude checks the film, and says why
+    // Music & Sound is shut while Claude checks the film, and says why
     const shut = key === "mix" && pipeline?.version1?.card?.kind === "working";
     return { key, label: t(label), icon, onClick: () => openSheet(kind), att: !shut && (s?.status === "waiting" || s?.status === "redo"),
-      off: notYet || shut || (gate && off && s?.status !== "waiting"), title: shut ? t("Claude is checking your film. The Final Mix opens again when it finishes.") : notYet ? t("Opens once {step} is done", { step: t(after) }) : gate && off ? t("Press Stop in the chat to change this") : undefined };
+      off: notYet || shut || (gate && off && s?.status !== "waiting"), title: shut ? t("Claude is checking your film. Music & Sound opens again when it finishes.") : notYet ? t("Opens once {step} is done", { step: t(after) }) : gate && off ? t("Press Stop in the chat to change this") : undefined };
   };
   const chr = pipeline?.steps?.find((x) => x.id === "character");          // a step inside the Storyboard stage, not a stage
   const actions = [
@@ -572,7 +577,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     st.storyboard && act("sb", "Storyboard", <LayoutList size={14} />, "storyboard", st.storyboard, false, "Prepare"),          // opens while Claude works, to look
     st.motion && act("mo", "Motion Plan", <Library size={14} />, "motion-plan", st.motion, true, "Storyboard"),
     // no Tech checks button: the checks run in the background; a real failure is one card in the chat, its Details open them
-    st.finalMix && act("mix", "Final Mix", <Sliders size={14} />, "mix", st.build?.status === "done" || pipeline?.finished ? { ...st.finalMix, status: st.finalMix.status === "todo" ? "ready" : st.finalMix.status } : st.finalMix, false, "Version 1"),
+    st.build && act("mix", "Music & Sound", <Sliders size={14} />, "mix", { ...st.build, status: st.build.status === "done" || pipeline?.finished ? "ready" : "todo" }, false, "Version 1"),
   ].filter(Boolean);
   const showAssets = () => { setLeftTab("assets"); setNarrowTab("left"); reloadAssets(); };
   // Until the Build the page is the 3 s starter: no white film, no 3 s timeline, shots "Not built"
@@ -616,7 +621,8 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     readOnly={pv.videoOnly}
     onSeek={(s) => pv.send("seek", { time: s })} onShot={(s) => { setShot(s); setDismissed(null); }}
     locked={locked || pv.videoOnly} onAudioMove={(c, to) => audioEdit("", c, to)} onAudioRemove={(c) => audioEdit("/remove", c, {})} onAudioRemoveMany={audioRemoveMany} onAskClaude={stage.askClaude} onSoundDrop={soundDrop}
-    onCaptionSave={captionSave} onCaptionLive={(hfId, text) => pv.send("live", { hfId, text })} />;
+    onCaptionSave={captionSave} onCaptionLive={(hfId, text) => pv.send("live", { hfId, text })}
+    onLevelLive={(lane, gain) => pv.send("lane", { lane, gain })} onLevel={levelSet} />;
   // the playhead and the film's length as the timeline has them: "Put on the timeline" starts a sound there
   const tlTime = unbuilt ? 0 : pv.state.time, tlLength = Math.max((unbuilt ? p.plannedDuration : pv.state.duration) || 0, (unbuilt ? voiceOnly : tl)?.duration || 0);
   // why Add is off, in words, when it is

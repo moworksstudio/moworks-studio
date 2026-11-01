@@ -1,4 +1,4 @@
-// Sound effects placed by the app at the Final Mix (only after the picture is locked, never during the build), a sound on every action
+// Sound effects placed by the app at Music & Sound (only after the picture is locked, never during the build), a sound on every action
 // (the owner, 30/10: "every film in every style must have full sound effects on every action in the film, for a lively mood"): the app
 // reads the film's cuts (the timeline) and every motion of the approved Motion Plan, and gives each its sound: the storyboard's own
 // named cues first (`- sfx:`, or a `- sound:` list), then the Motion Plan's per-motion `sound`, then the action's own (actions.mjs: an
@@ -72,7 +72,7 @@ export function autoCues(shots, plan = null, { whoosh = true, allow = null, styl
   return out.sort((a, b) => a.start - b.start);
 }
 
-/** The storyboard's named cues as the mix reads them: at their moment, each with its id (what the Final Mix's "remove" keeps out). */
+/** The storyboard's named cues as the mix reads them: at their moment, each with its id (what Music & Sound's "remove" keeps out). */
 function namedCues(shots) {
   const seen = new Map();
   return cuesOf(shots).map((c) => {
@@ -156,6 +156,8 @@ export async function durationOf(file, root) {
   return m ? Math.round((Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3])) * 1000) / 1000 : null;
 }
 
+/** A film no cartoon or game sound belongs in: a horror or found-footage style (T32-3). */
+export const graveFilm = (...said) => /\b(horror|liminal|found[- ]footage|backrooms|creepy|kinh d[ịi])\b/iu.test(said.filter(Boolean).join(" "));
 /** The film's spoken words, in film seconds, when it has a voice-over with its reviewed transcript (HyperFrames' transcript.json), else
  *  null: each word where the clip that plays it puts it, a voice cut into one clip a line (el-voice-01…, Test 22) too (tracks.mjs filmWords). */
 export const spokenWords = (dir) => filmWords(dir);
@@ -165,7 +167,8 @@ export const spokenWords = (dir) => filmWords(dir);
 export function afterWords(cues, words) {
   if (!words?.length) return cues;
   return cues.map((c) => {
-    const w = sustainedCue(c.name) ? null : words.find((x) => c.start >= x.start - 0.02 && c.start < x.end);
+    // a whoosh belongs to the move it marks: 0.3 to 0.5 s after it, it is a late sound (T33-11); it stays with its move, under the word on its own lane
+    const w = sustainedCue(c.name) || (c.family ?? familyOf(c.name)) === "whoosh" ? null : words.find((x) => c.start >= x.start - 0.02 && c.start < x.end);
     return w ? { ...c, start: r3(w.end + 0.04), offset: 0, movedFrom: c.start, afterWord: w.text } : c;
   }).sort((a, b) => a.start - b.start);
 }
@@ -296,7 +299,7 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   const keep = new Set(every.filter((c) => o.hand.has(c.id)).map((c) => c.name));
   const owned = await applyOwnerSounds(dir, every, opts);
   const families = new Map(every.filter((c) => c.family).map((c) => [c.name, c.family]));
-  const res = await resolveCues(dir, every, { ...opts, library: true, style, families, keep });
+  const res = await resolveCues(dir, every, { ...opts, library: true, style, families, keep, tone: graveFilm(opts.styleId, opts.styleTitle, palette) });
   // the mix once the sounds are known: a cue with no sound leaves its place to an automatic one; one file at most MAX_REPEATS times, and a
   // repeat left out may leave its moment to another sound (the motion's own), so the mix is planned again without it
   const st1 = readState(dir), sounded = (n) => !!st1.sounds[n] && existsSync(join(dir, ...String(st1.sounds[n].file).split("/")));

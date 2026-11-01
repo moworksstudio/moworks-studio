@@ -24,7 +24,7 @@ const ALIAS = { typing: "type", typed: "type", types: "type", typewriting: "type
   sparkles: "sparkle", sparkling: "sparkle", sparkly: "sparkle", glittering: "glitter", shimmering: "shimmer", twinkling: "twinkle", birdsong: "bird",
   tv: "television", telly: "television", monitor: "screen", bike: "bicycle", ship: "boat", ships: "boat", oars: "oar", rowing: "row", paddling: "paddle",
   "e-mail": "email", ok: "okay", pc: "computer", wooden: "wood", sewing: "sew", sewn: "sew", sews: "sew", embroidery: "embroider", embroidered: "embroider",
-  rattling: "rattle", rattles: "rattle", clattering: "clatter", sliding: "slide", slides: "slide", slid: "slide", rolling: "roll", rolls: "roll", rolled: "roll" };
+  whirr: "hum", whir: "hum", whirring: "hum", whirrs: "hum", whirs: "hum", rattling: "rattle", rattles: "rattle", clattering: "clatter", sliding: "slide", slides: "slide", slid: "slide", rolling: "roll", rolls: "roll", rolled: "roll" };
 function stem(w) {
   if (ALIAS[w]) return ALIAS[w];
   let s = w;

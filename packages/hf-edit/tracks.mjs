@@ -58,7 +58,7 @@ function fitMusic(a, film, { endCard = false, inside = false, fade = null, songF
   a["data-mw-fit"] = `${a["data-duration"]} ${a["data-fade-out"]}`;
   return [];
 }
-/** The music cut at `t` s of the film (a stop: What If's twist, the Final Mix's "Stop the music at"): the first clip (`a`, changed in place)
+/** The music cut at `t` s of the film (a stop: What If's twist, Music & Sound's "Stop the music at"): the first clip (`a`, changed in place)
  *  to that second with no fade, or, for a song that ends sooner, the song played again up to it (musicLoop), the last clip cut. Returns the
  *  attributes of the clips that play it again ([] when none). */
 function cutMusic(a, t, beats = null) {
@@ -84,7 +84,7 @@ function cutMusic(a, t, beats = null) {
 // across the crossfade; with no beats it is the song's tail, crossfaded plainly.
 /** The crossfade between a song and its repeat, s. */
 export const MUSIC_XF = 1.5;
-/** A song under this share of the film is said to the owner (the Final Mix, the chat), who may pick a longer one. */
+/** A song under this share of the film is said to the owner (Music & Sound, the chat), who may pick a longer one. */
 export const MUSIC_SHORT = 0.6;
 const MUSIC_TAIL = 8, MIN_LOOP = 3, MAX_LOOPS = 64, LOOP_TRACK = 15, LOOP_ID = "el-music-loop-";
 
@@ -145,7 +145,7 @@ function withLoops(html, loops) {
   return out.slice(0, at) + lines.join("") + out.slice(at);
 }
 /** The beat times HyperFrames measured for a track (beats/<src>.json, version 1, as analyseBeats has it written), s; null with none. */
-function beatTimes(dir, src) {
+export function beatTimes(dir, src) {
   if (!dir || !src) return null;
   try {
     const j = JSON.parse(readFileSync(join(dir, "beats", ...`${src}.json`.split("/")), "utf8"));
@@ -261,8 +261,13 @@ export function fitMusicToFilm(dir) {
 // data-mw-duck: its signature), so a level or a lane the user changed in Studio stays theirs; the earlier fixed levels (voice 1, music 0.6)
 // count as the app's.
 const DEFAULT_GAIN = { voice: "1", music: "0.6" };
-/** Whether a clip's level is the app's to set (kind: "voice" | "music"). */
-const gainIsOurs = (a, kind) => (a["data-mw-gain"] != null ? a["data-volume"] === a["data-mw-gain"] : (a["data-volume"] ?? "1") === DEFAULT_GAIN[kind]);
+// the level the app wrote, signed beside it (data-mw-gain-mark): Claude once wrote its level into data-mw-gain too, the app took it for its own and put the music back (T36-3)
+const gainMark = (v) => sig(`gain ${v}`);
+/** Whether a clip's level is the app's to set (kind: "voice" | "music"): the level the app wrote and signed; a film from before the mark goes by data-mw-gain alone. */
+const gainIsOurs = (a, kind) => {
+  if (a["data-mw-gain-mark"] != null) return a["data-mw-gain-mark"] === gainMark(a["data-volume"]);
+  return a["data-mw-gain"] != null ? a["data-volume"] === a["data-mw-gain"] : (a["data-volume"] ?? "1") === DEFAULT_GAIN[kind];
+};
 /** Set the app's level on every clip of the voice-over or the music whose level is the app's (gain: a number). Returns how many changed. */
 export function setTrackGain(dir, kind, gain) {
   const f = join(dir, "index.html");
@@ -272,22 +277,18 @@ export function setTrackGain(dir, kind, gain) {
   const v = String(Math.round(gain * 1000) / 1000);
   const out = html.replace(/<audio\b[^>]*>/gi, (tag) => {
     const a = attrsOf(tag);
-    if (audioKind(a) !== kind || !gainIsOurs(a, kind) || (a["data-volume"] === v && a["data-mw-gain"] === v)) return tag;
-    a["data-volume"] = v; a["data-mw-gain"] = v; n++;
+    if (audioKind(a) !== kind || !gainIsOurs(a, kind) || (a["data-volume"] === v && a["data-mw-gain"] === v && a["data-mw-gain-mark"] === gainMark(v))) return tag;
+    a["data-volume"] = v; a["data-mw-gain"] = v; a["data-mw-gain-mark"] = gainMark(v); n++;
     return audioLine(a);
   });
   if (out !== html) writeFileSync(f, out);
   return n;
 }
-/** The music's duck lanes written for the film's words as they are now (none without a transcript). deep: [{ start, duck }], the spoken spans
- *  (by their start) where the song is too loud for the usual duck to keep the words clear; by default what the last fit found (sfx/voicefit.mjs,
- *  kept in sfx.json), so the lane stays as it was while nothing changed. Returns how many clips duck. */
-export function duckMusic(dir, { deep = null } = {}) {
+/** The music's duck lanes written for the film's words as they are now (none without a transcript). Returns how many clips duck. */
+export function duckMusic(dir) {
   const f = join(dir, "index.html");
   let html; try { html = readFileSync(f, "utf8"); } catch { return 0; }
-  let deeper = deep;
-  if (!deeper) { try { deeper = JSON.parse(readFileSync(join(dir, ".moworks", "sfx.json"), "utf8")).fit?.deep ?? []; } catch { deeper = []; } }
-  const words = filmWords(dir), spans = (words?.length ? speechSpans(words) : []).map((s) => ({ ...s, duck: deeper.find((d) => d.start === s.start)?.duck }));
+  const words = filmWords(dir), spans = words?.length ? speechSpans(words) : [];
   let n = 0;
   const out = html.replace(/<audio\b[^>]*>/gi, (tag) => {
     const a = attrsOf(tag);

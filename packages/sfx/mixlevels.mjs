@@ -2,14 +2,16 @@
 // between the words and ducked under them; a film with no voice has its music at -16 LUFS) and the music's duck lanes written
 // (hf-edit/tracks.mjs duckMusic). Each file's loudness is measured once with the app's FFmpeg (EBU R128) and kept in .moworks/loudness.json
 // by its size and time. A level the user set by hand in Studio stays theirs (tracks.mjs setTrackGain). Run when the music or the voice is
-// placed, when the transcript is saved, before the Final Mix places the effects, and before a render, the checks or an export to AE; each
+// placed, when the transcript is saved, before Music & Sound places the effects, and before a render, the checks or an export to AE; each
 // time the effects already placed are fitted again to the voice and the mix as they are now (voicefit.mjs).
 import { execFile } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { trackGains } from "./actions.mjs";
-import { duckMusic, filmWords, setTrackGain, trackClips } from "../hf-edit/tracks.mjs";
+import { audioKind, duckMusic, filmWords, setTrackGain, trackClips } from "../hf-edit/tracks.mjs";
+import { LANES, setLane } from "./lanes.mjs";
+import { patchState, readState } from "./index.mjs";
 import { ffmpegExe } from "../library/preview-media.mjs";
 import { fitEffects } from "./voicefit.mjs";
 
@@ -64,4 +66,29 @@ export async function levelTracks(dir, { root, fit = true } = {}) {
   duckMusic(dir);
   if (fit) await fitEffects(dir, { root }).catch(() => null);
   return g;
+}
+
+/** The film's sound back to what the app sets: the lanes' faders at 0 dB, every level and lane set by hand or by Claude gone, then levelled and fitted as after the Build. The music, the voice
+ *  and where each clip sits stay; a sound the app did not place keeps its level. (owner 01/11: after moving levels, or with a new music or voice, one press balances it all again) */
+export async function balanceAgain(dir, { root } = {}) {
+  for (const lane of LANES) setLane(dir, lane, 0);
+  const f = join(dir, "index.html");
+  let html; try { html = readFileSync(f, "utf8"); } catch { return null; }
+  const st = readState(dir), placed = new Map((st.mounted ?? []).map((m, i) => [`el-sfx-${i}`, m]));
+  for (const m of st.added ?? []) placed.set(m.id, m);
+  const attrsOf = (tag) => Object.fromEntries([...tag.matchAll(/([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*"([^"]*)"/g)].map((x) => [x[1], x[2]]));
+  const out = html.replace(/<audio\b[^>]*>/gi, (tag) => {
+    const a = attrsOf(tag), kind = audioKind(a), m = placed.get(a.id);
+    if (!kind && !m) return tag;
+    for (const k of ["data-automation", "data-mw-duck", "data-fx-carve", "data-fx-chain"]) delete a[k];
+    if (kind) { delete a["data-mw-gain-mark"]; a["data-mw-gain"] = a["data-volume"] ?? "1"; }
+    else if (Number.isFinite(m.base ?? m.volume)) a["data-volume"] = String(m.base ?? m.volume);
+    return `<audio ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}>`;
+  });
+  if (out !== html) writeFileSync(f, out);
+  patchState(dir, (x) => {
+    for (const m of [...(x.mounted ?? []), ...(x.added ?? [])]) if (Number.isFinite(m.base)) m.volume = m.base;
+    delete x.fit;
+  });
+  return levelTracks(dir, { root });
 }

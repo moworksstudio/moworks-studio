@@ -29,6 +29,8 @@ for every section, a graphic transition nobody expects), all inside what section
 9. **Beat punctuation:** a ring or a burst from the word or the hero on the hits, never over text; one sticker or icon per feature, drawn for the film in one
    style, bouncing on the beat.
 
+**The owner's times:** a time the owner gives for a line is written in the lyrics as `[0:17.5] line`, and the app's Time keeps it: that line starts on it and its words stay before the next mark. Never keep a second table of your own (a docs file): the checks and the Review compare the film with the app's table, so it would call every word late. A line that is off: change its mark and time them again.
+
 ## 2. The song is the one grid
 
 The app measures the song when it comes in and writes `docs/BEATMAP.md`: beats, bars, hits, kicks, sections, in seconds. The sung words with their times

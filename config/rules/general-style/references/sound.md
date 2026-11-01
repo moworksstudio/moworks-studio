@@ -1,4 +1,4 @@
-# Sound (Final Mix: after the picture is locked, only when the owner asks)
+# Sound (Music & Sound: after the picture is locked, only when the owner asks)
 
 From the Moworks Motion kit 2.0.4 (`workflow/film.md` "Audio", "The sound pass"). The markup of audio in a composition is HyperFrames'
 (`hyperframes/references/sound.md` and `format.md`, `media-use/references/mixing.md`); the levels and the choices below are the studio's.
@@ -8,7 +8,7 @@ You cannot hear: measure every step (the app gives you beat maps, levels and cue
 
 - **Early (the owner's starting assets):** a voice-over or music the owner already has. The app places it on the timeline (voice-over and
   music each on their own track, from 0 s) and transcribes the voice / maps the beats; the picture is timed to it.
-- **Final Mix (after QC):** change or add music, add sound effects. Nothing here before the picture is locked.
+- **Music & Sound (after QC):** change or add music, add sound effects. Nothing here before the picture is locked.
 
 ## 2. Music
 
@@ -41,6 +41,6 @@ You cannot hear: measure every step (the app gives you beat maps, levels and cue
   (an impact over a click), a small move quieter, the ambience lowest (the app sets them).
 - The master: **-16 LUFS, true peak at most -1 dBTP** (the app's render masters and measures it); louder (-14 LUFS)
   only when the client asks.
-- The app applies these: at the Final Mix it measures the music, the voice and each effect and sets every effect's level (EBU R128); when
+- The app applies these: at Music & Sound it measures the music, the voice and each effect and sets every effect's level (EBU R128); when
   rendering it brings the master to the target with HyperFrames' two-pass `loudnorm` (media-use, "Publish loudness") and measures the
   result. Never set these levels by hand in the HTML.

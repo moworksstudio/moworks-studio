@@ -1,5 +1,5 @@
 // The Editor's timeline, for reading the film, not for cutting it: Shots, the voice-over's lines, the sound effects, the
-// music with its waveform, and the last Checks run's findings as dots. Click to jump; drag the ruler or the Shots to scrub; drag on the sound lanes to draw a box
+// music with its waveform. Click to jump; drag the ruler or the Shots to scrub; drag on the sound lanes to draw a box
 // round several clips (owner 31/10, Delete takes them off, shots in the box go to Claude); Ctrl or Shift + click adds one; Shift + drag marks a part to loop;
 // a shot's block selects that shot for Claude; Ctrl + wheel or − / + / Fit zoom. The fold button leaves only the Shots row. The how-to
 // line is the lanes' tooltip (less text on screen). Colours after HF Studio's own timeline
@@ -10,8 +10,9 @@
 // stays in Assets). + and - zoom, not while typing. A sound dragged from the Assets tab drops on the lane under the pointer, at the
 // pointer's time: the lane lights and a thin line shows the time while it is over it (not on a locked film or one shown as its render).
 import { useEffect, useRef, useState } from "react";
-import { Captions, ChevronDown, ChevronUp, Film, Mic2, Music, Sparkles, Trash2, ZoomIn, ZoomOut } from "lucide-react";
+import { Captions, ChevronDown, ChevronUp, Film, Mic2, Music, Sparkles, ZoomIn, ZoomOut } from "lucide-react";
 import { usePref, useToast } from "../lib.jsx";
+import { createPortal } from "react-dom";
 import { useT } from "../i18n.jsx";
 import { fmtTime } from "./Player.jsx";
 
@@ -70,7 +71,25 @@ export function sfxRows(all) {
 /** The drop line on a lane while a sound from the Assets tab is over it, with the time it would start at (its chip turns left at the end). */
 export const DropLine = ({ x, time, end = false }) => <div className={"tl-drop" + (end ? " end" : "")} style={{ left: x }} aria-hidden="true"><b className="num">{time}</b></div>;
 
-export default function Timeline({ data, time, duration, shot, onSeek, onShot, range, onRange, posters = null, fps = 30, locked = false, onAudioMove = null, onAudioRemove = null, onCaptionSave = null, onCaptionLive = null,
+/** One lane's level: every clip of it at once. Heard as it moves (onLive), kept when it is let go (onDone); a double click brings it back to its place. */
+function LaneFader({ name, db, disabled, onLive, onDone }) {
+  const t = useT();
+  const [now, setNow] = useState(null);
+  const [held, setHeld] = useState(null);          // the fader's place on screen while it is held: the level shows above its knob
+  const v = now ?? db;
+  const level = `${v > 0 ? "+" : ""}${v} dB`;
+  const done = (x) => { setNow(null); setHeld(null); if (x !== db) onDone(x); };
+  return <>
+    <input type="range" className="tl-fader" min={-30} max={12} step={1} value={v} disabled={disabled} aria-label={t("{name} level", { name })} title={held ? undefined : `${name}: ${level} · ${t("Double-click for 0 dB")}`}
+      onInput={(e) => { const x = Number(e.target.value); setNow(x); onLive(x); }}
+      onPointerDown={(e) => { e.stopPropagation(); setHeld(e.currentTarget.getBoundingClientRect()); }} onPointerUp={(e) => { done(Number(e.target.value)); e.currentTarget.blur(); }} onPointerCancel={(e) => done(Number(e.target.value))}
+      onKeyUp={(e) => { if (e.key.startsWith("Arrow")) done(Number(e.target.value)); }}
+      onDoubleClick={(e) => { onLive(0); done(0); e.currentTarget.blur(); }} />
+    {held && createPortal(<output className="tl-fader-level num" style={{ left: held.left + (held.width * (v + 30)) / 42, top: held.top }}>{level}</output>, document.body)}
+  </>;
+}
+
+export default function Timeline({ data, time, duration, shot, onSeek, onShot, range, onRange, posters = null, fps = 30, locked = false, onAudioMove = null, onAudioRemove = null, onCaptionSave = null, onCaptionLive = null, onLevelLive = null, onLevel = null,
   readOnly = false, onSoundDrop = null, onAudioRemoveMany = null, onAskClaude = null }) {
   const t = useT();
   const toast = useToast();
@@ -289,18 +308,14 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
   return <div className={"tl" + (folded ? " folded" : "")} ref={box}>
     <span className="sr-only" role="status" aria-live="polite">{say}</span>
     <div className="tl-head">
-      <span className="tl-name" title={t("Click to jump · drag the ruler to scrub · drag on the sound lanes to select several · Shift + drag to loop a part · Ctrl + wheel to zoom")}>{t("Timeline")}</span>
+      <span className="tl-name">{t("Timeline")}</span>
       {cue ? <span className="tl-capedit">{cue.parts.map((x) => <input key={x.hfId} autoFocus={x === cue.parts[0]} spellCheck={false} className="input sm" value={cueText[x.hfId] ?? ""} aria-label={t("Caption words")}
         onChange={(e) => { const v = e.target.value; setCueText((o) => ({ ...o, [x.hfId]: v })); onCaptionLive?.(x.hfId, v); }}
         onKeyDown={(e) => { e.stopPropagation(); if (e.key === "Enter") e.currentTarget.blur(); if (e.key === "Escape") { onCaptionLive?.(x.hfId, x.text); closeCue(); } }}
         onBlur={(e) => { const v = e.target.value.trim(); if (!v || v === x.text) { onCaptionLive?.(x.hfId, x.text); if (e.relatedTarget?.closest?.(".tl-capedit") == null) closeCue(); return; }
           onCaptionSave(cue.file, x.hfId, v); if (e.relatedTarget?.closest?.(".tl-capedit") == null) closeCue(); }} />)}</span> : <span className="tl-gap" />}
-      {many.length > 0 && onAudioRemoveMany && <button className="btn ghost sm" disabled={locked} onClick={takeMany} title={t("Delete key")}>
-        <Trash2 size={13} />{many.length === 1 ? t("Take {name} off the timeline", { name: soundName(many[0]) }) : t("Take {n} sounds off the timeline", { n: many.length })}</button>}
       {markedShots.length > 0 && onAskClaude && <button className="btn ghost sm" onClick={() => { onAskClaude(`Please take out ${markedShots.length === 1 ? "shot" : "shots"} ${markedShots.join(", ")}.`); clearMarks(); }}
         title={t("A shot is part of the film's picture, so Claude takes it out")}><Sparkles size={13} />{t("Ask Claude to take out {what}", { what: `${markedShots.length === 1 ? t("shot") : t("shots")} ${markedShots.join(", ")}` })}</button>}
-      {!many.length && selClip && onAudioRemove && <button className="btn ghost sm" disabled={locked} onClick={() => { onAudioRemove(selClip); setSel(null); }} title={t("Delete key")}>
-        <Trash2 size={13} />{t("Take {name} off the timeline", { name: soundName(selClip) })}</button>}
       {range && <button className="clink" onClick={() => onRange(null)}>{t("Clear the loop {a}–{b} s", { a: range[0].toFixed(1), b: range[1].toFixed(1) })}</button>}
       <span className="tl-tools">
         <button className="btn ghost icon sm" onClick={() => setPps(Math.max(2, scale / 1.4))} aria-label={t("Zoom out")}><ZoomOut size={14} /></button>
@@ -311,13 +326,11 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
       </span>
     </div>
     <div className="tl-body" ref={scroller} onWheel={wheel} style={{ "--sfx-rows": sfx.rows }}>
-      <div className="tl-labels">{["ruler", ...rows].map((k) => { const I = ICON[k]; return <div key={k} className={"tl-label " + k}>{I && <I size={12} />}{NAME[k] ? t(NAME[k]) : ""}</div>; })}</div>
+      <div className="tl-labels">{["ruler", ...rows].map((k) => { const I = ICON[k]; return <div key={k} className={"tl-label " + k}><span className="tl-name">{I && <I size={12} />}{NAME[k] ? t(NAME[k]) : ""}</span>
+        {(k === "voice" || k === "sfx" || k === "music") && onLevel && <LaneFader name={t(NAME[k])} db={data?.levels?.[k] ?? 0} disabled={locked} onLive={(db) => onLevelLive?.(k, 10 ** (db / 20))} onDone={(db) => onLevel(k, db)} />}</div>; })}</div>
       <div className={"tl-lanes" + (readOnly ? " ro" : "")} ref={lane} style={{ width }} onPointerDown={down}
-        onDragOver={canDrop ? dragOver : undefined} onDragLeave={canDrop ? dragLeave : undefined} onDrop={canDrop ? drop : undefined}
-        title={readOnly ? t("Click a shot to jump to its start") : t("Click to jump · drag the ruler to scrub · drag on the sound lanes to select several · Shift + drag to loop a part · Ctrl + wheel to zoom")}>
-        <div className="tl-ruler num">{ticks.map((s) => <i key={s} style={{ left: px(s) }}>{s % 1 ? s.toFixed(1) : `${s}s`}</i>)}
-          {(data?.qc ?? []).map((q, i) => <button key={i} className={"tl-qc" + (q.blocking ? " stop" : "")} style={{ left: px(q.time) }} title={qcSay(t, q)}
-            onPointerDown={(e) => { e.stopPropagation(); onSeek(q.time); }} aria-label={`${q.title} ${q.time}s`} />)}</div>
+        onDragOver={canDrop ? dragOver : undefined} onDragLeave={canDrop ? dragLeave : undefined} onDrop={canDrop ? drop : undefined}>
+        <div className="tl-ruler num">{ticks.map((s) => <i key={s} style={{ left: px(s) }}>{s % 1 ? s.toFixed(1) : `${s}s`}</i>)}</div>
         <div className="tl-row shots">{(data?.shots ?? []).map((s) => { const pic = posters?.find((x) => x.number === s.number)?.url; return <button key={s.mountId ?? s.number} data-shot={s.number} className={"tl-shot" + (shot?.number === s.number || markedShots.includes(s.number) ? " sel" : "") + (pic ? " pic" : "") + (s.planned ? " planned" : "")}
           style={{ left: px(s.start) + 2, width: Math.max(2, px(s.duration ?? 0) - 4), ...(pic ? { backgroundImage: `url("${pic}")` } : null) }} title={`${t("Shot {n}", { n: s.number })} · ${s.title} · ${(s.duration ?? 0).toFixed(1)} s${s.rate !== 1 ? ` · ${s.rate}×` : ""}`}
           onPointerDown={(e) => { if (!e.shiftKey && e.button === 0) { onShot(s); if (readOnly) onSeek(s.start); } }}><span className="tl-chip"><b className="num">{s.number}</b> {s.title}</span></button>; })}</div>

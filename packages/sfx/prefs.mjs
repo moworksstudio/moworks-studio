@@ -1,10 +1,10 @@
 // The owner's sound choices for one film, kept in .moworks/sfx-prefs.json and honoured by every placement (Test 24: the owner said
 // "no whoosh", Claude said it was done, and the next placement put the whooshes back). Claude sets them with the app's sfx_prefs tool;
-// the Final Mix sets the density and takes single sounds out.
+// Music & Sound sets the density and takes single sounds out.
 //   { off: ["whoosh", "footstep", "all"…],   families or sound names the film never gets ("all": no sound effects at all)
 //     ambience: true | false,                  false: no ambience beds
 //     density: "low" | "normal" | "lively",    how many sounds a second (default lively: owner 30/10, a sound on every action)
-//     skip: ["<cue id>"…],                     single sounds taken out in the Final Mix, kept out when the sounds are placed again
+//     skip: ["<cue id>"…],                     single sounds taken out in Music & Sound, kept out when the sounds are placed again
 //     songSounds: true }                       a film made for its song has none, until the owner asks for some ("on")
 // And what else asks for silence or fewer sounds: the brief, and the film style's own sound section (which wins over the house rule).
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
@@ -53,7 +53,7 @@ export function updatePrefs(dir, patch = {}) {
 export function prefsText(p = {}) {
   const parts = [p.off?.length ? (p.off.includes("all") ? "no sound effects at all" : `off: ${p.off.join(", ")}`) : "every family on",
     p.ambience === false ? "no ambience" : "ambience under every place", `density ${p.density ?? DEFAULT_DENSITY}`];
-  if (p.skip?.length) parts.push(`${p.skip.length} single sound(s) taken out in the Final Mix`);
+  if (p.skip?.length) parts.push(`${p.skip.length} single sound(s) taken out in Music & Sound`);
   return parts.join("; ");
 }
 
