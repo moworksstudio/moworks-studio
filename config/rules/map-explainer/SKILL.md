@@ -45,6 +45,7 @@ the same in the shot's own seconds. Count the occurrences in `transcript.json`. 
   calendar pages, a red rubber stamp. A live lat/long readout bottom left on the ground.
 - Sedgwick's digit 0 has a slash and reads as a crossed-out number: in handwriting write a capital O for zero, and say so in `docs/NOTES.md`. Its small c has a bar and reads as G ("cut off" reads "gut off"): in handwriting write a capital C.
 - A line of the world (the date line with its jogs, the equator, the tropics) comes from `M.lines(name)`; never draw it by hand.
+- The map already has its lakes (Natural Earth, on the paper and the drawn ground; `atlas: '10m'` for the small ones): never draw a lake by hand.
 - 16:9, 1920 × 1080, 30 fps by default.
 
 **Banned:** AI video or image generation, stock footage, word-by-word captions, hard cuts, any frame where nothing moves, icon packs, glossy gradients or glass UI.

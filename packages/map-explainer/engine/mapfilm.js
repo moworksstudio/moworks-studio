@@ -138,6 +138,18 @@
     shapes.forEach(function (s) { land.addPath(s.path); s.color = colorOf[s.gi]; byName[s.name] = s.path; });
     GEO.shapes = shapes; GEO.coast = coast; GEO.border = border; GEO.land = land; GEO.byName = byName;
   }
+  // --- lakes: Natural Earth's polygons (the atlas's countries run across them), one path; an island's ring is a hole, so they fill even-odd ---
+  function decodeLakes(data, box) {
+    var path = new Path2D(), pad = 24;
+    (data.lakes || []).forEach(function (lake) { lake.rings.forEach(function (r) {
+      var x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+      r.forEach(function (p) { var x = worldX(p[0]), y = worldY(p[1]); x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); });
+      if (x1 - x0 > 128 || x1 < box[0] - pad || x0 > box[2] + pad || y1 < box[1] - pad || y0 > box[3] + pad) return;
+      r.forEach(function (p, i) { var x = worldX(p[0]), y = worldY(p[1]); if (i) path.lineTo(x, y); else path.moveTo(x, y); });
+      path.closePath();
+    }); });
+    GEO.lakes = path;
+  }
   function newCanvas(w, h) { var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
 
   // --- paper map, drawn once at a level and laid out by the camera ---
@@ -148,6 +160,7 @@
     [[30, .16], [19, .2], [10, .26]].forEach(function (s) { c.strokeStyle = 'rgba(58,98,108,' + s[1] + ')'; c.lineWidth = s[0] / sc; c.stroke(GEO.coast); });
     c.fillStyle = '#ECE2CA'; c.fill(GEO.land);
     GEO.shapes.forEach(function (s) { c.fillStyle = s.color; c.fill(s.path); });
+    if (GEO.lakes) { c.fillStyle = '#A9C2C4'; c.fill(GEO.lakes, 'evenodd'); }
     c.strokeStyle = '#7A5A3C'; c.lineWidth = 1.6 / sc; c.setLineDash([7 / sc, 6 / sc]); c.stroke(GEO.border); c.setLineDash([]);
     c.strokeStyle = 'rgba(90,70,50,.26)'; c.lineWidth = 1 / sc; c.beginPath();
     var X0 = box[0], X1 = box[2], Y0 = box[1], Y1 = box[3], l0 = Math.floor((X0 / 256 * 360 - 180) / 10) * 10, l1 = (X1 / 256 * 360 - 180);
@@ -155,6 +168,7 @@
     for (var lat = -80; lat <= 80; lat += 10) { var y = worldY(lat); if (y < Y0 || y > Y1) continue; c.moveTo(X0, y); c.lineTo(X1, y); }
     c.stroke();
     c.strokeStyle = '#4A3424'; c.lineWidth = 1.25 / sc; c.stroke(GEO.coast);
+    if (GEO.lakes) { c.lineWidth = .9 / sc; c.stroke(GEO.lakes); }
     return L;
   }
 
@@ -173,6 +187,7 @@
     var B = BIOME[(FILM.ground && FILM.ground.biome) || 'desert'] || BIOME.desert;
     var L = layerAt(box, z), w = L.w, h = L.h, sc = L.sc, cv = L.cv = newCanvas(w, h), c = cv.getContext('2d'), img = c.createImageData(w, h), d = img.data;
     var mk = newCanvas(w, h), mc = mk.getContext('2d', { willReadFrequently: true }); mc.setTransform(sc, 0, 0, sc, -L.x0 * sc, -L.y0 * sc); mc.fillStyle = '#fff'; mc.fill(GEO.land);
+    if (GEO.lakes) { mc.globalCompositeOperation = 'destination-out'; mc.fill(GEO.lakes, 'evenodd'); mc.globalCompositeOperation = 'source-over'; }
     var m1 = newCanvas(w, h), m1c = m1.getContext('2d', { willReadFrequently: true }); m1c.filter = 'blur(1.5px)'; m1c.drawImage(mk, 0, 0); var M = m1c.getImageData(0, 0, w, h).data;
     var m2 = newCanvas(w, h), m2c = m2.getContext('2d', { willReadFrequently: true }); m2c.filter = 'blur(' + Math.max(4, .05 * sc).toFixed(1) + 'px)'; m2c.drawImage(mk, 0, 0); var Bl = m2c.getImageData(0, 0, w, h).data;
     // what changes slowly is read on a coarse grid
@@ -540,6 +555,8 @@
       GEO.lines = {}; g.features.forEach(function (f) { GEO.lines[f.properties.name] = f.geometry.type === 'MultiLineString' ? f.geometry.coordinates : [f.geometry.coordinates]; });
     }).catch(function () { GEO.lines = {}; }).then(function () { return fetch(base + 'data/countries-' + (FILM.atlas || '50m') + '.json'); }).then(function (r) { return r.json(); }).then(function (topo) {
       decodeAtlas(topo, box);
+      return fetch(base + 'data/lakes-' + (FILM.atlas || '50m') + '.json').then(function (r) { return r.json(); }).then(function (data) { decodeLakes(data, box); }).catch(function () { GEO.lakes = null; });
+    }).then(function () {
       // the paper map: one level at the widest view and, when the camera goes closer, one at the zoom's middle
       GEO.paper = [];
       if (minZ < 9.3) {

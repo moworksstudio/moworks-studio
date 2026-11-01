@@ -67,6 +67,6 @@ lyrics too. Only the owner's own word brings a sound in (the `sfx_prefs` tool, `
 ## 5. In each step
 
 - **Storyboard:** the frames follow the sections of the beat map, with a new world at least every 3 s, each frame's sung words at their times.
-- **Motion Plan:** the numbers of section 1 in the rows; `dynamic` is `strong`.
+- **Motion Plan:** the numbers of section 1 in the rows; `dynamic` is `strong`. Count the layout formulas before you show the plan: one used past rule 8's limit is changed here, not left for the Review "because the storyboard was approved" (Test 31: one formula in 8 shots).
 - **Build:** as the plan says, always-on layers in the root; frame rate as the project has it (a lyrics video defaults to 60 fps).
 - **Review:** moworks-qc §2b scores this.

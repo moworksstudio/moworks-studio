@@ -363,6 +363,15 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
       await filesChanged(true);
     } catch (e) { toast(e.message, "error"); await loadTimeline(); }
   };
+  // Ctrl+Z on the timeline: the last sound moved or taken off comes back
+  const audioUndo = async () => {
+    try {
+      const r = await post(`/api/projects/${id}/edit/audio/undo`, {});
+      if (!r.undone) { toast(t("Nothing to undo")); return; }
+      toast(r.kind === "move" ? t("Moved back: {name}", { name: r.name ?? "" }) : r.n > 1 ? t("{n} sounds put back", { n: r.n }) : t("Put back: {name}", { name: r.name ?? "" }));
+      await filesChanged(true);
+    } catch (e) { toast(e.message, "error"); await loadTimeline(); }
+  };
   // a caption's words changed on the timeline: the same hand edit as the Shots panel's words
   const captionSave = async (file, hfId, text) => {
     try { const r = await post(`/api/projects/${id}/edit/text`, { file, hfId, text }); toast(t("Words saved")); filesChanged(!!r.reload); }
@@ -620,7 +629,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const timelineEl = <Timeline data={unbuilt ? voiceOnly : tl} posters={shotPosters} fps={p?.meta?.format?.fps || pv.state.fps || 30} time={unbuilt ? 0 : pv.state.time} duration={unbuilt ? p.plannedDuration ?? 0 : pv.state.duration} shot={shot} range={range} onRange={setRange}
     readOnly={pv.videoOnly}
     onSeek={(s) => pv.send("seek", { time: s })} onShot={(s) => { setShot(s); setDismissed(null); }}
-    locked={locked || pv.videoOnly} onAudioMove={(c, to) => audioEdit("", c, to)} onAudioRemove={(c) => audioEdit("/remove", c, {})} onAudioRemoveMany={audioRemoveMany} onAskClaude={stage.askClaude} onSoundDrop={soundDrop}
+    locked={locked || pv.videoOnly} onAudioMove={(c, to) => audioEdit("", c, to)} onAudioRemove={(c) => audioEdit("/remove", c, {})} onAudioRemoveMany={audioRemoveMany} onAudioUndo={audioUndo} onAskClaude={stage.askClaude} onSoundDrop={soundDrop}
     onCaptionSave={captionSave} onCaptionLive={(hfId, text) => pv.send("live", { hfId, text })}
     onLevelLive={(lane, gain) => pv.send("lane", { lane, gain })} onLevel={levelSet} />;
   // the playhead and the film's length as the timeline has them: "Put on the timeline" starts a sound there

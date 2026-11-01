@@ -271,7 +271,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
           if (b.start != null && hand.isEffectClip(out.now)) await soundMoved(p.path, out.was, out.now, { root }).catch(() => null);
           await fitEffects(p.path, { root }).catch(() => null);
           return out;
-        });
+        }, { undo: { kind: "move", name: b.name ?? null } });
         if (changed) ctx.backupProject?.(id);
         return { changed };
       } catch (e) { fail(e); }
@@ -285,9 +285,18 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
           // names a sound by its HF id first)
           try { (await import("./assets.mjs")).soundTakenOff?.(p, { id: x.was.id ?? b.id, src: x.was.src ?? b.src, cue: x.was["data-mw-cue"] ?? null }, root); } catch { /* the edit stands */ }
           return x;
-        });
+        }, { undo: { kind: "off", name: b.name ?? null } });
         ctx.backupProject?.(id);
         return { changed: out.changed };
+      } catch (e) { fail(e); }
+    })),
+    // Ctrl+Z on the timeline: the last sound moved or taken off comes back (boards.mjs)
+    r("POST", `/projects/${P}/edit/audio/undo`, ([id]) => inTurn(id, async () => {
+      const p = mustProject(id, root); busySound(id);
+      try {
+        const out = await ctx.mix.undo(p);
+        if (out.undone) ctx.backupProject?.(id);
+        return out;
       } catch (e) { fail(e); }
     })),
     // several sounds taken off at once (a box drawn on the timeline): one revision. One gone already is no failure
@@ -306,7 +315,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
             try { soundTakenOff(p, { id: x.was.id ?? c.id, src: x.was.src ?? c.src, cue: x.was["data-mw-cue"] ?? null }, root); } catch { /* the edit stands */ }
           }
           return { changed: removed > 0 };
-        });
+        }, { undo: { kind: "off", n: clips.length } });
         ctx.backupProject?.(id);
         return { changed: out.changed, removed };
       } catch (e) { fail(e); }

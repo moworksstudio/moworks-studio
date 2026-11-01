@@ -10,7 +10,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 /** Where a page loads the engine from, beside itself. */
 export const ENGINE_DIR = "assets/_app/map";
 const FILES = [["engine/mapfilm.js", "mapfilm.js"], ["fonts/SpecialEliteVN-Regular.ttf", "fonts/SpecialEliteVN-Regular.ttf"], ["fonts/LICENSE-SpecialElite.txt", "fonts/LICENSE-SpecialElite.txt"],
-  ["data/countries-50m.json", "data/countries-50m.json"], ["data/countries-10m.json", "data/countries-10m.json"], ["data/geographic-lines.geojson", "data/geographic-lines.geojson"], ["data/CREDITS.md", "data/CREDITS.md"]];
+  ["data/countries-50m.json", "data/countries-50m.json"], ["data/countries-10m.json", "data/countries-10m.json"], ["data/geographic-lines.geojson", "data/geographic-lines.geojson"], ["data/lakes-50m.json", "data/lakes-50m.json"], ["data/lakes-10m.json", "data/lakes-10m.json"], ["data/CREDITS.md", "data/CREDITS.md"]];
 
 /** Does this page load the engine? */
 export const loadsMapEngine = (html) => /assets\/_app\/map\/mapfilm\.js/.test(String(html ?? ""));

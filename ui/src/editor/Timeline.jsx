@@ -89,7 +89,7 @@ function LaneFader({ name, db, disabled, onLive, onDone }) {
   </>;
 }
 
-export default function Timeline({ data, time, duration, shot, onSeek, onShot, range, onRange, posters = null, fps = 30, locked = false, onAudioMove = null, onAudioRemove = null, onCaptionSave = null, onCaptionLive = null, onLevelLive = null, onLevel = null,
+export default function Timeline({ data, time, duration, shot, onSeek, onShot, range, onRange, posters = null, fps = 30, locked = false, onAudioMove = null, onAudioRemove = null, onAudioUndo = null, onCaptionSave = null, onCaptionLive = null, onLevelLive = null, onLevel = null,
   readOnly = false, onSoundDrop = null, onAudioRemoveMany = null, onAskClaude = null }) {
   const t = useT();
   const toast = useToast();
@@ -182,7 +182,8 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
     const k = (e) => {
       const el = document.activeElement;
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(el?.tagName ?? "") || el?.isContentEditable || document.querySelector(".sheet-overlay")) return;
-      if ((e.key === "+" || e.key === "=") && !e.ctrlKey && !e.metaKey) { e.preventDefault(); setPps(Math.min(400, scale * 1.4)); }
+      if (e.key.toLowerCase() === "z" && (e.ctrlKey || e.metaKey) && !e.shiftKey && onAudioUndo && !locked) { e.preventDefault(); onAudioUndo(); }
+      else if ((e.key === "+" || e.key === "=") && !e.ctrlKey && !e.metaKey) { e.preventDefault(); setPps(Math.min(400, scale * 1.4)); }
       else if ((e.key === "-" || e.key === "_") && !e.ctrlKey && !e.metaKey) { e.preventDefault(); setPps(Math.max(2, scale / 1.4)); }
       else if ((e.key === "Delete" || e.key === "Backspace") && many.length && onAudioRemoveMany && !locked) { e.preventDefault(); takeMany(); }
       else if ((e.key === "Delete" || e.key === "Backspace") && selClip && onAudioRemove && !locked) { e.preventDefault(); onAudioRemove(selClip); setSel(null); }
@@ -191,7 +192,7 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
     };
     addEventListener("keydown", k);
     return () => removeEventListener("keydown", k);
-  }, [scale, selClip, sel, locked, onAudioRemove, marked, markedShots, onAudioRemoveMany]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [scale, selClip, sel, locked, onAudioRemove, marked, markedShots, onAudioRemoveMany, onAudioUndo]); // eslint-disable-line react-hooks/exhaustive-deps
   const laneAt = (y) => { for (const [ln, el] of Object.entries(rowsRef.current)) { const r = el?.getBoundingClientRect(); if (r && y >= r.top && y <= r.bottom) return ln; } return null; };
   // a sound from the Assets tab over a sound lane: { lane, start } (the drag carries only SOUND_MIME, so a picture or a file from Explorer
   // finds no drop target); on a locked film or one shown as its render nothing takes a drop

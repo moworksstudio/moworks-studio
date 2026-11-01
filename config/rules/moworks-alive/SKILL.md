@@ -72,6 +72,7 @@ never pulses as one; a loop that repeats visibly inside one shot is a fault.
 - **Motion Plan:** the searches of rule 9 come first. Each shot has a `loop` (or `camera`) row for every element held on screen, for the background and for the camera,
   with its numbers (amplitude in px, ° or %, and period), and an idle row for every character. A hold longer than 2 s without such rows
   is not finished. The shot's plain words (`says`) say how alive it is ("kính trôi rõ và xoay chậm quanh bà; máy quay lượn 15°").
+  Rule 10's living details get rows of their own, in the shots they play in: at least one for every 10 s of film and never fewer than three, each saying in plain words what it is (a sticker, an icon, a bubble, a burst, particles, a playful word). The user strikes out what they do not want at the approval; a detail never drawn was never offered (Tests 31 and 35: none in the film, seen only at the Review).
 - **Build:** build every hold row; the always-on motion runs from the element's entrance to its exit on the shot's own timeline, as a
   function of time (deterministic: no random numbers at play time). Scrub the shot: in any 2 s window something on screen moves.
 - **Review** (moworks-qc criterion 3, Motion): score it against the dynamic level and these numbers, from docs/MOTION-PLAN.json's hold rows,

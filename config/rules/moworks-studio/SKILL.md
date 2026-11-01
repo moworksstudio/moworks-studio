@@ -209,6 +209,7 @@ step; only the owner's own requests in the chat change them.
 Only when the film has a voice-over with its reviewed transcript (transcript.json, word timings). Written from What If animation's
 `references/sound.md` (FreshStack, MIT):
 
+- **The transcript gives the times; the brief's script gives the words.** A voice's words are heard by a machine and some come out wrong (Test 36: at least 12 in a poem). When the brief holds what the voice says, anything written on screen follows the brief, and `docs/NOTES.md` names the words that differ in one line.
 - **An effect that illustrates a word goes in the pause just after it, never on it** (the word stays clear and the sound answers it);
   write its `- sfx:` cue at the word's end (`name@<seconds into the shot>`). The app also moves an effect that would fall inside a spoken
   word to just after it.

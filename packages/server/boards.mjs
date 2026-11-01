@@ -6,7 +6,7 @@ import { LANES, applyLanes, setLane } from "../sfx/lanes.mjs";
 import { balanceAgain } from "../sfx/mixlevels.mjs";
 import { isSongFilm } from "../style-catalog/traits.mjs";
 import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, statSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
-import { basename, extname, join, resolve, sep } from "node:path";
+import { basename, dirname, extname, join, resolve, sep } from "node:path";
 import * as projects from "../project-service/index.mjs";
 import { docPath } from "../project-service/docs.mjs";
 import { rememberAssets } from "../project-service/assets.mjs";
@@ -259,16 +259,44 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       throw new HttpError(409, "MIX_SHUT", "Claude is checking your film. Music & Sound opens again when it finishes.");
   };
   // a Music & Sound change: the work before it is committed on its own, the change as a sound-only revision (the picture's checks hold)
-  const mixChange = async (p, what, fn, { preview = true } = {}) => {
-    try { await rev.saveAsync(p.path, "Changes before Music & Sound"); } catch { /* revisions optional */ }
+  // undo: what Ctrl+Z on the timeline says for this change ({ kind, name, n }): a sound moved or taken off goes on the film's list of what can be undone
+  const mixChange = async (p, what, fn, { preview = true, undo = null } = {}) => {
+    let before = null, after = null;
+    try { before = await rev.saveAsync(p.path, "Changes before Music & Sound"); } catch { /* revisions optional */ }
     const out = await fn();
     applyLanes(p.path);          // sounds placed by this change join the lane whose fader moved
-    try { await rev.commitAllAsync(p.path, `${rev.SOUND_MIX}: ${what}`); } catch { /* revisions optional */ }
-    // a finished film whose sound changed: the preview service is asked once (it decides by the film's
-    // picture and sound whether anything is made); while stage 4 places the sound, not yet
+    try { after = await rev.commitAllAsync(p.path, `${rev.SOUND_MIX}: ${what}`); } catch { /* revisions optional */ }
+    if (undo && after && after !== before) undoList(p, [...undoList(p), { ...undo, rev: after }].slice(-UNDO_KEPT));
+    previewAgain(p, preview);
+    return out;
+  };
+  // a finished film whose sound changed: the preview service is asked once (it decides by the film's
+  // picture and sound whether anything is made); while stage 4 places the sound, not yet
+  const previewAgain = (p, preview = true) => {
     const now0 = projects.getProject(p.id, root);
     if (preview && (now0?.meta?.pipeline?.finished || now0?.meta?.pipeline?.delivered)) { try { ctx.previewProxy?.(p.id); } catch { /* next change */ } }
-    return out;
+  };
+  // ---- Ctrl+Z on the timeline (T29-8): the last sound moved or taken off comes back, with all it changed (the film's page, its records), as a new revision. Only over sound changes: once
+  // Claude or anything else changed the film after it, it is no longer the last thing done and the list is dropped. The list is the app's own (in the cache, not the film's history) ----
+  const UNDO_KEPT = 30;
+  function undoList(p, list) {
+    const f = join(p.path, ".moworks", "cache", "sound-undo.json");
+    if (list === undefined) { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return []; } }
+    mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, JSON.stringify(list));
+    return list;
+  }
+  const soundOnly = (message) => message.includes(rev.SOUND_MIX) || message === rev.STUDIO_IDS || message === "Changes before Music & Sound";
+  const undoSound = async (p) => {
+    try { await rev.saveAsync(p.path, "Changes before Music & Sound"); } catch { /* revisions optional */ }
+    const list = undoList(p), last = list.at(-1);
+    if (!last) return { undone: false };
+    const log = await rev.logAsync(p.path, 200), at = log.findIndex((c) => c.rev === last.rev);
+    if (at < 0 || log.slice(0, at).some((c) => !soundOnly(c.message))) { undoList(p, []); return { undone: false }; }
+    // a sound change the list does not hold (a fader, a sound added) touched the same lines since: the film stays as it is
+    try { await rev.revertAsync(p.path, last.rev); } catch (e) { if (e.code !== "CONFLICT") throw e; undoList(p, []); return { undone: false }; }
+    undoList(p, list.slice(0, -1));
+    previewAgain(p);
+    return { undone: true, kind: last.kind, name: last.name ?? null, n: last.n ?? 1 };
   };
   /** a stop the app or Claude sets, moved into the voice-over's nearest pause (snapStop); the user's own second stays as given. */
   const snapped = (p, at) => {
@@ -356,7 +384,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
   };
   /** The plan's musicStop as the music step will apply it (for Claude's words before the app places the music). */
   const planStop = (p) => { const mp = plan.read(p.path); return mp.exists && !mp.error && mp.plan.musicStop > 0 && planStopAllowed(p, mp.plan) && p.meta?.music?.stopAt == null && !p.meta?.music?.toEnd ? snapped(p, mp.plan.musicStop).at : null; };
-  ctx.mix = { useOption, placeSfx, stopFromPlan, cuesAgain, timesAgain, change: mixChange };
+  ctx.mix = { useOption, placeSfx, stopFromPlan, cuesAgain, timesAgain, change: mixChange, undo: undoSound };
   // the app tools (Agent.callTool)
   const tools = {
     psd_layers: async ({ project, args }) => {
