@@ -347,7 +347,7 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
             : (data?.sfx ?? []).map((x, i) => <span key={i} className="tl-tick" style={{ left: px(x.start), width: Math.max(6, px(x.duration ?? 0.3)) }} title={`${x.name} · ${x.start.toFixed(2)} s`} />)}
             {!(hasAudio ? clipsIn("sfx").length : data?.sfx?.length) && <span className="tl-empty">{t("No sound effects")}</span>}{dropLine("sfx")}</div>
           <div className={"tl-row music" + (over?.lane === "music" ? " drop-on" : "")} {...dropRow("music")} ref={(el) => { rowsRef.current.music = el; }}>{hasAudio ? clipsIn("music").map((c) => clip(c, "music",
-            music?.peaks?.length && c.name === music.name ? <svg viewBox={`0 0 ${music.peaks.length} 100`} preserveAspectRatio="none" aria-hidden="true"><path d={wave(music.peaks)} /></svg> : null))
+            music?.peaks?.length && c.name === music.name ? <svg viewBox={`0 0 ${music.peaks.length} 100`} preserveAspectRatio="none" aria-hidden="true"><path d={wave(music.peaks, (at) => laneGain(c.gains, at * (c.duration ?? 0)) * 10 ** ((data?.levels?.music ?? 0) / 20))} /></svg> : null))
             : music ? <span className="tl-music" style={{ left: px(music.start), width: px(music.duration ?? D) }} title={music.name}>
               {music.peaks?.length ? <svg viewBox={`0 0 ${music.peaks.length} 100`} preserveAspectRatio="none" aria-hidden="true"><path d={wave(music.peaks)} /></svg> : null}</span> : null}
             {!(hasAudio ? clipsIn("music").length : music) && <span className="tl-empty">{t("No music")}</span>}{dropLine("music")}</div>
@@ -365,9 +365,19 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
 export const qcSay = (t, q) => q.plain || (q.blocking ? t("A tech check found a problem here that stops the render. Open Tech checks for details.")
   : t("A tech check found something to look at here. Open Tech checks for details."));
 
-function wave(peaks) {
+function wave(peaks, gainAt = () => 1) {
   const n = peaks.length;
-  const top = peaks.map((v, i) => `${i},${50 - Math.min(1, Math.abs(v)) * 24}`).join(" L");
-  const bot = peaks.map((v, i) => `${n - 1 - i},${50 + Math.min(1, Math.abs(peaks[n - 1 - i])) * 24}`).join(" L");
+  const h = (i) => Math.min(1, Math.abs(peaks[i]) * gainAt(i / n)) * 24;          // the level it plays at: a duck or a silence shows (T32-11)
+  const top = peaks.map((_, i) => `${i},${50 - h(i)}`).join(" L");
+  const bot = peaks.map((_, i) => `${n - 1 - i},${50 + h(n - 1 - i)}`).join(" L");
   return `M${top} L${bot} Z`;
+}
+/** A clip's volume lane at t (its own seconds; HF's points, straight between them); 1 with no lane. */
+function laneGain(points, t) {
+  if (!points?.length) return 1;
+  const after = points.findIndex((p) => p.t > t);
+  if (after === 0) return points[0].v;
+  if (after < 0) return points.at(-1).v;
+  const a = points[after - 1], b = points[after];
+  return a.v + ((b.v - a.v) * (t - a.t)) / (b.t - a.t);
 }

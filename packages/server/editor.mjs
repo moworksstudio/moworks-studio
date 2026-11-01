@@ -210,7 +210,8 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
       // the attribute itself, never the end of a longer name: the id of `<audio data-hf-id="hf-k4k5" id="el-sfx-3">` is el-sfx-3, the src of a scene's
       // data-composition-src is no src (T29-1: every sound on the timeline had its HF id as its id)
       const attr = (t, a) => new RegExp(`(?<![\\w-])${a}="([^"]*)"`).exec(t)?.[1] ?? null;
-      const clips = tags.map((t) => ({ id: attr(t, "id"), hfId: attr(t, "data-hf-id"), src: attr(t, "src"), role: attr(t, "data-timeline-role"), track: attr(t, "data-track-index") != null ? Number(attr(t, "data-track-index")) : null, start: Number(attr(t, "data-start") ?? 0),
+      const volumeLane = (t) => { try { return JSON.parse((attr(t, "data-automation") ?? "").replace(/&quot;/g, '"')).lanes?.find((l) => l.target === "volume")?.points ?? null; } catch { return null; } };
+      const clips = tags.map((t) => ({ id: attr(t, "id"), hfId: attr(t, "data-hf-id"), src: attr(t, "src"), role: attr(t, "data-timeline-role"), gains: volumeLane(t), track: attr(t, "data-track-index") != null ? Number(attr(t, "data-track-index")) : null, start: Number(attr(t, "data-start") ?? 0),
         mediaStart: attr(t, "data-media-start") != null ? Number(attr(t, "data-media-start")) : null, duration: attr(t, "data-duration") != null ? Number(attr(t, "data-duration")) : null }));
       // each sound's lane: its role, else its folder (voiceover / music / sound effects), as the Assets tab sorts them
       const laneOf = (c) => (c.role === "voiceover" ? "voice" : c.role === "music" ? "music" : c.role === "sfx" ? "sfx"
@@ -249,7 +250,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
           rate: rates[x.src] ?? 1, ...(x.planned ? { planned: true } : {}) })),
         voice: tr?.segments?.length && !p.meta?.voice?.offTimeline ? transcript.onFilm(tr.segments, voiceClips) : [],
         levels: readLanes(p.path),
-        audio: clips.map((c) => ({ id: c.id, hfId: c.hfId, src: c.src, start: c.start, duration: c.duration, lane: laneOf(c), track: c.track, name: (c.src ?? "").split("/").pop(), title: titles.get(c.src) ?? null, effect: effect(c) })),
+        audio: clips.map((c) => ({ id: c.id, hfId: c.hfId, src: c.src, start: c.start, duration: c.duration, lane: laneOf(c), gains: c.gains, track: c.track, name: (c.src ?? "").split("/").pop(), title: titles.get(c.src) ?? null, effect: effect(c) })),
         sfx: clips.filter((c) => !c.role && /\/sfx\//.test(c.src ?? "")).map((c) => ({ start: c.start, duration: c.duration, name: (c.src ?? "").split("/").pop().replace(/\.[^.]+$/, "") })),
         music: music ? { start: music.start, duration: music.duration, name: (music.src ?? "").split("/").pop(), peaks: musicPeaks } : null,
         captions,

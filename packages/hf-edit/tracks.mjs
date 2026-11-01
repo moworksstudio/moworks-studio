@@ -294,11 +294,16 @@ export function duckMusic(dir) {
     const a = attrsOf(tag);
     if (audioKind(a) !== "music") return tag;
     const had = a["data-automation"];
-    if (had != null && a["data-mw-duck"] !== sig(had)) return tag;          // a lane the user drew or changed in Studio
+    let lanes = [];
+    if (had != null) { try { lanes = JSON.parse(had.replace(/&quot;/g, '"')).lanes ?? []; } catch { return tag; } }
+    // a volume lane the user drew or changed in Studio stays theirs; a lane of something else (a carve's fx gain, T36-5) never took the music's place under the words
+    if (had != null && a["data-mw-duck"] !== sig(had) && lanes.some((l) => l.target === "volume")) return tag;
+    const others = lanes.filter((l) => l.target !== "volume");
     const duration = Number(a["data-duration"]);
     const lane = duration > 0 ? duckLane({ start: Number(a["data-start"]) || 0, duration }, spans, { duck: MUSIC_DUCK }) : null;
     delete a["data-automation"]; delete a["data-mw-duck"];
-    if (lane) { a["data-automation"] = JSON.stringify(lane).replace(/"/g, "&quot;"); a["data-mw-duck"] = sig(a["data-automation"]); n++; }
+    if (lane) n++;
+    if (lane || others.length) { a["data-automation"] = JSON.stringify({ ...(lane ?? { version: 1 }), lanes: [...(lane?.lanes ?? []), ...others] }).replace(/"/g, "&quot;"); a["data-mw-duck"] = sig(a["data-automation"]); }
     return had === a["data-automation"] ? tag : audioLine(a);
   });
   if (out !== html) writeFileSync(f, out);

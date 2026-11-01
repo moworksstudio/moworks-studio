@@ -114,6 +114,7 @@ export const bgWorkers = (free = freeGpuMb()) => (gpuShort(free) ? 1 : BG_WORKER
 export const gpuShort = (free = freeGpuMb()) => free != null && free < 8000;
 // the time a frame takes in a background render before this film has one of its own measured (ms; measured)
 const MS_PER_FRAME = { prerendered: 700, preview: 250 };
+const STILL_MS = 120000;
 const finished = (m) => { const pl = m?.pipeline ?? {}; return !!(pl.finished !== undefined ? pl.finished : pl.delivered); };
 /** The film's length in seconds, from its root's data-duration. */
 const filmSeconds = (dir) => {
@@ -136,7 +137,8 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
   };
   const url = (id, rel) => `${ctx.preview.base}/p/${id}/${rel}`;
   // the job as the app shows it (its record, not a handle): id, stage, progress, what it waits for
-  const pub = (j) => { const r = j && (ctx.jobs.get?.(j.id) ?? j); return r ? { id: r.id, kind: r.kind, status: r.status, stage: r.stage, progress: r.progress ?? null, waitingFor: r.waitingFor ?? null } : null; };
+  // still: HyperFrames has said no new percent for a while (its preparing part on a heavy film: 25% for 30 minutes, T32-5), so no time left can be promised
+  const pub = (j) => { const r = j && (ctx.jobs.get?.(j.id) ?? j); return r ? { id: r.id, kind: r.kind, status: r.status, stage: r.stage, progress: r.progress ?? null, waitingFor: r.waitingFor ?? null, ...(r.stage === "rendering" && r.movedAt != null && Date.now() - r.movedAt > STILL_MS ? { still: true } : {}) } : null; };
   const QUALITY_RANK = { draft: 0, standard: 1, high: 2 };
   /** The quality a background render is made at: a Brush film's video-only render "high", every other film the export's "standard"
    *  (the file an export reuses is the export it would have made). */
@@ -168,7 +170,7 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
     return { codeFilm, mode: pre ? "prerendered" : codeFilm ? "preview" : "film", videoOnly: pre, quality: st?.quality ?? qualityOf(p.meta?.style?.id), status,
       soundOnly: status === "stale" && picture, url: file ? url(p.id, smooth ?? file) : null, at: st?.at ?? null,
       fps: st?.fps ?? fps, duration: st?.duration ?? null, audio: st?.audio ?? false, job, hash: st?.hash ?? null,
-      etaMinutes: status === "fresh" || left == null ? null : Math.max(1, Math.round(left / 60000)),
+      etaMinutes: status === "fresh" || left == null || job?.still ? null : Math.max(1, Math.round(left / 60000)),
       // before the film is finished there is nothing to render yet: the Editor says the video comes once the film is built
       waitsFor: status === "none" && !job && !finished(p.meta) ? "film" : null,
       // a finished film with no file and nothing making one: the app closed while it was made (T32-6); said, with a button
@@ -284,7 +286,8 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
             ok = true;
             return { hash: next.hash, file: next.file, remixed: true };
           }
-          j.update({ stage: "rendering", waitingFor: null, progress: 0 });
+          j.update({ stage: "rendering", waitingFor: null, progress: 0, movedAt: Date.now() });
+          let lastPct = 0;
           const ac = new AbortController(), stop = () => ac.abort();
           j.signal.addEventListener("abort", stop, { once: true });
           let yielded = null;
@@ -292,7 +295,7 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
           const t0 = Date.now(), workers = bgWorkers(), gpu = renderSettings(root).gpu === "cpu" ? "software" : "auto";          // Settings' GPU choice, as an export
           j.update({ workers });
           const res = await render({ projectDir: p.path, outputPath: join(p.path, ...rel.split("/")), fps, format: "mp4", quality, workers, browserGpuMode: gpu }, {
-            signal: ac.signal, root, background: true, onEvent: (e) => { if (e.type === "progress" && typeof e.pct === "number") j.update({ progress: Math.round(e.pct) }); } });
+            signal: ac.signal, root, background: true, onEvent: (e) => { if (e.type === "progress" && typeof e.pct === "number" && Math.round(e.pct) !== lastPct) { lastPct = Math.round(e.pct); j.update({ progress: lastPct, movedAt: Date.now() }); } } });
           clearInterval(watch); j.signal.removeEventListener("abort", stop);
           if (res.type === "cancelled" && yielded && !j.signal.aborted && attempt < 5) continue;          // gave way: start again once it is quiet
           if (res.type !== "done") throw Object.assign(new Error(res.message ?? "The film could not be rendered"), { code: res.type === "cancelled" ? "CANCELLED" : res.code ?? "RENDER_FAILED" });

@@ -358,7 +358,7 @@ export function VideoStage({ pv }) {
   const { proxy, video, videoEvents } = pv;
   const job = proxy?.job, eta = proxy?.etaMinutes != null ? Math.max(1, Math.round(proxy.etaMinutes)) : null;
   const line = job?.stage === "waiting" ? t("Waiting for {title} to finish rendering", { title: job.waitingFor ?? "" })
-    : job ? [eta != null ? t("Rendering the preview, about {n} min left", { n: eta }) : t("Rendering the preview"), job.progress != null ? `${job.progress}%` : null].filter(Boolean).join(" · ")
+    : job ? [job.still ? t("Rendering the preview, this part can take a while") : eta != null ? t("Rendering the preview, about {n} min left", { n: eta }) : t("Rendering the preview"), job.progress != null ? `${job.progress}%` : null].filter(Boolean).join(" · ")
       : proxy?.waitsFor === "film" ? t("The preview comes once the film is built")
         : t("No preview yet: the app makes one by itself");
   return <>
@@ -366,7 +366,7 @@ export function VideoStage({ pv }) {
     {!proxy?.url && <div className="pv-wait pv-render" role="status">{job ? <Loader2 size={18} className="spin" /> : null}<span>{line}</span>
       {job?.progress != null && <span className="pv-prog" aria-hidden="true"><i style={{ transform: `scaleX(${job.progress / 100})` }} /></span>}</div>}
     {proxy?.held && <div className="pv-update old" role="status">{t("You are watching Version {n}", { n: proxy.held.n })}</div>}
-    {proxy?.url && job && <div className="pv-update" role="status"><Loader2 size={12} className="spin" />{t("Updating the preview")}{job.progress != null ? ` · ${job.progress}%` : ""}</div>}
+    {proxy?.url && job && <div className="pv-update" role="status"><Loader2 size={12} className="spin" />{job.still ? t("Updating the preview, this part can take a while") : t("Updating the preview")}{job.progress != null ? ` · ${job.progress}%` : ""}</div>}
     {proxy?.url && !job && proxy.status === "stale" && !proxy.stems && <div className="pv-update old" role="status">{t("Older version")}{proxy.update && <UpdateProxy proxy={proxy} className="btn ghost sm" label="Update" />}</div>}
   </>;
 }
