@@ -5,7 +5,7 @@
 <p align="center"><b>A desktop studio for motion films: Claude directs, Moworks Studio builds and checks every frame, you approve each step.</b></p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.8.214.3-1d3fd8" alt="version 0.8.214.3">
+  <img src="https://img.shields.io/badge/version-0.8.214.4-1d3fd8" alt="version 0.8.214.4">
   <img src="https://img.shields.io/badge/Claude-Opus_5.5_·_Sonnet_5.5-d97757" alt="Claude Opus 5.5 and Sonnet 5.5">
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-555" alt="Windows 10 | 11">
   <img src="https://img.shields.io/badge/film_styles-127_from_7_authors-0a7" alt="127 film styles from 7 authors">
@@ -341,8 +341,7 @@ The known limitations are listed in [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
 | `npm run build` | Builds the interface into `ui/dist` |
 | `npm run dev:ui` | Interface with hot reload, for interface work |
 
-The public release does not include the test suite, so `npm test` has nothing to run: `test/` keeps only the small sample film the
-HyperFrames version check renders.
+The public release does not include the test suite, so `npm test` has nothing to run.
 
 ## Documentation
 

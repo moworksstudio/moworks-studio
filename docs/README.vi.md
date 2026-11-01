@@ -5,7 +5,7 @@
 <p align="center"><b>Xưởng làm phim motion trên máy tính: Claude đạo diễn, Moworks Studio dựng và kiểm từng khung hình, bạn duyệt từng bước.</b></p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.8.214.3-1d3fd8" alt="version 0.8.214.3">
+  <img src="https://img.shields.io/badge/version-0.8.214.4-1d3fd8" alt="version 0.8.214.4">
   <img src="https://img.shields.io/badge/Claude-Opus_5.5_·_Sonnet_5.5-d97757" alt="Claude Opus 5.5 và Sonnet 5.5">
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-555" alt="Windows 10 | 11">
   <img src="https://img.shields.io/badge/film_styles-127_từ_7_tác_giả-0a7" alt="127 film style từ 7 tác giả">
@@ -342,8 +342,7 @@ Các giới hạn đã biết nằm ở [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
 | `npm run build` | Dựng giao diện vào `ui/dist` |
 | `npm run dev:ui` | Giao diện tự tải lại khi sửa, để làm phần giao diện |
 
-Bản phát hành công khai không kèm bộ test, nên `npm test` không có gì để chạy: `test/` chỉ giữ một phim mẫu nhỏ mà bước kiểm tra phiên bản
-HyperFrames dùng để render.
+Bản phát hành công khai không kèm bộ test, nên `npm test` không có gì để chạy.
 
 ## Tài liệu
 

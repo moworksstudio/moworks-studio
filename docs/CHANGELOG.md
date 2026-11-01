@@ -3,6 +3,50 @@
 One entry per version, newest first. The version is the HyperFrames version the app runs (0.8.214 runs HyperFrames 0.8.214); fixes to the
 app alone on the same engine are 0.8.214.1, 0.8.214.2…
 
+## 0.8.214.4 (2026-11-01)
+
+Still on HyperFrames 0.8.214: a first version with its sound before any Review, a level for each sound lane heard as you drag it, Undo on the timeline, and
+the Map Explainer film style.
+
+### The steps
+- **Version 1 first:** after the Motion Plan the app builds the film, places its sound and renders it. Then one question: Fix mistakes only, Fix mistakes and improve it, or No, I'm happy with it. The Review runs only if you choose it.
+- **Pipeline:** five rows: Prepare, Storyboard, Motion Plan, Production (the build, Music & Sound, Version 1), Review and checks. There is no separate Final Mix row.
+- **Time, never money, in a step's approval:** the dialogs say how long a step takes, and the estimates hold closer to the real time.
+- **Tech checks:** one closed line for each kind of finding, with all of its findings inside; a kind that stops the render opens by itself.
+
+### Sound
+- **Levels on the timeline:** Narration, SFX and Music each have a slider, with its dB shown as you drag. In the Smooth preview the picture and each lane's sound play apart, so a change is heard at once and only the export mixes again. A film shown as its render (Brush cartoon) keeps the old way.
+- **Music & Sound:** the new name of Final Mix. **Balance the sound again** puts the sliders at 0 and every level back by the app's rules. The Duck button and the loudness line are gone.
+- **The music under a voice:** 10 dB under the words, held through a pause under 2 s, rising slowly after a longer one. No part of it goes lower for one weak word. A film made for its song has no sound effects, and the song plays to its end with no fade.
+- **Undo:** Ctrl+Z brings back the last sound moved or taken off, up to 30 steps. It does not go back past a change Claude made.
+- **Timeline:** a box drawn on the sound lanes selects several clips, and Delete takes them off in one change; the music's wave follows the level it plays at; Space plays after a slider.
+- **Smooth preview:** a sound change keeps its picture: under a second instead of half a minute.
+
+### Film styles and motion
+- **Map Explainer:** a new film style by Moworks: a paper map and the real ground under one continuous camera, a red marker and paper props on top. Satellite pictures by default (EOX 2016, CC BY 4.0), a drawn ground when they cannot be had, and lakes from Natural Earth.
+- **Every film goes bolder:** in every style only what is forbidden is off limits. Each shot searches the Motion Library for the livelier move, and the Motion Plan gives the film's living details rows of their own, which you strike out at the approval.
+- **Lyrics videos:** energy and song rules in every film style, a beat map when the song comes in, Whisper's draft in the Lyrics dialog, 60 fps by default.
+- **Image sequences:** poses read at the scan, a player that never blends two pictures, and crawl, jump and product checks.
+- **Sample briefs:** every film style's sample reviewed against its rules.
+- **Subtitles:** one plain white line in one place, like YouTube's. Subtitles and supers are told apart.
+
+### Voice
+- **Kokoro** takes Fish Audio's place: a free voice on this computer through HyperFrames, optional at first run (no Vietnamese).
+- **ElevenLabs:** its own word times are used. A voice that left out a line stops and says so.
+- **Words on screen** follow the brief's script; the transcript gives the times.
+
+### Brand Kits and assets
+- **A kit's own page:** every kit opens as a visual page, can have a new version beside the old one, and kits may share a name.
+- **What a film is checked against:** crop limits, guideline motion and a numbered checklist travel with the film, and the Review passes only with every rule kept.
+- **A PDF with a password:** the scan stops and asks; the Editor's chat takes it too.
+- **Assets menu:** Add to Voice, SFX or Music track.
+
+### Fixes
+- A busy computer no longer stops a film without a word: a step that could not start is tried again, then said with a Retry, and the top bar says when the computer has been very busy.
+- A level Claude set stays set, and the Review reads the mix.
+- A step's first still has its own longer wait, so a film still loading is not taken for a hung run.
+- Smooth says when it cannot promise a time left, and a page left open across an update reads itself again instead of an error.
+
 ## 0.8.214.3 (2026-10-31)
 
 Still on HyperFrames 0.8.214: sounds you pick yourself, captions you can change on the timeline, Brand Kits that read a whole folder, and an
