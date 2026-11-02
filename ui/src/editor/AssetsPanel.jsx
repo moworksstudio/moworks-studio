@@ -71,8 +71,10 @@ export async function putOnTimeline(projectId, path, { start = null, lane = null
   const at = r.clip ? Number(r.clip["data-start"]) : r.lane === "voiceover" && !r.voice?.file ? null : start ?? 0;
   return { ...r, at };
 }
-/** The toast after it: "On the timeline at 1:05: bell.wav". */
-export const placedSay = (t, name, at) => (at == null ? t("On the timeline: {name}", { name }) : t("On the timeline at {time}: {name}", { time: clockTenths(at), name }));
+/** The toast after it: "On the timeline at 1:05: bell.wav"; cut: it stops where the film ends. */
+export const placedSay = (t, name, at, cut = false) => (at == null ? t("On the timeline: {name}", { name })
+  : cut ? t("On the timeline at {time}: {name}. It stops where the film ends.", { time: clockTenths(at), name })
+    : t("On the timeline at {time}: {name}", { time: clockTenths(at), name }));
 
 /** The server's list: { items } (pipeline v2), or the older { assets } read the same way. */
 function normalise(r) {
@@ -133,7 +135,7 @@ function Row({ a, items, projectId, fileUrl, locked, time, length, onChanged, on
   // at the playhead, on the lane the menu names
   const place = async (lane) => {
     setBusy("timeline");
-    try { const r = await putOnTimeline(projectId, a.path, { start: fitStart(time, a.duration, length), lane }); toast(placedSay(t, a.name, r.at)); onChanged(true); }
+    try { const r = await putOnTimeline(projectId, a.path, { start: fitStart(time, a.duration, length), lane }); toast(placedSay(t, a.name, r.at, r.cut)); onChanged(true); }
     catch (e) { toast(e.message, "error"); }
     finally { setBusy(null); }
   };

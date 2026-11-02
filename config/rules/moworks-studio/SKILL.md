@@ -301,7 +301,8 @@ ends with a short fade under the end card); this adds the fade:
   end card lands and holds 2-3 s), and the last shot plays it (its row marked `"ending": true`). A plan that says `author` but names no
   ending or does not play it in the last shot, or a style whose author has no ending of its own (General, HyperFrames' own styles), gets
   the house fade: the picture and the music fade together, after the set length. A picture kept lit and moving to its last frame, then
-  cut, is no author's ending (T24-12).
+  cut, is no author's ending (T24-12). **"The page holds" is an ending only if nothing changes in the last half second:** in a style whose
+  lines boil or whose camera drifts, stop them there, or fade the picture out (T37-9: a crayon page still boiling, lit to 89.98 s, read as a stop).
 - **The fade's length** (the app's one rule, `hf-edit/ending.mjs`), from the content: 12 % of it, at least 1.5 s, and 3-5 s for 30 s or
   more (10 s: 1.5 s, 20 s: 2.4 s, 30 s: 3.6 s, 60 s and longer: 5 s); after an end card half of that, at least 1 s.
 - The Motion Plan says it: its `ending` (`fade`, `endCard` or `author`, the fade's seconds, `inside`, and for `author` the ending's

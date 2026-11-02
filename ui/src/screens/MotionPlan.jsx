@@ -34,7 +34,7 @@ function LibrarySource({ card }) {
   if (!card) return <span className="chip amber">{t("Library item not found")}</span>;          // never the item's id
   return <div className="mp-src" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
     <span className="mp-src-thumb">{hover && card.video ? <video src={card.video} autoPlay muted loop playsInline /> : card.poster ? <img src={card.poster} alt="" loading="lazy" /> : <Film size={14} />}</span>
-    <span className="mp-src-t"><b>{card.title}</b></span>
+    <span className="mp-src-t" title={card.title}><b>{card.title}</b></span>
   </div>;
 }
 
@@ -126,7 +126,7 @@ export function ShotCard({ shot, motions, base, types, cardOf, projectId, onSave
               (T29-16: "#s01-…" in the Timing column; no internal ids on screen) */}
           <span className="mo-c mo-c-name"><b className="mo-target">{m.name || nameOf(m.target) || <span className="muted">{t("No target")}</span>}</b>
             {base && changed(m, i) && <span className="mo-changed" title={t("Changed by you")} aria-label={t("Changed by you")} />}</span>
-          {showNums && <span className="mo-c mo-c-tech"><span className="chip">{t(m.type)}</span><span className="muted num mo-when">{Number(m.start ?? 0)} s · {m.duration ?? "?"} s{m.ease ? ` · ${m.ease}` : ""}</span></span>}
+          {showNums && <span className="mo-c mo-c-tech"><span className="chip">{t(m.type)}</span><span className="muted num mo-when" title={m.ease || undefined}>{Number(m.start ?? 0)} s · {m.duration ?? "?"} s{m.ease ? ` · ${m.ease}` : ""}</span></span>}
           {/* what the user approves, in plain words first (Claude's `plain`), the technical notes after; one line, the
               whole of it on hover or a click */}
           {(() => { const what = m.plain || (m.source?.kind === "library" ? cardOf(m.source.id)?.desc || m.behavior : m.behavior);

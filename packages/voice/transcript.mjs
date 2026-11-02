@@ -64,7 +64,7 @@ export function fromScript(segments, script) {
   const words = [];          // { text, start, end, seg }
   pairs.forEach(([si, hi], k) => {
     if (si == null) { extra++; return; }
-    if (hi != null) { const h = heard[hi]; const eq = key(said[si]) === key(h.text); if (eq) same++; else changed++; words.push({ text: said[si], start: h.start, end: h.end, seg: h.seg, heardOther: !eq }); return; }
+    if (hi != null) { const h = heard[hi]; const eq = key(said[si]) === key(h.text); if (eq) same++; else changed++; words.push({ text: said[si], start: h.start, end: h.end, seg: h.seg, heardOther: !eq, heardAs: h.text }); return; }
     missed++;
     // missed: between the heard words around it
     const prev = [...pairs.slice(0, k)].reverse().find((p) => p[1] != null), next = pairs.slice(k + 1).find((p) => p[1] != null);
@@ -73,15 +73,17 @@ export function fromScript(segments, script) {
   });
   // a number the script spells out and Whisper hears as one ("nineteen eighty-seven" for "1987", "two hundred and twelve" for "212"): one heard word stands
   // for several, the others "missed" with no gap to sit in; all of them share that word's time by their length, in order, never before the word they follow
-  const TOUCH = 0.01;          // no time between two heard words
+  const TOUCH = 0.01, WORD_S = 0.08;          // no time between two heard words; the least Whisper gives a word inside a number (0.58 s for six words, Test 37)
+  // the same after a pause (T37-5: "Một nghìn không trăm linh bảy" opens a sentence, Whisper wrote "1007", and the app said the voice left it out): digits, heard long enough to say them all
+  const saysAll = (w, n) => !!w?.heardOther && /\p{N}/u.test(w.heardAs ?? "") && w.end - w.start >= WORD_S * n;
   for (let i = 0; i < words.length;) {
     if (!words[i].guessed) { i++; continue; }
     let j = i; while (words[j]?.guessed) j++;
-    const prev = words[i - 1], next = words[j];
-    const list = next?.heardOther && next.start - words[i].start <= TOUCH ? words.slice(i, j + 1)
-      : prev?.heardOther && next && next.start - prev.end <= TOUCH ? words.slice(i - 1, j) : null;
+    const prev = words[i - 1], next = words[j], n = j - i + 1;
+    const list = next?.heardOther && (next.start - words[i].start <= TOUCH || saysAll(next, n)) ? words.slice(i, j + 1)
+      : prev?.heardOther && ((next && next.start - prev.end <= TOUCH) || saysAll(prev, n)) ? words.slice(i - 1, j) : null;
     if (list) {
-      const from = list[0] === prev ? prev.start : words[i].start, to = list.at(-1) === next ? next.end : prev.end;
+      const from = list[0] === prev ? prev.start : next.start, to = list.at(-1) === next ? next.end : prev.end;
       const weight = list.map((w) => Math.max(1, key(w.text).length)), all = weight.reduce((x, y) => x + y, 0);
       let t = from;
       list.forEach((w, k) => { w.start = round(t); t += ((to - from) * weight[k]) / all; w.end = round(t); w.spread = true; });

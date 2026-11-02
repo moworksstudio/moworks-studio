@@ -186,6 +186,8 @@ export function audioKind(a) {
   const role = a?.role ?? a?.["data-timeline-role"] ?? null, id = String(a?.id ?? "");
   // Claude may write role "voice" (T36-2: the app then took a film with a voice for one with none, and the music played over the words); any other role with an el-voice or el-music id goes by its id
   const r = String(role ?? "").toLowerCase();
+  // a sound added beside the film's voice or music plays on that lane (fader, stems) and is neither: no words, no beats, no duck (T37-1)
+  if (/^el-(sfx|clip|amb)-/.test(id)) return null;
   if (r === ROLES.voice.role || r === "voice") return "voice";
   if (r === ROLES.music.role) return "music";
   if (r === "sfx") return null;          // a clip moved to another lane is that lane's
@@ -435,8 +437,9 @@ export function laneOfFile(rel, classify = null) {
 }
 /** Put a sound effect on the timeline at `start`: its own <audio> on its own track in the user's block, so the app's sfx block (rewritten
  *  from the storyboard's cues) never takes it away. Returns the attributes written. volume, fadeOut: its level and its fade at its end.
- *  freeLane: the first of the user's lanes free at its time, not one lane per clip (the Sounds drawer's many short sounds keep a few rows). */
-export function placeClip(dir, { src, duration, start = 0, volume = CLIP_VOLUME, fadeOut = 0, freeLane = false }) {
+ *  freeLane: the first of the user's lanes free at its time, not one lane per clip (the Sounds drawer's many short sounds keep a few rows).
+ *  role: the lane it shows on; on the voice's or the music's lane it still is a clip of its own, the film's voice and music stay as they are. */
+export function placeClip(dir, { src, duration, start = 0, volume = CLIP_VOLUME, fadeOut = 0, freeLane = false, role = "sfx" }) {
   const f = join(dir, "index.html");
   let html = readFileSync(f, "utf8");
   const used = [...html.matchAll(/\bid="el-clip-(\d+)"/g)].map((m) => Number(m[1]));
@@ -448,7 +451,7 @@ export function placeClip(dir, { src, duration, start = 0, volume = CLIP_VOLUME,
     for (track = CLIP_TRACK + 1; clash(track); track++);
   }
   const a = { id: `el-clip-${n}`, src, "data-start": String(at), "data-duration": String(r3(duration)),
-    "data-track-index": String(track), "data-volume": String(volume), ...(fadeOut > 0 ? { "data-fade-out": String(r3(fadeOut)) } : {}), "data-timeline-role": "sfx" };
+    "data-track-index": String(track), "data-volume": String(volume), ...(fadeOut > 0 ? { "data-fade-out": String(r3(fadeOut)) } : {}), "data-timeline-role": role };
   const line = `<audio ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}></audio>`;
   const block = new RegExp(`(${esc(CLIPS_BEGIN)})([\\s\\S]*?)(${esc(CLIPS_END)})`);
   if (block.test(html)) html = html.replace(block, (m0, b, inner, e) => `${b}${inner.replace(/\s*$/, "")}\n    ${line}\n    ${e}`);
@@ -458,10 +461,20 @@ export function placeClip(dir, { src, duration, start = 0, volume = CLIP_VOLUME,
     const root = /<[a-z]+\b[^>]*\bdata-composition-id="[^"]*"[^>]*>/i.exec(html);
     if (!root) throw Object.assign(new Error("index.html has no root composition"), { code: "INVALID" });
     const last = [...html.matchAll(/<audio\b[^>]*\bid="el-clip-\d+"[^>]*>(?:\s*<\/audio>)?/gi)].at(-1);
-    const pos = last ? last.index + last[0].length : root.index + root[0].length;
+    let pos = last ? last.index + last[0].length : root.index + root[0].length;
+    // HyperFrames takes the first <audio> with the music's role as the music: one added beside it comes after the film's own
+    if (role !== "sfx") { const own = html.indexOf(END); if (own >= 0) pos = Math.max(pos, own + END.length); }
     html = `${html.slice(0, pos)}\n    ${line}${html.slice(pos)}`;
   }
   writeFileSync(f, html);
   return a;
+}
+/** A sound added at `start` inside the film: one starting past the end moves back, one running past the end stops there. { start, duration, cut }. */
+export function fitToFilm(dir, start, duration) {
+  let html = ""; try { html = readFileSync(join(dir, "index.html"), "utf8"); } catch { /* no film page yet */ }
+  const film = filmOf(html, dir), s = Math.max(0, Number(start) || 0);
+  if (!(film > 0)) return { start: r3(s), duration: r3(duration), cut: false };
+  const at = s < film ? s : Math.max(0, film - duration), plays = Math.min(duration, film - at);
+  return { start: r3(at), duration: r3(plays), cut: plays < duration - 1e-3 };
 }
 

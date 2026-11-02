@@ -380,7 +380,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   // a sound dragged from the Assets tab onto a lane: there, at the drop's time, then read again as "Put on the timeline" does
   const soundDrop = async (path, to) => {
     const name = assets?.find((x) => x.path === path)?.name ?? path.split("/").pop();
-    try { const r = await putOnTimeline(id, path, to); toast(placedSay(t, name, r.at)); reloadAssets(); loadTimeline(); pv.send("reload"); }
+    try { const r = await putOnTimeline(id, path, to); toast(placedSay(t, name, r.at, r.cut)); reloadAssets(); loadTimeline(); pv.send("reload"); }
     catch (e) { toast(e.message, "error"); }
   };
   const filesChanged = (structure = false) => {

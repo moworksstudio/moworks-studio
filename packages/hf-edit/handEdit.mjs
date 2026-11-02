@@ -409,7 +409,7 @@ export async function setAudio(dir, target, { start = null, lane = null } = {}, 
   }
   if (lane != null) {
     if (!(lane in AUDIO_ROLE)) throw err("INVALID", "A lane is voice, music or sfx");
-    if (x && lane !== "sfx" && isEffectClip(x.a)) throw err("NOT_EDITABLE", "A sound effect stays on the SFX lane. To use its file as the voice or the music, drop it on that lane from Assets.");
+    if (x && lane !== "sfx" && AUDIO_ROLE[lane] !== x.a["data-timeline-role"] && isEffectClip(x.a)) throw err("NOT_EDITABLE", "A sound effect stays on the SFX lane. To add its file to the voice or the music, drop it on that lane from Assets.");
     ops.push({ type: "attribute", property: "data-timeline-role", value: AUDIO_ROLE[lane] });
   }
   if (!ops.length) return { changed: false };

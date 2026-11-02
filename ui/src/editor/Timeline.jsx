@@ -80,7 +80,7 @@ function LaneFader({ name, db, disabled, onLive, onDone }) {
   const level = `${v > 0 ? "+" : ""}${v} dB`;
   const done = (x) => { setNow(null); setHeld(null); if (x !== db) onDone(x); };
   return <>
-    <input type="range" className="tl-fader" min={-30} max={12} step={1} value={v} disabled={disabled} aria-label={t("{name} level", { name })} title={held ? undefined : `${name}: ${level} · ${t("Double-click for 0 dB")}`}
+    <input type="range" className="tl-fader" min={-30} max={12} step={1} value={v} disabled={disabled} aria-label={t("{name} level", { name })} title={held ? undefined : `${name}: ${level}`}
       onInput={(e) => { const x = Number(e.target.value); setNow(x); onLive(x); }}
       onPointerDown={(e) => { e.stopPropagation(); setHeld(e.currentTarget.getBoundingClientRect()); }} onPointerUp={(e) => { done(Number(e.target.value)); e.currentTarget.blur(); }} onPointerCancel={(e) => done(Number(e.target.value))}
       onKeyUp={(e) => { if (e.key.startsWith("Arrow")) done(Number(e.target.value)); }}

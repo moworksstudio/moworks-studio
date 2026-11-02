@@ -159,7 +159,7 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
   const send = async (file) => {
     if (!file) return;
     setUp(0);
-    try { const r = await upload(`/api/projects/${id}/voice/upload`, file, setUp); toast(t("Added {name}", { name: r.voice.name })); if (r.job) follow(r.job); if (r.needsModel) toast(r.needsModel, "error"); v.reload(); project.reload(); }
+    try { const r = await upload(`/api/projects/${id}/voice/upload`, file, setUp); toast(r.same ? t("This file is already the film's voice-over") : t("Added {name}", { name: r.voice.name })); if (r.job) follow(r.job); if (r.needsModel) toast(r.needsModel, "error"); v.reload(); project.reload(); }
     catch (e) { toast(e.message, "error"); } finally { setUp(null); }
   };
   const transcribe = async () => { try { follow(await post(`/api/projects/${id}/voice/transcribe`, { model, language: lang, hints: hints ?? "" })); v.reload(); } catch (e) { toast(e.message, "error"); } };

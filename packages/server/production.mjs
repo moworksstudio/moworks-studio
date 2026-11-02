@@ -853,6 +853,9 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       await pipeline(req, limit, createWriteStream(dest + ".part"));
       let info;
       try { info = await probe(dest + ".part", root); } catch (e) { rmSync(dest + ".part", { force: true }); throw new HttpError(400, "INVALID", e.code === "INVALID" ? e.message : "This file could not be read as audio"); }
+      // the file that is the voice already: nothing to replace, its script, words and cut stay (T37-6)
+      const cur = voiceOf(p);
+      if (cur?.file && await projects.sameBytes(join(p.path, ...cur.file.split("/")), dest + ".part")) { rmSync(dest + ".part", { force: true }); return { voice: cur, same: true }; }
       renameSync(dest + ".part", dest);
       return useVoice(p, dest, info, { source: "upload", size: n });
     }],

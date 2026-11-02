@@ -10,7 +10,7 @@ import { unlockPdf } from "../project-service/scan.mjs";
 import { readShots } from "../hf-edit/shots.mjs";
 import { fetchImagery, imageryCredit } from "../map-explainer/index.mjs";
 import { docPath } from "../project-service/docs.mjs";
-import { audioKind, laneOfFile, placeClip, placeTrack, removeRepeats, trackClips } from "../hf-edit/tracks.mjs";
+import { audioKind, fitToFilm, laneOfFile, placeClip, placeTrack, removeRepeats, trackClips } from "../hf-edit/tracks.mjs";
 import { ADDED, muteMounted, readState as readSfx, writeCredits } from "../sfx/index.mjs";
 import { placeAdded } from "../sfx/added.mjs";
 import { updatePrefs } from "../sfx/prefs.mjs";
@@ -119,8 +119,9 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
       }
       return ctx.useVoice(p, audio, await probe(audio, root), { source: "upload", size: statSync(audio).size, from });
     }),
-    // an audio file onto the timeline, on its lane: a voice-over as the voice (transcribed first when its words are not
-    // checked yet), music as the music track, a sound effect as its own clip; `start` (seconds) is where the user dropped it, else 0
+    // an audio file onto the timeline, on its lane: the first voice-over as the voice (transcribed first when its words are not
+    // checked yet), the first music as the music track, a sound effect as its own clip; on a lane the film's voice or music already holds it is a
+    // clip beside them, never in their place (T37-1, T37-3); `start` (seconds) is where the user dropped it, else 0
     r("POST", `/projects/${P}/assets/timeline`, async ([id], b) => {
       const p = mustProject(id, root); free(id);
       const rel = must(p, b.path);
@@ -129,8 +130,18 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
       const info = await probe(abs, root);
       const start = b.start != null && Number.isFinite(Number(b.start)) ? Math.max(0, Number(b.start)) : null;
       const lane = ["voiceover", "music", "sfx"].includes(b.lane) ? b.lane : laneOfFile(rel, projects.classifyAsset);
+      // inside the film: a long sound stops at its end (T37-4)
+      const clipHere = async (role, says) => {
+        const fit = fitToFilm(p.path, start ?? 0, Number(info?.duration) || 1);
+        const clip = placeClip(p.path, { src: rel, duration: fit.duration, start: fit.start, role });
+        await commit(p, `${says} on the timeline: ${rel}`);
+        return { lane, clip, ...(fit.cut ? { cut: true } : {}) };
+      };
+      let html = ""; try { html = readFileSync(join(p.path, "index.html"), "utf8"); } catch { /* no film page yet */ }
+      const taken = (kind) => trackClips(html, kind).some((c) => c.src !== rel);
       if (lane === "voiceover") {
         const v = p.meta?.voice;
+        if ((v?.file && v.file !== rel && !v.offTimeline) || (v?.file !== rel && taken("voice"))) return clipHere("voiceover", "Sound beside the voice-over");
         if (v?.file === rel && v.transcript?.status === "saved") {          // its words are checked: straight back on the timeline
           placeTrack(p.path, { kind: "voice", src: rel, duration: Number(info?.duration ?? v.info?.duration) || 1, start });
           projects.updateMeta(id, (m) => { if (m.voice) delete m.voice.offTimeline; }, root);
@@ -141,6 +152,7 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
         return { lane, voice: await ctx.useVoice(p, abs, info, { source: "upload", size: statSync(abs).size }) };
       }
       if (lane === "music") {
+        if (taken("music") && !trackClips(html, "music").some((c) => c.src === rel)) return clipHere("music", "Sound beside the music");
         const music = await ctx.placeMusic(p, rel, info, { start });
         await commit(p, `Music on the timeline: ${rel}`);
         return { lane, music };
@@ -148,9 +160,7 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
       // a sound added from the Sounds drawer and taken off comes back with its level and its credit
       const added = Object.entries(readSfx(p.path).sounds ?? {}).find(([n, s]) => n.startsWith(ADDED) && s.file === rel)?.[0];
       if (added) { const x = await placeAdded(p.path, added, { at: start ?? 0, root }); await commit(p, `Sound effect on the timeline: ${rel}`); return { lane, clip: x.tag }; }
-      const clip = placeClip(p.path, { src: rel, duration: Number(info?.duration) || 1, start: start ?? 0 });
-      await commit(p, `Sound effect on the timeline: ${rel}`);
-      return { lane, clip };
+      return clipHere("sfx", "Sound effect");
     }),
   ];
 

@@ -6,8 +6,8 @@
 // and runs nothing of Claude's until it is answered: Fix mistakes only, Fix mistakes and improve it (the Review and the checks run, Claude fixes a
 // failure once, a changed film is rendered again as a new version), or No (the film is ready to export). Version 1 stays in Versions; a new version
 // loads only when the user presses. Render: one at a time in the whole app, and a project being rendered is not edited.
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import * as projects from "../project-service/index.mjs";
 import { docPath } from "../project-service/docs.mjs";
 import { filmLength } from "../hf-edit/ending.mjs";
@@ -215,10 +215,23 @@ export function createAutopilot(ctx) {
     if (ctx.renders.isRendering(id)) throw Object.assign(new Error("The film is being rendered: wait until the render finishes"), { code: "RENDERING" });
     await saveVersion(id, "before-redo");
     const at = await rev.restoreTreeAsync(p.path, v.rev, `Opened version: ${v.name}`);
+    // the film's voice and music, the voice's words and what was approved are the app's own records, which a version's files leave as they are: without them
+    // Version 1's picture came back over another voice, with no words and no music (T37-2), its Motion Plan "changed since approval"
+    const was = await rev.fileAtAsync(p.path, v.rev, ".moworks/project.json").then((x) => JSON.parse(x)).catch(() => null);
+    let last = at;
+    if (was) {
+      for (const f of [".moworks/voice/transcript.json", ".moworks/voice/alignment.json"]) {
+        const text = await rev.fileAtAsync(p.path, v.rev, f), abs = join(p.path, ...f.split("/"));
+        if (text == null) rmSync(abs, { force: true });
+        else { mkdirSync(dirname(abs), { recursive: true }); writeFileSync(abs, text); }
+      }
+      meta(id, (m) => { for (const k of ["voice", "music", "approvals"]) { if (was[k] === undefined) delete m[k]; else m[k] = was[k]; } });
+      last = (await rev.saveAsync(p.path, `Opened version: ${v.name} (its voice and music)`)) ?? at;
+    }
     // the version's own render comes back with it (no render again for a film that may have taken an hour); the player follows the film again
     try { ctx.restoreVersionFile?.(projects.getProject(id, root) ?? p, v); } catch { /* the next render makes it */ }
     meta(id, (m) => { const x = m.pipeline?.version1; if (x) delete x.holding; });
-    return { opened: v, revision: at };
+    return { opened: v, revision: last };
   }
 
   /** Start a step's own work: a job (the checks) or a Claude task with the step's prompt (the way's own prompt for General), or with

@@ -88,6 +88,7 @@ A cap is a fault to fix in this round, not a taste. The film passes only when it
   (redrawn, recoloured, stretched, cropped, given an effect, put in a card or badge, text added around it, or breathing so much it distorts:
   moworks-studio §3); a piece of text off the film's design (moworks-studio §2); a jump at a loop or a cut; a shot that looks like its library demo; an out move that starts before its in
   move ends; anything the owner complained about earlier (in `docs/NOTES.md`).
+- **The film's end:** look at a still half a second before the end and at the last frame. A picture as full and lit on both, still changing, stops dead (moworks-studio §9; Tech checks come after you and only warn, G-END) → fade it out with the music, or finish on the author's ending with nothing changing in that half second.
 - In a film that shows how something real works: a thing that loses its support and stays up, a thing that appears or vanishes with no cause the film shows, a chain of events a stranger could not retell from the pictures, a label over a number (moworks-studio §6 point 7). Never a reason for a tamer move.
 - In a Vietnamese film: every mark of every Vietnamese word on every sheet, read letter by letter, the small texts too (status strips,
   inverted bars, labels, pills, captions): a word written without its marks, or marks cut off by a band, a mask or a line-height, breaks
