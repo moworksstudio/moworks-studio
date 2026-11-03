@@ -14,7 +14,7 @@ export const TYPING = /\btyping\b|\btyp(?:es|ed)\s+(?:out|in)\b|\btype-on\b|\bty
 
 // ---- Levels, the HyperFrames way (its skills at the pinned commit, Apache-2.0: hyperframes/references/sound.md §4-5, media-use's
 // bgm.md, tts.md and scripts/lib/duck.mjs). The voice-over is brought to about -16 LUFS (a mix of -16 to -14 LUFS for social); the music
-// sits 4 dB under it between the words and is ducked 10 dB (about -30 LUFS under a -16 voice) while they are spoken; a
+// sits 1.5 dB under it between the words and is ducked 10 dB (about -27.5 LUFS under a -16 voice) while they are spoken; a
 // film with no voice has its music at -16 LUFS. Each effect is set by its loudest 400 ms (momentary LUFS: an effect is mostly silence round
 // one hit, so its integrated loudness reads low) to HIT_OVER dB over the music between the words ("each hit sits 3-6 dB over the bed"),
 // its family a little louder or softer (LEVELS around LEVEL). Owner 30/10, after Tests 21-26: the music at a fixed 0.6 and never ducked
@@ -24,9 +24,9 @@ export const TYPING = /\btyping\b|\btyp(?:es|ed)\s+(?:out|in)\b|\btype-on\b|\bty
 // the library's files peak at about -4.5 dBFS, so without it +12 dB put single ticks at +7.5 dBFS and the stems at +8.5 dBFS (Test 28): the
 // render lowered the whole film 10 dB to keep them from clipping, and the master's limiter pulled the mix down around each one.
 export const VOICE_LUFS = -16, ALONE_LUFS = -16;          // the voice-over; the music of a film with no voice
-export const BED_UNDER = 4;             // the music between the words, dB under the voice
+export const BED_UNDER = 1.5;           // the music between the words, dB under the voice (owner 03/11 by ear on Test 37: the music 2-3 dB louder against the voice and the effects)
 export const MUSIC_DUCK = 0.316;        // the music while words are spoken, -10 dB (media-use audio-duck's default is 0.25; owner 31/10: 2 dB less, the music held under long speech was too low)
-export const HIT_OVER = 4;              // an effect's loudest moment, dB over the music between the words
+export const HIT_OVER = 1.5;            // an effect's loudest moment, dB over the music between the words (with BED_UNDER: the effects stay where they were, the music comes up)
 export const MAX_GAIN = Math.round(10 ** (12 / 20) * 100) / 100;          // +12 dB
 export const HIT_PEAK = -3;             // the loudest sample an effect's own gain may reach, dBFS (the film's whole mix: voicefit.mjs MIX_PEAK)
 export const EFFECTS_MARGIN_DB = 3, MUSIC_MARGIN_DB = 3;          // under a spoken word, how far under the voice (voicecheck.mjs, voicefit.mjs)

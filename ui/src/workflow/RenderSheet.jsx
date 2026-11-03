@@ -2,7 +2,7 @@
 // check runs first and only what would break the render stops it (script errors, missing files, remote URLs, fonts that are missing or
 // lack Vietnamese letters), with "Ask Claude to fix"; quality findings are warnings next to the result. Then HyperFrames' render worker.
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, Bot, Check, CheckCircle2, Film, FolderOpen, Hand, Loader2, Play, RefreshCw, Square, XCircle } from "lucide-react";
+import { Bot, Check, CheckCircle2, Film, FolderOpen, Hand, Loader2, Play, RefreshCw, Square, XCircle } from "lucide-react";
 import { get, post, watchJob } from "../api.js";
 import { Banner } from "../components.jsx";
 import { ago, useData, useToast } from "../lib.jsx";
@@ -39,7 +39,6 @@ export function notCheckedWhy(g, t) {
   if (g.skippedReason === "failed") return t("The check could not run this time");
   return t("This check did not run");
 }
-const checkDetail = (g, t) => (scriptTimedOut(g) ? t("No script error was found before the check stopped.") : notChecked(g) ? notCheckedWhy(g, t) : null);
 const findingText = (f) => f.message ?? f.reason ?? (f.url ? "a file it loads is missing" : f.family ? `${f.family}${f.chars ? ` (${f.chars})` : ""}` : f.composition ?? JSON.stringify(f));
 
 /** The text "Ask Claude to fix" sends: each render-breaking finding, in Claude's own terms. */
@@ -55,10 +54,6 @@ export function LoudLine({ l, master }) {
     <span className="hint num">{l.lufs} LUFS · {t("peak")} {l.truePeak} dBTP{l.target?.lufs != null ? ` · ${t("target {lufs} LUFS, peak under {peak} dBTP", { lufs: l.target.lufs, peak: l.target.peak ?? -1 })}` : ""}</span></details>;
 }
 
-// why the quick check runs before the file is written (`checksWhy`)
-const CHECKS_WHY = { changed: "The film changed since its last check, so the app checks it before writing the file.",
-  never: "The film was never checked, so the app checks it before writing the file." };
-const CHECKS_WHY_DONE = { changed: "checked first: the film had changed since its last check", never: "checked first: the film had never been checked" };
 
 /** "Used the finished render (1 min ago · on the GPU · took 32 s)": the pre-render an export reused (the server's result.reusedFrom);
  *  when it was made comes first, as a time ago ("made earlier in 1 min" read as a time). */
@@ -104,7 +99,6 @@ export function renderProgress(job, framesSince, now = Date.now()) {
   const left = framesSince && p >= 3 ? Math.round(((now - framesSince) / 1000) * (100 - p) / p) : null;
   return { pct, left };
 }
-const forText = (since, now, t) => { const s = Math.max(0, Math.round((now - Date.parse(since)) / 1000)); return s < 60 ? t("{n} s", { n: s }) : t("{m} min {n} s", { m: Math.floor(s / 60), n: s % 60 }); };
 const leftText = (s, t) => (s == null ? null : s < 60 ? t("about {n} s left", { n: Math.max(5, Math.round(s / 5) * 5) }) : t("about {n} min left", { n: Math.round(s / 60) }));
 
 export default function RenderSheet({ projectId, format: initialFormat = "mp4" }) {
@@ -141,7 +135,6 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
   // the quick check did not finish on a busy machine (T22): nothing in the film is at fault; a wait for the user, with a Retry
   const busy = job?.status === "failed" && job.error?.code === "CHECK_BUSY";
   const verdict = job?.error?.detail?.verdict;
-  const warnings = job?.warnings ?? verdict?.warnings ?? [];
   const d = ex.data.defaults;
   // the loudness setting only means something when the film has music, a voice or sound effects
   const hasSound = !mix.data || !!(mix.data.music || mix.data.voice || mix.data.sfx?.length);
@@ -174,23 +167,18 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
           : busy ? <Hand size={16} color="var(--status-pending)" /> : <XCircle size={16} color="var(--status-stop)" />}
         <h2>{running ? (job.stage === "checks" ? t("Quick check…") : t("Rendering")) : job.status === "done" ? t("Render finished") : job.status === "cancelled" ? t("Render stopped") : busy ? t("Waiting for you")
           : job.error?.code === "RENDER_BLOCKED" ? t("The render is blocked") : t("Render failed")}</h2>
-        <span className="muted end">{ago(job.endedAt ?? job.startedAt)}</span></div>
+        {running && <span className="muted end num">{leftText(renderProgress(job, framesSince.current).left, t) ?? t("working out the time left")}</span>}</div>
+      {/* the percentage under the bar, the time left in the head (owner 03/11: HyperFrames' steps and why the check runs were more than anyone reads) */}
       {running && (() => { const pr = renderProgress(job, framesSince.current);
         return <div className="progress-line big"><div style={{ flex: 1 }}><div className="bar" role="progressbar" aria-valuenow={pr.pct ?? undefined} aria-valuemin={0} aria-valuemax={100}><span style={{ transform: `scaleX(${(pr.pct ?? pr.bar) / 100})` }} /></div>
-          <span className="hint num">{[pr.pct != null ? `${pr.pct}%` : null, leftText(pr.left, t), job.stage === "checks" ? (job.checkWhat ? t("checking the film first: {what} ({done} of {n})", { what: t(job.checkWhat), done: Math.min(job.checkTotal, (job.checkDone ?? 0) + 1), n: job.checkTotal }) : t("checking the film first"))
-            + (pr.pct == null && job.checkSince ? ` · ${t("for")} ${forText(job.checkSince, Date.now(), t)}` : "") : job.stage === "gpu check" ? t("one test frame on the GPU") : null].filter(Boolean).join(" · ")}</span></div></div>; })()}
-      {/* `checksWhy`: why the checks run before the file is written */}
-      {running && job.stage === "checks" && job.checksWhy && <p className="hint">{t(CHECKS_WHY[job.checksWhy] ?? CHECKS_WHY.changed)}</p>}
-      {job.gpu && ["test-blank", "test-failed"].includes(job.gpu.reason) && <p className="hint"><AlertTriangle size={13} color="var(--status-pending)" /> {t("The GPU test frame came out wrong, so this render runs on the CPU (slower).")}</p>}
+          <span className="hint num">{pr.pct != null ? `${pr.pct}%` : null}</span></div></div>; })()}
       {job.status === "done" && job.result && <><dl className="kv"><dt>{t("File")}</dt><dd>{String(job.result.file ?? "").split(/[\\/]/).pop()}</dd><dt>{t("Size")}</dt><dd>{size(job.result.size)}</dd>
         {job.result.duration && <><dt>{t("Length")}</dt><dd className="num">{job.result.duration.toFixed(2)} s</dd></>}
         {/* a Brush film's export is the render made when the film was finished: said so, not "0 s on the CPU" */}
         {job.result.reused ? <><dt>{t("Source")}</dt><dd>{reusedLine(job.result.reusedFrom, t)}</dd>
           {/* the time the copy took, and why, when the checks ran first */}
-          {job.endedAt && job.startedAt && <><dt>{t("Took")}</dt><dd className="num">{Math.max(1, Math.round((Date.parse(job.endedAt) - Date.parse(job.startedAt)) / 1000))} s
-            {job.checksWhy ? ` · ${t(CHECKS_WHY_DONE[job.checksWhy] ?? CHECKS_WHY_DONE.changed)}` : ""}</dd></>}</>
+          {job.endedAt && job.startedAt && <><dt>{t("Took")}</dt><dd className="num">{Math.max(1, Math.round((Date.parse(job.endedAt) - Date.parse(job.startedAt)) / 1000))} s</dd></>}</>
           : <><dt>{t("Took")}</dt><dd className="num">{Math.round(job.result.wallMs / 1000)} s</dd></>}
-        {job.result.gpu && !job.result.reused && <><dt>{t("Rendered on")}</dt><dd>{job.result.gpu.mode === "auto" ? t("Automatic (2D film, no test frame)") : job.result.gpu.mode === "hardware" ? t("GPU") + (job.result.gpu.renderer ? ` · ${job.result.gpu.renderer.replace(/^ANGLE \(([^,]+), ([^(]+?) \(.*$/, "$2").trim()}` : "") : t("CPU")}</dd></>}
         {job.result.loudness && !job.result.loudness.silent && !job.result.loudness.error && <><dt>{t("Loudness")}</dt><dd><LoudLine l={job.result.loudness} master={job.settings?.master} /></dd></>}</dl>
         <div className="row"><button className="btn primary sm" onClick={() => play(job.result.file)}><Play size={14} />{t("Play")}</button>
           <button className="btn sm" onClick={() => file("reveal", job.result.file)}><FolderOpen size={14} />{t("Show in folder")}</button>
@@ -205,16 +193,13 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
       {job.status === "failed" && !verdict && !busy && <><Banner kind="error" action={<button className="btn sm" onClick={start}>{t("Retry")}</button>}>{job.error?.message}</Banner>
         <details className="diag"><summary>{t("Diagnostics")}</summary><pre className="mono">{JSON.stringify({ code: job.error?.code, detail: job.error?.detail, log: job.log?.slice(-20) }, null, 2)}</pre></details></>}
       {job.status === "cancelled" && <p className="secondary">{t("Stopped before it finished. Nothing was kept.")}</p>}
-      {/* the tech checks' own dialog, for whoever wants the detail (it is no step or button in the Editor) */}
-      {(verdict || warnings.length > 0) && <button className="clink" onClick={() => stage.open("qa")}>{t("Tech checks: details")}</button>}
-      {warnings.length > 0 && <details className="warn-list" open><summary><AlertTriangle size={13} color="var(--status-pending)" /> {warnings.length === 1 ? t("1 thing to look at · it does not stop the render") : t("{n} things to look at · they do not stop the render", { n: warnings.length })}</summary>
-        <ul className="plain">{warnings.map((g, i) => <li key={i}><b>{checkLabel(g, t)}</b> <span className="hint">{checkDetail(g, t) ?? (g.findings ?? []).slice(0, 3).map(findingText).join("; ")}</span></li>)}</ul></details>}
+      {/* warnings are not shown here (owner 03/11: the user rendered the film they watched; Review and Tech checks are where to look); a blocked render keeps its reasons */}
+      {verdict && <button className="clink" onClick={() => stage.open("qa")}>{t("Tech checks: details")}</button>}
     </section>}
 
     <section className="panel">
       <div className="panel-head"><h2>{t("Rendered files")}</h2>
-        {/* after the app restarts the render job is gone, but the last render's checks stay one click away */}
-        {!job && (ex.data.files[0]?.gates || ex.data.lastQa) && <button className="clink end" onClick={() => stage.open("qa")}>{t("Tech checks: details")}</button>}</div>
+</div>
       {ex.data.files.length === 0 ? <p className="muted">{t("Nothing rendered yet.")}</p> : <ul className="plain file-list">{ex.data.files.map((f) => (
         <li key={f.path}><Film size={14} /><span className="name">{f.name}</span><span className="muted num">{size(f.size)} · {ago(f.at)}</span>
           <button className="btn ghost sm" onClick={() => play(f.path)}><Play size={13} />{t("Play")}</button>

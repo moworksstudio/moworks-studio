@@ -39,7 +39,7 @@ Clawd. When the user asks for a character like it, make that: the project's own 
 | Motion ✋ | `docs/MOTION-PLAN.json`: per shot the acting (emotion keys, takes, turns, jumps, walks) and camera with numbers; cite the guide's principles and the kit's helpers as source `{"kind": "style", "id": "<principle or helper>"}` |
 | Build | §4 |
 | QC | the Moworks Review (moworks-qc), plus the guide's self-check workflow (contact sheets of the reads) |
-| Sound / Music & Sound | **the app's** music and sound effects; `PROJECT.bpm` matches the music the app picks |
+| Sound / Final Mix | **the app's** music and sound effects; `PROJECT.bpm` matches the music the app picks |
 
 ## 3. The characters: definitions, model sheets, approval
 

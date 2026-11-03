@@ -292,7 +292,7 @@ export function FilmDone({ n }) {
   // the film is handed over: no score here; the server's own words when it sends them
   return <li className="cdone" role="status">
     <div className="cdone-head"><Check size={16} /><b>{n.vars?.n ? t("Version {n} is ready", { n: n.vars.n }) : t("The film is ready")}</b></div>
-    <p>{/^Version/.test(n.text ?? "") ? t("Watch it, with sound.") : /^The film is ready/.test(n.text ?? "") ? t(n.text, n.vars) : t("Watch it: change the music or the sound effects in Music & Sound, and send your notes on the picture here.")}</p>
+    <p>{/^Version/.test(n.text ?? "") ? t("Watch it, with sound.") : /^The film is ready/.test(n.text ?? "") ? t(n.text, n.vars) : t("Watch it: change the music or the sound effects in Final Mix, and send your notes on the picture here.")}</p>
   </li>;
 }
 
@@ -616,7 +616,7 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
       else { setText((cur) => cur || next.text); setErr(e.message); }
     });
   }, [wait, queue.length]); // eslint-disable-line react-hooks/exhaustive-deps
-  // a question Claude waits on is shown over an open sheet too (Music & Sound once hid the web permission for 15 minutes)
+  // a question Claude waits on is shown over an open sheet too (Final Mix once hid the web permission for 15 minutes)
   const asking = tasks?.find((x) => x.status === "running" && x.permission);
   useEffect(() => { onWaiting?.(asking ? { taskId: asking.id, q: asking.permission } : null); }, [asking?.id, asking?.permission?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const stop = async () => { try { await post(`/api/tasks/${running}/cancel`); toast(t("Stopping Claude…")); } catch (e) { toast(e.message, "error"); } };

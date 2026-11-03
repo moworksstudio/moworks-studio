@@ -58,7 +58,7 @@ function fitMusic(a, film, { endCard = false, inside = false, fade = null, songF
   a["data-mw-fit"] = `${a["data-duration"]} ${a["data-fade-out"]}`;
   return [];
 }
-/** The music cut at `t` s of the film (a stop: What If's twist, Music & Sound's "Stop the music at"): the first clip (`a`, changed in place)
+/** The music cut at `t` s of the film (a stop: What If's twist, Final Mix's "Stop the music at"): the first clip (`a`, changed in place)
  *  to that second with no fade, or, for a song that ends sooner, the song played again up to it (musicLoop), the last clip cut. Returns the
  *  attributes of the clips that play it again ([] when none). */
 function cutMusic(a, t, beats = null) {
@@ -84,7 +84,7 @@ function cutMusic(a, t, beats = null) {
 // across the crossfade; with no beats it is the song's tail, crossfaded plainly.
 /** The crossfade between a song and its repeat, s. */
 export const MUSIC_XF = 1.5;
-/** A song under this share of the film is said to the owner (Music & Sound, the chat), who may pick a longer one. */
+/** A song under this share of the film is said to the owner (Final Mix, the chat), who may pick a longer one. */
 export const MUSIC_SHORT = 0.6;
 const MUSIC_TAIL = 8, MIN_LOOP = 3, MAX_LOOPS = 64, LOOP_TRACK = 15, LOOP_ID = "el-music-loop-";
 

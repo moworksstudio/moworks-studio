@@ -34,7 +34,7 @@ staged. **Moworks Studio runs every command** (stills, checks, render): where th
 | Motion ✋ | motion grammar, camera | `docs/MOTION-PLAN.json`: per shot the moves with numbers; cite the medium's motion grammar and the author's camera / motion references as source `{"kind": "style", "id": "<reference or move>"}` |
 | Build | build end to end | §3 |
 | QC | review (a fresh critic, a fix ledger) | the Moworks Review (moworks-qc), plus the author's `references/workflows/review.md` |
-| Sound / Music & Sound | the score in code | **the app's** music and sound effects only (no `music.mjs`, no sound pack); pick by the medium's mood |
+| Sound / Final Mix | the score in code | **the app's** music and sound effects only (no `music.mjs`, no sound pack); pick by the medium's mood |
 
 ## 3. The film: the author's film module, bundled and driven by HyperFrames
 

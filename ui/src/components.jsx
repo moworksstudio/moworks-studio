@@ -63,8 +63,8 @@ export function Menu({ trigger, items, label }) {
 }
 
 // A card counts the Pipeline's five stages, as the Editor's Pipeline column does ("2/5"), never the old six
-// or a style's own steps; a card with no saved count maps the old stage onto them (review is part of Build and review, export is Music & Sound)
-const FIVE = [["Prepare", ["brief"]], ["Storyboard", ["storyboard"]], ["Motion Plan", ["motionPlan"]], ["Build and review", ["build", "review"]], ["Music & Sound", ["export"]]];
+// or a style's own steps; a card with no saved count maps the old stage onto them (review is part of Build and review, export is Final Mix)
+const FIVE = [["Prepare", ["brief"]], ["Storyboard", ["storyboard"]], ["Motion Plan", ["motionPlan"]], ["Build and review", ["build", "review"]], ["Final Mix", ["export"]]];
 const STAGES = Object.keys(STAGE_NAMES);
 /** A film's stage as a gauge (drawn as a dive profile of nodes), with the stage name. */
 export function Gauge({ stage, done = false, label = true, progress = null }) {

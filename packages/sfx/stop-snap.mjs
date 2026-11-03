@@ -1,5 +1,5 @@
 // Example: the Motion Plan stopped the music at 31.5 s, inside the spoken "Hôm" (31.44-32.22 s); the Review said it would listen again in
-// Music & Sound, and no step did. A music stop the app or Claude sets lands in a pause of the voice-over: a gap between two words, else
+// Final Mix, and no step did. A music stop the app or Claude sets lands in a pause of the voice-over: a gap between two words, else
 // (Whisper's words often touch, as there) just before the word after a sentence or clause ends; on a music beat in that pause when one is.
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";

@@ -216,7 +216,7 @@ Only when the film has a voice-over with its reviewed transcript (transcript.jso
 - **Effects line up by their attack:** the app places each one so the moment it starts sounding, not the file's start, lands on its cue.
 - **The music plays to the film's end and fades out there** (the app sets the fade on the music track: the ending's fade, §9). Stop it early
   only when the owner or the brief asks for it: call the app's `music_stop` tool with that second (in a pause of the voice), or the
-  owner sets it in Music & Sound ("Stop the music at"). A film kind or a style may have its own rule for this (What If: its own
+  owner sets it in Final Mix ("Stop the music at"). A film kind or a style may have its own rule for this (What If: its own
   `SKILL.md`); never stop the music at a twist on your own.
 - **The voice stays on top:** the app's voice check lists every spoken word where the effects or the music come within 3 dB of the voice
   (a warning, never a block); fix each by moving the effect into the pause after the word or lowering it. The whole mix stays at -16 LUFS.
@@ -245,7 +245,7 @@ mood"):
   `- sfx: pop, door open@1.2, footstep wood@2`) and its place in `- ambience:` (`- ambience: rain`, `city street`, `room tone`, `forest
   night`; `none` for a shot with no place). Under a voice-over §7 holds: an effect goes just after the word, never on it.
 - **Motion Plan:** every motion row carries `"sound"`: a short name for what the row does on screen, or `"none"`.
-- **The app does the rest at Music & Sound:** it gives every action the names leave out a sound of its own, varies the repeats, keeps the mix
+- **The app does the rest at Final Mix:** it gives every action the names leave out a sound of its own, varies the repeats, keeps the mix
   lively and never cluttered (about three sounds a second at most, never two of one kind closer than 0.2 s), sets each kind of sound under
   the music and the voice, crossfades the ambience between places and fades it out with the film's ending (§9). Tech checks warn (G-SFX)
   where a visible motion of the plan has no sound.

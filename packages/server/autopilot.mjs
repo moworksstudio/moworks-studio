@@ -235,7 +235,7 @@ export function createAutopilot(ctx) {
   }
 
   /** Start a step's own work: a job (the checks) or a Claude task with the step's prompt (the way's own prompt for General), or with
-   *  the user's own words (`text`), a dialog's step too (Music & Sound's music request). */
+   *  the user's own words (`text`), a dialog's step too (Final Mix's music request). */
   async function startStep(id, s, { text = null, kickoff = false, fromAuto = false } = {}) {
     // a step the user starts (the pipeline's Run, Continue) is counted afresh by the autopilot's repeat limit
     // and the user's go is kept: what the autopilot may go on with after a restart, even if the step was refused just now
@@ -277,7 +277,7 @@ export function createAutopilot(ctx) {
       }
       if (p.meta?.pipeline?.gateFix) meta(id, (m) => { delete m.pipeline.gateFix; });
     }
-    // a step that opens in a dialog runs Claude only with the user's own words: Music & Sound's "Ask Claude for 3 new tracks" sent its
+    // a step that opens in a dialog runs Claude only with the user's own words: Final Mix's "Ask Claude for 3 new tracks" sent its
     // request and nothing started, the answer null while the dialog said Claude was looking (T25-2)
     if (s.action?.kind !== "claude" && !text) return null;
     // a step that comes back after the film was delivered: the film as it is is kept as a version first
@@ -483,7 +483,7 @@ export function createAutopilot(ctx) {
       if (p.meta?.pipeline?.version1?.stoppedAt) return null;
       s = pipe.nextAuto(state);
       if (!s) { voiceCard(p, state); inFlight.delete(id); await closeReview(id); return null; }
-      // once the film is done the checks are not run again by themselves (a change in Music & Sound or the chat): the render runs its own
+      // once the film is done the checks are not run again by themselves (a change in Final Mix or the chat): the render runs its own
       // quick check; a new build clears `finished` and the stage runs to the end again; a Review the user asked for brings its own checks
       if (s.id === "checks" && isFinished(p.meta) && !pipe.reviewPending(p.meta?.pipeline?.version1)) return null;
       // the motion is rewritten once per new storyboard approval (if Claude changed nothing, the user sees it as it is)
@@ -534,7 +534,7 @@ export function createAutopilot(ctx) {
   }
 
   /** A change that moved the film's shots: the sound effects follow them (ctx.mix.timesAgain: nothing when no shot moved, the user's hand moves kept). */
-  async function soundsAgain(p) { try { await ctx.mix?.timesAgain?.(p); } catch { /* Music & Sound's Place them again */ } }
+  async function soundsAgain(p) { try { await ctx.mix?.timesAgain?.(p); } catch { /* Final Mix's Place them again */ } }
 
   /** The music step's task ended: the first of Claude's three tracks goes on the timeline (unless the film has the user's track), the
    *  app places the sound effects; the checks come next (advance). */
@@ -658,7 +658,7 @@ export function createAutopilot(ctx) {
       if (task.continues === "qcReview" && !pipe.asksOwner(task.resultText)) { meta(id, (m) => { (m.pipeline ??= {}).reviewed = { at: now(), taskId: task.id }; }); await soundsAgain(p); }
       // Claude changed a frame's `- sfx:` cues in the chat: the sounds are placed again now, as its rules promise ("after your turn the
       // app finds each sound"), before the version, the preview and the checks take the film (Test 20 waited for "Place them again")
-      if (storyboardChanged(task.changed)) { try { await ctx.mix?.cuesAgain?.(p); } catch { /* Music & Sound's Place them again */ } }
+      if (storyboardChanged(task.changed)) { try { await ctx.mix?.cuesAgain?.(p); } catch { /* Final Mix's Place them again */ } }
       if (p.meta?.pipeline?.delivered && task.changed?.length) await saveVersion(id, "edit");
       // a finished code film changed by the chat: its preview is made again, once, now (never on open)
       if (isFinished(p.meta) && task.changed?.length) { try { ctx.previewProxy?.(id); } catch { /* next change */ } }

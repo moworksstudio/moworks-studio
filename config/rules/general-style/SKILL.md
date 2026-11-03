@@ -38,7 +38,7 @@ Three places where this layer overrides HyperFrames' work loop:
 | Motion Plan | One row per move, numbers not adjectives, a source per row, the always-alive rows of `moworks-alive`, each shot's plain words; only `docs/MOTION-PLAN.json`, no composition; stop for approval | `references/motion-spec.md`, `references/motion-craft.md`; ideas: `references/recipes.md` |
 | Build | Pose and dress the approved board's layouts (`boards/<option>/`, never redrawn) with the approved motion, every hold alive | `hyperframes/SKILL.md` (the contract), its `format.md`, `runtimes.md` and `motion.md`, `references/motion-craft.md` |
 | QC | Follow `moworks-qc` | `.moworks/rules/moworks-qc/SKILL.md` |
-| Music & Sound | Music and sound effects only when the owner asks, after the picture is locked | `references/sound.md` |
+| Final Mix | Music and sound effects only when the owner asks, after the picture is locked | `references/sound.md` |
 
 The way of working decides some steps (`references/inputs.md`): **free design** (text, an idea, a song) · **keep design** (finished
 artwork: no storyboard, a rebuild check instead; the motion is yours) · **re-layout** (the artwork re-laid out for this format) · **style

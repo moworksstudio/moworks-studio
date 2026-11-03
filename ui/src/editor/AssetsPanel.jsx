@@ -31,6 +31,13 @@ const audioFolder = (a) => AUDIO_FOLDERS.find(([k]) => new RegExp(`(^|/)${k}(/|$
 const GROUP_OF = { images: "image", footage: "footage", design: "design", fonts: "font", voiceover: "audio", sfx: "audio", music: "audio", other: "other" };
 const groupOf = (a) => (a.status === "missing" ? "missing" : GROUP_OF[a.group] ?? (a.kind === "sequence" ? "footage" : a.kind in ICON && a.kind !== "other" ? a.kind : "other"));
 const kidOf = (a) => (["voiceover", "sfx", "music"].includes(a.group) ? a.group : audioFolder(a));
+/** One folder, one lane (owner 03/11): a sound goes on its own folder's lane only; on another one it is moved there first, so the folder
+ *  and the lane always say the same. A drop's lane ("voiceover" | "sfx" | "music") against the file: null, or why not. */
+export function laneRefusal(a, lane, t) {
+  const folder = a?.kind === "audio" ? kidOf(a) : null;
+  if (!folder || !lane || lane === folder) return null;
+  return t("Move it to {where} first", { where: t(AUDIO_FOLDERS.find(([k]) => k === lane)?.[1] ?? lane) });
+}
 // No file names on screen: a font family's files are one row with the family's name ("Be Vietnam Pro · 18 styles"),
 // as the server already does for the app's own fonts (`app`); "BeVietnamPro-BoldItalic.ttf" → "Be Vietnam Pro"
 /** The shots a file is in, sorted, runs of three or more joined: [{ from, to }] that reads "3–9, 12" (Test 30: "In shot 6,2,8,9,5,3,12,7…"). */
@@ -147,8 +154,12 @@ function Row({ a, items, projectId, fileUrl, locked, time, length, onChanged, on
   const folder = kidOf(a);
   const showIt = { label: t("Show in Explorer"), icon: <FolderOpen size={14} />, onSelect: reveal };
   const menu = [
-    ...(a.kind === "audio" ? AUDIO_KIDS.filter(([k]) => !(a.onTimeline && k === folder)).map(([k, l]) => ({ label: t("Add to {track} track", { track: t(l) }), icon: <Clapperboard size={14} />, onSelect: () => place(k) })) : []),
-    sound && { label: a.transcript === "saved" || a.transcript === "review" ? t("Open the words") : t("Transcribe"), icon: <AudioLines size={14} />,
+    // one folder, one lane (owner 03/11): a sound goes on its own folder's lane; the film's voice or music already on it says so instead
+    // (a sound effect can be used again); a file in no sound folder (an older project) offers the three lanes
+    ...(a.kind !== "audio" ? [] : !folder ? AUDIO_KIDS.map(([k, l]) => ({ label: t("Add to {track} track", { track: t(l) }), icon: <Clapperboard size={14} />, onSelect: () => place(k) }))
+      : folder !== "sfx" && a.onTimeline ? [{ label: t("On the {track} track", { track: t(AUDIO_KIDS.find(([k]) => k === folder)[1]) }), icon: <Clapperboard size={14} />, disabled: true }]
+        : [{ label: t("Add to {track} track", { track: t(AUDIO_KIDS.find(([k]) => k === folder)[1]) }), icon: <Clapperboard size={14} />, onSelect: () => place(folder) }]),
+    sound && (a.kind === "footage" || folder === "voiceover" || a.transcript === "saved" || a.transcript === "review") && { label: a.transcript === "saved" || a.transcript === "review" ? t("Open the words") : t("Transcribe"), icon: <AudioLines size={14} />,
       onSelect: async () => { if (a.transcript !== "saved" && a.transcript !== "review") { if (!(await call("transcribe", {}))) return; } onTranscript(a.path); } },
     ...(a.kind === "audio" && !a.app ? AUDIO_FOLDERS.filter(([k]) => k !== folder).map(([k, l]) => ({ label: t("Move to: {where}", { where: t(l) }), onSelect: () => call("move", { folder: k }, t("Moved to {where}", { where: t(l) })) })) : []),
     showIt,

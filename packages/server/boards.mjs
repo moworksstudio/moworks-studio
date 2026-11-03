@@ -1,6 +1,6 @@
 // Storyboard boards and the Review in the app: the Storyboard dialog's rounds (stills, history, the user's pick,
 // the PDF), and the two app tools Claude calls through the MCP channel: board_stills (stills of the boards it wrote) and qc_sheets (one Review
-// round: sheets + HyperFrames' full check, with a fresh-eyes look on the first round of a task), and Music & Sound: music
+// round: sheets + HyperFrames' full check, with a fresh-eyes look on the first round of a task), and Final Mix: music
 // options from Mixkit, sound effects placed by the app, the music ducked under the voice with HyperFrames' carve.
 import { LANES, applyLanes, setLane } from "../sfx/lanes.mjs";
 import { balanceAgain } from "../sfx/mixlevels.mjs";
@@ -256,13 +256,13 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
   /** The sound stays as it is while Claude checks the film, or the app would place it under Claude's changes (owner 31/10, #694-#698). */
   const mixOpen = (id) => {
     if (pipe.reviewPending(projects.getProject(id, root)?.meta?.pipeline?.version1) && (ctx.agent.running.has(id) || ctx.jobs.list({ projectId: id }).some((j) => j.status === "running" && j.kind === "qa")))
-      throw new HttpError(409, "MIX_SHUT", "Claude is checking your film. Music & Sound opens again when it finishes.");
+      throw new HttpError(409, "MIX_SHUT", "Claude is checking your film. Final Mix opens again when it finishes.");
   };
-  // a Music & Sound change: the work before it is committed on its own, the change as a sound-only revision (the picture's checks hold)
+  // a Final Mix change: the work before it is committed on its own, the change as a sound-only revision (the picture's checks hold)
   // undo: what Ctrl+Z on the timeline says for this change ({ kind, name, n }): a sound moved or taken off goes on the film's list of what can be undone
   const mixChange = async (p, what, fn, { preview = true, undo = null } = {}) => {
     let before = null, after = null;
-    try { before = await rev.saveAsync(p.path, "Changes before Music & Sound"); } catch { /* revisions optional */ }
+    try { before = await rev.saveAsync(p.path, "Changes before Final Mix"); } catch { /* revisions optional */ }
     const out = await fn();
     applyLanes(p.path);          // sounds placed by this change join the lane whose fader moved
     try { after = await rev.commitAllAsync(p.path, `${rev.SOUND_MIX}: ${what}`); } catch { /* revisions optional */ }
@@ -285,9 +285,9 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, JSON.stringify(list));
     return list;
   }
-  const soundOnly = (message) => message.includes(rev.SOUND_MIX) || message === rev.STUDIO_IDS || message === "Changes before Music & Sound";
+  const soundOnly = (message) => message.includes(rev.SOUND_MIX) || message === rev.STUDIO_IDS || message === "Changes before Final Mix";
   const undoSound = async (p) => {
-    try { await rev.saveAsync(p.path, "Changes before Music & Sound"); } catch { /* revisions optional */ }
+    try { await rev.saveAsync(p.path, "Changes before Final Mix"); } catch { /* revisions optional */ }
     const list = undoList(p), last = list.at(-1);
     if (!last) return { undone: false };
     const log = await rev.logAsync(p.path, 200), at = log.findIndex((c) => c.rev === last.rev);
@@ -315,7 +315,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     }
     catch (e) { throw new HttpError(400, e.code ?? "INVALID", e.message); }
   }); };
-  /** A music option onto the timeline (Music & Sound's "Use this", and the autopilot's pick of the first track). */
+  /** A music option onto the timeline (Final Mix's "Use this", and the autopilot's pick of the first track). */
   const useOption = (p, track) => mixChange(p, `music "${track.title}"`, async () => {
     // the chosen track is copied to assets/3_audio/music/ (kept in the history like the user's files; the options are not)
     const rel = `assets/3_audio/music/${basename(track.file)}`;
@@ -328,7 +328,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     projects.updateMeta(p.id, (m) => { m.music = { ...m.music, title: track.title, artist: track.artist, page: track.page, licence: track.licence, option: track.file }; }, root);
     return placed;
   });
-  /** Sound effects placed by the app from the storyboard's cues and the motion plan (Music & Sound's "Place", and the autopilot). The
+  /** Sound effects placed by the app from the storyboard's cues and the motion plan (Final Mix's "Place", and the autopilot). The
    *  chat's line names the sounds left out or on a stand-in (placedNote: a warning, which the chat shows). */
   const placeSfx = (p, signal = null) => mixChange(p, "sound effects", async () => {
     const { shots, root: comp } = await readShots(p.path);          // a one-page code film: the storyboard's planned times
@@ -368,11 +368,11 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     return job.status === "done" ? job.result : null;
   };
   /** The plan's musicStop, once the music is on the timeline (the app once put the music on after Claude's music step and it played
-   *  all 40 s past the plan's stop at 26.5 s, so Claude told the user to set it in Music & Sound), unless a stop
+   *  all 40 s past the plan's stop at 26.5 s, so Claude told the user to set it in Final Mix), unless a stop
    *  is set already or someone chose "play to the end". Its second, or null. */
   /** A music cut at the twist is What If's own rule: the plan's musicStop counts only in a What If film (the film kind, or
    *  the What If animation style) or when the plan quotes the brief's or the user's words asking for it; otherwise the music plays to the
-   *  end, with its fade out. Music & Sound's "Stop the music at" and Claude's music_stop tool are not gated. */
+   *  end, with its fade out. Final Mix's "Stop the music at" and Claude's music_stop tool are not gated. */
   const planStopAllowed = (p, mp) => filmKind(p.path)?.id === "whatIf" || p.meta?.style?.id === "what-if" || !!mp.musicStopAsked;
   const stopFromPlan = async (p) => {
     const now0 = projects.getProject(p.id, root);
@@ -405,20 +405,20 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     },
     music_options: async ({ task, project, args }) => {
       const round = await saveOptions(project.path, Array.isArray(args.tracks) ? args.tracks : [], { signal: ctx.stopping.signal, root });
-      // the music step's end places them (autopilot afterSound); a chat turn's tracks only wait in Music & Sound
+      // the music step's end places them (autopilot afterSound); a chat turn's tracks only wait in Final Mix
       const step = task?.step === "sound", now0 = projects.getProject(project.id, root);
       // tracks found before the build, for a film
       // with no music yet, put track 1 on the timeline now (the user plays it on the Editor's MUSIC lane and the Music map; the beat map
-      // and the lyrics need it); the others wait in Music & Sound
+      // and the lyrics need it); the others wait in Final Mix
       const noMusic = !now0 || !musicOnFilm(now0.path, now0.meta);
       const early = !step && round.tracks.length && noMusic && !(now0?.meta?.pipeline?.ran?.build || now0?.meta?.pipeline?.finished || now0?.meta?.pipeline?.delivered);
       let placedNow = false;
       let stopAt = null;
-      if (early) { try { await ctx.mix.useOption(now0, round.tracks[0]); placedNow = true; stopAt = await stopFromPlan(now0); } catch { /* they wait in Music & Sound */ } }
+      if (early) { try { await ctx.mix.useOption(now0, round.tracks[0]); placedNow = true; stopAt = await stopFromPlan(now0); } catch { /* they wait in Final Mix */ } }
       else if (step && noMusic) stopAt = planStop(now0);
       if (round.tracks.length) projects.addNote(project.path, placedNow
-        ? { kind: "music", text: "\"{title}\" is the film's music now, on the timeline; the other track(s) wait in Music & Sound", vars: { title: round.tracks[0].title } }
-        : { kind: "music", text: "{n} music track(s) to listen to in Music & Sound", vars: { n: round.tracks.length } });
+        ? { kind: "music", text: "\"{title}\" is the film's music now, on the timeline; the other track(s) wait in Final Mix", vars: { title: round.tracks[0].title } }
+        : { kind: "music", text: "{n} music track(s) to listen to in Final Mix", vars: { n: round.tracks.length } });
       return optionsText(round, { placeMusic: step && noMusic, placeSfx: step, placedNow, stopAt });
     },
     hf_script: async ({ task, project, args }) => {
@@ -478,19 +478,19 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       if (patch.on?.length && isSongFilm(null, { dir: project.path, root })) patch.songSounds = true;
       if (!Object.keys(patch).length) return `Nothing changed. The film's sound choices: ${prefsText(readPrefs(project.path))}.`;
       const prefs = updatePrefs(project.path, patch);
-      if (!readState(project.path).placedAt) return `Saved: ${prefsText(prefs)}. The app follows them when it places the sound effects (Music & Sound).`;
+      if (!readState(project.path).placedAt) return `Saved: ${prefsText(prefs)}. The app follows them when it places the sound effects (Final Mix).`;
       let end;
       const ended = new Promise((r) => { end = r; });
       try { ctx.jobs.start("mix-sfx", { projectId: project.id, title: "Sound effects", onEnd: (j) => end(j) }, async (job) => { job.update({ stage: "placing sound effects" }); return placeSfx(project, job.signal); }); }
-      catch (e) { if (e.code === "BUSY") return `Saved: ${prefsText(prefs)}. The sounds are being placed right now: tell the owner to press Place them again in Music & Sound once it ends.`; throw e; }
+      catch (e) { if (e.code === "BUSY") return `Saved: ${prefsText(prefs)}. The sounds are being placed right now: tell the owner to press Place them again in Final Mix once it ends.`; throw e; }
       const job = await ended;
-      if (job.status !== "done") return `Saved: ${prefsText(prefs)}, but placing the sounds again did not finish (${job.error?.message ?? job.status}): tell the owner to press Place them again in Music & Sound.`;
+      if (job.status !== "done") return `Saved: ${prefsText(prefs)}, but placing the sounds again did not finish (${job.error?.message ?? job.status}): tell the owner to press Place them again in Final Mix.`;
       const n = placedNote(job.result);
       return `Saved: ${prefsText(prefs)}. The sounds are placed again with them. ${n.text.replace(/\{(\w+)\}/g, (m, k) => n.vars?.[k] ?? m)}`;
     },
     // the twist: Claude stops the music at the second the story turns
     music_stop: async ({ project, args = {} }) => {
-      if (!project.meta?.music?.file) return "No music is on the timeline yet: the app places it in Music & Sound; stop it there afterwards.";
+      if (!project.meta?.music?.file) return "No music is on the timeline yet: the app places it in Final Mix; stop it there afterwards.";
       const at = args.at == null || args.at === "" ? null : Number(args.at);
       const r0 = await musicStop(project, at, { snap: true });
       return at == null ? "The music plays to its end again." : `The music now stops at ${r0.at} s (it starts at ${r0.start} s)${r0.asked != null ? `: ${r0.asked} s fell on the spoken "${r0.word}", so the app moved the stop into the pause${r0.after ? ` after "${r0.after}"` : ""}` : ""}.`;
@@ -597,7 +597,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       return { mode: card?.mode ?? null, rounds: card?.rounds ?? [], text: existsSync(f) ? readFileSync(f, "utf8") : "", at: existsSync(f) ? statSync(f).mtime.toISOString() : null, last, brand: pipe.brandCheck(p.path),
         sheetUrls: last?.sheets ? Object.fromEntries(Object.entries(last.sheets).map(([k, v]) => [k, url(id, v)])) : {} };
     }),
-    // Music & Sound dialog
+    // Final Mix dialog
     r("GET", `/projects/${P}/mix`, ([id]) => {
       const p = mustProject(id, root), m = p.meta ?? {};
       const rounds = readOptions(p.path).rounds;
@@ -641,7 +641,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
         return placeSfx(p, job.signal);
       }) };
     }),
-    // the owner's sound choices from Music & Sound: one sound taken out (skip: its id), all of them back (unskip: true), the density, the
+    // the owner's sound choices from Final Mix: one sound taken out (skip: its id), all of them back (unskip: true), the density, the
     // ambience on or off; kept in .moworks/sfx-prefs.json, and the sounds placed again at once with them
     r("POST", `/projects/${P}/mix/sfx/prefs`, ([id], b) => {
       mixOpen(id);

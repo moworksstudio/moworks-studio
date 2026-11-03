@@ -441,13 +441,13 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     if (beatMapTrack(p.path) !== (inFilm ?? songs[0])) await writeBeatMap(p.path, inFilm ?? songs[0], { root, fps: projects.projectFps(p) }).catch(() => false);
   };
   /** A song far shorter than the film plays again after itself to the film's end (tracks.mjs musicLoop, T22-9): said once in the chat, its
-   *  Music & Sound button there to pick a longer one (Music & Sound says it too). */
+   *  Final Mix button there to pick a longer one (Final Mix says it too). */
   const repeatNote = (p) => {
     const r = musicRepeats(p.path);
     const cur = projects.getProject(p.id, root)?.meta?.music;
     if (!r?.short || !cur || cur.repeatNoted === r.from) return;
     meta(p.id, (m) => { if (m.music) m.music.repeatNoted = r.from; });
-    note(p, { kind: "music", status: "warning", open: "mix", text: "The song is shorter than the film; it repeats from {at}. Pick a longer track in Music & Sound if you hear the repeat.", vars: { at: r.at } });
+    note(p, { kind: "music", status: "warning", open: "mix", text: "The song is shorter than the film; it repeats from {at}. Pick a longer track in Final Mix if you hear the repeat.", vars: { at: r.at } });
   };
 
   // ---- Render (top bar): a quick check first (render-breaking issues only), then the HF render worker

@@ -925,10 +925,11 @@ ol.plain.conversation, .conversation { padding: var(--sp-3); gap: 0.875rem; }
 .tl-row.music, .tl-label.music { margin-bottom: 0.75rem; }
 /* the edit card's Google font search: a small field over the font list */
 .pe-field .pe-font-find { height: 1.75rem; font-size: var(--fs-meta); }
-/* the Pipeline column underlines nothing at rest. The links (Brief, Assets, Voice-over…) carry the link
-   colour; a stage's status line that opens its sheet reads as plain text and shows its underline only under the pointer or keyboard focus */
+/* the Pipeline column underlines nothing at rest. The links (Brief, Assets, Voice-over…) and a stage's line that opens its sheet carry the
+   link colour, apart from the stage's title (owner 03/11); the underline only under the pointer or keyboard focus */
 :root:not([data-theme="studio"]) .pl-links .clink:not(:disabled) { text-decoration: none; color: var(--link); }
 :root:not([data-theme="studio"]) .pl-line.pl-go { text-decoration: none; }
+:root:not([data-theme="studio"]) .pl-stage:not(.waiting):not(.redo):not(.running) .pl-line.pl-go { color: var(--link); }
 @media (hover: hover) and (pointer: fine) {
   :root:not([data-theme="studio"]) .pl-links .clink:not(:disabled):hover, :root:not([data-theme="studio"]) .pl-line.pl-go:hover { text-decoration: underline; text-decoration-color: currentColor; text-underline-offset: 2px; }
 }
@@ -957,7 +958,7 @@ ol.plain.conversation, .conversation { padding: var(--sp-3); gap: 0.875rem; }
 .pl-subs:not(.more) { flex-wrap: nowrap; white-space: nowrap; overflow: hidden; gap: 0.5rem; }
 .pl-subs .pl-sub { display: inline-flex; align-items: center; gap: 0.25rem; flex: none; }
 .pl-subs span.pl-sub { font-size: var(--fs-dense); color: var(--text-secondary); }
-:root:not([data-theme="studio"]) .pl-subs .clink.pl-sub:not(:disabled):not(.running) { color: var(--text-secondary); }
+:root:not([data-theme="studio"]) .pl-subs .clink.pl-sub:not(:disabled):not(.running) { color: var(--link); }
 .pl-subs .pl-sub.running, :root:not([data-theme="studio"]) .pl-subs .clink.pl-sub.running:not(:disabled) { color: var(--state-run); font-weight: var(--strong-weight); }
 .pl-subs .pl-sub.running > svg { color: var(--state-run); }
 .pl-subs .pl-sub b { font-weight: var(--strong-weight); }

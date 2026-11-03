@@ -18,7 +18,7 @@ export function useStage(projectId) {
 }
 
 export const SHEET_TITLES = { storyboard: "Storyboard", "motion-plan": "Motion Plan", voice: "Voice-over & transcript", qa: "Tech checks", ae: "Export to After Effects", render: "Render",
-  brief: "Brief", doc: "Document", assets: "Import assets", analysis: "Assets analysis", "qc-review": "Review", mix: "Music & Sound", lyrics: "Lyrics", "music-map": "Music map", character: "Characters" };
+  brief: "Brief", doc: "Document", assets: "Import assets", analysis: "Assets analysis", "qc-review": "Review", mix: "Final Mix", lyrics: "Lyrics", "music-map": "Music map", character: "Characters" };
 
 const GuardCtx = createContext(null);
 /** A sheet's content calls this with "has unsaved edits": closing the sheet (×, Escape, a click outside) then asks first. */

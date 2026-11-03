@@ -1,4 +1,4 @@
-// Music & Sound: the audio review after the build. The app already placed the music and the
+// Final Mix: the audio review after the build. The app already placed the music and the
 // sound effects. Music: the three tracks as one list, each on one line (title · author · length), Claude's pick and the one in use marked on
 // the list itself (no separate block for the current track), one player for the whole dialog so two tracks never play at once; "Use this"
 // switches the track on the timeline (from 0 s, beats measured, credited), "Three other tracks" asks for more. Sound effects: placed by the app
@@ -7,9 +7,9 @@
 // Levels are the timeline's faders; here one press sets them all back to the app's. The last placement's result is said under the count: the sounds left out and those on a stand-in. The sounds the
 // user added from the Editor's Sounds drawer are in the list too, each with its ×; placing again leaves them where they are.
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { AlertTriangle, AudioLines, Check, Info, Loader2, Music, Pause, Play, RefreshCw, RotateCcw, ShieldCheck, Sparkles, Trash2, X } from "lucide-react";
+import { AlertTriangle, AudioLines, Check, Info, Loader2, Music, Pause, Play, RefreshCw, RotateCcw, ShieldCheck, SlidersHorizontal, Sparkles, Trash2, X } from "lucide-react";
 import { get, post } from "../api.js";
-import { Banner } from "../components.jsx";
+import { Banner, Dialog } from "../components.jsx";
 import { useData, useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 
@@ -84,8 +84,8 @@ export default function MixSheet({ projectId, project, onChanged }) {
   const q = useData(() => get(`/api/projects/${projectId}/mix`), [projectId]);
   const pipe = useData(() => get(`/api/projects/${projectId}/pipeline`).catch(() => null), [projectId]);          // is the film really ready
   const [busy, setBusy] = useState(null);
+  const [mixAsk, setMixAsk] = useState(false);          // the Final mix button asks first
   const [waitSfx, setWaitSfx] = useState(false);
-  const [stopAt, setStopAt] = useState("");          // "Stop the music at" (the twist)
   const player = usePlayer();
   const root = useRef(null);
   const [back] = useState(() => { const k = kept.get(projectId); return k?.gone && Date.now() - k.gone < 8000 ? k : null; });
@@ -126,9 +126,9 @@ export default function MixSheet({ projectId, project, onChanged }) {
   const tracks = round ? round.tracks : d.music ? [{ ...d.music, title: d.music.title ?? d.music.file.split("/").pop(), current: true }] : [];
   const left = d.sfxPlacing ? [] : d.sfxMissing ?? [], near = d.sfxPlacing ? [] : d.sfxNear ?? [];
   return <div className="mix" ref={root}>
-    {/* Music & Sound hands the film over: no score, no Tech checks; a change asked in the chat is rebuilt and rendered by itself */}
+    {/* Final Mix hands the film over: no score, no Tech checks; a change asked in the chat is rebuilt and rendered by itself */}
     {/* Not "ready" while something stops the render or Claude waits for an answer */}
-    {/* the same rule as the Pipeline: ready only when nothing blocks and Music & Sound row is done ("Your film is ready to export.") */}
+    {/* the same rule as the Pipeline: ready only when nothing blocks and Final Mix row is done ("Your film is ready to export.") */}
     {(() => { const ck = pipe.data?.checks, blocking = ck?.pass === false ? ck.blocking ?? 0 : 0;
       const waits = pipe.data?.stages?.some((s) => s.status === "waiting") || !!pipe.data?.question;
       const mixRow = pipe.data?.stages?.find((s) => s.id === "finalMix");
@@ -150,16 +150,11 @@ export default function MixSheet({ projectId, project, onChanged }) {
       {round?.failed?.length > 0 && <p className="hint">{t("{n} track(s) could not be saved", { n: round.failed.length })}</p>}
       {/* a song far shorter than the film plays again after itself to the film's end (T22-9): said, so the owner can pick a longer one */}
       {d.music?.repeat?.short && d.music.stopAt == null && <p className="hint warn"><AlertTriangle size={12} /> {t("The song is shorter than the film; it repeats from {at}. Pick a longer track if you hear the repeat.", { at: d.music.repeat.at })}</p>}
-      {d.music && <div className="row mix-stop">
-        <label className="hint" htmlFor="mix-stop-at">{d.music.stopAt != null ? t("The music stops at {s} s", { s: d.music.stopAt }) : t("Stop the music at")}</label>
-        <input id="mix-stop-at" className="input num" style={{ width: "6rem" }} inputMode="decimal" value={stopAt} placeholder={t("e.g. 18")}
-          onChange={(e) => setStopAt(e.target.value)} aria-label={t("Second where the music stops")} /><span className="muted">{t("s")}</span>
-        <button className="btn ghost sm" disabled={!!busy || !(Number(stopAt) > 0)} onClick={() => act("stop", () => post(`/api/projects/${projectId}/mix/music/stop`, { at: Number(stopAt) }), () => { setStopAt(""); toast(t("The music stops at {s} s", { s: Number(stopAt) })); })}>
-          {busy === "stop" ? <Loader2 size={14} className="spin" /> : null}{t("Stop here")}</button>
-        {d.music.stopAt != null && <button className="btn ghost sm" disabled={!!busy} onClick={() => act("play", () => post(`/api/projects/${projectId}/mix/music/stop`, { at: null }), () => toast(t("The music plays to its end")))}>{t("Play to the end")}</button>}
+      {/* a stop at a second is Claude's (a What If film's twist, or asked in the chat): shown with its undo; no field for it here (owner 03/11) */}
+      {d.music?.stopAt != null && <div className="row mix-stop">
+        <span className="hint">{t("The music stops at {s} s", { s: d.music.stopAt })}</span>
+        <button className="btn ghost sm" disabled={!!busy} onClick={() => act("play", () => post(`/api/projects/${projectId}/mix/music/stop`, { at: null }), () => toast(t("The music plays to its end")))}>{t("Play to the end")}</button>
       </div>}
-      {/* The empty field said nothing about what it is for */}
-      {d.music && d.music.stopAt == null && <p className="hint">{t("Optional. Left empty, the music plays to the end.")}</p>}
       {ownSong && <p className="hint">{t("The film uses the song you gave. Another track would replace it.")}</p>}
     </section>
     <section className="panel">
@@ -188,9 +183,17 @@ export default function MixSheet({ projectId, project, onChanged }) {
         <ul className="plain mix-sfx">{sounds.map((x, i) => <li key={i}><span className="num">{x.start.toFixed(2)} s</span> {x.bed ? t("{name} (ambience)", { name: x.name }) : x.mine ? t("{name} (you added it)", { name: x.name }) : x.name}
           {x.id && <button type="button" className="btn icon ghost mix-sfx-x" disabled={placing} onClick={() => (x.mine ? takeOff(x) : setPref({ skip: x.id }))}
             aria-label={t("Take out {name} at {s} s", { name: x.name, s: x.start.toFixed(2) })} title={t("Take this sound out")}><X size={12} /></button>}</li>)}</ul></details>}
-      {(d.music || d.voice) && <div className="row mix-duck"><button className="btn ghost sm" disabled={!!busy} onClick={() => act("balance", () => post(`/api/projects/${projectId}/mix/balance`), () => toast(t("The sound is balanced again.")))}>
-        {busy === "balance" ? <Loader2 size={14} className="spin" /> : <RotateCcw size={14} />}{t("Balance the sound again")}</button>
-        <span className="hint">{t("Voice, music and sound effects back to the app's levels. Your music and clips stay.")}</span></div>}
+
     </section>
+    {(d.music || d.voice) && <section className="panel">
+      <div className="panel-head"><h2><SlidersHorizontal size={16} /> {t("Levels")}</h2>
+        <button className="btn sm end" disabled={!!busy} onClick={() => setMixAsk(true)}>{busy === "balance" ? <Loader2 size={14} className="spin" /> : <SlidersHorizontal size={14} />}{t("Final mix")}</button></div>
+      <p className="secondary">{t("Balances the film's sound again: the voice, the music and the sound effects back to the app's levels, every fader back to 0 dB.")}</p>
+    </section>}
+    {mixAsk && <Dialog title={t("Final mix")} onClose={() => setMixAsk(false)} footer={<>
+      <button className="btn ghost" onClick={() => setMixAsk(false)}>{t("Cancel")}</button>
+      <button className="btn primary" onClick={() => { setMixAsk(false); act("balance", () => post(`/api/projects/${projectId}/mix/balance`), () => toast(t("The film's sound is balanced again."))); }}>{t("Final mix")}</button></>}>
+      <p>{t("The app balances the film's final sound again.")}<br />{t("The voice, the music and the sound effects go back to the app's levels, every fader to 0 dB.")}</p>
+    </Dialog>}
   </div>;
 }

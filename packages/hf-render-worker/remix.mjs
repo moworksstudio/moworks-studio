@@ -1,6 +1,6 @@
 // The film's sound mixed again onto a picture already rendered, so an audio-only change re-mixes onto the
 // existing picture. Child process (client.mjs remixAudio): HyperFrames' own pieces, as its render runs them: collectRenderMedia on the
-// root page (where Music & Sound places every track; the caller sends a film with sound inside a sub-composition to a full render),
+// root page (where Final Mix places every track; the caller sends a film with sound inside a sub-composition to a full render),
 // processCompositionAudio with the page's master chain and the engine's config, the mix padded or trimmed to the picture's length as HF's
 // assemble does (its AAC, 192k), and muxVideoWithAudio onto the picture's own video stream (copied, never re-encoded). The app's loudness
 // master runs after, as for every export.

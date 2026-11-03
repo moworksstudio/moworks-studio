@@ -86,7 +86,7 @@ Màu: xám = cài đặt · cam = Claude và app thực hiện · xanh dương =
 cột chat bên phải. Bấm vào một phần tử trong phim để Claude nhắm vào nó, hoặc tự sửa chữ của nó bằng tay.
 
 Trên timeline, Narration, SFX và Music mỗi lane có một thanh âm lượng, kéo là nghe ngay, và **Ctrl+Z** trả lại tiếng vừa kéo hoặc vừa xoá.
-**Music & Sound** đổi nhạc và hiệu ứng âm thanh, còn **Balance the sound again** đưa mọi mức tiếng về theo luật của app.
+**Final Mix** đổi nhạc và hiệu ứng âm thanh, còn **Balance the sound again** đưa mọi mức tiếng về theo luật của app.
 
 <p align="center"><img src="images/desk-editor.jpg" alt="Editor (The Desk): shot và quy trình bên trái, phim trong trình phát, timeline, và Claude thuật lại từng bước bên phải"><br><sub>Editor (The Desk): shot và quy trình bên trái, phim trong trình phát, timeline, và Claude thuật lại từng bước bên phải</sub></p>
 

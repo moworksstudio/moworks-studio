@@ -87,7 +87,7 @@ The **Editor** plays the film frame by frame as it will render, with the shots a
 and Claude in a chat column on the right. Click an element in the film to make it Claude's target, or edit its words by hand.
 
 On the timeline, Narration, SFX and Music each have a level you hear as you drag it, and **Ctrl+Z** brings back a sound you just moved or
-took off. **Music & Sound** changes the music and the effects, and **Balance the sound again** puts every level back by the app's rules.
+took off. **Final Mix** changes the music and the effects, and **Balance the sound again** puts every level back by the app's rules.
 
 <p align="center"><img src="images/desk-editor.jpg" alt="The Editor (The Desk): shots and pipeline on the left, the film in the player, the timeline, and Claude's account of each step on the right"><br><sub>The Editor (The Desk): shots and pipeline on the left, the film in the player, the timeline, and Claude's account of each step on the right</sub></p>
 

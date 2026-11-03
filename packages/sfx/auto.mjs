@@ -1,4 +1,4 @@
-// Sound effects placed by the app at Music & Sound (only after the picture is locked, never during the build), a sound on every action
+// Sound effects placed by the app at Final Mix (only after the picture is locked, never during the build), a sound on every action
 // (the owner, 30/10: "every film in every style must have full sound effects on every action in the film, for a lively mood"): the app
 // reads the film's cuts (the timeline) and every motion of the approved Motion Plan, and gives each its sound: the storyboard's own
 // named cues first (`- sfx:`, or a `- sound:` list), then the Motion Plan's per-motion `sound`, then the action's own (actions.mjs: an
@@ -72,7 +72,7 @@ export function autoCues(shots, plan = null, { whoosh = true, allow = null, styl
   return out.sort((a, b) => a.start - b.start);
 }
 
-/** The storyboard's named cues as the mix reads them: at their moment, each with its id (what Music & Sound's "remove" keeps out). */
+/** The storyboard's named cues as the mix reads them: at their moment, each with its id (what Final Mix's "remove" keeps out). */
 function namedCues(shots) {
   const seen = new Map();
   return cuesOf(shots).map((c) => {

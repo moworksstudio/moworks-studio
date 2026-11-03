@@ -138,10 +138,11 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
         return { lane, clip, ...(fit.cut ? { cut: true } : {}) };
       };
       let html = ""; try { html = readFileSync(join(p.path, "index.html"), "utf8"); } catch { /* no film page yet */ }
-      const taken = (kind) => trackClips(html, kind).some((c) => c.src !== rel);
+      const taken = (kind) => trackClips(html, kind).length > 0;
       if (lane === "voiceover") {
         const v = p.meta?.voice;
-        if ((v?.file && v.file !== rel && !v.offTimeline) || (v?.file !== rel && taken("voice"))) return clipHere("voiceover", "Sound beside the voice-over");
+        // the film's voice taken off comes back; on a lane that holds a voice, the same file too, it is a clip beside it
+        if (taken("voice") || (v?.file && v.file !== rel && !v.offTimeline)) return clipHere("voiceover", "Sound beside the voice-over");
         if (v?.file === rel && v.transcript?.status === "saved") {          // its words are checked: straight back on the timeline
           placeTrack(p.path, { kind: "voice", src: rel, duration: Number(info?.duration ?? v.info?.duration) || 1, start });
           projects.updateMeta(id, (m) => { if (m.voice) delete m.voice.offTimeline; }, root);
@@ -152,7 +153,7 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
         return { lane, voice: await ctx.useVoice(p, abs, info, { source: "upload", size: statSync(abs).size }) };
       }
       if (lane === "music") {
-        if (taken("music") && !trackClips(html, "music").some((c) => c.src === rel)) return clipHere("music", "Sound beside the music");
+        if (taken("music")) return clipHere("music", "Sound beside the music");
         const music = await ctx.placeMusic(p, rel, info, { start });
         await commit(p, `Music on the timeline: ${rel}`);
         return { lane, music };

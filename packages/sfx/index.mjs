@@ -17,7 +17,7 @@ import { SUSTAINED_MIN_S, familyOf, loadLibrary, matchLocal, plainName, rankLoca
 export const OPENVERSE = "https://api.openverse.org/v1/audio/";
 export const SFXMINT = "https://sfxmint.com/api/v1/";
 const LICENCES = { cc0: "CC0", by: "CC BY" };
-// VOLUME: a sound with no family (the storyboard-only pass, apply); Music & Sound levels each by its family (actions.mjs LEVELS).
+// VOLUME: a sound with no family (the storyboard-only pass, apply); Final Mix levels each by its family (actions.mjs LEVELS).
 // TRACK: the first sound-effect lane, LANES of them (the owner's own clips start at 40)
 export const VOLUME = 0.35, TRACK = 20, LANES = 16, MAX_AUTO_S = 6;
 const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
@@ -386,7 +386,7 @@ function closestItem(results, name) {
  *  recording, which is a bed), SFXMint when it is down or has none that fits (onlineSources), HF's bundled set when offline or nothing is found. While the search does not answer (online, but every try
  *  failed), a name that only sounds like one of the bundled set ("lamp ting": the chime) gets that sound as a stand-in, looked up again the
  *  next time the search may answer.
- *  library: true (Music & Sound's placement) asks the offline library first, for one-shots only (its ambience loops are the beds'): a name
+ *  library: true (Final Mix's placement) asks the offline library first, for one-shots only (its ambience loops are the beds'): a name
  *  it matches well, or with a sound of the cue's own kind, never goes to the search (and an older pick of the search or of HF's set is
  *  replaced by it; the library's own picks are matched again on every placement, so a better match replaces an old one); any other name
  *  goes to the search, and when the search finds nothing or does not answer, the library's best match stands in, before HF's set (Test 26:
@@ -445,7 +445,7 @@ export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root =
   }
   // the searches run four at a time (one at a time took about 5 minutes), each tried twice, each at most SEARCH_TIMEOUT_MS; one failed
   // search no longer sends every other sound offline (the automatic pass placed 0 of 13 that way), but three searches in a row that fail
-  // leave that service out for the rest of this placement (Test 24: every query hung 15-20 s, and Music & Sound waited on each): SFXMint
+  // leave that service out for the rest of this placement (Test 24: every query hung 15-20 s, and Final Mix waited on each): SFXMint
   // answers without another wait on Openverse, and with both down the built-in sounds stand in
   const hits = new Map(), sources = onlineSources({ fetchImpl, signal, timeoutMs, closest: library ? "any" : false });
   let offline = !online;
@@ -528,7 +528,7 @@ export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root =
   return { added, missing, failed, near, offline: offline || (online && names.length > 0 && [...hits.values()].every((h) => h == null)) };
 }
 
-/** Music & Sound's line about a placement, for the chat: what was placed, which named sounds use a stand-in and which could not be found
+/** Final Mix's line about a placement, for the chat: what was placed, which named sounds use a stand-in and which could not be found
  *  (the search did not answer, or found nothing), in plain words with no paths. A sound left out or on a stand-in makes it a warning, which
  *  the chat always shows (Test 20: "placed 6 (pop, typing, whoosh)" and seven named sounds gone without a word). { text, vars, status? } */
 export function placedNote(res) {
@@ -544,8 +544,8 @@ export function placedNote(res) {
   const vars = { n: res.placed ?? 0, names: names.length ? shown : "none", ...(res.ambience ? { beds: res.ambience } : {}) };
   if (near.length) { parts.push("A close sound stands in for now: {near}"); vars.near = some(near.map((x) => `"${x.name}" (${x.as})`)); }
   // said plainly, name by name: these are not the sound the film asks for (Test 28: fifteen marbles were ticks and the note only said "close")
-  if (lasting.length) { parts.push("The app has no such sound of its own and the sound search found none, so these are stand-ins, not the real sound: {lasting}. Press Place them again in Music & Sound when the search is back, or add your own"); vars.lasting = lasting.map((x) => `"${x.name}" plays ${x.as}`).join(", "); }
-  if (failed.length) { parts.push("Left out because the sound search did not answer: {failed}. Press Place them again in Music & Sound later"); vars.failed = quote(failed); }
+  if (lasting.length) { parts.push("The app has no such sound of its own and the sound search found none, so these are stand-ins, not the real sound: {lasting}. Press Place them again in Final Mix when the search is back, or add your own"); vars.lasting = lasting.map((x) => `"${x.name}" plays ${x.as}`).join(", "); }
+  if (failed.length) { parts.push("Left out because the sound search did not answer: {failed}. Press Place them again in Final Mix later"); vars.failed = quote(failed); }
   if (none.length) { parts.push("No sound found for {missing}: ask Claude for other names"); vars.missing = quote(none); }
   return parts.length > 1 ? { text: `${parts.join(". ")}.`, vars, status: "warning" } : { text: parts[0], vars };
 }
@@ -619,7 +619,7 @@ export function mount(dir, cues, { filmEnd = null, endFade = 0, cueKey: key = un
     const named = c.prio === 0 && saysNear(c.name);
     const fadeGain = inFade && !named && start > fadeAt ? Math.max(0.05, (end - start) / fadeLen) : 1;
     const fadeOut = named ? (dur < whole ? Math.min(0.15, dur) : 0) : Math.max(held ? 0.15 : 0, inFade ? r3(Math.max(0.05, start + dur - Math.max(fadeAt, start))) : 0);
-    // the sound's level from Music & Sound (auto.mjs levels: its family's), else its family's, else the default; a small motion's cue is quieter
+    // the sound's level from Final Mix (auto.mjs levels: its family's), else its family's, else the default; a small motion's cue is quieter
     const level = v?.volume ?? s.volume ?? (s.family ? levelOf(s.family) : VOLUME);
     const volume = String(Math.round(Math.min(MAX_GAIN, Math.max(0.01, level * (Number(c.gain) || 1) * fadeGain)) * 100) / 100);          // HF carries gain to +12 dB
     const ours = { id, src: file, "data-start": String(start), "data-duration": String(dur), "data-track-index": "", "data-volume": volume,
@@ -663,7 +663,7 @@ export function mount(dir, cues, { filmEnd = null, endFade = 0, cueKey: key = un
   writeFileSync(f, html);
   st.mounted = placed;
   delete st.fit;          // the lanes went with the old placement: fitted again (voicefit.mjs)
-  st.placedAt = new Date().toISOString();          // the Editor reads Music & Sound again when this changes (GET /pipeline's sfx)
+  st.placedAt = new Date().toISOString();          // the Editor reads Final Mix again when this changes (GET /pipeline's sfx)
   if (key !== undefined) st.cueKey = key;          // the storyboard's named cues this placement was made from
   if (times !== undefined) st.times = times;          // where the shots stood when it was made (timeKey)
   if (left !== undefined) st.left = left;          // { missing, near }: named sounds left out or on a stand-in (GET /mix)
@@ -682,7 +682,7 @@ export function timesChanged(dir, shots) {
   const st = readState(dir);
   return !!st.mounted && st.times != null && st.times !== timeKey(shots);
 }
-/** Did the storyboard's named cues change since the sounds were last placed? false while none were ever placed (Music & Sound places
+/** Did the storyboard's named cues change since the sounds were last placed? false while none were ever placed (Final Mix places
  *  them first). A placement from before cueKey was kept counts as changed once. */
 export function cuesChanged(dir, shots) {
   const st = readState(dir);
@@ -690,7 +690,7 @@ export function cuesChanged(dir, shots) {
   return st.cueKey !== cueKey(shots);
 }
 
-/** Music & Sound's "Place" again: the cues the user took off come back. */
+/** Final Mix's "Place" again: the cues the user took off come back. */
 export function unmuteAll(dir) { const st = readState(dir); if (st.muted?.length) { delete st.muted; saveState(dir, st); } }
 
 /** The user took the app's sound `el-sfx-<i>` off the timeline: that cue stays off when the cues are placed again, by its identity (cue: the one written on its tag, else
@@ -802,7 +802,7 @@ export async function apply(dir, shots, opts = {}) {
   return { cues: cues.length, placed: placed.length, ...res };
 }
 
-/** Set the level of each sound by name ({ name: 0-1 }) before mounting (Music & Sound levels). */
+/** Set the level of each sound by name ({ name: 0-1 }) before mounting (Final Mix levels). */
 export function setVolumes(dir, levels) {
   const st = readState(dir);
   for (const [k, v] of Object.entries(levels)) {

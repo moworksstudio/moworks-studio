@@ -52,7 +52,7 @@ export function sfxCover(dir, shots, plan) {
 }
 
 const KIND = { entrance: "an entrance", exit: "an exit", text: "a text", transition: "a transition", emphasis: "an emphasis", other: "a motion" };
-const message = (x) => `Shot ${x.shot} at ${x.time} s: ${x.motion ? `"${x.motion}" (${KIND[x.type] ?? "a motion"})` : KIND[x.type] ?? "a motion"} has no sound (the app's would be "${x.want}"); place the sound effects again in Music & Sound, or name its sound`;
+const message = (x) => `Shot ${x.shot} at ${x.time} s: ${x.motion ? `"${x.motion}" (${KIND[x.type] ?? "a motion"})` : KIND[x.type] ?? "a motion"} has no sound (the app's would be "${x.want}"); place the sound effects again in Final Mix, or name its sound`;
 
 /** The Tech checks gate: a warning, never a block; null before the sound effects are placed or when the film has no Motion Plan. */
 export async function gateSfx(projectDir) {

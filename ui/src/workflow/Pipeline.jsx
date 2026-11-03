@@ -1,6 +1,6 @@
 // The Pipeline column of the Editor: its stages, the same for every style (the server computes them: `stages` of
 // GET /pipeline, packages/pipeline stagesOf). Each stage is its state and one line; the stage that needs the user or is running stands
-// out. The dialogs (Storyboard, Motion, Music & Sound, Checks) open from one bar above the chat input, not from here. The app runs the next step by itself (autopilot); while it runs, the buttons of stages
+// out. The dialogs (Storyboard, Motion, Final Mix, Checks) open from one bar above the chat input, not from here. The app runs the next step by itself (autopilot); while it runs, the buttons of stages
 // 1-3 are off ("press Stop in the chat to change this": the chat's own Stop is the only stop). A stopped or failed stage offers
 // "Continue" (POST /pipeline/resume; writing "continue" in the chat does the same).
 import { useEffect, useState } from "react";
@@ -13,7 +13,7 @@ import { useThemeId } from "../theme.jsx";
 // no word for a running stage: its spinner, the strip and the chat already say it
 const STATUS_WORD = { waiting: "Waiting for you", stopped: "Stopped", redo: "Approve again", failed: "Needs a fix" };
 // what a stage's `open` opens, and the label of its button while it waits for the user
-export const OPENS = { brief: ["brief", "Open the brief"], storyboard: ["storyboard", "Open Storyboard"], "motion-plan": ["motion-plan", "Open Motion"], mix: ["mix", "Open Music & Sound"],
+export const OPENS = { brief: ["brief", "Open the brief"], storyboard: ["storyboard", "Open Storyboard"], "motion-plan": ["motion-plan", "Open Motion"], mix: ["mix", "Open Final Mix"],
   character: ["character", "Open Characters"],          // the Storyboard stage while its Character step runs or waits
   // The Storyboard waits for the voice-over and its words, or for the lyrics' timing (`voiceWait`)
   voice: ["voice", "Open Voice-over"], lyrics: ["lyrics", "Open Lyrics"] };
@@ -77,7 +77,7 @@ export default function Pipeline({ projectId, data, starting = false, onOpen, on
     const app = data?.appBusy?.stage === s0.id && !NOW.has(s0.status) ? data.appBusy : null;
     const s = app ? { ...s0, status: "running", line: app.key, lineVars: app.vars } : s0;
     const now = NOW.has(s.status);
-    // the user changes stages 1-3 only after pressing Stop in the chat; Music & Sound is shut while Claude checks the film, and its line says why
+    // the user changes stages 1-3 only after pressing Stop in the chat; Final Mix is shut while Claude checks the film, and its line says why
     const off = (running && s.n <= 3 && !NEVER_LOCKED.has(s.open)) ;
     const opens = OPENS[s.open];
     // "6 shots" / "1 shot", never the machine-like "shot(s)" of the server's line
@@ -161,7 +161,7 @@ export default function Pipeline({ projectId, data, starting = false, onOpen, on
 // whose sheet lies on the light table is lifted and lit by the lamp. A station opens its sheet on the table (Build and review: the film
 // itself); every action of the column above is here: Waiting for you, Continue, Keep it as it is / Approve again, Run checks again, the
 // Prepare links, "Press Stop in the chat to change this" and the brief that changed after the build.
-const SUB = { build: "Build", sound: "Music & Sound", firstVersion: "Version 1", qcReview: "Review", checks: "Tech checks" };
+const SUB = { build: "Build", sound: "Final Mix", firstVersion: "Version 1", qcReview: "Review", checks: "Tech checks" };
 // The Desk's column holds them in one row: the whole name on hover
 const SUB_SHORT = { checks: "Checks" };
 /** The time left of a running step, as the server's etaWords says it (packages/server/boards.mjs), from now: "about N min left" down
@@ -182,7 +182,7 @@ export const stageMinutes = (est) => (est.basis === "steps" ? Math.min(est.plann
 const warnWords = (t, n) => (n === 1 ? t("1 warning") : t("{n} warnings", { n }));
 const MATERIAL = { todo: "todo", done: "done", running: "wip", waiting: "wip", stopped: "wip", redo: "wip", failed: "wip" };
 // the chat's bar of dialogs (Editor `actions`) gives the stations their gates: Storyboard opens to look while Claude works, Motion Plan only
-// after Stop, Music & Sound once the film is built
+// after Stop, Final Mix once the film is built
 const ACTION_OF = { storyboard: "sb", motion: "mo" };
 
 function StudioLine({ data, stages, view, running, hasCast, here, actions, onOpen, onAssets, onPlayer, resume, resuming, keep, keeping, recheck, rechecking, blocked, music, warnings }) {
@@ -216,7 +216,7 @@ function StudioLine({ data, stages, view, running, hasCast, here, actions, onOpe
           {id === "qcReview" && data?.qc?.final != null && <b className="num">{` ${data.qc.final}/10`}</b>}
           {id === "checks" && warnings > 0 && <span className="sp-warn num">{" · " + warnWords(t, warnings)}</span>}</button>;
       };
-      // the whole station opens what its head opens (T24-5, T26-9: a click on "05 Music & Sound" beside its title did nothing); its own
+      // the whole station opens what its head opens (T24-5, T26-9: a click on "05 Final Mix" beside its title did nothing); its own
       // buttons inside keep theirs, and the head stays the control for the keyboard
       const card = go && !go.off ? (e) => { if (!e.target.closest("button, a, input, select, summary, label")) go.on(); } : undefined;
       return <div key={s.id} className={`sp-st ${mat} ${s.status}` + (here === s.id ? " here" : "") + (act?.att ? " att" : "") + (card ? " go" : "")} aria-current={here === s.id ? "step" : undefined}

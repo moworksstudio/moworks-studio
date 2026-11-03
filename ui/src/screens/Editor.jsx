@@ -17,7 +17,7 @@ import Timeline, { soundName } from "../editor/Timeline.jsx";
 import MotionDrawer from "../editor/MotionDrawer.jsx";
 import SoundDrawer from "../editor/SoundDrawer.jsx";
 import ShotList from "../editor/ShotList.jsx";
-import AssetsPanel, { placedSay, putOnTimeline, useAssets } from "../editor/AssetsPanel.jsx";
+import AssetsPanel, { laneRefusal, placedSay, putOnTimeline, useAssets } from "../editor/AssetsPanel.jsx";
 import Versions from "../editor/Versions.jsx";
 import FilmCard from "../editor/FilmCard.jsx";
 import { useT } from "../i18n.jsx";
@@ -380,6 +380,8 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   // a sound dragged from the Assets tab onto a lane: there, at the drop's time, then read again as "Put on the timeline" does
   const soundDrop = async (path, to) => {
     const name = assets?.find((x) => x.path === path)?.name ?? path.split("/").pop();
+    const no = laneRefusal(assets?.find((x) => x.path === path), to?.lane, t);          // its own folder's lane only (owner 03/11)
+    if (no) { toast(no, "error"); return; }
     try { const r = await putOnTimeline(id, path, to); toast(placedSay(t, name, r.at, r.cut)); reloadAssets(); loadTimeline(); pv.send("reload"); }
     catch (e) { toast(e.message, "error"); }
   };
@@ -404,8 +406,8 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     if (lastAppWork.current && !appWork) { project.reload(); loadTimeline(); reloadAssets(); pv.send("reload"); setTimeout(loadPosters, 1500); }
     lastAppWork.current = appWork;
   }, [appWork]); // eslint-disable-line react-hooks/exhaustive-deps
-  // the sound effects placed again (Music & Sound's Place, or by the app after Claude changed the storyboard's cues): the SFX lane and the
-  // Music & Sound read them again (the dialog showed 26 after only 6 were left: it read them once, 4 s after Place, while the app still searched)
+  // the sound effects placed again (Final Mix's Place, or by the app after Claude changed the storyboard's cues): the SFX lane and the
+  // Final Mix read them again (the dialog showed 26 after only 6 were left: it read them once, 4 s after Place, while the app still searched)
   const sfxAt = pipeline?.sfx?.at ?? null;
   const lastSfx = useRef(sfxAt);
   useEffect(() => {          // the film plays the new sounds too (not on the first read of the pipeline)
@@ -569,16 +571,16 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const qcWarnings = pipeline?.checks?.warnings ?? tl?.qc?.filter((q) => !q.blocking).length ?? 0;
   const shotTarget = shot ? t("Shot {n}", { n: shot.number }) + (shot.title ? ` · ${shot.title}` : "") : null;
   // the dialogs the user opens most, in one place above the chat input: Storyboard and Motion once their stage has
-  // started, Music & Sound once the film is built, Checks when the build failed; lit when the stage waits for the user
+  // started, Final Mix once the film is built, Checks when the build failed; lit when the stage waits for the user
   const st = Object.fromEntries((pipeline?.stages ?? []).map((x) => [x.id, x]));
   const off = !!(pipeline?.autopilot?.running || pipeline?.claudeBusy);
   // every stage the film has gets its button; one not reached yet is shown, off, with what it waits for
   const act = (key, label, icon, kind, s, gate = true, after = null) => {
     const notYet = !!after && (!s || s.status === "todo");
-    // Music & Sound is shut while Claude checks the film, and says why
+    // Final Mix is shut while Claude checks the film, and says why
     const shut = key === "mix" && pipeline?.version1?.card?.kind === "working";
     return { key, label: t(label), icon, onClick: () => openSheet(kind), att: !shut && (s?.status === "waiting" || s?.status === "redo"),
-      off: notYet || shut || (gate && off && s?.status !== "waiting"), title: shut ? t("Claude is checking your film. Music & Sound opens again when it finishes.") : notYet ? t("Opens once {step} is done", { step: t(after) }) : gate && off ? t("Press Stop in the chat to change this") : undefined };
+      off: notYet || shut || (gate && off && s?.status !== "waiting"), title: shut ? t("Claude is checking your film. Final Mix opens again when it finishes.") : notYet ? t("Opens once {step} is done", { step: t(after) }) : gate && off ? t("Press Stop in the chat to change this") : undefined };
   };
   const chr = pipeline?.steps?.find((x) => x.id === "character");          // a step inside the Storyboard stage, not a stage
   const actions = [
@@ -586,7 +588,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     st.storyboard && act("sb", "Storyboard", <LayoutList size={14} />, "storyboard", st.storyboard, false, "Prepare"),          // opens while Claude works, to look
     st.motion && act("mo", "Motion Plan", <Library size={14} />, "motion-plan", st.motion, true, "Storyboard"),
     // no Tech checks button: the checks run in the background; a real failure is one card in the chat, its Details open them
-    st.build && act("mix", "Music & Sound", <Sliders size={14} />, "mix", { ...st.build, status: st.build.status === "done" || pipeline?.finished ? "ready" : "todo" }, false, "Version 1"),
+    st.build && act("mix", "Final Mix", <Sliders size={14} />, "mix", { ...st.build, status: st.build.status === "done" || pipeline?.finished ? "ready" : "todo" }, false, "Version 1"),
   ].filter(Boolean);
   const showAssets = () => { setLeftTab("assets"); setNarrowTab("left"); reloadAssets(); };
   // Until the Build the page is the 3 s starter: no white film, no 3 s timeline, shots "Not built"

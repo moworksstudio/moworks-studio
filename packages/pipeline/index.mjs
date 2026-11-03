@@ -439,7 +439,7 @@ export function computePipeline(steps, f) {
     const j = again || checksDue ? { met: false } : judge(step.done, f, step.id);
     const needs = (step.needs ?? []).map((id) => by.get(id)).filter((x) => x && x.visible);
     const after = (step.after ?? []).map((id) => by.get(id)).filter((x) => x && x.visible);
-    // an optional step (Music & Sound) opens on what was done once: a later change there does not lock it
+    // an optional step (Final Mix) opens on what was done once: a later change there does not lock it
     const unmet = needs.filter((x) => !SATISFIED.has(x.status) && !(step.optional && x.status === "redo"));
     const missing = unmet.filter((x) => x.status !== "redo");        // never done: a built film is not "built" for this step yet
     const skip = step.skippable ? f.skips[step.id] : null;
@@ -457,7 +457,7 @@ export function computePipeline(steps, f) {
       // Prepare once ran again for the voice answer and the approved cast showed "Approve again", which did nothing: the cast is
       // approved once; an earlier step that ran again does not ask for it again
       const moved = !source && step.id !== "character" && [...needs, ...after].filter((x) => x.id !== "character").find((x) => x.status === "redo" || (x.doneAt != null && s.doneAt != null && x.doneAt > s.doneAt + 1000));
-      // the music stays when the picture changes (the user changes it in Music & Sound), and once the film is handed
+      // the music stays when the picture changes (the user changes it in Final Mix), and once the film is handed
       // over the background checks (quiet) run again before a render on their own: neither turns "redo" for a change the user made
       // Version 1 stays what it was, whatever changes the film after it
       const stays = (step.id === "sound" && !j.changed) || (step.quiet && f.finished) || step.done?.kind === "firstVersion";
@@ -564,7 +564,7 @@ export function asksOwner(text) {
  *  for the user reads "Waiting for you: …". */
 export const STAGES = [
   { n: 1, id: "prepare", title: "Prepare" }, { n: 2, id: "storyboard", title: "Storyboard" }, { n: 3, id: "motion", title: "Motion Plan" },
-  // Production makes the film and its sound up to Version 1; the Review and the Tech checks run only when the user asks (owner 01/11). Music & Sound is a dialog of Production; Render is a button, not a row
+  // Production makes the film and its sound up to Version 1; the Review and the Tech checks run only when the user asks (owner 01/11). Final Mix is a dialog of Production; Render is a button, not a row
   { n: 4, id: "build", title: "Production" }, { n: 5, id: "review", title: "Review and checks" },
 ];
 /** Every line of the Pipeline is for someone who knows nothing yet: where the film is and what to do, one line at best, two at most (owner 31/10, #697, #698).
@@ -699,7 +699,7 @@ export function nextAuto(state) {
     if (s.hidden || s.optional) continue;
     if (s.asking) return null;          // a question to the user is answered first
     if (s.status === "done" || s.status === "skipped") continue;
-    if (s.status === "redo") {            // after a new motion spec: build and check again; the music stays (the user changes it in Music & Sound)
+    if (s.status === "redo") {            // after a new motion spec: build and check again; the music stays (the user changes it in Final Mix)
       if (s.stage === 4 && s.id !== "sound" && !s.stopped && ["claude", "job"].includes(s.action?.kind)) return s;
       if (s.stage === 4) continue;
       // a new storyboard after the motion was approved: Claude rewrites the motion of the shots that changed, then the user approves again

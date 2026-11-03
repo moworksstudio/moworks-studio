@@ -2,7 +2,7 @@
 // between the words and ducked under them; a film with no voice has its music at -16 LUFS) and the music's duck lanes written
 // (hf-edit/tracks.mjs duckMusic). Each file's loudness is measured once with the app's FFmpeg (EBU R128) and kept in .moworks/loudness.json
 // by its size and time. A level the user set by hand in Studio stays theirs (tracks.mjs setTrackGain). Run when the music or the voice is
-// placed, when the transcript is saved, before Music & Sound places the effects, and before a render, the checks or an export to AE; each
+// placed, when the transcript is saved, before Final Mix places the effects, and before a render, the checks or an export to AE; each
 // time the effects already placed are fitted again to the voice and the mix as they are now (voicefit.mjs).
 import { execFile } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";

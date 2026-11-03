@@ -131,11 +131,11 @@ already (the app placed them before Version 1): score Sync on the voice-over, th
 when a fix of yours moves a shot, the app places the sound effects again for the new times and keeps the owner's own moves.
 A score you cannot raise without the owner (sync when you cannot hear the song, a colour only they can approve): ask them right away, with
 the seconds to check, instead of stopping quietly.
-**Never promise a later check** ("the 31.5 s cut may fall into 'Hôm', check by ear in Music & Sound", and no step did): no later
+**Never promise a later check** ("the 31.5 s cut may fall into 'Hôm', check by ear in Final Mix", and no step did): no later
 step reads your doubts again. Check it now with what you have (a cut or a music stop against the voice: transcript.json's word times
 against the music's data-mw-stop or the cut's second; voice_check for the levels), fix it in this round (the music_stop tool moves a stop
 into the nearest pause by itself), or name it in the review as unchecked, with its seconds, for the owner. Never "I will check it later",
-"listen again in Music & Sound" or "the next step will".
+"listen again in Final Mix" or "the next step will".
 
 Write every round to `docs/QC-REVIEW.md`: round · the seven scores · the three worst problems (seconds) · what you changed. End the file with
 one line `Final score: N/10`, N the lowest of the last seven scores (the app reads it: 8 or more passes the step). Write the same rounds

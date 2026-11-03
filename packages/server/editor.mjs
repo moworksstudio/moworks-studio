@@ -262,7 +262,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
       const p = mustProject(id, root); busySound(id);
       const what = `sound ${b.name ?? b.id ?? b.hfId ?? ""}${b.start != null ? ` at ${r3(b.start)} s` : ""}${b.lane ? ` on ${b.lane}` : ""}`.replace(/\s+/g, " ").trim();
       try {
-        // a sound-only revision, as Music & Sound's: the picture's checks hold, and a finished film gets the new sound mixed onto its render in seconds
+        // a sound-only revision, as Final Mix's: the picture's checks hold, and a finished film gets the new sound mixed onto its render in seconds
         const { changed } = await ctx.mix.change(p, what, async () => {
           // the sound is named by its HF id or id, else by its src and its present start (`at`); `start` is where it goes
           const out = await hand.setAudio(p.path, { hfId: b.hfId, id: b.id, src: b.src, start: b.at }, { start: b.start ?? null, lane: b.lane ?? null });

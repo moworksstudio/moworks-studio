@@ -265,14 +265,14 @@ export const [revert, revertAsync] = forms(revertOp);
 
 /** The revision HyperFrames Studio makes when it opens a film (it writes its element ids, nothing the film shows changes). */
 export const STUDIO_IDS = "Opened in HyperFrames Studio (element ids)";
-/** The revisions of Music & Sound (music, sound effects, levels): sound only, so the picture's checks still hold. */
+/** The revisions of Final Mix (music, sound effects, levels): sound only, so the picture's checks still hold. */
 export const SOUND_MIX = "Final Mix (sound only)";
 
 /** When the film's own work last changed under a path (ms), leaving out Studio's element-id revisions; uncommitted changes count now. */
 export const [lastWorkChange, lastWorkChangeAsync] = forms(lastWorkChangeOp, { read: true });
 /** The last revision that changed the film's pictures (compositions, index.html, assets), leaving out Studio's element-id revisions. */
 export const [lastWorkRev, lastWorkRevAsync] = forms(lastWorkRevOp, { read: true });
-/** Did the film change since this revision? Studio's element-id revisions, Music & Sound's sound-only revisions and the app's own records
+/** Did the film change since this revision? Studio's element-id revisions, Final Mix's sound-only revisions and the app's own records
  *  (.moworks/) do not count, so a check stays valid when Studio opens the film, the sound is mixed or the app writes its notes. */
 export const [changedSince, changedSinceAsync] = forms(changedSinceOp, { read: true });
 /** Put the project's files back as they were at a revision (a named version), as a new revision: what was there is

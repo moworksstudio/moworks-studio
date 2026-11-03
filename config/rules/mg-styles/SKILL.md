@@ -32,7 +32,7 @@ The **Creative seed** is one example story: never copy it. Its brand names are i
 | Motion ✋ | Motion | `docs/MOTION-PLAN.json`: per shot the moves with numbers; cite the signature techniques as source `{"kind": "style", "id": "<signature feature>"}` |
 | Build | Motion, Final | §3. The demo source is staged into `.moworks/library/mg/<id>/` now: read it for techniques only (a brush renderer, a boil cycle, a shader, a morph), never its story, brand, copy or timeline |
 | QC | self-critique, rubric | the Moworks Review (moworks-qc), plus the author's `rubric.md` (staged with the demo) and the prompt's Craft checklist |
-| Sound / Music & Sound | Sound | **the app's** music and sound effects only (no `audio.py`, no instrument samples); pick by the prompt's Sound line |
+| Sound / Final Mix | Sound | **the app's** music and sound effects only (no `audio.py`, no instrument samples); pick by the prompt's Sound line |
 
 ## 3. The page: a renderAt(t) film inside HyperFrames
 

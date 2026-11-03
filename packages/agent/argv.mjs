@@ -1,5 +1,5 @@
 // Claude Code's command line on Windows. CreateProcess takes at most 32,767 characters, and the app once passed the whole system prompt
-// as --append-system-prompt: a film past its Music & Sound carried 33,139 characters of it and every chat message failed in 3 s with
+// as --append-system-prompt: a film past its Final Mix carried 33,139 characters of it and every chat message failed in 3 s with
 // "spawn ENAMETOOLONG" (T27-14). Long text now reaches Claude Code in a file (--append-system-prompt-file, read by Claude Code 2.1.309:
 // checked against a local stand-in for the API, the whole file arrived as the system prompt) or on stdin (the request); the command line
 // keeps only the app's own flags, and checkArgv measures it before every start against a budget far under the limit, so a part that

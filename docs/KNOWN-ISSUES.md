@@ -14,7 +14,7 @@ them.
 | [KI-05](#ki-05-after-effects-gets-some-styles-as-video) | After Effects gets some styles as video | AE port | Limitation |
 | [KI-06](#ki-06-whisper-on-rtx-50-series-cards-not-yet-tried) | Whisper on RTX 50-series cards not yet tried | Voice-over | Open |
 | [KI-07](#ki-07-vietnamese-letters-in-the-studios-mono-labels) | Vietnamese letters in The Studio's mono labels | Interface | Limitation |
-| [KI-08](#ki-08-mixkit-music-is-for-online-use) | Mixkit music is for online use | Music & Sound | Limitation |
+| [KI-08](#ki-08-mixkit-music-is-for-online-use) | Mixkit music is for online use | Final Mix | Limitation |
 
 ---
 
@@ -60,7 +60,7 @@ letters. The Desk is not affected.
 
 ## KI-08: Mixkit music is for online use
 
-**Limitation.** Tracks offered in Music & Sound come from Mixkit under the Mixkit Stock Music Free License: web, social media, YouTube,
-podcasts and online ads are allowed; TV / radio broadcast, CD / DVD and games are not. The Music & Sound dialog says so, and the film's
+**Limitation.** Tracks offered in Final Mix come from Mixkit under the Mixkit Stock Music Free License: web, social media, YouTube,
+podcasts and online ads are allowed; TV / radio broadcast, CD / DVD and games are not. The Final Mix dialog says so, and the film's
 `docs/CREDITS.md` records it.
-**Workaround:** for broadcast work, use your own licensed music (Music & Sound accepts your own file).
+**Workaround:** for broadcast work, use your own licensed music (Final Mix accepts your own file).

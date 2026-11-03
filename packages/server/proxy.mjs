@@ -47,7 +47,7 @@ const drawnText = (s) => s.split(/\r?\n/).map((l) => l.trimEnd()).filter(Boolean
 /** The film's files, hashed in two parts: the picture (index.html and the compositions without their <audio> tags,
  *  CHARACTERS.json, every asset but sound files: names, sizes and dates) at its fps, and the sound (every <audio> tag and the sound files
  *  under assets/ and audio/). HF's element ids count in neither. `drawn`: the picture once more with the pages' blank lines left out. The
- *  Music & Sound taking a sound out leaves its tag's line empty, so the picture read as changed: a full render (3 min) for a sound alone,
+ *  Final Mix taking a sound out leaves its tag's line empty, so the picture read as changed: a full render (3 min) for a sound alone,
  *  never the sound mixed again onto the picture (T25-3). `picture` stays as it was: the checks' hash and an export's reuse read it. */
 export function filmParts(dir, fps, { stamps = false } = {}) {
   const pic = createHash("sha256"), snd = createHash("sha256"), drw = createHash("sha256"), hrd = createHash("sha256");
@@ -75,7 +75,7 @@ export function filmParts(dir, fps, { stamps = false } = {}) {
   walk(join(dir, "audio"), false, "sound");
   return { picture: pic.digest("hex").slice(0, 16), sound: snd.digest("hex").slice(0, 16), drawn: drw.digest("hex").slice(0, 16), heard: hrd.digest("hex").slice(0, 16) };
 }
-/** Whether every sound of the film sits on its root page (where Music & Sound places music, voice and effects): only then can the sound
+/** Whether every sound of the film sits on its root page (where Final Mix places music, voice and effects): only then can the sound
  *  be mixed again onto a rendered picture (remix.mjs); a sound inside a sub-composition sends the film to a full render. */
 export function soundOnRoot(dir) {
   const walk = (d) => existsSync(d) && readdirSync(d).some((n) => { const p = join(d, n); return statSync(p).isDirectory() ? walk(p) : /\.html?$/i.test(n) && /<(audio|video)\b/i.test(readFileSync(p, "utf8")); });
@@ -245,7 +245,7 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
     if (!asked && (reviewPending(v1) || ["ask", "later"].includes(v1?.next?.render))) return null;
     const v = view(p);
     const wait = (job) => { if (job && onEnd) waiters.set(p.id, [...(waiters.get(p.id) ?? []), onEnd]); return job; };
-    // asked again while one runs (Music & Sound changed the sound during it): that file is of the film as it was when it began, so the
+    // asked again while one runs (Final Mix changed the sound during it): that file is of the film as it was when it began, so the
     // film is looked at again once it ends (T25-3: the render ended stale, with no job, and the Editor said "Updating…" for good)
     if (running.has(p.id)) { again.add(p.id); return wait(running.get(p.id)); }
     if (v.status === "fresh" && v.needsSmooth) {          // a render made before the Smooth copy existed: only the copy
