@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0",
+  "setupDate": "YYYY-MM-DD",
+  "defaults": { "format": "square", "fps": 60, "outputs": ["mp4"] },
+  "images": { "inbox": "images/", "chat": true },
+  "imageGeneration": {
+    "provider": "none",
+    "tool": "",
+    "model": "",
+    "params": {},
+    "transparent": false,
+    "notes": "filled in after the test generation at setup (IMAGES.md §3)"
+  },
+  "voiceGeneration": {
+    "provider": "none",
+    "tool": "",
+    "model": "",
+    "voice": "",
+    "params": {},
+    "notes": "filled in after the test line at setup (VOICE.md §2)"
+  }
+}

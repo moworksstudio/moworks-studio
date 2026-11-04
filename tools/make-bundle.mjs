@@ -4,11 +4,12 @@
 //   hf/        HyperFrames' skills/ and registry/ at the pinned commit, its skills-manifest.json and PINNED
 //   styles/    lemo-opuscar, mg-styles-15, anidoodle, ClaudeAnimationBase, motion-prompt, what-if-animation: the run-time files at each
 //              pinned commit, PINNED; the gallery stills re-encoded at 960 px under their own names (JPEG stays JPEG, WebP stays WebP),
-//              no demo films, no audio
+//              no demo films, no audio; moworks-kits: the owner's own kits as shipped, their pin the folder itself (kept)
 //   library/   the built stores (Blocks, intake, Looks, Vocabulary, tiles, anidoodle cards, the Lemo-Opuscar fonts' Vietnamese check), What
 //              If's demo film (made in the app, kept as it is) and the app's own characters (bundle/library/characters: the app reads them
 //              there, so they are their own source; only counted, or copied into another outDir)
-//   sfx/       the offline sound effects (made by tools/make-sfx-library.mjs from CC0 / public-domain packs; kept as they are, counted)
+//   sfx/       the offline sound effects (made by tools/make-sfx-library.mjs from CC0 / public-domain packs, and the owner's code-made sounds
+//              by tools/make-code-sfx.mjs; kept as they are, counted)
 //   MANIFEST.json  every part: files, bytes, source, commit, licence
 // Usage: node tools/make-bundle.mjs [outDir] [--only part,part]   (default app/bundle; each part's folder is replaced, a part whose pinned
 //   source is its own bundle folder is kept as it is, and a folder no part makes stays). Nothing is downloaded.
@@ -116,6 +117,10 @@ copyPart("what-if-animation", wi.root, join(OUT, "styles", "what-if-animation"),
 
 // library: the built stores, so a clean computer's library is not empty: the store for the pins (the folder the app reads), never one built
 // at another pin; intake has one folder (current.json)
+// (before them, the owner's own kits: written as shipped by tools/intake-moworks-kit.mjs, pinned by the SHA-256 of each kit's .md; the pin is
+// the bundled folder itself, kept and counted)
+for (const [id, k] of Object.entries(pins.moworksKits?.kits ?? {}))
+  copyPart(`moworks-kit-${id}`, join(pins.moworksKits.root, k.dir), join(OUT, "styles", "moworks-kits", id), { source: `${k.title} ${k.version} (${k.file}, SHA-256 ${k.sha256})`, licence: pins.moworksKits.licence });
 const lib = join(work, "library");
 const current = (store) => { try { return JSON.parse(readFileSync(join(lib, store, "current.json"), "utf8")).dir; } catch { return null; } };
 const pinned = { blocks: blocksStore, intake: () => current("intake"), looks: looksStore };

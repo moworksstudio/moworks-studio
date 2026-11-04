@@ -398,8 +398,13 @@ async function make(s) {
     source: { name: P.name, url: P.page, author: P.author, licence: P.licence, licenceUrl: P.licenceUrl, file: archive ? `${archive} › ${rel}` : basename(src), ...(P.origin ? { origin: P.origin } : {}), read: READ, how } };
 }
 
+// the owner's code-made sounds (tools/make-code-sfx.mjs, source.kind "code") come from no pack: kept as they are, with their CREDITS.md block
+const prevCat = (() => { try { return JSON.parse(readFileSync(join(OUT, "catalog.json"), "utf8")); } catch { return { sounds: [] }; } })();
+const kept = (prevCat.sounds ?? []).filter((s) => s.source?.kind === "code" && existsSync(join(OUT, ...s.file.split("/")))).map((s) => ({ s, data: readFileSync(join(OUT, ...s.file.split("/"))) }));
+const keptCredits = (() => { try { return /<!-- mw:code-sfx -->[\s\S]*?<!-- \/mw:code-sfx -->/.exec(readFileSync(join(OUT, "CREDITS.md"), "utf8"))?.[0] ?? null; } catch { return null; } })();
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
+for (const k of kept) { mkdirSync(join(OUT, k.s.family), { recursive: true }); writeFileSync(join(OUT, ...k.s.file.split("/")), k.data); }
 const made = new Array(sounds.length);
 let next = 0;
 await Promise.all(Array.from({ length: 6 }, async () => { while (next < sounds.length) { const i = next++; made[i] = await make(sounds[i]); process.stdout.write("."); } }));
@@ -408,6 +413,7 @@ console.log("");
 
 // catalog and credits
 const order = (s) => FAMILIES.indexOf(s.family);
+made.push(...kept.map((k) => k.s));
 made.sort((a, b) => order(a) - order(b) || a.id.localeCompare(b.id, "en", { numeric: true }));
 const used = [...new Set(sounds.map((s) => s.pack))];
 writeFileSync(join(OUT, "catalog.json"), JSON.stringify({
@@ -420,13 +426,13 @@ const L = ["# Sound effects bundled with Moworks Studio", "",
   "Licences: CC0 1.0, https://creativecommons.org/publicdomain/zero/1.0/ . Public domain (pdsounds.org): the author dedicated the recording to the",
   "public domain on pdsounds.org; Wikimedia Commons keeps the record (https://commons.wikimedia.org/wiki/Template:PD-pdsounds.org).", ""];
 for (const key of used) {
-  const P = PACKS[key], mine = made.filter((m) => sounds.find((s) => s.id === m.id).pack === key);
+  const P = PACKS[key], mine = made.filter((m) => sounds.find((s) => s.id === m.id)?.pack === key);
   L.push(`## ${P.name}`, "", `- Author: ${P.author}`, `- Page: ${P.page}`, `- Licence: ${P.licence} (${P.licenceUrl}); as found: ${P.licenceSeen}`);
   if (P.origin) L.push(`- First published at: ${P.origin}`);
   L.push(`- Downloaded ${READ}: ${P.files.map((f) => `\`${f.name}\` (${f.bytes} bytes, SHA-256 \`${f.sha256}\`)`).join("; ")}`);
   L.push(`- Sounds (${mine.length}): ${mine.map((m) => `\`${m.id}\` ← ${m.source.file}`).join("; ")}`, "");
 }
-writeFileSync(join(OUT, "CREDITS.md"), L.join("\n"));
+writeFileSync(join(OUT, "CREDITS.md"), L.join("\n") + (keptCredits ? `\n${keptCredits}\n` : ""));
 
 // size against the budget, by family
 const bytesOf = (rel) => statSync(join(OUT, ...rel.split("/"))).size;

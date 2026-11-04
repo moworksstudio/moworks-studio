@@ -34,6 +34,7 @@ import { anidoodleId, ruleText as anidoodleRuleText, stageEngine as stageAnidood
 import { readCast, ruleText as brushRuleText, stageGuide as stageBrushGuide } from "../character-kit/index.mjs";
 import { stageEngine as stageWhatIf, whatIfSource } from "../what-if-styles/index.mjs";
 import { MAP_STYLE_ID, placeEngine as placeMapEngine, stageGuide as stageMapGuide } from "../map-explainer/index.mjs";
+import { isKitStyle, placeKit, stageGuide as stageKitGuide } from "../moworks-kits/index.mjs";
 import { status as secretsStatus } from "../secrets/index.mjs";
 import { filmVietnamese } from "../voice/tts.mjs";
 import { packStatus as kokoroStatus } from "../voice/kokoro.mjs";
@@ -968,6 +969,11 @@ export class Agent {
       if (meta.style?.id === MAP_STYLE_ID) {
         try { if (stageMapGuide(dir).files.length) this.event(task, { kind: "status", text: "map engine staged" }); placeMapEngine(dir); } catch { /* the rules are enough */ }
       }
+      // the owner's kit styles (Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, 2D Explainer): the kit as shipped and the page to start
+      // from, from the first step; the engine and the faces beside the film's page too once it has one, so a Build can see its frames before the app's finish
+      if (isKitStyle(meta.style?.id)) {
+        try { if (stageKitGuide(dir, meta.style.id, this.root).files.length) this.event(task, { kind: "status", text: "the kit staged" }); await placeKit(dir, "index.html").catch(() => null); } catch { /* the rules are enough */ }
+      }
       // the Brush cartoon style: the character kit (its guide, the layer's code, an example definition; never clawd.js) from the first step
       if (meta.style?.id === "brush-cartoon") {
         try { if (stageBrushGuide(dir, this.root).files.length) this.event(task, { kind: "status", text: "character kit staged" }); } catch { /* the rules are enough */ }
@@ -1267,7 +1273,7 @@ export class Agent {
       try {
         const rep = await finalize(dir);
         // a film whose source does not compile keeps its older bundle: said at once, kept for the pipeline and the autopilot
-        const bad = rep?.anidoodle?.error ?? null;
+        const bad = rep?.anidoodle?.error ?? rep?.kit?.error ?? null;
         if (bad) this.event(task, { kind: "tool-error", text: `The film's code does not compile: ${bad}` });
         this.updateMeta?.(task.projectId, (m) => { const pl = (m.pipeline ??= {}); if (bad) pl.buildError = { at: new Date().toISOString(), error: bad, taskId: task.id }; else delete pl.buildError; });
       } catch (e) { this.event(task, { kind: "tool-error", text: `Finalize: ${e.message}` }); }

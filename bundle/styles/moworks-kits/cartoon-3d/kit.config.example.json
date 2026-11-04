@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0",
+  "setupDate": "YYYY-MM-DD",
+  "modules": {
+    "shorts": true,
+    "whatif": true,
+    "ideas": true,
+    "builder": true,
+    "review": true,
+    "music": false
+  },
+  "defaults": { "format": "short", "fps": 30, "captions": true, "review": "fast", "outputs": ["mp4"], "loudness": -14 },
+  "render": { "gl": "angle", "concurrency": null },
+  "voiceGeneration": {
+    "provider": "none",
+    "tool": "",
+    "model": "",
+    "voice": "",
+    "params": {},
+    "notes": "filled in after a test line (cartoon-video/references/VOICE.md §2)"
+  },
+  "channel": { "niche": "", "audience": "", "tone": "", "tagline": "" }
+}

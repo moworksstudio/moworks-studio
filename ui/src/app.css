@@ -471,7 +471,10 @@ details.diag pre { white-space: pre-wrap; overflow-wrap: anywhere; background: v
    dim and small. Then the status and the time, then the actions as one quiet row (sentence case; the remove button at the far end). */
 .card .card-body { gap: 0.5rem; padding-top: var(--sp-3); }
 .card .card-title { font-size: calc(var(--fs-heading) * 1.04); color: var(--text-primary); }
-.card .card-tags { gap: 0.375rem; }
+.card .card-tags { gap: 0.375rem; flex-wrap: nowrap; }
+/* the film style on one line, cut with "…" like the project's name (owner 04/11: a long style name ran onto a second line) */
+.card .card-tags .chip.tag-aspect { flex: none; }
+.card .card-tags .chip.tag-style { flex: 0 1 auto; min-width: 0; display: block; line-height: 1.5rem; }
 .chip.tag-aspect, .chip.tag-style { height: 1.5rem; padding: 0 0.625rem; font-size: var(--fs-meta); font-weight: 500; border-color: transparent; }
 .chip.tag-aspect { color: var(--accent-ink); background: var(--accent-soft); }
 .chip.tag-style { color: var(--tag-2); background: color-mix(in srgb, var(--tag-2) 14%, transparent); }

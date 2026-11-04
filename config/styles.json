@@ -336,6 +336,337 @@
       }
     },
     {
+     "id": "paper-collage",
+     "title": "Paper Collage",
+     "defaultLength": 30,
+     "description": "An editorial paper-collage explainer: grid paper, black-and-white halftone cut-outs with a white paper edge, one red accent and a yellow highlighter, torn-paper transitions, springy hand-made motion on every beat of the voice.",
+     "category": "Motion graphics",
+     "tags": [
+      "paper",
+      "collage",
+      "halftone",
+      "explainer",
+      "editorial"
+     ],
+     "aspects": [
+      "16:9",
+      "9:16",
+      "1:1"
+     ],
+     "fps": {
+      "default": 60,
+      "allowed": [
+       60,
+       30
+      ],
+      "_about": "the kit's 60 fps (smooth springs); 30 when the owner is in a hurry (OUTPUT.md)"
+     },
+     "rules": {
+      "kind": "moworks",
+      "files": [
+       "config/rules/paper-collage/SKILL.md",
+       "config/rules/general-style/SKILL.md"
+      ],
+      "uses": [
+       "hyperframes",
+       "hyperframes-cli",
+       "media-use"
+      ],
+      "readFirst": [
+       "paper-collage",
+       "general-style"
+      ]
+     },
+     "pipelineFrom": "general",
+     "boards": "second",
+     "intendedUse": "A motion graphic or a voiced explainer clip in the paper-collage editorial look: a title, a list, a chart of real data, a number, a verdict.",
+     "preview": {
+      "image": "/styles/paper-collage.jpg",
+      "placeholder": false,
+      "label": "Preview: the kit's own demo, made in the app",
+      "credit": "Moworks Studio · a frame of the kit's demo, drawn by the app"
+     },
+     "look": false,
+     "dim": "2D",
+     "renderer": "dom",
+     "credit": {
+      "author": "Moworks Studio",
+      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-kits/paper-collage",
+      "licence": "the owner's own (Moworks Studio)",
+      "made": "as shipped",
+      "madeNote": "the owner's kit as shipped (its React blocks, its rules, its code-made sounds and textures), run on HyperFrames through the app's stand-in for Remotion; Special Elite drawn by Special Elite VN for the Vietnamese letters",
+      "kit": {
+       "id": "paper-collage",
+       "title": "Paper Collage Motion Kit",
+       "version": "1.0.0"
+      }
+     }
+    },
+    {
+     "id": "stickman-explainer",
+     "title": "Stickman Explainer",
+     "defaultLength": 45,
+     "description": "A narrated \"What if…\" explainer: flat vector figures with round heads, a hoodie hero with rim light, a 2:1 letterbox, a cut on every sentence, data scenes (rulers, bell curves, maps), a gold title card, crisp UI sounds.",
+     "category": "Explainer",
+     "tags": [
+      "stickman",
+      "what if",
+      "explainer",
+      "narrated",
+      "flat vector"
+     ],
+     "aspects": [
+      "16:9"
+     ],
+     "sizeLocked": true,
+     "fps": {
+      "default": 24,
+      "allowed": [
+       24
+      ],
+      "_about": "the kit's frame: 1920×1080 at 24 fps (STYLE.md)"
+     },
+     "rules": {
+      "kind": "moworks",
+      "files": [
+       "config/rules/stickman-explainer/SKILL.md",
+       "config/rules/general-style/SKILL.md"
+      ],
+      "uses": [
+       "hyperframes",
+       "hyperframes-cli",
+       "media-use"
+      ],
+      "readFirst": [
+       "stickman-explainer",
+       "general-style"
+      ]
+     },
+     "pipelineFrom": "general",
+     "boards": "second",
+     "intendedUse": "A 35-60 s (or 6-12 min) narrated \"what if…\" premise in second person, every number real and sourced.",
+     "preview": {
+      "image": "/styles/stickman-explainer.jpg",
+      "placeholder": false,
+      "label": "Preview: the kit's own demo, made in the app",
+      "credit": "Moworks Studio · a frame of the kit's demo, drawn by the app"
+     },
+     "look": false,
+     "dim": "2D",
+     "renderer": "canvas",
+     "credit": {
+      "author": "Moworks Studio",
+      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-kits/story",
+      "licence": "the owner's own (Moworks Studio)",
+      "made": "as shipped",
+      "madeNote": "the owner's kit as shipped (its Canvas 2D drawing kit, its rules, its code-made sounds), run on HyperFrames through the app's stand-in for Remotion",
+      "kit": {
+       "id": "story",
+       "title": "Story Animation Kit",
+       "version": "1.0.0"
+      }
+     }
+    },
+    {
+     "id": "inner-voice-short",
+     "title": "Inner Voice Short",
+     "defaultLength": 45,
+     "description": "A dark, quiet short told in captions: moonlit rooms in thin grey lines, a cream capsule character, a black shadow with a red glow that speaks in red typed words, a DAY N counter, slow fades, close foley.",
+     "category": "Story",
+     "tags": [
+      "inner voice",
+      "captions",
+      "dark",
+      "short story",
+      "no narration"
+     ],
+     "aspects": [
+      "16:9"
+     ],
+     "sizeLocked": true,
+     "fps": {
+      "default": 30,
+      "allowed": [
+       30
+      ],
+      "_about": "the kit's frame: 1920×1080 at 30 fps (STYLE.md)"
+     },
+     "rules": {
+      "kind": "moworks",
+      "files": [
+       "config/rules/inner-voice-short/SKILL.md",
+       "config/rules/general-style/SKILL.md"
+      ],
+      "uses": [
+       "hyperframes",
+       "hyperframes-cli",
+       "media-use"
+      ],
+      "readFirst": [
+       "inner-voice-short",
+       "general-style"
+      ]
+     },
+     "pipelineFrom": "general",
+     "boards": "second",
+     "ownEnding": true,
+     "intendedUse": "A caption-told motivational short with no narrator: a routine, the inner voice's excuses, DAY counters, a turn, the payoff word.",
+     "preview": {
+      "image": "/styles/inner-voice-short.jpg",
+      "placeholder": false,
+      "label": "Preview: the kit's own demo, made in the app",
+      "credit": "Moworks Studio · a frame of the kit's demo, drawn by the app"
+     },
+     "look": false,
+     "dim": "2D",
+     "renderer": "canvas",
+     "credit": {
+      "author": "Moworks Studio",
+      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-kits/story",
+      "licence": "the owner's own (Moworks Studio)",
+      "made": "as shipped",
+      "madeNote": "the owner's kit as shipped (its Canvas 2D drawing kit, its rules, its code-made sounds), run on HyperFrames through the app's stand-in for Remotion; Comic Sans drawn by Pangolin for the Vietnamese letters",
+      "kit": {
+       "id": "story",
+       "title": "Story Animation Kit",
+       "version": "1.0.0"
+      }
+     }
+    },
+    {
+     "id": "cartoon-3d",
+     "title": "3D Cartoon",
+     "defaultLength": 50,
+     "description": "Narrated 3D cartoon stories: an original flat-drawn cast with painted faces and ink-stick limbs, toon-lit sets, thick ink outlines, glowing props with bloom, depth of field, word-by-word captions. Story Shorts in 9:16, What-If stories in 16:9.",
+     "category": "Story",
+     "tags": [
+      "3d",
+      "cartoon",
+      "toon",
+      "story shorts",
+      "what if",
+      "three.js"
+     ],
+     "aspects": [
+      "9:16",
+      "16:9"
+     ],
+     "fps": {
+      "default": 30,
+      "allowed": [
+       30
+      ],
+      "_about": "the kit's 30 fps (STYLE.md §1)"
+     },
+     "rules": {
+      "kind": "moworks",
+      "files": [
+       "config/rules/cartoon-3d/SKILL.md",
+       "config/rules/general-style/SKILL.md"
+      ],
+      "uses": [
+       "hyperframes",
+       "hyperframes-cli",
+       "media-use"
+      ],
+      "readFirst": [
+       "cartoon-3d",
+       "general-style"
+      ]
+     },
+     "pipelineFrom": "general",
+     "boards": "second",
+     "intendedUse": "A 40-60 s narrated 9:16 story short in one of five formats, or a 30-50 s (8-12 min) 16:9 What-If story.",
+     "preview": {
+      "image": "/styles/cartoon-3d.jpg",
+      "placeholder": false,
+      "label": "Preview: the kit's own demo, made in the app",
+      "credit": "Moworks Studio · a frame of the kit's demo, drawn by the app"
+     },
+     "look": false,
+     "dim": "3D",
+     "renderer": "webgl",
+     "credit": {
+      "author": "Moworks Studio",
+      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-kits/cartoon-3d",
+      "licence": "the owner's own (Moworks Studio)",
+      "made": "as shipped",
+      "madeNote": "the owner's kit as shipped (its three.js runtime and post chain, its cast and sets, its rules, its code-made sounds), run on HyperFrames through the app's stand-in for Remotion, three.js 0.186.1 (the patch of the kit's 0.186.0); Outfit and Caveat Brush drawn by Lexend and Sedgwick Ave Display for the Vietnamese letters",
+      "kit": {
+       "id": "cartoon-3d",
+       "title": "3D Cartoon Animation Toolkit",
+       "version": "1.0.0"
+      }
+     }
+    },
+    {
+     "id": "explainer-2d",
+     "title": "2D Explainer",
+     "defaultLength": 40,
+     "description": "Narrated 2D science explainers drawn in code on one canvas: flat cel shapes with rim light and no outlines, deep indigo grounds, glowing accents, a red-hoodie hero, label pills and a word-by-word title, every cut on a word.",
+     "category": "Explainer",
+     "tags": [
+      "2d",
+      "explainer",
+      "cel",
+      "science",
+      "narrated"
+     ],
+     "aspects": [
+      "16:9",
+      "9:16"
+     ],
+     "fps": {
+      "default": 60,
+      "allowed": [
+       60,
+       30
+      ],
+      "_about": "the kit's 60 fps; 30 only when the owner asks (STYLE.md §5)"
+     },
+     "rules": {
+      "kind": "moworks",
+      "files": [
+       "config/rules/explainer-2d/SKILL.md",
+       "config/rules/general-style/SKILL.md"
+      ],
+      "uses": [
+       "hyperframes",
+       "hyperframes-cli",
+       "media-use"
+      ],
+      "readFirst": [
+       "explainer-2d",
+       "general-style"
+      ]
+     },
+     "pipelineFrom": "general",
+     "boards": "second",
+     "ownEnding": true,
+     "intendedUse": "A narrated explainer: a 30-60 s vertical short or a 16:9 explainer of 40 s to 12 minutes in chapters.",
+     "preview": {
+      "image": "/styles/explainer-2d.jpg",
+      "placeholder": false,
+      "label": "Preview: the kit's own demo, made in the app",
+      "credit": "Moworks Studio · a frame of the kit's demo, drawn by the app"
+     },
+     "look": false,
+     "dim": "2D",
+     "renderer": "canvas",
+     "credit": {
+      "author": "Moworks Studio",
+      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-kits/explainer-2d",
+      "licence": "the owner's own (Moworks Studio)",
+      "made": "as shipped",
+      "madeNote": "the owner's kit as shipped (its HyperFrames page and canvas engine, its rules, its code-made sounds); Figtree drawn by Hanken Grotesk for the Vietnamese letters",
+      "kit": {
+       "id": "explainer-2d",
+       "title": "2D Explainer Animation Toolkit",
+       "version": "1.0.0"
+      }
+     }
+    },
+    {
       "id": "hf-explainer",
       "title": "Explainers, tutorials and \"how it works\"",
       "description": "One idea the viewer understands by the end. The spine is one concrete example worked through, start to finish, not a tour of facts. Usually 30–90 s.",

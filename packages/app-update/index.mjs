@@ -45,8 +45,15 @@ export function updateConfig(root = APP_ROOT) {
 
 const commitInfo = async (root, rev) => {
   const [hash, date, subject] = (await git(root, ["log", "-1", "--format=%H%x00%cI%x00%s", rev])).split("\0");
-  return { hash, short: hash.slice(0, 8), date, subject };
+  return { hash, short: hash.slice(0, 8), date, subject, version: await versionAt(root, rev) };
 };
+/** The app's version at a revision: the changelog's newest heading ("## 0.8.214.4 (2026-11-01)"), docs/ then the root; null when none. */
+async function versionAt(root, rev) {
+  for (const f of ["docs/CHANGELOG.md", "CHANGELOG.md"]) {
+    try { const v = /^## (\d[\w.-]*)/m.exec(await git(root, ["show", `${rev}:${f}`]))?.[1]; if (v) return v; } catch { /* not at this revision */ }
+  }
+  return null;
+}
 
 /** Where the app is: its commit, the repo it updates from, the last check and the last update's result. */
 export async function status(root = APP_ROOT) {

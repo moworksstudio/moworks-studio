@@ -1,0 +1,59 @@
+<!doctype html>
+<!-- Module test page. Make it with: node tools/new-module-test.mjs videos/<slug> <module>
+     The tool sets the size from the video (or --format), syncs ex/, copies story/film-pal.js and
+     story/<module>.js into story/, and adds the module's script tag below. Edit test.js, not this file. -->
+<html lang="en" data-resolution="landscape">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Module test</title>
+    <script src="ex/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Figtree";
+        src: url("ex/fonts/figtree-latin-600-normal.woff2") format("woff2");
+        font-weight: 600;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Figtree";
+        src: url("ex/fonts/figtree-latin-700-normal.woff2") format("woff2");
+        font-weight: 700;
+        font-display: block;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #0a0230;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+      #ex-stage {
+        position: absolute;
+        inset: 0;
+        width: 1920px;
+        height: 1080px;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="8" data-fps="60" data-width="1920" data-height="1080">
+      <canvas id="ex-stage" width="1920" height="1080"></canvas>
+    </div>
+    <script src="ex/ex-core.js"></script>
+    <script src="ex/ex-fx.js"></script>
+    <script src="ex/house-pal.js"></script>
+    <script src="story/film-pal.js"></script>
+    <script src="ex/house-hero.js"></script>
+    <script src="ex/house-ui.js"></script>
+    <!-- @module: the module under test (new-module-test.mjs writes its script tag here) -->
+    <script src="test.js"></script>
+  </body>
+</html>

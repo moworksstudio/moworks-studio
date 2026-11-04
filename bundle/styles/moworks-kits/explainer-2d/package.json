@@ -1,0 +1,26 @@
+{
+  "name": "2d-explainer-toolkit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Narrated 2D explainer videos drawn in code on one canvas, rendered to MP4 with HyperFrames.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "doctor": "node tools/doctor.mjs",
+    "check": "node tools/check.mjs",
+    "browser": "hyperframes browser ensure",
+    "speech": "hyperframes models install parakeet",
+    "new": "node tools/new-video.mjs",
+    "snapshot": "node tools/snapshot.mjs",
+    "sound": "node tools/sound.mjs",
+    "render": "node tools/render.mjs",
+    "qc": "node tools/qc.mjs"
+  },
+  "devDependencies": {
+    "@fontsource/figtree": "5.3.0",
+    "gsap": "3.15.0",
+    "hyperframes": "0.9.1"
+  }
+}

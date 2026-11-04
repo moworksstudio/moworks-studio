@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "setupDate": "YYYY-MM-DD",
+  "modules": { "shorts": true, "longform": true, "ideas": true, "review": true },
+  "sound": { "music": "generic", "sfx": "generic" },
+  "voiceGeneration": { "provider": "none", "tool": null, "notes": "" },
+  "defaults": { "format": "wide", "fps": 60 }
+}

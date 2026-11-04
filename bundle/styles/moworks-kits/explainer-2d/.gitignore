@@ -1,0 +1,15 @@
+node_modules/
+videos/
+renders/
+snaps/
+.hyperframes/
+ex/
+audio/takes/
+*.wav
+*.m4a
+*.mp3
+*.flac
+*.aiff
+kit.config.json
+__pycache__/
+.DS_Store

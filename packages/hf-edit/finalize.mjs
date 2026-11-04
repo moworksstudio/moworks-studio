@@ -14,6 +14,9 @@
 //            the families instead (packages/hf-edit/vendorLibs.mjs)
 //  R-ANIDOODLE an anidoodle film or board (anidoodle/page.ts, boards/X/page.ts) is bundled with the pinned engine (anidoodleBuild.mjs)
 //  R-MAP     a Map Explainer film or board gets the shared engine, its map data and face and the voice's words beside the page (map-explainer)
+//  R-KIT     a film or board of the owner's kits (data-kit on its root): a Remotion kit's composition bundled with the kit's code as pinned, React and the
+//            app's stand-in for Remotion into compositions/film/film.js (driven by R-LEMO); the 2D Explainer's engine and the voice's words beside its page;
+//            the kits' faces without Vietnamese letters declared with their twins (moworks-kits)
 //  R-WHATIF  a What If film (whatif/episode.tsx) is bundled with the pinned engine, the author's React and the app's stand-in for Remotion
 //            (whatIfBuild.mjs); the Google faces it asks for are named in index.html so R-FONTS installs them
 //  R-LEMO    a code-film page (lemo, mg-styles-15, anidoodle: render(t) / renderAt(t) / window.FILM) gets the bridge to HyperFrames' timeline,
@@ -34,6 +37,7 @@ import { lemoBoard, lemoFilm } from "./lemoPage.mjs";
 import { buildAnidoodle } from "./anidoodleBuild.mjs";
 import { buildWhatIf } from "./whatIfBuild.mjs";
 import { loadsMapEngine, placeEngine as placeMapEngine } from "../map-explainer/index.mjs";
+import { placeKit } from "../moworks-kits/index.mjs";
 import { clawdIn, refreshFilmKit } from "../character-kit/index.mjs";
 import { familyKey, projectFonts } from "./localFonts.mjs";
 
@@ -286,6 +290,9 @@ export async function finalize(projectDir, { version = null, googleFonts = true,
   if (wi) { report.whatIf = wi; whatIfFaces(projectDir, wi.families); }
   // R-MAP: the Map Explainer engine beside the page; the words of the voice written again, so a new voice re-times the film
   try { if (loadsMapEngine(readFileSync(join(projectDir, "index.html"), "utf8"))) { const m = placeMapEngine(projectDir); if (m.length) report.map = { files: m }; } } catch (e) { if (e.code !== "ENOENT") throw e; }
+  // R-KIT: a film of the owner's kits, before R-LEMO sees its page (the bundle holds window.render and READY)
+  const kit = await placeKit(projectDir, "index.html");
+  if (kit) report.kit = { style: kit.style, files: kit.files.length, ...(kit.build ? { built: kit.build.built, families: kit.build.families, twinned: kit.build.twinned, ...(kit.build.error ? { error: kit.build.error } : {}) } : {}), ...(kit.fonts.missing.length ? { missingFaces: kit.fonts.missing } : {}) };
   // R-CAST: a Brush cartoon film (or board) gets the character kit and cast.js (from CHARACTERS.json) where its page loads them
   const cast = refreshFilmKit(projectDir);
   if (cast) report.cast = { pages: cast.pages, files: cast.files.length };
@@ -419,6 +426,9 @@ export async function boardFonts(projectDir, file, { version = null, googleFonts
     const wi = await buildWhatIf(projectDir, { out: `${file.split("/").slice(0, -1).join("/")}/film.js` });
     if (wi) { report.whatIf = wi; whatIfFaces(projectDir, wi.families, file); }
   }
+  // R-KIT for a board of the owner's kits: the film's drawing bundled into the board's own folder, its engine and faces beside it
+  const kb = await placeKit(projectDir, file);
+  if (kb) report.kit = { style: kb.style, ...(kb.build?.error ? { error: kb.build.error } : {}) };
   const html = readFileSync(path, "utf8");
   // R-MAP for a Map Explainer board: the engine inside the board's own folder, HF's web root for its stills
   if (loadsMapEngine(html)) { const m = placeMapEngine(projectDir, dirname(path)); if (m.length) report.map = { files: m }; }

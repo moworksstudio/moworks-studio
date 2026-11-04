@@ -15,6 +15,8 @@ import { UPDATE_CHANGED, versionDay as day } from "./UpdateNotice.jsx";
 
 /** What runs that an update waits for, by the update's own rule (POST /app/update/apply: anything running that is not the app's quiet
  *  background work); [] when nothing does or the service cannot say (the update itself refuses then). */
+/** A version as the screen says it: its number, else the day it is from. */
+const versionOf = (c, day) => c?.version ?? day(c?.date);
 const runningNow = async () => { try { return ((await get("/api/app")).running ?? []).filter((x) => !x.idle).map((x) => x.title); } catch { return []; } };
 
 /** The last update, as one line in the state colours. No commit hash: the "In use" line above names the version by its date and subject. */
@@ -61,13 +63,6 @@ function Uninstall() {
     </Dialog>}
   </div>;
 }
-
-/** The new versions, newest first, with the ones in a row that share a subject as one ({ ...newest, n }). */
-export const sameInARow = (commits) => commits.reduce((out, c) => {
-  const last = out[out.length - 1];
-  if (last && last.subject === c.subject) last.n += 1; else out.push({ ...c, n: 1 });
-  return out;
-}, []);
 
 export default function AppUpdate() {
   const t = useT();
@@ -117,8 +112,9 @@ export default function AppUpdate() {
       {!d.git ? <p className="state-line stop"><AlertTriangle size={14} />{t("This copy of the app cannot update itself; install the new version instead.")}</p>
         : !d.configured ? <p className="state-line run"><AlertTriangle size={14} />{t("Update address not set yet.")}</p> : null}
       <dl className="kv upd-kv">
-        <dt>{t("In use")}</dt><dd>{day(d.current?.date)}{d.source ? <span className="muted"> · {t("source copy")}</span> : d.current?.subject && <span className="muted"> · {d.current.subject}</span>}</dd>
-        {d.lastCheck?.at && <><dt>{t("Last check")}</dt><dd>{ago(d.lastCheck.at)} · {d.lastCheck.source ? t("source copy") : d.lastCheck.available ? t("{n} new change(s)", { n: d.lastCheck.ahead ?? 0 }) : t("up to date")}</dd></>}
+        {/* the version and nothing else (owner 04/11: no list of every day's changes, no counts) */}
+        <dt>{t("In use")}</dt><dd>{versionOf(d.current, day)}{d.source && <span className="muted"> · {t("source copy")}</span>}</dd>
+        {check?.available && <><dt>{t("New")}</dt><dd>{versionOf(check.latest, day)} · {check.latest?.version && check.latest.version !== d.current?.version ? t("a new version") : t("bug fixes")}</dd></>}
       </dl>
       <LastResult last={d.last} />
     </div>
@@ -131,21 +127,16 @@ export default function AppUpdate() {
       ? t("This is the source copy: releases are made from it, so it does not update itself.") : t("You have the latest version.")}</p>}
 
     {check?.available && <div className="panel">
-      <div className="panel-head"><h2>{t("What changed")}</h2><span className="muted num">{t("{n} change(s)", { n: check.ahead ?? check.commits?.length ?? 0 })}</span>
+      <div className="panel-head"><h2>{t("A new version is ready")}</h2>
         <button className="btn ok sm end" onClick={askUpdate} disabled={running || done || blocked.length > 0}><Download size={14} />{t("Update and restart")}</button></div>
       {wait && !running && !done && <p className="state-line run upd-wait"><Clock size={14} />{t("Wait until this has finished, then update: {what}.", { what: wait.join(", ") })}</p>}
       {/* changed files by their count, never their paths in the repo */}
       {blocked.map((b) => <p key={b.code} className="warn-note"><AlertTriangle size={13} />{b.code === "LOCAL_CHANGES"
         ? t("{n} app file(s) were changed on this computer.", { n: b.files?.length ?? 0 }) : t(b.message)}</p>)}
-      {/* releases in a row with one subject ("Bug fixes") read as one line with their count, dated by the newest */}
-      <ol className="plain upd-commits">{sameInARow(check.commits ?? []).map((c) => <li key={c.short}><span className="muted">{day(c.date)}</span>
-        <span>{c.subject}{c.n > 1 && <span className="muted"> · {t("{n} updates", { n: c.n })}</span>}</span></li>)}</ol>
-      {(check.files != null || check.packages) && <p className="hint">{t("{n} file(s) change", { n: check.files ?? 0 })}{check.packages ? ` · ${t("the app's packages change too")}` : ""}</p>}
-      {check.changelog && <details className="upd-log"><summary>{t("What's new")}</summary><pre>{check.changelog}</pre></details>}
     </div>}
 
     {(running || done) && <div className="panel">
-      {running && <p className="state-line run"><Loader2 size={14} className="spin" />{job.stage ? t(job.stage) : t("Starting…")}{job.progress != null ? ` · ${job.progress}%` : ""}</p>}
+      {running && <p className="state-line run"><Loader2 size={14} className="spin" />{t("Updating… the app restarts when it is done.")}{job.progress != null ? ` · ${job.progress}%` : ""}</p>}
       {done && <p className="state-line ok"><RotateCcw size={14} />{check?.latest?.date ? t("Updated to the version of {date}. The app restarts now: a new window opens and this one closes.", { date: day(check.latest.date) })
         : t("Updated. The app restarts now: a new window opens and this one closes.")}</p>}
     </div>}

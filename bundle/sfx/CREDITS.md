@@ -640,3 +640,15 @@ public domain on pdsounds.org; Wikimedia Commons keeps the record (https://commo
 - Licence: CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/); as found: file page licence: CC0 (self)
 - Downloaded 2026-10-30: `James_River_Rapids_2.ogg` (17025822 bytes, SHA-256 `daad9a9b17a5bdc3cdae11f9857ce32c8f6189fd06249ee898f65df68947040c`)
 - Sounds (1): `ambience-river-1` ← James_River_Rapids_2.ogg
+
+<!-- mw:code-sfx -->
+## The owner's code-made sounds (Moworks Studio)
+
+- 109 sounds synthesised by the Python code of the owner's own kits (numpy / scipy, fixed seeds, no samples or recordings), built on 2026-11-04 by `tools/make-code-sfx.mjs` from the pinned kits in `bundle/styles/moworks-kits` (config/pins.json moworksKits).
+- Licence: the owner's own work. Credit: Moworks Studio.
+- Paper Collage, `paper-collage/tools/sfx/build_kit.py`: `pc-cash`, `pc-chip`, `pc-circle`, `pc-click`, `pc-count`, `pc-ding`, `pc-flip`, `pc-impact`, `pc-launch`, `pc-lock`, `pc-marker-long`, `pc-paper-land`, `pc-pluck`, `pc-pop`, `pc-scatter`, `pc-scribble`, `pc-shot`, `pc-slam`, `pc-stamp`, `pc-strike`, `pc-tear`, `pc-tick`, `pc-ticker`, `pc-typing`, `pc-whoosh-deep`, `pc-whoosh-up`, `pc-whoosh`, `pc-zoom`
+- Stickman Explainer, `story/tools/sfx/build_stickman.py`: `sm-alert`, `sm-bite`, `sm-boom`, `sm-breath`, `sm-chatter`, `sm-cheer`, `sm-chime`, `sm-chip-seat`, `sm-cloud`, `sm-crack`, `sm-crowd`, `sm-dawn`, `sm-ding`, `sm-door`, `sm-flock`, `sm-flythrough`, `sm-frost`, `sm-honk`, `sm-jet`, `sm-led`, `sm-office`, `sm-papers`, `sm-pass`, `sm-pigeon`, `sm-ping`, `sm-pop`, `sm-prop`, `sm-reveal`, `sm-screen-on`, `sm-shimmer`, `sm-signal`, `sm-snap-out`, `sm-steps`, `sm-swell`, `sm-swish`, `sm-tag-a`, `sm-tag-d`, `sm-tag-fs`, `sm-takeoff`, `sm-thermo`, `sm-thud`, `sm-timer`, `sm-traffic`, `sm-ui`, `sm-up`, `sm-wind`, `sm-wire`
+- Inner Voice Short, `story/tools/sfx/build_inner_voice.py`: `iv-alarm`, `iv-clock-spin`, `iv-dread`, `iv-harmonics`, `iv-room`, `iv-string-mute`, `iv-strum-sour`, `iv-tap`, `iv-whisper`
+- 3D Cartoon, `cartoon-3d/tools/sfx/build_sounds.py`: `c3-blip-down`, `c3-blip-up`, `c3-chip`, `c3-click`, `c3-count`, `c3-glitch`, `c3-impact`, `c3-lock`, `c3-resolve`, `c3-slice`, `c3-tick`, `c3-vs`, `c3-win`
+- 2D Explainer, `explainer-2d/tools/audio/sfx.py`: `x2-counter-roll`, `x2-impact`, `x2-light-hit`, `x2-pop-big`, `x2-pop`, `x2-reveal`, `x2-sparkle`, `x2-swish`, `x2-tick`, `x2-title`, `x2-whoosh-dive`, `x2-whoosh-pullback`
+<!-- /mw:code-sfx -->

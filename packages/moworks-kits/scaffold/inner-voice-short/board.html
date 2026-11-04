@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Inner Voice Short: board</title>
+    <style>
+      html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+      #main { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+      #stage { position: absolute; inset: 0; }
+    </style>
+  </head>
+  <body>
+    <!-- A storyboard option (boards/<X>/index.html): the film's own drawing at the seconds in data-kit-board, one frame per second of the board
+         (data-duration = how many). The board draws boards/<X>/src/videos/film/Video.tsx when it has one, else the project's; the app builds it
+         into film.js beside this page when it takes the stills (never write film.js). -->
+    <div id="main" data-composition-id="board-A" data-kit="inner-voice-short" data-kit-board="0.5,2,4" data-start="0" data-duration="3" data-width="1920" data-height="1080" data-fps="30">
+      <div id="stage" class="clip" data-start="0" data-duration="3" data-track-index="1"></div>
+    </div>
+    <script src="film.js"></script>
+  </body>
+</html>

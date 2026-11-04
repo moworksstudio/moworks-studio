@@ -1,0 +1,52 @@
+// The host page of a film in one of the owner's Remotion kits (Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon): React draws the
+// project's composition (src/videos/film/Video.tsx, written from the kit's own template and examples, on the kit's own code as shipped) at the
+// frame HyperFrames asks for, through the app's stand-in for Remotion (the What If bridge: no Remotion package). R-LEMO drives it from HF's
+// timeline: window.render(t), then window.READY once every face and every delayRender handle is in. The page's root (#main, HF's composition)
+// gives the size and rate when the module does not; data-kit-board="t1,t2,…" on it draws the film at those seconds, one per second of HF's time
+// (the storyboard's stills).
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { flushSync } from "react-dom";
+import * as film from "mw-film";
+import { FrameContext, VideoConfigContext, whenRendered, type VideoConfig } from "remotion";
+
+const mod = film as Record<string, unknown>;
+// the composition: the one the root names (data-kit-comp), else the module's default export, else its first capitalised component that is not the
+// collision-QA twin (…Check)
+const asked = document.getElementById("main")?.dataset.kitComp;
+const name = asked && typeof mod[asked] === "function" ? asked : typeof mod.default === "function" ? "default"
+  : Object.keys(mod).find((k) => typeof mod[k] === "function" && /^[A-Z]/.test(k) && !/Check$/.test(k) && !/^[A-Z0-9_]+$/.test(k));
+if (!name) throw new Error("src/videos/film/Video.tsx exports no composition: export the video's component, as the kit's template does");
+const Comp = mod[name] as React.FC<Record<string, unknown>>;
+
+const main = document.getElementById("main")!, stage = document.getElementById("stage")!;
+const num = (v: unknown) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Number(v) : null);
+const fps = num(mod.FPS) ?? num(main.dataset.fps) ?? 30;
+const board = String(main.dataset.kitBoard ?? "").split(",").map((x) => x.trim()).filter(Boolean).map(Number).filter((x) => Number.isFinite(x));
+const config: VideoConfig = { id: name, width: num(mod.WIDTH) ?? num(main.dataset.width) ?? 1920, height: num(mod.HEIGHT) ?? num(main.dataset.height) ?? 1080, fps,
+  durationInFrames: Math.max(1, Math.round(num(mod.FRAMES) ?? (num(main.dataset.duration) ?? 1) * fps)), defaultProps: {}, props: {} };
+
+const root = createRoot(stage);
+let drawn = -1;
+/** Draw frame f synchronously: the bridge's draw leaves the picture finished when it returns. */
+const draw = (f: number) => {
+  flushSync(() => root.render(<VideoConfigContext.Provider value={config}><FrameContext.Provider value={f}><Comp /></FrameContext.Provider></VideoConfigContext.Provider>));
+  drawn = f;
+};
+const frameAt = (t: number) => {
+  const s = board.length ? board[Math.max(0, Math.min(board.length - 1, Math.floor(t + 1e-6)))] : t;
+  return Math.max(0, Math.min(config.durationInFrames - 1, Math.round(s * fps)));
+};
+
+declare global { interface Window { render?: (t: number) => void; READY?: boolean; __kitFrame?: () => number } }
+// the R-LEMO contract, written out as finalize looks for it: window.render = ..., window.READY = true
+window.render = (t: number) => { const f = frameAt(t); if (f !== drawn) draw(f); };
+window.__kitFrame = () => drawn;
+
+// every face the page declares (the kit's own and their Vietnamese twins), then every delayRender handle (the kits' own waits: the canvas
+// stage's fonts, the 3D world's build), before the first frame is called ready
+const faces = [...document.fonts].map((f) => `${f.style} ${f.weight.split(" ")[0]} 40px "${f.family.replace(/"/g, "")}"`);
+Promise.all(faces.map((f) => document.fonts.load(f))).then(() => document.fonts.ready)
+  .then(() => { draw(0); return whenRendered(); })
+  .then(() => { draw(0); return whenRendered(); })
+  .then(() => { window.READY = true; });

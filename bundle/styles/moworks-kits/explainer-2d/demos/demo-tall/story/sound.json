@@ -1,0 +1,21 @@
+{
+  "duration": 5.0,
+  "vo": "vo.wav",
+  "title": {
+    "t": 3.2
+  },
+  "cues": [
+    {
+      "t": 1.0,
+      "kind": "pop"
+    },
+    {
+      "t": 2.2,
+      "kind": "swish"
+    },
+    {
+      "t": 3.2,
+      "kind": "title"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en" data-resolution="__RES__">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=__W__, height=__H__" />
+    <title>__TITLE__</title>
+    <script src="ex/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Figtree";
+        src: url("ex/fonts/figtree-latin-600-normal.woff2") format("woff2");
+        font-weight: 600;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Figtree";
+        src: url("ex/fonts/figtree-latin-700-normal.woff2") format("woff2");
+        font-weight: 700;
+        font-display: block;
+      }
+      html,
+      body {
+        margin: 0;
+        width: __W__px;
+        height: __H__px;
+        overflow: hidden;
+        background: #0a0230;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+      #ex-stage {
+        position: absolute;
+        inset: 0;
+        width: __W__px;
+        height: __H__px;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="__DUR__" data-fps="60" data-width="__W__" data-height="__H__">
+      <canvas id="ex-stage" width="__W__" height="__H__"></canvas>
+      <audio id="mix" src="audio/mix.wav" data-start="0" data-duration="__DUR__" data-track-index="1"></audio>
+    </div>
+    <script src="ex/ex-core.js"></script>
+    <script src="ex/ex-fx.js"></script>
+    <script src="story/words.js"></script>
+    <script src="ex/house-pal.js"></script>
+    <script src="story/film-pal.js"></script>
+    <script src="ex/house-hero.js"></script>
+    <script src="ex/house-ui.js"></script>
+    <!-- art modules: one line per story/<module>.js, in the order they depend on each other -->
+    <script src="story/story.js"></script>
+  </body>
+</html>

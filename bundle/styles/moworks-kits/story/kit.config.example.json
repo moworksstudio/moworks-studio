@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0",
+  "setupDate": "YYYY-MM-DD",
+  "styles": {
+    "stickman": { "name": "Stickman Explainer", "fps": 24, "letterbox": "2:1", "sfx": "public/sfx/stickman" },
+    "inner-voice": { "name": "Inner Voice Short", "fps": 30, "letterbox": "96 px bars", "sfx": "public/sfx/inner-voice" }
+  },
+  "defaults": { "width": 1920, "height": 1080, "outputs": ["mp4"], "loudness": -14, "music": "only when the user asks (original, composed in code)" },
+  "captionFont": "Comic Sans MS (system) | Comic Neue (fallback, loaded from Google Fonts)",
+  "voiceGeneration": {
+    "provider": "none",
+    "tool": "",
+    "model": "",
+    "voices": {},
+    "params": {},
+    "notes": "filled in after a test line (stickman-explainer/references/VOICE.md §2); narrated videos only"
+  }
+}

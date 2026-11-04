@@ -403,7 +403,7 @@ function closestItem(results, name) {
  *  Returns { added: [names], missing: [names], offline, near: [{ name, as, lasting? }] } (near: the cues on a stand-in now; lasting: a stand-in
  *  for a sound that lasts). */
 export const shorterQuery = (name) => { const ws = String(name ?? "").trim().split(/\s+/); return ws.length > 2 ? ws.slice(-2).join(" ") : null; };
-export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root = APP_ROOT, online = true, timeoutMs = SEARCH_TIMEOUT_MS, library = false, style = null, families = null, keep = null, tone = false } = {}) {
+export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root = APP_ROOT, online = true, timeoutMs = SEARCH_TIMEOUT_MS, library = false, style = null, families = null, keep = null, tone = false, styleId = null } = {}) {
   let st = readState(dir);
   const local = bundled(root), added = [], missing = [], failed = [], near = [];
   const has = (name) => !!st.sounds[name] && existsSync(join(dir, st.sounds[name].file));
@@ -411,7 +411,7 @@ export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root =
   const lib = new Map();
   const libOf = (name) => {
     if (!library) return null;
-    if (!lib.has(name)) { let m = null; try { m = matchLocal(LIBRARY_QUERY[name] ?? name, { family: families?.get?.(name) ?? null, style, root, oneShot: true, minDuration: sustainedCue(name) ? SUSTAINED_MIN_S : 0 }); } catch { /* no library */ } lib.set(name, m); }
+    if (!lib.has(name)) { let m = null; try { m = matchLocal(LIBRARY_QUERY[name] ?? name, { family: families?.get?.(name) ?? null, style, root, kit: styleId, oneShot: true, minDuration: sustainedCue(name) ? SUSTAINED_MIN_S : 0 }); } catch { /* no library */ } lib.set(name, m); }
     return lib.get(name);
   };
   // the library answers well enough: a good match, or a sound of the cue's own kind (not worth waiting on the search)

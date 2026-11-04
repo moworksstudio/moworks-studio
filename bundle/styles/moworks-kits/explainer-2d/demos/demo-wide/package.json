@@ -1,0 +1,9 @@
+{
+  "name": "demo-wide",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "hyperframes preview",
+    "check": "hyperframes check"
+  }
+}

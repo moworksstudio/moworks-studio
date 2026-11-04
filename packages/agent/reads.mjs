@@ -12,6 +12,7 @@ import { docRelIn } from "../project-service/docs.mjs";
 import { APP_ROOT } from "../version-manager/index.mjs";
 import { HF_SKILL } from "../hf-edit/hf-scripts.mjs";
 import { isLyricVideo } from "../style-catalog/traits.mjs";
+import { isKitStyle, kitReads } from "../moworks-kits/index.mjs";
 
 const R = (...p) => `.moworks/rules/${p.join("/")}`;
 // HyperFrames' knowledge (skills/hyperframes at the pinned commit): the entry with the contract, and the references each step writes from
@@ -42,6 +43,17 @@ const MAP = {
   brief: [MAP_PACK, ...GENERAL.brief], storyboard: [MAP_PACK, MAP_ENGINE, ".moworks/library/map-explainer/example/film.js", ...GENERAL.storyboard],
   motionSpec: [MAP_PACK, ...GENERAL.motionSpec], build: [MAP_PACK, MAP_ENGINE, ".moworks/library/map-explainer/example/f3.html", ...GENERAL.build],
   qcReview: GENERAL.qcReview, checks: GENERAL.checks, sound: GENERAL.sound, chat: [MAP_PACK, ...GENERAL.chat],
+};
+// The owner's kit styles (Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, 2D Explainer): the app's pack in every step, over General's
+// table, and the kit as shipped (.moworks/library/<style>/kit): its skill and look for the brief, its look, worked examples and the app's page for the
+// board and the build, its sound rules for the music step
+const KIT = (styleId) => {
+  const pack = R(styleId, "SKILL.md"), k = kitReads(styleId);
+  return {
+    brief: [pack, ...k.method, k.look[0], ...GENERAL.brief], storyboard: [pack, ...k.look, ...k.examples.slice(0, 2), ...k.app, ...GENERAL.storyboard],
+    motionSpec: [pack, k.look[0], ...GENERAL.motionSpec], build: [pack, ...k.look, ...k.examples, ...k.app, ...GENERAL.build],
+    qcReview: GENERAL.qcReview, checks: GENERAL.checks, sound: [pack, ...k.sound, ...GENERAL.sound], chat: [pack, ...GENERAL.chat],
+  };
 };
 // A Lemo-Opuscar style: its STYLE.md (.moworks/rules/lemo-<slug>) and the app's lemo-opuscar pack in every step, HF's
 // mandatory reads for what the step writes, and from the build on the style's demo (staged in .moworks/library/lemo/<slug>/): never
@@ -164,6 +176,7 @@ export function requiredReads(dir, { styleId, first = [], step = null } = {}) {
   let list;
   if (styleId === "general") list = GENERAL[key] ?? GENERAL.chat;
   else if (styleId === "map-explainer") list = MAP[key] ?? MAP.chat;
+  else if (isKitStyle(styleId)) { const t = KIT(styleId); list = t[key] ?? t.chat; }
   else if (lemo) { const t = LEMO(lemo); list = t[key] ?? t.chat; }
   else if (mg) { const t = MG(mg); list = t[key] ?? t.chat; }
   else if (ani) { const t = ANIDOODLE(ani); list = [...(t[key] ?? t.chat), ...(ANIDOODLE_MORE(dir)[key] ?? [])]; }

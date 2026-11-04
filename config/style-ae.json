@@ -505,6 +505,36 @@
    "source": "film:f60b4257e78784c0",
    "ms": 41033
   },
+  "cartoon-3d": {
+   "level": "partial",
+   "kind": "mostly-canvas",
+   "layers": 3,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-11-04",
+   "demo": "the kit's DemoWide (made in the app from the owner's kit)",
+   "source": "film:ae02c1c9a9b5d590",
+   "ms": 3947
+  },
+  "explainer-2d": {
+   "level": "video",
+   "kind": "canvas",
+   "layers": 1,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-11-04",
+   "demo": "the kit's demo-wide (made in the app from the owner's kit)",
+   "source": "film:3c82a9c848b72f36",
+   "ms": 1978
+  },
   "general": {
    "level": "editable",
    "kind": "layers",
@@ -519,6 +549,21 @@
    "demo": "demo-qa-03-general-biennale (the app's demo film)",
    "source": "film:dfce0bb83225e42e",
    "ms": 2897
+  },
+  "inner-voice-short": {
+   "level": "partial",
+   "kind": "mostly-canvas",
+   "layers": 3,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-11-04",
+   "demo": "the kit's DemoInnerVoice (made in the app from the owner's kit)",
+   "source": "film:bb6872b51b17f3bb",
+   "ms": 1956
   },
   "lemo-art-deco": {
    "level": "video",
@@ -1351,6 +1396,36 @@
    "demo": "mg-styles-15/demos/22-hud@49052d8",
    "source": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
    "ms": 3489
+  },
+  "paper-collage": {
+   "level": "video",
+   "kind": "dynamic",
+   "layers": 35,
+   "canvas": {
+    "count": 0,
+    "area": 0
+   },
+   "later": 91,
+   "pictures": 0,
+   "measured": "2026-11-04",
+   "demo": "the kit's Demo (made in the app from the owner's kit)",
+   "source": "film:481f3559a41ff3c7",
+   "ms": 3143
+  },
+  "stickman-explainer": {
+   "level": "partial",
+   "kind": "mostly-canvas",
+   "layers": 3,
+   "canvas": {
+    "count": 1,
+    "area": 1
+   },
+   "later": 0,
+   "pictures": 1,
+   "measured": "2026-11-04",
+   "demo": "the kit's DemoStickman (made in the app from the owner's kit)",
+   "source": "film:b159f0aecf5db424",
+   "ms": 2052
   },
   "what-if": {
    "level": "video",

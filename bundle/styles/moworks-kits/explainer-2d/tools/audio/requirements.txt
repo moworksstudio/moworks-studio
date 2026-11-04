@@ -1,0 +1,8 @@
+# Python packages for the kit's audio and voice tools (tools/audio, tools/voice).
+# Nobody installs these by hand: `node tools/py.mjs <script> …` (and tools/sound.mjs, tools/time-voice.mjs) run each
+# script through uv on Python 3.12 with exactly these pins; uv fetches them once and caches them.
+# ffmpeg must be installed (the Node tools pass its path to Python in FFMPEG; otherwise it must be on PATH).
+numpy==2.0.2
+scipy==1.13.1
+soundfile==0.13.1
+pyloudnorm==0.2.0

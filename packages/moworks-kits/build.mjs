@@ -1,0 +1,101 @@
+// R-KIT for the owner's Remotion kits (Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon): the project's composition
+// (src/videos/film/Video.tsx, laid out as the kit lays out a video: src/videos/<slug>/, so the kit's own relative imports work as shipped) is
+// bundled with the kit's code exactly as pinned (bundle/styles/moworks-kits/<kit>/src: a file the project does not have is the kit's), the
+// author's React (codeLibs, the What If pin), three.js 0.186.1 for the 3D Cartoon, and the app's stand-in for Remotion (the What If bridge:
+// what-if-styles/shims; staticFile and @remotion/paths from hosts/) into one page script, compositions/film/film.js. The film's index.html
+// loads it beside <div id="stage">; R-LEMO drives it (window.render(t), READY). No Remotion package anywhere, no new bridge.
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { dirname, join, relative, resolve, sep } from "node:path";
+import { fileURLToPath } from "node:url";
+import { build } from "esbuild";
+import { APP_ROOT, loadPins } from "../version-manager/index.mjs";
+import { threeDir } from "../offline-assets/index.mjs";
+import { SHIMS, reactDirs } from "../what-if-styles/index.mjs";
+import { familyOf, googleFontModule } from "../hf-edit/whatIfBuild.mjs";
+import { TWINS } from "./fonts.mjs";
+
+const HERE = dirname(fileURLToPath(import.meta.url)), HOSTS = join(HERE, "hosts");
+export const ENTRY = "src/videos/film/Video.tsx", OUT = "compositions/film/film.js";
+export const THREE = "0.186.1";
+const EXT = ["", ".tsx", ".ts", ".jsx", ".js", "/index.tsx", "/index.ts", "/index.js"];
+const resolveFile = (p) => { for (const s of EXT) if (existsSync(p + s) && statSync(p + s).isFile()) return p + s; return null; };
+const inside = (dir, p) => { const r = relative(dir, p); return !!r && !r.startsWith("..") && !/^[a-zA-Z]:/.test(r); };
+
+/** The newest change among files (folders walked), skipping `skip`. */
+function newest(paths, skip) {
+  let m = 0;
+  const walk = (x) => { let s; try { s = statSync(x); } catch { return; } if (s.isDirectory()) { for (const n of readdirSync(x)) if (n !== "node_modules") walk(join(x, n)); } else if (x !== skip) m = Math.max(m, s.mtimeMs); };
+  for (const p of paths) walk(p);
+  return m;
+}
+
+/** Bundle a film (or a board: entry and out inside boards/<X>/) of a kit style when its entry exists and the bundle is older than its sources.
+ *  style: { id, kit, three }. Returns null (no film) or { built, out, families (the faces the film's code asked for that R-FONTS installs),
+ *  twinned (kit faces drawn by a Vietnamese twin), error? }. */
+export async function buildKitFilm(projectDir, style, { root = APP_ROOT, force = false, entry: entryRel = ENTRY, out: outRel = OUT } = {}) {
+  const entry = join(projectDir, ...entryRel.split("/"));
+  if (!existsSync(entry)) return null;
+  const pin = loadPins(root).moworksKits, kitSrc = join(pin?.root ?? join(root, "bundle", "styles", "moworks-kits"), pin?.kits?.[style.kit]?.dir ?? style.kit, "src");
+  if (!existsSync(kitSrc)) return { built: false, out: outRel, families: [], twinned: [], error: `The ${style.kit} kit is not pinned (config/pins.json moworksKits)` };
+  const react = reactDirs(root);
+  if (!react) return { built: false, out: outRel, families: [], twinned: [], error: "The author's React is not installed (offline assets: react, react-dom, scheduler)" };
+  const out = join(projectDir, ...outRel.split("/"));
+  // the film's own src/ (the project's, or a board's own copy beside it): a relative import that leaves it for a file it does not have is the kit's
+  const srcRoot = (() => { let d = dirname(entry); while (inside(projectDir, d) && d.split(sep).pop() !== "src") d = dirname(d); return d.split(sep).pop() === "src" ? d : join(projectDir, "src"); })();
+  const words = join(projectDir, "transcript.json");
+  const latest = newest([srcRoot, kitSrc, HOSTS, SHIMS, words], out);
+  if (!force && existsSync(out) && statSync(out).mtimeMs >= latest) return { built: false, out: outRel, ...readBanner(out) };
+  const families = new Set(), twinned = new Set();
+  const three = style.three ? join(threeDir(root), THREE) : null;
+  const plugin = { name: "moworks-kit", setup(b) {
+    b.onResolve({ filter: /^mw-film$/ }, () => ({ path: entry }));
+    b.onResolve({ filter: /^remotion$/ }, () => ({ path: join(HOSTS, "remotion.ts") }));
+    b.onResolve({ filter: /^mw-remotion-shim$/ }, () => ({ path: join(SHIMS, "remotion.tsx") }));
+    b.onResolve({ filter: /^@remotion\/paths$/ }, () => ({ path: join(HOSTS, "paths.ts") }));
+    b.onResolve({ filter: /^@remotion\/fonts$/ }, () => ({ path: join(SHIMS, "fonts.ts") }));
+    b.onResolve({ filter: /^@remotion\/google-fonts\// }, (a) => { const f = familyOf(a.path); (TWINS[f] ? twinned : families).add(f); return { path: f, namespace: "kit-google-font" }; });
+    b.onLoad({ filter: /.*/, namespace: "kit-google-font" }, (a) => ({ loader: "js", contents: googleFontModule(a.path) }));
+    b.onResolve({ filter: /^@remotion\// }, (a) => ({ errors: [{ text: `${a.path} is not available in a Moworks film (no Remotion package): use the kit's own code` }] }));
+    // the voice's words, from the project's transcript: [{ word, start, end }] in the order spoken
+    b.onResolve({ filter: /^mw:words$/ }, () => ({ path: "words", namespace: "kit-words" }));
+    b.onLoad({ filter: /.*/, namespace: "kit-words" }, () => ({ loader: "js", contents: `export default ${JSON.stringify(transcriptWords(projectDir))};\nexport const WORDS = ${JSON.stringify(transcriptWords(projectDir))};\n` }));
+    if (three) {
+      b.onResolve({ filter: /^three$/ }, () => ({ path: join(three, "build", "three.module.min.js") }));
+      b.onResolve({ filter: /^three\/addons\// }, (a) => { const p = join(three, "examples", "jsm", ...a.path.slice("three/addons/".length).split("/")); return existsSync(p) ? { path: p } : { errors: [{ text: `${a.path} is not in three.js ${THREE} (config/pins.json three)` }] }; });
+    }
+    b.onResolve({ filter: /^\.\.?\// }, (a) => {
+      if (a.namespace !== "file" || !a.importer) return undefined;
+      const want = resolve(a.resolveDir, a.path);
+      if (resolveFile(want)) return { path: resolveFile(want) };
+      if (inside(srcRoot, want) || want === srcRoot) { const k = resolveFile(join(kitSrc, relative(srcRoot, want))); if (k) return { path: k }; }
+      return undefined;
+    });
+  } };
+  mkdirSync(dirname(out), { recursive: true });
+  try {
+    await build({
+      absWorkingDir: projectDir, entryPoints: [join(HOSTS, "host.tsx")], outfile: out, bundle: true, format: "iife", platform: "browser", target: "es2022",
+      minifyWhitespace: true, minifyIdentifiers: true, legalComments: "none", jsx: "automatic", logLevel: "silent",
+      define: { "process.env.NODE_ENV": '"production"', __MW_KIT__: JSON.stringify(style.id) }, alias: react, plugins: [plugin],
+    });
+    const reactVersion = JSON.parse(readFileSync(join(react.react, "package.json"), "utf8")).version;
+    const k = pin?.kits?.[style.kit] ?? {};
+    const banner = `/* ${k.title ?? style.kit} ${k.version ?? ""} by Moworks Studio (the owner's own kit, sha256 ${String(k.sha256 ?? "").slice(0, 12)}); React ${reactVersion} (MIT, Meta)${three ? `; three.js ${THREE} (MIT)` : ""}; bundled by Moworks Studio; fonts: ${[...families].sort().join(", ")}; twinned: ${[...twinned].sort().join(", ")} */\n`;
+    // React's production error text names a docs page: words, never loaded, but the offline gate (G-REMOTE) reads a quoted URL as a load
+    writeFileSync(out, banner + readFileSync(out, "utf8").replace(/https:\/\/react\.dev\/errors\//g, "react.dev/errors/").replace(/https:\/\/reactjs\.org\/docs\/error-decoder\.html/g, "reactjs.org/docs/error-decoder.html"));
+    return { built: true, out: outRel, families: [...families].sort(), twinned: [...twinned].sort() };
+  } catch (e) {
+    return { built: false, out: outRel, families: [...families].sort(), twinned: [...twinned].sort(), error: (e.errors ?? []).map((x) => `${x.location?.file ? relative(projectDir, x.location.file) : ""}:${x.location?.line ?? ""} ${x.text}`).join("; ").slice(0, 600) || String(e.message).slice(0, 600) };
+  }
+}
+
+/** The voice's words from the project's transcript.json: [{ word, start, end }]. */
+export function transcriptWords(projectDir) {
+  let t = null; try { t = JSON.parse(readFileSync(join(projectDir, "transcript.json"), "utf8")); } catch { return []; }
+  const list = Array.isArray(t) ? t : Array.isArray(t?.words) && t.words.length ? t.words : (t?.segments ?? []).flatMap((s) => s.words ?? []);
+  return list.map((w) => ({ word: String(w.word ?? w.text ?? "").trim(), start: Number(w.start), end: Number(w.end) })).filter((w) => w.word && Number.isFinite(w.start) && Number.isFinite(w.end));
+}
+function readBanner(out) {
+  const head = readFileSync(out, "utf8").slice(0, 900), list = (re) => (re.exec(head)?.[1] ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  return { families: list(/fonts: ([^;*]*)/), twinned: list(/twinned: ([^*]*) \*\//) };
+}

@@ -1,4 +1,64 @@
 {
+ "paper-collage": {
+  "file": "styles/paper-collage.jpg",
+  "bytes": 42514,
+  "size": [
+   960,
+   540
+  ],
+  "author": "Moworks Studio",
+  "licence": "the owner's own",
+  "item": "Paper Collage Motion Kit 1.0.0 · its Demo (PAPER / COLLAGE), 1.4 s of 9.6 s",
+  "made": "a frame of the kit's own Demo drawn by the app (HyperFrames), 540 px on the paper colour in a 960 × 540 JPEG"
+ },
+ "stickman-explainer": {
+  "file": "styles/stickman-explainer.jpg",
+  "bytes": 36214,
+  "size": [
+   960,
+   540
+  ],
+  "author": "Moworks Studio",
+  "licence": "the owner's own",
+  "item": "Story Animation Kit 1.0.0 · its worked example \"What If You Could Fly?\", the title card at 16.4 s",
+  "made": "a frame of the kit's worked example drawn by the app (HyperFrames), as a 960 px JPEG"
+ },
+ "inner-voice-short": {
+  "file": "styles/inner-voice-short.jpg",
+  "bytes": 30290,
+  "size": [
+   960,
+   540
+  ],
+  "author": "Moworks Studio",
+  "licence": "the owner's own",
+  "item": "Story Animation Kit 1.0.0 · its worked example \"First Chord\", 17.4 s",
+  "made": "a frame of the kit's worked example drawn by the app (HyperFrames), as a 960 px JPEG"
+ },
+ "cartoon-3d": {
+  "file": "styles/cartoon-3d.jpg",
+  "bytes": 106489,
+  "size": [
+   960,
+   540
+  ],
+  "author": "Moworks Studio",
+  "licence": "the owner's own",
+  "item": "3D Cartoon Animation Toolkit 1.0.0 · its worked example \"What if you stopped feeling pain?\", 28 s",
+  "made": "a frame of the kit's worked example drawn by the app (HyperFrames, three.js 0.186.1), as a 960 px JPEG"
+ },
+ "explainer-2d": {
+  "file": "styles/explainer-2d.jpg",
+  "bytes": 77870,
+  "size": [
+   960,
+   540
+  ],
+  "author": "Moworks Studio",
+  "licence": "the owner's own",
+  "item": "2D Explainer Animation Toolkit 1.0.0 · its worked example \"Where the Needle Stops\", 6 s",
+  "made": "a frame of the kit's worked example drawn by the app (HyperFrames), as a 960 px JPEG"
+ },
  "map-explainer": {
   "file": "styles/map-explainer.jpg",
   "bytes": 93271,
