@@ -64,6 +64,10 @@ casual build that has them (a declared name, so no system font is ever used); th
 
 ## 5. Sound
 
+**Code-made sounds only** (owner 04/11/2026): every sound of this style is made by code: the kit's own sounds first, then new takes and new
+sounds from its recipes and the app's, made with the owner's sfxlib. While the computer can run the code the app never takes a library or a downloaded
+sound for it, because the kit's own sound rules forbid them; a sound no recipe makes is left out, so write one the kit's way (moworks-studio §7b).
+
 The kit's own sounds are in the app's library, made by the kit's code: `room` under each scene, `tap`, `alarm`, `clock-spin`, `whisper` under a red line,
 `harmonics`, `strum-sour`, `string-mute`, `dread` on the shadow's arrival (SOUND.md's gains). Quiet and close; **silence is part of the design**: the low
 point and the turn have no words and only the room tone. **Never a whoosh or a pop.** Music only when the owner asks (often a sparse piano). The app places

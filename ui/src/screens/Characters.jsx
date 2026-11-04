@@ -360,7 +360,7 @@ export default function Characters() {
   const styleKeys = [...new Set(list.map(styleKeyOf))].sort((a, b) => label(a).localeCompare(label(b)));
   const sel = shown.find((c) => c.id === cur) ?? shown.find(usable) ?? shown[0] ?? null;
   // the shared 3-row grid; the tile of a character being made takes the first place
-  const grid = useGalleryGrid(), slots = grid.size - (run && !run.changing ? 1 : 0);
+  const grid = useGalleryGrid({ fewer: 1 }), slots = grid.size - (run && !run.changing ? 1 : 0);
   const [pg, setPg] = useState(0);
   useEffect(() => { setPg(0); }, [fp]);
   const pick = (c) => { setCur(c.id); if (matchMedia("(max-width: 1100px)").matches) setPanel("style"); };

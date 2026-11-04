@@ -3,6 +3,43 @@
 One entry per version, newest first. The version is the HyperFrames version the app runs (0.8.214 runs HyperFrames 0.8.214); fixes to the
 app alone on the same engine are 0.8.214.1, 0.8.214.2…
 
+## 0.8.214.5 (2026-11-05)
+
+Still on HyperFrames 0.8.214: five new film styles, sound effects made by code, Assets and Timeline that show where each sound plays,
+notifications when the app waits for you, and an Idea Library.
+
+### New
+- **Five film styles:** Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon and Moworks 2D Explainer. Each comes with its own checks in Review and a sample brief of its own.
+- **Sound effects made by code:** a film's effects are made fresh for it first, from each style's recipes. Library and online sounds fill in where no recipe fits; the five new styles use only sounds made by code.
+- **Idea Library:** a page under Characters. It holds every film style's sample brief, the OPUSCAR 98 prompts and your own ideas (name, brief, film style).
+  - **Start a project** opens New project with the idea's brief and film style.
+  - **Save as idea** keeps the brief you are writing.
+- **Notifications:** when the app waits for you and its window is not in front, you get a notice. The window title reads "Waiting for you", and the taskbar button flashes and shows a red dot. Clicking the notice opens the right dialog. A ding is optional. Turn these on or off in Settings › General › Notifications.
+- **3D:** asked for a 3D film, Claude offers a scene built with three.js.
+
+### Improvements
+- **Assets:**
+  - each sound shows where the film uses it, and its times take you there;
+  - ▶ plays a sound in place;
+  - "Use as the film's voice-over / music" swaps the film's voice or music; after Version 1 a new voice asks once first;
+  - right-clicking a clip on the timeline offers Show in Assets.
+- **Timeline:**
+  - Mute on each sound lane, kept in the render;
+  - a drop onto sound already playing on Narration or Music is refused, and nothing moves;
+  - an empty lane takes the file as the film's voice or music.
+- **Sample brief** gives each film style its own sample; the other prompts are in the Idea Library.
+- **Final Mix** goes back to its name; the render shows its percent and the time left.
+- **Music** sits 2.5 dB higher against the voice and the effects.
+- **Library pages** show one tile fewer per row, so previews are bigger.
+- **Update screen** offers updates by version only.
+
+### Fixes
+- Replacing the voice after Version 1 no longer starts a Claude task by itself.
+- Edge no longer asks again at every start whether the app may notify.
+- A window minimised for a long time still gets its notices on time.
+- A version brings back its own voice, music and approvals.
+- A long sound stops at the film's end, and says so.
+
 ## 0.8.214.4 (2026-11-01)
 
 Still on HyperFrames 0.8.214: a first version with its sound before any Review, a level for each sound lane heard as you drag it, Undo on the timeline, and

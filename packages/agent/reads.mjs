@@ -52,7 +52,8 @@ const KIT = (styleId) => {
   return {
     brief: [pack, ...k.method, k.look[0], ...GENERAL.brief], storyboard: [pack, ...k.look, ...k.examples.slice(0, 2), ...k.app, ...GENERAL.storyboard],
     motionSpec: [pack, k.look[0], ...GENERAL.motionSpec], build: [pack, ...k.look, ...k.examples, ...k.app, ...GENERAL.build],
-    qcReview: GENERAL.qcReview, checks: GENERAL.checks, sound: [pack, ...k.sound, ...GENERAL.sound], chat: [pack, ...GENERAL.chat],
+    // the Review: the house review, then this style's pack (its Review row) and the kit's own checklists (#947); GENERAL's own list is unchanged
+    qcReview: [...GENERAL.qcReview, pack, ...k.review, k.look[0]], checks: GENERAL.checks, sound: [pack, ...k.sound, ...GENERAL.sound], chat: [pack, ...GENERAL.chat],
   };
 };
 // A Lemo-Opuscar style: its STYLE.md (.moworks/rules/lemo-<slug>) and the app's lemo-opuscar pack in every step, HF's

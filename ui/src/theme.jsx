@@ -12,7 +12,7 @@ export const THEMES = [
 export const THEMES_SHOWN = THEMES;
 export const SIZES = [["sm", 0.92, "Small"], ["md", 1, "Medium"], ["lg", 1.1, "Large"]];
 const KEY_THEME = "mw-pref:theme", KEY_SIZE = "mw-pref:text-size", KEY_ASKED = "mw-pref:theme-asked";
-export const KEEP_ON_RESET = [KEY_THEME, KEY_SIZE, KEY_ASKED];
+export const KEEP_ON_RESET = [KEY_THEME, KEY_SIZE, KEY_ASKED, "mw-pref:notify-windows", "mw-pref:notify-sound"];          // the notifications' switches are no layout
 
 const read = (k, ok, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return ok(v) ? v : d; } catch { return d; } };
 const readTheme = () => read(KEY_THEME, (v) => THEMES_SHOWN.some((x) => x.id === v), "pelagra");          // a stored theme that is neither The Desk nor The Studio reads as The Desk

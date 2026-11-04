@@ -64,6 +64,10 @@ number on screen that differs from the voice, an unsourced statistic, a whoosh n
 
 ## 5. Sound
 
+**Code-made sounds only** (owner 04/11/2026): every sound of this style is made by code: the kit's own sounds first, then new takes and new
+sounds from its recipes and the app's, made with the owner's sfxlib. While the computer can run the code the app never takes a library or a downloaded
+sound for it, because the kit's own sound rules forbid them; a sound no recipe makes is left out, so write one the kit's way (moworks-studio §7b).
+
 The kit's own sounds are in the app's library, made by the kit's code (`tag-d`, `tag-fs`, `tag-a` marimba tags for a label pill landing, `ui`, `boom` for the
 title with `swell` before it, `shimmer`, `reveal`, foley, beds: SOUND.md's table and gains). One or two sounds per shot, a power moment alone; hits in the
 narration's pauses, a hit on a word 3-6 dB lower. **Never a whoosh or a cartoon pop** unless the owner asks (the whip-ups use streaks and wind). The app places

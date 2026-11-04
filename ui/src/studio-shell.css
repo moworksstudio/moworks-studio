@@ -426,6 +426,23 @@
 [data-theme="studio"] .st-motionlib .mlp-big { border-radius: var(--st-r-md); box-shadow: 0 0.6rem 1.4rem rgba(70, 50, 20, 0.2); }
 @media (prefers-reduced-motion: reduce) { [data-theme="studio"] .st-motionlib, [data-theme="studio"] .st-motionlib .sgb-card .shot { animation: none; transition: none; } }
 
+/* ---- Idea Library (audit/97): the same room layout as the Motion Library (.st-motionlib), each idea an index card taped up: a picture
+   card for the app's ideas, a ruled card with a red margin and the brief in pencil for the user's own (the pitch card's paper) ---- */
+[data-theme="studio"] .st-ideas .sgb-card .shot { border-radius: var(--st-r-xs); background: var(--paper-white); box-shadow: 0 0.35rem 0.9rem rgba(0, 0, 0, 0.45); transform: rotate(-0.6deg); }
+[data-theme="studio"] .st-ideas .sgb-card:nth-child(3n + 2) .shot { transform: rotate(0.5deg); }
+[data-theme="studio"] .st-ideas .sgb-card:nth-child(4n + 3) .shot { transform: rotate(-0.2deg); }
+[data-theme="studio"] .st-ideas .sgb-card .shot::after { content: ""; position: absolute; z-index: 1; top: -0.2rem; left: 38%; width: 3rem; height: 0.8rem; background: rgba(242, 216, 138, 0.72);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); transform: rotate(-4deg); pointer-events: none; }
+[data-theme="studio"] .st-ideas .sgb-card:focus-visible .shot { transform: rotate(0deg) translateY(-0.2rem); }
+[data-theme="studio"] .st-ideas .sgb-card.on .shot { transform: rotate(0deg); box-shadow: 0 0 0 2px var(--lamp), 0 0 1.4rem rgba(255, 200, 114, 0.45); }
+[data-theme="studio"] .st-ideas .idl-card.own .shot { --st-line: 1.45rem; --st-rule-at: calc(var(--st-line) * 0.78);
+  background: var(--st-ruled), linear-gradient(90deg, transparent 1.5rem, rgba(210, 60, 34, 0.35) 1.5rem calc(1.5rem + 1px), transparent calc(1.5rem + 1px)), var(--paper-white);
+  background-size: 100% var(--st-line), auto, auto; }
+[data-theme="studio"] .st-ideas .idl-card.own .idl-text { padding: 0.1rem 0.6rem 0 1.9rem; font: 1.05rem / 1.45rem var(--font-studio-hand); color: var(--pencil-ink); }
+[data-theme="studio"] .st-ideas .sgb-insp .plx-prompt { background: var(--paper-white); border-color: var(--paper-3); color: var(--ink); }
+[data-theme="studio"] .st-ideas .sgb-insp .sgb-title { font: 400 1.9rem / 1.05 var(--font-studio-display); text-transform: none; letter-spacing: -0.01em; color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { [data-theme="studio"] .st-ideas .sgb-card .shot { transform: none; } }
+
 /* ---- the materials a picture is drawn in: blue pencil (not yet), ink (done), colour (rendered) ---- */
 [data-theme="studio"] .st-dev-pencil { filter: grayscale(1) contrast(1.9) brightness(1.18) sepia(1) hue-rotate(172deg) saturate(2.6); mix-blend-mode: multiply; opacity: 0.92; }
 [data-theme="studio"] .st-dev-ink { filter: grayscale(1) contrast(1.45) brightness(1.08); mix-blend-mode: multiply; }

@@ -23,8 +23,8 @@ The owner's kit is in `.moworks/library/paper-collage/kit/`, exactly as shipped:
 | `.claude/skills/motion-graphic/references/VOICE.md`, `IMAGES.md`, `SOUND.md`, `OUTPUT.md` | The voice, the cut-outs, the sound cues, the formats |
 | `src/demo/Demo.tsx` | The live reference: read it once per session |
 
-The kit's own commands are never run here (`doctor`, `new-graphic`, `stills`, `render`, `check`, `transcribe`, `tighten-voice`, `cutout.py`,
-`halftone.py`, `textures.py`, `build_kit.py`, `npm`, `uv`): the app does each part (§4). Its `kit-setup` and `style-note` skills are not used: a lasting
+The kit's own commands are never run here (`doctor`, `new-graphic`, `stills`, `render`, `check`, `transcribe`, `tighten-voice`, `textures.py`,
+`build_kit.py`, `npm`, `uv`): the app does each part (§4); the kit's `cutout.py` and `halftone.py` run in the app through `paper_cutout` (§5). Its `kit-setup` and `style-note` skills are not used: a lasting
 preference of the owner goes in `docs/NOTES.md` and in your reply ("this can go into the kit itself"); the owner updates the kit.
 
 ## 2. Where the film lives (`.moworks/library/paper-collage/app/README.md`)
@@ -66,9 +66,17 @@ name. Anton and Playfair Display draw Vietnamese as they are.
 
 In the kit's order: code first (`PersonIcon`, `Bulb`, `Gear`, `Stamp`, `LineChart`…), then cut-outs already made, then the owner's images (`PhotoPrint` for a photo,
 `mono={false}` for a screenshot shown untouched, a logo only as the owner's official file), then generation when an image tool is connected: the kit's
-prompt as written, cost shown and asked first. A cut-out the app cannot clean with the kit's tools: ask the owner for a transparent PNG.
+prompt as written, cost shown and asked first. **A cut-out is made by the kit's own tools in the app: call `paper_cutout`** with the picture's path. It takes a flat green or white
+background out (a transparent PNG keeps its own) and makes the halftone print with its white paper edge (`mode: "clean"` keeps the colours), into a
+**new** file in `assets/graphics/cutouts/` (`staticFile("graphics/cutouts/…")`) with a row in its `INDEX.md`; the owner's picture is never changed. Never on
+a real person's face, a logo or a screenshot. A picture with a busy background cannot be keyed: a photo goes in `PhotoPrint` as it is; an object needs a
+transparent PNG from the owner (or one generated on flat green, IMAGES.md §2).
 
 ## 6. Sound
+
+**Code-made sounds only** (owner 04/11/2026): every sound of this style is made by code: the kit's own sounds first, then new takes and new
+sounds from its recipes and the app's, made with the owner's sfxlib. While the computer can run the code the app never takes a library or a downloaded
+sound for it, because the kit's own sound rules forbid them; a sound no recipe makes is left out, so write one the kit's way (moworks-studio §7b).
 
 The kit's own sounds are in the app's library, made by the kit's code: the cues of `SFX` use the kit's names (`tear` on each sheet, `paper-land`,
 `stamp` with `impact` under it on the power word, `strike`, `circle`, `count`, `pop`, `click`, `ding`…: SOUND.md's table and gains). Cues on key moments only,

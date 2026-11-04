@@ -2,7 +2,7 @@
 // the PDF), and the two app tools Claude calls through the MCP channel: board_stills (stills of the boards it wrote) and qc_sheets (one Review
 // round: sheets + HyperFrames' full check, with a fresh-eyes look on the first round of a task), and Final Mix: music
 // options from Mixkit, sound effects placed by the app, the music ducked under the voice with HyperFrames' carve.
-import { LANES, applyLanes, setLane } from "../sfx/lanes.mjs";
+import { LANES, applyLanes, readLanes, setLane, setMute } from "../sfx/lanes.mjs";
 import { balanceAgain } from "../sfx/mixlevels.mjs";
 import { isSongFilm } from "../style-catalog/traits.mjs";
 import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, statSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
@@ -36,6 +36,8 @@ import { voiceCheck, voiceText } from "../sfx/voicecheck.mjs";
 import { gpuShort } from "./proxy.mjs";
 import { styleNevers } from "../style-catalog/index.mjs";
 import { styleTraits } from "../style-catalog/traits.mjs";
+import { collisionCheck, collisionText } from "../moworks-kits/collision.mjs";
+import { cutoutText, makeCutout } from "../moworks-kits/cutout.mjs";
 
 const TYPES = { ".png": "image/png", ".jpg": "image/jpeg", ".pdf": "application/pdf" };
 
@@ -399,6 +401,10 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       return `Frame "${frame}" exported: ${r.units} layer(s) at ${r.width} x ${r.height} in ${outRel}/ (PNG per layer, back to front) with ${outRel}/layout.json (positions in px, opacity, blend, and each text layer's words, font, size and colour). Rebuild text layers as live text with the font named there; place the pictures by layout.json.`;
     },
     // a What If film's shot list on the voice (the author's plan.py, in JavaScript)
+    // a 3D Cartoon film: the kit's own collision check on every frame (moworks-kits/collision.mjs)
+    collision_check: async ({ project }) => collisionText(await collisionCheck(project.path, { root })) || "This is not a 3D Cartoon film: the collision check is the 3D Cartoon kit's own and runs only on its films.",
+    // a Paper Collage film: the kit's own cut-out tools on one picture, into a new file (moworks-kits/cutout.mjs)
+    paper_cutout: async ({ project, args = {} }) => cutoutText(await makeCutout(project.path, args, { root })),
     whatif_plan: async ({ project }) => {
       try { return planText(planEpisode(project.path, { lengthSec: projects.getProject(project.id, root)?.meta?.targetDurationSec ?? null })); }
       catch (e) { return `The plan could not be made: ${e.message}`; }
@@ -518,8 +524,10 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       // an anidoodle film: every frame drawn, every pose inside its joint limits (a run pose once left them and
       // HyperFrames' check, which samples, stopped the render at the end); the Review fixes what it names
       const pose = poseText(await poseCheck(project.path));
+      // a 3D Cartoon film: the kit's collision check on every frame (no one through furniture, no prop through a hand)
+      const collision = collisionText(await collisionCheck(project.path, { root }));
       // a Vietnamese film's words on screen written without their marks (Test 24: the Review never saw "NHAT KY · TRAM HON GIO")
-      return [qcText(res, fresh), pose, glyphText(codeGlyphs(project.path)), viMarksText(viMarks(project.path))].filter(Boolean).join("\n\n");
+      return [qcText(res, fresh), pose, collision, glyphText(codeGlyphs(project.path)), viMarksText(viMarks(project.path))].filter(Boolean).join("\n\n");
     },
     // one moment of the film, whole, with its text: what the sheets are too small for (T28-6)
     film_frames: async ({ project, args = {} }) => {
@@ -664,6 +672,8 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       mixOpen(id);
       const p = mustProject(id, root);
       if (!LANES.includes(b.lane)) throw new HttpError(400, "INVALID", "A lane is the voice, the effects or the music");
+      // Mute (3b): HF's own mute of the lane's bus, heard neither in the Editor nor in the render; its fader is kept
+      if (typeof b.muted === "boolean") return mixChange(p, `${b.lane} ${b.muted ? "muted" : "unmuted"}`, () => ({ muted: setMute(p.path, b.lane, b.muted), levels: readLanes(p.path) }), { preview: !ctx.stemsReady?.(id) });
       // with the lanes as files of their own the Editor already plays the new level: only the export mixes again
       return mixChange(p, `${b.lane} level ${b.db} dB`, () => ({ levels: setLane(p.path, b.lane, b.db) }), { preview: !ctx.stemsReady?.(id) });
     }),

@@ -9,6 +9,7 @@ import { basename, join } from "node:path";
 import { startServer } from "./index.mjs";
 import { APP_ROOT } from "../version-manager/index.mjs";
 import { trimWindowProfile } from "./housekeeping.mjs";
+import { carryNotifyAnswer } from "./window-notify.mjs";
 
 const argv = process.argv.slice(2);
 const opt = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
@@ -17,6 +18,9 @@ const IDLE_MS = Number(process.env.MW_IDLE_MS ?? 3 * 60 * 1000);   // MW_IDLE_MS
 const stateFile = join(process.env.MW_STATE_DIR ?? join(APP_ROOT, "runtime", "state"), "app.json");
 const logFile = join(APP_ROOT, "runtime", "logs", "app.log");
 const profile = process.env.MW_APP_PROFILE ?? join(APP_ROOT, "runtime", "app-window");   // MW_APP_PROFILE, MW_APP_ARGS: tests
+// there while the app waits for the user and its window is not in use: the window's icon wears a red dot (dressWindow reads it)
+const attentionFlag = join(stateFile, "..", "window-attention.flag");
+try { rmSync(attentionFlag, { force: true }); } catch { /* none */ }
 
 if (background) {             // no console: every line goes to the log
   mkdirSync(join(logFile, ".."), { recursive: true });
@@ -47,6 +51,7 @@ try {
   s = await startServer({ port: Number(opt("--port", process.env.MW_PORT ?? 0)), token: process.env.MW_TOKEN || undefined, onExit: () => quit("exit"),
     onRestart: () => { spawn(process.execPath, [join(APP_ROOT, "tools", "restart-app.mjs"), String(process.pid)], { cwd: APP_ROOT, detached: true, stdio: "ignore", windowsHide: true }).unref(); quit("exit"); },
     onWindowGone: () => quit("window closed"), thumbnails: true,
+    onAttention: (on) => windowAttention(on), onFocusWindow: () => { focusAppWindow({ wait: false }); },
     updateCheck: process.env.MW_NO_UPDATE_CHECK !== "1", housekeeping: process.env.MW_NO_HOUSEKEEPING !== "1" });          // MW_NO_UPDATE_CHECK=1: a test run of the app never asks GitHub
 } catch (e) {
   console.error(e?.stack ?? e);
@@ -75,6 +80,7 @@ async function quit(reason) {
   // the window's browser profile without the web components it never uses, now that no window holds it (housekeeping.mjs)
   try { await trimWindowProfile(profile); } catch { /* the next time */ }
   try { if (JSON.parse(readFileSync(stateFile, "utf8")).pid === process.pid) rmSync(stateFile, { force: true }); } catch { /* gone */ }
+  try { rmSync(attentionFlag, { force: true }); } catch { /* gone */ }
   process.exit(0);
 }
 process.on("SIGINT", () => quit("interrupt"));
@@ -89,6 +95,8 @@ function findBrowser() {
 
 function openWindow(url) {
   const exe = findBrowser();
+  // the user's answer to "Allow notifications?" carried to this start's address (window-notify.mjs)
+  try { carryNotifyAnswer(join(profile, "Default", "Preferences"), url); } catch { /* the browser asks again */ }
   // Its own browser profile (runtime/app-window): a browser that is already running (Edge keeps one in the background) reuses its process
   // and ignores the window flags. Sign-in and sync are off, so the profile never copies the user's browser data or shows a sync prompt.
   // Opens maximized; "Restore down" goes to a centred window of 75% of the screen's work area. The browser opens at that centred size
@@ -104,7 +112,9 @@ function openWindow(url) {
   } catch { /* no size: --start-maximized alone */ }
   if (exe) {
     const b = spawn(exe, [`--app=${url}`, `--user-data-dir=${profile}`, ...(place.length ? place : ["--start-maximized"]), "--no-first-run",
-      "--no-default-browser-check", "--disable-sync", "--disable-features=msImplicitSignin",
+      "--no-default-browser-check", "--disable-sync", "--disable-features=msImplicitSignin,IntensiveWakeUpThrottling",
+      // (one --disable-features list: the browser reads only the last one. IntensiveWakeUpThrottling off: a window minimized for minutes
+      // still reads the app's status every few seconds, so a wait for the user is said at once, not up to a minute later; audit/96)
       // no downloads of the browser's web components (shopping, wallet, models: 600 MB once) and a 64 MB page cache for this computer's own pages
       "--disable-component-update", "--disk-cache-size=67108864", ...(process.env.MW_APP_ARGS ?? "").split(" ").filter(Boolean)],
       // windowsHide stays off for this one: the browser is a GUI program (it has no console to hide), and windowsHide starts a GUI
@@ -171,6 +181,19 @@ public static class MWD {
   [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
   [DllImport("user32.dll")] public static extern int GetSystemMetrics(int i);
   [DllImport("user32.dll")] public static extern bool IsWindow(IntPtr h);
+  public delegate bool EP(IntPtr h, IntPtr l);
+  [DllImport("user32.dll")] static extern bool EnumWindows(EP f, IntPtr l);
+  [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint p);
+  [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);
+  [DllImport("user32.dll")] static extern IntPtr GetWindow(IntPtr h, uint c);
+  [DllImport("user32.dll")] static extern int GetWindowTextLength(IntPtr h);
+  [DllImport("user32.dll", CharSet=CharSet.Unicode)] static extern int GetClassName(IntPtr h, System.Text.StringBuilder s, int n);
+  // the app window itself: shown, owned by no other window, a browser frame with a title. The process's "main window" is at times
+  // another one (the browser's own notification popup, untitled), which must not take the app's icon or its red dot
+  public static IntPtr Find(uint pid) { IntPtr r = IntPtr.Zero; EnumWindows((h, l) => { uint p; GetWindowThreadProcessId(h, out p);
+    if (p != pid || !IsWindowVisible(h) || GetWindow(h, 4) != IntPtr.Zero || GetWindowTextLength(h) == 0) return true;
+    var c = new System.Text.StringBuilder(64); GetClassName(h, c, 64); if (c.ToString() != "Chrome_WidgetWin_1") return true;
+    r = h; return false; }, IntPtr.Zero); return r; }
   public static void Prop(IntPtr h, uint pid, string val) {
     Guid iid = new Guid("886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99"); IPS ps; if (SHGetPropertyStoreForWindow(h, ref iid, out ps) != 0) return;
     PKEY k = new PKEY(); k.f = new Guid("9F4C2855-9F79-4B39-A8D0-E1D42DE1D5F3"); k.p = pid;
@@ -182,30 +205,45 @@ public static class MWD {
     $ico = $env:MW_ICO
     $cx = [MWD]::GetSystemMetrics(11); $sx = [MWD]::GetSystemMetrics(49)
     $big = [MWD]::LoadImage([IntPtr]::Zero, $ico, 1, $cx, $cx, 0x10); $small = [MWD]::LoadImage([IntPtr]::Zero, $ico, 1, $sx, $sx, 0x10)
+    # the same icons with a red dot in their top right corner: worn while the app waits for the user ($env:MW_ATTN is there)
+    $bigDot = $big; $smallDot = $small
+    try {
+      Add-Type -AssemblyName System.Drawing
+      function Dot($hi, $n) {
+        $bm = [System.Drawing.Icon]::FromHandle($hi).ToBitmap(); $g = [System.Drawing.Graphics]::FromImage($bm)
+        $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+        $d = [Math]::Max(6, [int][Math]::Round($n * 0.46)); $r = [Math]::Max(1, [int][Math]::Round($n / 24))
+        $g.FillEllipse((New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255, 24, 24, 27))), $n - $d - 1 + 0, 0, $d + 1, $d + 1)
+        $g.FillEllipse((New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255, 229, 72, 77))), $n - $d - 1 + $r, $r, $d + 1 - 2 * $r, $d + 1 - 2 * $r)
+        $g.Dispose(); return $bm.GetHicon()
+      }
+      $bigDot = Dot $big $cx; $smallDot = Dot $small $sx
+    } catch { $bigDot = $big; $smallDot = $small }
     $done = [IntPtr]::Zero; $gone = 0
     for ($i = 0; $i -lt 100000 -and $gone -lt 4; $i++) {
       Start-Sleep -Milliseconds ($(if ($done -eq [IntPtr]::Zero) { 250 } else { 3000 }))
       ${appProcess()}
       $b = $b | Select-Object -First 1
       if (-not $b) { if ($done -ne [IntPtr]::Zero -or $i -gt 80) { $gone++ }; continue }
-      $h = (Get-Process -Id $b.ProcessId -ErrorAction SilentlyContinue).MainWindowHandle
-      if (-not $h -or $h -eq 0 -or -not [MWD]::IsWindow($h)) { continue }
+      $h = [MWD]::Find([uint32]$b.ProcessId)
+      if ($h -eq [IntPtr]::Zero -or -not [MWD]::IsWindow($h)) { continue }
       $gone = 0
       if ($h -ne $done) {
         [MWD]::Prop($h, 3, "$ico,0"); [MWD]::Prop($h, 4, 'Moworks Studio'); [MWD]::Prop($h, 2, ('"' + $env:MW_BAT + '"')); [MWD]::Prop($h, 5, 'MoworksStudio.App')
         $done = $h
       }
-      if ([MWD]::SendMessage($h, 0x7F, [IntPtr]1, [IntPtr]::Zero) -ne $big) {
-        [MWD]::SendMessage($h, 0x80, [IntPtr]1, $big) | Out-Null; [MWD]::SendMessage($h, 0x80, [IntPtr]0, $small) | Out-Null
+      $wb = $big; $ws = $small; if ($env:MW_ATTN -and (Test-Path -LiteralPath $env:MW_ATTN)) { $wb = $bigDot; $ws = $smallDot }
+      if ([MWD]::SendMessage($h, 0x7F, [IntPtr]1, [IntPtr]::Zero) -ne $wb) {
+        [MWD]::SendMessage($h, 0x80, [IntPtr]1, $wb) | Out-Null; [MWD]::SendMessage($h, 0x80, [IntPtr]0, $ws) | Out-Null
       }
     }`;
-  const [cmd, args, o] = ps(script, { stdio: "ignore" }, { MW_EXE: exeName, MW_ICO: ico, MW_BAT: bat });
+  const [cmd, args, o] = ps(script, { stdio: "ignore" }, { MW_EXE: exeName, MW_ICO: ico, MW_BAT: bat, MW_ATTN: attentionFlag });
   spawn(cmd, args, o).on("error", () => {}).unref();
 }
 
 /** Bring the app's window to the front (restored if minimized). False when no app window is open. The Alt key tap lets this background
  *  process hand the foreground over (Windows refuses SetForegroundWindow otherwise). */
-function focusAppWindow() {
+function focusAppWindow({ wait = true } = {}) {
   const exe = findBrowser();
   if (!exe) return false;
   const script = `Add-Type -Namespace MW -Name F -MemberDefinition '[DllImport("user32.dll")] public static extern bool ShowWindow(System.IntPtr h, int c);
@@ -221,7 +259,48 @@ function focusAppWindow() {
     [MW.F]::SetForegroundWindow($h) | Out-Null
     exit 0`;
   const [cmd, args, o] = ps(script, { timeout: 15000 }, { MW_EXE: basename(exe) });
+  if (!wait) { spawn(cmd, args, { ...o, stdio: "ignore" }).on("error", () => {}).unref(); return true; }          // a notification's click: the request is answered at once
   return spawnSync(cmd, args, o).status === 0;
+}
+
+/** The app waits for the user and its window is not the one in use (the window says so, POST /window/attention): the window's taskbar
+ *  button flashes orange and stays orange until it is clicked (user32 FlashWindowEx, FLASHW_TRAY | FLASHW_TIMERNOFG: Windows stops it when
+ *  the window comes to the front), and its icon wears a red dot (dressWindow). `on` false: the user is back, both end. The app profile's
+ *  own window only, never another window. */
+function windowAttention(on) {
+  try { if (on) writeFileSync(attentionFlag, new Date().toISOString()); else rmSync(attentionFlag, { force: true }); } catch { /* the title says it */ }
+  const exe = findBrowser();
+  if (!exe) return;
+  const script = `Add-Type -TypeDefinition @'
+using System; using System.Runtime.InteropServices;
+public static class MWA {
+  [StructLayout(LayoutKind.Sequential)] public struct FI { public uint cbSize; public IntPtr hwnd; public uint dwFlags; public uint uCount; public uint dwTimeout; }
+  [DllImport("user32.dll")] static extern bool FlashWindowEx(ref FI f);
+  [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+  public static void Flash(IntPtr h, uint flags) { FI f = new FI(); f.cbSize = (uint)Marshal.SizeOf(typeof(FI)); f.hwnd = h; f.dwFlags = flags; f.uCount = 0; f.dwTimeout = 0; FlashWindowEx(ref f); }
+  public delegate bool EP(IntPtr h, IntPtr l);
+  [DllImport("user32.dll")] static extern bool EnumWindows(EP f, IntPtr l);
+  [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint p);
+  [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);
+  [DllImport("user32.dll")] static extern IntPtr GetWindow(IntPtr h, uint c);
+  [DllImport("user32.dll")] static extern int GetWindowTextLength(IntPtr h);
+  [DllImport("user32.dll", CharSet=CharSet.Unicode)] static extern int GetClassName(IntPtr h, System.Text.StringBuilder s, int n);
+  // the app window itself: shown, owned by no other window, a browser frame with a title (the process's "main window" is at times a passing popup)
+  public static IntPtr Find(uint pid) { IntPtr r = IntPtr.Zero; EnumWindows((h, l) => { uint p; GetWindowThreadProcessId(h, out p);
+    if (p != pid || !IsWindowVisible(h) || GetWindow(h, 4) != IntPtr.Zero || GetWindowTextLength(h) == 0) return true;
+    var c = new System.Text.StringBuilder(64); GetClassName(h, c, 64); if (c.ToString() != "Chrome_WidgetWin_1") return true;
+    r = h; return false; }, IntPtr.Zero); return r; }
+}
+'@
+    ${appProcess()}
+    $b = $b | Select-Object -First 1
+    if (-not $b) { exit 3 }
+    $h = [MWA]::Find([uint32]$b.ProcessId)
+    if ($h -eq [IntPtr]::Zero) { exit 3 }
+    if ($env:MW_ON -eq '1') { if ([MWA]::GetForegroundWindow() -ne $h) { [MWA]::Flash($h, 14) } } else { [MWA]::Flash($h, 0) }
+    exit 0`;
+  const [cmd, args, o] = ps(script, { timeout: 15000, stdio: "ignore" }, { MW_EXE: basename(exe), MW_ON: on ? "1" : "0" });
+  spawn(cmd, args, o).on("error", () => {}).unref();
 }
 
 /** Close the app's own browser window(s): the browser process of the app profile only (never the user's other browser windows); a

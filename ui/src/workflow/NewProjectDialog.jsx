@@ -9,7 +9,7 @@
 // Without a Claude sign-in it cannot create: the first message (the brief and the style's skill) must reach a Claude that is ready.
 // Create makes the project, copies the files in, and opens the Editor, where Claude starts with the style's first step.
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertCircle, ArrowDown, Check, ChevronDown, FileText, Lightbulb, Loader2, Lock, Sparkles, X } from "lucide-react";
+import { AlertCircle, ArrowDown, BookmarkPlus, Check, ChevronDown, FileText, Lightbulb, Loader2, Lock, Sparkles, X } from "lucide-react";
 import { get, post } from "../api.js";
 import { go, useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
@@ -17,7 +17,7 @@ import { authorOf, authorsOf, useStyles } from "../screens/StyleGallery.jsx";
 import { StyleCard } from "./StyleChooser.jsx";
 import DesignSteps from "./DesignSteps.jsx";
 import CharacterPick from "./CharacterPick.jsx";
-import PromptLibrary from "./PromptLibrary.jsx";
+import { IdeaDialog, IdeaPicker, takeStartIdea } from "../screens/IdeaLibrary.jsx";
 import { AssetPicker, uploadAll } from "./assets.jsx";
 import { NeedsClaude, useClaude } from "./claude.jsx";
 import { FolderField } from "./folder.jsx";
@@ -245,7 +245,8 @@ export default function NewProjectDialog({ onClose }) {
   const [agent, setAgent] = useState(null);
   const [loc, setLoc] = useState(null);              // where the project is saved ({ path, drive }); default from Settings
   const [touched, setTouched] = useState(false);
-  const [ideas, setIdeas] = useState(false);   // Writing ideas: the prompt library (OPUSCAR 98 first) over the dialog
+  const [ideas, setIdeas] = useState(false);   // the Idea Library over the dialog (the old Writing ideas, #942)
+  const [saveIdea, setSaveIdea] = useState(false);   // Save as idea: New idea with this brief and film style (#941)
   const [askReplace, setAskReplace] = useState(false);   // a style was chosen while the brief holds the user's own text
   const [sampleMenu, setSampleMenu] = useState(false);   // Anidoodle's three kinds of film as samples
   const sampleBox = useRef(null);
@@ -259,7 +260,12 @@ export default function NewProjectDialog({ onClose }) {
   const { scale, width: fitW } = useFit();
   useEffect(() => { const q = new URLSearchParams(location.hash.split("?")[1] ?? ""); const s = q.get("style"), lk = q.get("look"), ch = q.get("character");          // from the Style Gallery, the Look page or the Characters page
     if (s) chooseStyle(s); if (lk) setD((x) => ({ ...x, look: lk }));
-    if (ch) setD((x) => ({ ...x, brief: withCharacter(ch) })); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (ch) setD((x) => ({ ...x, brief: withCharacter(ch) }));
+    // Start a project from the Idea Library: only the brief and the film style are filled in; the rest stays as usual. The brief is the
+    // user's choice, not a sample to type over (ideaText).
+    const idea = takeStartIdea();
+    if (idea?.brief) { setD((x) => ({ ...x, ...(idea.styleId ? { styleId: idea.styleId } : {}), sampleKind: null, brief: idea.brief, ideaText: idea.brief })); setAskReplace(false); }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { try { sessionStorage.setItem(KEY, JSON.stringify(d)); } catch { /* private */ } }, [d]);
   useEffect(() => { get("/api/agent/settings").then(setAgent).catch(() => {});
     get("/api/storage/location").then((r) => setLoc({ path: r.location, drive: r.drive })).catch(() => {}); }, []);
@@ -384,7 +390,8 @@ export default function NewProjectDialog({ onClose }) {
   };
   /** The draft with a style's sample brief. The boxes stay as they are (the boxes win over any brief); what the
    *  sample was written for (its length, aspect and rate) shows under Format with one button to take it. The design fields never change. */
-  const withSample = (x, styleId, kind = null) => ({ ...x, styleId, sampleKind: kind, brief: briefSampleFor(styleId, "en", kind) });
+  // Sample brief is the style's own sample only; the OPUSCAR 98 prompts are in the Idea Library, never here (owner #1002)
+  const withSample = (x, styleId, kind = null) => ({ ...x, styleId, sampleKind: kind, ideaText: null, brief: briefSampleFor(styleId, "en", kind) });
   const sampleFor = (() => {
     const f = sampleFieldsFor(d.styleId, d.sampleKind) ?? {};
     if (!isSample(d.brief) || !d.brief.trim()) return null;
@@ -402,7 +409,7 @@ export default function NewProjectDialog({ onClose }) {
   // Choosing a style loads its sample brief: straight away when the box is empty or still holds a sample, else one question.
   // A sample's credit (lemo's, from STYLE.md) rides on the Sample brief button (no credit line under the box).
   const credit = sampleOf(d.styleId, d.sampleKind)?.credit;
-  function isSample(text) { return !text.trim() || ALL_SAMPLES.some((s) => text === s.en || text === s.vi); }
+  function isSample(text) { return !text.trim() || (text !== d.ideaText && ALL_SAMPLES.some((s) => text === s.en || text === s.vi)); }
   const chooseStyle = (id) => {
     if (isSample(d.brief)) { setD((x) => withSample(x, id)); setAskReplace(false); }
     else { setD((x) => ({ ...x, styleId: id, sampleKind: null })); setAskReplace(true); }
@@ -481,14 +488,17 @@ export default function NewProjectDialog({ onClose }) {
           </div>
 
           <div className="np2-col">
-            <Step n={7} title={t("Brief")} className="grow" action={kinds.length > 1
+            <Step n={7} title={t("Brief")} className="grow" action={<span className="np2-acts">{kinds.length > 1
               ? <span className="pick np2-act-wrap" ref={sampleBox}><button type="button" className="btn ghost sm np2-act" onClick={() => setSampleMenu((o) => !o)} aria-haspopup="listbox" aria-expanded={sampleMenu}
                   title={credit ? t(credit.text) : undefined}><FileText size={13} />{t("Sample brief")}<ChevronDown size={13} /></button>
                 {sampleMenu && <ul className="pick-list np-sample-list" role="listbox">{kinds.map(([k, l]) => <li key={k ?? "story"} role="option" aria-selected={(d.sampleKind ?? null) === k}>
                   <button type="button" onClick={() => (isSample(d.brief) ? fillSample(k) : (setD((x) => ({ ...x, sampleKind: k })), setAskReplace(true), setSampleMenu(false)))}>
                     <span className="tx"><b>{t(l)}</b></span>{(d.sampleKind ?? null) === k && <Check size={14} />}</button></li>)}</ul>}</span>
               : <button type="button" className="btn ghost sm np2-act" onClick={() => (isSample(d.brief) ? fillSample() : setAskReplace(true))}
-              title={credit ? `${t("Fill the box with this style's sample brief")} · ${t(credit.text)}` : t("Fill the box with this style's sample brief")}><FileText size={13} />{t("Sample brief")}</button>}>
+              title={credit ? `${t("Fill the box with this style's sample brief")} · ${t(credit.text)}` : t("Fill the box with this style's sample brief")}><FileText size={13} />{t("Sample brief")}</button>}
+              <button type="button" className="btn ghost sm np2-act" onClick={() => setSaveIdea(true)} disabled={!!phase || !d.brief.trim()} aria-haspopup="dialog"
+                title={d.brief.trim() ? t("Keep this brief in My ideas, in the Idea Library") : t("Write a brief first")}><BookmarkPlus size={13} />{t("Save as idea")}</button></span>}>
+              {saveIdea && <IdeaDialog value={{ name: "", brief: d.brief, styleId: d.styleId }} onClose={() => setSaveIdea(false)} onSaved={() => setSaveIdea(false)} />}
               {askReplace && <div className="np-ask" role="alert"><span>{t("Replace with this style's sample brief?")}</span>
                 <button type="button" className="btn sm" onClick={() => setAskReplace(false)}>{t("Keep")}</button>
                 <button type="button" className="btn sm primary" onClick={() => fillSample()}>{t("Replace")}</button></div>}
@@ -515,10 +525,10 @@ export default function NewProjectDialog({ onClose }) {
         {reason ? <span className="np-why" role="status" id="np-why"><AlertCircle size={14} />{t(reason)}</span>
           : <span className="hint kbd-hint"><kbd>Ctrl</kbd><kbd>Enter</kbd> {t("to create")}</span>}
         <span className="spacer" />
-        <button type="button" className="btn ghost" onClick={() => setIdeas(true)} disabled={!!phase} aria-haspopup="dialog"><Lightbulb size={15} />{t("Writing ideas")}</button>
+        <button type="button" className="btn ghost" onClick={() => setIdeas(true)} disabled={!!phase} aria-haspopup="dialog"><Lightbulb size={15} />{t("Idea Library")}</button>
         <button className="btn" onClick={close} disabled={!!phase}>{t("Cancel")}</button>
         {phase === "copying" && <button className="btn" onClick={() => job.current?.cancel()}>{t("Stop copying")}</button>}
-        {ideas && <PromptLibrary onAdd={addToBrief} onClose={() => setIdeas(false)} />}
+        {ideas && <IdeaPicker onAdd={addToBrief} onClose={() => setIdeas(false)} />}
         <button className={"btn primary" + (missing ? " blocked" : "")} onClick={create} disabled={!!phase || (!missing && !canCreate)} aria-disabled={!!missing || undefined} aria-describedby={reason ? "np-why" : undefined} title={reason ? t(reason) : undefined}>
           {phase ? <><Loader2 size={15} className="spin" />{phase === "copying" ? t("Copying files {done}/{n}…", { done: files.filter((f) => f.status === "done").length, n: files.length }) : t("Creating…")}</> : <><Sparkles size={15} />{t("Create project")}</>}</button>
       </div>

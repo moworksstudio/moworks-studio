@@ -6,12 +6,13 @@
 // Appearance, Render & export), Director (the AI that makes the films: model, effort, mode, web, bypass), System (what runs the app: the
 // components as one line with Install, or Check again when something is wrong, and only what needs the user; Voice-over; the optional
 // extras; "Open-source licences" folded; backups one line), Update.
+// General › Notifications (audit/96): Windows notifications (on) and the ding (off) for the moments the app waits for the user.
 // Old addresses (ai, workspace, voice, styles, ae, models) land in their new place. Whatever waits on the server shows a skeleton at once.
 import { useEffect, useState } from "react";
-import { ALargeSmall, Bot, Brain, Clapperboard, Cpu, Download, FlaskConical, FolderOpen, Gauge as GaugeIcon, Globe, Languages, Loader2, LogOut, Palette, RefreshCw, RotateCcw, RotateCw, ShieldCheck, SlidersHorizontal } from "lucide-react";
+import { ALargeSmall, Bell, Bot, Brain, Clapperboard, Cpu, Download, FlaskConical, FolderOpen, Gauge as GaugeIcon, Globe, Languages, Loader2, LogOut, Palette, RefreshCw, RotateCcw, RotateCw, ShieldCheck, SlidersHorizontal, Volume2 } from "lucide-react";
 import { get, patch, post, watchJob } from "../api.js";
 import { BackButton, Banner, Dialog, StatusIcon, useChecks } from "../components.jsx";
-import { go, useData, useToast } from "../lib.jsx";
+import { go, useData, usePref, useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 import { SignInFlow, useClaude } from "../workflow/claude.jsx";
 import { DriveNote, folderName } from "../workflow/folder.jsx";
@@ -22,6 +23,7 @@ import { KEEP_ON_RESET, SIZES, THEMES_SHOWN, useAppearance } from "../theme.jsx"
 import { flushPrefs } from "../prefs-sync.js";
 import { useVoiceSettings } from "../voice/settings.js";
 import Keys from "../voice/Keys.jsx";
+import { ding } from "../workflow/attention.js";
 
 // labels are English keys for t
 const SECTIONS = [["general", "General", SlidersHorizontal], ["director", "Director", Bot], ["runtime", "System", Cpu], ["update", "Update", Download]];
@@ -123,6 +125,31 @@ function Appearance() {
     {ask && <Dialog icon={<RotateCcw size={18} />} title={t("Reset the panel layout?")} onClose={() => setAsk(false)} footer={<><span className="spacer" /><button className="btn" onClick={() => setAsk(false)}>{t("Cancel")}</button>
       <button className="btn primary" onClick={reset}><RotateCcw size={14} />{t("Reset layout")}</button></>}>
         <div className="dlg-lines"><p>{t("Panel widths, views and filters go back to their defaults.")}</p><p>{t("Projects are not touched.")}</p></div></Dialog>}          {/* one idea a line */}
+  </Group>;
+}
+
+/** Notifications: when the app waits for the user and its window is not in use. Two switches, the browser's own answer said only when it blocks them. */
+function Notifications() {
+  const t = useT();
+  const [on, setOn] = usePref("notify-windows", true);
+  const [sound, setSound] = usePref("notify-sound", false);
+  const has = typeof Notification !== "undefined";
+  const [perm, setPerm] = useState(has ? Notification.permission : "denied");
+  const turn = (v) => {
+    setOn(v);
+    // turned on with a click: the browser asks "Allow notifications?" now, not on the first wait
+    if (v && has && Notification.permission === "default") Notification.requestPermission().then(setPerm).catch(() => {});
+  };
+  const onOff = (value, set, label) => <div className="segmented" role="group" aria-label={label}>
+    <button type="button" aria-pressed={value} onClick={() => set(true)}>{t("On")}</button>
+    <button type="button" aria-pressed={!value} onClick={() => set(false)}>{t("Off")}</button></div>;
+  return <Group title={t("Notifications")}>
+    <Row icon={<Bell size={16} />} title={t("Windows notifications")} desc={t("When the app waits for you and you are in another window.")}
+      more={t("A notice in the corner of the screen and a flashing taskbar button. Click the notice to go straight to what needs you.")}>
+      {onOff(on, turn, t("Windows notifications"))}</Row>
+    {on && perm === "denied" && <p className="state-line stop" role="status">{t("Notifications are blocked for the app window. The window title and the chat still tell you.")}</p>}
+    <Row icon={<Volume2 size={16} />} title={t("Sound")} desc={t("A short ding with the notice.")}>
+      {onOff(sound, (v) => { setSound(v); if (v) ding(); }, t("Sound"))}</Row>
   </Group>;
 }
 
@@ -286,6 +313,7 @@ export default function Settings({ section, claude, onRecheckClaude, updateReady
             <Account claude={claude} onRecheck={onRecheckClaude} />
             <ProjectsFolder />
             <Appearance />
+            <Notifications />
             <RenderExport sys={sys.data} reload={sys.reload} />
           </section>}
           {cur[0] === "director" && <Director />}

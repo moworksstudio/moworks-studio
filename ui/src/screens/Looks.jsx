@@ -262,7 +262,7 @@ export default function Looks({ kitId = null }) {
     && (!qs || qs.toLowerCase().split(/\s+/).every((w) => [l.title, l.description, ...(l.fonts ?? []).map((f) => f.family)].join(" ").toLowerCase().includes(w)))), [looks, on.join(), qs]); // eslint-disable-line react-hooks/exhaustive-deps
   const sel = list.find((l) => l.id === cur) ?? list[0] ?? null;
   // 3 rows a page; a new filter starts at page 1, a new page size (or the first visit) shows the Look in hand
-  const grid = useGalleryGrid(), size = grid.size;
+  const grid = useGalleryGrid({ fewer: 1 }), size = grid.size;
   const [pg, setPg] = useState(0);
   useEffect(() => { setPg(0); }, [on.join(), qs]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { setPg(Math.max(0, Math.floor(list.findIndex((l) => l.id === sel?.id) / size))); }, [size, !!q.data]); // eslint-disable-line react-hooks/exhaustive-deps

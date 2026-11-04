@@ -11,6 +11,10 @@
 //                network: anidoodle's gate.mjs list); only a project with anidoodle/ or boards/ TypeScript      blocking
 //   G-POSE       an anidoodle film drawn on every frame: a pose outside its joint limits, an error thrown or logged, a rig point that
 //                is not a number (HF's check samples and found Mira's at the very end)                     blocking
+//   G-COLLISION  a 3D Cartoon film, every frame: a character through furniture or another character, a foot below the floor (the
+//                kit's own collision check, moworks-kits/collision.mjs)                                       warning
+//   G-CUTS       a film of the owner's kit styles (2D Explainer, 3D Cartoon, Stickman, Inner Voice), on a render of the film as it is: its
+//                hard cuts against the cuts its own shot table declares (the kits' qc.mjs, moworks-kits/cuts.mjs)             warning
 //   G-VOICE      under a voice-over, effects or music within 3 dB of the voice on a spoken word        warning
 //   G-GLYPH-CODE Vietnamese letters a code film's own code (whatif/*.tsx, anidoodle/*.ts) draws in a face that lacks them
 //                (G-GLYPH reads only the HTML; codeGlyphs.mjs)                                                warning
@@ -33,6 +37,8 @@ import { CHECK_BUSY, checkFindings, checkOnceMore, checkSamples, checkTimeoutMs,
 import { dropDecorationContrast } from "./contrastDecor.mjs";
 import { gateContract } from "../anidoodle-styles/contract.mjs";
 import { gatePose } from "../anidoodle-styles/posecheck.mjs";
+import { gateCollision } from "../moworks-kits/collision.mjs";
+import { gateCuts } from "../moworks-kits/cuts.mjs";
 import { gateVoice } from "../sfx/voicecheck.mjs";
 import { freshFilm } from "../hf-edit/codeFilm.mjs";
 import { gateCodeGlyphs } from "./codeGlyphs.mjs";
@@ -270,10 +276,12 @@ export async function runGates(projectDir, { workDir, blank = true, onStep = () 
     ["Building the film's code", async () => [await gateBuild(projectDir)]],          // first: the checks below look at the film as its source is now
     ["HyperFrames' check of the film", (again) => hfCheck(projectDir, { onRetry: () => again("HyperFrames' check of the film, once more (the computer is busy)") })],
     ["Files and fonts", async () => [gateRemote(projectDir), ...(await gateFonts(projectDir)), gateCodeGlyphs(projectDir), gateViMarks(projectDir)]],
-    ["The film's drawing rules", async () => [gateContract(projectDir), await gatePose(projectDir)]],
+    // a 3D Cartoon film: the kit's collision check on every frame (a warning; nothing for any other film)
+    ["The film's drawing rules", async () => [gateContract(projectDir), await gatePose(projectDir), await gateCollision(projectDir)]],
     ["The voice against the sound", async () => [await gateVoice(projectDir)]],          // a warning; nothing without a voice-over
     ["A sound on every action", async () => [await gateSfx(projectDir)]],          // a warning; nothing before the sound effects are placed
     ["The moves on their words", async () => [await gateSync(projectDir)]],          // a warning; nothing when no row names a word
+    ["The cuts on the shot table", async () => [await gateCuts(projectDir)]],          // a warning; the owner's kit styles, on a render of the film as it is
     ["The image sequence", () => gateSequence(projectDir)],          // warnings; nothing without a sequence
     ["The sung words", async () => [await gateSung(projectDir)]],          // a warning; nothing without timed lyrics
     ...(blank && workDir ? [["Blank scenes", () => [gateBlank(projectDir, workDir)]]] : []),

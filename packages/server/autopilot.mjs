@@ -25,6 +25,7 @@ import { appMade, rememberAssets } from "../project-service/assets.mjs";
 import { unheardSongs } from "../project-service/scan.mjs";
 import { createHash } from "node:crypto";
 import { STILLS_BUSY } from "../hf-qa/cli.mjs";
+import { WAIT_MOMENT } from "./attention.mjs";
 
 const readJson = (f, fallback) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return fallback; } };
 
@@ -167,6 +168,8 @@ export function createAutopilot(ctx) {
   // a step that could not start (a busy computer, Test 33: Approve and build, then 17 minutes of nothing): tried again by itself, then said with a Retry
   const startTries = new Map();
   const START_TRIES = ctx.startTries ?? 3, START_WAIT = ctx.startWait ?? 60000;
+  /** A moment the user waits for (attention.mjs): Claude asks, a dialog to approve, the film ready, a step stopped. */
+  const attend = (id, moment, o = {}) => { try { ctx.attention?.add?.(id, moment, o); } catch { /* the chat card says it */ } };
   function stepNotStarted(id, s, e) {
     const signedOut = ["CLAUDE_SIGNED_OUT", "NO_CLAUDE"].includes(e?.code), n = (startTries.get(id) ?? 0) + 1;
     if (!signedOut && n <= START_TRIES) {
@@ -176,12 +179,17 @@ export function createAutopilot(ctx) {
     }
     startTries.delete(id);
     const p = projects.getProject(id, root);
+    attend(id, "error", { title: p?.title });
     try { if (p && !p.missing) projects.addNote(p.path, { kind: "pipeline", status: "warning", text: signedOut ? e.message : "The step \"{step}\" could not start: {why}. The app tried again and stopped; press Retry when the computer is less busy.", vars: { step: s?.title ?? s?.id ?? "next", why: String(e?.message ?? e).slice(0, 200) }, ...(s?.id ? { retry: s.id } : {}) }); } catch { /* notes are best effort */ }
     return { error: e.message };
   }
   const note = (p, text, vars = {}) => { try { projects.addNote(p.path, { kind: "pipeline", text, vars }); } catch { /* notes are best effort */ } };
   // a reminder card: `open` names the dialog the card's button opens (character | storyboard | motion-plan)
-  const waitCard = (p, open, text, vars = {}) => { try { projects.addNote(p.path, { kind: "waiting", open, text, vars }); } catch { /* notes are best effort */ } };
+  const waitCard = (p, open, text, vars = {}) => {
+    try { projects.addNote(p.path, { kind: "waiting", open, text, vars }); } catch { /* notes are best effort */ }
+    // the same wait said in Windows while the app's window is not in use (attention.mjs)
+    if (WAIT_MOMENT[open]) attend(p.id, WAIT_MOMENT[open], { title: p.title, ...(open === "lyrics" ? { open: "lyrics" } : {}) });
+  };
   const meta = (id, fn) => projects.updateMeta(id, fn, root);
 
   /** A named version: the files as they are now, committed; kept in the project's metadata to open again. Resolves it, or null; never
@@ -358,6 +366,7 @@ export function createAutopilot(ctx) {
     if (!ok) {
       const stopped = e?.code === "CANCELLED";
       meta(id, (m) => { (m.pipeline ??= {}).firstVersionFail = { at: now(), stopped, why: String(e?.message ?? "").slice(0, 200) }; });
+      if (!stopped) attend(p.id, "error", { title: p.title });
       if (!stopped) { try { projects.addNote(p.path, { kind: "pipeline", status: "warning", text: "Version 1 could not be rendered: {why}", vars: { why: String(e?.message ?? "the render failed").slice(0, 200) } }); } catch { /* notes are best effort */ } }
       return null;
     }
@@ -407,12 +416,13 @@ export function createAutopilot(ctx) {
       meta(id, (m) => { delete m.pipeline.version1.holding; });
       note(p, "Claude checked your film and changed nothing. Your film is ready to export.");
       notify(id, "Claude checked your film and changed nothing.");
+      attend(id, "review", { title: p.title });
       return { changed: false };
     }
     const v = await saveVersion(id, "version"), three = !!ctx.threeFilm?.(projects.getProject(id, root) ?? p);
     const next = { version: v?.id ?? null, n: v?.n ?? (x.n ?? 1) + 1, at: now(), render: three ? "ask" : "running" };
     meta(id, (m) => { m.pipeline.version1.next = next; });
-    if (three) { notify(id, "Claude changed your film. Render Version {n} now?", { n: next.n }); return { changed: true, ask: true }; }
+    if (three) { notify(id, "Claude changed your film. Render Version {n} now?", { n: next.n }); attend(id, "review", { title: p.title }); return { changed: true, ask: true }; }
     renderNext(id);
     return { changed: true };
   }
@@ -430,6 +440,7 @@ export function createAutopilot(ctx) {
     if (!ok) return;
     note(p, "Version {n} is ready. Press Open Version {n} to watch it. Version 1 stays in Versions.", { n: next.n });
     notify(id, "Version {n} is ready.", { n: next.n });
+    attend(id, "review", { title: p.title });          // the Review's new version, rendered: Review and checks are done
   }
   /** The 3D film's answer: render the new version now, or later. */
   function renderAnswer(id, yes) {
@@ -494,6 +505,7 @@ export function createAutopilot(ctx) {
       if (s.action?.kind === "claude" && last?.step === s.id && last.n >= 2) {
         if (!last.told) {
           meta(id, (m) => { m.pipeline.autoRun.told = now(); });
+          attend(id, "error", { title: p.title });
           note(p, "The step \"{step}\" ran twice and is still not done{why}. The app stopped running it by itself: look at it, then press Continue or tell Claude in the chat.",
             { step: s.title ?? s.id, why: s.reason?.key ? `: ${pipe.fill(s.reason.key, s.reason.vars ?? {})}` : "" });
         }
@@ -586,6 +598,7 @@ export function createAutopilot(ctx) {
     };
     say();
     notify(id, "Version {n} is ready. Watch it, with sound.", { n });
+    attend(id, "version1", { title: p.title });
     const b = m.pipeline?.build;
     if (b?.startedAt && !b.recorded) {
       const minutes = (Date.now() - Date.parse(b.startedAt)) / 60000;
@@ -623,7 +636,9 @@ export function createAutopilot(ctx) {
     const wrote = (task.changed ?? []).map((c) => String(c?.path ?? c).replace(/\\/g, "/")).filter((x) => /^(assets|sources)\//.test(x));
     if (wrote.length) { try { rememberAssets(p.path, wrote); } catch { /* the Assets tab shows them as new once */ } }
     if (task.status === "cancelled") { if (task.step) note(p, "Stopped. What was done is saved. Press Continue to go on."); return; }
-    if (task.status !== "done") return;
+    if (task.status !== "done") { if (task.status === "failed") attend(id, "error", { title: p.title }); return; }          // a lost sign-in, a busy computer: the chat's red line
+    // a chat turn that ended with a question to the user, or the app's own question: Claude has a question (a step that asks gets its waiting card below)
+    if ((!task.step && pipe.asksOwner(task.resultText)) || pipe.appAsked(task)) attend(id, "ask", { title: p.title });
     const step = task.step;
     // the owner said yes to the product's search in a run that began with the web off or asking: the next conversation has the web
     if (p.meta?.research?.restart) {
@@ -866,6 +881,9 @@ export function createAutopilot(ctx) {
     const p = projects.getProject(id, root);
     if (!p || p.missing || p.meta?.voice?.transcript?.status === "failed" || p.meta?.voice?.transcript?.status === "cancelled") return null;
     if (p.meta?.pipeline?.briefWaits) { meta(id, (m) => { delete m.pipeline.briefWaits; }); return advance(id); }
+    // the owner put another voice in after Version 1 ("Use as the film's voice-over", or a drop on an empty Narration lane): the Editor said once that
+    // the picture was timed to the old voice, and the Review says where it is off; Claude is not started to re-time the film (owner #920)
+    if (p.meta?.pipeline?.version1?.at && p.meta?.voice?.replaced?.afterVersion1) return null;
     // the words landed while Claude was at work (the storyboard being drawn): checked once that turn ends (voiceCheckDue)
     if (ctx.agent.running.has(id)) { meta(id, (m) => { (m.pipeline ??= {}).voiceCheck = { at: now() }; }); return null; }
     const { state } = await ctx.pipelineOf(id);

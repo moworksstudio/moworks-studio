@@ -7,7 +7,9 @@
 // own level under the music and the voice, repeats of one sound varied and one file at most MAX_REPEATS times a film, the sounds in the
 // ending's fade faded with it, and a quiet ambience bed under every scene that has a place.
 // The owner's choices (prefs.mjs: no whoosh, no ambience, the density, single sounds taken out) hold on every placement. Sounds come
-// from the app's offline library first, then Openverse / Freesound, then HyperFrames' bundled set; mounted and credited by index.mjs.
+// first from the code (code.mjs: the owner's kits' sounds and new ones made by code for the film; a kit style's film from the code only),
+// then the app's offline library, then Openverse / Freesound, then HyperFrames' bundled set; mounted and credited by index.mjs. Each
+// placement reports its coverage: the Motion Plan's moving rows that got a sound, and how many sounds came from each source (st.report).
 import { execFile } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
@@ -50,7 +52,20 @@ export function whooshInto(s, prev, plan = null) {
 export function whooshAllowed(palette) {
   const all = String(palette ?? "");
   if (!all.trim()) return true;
-  return /\b(whoosh|woosh|swoosh|swish|whip|swipe)/i.test(all.replace(/never (?:a |an |any )?(?:[\w-]+ )?(?:whoosh|woosh|swoosh|swish)\w*/gi, ""));
+  if (bannedFamilies(all).has("whoosh")) return false;
+  return /\b(whoosh|woosh|swoosh|swish|whip|swipe)/i.test(all.replace(NEVER, ""));
+}
+// "never a whoosh, a swoosh or a riser", "**Never a whoosh or a cartoon pop** unless the owner asks": the whole clause, to its stop
+const NEVER = /\bnever\b[^.;:\n]*/gi;
+/** The families a style's sound section forbids (the owner's kits: "never a whoosh", "never a whoosh or a pop"): a Set of whoosh and pop. A ban
+ *  stays (owner 31/10); only the owner's own word brings one back. */
+export function bannedFamilies(palette) {
+  const out = new Set();
+  for (const m of String(palette ?? "").matchAll(NEVER)) {
+    if (/\b(whoosh|woosh|swoosh|swish|whip|swipe)/i.test(m[0])) out.add("whoosh");
+    if (/\bpops?\b/i.test(m[0])) out.add("pop");
+  }
+  return out;
 }
 
 /** The automatic cues, unthinned: a whoosh into each real cut and every motion row's own sound (motionCues), each { id, shot, index,
@@ -125,7 +140,8 @@ const cueWords = (line) => {
 export async function applyOwnerSounds(dir, cues, { root } = {}) {
   // the user's sounds: assets/3_audio/sfx/ and music/, or the old assets/audio/; f is the project-relative path below
   // the sounds the app copied share assets/3_audio/sfx with the user's (the library's variants and ambience loops too): they are not the user's
-  const mine = new Set(Object.values(readState(dir).sounds ?? {}).filter((s) => s.source !== "owner").flatMap((s) => [s.file, ...(s.variants ?? []).map((v) => v.file)]));
+  const st0 = readState(dir);          // and those the app placed before and replaced since (code.mjs retire)
+  const mine = new Set([...Object.values(st0.sounds ?? {}).filter((s) => s.source !== "owner").flatMap((s) => [s.file, ...(s.variants ?? []).map((v) => v.file)]), ...(st0.retired ?? [])]);
   const files = ["assets/3_audio/sfx", "assets/3_audio/music", "assets/audio"].flatMap((rel) => {
     const d = join(dir, ...rel.split("/"));
     return existsSync(d) ? readdirSync(d).filter((n) => AUDIO.test(n)).map((n) => `${rel}/${n}`).filter((p) => !mine.has(p)) : [];
@@ -281,10 +297,13 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   const prefs = readPrefs(dir), palette = opts.palette ?? "";
   const policy = soundPolicy({ prefs, brief: briefOf(dir), palette, song: isSongFilm(null, { dir, root: opts.root }) });
   const style = opts.style ?? styleHint({ palette, id: opts.styleId, title: opts.styleTitle });
-  const words = spokenWords(dir), whoosh = opts.whoosh !== false && !isOff(prefs, { family: "whoosh" });
+  // a family the style's sound section forbids is off as the owner's own off would be (bannedFamilies: the kits' "never a pop")
+  const banned = [...bannedFamilies(palette)].filter((f) => f !== "whoosh");
+  if (banned.length) prefs.off = [...new Set([...(prefs.off ?? []), ...banned])];
+  const words = spokenWords(dir), whoosh = opts.whoosh !== false && !isOff(prefs, { family: "whoosh" }) && !bannedFamilies(palette).has("whoosh");
   const ends = (shots ?? []).map((s) => Number(s.start) + Number(s.duration)).filter((x) => Number.isFinite(x) && x > 0);
   const filmEnd = ends.length ? Math.max(...ends) : null;
-  const note = (extra) => patchState(dir, (st) => { st.policy = { density: policy.density, whoosh, silent: policy.silent, ambience: policy.ambience, style }; Object.assign(st, extra); });
+  const note = (extra) => patchState(dir, (st) => { st.policy = { density: policy.density, whoosh, silent: policy.silent, ambience: policy.ambience, style, ...(banned.length ? { banned } : {}) }; Object.assign(st, extra); });
   if (policy.silent) {          // the owner, the style, the brief or the song asks for no sound effects: none of the app's own
     mount(dir, [], { cueKey: cueKey(shots ?? []), times: timeKey(shots ?? []), left: { missing: [], near: [] } });
     mountAmbience(dir, []);
@@ -333,10 +352,27 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   const beds = policy.ambience ? await placeAmbience(dir, shots, { prefs, filmEnd, endFade, words, shift: lv?.shift ?? 0, root: opts.root }) : (mountAmbience(dir, []), []);
   // every effect under the voice where a word is spoken, and the whole mix under the master's ceiling: nothing later has to fix them
   const fitted = await fitEffects(dir, { root: opts.root }).catch(() => null);
-  note({ thinned: thinned.map((c) => ({ id: c.id, name: c.name, start: c.start, why: c.why })) });
+  const report = coverage(shots ?? [], plan, cues, thinned, readState(dir).sounds, o);
+  note({ thinned: thinned.map((c) => ({ id: c.id, name: c.name, start: c.start, why: c.why })), report: { ...report, at: new Date().toISOString() } });
   writeCredits(dir);
-  return { levels: lv, fitted, cues: cues.length, placed: placed.length, owned, added: res.added, missing: res.missing, failed: res.failed ?? [],
+  return { levels: lv, fitted, report, code: res.code ?? null, cues: cues.length, placed: placed.length, owned, added: res.added, missing: res.missing, failed: res.failed ?? [],
     near, offline: !!res.offline, names: [...new Set(placed.map((p) => p.name))], ambience: beds.length, thinned: thinned.length, density: policy.density, silent: null };
+}
+
+/** A placement's coverage (owner #910: a sound for every visible action): { rows: the Motion Plan's moving rows (a walk is one), sounded: those
+ *  with a sound (their own, or one merged with them at their moment), coverage: %, cues: the sounds placed, sources: { code, library, online,
+ *  bundled, owner } by placed cue }. */
+export function coverage(shots, plan, kept, thinned, sounds, { whoosh = true, prefs = {}, style = null, density = DEFAULT_DENSITY } = {}) {
+  const allow = (f) => (f !== "whoosh" || whoosh) && !isOff(prefs, { family: f });
+  const row = (c) => String(c.id ?? "").replace(/:[0-9]+$/, "");          // a walk's steps are one row
+  const rows = new Set(autoCues(shots, plan, { whoosh, allow, style, density }).filter((c) => !c.alt && !c.cut && String(c.id).startsWith("m:")).map(row));
+  const heard = new Set([...kept, ...(thinned ?? []).filter((t) => t.why === "same moment" || t.why === "named" || t.why === "repeat")].map(row));
+  const sounded = [...rows].filter((r) => heard.has(r)).length, sources = {};
+  for (const c of kept) {
+    const src = sounds?.[c.name]?.source, k = !src ? "none" : src === "openverse" || src === "sfxmint" ? "online" : src === "pixabay" ? "bundled" : src;
+    sources[k] = (sources[k] ?? 0) + 1;
+  }
+  return { rows: rows.size, sounded, coverage: rows.size ? Math.round((1000 * sounded) / rows.size) / 10 : 100, cues: kept.length, sources };
 }
 
 const db = (v) => 20 * Math.log10(Math.max(0.001, Number(v) || 0));

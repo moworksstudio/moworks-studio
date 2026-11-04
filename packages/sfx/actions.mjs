@@ -94,12 +94,17 @@ export const DENSITY = Object.freeze({
 });
 /** Two cues closer than this are at one moment. */
 export const SAME_MOMENT_S = 0.03;
+/** Lively (every film's default): a sound for every visible action (owner 04/11/2026 #910: "đặt sound đầy đủ cho mọi visual trên phim").
+ *  Only two sounds of one kind (the same family or the same name) closer than this are one sound; a small action's sound plays quieter
+ *  (SMALL_GAIN), never left out. Normal and low (the owner's choice in Final Mix, or a style or a brief that asks for fewer) thin as before. */
+export const MERGE_S = 0.1;
 const PRIO = { named: 0, plan: 1, auto: 2 };
 /** Thin the cues: { kept (by time), thinned (each with its why) }. Priority: the storyboard's named sounds (kept, but one of a kind at one
  *  moment), then the Motion Plan's `sound`, then the automatic ones; in each, the bigger actions before the small ones. */
 export function thin(cues, density = "lively") {
   const D = DENSITY[density] ?? DENSITY.lively, kept = [], thinned = [];
   const p = (c) => c.prio ?? PRIO.auto;
+  if ((DENSITY[density] ? density : "lively") === "lively") return merge(cues, p, D);
   // busy: some second of the film that holds this sound would hold more than perSecond (the windows that start at a kept sound or at it)
   const busy = (c) => [c.start, ...kept.map((k) => k.start).filter((t) => t <= c.start && t > c.start - 1)]
     .some((w) => 1 + kept.filter((k) => k.start >= w - 1e-6 && k.start < w + 1 - 1e-6).length > D.perSecond);
@@ -117,6 +122,24 @@ export function thin(cues, density = "lively") {
       : [...kept, ...left].some((k) => p(k) < p(c) && Math.abs(k.start - c.start) < D.same) ? "same moment"
       : kept.some((k) => k.family && k.family === c.family && Math.abs(k.start - c.start) < D.sameFamily - 1e-6) ? "same family"
       : busy(c) ? "busy" : null;
+    if (why) thinned.push({ ...c, why }); else kept.push(c);
+  }
+  return { kept: kept.sort((a, b) => a.start - b.start), thinned: thinned.sort((a, b) => a.start - b.start) };
+}
+/** Lively: every cue kept but those that are one sound with another (MERGE_S): the same family or name at one moment, a motion row's stand-by
+ *  sound once its own is kept, the automatic steps of a shot whose storyboard names its footsteps, and what plays within D.same of a sound the
+ *  storyboard names (that moment's action has its sound: the name is it); a cue the user moved stays, and where it was holds its moment
+ *  against what was the same sound there. */
+function merge(cues, p, D) {
+  const kept = [], thinned = [], left = cues.filter((c) => c.left);
+  const one = (k, c) => Math.abs(k.start - c.start) < MERGE_S - 1e-6 && ((!!k.name && k.name === c.name) || (!!k.family && k.family === c.family));
+  for (const c of cues.filter((x) => !x.left).sort((a, b) => Number(!!b.pinned) - Number(!!a.pinned) || p(a) - p(b) || Number(!!a.alt) - Number(!!b.alt) || Number(!!a.small) - Number(!!b.small) || a.start - b.start)) {
+    const why = c.pinned ? null
+      : c.alt && kept.some((k) => k.id === c.id && !k.alt) ? "same moment"
+      : p(c) > PRIO.named && [...kept, ...left].some((k) => p(k) === PRIO.named && Math.abs(k.start - c.start) < D.same) ? "same moment"
+      : [...kept, ...left].some((k) => one(k, c)) ? "same moment"
+      : c.auto && c.family === "footstep" && kept.some((k) => p(k) === PRIO.named && k.family === "footstep" && k.shot === c.shot) ? "named"
+      : null;
     if (why) thinned.push({ ...c, why }); else kept.push(c);
   }
   return { kept: kept.sort((a, b) => a.start - b.start), thinned: thinned.sort((a, b) => a.start - b.start) };

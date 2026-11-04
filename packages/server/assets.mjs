@@ -11,6 +11,7 @@ import { readShots } from "../hf-edit/shots.mjs";
 import { fetchImagery, imageryCredit } from "../map-explainer/index.mjs";
 import { docPath } from "../project-service/docs.mjs";
 import { audioKind, fitToFilm, laneOfFile, placeClip, placeTrack, removeRepeats, trackClips } from "../hf-edit/tracks.mjs";
+import { filmLength } from "../hf-edit/ending.mjs";
 import { ADDED, muteMounted, readState as readSfx, writeCredits } from "../sfx/index.mjs";
 import { placeAdded } from "../sfx/added.mjs";
 import { updatePrefs } from "../sfx/prefs.mjs";
@@ -33,6 +34,34 @@ export function soundTakenOff(p, { id = null, src = null, cue = null } = {}, roo
   const muted = id && /^el-sfx-\d+$/.test(id) ? muteMounted(p.path, id, { cue }) : bed?.key ? { name: bed.name, start: bed.start } : null;
   if (id && /^el-clip-\d+$/.test(id)) writeCredits(p.path);          // a sound from the Sounds drawer leaves the credits with its clip
   return { music: !!(src && m0.music?.file === src), voice: !!(src && m0.voice?.file === src), muted };
+}
+/** The lane an <audio> shows on (as the Editor's timeline: Narration, Music, else SFX). a: the tag's attributes. */
+const laneOfTag = (a) => {
+  const role = String(a["data-timeline-role"] ?? "").toLowerCase(), id = String(a.id ?? "");
+  return role === "voiceover" || role === "voice" ? "voiceover" : role === "music" ? "music" : role ? "sfx" : /^el-voice/.test(id) ? "voiceover" : /^el-music/.test(id) ? "music" : "sfx";
+};
+const tagAttrs = (tag) => Object.fromEntries([...tag.matchAll(/([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*"([^"]*)"/g)].map((m) => [m[1], m[2]]));
+/** Whether a sound from `start` for `length` seconds would lie over a sound already on that lane of the page (owner #933: on Narration and Music
+ *  a drop onto sound is refused, never moved). A clip that names no length runs to the film's end. */
+export function laneBusy(html, lane, start, length, film = 0) {
+  const s = Math.max(0, Number(start) || 0), e = s + Math.max(0.05, Number(length) || 0);
+  return [...String(html ?? "").matchAll(/<audio\b[^>]*>/gi)].map((m) => tagAttrs(m[0])).filter((a) => laneOfTag(a) === lane).some((a) => {
+    const a0 = Number(a["data-start"]) || 0, d = Number(a["data-duration"]), a1 = d > 0 ? a0 + d : Math.max(film, a0 + 1);
+    return a0 < e - 0.01 && s < a1 - 0.01;
+  });
+}
+/** Every clip of the film's voice-over ("voice": the app's el-voice, or the clips the Build cut it into, el-voice-01…, one a line, T22-11) or of its music
+ *  ("music": el-music and its repeats) off the page, the files kept; a clip the user added beside them (el-clip-N) stays. Returns whether the page changed. */
+function filmClipsOff(p, kind = "voice") {
+  const f = join(p.path, "index.html");
+  let html = ""; try { html = readFileSync(f, "utf8"); } catch { return false; }
+  const own = kind === "voice" ? /^el-voice(?:-[\w-]+)?$/ : /^el-music(?:-[\w-]+)?$/, file = kind === "voice" ? p.meta?.voice?.file : p.meta?.music?.file;
+  const out = html.replace(/[ \t]*<audio\b[^>]*>(?:\s*<\/audio>)?[ \t]*\r?\n?/g, (tag) => {
+    const a = tagAttrs(tag);
+    return audioKind(a) === kind && (a.src === file || own.test(a.id ?? "")) ? "" : tag;
+  });
+  if (out !== html) writeFileSync(f, out);
+  return out !== html;
 }
 import { extractAudio, probe } from "../voice/audio.mjs";
 import * as rev from "../revisions/index.mjs";
@@ -59,6 +88,12 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
   };
   // recorded beside the server's thread, in the project's git queue (T22-5); never rejects
   const commit = async (p, msg) => { try { await rev.saveAsync(p.path, msg); } catch { /* revisions optional */ } };
+  /** Another voice than the one Version 1 was timed to (owner #920): recorded, so the Review looks for a picture off the new voice and says so. Claude does
+   *  not re-time the film by itself. */
+  const replacedVoice = (p, from, to) => {
+    if (!from || from === to || !p.meta?.pipeline?.version1?.at) return;
+    projects.updateMeta(p.id, (m) => { if (m.voice) m.voice.replaced = { at: new Date().toISOString(), from, afterVersion1: true }; }, root);
+  };
 
   const routes = [
     r("GET", `/projects/${P}/assets`, async ([id]) => {
@@ -117,7 +152,9 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
         audio = projects.assetDestination(p.path, basename(abs, extname(abs)) + ".m4a", "voiceover").path;
         await extractAudio(abs, audio, root); from = rel;
       }
-      return ctx.useVoice(p, audio, await probe(audio, root), { source: "upload", size: statSync(audio).size, from });
+      const old = p.meta?.voice?.file ?? null, voice = await ctx.useVoice(p, audio, await probe(audio, root), { source: "upload", size: statSync(audio).size, from });
+      replacedVoice(p, old, voice?.voice?.file ?? rel);
+      return voice;
     }),
     // an audio file onto the timeline, on its lane: the first voice-over as the voice (transcribed first when its words are not
     // checked yet), the first music as the music track, a sound effect as its own clip; on a lane the film's voice or music already holds it is a
@@ -139,9 +176,16 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
       };
       let html = ""; try { html = readFileSync(join(p.path, "index.html"), "utf8"); } catch { /* no film page yet */ }
       const taken = (kind) => trackClips(html, kind).length > 0;
+      // Narration and Music hold one sound at a time (owner #933): onto sound already there the drop is refused and nothing moves; the SFX lane
+      // stacks its sounds on rows of their own as before
+      if (lane !== "sfx") {
+        const film = filmLength(p.meta ?? {}, { dir: p.path }).total || 0, fit = fitToFilm(p.path, start ?? 0, Number(info?.duration) || 1);
+        if (laneBusy(html, lane, fit.start, fit.duration, film)) throw new HttpError(409, "LANE_BUSY", lane === "music" ? "Music already has sound there" : "Narration already has sound there");
+      }
       if (lane === "voiceover") {
         const v = p.meta?.voice;
-        // the film's voice taken off comes back; on a lane that holds a voice, the same file too, it is a clip beside it
+        // the film's voice taken off comes back; on a lane that holds a voice, the same file too, it is a clip beside it; on an empty lane (the film's
+        // voice taken off) another file becomes the film's voice (owner #937), the Editor having said once that the picture was timed to the old one
         if (taken("voice") || (v?.file && v.file !== rel && !v.offTimeline)) return clipHere("voiceover", "Sound beside the voice-over");
         if (v?.file === rel && v.transcript?.status === "saved") {          // its words are checked: straight back on the timeline
           placeTrack(p.path, { kind: "voice", src: rel, duration: Number(info?.duration ?? v.info?.duration) || 1, start });
@@ -150,7 +194,9 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
           await commit(p, `Voice-over on the timeline: ${rel}`);
           return { lane, voice: { file: rel } };
         }
-        return { lane, voice: await ctx.useVoice(p, abs, info, { source: "upload", size: statSync(abs).size }) };
+        const voice = await ctx.useVoice(p, abs, info, { source: "upload", size: statSync(abs).size });
+        replacedVoice(p, v?.file, rel);
+        return { lane, voice };
       }
       if (lane === "music") {
         if (taken("music")) return clipHere("music", "Sound beside the music");
@@ -162,6 +208,40 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
       const added = Object.entries(readSfx(p.path).sounds ?? {}).find(([n, s]) => n.startsWith(ADDED) && s.file === rel)?.[0];
       if (added) { const x = await placeAdded(p.path, added, { at: start ?? 0, root }); await commit(p, `Sound effect on the timeline: ${rel}`); return { lane, clip: x.tag }; }
       return clipHere("sfx", "Sound effect");
+    }),
+    // "Use as the film's voice-over" / "Use as the film's music" (owner 03/11, 2a): the only way to replace them. The old voice or music leaves the timeline
+    // (its file stays in Assets) and this file takes its place from 0 s: a voice is transcribed first, as any new voice; a music gets its beats and its level.
+    // Clips the user added beside them stay where they are.
+    r("POST", `/projects/${P}/assets/use`, async ([id], b) => {
+      const p = mustProject(id, root); free(id);
+      const rel = must(p, b.path);
+      if (!AUDIO.test(rel)) throw new HttpError(400, "INVALID", "Choose an audio file");
+      if (!["voiceover", "music"].includes(b.as)) throw new HttpError(400, "INVALID", "A file is used as the voice-over or the music");
+      const abs = join(p.path, ...rel.split("/"));
+      const info = await probe(abs, root);
+      let html = ""; try { html = readFileSync(join(p.path, "index.html"), "utf8"); } catch { /* no film page yet */ }
+      if (b.as === "voiceover") {
+        const v = p.meta?.voice;
+        if (v?.file === rel && !v.offTimeline && trackClips(html, "voice").some((c) => c.src === rel)) throw new HttpError(409, "SAME", "It is already the film's voice-over");
+        if (v?.file) { filmClipsOff(p, "voice"); soundTakenOff(p, { id: "el-voice", src: v.file }, root); }
+        if (v?.file === rel && v.transcript?.status === "saved") {          // its words are checked: straight back on the timeline
+          placeTrack(p.path, { kind: "voice", src: rel, duration: Number(info?.duration ?? v.info?.duration) || 1 });
+          projects.updateMeta(id, (m) => { if (m.voice) delete m.voice.offTimeline; }, root);
+          await levelTracks(p.path, { root }).catch(() => null);
+          await commit(p, `The film's voice-over: ${rel}`);
+          return { as: "voiceover", voice: { file: rel } };
+        }
+        const voice = await ctx.useVoice(p, abs, info, { source: "upload", size: statSync(abs).size });
+        replacedVoice(p, v?.file, rel);
+        return { as: "voiceover", voice };
+      }
+      const m0 = p.meta?.music;
+      if (m0?.file === rel && trackClips(html, "music").some((c) => c.src === rel && c.id === "el-music")) throw new HttpError(409, "SAME", "It is already the film's music");
+      removeRepeats(p.path);          // the old song and its repeats go; placeTrack puts this one in el-music's place
+      if (m0?.file) filmClipsOff(p, "music");
+      const music = await ctx.placeMusic(p, rel, info, {});
+      await commit(p, `The film's music: ${rel}`);
+      return { as: "music", music };
     }),
   ];
 
@@ -190,14 +270,7 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
       const p = projects.getProject(project.id, root);
       if (!p?.meta?.voice?.file) return "This film has no voice-over.";
       if (ctx.renders?.isRendering(project.id)) return "The film is being rendered: try again when it finishes.";
-      const f = join(p.path, "index.html");
-      let html = ""; try { html = readFileSync(f, "utf8"); } catch { /* no film yet */ }
-      // every clip of it: the app's el-voice, or the clips the Build cut it into (el-voice-01…, one a line, T22-11)
-      const out = html.replace(/[ \t]*<audio\b[^>]*>(?:\s*<\/audio>)?[ \t]*\r?\n?/g, (tag) => {
-        const a = Object.fromEntries([...tag.matchAll(/([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*"([^"]*)"/g)].map((m) => [m[1], m[2]]));
-        return audioKind(a) === "voice" && (a.src === p.meta.voice.file || /^el-voice(?:-[\w-]+)?$/.test(a.id ?? "")) ? "" : tag;
-      });
-      if (out !== html) writeFileSync(f, out);
+      filmClipsOff(p, "voice");          // every clip of it: the app's el-voice, or the clips the Build cut it into
       soundTakenOff(p, { id: "el-voice", src: p.meta.voice.file }, root);
       await commit(p, `Voice-over off the timeline: ${p.meta.voice.file} (kept in the assets)`);
       return `The voice-over ${basename(p.meta.voice.file)} is off the timeline (the file stays in the assets): the film has no narration.`;

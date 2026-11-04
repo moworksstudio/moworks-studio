@@ -4,8 +4,8 @@
 // back to the app (the server compares the film's paths with the disk): a file the film uses that is gone shows as "Missing" with
 // "Relink"; a file copied in from Explorer shows as "New". Audio and footage can be transcribed and put on the timeline: at the
 // playhead from the menu, or dragged onto a lane of the timeline.
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { AudioLines, ChevronDown, ChevronRight, Clapperboard, FileText, Film, Folder, FolderOpen, Image as ImageIcon, Images, Loader2, MoreHorizontal, Trash2, Type } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AudioLines, ChevronDown, ChevronRight, Clapperboard, FileText, Film, Folder, FolderOpen, Image as ImageIcon, Images, Loader2, MoreHorizontal, Play, Replace, Square, Trash2, Type } from "lucide-react";
 import { get, post } from "../api.js";
 import { Dialog, Menu } from "../components.jsx";
 import { usePref, useToast } from "../lib.jsx";
@@ -83,6 +83,41 @@ export const placedSay = (t, name, at, cut = false) => (at == null ? t("On the t
   : cut ? t("On the timeline at {time}: {name}. It stops where the film ends.", { time: clockTenths(at), name })
     : t("On the timeline at {time}: {name}", { time: clockTenths(at), name }));
 
+/** A sound heard at once from its row (owner #921), never put on the timeline: one at a time, it stops when another starts, when it is pressed again or
+ *  when the tab closes. Listeners: the rows, to show which one plays. */
+const listen = { el: null, path: null, subs: new Set() };
+const listenSay = () => listen.subs.forEach((f) => f(listen.path));
+export function stopListening() {
+  if (listen.el) { listen.el.pause(); listen.el.removeAttribute("src"); listen.el.load(); }
+  listen.el = null; listen.path = null; listenSay();
+}
+function startListening(path, url, onFail) {
+  stopListening();
+  const el = new Audio(url);
+  listen.el = el; listen.path = path; listenSay();
+  el.addEventListener("ended", () => { if (listen.el === el) stopListening(); });
+  el.play().catch(() => { if (listen.el === el) { stopListening(); onFail?.(); } });
+}
+function useListening() {
+  const [now, setNow] = useState(listen.path);
+  useEffect(() => { listen.subs.add(setNow); return () => { listen.subs.delete(setNow); }; }, []);
+  return now;
+}
+
+/** The warning before another voice becomes the film's after Version 1 (owner #920, #937): the picture was timed to the old voice. Claude does not
+ *  re-time it; the Review says where it finds the picture off the voice. */
+export function VoiceSwapDialog({ name, onYes, onClose }) {
+  const t = useT();
+  return <Dialog title={t("Use {name} as the film's voice-over?", { name })} onClose={onClose} footer={<>
+    <button className="btn ghost" onClick={onClose}>{t("Cancel")}</button>
+    <button className="btn primary" onClick={() => { onClose(); onYes(); }}>{t("Use this voice")}</button></>}>
+    <p>{t("The picture was timed to the old voice.")}<br />{t("With this one it may be off in places.")}</p>
+    <p className="hint">{t("Claude does not re-time the film. The Review says where it finds the picture off the voice.")}</p>
+  </Dialog>;
+}
+/** Whether another voice made the film's after Version 1 needs that warning first. */
+export const voiceSwapAsks = (project, path) => !!project?.meta?.pipeline?.version1?.at && !!project?.meta?.voice?.file && project.meta.voice.file !== path;
+
 /** The server's list: { items } (pipeline v2), or the older { assets } read the same way. */
 function normalise(r) {
   if (r.items) return r.items;
@@ -124,17 +159,37 @@ function Relink({ item, items, projectId, onDone, onClose }) {
   </Dialog>;
 }
 
-function Row({ a, items, projectId, fileUrl, locked, time, length, onChanged, onTranscript, onShot }) {
+/** Where a sound plays in the film (owner 03/11, 1a): the film's own voice or music says its track; any other sound its times, each a link to the
+ *  playhead; one nothing uses says so. At most MAX_TIMES links, then "+N". */
+const MAX_TIMES = 6;
+function SoundUse({ a, onSeek }) {
+  const t = useT();
+  const times = a.times ?? [];
+  const track = a.track === "voice" ? t("On the Voice track") : a.track === "music" ? t("On the Music track") : null;
+  if (!track && !times.length) return a.usedIn?.some((n) => typeof n === "number") ? null : <span className="as-used none">{t("Not used")}</span>;
+  return <>
+    {track && <span className="as-used track">{track}</span>}
+    {times.length > 0 && <span className="as-used">{track ? t("Also used {n}×", { n: times.length }) : t("Used {n}×", { n: times.length })}{" "}
+      {times.slice(0, MAX_TIMES).map((s, i) => <button key={`${s}-${i}`} className="clink num" onClick={() => onSeek?.(s)} title={t("Move the playhead to {time}", { time: clockTenths(s) })}>{clockTenths(s)}</button>)}
+      {times.length > MAX_TIMES && <span className="num"> +{times.length - MAX_TIMES}</span>}</span>}
+  </>;
+}
+
+function Row({ a, items, projectId, project, fileUrl, locked, time, length, flash, onChanged, onTranscript, onShot, onSeek }) {
   const t = useT();
   const toast = useToast();
   const [busy, setBusy] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [relink, setRelink] = useState(false);
   const [del, setDel] = useState(null);          // { inUse } while the delete question is open
+  const [swap, setSwap] = useState(false);          // the voice warning before "Use as the film's voice-over"
+  const listening = useListening() === a.path;
+  const ref = useRef(null);
+  useEffect(() => { if (flash) ref.current?.scrollIntoView({ block: "center", behavior: "smooth" }); }, [flash]);
   const I = ICON[a.kind] ?? FileText;
   const call = async (what, body, done) => {
     setBusy(what);
-    try { const r = await post(`/api/projects/${projectId}/assets/${what}`, { path: a.path, ...body }); if (done) toast(done); onChanged(what === "timeline" || what === "move"); return r; }
+    try { const r = await post(`/api/projects/${projectId}/assets/${what}`, { path: a.path, ...body }); if (done) toast(done); onChanged(what === "timeline" || what === "move" || what === "use"); return r; }
     catch (e) { if (e.code === "IN_USE") setDel({ inUse: true }); else toast(e.message, "error"); return null; }
     finally { setBusy(null); }
   };
@@ -146,6 +201,15 @@ function Row({ a, items, projectId, fileUrl, locked, time, length, onChanged, on
     catch (e) { toast(e.message, "error"); }
     finally { setBusy(null); }
   };
+  // "Use as the film's voice-over / music" (2a): the only way to replace them
+  const useAs = async (as) => {
+    const r = await call("use", { as });
+    if (!r) return;
+    // a new voice is transcribed first; with no speech model yet the server says how to get one
+    if (as === "voiceover" && r.voice?.needsModel) toast(r.voice.needsModel, "error");
+    else toast(as === "music" ? t("{name} is the film's music now", { name: a.name })
+      : r.voice?.job ? t("{name} is the film's voice-over now. Its words are read first, then it goes on the timeline.", { name: a.name }) : t("{name} is the film's voice-over now", { name: a.name }));
+  };
   // a sound drags onto a lane of the timeline (the menu item stays for the keyboard); the drag carries the path, never shown
   const drags = a.kind === "audio" && a.status !== "missing" && !locked && !busy;
   const dragProps = drags ? { draggable: true, onDragStart: (e) => { e.dataTransfer.setData(SOUND_MIME, a.path); e.dataTransfer.effectAllowed = "copy"; setDragging(true); },
@@ -153,12 +217,20 @@ function Row({ a, items, projectId, fileUrl, locked, time, length, onChanged, on
   const sound = a.kind === "audio" || a.kind === "footage";
   const folder = kidOf(a);
   const showIt = { label: t("Show in Explorer"), icon: <FolderOpen size={14} />, onSelect: reveal };
+  const trackName = (k) => t(AUDIO_KIDS.find(([x]) => x === k)[1]);
+  const own = !!a.track && a.track === (folder === "voiceover" ? "voice" : folder);          // the film's own voice or music, in its own folder
+  // The menu is the same for every file of a kind (owner 03/11, 1e): what cannot run now is greyed with its reason, never left out
   const menu = [
     // one folder, one lane (owner 03/11): a sound goes on its own folder's lane; the film's voice or music already on it says so instead
     // (a sound effect can be used again); a file in no sound folder (an older project) offers the three lanes
     ...(a.kind !== "audio" ? [] : !folder ? AUDIO_KIDS.map(([k, l]) => ({ label: t("Add to {track} track", { track: t(l) }), icon: <Clapperboard size={14} />, onSelect: () => place(k) }))
-      : folder !== "sfx" && a.onTimeline ? [{ label: t("On the {track} track", { track: t(AUDIO_KIDS.find(([k]) => k === folder)[1]) }), icon: <Clapperboard size={14} />, disabled: true }]
-        : [{ label: t("Add to {track} track", { track: t(AUDIO_KIDS.find(([k]) => k === folder)[1]) }), icon: <Clapperboard size={14} />, onSelect: () => place(folder) }]),
+      : folder !== "sfx" && a.onTimeline && own ? [{ label: t("On the {track} track", { track: trackName(folder) }), icon: <Clapperboard size={14} />, disabled: true }]
+        : [{ label: t("Add to {track} track", { track: trackName(folder) }), icon: <Clapperboard size={14} />, onSelect: () => place(folder) }]),
+    // the only way to replace the film's voice or music (2a); "Add to … track" only ever adds a clip
+    a.kind === "audio" && folder === "voiceover" && { label: t("Use as the film's voice-over"), icon: <Replace size={14} />,
+      ...(a.track === "voice" ? { disabled: true, hint: t("It is the film's voice-over") } : { onSelect: () => (voiceSwapAsks(project, a.path) ? setSwap(true) : useAs("voiceover")) }) },
+    a.kind === "audio" && folder === "music" && { label: t("Use as the film's music"), icon: <Replace size={14} />,
+      ...(a.track === "music" ? { disabled: true, hint: t("It is the film's music") } : { onSelect: () => useAs("music") }) },
     sound && (a.kind === "footage" || folder === "voiceover" || a.transcript === "saved" || a.transcript === "review") && { label: a.transcript === "saved" || a.transcript === "review" ? t("Open the words") : t("Transcribe"), icon: <AudioLines size={14} />,
       onSelect: async () => { if (a.transcript !== "saved" && a.transcript !== "review") { if (!(await call("transcribe", {}))) return; } onTranscript(a.path); } },
     ...(a.kind === "audio" && !a.app ? AUDIO_FOLDERS.filter(([k]) => k !== folder).map(([k, l]) => ({ label: t("Move to: {where}", { where: t(l) }), onSelect: () => call("move", { folder: k }, t("Moved to {where}", { where: t(l) })) })) : []),
@@ -167,23 +239,34 @@ function Row({ a, items, projectId, fileUrl, locked, time, length, onChanged, on
     !a.app && !a.members && "-",
     !a.app && !a.members && { label: t("Delete"), icon: <Trash2 size={14} />, onSelect: () => setDel({ inUse: (a.usedIn ?? []).length > 0 }) },
   ].filter(Boolean);
+  // while the film renders, the same items greyed with the reason; Show in Explorer still works
+  const items_ = locked ? menu.map((it) => (it === "-" || it === showIt || it.disabled ? it : { ...it, disabled: true, hint: t("Wait until the render finishes"), onSelect: undefined })) : menu;
   // kind, length and size only (no side notes such as "on the timeline" or "from the app")
   const sub = [t(KIND[a.kind] ?? "File"), a.files > 1 ? t("{n} styles", { n: a.files }) : null, a.duration ? fmtDur(a.duration) : null, a.frames ? t("{n} frames", { n: a.frames }) : null, fmtSize(a.size)].filter(Boolean).join(" · ");
   const shotRuns = runsOfShots(a.usedIn);
+  const url = a.kind === "audio" && a.status !== "missing" && fileUrl ? fileUrl(a.path) : null;
   // no paths on screen: the name, and the app's note when there is one
-  return <li className={"as-row" + (a.status === "missing" ? " missing" : "") + (dragging ? " dragging" : "")} title={a.note ? `${a.name}\n${a.note}` : a.name} {...dragProps}>
+  return <li ref={ref} className={"as-row" + (a.status === "missing" ? " missing" : "") + (dragging ? " dragging" : "") + (a.kind === "audio" && a.status !== "missing" ? " snd" : "") + (flash ? " flash" : "")} title={a.note ? `${a.name}\n${a.note}` : a.name} {...dragProps}>
     <span className={"as-thumb " + a.kind + (a.kind === "audio" ? " " + (folder ?? "audio") : "")} aria-hidden="true">
       {a.kind === "image" && a.status !== "missing" && fileUrl ? <img src={fileUrl(a.path)} alt="" loading="lazy" /> : <I size={14} />}</span>
     <span className="as-t">
       <span className="as-name">{a.name}{a.status === "new" && <span className="as-new">{t("New")}</span>}</span>
       <span className="as-sub">{a.status === "missing" ? t("Missing") : sub}</span>
       {a.unread && <span className="as-unread">{t("Not read: {why}", { why: t(a.unread) })}</span>}
+      {a.kind === "audio" && a.status !== "missing" && <SoundUse a={a} onSeek={onSeek} />}
       {shotRuns.length > 0 && <span className="as-used">{t("In shot")} {shotRuns.map((run, i) => <button key={run.from} className="clink" onClick={() => onShot(run.from)}>{shotRunText(run)}{i < shotRuns.length - 1 ? "," : ""}</button>)}</span>}
     </span>
-    {busy ? <Loader2 size={14} className="spin as-busy" />
-      : a.status === "missing" && !a.app ? <button className="btn sm" disabled={locked} onClick={() => setRelink(true)}>{t("Relink")}</button>
-        : <Menu trigger={<MoreHorizontal size={14} />} label={t("More for {name}", { name: a.name })} items={locked ? [showIt] : menu} />}
+    <span className="as-acts">
+      {a.kind === "audio" && a.status !== "missing" && <button className={"btn ghost icon sm as-play" + (listening ? " on" : "")} aria-pressed={listening} disabled={!url}
+        aria-label={listening ? t("Stop {name}", { name: a.name }) : t("Listen to {name}", { name: a.name })} title={!url ? t("The film's preview is still loading") : listening ? t("Stop") : t("Listen")}
+        onClick={(e) => { e.stopPropagation(); if (listening) stopListening(); else startListening(a.path, url, () => toast(t("This sound could not be played"), "error")); }}>
+        {listening ? <Square size={12} /> : <Play size={13} />}</button>}
+      {busy ? <Loader2 size={14} className="spin as-busy" />
+        : a.status === "missing" && !a.app ? <button className="btn sm" disabled={locked} onClick={() => setRelink(true)}>{t("Relink")}</button>
+          : <Menu trigger={<MoreHorizontal size={14} />} label={t("More for {name}", { name: a.name })} items={items_} />}
+    </span>
     {relink && <Relink item={a} items={items} projectId={projectId} onDone={onChanged} onClose={() => setRelink(false)} />}
+    {swap && <VoiceSwapDialog name={a.name} onYes={() => useAs("voiceover")} onClose={() => setSwap(false)} />}
     {del && <Dialog title={t("Delete {name}?", { name: a.name })} danger onClose={() => setDel(null)} footer={<>
       <button className="btn ghost" onClick={() => setDel(null)}>{t("Cancel")}</button>
       <button className="btn danger" onClick={async () => { const ok = await call("delete", del.inUse ? { force: true } : {}, t("Deleted: {name}", { name: a.name })); if (ok) setDel(null); }}>{t("Delete")}</button></>}>
@@ -193,10 +276,23 @@ function Row({ a, items, projectId, fileUrl, locked, time, length, onChanged, on
   </li>;
 }
 
-export default function AssetsPanel({ projectId, items, reload, fileUrl, locked, time = 0, length = 0, onTranscript, onTimelineChanged, onShot }) {
+export default function AssetsPanel({ projectId, project = null, items, reload, fileUrl, locked, time = 0, length = 0, focus = null, onTranscript, onTimelineChanged, onShot, onSeek }) {
   const t = useT();
   const studio = useThemeId() === "studio";
   const [folded, setFolded] = usePref("editor:assets-folded", {});
+  useEffect(() => () => stopListening(), []);          // the tab closed: what plays stops
+  // "Show in Assets" from the timeline (1c): its folders open and its row lights for a moment
+  const [flash, setFlash] = useState(null);
+  useEffect(() => {
+    if (!focus?.path || !items) return undefined;
+    const a = items.find((x) => x.path === focus.path);
+    if (!a) return undefined;
+    const g = groupOf(a), k = kidOf(a);
+    setFolded((f) => ({ ...f, [g]: false, ...(g === "audio" && k ? { ["audio-" + k]: false } : {}) }));
+    setFlash(a.path);
+    const h = setTimeout(() => setFlash(null), 2400);
+    return () => clearTimeout(h);
+  }, [focus?.n, !!items]); // eslint-disable-line react-hooks/exhaustive-deps
   const groups = useMemo(() => {
     const by = new Map();
     for (const a of items ?? []) { const g = groupOf(a); if (!by.has(g)) by.set(g, []); by.get(g).push(a); }
@@ -204,7 +300,8 @@ export default function AssetsPanel({ projectId, items, reload, fileUrl, locked,
     return GROUPS.filter(([k]) => by.has(k)).map(([k, l]) => [k, studio ? STUDIO_NAMES[k] ?? l : l, order(by.get(k))]);
   }, [items, studio]);
   const changed = (timeline) => { reload(); if (timeline) onTimelineChanged?.(); };
-  const row = (a) => <Row key={a.path} a={a} items={items} projectId={projectId} fileUrl={fileUrl} locked={locked} time={time} length={length} onChanged={changed} onTranscript={onTranscript} onShot={onShot} />;
+  const row = (a) => <Row key={a.path} a={a} items={items} projectId={projectId} project={project} fileUrl={fileUrl} locked={locked} time={time} length={length} flash={flash === a.path}
+    onChanged={changed} onTranscript={onTranscript} onShot={onShot} onSeek={onSeek} />;
   /** A folder that opens and closes like one of After Effects' Project panel. */
   const folder = (k, label, count, body, depth = 0) => <section key={k} className={"as-grp " + k + (depth ? " sub" : "")}>
     <h3><button className="as-fold" aria-expanded={!folded[k]} onClick={() => setFolded((f) => ({ ...f, [k]: !f[k] }))}>

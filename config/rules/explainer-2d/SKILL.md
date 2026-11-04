@@ -1,11 +1,11 @@
 ---
 name: explainer-2d
-description: Moworks Studio's 2D Explainer film style - the owner's 2D Explainer Animation Toolkit 1.0.0 as shipped: narrated 2D explainers drawn in code on one canvas, flat cel-shaded shapes with rim light and no outlines on deep indigo grounds, glow only on things that emit light, the red-hoodie hero, near-square label pills, callouts and an uppercase title that pops in word by word, every cut, label and sound keyed to a word of the narration. The kit's own HyperFrames page and canvas engine.
+description: The Moworks 2D Explainer film style - the owner's 2D Explainer Animation Toolkit 1.0.0 as shipped: narrated 2D explainers drawn in code on one canvas, flat cel-shaded shapes with rim light and no outlines on deep indigo grounds, glow only on things that emit light, the red-hoodie hero, near-square label pills, callouts and an uppercase title that pops in word by word, every cut, label and sound keyed to a word of the narration. The kit's own HyperFrames page and canvas engine.
 version: 1.0.0
 derived-from: The owner's 2D Explainer Animation Toolkit 1.0.0 (2D-EXPLAINER-ANIMATION-TOOLKIT.md, SHA-256 in config/pins.json moworksKits), pinned as shipped in .moworks/library/explainer-2d/kit/.
 ---
 
-# 2D Explainer: the film style
+# Moworks 2D Explainer: the film style
 
 This pack sits on top of `.moworks/rules/general-style/SKILL.md`, whose steps, gates and files stay as they are. Where the two differ this pack wins, and
 where this pack and the kit differ on taste **the kit wins**. The house rules (`moworks-studio`) win over all three, and the app's own parts stand: voice-over,
@@ -65,6 +65,10 @@ engine keeps the name and `HOUSE.ui.init()` waits for it as shipped.
 | Review | CHECKLIST.md on the snapshots, then `moworks-qc` with `render-review/references/REVIEW.md`. The app's transcript check stands in for the kit's word-for-word diff of the final MP4 |
 
 ## 5. Sound
+
+**Code-made sounds only** (owner 04/11/2026): every sound of this style is made by code: the kit's own sounds first, then new takes and new
+sounds from its recipes and the app's, made with the owner's sfxlib. While the computer can run the code the app never takes a library or a downloaded
+sound for it, because the kit's own sound rules forbid them; a sound no recipe makes is left out, so write one the kit's way (moworks-studio §7b).
 
 The kit's own effects are in the app's library, made by the kit's code (`pop`, `pop-big`, `tick`, `counter-roll`, `impact`, `reveal`, `light-hit`, `sparkle`,
 `swish`, `title`, and the camera sweeps `whoosh-pullback`, `whoosh-dive`): small, warm and soft, on their word (`sound-design`). The kit's music bed (a soft pad,

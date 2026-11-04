@@ -395,8 +395,8 @@ export default function Player({ projectId, pv, shots, shot, onShot, locked, ran
   useEffect(() => { send("lock", { locked: !!locked }); }, [locked, send]);
   useEffect(() => { if (state.ready) send("quality", { level: quality }); }, [state.ready, quality, send]);
   const { proxy, videoOnly } = pv;
-  useEffect(() => { if (state.ready && !videoOnly) send("proxy", { url: proxy?.url ?? null, fresh: proxy?.status === "fresh" || !!proxy?.stems, duration: proxy?.duration ?? null, stems: proxy?.stems ?? null, levels: proxy?.levels ?? null }); },
-    [state.ready, proxy?.url, proxy?.status, proxy?.duration, proxy?.stems?.key, send]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (state.ready && !videoOnly) send("proxy", { url: proxy?.url ?? null, fresh: proxy?.status === "fresh" || !!proxy?.stems, duration: proxy?.duration ?? null, stems: proxy?.stems ?? null, levels: proxy?.levels ?? null, muted: proxy?.muted ?? null }); },
+    [state.ready, proxy?.url, proxy?.status, proxy?.duration, proxy?.stems?.key, JSON.stringify(proxy?.muted ?? null), send]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { setCard(true); }, [picked[0]?.hfId, picked[0]?.label, pickN]);
   const seek = (s) => send("seek", { time: Math.max(0, Math.min(state.duration || 0, s)) });
   const shotIdx = shots.findIndex((s) => state.time >= s.start - 1e-3 && state.time < s.start + (s.duration ?? 0) - 1e-3);

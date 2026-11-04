@@ -236,19 +236,36 @@ mood"):
 - **In the style's material:** paper and wood for crafted styles (paper, cut-out, clay, stop-motion), synth and electronic for CRT, terminal
   and tech, soft and organic for gouache and watercolour, cartoon for rubber-hose. Name the sounds that way ("paper slide", "wood thud",
   "synth blip", "soft pop", "boing").
-- **Name what is heard: the thing and its sound** ("thread rustle", "needle through cloth", "wooden box lid", "spool rattle"), never a
-  motion verb alone ("pull", "park", "roll", "close"): the app matches the thing first, and a bare verb can match another thing's sound
-  (Test 26: "thread pull" was a plug pulled out). A cue is one sound at its moment; a place's sound is its `- ambience:` line, never a cue.
+- **Name what is heard: the thing, its material and its action** ("crayon stroke on paper", "snail shell sliding on wet stone", "door knock
+  wood", "letter paper unfold", "thread rustle", "wooden box lid"), never a bare "pop", "sfx" or a motion verb alone ("pull", "park", "roll",
+  "close"): the app matches the thing and its material first, and a bare verb can match another thing's sound (Test 26: "thread pull" was a
+  plug pulled out). A cue is one sound at its moment; a place's sound is its `- ambience:` line, never a cue. Every row of the Motion Plan
+  that moves something names its sound that way (entrances, exits, landings, text writing on, camera moves and cuts, a character's
+  actions, two things touching), so the app can make or find the right one; never a stand-in name for a sound the app could make better.
 - **One sound at most three times a film:** past that it sounds like a loop. Give repeated actions different names of the same thing
   ("thread pull", "thread tug", "thread knot"); the app varies the repeats over its files and leaves the extra ones out.
 - **Storyboard:** each frame names the sound of each of its actions in `- sfx:` (short English names, comma-separated, each at its moment:
   `- sfx: pop, door open@1.2, footstep wood@2`) and its place in `- ambience:` (`- ambience: rain`, `city street`, `room tone`, `forest
   night`; `none` for a shot with no place). Under a voice-over §7 holds: an effect goes just after the word, never on it.
 - **Motion Plan:** every motion row carries `"sound"`: a short name for what the row does on screen, or `"none"`.
-- **The app does the rest at Final Mix:** it gives every action the names leave out a sound of its own, varies the repeats, keeps the mix
-  lively and never cluttered (about three sounds a second at most, never two of one kind closer than 0.2 s), sets each kind of sound under
-  the music and the voice, crossfades the ambience between places and fades it out with the film's ending (§9). Tech checks warn (G-SFX)
-  where a visible motion of the plan has no sound.
+- **The app does the rest at Final Mix:** it gives every action the names leave out a sound of its own, varies the repeats, keeps a sound
+  on every action (only two of one kind within 0.1 s are one sound; a small action's sound plays quieter, never left out), sets each kind
+  of sound under the music and the voice, crossfades the ambience between places and fades it out with the film's ending (§9). Tech checks'
+  G-SFX ("Actions with no sound") is to be zero once the sounds are placed.
+- **Sounds made by code (owner 04/11/2026):** the app makes the effects in code first, before its library and the online search: the owner's
+  kits' own sounds (a kit's signature sounds stay in its own style), new ones made by their recipes and by the app's (impacts by material,
+  steps by ground, paper by action, a crayon, a marker, a pencil or chalk by stroke, doors, water, fire, wind, rain, bells, machines,
+  electronics, magic, birds, frogs, crickets, a heartbeat…), each film with its own takes. A film of one of the owner's kit styles takes code
+  only (its kit's rules forbid downloaded sounds). It decides the source itself; you name the sound. Nothing about it is on screen.
+- **A sound the code cannot make yet:** when a cue needs one (Final Mix's note says it was left out, or it is on a stand-in, or its name
+  finds only a wrong kind), you may write a recipe for it: `.moworks/sfx-recipes/<sound-name>.py` (lower-case words and dashes), with a
+  one-line docstring of what is heard, `FAMILY = "<one of the library's families>"`, `TAGS = ["<the cue's name>", "<other names for it>"]`,
+  `DURATION = <seconds>` and `def make(rng, p):` returning a mono numpy array (or stereo `(n, 2)`) at `SR` (48 kHz). It gets `np`, `signal`
+  (scipy.signal) and the owner's sfxlib ingredients by name (`tt`, `bp`, `lp`, `hp`, `norm`, `modes`, `transient`, `grain`, `moving_band`,
+  `sub_kick`, `fm_bell`, `space`, `pan`…): no import, no file, no name that starts with `_`. `p` holds `dur` for a sound that lasts as
+  long as its motion. Write it the kits' way (noise grains, damped modes, filters, envelopes; never a sample), then ask the owner to press
+  Place them again. The app runs it in its restricted runner, levels it, checks it (no silence, clipping or DC), and keeps one that passes
+  for later films. Effects only: music stays licensed.
 - **The owner's word holds:** when the owner asks for no whoosh, fewer or more sounds, no ambience or silence, call the app's `sfx_prefs`
   tool; the app keeps the choice on every placement. Never only edit the `- sfx:` lines for that: the app would put its own sounds back.
   A frame whose `- sfx:` says `none` stays silent: the app adds nothing of its own there, no whoosh into it either.

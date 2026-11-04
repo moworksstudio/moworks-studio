@@ -789,7 +789,9 @@ ul.pick-list { width: min(30rem, 80vw); }
 .scx-tab.soon { opacity: 0.55; cursor: default; }
 .scx-tab .au-name small { font-size: var(--fs-dense); }
 
-.np-sample-list { position: absolute; z-index: 30; right: 0; top: calc(100% + 0.375rem); min-width: 15rem; }          /* Anidoodle's samples on the Sample brief button (same list as the pickers) */
+.np-sample-list { position: absolute; z-index: 30; right: 0; top: calc(100% + 0.375rem); min-width: 15rem; }
+/* opened to the left of its button, so a long name (a Lemo style's OPUSCAR 98 prompts) stays inside the dialog */
+.np-sample-list { left: auto; width: max-content; max-width: 26rem; } .np-sample-list .tx { white-space: normal; text-align: left; }          /* Anidoodle's samples on the Sample brief button (same list as the pickers) */
 .np2-act-wrap { margin-left: auto; position: relative; }
 
 

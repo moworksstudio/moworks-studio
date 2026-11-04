@@ -64,6 +64,7 @@ import { characterRoutes } from "./characters.mjs";
 import { proxyRoutes } from "./proxy.mjs";
 import { styleAeRoutes } from "./styleAe.mjs";
 import { prefsRoutes } from "./prefs.mjs";
+import { ideaRoutes } from "../idea-library/index.mjs";
 import { chatNotes } from "./filmNotes.mjs";
 import * as hfSkills from "../setup/hf-skills.mjs";
 import * as pySetup from "../setup/python.mjs";
@@ -77,6 +78,7 @@ import * as appUpdate from "../app-update/index.mjs";
 import { createUpdateChecker } from "../app-update/schedule.mjs";
 import { startUninstall, uninstallPlan } from "../setup/uninstall.mjs";
 import * as characterMaker from "../character-maker/index.mjs";
+import { createAttention } from "./attention.mjs";
 
 /** Backups to Drive run as child processes (tools/backup.mjs), so the server never waits on git or Drive: the app and the user's characters once at start and
  *  from Settings (the git hook backs it up after each commit too). Projects and models are never backed up. */
@@ -361,6 +363,11 @@ export function routes(ctx) {
     r("GET", "/health", () => ({ ok: true, app: "Moworks Studio", time: new Date().toISOString() })),
     // Exit (top bar): what would be stopped, then stop everything and close the app window (only when started by the launcher)
     r("GET", "/app", () => ({ canExit: !!ctx.onExit, running: ctx.running() })),
+    // the app waits for the user and the window is not the one in use (ui attention.js): its taskbar button flashes and wears a red dot
+    // until the user is back ({ on: false }); the launcher's own window only (cli.mjs), nothing without it
+    r("POST", "/window/attention", (_m, b) => { const on = !!b?.on; try { ctx.onAttention?.(on); } catch { /* the title says it too */ } return { ok: !!ctx.onAttention, on }; }),
+    // a click on the app's Windows notification: the window comes to the front (the browser does it too; a minimized window is restored here)
+    r("POST", "/window/focus", () => { try { ctx.onFocusWindow?.(); } catch { /* the browser focuses it */ } return { ok: !!ctx.onFocusWindow }; }),
     r("POST", "/app/exit", () => {
       if (!ctx.onExit) throw new HttpError(404, "NOT_FOUND", "Exit works when the app was started from its launcher");
       setTimeout(() => ctx.onExit(), 300);                 // answer first, then stop
@@ -969,7 +976,7 @@ export function routes(ctx) {
       return answered(await ctx.agent.start(id, { text: b.text, scope: b.scope, ...(rv ? { label: "Storyboard · revision" } : {}), ...(continues ? { continues } : {}) }));
     }),
     // the status button's one word (state: idle | working | downloading | updating) with what it is about (job title)
-    r("GET", "/tasks/running", () => ({ notices: ctx.notices?.list() ?? [], ...appState({ machineBusy: !!ctx.machine?.busy() && (ctx.agent.running.size > 0 || ctx.jobs.running().length > 0), tasks: [...ctx.agent.running.entries()].map(([projectId, taskId]) => {
+    r("GET", "/tasks/running", () => ({ notices: ctx.notices?.list() ?? [], attention: ctx.attention?.list() ?? [], ...appState({ machineBusy: !!ctx.machine?.busy() && (ctx.agent.running.size > 0 || ctx.jobs.running().length > 0), tasks: [...ctx.agent.running.entries()].map(([projectId, taskId]) => {
       const t = ctx.agent.get(taskId); return { projectId, taskId, kind: "claude", stage: t?.stage ?? null, title: projects.getProject(projectId, root)?.title ?? "" }; }),
       jobs: ctx.jobs.running().map((j) => ({ id: j.id, kind: j.kind, projectId: j.projectId, title: j.title, stage: j.stage, progress: j.progress,
         project: j.projectId ? projects.getProject(j.projectId, root)?.title ?? "" : null })) }) })),
@@ -983,10 +990,16 @@ export function routes(ctx) {
 
 export async function startServer({ port = 0, root = APP_ROOT, token = randomBytes(24).toString("hex"), uiDir = join(root, "ui", "dist"),
   autoBackup = process.env.MW_NO_BACKUP !== "1", autoLibrary = process.env.MW_NO_LIBRARY_IMPORT !== "1", autoAssets = process.env.MW_NO_ASSET_INSTALL !== "1",
-  onExit = null, onRestart = null, onWindowGone = null, windowGraceMs = Number(process.env.MW_WINDOW_GRACE_MS ?? 10000), thumbnails = false,
+  onExit = null, onRestart = null, onWindowGone = null, onAttention = null, onFocusWindow = null, windowGraceMs = Number(process.env.MW_WINDOW_GRACE_MS ?? 10000), thumbnails = false,
   updateCheck = false, housekeeping = false } = {}) {          // updateCheck: the app checks for its own new version by itself (the launcher; never in tests)
   // housekeeping: old logs, old work folders and unused HyperFrames versions cleaned once at start (the launcher; never in tests)
-  const ctx = { root, preview: null, onExit, onRestart, lastSeen: Date.now(), machine: busyWatch() };
+  const ctx = { root, preview: null, onExit, onRestart, onAttention, onFocusWindow, lastSeen: Date.now(), machine: busyWatch() };
+  // the moments the app waits for the user, said in Windows while the window is not in use (attention.mjs; read with GET /tasks/running)
+  const attention = createAttention();
+  ctx.attention = { list: attention.list, add: (projectId, moment, o = {}) => {
+    let title = o.title; if (title == null) { try { title = projects.getProject(projectId, root)?.title ?? ""; } catch { title = ""; } }
+    return attention.add(projectId, moment, { ...o, title });
+  } };
   // a film's new version, said on whatever screen the user is on, once (App's notice with its Open); kept while the app runs, the Pipeline says it after that
   const notices = [];
   ctx.notices = {
@@ -1139,7 +1152,10 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
     stepOf: (meta, stepId, all = false) => (all ? pipelineSteps(meta?.style?.id, root) : pipelineSteps(meta?.style?.id, root).find((x) => x.id === stepId) ?? null),
     permitUrl: `http://127.0.0.1:${p}/api/agent/permit`, permitToken: agentToken });
   // a setup or download job that ends changes what Settings › System finds: its checks run again on the next read
-  ctx.jobs = createJobs({ ended: (job) => { if (DOWNLOADS.has(job.kind) || job.kind === "app-update") { ctx.checks?.system.clear(); ctx.checks?.firstRun.clear(); } } });
+  ctx.jobs = createJobs({ ended: (job) => {
+    // the Render dialog's export: its end is a moment the user waits for; a failed one too (a stopped one is the user's own)
+    if (job.kind === "export" && job.projectId) { try { if (job.status === "done") ctx.attention.add(job.projectId, "render"); else if (job.status === "failed") ctx.attention.add(job.projectId, "error", { open: "render" }); } catch { /* the dialog says it */ } }
+    if (DOWNLOADS.has(job.kind) || job.kind === "app-update") { ctx.checks?.system.clear(); ctx.checks?.firstRun.clear(); } } });
   // the app's own check for a new version: a minute after start, then every six hours; never while it updates itself or renders
   ctx.updates = createUpdateChecker({ root, log: (line) => console.log(line), busy: () => updateCheckWaits(ctx.jobs, ctx.renders) });
   if (updateCheck) ctx.updates.start();
@@ -1167,6 +1183,7 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
   ctx.table.push(...proxyRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject }).routes);          // a code film's smooth preview
   ctx.table.push(...styleAeRoutes(ctx).routes);          // the styles' After Effects badges (measured in the background, no route)
   ctx.table.push(...prefsRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn] }).routes);          // the UI's settings on this computer (the port changes each start)
+  ctx.table.push(...ideaRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn] }).routes);          // the Idea Library: the app's ideas and the user's own (audit/97)
   ctx.agent.appTools = { ...boards.tools, ...assets.tools, ...chars.tools,
     // the user chose the brief's output over the New project fields (Claude asked in Prepare): the project's output changes
     // the film's language, the user's answer when the brief did not say it

@@ -74,6 +74,24 @@ export function referencedFiles(dir) {
   return refs;
 }
 
+/** Where the film plays each sound on its timeline (index.html's <audio> tags, owner 03/11, 1a): { "assets/x.wav": { track: "voice" | "music" | null, times: [s…] } }.
+ *  track: the file is the film's own voice-over (el-voice, el-voice-01…) or music (el-music and its repeats); times: the starts of every other clip of it, by time. */
+export function soundUses(dir) {
+  let html = ""; try { html = readFileSync(join(dir, "index.html"), "utf8"); } catch { return {}; }
+  const out = {};
+  for (const m of html.matchAll(/<audio\b[^>]*>/gi)) {
+    const a = Object.fromEntries([...m[0].matchAll(/([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*"([^"]*)"/g)].map((x) => [x[1], x[2]]));
+    let src = String(a.src ?? "").replace(/^\.?\//, ""); try { src = decodeURI(src); } catch { /* as written */ }
+    if (!src.startsWith("assets/")) continue;
+    const u = (out[src] ??= { track: null, times: [] }), id = String(a.id ?? "");
+    if (/^el-voice(?:-[\w-]+)?$/.test(id)) u.track ??= "voice";
+    else if (/^el-music(?:-[\w-]+)?$/.test(id)) u.track ??= "music";
+    else u.times.push(Math.round((Number(a["data-start"]) || 0) * 100) / 100);
+  }
+  for (const u of Object.values(out)) u.times.sort((x, y) => x - y);
+  return out;
+}
+
 const kindOf = (p) => (isDesignPath(p) ? "design" : AUDIO.test(p) ? "audio" : VIDEO.test(p) ? "footage"
   : FONT.test(p) ? "font" : IMAGE.test(p) ? "image" : "other");
 
@@ -101,7 +119,7 @@ export function listAssets(dir, { shots = [], layers = [], meta = {}, remember =
   const usedIn = (p) => users(refs.get(p) ?? []);
   const items = [];
   const sequences = new Map(), appFonts = new Map();
-  const placed = appSounds(dir), made = appMade(dir, meta);
+  const placed = appSounds(dir), made = appMade(dir, meta), uses = soundUses(dir);
   for (const f of files) {
     const name = f.path.split("/").pop();
     const af = APP_FONT.exec(f.path);
@@ -131,7 +149,8 @@ export function listAssets(dir, { shots = [], layers = [], meta = {}, remember =
       ...(sc.password ? { unread: "has a password: give Claude the password in the chat, or add a copy without one" } : sc.wordsUnheard ? { unread: "its sung words could not be heard: paste them in the Lyrics dialog" } : {}),
       // on the timeline: the voice, the music, or any sound placed in the root composition
       status: seen.has(f.path) || made.has(f.path) ? "ok" : "new", usedIn: usedIn(f.path), onTimeline: meta.voice?.file === f.path || meta.music?.file === f.path || (kindOf(f.path) === "audio" && (refs.get(f.path) ?? []).includes("index.html")),
-      ...(kindOf(f.path) === "audio" ? { transcript: meta.voice?.file === f.path ? (meta.voice.transcript?.status === "saved" ? "saved" : meta.voice.transcript?.status ?? "none") : "none" } : {}),
+      ...(kindOf(f.path) === "audio" ? { transcript: meta.voice?.file === f.path ? (meta.voice.transcript?.status === "saved" ? "saved" : meta.voice.transcript?.status ?? "none") : "none",
+        track: uses[f.path]?.track ?? null, times: uses[f.path]?.times ?? [] } : {}),
       ...(f.path.startsWith("assets/sfx/") || placed.has(f.path) ? { app: true } : {}) });          // the sounds the app placed
   }
   for (const g of sequences.values()) items.push(g);

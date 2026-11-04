@@ -17,7 +17,7 @@ import Timeline, { soundName } from "../editor/Timeline.jsx";
 import MotionDrawer from "../editor/MotionDrawer.jsx";
 import SoundDrawer from "../editor/SoundDrawer.jsx";
 import ShotList from "../editor/ShotList.jsx";
-import AssetsPanel, { laneRefusal, placedSay, putOnTimeline, useAssets } from "../editor/AssetsPanel.jsx";
+import AssetsPanel, { VoiceSwapDialog, laneRefusal, placedSay, putOnTimeline, useAssets, voiceSwapAsks } from "../editor/AssetsPanel.jsx";
 import Versions from "../editor/Versions.jsx";
 import FilmCard from "../editor/FilmCard.jsx";
 import { useT } from "../i18n.jsx";
@@ -242,6 +242,8 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const [chatKey, setChatKey] = useState(0);
   const [narrowTab, setNarrowTab] = useState("film");
   const [leftTab, setLeftTab] = usePref("editor:left-tab", "shots");
+  const [assetFocus, setAssetFocus] = useState(null);          // { path, n }: the Assets row "Show in Assets" lights
+  const [swapDrop, setSwapDrop] = useState(null);          // { path, to, name }: a voice dropped on the empty Narration lane, waiting for the warning's answer
   const [dismissed, setDismissed] = useState(null);
   const [tlH, setTlH] = usePref("editor:tl-h", 0);          // the timeline's height in px, dragged by the user; 0 = the default share
   const centerRef = useRef(null);
@@ -343,6 +345,12 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   // a sound on the timeline moved, moved to another lane, or taken off: the film is loaded again where it was
   // resolves once the film's own list is read again: the timeline holds a dropped sound where it was dropped until then
   // a lane's fader let go: kept in the film, the app mixes the sound again by itself (the film plays live meanwhile)
+  // a lane muted or heard again (3b): heard at once in the Editor (the live film's bus, or its lane file at 0), kept in the film so the render has it too
+  const muteSet = async (lane, muted) => {
+    pv.send("laneMute", { lane, muted });
+    try { await post(`/api/projects/${id}/mix/lanes`, { lane, muted }); loadTimeline(); pv.proxy?.refresh?.(); }
+    catch (e) { toast(e.message, "error"); pv.send("laneMute", { lane, muted: !muted }); loadTimeline(); }
+  };
   const levelSet = async (lane, db) => {
     try { await post(`/api/projects/${id}/mix/lanes`, { lane, db }); loadTimeline(); pv.proxy?.refresh?.(); }
     catch (e) { toast(e.message, "error"); loadTimeline(); }
@@ -382,6 +390,8 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     const name = assets?.find((x) => x.path === path)?.name ?? path.split("/").pop();
     const no = laneRefusal(assets?.find((x) => x.path === path), to?.lane, t);          // its own folder's lane only (owner 03/11)
     if (no) { toast(no, "error"); return; }
+    // onto an empty Narration lane another voice becomes the film's (owner #937): after Version 1 the same warning first as "Use as the film's voice-over"
+    if (to?.lane === "voiceover" && !(tl?.audio ?? []).some((c) => c.lane === "voice") && voiceSwapAsks(p, path) && !to.asked) { setSwapDrop({ path, to, name }); return; }
     try { const r = await putOnTimeline(id, path, to); toast(placedSay(t, name, r.at, r.cut)); reloadAssets(); loadTimeline(); pv.send("reload"); }
     catch (e) { toast(e.message, "error"); }
   };
@@ -591,6 +601,8 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     st.build && act("mix", "Final Mix", <Sliders size={14} />, "mix", { ...st.build, status: st.build.status === "done" || pipeline?.finished ? "ready" : "todo" }, false, "Version 1"),
   ].filter(Boolean);
   const showAssets = () => { setLeftTab("assets"); setNarrowTab("left"); reloadAssets(); };
+  // "Show in Assets" on a timeline clip (1c): the Assets tab, that file's row lit
+  const showInAssets = (src) => { showAssets(); setAssetFocus({ path: src, n: Date.now() }); };
   // Until the Build the page is the 3 s starter: no white film, no 3 s timeline, shots "Not built"
   const unbuilt = p?.built === false;
   // before the Build a shot's picture is its approved storyboard still or none: a still of the starter's title card is no shot's
@@ -631,7 +643,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const timelineEl = <Timeline data={unbuilt ? voiceOnly : tl} posters={shotPosters} fps={p?.meta?.format?.fps || pv.state.fps || 30} time={unbuilt ? 0 : pv.state.time} duration={unbuilt ? p.plannedDuration ?? 0 : pv.state.duration} shot={shot} range={range} onRange={setRange}
     readOnly={pv.videoOnly}
     onSeek={(s) => pv.send("seek", { time: s })} onShot={(s) => { setShot(s); setDismissed(null); }}
-    locked={locked || pv.videoOnly} onAudioMove={(c, to) => audioEdit("", c, to)} onAudioRemove={(c) => audioEdit("/remove", c, {})} onAudioRemoveMany={audioRemoveMany} onAudioUndo={audioUndo} onAskClaude={stage.askClaude} onSoundDrop={soundDrop}
+    locked={locked || pv.videoOnly} onAudioMove={(c, to) => audioEdit("", c, to)} onAudioRemove={(c) => audioEdit("/remove", c, {})} onAudioRemoveMany={audioRemoveMany} onAudioUndo={audioUndo} onAskClaude={stage.askClaude} onSoundDrop={soundDrop} onMute={muteSet} onShowInAssets={showInAssets}
     onCaptionSave={captionSave} onCaptionLive={(hfId, text) => pv.send("live", { hfId, text })}
     onLevelLive={(lane, gain) => pv.send("lane", { lane, gain })} onLevel={levelSet} />;
   // the playhead and the film's length as the timeline has them: "Put on the timeline" starts a sound there
@@ -658,7 +670,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
         aria-label={t("Add files")} title={rendering ? t("Wait until the render finishes") : t("Add files: pictures, video, audio, fonts, logos, PDF")}><Plus size={14} /><span className="lbl">{t("Add files")}</span></button>
     </div>
     <section className="ed-tabbody" role="tabpanel">
-      {leftTab === "assets" ? <AssetsPanel projectId={id} items={assets} reload={reloadAssets} fileUrl={fileUrl} locked={rendering} time={tlTime} length={tlLength}
+      {leftTab === "assets" ? <AssetsPanel projectId={id} project={p} items={assets} reload={reloadAssets} fileUrl={fileUrl} locked={rendering} time={tlTime} length={tlLength} focus={assetFocus} onSeek={(s) => pv.send("seek", { time: s })}
         onTranscript={(path) => openSheet("voice", { path })} onTimelineChanged={() => { loadTimeline(); pv.send("reload"); }}
         onShot={(n) => { const s = shots?.find((x) => x.number === n); if (s) { setShot(s); pv.send("seek", { time: s.start }); setLeftTab("shots"); } }} />
         : <ShotList projectId={id} shots={unbuilt ? shots?.map((s) => ({ ...s, start: null })) : shots} blank={blankShot} posters={shotPosters} shot={shot} locked={locked} send={pv.send} version={version}
@@ -694,9 +706,11 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
       {sheet.kind === "mix" && <MixSheet key={sfxAt ?? "none"} projectId={id} project={p} onChanged={refreshAll} />}      {sheet.kind === "assets" && <ImportSheet projectId={id} project={p} onChanged={refreshAll} />}
     </Sheet></ErrorBoundary></StageCtx.Provider>;
 
-  const viewerEl = viewer && fileUrl && <Dialog title={String(viewer).split("/").pop()} onClose={() => setViewer(null)} wide>
+  const swapEl = swapDrop && <VoiceSwapDialog name={swapDrop.name} onYes={() => soundDrop(swapDrop.path, { ...swapDrop.to, asked: true })} onClose={() => setSwapDrop(null)} />;
+  const viewerOnly = viewer && fileUrl && <Dialog title={String(viewer).split("/").pop()} onClose={() => setViewer(null)} wide>
     <video className="ed-viewer" src={fileUrl(viewer)} controls autoPlay playsInline />
   </Dialog>;
+  const viewerEl = <>{viewerOnly}{swapEl}</>;
   const leaveDialog = leaveTo && <Dialog title={t("The film is still being built")} onClose={() => setLeaveTo(null)} footer={<>
     <button className="btn ghost" onClick={() => setLeaveTo(null)}>{t("Stay")}</button>
     <button className="btn primary" onClick={() => { const to = leaveTo; setLeaveTo(null); go(to); }}>{t("Leave")}</button></>}>
@@ -729,7 +743,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
           <div className="st-addfiles"><button className="btn sm" onClick={() => openSheet("assets")} disabled={rendering}
             title={rendering ? t("Wait until the render finishes") : t("Add files: pictures, video, audio, fonts, logos, PDF")}><Plus size={14} />{t("Add files")}</button>
             <span className="hint">{t("Files copied into the project's folder show up here too.")}</span></div>
-          <AssetsPanel projectId={id} items={assets} reload={reloadAssets} fileUrl={fileUrl} locked={rendering} time={tlTime} length={tlLength}
+          <AssetsPanel projectId={id} project={p} items={assets} reload={reloadAssets} fileUrl={fileUrl} locked={rendering} time={tlTime} length={tlLength} focus={assetFocus} onSeek={(s) => pv.send("seek", { time: s })}
             onTranscript={(path) => openSheet("voice", { path })} onTimelineChanged={() => { loadTimeline(); pv.send("reload"); }}
             onShot={(n) => { const s = shots?.find((x) => x.number === n); if (s) { setShot(s); pv.send("seek", { time: s.start }); setLeftTab("shots"); } }} /></>
           : tab === "film" ? <FilmCard id={id} project={p} locked={locked} onRestored={reloadFilm} />

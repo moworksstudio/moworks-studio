@@ -2,7 +2,7 @@
 // HyperFrames' source mutation (packages/hf-edit/handEdit.mjs), the timeline the Editor draws (shots, voice-over lines, sound effects,
 // music with its waveform), a still of the frame on screen saved into the project, and the font lists of the edit card.
 // Nothing here edits while Claude works on the same project (409 CLAUDE_BUSY): the user's edit and Claude's would cross.
-import { readLanes } from "../sfx/lanes.mjs";
+import { readLanes, readMuted } from "../sfx/lanes.mjs";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -250,6 +250,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
           rate: rates[x.src] ?? 1, ...(x.planned ? { planned: true } : {}) })),
         voice: tr?.segments?.length && !p.meta?.voice?.offTimeline ? transcript.onFilm(tr.segments, voiceClips) : [],
         levels: readLanes(p.path),
+        muted: readMuted(p.path),
         audio: clips.map((c) => ({ id: c.id, hfId: c.hfId, src: c.src, start: c.start, duration: c.duration, lane: laneOf(c), gains: c.gains, track: c.track, name: (c.src ?? "").split("/").pop(), title: titles.get(c.src) ?? null, effect: effect(c) })),
         sfx: clips.filter((c) => !c.role && /\/sfx\//.test(c.src ?? "")).map((c) => ({ start: c.start, duration: c.duration, name: (c.src ?? "").split("/").pop().replace(/\.[^.]+$/, "") })),
         music: music ? { start: music.start, duration: music.duration, name: (music.src ?? "").split("/").pop(), peaks: musicPeaks } : null,

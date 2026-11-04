@@ -5,8 +5,9 @@ import { join } from "node:path";
 import { resolveRuntime } from "../version-manager/index.mjs";
 import { servePage } from "../hf-page/index.mjs";
 
-/** { tab, total, size: { width, height }, close() }. */
-export async function openFilmPage(dir, { version = null } = {}) {
+/** { tab, total, size: { width, height }, close() }. query: added to the page's address ("?kit-check=1"); beforeLoad(tab): called before the page
+ *  loads (a listener on its console). */
+export async function openFilmPage(dir, { version = null, query = "", beforeLoad = null } = {}) {
   const page = await servePage(dir, { version });
   let browser = null;
   try {
@@ -14,7 +15,8 @@ export async function openFilmPage(dir, { version = null } = {}) {
     const puppeteer = createRequire(join(rt.dir, "node_modules", "puppeteer-core", "package.json"))("puppeteer-core");
     browser = await puppeteer.launch({ executablePath: page.chromium, headless: true, args: ["--hide-scrollbars"] });
     const tab = await browser.newPage();
-    await tab.goto(page.url, { waitUntil: "load", timeout: 60000 });
+    if (beforeLoad) await beforeLoad(tab);
+    await tab.goto(page.url + query, { waitUntil: "load", timeout: 60000 });
     await tab.waitForFunction(() => window.__hf && typeof window.__hf.seek === "function" && window.__hf.duration > 0, { timeout: 60000 });
     const info = await tab.evaluate(() => { const r = document.querySelector("[data-composition-id]"); return { width: +r?.getAttribute("data-width") || 1920, height: +r?.getAttribute("data-height") || 1080, total: window.__hf.duration }; });
     await tab.setViewport({ width: info.width, height: info.height });

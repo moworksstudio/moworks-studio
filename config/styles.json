@@ -601,7 +601,7 @@
     },
     {
      "id": "explainer-2d",
-     "title": "2D Explainer",
+     "title": "Moworks 2D Explainer",
      "defaultLength": 40,
      "description": "Narrated 2D science explainers drawn in code on one canvas: flat cel shapes with rim light and no outlines, deep indigo grounds, glowing accents, a red-hoodie hero, label pills and a word-by-word title, every cut on a word.",
      "category": "Explainer",

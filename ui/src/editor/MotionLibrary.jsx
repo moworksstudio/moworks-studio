@@ -315,7 +315,7 @@ function LibFacets({ L }) {
 function LibraryPage({ onPick, pickLabel }) {
   const t = useT();
   pickLabel = pickLabel ?? t("Copy");
-  const grid = useGalleryGrid(), size = grid.size;          // the gallery pages' one grid
+  const grid = useGalleryGrid({ fewer: 1 }), size = grid.size;          // the gallery pages' one grid
   const L = useLibrary(size, onPick, PAGE_KINDS);
   const { kind, setKind, category, setCategory, tab, setTab, q, setQ, data, loading } = L;
   const [curUid, setCurUid] = usePref("ml:current", null);

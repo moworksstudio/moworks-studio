@@ -10,7 +10,7 @@
 // stays in Assets). + and - zoom, not while typing. A sound dragged from the Assets tab drops on the lane under the pointer, at the
 // pointer's time: the lane lights and a thin line shows the time while it is over it (not on a locked film or one shown as its render).
 import { useEffect, useRef, useState } from "react";
-import { Captions, ChevronDown, ChevronUp, Film, Mic2, Music, Sparkles, ZoomIn, ZoomOut } from "lucide-react";
+import { Captions, ChevronDown, ChevronUp, Film, FolderOpen, Mic2, Music, Sparkles, Volume2, VolumeX, ZoomIn, ZoomOut } from "lucide-react";
 import { usePref, useToast } from "../lib.jsx";
 import { createPortal } from "react-dom";
 import { useT } from "../i18n.jsx";
@@ -90,7 +90,7 @@ function LaneFader({ name, db, disabled, onLive, onDone }) {
 }
 
 export default function Timeline({ data, time, duration, shot, onSeek, onShot, range, onRange, posters = null, fps = 30, locked = false, onAudioMove = null, onAudioRemove = null, onAudioUndo = null, onCaptionSave = null, onCaptionLive = null, onLevelLive = null, onLevel = null,
-  readOnly = false, onSoundDrop = null, onAudioRemoveMany = null, onAskClaude = null }) {
+  readOnly = false, onSoundDrop = null, onAudioRemoveMany = null, onAskClaude = null, onMute = null, onShowInAssets = null }) {
   const t = useT();
   const toast = useToast();
   const [pps, setPps] = usePref("editor:tl-pps", 0);          // pixels per second; 0 = fit
@@ -288,10 +288,24 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
   };
   // the SFX lane shows each sound: thin enough not to run into the next one at Fit, its name on it once a zoom gives it the room
   const sfx = cls_sfx(audio);
-  const clip = (c, cls, inner = null) => <span key={keyOf(c)} className={`tl-aclip ${cls}` + (cls === "sfx" && isBed(c) ? " bed" : "") + (keyOf(c) === sel || marked.includes(keyOf(c)) ? " sel" : "") + (c.moving ? " moving" : "") + (locked ? " locked" : "")}
+  // the film's own voice-over and music (el-voice*, el-music and its repeats, owner 03/11 1b): a small mark, so they read apart from clips added beside them
+  const ownOf = (c) => (/^el-voice(?:-[\w-]+)?$/.test(c.id ?? "") ? "voice" : /^el-music(?:-[\w-]+)?$/.test(c.id ?? "") ? "music" : null);
+  const clip = (c, cls, inner = null) => <span key={keyOf(c)} className={`tl-aclip ${cls}` + (ownOf(c) ? " own" : "") + (cls === "sfx" && isBed(c) ? " bed" : "") + (keyOf(c) === sel || marked.includes(keyOf(c)) ? " sel" : "") + (c.moving ? " moving" : "") + (locked ? " locked" : "")}
     style={{ left: px(c.start), width: Math.max(cls === "sfx" ? 3 : 8, px(c.duration ?? (cls === "sfx" ? 0.3 : D - c.start))), ...(cls === "sfx" ? { "--row": sfx.rowOf(c) } : null) }} title={`${soundName(c)} · ${c.start.toFixed(2)} s`}
-    data-clip={keyOf(c)} tabIndex={0} role="button" aria-label={t("{name}, starts at {time}; arrow keys move it, Delete takes it off", { name: soundName(c), time: fmtTime(c.start, fps) })}
-    onFocus={() => { if (!marked.length) setSel(keyOf(c)); }} onKeyDown={nudge(c)} onPointerDown={grab(c)}>{inner}</span>;
+    data-clip={keyOf(c)} tabIndex={0} role="button" aria-label={(ownOf(c) === "voice" ? t("The film's voice-over") + ": " : ownOf(c) === "music" ? t("The film's music") + ": " : "") + t("{name}, starts at {time}; arrow keys move it, Delete takes it off", { name: soundName(c), time: fmtTime(c.start, fps) })}
+    onFocus={() => { if (!marked.length) setSel(keyOf(c)); }} onKeyDown={nudge(c)} onPointerDown={grab(c)}
+    onContextMenu={onShowInAssets && c.src ? (e) => { e.preventDefault(); e.stopPropagation(); setCtx({ x: e.clientX, y: e.clientY, src: c.src }); } : undefined}>
+    {ownOf(c) && <span className="tl-own" title={ownOf(c) === "voice" ? t("The film's voice-over") : t("The film's music")}>{ownOf(c) === "voice" ? <Mic2 size={9} /> : <Music size={9} />}</span>}{inner}</span>;
+  // a right-click on a clip (1c): "Show in Assets" opens the Assets tab on that file's row
+  const [ctx, setCtx] = useState(null);
+  useEffect(() => {
+    if (!ctx) return undefined;
+    const off = (e) => { if (!e.target.closest?.(".tl-ctx")) setCtx(null); };
+    const esc = (e) => { if (e.key === "Escape") setCtx(null); };
+    addEventListener("pointerdown", off, true); addEventListener("keydown", esc); addEventListener("scroll", () => setCtx(null), { once: true, capture: true });
+    return () => { removeEventListener("pointerdown", off, true); removeEventListener("keydown", esc); };
+  }, [ctx]);
+  const muted = data?.muted ?? {};
   const wheel = (e) => { if (e.ctrlKey) { e.preventDefault(); setPps(Math.min(400, Math.max(2, scale * (e.deltaY < 0 ? 1.2 : 1 / 1.2)))); } };
   const px = (s) => s * scale;
   const music = data?.music;
@@ -327,8 +341,15 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
       </span>
     </div>
     <div className="tl-body" ref={scroller} onWheel={wheel} style={{ "--sfx-rows": sfx.rows }}>
-      <div className="tl-labels">{["ruler", ...rows].map((k) => { const I = ICON[k]; return <div key={k} className={"tl-label " + k}><span className="tl-name">{I && <I size={12} />}{NAME[k] ? t(NAME[k]) : ""}</span>
-        {(k === "voice" || k === "sfx" || k === "music") && onLevel && <LaneFader name={t(NAME[k])} db={data?.levels?.[k] ?? 0} disabled={locked} onLive={(db) => onLevelLive?.(k, 10 ** (db / 20))} onDone={(db) => onLevel(k, db)} />}</div>; })}</div>
+      <div className="tl-labels">{["ruler", ...rows].map((k) => { const I = ICON[k]; const snd = k === "voice" || k === "sfx" || k === "music"; return <div key={k} className={"tl-label " + k}>
+        <span className="tl-name">{I && <I size={12} />}{NAME[k] ? t(NAME[k]) : ""}</span>
+        {snd && (onMute || onLevel) && <span className="tl-lh">
+          {/* Mute (3b) before the lane's fader: not heard in the Editor, not in the render */}
+          {onMute && <button type="button" className={"tl-mute" + (muted[k] ? " on" : "")} aria-pressed={!!muted[k]} disabled={locked}
+            aria-label={muted[k] ? t("Unmute {name}", { name: t(NAME[k]) }) : t("Mute {name}", { name: t(NAME[k]) })}
+            title={muted[k] ? t("{name} is muted: not heard here or in the render. Click to hear it again.", { name: t(NAME[k]) }) : t("Mute {name}: not heard here or in the render", { name: t(NAME[k]) })}
+            onPointerDown={(e) => e.stopPropagation()} onClick={() => onMute(k, !muted[k])}>{muted[k] ? <VolumeX size={11} /> : <Volume2 size={11} />}</button>}
+          {onLevel && <LaneFader name={t(NAME[k])} db={data?.levels?.[k] ?? 0} disabled={locked} onLive={(db) => onLevelLive?.(k, 10 ** (db / 20))} onDone={(db) => onLevel(k, db)} />}</span>}</div>; })}</div>
       <div className={"tl-lanes" + (readOnly ? " ro" : "")} ref={lane} style={{ width }} onPointerDown={down}
         onDragOver={canDrop ? dragOver : undefined} onDragLeave={canDrop ? dragLeave : undefined} onDrop={canDrop ? drop : undefined}>
         <div className="tl-ruler num">{ticks.map((s) => <i key={s} style={{ left: px(s) }}>{s % 1 ? s.toFixed(1) : `${s}s`}</i>)}</div>
@@ -336,7 +357,7 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
           style={{ left: px(s.start) + 2, width: Math.max(2, px(s.duration ?? 0) - 4), ...(pic ? { backgroundImage: `url("${pic}")` } : null) }} title={`${t("Shot {n}", { n: s.number })} · ${s.title} · ${(s.duration ?? 0).toFixed(1)} s${s.rate !== 1 ? ` · ${s.rate}×` : ""}`}
           onPointerDown={(e) => { if (!e.shiftKey && e.button === 0) { onShot(s); if (readOnly) onSeek(s.start); } }}><span className="tl-chip"><b className="num">{s.number}</b> {s.title}</span></button>; })}</div>
         {!folded && <>
-          <div className={"tl-row voice" + (over?.lane === "voice" ? " drop-on" : "")} {...dropRow("voice")} ref={(el) => { rowsRef.current.voice = el; }}>{hasAudio && clipsIn("voice").map((c) => clip(c, "voice"))}
+          <div className={"tl-row voice" + (over?.lane === "voice" ? " drop-on" : "") + (muted.voice ? " muted" : "")} {...dropRow("voice")} ref={(el) => { rowsRef.current.voice = el; }}>{hasAudio && clipsIn("voice").map((c) => clip(c, "voice"))}
             {(data?.voice ?? []).map((v, i) => <span key={i} className="tl-word" style={{ left: px(v.start), width: Math.max(2, px(v.end - v.start) - 1) }} title={v.text}>{v.text}</span>)}
             {!data?.voice?.length && !(hasAudio && clipsIn("voice").length) && <span className="tl-empty">{t("No voice-over")}</span>}{dropLine("voice")}</div>
           <div className="tl-row captions">{captions.flatMap((h) => (h.cues?.length ? h.cues.map((c) => <button key={`${h.id}@${c.start}`} type="button" className={"tl-cap" + (cue?.start === c.start ? " sel" : "")}
@@ -344,10 +365,10 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
             // words a script builds: the track shows where they are, Claude changes them
             : [<span key={h.id ?? h.start} className="tl-cap whole" style={{ left: px(h.start), width: Math.max(2, px(h.duration ?? D - h.start)) }} title={t("These captions are made by a script: ask Claude to change them")}>{t("Captions")}</span>]))}
             {!captions.length && <span className="tl-empty">{t("No captions")}</span>}</div>
-          <div className={"tl-row sfx" + (over?.lane === "sfx" ? " drop-on" : "")} {...dropRow("sfx")} ref={(el) => { rowsRef.current.sfx = el; }}>{hasAudio ? clipsIn("sfx").map((c) => clip(c, "sfx", px(c.duration ?? 0.3) >= 44 ? <span className="tl-aname">{soundName(c)}</span> : null))
+          <div className={"tl-row sfx" + (over?.lane === "sfx" ? " drop-on" : "") + (muted.sfx ? " muted" : "")} {...dropRow("sfx")} ref={(el) => { rowsRef.current.sfx = el; }}>{hasAudio ? clipsIn("sfx").map((c) => clip(c, "sfx", px(c.duration ?? 0.3) >= 44 ? <span className="tl-aname">{soundName(c)}</span> : null))
             : (data?.sfx ?? []).map((x, i) => <span key={i} className="tl-tick" style={{ left: px(x.start), width: Math.max(6, px(x.duration ?? 0.3)) }} title={`${x.name} · ${x.start.toFixed(2)} s`} />)}
             {!(hasAudio ? clipsIn("sfx").length : data?.sfx?.length) && <span className="tl-empty">{t("No sound effects")}</span>}{dropLine("sfx")}</div>
-          <div className={"tl-row music" + (over?.lane === "music" ? " drop-on" : "")} {...dropRow("music")} ref={(el) => { rowsRef.current.music = el; }}>{hasAudio ? clipsIn("music").map((c) => clip(c, "music",
+          <div className={"tl-row music" + (over?.lane === "music" ? " drop-on" : "") + (muted.music ? " muted" : "")} {...dropRow("music")} ref={(el) => { rowsRef.current.music = el; }}>{hasAudio ? clipsIn("music").map((c) => clip(c, "music",
             music?.peaks?.length && c.name === music.name ? <svg viewBox={`0 0 ${music.peaks.length} 100`} preserveAspectRatio="none" aria-hidden="true"><path d={wave(music.peaks, (at) => laneGain(c.gains, at * (c.duration ?? 0)) * 10 ** ((data?.levels?.music ?? 0) / 20))} /></svg> : null))
             : music ? <span className="tl-music" style={{ left: px(music.start), width: px(music.duration ?? D) }} title={music.name}>
               {music.peaks?.length ? <svg viewBox={`0 0 ${music.peaks.length} 100`} preserveAspectRatio="none" aria-hidden="true"><path d={wave(music.peaks)} /></svg> : null}</span> : null}
@@ -355,6 +376,8 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
         </>}
         {range && <div className="tl-range" style={{ left: px(range[0]), width: Math.max(2, px(range[1] - range[0])) }} />}
         <div className="tl-head-line" style={{ left: px(time) }} />
+        {ctx && createPortal(<div className="menu tl-ctx" role="menu" style={{ left: Math.min(ctx.x, innerWidth - 200), top: Math.min(ctx.y, innerHeight - 60) }}>
+          <button role="menuitem" autoFocus onClick={() => { const src = ctx.src; setCtx(null); onShowInAssets(src); }}><FolderOpen size={14} />{t("Show in Assets")}</button></div>, document.body)}
         {drawn && lane.current && (() => { const r = lane.current.getBoundingClientRect(); return <div className="tl-marquee" aria-hidden="true" style={{ left: Math.min(drawn.x0, drawn.x1) - r.left, top: Math.min(drawn.y0, drawn.y1) - r.top, width: Math.abs(drawn.x1 - drawn.x0), height: Math.abs(drawn.y1 - drawn.y0) }} />; })()}
       </div>
     </div>

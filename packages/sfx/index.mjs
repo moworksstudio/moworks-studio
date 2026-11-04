@@ -13,6 +13,7 @@ import { docPath } from "../project-service/docs.mjs";
 import { APP_ROOT, expandEnv, loadPins, sourceHead } from "../version-manager/index.mjs";
 import { MAX_GAIN, levelOf, sig } from "./actions.mjs";
 import { SUSTAINED_MIN_S, familyOf, loadLibrary, matchLocal, plainName, rankLocal, stepsRun, sustainedCue, sustainedQuery, sustainedStandIn, words } from "./library.mjs";
+import { MAX_TAKES, codeFirst, codeLibrary, codeRuns, isKitStyle, makeCodeSounds, matchCode, retire, tierOf } from "./code.mjs";
 
 export const OPENVERSE = "https://api.openverse.org/v1/audio/";
 export const SFXMINT = "https://sfxmint.com/api/v1/";
@@ -403,7 +404,7 @@ function closestItem(results, name) {
  *  Returns { added: [names], missing: [names], offline, near: [{ name, as, lasting? }] } (near: the cues on a stand-in now; lasting: a stand-in
  *  for a sound that lasts). */
 export const shorterQuery = (name) => { const ws = String(name ?? "").trim().split(/\s+/); return ws.length > 2 ? ws.slice(-2).join(" ") : null; };
-export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root = APP_ROOT, online = true, timeoutMs = SEARCH_TIMEOUT_MS, library = false, style = null, families = null, keep = null, tone = false, styleId = null } = {}) {
+export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root = APP_ROOT, online = true, timeoutMs = SEARCH_TIMEOUT_MS, library = false, style = null, families = null, keep = null, tone = false, styleId = null, code = true } = {}) {
   let st = readState(dir);
   const local = bundled(root), added = [], missing = [], failed = [], near = [];
   const has = (name) => !!st.sounds[name] && existsSync(join(dir, st.sounds[name].file));
@@ -414,6 +415,18 @@ export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root =
     if (!lib.has(name)) { let m = null; try { m = matchLocal(LIBRARY_QUERY[name] ?? name, { family: families?.get?.(name) ?? null, style, root, kit: styleId, oneShot: true, minDuration: sustainedCue(name) ? SUSTAINED_MIN_S : 0 }); } catch { /* no library */ } lib.set(name, m); }
     return lib.get(name);
   };
+  // code-made sounds first (code.mjs, owner #909): a film of a kit style takes the code only while this computer can run it (its kits forbid the
+  // others); any other film takes the code's answer when it is as close as the library's, then the library, then the search
+  // code false or MW_CODE_SFX=none: no code at all (the tests of the library's and the search's own ways)
+  const useCode = library && code !== false && process.env.MW_CODE_SFX !== "none";
+  const runs = useCode ? await codeRuns(root) : false, kitStyle = useCode && isKitStyle(styleId) && runs;
+  const codeLib = useCode ? codeLibrary({ kit: styleId, root, dir, run: runs }) : null, codeM = new Map();
+  const codeOf = (name) => {
+    if (!codeLib) return null;
+    if (!codeM.has(name)) { let m = null; try { m = matchCode(name, { kit: styleId, family: families?.get?.(name) ?? null, library: codeLib }); } catch { /* no recipe */ } codeM.set(name, m && tone && offTone(m.entry) ? null : m); }
+    return codeM.get(name);
+  };
+  const codeTakes = (name) => !!codeLib && codeFirst(codeOf(name), kitStyle ? null : libOf(name), { kitStyle });
   // the library answers well enough: a good match, or a sound of the cue's own kind (not worth waiting on the search)
   const enough = (name) => { const m = libOf(name); return !!m && (m.good || m.right); };
   // a name someone wrote (the storyboard's, the Motion Plan's: the app's own automatic names are the library's words) that the library answers only with something like it
@@ -424,11 +437,28 @@ export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root =
     if (!has(name)) return true;
     const s = st.sounds[name];
     if (s.source === "owner") return false;
+    if (s.source === "code" || codeTakes(name)) return true;          // matched again on every placement: its takes are kept in the film, made once
     if (online && (s.near || s.weak)) return true;
     if (library && s.source === "library") return true;
     return library && enough(name) && !likeOnly(name);          // a sound found online for such a name stays: never downloaded twice
   });
-  let look = new Set();
+  let look = new Set(), coded = null;
+  if (codeLib) {
+    const want = names.filter(codeTakes), count = new Map(), hold = new Map();
+    for (const c of cues) { count.set(c.name, (count.get(c.name) ?? 0) + 1); if (Number(c.hold) > 0) hold.set(c.name, Math.max(hold.get(c.name) ?? 0, Number(c.hold))); }
+    const asks = want.map((name) => { const m = codeOf(name);
+      return { name, entry: m.entry, takes: Math.min(MAX_TAKES, count.get(name) ?? 1), dur: hold.get(name) ?? null,
+        why: kitStyle ? "the film style's kits make every sound in code" : ["", "the code's sound of its kind, as close as the library's", "the code's recipe is named for it", "the code makes this very sound"][tierOf(m)] }; });
+    coded = asks.length ? await makeCodeSounds(dir, asks, { root, signal, run: runs }) : { used: new Map(), failed: [], made: 0, broken: 0, errors: [] };
+    for (const n of coded.used.keys()) added.push(n);
+    names = names.filter((n) => !coded.used.has(n));
+    // a kit style's film: a name the code has no recipe for is left out (Claude can name it otherwise, or write a recipe); one whose making failed falls back
+    if (kitStyle) { for (const n of names.filter((x) => !want.includes(x))) missing.push(n); names = names.filter((x) => want.includes(x)); }
+    st = readState(dir);
+    // a sound made by code earlier that the code no longer gives: found again below
+    const gone = names.filter((n) => st.sounds[n]?.source === "code");
+    if (gone.length) st = patchState(dir, (x) => { for (const n of gone) { retire(x, x.sounds[n]); delete x.sounds[n]; } });
+  }
   if (library) {
     // a pick the library would no longer give (Test 26: a plug for "thread pull", a loop of birds for "needle park") is dropped, not kept
     const stale = names.filter((name) => st.sounds[name]?.source === "library" && !enough(name) && (!st.sounds[name].weak || !libOf(name)));
@@ -524,8 +554,12 @@ export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root =
       if (b) { await useSound(dir, name, b); added.push(name); if (b.near) near.push({ name, as: b.near }); } else { missing.push(name); failed.push(name); }
     }
   }
+  // why each sound came from where it did (code.mjs: the code's own reason is on its record already)
+  if (codeLib && added.length) patchState(dir, (x) => { for (const n of added) { const s = x.sounds[n]; if (s && !s.why) s.why = s.source === "library" ? (codeOf(n) ? "the library's sound is closer than the code's" : "the code has no recipe for it")
+    : s.source === "owner" ? null : "neither the code nor the library has it"; } });
   // offline: no search answered at all (the bundled sounds were the only source)
-  return { added, missing, failed, near, offline: offline || (online && names.length > 0 && [...hits.values()].every((h) => h == null)) };
+  return { added, missing, failed, near, offline: offline || (online && names.length > 0 && [...hits.values()].every((h) => h == null)),
+    code: coded ? { runs, kitStyle, names: [...coded.used.keys()], made: coded.made, broken: coded.broken, errors: coded.errors.length } : null };
 }
 
 /** Final Mix's line about a placement, for the chat: what was placed, which named sounds use a stand-in and which could not be found
@@ -759,6 +793,8 @@ export function mountAmbience(dir, clips) {
 export function creditLine(s) {
   if (s.source === "pixabay") return `"${s.title}", from the Pixabay sound set that HyperFrames bundles in its media-use skill (Pixabay Content License, ${s.licenceUrl}); HyperFrames does not record the sound's own Pixabay page. File: ${String(s.via ?? "").replace(/^.*?(https:\/\/\S+)$/, "$1")}`;
   if (s.source === "owner") return s.attribution;
+  // made by code for this film (code.mjs): the recipe and the owner's code it came from
+  if (s.source === "code") { const c = s.credit ?? {}; return `"${s.title}", Moworks Studio, made by code from the owner's synthesis (${c.name ?? "the app's sound recipes"}), ${c.licence ?? "the owner's own"}${c.how ? `; ${c.how}` : ""}.`; }
   if (s.source === "library") {
     const c = s.credit ?? {};
     return `"${s.title}", from ${c.name ?? "the app's sound library"} by ${c.author ?? s.creator ?? "unknown"}, ${c.licence ?? s.licence}${c.licenceUrl ? ` (${c.licenceUrl})` : ""}. Source: ${c.url ?? s.page ?? ""}${c.file ? `; original file: ${c.file}` : ""}${c.how ? `; ${c.how}` : ""}.`;

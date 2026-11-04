@@ -422,7 +422,27 @@ ol.plain.conversation, .conversation { flex: 1; overflow-y: auto; overflow-x: hi
 .as-row.missing .as-sub { color: var(--status-stop); }
 .as-unread { font-size: var(--fs-dense); color: var(--status-stop); }
 .as-used .clink { padding: 0 0.125rem; font-size: inherit; color: var(--text-secondary); }
+.as-used.track { color: var(--text-secondary); }
 .as-busy { color: var(--text-muted); }
+/* a sound's ▶ beside its menu: heard at once, never put on the timeline; the one playing shows Stop in the accent */
+.as-acts { display: flex; align-items: center; gap: 0.125rem; }
+.as-play.on { color: var(--accent-ink); background-color: var(--accent-soft); }
+/* "Show in Assets" from the timeline: the row lights for a moment */
+.as-row.flash { background: var(--accent-soft); box-shadow: inset 2px 0 0 var(--accent); transition: background-color 400ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .as-row.flash { transition: none; } }
+/* the film's own voice and music (el-voice*, el-music) carry a small mark at their start, so they read apart from clips added beside them */
+.tl-own { position: absolute; left: 2px; top: 2px; z-index: 1; display: grid; place-items: center; width: 14px; height: 14px; border-radius: 3px;
+  background: var(--surface-1, #111); color: var(--text-primary); opacity: 0.9; pointer-events: none; }
+/* a muted lane: its clips faded; its Mute button lit */
+.tl-row.muted .tl-aclip, .tl-row.muted .tl-word, .tl-row.muted .tl-tick, .tl-row.muted .tl-music { opacity: 0.35; }
+.tl-label .tl-lh { display: flex; align-items: center; gap: 0.25rem; width: 100%; min-width: 0; }
+.tl-mute { flex: none; display: grid; place-items: center; width: 0.875rem; height: 0.75rem; padding: 0; border: 0; border-radius: var(--r-xs, 3px);
+  background: transparent; color: var(--text-muted); cursor: pointer; }
+@media (hover: hover) and (pointer: fine) { .tl-mute:not(:disabled):hover { color: var(--text-primary); background: var(--surface-3); } }
+.tl-mute:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.tl-mute:disabled { opacity: 0.4; cursor: default; }
+.tl-mute.on { color: var(--status-stop, var(--danger)); background-color: color-mix(in srgb, var(--status-stop, red) 16%, transparent); }
+.tl-ctx { position: fixed; z-index: 1000; min-width: 11rem; }
 
 /* centre: the film in its well; the tools named in words */
 .ed-center, .pv-stage { background: var(--ed-well, #0a0a0a); }

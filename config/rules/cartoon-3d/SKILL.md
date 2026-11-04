@@ -27,8 +27,8 @@ The owner's kit is in `.moworks/library/cartoon-3d/kit/`, exactly as shipped: ne
 | `src/examples/what-if-no-pain/` (16:9, 13 shots), `src/examples/cheese-bank-vault/` (9:16, 29 shots) | The worked examples: every technique in working code. Study them; never copy their stories |
 
 A 9:16 film follows `cartoon-shorts`, a 16:9 one `cartoon-whatif`, both on `cartoon-video`'s core loop (precedence: the format skill, then
-`cartoon-video`). The kit's own commands are never run here (`doctor`, `new-video`, `vo-words`, `tighten-voice`, `place-voice`, `stills`, `qa`, `render`,
-`qc`, `review-frames`, `patch-render`, `check`, the sound builders, `npm`, `uv`): the app does each part (§4). Its `kit-setup`, `style-note`,
+`cartoon-video`). The kit's own commands are never run here (`doctor`, `new-video`, `vo-words`, `tighten-voice`, `place-voice`, `stills`, `render`,
+`qc`, `review-frames`, `patch-render`, `check`, the sound builders, `npm`, `uv`): the app does each part (§4); the kit's `qa` is the app's `collision_check`. Its `kit-setup`, `style-note`,
 `original-music` and `render-review` skills are not used as commands: a lasting preference goes in `docs/NOTES.md` and in your reply ("this can go into the
 kit itself"); music is the app's; the fresh-eyes review is the app's Review (`moworks-qc`), with `render-review`'s REVIEW.md as its checklist.
 
@@ -64,10 +64,14 @@ the kit's code keeps the names. Patrick Hand (sticky notes) draws Vietnamese as 
 | Voice | The app's Voice screen makes it from the approved paragraph; the length follows the voice (too long: cut words, never speed it up). The owner's own recording is never rewritten or re-voiced |
 | Storyboard | The board is the kit's real drawing: `boards/A/index.html` from `app/board.html`, one frame per shot at its key second in `data-kit-board`, drawing the film's world and shots. The shot table (one shot per spoken beat, one look per shot, each starting on its phrase) in `STORYBOARD.md` and `shots.ts` |
 | Motion Plan | Rows name the kit's moves (camera `a → b` eases, `cam(T, t)` tracking, `poseReach` and `legIK`, `walkPose` along routes, `setExpr` faces, looks, emissive glows) with their words and numbers. They come first and the film goes past them: moworks-alive rules 8-10 hold here too (each shot calls `library_search` twice, and what it takes is rebuilt as toon shapes in this look, on a word). Only STYLE.md's never list and the house bans are off limits |
-| Build | `world.ts`, `shots.ts`, `vo.ts` on the kit (KIT.md, STAGING.md); anything one video needs is built in its own `world.ts`, never in the kit. Held props gripped from the outside at `userData.grip`; furniture as `box()` / `cyl()`; walks along routes in the walk lanes |
-| Review | CHECKLIST.md on every still round, then `moworks-qc` with `render-review/references/REVIEW.md`. The kit's collision QA (`qa.mjs`) is not run by the app: check on the stills that no one walks through furniture and no prop goes through a table, a hand or a body, at each shot's start, middle and end |
+| Build | `world.ts`, `shots.ts`, `vo.ts` on the kit (KIT.md, STAGING.md); anything one video needs is built in its own `world.ts`, never in the kit. Held props gripped from the outside at `userData.grip`; furniture as `box()` / `cyl()` (named, so the check names it); walks along routes in the walk lanes. Keep `FilmCheck`, the template's collision twin, exported from `Video.tsx`, and call **`collision_check`** after every change to the blocking (positions, walks, poses, props): fix what it names until it says `COLLISION none` |
+| Review | CHECKLIST.md on every still round, then `moworks-qc` with `render-review/references/REVIEW.md`. The kit's collision QA runs in the app (`collision_check`, also in every Review round and in Tech checks): it must say `COLLISION none`. It sees bodies against furniture and each other, not a held prop: check on the stills that no prop goes through a table, a hand or a body, at each shot's start, middle and end |
 
 ## 5. Sound
+
+**Code-made sounds only** (owner 04/11/2026): every sound of this style is made by code: the kit's own sounds first, then new takes and new
+sounds from its recipes and the app's, made with the owner's sfxlib. While the computer can run the code the app never takes a library or a downloaded
+sound for it, because the kit's own sound rules forbid them; a sound no recipe makes is left out, so write one the kit's way (moworks-studio §7b).
 
 The kit's own sounds are in the app's library, made by the kit's code: `impact`, `blip-up` / `blip-down`, `glitch`, `win`, `chip`, `tick`, `count`, `lock`,
 `slice`, `vs`, `click`, `resolve` (SOUND.md's table and gains). Key moments only, about one cue per 3-4 s at most (3-5 in a short, one per 6-10 s in a long

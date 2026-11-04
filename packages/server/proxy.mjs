@@ -22,7 +22,7 @@ import { expandEnv, loadPins, renderSettings } from "../version-manager/index.mj
 import * as projects from "../project-service/index.mjs";
 import { docPath } from "../project-service/docs.mjs";
 import { refreshBridge } from "../hf-edit/lemoPage.mjs";
-import { applyLanes, readLanes } from "../sfx/lanes.mjs";
+import { applyLanes, readLanes, readMuted } from "../sfx/lanes.mjs";
 import { fitMusicToFilm } from "../hf-edit/tracks.mjs";
 import { levelTracks } from "../sfx/mixlevels.mjs";
 import { capWebBitrate, smoothCopy, smoothWithSound } from "../hf-qa/webBitrate.mjs";
@@ -180,7 +180,7 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
       ...(() => {
         const made = !pre && picture && st?.audio !== false ? stemsState(p.path) : null, ok = made?.heard === parts.heard && Object.values(made.files ?? {}).every((f) => existsSync(join(p.path, ...STEMS, f)));
         return { stems: ok ? { key: made.heard, master: made.master, urls: Object.fromEntries(Object.entries(made.files).map(([l, f]) => [l, url(p.id, [...STEMS, f].join("/"))])) } : null,
-          levels: ok ? readLanes(p.path) : null, needsStems: !pre && !!file && picture && !ok, heard: parts.heard };
+          levels: ok ? readLanes(p.path) : null, muted: ok ? readMuted(p.path) : null, needsStems: !pre && !!file && picture && !ok, heard: parts.heard };
       })() };
   };
   // what a background render gives way to: another film's export (the app's one render at a time) and Claude changing this film. An

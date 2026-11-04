@@ -240,6 +240,11 @@ input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 1
 @media (hover: hover) and (pointer: fine) { .menu button:hover { background: var(--surface-3); } }
 .menu button.danger { color: var(--danger); }
 .menu button:disabled { opacity: 0.45; cursor: not-allowed; }
+/* an item that cannot run now says why under its name (never left out): greyed, its reason still readable */
+.menu button:has(.menu-hint) { height: auto; min-height: 2.25rem; padding-block: 0.375rem; }
+.menu button:disabled:has(.menu-hint) { opacity: 1; color: var(--text-muted); }
+.menu-lbl { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.menu-hint { font-size: var(--fs-dense); color: var(--text-muted); line-height: 1.3; }
 .menu hr { border: 0; border-top: 1px solid var(--border); margin: 0.25rem 0; }
 .overlay { position: fixed; inset: 0; background: var(--scrim); display: grid; place-items: center; z-index: 60; padding: var(--sp-4);
   animation: fade-in var(--t-dialog) var(--ease-out); }
@@ -908,6 +913,22 @@ details.diag pre { white-space: pre-wrap; overflow-wrap: anywhere; background: v
 .gal-page .pager { flex: none; min-height: 3rem; padding: 0.375rem 1.25rem 0.625rem; }
 .gal-page .sgb-center > .empty { flex: none; margin: 1.5rem 1.25rem 0; }
 .gal-page .mlp-notes { padding: 0; }
+
+/* ---------- Idea Library (audit/97): the library page's tiles and the New idea dialog ---------- */
+/* the user's own idea has no picture: the first lines of its brief fill the frame, faded at the foot */
+.idl-card .shot .idl-text { position: absolute; inset: 0; padding: 0.6rem 0.7rem; overflow: hidden; white-space: pre-line; font-size: var(--fs-dense); line-height: 1.45; color: var(--text-secondary);
+  -webkit-mask-image: linear-gradient(#000 60%, transparent); mask-image: linear-gradient(#000 60%, transparent); }
+.idl-kv { grid-template-columns: auto minmax(0, 1fr); }
+/* the actions stay at the foot of the idea in hand, under a long brief (as Writing ideas had them) */
+.idl-page .sgb-insp .sgb-acts { position: sticky; bottom: -1rem; z-index: 1; margin: 0 -1rem -1rem; padding: 0.75rem 1rem; background: var(--surface-2); border-top: 1px solid var(--border); }
+.idl-page .sgb-insp .credit-line { margin-top: 0; }
+.sgb-insp .plx-prompt, .plx-detail .plx-prompt { white-space: pre-line; }
+.idl-form { display: flex; flex-direction: column; gap: 1rem; }
+.idl-form .hint { font-size: var(--fs-meta); }
+.textarea.idl-brief { min-height: 16rem; max-height: 50vh; }
+/* New project: Sample brief and Save as idea side by side over the Brief */
+.np2-acts { margin-left: auto; display: flex; align-items: center; gap: 0.25rem; }
+.np2-acts > .np2-act-wrap { margin-left: 0; }
 /* one tile height on the three pages: the picture, then a name line and an author line of fixed height */
 .gal-page .sgb-card { gap: 0.25rem; } .gal-page .sgb-card .shot { margin-bottom: 0.25rem; }
 .gal-page .sgb-card .nm { height: 1.375rem; line-height: 1.375rem; } .gal-page .sgb-card .by { height: 1.25rem; overflow: hidden; }

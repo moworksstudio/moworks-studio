@@ -1,7 +1,7 @@
 // App shell: top bar (with the Claude chip and the quiet "A new version is ready" line), left navigation rail, routed screens. A project
 // opens in the Editor; its stages are sheets there, so their old addresses open the Editor with that sheet.
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, LayoutGrid, Library as LibraryIcon, PanelLeftClose, PanelLeftOpen, Settings as Gear, Palette, Smile, Sparkles,
+import { CheckCircle2, LayoutGrid, Library as LibraryIcon, Lightbulb, PanelLeftClose, PanelLeftOpen, Settings as Gear, Palette, Smile, Sparkles,
   X, XCircle } from "lucide-react";
 import { get, holdPresence, post, setBusy } from "./api.js";
 import { ToastProvider, go, usePref, useRoute } from "./lib.jsx";
@@ -12,6 +12,7 @@ import Projects from "./screens/Projects.jsx";
 import StyleGallery from "./screens/StyleGallery.jsx";
 import Looks from "./screens/Looks.jsx";
 import Characters from "./screens/Characters.jsx";
+import IdeaLibrary from "./screens/IdeaLibrary.jsx";
 import Editor from "./screens/Editor.jsx";
 import Settings from "./screens/Settings.jsx";
 import Library from "./screens/Library.jsx";
@@ -22,6 +23,7 @@ import ExitButton from "./ExitButton.jsx";
 import AiMark from "./intro/AiMark.jsx";   // "AI motion studio" beside the name
 import { useThemeId } from "./theme.jsx";
 import { UpdateDot, UpdateLine, useUpdateNotice } from "./workflow/UpdateNotice.jsx";          // "A new version is ready"
+import { takeAttention } from "./workflow/attention.js";          // the app waits for the user: said in Windows while the window is not in use
 
 function Toasts({ items }) {
   return <div className="toasts" aria-live="polite">{items.map((t) => (
@@ -41,6 +43,7 @@ function Rail({ path, count, updateReady = false }) {
       {item("/styles", <Sparkles size={18} />, t("Film Styles"))}
       {item("/library", <LibraryIcon size={18} />, t("Motion Library"))}
       {item("/characters", <Smile size={18} />, t("Characters"))}
+      {item("/ideas", <Lightbulb size={18} />, t("Idea Library"))}          {/* audit/97: just under Characters */}
       <div className="rail-bottom">{item("/settings", <Gear size={18} />, t("Settings"), <UpdateDot on={updateReady} />)}</div>
     </nav>
   );
@@ -48,7 +51,7 @@ function Rail({ path, count, updateReady = false }) {
 
 // The Studio theme: no left rail; the top bar is the peg bar, an animator's peg bar with its three pegs, the pages
 // hanging from it as paper tabs (the page in hand is the lit sheet); Settings is the gear beside the Claude lamp.
-const PEG_TABS = [["/projects", "Projects"], ["/styles", "Film Styles"], ["/characters", "Characters"], ["/looks", "Brand Kits"], ["/library", "Motion Library"]];
+const PEG_TABS = [["/projects", "Projects"], ["/styles", "Film Styles"], ["/characters", "Characters"], ["/ideas", "Idea Library"], ["/looks", "Brand Kits"], ["/library", "Motion Library"]];
 function Pegs({ path }) {
   const t = useT();
   const on = (to) => (to === "/projects" ? path === "/projects" || path.startsWith("/projects/") || path === "/new" : path.startsWith(to));
@@ -96,7 +99,7 @@ function TopBar({ crumbs, collapsed, setCollapsed, studio = false, path = "", up
   const [hot, setHot] = useState(false);         // the computer has been very busy for minutes while the app works
   useEffect(() => {
     let alive = true;
-    const tick = async () => { try { const r = await get("/api/tasks/running"); if (alive) { setRunning(r.tasks); setBg(r.jobs ?? []); setSrv(r.state ?? null); setHot(!!r.machineBusy); setNotices(r.notices ?? []); setBusy(r.tasks.length + (r.jobs ?? []).length > 0); } } catch { /* offline shows elsewhere */ } if (alive) setTimeout(tick, 4000); };
+    const tick = async () => { try { const r = await get("/api/tasks/running"); if (alive) { setRunning(r.tasks); setBg(r.jobs ?? []); setSrv(r.state ?? null); setHot(!!r.machineBusy); setNotices(r.notices ?? []); takeAttention(r.attention); setBusy(r.tasks.length + (r.jobs ?? []).length > 0); } } catch { /* offline shows elsewhere */ } if (alive) setTimeout(tick, 4000); };
     tick(); return () => { alive = false; };
   }, []);
   return (
@@ -129,7 +132,7 @@ function TopBar({ crumbs, collapsed, setCollapsed, studio = false, path = "", up
 }
 
 // the stages that open as sheets in the Editor (their old page addresses still work)
-const SHEETS = { storyboard: "storyboard", "motion-plan": "motion-plan", voice: "voice", qa: "qa", ae: "ae", export: "render", render: "render", brief: "brief", assets: "assets", mix: "mix", character: "character", characters: "character" };
+const SHEETS = { storyboard: "storyboard", "motion-plan": "motion-plan", voice: "voice", qa: "qa", ae: "ae", export: "render", render: "render", brief: "brief", assets: "assets", mix: "mix", character: "character", characters: "character", lyrics: "lyrics" };
 
 let held = false;
 export default function App() {
@@ -165,6 +168,7 @@ export function Shell({ update: firstUpdate = null } = {}) {
   else if (seg[0] === "styles") screen = <StyleGallery />;
   else if (seg[0] === "looks") screen = <Looks kitId={seg.slice(1).join("/") || null} />;
   else if (seg[0] === "characters") screen = <Characters />;
+  else if (seg[0] === "ideas") screen = <IdeaLibrary />;
   else if (seg[0] === "library") screen = <Library />;
   else if (seg[0] === "settings") screen = <Settings section={seg[1] ?? "general"} claude={claude?.status ?? { loggedIn: false }} onRecheckClaude={() => claude?.refresh(true)} updateReady={update.ready} />;
   else screen = <Projects />;

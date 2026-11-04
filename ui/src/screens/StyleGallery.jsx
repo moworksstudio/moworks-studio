@@ -239,7 +239,7 @@ function DeskGallery() {
   }, [styles, fp, sort, authors]); // eslint-disable-line react-hooks/exhaustive-deps
   const cur = list.find((s) => s.id === curId) ?? list[0] ?? null;
   // 3 rows a page; a new filter or sort starts at page 1, a new page size (or the first visit) shows the style in hand
-  const grid = useGalleryGrid(), size = grid.size;
+  const grid = useGalleryGrid({ fewer: 1 }), size = grid.size;
   const [pg, setPg] = useState(0);
   useEffect(() => { setPg(0); }, [fp, sort]);
   useEffect(() => { setPg(Math.max(0, Math.floor(list.findIndex((s) => s.id === cur?.id) / size))); }, [size, data]); // eslint-disable-line react-hooks/exhaustive-deps

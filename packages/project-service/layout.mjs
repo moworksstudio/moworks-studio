@@ -30,7 +30,7 @@ export function appSounds(dir) {
   try {
     const st = JSON.parse(readFileSync(join(dir, ".moworks", "sfx.json"), "utf8"));
     // a library sound's variants and the ambience loops are the app's copies too
-    return new Set(Object.values(st.sounds ?? {}).filter((s) => s?.file && s.source !== "owner").flatMap((s) => [s.file, ...(s.variants ?? []).map((v) => v.file)]));
+    return new Set([...Object.values(st.sounds ?? {}).filter((s) => s?.file && s.source !== "owner").flatMap((s) => [s.file, ...(s.variants ?? []).map((v) => v.file)]), ...(st.retired ?? [])]);
   } catch { return new Set(); }
 }
 /** What the app copied into a new film from its Brand Kit (never one of the user's added files): { id, title, version, at, logos: [path],

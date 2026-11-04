@@ -56,7 +56,7 @@ export function Menu({ trigger, items, label }) {
       {open && <div className="menu" role="menu">
         {items.map((it, i) => it === "-" ? <hr key={i} /> : (
           <button key={i} role="menuitem" className={it.danger ? "danger" : ""} disabled={it.disabled} title={it.title}
-            onClick={() => { setOpen(false); it.onSelect(); }}>{it.icon}{it.label}</button>))}
+            onClick={() => { setOpen(false); it.onSelect(); }}>{it.icon}{it.hint ? <span className="menu-lbl">{it.label}<small className="menu-hint">{it.hint}</small></span> : it.label}</button>))}
       </div>}
     </div>
   );
@@ -184,8 +184,10 @@ export function BackButton({ onClick, fallback = "/projects", className = "" }) 
  *  page scroll. Every tile keeps ONE 16:9 picture frame over its text. For each column count that keeps a tile `min` to `max`
  *  rem wide, the tiles are laid out once and measured (a narrow card wraps its lines and grows), the whole rows that fit are counted, and
  *  the pair of columns and rows that leaves the least height empty wins (more tiles on a tie). Recounted on every resize. `room(el, rem)`
- *  gives the height when the page sets none (Projects). Returns the ref and style for the grid and the page size. */
-export function useGalleryGrid({ card: cardSel = ".sgb-card", media = ".shot", room = null, min = 11, max = 22 } = {}) {
+ *  gives the height when the page sets none (Projects). `fewer`: that many columns less than the best fit, the rows counted again for the
+ *  bigger tiles (owner #943: the library pages show one tile less per row, 6 → 5, 5 → 4, so the previews are bigger). Returns the ref and
+ *  style for the grid and the page size. */
+export function useGalleryGrid({ card: cardSel = ".sgb-card", media = ".shot", room = null, min = 11, max = 22, fewer = 0 } = {}) {
   const [el, ref] = useState(null);
   const [grid, setGrid] = useState({ cols: 3, rows: 3 });
   useLayoutEffect(() => {
@@ -210,6 +212,10 @@ export function useGalleryGrid({ card: cardSel = ".sgb-card", media = ".shot", r
         if (tileW < min * rem && best) break;
         const th = tileH(cols, tileW), rows = Math.max(1, Math.floor((h + gy) / (th + gy))), left = h - rows * th - (rows - 1) * gy;
         if (!best || left < best.left - 4 || (Math.abs(left - best.left) <= 4 && cols * rows > best.cols * best.rows)) best = { cols, rows, left };
+      }
+      if (fewer > 0 && best.cols > 1) {
+        const cols = Math.max(1, best.cols - fewer), tileW = (w - (cols - 1) * gx) / cols, th = tileH(cols, tileW);
+        best = { cols, rows: Math.max(1, Math.floor((h + gy) / (th + gy))) };
       }
       el.style.gridTemplateColumns = kept;
       el.dataset.rows = String(best.rows);

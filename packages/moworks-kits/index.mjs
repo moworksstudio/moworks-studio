@@ -63,7 +63,7 @@ export function stageGuide(projectDir, styleId, root = APP_ROOT) {
 /** What each step reads of the kit (project-relative), for agent/reads.mjs. */
 export function kitReads(styleId) {
   const s = kitStyle(styleId);
-  if (!s) return { look: [], method: [], examples: [], app: [], sound: [] };
+  if (!s) return { look: [], method: [], examples: [], app: [], sound: [], review: [] };
   const lib = `.moworks/library/${styleId}`, k = `${lib}/kit`;
   const skill = (n) => `${k}/.claude/skills/${n}/SKILL.md`;
   const LOOK = { "paper-collage": [`${k}/.claude/skills/motion-graphic/references/STYLE.md`, `${k}/.claude/skills/motion-graphic/references/RECIPES.md`],
@@ -73,7 +73,13 @@ export function kitReads(styleId) {
     "explainer-2d": [`${k}/STYLE.md`, `${k}/SCRIPTING.md`, `${k}/engine/CONTRACT.md`] }[styleId];
   const SOUND = { "paper-collage": "motion-graphic/references/SOUND.md", "stickman-explainer": "stickman-explainer/references/SOUND.md", "inner-voice-short": "inner-voice-short/references/SOUND.md",
     "cartoon-3d": "cartoon-video/references/SOUND.md", "explainer-2d": "sound-design/SKILL.md" }[styleId];
-  return { look: LOOK, method: [skill(s.skills[0])], examples: s.examples.map((e) => `${k}/${e}`), app: [`${lib}/app/README.md`], sound: [`${k}/.claude/skills/${SOUND}`] };
+  // the Review's checklists: the kit's own (its still-round CHECKLIST.md, the fresh-eyes REVIEW.md), else the style's loop with what the
+  // author learned (the Story kit's two styles keep theirs in SKILL.md)
+  const REVIEW = { "paper-collage": ["motion-graphic/references/CHECKLIST.md"], "stickman-explainer": ["stickman-explainer/SKILL.md"],
+    "inner-voice-short": ["inner-voice-short/SKILL.md"], "cartoon-3d": ["cartoon-video/references/CHECKLIST.md", "render-review/references/REVIEW.md"],
+    "explainer-2d": ["explainer-video/references/CHECKLIST.md", "render-review/references/REVIEW.md"] }[styleId];
+  return { look: LOOK, method: [skill(s.skills[0])], examples: s.examples.map((e) => `${k}/${e}`), app: [`${lib}/app/README.md`], sound: [`${k}/.claude/skills/${SOUND}`],
+    review: REVIEW.map((r) => `${k}/.claude/skills/${r}`) };
 }
 
 // ---- in a film: the engine, the faces and the words beside the page that runs them (the film's index.html, or a board, its own web root)

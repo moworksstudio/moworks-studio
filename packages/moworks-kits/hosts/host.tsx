@@ -12,11 +12,14 @@ import { FrameContext, VideoConfigContext, whenRendered, type VideoConfig } from
 
 const mod = film as Record<string, unknown>;
 // the composition: the one the root names (data-kit-comp), else the module's default export, else its first capitalised component that is not the
-// collision-QA twin (…Check)
+// collision-QA twin (…Check). ?kit-check=1 in the page's address draws that twin instead: the 3D Cartoon's collision check (collision.mjs)
 const asked = document.getElementById("main")?.dataset.kitComp;
-const name = asked && typeof mod[asked] === "function" ? asked : typeof mod.default === "function" ? "default"
+const check = new URLSearchParams(location.search).get("kit-check") === "1";
+const name = check ? Object.keys(mod).find((k) => typeof mod[k] === "function" && /^[A-Z]\w*Check$/.test(k))
+  : asked && typeof mod[asked] === "function" ? asked : typeof mod.default === "function" ? "default"
   : Object.keys(mod).find((k) => typeof mod[k] === "function" && /^[A-Z]/.test(k) && !/Check$/.test(k) && !/^[A-Z0-9_]+$/.test(k));
-if (!name) throw new Error("src/videos/film/Video.tsx exports no composition: export the video's component, as the kit's template does");
+if (!name) throw new Error(check ? "src/videos/film/Video.tsx exports no collision check: export FilmCheck as the kit's template does (CollisionCheck from ../../kit/collision)"
+  : "src/videos/film/Video.tsx exports no composition: export the video's component, as the kit's template does");
 const Comp = mod[name] as React.FC<Record<string, unknown>>;
 
 const main = document.getElementById("main")!, stage = document.getElementById("stage")!;
@@ -38,10 +41,11 @@ const frameAt = (t: number) => {
   return Math.max(0, Math.min(config.durationInFrames - 1, Math.round(s * fps)));
 };
 
-declare global { interface Window { render?: (t: number) => void; READY?: boolean; __kitFrame?: () => number } }
+declare global { interface Window { render?: (t: number) => void; READY?: boolean; __kitFrame?: () => number; __kitConfig?: VideoConfig; __kitError?: string } }
 // the R-LEMO contract, written out as finalize looks for it: window.render = ..., window.READY = true
 window.render = (t: number) => { const f = frameAt(t); if (f !== drawn) draw(f); };
 window.__kitFrame = () => drawn;
+window.__kitConfig = config;
 
 // every face the page declares (the kit's own and their Vietnamese twins), then every delayRender handle (the kits' own waits: the canvas
 // stage's fonts, the 3D world's build), before the first frame is called ready
@@ -49,4 +53,6 @@ const faces = [...document.fonts].map((f) => `${f.style} ${f.weight.split(" ")[0
 Promise.all(faces.map((f) => document.fonts.load(f))).then(() => document.fonts.ready)
   .then(() => { draw(0); return whenRendered(); })
   .then(() => { draw(0); return whenRendered(); })
-  .then(() => { window.READY = true; });
+  .then(() => { window.READY = true; })
+  // a cancelRender (a kit's own failure) said to whoever reads the page, and thrown on as before
+  .catch((e) => { window.__kitError = String((e as Error)?.message ?? e); throw e; });
