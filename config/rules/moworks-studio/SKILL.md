@@ -258,6 +258,8 @@ mood"):
 
 ## 8. Text over a canvas film (owner 27/10)
 
+**3D (owner 04/11):** when the owner asks for 3D, never answer that the app cannot do it. three.js is on this computer: offer it as one of the choices, a 3D scene built by code (shapes, materials, lights, a moving camera) in the film style's colours. Say plainly that it is not photoreal like a 3D render or a photo, and that it reaches After Effects as one picture. HTML / CSS / GSAP stays the default when the owner did not ask for 3D.
+
 Only when the film draws on a canvas: its film style's After Effects badge is "video" (measured on the style's demo), or the film's own
 code draws its picture on a canvas (a 2D or WebGL canvas, three.js, an engine's page). The app says so in the step's message. Such a film
 reaches After Effects as one rendered picture, so its text splits in two kinds:
