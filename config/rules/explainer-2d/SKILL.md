@@ -51,17 +51,13 @@ word, a new element every 1.5-3 s, a shot every 3-4 s (the example cuts 12 times
 camera's 1.00-1.06 push over one such shot (about 1.8 % a second) or a punch-in on the key word, moves of 0.3-0.6 s on `EX.spring`. **No text inside art modules** (every label from `story.js` through `HOUSE.ui`); no film grain, global
 vignette or grade filter; no image files, no AI images; every frame a pure function of time.
 
-**A finished film of this style** (owner 05/11/2026 #1050, from a reference film of the style: "The Millisecond Lightning Hits You", RandomAI,
-https://youtu.be/wSZx2auhKlc, seen for its devices, nothing of it copied; SOURCES S-2DX-REF). Its energy comes from the cut, the cards and the scale,
-not from smiles (its hero is pensive throughout):
-- **The hero at every size:** from behind looking out at the scene, medium, close on the face, an extreme close profile with a symbol in the head
-  (a brain lighting up); each cut changes the size (moworks-studio §6). The hero is the anchor between the facts.
-- **One picture card per fact:** a split screen that compares two numbers (the Sun's surface against lightning), a row of icons for a multiple
-  (five suns for "5 times hotter"), a timeline bar for a duration ("less than a blink"), a body symbol for a body fact (a heartbeat), a globe
-  half day, half night. Pills carry the numbers.
-- **One or two big scale moves:** from the sky down to the ground, from the hero out to the planet (STYLE.md's log-space moves).
-- **Weather or particles all through** (rain), and **one strong hit** (a lightning strike with its flash) at the peak.
-- About 4 s a shot over its 67 s, the title in capitals over the wide shot at the end.
+**A finished film of this style** (owner 05/11/2026 #1050; a reference film of the style, "The Millisecond Lightning Hits You", RandomAI,
+https://youtu.be/wSZx2auhKlc, seen for its devices, nothing copied; SOURCES S-2DX-REF). The kit already has every device; use them: the hero at
+every size and view (`view: "back"` looking out at the scene, `profile`, `h` up to 3000+, `anchors().brain` lighting), one picture card per fact
+(`HOUSE.ui.divider` for a split-screen comparison, `timebar` for a duration, `panel`, `lens`, pills for the numbers; a row of icons for a multiple
+is drawn in an art module), one or two scale moves (`EX.cameraAt` in log space, STYLE.md), weather all through (`wet`, rain) and one strong hit
+(`EX.fx.flash`, a few times a film at most), the title in capitals over the wide end shot. Clouds, a bolt, a globe or an icon row are new art
+modules: the engine ships their colours, not their drawings.
 
 **Faces:** Figtree has no Vietnamese letters, so the app declares the kit's "Figtree" with Hanken Grotesk, a grotesk of the same build that has them; the
 engine keeps the name and `HOUSE.ui.init()` waits for it as shipped.
@@ -73,7 +69,7 @@ engine keeps the name and `HOUSE.ui.init()` waits for it as shipped.
 | Prepare | The kit's way: restate the brief and wait for the owner's yes, then the script (`script-writer`, SCRIPTING.md): continuous narration, every number with its source in the fact sheet (in `BRIEF.md` and `SCRIPT.md`). Ideas: about 5 topics with a recommendation. The format from New project's size: a 9:16 short (`explainer-shorts`) or a 16:9 explainer (`explainer-longform` past 2 minutes). In Vietnamese SCRIPTING.md's 12-18 words a sentence and 2.6-3 words a second become about 15-22 syllables and 3.5-4 syllables a second, enough words for the film's whole length (moworks-studio §6c). The narrator is bright and quick, livelier than STYLE.md's "unhurried" (owner 05/11) |
 | Voice | The app's Voice screen makes it from the approved script, word for word. The owner's own recording is never paraphrased or re-voiced; "no narrator" is respected (`voice-over`, without a narrator) |
 | Storyboard | `STORYBOARD.md` the kit's way (shots, event cues on words, the snapshot plan). The board is the kit's real drawing: `boards/A/index.html` a copy of the film's page whose `story/` (in the board's folder) draws, for second k of the board, the film at the k-th frame's time; the app places the engine beside it |
-| Motion Plan | Rows name the engine's moves (`EX.spring`, `EX.squash`, `EX.cameraAt` moves, `HOUSE.ui` pills, callouts and title, `HOUSE.hero` poses, `EX.fx.flash`, `EX.fx.ring`) with their words and numbers. They come first and the film goes past them: moworks-alive rules 8-10 hold here too (each shot calls `library_search` twice, and what it takes is redrawn as flat cel shapes in an art module, on a word). Only STYLE.md's rules, CONTRACT.md's hard rules and the house bans are off limits. Each frame lists its cuts (a shot every 3-4 s). `HOUSE.hero` can only look, lift and turn its head, worry and smile (`mouth` -1..1, CONTRACT.md): plan its face on those, a clear smile (`mouth` 0.6-1) in a happy beat, a close shot (`h` about 900, `headUp` at most 0.2) when the face carries the beat, an `EX.squash` or `EX.spring` hop on the words; never brows, arms or wide eyes it does not have |
+| Motion Plan | Rows name the engine's moves (`EX.spring`, `EX.squash`, `EX.cameraAt` moves, `HOUSE.ui` pills, callouts and title, `HOUSE.hero` poses, `EX.fx.flash`, `EX.fx.ring`) with their words and numbers. They come first and the film goes past them: moworks-alive rules 8-10 hold here too (each shot calls `library_search` twice, and what it takes is redrawn as flat cel shapes in an art module, on a word). Only STYLE.md's rules, CONTRACT.md's hard rules and the house bans are off limits. Each frame lists its cuts (a shot every 3-4 s). `HOUSE.hero` (CONTRACT.md): its views (`front`, `back`, `profile`), its size from a wide shot (`h` about 60) to an extreme close-up (3000+), its look, head lift and turn, `worry` and `mouth` (-1..1), its anchors (the `brain` that lights), `wet` in the rain: change its view and size at the cuts, its face on the beat's feeling (moworks-studio §5); never brows, arms or wide eyes it does not have |
 | Build | `story.js` and the art modules on the engine (CONTRACT.md, BUILD.md); a big film's modules may be briefed to parallel agents as `art-modules` says |
 | Review | CHECKLIST.md on the snapshots, then `moworks-qc` with `render-review/references/REVIEW.md`. The app's transcript check stands in for the kit's word-for-word diff of the final MP4 |
 
