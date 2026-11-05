@@ -28,7 +28,7 @@ You cannot hear: measure every step (the app gives you beat maps, levels and cue
 - A sound on every action (the house rules §7b, owner 30/10): a whoosh for movement, pop for things appearing, click for clicks, typing
   for typing, riser into a reveal, impact on a slam, footsteps, doors, pages; and a quiet ambience bed under every scene with a place. The
   app picks them by what happens on screen: its offline library of CC0 sounds first, then Freesound through Openverse (CC0 / CC BY) and
-  HyperFrames' bundled set, then a sound made by code (the owner's kits' sounds and new ones from their recipes and the app's) only for what
+  HyperFrames' bundled set, then a sound made by code (the owner's film styles' sounds and new ones from their recipes and the app's) only for what
   neither has (owner 05/11/2026 #1034), every one credited; name them in the storyboard frames by the thing and its action (`- sfx: crayon stroke on paper, door
   knock wood`, `- ambience: rain`).
 - **The light comes before the sound:** a sound's attack (the top of a whoosh's swell) lands one frame after its picture. The picture must

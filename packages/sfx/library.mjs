@@ -137,9 +137,12 @@ const ENV = new Set(["rain", "sea", "ocean", "river", "lake", "forest", "street"
   "wind", "blizzard", "fireplace", "campfire", "cafe", "restaurant", "mall", "classroom", "cave", "beach", "shore", "park", "garden", "jungle", "highway", "rapids"].map(stem));
 
 let cache = null;
+/** The film style a sound belongs to (a style's own code-made sound): its filmStyle, or `kit` as a catalog written before #1061 names it; null for any film's. */
+export const soundStyle = (s) => s?.filmStyle ?? s?.kit ?? null;
 /** The bundled catalog (cached; read again when catalog.json changes): { dir, about, made, sounds }. Each sound keeps the catalog's fields
  *  and gets `path`, its absolute file. An empty library when the bundle has none. */
-export function loadLibrary(root = APP_ROOT, { kit = null } = {}) {
+export function loadLibrary(root = APP_ROOT, { filmStyle = null, kit = null } = {}) {
+  const style = filmStyle ?? kit;          // kit: the option's name before #1061
   const dir = libraryDir(root), file = join(dir, "catalog.json");
   const mtime = existsSync(file) ? statSync(file).mtimeMs : 0;
   if (cache?.file !== file || cache.mtime !== mtime) {
@@ -147,9 +150,9 @@ export function loadLibrary(root = APP_ROOT, { kit = null } = {}) {
     try { cat = JSON.parse(readFileSync(file, "utf8")); } catch { /* no library: findLocal answers null */ }
     cache = { file, mtime, cat, libs: new Map() };
   }
-  // a film style's own code-made sounds (source.kind "code", `kit`: the style's id; tools/make-code-sfx.mjs) are in the library of that style's films only
-  const key = kit ?? "";
-  if (!cache.libs.has(key)) cache.libs.set(key, fromCatalog({ ...cache.cat, sounds: (cache.cat.sounds ?? []).filter((s) => !s.kit || s.kit === kit) }, dir));
+  // a film style's own code-made sounds (source.kind "code", `filmStyle`: the style's id; tools/make-code-sfx.mjs) are in the library of that style's films only
+  const key = style ?? "";
+  if (!cache.libs.has(key)) cache.libs.set(key, fromCatalog({ ...cache.cat, sounds: (cache.cat.sounds ?? []).filter((s) => !soundStyle(s) || soundStyle(s) === style) }, dir));
   return cache.libs.get(key);
 }
 /** A library object from a catalog already read (tests, tools): { dir, about, made, sounds }. */
@@ -198,12 +201,12 @@ export function sustainedStandIn(name, { library = null, root = APP_ROOT } = {})
 const RINGS = /\b(ring(s|ing)?|chimes?|tolls?|tolling|peals?|resonat\w*|reverberat\w*)\b/;
 const RING_MIN_S = 1;
 const wantsRing = (name) => RINGS.test(norm(name)) && !/\b(ting|tink|tiny|tick|phone|alarm|doorbell|timer)\b/.test(norm(name));
-/** Every entry scored for a cue name, best first: [{ entry, score }] (only those that match). Options as findLocal; kit: the film's style id (its own
+/** Every entry scored for a cue name, best first: [{ entry, score }] (only those that match). Options as findLocal; filmStyle: the film's style id (its own
  *  code-made sounds join the library and come first); oneShot: true leaves out
  *  the ambience loops and the recordings longer than a cue may play (a cue is one sound at its moment: only the ambience beds use a loop;
  *  Test 26's "needle park" got 4.3 s of birds, and "rain" would get a 10 s thunder roll). */
-export function rankLocal(name, { family = null, style = null, exclude = [], library = null, root = APP_ROOT, oneShot = false, minDuration = 0, kit = null } = {}) {
-  const lib = library ?? loadLibrary(root, { kit }), index = INDEX.get(lib) ?? INDEX.get(fromCatalog({ sounds: lib.sounds }, lib.dir)) ?? [];
+export function rankLocal(name, { family = null, style = null, exclude = [], library = null, root = APP_ROOT, oneShot = false, minDuration = 0, filmStyle = null, kit = null } = {}) {
+  const ownStyle = filmStyle ?? kit, lib = library ?? loadLibrary(root, { filmStyle: ownStyle }), index = INDEX.get(lib) ?? INDEX.get(fromCatalog({ sounds: lib.sounds }, lib.dir)) ?? [];
   const q = words(name);
   if (!q.length) return [];
   const skip = new Set(exclude instanceof Set ? exclude : [].concat(exclude ?? []));
@@ -237,7 +240,7 @@ export function rankLocal(name, { family = null, style = null, exclude = [], lib
     if (want && s.family === want) score += 2.5;
     if (family && s.family === family) score += 4;
     for (const st of styleWords) if (ws.has(st)) score += 1.5;
-    if (kit && s.kit === kit) score += 2;                              // the film style's own sound first (owner #887)
+    if (ownStyle && soundStyle(s) === ownStyle) score += 2;                              // the film style's own sound first (owner #887)
     score += s.loop ? (ambient ? 4 : env ? 3.5 : -2) : (ambient ? -1 : 0);       // actions get one-shots; "rain", "rain ambience" the loop
     // direct: how many of the cue's words are the sound's own tags; last: its last word is (the head of "lamp ting", "oar paddle")
     if (score >= 3) out.push({ entry: s, score: Math.round(score * 100) / 100, direct, hits, own, last: ws.has(q[q.length - 1]) });

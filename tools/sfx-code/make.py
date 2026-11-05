@@ -1,15 +1,16 @@
 """Make sound effects by code for one film (packages/sfx/code.mjs runs it at Final Mix): every job is one sound, from
 
     a recipe of the app's own        "impact", "writing", "door"…      (tools/sfx-code/recipes.py)
-    a recipe of the owner's kits     "kit:story/build_stickman:pop"   (bundle/styles/moworks-kits, run as they ship; Ricks Clip's
-                                     "kit:ricks-clip/audio:thunk", a synth of its worked example's audio.py)
+    a recipe of the owner's styles   "style:story/build_stickman:pop" (their source skills in bundle/styles/moworks-styles, run as they
+                                     ship; Ricks Clip's "style:ricks-clip/audio:thunk", a synth of its worked example's audio.py;
+                                     "kit:" is the prefix's name before #1061, read the same)
     a recipe Claude wrote            "user:<file>.py"                 (sandbox.py: only sound, nothing else)
 
 with its parameters and a seed, then pitched (pitch, semitones), brightened or darkened (bright, -1 to 1), DC-blocked, its silence before the
 attack trimmed (4 ms kept) and after its tail, levelled by loudness (BS.1770 momentary max, sfxlib) to its target with its peak at most
 -1 dBFS, a short fade at its end, written as 16-bit WAV at 48 kHz. The same job always writes the same samples.
 
-    python -I make.py <jobs.json>      jobs.json: { "kits": <bundle/styles/moworks-kits>, "jobs": [{ recipe, params, seed, pitch, bright, target, out }] }
+    python -I make.py <jobs.json>      jobs.json: { "sources": <bundle/styles/moworks-styles>, "jobs": [{ recipe, params, seed, pitch, bright, target, out }] }
 
 The last line of stdout is the answer: { ok, made: [{ out, seconds, channels, peak_db, mmax, dc, edge }], failed: [{ out, error }] }.
 """
@@ -28,9 +29,9 @@ if libs and os.path.isdir(libs):
 MAX_S = 8.0
 
 
-def setup(kits):
-    # the owner's sfxlib, as the Story kit ships it, is the ingredients of every recipe here
-    sys.path.insert(0, str(Path(kits) / "story" / "tools" / "sfx"))
+def setup(sources):
+    # the owner's sfxlib, as the Story source skill ships it, is the ingredients of every recipe here
+    sys.path.insert(0, str(Path(sources) / "story" / "tools" / "sfx"))
     sys.path.insert(1, str(HERE))
     try:
         import soundfile  # noqa: F401  (the 2D Explainer's audio_common imports it; its generators never use it)
@@ -43,13 +44,13 @@ def setup(kits):
 _mods = {}
 
 
-def kit_module(kits, kit, mod):
-    key = f"{kit}/{mod}"
+def source_module(sources, source, mod):
+    key = f"{source}/{mod}"
     if key not in _mods:
-        folder = Path(kits) / kit / "tools" / ("audio" if mod == "sfx" else "sfx")
+        folder = Path(sources) / source / "tools" / ("audio" if mod == "sfx" else "sfx")
         if str(folder) not in sys.path:
             sys.path.insert(2, str(folder))
-        spec = importlib.util.spec_from_file_location(f"mwkit_{kit.replace('-', '_')}_{mod}", folder / f"{mod}.py")
+        spec = importlib.util.spec_from_file_location(f"mwstyle_{source.replace('-', '_')}_{mod}", folder / f"{mod}.py")
         m = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(m)
         _mods[key] = m
@@ -68,22 +69,24 @@ RC_CALLS = {"whoosh": ("whoosh", (0.6,)), "leaves": ("leaves", (2.2,)), "thunk":
             "creak": ("creak", (0.55, 120)), "creak-low": ("creak", (0.8, 90)), "snap": ("snap", ()), "splash": ("splash", (1.0,)), "water": ("water", (8.0,))}
 
 
-def ricks_synths(kits):
+def ricks_synths(sources):
     if "ricks-clip" not in _mods:
-        text = (Path(kits) / "ricks-clip" / "kit" / "example" / "soldier" / "audio.py").read_text(encoding="utf-8")
+        text = (Path(sources) / "ricks-clip" / "kit" / "example" / "soldier" / "audio.py").read_text(encoding="utf-8")
         cut = text.index("\nF = lambda")
-        ns = {"__name__": "mwkit_ricks_clip_audio"}
+        ns = {"__name__": "mwstyle_ricks_clip_audio"}
         exec(compile(text[:cut], "ricks-clip/kit/example/soldier/audio.py", "exec"), ns)
         _mods["ricks-clip"] = ns
     return _mods["ricks-clip"]
 
 
-def recipe_of(job, kits):
+def recipe_of(job, sources):
     """(fn(rng, p) -> array, the recipe's own seed or None, its own loudness target or None)"""
     r = job["recipe"]
-    if r.startswith("kit:ricks-clip/"):
+    if r.startswith("kit:"):
+        r = "style:" + r[4:]  # a recipe named before #1061
+    if r.startswith("style:ricks-clip/"):
         name = r.split(":", 2)[2]
-        ns, (fn, args) = ricks_synths(kits), RC_CALLS[name]
+        ns, (fn, args) = ricks_synths(sources), RC_CALLS[name]
 
         def run(rng, p, ns=ns, fn=fn, args=args):
             import numpy as np
@@ -92,10 +95,10 @@ def recipe_of(job, kits):
             return np.asarray(ns[fn](*args), dtype=np.float64)
 
         return run, None, None
-    if r.startswith("kit:"):
-        kit_mod, name = r[4:].split(":", 1)
-        kit, mod = kit_mod.split("/", 1)
-        m = kit_module(kits, kit, mod)
+    if r.startswith("style:"):
+        source_mod, name = r[6:].split(":", 1)
+        source, mod = source_mod.split("/", 1)
+        m = source_module(sources, source, mod)
         if mod == "sfx":
             import numpy as np
 
@@ -165,7 +168,8 @@ def finish(x, target, pitch=0.0, bright=0.0):
 
 def main():
     jobs = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-    setup(jobs["kits"])
+    sources = jobs.get("sources") or jobs.get("kits")  # "kits": the key's name before #1061
+    setup(sources)
     import numpy as np
 
     import sfxlib as K
@@ -173,9 +177,9 @@ def main():
     made, failed = [], []
     for job in jobs["jobs"]:
         try:
-            fn, own_seed, own_target = recipe_of(job, jobs["kits"])
-            seed = own_seed if job.get("kitSeed") and own_seed is not None else int(job.get("seed", 1)) & 0xFFFFFFFF
-            # a kit's recipe was written for its own fixed seed: with a new one it can fail now and then (Stickman's chatter places a tick
+            fn, own_seed, own_target = recipe_of(job, sources)
+            seed = own_seed if (job.get("ownSeed") or job.get("kitSeed")) and own_seed is not None else int(job.get("seed", 1)) & 0xFFFFFFFF
+            # a source skill's recipe was written for its own fixed seed: with a new one it can fail now and then (Stickman's chatter places a tick
             # before the start); the next seeds are tried, so the same job still always makes the same sound
             for k in range(4):
                 try:

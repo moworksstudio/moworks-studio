@@ -1,7 +1,7 @@
 // What a project's style id says without building the catalog (read from config/styles.json alone, so the scan and the project
 // read can ask): a film cut to a song (its category is Music / Lyrics: the Lyrics step and the Music map); a board posed at the film's own
 // seconds (HyperFrames' styles and General, whose storyboard rules follow HF's storyboard.md; the other authors' boards pose one frame a
-// second); a style whose author gives its own ending (every style but General and HyperFrames' own, and an owner's kit style that says so: house
+// second); a style whose author gives its own ending (every style but General and HyperFrames' own, and one of the owner's film styles that says so: house
 // rules §9, the app fades only the music).
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -25,8 +25,8 @@ export function styleTraits(id, root = APP_ROOT) {
   try { styles = JSON.parse(readFileSync(join(root, "config", "styles.json"), "utf8")).styles ?? []; } catch { /* no catalog: nothing special */ }
   const s = id ? styles.find((x) => x.id === id) : null;
   const hf = s?.rules?.kind === "moworks" || s?.rules?.kind === "hf-skill";
-  // the authors' styles live in the library, not in styles.json; the owner's kit styles there say how their boards are posed (one frame a second,
-  // as an author's) and whether the kit ships its own ending (Inner Voice Short, 2D Explainer)
+  // the authors' styles live in the library, not in styles.json; the owner's film styles there say how their boards are posed (one frame a second,
+  // as an author's) and whether the source skill ships its own ending (Inner Voice Short, 2D Explainer)
   return { music: s?.category === MUSIC, filmBoards: hf && s?.boards !== "second", ownEnding: !!id && (!hf || s?.ownEnding === true) };
 }
 

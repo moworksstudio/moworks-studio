@@ -1,23 +1,23 @@
 // The recipes the app makes sound effects from by code (owner 04/11/2026, #888, #889, #899, #909, #910: "a sound-effect library built by
 // code for the films; only a sound the code cannot make is searched online"). Each entry is one sound the code can make: what it is called
 // (tags, matched against a cue's words the way the offline library is, library.mjs rankLocal), its family, its length, and the recipe and
-// parameters that make it (tools/sfx-code/recipes.py: the app's own recipes, written with the owner's sfxlib; or the owner's own kits'
-// recipes, run as they ship). Pure data; packages/sfx/code.mjs matches, makes and records them.
+// parameters that make it (tools/sfx-code/recipes.py: the app's own recipes, written with the owner's sfxlib; or the recipes of the owner's
+// film styles' source skills, run as they ship). Pure data; packages/sfx/code.mjs matches, makes and records them.
 //
-// The owner's kits' prebuilt sounds (bundle/sfx, source.kind "code", ids pc-, sm-, iv-, c3-, x2-, rc-) are recipes too: each is made again by
-// its kit's own recipe with a new seed when a film needs more takes of it. A kit style's signature sounds (SIGNATURE) stay in that style's
+// The owner's film styles' prebuilt sounds (bundle/sfx, source.kind "code", ids pc-, sm-, iv-, c3-, x2-, rc-) are recipes too: each is made again by
+// its source skill's own recipe with a new seed when a film needs more takes of it. A style's signature sounds (SIGNATURE) stay in that style's
 // films; every other one is neutral and any film may take it (owner #909).
 
-/** The film styles made from the owner's kits: they take code-made sounds only, the kits' own sound rules forbid downloaded ones (owner #909). */
-export const KIT_STYLES = Object.freeze(["paper-collage", "stickman-explainer", "inner-voice-short", "cartoon-3d", "explainer-2d", "ricks-clip"]);
-/** The kit recipe of a prebuilt kit sound: its id's prefix names the kit's builder, the rest the sound in its SOUNDS (or GENERATORS); Ricks Clip's
+/** The owner's film styles: they take code-made sounds only, their source skills' own sound rules forbid downloaded ones (owner #909). */
+export const MOWORKS_STYLE_IDS = Object.freeze(["paper-collage", "stickman-explainer", "inner-voice-short", "cartoon-3d", "explainer-2d", "ricks-clip"]);
+/** The source skill's recipe of a style's prebuilt sound ("style:<builder>:<sound>"; "kit:" before #1061): its id's prefix names the builder, the rest the sound in its SOUNDS (or GENERATORS); Ricks Clip's
  *  (rc-, owner #1073): a synth of its worked example's audio.py, called as its cue table calls it (tools/sfx-code/make.py RC_CALLS). */
-const KIT_BUILDERS = { pc: "paper-collage/build_kit", sm: "story/build_stickman", iv: "story/build_inner_voice", c3: "cartoon-3d/build_sounds", x2: "explainer-2d/sfx", rc: "ricks-clip/audio" };
-export const kitRecipe = (id) => {
+const STYLE_BUILDERS = { pc: "paper-collage/build_kit", sm: "story/build_stickman", iv: "story/build_inner_voice", c3: "cartoon-3d/build_sounds", x2: "explainer-2d/sfx", rc: "ricks-clip/audio" };
+export const styleRecipe = (id) => {
   const m = /^(pc|sm|iv|c3|x2|rc)-(.+)$/.exec(String(id));
-  return m ? `kit:${KIT_BUILDERS[m[1]]}:${m[1] === "x2" ? m[2].replace(/-/g, "_") : m[2]}` : null;
+  return m ? `style:${STYLE_BUILDERS[m[1]]}:${m[1] === "x2" ? m[2].replace(/-/g, "_") : m[2]}` : null;
 };
-/** A kit style's own sounds that stay in its films (paper tear, stamp and slam of Paper Collage, Stickman's marimba tags, Inner Voice's guitar
+/** A film style's own sounds that stay in its films (paper tear, stamp and slam of Paper Collage, Stickman's marimba tags, Inner Voice's guitar
  *  and dread, 3D Cartoon's stingers, the 2D Explainer's title and reveal tuned to its own music, Ricks Clip's twist sting). */
 export const SIGNATURE = Object.freeze(new Set(["pc-tear", "pc-stamp", "pc-slam", "pc-shot", "sm-tag-d", "sm-tag-fs", "sm-tag-a", "iv-harmonics",
   "iv-strum-sour", "iv-string-mute", "iv-dread", "c3-win", "c3-resolve", "x2-reveal", "x2-title", "rc-sting"]));

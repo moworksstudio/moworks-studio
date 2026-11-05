@@ -20,7 +20,7 @@ import { appSounds } from "../project-service/layout.mjs";
 import { checklistOf } from "../project-service/design.mjs";
 import { docPath } from "../project-service/docs.mjs";
 import { humanHandOf } from "../style-catalog/hands.mjs";
-import { KIT_STYLES } from "../sfx/code-recipes.mjs";
+import { MOWORKS_STYLE_IDS } from "../sfx/code-recipes.mjs";
 import { scriptDraft } from "../voice/script.mjs";
 
 const SATISFIED = new Set(["done", "skipped"]);
@@ -71,10 +71,10 @@ function assetFacts(dir) {
 /** A style whose film is one page of code: Lemo-Opuscar, mg-styles-15, anidoodle and Brush cartoon films are a single index.html
  *  (and its script), with no HyperFrames sub-composition mounted per frame, so "every frame mounted" never holds for them. */
 // What If (its Build once ran twice and was never "built") is one page of code too: whatif/ bundled to film.js
-// The owner's five kit styles are one page too (moworks-kits: the kit's page or its bundled composition in index.html): Test 38's 2D
+// The owner's film styles are one page too (moworks-styles: the source skill's page or its bundled composition in index.html): Test 38's 2D
 // Explainer film was never "built", so Sound and Version 1 never started (T38-2)
 export const isCodeFilm = (styleId) => /^(lemo-|mg-|anidoodle-)/.test(String(styleId ?? "")) || styleId === "brush-cartoon" || styleId === "what-if"
-  || KIT_STYLES.includes(String(styleId ?? ""));
+  || MOWORKS_STYLE_IDS.includes(String(styleId ?? ""));
 
 /** The last Tech checks as the steps judge them. A script check that ran out of time found nothing and blocks nothing,
  *  in reports saved before that rule too: the blocking count is read again from the report's gates. */

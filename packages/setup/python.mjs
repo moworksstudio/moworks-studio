@@ -19,7 +19,7 @@ export const COMPONENTS = [
   { module: "soundfile", pip: "soundfile==0.14.0", licence: "BSD-3-Clause", link: "https://github.com/bastibe/python-soundfile", for: "reading audio for librosa", mb: 1 },
   { module: "PIL", pip: "pillow==12.3.0", licence: "MIT-CMU", link: "https://github.com/python-pillow/Pillow", for: "pictures", mb: 7 },
   { module: "numpy", pip: "numpy==2.5.1", licence: "BSD-3-Clause", link: "https://github.com/numpy/numpy", for: "numbers", mb: 12 },
-  // the sound effects made by code (packages/sfx/code.mjs, tools/sfx-code: the owner's kits' synthesis, owner #899). librosa brings scipy too, so
+  // the sound effects made by code (packages/sfx/code.mjs, tools/sfx-code: the synthesis of the owner's film styles' source skills, owner #899). librosa brings scipy too, so
   // a computer set up before this already has it and Set up does not open again for it; the 35 MB is for a computer that has none
   { module: "scipy", pip: "scipy==1.18.1", licence: "BSD-3-Clause", link: "https://github.com/scipy/scipy", for: "sound effects made by code", mb: 35 },
   // the After Effects export (packages/ae-export/port): Playwright drives the pinned Chromium through executable_path (no browser

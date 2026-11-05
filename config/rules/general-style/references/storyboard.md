@@ -1,7 +1,7 @@
 # Storyboard: one option as an image board (the first approval gate)
 
 The board format is HyperFrames' (`hyperframes/references/storyboard.md` and `storyboard-format.md`: read them before the first board); the options
-are the Moworks kit's gate 1 (`workflow/free-design.md`): one at first, another only when the owner asks (the kit made three). A storyboard is a set of **stills the owner approves**: the layout,
+are the Moworks Motion kit's gate 1 (`workflow/free-design.md`): one at first, another only when the owner asks (it made three). A storyboard is a set of **stills the owner approves**: the layout,
 type, colour and copy of every shot at its key moment, with no motion yet.
 
 ## 1. One real option, another on request

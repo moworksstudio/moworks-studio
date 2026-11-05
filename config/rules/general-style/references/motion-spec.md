@@ -55,7 +55,7 @@ never the main beat of more than two shots. Only what a guideline, the film styl
 
 ## 3. The numbers
 
-From the "Motion Lab" study the kit used: every adjective left in a spec is a decision handed to the default look.
+From the "Motion Lab" study the Moworks Motion kit used: every adjective left in a spec is a decision handed to the default look.
 - **Easing by role:** entrances ease out (`expo.out` 0.16,1,0.3,1 for text and logo reveals; `power4.out` / quint 0.22,1,0.36,1 for a premium
   entrance); moves across the frame and camera ease in-out (quart 0.76,0,0.24,1; camera the softest: sine / quart); exits ease in
   (`expo.in` 0.7,0,0.84,0) and run 40 to 50 % shorter than their entrance; a playful pop `back.out` (0.34,1.56,0.64,1). Linear only for a

@@ -1,5 +1,5 @@
-"""Moworks Studio's own sound recipes, written with the owner's sfxlib (the ingredients of the owner's Story kit, pinned in
-bundle/styles/moworks-kits/story/tools/sfx/sfxlib.py and imported from there as it ships). Nothing here is a sample: every sound is
+"""Moworks Studio's own sound recipes, written with the owner's sfxlib (the ingredients of the owner's Story Animation source skill, pinned in
+bundle/styles/moworks-styles/story/tools/sfx/sfxlib.py and imported from there as it ships). Nothing here is a sample: every sound is
 made from noise, damped modes, filters and envelopes, seeded, so the same seed always gives the same sound.
 
 Each recipe is r_<name>(rng, p) -> a mono array (or stereo (n, 2)) at sfxlib.SR. p holds the recipe's parameters (the entry's own in

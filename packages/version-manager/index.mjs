@@ -44,10 +44,21 @@ function findPython(pinned) {
   return pinned;
 }
 
+/** Sections of pins.json read under an older name too (a local pin or a pins file written before the rename): old → new. */
+const RENAMED_SECTIONS = { moworksKits: "moworksStyles" };          // owner #1061: the owner's film styles, no "kit"
+/** pins with each old section name read as its new one (moworksKits.kits → moworksStyles.sources). */
+export function renamedPins(p) {
+  if (p?.moworksKits && !p.moworksStyles) {
+    const { kits, ...rest } = p.moworksKits;
+    p.moworksStyles = { ...rest, sources: rest.sources ?? kits };
+  }
+  if (p) delete p.moworksKits;
+  return p;
+}
 export function loadPins(root = APP_ROOT) {
-  const p = JSON.parse(readFileSync(join(root, "config", "pins.json"), "utf8"));
+  const p = renamedPins(JSON.parse(readFileSync(join(root, "config", "pins.json"), "utf8")));
   for (const [k, v] of Object.entries(readJsonSafe(localPinsFile(root), {}))) {          // this computer's own paths first
-    const [sec, key] = k.split(".");
+    const [was, old] = k.split("."), sec = RENAMED_SECTIONS[was] ?? was, key = sec === "moworksStyles" && old === "kits" ? "sources" : old;
     if (p[sec] && key) p[sec][key] = v;
   }
   const work = p.storage?.workRoot && !p.storage.workRoot.includes("{work}") ? p.storage.workRoot.replace(/\{app\}/g, root) : join(root, "..");
@@ -56,6 +67,10 @@ export function loadPins(root = APP_ROOT) {
     for (const [k, v] of Object.entries(sec)) if (PATH_KEYS.has(k) && typeof v === "string" && /\{(app|work)\}/.test(v)) sec[k] = fill(v);
   if (p.ffmpeg) p.ffmpeg.dir = findFfmpegDir(p.ffmpeg.dir ? expandEnv(p.ffmpeg.dir) : null) ?? p.ffmpeg.dir;
   if (p.python?.exe) p.python.exe = findPython(expandEnv(p.python.exe));
+  // the owner's film styles' folder under its old name (bundle/styles/moworks-kits, a local pin written before #1061): the folder that is there
+  const ms = p.moworksStyles;
+  if (ms?.root && !existsSync(ms.root) && /moworks-kits[\\/]?$/.test(ms.root) && existsSync(ms.root.replace(/moworks-kits([\\/]?)$/, "moworks-styles$1")))
+    ms.root = ms.root.replace(/moworks-kits([\\/]?)$/, "moworks-styles$1");
   // HF's skills and registry: the configured clone, else the copy bundled with the app (bundle/hf), else the app's own thin copy at the
   // pinned commit (runtime/hf-src)
   for (const [key, sub] of [["skillsRoot", "skills"], ["registryRoot", "registry"]]) {

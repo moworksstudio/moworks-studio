@@ -15,7 +15,7 @@ its drawing and its motion. This file adds only what they leave open, and the ow
 
 | Layer | What it decides | Where |
 |---|---|---|
-| **Local**: the film style's author | The look, the drawing, the colours, the pace and the cut rate, the camera, how long a move takes and its easing, the mood, how characters act, the voice's tone and pace, the sound's character | The author's source as pinned (STYLE.md, a prompt, a kit, HyperFrames' film types) and the style's own pack in `.moworks/rules/<style>` |
+| **Local**: the film style's author | The look, the drawing, the colours, the pace and the cut rate, the camera, how long a move takes and its easing, the mood, how characters act, the voice's tone and pace, the sound's character | The author's source as pinned (STYLE.md, a prompt, a source skill, HyperFrames' film types) and the style's own pack in `.moworks/rules/<style>` |
 | **Global**: this file, moworks-alive, moworks-qc | Only what holds in every style without changing how any author works: the story and its content, how a long film is built (§6c), truth, logos, Vietnamese text, readable text, the floor of moworks-alive (nothing still over 2 s), the mix levels (§7), how to ask the owner (§2b) | Here |
 
 A global rule never sets a number for the pace, the camera, a move's length or the mood: where a rule here or in moworks-alive gives such a
@@ -159,7 +159,7 @@ When the owner brings a product for a product showcase or launch (a named produc
   vanish. When the style's face or grid cannot hold them, that is a conflict (§2b), never a reason to strip them.
 - On-screen text and voice in the brief's language; the chat in the owner's.
 
-## 5. Characters: acting (any character engine: anidoodle's human engine, the Brush cartoon kit, drawn HTML people)
+## 5. Characters: acting (any character engine: anidoodle's human engine, the Brush cartoon engine, drawn HTML people)
 
 - **List the gestures before animating:** from the storyboard, for each character, every pose AND every gesture (two palms rising one
   after the other, a knee bending on a landing, a head turning to the speaker), with its time. The character's sheet shows those
@@ -172,8 +172,8 @@ When the owner brings a product for a product showcase or launch (a named produc
 - **Weight and contact:** feet on the ground (no sliding, no floating; a step plants the foot), weight shifts before a move, anticipation
   before a big action. Anything that lands squashes and settles, and what it hits reacts. Nothing floats unless the story makes it float.
 - **Always alive** between the gestures (the moworks-alive rule): breathing, sway, blinks.
-- Each engine's own tools do it: anidoodle's poses inside its joint limits, `toScene`, `planWalk` / `walkAt`; the Brush kit's
-  `character()`, emotions, takes and turns. Never the old kit's runtime (`AIMK_RIG`, `AIMK_ART`): it does not exist here.
+- Each engine's own tools do it: anidoodle's poses inside its joint limits, `toScene`, `planWalk` / `walkAt`; the Brush engine's
+  `character()`, emotions, takes and turns. Never the retired Moworks Motion kit's runtime (`AIMK_RIG`, `AIMK_ART`): it does not exist here.
 
 ## 6. The storyboard and the cut, checked in every style
 
@@ -219,7 +219,7 @@ The house rules were first made on films of 15-30 s. A film of a minute or more 
   rise to a peak; a quiet beat that stays short and turns; no layout or move repeated as the film's habit. HyperFrames: any single treatment
   goes stale after about 6 s. All of it in the style's own hand.
 - **The voice fits the film without dragging.** The film kind's and the style's own script rules come first (What If, Map Explainer, a
-  kit's SCRIPTING.md, HyperFrames' film.md). A script Claude writes is sized to the film at the style's reading pace; a script the owner
+  source skill's SCRIPTING.md, HyperFrames' film.md). A script Claude writes is sized to the film at the style's reading pace; a script the owner
   wrote is read word for word (§2b). When the content is too thin for the length, do not write filler and do not read slower: offer the
   owner, as §2b says, more content (an example, a fact with its source, a small scene), a shorter film, or the film as it is.
 - **Before the Storyboard,** for a film longer than its style's demo, say in one line how the length is filled (how many chapters, about
@@ -261,7 +261,7 @@ Only when the film has a voice-over with its reviewed transcript (transcript.jso
 - **The mix levels (owner 05/11/2026 #1027, every film style, over any style's own numbers):** the voice-over at -16 LUFS; the music
   1.5 dB under the voice between the words and 10 dB under it while words are spoken; the sound effects at their loudest 6 dB under the
   voice, and 8 dB under it on a spoken word; the render masters the whole film to -14 LUFS, true peak -1 dBTP (Render's Standard, the web's level;
-  Quieter -16 LUFS when chosen, owner #1073). The app sets them (Final Mix, Balance again); a kit's own mix
+  Quieter -16 LUFS when chosen, owner #1073). The app sets them (Final Mix, Balance again); a source skill's own mix
   numbers (a music bed far under the voice, a louder master) give way to these. A level the owner sets stays theirs.
 - **The voice stays on top:** the app's voice check lists every spoken word where the effects come within 8 dB of the voice or the music
   within 3 dB (a warning, never a block); fix each by moving the effect into the pause after the word or lowering it.
@@ -297,9 +297,12 @@ mood"):
   on every action (only two of one kind within 0.1 s are one sound; a small action's sound plays quieter, never left out), sets each kind
   of sound under the music and the voice, crossfades the ambience between places and fades it out with the film's ending (§9). Tech checks'
   G-SFX ("Actions with no sound") is to be zero once the sounds are placed.
-- **Where the sounds come from (owner 05/11/2026 #1034):** the app's offline library first, then the online search, then sounds made by code for a
-  cue neither has (the order of 04/11, code first, made Test 38's sounds dull and off the picture). The code: the owner's
-  kits' own sounds (a kit's signature sounds stay in its own style), new ones made by their recipes and by the app's (impacts by material,
+- **Where the sounds come from (owner 05/11/2026 #1034, #1096):** the app's offline library when it has the very sound; else the app shows Claude
+  the cue's moment and the library's closest sounds and Claude picks the one a sound designer would use there, or describes the sound and the app
+  makes it with ElevenLabs Sound Effects (the owner's key and credits; kept in the film and the studio's cache, credited); then the online search;
+  then sounds made by code for a cue none of them has (the order of 04/11, code first, made Test 38's sounds dull and off the picture). One file
+  plays at most three times a film by every name, and a sound heard again is a little higher or lower each time. The code: the owner's
+  film styles' own sounds (a style's signature sounds stay in its own style), new ones made by their recipes and by the app's (impacts by material,
   steps by ground, paper by action, a crayon, a marker, a pencil or chalk by stroke, doors, water, fire, wind, rain, bells, machines,
   electronics, magic, birds, frogs, crickets, a heartbeat…), each film with its own takes. It decides the source itself; you name the sound by the thing on
   screen and its action (`- sfx: rock grain crackle, earth whoosh past`), so the library finds the one that matches the picture. Nothing about it is on screen.
@@ -309,7 +312,7 @@ mood"):
   `DURATION = <seconds>` and `def make(rng, p):` returning a mono numpy array (or stereo `(n, 2)`) at `SR` (48 kHz). It gets `np`, `signal`
   (scipy.signal) and the owner's sfxlib ingredients by name (`tt`, `bp`, `lp`, `hp`, `norm`, `modes`, `transient`, `grain`, `moving_band`,
   `sub_kick`, `fm_bell`, `space`, `pan`…): no import, no file, no name that starts with `_`. `p` holds `dur` for a sound that lasts as
-  long as its motion. Write it the kits' way (noise grains, damped modes, filters, envelopes; never a sample), then ask the owner to press
+  long as its motion. Write it the source skills' way (noise grains, damped modes, filters, envelopes; never a sample), then ask the owner to press
   Place them again. The app runs it in its restricted runner, levels it, checks it (no silence, clipping or DC), and keeps one that passes
   for later films. Effects only: music stays licensed.
 - **The owner's word holds:** when the owner asks for no whoosh, fewer or more sounds, no ambience or silence, call the app's `sfx_prefs`
@@ -407,7 +410,7 @@ its sizes, places, blends and motion give way to this:
 
 - **One line, always:** one group on screen at a time, on one line that fits inside the safe width, at most about 42 characters. Too long: split it
   at the phrase, with the next group taking the words at their own time. Sentence case, as spoken; never all capitals.
-- **White, thin, plain:** `#FFFFFF`, weight 400, **Roboto Flex** (the app bundles it; it draws Vietnamese). A film with a Brand Kit uses the kit's body
+- **White, thin, plain:** `#FFFFFF`, weight 400, **Roboto Flex** (the app bundles it; it draws Vietnamese). A film with a Brand Kit uses the Brand Kit's body
   font at its regular weight instead. No shadow, outline, gradient, colour per word or highlight.
 - **Size:** 3.7 % of the frame's shorter side (40 px on a 1080 side), in every format.
 - **Place:** centred, the bottom of the line resting on the frame's bottom safe margin (5 % of its height, or the bottom margin `frame.md` gives). Every

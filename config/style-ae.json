@@ -516,7 +516,7 @@
    "later": 0,
    "pictures": 1,
    "measured": "2026-11-04",
-   "demo": "the kit's DemoWide (made in the app from the owner's kit)",
+   "demo": "the source skill's DemoWide (made in the app from the owner's source skill)",
    "source": "film:ae02c1c9a9b5d590",
    "ms": 3947
   },
@@ -531,7 +531,7 @@
    "later": 0,
    "pictures": 1,
    "measured": "2026-11-04",
-   "demo": "the kit's demo-wide (made in the app from the owner's kit)",
+   "demo": "the source skill's demo-wide (made in the app from the owner's source skill)",
    "source": "film:3c82a9c848b72f36",
    "ms": 1978
   },
@@ -561,7 +561,7 @@
    "later": 0,
    "pictures": 1,
    "measured": "2026-11-04",
-   "demo": "the kit's DemoInnerVoice (made in the app from the owner's kit)",
+   "demo": "the source skill's DemoInnerVoice (made in the app from the owner's source skill)",
    "source": "film:bb6872b51b17f3bb",
    "ms": 1956
   },
@@ -1408,7 +1408,7 @@
    "later": 91,
    "pictures": 0,
    "measured": "2026-11-04",
-   "demo": "the kit's Demo (made in the app from the owner's kit)",
+   "demo": "the source skill's Demo (made in the app from the owner's source skill)",
    "source": "film:481f3559a41ff3c7",
    "ms": 3143
   },
@@ -1423,7 +1423,7 @@
    "later": 0,
    "pictures": 1,
    "measured": "2026-11-04",
-   "demo": "the kit's DemoStickman (made in the app from the owner's kit)",
+   "demo": "the source skill's DemoStickman (made in the app from the owner's source skill)",
    "source": "film:b159f0aecf5db424",
    "ms": 2052
   },

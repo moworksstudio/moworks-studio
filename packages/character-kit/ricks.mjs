@@ -1,8 +1,8 @@
 // Ricks Clip's characters (owner 05/11/2026 #1076, audit/102 §9): the fourth way to make a character. Each is one file, module/<id>.js
-// (defineCast in toon.js's scope: packages/moworks-kits/ricks-cast.js), saved with its checks, its model sheet, its life clip and its poster in
+// (defineCast in toon.js's scope: packages/moworks-styles/ricks-cast.js), saved with its checks, its model sheet, its life clip and its poster in
 // the user's store, <work>/library/characters/ricks-clip/<id>/ (never inside the app's repository). A Ricks Clip film takes it as it is: the
 // file into film/cast/<id>.js (the film's bundle appends it to toon.js) and a line in CHARACTERS.json; Claude places, turns, poses and gives it
-// faces with castDraw and never redraws it. The app ships none: the kit's own cast (roman.js OUTFITS) is drawn by the film's story.js as before.
+// faces with castDraw and never redraws it. The app ships none: the source skill's own cast (roman.js OUTFITS) is drawn by the film's story.js as before.
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { docPath, writeDoc } from "../project-service/docs.mjs";

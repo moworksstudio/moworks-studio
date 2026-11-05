@@ -1,22 +1,22 @@
 ---
 name: brush-cartoon-app
-description: How Moworks Studio makes a Brush cartoon film - ClaudeAnimationBase's hand-painted cartoon method (p5.brush, boil, flat 2D, acting), the project's own characters defined as data and approved on model sheets, one renderAt(t) page driven by HyperFrames, sound from the app. The kit's Clawd stays a demo.
+description: How Moworks Studio makes a Brush cartoon film - ClaudeAnimationBase's hand-painted cartoon method (p5.brush, boil, flat 2D, acting), the project's own characters defined as data and approved on model sheets, one renderAt(t) page driven by HyperFrames, sound from the app. ClaudeAnimationBase's Clawd stays a demo.
 version: 1.0.0
 derived-from: ClaudeAnimationBase by John Heibel, commit 0ac8bf2b31942376cb6b8c4074715595d512acd2, MIT - ANIMATION_GUIDE.md (rules, principles, workflow), src/core.js and src/timeline.js (the engine and page contract), src/clawd.js (faces, emotions, moves), rewritten for Moworks Studio's character layer. https://github.com/JohnHeibel/ClaudeAnimationBase/tree/0ac8bf2b31942376cb6b8c4074715595d512acd2
 ---
 
 # Brush cartoon: the rules of this project
 
-The project's style is ClaudeAnimationBase's hand-painted cartoon. Its own rule file is `.moworks/rules/brush-cartoon/SKILL.md`: the kit's
-`ANIMATION_GUIDE.md` as the author wrote it (the three goals, the rules, the animation principles, the workflow). The kit is staged in
+The project's style is ClaudeAnimationBase's hand-painted cartoon. Its own rule file is `.moworks/rules/brush-cartoon/SKILL.md`: ClaudeAnimationBase's
+`ANIMATION_GUIDE.md` as the author wrote it (the three goals, the rules, the animation principles, the workflow). ClaudeAnimationBase is staged in
 `.moworks/library/character-kit/`: `src/core.js` and `src/timeline.js` (the engine, as shipped), `src/clawd-parts.js` (faces, 31 emotions,
 hats, emotes, moves, turns, as shipped), `src/character.js` (the app's character layer) and `examples/definition.json` (the fields of a definition, never a character to draw).
 **Moworks Studio runs every command** (stills, checks, render): where the guide says `node render.mjs`, `studio.html` or a sheet, skip it.
 
-## 0. The kit's Clawd demo
+## 0. ClaudeAnimationBase's Clawd demo
 
-Clawd is Anthropic's mascot and stays the kit's demo. Do not bring it into a film on your own. Never call `clawd()` or `dancer()`, never copy
-the kit's `clawd.js`. The guide's examples say Clawd: read them as the project's own characters. The app refuses a film that draws the kit's
+Clawd is Anthropic's mascot and stays ClaudeAnimationBase's demo. Do not bring it into a film on your own. Never call `clawd()` or `dancer()`, never copy
+ClaudeAnimationBase's `clawd.js`. The guide's examples say Clawd: read them as the project's own characters. The app refuses a film that draws ClaudeAnimationBase's
 Clawd. When the user asks for a character like it, make that: the project's own definition, drawn in this style, with an id of its own (not
 `clawd`).
 
@@ -35,8 +35,8 @@ Clawd. When the user asks for a character like it, make that: the project's own 
 |---|---|
 | Prepare | BRIEF.md and docs/ASSETS.md as the step says; the brief names who the characters are |
 | Character ✋ | §3: `docs/CHARACTERS.json`, the app's `character_sheet` tool, the owner approves the model sheets |
-| Storyboard ✋ | one option (another when the owner asks): a short treatment and posed frames painted with the real kit and the approved characters (§4, boards) |
-| Motion ✋ | `docs/MOTION-PLAN.json`: per shot the acting (emotion keys, takes, turns, jumps, walks) and camera with numbers; cite the guide's principles and the kit's helpers as source `{"kind": "style", "id": "<principle or helper>"}` |
+| Storyboard ✋ | one option (another when the owner asks): a short treatment and posed frames painted with the real engine and the approved characters (§4, boards) |
+| Motion ✋ | `docs/MOTION-PLAN.json`: per shot the acting (emotion keys, takes, turns, jumps, walks) and camera with numbers; cite the guide's principles and the engine's helpers as source `{"kind": "style", "id": "<principle or helper>"}` |
 | Build | §4 |
 | QC | the Moworks Review (moworks-qc), plus the guide's self-check workflow (contact sheets of the reads) |
 | Sound / Final Mix | **the app's** music and sound effects; `PROJECT.bpm` matches the music the app picks |
@@ -64,9 +64,9 @@ Clawd. When the user asks for a character like it, make that: the project's own 
   needs no redraw, only the gate.
 - Change an approved `docs/CHARACTERS.json` only when the owner asks (the approval is of the file as it was).
 
-## 4. The film: one page painted by the kit, driven by HyperFrames
+## 4. The film: one page painted by the engine, driven by HyperFrames
 
-- Frame: **1920 × 1080** (the kit's engine draws at that size; this style is 16:9).
+- Frame: **1920 × 1080** (ClaudeAnimationBase's engine draws at that size; this style is 16:9).
 - `index.html` (the HyperFrames root), exactly this shape:
 
 ```html
@@ -96,20 +96,20 @@ Clawd. When the user asks for a character like it, make that: the project's own 
   libraries after your task and before stills: never write or edit them. Write only `index.html` and **`compositions/film.js`**: the shots,
   `shots([[t0, (t, lt, dur) => { … }], …])`, each a pure function of t painting the whole frame (the guide's rules).
 - Draw a character with **`character(CAST.<id>, x, y, u, { …charEmotions(CAST.<id>, t, keys), view, flip, …jump(…), …move(…) })`**: the
-  options of the kit's `clawd()` (pose, view, face, colour, extras; see `src/clawd-parts.js` and the guide's reference). Moods: `charFeel(def,
-  name, t)` and `charEmotions(def, t, keys)` (the kit's `feel()` / `emotions()` coloured as that character); acting: `jump()`, `take()`,
+  options of ClaudeAnimationBase's `clawd()` (pose, view, face, colour, extras; see `src/clawd-parts.js` and the guide's reference). Moods: `charFeel(def,
+  name, t)` and `charEmotions(def, t, keys)` (ClaudeAnimationBase's `feel()` / `emotions()` coloured as that character); acting: `jump()`, `take()`,
   `stroll()`, `spring()`, `turn()`, `spinView()`, `move()`; the world: `paint()`, `inkLine()`, `glow()`, `brushWipe()`, `iris()`, camera
   `camBegin()` / `camEnd()`, `letter()` (sparingly: the guide's "No text").
 - A storyboard board is the same page in `boards/<X>/index.html` with `boards/<X>/board.js` (its posed frames, one per second of the board; the frames are one frame per shot or beat of the film (3-6 for a film under 20 s, at most 12 for a long one: group short shots into one beat), never one per second of the film) in place of
   `compositions/film.js`: its scripts are `kit/core.js`, `kit/clawd-parts.js`, `kit/timeline.js`, `kit/character.js`, `kit/cast.js` (the app
   copies the kit into `boards/<X>/kit/`), `board.js`, and the p5 libraries from `../../assets/_app/vendor/lib/…`.
-- The contract (the kit's own): every frame a pure function of t (frames render in parallel and out of order), randomness only from the
-  kit's seeded `jit()` / `hash()` / `boilSeed()`, no clock, no `requestAnimationFrame`, no `Math.random()` in your code.
+- The contract (ClaudeAnimationBase's own): every frame a pure function of t (frames render in parallel and out of order), randomness only from the
+  engine's seeded `jit()` / `hash()` / `boilSeed()`, no clock, no `requestAnimationFrame`, no `Math.random()` in your code.
 - Words in the film are rare (the guide); when one is needed, `letter()` with a font that has Vietnamese letters for Vietnamese text.
 
 ## 5. Never here
 
-- Clawd (§0); the kit's `render.mjs`, `studio.html`, `gpu_probe.mjs`, sheets and demo scene; editing anything under `compositions/kit/`,
+- Clawd (§0); ClaudeAnimationBase's `render.mjs`, `studio.html`, `gpu_probe.mjs`, sheets and demo scene; editing anything under `compositions/kit/`,
   `boards/*/kit/` or `.moworks/library/character-kit/`; a 3D projection (the guide's rule 1).
 
 ## 6. Credit

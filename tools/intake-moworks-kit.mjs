@@ -1,9 +1,9 @@
-// The owner's own kits (Moworks Studio's film styles Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon and 2D Explainer, owner
-// 04/11/2026 #880-#886): each kit is one .md installer with its files embedded (<!-- FILE: path --> and a fenced block). This writes the files
-// exactly as the kit's own unpacker would, into bundle/styles/moworks-kits/<kit>/, with PINNED (the kit's name, KIT VERSION, the SHA-256 of the
-// .md and the day read), and prints the pin for config/pins.json moworksKits. The copy is never edited; the app's own parts are in
-// packages/moworks-kits. Update path: node tools/intake-moworks-kit.mjs <NEW-KIT.md> → read the diff (git diff bundle/styles/moworks-kits),
-// carry what changed into config/rules/<style>/SKILL.md and packages/moworks-kits, set the pin, run test/moworks-kits.test.mjs.
+// The source skills of the owner's own film styles (called kits before #1061; the files' own titles and KIT VERSION lines keep the word:
+// Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon and 2D Explainer, owner 04/11/2026 #880-#886): each is one .md installer with its files embedded (<!-- FILE: path --> and a fenced block). This writes the files
+// exactly as the kit's own unpacker would, into bundle/styles/moworks-styles/<kit>/, with PINNED (the kit's name, KIT VERSION, the SHA-256 of the
+// .md and the day read), and prints the pin for config/pins.json moworksStyles. The copy is never edited; the app's own parts are in
+// packages/moworks-styles. Update path: node tools/intake-moworks-kit.mjs <NEW-KIT.md> → read the diff (git diff bundle/styles/moworks-styles),
+// carry what changed into config/rules/<style>/SKILL.md and packages/moworks-styles, set the pin, run test/moworks-styles.test.mjs.
 // Usage: node tools/intake-moworks-kit.mjs <kit.md> [<kit.md> …]
 //        node tools/intake-moworks-kit.mjs <skill folder>/SKILL.md <its kit .zip>    (a skill whose code kit ships as a zip: Ricks Clip)
 import { createHash } from "node:crypto";
@@ -36,7 +36,7 @@ export function intake(file, { root = APP_ROOT, day = new Date().toISOString().s
   const title = /^# (.+)$/m.exec(text)?.[1]?.trim(), id = KIT_IDS[title];
   if (!id) throw new Error(`${basename(file)}: not one of the owner's kits (${Object.keys(KIT_IDS).join(", ")})`);
   const version = /^KIT VERSION: (\S+)/m.exec(text)?.[1] ?? null, sha256 = createHash("sha256").update(raw).digest("hex");
-  const dest = join(root, "bundle", "styles", "moworks-kits", id), files = kitFiles(text);
+  const dest = join(root, "bundle", "styles", "moworks-styles", id), files = kitFiles(text);
   rmSync(dest, { recursive: true, force: true });
   for (const f of files) { const d = join(dest, ...f.path.split("/")); mkdirSync(dirname(d), { recursive: true }); writeFileSync(d, f.body); }
   writeFileSync(join(dest, "PINNED"), `${title} ${version} sha256:${sha256} ${basename(file)} read ${day}\n`);
@@ -59,7 +59,7 @@ export const SKILL_VENDOR = {
 const skillName = (text) => /^---\r?\n[\s\S]*?^name:\s*(\S+)/m.exec(text)?.[1] ?? null;
 
 /** Intake a skill folder: its SKILL.md, its kit's .zip, and what its setup fetches (by vendor: dest → Buffer, else fetched from GitHub at the pin).
- *  Returns the pin for config/pins.json moworksKits. The zip is unpacked by the app's own guarded unpacker. */
+ *  Returns the pin for config/pins.json moworksStyles. The zip is unpacked by the app's own guarded unpacker. */
 export async function intakeSkill(skillFile, zipFile, { root = APP_ROOT, day = new Date().toISOString().slice(0, 10), vendor = {} } = {}) {
   const { unpackArchive } = await import("../packages/project-service/archive.mjs");
   const raw = readFileSync(skillFile), name = skillName(raw.toString("utf8")), style = SKILL_IDS[name];
@@ -67,7 +67,7 @@ export async function intakeSkill(skillFile, zipFile, { root = APP_ROOT, day = n
   const zip = readFileSync(zipFile), sha256 = createHash("sha256").update(raw).digest("hex"), zipSha256 = createHash("sha256").update(zip).digest("hex");
   const u = await unpackArchive(zipFile);
   if (!u.ok) throw new Error(`${basename(zipFile)}: not unpacked (${u.reason})`);
-  const dest = join(root, "bundle", "styles", "moworks-kits", style.id), wrote = [];
+  const dest = join(root, "bundle", "styles", "moworks-styles", style.id), wrote = [];
   try {
     const tops = new Set(u.files.map((f) => f.rel.split("/")[0]));
     if (tops.size !== 1 || u.files.some((f) => !f.rel.includes("/"))) throw new Error(`${basename(zipFile)}: one folder expected at the top, found ${[...tops].join(", ")}`);

@@ -12,7 +12,7 @@ import { docRelIn } from "../project-service/docs.mjs";
 import { APP_ROOT } from "../version-manager/index.mjs";
 import { HF_SKILL } from "../hf-edit/hf-scripts.mjs";
 import { isLyricVideo } from "../style-catalog/traits.mjs";
-import { isKitStyle, kitReads } from "../moworks-kits/index.mjs";
+import { isMoworksStyle, skillReads } from "../moworks-styles/index.mjs";
 
 const R = (...p) => `.moworks/rules/${p.join("/")}`;
 // HyperFrames' knowledge (skills/hyperframes at the pinned commit): the entry with the contract, and the references each step writes from
@@ -44,16 +44,16 @@ const MAP = {
   motionSpec: [MAP_PACK, ...GENERAL.motionSpec], build: [MAP_PACK, MAP_ENGINE, ".moworks/library/map-explainer/example/f3.html", ...GENERAL.build],
   qcReview: GENERAL.qcReview, checks: GENERAL.checks, sound: GENERAL.sound, chat: [MAP_PACK, ...GENERAL.chat],
 };
-// The owner's kit styles (Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, 2D Explainer): the app's pack in every step, over General's
-// table, and the kit as shipped (.moworks/library/<style>/kit): its skill and look for the brief, its look, worked examples and the app's page for the
+// The owner's film styles (Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, 2D Explainer, Ricks Clip): the app's pack in every step, over General's
+// table, and the style's source skill as shipped (.moworks/library/<style>/skill): its skill and look for the brief, its look, worked examples and the app's page for the
 // board and the build, its sound rules for the music step
-const KIT = (styleId) => {
-  const pack = R(styleId, "SKILL.md"), k = kitReads(styleId), uniq = (xs) => [...new Set(xs.filter(Boolean))];
+const SKILL = (styleId) => {
+  const pack = R(styleId, "SKILL.md"), k = skillReads(styleId), uniq = (xs) => [...new Set(xs.filter(Boolean))];
   return {
-    // each step the kit's own files for it (kitReads steps, #1036), then the look and General's
+    // each step the source skill's own files for it (skillReads steps, #1036), then the look and General's
     brief: uniq([pack, ...k.steps.brief, ...GENERAL.brief]), storyboard: uniq([pack, ...k.look, ...k.steps.storyboard, ...k.app, ...GENERAL.storyboard]),
     motionSpec: uniq([pack, ...k.steps.motionSpec, ...GENERAL.motionSpec]), build: uniq([pack, ...k.look, ...k.steps.build, ...k.examples, ...k.app, ...GENERAL.build]),
-    // the Review: the house review, then this style's pack (its Review row) and the kit's own checklists (#947); GENERAL's own list is unchanged
+    // the Review: the house review, then this style's pack (its Review row) and the source skill's own checklists (#947); GENERAL's own list is unchanged
     qcReview: uniq([...GENERAL.qcReview, pack, ...k.steps.review, k.look[0]]), checks: GENERAL.checks, sound: [pack, ...k.sound, ...GENERAL.sound], chat: [pack, ...GENERAL.chat],
   };
 };
@@ -178,7 +178,7 @@ export function requiredReads(dir, { styleId, first = [], step = null } = {}) {
   let list;
   if (styleId === "general") list = GENERAL[key] ?? GENERAL.chat;
   else if (styleId === "map-explainer") list = MAP[key] ?? MAP.chat;
-  else if (isKitStyle(styleId)) { const t = KIT(styleId); list = t[key] ?? t.chat; }
+  else if (isMoworksStyle(styleId)) { const t = SKILL(styleId); list = t[key] ?? t.chat; }
   else if (lemo) { const t = LEMO(lemo); list = t[key] ?? t.chat; }
   else if (mg) { const t = MG(mg); list = t[key] ?? t.chat; }
   else if (ani) { const t = ANIDOODLE(ani); list = [...(t[key] ?? t.chat), ...(ANIDOODLE_MORE(dir)[key] ?? [])]; }

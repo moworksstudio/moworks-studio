@@ -2,10 +2,10 @@
 // sound shows by its name like any other, and is credited in the film's CREDITS.md. Where each sound comes from, the app decides in code
 // (index.mjs resolveCues), never Claude. Since owner 05/11 #1034 every film asks the library and the search first (auto.mjs) and comes here only
 // for the cues they have not; for those:
-//   - a film of one of the owner's kit styles (KIT_STYLES): code only, its kit's own sounds first. The kits' own sound rules make every
+//   - a film of one of the owner's film styles (MOWORKS_STYLE_IDS): code only, its own sounds first. Their source skills' sound rules make every
 //     sound in code and forbid downloaded ones and outside libraries; the library and the search come in only when this computer cannot
 //     run the code (no Python with numpy and scipy), so the film is never silent.
-//   - any other film: the kits' neutral sounds, then a new sound made by code, then the offline library, then Openverse / Freesound.
+//   - any other film: the film styles' neutral sounds, then a new sound made by code, then the offline library, then Openverse / Freesound.
 // The recipes (code-recipes.mjs) are matched to a cue by its words as the library is (library.mjs matchLocal). Each film gets its own takes
 // of a recipe (the seed comes from the film and the cue's name), up to four, so a sound repeated in a film varies and two films never share
 // one file; the same film made again gets the same samples. Python (the app's 3.12 with numpy and scipy, setup/python.mjs) makes them:
@@ -17,8 +17,8 @@ import { tmpdir } from "node:os";
 import { basename, join, resolve } from "node:path";
 import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
 import { pyLibs, pythonExe } from "../setup/python.mjs";
-import { KIT_STYLES, RECIPES, SIGNATURE, kitRecipe } from "./code-recipes.mjs";
-import { FAMILIES, familyOf, fromCatalog, libraryDir, matchLocal, stepsRun, sustainedCue } from "./library.mjs";
+import { MOWORKS_STYLE_IDS, RECIPES, SIGNATURE, styleRecipe } from "./code-recipes.mjs";
+import { FAMILIES, familyOf, fromCatalog, libraryDir, matchLocal, soundStyle, stepsRun, sustainedCue } from "./library.mjs";
 
 /** Raised when a recipe changes what it makes: every film's takes are made again. */
 export const CODE_VERSION = 1;
@@ -26,8 +26,8 @@ export const MAX_TAKES = 4;
 /** The longest sound a sustained cue's take is made for, s (index.mjs MAX_AUTO_S: a clip plays at most that long). */
 const LONGEST_S = 6;
 const SCRIPT = ["tools", "sfx-code", "make.py"];
-export const isKitStyle = (styleId) => KIT_STYLES.includes(String(styleId ?? ""));
-const kitsDir = (root) => join(root, "bundle", "styles", "moworks-kits");
+export const isMoworksStyle = (styleId) => MOWORKS_STYLE_IDS.includes(String(styleId ?? ""));
+const sourcesDir = (root) => join(root, "bundle", "styles", "moworks-styles");
 /** Where the recipes Claude wrote and that passed are kept for every film (MW_SFX_RECIPES: tests). */
 export function keptRecipesDir(root = APP_ROOT) {
   if (process.env.MW_SFX_RECIPES) return process.env.MW_SFX_RECIPES;
@@ -52,8 +52,10 @@ export async function codeRuns(root = APP_ROOT) {
 
 // ---- the recipes a film may use
 const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
-const pins = (root) => { try { return loadPins(root).moworksKits?.kits ?? {}; } catch { return {}; } };
-const KIT_DIR = { pc: "paper-collage", sm: "story", iv: "story", c3: "cartoon-3d", x2: "explainer-2d", rc: "ricks-clip" };
+const pins = (root) => { try { return loadPins(root).moworksStyles?.sources ?? {}; } catch { return {}; } };
+const SOURCE_DIR = { pc: "paper-collage", sm: "story", iv: "story", c3: "cartoon-3d", x2: "explainer-2d", rc: "ricks-clip" };
+/** Each source skill as the owner's credits name it (its pinned title says "Kit": owner #1061 names none). */
+const SOURCE_TITLE = { "paper-collage": "Paper Collage", story: "Story Animation", "cartoon-3d": "3D Cartoon Animation", "explainer-2d": "2D Explainer Animation", "ricks-clip": "Ricks Clip" };
 /** A recipe file's own words: { family, tags, duration } from its sidecar (<name>.json), or from its FAMILY / TAGS lines. */
 function recipeMeta(file) {
   const side = readJson(file.replace(/\.py$/i, ".json"), null);
@@ -69,16 +71,16 @@ const recipeFiles = (folder, kind) => (existsSync(folder) ? readdirSync(folder).
   return m.tags?.length && FAMILIES.includes(m.family) ? { id: `${kind}-${name}`, recipe: `user:${file}`, params: {}, family: m.family, tags: [name.replace(/-/g, " "), ...m.tags], duration: Number(m.duration) || 1, [kind]: true, file } : null;
 }).filter(Boolean) : []);
 
-/** The code library of one film: the kits' sounds it may take (its own kit's all, the others' neutral ones), the app's recipes, the recipes kept
- *  from earlier films and the film's own. run false: only the kits' sounds already made (no Python to make a new one). A library object for
- *  matchLocal ({ dir, sounds }); each entry keeps its recipe and, for a kit's sound, its file (path). */
-export function codeLibrary({ kit = null, root = APP_ROOT, dir = null, run = true } = {}) {
-  const libDir = libraryDir(root), all = catalogOf(libDir);          // the catalog with no style left out: the kits' sounds are picked here
-  // a kit style's film takes its own kit's sounds only (owner #909: "the kit's sounds, then new ones by its code"; Test 38's 2D Explainer had
-  // Stickman's chime and jet, Inner Voice's whisper, T38-3); any other film the kits' neutral ones
-  const own = isKitStyle(kit);
-  const prebuilt = all.filter((s) => s.source?.kind === "code" && kitRecipe(s.id) && (s.kit === kit || (!own && !SIGNATURE.has(s.id))))
-    .map((s) => ({ ...s, recipe: kitRecipe(s.id), prebuilt: true, own: s.kit === kit, kitDir: KIT_DIR[s.id.slice(0, 2)], params: {} }));
+/** The code library of one film: the film styles' sounds it may take (all its own style's, the others' neutral ones), the app's recipes, the recipes kept
+ *  from earlier films and the film's own. run false: only the styles' sounds already made (no Python to make a new one). A library object for
+ *  matchLocal ({ dir, sounds }); each entry keeps its recipe and, for a style's own sound, its file (path). filmStyle: the film's style id (kit: its name before #1061). */
+export function codeLibrary({ filmStyle = null, kit = null, root = APP_ROOT, dir = null, run = true } = {}) {
+  const style = filmStyle ?? kit, libDir = libraryDir(root), all = catalogOf(libDir);          // the catalog with no style left out: the styles' sounds are picked here
+  // a film of the owner's styles takes its own style's sounds only (owner #909: "the kit's sounds, then new ones by its code"; Test 38's 2D Explainer had
+  // Stickman's chime and jet, Inner Voice's whisper, T38-3); any other film the styles' neutral ones
+  const own = isMoworksStyle(style);
+  const prebuilt = all.filter((s) => s.source?.kind === "code" && styleRecipe(s.id) && (soundStyle(s) === style || (!own && !SIGNATURE.has(s.id))))
+    .map((s) => ({ ...s, recipe: styleRecipe(s.id), prebuilt: true, own: soundStyle(s) === style, sourceDir: SOURCE_DIR[s.id.slice(0, 2)], params: {} }));
   const sounds = run ? [...prebuilt, ...RECIPES.map((e) => ({ ...e })), ...recipeFiles(keptRecipesDir(root), "kept"), ...(dir ? recipeFiles(filmRecipesDir(dir), "film") : [])]
     : prebuilt;
   return fromCatalog({ sounds }, libDir);
@@ -89,8 +91,8 @@ const catalogOf = (libDir) => { const f = join(libDir, "catalog.json"); if (catC
 const FITS = new WeakMap();
 /** The code's answer for a cue name: matchLocal's ({ entry, choices, good, right, exact, closeness, generic? }) over the film's code library,
  *  or null. A run of steps takes a walk or a run, one step takes one step (stepsRun). */
-export function matchCode(name, { kit = null, family = null, root = APP_ROOT, dir = null, run = true, library = null } = {}) {
-  const lib = library ?? codeLibrary({ kit, root, dir, run });
+export function matchCode(name, { filmStyle = null, kit = null, family = null, root = APP_ROOT, dir = null, run = true, library = null } = {}) {
+  const style = filmStyle ?? kit, lib = library ?? codeLibrary({ filmStyle: style, root, dir, run });
   const sus = sustainedCue(name), steps = stepsRun(name);
   if (!FITS.has(lib)) FITS.set(lib, new Map());
   const byRun = FITS.get(lib);
@@ -103,16 +105,16 @@ export function matchCode(name, { kit = null, family = null, root = APP_ROOT, di
     if (ws.length) { q = ws.join(" "); fam = familyOf(q); }
   }
   let m = null;
-  try { m = matchLocal(q, { family: fam, library: fit, kit, oneShot: true, minDuration: sus ? 0.8 : 0 }); } catch { m = null; }
+  try { m = matchLocal(q, { family: fam, library: fit, filmStyle: style, oneShot: true, minDuration: sus ? 0.8 : 0 }); } catch { m = null; }
   return m;
 }
 /** How well a match answers its cue: 3 exact, 2 good (its own tags say it), 1 right (of the cue's kind: a family's plain sound too), 0 none. */
 export const tierOf = (m) => (!m ? 0 : m.exact && !m.generic ? 3 : m.good && !m.generic ? 2 : m.right ? 1 : 0);
-/** Does the code take this cue before the library? A kit style takes any answer of the code (its kits forbid the others while the code runs);
+/** Does the code take this cue before the library? A film of the owner's styles takes any answer of the code (its source skill forbids the others while the code runs);
  *  any other film the code's answer when it is at least as close as the library's (`lib`: its matchLocal, or null) and of the cue's kind. */
-export function codeFirst(code, lib, { kitStyle = false } = {}) {
+export function codeFirst(code, lib, { ownStyle = false, kitStyle = false } = {}) {
   if (!code) return false;
-  if (kitStyle) return true;
+  if (ownStyle || kitStyle) return true;          // kitStyle: the option's name before #1061
   const c = tierOf(code);
   return c >= 1 && c >= tierOf(lib);
 }
@@ -124,7 +126,7 @@ export function filmKey(dir) {
   const meta = readJson(join(dir, ".moworks", "project.json"), {});
   return String(meta.id ?? meta.projectId ?? basename(dir));
 }
-/** Take k of a recipe for a cue name: { seed, pitch, bright, kitSeed }. A kit's sound itself is take 0 (its own file); the others are new seeds,
+/** Take k of a recipe for a cue name: { seed, pitch, bright }. A style's own sound itself is take 0 (its own file); the others are new seeds,
  *  a little higher or lower and brighter or darker, so the repeats of one sound vary. */
 export function takeOf(film, name, entryId, k) {
   const h = fnv(`${film}|${name}|${entryId}|${k}|v${CODE_VERSION}`);
@@ -138,18 +140,18 @@ const titleOf = (entry, k) => `${String(entry.tags?.[0] ?? entry.id).replace(/[^
 /** The credit of a code-made sound (index.mjs creditLine reads it). */
 function creditOf(entry, root) {
   const p = pins(root);
-  if (entry.prebuilt || String(entry.recipe).startsWith("kit:")) {
-    const [, builder, fn] = /^kit:([^:]+):(.+)$/.exec(entry.recipe) ?? [];
-    const kitDir = String(builder ?? "").split("/")[0], pin = p[kitDir] ?? {};
-    // Ricks Clip's synths are in its worked example's audio.py (the skill folder's kit/), the others in each kit's own builder
-    const file = kitDir === "ricks-clip" ? "ricks-clip/kit/example/soldier/audio.py" : `${builder}.py`;
-    return { name: `the owner's ${pin.title ?? kitDir} ${pin.version ?? ""}`.replace(/\s+/g, " ").trim(), author: "Moworks Studio (the owner's own code)", licence: "the owner's own",
-      how: `made by code from the owner's synthesis: the kit's own recipe ${fn} (bundle/styles/moworks-kits/${file}, the kit pinned at SHA-256 ${String(pin.sha256 ?? "").slice(0, 12)}), numpy/scipy, the film's own seed` };
+  if (entry.prebuilt || /^(style|kit):/.test(String(entry.recipe))) {          // "kit:": a recipe named before #1061
+    const [, builder, fn] = /^(?:style|kit):([^:]+):(.+)$/.exec(entry.recipe) ?? [];
+    const sourceDir = String(builder ?? "").split("/")[0], pin = p[sourceDir] ?? {};
+    // Ricks Clip's synths are in its worked example's audio.py (the skill folder's own kit/), the others in each source skill's own builder
+    const file = sourceDir === "ricks-clip" ? "ricks-clip/kit/example/soldier/audio.py" : `${builder}.py`;
+    return { name: `the owner's source skill ${SOURCE_TITLE[sourceDir] ?? sourceDir} ${pin.version ?? ""}`.replace(/\s+/g, " ").trim(), author: "Moworks Studio (the owner's own code)", licence: "the owner's own",
+      how: `made by code from the owner's synthesis: the source skill's own recipe ${fn} (bundle/styles/moworks-styles/${file}, the source skill pinned at SHA-256 ${String(pin.sha256 ?? "").slice(0, 12)}), numpy/scipy, the film's own seed` };
   }
   const story = p.story ?? {};
   const own = entry.kept || entry.film;
   return { name: own ? "a recipe written for a film" : "the app's sound recipes", author: "Moworks Studio", licence: "the owner's own",
-    how: `made by code from the owner's synthesis: ${own ? "a recipe written for a film, run in the app's restricted runner" : `Moworks Studio's recipe "${entry.recipe}" (tools/sfx-code/recipes.py)`} with the owner's sfxlib (bundle/styles/moworks-kits/story/tools/sfx/sfxlib.py, ${story.title ?? "Story Animation Kit"} ${story.version ?? ""} pinned at SHA-256 ${String(story.sha256 ?? "").slice(0, 12)}), numpy/scipy, the film's own seed` };
+    how: `made by code from the owner's synthesis: ${own ? "a recipe written for a film, run in the app's restricted runner" : `Moworks Studio's recipe "${entry.recipe}" (tools/sfx-code/recipes.py)`} with the owner's sfxlib (bundle/styles/moworks-styles/story/tools/sfx/sfxlib.py, the source skill Story Animation ${story.version ?? ""} pinned at SHA-256 ${String(story.sha256 ?? "").slice(0, 12)}), numpy/scipy, the film's own seed` };
 }
 
 /** Run make.py on jobs, split over a few processes: { made: Map out -> stats, failed: [{ out, error }] }. */
@@ -161,7 +163,7 @@ async function runMake(root, jobs, { signal = null, timeoutMs = 180000 } = {}) {
     await Promise.all(Array.from({ length: parts }, (_, i) => new Promise((done) => {
       // a recipe Claude wrote runs in a process of its own: whatever it does, the others are made
       const mine = jobs.filter((_, k) => k % parts === i), file = join(tmp, `jobs-${i}.json`);
-      writeFileSync(file, JSON.stringify({ kits: kitsDir(root), jobs: mine }));
+      writeFileSync(file, JSON.stringify({ sources: sourcesDir(root), jobs: mine }));
       const c = execFile(exe, ["-I", "-B", join(root, ...SCRIPT), file], { env: { ...process.env, MW_PYLIBS: pyLibs(root), PYTHONIOENCODING: "utf-8", PYTHONUTF8: "1" }, cwd: tmp, windowsHide: true, timeout: timeoutMs, maxBuffer: 16 << 20 },
         (e, so) => {
           let ans = null; try { ans = JSON.parse(String(so).trim().split(/\r?\n/).pop()); } catch { /* no answer */ }

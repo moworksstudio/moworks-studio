@@ -4,7 +4,7 @@
 //   hf/        HyperFrames' skills/ and registry/ at the pinned commit, its skills-manifest.json and PINNED
 //   styles/    lemo-opuscar, mg-styles-15, anidoodle, ClaudeAnimationBase, motion-prompt, what-if-animation: the run-time files at each
 //              pinned commit, PINNED; the gallery stills re-encoded at 960 px under their own names (JPEG stays JPEG, WebP stays WebP),
-//              no demo films, no audio; moworks-kits: the owner's own kits as shipped, their pin the folder itself (kept)
+//              no demo films, no audio; moworks-styles: the source skills of the owner's own film styles as shipped, their pin the folder itself (kept)
 //   library/   the built stores (Blocks, intake, Looks, Vocabulary, tiles, anidoodle cards, the Lemo-Opuscar fonts' Vietnamese check), What
 //              If's demo film (made in the app, kept as it is) and the app's own characters (bundle/library/characters: the app reads them
 //              there, so they are their own source; only counted, or copied into another outDir)
@@ -117,11 +117,11 @@ copyPart("what-if-animation", wi.root, join(OUT, "styles", "what-if-animation"),
 
 // library: the built stores, so a clean computer's library is not empty: the store for the pins (the folder the app reads), never one built
 // at another pin; intake has one folder (current.json)
-// (before them, the owner's own kits: written as shipped by tools/intake-moworks-kit.mjs, pinned by the SHA-256 of each kit's .md; the pin is
+// (before them, the owner's film styles' source skills: written as shipped by tools/intake-moworks-kit.mjs, pinned by the SHA-256 of each one's .md; the pin is
 // the bundled folder itself, kept and counted)
-for (const [id, k] of Object.entries(pins.moworksKits?.kits ?? {}))
-  copyPart(`moworks-kit-${id}`, join(pins.moworksKits.root, k.dir), join(OUT, "styles", "moworks-kits", id), { source: k.skill ? `${k.title} (the owner's skill ${k.skill}: ${k.file} SHA-256 ${k.sha256}, ${k.zip} SHA-256 ${k.zipSha256}; ${Object.entries(k.vendor ?? {}).map(([p, v]) => `${p} from ${v.repo}@${v.commit.slice(0, 8)}`).join(", ")})` : `${k.title} ${k.version} (${k.file}, SHA-256 ${k.sha256})`,
-    licence: k.vendor ? `${pins.moworksKits.licence}; ${Object.values(k.vendor).map((v) => `${v.path.split("/").pop()}: ${v.licence}`).join("; ")}` : pins.moworksKits.licence });
+for (const [id, k] of Object.entries(pins.moworksStyles?.sources ?? {}))
+  copyPart(`moworks-style-${id}`, join(pins.moworksStyles.root, k.dir), join(OUT, "styles", "moworks-styles", id), { source: k.skill ? `${k.title} (the owner's skill ${k.skill}: ${k.file} SHA-256 ${k.sha256}, ${k.zip} SHA-256 ${k.zipSha256}; ${Object.entries(k.vendor ?? {}).map(([p, v]) => `${p} from ${v.repo}@${v.commit.slice(0, 8)}`).join(", ")})` : `${k.title} ${k.version} (${k.file}, SHA-256 ${k.sha256})`,
+    licence: k.vendor ? `${pins.moworksStyles.licence}; ${Object.values(k.vendor).map((v) => `${v.path.split("/").pop()}: ${v.licence}`).join("; ")}` : pins.moworksStyles.licence });
 const lib = join(work, "library");
 const current = (store) => { try { return JSON.parse(readFileSync(join(lib, store, "current.json"), "utf8")).dir; } catch { return null; } };
 const pinned = { blocks: blocksStore, intake: () => current("intake"), looks: looksStore };

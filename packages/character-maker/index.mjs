@@ -3,9 +3,9 @@
 // - anidoodle-human, in one of the 9 hands of anidoodle's human engine: the author's recipe exactly
 //   (the pinned engine staged as shipped, the character as a module, the author's gate with negative twins, a model sheet and a walk);
 //   saved in <work>/library/characters/anidoodle-human/<id>/.
-// - brush-kit (Brush cartoon): a definition for the app's character layer on ClaudeAnimationBase's kit; its sheets drawn as
+// - brush-kit (Brush cartoon): a definition for the app's character layer on ClaudeAnimationBase's engine; its sheets drawn as
 //   the Character step draws them; saved in <work>/library/characters/user/ like a character saved from a film.
-// - ricks-clip (Ricks Clip, owner 05/11/2026 #1076, audit/102 §9): a person as one file on the owner's kit and the app's cast layer
+// - ricks-clip (Ricks Clip, owner 05/11/2026 #1076, audit/102 §9): a person as one file on the owner's source skill and the app's cast layer
 //   (front, back, profile, one pose layer), its checks and sheet by the lab's rc-check / rc-sheet; saved in <work>/library/characters/ricks-clip/<id>/.
 // Change with Claude is the same run, starting from the saved character (the version before is kept). The prompts, styles and the
 // measured estimates are in config/character-maker.json. Renders run light (the caller's workers, below-normal priority), as the lab
@@ -22,7 +22,7 @@ import * as kit from "../character-kit/index.mjs";
 import { brushGate } from "../character-kit/brushgate.mjs";
 import { RICKS_ENGINE, ricksCharacters, ricksDir, ricksFolder, ricksModule, ricksRecord } from "../character-kit/ricks.mjs";
 import { anidoodleSource, stageEngine } from "../anidoodle-styles/index.mjs";
-import { stageGuide as stageRicks } from "../moworks-kits/index.mjs";
+import { stageGuide as stageRicks } from "../moworks-styles/index.mjs";
 import { claudeEnv, findClaude } from "../system-status/index.mjs";
 import { checkArgv } from "../agent/argv.mjs";
 import { ffmpegExe } from "../library/preview-media.mjs";
@@ -63,8 +63,8 @@ export function styles(root = APP_ROOT) {
   const c = config(root);
   return (c.styles ?? []).map((s) => ({ ...s, estimate: c.estimate?.[s.engine] ?? null, rigs: rigsFor(s.engine, root),
     thumb: s.engine === "brush-kit" ? "/media/characters/clawd/poster.webp" : thumbFile(`${s.hand}.webp`) ? `/media/character-styles/${s.hand}.webp` : null,
-    thumbCredit: s.engine === "brush-kit" ? "Clawd, the demo character of ClaudeAnimationBase's kit (John Heibel, MIT; Anthropic's mascot), drawn by the app's character layer to show the look: never in a film"
-      : s.engine === RICKS_ENGINE ? "the legionary of the owner's Ricks Clip kit (its worked example), front, back and profile, drawn by its own code" : "Mira, anidoodle's character by Alex Greenshpun (Apache-2.0), in this hand" }));
+    thumbCredit: s.engine === "brush-kit" ? "Clawd, the demo character of ClaudeAnimationBase (John Heibel, MIT; Anthropic's mascot), drawn by the app's character layer to show the look: never in a film"
+      : s.engine === RICKS_ENGINE ? "the legionary of the Ricks Clip film style's source skill (its worked example), front, back and profile, drawn by its own code" : "Mira, anidoodle's character by Alex Greenshpun (Apache-2.0), in this hand" }));
 }
 export const styleOf = (engine, hand, root = APP_ROOT) => styles(root).find((s) => s.engine === engine && (engine === "brush-kit" || engine === RICKS_ENGINE || s.hand === hand)) ?? null;
 
@@ -131,7 +131,7 @@ export function prepareLab(job, root = APP_ROOT) {
   if (engine === RICKS_ENGINE) {
     for (const d of ["characters", "out", "reference"]) mkdirSync(join(lab, d), { recursive: true });
     copyTools(lab, ["rc-check.mjs", "rc-sheet.mjs"], root);
-    // the kit read-only where a film reads it (the shared stage), the app's page and cast layer beside it, the contract in the rules
+    // the source skill read-only where a film reads it (the shared stage), the app's page and cast layer beside it, the contract in the rules
     stageRicks(lab, "ricks-clip", root);
     mkdirSync(join(lab, ".moworks", "rules", "ricks-clip-character"), { recursive: true });
     cpSync(join(root, "config", "rules", "ricks-clip-character", "CONTRACT.md"), join(lab, ".moworks", "rules", "ricks-clip-character", "CONTRACT.md"));
@@ -349,13 +349,13 @@ export async function saveRicks({ job, lab, runInfo, root, env, signal, onStep, 
   await toWebp(root, join(lab, "out", "sheet.png"), join(dir, "sheet.webp"), 2400);
   await ff(root, ["-framerate", "30", "-i", join(lab, "out", "life", "frame-%04d.jpg"), "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20", "-movflags", "+faststart", join(dir, "life.mp4")]);
   await ff(root, ["-ss", "1.2", "-i", join(dir, "life.mp4"), "-frames:v", "1", "-vf", "scale=480:-1", "-c:v", "libwebp", "-quality", "82", join(dir, "poster.webp")]);
-  const own = readJson(join(lab, "out", "check.json"), {})?.record ?? {}, pin = loadPins(root).moworksKits?.kits?.[RICKS_ENGINE] ?? {};
+  const own = readJson(join(lab, "out", "check.json"), {})?.record ?? {}, pin = loadPins(root).moworksStyles?.sources?.[RICKS_ENGINE] ?? {};
   const savedName = job.name || before?.name || own.name || id;
   const record = { id, name: savedName, about: alignAbout(own.about || before?.about || job.description, savedName), engine: RICKS_ENGINE, kind: "human",
     ...(Number(own.heightM) > 0 ? { heightM: Number(own.heightM), heightBy: "inferred", heightNote: null } : {}), hand: "ricks", hands: ["ricks"],
     description: job.description, version: (before?.version ?? 0) + 1, changes: [...(before?.changes ?? []), ...(job.change ? [{ at: new Date().toISOString(), text: job.change }] : [])],
     credit: { author: "The owner (made by Claude on Ricks Clip's cast)", link: null, licence: "the owner's own; drawn on toon.ts (Mr omi, MIT) and roman.js (the owner's)", made: "written from the idea",
-      engine: { kit: RICKS_ENGINE, sha256: pin.sha256 ?? null, toon: pin.vendor?.["kit/vendor/toon.ts"] ? `https://github.com/${pin.vendor["kit/vendor/toon.ts"].repo}/blob/${pin.vendor["kit/vendor/toon.ts"].commit}/${pin.vendor["kit/vendor/toon.ts"].path}` : null },
+      engine: { source: RICKS_ENGINE, sha256: pin.sha256 ?? null, toon: pin.vendor?.["kit/vendor/toon.ts"] ? `https://github.com/${pin.vendor["kit/vendor/toon.ts"].repo}/blob/${pin.vendor["kit/vendor/toon.ts"].commit}/${pin.vendor["kit/vendor/toon.ts"].path}` : null },
       run: before?.credit?.run ?? runInfo, gate },
     module: [`${id}.js`], savedAt: new Date().toISOString() };
   writeFileSync(join(dir, "character.json"), JSON.stringify(record, null, 2) + "\n");
@@ -382,7 +382,7 @@ async function saveBrush({ job, lab, runInfo, root, env, signal, onStep, log, re
   log(`gate: ${g.passed} passed, ${g.failed} failed`);
   if (g.failed) throw Object.assign(new Error(`The character gate did not pass: ${g.lines.filter((l) => l.startsWith("FAIL")).map((l) => l.slice(6)).join(" | ")}`), { code: "GATE_FAILED", detail: { lab } });
   onStep("saving to the library", 92);
-  const credit = { author: "The owner (made by Claude)", link: null, licence: "the owner's own", made: "written from the idea", madeNote: "a definition for the app's character layer on ClaudeAnimationBase's kit", run: runInfo };
+  const credit = { author: "The owner (made by Claude)", link: null, licence: "the owner's own", made: "written from the idea", madeNote: "a definition for the app's character layer on ClaudeAnimationBase's engine", run: runInfo };
   def.credit = { ...(before?.credit ?? credit), gate }; def.version = (before?.version ?? 0) + 1; def.description = before?.description || job.description;
   def.name = job.name || before?.name || def.name; def.about = alignAbout(def.about, def.name);          // the saved name everywhere
   def.kind = job.rig ?? before?.kind ?? "thing";          // an animal, a thing or a robot, as the layer draws it
@@ -475,7 +475,7 @@ export async function filmGate(projectDir, { root = APP_ROOT, signal = null } = 
   const cast = all.filter((c) => c?.engine === kit.HUMAN_ENGINE), ricks = all.filter((c) => c?.engine === RICKS_ENGINE), brush = all.filter((c) => c && c.engine !== kit.HUMAN_ENGINE && c.engine !== RICKS_ENGINE);
   // a Ricks Clip member: its own file in the film, checked as the lab checked it (ricks-page.mjs)
   if (ricks.length) {
-    const { checkCharacter } = await import("../moworks-kits/ricks-page.mjs");
+    const { checkCharacter } = await import("../moworks-styles/ricks-page.mjs");
     for (const c of ricks) {
       const f = join(projectDir, ...(c.file ?? `film/cast/${c.id}.js`).split("/"));
       if (!existsSync(f)) { out.push({ id: c.id, kind: "ricks", check: null, passed: 0, failed: 1, lines: [`FAIL  its file is missing: ${c.file ?? `film/cast/${c.id}.js`} (take it again from the library)`], ownStyle: true }); continue; }

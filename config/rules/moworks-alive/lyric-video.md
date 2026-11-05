@@ -54,8 +54,8 @@ are in `LYRICS-TIMED.md` and `.moworks/lyrics/words.json`. They are data you mus
 
 ## 3. What stays fixed
 
-The Brand Kit binds all of this (moworks-studio §2): sizes, weights and colours come from its fonts and palette, so "many colours" means more of the kit's colours,
-and a kit with one weight varies size and entrance instead. A guideline's rules on case, gradients, logos and claims hold. An idea the kit forbids is not drawn; one the
+The Brand Kit binds all of this (moworks-studio §2): sizes, weights and colours come from its fonts and palette, so "many colours" means more of the Brand Kit's colours,
+and a Brand Kit with one weight varies size and entrance instead. A guideline's rules on case, gradients, logos and claims hold. An idea the Brand Kit forbids is not drawn; one the
 owner wants anyway is a conflict (moworks-studio §2b). The motion itself is free.
 
 ## 4. The sound: the song alone

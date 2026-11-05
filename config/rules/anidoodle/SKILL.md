@@ -12,7 +12,7 @@ The project's style is one anidoodle medium. Its own rule file is `.moworks/rule
 house styles (adaptAlmond, adaptAquarelle, adaptScrapbook) its recipe as shipped and its plate. The author's skill is staged in
 `.moworks/library/anidoodle/`: `SKILL.md` (the seven laws and the workflows), `references/`, the engine's source `engine/src/`, the worked
 example `example/` (Mechanical Lepidoptera and its spec, `example/butterfly-film-spec.md`: what a good spec looks like; study it, never
-copy it), the house styles `styles/house/` and the launch kit's example facts `engine/facts/`. The author's tools (`engine/tools/`) are not
+copy it), the house styles `styles/house/` and the launch video's example facts `engine/facts/`. The author's tools (`engine/tools/`) are not
 staged. **Moworks Studio runs every command** (stills, checks, render): where the author's guides say `node tools/…`, `npm`,
 `render.mjs`, `music.mjs` or a gate, skip it; the app does that part or it is not used here.
 
@@ -40,7 +40,7 @@ staged. **Moworks Studio runs every command** (stills, checks, render): where th
 
 - The film is TypeScript, the author's way (`engine/src/canvas-core/film.ts`): `export const <name>: Film = { meta: { title, W, H, fps, bpm,
   durationFrames, … }, assets: { images }, shots: [{ id, start, end, draw(ctx, local, env) }] }`. Frames are the unit; shots tile
-  `[0, durationFrames)`; `bpm` at `fps` gives a whole-frame beat. Draw with the medium's own module and kit (read their code in
+  `[0, durationFrames)`; `bpm` at `fps` gives a whole-frame beat. Draw with the medium's own module and drawing helpers, its `*Kit.ts` (read their code in
   `.moworks/library/anidoodle/engine/src/canvas-core/`), and the engine's helpers (`core.ts`: seeded `rng`, paper, marks).
   `meta.W` / `meta.H` are the project's Format size (the system prompt's "Format W×H", any size the owner typed, e.g. 2160×1080), the
   same as the root's `data-width` / `data-height`; so is every board page's meta. Lay out from W and H, never from 1920 × 1080 (the engine draws any size).
@@ -119,7 +119,7 @@ its own rig, not the human engine. They can come into a film in any anidoodle me
   `fk(rig, x, y, ground)` gives every joint of the frame (`spine` 10 points, `tail` 6, `foreN`/`foreF`/`hindN`/`hindF` 5 each, `head` the
   head's angle), from `STAND`, `BOW`, `CROUCH`, `SKID`, `mixRig` between them, `settle` onto the ground, and the rotary gallop
   (`gallopRig(phase)`, `gallopY`); `cheetahRun.ts` shows the run, the stop and the turn. Pose her only through the rig and keep its numbers
-  (bone lengths, joint ranges, the build widths in `cheetahBody.ts`). Then draw her with **this medium's** kit along those points (a Sumi-e
+  (bone lengths, joint ranges, the build widths in `cheetahBody.ts`). Then draw her with **this medium's** drawing helpers along those points (a Sumi-e
   film: `sumiEKit.ts` `brush` strokes along the spine, legs and tail; a woodcut: its blocks; a scratchboard: knife lines…): her shape and
   motion stay hers, the marks are the film's. Her own painted look (`cheetahBody.ts` `drawCheetah(pose)`: ochre tufts and solid spots,
   `cheetahDusk.ts`'s hand) is used as it is only when the owner asks for it. Keep the features that make her a cheetah in every medium: the

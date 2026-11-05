@@ -359,7 +359,7 @@
        60,
        30
       ],
-      "_about": "the kit's 60 fps (smooth springs); 30 when the owner is in a hurry (OUTPUT.md)"
+      "_about": "the source skill's 60 fps (smooth springs); 30 when the owner is in a hurry (OUTPUT.md)"
      },
      "rules": {
       "kind": "moworks",
@@ -383,19 +383,19 @@
      "preview": {
       "image": "/styles/paper-collage.jpg",
       "placeholder": false,
-      "label": "Preview: the kit's own demo, made in the app",
-      "credit": "Moworks Studio · a frame of the kit's demo, drawn by the app"
+      "label": "Preview: its source skill's own demo, made in the app",
+      "credit": "Moworks Studio · a frame of its source skill's demo, drawn by the app"
      },
      "look": false,
      "dim": "2D",
      "renderer": "dom",
      "credit": {
       "author": "Moworks Studio",
-      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-kits/paper-collage",
+      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-styles/paper-collage",
       "licence": "the owner's own (Moworks Studio)",
       "made": "as shipped",
-      "madeNote": "the owner's kit as shipped (its React blocks, its rules, its code-made sounds and textures), run on HyperFrames through the app's stand-in for Remotion; Special Elite drawn by Special Elite VN for the Vietnamese letters",
-      "kit": {
+      "madeNote": "the owner's source skill as shipped (its React blocks, its rules, its code-made sounds and textures), run on HyperFrames through the app's stand-in for Remotion; Special Elite drawn by Special Elite VN for the Vietnamese letters",
+      "source": {
        "id": "paper-collage",
        "title": "Paper Collage Motion Kit",
        "version": "1.0.0"
@@ -424,7 +424,7 @@
       "allowed": [
        24
       ],
-      "_about": "the kit's frame: 1920×1080 at 24 fps (STYLE.md)"
+      "_about": "the source skill's frame: 1920×1080 at 24 fps (STYLE.md)"
      },
      "rules": {
       "kind": "moworks",
@@ -448,19 +448,19 @@
      "preview": {
       "image": "/styles/stickman-explainer.jpg",
       "placeholder": false,
-      "label": "Preview: the kit's own demo, made in the app",
-      "credit": "Moworks Studio · a frame of the kit's demo, drawn by the app"
+      "label": "Preview: its source skill's own demo, made in the app",
+      "credit": "Moworks Studio · a frame of its source skill's demo, drawn by the app"
      },
      "look": false,
      "dim": "2D",
      "renderer": "canvas",
      "credit": {
       "author": "Moworks Studio",
-      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-kits/story",
+      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-styles/story",
       "licence": "the owner's own (Moworks Studio)",
       "made": "as shipped",
-      "madeNote": "the owner's kit as shipped (its Canvas 2D drawing kit, its rules, its code-made sounds), run on HyperFrames through the app's stand-in for Remotion",
-      "kit": {
+      "madeNote": "the owner's source skill as shipped (its Canvas 2D drawing code, its rules, its code-made sounds), run on HyperFrames through the app's stand-in for Remotion",
+      "source": {
        "id": "story",
        "title": "Story Animation Kit",
        "version": "1.0.0"
@@ -489,7 +489,7 @@
       "allowed": [
        30
       ],
-      "_about": "the kit's frame: 1920×1080 at 30 fps (STYLE.md)"
+      "_about": "the source skill's frame: 1920×1080 at 30 fps (STYLE.md)"
      },
      "rules": {
       "kind": "moworks",
@@ -514,19 +514,19 @@
      "preview": {
       "image": "/styles/inner-voice-short.jpg",
       "placeholder": false,
-      "label": "Preview: the kit's own demo, made in the app",
-      "credit": "Moworks Studio · a frame of the kit's demo, drawn by the app"
+      "label": "Preview: its source skill's own demo, made in the app",
+      "credit": "Moworks Studio · a frame of its source skill's demo, drawn by the app"
      },
      "look": false,
      "dim": "2D",
      "renderer": "canvas",
      "credit": {
       "author": "Moworks Studio",
-      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-kits/story",
+      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-styles/story",
       "licence": "the owner's own (Moworks Studio)",
       "made": "as shipped",
-      "madeNote": "the owner's kit as shipped (its Canvas 2D drawing kit, its rules, its code-made sounds), run on HyperFrames through the app's stand-in for Remotion; Comic Sans drawn by Pangolin for the Vietnamese letters",
-      "kit": {
+      "madeNote": "the owner's source skill as shipped (its Canvas 2D drawing code, its rules, its code-made sounds), run on HyperFrames through the app's stand-in for Remotion; Comic Sans drawn by Pangolin for the Vietnamese letters",
+      "source": {
        "id": "story",
        "title": "Story Animation Kit",
        "version": "1.0.0"
@@ -556,7 +556,7 @@
       "allowed": [
        30
       ],
-      "_about": "the kit's 30 fps (STYLE.md §1)"
+      "_about": "the source skill's 30 fps (STYLE.md §1)"
      },
      "rules": {
       "kind": "moworks",
@@ -580,19 +580,19 @@
      "preview": {
       "image": "/styles/cartoon-3d.jpg",
       "placeholder": false,
-      "label": "Preview: the kit's own demo, made in the app",
-      "credit": "Moworks Studio · a frame of the kit's demo, drawn by the app"
+      "label": "Preview: its source skill's own demo, made in the app",
+      "credit": "Moworks Studio · a frame of its source skill's demo, drawn by the app"
      },
      "look": false,
      "dim": "3D",
      "renderer": "webgl",
      "credit": {
       "author": "Moworks Studio",
-      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-kits/cartoon-3d",
+      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-styles/cartoon-3d",
       "licence": "the owner's own (Moworks Studio)",
       "made": "as shipped",
-      "madeNote": "the owner's kit as shipped (its three.js runtime and post chain, its cast and sets, its rules, its code-made sounds), run on HyperFrames through the app's stand-in for Remotion, three.js 0.187.0 (the latest, owner #1071; the kit asks for 0.186.0); Outfit and Caveat Brush drawn by Lexend and Sedgwick Ave Display for the Vietnamese letters",
-      "kit": {
+      "madeNote": "the owner's source skill as shipped (its three.js runtime and post chain, its cast and sets, its rules, its code-made sounds), run on HyperFrames through the app's stand-in for Remotion, three.js 0.187.0 (the latest, owner #1071; the source skill asks for 0.186.0); Outfit and Caveat Brush drawn by Lexend and Sedgwick Ave Display for the Vietnamese letters",
+      "source": {
        "id": "cartoon-3d",
        "title": "3D Cartoon Animation Toolkit",
        "version": "1.0.0"
@@ -622,7 +622,7 @@
        60,
        30
       ],
-      "_about": "the kit's 60 fps; 30 only when the owner asks (STYLE.md §5)"
+      "_about": "the source skill's 60 fps; 30 only when the owner asks (STYLE.md §5)"
      },
      "rules": {
       "kind": "moworks",
@@ -647,19 +647,19 @@
      "preview": {
       "image": "/styles/explainer-2d.jpg",
       "placeholder": false,
-      "label": "Preview: the kit's own demo, made in the app",
-      "credit": "Moworks Studio · a frame of the kit's demo, drawn by the app"
+      "label": "Preview: its source skill's own demo, made in the app",
+      "credit": "Moworks Studio · a frame of its source skill's demo, drawn by the app"
      },
      "look": false,
      "dim": "2D",
      "renderer": "canvas",
      "credit": {
       "author": "Moworks Studio",
-      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-kits/explainer-2d",
+      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-styles/explainer-2d",
       "licence": "the owner's own (Moworks Studio)",
       "made": "as shipped",
-      "madeNote": "the owner's kit as shipped (its HyperFrames page and canvas engine, its rules, its code-made sounds); Figtree drawn by Hanken Grotesk for the Vietnamese letters",
-      "kit": {
+      "madeNote": "the owner's source skill as shipped (its HyperFrames page and canvas engine, its rules, its code-made sounds); Figtree drawn by Hanken Grotesk for the Vietnamese letters",
+      "source": {
        "id": "explainer-2d",
        "title": "2D Explainer Animation Toolkit",
        "version": "1.0.0"
@@ -720,11 +720,11 @@
      "renderer": "webgl",
      "credit": {
       "author": "Moworks Studio",
-      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-kits/ricks-clip",
+      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-styles/ricks-clip",
       "licence": "the owner's own (Moworks Studio); its toon.ts by Mr omi, MIT",
       "made": "as shipped",
-      "madeNote": "the owner's skill cartoon-audio-short and its code kit as shipped (its three.js engine, ink and lens passes, painted textures, its cast on toon.ts from mromidev/claude-animated-shorts, MIT, its rules, its worked example), run on HyperFrames through R-LEMO; its r160 code on three.js 0.187.0 (owner #1071; PCFSoftShadowMap, removed in r186, as PCFShadowMap); DejaVu Serif and Arial Black drawn by Source Serif 4 and Archivo for the Vietnamese letters",
-      "kit": {
+      "madeNote": "the owner's skill cartoon-audio-short and its code as shipped (its three.js engine, ink and lens passes, painted textures, its cast on toon.ts from mromidev/claude-animated-shorts, MIT, its rules, its worked example), run on HyperFrames through R-LEMO; its r160 code on three.js 0.187.0 (owner #1071; PCFSoftShadowMap, removed in r186, as PCFShadowMap); DejaVu Serif and Arial Black drawn by Source Serif 4 and Archivo for the Vietnamese letters",
+      "source": {
        "id": "ricks-clip",
        "title": "Ricks Clip",
        "version": null

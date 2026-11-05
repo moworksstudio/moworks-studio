@@ -115,7 +115,7 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
   useEffect(() => { const h = setInterval(() => setNow(new Date()), 20000); return () => clearInterval(h); }, []);
   const [job, setJob] = useState(null);
   useEffect(() => {
-    if (ex.data && !form) setForm({ filename: ex.data.defaults.filename, format: initialFormat, quality: "standard", master: "kit" });
+    if (ex.data && !form) setForm({ filename: ex.data.defaults.filename, format: initialFormat, quality: "standard", master: "standard" });
     const r = ex.data?.jobs.find((j) => j.status === "running"); if (r && r.id !== job?.id) follow(r);
     else if (!r && !job && ex.data?.jobs?.[0]) setJob(ex.data.jobs[0]);          // the last render, its result and its checks stay here after reopening
   }, [ex.data]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -150,7 +150,7 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
         {/* the film renders at its own rate, the one its timeline is built at: shown, not chosen */}
         <div className="field"><span>{t("Frame rate")}</span><span className="input ro num" aria-readonly="true">{t("{n} fps · as the film", { n: ex.data.defaults.fps ?? 30 })}</span></div>
         {hasSound && <label className="field" title={t("Evens out the sound to the web's level: -14 LUFS, true peak at most -1 dBTP")}><span>{t("Loudness")}</span><select className="select" value={form.master} onChange={(e) => set("master", e.target.value)} disabled={running || form.format === "webm"}>
-          <option value="kit">{t("Standard, for web and social (recommended)")}</option><option value="quiet">{t("Quieter, -16 LUFS (a podcast, or when asked)")}</option><option value="off">{t("Keep the mix as it is")}</option></select></label>}
+          <option value="standard">{t("Standard, for web and social (recommended)")}</option><option value="quiet">{t("Quieter, -16 LUFS (a podcast, or when asked)")}</option><option value="off">{t("Keep the mix as it is")}</option></select></label>}
       </div>
       {mix.data?.music?.licence && /mixkit/i.test(mix.data.music.licence) && <Banner kind="warning">{t("Mixkit music is for online use only (YouTube, social, websites, online ads). For TV, radio, cinema, DVD or games, use broadcast-licensed music.")}</Banner>}
       {pipe.data?.version1?.card?.brand && <Banner kind="warning">{t("Moworks Studio has not checked this film against your brand guideline. Please check it yourself before you send it.")}</Banner>}

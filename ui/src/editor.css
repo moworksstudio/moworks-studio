@@ -963,7 +963,7 @@ ol.plain.conversation, .conversation { padding: var(--sp-3); gap: 0.875rem; }
 /* Render cuts nothing it shows: the stamped file name wraps, and the Loudness field takes two columns so its
    choice reads in full */
 :root:not([data-theme="studio"]) .render-name { white-space: normal; overflow-wrap: anywhere; }
-@media (min-width: 64rem) { :root:not([data-theme="studio"]) .render-sheet .form-cols > .field:has(> select option[value="kit"]) { grid-column: span 2; } }
+@media (min-width: 64rem) { :root:not([data-theme="studio"]) .render-sheet .form-cols > .field:has(> select option[value="standard"]) { grid-column: span 2; } }
 /* a code film's words field while the film is made again from its code: the pending edge (amber: waiting) */
 .input.cw-busy, .input.cw-busy:disabled { border-color: var(--status-pending); box-shadow: 0 0 0 1px var(--status-pending-soft); cursor: progress; }
 /* while the film plays the clock keeps one width (each digit as wide as a 0, the running time in a box of eight), so

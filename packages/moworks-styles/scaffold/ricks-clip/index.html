@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Ricks Clip</title>
+    <style>
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+      #c { position: absolute; inset: 0; display: block; width: 1080px; height: 1920px; }
+    </style>
+  </head>
+  <body>
+    <!-- Ricks Clip (the owner's skill cartoon-audio-short): the source skill's own page (engine/index.html) inside HyperFrames' root. The film's files are
+         film/ (story.js always; main.js, roman.js, paint.js, motion.js only when the film changes them); the app bundles them with the source skill's engine,
+         toon.js and three.js into compositions/film/film.js (never write that file). 9:16 1080x1920, 30 fps; data-duration is the film's TOTAL / 30
+         plus the ending's fade. -->
+    <div id="main" data-composition-id="main" data-skill="ricks-clip" data-start="0" data-duration="10" data-width="1080" data-height="1920" data-fps="30">
+      <canvas id="c" width="1080" height="1920"></canvas>
+    </div>
+    <script>window.addEventListener("error", function (e) { window.err = String(e.message); console.log("ERR " + e.message); });</script>
+    <script src="compositions/film/film.js"></script>
+  </body>
+</html>

@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { resolveRuntime } from "../version-manager/index.mjs";
 import { servePage } from "../hf-page/index.mjs";
 
-/** { tab, total, size: { width, height }, close() }. query: added to the page's address ("?kit-check=1"); beforeLoad(tab): called before the page
+/** { tab, total, size: { width, height }, close() }. query: added to the page's address ("?skill-check=1"); beforeLoad(tab): called before the page
  *  loads (a listener on its console). */
 export async function openFilmPage(dir, { version = null, query = "", beforeLoad = null } = {}) {
   const page = await servePage(dir, { version });

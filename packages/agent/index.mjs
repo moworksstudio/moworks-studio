@@ -34,13 +34,13 @@ import { anidoodleId, ruleText as anidoodleRuleText, stageEngine as stageAnidood
 import { readCast, ruleText as brushRuleText, stageGuide as stageBrushGuide } from "../character-kit/index.mjs";
 import { stageEngine as stageWhatIf, whatIfSource } from "../what-if-styles/index.mjs";
 import { MAP_STYLE_ID, placeEngine as placeMapEngine, stageGuide as stageMapGuide } from "../map-explainer/index.mjs";
-import { isKitStyle, placeKit, stageGuide as stageKitGuide } from "../moworks-kits/index.mjs";
+import { isMoworksStyle, placeStyle, stageGuide as stageStyleGuide } from "../moworks-styles/index.mjs";
 import { status as secretsStatus } from "../secrets/index.mjs";
 import { filmVietnamese } from "../voice/tts.mjs";
 import { packStatus as kokoroStatus } from "../voice/kokoro.mjs";
 import { PROMPT as MOTION_PLAN_PROMPT, SOUND_PROMPT as MOTION_PLAN_SOUND } from "../motion-plan/index.mjs";
 import * as sfx from "../sfx/index.mjs";
-import { KIT_STYLES } from "../sfx/code-recipes.mjs";
+import { MOWORKS_STYLE_IDS } from "../sfx/code-recipes.mjs";
 import { SIGNED_OUT_TEXT } from "../server/claude.mjs";
 /** Claude Code's own message when another of its processes is refreshing the sign-in at the same moment: passing, worth one retry. */
 export const OAUTH_RACE = /another Claude Code process is refreshing|Failed to refresh OAuth token/i;
@@ -239,14 +239,14 @@ export const APP_TOOLS = {
     inputSchema: { type: "object", properties: {} } },
   pose_check: { description: "Draws EVERY frame of the project's anidoodle film (anidoodle/page.ts) without a browser and lists each pose outside its joint limits, each error the film throws or logs (console.error is a script error for HyperFrames and stops the render) and each rig point that is not a number, with the times. Call it after the Build and after fixing a pose; the Review's qc_sheets includes it.",
     inputSchema: { type: "object", properties: {} } },
-  collision_check: { description: "A 3D Cartoon film only: the kit's own collision check (its qa) on EVERY frame of the film: each character's body against the solid furniture (box and cylinder meshes) and against the other characters, and feet below the floor, with the seconds and the depth. Call it after every change to the blocking (positions, walks, poses, props) and before the film is done; fix what it names in the film's own world.ts and shots.ts until it says COLLISION none. The Review and Tech checks run it too.",
+  collision_check: { description: "A 3D Cartoon film only: its source skill's own collision check (its qa) on EVERY frame of the film: each character's body against the solid furniture (box and cylinder meshes) and against the other characters, and feet below the floor, with the seconds and the depth. Call it after every change to the blocking (positions, walks, poses, props) and before the film is done; fix what it names in the film's own world.ts and shots.ts until it says COLLISION none. The Review and Tech checks run it too.",
     inputSchema: { type: "object", properties: {} } },
-  paper_cutout: { description: "A Paper Collage film only: makes the look's cut-out of one picture with the kit's own tools (cutout.py, then halftone.py): its flat green or white background taken out (a transparent PNG keeps its own), then a black-and-white halftone print with a thin white paper edge (mode halftone), or the picture without its background in its own colours (mode clean). The owner's picture is never changed: the new file goes in assets/graphics/cutouts/ with a row in its INDEX.md. The kit's IMAGES.md order holds: an object on a transparent or flat background → a cut-out; a photo → PhotoPrint with the original; a screenshot or a logo untouched; never a real person's face. Returns the new file's path and size.",
+  paper_cutout: { description: "A Paper Collage film only: makes the look's cut-out of one picture with its source skill's own tools (cutout.py, then halftone.py): its flat green or white background taken out (a transparent PNG keeps its own), then a black-and-white halftone print with a thin white paper edge (mode halftone), or the picture without its background in its own colours (mode clean). The owner's picture is never changed: the new file goes in assets/graphics/cutouts/ with a row in its INDEX.md. The kit's IMAGES.md order holds: an object on a transparent or flat background → a cut-out; a photo → PhotoPrint with the original; a screenshot or a logo untouched; never a real person's face. Returns the new file's path and size.",
     inputSchema: { type: "object", properties: { file: { type: "string", description: "The picture's path in the project, e.g. assets/images/globe.png" },
       mode: { type: "string", enum: ["halftone", "clean"], description: "halftone (the default): the look's cut-out; clean: the background out, its colours kept" },
       key: { type: "string", enum: ["auto", "none", "green", "white"], description: "The background to take out (cutout.py): auto (the default) reads the corners" },
-      cell: { type: "number", description: "Halftone dot spacing in px (the kit's 9; smaller is finer)" }, angle: { type: "number", description: "Screen angle (the kit's 45)" },
-      border: { type: "number", description: "The white paper edge in px (the kit's 14)" }, max: { type: "number", description: "The longest side in px (the kit's 900)" },
+      cell: { type: "number", description: "Halftone dot spacing in px (the source skill's 9; smaller is finer)" }, angle: { type: "number", description: "Screen angle (the source skill's 45)" },
+      border: { type: "number", description: "The white paper edge in px (the source skill's 14)" }, max: { type: "number", description: "The longest side in px (the source skill's 900)" },
       name: { type: "string", description: "The new file's name, without .png" } }, required: ["file"] } },
   film_language: { description: "Sets the film's language (the voice-over and the words on screen): vi or en. Call it only with the owner's answer when the brief did not say it and you asked (the app says when). Returns the language set.",
     inputSchema: { type: "object", properties: { language: { type: "string", enum: ["vi", "en"] } }, required: ["language"] } },
@@ -360,7 +360,7 @@ export function prepareRules(dir, styleId, root = APP_ROOT) {
   const want = style.rules.map((r) => ({ name: r.name, from: dirname(r.path), hash: r.hash, kind: r.kind, role: r.role ?? null, slug: r.slug ?? null }));
   // a Lemo-Opuscar style: its STYLE.md only, as SKILL.md under a credit header (its folder also holds the demo, staged at the build)
   // (an mg-styles-15 style: its prompt the same way; an anidoodle medium: its reference)
-  // (the Brush cartoon style: the character kit's ANIMATION_GUIDE.md, under a header on the kit's Clawd demo)
+  // (the Brush cartoon style: ClaudeAnimationBase's ANIMATION_GUIDE.md, under a header on its Clawd demo)
   // (the What If animation style: the author's SKILL.md under a credit header, its references/ beside it; never its studio or scripts)
   const ownText = (w) => {
     const own = { "lemo-style": lemoRuleText, "mg-style": mgRuleText, "anidoodle-style": anidoodleRuleText, "brush-style": (_slug, r) => brushRuleText(r),
@@ -523,7 +523,7 @@ export function designLines(meta, dir, brandFonts = null) {
   lines.push(look.frame && has("frame.md")
     ? `Brand Kit chosen by the owner: ${look.title}: the film's colours, type and layout. The app wrote it to frame.md (HyperFrames' design spec): read it and design to it; never write or change frame.md. A brand guideline in the assets that differs from it is a conflict: stop and ask (moworks-studio §2b).`
     : `Brand Kit chosen by the owner: ${look.title} (HyperFrames look ${look.id}; its files are in .moworks/library/looks/): the film's colours, type and layout. A brand guideline in the assets that differs from it is a conflict: stop and ask (moworks-studio §2b).`);
-  // what the app copied in from the kit: the film's own files, told apart from what the owner imports (never "files the owner just added")
+  // what the app copied in from the Brand Kit: the film's own files, told apart from what the owner imports (never "files the owner just added")
   const kitFiles = dir ? kitFilesOf(dir) : null;
   if (kitFiles?.logos?.length || kitFiles?.fonts?.length) {
     const folder = kitFiles.logos?.[0]?.split("/").slice(0, -1).join("/");
@@ -531,7 +531,7 @@ export function designLines(meta, dir, brandFonts = null) {
       kitFiles.logos?.length ? `logos and pictures in ${folder}/: ${kitFiles.logos.slice(0, 40).map((x) => x.split("/").pop()).join(", ")}${kitFiles.logos.length > 40 ? ` (+${kitFiles.logos.length - 40})` : ""}; use these files, as frame.md's logo rules say, never redraw a logo` : "",
       kitFiles.fonts?.length ? `fonts, declared in index.html and ready by their family names: ${kitFiles.fonts.map((f) => f.family).join(", ")}` : ""].filter(Boolean).join("; ")}.`);
   }
-  if (kitFiles?.guideline) lines.push(`The guideline behind the kit is in this film too (${kitFiles.guideline} lists it; not files the owner added): where frame.md points to a page or does not answer, open that page; never guess a brand rule. frame.md's "Guideline checklist" is checked rule by rule (moworks-studio §2d).`);
+  if (kitFiles?.guideline) lines.push(`The guideline behind the Brand Kit is in this film too (${kitFiles.guideline} lists it; not files the owner added): where frame.md points to a page or does not answer, open that page; never guess a brand rule. frame.md's "Guideline checklist" is checked rule by rule (moworks-studio §2d).`);
   // a Brand Kit value is never changed silently: a font with no Vietnamese letters, a font the app lacks or a colour asked to change is a
   // stop, because a brand guideline matters and Claude asks before changing it
   lines.push(`A Brand Kit value (a font, a colour) is never changed by you: a Brand Kit font that cannot draw the Vietnamese letters the film writes or that the app does not have, and a Brand Kit colour the brief, a guideline or the chat asks to change, are conflicts: stop and ask (moworks-studio §2b). For a font, offer 2-3 fonts that draw Vietnamese and the app can use, the nearest first, each with a short reason (bundled with the app: ${Object.keys(fontMap()).join(", ")}; or a Google Fonts family with Vietnamese), plus "upload the font file" when the app does not have it, plus "keep it and accept the missing accents" only when the font exists.`);
@@ -981,14 +981,14 @@ export class Agent {
       if (meta.style?.id === MAP_STYLE_ID) {
         try { if (stageMapGuide(dir).files.length) this.event(task, { kind: "status", text: "map engine staged" }); placeMapEngine(dir); } catch { /* the rules are enough */ }
       }
-      // the owner's kit styles (Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, 2D Explainer): the kit as shipped and the page to start
+      // the owner's film styles (Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, 2D Explainer, Ricks Clip): the source skill as shipped and the page to start
       // from, from the first step; the engine and the faces beside the film's page too once it has one, so a Build can see its frames before the app's finish
-      if (isKitStyle(meta.style?.id)) {
-        try { if (stageKitGuide(dir, meta.style.id, this.root).files.length) this.event(task, { kind: "status", text: "the kit staged" }); await placeKit(dir, "index.html").catch(() => null); } catch { /* the rules are enough */ }
+      if (isMoworksStyle(meta.style?.id)) {
+        try { if (stageStyleGuide(dir, meta.style.id, this.root).files.length) this.event(task, { kind: "status", text: "the film style's source skill staged" }); await placeStyle(dir, "index.html").catch(() => null); } catch { /* the rules are enough */ }
       }
-      // the Brush cartoon style: the character kit (its guide, the layer's code, an example definition; never clawd.js) from the first step
+      // the Brush cartoon style: the character layer (its guide, the layer's code, an example definition; never clawd.js) from the first step
       if (meta.style?.id === "brush-cartoon") {
-        try { if (stageBrushGuide(dir, this.root).files.length) this.event(task, { kind: "status", text: "character kit staged" }); } catch { /* the rules are enough */ }
+        try { if (stageBrushGuide(dir, this.root).files.length) this.event(task, { kind: "status", text: "character layer staged" }); } catch { /* the rules are enough */ }
       }
       const pipeline = this.pipeline ? await this.pipeline(projectId).catch(() => "") : "";
       const prev = this.list(projectId).filter((x) => x.id !== task.id).at(-1);
@@ -1285,7 +1285,7 @@ export class Agent {
       try {
         const rep = await finalize(dir);
         // a film whose source does not compile keeps its older bundle: said at once, kept for the pipeline and the autopilot
-        const bad = rep?.anidoodle?.error ?? rep?.kit?.error ?? null;
+        const bad = rep?.anidoodle?.error ?? (rep?.filmStyle ?? rep?.kit)?.error ?? null;
         if (bad) this.event(task, { kind: "tool-error", text: `The film's code does not compile: ${bad}` });
         this.updateMeta?.(task.projectId, (m) => { const pl = (m.pipeline ??= {}); if (bad) pl.buildError = { at: new Date().toISOString(), error: bad, taskId: task.id }; else delete pl.buildError; });
       } catch (e) { this.event(task, { kind: "tool-error", text: `Finalize: ${e.message}` }); }
@@ -1495,8 +1495,8 @@ export function lyricsLine(dir) {
 /** The sound section of the film style's own file (its author's sound palette: music, foley, mix), "" when it has none, null when the
  *  style cannot be read. The music step and the sound effects follow it. */
 export function styleSound(meta, root = APP_ROOT) {
-  // the owner's kit styles have no style file of their own: their pack (config/rules/<style>) holds their sound rules (owner #909)
-  let text = ""; try { const s = getStyle(meta?.style?.id, root); const r = s?.rules?.find((x) => /-style$/.test(x.kind) && x.path) ?? (KIT_STYLES.includes(s?.id) ? s.rules?.find((x) => x.kind === "moworks-rule" && x.name === s.id && x.path) : null); text = r ? readFileSync(r.path, "utf8") : ""; } catch { return null; }
+  // the owner's film styles have no style file of their own: their pack (config/rules/<style>) holds their sound rules (owner #909)
+  let text = ""; try { const s = getStyle(meta?.style?.id, root); const r = s?.rules?.find((x) => /-style$/.test(x.kind) && x.path) ?? (MOWORKS_STYLE_IDS.includes(s?.id) ? s.rules?.find((x) => x.kind === "moworks-rule" && x.name === s.id && x.path) : null); text = r ? readFileSync(r.path, "utf8") : ""; } catch { return null; }
   return /^#{2,3}[^\n]*(sound|music|audio)[^\n]*\n([\s\S]*?)(?=^#{1,3}\s|(?![\s\S]))/im.exec(text)?.[2] ?? "";
 }
 

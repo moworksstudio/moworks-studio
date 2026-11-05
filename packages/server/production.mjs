@@ -37,7 +37,7 @@ import * as asr from "../voice/asr.mjs";
 import * as transcript from "../voice/transcript.mjs";
 import * as lyrics from "../voice/lyrics.mjs";
 import { briefScript, firstLines, scriptDraft, scriptGap } from "../voice/script.mjs";
-import { MASTER, loudness, masterLoudness } from "../hf-qa/loudness.mjs";
+import { MASTER, loudness, masterLoudness, masterName } from "../hf-qa/loudness.mjs";
 import { capWebBitrate } from "../hf-qa/webBitrate.mjs";
 import { analyseBeats, fitMusicToFilm, musicRepeats, musicUsed, placeTrack } from "../hf-edit/tracks.mjs";
 import { levelTracks } from "../sfx/mixlevels.mjs";
@@ -46,7 +46,7 @@ import { applyLanes } from "../sfx/lanes.mjs";
 import { resolveRuntime } from "../version-manager/index.mjs";
 import { filmHash, filmParts } from "./proxy.mjs";
 import { withSoundChecks } from "../hf-qa/gates.mjs";
-import { gateCuts } from "../moworks-kits/cuts.mjs";
+import { gateCuts } from "../moworks-styles/cuts.mjs";
 import { freshFilm } from "../hf-edit/codeFilm.mjs";
 import { fetchSlides, saveSlides, slidesLinks } from "./slides.mjs";
 
@@ -204,7 +204,7 @@ export const CHECKS = {
   "G-SFX": { title: "A sound on every action", explain: "Once the sound effects are placed, every visible action of the Motion Plan (an entrance, an exit, a landing, a step, a door…) has a sound within about 0.3 s, unless you, the brief or the film style asked for silence or keep that kind of sound out. A warning, never a block.", kind: "deterministic" },
   "G-POSE": { title: "Poses inside their limits", explain: "Draws every frame of an anidoodle film and checks each character's pose against its joint limits, and that nothing throws or logs an error.", kind: "deterministic" },
   "G-COLLISION": { title: "Nothing walks through anything", explain: "A 3D Cartoon film, every frame: no character walks through furniture or another character, and no foot goes below the floor (the style's own check). A warning, never a block.", kind: "deterministic" },
-  "G-CUTS": { title: "Cuts on the shot table", explain: "A film in one of the owner's kit styles, once it is rendered: the hard cuts in the picture match the cuts its own shot table declares (an Inner Voice film has none: every change is a fade). A warning, never a block.", kind: "deterministic" },
+  "G-CUTS": { title: "Cuts on the shot table", explain: "A film in one of the owner's film styles, once it is rendered: the hard cuts in the picture match the cuts its own shot table declares (an Inner Voice film has none: every change is a fade). A warning, never a block.", kind: "deterministic" },
   "G-CONTRACT": { title: "Same film every time", explain: "An anidoodle film draws each frame the same way every time, so the render matches what you saw.", kind: "deterministic" },
   "G-HF-LAYOUT": { title: "Layout", explain: "At every cut: text that overlaps, hides, is cut off or runs out of the frame or its box.", kind: "deterministic" },
   "G-HF-CONTRAST": { title: "Contrast", explain: "Every text stands out enough from what is behind it to read easily.", kind: "deterministic" },
@@ -467,8 +467,8 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   function startExport(p, b) {
     const format = FORMATS[b.format] ? b.format : "mp4";
     const quality = QUALITIES.includes(b.quality) ? b.quality : "standard";
-    // the sound master: Standard -14 LUFS by default, Quieter -16, or the mix as it is (#1073); "loud", the old name of -14, is Standard
-    const master = b.master === "loud" ? "kit" : ["kit", "quiet", "off"].includes(b.master) ? b.master : "kit";
+    // the sound master: Standard -14 LUFS by default, Quieter -16, or the mix as it is (#1073); "loud" and "kit", older names of -14, are Standard
+    const master = masterName(b.master);
     // always the film's own rate: HyperFrames renders the timeline at any rate it is given, but the player,
     // frame-stepped motion and the film's data-fps follow the project's; a separate choice only disagreed with the timeline. b.fps is ignored.
     const fps = projects.projectFps(projects.getProject(p.id, root) ?? p);
@@ -543,7 +543,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       if (format === "mp4" || format === "mov") {
         const target = MASTER[master] ?? null;
         if (target) { job.update({ stage: "master loudness" }); await masterLoudness(out, { target, root }).catch((e) => job.log(`master loudness: ${e.message}`)); }
-        loud = await loudness(out, { root, target: { lufs: (target ?? MASTER.kit).lufs, peak: (target ?? MASTER.kit).tp, tolerance: 1 } }).catch((e) => ({ error: e.message }));
+        loud = await loudness(out, { root, target: { lufs: (target ?? MASTER.standard).lufs, peak: (target ?? MASTER.standard).tp, tolerance: 1 } }).catch((e) => ({ error: e.message }));
         if (loud && !loud.error) loud.master = target ? master : "off";
       }
       // the film's hash beside it: a check that reads a render (G-CUTS) reads this one while the film is as it was rendered (T38-7)
@@ -557,7 +557,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       try { await ctx.autopilot?.saveVersion(p.id, "render"); } catch { /* a version is best effort */ }          // each render is a version
       // the cuts read from this render into the last Tech checks at once (T38b-2), in the background: the render is done whatever they find
       cutsIntoChecks(p).catch(() => null);
-      if (loud?.notes?.length) note(p, { kind: "render", status: "warning", text: "Sound: {lufs} LUFS, peak {peak} dBTP ({notes}); the target is {target} LUFS, peak at most -1", vars: { lufs: loud.lufs, peak: loud.truePeak, notes: loud.notes.join(", "), target: (MASTER[master] ?? MASTER.kit).lufs } });
+      if (loud?.notes?.length) note(p, { kind: "render", status: "warning", text: "Sound: {lufs} LUFS, peak {peak} dBTP ({notes}); the target is {target} LUFS, peak at most -1", vars: { lufs: loud.lufs, peak: loud.truePeak, notes: loud.notes.join(", "), target: (MASTER[master] ?? MASTER.standard).lufs } });
       // "Took" is the whole wait from pressing Render (the checks, the GPU test, the frames, the sound), not the frames alone
       const whole = job.startedAt ? Date.now() - Date.parse(job.startedAt) : res.wallMs;
       return { loudness: loud, file: out, size, frames: res.totalFrames ?? null, duration: res.duration ?? null, wallMs: whole, renderMs: res.wallMs, hfVersion: res.hfVersion, logFile: res.logFile,

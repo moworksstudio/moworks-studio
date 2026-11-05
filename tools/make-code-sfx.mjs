@@ -1,10 +1,10 @@
-// The owner's code-made sound effects (owner 04/11/2026 #882, #887): every sound the owner's kits synthesise in Python (numpy / scipy, fixed
-// seeds, no samples), built from the pinned kits (bundle/styles/moworks-kits) and added to the offline library (bundle/sfx) in its format:
+// The owner's code-made sound effects (owner 04/11/2026 #882, #887): every sound the source skills of the owner's film styles synthesise in Python
+// (numpy / scipy, fixed seeds, no samples), built from the pinned source skills (bundle/styles/moworks-styles) and added to the offline library (bundle/sfx) in its format:
 //   one-shots  silence trimmed (4 ms kept before the attack), -16 LUFS-I with true peak at most -1.5 dBTP (plain gain), mono, 44.1 kHz,
 //              Ogg Vorbis q4, at most 4 s (beds 8 s); a 20 s bed is a loop at -28 LUFS, stereo, q3 (as tools/make-sfx-library.mjs)
-// as bundle/sfx/<family>/<id>.ogg, ids by kit (pc- Paper Collage, sm- Stickman Explainer, iv- Inner Voice Short, c3- 3D Cartoon, rc- Ricks Clip, x2- 2D
-// Explainer) and `kit` the style id (only that style's films get them, first), each entry's source.kind "code" (credit: the owner's own code, made by synthesis); catalog.json keeps every other entry, and
-// tools/make-sfx-library.mjs keeps these when it remakes the packs. The kits' "opt-in" whooshes stay whooshes (family whoosh).
+// as bundle/sfx/<family>/<id>.ogg, ids by style (pc- Paper Collage, sm- Stickman Explainer, iv- Inner Voice Short, c3- 3D Cartoon, rc- Ricks Clip, x2- 2D
+// Explainer) and `filmStyle` the style id (only that style's films get them, first; `kit` before #1061), each entry's source.kind "code" (credit: the owner's own code, made by synthesis); catalog.json keeps every other entry, and
+// tools/make-sfx-library.mjs keeps these when it remakes the packs. The source skills' "opt-in" whooshes stay whooshes (family whoosh).
 // Usage: node tools/make-code-sfx.mjs [--only rc,c3]   (needs uv; Python 3.11 with numpy, scipy, and for the 2D Explainer soundfile and pyloudnorm)
 import { execFile } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
@@ -16,11 +16,11 @@ import { ffmpegExe } from "../packages/library/preview-media.mjs";
 import { FAMILIES } from "../packages/sfx/library.mjs";
 
 const run = promisify(execFile);
-const KITS = join(APP_ROOT, "bundle", "styles", "moworks-kits"), OUT = join(APP_ROOT, "bundle", "sfx");
+const SOURCES = join(APP_ROOT, "bundle", "styles", "moworks-styles"), OUT = join(APP_ROOT, "bundle", "sfx");
 const ONE = { lufs: -16, tp: -1.5, q: 4, max: 4 }, LOOP = { lufs: -28, q: 3, len: 20, xfade: 1.5 };
 const READ = new Date().toISOString().slice(0, 10);
 
-// [kit folder, builder (relative to the kit), its output folder, id prefix, style words (tags), the style's title]
+// [source folder, builder (relative to the source skill), its output folder, id prefix, style words (tags), the style's title]
 const BUILDS = [
   ["paper-collage", "tools/sfx/build_kit.py", "public/sfx/kit", "pc", "paper collage, paper", "Paper Collage"],
   ["story", "tools/sfx/build_stickman.py", "public/sfx/stickman", "sm", "stickman explainer, stickman", "Stickman Explainer"],
@@ -39,7 +39,7 @@ const RC_USE = { whoosh: "a soft low-passed air sweep: a big camera move (a pull
   scrape: "a metal scrape with a ring: a helmet lifted, iron dragged", ting: "a bright metallic ting: a reveal, a carving glints", sting: "a low brass sting and hit: the twist line",
   creak: "a wooden creak: a beam or a deck strains", "creak-low": "a deeper, longer creak: an old support about to give", snap: "a sharp wooden snap: a brace breaks",
   splash: "a splash into water: something falls in a river", water: "a flowing river bed: water ambience under a bridge" };
-/** The Python that renders each Ricks Clip synth alone: the kit's synth definitions as shipped, then one WAV per kind (peak 0.89, 48 kHz mono). */
+/** The Python that renders each Ricks Clip synth alone: the source skill's synth definitions as shipped, then one WAV per kind (peak 0.89, 48 kHz mono). */
 const rcDriver = (audioPy, outDir) => {
   const text = readFileSync(audioPy, "utf8"), cut = text.indexOf("\nF = lambda");
   if (cut < 0) throw new Error("Ricks Clip audio.py: its cue table (F = lambda) is not where it was");
@@ -55,7 +55,7 @@ const X2_USE = { pop: "soft bubbly UI pop: a label pill pops in", pop_big: "a he
   impact: "a deep soft boom: an impact, a big beat", reveal: "a shimmering riser into a warm bloom: a reveal", light_hit: "a bright airy shimmer: a light comes on, a hit of light",
   sparkle: "five tiny glassy chimes: a sparkle, the film's glowing accent", swish: "a short whoosh for a slide or a cut", title: "a soft warm chord swell and a bell: the title lands" };
 
-// the library family of each sound (kit prefix + name); loop: a bed long enough to repeat (20 s), bed: a longer one-shot (8 s at most)
+// the library family of each sound (style prefix + name); loop: a bed long enough to repeat (20 s), bed: a longer one-shot (8 s at most)
 const FAMILY = {
   "pc-paper-land": "paper", "pc-tear": "paper", "pc-stamp": "impact", "pc-scribble": "paper", "pc-strike": "paper", "pc-circle": "paper", "pc-marker-long": "paper",
   "pc-slam": "impact", "pc-cash": "paper", "pc-scatter": "paper", "pc-flip": "mechanical", "pc-ticker": "mechanical", "pc-pluck": "pop", "pc-shot": "impact",
@@ -77,8 +77,8 @@ const FAMILY = {
   "rc-whoosh": "whoosh", "rc-leaves": "wind", "rc-thunk": "impact", "rc-rumble": "impact", "rc-crash": "impact", "rc-cuckoo": "animal", "rc-snore": "cloth",
   "rc-scrape": "mechanical", "rc-ting": "bell", "rc-sting": "impact", "rc-creak": "door", "rc-creak-low": "door", "rc-snap": "impact", "rc-splash": "water", "rc-water": "water",
 };
-// the film style whose films get each kit's sounds (packages/sfx/library.mjs loadLibrary({ kit })): a style's own sounds stay in its own films
-const KIT_OF = { pc: "paper-collage", sm: "stickman-explainer", iv: "inner-voice-short", c3: "cartoon-3d", x2: "explainer-2d", rc: "ricks-clip" };
+// the film style whose films get each style's sounds (packages/sfx/library.mjs loadLibrary({ filmStyle })): a style's own sounds stay in its own films
+const STYLE_OF = { pc: "paper-collage", sm: "stickman-explainer", iv: "inner-voice-short", c3: "cartoon-3d", x2: "explainer-2d", rc: "ricks-clip" };
 const LOOPS = new Set(["iv-room", "rc-water"]), BEDS = new Set(["sm-traffic", "sm-office", "sm-dawn", "sm-wind", "sm-crowd", "sm-cheer", "sm-cloud", "iv-dread", "sm-boom", "sm-reveal"]);
 
 const FF = ffmpegExe(), FFPROBE = FF.replace(/ffmpeg(\.exe)?$/i, (m, e) => `ffprobe${e ?? ""}`);
@@ -94,7 +94,7 @@ async function onset(f) {
   const first = /silence_start:\s*(-?[\d.]+)/.exec(e), end = /silence_end:\s*([\d.]+)/.exec(e);
   return first && Number(first[1]) <= 0.001 && end ? Math.min(1, r3(Number(end[1]))) : 0;
 }
-/** The use of each sound, from the INDEX.md the kit's builder writes (| `name` | length | loudness | use |). */
+/** The use of each sound, from the INDEX.md the source skill's builder writes (| `name` | length | loudness | use |). */
 function uses(file) {
   const out = {};
   try { for (const m of readFileSync(file, "utf8").matchAll(/^\| `([^`]+)` \|[^|]*\|[^|]*\| (.+?) \|\s*$/gm)) out[m[1]] = m[2].replace(/\s*\|\s*/g, " ").trim(); } catch { /* none */ }
@@ -104,7 +104,9 @@ const TAG_STOP = new Set(["a", "an", "the", "of", "on", "in", "to", "and", "or",
 const tagsOf = (name, use, styleWords) => [...new Set([name.replace(/[-_]/g, " "), ...name.split(/[-_]/), ...String(use).toLowerCase().replace(/opt-in[^:]*:/g, "").split(/[^a-z]+/).filter((w) => w.length > 2 && !TAG_STOP.has(w)),
   ...styleWords.split(",").map((s) => s.trim()), "code made", "synth"])].filter(Boolean);
 
-async function make({ id, wav, family, tags, kitTitle, builder, use, kit }) {
+/** A code-made sound's source name, as the credits show it: "3D Cartoon: its source skill's own sounds (1.0.0)". */
+export const soundSourceName = (title, version) => `${title}: its source skill's own sounds${version ? ` (${version})` : ""}`;
+async function make({ id, wav, family, tags, styleTitle, builder, use, source }) {
   const loop = LOOPS.has(id), max = BEDS.has(id) ? 8 : ONE.max, tmp = `${wav}.mw.wav`, out = join(OUT, family, `${id}.ogg`);
   let how;
   if (loop) {
@@ -139,10 +141,10 @@ async function make({ id, wav, family, tags, kitTitle, builder, use, kit }) {
     if (fin.TP <= -1) break;
     gain -= fin.TP + 1.2;
   }
-  const pin = loadPins().moworksKits?.kits?.[kit] ?? {};
-  return { id, file: `${family}/${id}.ogg`, family, kit: KIT_OF[id.slice(0, 2)], tags, duration: r3(await duration(out)), loop, onset: loop ? 0 : await onset(out), lufs: r1(fin.I), peak: r1(fin.TP),
-    source: { kind: "code", name: `${kitTitle}: the kit's sound kit (${[pin.title ?? kit, pin.version].filter(Boolean).join(" ")})`, url: null, author: "Moworks Studio (the owner's own code)",
-      licence: "the owner's own", licenceUrl: null, file: `bundle/styles/moworks-kits/${kit}/${builder} › ${id.slice(3)}`, use, read: READ, how } };
+  const pin = loadPins().moworksStyles?.sources?.[source] ?? {};
+  return { id, file: `${family}/${id}.ogg`, family, filmStyle: STYLE_OF[id.slice(0, 2)], tags, duration: r3(await duration(out)), loop, onset: loop ? 0 : await onset(out), lufs: r1(fin.I), peak: r1(fin.TP),
+    source: { kind: "code", name: soundSourceName(styleTitle, pin.version), url: null, author: "Moworks Studio (the owner's own code)",
+      licence: "the owner's own", licenceUrl: null, file: `bundle/styles/moworks-styles/${source}/${builder} › ${id.slice(3)}`, use, read: READ, how } };
 }
 
 const isMain = process.argv[1] && /make-code-sfx\.mjs$/.test(process.argv[1]);
@@ -150,18 +152,18 @@ if (isMain) {
   const TMP = mkdtempSync(join(tmpdir(), "mw-code-sfx-")), py = ["run", "--python", "3.11", "--with", "numpy", "--with", "scipy"];
   const env = { ...process.env, PYTHONUTF8: "1", PYTHONIOENCODING: "utf-8" };
   const jobs = [];
-  // --only rc,c3: remake those kits' sounds only, every other code-made sound kept as it is
+  // --only rc,c3: remake those styles' sounds only, every other code-made sound kept as it is
   const oi = process.argv.indexOf("--only"), only = oi > 0 ? new Set(String(process.argv[oi + 1] ?? "").split(",").filter(Boolean)) : null;
-  for (const [kit, builder, outRel, pre, styleWords, title] of BUILDS) {
+  for (const [source, builder, outRel, pre, styleWords, title] of BUILDS) {
     if (only && !only.has(pre)) continue;
-    const root = join(TMP, kit);
-    if (pre !== "rc" && !existsSync(join(root, "tools"))) cpSync(join(KITS, kit, "tools"), join(root, "tools"), { recursive: true });
+    const root = join(TMP, source);
+    if (pre !== "rc" && !existsSync(join(root, "tools"))) cpSync(join(SOURCES, source, "tools"), join(root, "tools"), { recursive: true });
     const outDir = join(root, ...outRel.split("/"));
     let use = {};
     if (pre === "rc") {
       mkdirSync(outDir, { recursive: true });
       const driver = join(root, "rc_sounds.py");
-      writeFileSync(driver, rcDriver(join(KITS, kit, ...builder.split("/")), outDir));
+      writeFileSync(driver, rcDriver(join(SOURCES, source, ...builder.split("/")), outDir));
       await run("uv", ["run", "--python", "3.11", "--with", "numpy", "python", "-I", "-B", driver], { cwd: root, env, windowsHide: true, maxBuffer: 64 << 20 });
       use = RC_USE;
     } else if (pre === "x2") {
@@ -181,7 +183,7 @@ if (isMain) {
     for (const name of Object.keys(pre === "x2" ? X2_KINDS : use)) {
       const id = `${pre}-${name.replace(/_/g, "-")}`, family = FAMILY[id];
       if (!family || !FAMILIES.includes(family)) throw new Error(`${id}: no family (add it to FAMILY)`);
-      jobs.push({ id, wav: join(outDir, `${name}.wav`), family, tags: tagsOf(name, use[name] ?? "", styleWords), kitTitle: title, builder, use: use[name] ?? "", kit });
+      jobs.push({ id, wav: join(outDir, `${name}.wav`), family, tags: tagsOf(name, use[name] ?? "", styleWords), styleTitle: title, builder, use: use[name] ?? "", source });
     }
     console.log(`${title}: ${Object.keys(pre === "x2" ? X2_KINDS : use).length} sounds built`);
   }
@@ -195,15 +197,15 @@ if (isMain) {
   const ids = new Set(made.map((m) => m.id)), order = (s) => FAMILIES.indexOf(s.family);
   const remade = (s) => s.source?.kind === "code" && (!only || only.has(String(s.id).slice(0, 2)));
   cat.sounds = [...cat.sounds.filter((s) => !ids.has(s.id) && !remade(s)), ...made].sort((a, b) => order(a) - order(b) || a.id.localeCompare(b.id, "en", { numeric: true }));
-  if (!/owner's own code/.test(cat.about)) cat.about += " Sounds whose source.kind is \"code\" are the owner's own code-made effects (the kits' Python synthesis, made by tools/make-code-sfx.mjs; ids pc-, sm-, iv-, c3-, x2-, rc-).";
+  if (!/owner's own code/.test(cat.about)) cat.about += " Sounds whose source.kind is \"code\" are the owner's own code-made effects (the Python synthesis of the film styles' source skills, made by tools/make-code-sfx.mjs; ids pc-, sm-, iv-, c3-, x2-, rc-).";
   else if (!/\brc-\)/.test(cat.about)) cat.about = cat.about.replace("ids pc-, sm-, iv-, c3-, x2-)", "ids pc-, sm-, iv-, c3-, x2-, rc-)");
   writeFileSync(file, JSON.stringify(cat, null, 1) + "\n");
   const code = cat.sounds.filter((s) => s.source?.kind === "code");
   // CREDITS.md: one block for the code-made sounds, replaced each time
   const credits = join(OUT, "CREDITS.md"), block = ["<!-- mw:code-sfx -->", "## The owner's code-made sounds (Moworks Studio)", "",
-    `- ${code.length} sounds synthesised by the Python code of the owner's own kits (numpy / scipy, fixed seeds, no samples or recordings), built on ${READ} by \`tools/make-code-sfx.mjs\` from the pinned kits in \`bundle/styles/moworks-kits\` (config/pins.json moworksKits).`,
+    `- ${code.length} sounds synthesised by the Python code of the owner's film styles' source skills (numpy / scipy, fixed seeds, no samples or recordings), built on ${READ} by \`tools/make-code-sfx.mjs\` from the pinned source skills in \`bundle/styles/moworks-styles\` (config/pins.json moworksStyles).`,
     "- Licence: the owner's own work. Credit: Moworks Studio.",
-    ...BUILDS.map(([kit, builder, , pre, , title]) => `- ${title}, \`${kit}/${builder}\`: ${code.filter((m) => m.id.startsWith(`${pre}-`)).map((m) => `\`${m.id}\``).sort().join(", ")}`), "<!-- /mw:code-sfx -->"].join("\n");
+    ...BUILDS.map(([source, builder, , pre, , title]) => `- ${title}, \`${source}/${builder}\`: ${code.filter((m) => m.id.startsWith(`${pre}-`)).map((m) => `\`${m.id}\``).sort().join(", ")}`), "<!-- /mw:code-sfx -->"].join("\n");
   let text = readFileSync(credits, "utf8");
   const re = /<!-- mw:code-sfx -->[\s\S]*?<!-- \/mw:code-sfx -->/;
   writeFileSync(credits, re.test(text) ? text.replace(re, block) : `${text.trimEnd()}\n\n${block}\n`);

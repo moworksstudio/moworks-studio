@@ -27,17 +27,20 @@ export async function loudness(file, { root, target = TARGET } = {}) {
 }
 
 /** The master's loudness set to the rule, the way HyperFrames' media-use skill does publish loudness (two-pass `loudnorm`, measured values
- *  fed back, linear when it can stay linear): -16 LUFS / true peak -1 dBTP, or -14 LUFS when the client asks. (The retired kit's -4 dBTP
+ *  fed back, linear when it can stay linear): -16 LUFS / true peak -1 dBTP, or -14 LUFS when the client asks. (The retired Moworks Motion kit's -4 dBTP
  *  ceiling made a peaky mix land quieter: -17.2 LUFS on one film.) The video stream is
  *  copied untouched; the file is replaced only when the new one is written. Returns { applied, target, measured } or { silent: true }. */
 /** The range the master's loudnorm may keep: the film's own, at least the rule's, at most 20 (loudnorm's top). */
 export const keptRange = (measured, rule) => Math.min(20, Math.max(rule, Math.ceil(Number(measured) || 0)));
 // the render's master (owner 05/11/2026 #1073): Standard -14 LUFS, the web's own level (YouTube turns louder films down to about -14 and never
 // a quieter one up: a -16 film played 2 dB under the rest); Quieter -16 LUFS (a podcast, a platform that asks for less). "loud" (-14, "when
-// the client asks") was the old name of today's Standard: kept so a render asked for with it still masters the same
-export const MASTER = { kit: { lufs: -14, tp: -1, lra: 11 }, quiet: { lufs: -16, tp: -1, lra: 11 } };
-MASTER.loud = MASTER.kit;
-export async function masterLoudness(file, { target = MASTER.kit, root } = {}) {
+// the client asks") and "kit" (its name until #1061) are older names of today's Standard: kept so a render asked for with either still
+// masters the same
+export const MASTER = { standard: { lufs: -14, tp: -1, lra: 11 }, quiet: { lufs: -16, tp: -1, lra: 11 } };
+MASTER.loud = MASTER.kit = MASTER.standard;
+/** A master asked for by any of its names (an older render's "loud" or "kit" is "standard"): "standard" | "quiet" | "off". */
+export const masterName = (m) => (m === "loud" || m === "kit" ? "standard" : ["standard", "quiet", "off"].includes(m) ? m : "standard");
+export async function masterLoudness(file, { target = MASTER.standard, root } = {}) {
   const ff = ffmpegExe(root);
   // a range of its own stays: a film with silences has its quiet parts raised less (T32-8: a film's opening went from -23 to -16.5 dB)
   let lra = target.lra;

@@ -71,7 +71,7 @@ export function filmParts(dir, fps, { stamps = false } = {}) {
   if (existsSync(join(dir, "index.html"))) { both("index.html"); page(text(join(dir, "index.html"))); }
   if (existsSync(docPath(dir, "CHARACTERS.json"))) { both("CHARACTERS.json"); both(readFileSync(docPath(dir, "CHARACTERS.json"))); }
   walk(join(dir, "compositions"), true);
-  // a 2D Explainer film (kit style) keeps its code in story/, the page's own scripts, timed to the voice's words (STORY_WORDS, from
+  // a 2D Explainer film (one of the owner's film styles) keeps its code in story/, the page's own scripts, timed to the voice's words (STORY_WORDS, from
   // transcript.json): both are its picture. Test 38's final render was Version 1's picture with none of the Review's fixes in it (T38-8)
   if (existsSync(join(dir, "story"))) {
     walk(join(dir, "story"), true);

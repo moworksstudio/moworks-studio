@@ -202,7 +202,7 @@
       },
       "0.186.1": {
         "_size": 2015334,
-        "_about": "for the mg-styles-15 films: their package.json pins three 0.186.1; the 3D Cartoon style (the owner's kit asks for 0.186.0: 0.186.1 is its patch, main chat 04/11) adds GTAOPass, BokehPass, OutputPass and their shaders (GTAOShader, PoissonDenoiseShader, BokehShader, OutputShader, math/SimplexNoise), SHA-256 checked 04/11/2026",
+        "_about": "for the mg-styles-15 films: their package.json pins three 0.186.1; the 3D Cartoon style (the owner's source skill asks for 0.186.0: 0.186.1 is its patch, main chat 04/11) adds GTAOPass, BokehPass, OutputPass and their shaders (GTAOShader, PoissonDenoiseShader, BokehShader, OutputShader, math/SimplexNoise), SHA-256 checked 04/11/2026",
         "files": [
           { "path": "LICENSE", "size": 1081, "sha256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc" },
           { "path": "build/three.module.min.js", "size": 392831, "sha256": "3bc833fceb6577bd1a380388f832ae61cd6e2f78ad02b0bf0d5adf5a4a9334fe" },
@@ -347,11 +347,11 @@
     "root": "{app}/bundle/styles/what-if-animation",
     "react": "19.0.0"
   },
-  "moworksKits": {
-    "_about": "The owner's own kits (Moworks Studio, written by the owner; owner 04/11/2026 #880-#886): Paper Collage Motion Kit, Story Animation Kit (two styles: Stickman Explainer, Inner Voice Short), 3D Cartoon Animation Toolkit, 2D Explainer Animation Toolkit; and one skill folder (owner 05/11/2026 #1065-#1073): Ricks Clip, the skill cartoon-audio-short (SKILL.md) with its code kit cartoon-short-kit.zip, pinned by both SHA-256s as SKILL.md and kit/ (the skill's own layout), plus kit/vendor/toon.ts, the one file its setup.sh fetches (mromidev/claude-animated-shorts at its commit, MIT); its three.js is the app's default (three). Each kit is one .md installer; its embedded files are written as shipped into bundle/styles/moworks-kits/<kit> (never edited) by tools/intake-moworks-kit.mjs, pinned by the SHA-256 of the .md and its KIT VERSION. The app's parts (the HyperFrames hosts, the build, the staging) are packages/moworks-kits; the rules are config/rules/<style>. No Remotion package: the Remotion kits run on HyperFrames through R-LEMO (window.render(t), READY), Paper Collage through the What If bridge. Update: node tools/intake-moworks-kit.mjs <new kit .md>, read git diff bundle/styles/moworks-kits, carry the changes into the rules and packages/moworks-kits, set this pin, run test/moworks-kits.test.mjs",
+  "moworksStyles": {
+    "_about": "The owner's own film styles, each from a source skill the owner wrote (Moworks Studio; owner 04/11/2026 #880-#886; renamed from moworksKits, owner #1061: a local pin under the old name is still read): Paper Collage, Story Animation (two styles: Stickman Explainer, Inner Voice Short), 3D Cartoon, 2D Explainer (their own titles, as each PINNED file records them, are in title); and one skill folder (owner 05/11/2026 #1065-#1073): Ricks Clip, the skill cartoon-audio-short (SKILL.md) with its code in cartoon-short-kit.zip, pinned by both SHA-256s as SKILL.md and kit/ (the skill's own layout), plus kit/vendor/toon.ts, the one file its setup.sh fetches (mromidev/claude-animated-shorts at its commit, MIT); its three.js is the app's default (three). Each of the four is one .md installer; its embedded files are written as shipped into bundle/styles/moworks-styles/<source> (never edited) by tools/intake-moworks-kit.mjs, pinned by the SHA-256 of the .md and its KIT VERSION. The app's parts (the HyperFrames hosts, the build, the staging) are packages/moworks-styles; the rules are config/rules/<style>. No Remotion package: the Remotion styles run on HyperFrames through R-LEMO (window.render(t), READY), Paper Collage through the What If bridge. Update: node tools/intake-moworks-kit.mjs <new .md>, read git diff bundle/styles/moworks-styles, carry the changes into the rules and packages/moworks-styles, set this pin, run test/moworks-styles.test.mjs",
     "licence": "the owner's own (Moworks Studio)",
-    "root": "{app}/bundle/styles/moworks-kits",
-    "kits": {
+    "root": "{app}/bundle/styles/moworks-styles",
+    "sources": {
       "paper-collage": {
         "title": "Paper Collage Motion Kit",
         "version": "1.0.0",
@@ -423,7 +423,7 @@
     "HYPERFRAMES_API_KEY"
   ],
   "python": {
-    "_about": "Python for the AE export (packages/ae-export/port, from the kit's port): Playwright drives the pinned Chromium; fontTools, numpy, Pillow",
+    "_about": "Python for the AE export (packages/ae-export/port, from the Moworks Motion kit's port): Playwright drives the pinned Chromium; fontTools, numpy, Pillow",
     "exe": "%LOCALAPPDATA%/Programs/Python/Python312/python.exe",
     "modules": [
       "playwright",

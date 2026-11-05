@@ -13,7 +13,7 @@ import { docPath } from "../project-service/docs.mjs";
 import { APP_ROOT, expandEnv, loadPins, sourceHead } from "../version-manager/index.mjs";
 import { MAX_GAIN, levelOf, sig } from "./actions.mjs";
 import { SUSTAINED_MIN_S, familyOf, loadLibrary, matchLocal, plainName, rankLocal, stepsRun, sustainedCue, sustainedQuery, sustainedStandIn, words } from "./library.mjs";
-import { MAX_TAKES, codeFirst, codeLibrary, codeRuns, isKitStyle, makeCodeSounds, matchCode, retire, tierOf } from "./code.mjs";
+import { MAX_TAKES, codeFirst, codeLibrary, codeRuns, isMoworksStyle, makeCodeSounds, matchCode, retire, tierOf } from "./code.mjs";
 
 export const OPENVERSE = "https://api.openverse.org/v1/audio/";
 export const SFXMINT = "https://sfxmint.com/api/v1/";
@@ -414,21 +414,21 @@ export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root =
   const lib = new Map();
   const libOf = (name) => {
     if (!library) return null;
-    if (!lib.has(name)) { let m = null; try { m = matchLocal(LIBRARY_QUERY[name] ?? name, { family: families?.get?.(name) ?? null, style, root, kit: styleId, oneShot: true, minDuration: sustainedCue(name) ? SUSTAINED_MIN_S : 0 }); } catch { /* no library */ } lib.set(name, m); }
+    if (!lib.has(name)) { let m = null; try { m = matchLocal(LIBRARY_QUERY[name] ?? name, { family: families?.get?.(name) ?? null, style, root, filmStyle: styleId, oneShot: true, minDuration: sustainedCue(name) ? SUSTAINED_MIN_S : 0 }); } catch { /* no library */ } lib.set(name, m); }
     return lib.get(name);
   };
-  // code-made sounds first (code.mjs, owner #909): a film of a kit style takes the code only while this computer can run it (its kits forbid the
+  // code-made sounds first (code.mjs, owner #909): a film of the owner's styles takes the code only while this computer can run it (their source skills forbid the
   // others); any other film takes the code's answer when it is as close as the library's, then the library, then the search
   // code false or MW_CODE_SFX=none: no code at all (the tests of the library's and the search's own ways)
   const useCode = library && code !== false && process.env.MW_CODE_SFX !== "none";
-  const runs = useCode ? await codeRuns(root) : false, kitStyle = useCode && isKitStyle(styleId) && runs;
-  const codeLib = useCode ? codeLibrary({ kit: styleId, root, dir, run: runs }) : null, codeM = new Map();
+  const runs = useCode ? await codeRuns(root) : false, ownStyle = useCode && isMoworksStyle(styleId) && runs;
+  const codeLib = useCode ? codeLibrary({ filmStyle: styleId, root, dir, run: runs }) : null, codeM = new Map();
   const codeOf = (name) => {
     if (!codeLib) return null;
-    if (!codeM.has(name)) { let m = null; try { m = matchCode(name, { kit: styleId, family: families?.get?.(name) ?? null, library: codeLib }); } catch { /* no recipe */ } codeM.set(name, m && tone && offTone(m.entry) ? null : m); }
+    if (!codeM.has(name)) { let m = null; try { m = matchCode(name, { filmStyle: styleId, family: families?.get?.(name) ?? null, library: codeLib }); } catch { /* no recipe */ } codeM.set(name, m && tone && offTone(m.entry) ? null : m); }
     return codeM.get(name);
   };
-  const codeTakes = (name) => !!codeLib && codeFirst(codeOf(name), kitStyle ? null : libOf(name), { kitStyle });
+  const codeTakes = (name) => !!codeLib && codeFirst(codeOf(name), ownStyle ? null : libOf(name), { ownStyle });
   // the library answers well enough: a good match, or a sound of the cue's own kind (not worth waiting on the search)
   const enough = (name) => { const m = libOf(name); return !!m && (m.good || m.right); };
   // a name someone wrote (the storyboard's, the Motion Plan's: the app's own automatic names are the library's words) that the library answers only with something like it
@@ -450,12 +450,12 @@ export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root =
     for (const c of cues) { count.set(c.name, (count.get(c.name) ?? 0) + 1); if (Number(c.hold) > 0) hold.set(c.name, Math.max(hold.get(c.name) ?? 0, Number(c.hold))); }
     const asks = want.map((name) => { const m = codeOf(name);
       return { name, entry: m.entry, takes: Math.min(MAX_TAKES, count.get(name) ?? 1), dur: hold.get(name) ?? null,
-        why: kitStyle ? "the film style's kits make every sound in code" : ["", "the code's sound of its kind, as close as the library's", "the code's recipe is named for it", "the code makes this very sound"][tierOf(m)] }; });
+        why: ownStyle ? "the film style's source skill makes every sound in code" : ["", "the code's sound of its kind, as close as the library's", "the code's recipe is named for it", "the code makes this very sound"][tierOf(m)] }; });
     coded = asks.length ? await makeCodeSounds(dir, asks, { root, signal, run: runs }) : { used: new Map(), failed: [], made: 0, broken: 0, errors: [] };
     for (const n of coded.used.keys()) added.push(n);
     names = names.filter((n) => !coded.used.has(n));
-    // a kit style's film: a name the code has no recipe for is left out (Claude can name it otherwise, or write a recipe); one whose making failed falls back
-    if (kitStyle) { for (const n of names.filter((x) => !want.includes(x))) missing.push(n); names = names.filter((x) => want.includes(x)); }
+    // a film of the owner's styles: a name the code has no recipe for is left out (Claude can name it otherwise, or write a recipe); one whose making failed falls back
+    if (ownStyle) { for (const n of names.filter((x) => !want.includes(x))) missing.push(n); names = names.filter((x) => want.includes(x)); }
     st = readState(dir);
     // a sound made by code earlier that the code no longer gives: found again below
     const gone = names.filter((n) => st.sounds[n]?.source === "code");
@@ -561,7 +561,7 @@ export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root =
     : s.source === "owner" ? null : "neither the code nor the library has it"; } });
   // offline: no search answered at all (the bundled sounds were the only source)
   return { added, missing, failed, near, offline: offline || (online && names.length > 0 && [...hits.values()].every((h) => h == null)),
-    code: coded ? { runs, kitStyle, names: [...coded.used.keys()], made: coded.made, broken: coded.broken, errors: coded.errors.length } : null };
+    code: coded ? { runs, ownStyle, names: [...coded.used.keys()], made: coded.made, broken: coded.broken, errors: coded.errors.length } : null };
 }
 
 /** Final Mix's line about a placement, for the chat: what was placed, which named sounds use a stand-in and which could not be found
@@ -578,12 +578,18 @@ export function placedNote(res) {
   const names = res.names ?? [], shown = names.length > 12 ? `${names.slice(0, 12).join(", ")} and ${names.length - 12} more` : names.join(", ");
   const parts = [`Sound effects placed by the app: {n} ({names})${res.ambience ? ", with an ambience bed under {beds} place(s)" : ""}`];
   const vars = { n: res.placed ?? 0, names: names.length ? shown : "none", ...(res.ambience ? { beds: res.ambience } : {}) };
+  // who chose (owner #1096): Claude's picks of the library, the sounds made with ElevenLabs and the credits' seconds they took, and why making stopped
+  const pk = res.picks ?? null;
+  if (pk?.picked?.length) { parts.push("Claude picked {picked} of the library's sounds for their moments"); vars.picked = pk.picked.length; }
+  if (pk?.made?.length) { parts.push("Made with ElevenLabs Sound Effects: {made} ({secs} s of your credits)"); vars.made = pk.made.length; vars.secs = Math.round((res.madeSeconds ?? 0) * 10) / 10; }
+  if (res.makeStopped) { parts.push("No more sounds were made: {stop}"); vars.stop = res.makeStopped; }
   if (near.length) { parts.push("A close sound stands in for now: {near}"); vars.near = some(near.map((x) => `"${x.name}" (${x.as})`)); }
   // said plainly, name by name: these are not the sound the film asks for (Test 28: fifteen marbles were ticks and the note only said "close")
   if (lasting.length) { parts.push("The app has no such sound of its own and the sound search found none, so these are stand-ins, not the real sound: {lasting}. Press Place them again in Final Mix to search again, or add your own"); vars.lasting = lasting.map((x) => `"${x.name}" plays ${x.as}`).join(", "); }
   if (failed.length) { parts.push("Left out because the sound search did not answer: {failed}. Press Place them again in Final Mix later"); vars.failed = quote(failed); }
   if (none.length) { parts.push("No sound found for {missing}: ask Claude for other names"); vars.missing = quote(none); }
-  return parts.length > 1 ? { text: `${parts.join(". ")}.`, vars, status: "warning" } : { text: parts[0], vars };
+  const warn = near.length || lasting.length || failed.length || none.length || res.makeStopped;
+  return parts.length > 1 ? { text: `${parts.join(". ")}.`, vars, ...(warn ? { status: "warning" } : {}) } : { text: parts[0], vars };
 }
 
 const BEGIN = "<!-- mw:sfx (Moworks Studio: the storyboard's sfx: cues; rewritten on every change) -->", END = "<!-- /mw:sfx -->";
@@ -814,7 +820,8 @@ export function writeCredits(dir) {
     const s = st.sounds[name];
     if (!s) return;
     const v = (s.variants ?? []).find((x) => x.file === file), rec = v ? { ...s, ...v } : s;
-    if (!rows.has(rec.file)) rows.set(rec.file, [name, rec]);
+    const key = v?.of ?? rec.file;          // a copy a little higher or lower (vary.mjs) is credited once, as its original
+    if (!rows.has(key)) rows.set(key, [name, v?.of ? { ...rec, file: v.of } : rec]);
   };
   for (const m of st.mounted ?? []) add(m.name, m.file);
   for (const a of st.ambience?.placed ?? []) add(a.name, a.file);

@@ -178,14 +178,14 @@
       "name": "sfx",
       "path": "sfx",
       "files": 376,
-      "bytes": 9624473,
+      "bytes": 9624655,
       "source": "Kenney audio packs (kenney.nl), OpenGameArt.org CC0 sets and Wikimedia Commons, cut and re-encoded by tools/make-sfx-library.mjs (tools/sfx-library-packs.json)",
       "commit": null,
       "licence": "CC0 1.0 and public domain (each sound's source in sfx/catalog.json and sfx/CREDITS.md)"
     },
     {
-      "name": "moworks-kit-paper-collage",
-      "path": "styles/moworks-kits/paper-collage",
+      "name": "moworks-style-paper-collage",
+      "path": "styles/moworks-styles/paper-collage",
       "files": 45,
       "bytes": 228765,
       "source": "Paper Collage Motion Kit 1.0.0 (PAPER-COLLAGE-MOTION-KIT.md, SHA-256 c7bbbd7ef924931b6aae24e6ae189f2c5c9317dc2764632af25fcae317337aea)",
@@ -193,8 +193,8 @@
       "licence": "the owner's own (Moworks Studio)"
     },
     {
-      "name": "moworks-kit-story",
-      "path": "styles/moworks-kits/story",
+      "name": "moworks-style-story",
+      "path": "styles/moworks-styles/story",
       "files": 59,
       "bytes": 363373,
       "source": "Story Animation Kit 1.0.0 (STORY-ANIMATION-KIT.md, SHA-256 2c6ad666af509acdbf061b1c4a226dc47cad2889bb88a2505285fee9d9fb79f7)",
@@ -202,8 +202,8 @@
       "licence": "the owner's own (Moworks Studio)"
     },
     {
-      "name": "moworks-kit-cartoon-3d",
-      "path": "styles/moworks-kits/cartoon-3d",
+      "name": "moworks-style-cartoon-3d",
+      "path": "styles/moworks-styles/cartoon-3d",
       "files": 88,
       "bytes": 594985,
       "source": "3D Cartoon Animation Toolkit 1.0.0 (3D-CARTOON-ANIMATION-TOOLKIT.md, SHA-256 794b432693b5c2111d3004063f536af4ebe9a84e36ee3fdcc42d597ff7d88caf)",
@@ -211,8 +211,8 @@
       "licence": "the owner's own (Moworks Studio)"
     },
     {
-      "name": "moworks-kit-explainer-2d",
-      "path": "styles/moworks-kits/explainer-2d",
+      "name": "moworks-style-explainer-2d",
+      "path": "styles/moworks-styles/explainer-2d",
       "files": 111,
       "bytes": 1088549,
       "source": "2D Explainer Animation Toolkit 1.0.0 (2D-EXPLAINER-ANIMATION-TOOLKIT.md, SHA-256 e1e2df8e064e0efbd5faa0832e890b6bb3e8074dd73545934376d9771ef66c53)",
@@ -220,8 +220,8 @@
       "licence": "the owner's own (Moworks Studio)"
     },
     {
-      "name": "moworks-kit-ricks-clip",
-      "path": "styles/moworks-kits/ricks-clip",
+      "name": "moworks-style-ricks-clip",
+      "path": "styles/moworks-styles/ricks-clip",
       "files": 17,
       "bytes": 578169,
       "source": "Ricks Clip (the owner's skill cartoon-audio-short: SKILL.md SHA-256 2ac0bf5f2ab7a689b3751050df664920d7763392a9287b0ce8d7254ea4cfc2ed, cartoon-short-kit.zip SHA-256 784c07e36df5e91ddf93c78a1dde6b98b3aa3e3c37cadff03c5603d3971ce788; kit/vendor/toon.ts from mromidev/claude-animated-shorts@e3b817b6)",

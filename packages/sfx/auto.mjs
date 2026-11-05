@@ -7,7 +7,7 @@
 // own level under the music and the voice, repeats of one sound varied and one file at most MAX_REPEATS times a film, the sounds in the
 // ending's fade faded with it, and a quiet ambience bed under every scene that has a place.
 // The owner's choices (prefs.mjs: no whoosh, no ambience, the density, single sounds taken out) hold on every placement. Sounds come
-// first from the code (code.mjs: the owner's kits' sounds and new ones made by code for the film; a kit style's film from the code only),
+// first from the code (code.mjs: the owner's film styles' sounds and new ones made by code for the film; a film of those styles from the code only),
 // then the app's offline library, then Openverse / Freesound, then HyperFrames' bundled set; mounted and credited by index.mjs. Each
 // placement reports its coverage: the Motion Plan's moving rows that got a sound, and how many sounds came from each source (st.report).
 import { execFile } from "node:child_process";
@@ -24,6 +24,10 @@ import { isSongFilm } from "../style-catalog/traits.mjs";
 import { fadeOfTotal, planEnding } from "../hf-edit/ending.mjs";
 import { filmWords, trackClips } from "../hf-edit/tracks.mjs";
 import { ffmpegExe } from "../library/preview-media.mjs";
+import { pickAsker, pickSounds } from "./pick.mjs";
+import { soundMaker } from "./generate.mjs";
+import { varySounds } from "./vary.mjs";
+import { rankLocal, variantsOf } from "./library.mjs";
 
 export { TYPING };
 const run = promisify(execFile);
@@ -57,7 +61,7 @@ export function whooshAllowed(palette) {
 }
 // "never a whoosh, a swoosh or a riser", "**Never a whoosh or a cartoon pop** unless the owner asks": the whole clause, to its stop
 const NEVER = /\bnever\b[^.;:\n]*/gi;
-/** The families a style's sound section forbids (the owner's kits: "never a whoosh", "never a whoosh or a pop"): a Set of whoosh and pop. A ban
+/** The families a style's sound section forbids (the owner's film styles: "never a whoosh", "never a whoosh or a pop"): a Set of whoosh and pop. A ban
  *  stays (owner 31/10); only the owner's own word brings one back. */
 export function bannedFamilies(palette) {
   const out = new Set();
@@ -216,6 +220,21 @@ export function withVariants(cues, sounds) {
   });
 }
 
+/** After the cap: the moments of one sound that stay take its copies in turn (vary.mjs: a little higher, a little lower), so the three a
+ *  film keeps are never the very same (the cap keeps moments spread over the film, which may all have had the original). */
+export function rotateCopies(cues, sounds) {
+  const turn = new Map();
+  return cues.map((c) => {
+    const vs = sounds?.[c.name]?.variants;
+    if (!vs?.some((v) => v.of)) return c;
+    const cur = vs.find((v) => v.id === c.variant) ?? vs[0], group = cur.of ?? cur.file, members = vs.filter((v) => (v.of ?? v.file) === group);
+    if (members.length < 2) return c;
+    const k = turn.get(group) ?? 0;
+    turn.set(group, k + 1);
+    return { ...c, variant: members[k % members.length].id };
+  });
+}
+
 /** How many times one sound file may play in a film (owner 30/10, Test 26: a plug's pull twelve times, one bee buzz twelve times). */
 export const MAX_REPEATS = 3;
 /** The same file at most `max` times: the uses past it are left out ({ kept, thinned }, why "repeat"), the Motion Plan's kept before the automatic ones, each kept set
@@ -224,7 +243,9 @@ export const MAX_REPEATS = 3;
  *  a name again in one shot is its rhythm, one use (`tick@2.6, tick@4.6`), as a walk's steps are. A cue the user moved and the owner's own sounds are never left out. */
 export function capRepeats(cues, sounds, max = MAX_REPEATS) {
   const fileOf = (c) => { const s = sounds?.[c.name]; if (!s || s.source === "owner") return null;
-    return (c.variant ? (s.variants ?? []).find((v) => v.id === c.variant)?.file : null) ?? s.file ?? null; };
+    // a copy a little higher or lower (vary.mjs) is its original's file: the cap counts the sound, not its copies (#1096)
+    const v = c.variant ? (s.variants ?? []).find((x) => x.id === c.variant) : null;
+    return v ? v.of ?? v.file : s.file ?? null; };
   const walk = (c) => (c.family === "footstep" && /:\d+$/.test(String(c.id ?? "")) ? String(c.id).replace(/:\d+$/, "") : null);
   const prio = (c) => c.prio ?? 2, out = new Set();
   const useOf = (c) => walk(c) ?? (prio(c) === 0 && c.shot != null ? `${c.shot}|${c.name}` : c);
@@ -256,6 +277,48 @@ export function capRepeats(cues, sounds, max = MAX_REPEATS) {
     for (const u of uses) if (!keep.has(u)) for (const c of u) out.add(c);
   }
   return { kept: cues.filter((c) => !out.has(c)), thinned: cues.filter((c) => out.has(c)).map((c) => ({ ...c, why: "repeat" })) };
+}
+
+/** One file under many names (the storyboard's and the Motion Plan's): past MAX_REPEATS moments of it, the later names take the library's
+ *  next sound of their kind that is not one of those files, else a sound made from their own words (maker), else they stay (capRepeats keeps
+ *  a named sound's moments). Moments: a name's shots (a name again in one shot is its rhythm). Returns the names moved. */
+export async function spreadNamed(dir, cues, { root, style = null, styleId = null, families = null, keep = null, maker = null, max = MAX_REPEATS } = {}) {
+  const st = readState(dir), moments = new Map(), first = new Map();
+  for (const c of cues) {
+    if ((c.prio ?? 0) >= 2) continue;
+    moments.set(c.name, new Set([...(moments.get(c.name) ?? []), c.shot ?? c.start]));
+    first.set(c.name, Math.min(first.get(c.name) ?? Infinity, Number(c.start) || 0));
+  }
+  const byFile = new Map();
+  for (const name of moments.keys()) {
+    const s = st.sounds[name];
+    if (!s?.file || s.source === "owner" || keep?.has(name) && s.picked !== "claude") continue;
+    byFile.set(s.file, [...(byFile.get(s.file) ?? []), name]);
+  }
+  const over = [...byFile.entries()].filter(([, ns]) => ns.reduce((k, n) => k + moments.get(n).size, 0) > max);
+  if (!over.length) return [];
+  const crowded = new Set(over.map(([f]) => f)), moved = [];
+  const libId = (f) => String(f).split("/").pop().replace(/\.[a-z0-9]+$/i, "");
+  for (const [, names] of over) {
+    let used = 0;
+    for (const name of names.sort((a, b) => first.get(a) - first.get(b))) {
+      const k = moments.get(name).size;
+      if (used + k <= max || used === 0) { used += k; continue; }
+      const family = families?.get?.(name) ?? familyOf(name);
+      let alt = null;
+      try { alt = rankLocal(name, { family, style, root, filmStyle: styleId, oneShot: true, minDuration: sustainedCue(name) ? SUSTAINED_MIN_S : 0, exclude: [...crowded].map(libId) })
+        .find((r) => r.direct >= 1 && (!family || r.entry.family === family))?.entry ?? null; } catch { /* no library */ }
+      let ok = false;
+      const was = st.sounds[name]?.picked ?? null;          // Claude's pick moved on stays Claude's (no second run for it)
+      if (alt) { let vs = [alt]; try { vs = [alt, ...variantsOf(alt, { root }).filter((x) => x.id !== alt.id && !crowded.has(`assets/3_audio/sfx/${x.id}.ogg`))].slice(0, 4); } catch { /* the one */ }
+        ok = !!useLibrarySound(dir, name, vs); }
+      if (!ok && maker) ok = !!(await maker.make(name, name, sustainedCue(name) ? 3 : 1));
+      if (ok && was) patchState(dir, (x) => { if (x.sounds[name]) x.sounds[name].picked ??= was; });
+      if (ok) { moved.push(name); const f = readState(dir).sounds[name]?.file; if (f) crowded.add(f); } else used += k;
+    }
+  }
+  if (moved.length) patchState(dir, (x) => { for (const n of moved) if (x.sounds[n]) x.sounds[n].spread = true; });
+  return moved;
 }
 
 /** The ending's fade at the film's end, for the ambience: the music's own fade when it plays to the end (tracks.mjs fitted it to the
@@ -301,7 +364,7 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   opts = { ...opts, code: false };
   const policy = soundPolicy({ prefs, brief: briefOf(dir), palette, song: isSongFilm(null, { dir, root: opts.root }) });
   const style = opts.style ?? styleHint({ palette, id: opts.styleId, title: opts.styleTitle });
-  // a family the style's sound section forbids is off as the owner's own off would be (bannedFamilies: the kits' "never a pop")
+  // a family the style's sound section forbids is off as the owner's own off would be (bannedFamilies: the film styles' "never a pop")
   const banned = [...bannedFamilies(palette)].filter((f) => f !== "whoosh");
   if (banned.length) prefs.off = [...new Set([...(prefs.off ?? []), ...banned])];
   const words = spokenWords(dir), whoosh = opts.whoosh !== false && !isOff(prefs, { family: "whoosh" }) && !bannedFamilies(palette).has("whoosh");
@@ -322,11 +385,22 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   const keep = new Set(every.filter((c) => o.hand.has(c.id)).map((c) => c.name));
   const owned = await applyOwnerSounds(dir, every, opts);
   const families = new Map(every.filter((c) => c.family).map((c) => [c.name, c.family]));
+  // the named sounds the library has no exact sound for: Claude picks from the library's closest, or the sound is made with ElevenLabs (owner
+  // #1096 C and B: the library's exact sound, then Claude's pick, then made, then online, then code); what they settle stays through the placement
+  const maker = opts.maker !== undefined ? opts.maker : soundMaker(dir, { root: opts.root, signal: opts.signal });
+  const ask = opts.ask !== undefined ? opts.ask : pickAsker(opts.root);
+  const picks = await pickSounds(dir, every, shots, { root: opts.root, ask, maker, style, styleTitle: opts.styleTitle ?? null, styleId: opts.styleId, families, keep }).catch((e) => { if (opts.signal?.aborted) throw e; return null; });
+  for (const n of picks?.settled ?? []) keep.add(n);
   const res = await resolveCues(dir, every, { ...opts, library: true, style, families, keep, tone: graveFilm(opts.styleId, opts.styleTitle, palette) });
   if (codeAllowed && res.missing?.length) {          // what the library and the search have not: made by code
     const left = new Set(res.missing), more = await resolveCues(dir, every.filter((c) => left.has(c.name)), { ...opts, code: true, library: true, style, families, keep, tone: graveFilm(opts.styleId, opts.styleTitle, palette) });
     res.added = [...(res.added ?? []), ...(more.added ?? [])]; res.missing = more.missing ?? []; res.failed = [...(res.failed ?? []), ...(more.failed ?? [])]; res.code = more.code ?? res.code;
   }
+  // one file for many names (Test 38b: nine names on one pop): the later names take another sound of the library, or one made (#1096 A); then a
+  // sound heard more than once gets its copies a little higher and lower
+  const spread = await spreadNamed(dir, every, { root: opts.root, style, styleId: opts.styleId, families, keep, maker }).catch(() => []);
+  const uses = new Map(); for (const c of every) uses.set(c.name, (uses.get(c.name) ?? 0) + 1);
+  await varySounds(dir, uses, { root: opts.root }).catch(() => []);
   // the mix once the sounds are known: a cue with no sound leaves its place to an automatic one; one file at most MAX_REPEATS times, and a
   // repeat left out may leave its moment to another sound (the motion's own), so the mix is planned again without it
   const st1 = readState(dir), sounded = (n) => !!st1.sounds[n] && existsSync(join(dir, ...String(st1.sounds[n].file).split("/")));
@@ -335,7 +409,7 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   for (let pass = 0; pass < 4; pass++) {
     ({ kept, thinned } = planCues(shots, plan, { ...o, sounded, words, familyOfSound: (n) => st1.sounds[n]?.family ?? null, drop }));
     const capped = capRepeats(withVariants(kept, st1.sounds), st1.sounds);
-    kept = capped.kept;
+    kept = rotateCopies(capped.kept, st1.sounds);
     if (!capped.thinned.length) break;
     for (const c of capped.thinned) { drop.add(useKey(c)); repeats.push(c); }
   }
@@ -363,7 +437,8 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   const report = coverage(shots ?? [], plan, cues, thinned, readState(dir).sounds, o);
   note({ thinned: thinned.map((c) => ({ id: c.id, name: c.name, start: c.start, why: c.why })), report: { ...report, at: new Date().toISOString() } });
   writeCredits(dir);
-  return { levels: lv, fitted, report, code: res.code ?? null, cues: cues.length, placed: placed.length, owned, added: res.added, missing: res.missing, failed: res.failed ?? [],
+  return { levels: lv, fitted, report, code: res.code ?? null, picks: picks ? { asked: picks.asked, picked: picks.picked, made: picks.made, none: picks.none } : null, spread,
+    madeSeconds: maker?.seconds ?? 0, makeStopped: maker?.stopped ?? null, cues: cues.length, placed: placed.length, owned, added: res.added, missing: res.missing, failed: res.failed ?? [],
     near, offline: !!res.offline, names: [...new Set(placed.map((p) => p.name))], ambience: beds.length, thinned: thinned.length, density: policy.density, silent: null };
 }
 

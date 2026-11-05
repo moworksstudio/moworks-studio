@@ -36,8 +36,8 @@ import { voiceCheck, voiceText } from "../sfx/voicecheck.mjs";
 import { gpuShort } from "./proxy.mjs";
 import { styleNevers } from "../style-catalog/index.mjs";
 import { styleTraits } from "../style-catalog/traits.mjs";
-import { collisionCheck, collisionText } from "../moworks-kits/collision.mjs";
-import { cutoutText, makeCutout } from "../moworks-kits/cutout.mjs";
+import { collisionCheck, collisionText } from "../moworks-styles/collision.mjs";
+import { cutoutText, makeCutout } from "../moworks-styles/cutout.mjs";
 
 const TYPES = { ".png": "image/png", ".jpg": "image/jpeg", ".pdf": "application/pdf" };
 
@@ -401,9 +401,9 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       return `Frame "${frame}" exported: ${r.units} layer(s) at ${r.width} x ${r.height} in ${outRel}/ (PNG per layer, back to front) with ${outRel}/layout.json (positions in px, opacity, blend, and each text layer's words, font, size and colour). Rebuild text layers as live text with the font named there; place the pictures by layout.json.`;
     },
     // a What If film's shot list on the voice (the author's plan.py, in JavaScript)
-    // a 3D Cartoon film: the kit's own collision check on every frame (moworks-kits/collision.mjs)
-    collision_check: async ({ project }) => collisionText(await collisionCheck(project.path, { root })) || "This is not a 3D Cartoon film: the collision check is the 3D Cartoon kit's own and runs only on its films.",
-    // a Paper Collage film: the kit's own cut-out tools on one picture, into a new file (moworks-kits/cutout.mjs)
+    // a 3D Cartoon film: its source skill's own collision check on every frame (moworks-styles/collision.mjs)
+    collision_check: async ({ project }) => collisionText(await collisionCheck(project.path, { root })) || "This is not a 3D Cartoon film: the collision check is the 3D Cartoon film style's own and runs only on its films.",
+    // a Paper Collage film: its source skill's own cut-out tools on one picture, into a new file (moworks-styles/cutout.mjs)
     paper_cutout: async ({ project, args = {} }) => cutoutText(await makeCutout(project.path, args, { root })),
     whatif_plan: async ({ project }) => {
       try { return planText(planEpisode(project.path, { lengthSec: projects.getProject(project.id, root)?.meta?.targetDurationSec ?? null })); }
@@ -524,7 +524,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       // an anidoodle film: every frame drawn, every pose inside its joint limits (a run pose once left them and
       // HyperFrames' check, which samples, stopped the render at the end); the Review fixes what it names
       const pose = poseText(await poseCheck(project.path));
-      // a 3D Cartoon film: the kit's collision check on every frame (no one through furniture, no prop through a hand)
+      // a 3D Cartoon film: its source skill's collision check on every frame (no one through furniture, no prop through a hand)
       const collision = collisionText(await collisionCheck(project.path, { root }));
       // a Vietnamese film's words on screen written without their marks (Test 24: the Review never saw "NHAT KY · TRAM HON GIO")
       return [qcText(res, fresh), pose, collision, glyphText(codeGlyphs(project.path)), viMarksText(viMarks(project.path))].filter(Boolean).join("\n\n");

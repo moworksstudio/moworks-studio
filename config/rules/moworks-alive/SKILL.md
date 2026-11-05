@@ -11,7 +11,7 @@ A film is never still for more than 2 s, every object keeps a smooth subtle move
 film is lively, never a slideshow. **The floor is global** (moworks-studio, two layers): nothing on screen stays still for more than 2 s, except
 the final logo hold; where a style's text asks for a longer still hold, the floor wins. **The numbers are local:** how fast the film cuts,
 how far and how fast the camera moves, how long a move takes and how often something new comes are the film style's own (its STYLE.md, prompt,
-kit or HyperFrames' film type). The numbers below are the defaults for a style that gives none. It never replaces how the style draws: a style
+source skill or HyperFrames' film type). The numbers below are the defaults for a style that gives none. It never replaces how the style draws: a style
 that draws in code (canvas, an engine) does it with its own technique. A film longer than its style's demo: moworks-studio §6c.
 
 ## 1. The rules
@@ -38,7 +38,7 @@ that draws in code (canvas, an engine) does it with its own technique. A film lo
    (2-4 %) runs over the whole drawing; the finished picture may hold at the end as the end card. No float or drift is added to marks
    still being drawn.
 
-8. **Only what is forbidden is off limits (owner 31/10, every film style).** A guideline, a film style or the owner may forbid a move: that move is not done (a kit that forbids glitch and
+8. **Only what is forbidden is off limits (owner 31/10, every film style).** A guideline, a film style or the owner may forbid a move: that move is not done (a film style that forbids glitch and
    split forbids those two, and leaves every other effect in the library). What is not forbidden is allowed: never swap a move for a tamer one to be safe, and never read a rule wider than it
    is written. Fonts, sizes, colours, logos, end tags, legal lines and the product's picture stay as the Brand Kit says; the motion around them is free. Be bold: the owner tones it down at the
    Motion Plan if it is too much, so that is the place to offer more, not less.

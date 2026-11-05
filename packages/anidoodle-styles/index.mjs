@@ -143,7 +143,7 @@ function houseText(s, src) {
 }
 
 // What a project gets of the skill (paths under skills/anidoodle): the engine's source and the author's guides from the first step; since
-// also the worked example (Mechanical Lepidoptera: to study, never to copy), the house styles and the launch kit's facts
+// also the worked example (Mechanical Lepidoptera: to study, never to copy), the house styles and the launch video's facts
 const STAGED = ["engine/src", "references", "SKILL.md", "example", "styles/house", "engine/facts"];
 
 /** The engine's source, the author's SKILL.md, references, worked example, house styles and LICENSE/NOTICE in .moworks/library/anidoodle/
@@ -166,7 +166,7 @@ function fillEngine(dest, src) {
   for (const f of ["LICENSE", "NOTICE"]) if (existsSync(join(src.root, f))) cpSync(join(src.root, f), join(dest, f));
   writeFileSync(join(dest, "CREDIT.md"), `# anidoodle, staged for this project\n\nBy ${AUTHOR.name}. ${treeLink(src, src.skill ?? "skills/anidoodle")} (commit ${src.commit}), Apache-2.0 with NOTICE.\n`
     + "The engine's source (engine/src), the author's SKILL.md and references, the worked example (example/: study it, never copy it), the house\n"
-    + "styles (styles/house/) and the launch kit's example facts (engine/facts/). The author's tools (engine/tools) are not here: Moworks Studio runs\n"
+    + "styles (styles/house/) and the launch video's example facts (engine/facts/). The author's tools (engine/tools) are not here: Moworks Studio runs\n"
     + "every command. Import the engine as `anidoodle/...` (the app bundles it); never edit these files.\n");
   writeFileSync(join(dest, "PINNED"), `${src.commit}\n`);
 }
