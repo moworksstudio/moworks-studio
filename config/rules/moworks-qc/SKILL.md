@@ -1,7 +1,7 @@
 ---
 name: moworks-qc
 description: Moworks Studio quality review, for every video style - after Version 1, when the owner asks for it, look at stills of the film like a strict director, score it on seven criteria, fix until every score is 8 or more (or fix hard mistakes only), with HyperFrames' check folded in.
-version: 1.3.2
+version: 1.3.3
 derived-from: Moworks Motion kit 2.0.4 (commit 30b7dcb, MIT, Moworks) - engine/skill/moworks-motion/workflow/review.md, rewritten for Moworks Studio. Folds in the layout and contrast findings of HyperFrames' check (Apache-2.0, 0.8.214 at 4719543), read as shipped. Criterion 6 (Brand / design) keeps the checklist of HyperFrames' design adherence at 0.8.163 (Apache-2.0, as shipped: https://github.com/heygen-com/hyperframes/blob/490ecafbc4d1fba3dd9246d516390d4a1a188089/skills/hyperframes-creative/references/design-adherence.md); HF retired that file in 0.8.185, so the studio keeps it as its own rule.
 ---
 
@@ -43,7 +43,7 @@ guide lines and no HTML text, so a word missing from it says nothing about the f
    read docs/MOTION-PLAN.json's hold, loop and idle rows and the app's still-stretch check when it gives one. A still stretch over 2 s other than
    the end logo hold, a held object or character with no idle motion, a camera frozen behind text, a motion word of the brief not done:
    6 at most; a film that reads as a slideshow: 5 at most.
-4. **Variety:** something new every 2-4 s.
+4. **Variety:** something new as often as the style's pace asks (moworks-alive rule 6); a long film changes its treatment from chapter to chapter (moworks-studio §6c).
 5. **Composition:** the main super and the hero near the centre (a tendency, never forced), the rest floating free; balance, margins.
 6. **Brand / design:** the film's design spec (`frame.md`, a Brand Kit chosen in the project; `design.md`; the design the brief describes; with no Brand Kit, the guideline's rules), held strictly (HyperFrames' design adherence at 0.8.163, kept as the studio's own rule):
    every colour from its palette, its fonts and weights, its corners, spacing and depth, none of its "don'ts"; the owner's frames in keep design (2 px).

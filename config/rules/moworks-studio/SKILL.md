@@ -1,7 +1,7 @@
 ---
 name: moworks-studio
 description: Moworks Studio's house rules for every film style, read first in every step - the five rules of every film (collisions, readable text, determinism, truth, logos), the guideline or Brand Kit on every piece of text, the client's logo used as given, Vietnamese text, hand-drawn styles under a Brand Kit, character acting, a sound on every action, text over a canvas film, and how every film ends. Adds only what HyperFrames and the style leave open.
-version: 1.3.24
+version: 1.3.25
 derived-from: Moworks Motion kit 2.0.4 (Moworks; commit 30b7dcb65808b2a5299ad6a3357280a12773395f) - engine/skill/moworks-motion/SKILL.md step 3 ("Brand") and "Rules in every film" 1-5, workflow/characters.md sections 2, 3 ("Faces", "Hands") and 6 ("Collisions and physics"), brands/other.md; written from the idea for Moworks Studio. HyperFrames (Apache-2.0, 0.8.214 at 4719543) read as shipped where cited. Owner rules 24/10/2026 (#345, #346); the ending, owner 29/10/2026; the docs/ folder, owner 30/10/2026.
 ---
 
@@ -10,6 +10,17 @@ derived-from: Moworks Motion kit 2.0.4 (Moworks; commit 30b7dcb65808b2a5299ad6a3
 Read this first, in every step, in every film style. **What wins:** where HyperFrames already has a rule (how a composition is built,
 timing, determinism, captions, design files, its checks), HyperFrames' rule holds as it ships; the film style's own rules decide its look,
 its drawing and its motion. This file adds only what they leave open, and the owner's own words in the chat win over it for their film.
+
+**Two layers (owner 05/11/2026, audit/101):**
+
+| Layer | What it decides | Where |
+|---|---|---|
+| **Local**: the film style's author | The look, the drawing, the colours, the pace and the cut rate, the camera, how long a move takes and its easing, the mood, how characters act, the voice's tone and pace, the sound's character | The author's source as pinned (STYLE.md, a prompt, a kit, HyperFrames' film types) and the style's own pack in `.moworks/rules/<style>` |
+| **Global**: this file, moworks-alive, moworks-qc | Only what holds in every style without changing how any author works: the story and its content, how a long film is built (§6c), truth, logos, Vietnamese text, readable text, the floor of moworks-alive (nothing still over 2 s), the mix levels (§7), how to ask the owner (§2b) | Here |
+
+A global rule never sets a number for the pace, the camera, a move's length or the mood: where a rule here or in moworks-alive gives such a
+number, it is the default for a style whose author gives none, and the author's own number wins. Where the author gives none, HyperFrames' own
+number for the film's type holds as it ships.
 
 **Where the files go:** HyperFrames' files stay where it reads them, at the project root (`index.html`, `compositions/`, `assets/`,
 `frame.md`, `BRIEF.md`, `STORYBOARD.md`, `SPEC.md`, `SCRIPT.md`, `transcript.json`). The app's documents are in `docs/`: `docs/NOTES.md`,
@@ -155,6 +166,8 @@ When the owner brings a product for a product showcase or launch (a named produc
   gestures, not only rest poses; a gesture the engine cannot make is named to the owner before the build.
 - **Faces are never frozen:** every character on screen longer than a second has an expression that fits the beat, blinks (a lid for
   about 0.1 s, every 2-5 s) and a talking mouth while it speaks.
+- **The face carries the story's mood** (the film kind's, then the brief's, then the style's), in the engine's own way and within what its rig
+  can do: a face never stays blank through a beat that has a feeling. A pose or an expression the rig cannot make is named to the owner.
 - **Hands act:** open, relaxed, pointing, gripping, as the gesture needs; a hand that holds something grips it.
 - **Weight and contact:** feet on the ground (no sliding, no floating; a step plants the foot), weight shifts before a move, anticipation
   before a big action. Anything that lands squashes and settles, and what it hits reacts. Nothing floats unless the story makes it float.
@@ -196,6 +209,22 @@ never edit its frames (their times, words or scenes). A timing the voice or the 
 code; a change of what a frame says or shows is the owner's to approve (§2b). The app puts the frames back as approved after such a
 step; only the owner's own requests in the chat change them.
 
+## 6c. A long film is never a short one stretched (owner 05/11/2026, every film style)
+
+The house rules were first made on films of 15-30 s. A film of a minute or more needs its own care (Test 38, 190 s, read slow and sad):
+- **Length comes from content, never from stretching.** A film longer than its style's demo keeps the demo's pace (measured: its cuts a
+  minute, its moves, its camera), and gets its length from more beats and more shots, never from longer shots, slower moves or a slower
+  reading. A style made of one continuous take keeps its take and changes what it shows along it.
+- **A long film has a shape:** chapters (each one idea), each changing its treatment, its framing and its rhythm from the one before; one
+  rise to a peak; a quiet beat that stays short and turns; no layout or move repeated as the film's habit. HyperFrames: any single treatment
+  goes stale after about 6 s. All of it in the style's own hand.
+- **The voice fits the film without dragging.** The film kind's and the style's own script rules come first (What If, Map Explainer, a
+  kit's SCRIPTING.md, HyperFrames' film.md). A script Claude writes is sized to the film at the style's reading pace; a script the owner
+  wrote is read word for word (§2b). When the content is too thin for the length, do not write filler and do not read slower: offer the
+  owner, as §2b says, more content (an example, a fact with its source, a small scene), a shorter film, or the film as it is.
+- **Before the Storyboard,** for a film longer than its style's demo, say in one line how the length is filled (how many chapters, about
+  how many shots), so the owner sees it before frames are drawn.
+
 ## 6b. Feedback
 
 - **Feedback against the film style** (darker and older on a style whose author says "clean", "not a ruin"): say so in one line before you change the picture, and ask; the style's author decided it. A note that does not touch what the style fixes: just do it.
@@ -218,8 +247,12 @@ Only when the film has a voice-over with its reviewed transcript (transcript.jso
   only when the owner or the brief asks for it: call the app's `music_stop` tool with that second (in a pause of the voice), or the
   owner sets it in Final Mix ("Stop the music at"). A film kind or a style may have its own rule for this (What If: its own
   `SKILL.md`); never stop the music at a twist on your own.
-- **The voice stays on top:** the app's voice check lists every spoken word where the effects or the music come within 3 dB of the voice
-  (a warning, never a block); fix each by moving the effect into the pause after the word or lowering it. The whole mix stays at -16 LUFS.
+- **The mix levels (owner 05/11/2026 #1027, every film style, over any style's own numbers):** the voice-over at -16 LUFS; the music
+  1.5 dB under the voice between the words and 10 dB under it while words are spoken; the sound effects at their loudest 6 dB under the
+  voice, and 8 dB under it on a spoken word; the whole mix at -16 LUFS. The app sets them (Final Mix, Balance again); a kit's own mix
+  numbers (a music bed far under the voice, a louder master) give way to these. A level the owner sets stays theirs.
+- **The voice stays on top:** the app's voice check lists every spoken word where the effects come within 8 dB of the voice or the music
+  within 3 dB (a warning, never a block); fix each by moving the effect into the pause after the word or lowering it.
 
 ### 7b. A sound on every action (owner 30/10)
 
@@ -252,11 +285,12 @@ mood"):
   on every action (only two of one kind within 0.1 s are one sound; a small action's sound plays quieter, never left out), sets each kind
   of sound under the music and the voice, crossfades the ambience between places and fades it out with the film's ending (§9). Tech checks'
   G-SFX ("Actions with no sound") is to be zero once the sounds are placed.
-- **Sounds made by code (owner 04/11/2026):** the app makes the effects in code first, before its library and the online search: the owner's
+- **Where the sounds come from (owner 05/11/2026 #1034):** the app's offline library first, then the online search, then sounds made by code for a
+  cue neither has (the order of 04/11, code first, made Test 38's sounds dull and off the picture). The code: the owner's
   kits' own sounds (a kit's signature sounds stay in its own style), new ones made by their recipes and by the app's (impacts by material,
   steps by ground, paper by action, a crayon, a marker, a pencil or chalk by stroke, doors, water, fire, wind, rain, bells, machines,
-  electronics, magic, birds, frogs, crickets, a heartbeat…), each film with its own takes. A film of one of the owner's kit styles takes code
-  only (its kit's rules forbid downloaded sounds). It decides the source itself; you name the sound. Nothing about it is on screen.
+  electronics, magic, birds, frogs, crickets, a heartbeat…), each film with its own takes. It decides the source itself; you name the sound by the thing on
+  screen and its action (`- sfx: rock grain crackle, earth whoosh past`), so the library finds the one that matches the picture. Nothing about it is on screen.
 - **A sound the code cannot make yet:** when a cue needs one (Final Mix's note says it was left out, or it is on a stand-in, or its name
   finds only a wrong kind), you may write a recipe for it: `.moworks/sfx-recipes/<sound-name>.py` (lower-case words and dashes), with a
   one-line docstring of what is heard, `FAMILY = "<one of the library's families>"`, `TAGS = ["<the cue's name>", "<other names for it>"]`,
@@ -276,6 +310,15 @@ mood"):
 ## 8. Text over a canvas film (owner 27/10)
 
 **3D (owner 04/11):** when the owner asks for 3D, never answer that the app cannot do it. three.js is on this computer: offer it as one of the choices, a 3D scene built by code (shapes, materials, lights, a moving camera) in the film style's colours. Say plainly that it is not photoreal like a 3D render or a photo, and that it reaches After Effects as one picture. HTML / CSS / GSAP stays the default when the owner did not ask for 3D.
+
+### 8b. 3D that reads as 3D (owner 05/11/2026)
+
+When the owner asks for 3D, Prepare names the shots it would build in 3D (every shot whose subject is a thing in space is a candidate, not
+one by default) and the owner chooses. A style with its own 3D engine (3D Cartoon) builds it its own way; otherwise HyperFrames' `3d.md`
+holds as it ships (fly or push into the subject rather than orbit it; one hero object). In every 3D scene, in the style's colours and bans:
+something to measure the depth by (things near and far that move against each other as the camera moves, something passing in front),
+a camera that travels rather than turning in place, and form that reads (a silhouette that changes as it turns, a cast shadow, a lit rim).
+The 2D shots around it take their depth the style's own way.
 
 Only when the film draws on a canvas: its film style's After Effects badge is "video" (measured on the style's demo), or the film's own
 code draws its picture on a canvas (a 2D or WebGL canvas, three.js, an engine's page). The app says so in the step's message. Such a film

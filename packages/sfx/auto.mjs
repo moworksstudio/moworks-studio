@@ -21,7 +21,6 @@ import { fitEffects } from "./voicefit.mjs";
 import { SUSTAINED_MIN_S, familyOf, findAmbience, pickVariant, sustainedCue } from "./library.mjs";
 import { DEFAULT_DENSITY, briefOf, isOff, readPrefs, soundPolicy } from "./prefs.mjs";
 import { isSongFilm } from "../style-catalog/traits.mjs";
-import { codeRuns, isKitStyle } from "./code.mjs";
 import { fadeOfTotal, planEnding } from "../hf-edit/ending.mjs";
 import { filmWords, trackClips } from "../hf-edit/tracks.mjs";
 import { ffmpegExe } from "../library/preview-media.mjs";
@@ -296,6 +295,10 @@ async function placeAmbience(dir, shots, { prefs = {}, filmEnd = null, endFade =
 export async function autoSfx(dir, shots, plan, opts = {}) {
   await levelTracks(dir, { root: opts.root, fit: false }).catch(() => null);          // the voice and the music at their levels first: the effects sit against them
   const prefs = readPrefs(dir), palette = opts.palette ?? "";
+  // where the sounds come from, every film (owner 05/11 #1034: code first did not work, Test 38's code-made sounds were dull and off the
+  // picture): the offline library first, then online, then a sound made by code only for a cue neither has (below)
+  const codeAllowed = opts.code !== false;
+  opts = { ...opts, code: false };
   const policy = soundPolicy({ prefs, brief: briefOf(dir), palette, song: isSongFilm(null, { dir, root: opts.root }) });
   const style = opts.style ?? styleHint({ palette, id: opts.styleId, title: opts.styleTitle });
   // a family the style's sound section forbids is off as the owner's own off would be (bannedFamilies: the kits' "never a pop")
@@ -320,6 +323,10 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   const owned = await applyOwnerSounds(dir, every, opts);
   const families = new Map(every.filter((c) => c.family).map((c) => [c.name, c.family]));
   const res = await resolveCues(dir, every, { ...opts, library: true, style, families, keep, tone: graveFilm(opts.styleId, opts.styleTitle, palette) });
+  if (codeAllowed && res.missing?.length) {          // what the library and the search have not: made by code
+    const left = new Set(res.missing), more = await resolveCues(dir, every.filter((c) => left.has(c.name)), { ...opts, code: true, library: true, style, families, keep, tone: graveFilm(opts.styleId, opts.styleTitle, palette) });
+    res.added = [...(res.added ?? []), ...(more.added ?? [])]; res.missing = more.missing ?? []; res.failed = [...(res.failed ?? []), ...(more.failed ?? [])]; res.code = more.code ?? res.code;
+  }
   // the mix once the sounds are known: a cue with no sound leaves its place to an automatic one; one file at most MAX_REPEATS times, and a
   // repeat left out may leave its moment to another sound (the motion's own), so the mix is planned again without it
   const st1 = readState(dir), sounded = (n) => !!st1.sounds[n] && existsSync(join(dir, ...String(st1.sounds[n].file).split("/")));
@@ -350,9 +357,7 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   const near = (res.near ?? []).filter((x) => cues.some((c) => c.name === x.name));          // what the film plays, not a name thinned away
   const endFade = filmEnd ? endFadeOf(dir, filmEnd) : 0;         // the ending's fade: the beds and the sounds in it fade with the film
   const placed = mount(dir, cues, { filmEnd, endFade, cueKey: cueKey(shots ?? []), times: timeKey(shots ?? []), left: { missing: res.missing, near } });
-  // a kit style's film: every sound by code while this computer runs it (owner #909); the beds are library loops, so none (T38-3)
-  const codeOnly = isKitStyle(opts.styleId) && opts.code !== false && process.env.MW_CODE_SFX !== "none" && await codeRuns(opts.root);
-  const beds = policy.ambience && !codeOnly ? await placeAmbience(dir, shots, { prefs, filmEnd, endFade, words, shift: lv?.shift ?? 0, root: opts.root }) : (mountAmbience(dir, []), []);
+  const beds = policy.ambience ? await placeAmbience(dir, shots, { prefs, filmEnd, endFade, words, shift: lv?.shift ?? 0, root: opts.root }) : (mountAmbience(dir, []), []);
   // every effect under the voice where a word is spoken, and the whole mix under the master's ceiling: nothing later has to fix them
   const fitted = await fitEffects(dir, { root: opts.root }).catch(() => null);
   const report = coverage(shots ?? [], plan, cues, thinned, readState(dir).sounds, o);

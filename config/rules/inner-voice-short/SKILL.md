@@ -8,7 +8,7 @@ derived-from: The owner's Story Animation Kit 1.0.0 (STORY-ANIMATION-KIT.md, SHA
 # Inner Voice Short: the film style
 
 This pack sits on top of `.moworks/rules/general-style/SKILL.md`, whose steps, gates and files stay as they are. Where the two differ this pack wins, and
-where this pack and the kit differ on taste **the kit wins**. The house rules (`moworks-studio`) win over all three, and the app's own parts stand: music,
+where this pack and the kit differ on taste **the kit wins**. The house rules (`moworks-studio`) win only on what is global there (two layers: truth, logos, Vietnamese text, the floor of moworks-alive, a long film's shape, the mix levels); the pace, the camera, the moves and the mood are the kit's, and the app's own parts stand: music,
 sound effects, levels, render.
 
 ## 1. The kit is the style
@@ -62,11 +62,14 @@ casual build that has them (a declared name, so no system font is ever used); th
 | Build | `film.js` with `kit.js`, the draw order of SKILL.md (room, moon shaft, set pieces, glows, hero, shadow, words, finish); new set pieces in the film's own file, never in the kit |
 | Review | The author's "what we learned" (SKILL.md) and the stills, then `moworks-qc`. The cold open on black is meant |
 
+**The kit's pace (local; a long film keeps it, moworks-studio §6c):** no cuts as a rule, long holds, fades through black of 0.4-0.8 s, a static camera, small and slow acting (STYLE.md, SKILL.md); its life is in the captions and the small moves, never in a faster cut.
+
 ## 5. Sound
 
-**Code-made sounds only** (owner 04/11/2026): every sound of this style is made by code: the kit's own sounds first, then new takes and new
-sounds from its recipes and the app's, made with the owner's sfxlib. While the computer can run the code the app never takes a library or a downloaded
-sound for it, because the kit's own sound rules forbid them; a sound no recipe makes is left out, so write one the kit's way (moworks-studio §7b).
+**Where the sounds come from** (owner 05/11/2026, #1034, in place of "code-made sounds only" of 04/11: Test 38's code-made sounds were dull
+and did not match the picture): as for every film, the app's offline library first, then the online search, then a sound made by code (the kit's own
+sounds, new takes from its recipes and the app's) only for a cue neither has. Name each sound by the thing on screen and its action, so the library
+finds the one that matches (moworks-studio §7b).
 
 The kit's own sounds are in the app's library, made by the kit's code: `room` under each scene, `tap`, `alarm`, `clock-spin`, `whisper` under a red line,
 `harmonics`, `strum-sour`, `string-mute`, `dread` on the shadow's arrival (SOUND.md's gains). Quiet and close; **silence is part of the design**: the low

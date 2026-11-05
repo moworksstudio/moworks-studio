@@ -25,11 +25,16 @@ export const TYPING = /\btyping\b|\btyp(?:es|ed)\s+(?:out|in)\b|\btype-on\b|\bty
 // render lowered the whole film 10 dB to keep them from clipping, and the master's limiter pulled the mix down around each one.
 export const VOICE_LUFS = -16, ALONE_LUFS = -16;          // the voice-over; the music of a film with no voice
 export const BED_UNDER = 1.5;           // the music between the words, dB under the voice (owner 03/11 by ear on Test 37: the music 2-3 dB louder against the voice and the effects)
-export const MUSIC_DUCK = 0.316;        // the music while words are spoken, -10 dB (media-use audio-duck's default is 0.25; owner 31/10: 2 dB less, the music held under long speech was too low)
+// the music while words are spoken: 10 dB under the voice itself (the owner's rule, 31/10), so 8.5 dB under its own level between the words
+// (BED_UNDER). It was -10 dB under that level, -11.5 under the voice, and Test 38's music was hard to hear (owner 05/11 #1027)
+export const MUSIC_DUCK = Math.round(10 ** (-(10 - BED_UNDER) / 20) * 1000) / 1000;
 export const HIT_OVER = 1.5;            // an effect's loudest moment, dB over the music between the words (with BED_UNDER: the effects stay where they were, the music comes up)
 export const MAX_GAIN = Math.round(10 ** (12 / 20) * 100) / 100;          // +12 dB
 export const HIT_PEAK = -3;             // the loudest sample an effect's own gain may reach, dBFS (the film's whole mix: voicefit.mjs MIX_PEAK)
-export const EFFECTS_MARGIN_DB = 3, MUSIC_MARGIN_DB = 3;          // under a spoken word, how far under the voice (voicecheck.mjs, voicefit.mjs)
+// under a spoken word, how far under the voice (voicecheck.mjs, voicefit.mjs); the effects 8 dB (they were 3 and covered the voice, owner 05/11 #1027)
+export const EFFECTS_MARGIN_DB = 8, MUSIC_MARGIN_DB = 3;
+/** An effect's loudest moment, dB under the voice's level at most: the effects under the music, never over the voice (they were up to 2 dB over, Test 38) */
+export const HIT_UNDER_VOICE = 6;
 // LEVELS: each family's place against the others (impact louder, click softer) and, for the ambience beds, their volume at the library's
 // loudness (loops -28 LUFS, brought up to it), moved with the film's mix (mixShift)
 export const LEVELS = Object.freeze({ click: 0.2, switch: 0.22, pop: 0.25, footstep: 0.25, cloth: 0.25, typing: 0.25, electronic: 0.25, whoosh: 0.3,
@@ -60,11 +65,11 @@ export function volumeFor(family, lufs = null, { shift = 0, voice = null, maxBoo
 }
 /** A sound effect's volume (0.02 to MAX_GAIN): its loudest 400 ms (`peak`, momentary LUFS; null: at REF_LUFS) brought HIT_OVER dB over
  *  the music between the words (`bed`, LUFS; with no music, where it would be), its family up to 4 dB louder or softer (LEVELS against
- *  LEVEL), never more than 2 dB over the voice's own level (`voice`, LUFS: the effects sit in the pauses, afterWords; under a word its own
+ *  LEVEL), HIT_UNDER_VOICE dB under the voice's own level at most (`voice`, LUFS: the effects sit in the pauses, afterWords; under a word its own
  *  lane holds it, voicefit.mjs), and never past the room its file has (`filePeak`, the file's loudest sample, dBFS: HIT_PEAK). */
 export function hitVolume(family, peak = null, { bed = REF_BED, voice = null, filePeak = null } = {}) {
   let target = bed + HIT_OVER + clamp(20 * Math.log10(levelOf(family) / LEVEL), -4, 4);
-  if (Number.isFinite(voice)) target = Math.min(target, voice + 2);
+  if (Number.isFinite(voice)) target = Math.min(target, voice - HIT_UNDER_VOICE);
   let gain = target - (Number.isFinite(peak) ? peak : REF_LUFS);
   if (Number.isFinite(filePeak)) gain = Math.min(gain, HIT_PEAK - filePeak);
   return Math.round(clamp(10 ** (gain / 20), 0.02, MAX_GAIN) * 100) / 100;

@@ -8,7 +8,7 @@ derived-from: The owner's Story Animation Kit 1.0.0 (STORY-ANIMATION-KIT.md, SHA
 # Stickman Explainer: the film style
 
 This pack sits on top of `.moworks/rules/general-style/SKILL.md`, whose steps, gates and files stay as they are. Where the two differ this pack wins, and
-where this pack and the kit differ on taste **the kit wins**. The house rules (`moworks-studio`) win over all three, and the app's own parts stand: voice-over,
+where this pack and the kit differ on taste **the kit wins**. The house rules (`moworks-studio`) win only on what is global there (two layers: truth, logos, Vietnamese text, the floor of moworks-alive, a long film's shape, the mix levels); the pace, the camera, the moves and the mood are the kit's, and the app's own parts stand: voice-over,
 transcript, music, sound effects, levels, render.
 
 ## 1. The kit is the style
@@ -62,11 +62,14 @@ number on screen that differs from the voice, an unsourced statistic, a whoosh n
 | Build | `film.js` with `kit.js`; new props and sets as flat shapes with one light idea each, in the film's own file, never in the kit |
 | Review | The author's "what we learned" (SKILL.md) and the stills, then `moworks-qc` |
 
+**The kit's pace (local; a long film keeps it, moworks-studio §6c):** a cut on every spoken sentence, 1-2.5 s shots in the cold open (STYLE.md); slow pushes of 1-3 % a shot, a snap zoom-out about 0.4 s; the voice 2.6-2.8 words a second, pauses 0.3-0.5 s.
+
 ## 5. Sound
 
-**Code-made sounds only** (owner 04/11/2026): every sound of this style is made by code: the kit's own sounds first, then new takes and new
-sounds from its recipes and the app's, made with the owner's sfxlib. While the computer can run the code the app never takes a library or a downloaded
-sound for it, because the kit's own sound rules forbid them; a sound no recipe makes is left out, so write one the kit's way (moworks-studio §7b).
+**Where the sounds come from** (owner 05/11/2026, #1034, in place of "code-made sounds only" of 04/11: Test 38's code-made sounds were dull
+and did not match the picture): as for every film, the app's offline library first, then the online search, then a sound made by code (the kit's own
+sounds, new takes from its recipes and the app's) only for a cue neither has. Name each sound by the thing on screen and its action, so the library
+finds the one that matches (moworks-studio §7b).
 
 The kit's own sounds are in the app's library, made by the kit's code (`tag-d`, `tag-fs`, `tag-a` marimba tags for a label pill landing, `ui`, `boom` for the
 title with `swell` before it, `shimmer`, `reveal`, foley, beds: SOUND.md's table and gains). One or two sounds per shot, a power moment alone; hits in the

@@ -11,18 +11,18 @@ type, colour and copy of every shot at its key moment, with no motion yet.
 - Another option (the Storyboard dialog's Make another): a real other direction, different composition, type and motion language,
   never a colourway of an earlier layout; follow what the owner asked to change.
 - An option follows a HyperFrames frame preset, as it ships, only when the owner names one (name it).
-- Every option has the same beats (from `BRIEF.md`); a short film (under 20 s) may show 3-5 frames, a long one one frame per shot, at most 12 (group short shots into one beat).
+- Every option has the same beats (from `BRIEF.md`); as many frames as the story has beats: no fixed count (owner 05/11/2026: 12 frames are one mood on 30 s and another on 3 minutes). A long film's frame may hold a beat's several shots, listed under `- cuts:` with each cut's second; say in the step's message how many frames and why.
 
 ## 2. Files
 
 For the option A (the owner may ask for more: B, C…, one at a time; feedback on an option makes its revision, B2 · revised from B, see below; keep every option, delete nothing):
-- `boards/X/STORYBOARD.md`: HyperFrames' storyboard format, one `## Frame N` block per shot (duration, scene, voice-over line when
+- `boards/X/STORYBOARD.md`: HyperFrames' storyboard format, one `## Frame N` block per shot or per beat with its `- cuts:` (duration, scene, voice-over line when
   narrated, the Motion Library item or HyperFrames move it will cite, `status: outline`), plus the option's one-line idea and motion language at the top.
   Its heading names it: `# Option A · "a short name for its idea"`, in the language of the chat; a revision keeps the name of the
   option it comes from (`# Option B2 · "that name" · revised from Option B`).
-  Every frame is one shot with its own length in seconds (`duration: 1.8s`, never words such as "the same shot goes on"); the frames
+  Every frame has its own length in seconds (`duration: 1.8s`, never words such as "the same shot goes on"); the frames
   add up to the film's whole length (the length set in New project and the ending's fade after it, house rules §9: the app gives the
-  numbers), and the Motion Plan makes one shot per frame. A beat inside a shot goes in that frame's scene, or
+  numbers), and the Motion Plan makes one entry per frame, its cuts timed to the voice. A beat inside a shot goes in that frame's scene, or
   becomes its own shot with its own seconds.
   The last frame shows how the film ends (house rules §9): its scene says the ending (the last shot's gentle hold and the fade out of
   the picture and the music, or the end card, its hold and its shorter fade) and the fade's seconds, which its duration includes.

@@ -8,7 +8,7 @@ derived-from: The owner's Paper Collage Motion Kit 1.0.0 (PAPER-COLLAGE-MOTION-K
 # Paper Collage: the film style
 
 This pack sits on top of `.moworks/rules/general-style/SKILL.md`, whose steps, gates and files stay as they are. Where the two differ this pack wins, and
-where this pack and the kit differ on taste **the kit wins**. The house rules (`moworks-studio`) win over all three, and the app's own parts stand: voice-over,
+where this pack and the kit differ on taste **the kit wins**. The house rules (`moworks-studio`) win only on what is global there (two layers: truth, logos, Vietnamese text, the floor of moworks-alive, a long film's shape, the mix levels); the pace, the camera, the moves and the mood are the kit's, and the app's own parts stand: voice-over,
 transcript, music, sound effects, levels, render.
 
 ## 1. The kit is the style
@@ -72,11 +72,14 @@ background out (a transparent PNG keeps its own) and makes the halftone print wi
 a real person's face, a logo or a screenshot. A picture with a busy background cannot be keyed: a photo goes in `PhotoPrint` as it is; an object needs a
 transparent PNG from the owner (or one generated on flat green, IMAGES.md §2).
 
+**The kit's pace (local; a long film keeps it, moworks-studio §6c):** scenes of 4-6 s in an explainer with a voice-over, a change every 0.5-1.2 s inside them (STYLE.md); the camera a drift of 1.00-1.03 over a scene, no punch-ins or pans unless asked; springs, exits about 0.25 s.
+
 ## 6. Sound
 
-**Code-made sounds only** (owner 04/11/2026): every sound of this style is made by code: the kit's own sounds first, then new takes and new
-sounds from its recipes and the app's, made with the owner's sfxlib. While the computer can run the code the app never takes a library or a downloaded
-sound for it, because the kit's own sound rules forbid them; a sound no recipe makes is left out, so write one the kit's way (moworks-studio §7b).
+**Where the sounds come from** (owner 05/11/2026, #1034, in place of "code-made sounds only" of 04/11: Test 38's code-made sounds were dull
+and did not match the picture): as for every film, the app's offline library first, then the online search, then a sound made by code (the kit's own
+sounds, new takes from its recipes and the app's) only for a cue neither has. Name each sound by the thing on screen and its action, so the library
+finds the one that matches (moworks-studio §7b).
 
 The kit's own sounds are in the app's library, made by the kit's code: the cues of `SFX` use the kit's names (`tear` on each sheet, `paper-land`,
 `stamp` with `impact` under it on the power word, `strike`, `circle`, `count`, `pop`, `click`, `ding`…: SOUND.md's table and gains). Cues on key moments only,

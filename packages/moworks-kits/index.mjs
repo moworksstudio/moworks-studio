@@ -78,9 +78,49 @@ export function kitReads(styleId) {
   const REVIEW = { "paper-collage": ["motion-graphic/references/CHECKLIST.md"], "stickman-explainer": ["stickman-explainer/SKILL.md"],
     "inner-voice-short": ["inner-voice-short/SKILL.md"], "cartoon-3d": ["cartoon-video/references/CHECKLIST.md", "render-review/references/REVIEW.md"],
     "explainer-2d": ["explainer-video/references/CHECKLIST.md", "render-review/references/REVIEW.md"] }[styleId];
-  return { look: LOOK, method: [skill(s.skills[0])], examples: s.examples.map((e) => `${k}/${e}`), app: [`${lib}/app/README.md`], sound: [`${k}/.claude/skills/${SOUND}`],
+  const out = { look: LOOK, method: [skill(s.skills[0])], examples: s.examples.map((e) => `${k}/${e}`), app: [`${lib}/app/README.md`], sound: [`${k}/.claude/skills/${SOUND}`],
     review: REVIEW.map((r) => `${k}/.claude/skills/${r}`) };
+  // each step's own files of the kit (owner 05/11 #1036: the script step read one skill and the Motion Plan only STYLE.md, so Test 38 wrote
+  // long sentences and planned moves the hero cannot make). Every file of the kit's skills is read by a step, but KIT_UNREAD (test: moworks-kits)
+  const sk = (p) => `${k}/.claude/skills/${p}`, at = (p) => `${k}/${p}`, ex = out.examples;
+  const STEPS = {
+    "explainer-2d": {
+      brief: [sk("explainer-video/SKILL.md"), sk("script-writer/SKILL.md"), at("SCRIPTING.md"), sk("voice-over/SKILL.md"), sk("explainer-longform/SKILL.md"), sk("explainer-shorts/SKILL.md"), at("STYLE.md")],
+      storyboard: [at("STYLE.md"), at("SCRIPTING.md"), at("engine/CONTRACT.md"), sk("explainer-video/references/BUILD.md"), sk("art-modules/SKILL.md"), ...ex.slice(0, 2)],
+      motionSpec: [at("STYLE.md"), at("engine/CONTRACT.md"), sk("explainer-video/references/BUILD.md"), ex[0]],
+      build: [at("STYLE.md"), at("SCRIPTING.md"), at("engine/CONTRACT.md"), sk("explainer-video/references/BUILD.md"), sk("art-modules/SKILL.md"), sk("art-modules/references/BRIEF.md"), ...ex],
+      review: [...out.review, sk("render-review/SKILL.md")] },
+    "cartoon-3d": {
+      brief: [sk("cartoon-video/SKILL.md"), sk("cartoon-shorts/SKILL.md"), sk("cartoon-shorts/references/SCRIPT.md"), sk("cartoon-shorts/references/FORMATS.md"), sk("cartoon-whatif/SKILL.md"),
+        sk("cartoon-whatif/references/SCRIPT.md"), sk("cartoon-whatif/references/FORMATS.md"), sk("cartoon-whatif/references/EPISODES.md"), sk("idea-lab/SKILL.md"), sk("cartoon-video/references/VOICE.md"), ...LOOK.slice(0, 1)],
+      storyboard: [...LOOK, sk("cartoon-video/references/PIPELINE.md"), sk("character-builder/SKILL.md"), ...ex.slice(0, 2)],
+      motionSpec: [...LOOK],
+      build: [...LOOK, sk("cartoon-video/references/PIPELINE.md"), sk("character-builder/SKILL.md"), ...ex],
+      review: [...out.review, sk("render-review/SKILL.md")] },
+    "paper-collage": {
+      brief: [sk("motion-graphic/SKILL.md"), sk("motion-graphic/references/VOICE.md"), LOOK[0]],
+      storyboard: [...LOOK, sk("motion-graphic/references/IMAGES.md"), sk("motion-graphic/references/OUTPUT.md"), ...ex.slice(0, 2)],
+      motionSpec: [...LOOK],
+      build: [...LOOK, sk("motion-graphic/references/IMAGES.md"), sk("motion-graphic/references/OUTPUT.md"), ...ex],
+      review: out.review },
+    "stickman-explainer": {
+      brief: [sk("stickman-explainer/SKILL.md"), ...LOOK, sk("stickman-explainer/references/VOICE.md")],
+      storyboard: [...LOOK, ...ex.slice(0, 2)], motionSpec: [...LOOK], build: [...LOOK, ...ex], review: out.review },
+    "inner-voice-short": {
+      brief: [sk("inner-voice-short/SKILL.md"), ...LOOK],
+      storyboard: [...LOOK, ...ex.slice(0, 2)], motionSpec: [...LOOK], build: [...LOOK, ...ex], review: out.review },
+  }[styleId];
+  out.steps = { ...STEPS, sound: out.sound };
+  return out;
 }
+/** The kit's skill files no step reads, and why (test: every other one is read by a step). */
+export const KIT_UNREAD = Object.freeze({
+  "kit-setup/SKILL.md": "the kit's own install; the app sets up everything",
+  "style-note/SKILL.md": "the kit's note to itself about writing a new style",
+  "original-music/SKILL.md": "the kit's own music; the app's music comes from Final Mix",
+  // the other kit's skills in the Story kit (two styles share it)
+  "story:inner-voice-short": "the Story kit's other style", "story:stickman-explainer": "the Story kit's other style",
+});
 
 // ---- in a film: the engine, the faces and the words beside the page that runs them (the film's index.html, or a board, its own web root)
 /** Which kit style a page runs: the data-kit on its root (#main), or null. */

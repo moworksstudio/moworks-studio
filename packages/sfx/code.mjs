@@ -1,6 +1,7 @@
 // Sound effects made by code, the films' first source (owner 04/11/2026 #888, #889, #899, #909, #910). Nothing of it is on screen: a placed
 // sound shows by its name like any other, and is credited in the film's CREDITS.md. Where each sound comes from, the app decides in code
-// (index.mjs resolveCues), never Claude:
+// (index.mjs resolveCues), never Claude. Since owner 05/11 #1034 every film asks the library and the search first (auto.mjs) and comes here only
+// for the cues they have not; for those:
 //   - a film of one of the owner's kit styles (KIT_STYLES): code only, its kit's own sounds first. The kits' own sound rules make every
 //     sound in code and forbid downloaded ones and outside libraries; the library and the search come in only when this computer cannot
 //     run the code (no Python with numpy and scipy), so the film is never silent.

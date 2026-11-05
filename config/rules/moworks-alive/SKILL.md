@@ -1,16 +1,18 @@
 ---
 name: moworks-alive
 description: Moworks Studio's motion rule for every film style - the film is never still for more than 2 s, every held object keeps a smooth subtle movement, characters always move, text stays readable while the scene moves, the brief's motion words become real motion; minimum numbers per dynamic level. Read in the Motion Plan, the Build and the Review of every style.
-version: 1.2.0
+version: 1.3.0
 derived-from: Moworks Motion kit 2.0.4 (Moworks; commit 30b7dcb65808b2a5299ad6a3357280a12773395f) - engine/skill/moworks-motion/workflow/film.md L207-211 ("Dynamic level") and L240-241 ("A strong film keeps its always-on layers"), workflow/recipes.md L177 ("Nothing frozen except the final hold"), workflow/review.md L29 (criterion 3, motion); written from the idea for Moworks Studio.
 ---
 
 # The film is always alive (every film style)
 
 A film is never still for more than 2 s, every object keeps a smooth subtle movement, characters always move; the
-film is lively, never a slideshow. This is the studio's rule over every film style. It adds to the style's own rules and never replaces
-how the style draws: a style that draws in code (canvas, an engine) does it with its own technique. Where a style's text asks for a
-still hold, this rule wins, except for the final logo hold.
+film is lively, never a slideshow. **The floor is global** (moworks-studio, two layers): nothing on screen stays still for more than 2 s, except
+the final logo hold; where a style's text asks for a longer still hold, the floor wins. **The numbers are local:** how fast the film cuts,
+how far and how fast the camera moves, how long a move takes and how often something new comes are the film style's own (its STYLE.md, prompt,
+kit or HyperFrames' film type). The numbers below are the defaults for a style that gives none. It never replaces how the style draws: a style
+that draws in code (canvas, an engine) does it with its own technique. A film longer than its style's demo: moworks-studio §6c.
 
 ## 1. The rules
 
@@ -29,7 +31,8 @@ still hold, this rule wins, except for the final logo hold.
 5. **The brief's motion words become that motion:** "xoay quanh" / orbit / circle around = an orbit around that subject (at least 90° of
    arc while it is on screen); "xoay" / spin = a rotation; "bay" / float = a float; "rơi" / fall, "nảy" / bounce, "mở ra" / unfold… as
    said. Name the word and its move in the Motion Plan row.
-6. **Something new every 1.5-3.5 s:** a new element, a layout change, a camera move or a cut. A small float alone does not read as alive.
+6. **Something new as often as the style's pace asks** (with no number of its own: every 1.5-3.5 s): a new element, a layout change, a
+   camera move or a cut. A small float alone does not read as alive.
 7. **A film drawn stroke by stroke** (a picture that draws itself, a drawing being made): the new strokes,
    washes and marks drawn every second count as the motion. A hand may rest at most half a second between passes; a slow camera push
    (2-4 %) runs over the whole drawing; the finished picture may hold at the end as the end card. No float or drift is added to marks
@@ -47,7 +50,7 @@ still hold, this rule wins, except for the final logo hold.
    rings and bursts on the hits, particles, little words that play with the subject. Think of them in the Storyboard, from what is funny or charming in the subject and its words; a brief that asks for a sober film keeps them quiet, not absent.
    Text you add holds to moworks-studio §2c: nothing invented is presented as a fact.
 
-## 2. The minimum numbers, by dynamic level
+## 2. The default numbers, by dynamic level (a style's own numbers win)
 
 At 1920 px across; scale them to the frame. The hero's move stays the biggest of its shot; the always-on motion is smaller than the
 hero's, never smaller than this.

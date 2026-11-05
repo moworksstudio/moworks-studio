@@ -48,12 +48,13 @@ const MAP = {
 // table, and the kit as shipped (.moworks/library/<style>/kit): its skill and look for the brief, its look, worked examples and the app's page for the
 // board and the build, its sound rules for the music step
 const KIT = (styleId) => {
-  const pack = R(styleId, "SKILL.md"), k = kitReads(styleId);
+  const pack = R(styleId, "SKILL.md"), k = kitReads(styleId), uniq = (xs) => [...new Set(xs.filter(Boolean))];
   return {
-    brief: [pack, ...k.method, k.look[0], ...GENERAL.brief], storyboard: [pack, ...k.look, ...k.examples.slice(0, 2), ...k.app, ...GENERAL.storyboard],
-    motionSpec: [pack, k.look[0], ...GENERAL.motionSpec], build: [pack, ...k.look, ...k.examples, ...k.app, ...GENERAL.build],
+    // each step the kit's own files for it (kitReads steps, #1036), then the look and General's
+    brief: uniq([pack, ...k.steps.brief, ...GENERAL.brief]), storyboard: uniq([pack, ...k.look, ...k.steps.storyboard, ...k.app, ...GENERAL.storyboard]),
+    motionSpec: uniq([pack, ...k.steps.motionSpec, ...GENERAL.motionSpec]), build: uniq([pack, ...k.look, ...k.steps.build, ...k.examples, ...k.app, ...GENERAL.build]),
     // the Review: the house review, then this style's pack (its Review row) and the kit's own checklists (#947); GENERAL's own list is unchanged
-    qcReview: [...GENERAL.qcReview, pack, ...k.review, k.look[0]], checks: GENERAL.checks, sound: [pack, ...k.sound, ...GENERAL.sound], chat: [pack, ...GENERAL.chat],
+    qcReview: uniq([...GENERAL.qcReview, pack, ...k.steps.review, k.look[0]]), checks: GENERAL.checks, sound: [pack, ...k.sound, ...GENERAL.sound], chat: [pack, ...GENERAL.chat],
   };
 };
 // A Lemo-Opuscar style: its STYLE.md (.moworks/rules/lemo-<slug>) and the app's lemo-opuscar pack in every step, HF's
@@ -197,8 +198,8 @@ export function requiredReads(dir, { styleId, first = [], step = null } = {}) {
   // the film's design: frame.md (the Look the app wrote) or design.md (one Claude wrote), read in
   // every step that designs, moves, builds or checks the picture (HyperFrames' design spec; listed only when there is one)
   if (["storyboard", "motionSpec", "build", "qcReview"].includes(key)) list = [...list, "frame.md", "design.md"];
-  // the studio's always-alive rule: every style's Motion Plan, Build and Review
-  if (["motionSpec", "build", "qcReview"].includes(key)) list = [...list, R("moworks-alive", "SKILL.md")];
+  // the studio's always-alive rule: every style's Storyboard (its beats and cuts are planned there, audit/101), Motion Plan, Build and Review
+  if (["storyboard", "motionSpec", "build", "qcReview"].includes(key)) list = [...list, R("moworks-alive", "SKILL.md")];
   // the motion vocabulary: the names of the film packs, read in the Motion Plan only; library_search kind "vocab" answers with their numbers
   if (key === "motionSpec") list = [...list, R("motion-vocab", "SKILL.md")];
   // a lyrics video, whatever its film style: the energy and song rules, and the song's data once the app has it (the beat map, the timed words)

@@ -13,7 +13,7 @@ You cannot hear: measure every step (the app gives you beat maps, levels and cue
 ## 2. Music
 
 1. Licensed music only: the owner's track, or free Mixkit tracks (Mixkit Stock Music Free Licence). Never music synthesised in code. Sound
-   effects are another matter: the app makes them in code first (§3, owner 04/11/2026).
+   effects are another matter: the app picks them from its library and online, and makes one in code only where neither has it (§3, owner 05/11/2026).
 2. No music given and the owner asks for some: find **3 tracks on mixkit.co** that fit the brief (mood, tempo, length) when the project
    allows the web; give their pages to the app, which downloads all three into the project's cache so the owner can listen and pick (or
    ask for three others). Your table: A / B / C · title · artist · length · mood · why it fits · its Mixkit page.
@@ -27,9 +27,9 @@ You cannot hear: measure every step (the app gives you beat maps, levels and cue
 - **A film made for its song (a lyrics or music video) has none:** the song is what is heard (owner 31/10; the house rules §7b).
 - A sound on every action (the house rules §7b, owner 30/10): a whoosh for movement, pop for things appearing, click for clicks, typing
   for typing, riser into a reveal, impact on a slam, footsteps, doors, pages; and a quiet ambience bed under every scene with a place. The
-  app picks them by what happens on screen, made by code first (the owner's kits' sounds and new ones from their recipes and the app's,
-  with a fresh take for this film), then its offline library of CC0 sounds, then Freesound through Openverse (CC0 / CC BY) and HyperFrames'
-  bundled set, every one credited; name them in the storyboard frames by the thing and its action (`- sfx: crayon stroke on paper, door
+  app picks them by what happens on screen: its offline library of CC0 sounds first, then Freesound through Openverse (CC0 / CC BY) and
+  HyperFrames' bundled set, then a sound made by code (the owner's kits' sounds and new ones from their recipes and the app's) only for what
+  neither has (owner 05/11/2026 #1034), every one credited; name them in the storyboard frames by the thing and its action (`- sfx: crayon stroke on paper, door
   knock wood`, `- ambience: rain`).
 - **The light comes before the sound:** a sound's attack (the top of a whoosh's swell) lands one frame after its picture. The picture must
   work muted first: social feeds play without sound.
