@@ -29,7 +29,7 @@ const FIT_MARGIN_DB = EFFECTS_MARGIN_DB + 0.5;
 export const MIX_PEAK = -2.5;
 const LOWEST_FIT = 0.25;          // the peak rule takes at most 12 dB off one effect: over that the music itself is the peak
 const LOWEST_DIP = 0.01;
-const FIT_VERSION = 2;          // 2: the pauses rule (T38b-1)
+const FIT_VERSION = 3;          // 2: the pauses rule (T38b-1); 3: the beds take their share of the pauses
 const r3 = (n) => Math.round(n * 1000) / 1000;
 
 /** The file's samples as the film plays it: 48 kHz stereo, interleaved Float32. A mono file goes to both channels at its full level, as HF's mixer
@@ -196,13 +196,15 @@ export async function fitEffects(dir, { root } = {}) {
     for (let pass = 0; ref > 0 && pass < 4; pass++) {
       const fx = new Float32Array(N);
       for (const c of clips) for (let i = 0; i < c.sound.buf.length && c.sound.i0 + i < N; i++) fx[c.sound.i0 + i] += c.sound.buf[i];
-      const cum = new Float64Array(N + 1);
-      for (let i = 0; i < N; i++) cum[i + 1] = cum[i] + fx[i] * fx[i];
+      const cum = new Float64Array(N + 1), bed = new Float64Array(N + 1);
+      for (let i = 0; i < N; i++) { cum[i + 1] = cum[i] + fx[i] * fx[i]; const b = fixed?.[i] ?? 0; bed[i + 1] = bed[i] + b * b; }
       const asked = new Map();
       for (let i = 0; i + W <= N; i += HOP) {
         const pw = (cum[i + W] - cum[i]) / W;
-        if (pw <= limit) continue;
-        const scale = Math.sqrt(limit / pw);
+        // the ambience beds heard there take their share (T38b-1: a roof's night bed with a hit at 0:03 came to 1.4 dB under the voice)
+        const room = Math.max(limit - (bed[i + W] - bed[i]) / W, limit * 0.25);
+        if (pw <= room) continue;
+        const scale = Math.sqrt(room / pw);
         for (const c of clips) { const a = c.sound.i0, b = a + c.sound.buf.length; if (b > i && a < i + W) asked.set(c, Math.min(asked.get(c) ?? 1, scale)); }
       }
       let changed = false;

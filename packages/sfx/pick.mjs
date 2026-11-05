@@ -48,14 +48,50 @@ export function pickAsks(dir, cues, shots, { root = APP_ROOT, style = null, styl
     const family = families?.get?.(name) ?? familyOf(name);
     const opts = { family, style, root, filmStyle: styleId, oneShot: true, minDuration: sustainedCue(name) ? SUSTAINED_MIN_S : 0 };
     let m = null; try { m = matchLocal(name, opts); } catch { /* no library */ }
-    if (m?.exact) continue;
+    // the library's own sound only when its tags say every word of the name (T38b-14: "magnet clack" took a typewriter on "clack",
+    // "paper sheet rustle" a cloth on "rustle", and Claude never saw them)
+    if (m?.exact && m.closeness >= 1) continue;
     let ranked = []; try { ranked = rankLocal(name, opts).slice(0, PICK_CANDIDATES).map((r) => r.entry); } catch { /* no library */ }
     for (const e of m?.choices ?? []) if (!ranked.some((x) => x.id === e.id) && ranked.length < PICK_CANDIDATES) ranked.push(e);
-    out.push({ name, family, moments: list.slice(0, 3).map((c) => momentOf(c, shots)), seconds: secondsOf(list), candidates: ranked,
-      ctx: hash([name, list.map((c) => momentOf(c, shots)), ranked.map((e) => e.id)]) });
+    out.push(askOf(name, list, shots, ranked, family));
     if (out.length >= PICK_MAX) break;
   }
   return out;
+}
+
+/** One name to ask about: its moments (at most 3), its length, the library's candidates, and the key its answer is kept by. */
+export const askOf = (name, list, shots, candidates, family = null) => ({ name, family, moments: list.slice(0, 3).map((c) => momentOf(c, shots)), seconds: secondsOf(list), candidates,
+  ctx: hash([name, list.map((c) => momentOf(c, shots)), candidates.map((e) => e.id)]) });
+
+/** Claude's answers for some asks (one short run), or, with no Claude, a sound made from the name's own words where `makeAll` (or the library
+ *  has nothing of its kind): Map name -> { pick } | { make, seconds }. */
+export async function askClaude(asks, { ask = null, maker = null, dir, style = null, root = APP_ROOT, filmStyle = null, makeAll = false } = {}) {
+  if (!asks.length) return new Map();
+  if (ask) return readPicks(await ask(pickPrompt(asks, { style }), { cwd: join(dir, ".moworks") }).catch(() => null), asks);
+  const out = new Map();
+  if (maker) for (const a of asks) { let m = null; if (!makeAll) try { m = matchLocal(a.name, { family: a.family, root, filmStyle, oneShot: true }); } catch { /* none */ }
+    if (makeAll || !m?.good) out.set(a.name, { make: a.name, seconds: a.seconds }); }
+  return out;
+}
+
+/** Put the answers in the film: a pick becomes the name's sound (with its own numbered variants), a description is made (maker). mark: how the
+ *  record says it came ("claude", "made"). { settled, picked, made, none }. */
+export async function settleAsks(dir, asks, answers, { root = APP_ROOT, maker = null } = {}) {
+  const settled = new Set(), picked = [], made = [], none = [];
+  for (const a of asks) {
+    const r = answers.get(a.name);
+    if (!r) continue;
+    if (r.pick) {
+      const e = a.candidates.find((x) => x.id === r.pick);
+      let vs = [e]; try { vs = [e, ...variantsOf(e, { root }).filter((x) => x.id !== e.id && !a.exclude?.has(x.id))].slice(0, 4); } catch { /* the one */ }
+      if (useLibrarySound(dir, a.name, vs)) { patchState(dir, (x) => { x.sounds[a.name].picked = "claude"; (x.picks ??= {})[a.name] = { ctx: a.ctx, pick: r.pick }; }); settled.add(a.name); picked.push(a.name); }
+      continue;
+    }
+    const s = maker ? await maker.make(a.name, r.make, r.seconds) : null;
+    if (s) { patchState(dir, (x) => { x.sounds[a.name].picked = "made"; (x.picks ??= {})[a.name] = { ctx: a.ctx, make: r.make, seconds: r.seconds }; }); settled.add(a.name); made.push(a.name); }
+    else none.push(a.name);
+  }
+  return { settled, picked, made, none };
 }
 
 /** The prompt of one run: every name, its moments and candidates; the answer is JSON only. */
@@ -113,33 +149,15 @@ export async function pickSounds(dir, cues, shots, { root = APP_ROOT, ask = null
   const asks = pickAsks(dir, cues, shots, { root, style, styleId, families, keep });
   const settled = new Set(), picked = [], made = [], none = [];
   if (!asks.length) return { settled, asked: 0, picked, made, none };
-  let st = readState(dir);
+  const st = readState(dir);
   const has = (n) => !!st.sounds[n] && existsSync(join(dir, ...String(st.sounds[n].file).split("/")));
   // Claude's earlier answer for the same moment and candidates stands (no second run), while its sound is in the film
   const fresh = asks.filter((a) => !(st.picks?.[a.name]?.ctx === a.ctx && has(a.name) && st.sounds[a.name].picked));
   for (const a of asks) if (!fresh.includes(a)) settled.add(a.name);
-  let answers = new Map(), asked = 0;
-  if (fresh.length && ask) {
-    asked = fresh.length;
-    const text = await ask(pickPrompt(fresh, { style: styleTitle ?? style }), { cwd: join(dir, ".moworks") }).catch(() => null);
-    answers = readPicks(text, fresh);
-  } else if (fresh.length && maker) {
-    // no Claude to ask: a name the library has nothing of its own kind for is made from its own words
-    for (const a of fresh) { let m = null; try { m = matchLocal(a.name, { family: a.family, style, root, filmStyle: styleId, oneShot: true }); } catch { /* none */ } if (!m?.good) answers.set(a.name, { make: a.name, seconds: a.seconds }); }
-  }
-  for (const a of fresh) {
-    const r = answers.get(a.name);
-    if (!r) continue;
-    if (r.pick) {
-      const e = a.candidates.find((x) => x.id === r.pick);
-      let vs = [e]; try { vs = [e, ...variantsOf(e, { root }).filter((x) => x.id !== e.id)].slice(0, 4); } catch { /* the one */ }
-      if (useLibrarySound(dir, a.name, vs)) { patchState(dir, (x) => { x.sounds[a.name].picked = "claude"; (x.picks ??= {})[a.name] = { ctx: a.ctx, pick: r.pick }; }); settled.add(a.name); picked.push(a.name); }
-      continue;
-    }
-    const s = maker ? await maker.make(a.name, r.make, r.seconds) : null;
-    if (s) { patchState(dir, (x) => { x.sounds[a.name].picked = "made"; (x.picks ??= {})[a.name] = { ctx: a.ctx, make: r.make, seconds: r.seconds }; }); settled.add(a.name); made.push(a.name); }
-    else none.push(a.name);
-    st = readState(dir);
-  }
+  const answers = fresh.length ? await askClaude(fresh, { ask, maker, dir, style: styleTitle ?? style, root, filmStyle: styleId }) : new Map();
+  const asked = ask ? fresh.length : 0;
+  const done = await settleAsks(dir, fresh, answers, { root, maker });
+  for (const n of done.settled) settled.add(n);
+  picked.push(...done.picked); made.push(...done.made); none.push(...done.none);
   return { settled, asked, picked, made, none };
 }

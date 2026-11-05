@@ -12,7 +12,7 @@ import { stampName } from "../../../packages/render-names/index.mjs";
 import { useStage } from "./stage.jsx";
 
 // plain words for each check, English keys for t
-export const CHECK_WORDS = { "G-HF-LINT": "Composition files", "G-HF-SCRIPT": "Script errors in the preview", "G-REMOTE": "Loads something from the internet",
+export const CHECK_WORDS = { "G-AUDIO-FILES": "Sound files that are missing", "G-HF-LINT": "Composition files", "G-HF-SCRIPT": "Script errors in the preview", "G-REMOTE": "Loads something from the internet",
   "G-FONT": "A font that is not on this computer", "G-GLYPH": "A font without Vietnamese letters",
   "G-GLYPH-CODE": "A font without Vietnamese letters in the film's code", "G-VI-MARKS": "Vietnamese written without its marks", "G-BLANK": "Scenes that look empty",
   "G-HF-LAYOUT": "Layout: text overlapping, hidden or cut", "G-HF-CONTRAST": "Contrast too low to read", "G-HF-MOTION": "Motion",

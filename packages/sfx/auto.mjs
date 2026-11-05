@@ -4,7 +4,7 @@
 // named cues first (`- sfx:`, or a `- sound:` list), then the Motion Plan's per-motion `sound`, then the action's own (actions.mjs: an
 // entrance pops, an exit whooshes out, a landing thuds in its material, a walk steps, a door opens…), and a whoosh into a cut where the
 // picture really changes. Lively but never cluttered: density limits instead of a cap per shot (actions.mjs thin), each family at its
-// own level under the music and the voice, repeats of one sound varied and one file at most MAX_REPEATS times a film, the sounds in the
+// own level under the music and the voice, repeats of one sound varied (no cap on how often: the right sound first, #1113), the sounds in the
 // ending's fade faded with it, and a quiet ambience bed under every scene that has a place.
 // The owner's choices (prefs.mjs: no whoosh, no ambience, the density, single sounds taken out) hold on every placement. Sounds come
 // first from the code (code.mjs: the owner's film styles' sounds and new ones made by code for the film; a film of those styles from the code only),
@@ -235,7 +235,8 @@ export function rotateCopies(cues, sounds) {
   });
 }
 
-/** How many times one sound file may play in a film (owner 30/10, Test 26: a plug's pull twelve times, one bee buzz twelve times). */
+/** How many times one sound file played at most a film under the rule of 30/10 (Test 26); the owner dropped the cap 05/11 (#1113): autoSfx no
+ *  longer calls capRepeats, kept for the Review's own counts. */
 export const MAX_REPEATS = 3;
 /** The same file at most `max` times: the uses past it are left out ({ kept, thinned }, why "repeat"), the Motion Plan's kept before the automatic ones, each kept set
  *  spread over the film. What the storyboard names is not the app's to leave out for sharing a file: nine names of a clock's tick fell on two files of the library, and
@@ -279,47 +280,6 @@ export function capRepeats(cues, sounds, max = MAX_REPEATS) {
   return { kept: cues.filter((c) => !out.has(c)), thinned: cues.filter((c) => out.has(c)).map((c) => ({ ...c, why: "repeat" })) };
 }
 
-/** One file under many names (the storyboard's and the Motion Plan's): past MAX_REPEATS moments of it, the later names take the library's
- *  next sound of their kind that is not one of those files, else a sound made from their own words (maker), else they stay (capRepeats keeps
- *  a named sound's moments). Moments: a name's shots (a name again in one shot is its rhythm). Returns the names moved. */
-export async function spreadNamed(dir, cues, { root, style = null, styleId = null, families = null, keep = null, maker = null, max = MAX_REPEATS } = {}) {
-  const st = readState(dir), moments = new Map(), first = new Map();
-  for (const c of cues) {
-    if ((c.prio ?? 0) >= 2) continue;
-    moments.set(c.name, new Set([...(moments.get(c.name) ?? []), c.shot ?? c.start]));
-    first.set(c.name, Math.min(first.get(c.name) ?? Infinity, Number(c.start) || 0));
-  }
-  const byFile = new Map();
-  for (const name of moments.keys()) {
-    const s = st.sounds[name];
-    if (!s?.file || s.source === "owner" || keep?.has(name) && s.picked !== "claude") continue;
-    byFile.set(s.file, [...(byFile.get(s.file) ?? []), name]);
-  }
-  const over = [...byFile.entries()].filter(([, ns]) => ns.reduce((k, n) => k + moments.get(n).size, 0) > max);
-  if (!over.length) return [];
-  const crowded = new Set(over.map(([f]) => f)), moved = [];
-  const libId = (f) => String(f).split("/").pop().replace(/\.[a-z0-9]+$/i, "");
-  for (const [, names] of over) {
-    let used = 0;
-    for (const name of names.sort((a, b) => first.get(a) - first.get(b))) {
-      const k = moments.get(name).size;
-      if (used + k <= max || used === 0) { used += k; continue; }
-      const family = families?.get?.(name) ?? familyOf(name);
-      let alt = null;
-      try { alt = rankLocal(name, { family, style, root, filmStyle: styleId, oneShot: true, minDuration: sustainedCue(name) ? SUSTAINED_MIN_S : 0, exclude: [...crowded].map(libId) })
-        .find((r) => r.direct >= 1 && (!family || r.entry.family === family))?.entry ?? null; } catch { /* no library */ }
-      let ok = false;
-      const was = st.sounds[name]?.picked ?? null;          // Claude's pick moved on stays Claude's (no second run for it)
-      if (alt) { let vs = [alt]; try { vs = [alt, ...variantsOf(alt, { root }).filter((x) => x.id !== alt.id && !crowded.has(`assets/3_audio/sfx/${x.id}.ogg`))].slice(0, 4); } catch { /* the one */ }
-        ok = !!useLibrarySound(dir, name, vs); }
-      if (!ok && maker) ok = !!(await maker.make(name, name, sustainedCue(name) ? 3 : 1));
-      if (ok && was) patchState(dir, (x) => { if (x.sounds[name]) x.sounds[name].picked ??= was; });
-      if (ok) { moved.push(name); const f = readState(dir).sounds[name]?.file; if (f) crowded.add(f); } else used += k;
-    }
-  }
-  if (moved.length) patchState(dir, (x) => { for (const n of moved) if (x.sounds[n]) x.sounds[n].spread = true; });
-  return moved;
-}
 
 /** The ending's fade at the film's end, for the ambience: the music's own fade when it plays to the end (tracks.mjs fitted it to the
  *  plan's ending), else the plan's ending fade, else ending.mjs's for the film's length. */
@@ -396,24 +356,16 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
     const left = new Set(res.missing), more = await resolveCues(dir, every.filter((c) => left.has(c.name)), { ...opts, code: true, library: true, style, families, keep, tone: graveFilm(opts.styleId, opts.styleTitle, palette) });
     res.added = [...(res.added ?? []), ...(more.added ?? [])]; res.missing = more.missing ?? []; res.failed = [...(res.failed ?? []), ...(more.failed ?? [])]; res.code = more.code ?? res.code;
   }
-  // one file for many names (Test 38b: nine names on one pop): the later names take another sound of the library, or one made (#1096 A); then a
-  // sound heard more than once gets its copies a little higher and lower
-  const spread = await spreadNamed(dir, every, { root: opts.root, style, styleId: opts.styleId, families, keep, maker }).catch(() => []);
+  // a sound heard more than once gets its copies a little higher and lower. No cap on how often one file plays (owner 05/11 #1113: "phải ưu
+  // tiên âm thanh nó đúng, cho dù nó xuất hiện đi lại nhiều lần"; the 3-times rule of 30/10 swapped right sounds for wrong ones, T38b-14)
+  const spread = [];
   const uses = new Map(); for (const c of every) uses.set(c.name, (uses.get(c.name) ?? 0) + 1);
   await varySounds(dir, uses, { root: opts.root }).catch(() => []);
-  // the mix once the sounds are known: a cue with no sound leaves its place to an automatic one; one file at most MAX_REPEATS times, and a
-  // repeat left out may leave its moment to another sound (the motion's own), so the mix is planned again without it
+  // the mix once the sounds are known: a cue with no sound leaves its place to an automatic one; its repeats take the copies in turn
   const st1 = readState(dir), sounded = (n) => !!st1.sounds[n] && existsSync(join(dir, ...String(st1.sounds[n].file).split("/")));
-  const drop = new Set(), repeats = [];
-  let kept = [], thinned = [];
-  for (let pass = 0; pass < 4; pass++) {
-    ({ kept, thinned } = planCues(shots, plan, { ...o, sounded, words, familyOfSound: (n) => st1.sounds[n]?.family ?? null, drop }));
-    const capped = capRepeats(withVariants(kept, st1.sounds), st1.sounds);
-    kept = rotateCopies(capped.kept, st1.sounds);
-    if (!capped.thinned.length) break;
-    for (const c of capped.thinned) { drop.add(useKey(c)); repeats.push(c); }
-  }
-  thinned = [...thinned, ...repeats].sort((a, b) => a.start - b.start);
+  let { kept, thinned } = planCues(shots, plan, { ...o, sounded, words, familyOfSound: (n) => st1.sounds[n]?.family ?? null });
+  kept = rotateCopies(withVariants(kept, st1.sounds), st1.sounds);
+  thinned = [...thinned].sort((a, b) => a.start - b.start);
   const lv = await levels(dir, [...new Set(kept.map((c) => c.name))], opts).catch(() => null);
   if (lv) setVolumes(dir, lv.volumes);
   const st = readState(dir);

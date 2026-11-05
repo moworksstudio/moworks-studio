@@ -39,7 +39,7 @@ import * as lyrics from "../voice/lyrics.mjs";
 import { briefScript, firstLines, scriptDraft, scriptGap } from "../voice/script.mjs";
 import { MASTER, loudness, masterLoudness, masterName } from "../hf-qa/loudness.mjs";
 import { capWebBitrate } from "../hf-qa/webBitrate.mjs";
-import { analyseBeats, fitMusicToFilm, musicRepeats, musicUsed, placeTrack } from "../hf-edit/tracks.mjs";
+import { analyseBeats, dropMissingAudio, fitMusicToFilm, gateAudioFiles, musicRepeats, musicUsed, placeTrack } from "../hf-edit/tracks.mjs";
 import { levelTracks } from "../sfx/mixlevels.mjs";
 import { refreshBridge } from "../hf-edit/lemoPage.mjs";
 import { applyLanes } from "../sfx/lanes.mjs";
@@ -492,6 +492,9 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       repeatNote(p);
       refreshBridge(p.path);          // a code film built before a bridge change gets today's bridge
       applyLanes(p.path);
+      // a sound whose file is gone is left out of the render, said in the chat (owner #1109; T38b-9: HF failed after a minute on it)
+      const lost = gateAudioFiles(p.path);
+      if (!lost.pass) { dropMissingAudio(p.path); note(p, { kind: "render", status: "warning", open: "mix", text: lost.findings.map((f) => f.message).join(" ") }); }
       await commit(p, "Changes before render");
       job.update({ stage: "checks", revision: await rev.headAsync(p.path) });
       const gates = await gatesFor(p, job, { blank: false }).catch((e) => {          // Tech checks' results when the film is unchanged

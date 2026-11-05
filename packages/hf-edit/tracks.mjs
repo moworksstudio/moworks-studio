@@ -273,6 +273,9 @@ const gainIsOurs = (a, kind) => {
 /** Whether the owner set the level of the film's voice-over or music themselves (Final Mix, Studio): a level the app did not write. */
 export function levelIsOwners(dir, kind) {
   let html = ""; try { html = readFileSync(join(dir, "index.html"), "utf8"); } catch { return false; }
+  // the lane's fader in Final Mix (sfx/lanes.mjs: <hf-audio-group id="mw-lane-music" data-volume>) is the owner's too when it is not at 1 (T38b-11)
+  const lane = [...html.matchAll(/<hf-audio-group\b[^>]*>/gi)].map((m) => attrsOf(m[0])).find((a) => a.id === `mw-lane-${kind}`);
+  if (lane && Math.abs(Number(lane["data-volume"] ?? 1) - 1) > 0.001) return true;
   return [...html.matchAll(/<audio\b[^>]*>/gi)].map((m) => attrsOf(m[0])).some((a) => audioKind(a) === kind && !gainIsOurs(a, kind));
 }
 /** Set the app's level on every clip of the voice-over or the music whose level is the app's (gain: a number). Returns how many changed. */
@@ -491,3 +494,47 @@ export function fitToFilm(dir, start, duration) {
   return { start: r3(at), duration: r3(plays), cut: plays < duration - 1e-3 };
 }
 
+
+/** The sound files the film's page plays that are not there (T38b-9: the effects' files deleted from the folder, and the render failed after a
+ *  minute with HF's raw "audio_processing_failed"): [{ src, kind: "voice" | "music" | "sfx" | … }]. A web address is not checked. */
+export function missingAudio(dir) {
+  let html = ""; try { html = readFileSync(join(dir, "index.html"), "utf8"); } catch { return []; }
+  const out = [], seen = new Set();
+  for (const m of html.matchAll(/<audio\b[^>]*>/gi)) {
+    const a = attrsOf(m[0]), src = String(a.src ?? "").split(/[?#]/)[0];
+    if (!src || /^[a-z]+:/i.test(src) || src.startsWith("//") || seen.has(src)) continue;
+    seen.add(src);
+    let file = src; try { file = decodeURIComponent(src); } catch { /* as written */ }
+    if (!existsSync(join(dir, ...file.replace(/^\.?\//, "").split("/")))) out.push({ src: file, kind: audioKind(a) ?? "sound" });
+  }
+  return out;
+}
+/** Take out of the page the sounds whose file is gone, before a render (owner 05/11 #1109: a user who deleted a sound's file meant it out; the
+ *  render never stops for it). The film's history keeps the page as it was; Place sound effects, or choosing the voice or the music again,
+ *  puts them back. Returns the sounds taken out ([{ src, kind }]). */
+export function dropMissingAudio(dir) {
+  const miss = missingAudio(dir);
+  if (!miss.length) return [];
+  const f = join(dir, "index.html"), gone = new Set(miss.map((x) => x.src));
+  const html = readFileSync(f, "utf8").replace(/[ \t]*<audio\b[^>]*>(?:\s*<\/audio>)?[ \t]*\r?\n?/gi, (tag) => {
+    const src = String(attrsOf(tag).src ?? "").split(/[?#]/)[0];
+    let file = src; try { file = decodeURIComponent(src); } catch { /* as written */ }
+    return gone.has(file) ? "" : tag;
+  });
+  writeFileSync(f, html);
+  return miss;
+}
+/** Tech checks' G-AUDIO-FILES: a warning when a sound the film plays has no file (the render leaves it out, dropMissingAudio), with what to do. */
+export function gateAudioFiles(dir) {
+  const miss = missingAudio(dir);
+  if (!miss.length) return { id: "G-AUDIO-FILES", blocking: false, pass: true, findings: [] };
+  const fx = miss.filter((x) => !["voice", "music"].includes(x.kind)), other = miss.filter((x) => ["voice", "music"].includes(x.kind));
+  const names = (xs) => xs.slice(0, 3).map((x) => `"${x.src.split("/").pop()}"`).join(", ") + (xs.length > 3 ? "…" : "");
+  const findings = [];
+  if (fx.length) { const line = `${fx.length} sound effect file${fx.length === 1 ? " is" : "s are"} missing (${names(fx)}); the render leaves ${fx.length === 1 ? "it" : "them"} out. Press Place sound effects in Final Mix to bring ${fx.length === 1 ? "it" : "them"} back, or relink the files in Assets.`;
+    findings.push({ severity: "warning", code: "sfx_files_missing", count: fx.length, message: line, plain: line }); }
+  for (const x of other) { const what = x.kind === "voice" ? "voice-over" : "music";
+    const line = `The ${what} file is missing ("${x.src.split("/").pop()}"); the film renders without its ${what}. Relink it in Assets, or choose ${x.kind === "voice" ? "the voice again on the Voice screen" : "the music again in Final Mix"}.`;
+    findings.push({ severity: "warning", code: `${x.kind}_file_missing`, message: line, plain: line }); }
+  return { id: "G-AUDIO-FILES", blocking: false, pass: false, warnings: findings.length, findings, missing: miss };
+}

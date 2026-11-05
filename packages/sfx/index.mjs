@@ -289,7 +289,13 @@ export function mountedNow(dir) {
   const st = readState(dir);
   let html; try { html = readFileSync(join(dir, "index.html"), "utf8"); } catch { return st.mounted ?? []; }
   const tags = new Map([...html.matchAll(/<audio\b([^>]*)>/gi)].map((m) => attrsOf(m[1])).filter((a) => /^el-sfx-\d+$/.test(a.id ?? "")).map((a) => [a.id, a]));
-  return (st.mounted ?? []).flatMap((m, i) => { const a = tags.get(`el-sfx-${i}`); return a ? [{ ...m, start: Number(a["data-start"]) || 0, file: a.src ?? m.file }] : []; });
+  const mounted = st.mounted ?? [];
+  const known = mounted.flatMap((m, i) => { const a = tags.get(`el-sfx-${i}`); return a ? [{ ...m, start: Number(a["data-start"]) || 0, file: a.src ?? m.file }] : []; });
+  // a page whose sounds sfx.json no longer lists (T38b-13: Open version brought back a page with 157 sounds, Final Mix said "None placed yet"):
+  // its sounds as the page has them, named by their file
+  const extra = [...tags.entries()].filter(([id]) => Number(id.slice(7)) >= mounted.length).map(([id, a]) => ({ id: a["data-mw-cue"] ?? id,
+    name: String(a.src ?? "").split("/").pop().replace(/\.[a-z0-9]+$/i, "").replace(/[-_~]+/g, " ").trim() || "sound", start: Number(a["data-start"]) || 0, file: a.src ?? null, auto: false, fromPage: true }));
+  return [...known, ...extra];
 }
 /** Every sound file of the film by the name the Sounds drawer gives it ("Bell desk 1", "Soft Service Bell 01"): Map file -> title. */
 export function soundTitles(st) {

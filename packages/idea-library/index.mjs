@@ -9,6 +9,7 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "
 import { dirname, join } from "node:path";
 import { randomBytes } from "node:crypto";
 import { samplePrompts } from "../lemo-styles/index.mjs";
+import { claudeStandIn, clearPitch, pitchIdeas, readPitch, savePitched, scriptIdea } from "./pitch.mjs";
 
 const DATA = JSON.parse(readFileSync(new URL("./samples.json", import.meta.url), "utf8"));
 export const SAMPLES = DATA;
@@ -53,8 +54,9 @@ function clean(b) {
   if (styleId && !STYLE_ID.test(styleId)) throw invalid("That film style is not known.");
   return { name, brief, styleId };
 }
-export function createIdea(root, b) {
-  const idea = { id: randomBytes(6).toString("hex"), ...clean(b), created: new Date().toISOString() };
+/** A new idea in My ideas; `extra`: what the app records beside it (a pitched card's style, sources and truth: pitch.mjs). */
+export function createIdea(root, b, extra = {}) {
+  const idea = { id: randomBytes(6).toString("hex"), ...clean(b), ...extra, created: new Date().toISOString() };
   idea.updated = idea.created;
   writeIdeas(root, [idea, ...readIdeas(root)]);
   return idea;
@@ -66,6 +68,14 @@ export function updateIdea(root, id, b) {
   writeIdeas(root, list);
   return list[i];
 }
+/** The script Claude wrote for an idea (pitch.mjs scriptIdea), kept on it: { text, words, seconds, lang, lengthSec, styleId, style, author, at }. */
+export function setScript(root, id, script) {
+  const list = readIdeas(root), i = list.findIndex((x) => x.id === id);
+  if (i < 0) throw Object.assign(new Error("That idea is not here any more."), { code: "NOT_FOUND" });
+  list[i] = { ...list[i], script, updated: new Date().toISOString() };
+  writeIdeas(root, list);
+  return list[i];
+}
 export function deleteIdea(root, id) {
   const list = readIdeas(root);
   if (!list.some((x) => x.id === id)) throw Object.assign(new Error("That idea is not here any more."), { code: "NOT_FOUND" });
@@ -73,9 +83,33 @@ export function deleteIdea(root, id) {
   return { ok: true };
 }
 
+// Pitch 10 ideas (#1101): one pitch and one script at a time, as background jobs; the round in hand is the server's (GET /ideas/pitch)
+const PITCH_ESTIMATE = { minutes: [2, 6] }, SCRIPT_ESTIMATE = { minutes: [1, 3] };          // guesses until a real run measures them (audit/102 §12)
 export function ideaRoutes(ctx, { r }) {
   const root = ctx.root, ID = "([0-9a-f]{12})";
+  const claude = async (opts) => (claudeStandIn() ?? (await import("../character-maker/index.mjs")).runClaude)(opts);
+  const jobArgs = (j, prefix) => ({ root, jobId: `${prefix}-${Date.now().toString(36)}`, claude, signal: j.signal, onStep: (stage, progress) => j.update({ stage, progress }), log: (l) => j.log(l) });
+  const busy = (kind) => ctx.jobs.running().some((j) => j.kind === kind);
   return { routes: [
+    r("GET", "/ideas/jobs", () => ({ jobs: ctx.jobs.running().filter((j) => j.kind === "idea-pitch" || j.kind === "idea-script") })),
+    r("GET", "/ideas/pitch", () => ({ pitch: readPitch(root), job: ctx.jobs.running().find((j) => j.kind === "idea-pitch") ?? null })),
+    r("POST", "/ideas/pitch", (_p, b) => {
+      if (busy("idea-pitch")) throw Object.assign(new Error("Claude is pitching already: wait for it"), { code: "BUSY" });
+      const more = b?.more === true;
+      if (!more && !b?.styleId) throw Object.assign(new Error("Choose a film style"), { code: "INVALID" });
+      const job = ctx.jobs.start("idea-pitch", { title: more ? "Pitching 10 more ideas" : "Pitching 10 ideas", estimate: PITCH_ESTIMATE, more },
+        async (j) => { const p = await pitchIdeas(b ?? {}, jobArgs(j, "pitch")); return { rounds: p.rounds, ideas: p.ideas.length }; });
+      return { job, estimate: PITCH_ESTIMATE };
+    }),
+    r("POST", "/ideas/pitch/save", async (_p, b) => savePitched(root, { ids: Array.isArray(b?.ids) ? b.ids.map(String) : [], all: b?.all === true })),
+    r("DELETE", "/ideas/pitch", () => clearPitch(root)),
+    r("POST", `/ideas/${ID}/script`, ([id], b) => {
+      if (!readIdeas(root).some((x) => x.id === id)) throw Object.assign(new Error("That idea is not here any more."), { code: "NOT_FOUND" });
+      if (busy("idea-script")) throw Object.assign(new Error("Claude is writing a script already: wait for it"), { code: "BUSY" });
+      const job = ctx.jobs.start("idea-script", { title: "Writing the script", estimate: SCRIPT_ESTIMATE, ideaId: id },
+        async (j) => { const idea = await scriptIdea(id, b ?? {}, jobArgs(j, "script")); return { ideaId: idea.id, words: idea.script.words }; });
+      return { job, estimate: SCRIPT_ESTIMATE };
+    }),
     r("GET", "/ideas", () => ({ ...appIdeas(root), mine: readIdeas(root) })),
     r("POST", "/ideas", (_p, b) => ({ idea: createIdea(root, b) })),
     r("PUT", `/ideas/${ID}`, ([id], b) => ({ idea: updateIdea(root, id, b) })),

@@ -287,8 +287,9 @@ mood"):
   plug pulled out). A cue is one sound at its moment; a place's sound is its `- ambience:` line, never a cue. Every row of the Motion Plan
   that moves something names its sound that way (entrances, exits, landings, text writing on, camera moves and cuts, a character's
   actions, two things touching), so the app can make or find the right one; never a stand-in name for a sound the app could make better.
-- **One sound at most three times a film:** past that it sounds like a loop. Give repeated actions different names of the same thing
-  ("thread pull", "thread tug", "thread knot"); the app varies the repeats over its files and leaves the extra ones out.
+- **The right sound first, however often it plays (owner 05/11/2026 #1113, in place of "at most three times" of 30/10):** an action
+  that happens again takes its own sound again; the app plays each repeat a little higher or lower. Name a repeated action by what is
+  heard each time; a different name only when the sound is different.
 - **Storyboard:** each frame names the sound of each of its actions in `- sfx:` (short English names, comma-separated, each at its moment:
   `- sfx: pop, door open@1.2, footstep wood@2`) and its place in `- ambience:` (`- ambience: rain`, `city street`, `room tone`, `forest
   night`; `none` for a shot with no place). Under a voice-over §7 holds: an effect goes just after the word, never on it.
@@ -300,8 +301,8 @@ mood"):
 - **Where the sounds come from (owner 05/11/2026 #1034, #1096):** the app's offline library when it has the very sound; else the app shows Claude
   the cue's moment and the library's closest sounds and Claude picks the one a sound designer would use there, or describes the sound and the app
   makes it with ElevenLabs Sound Effects (the owner's key and credits; kept in the film and the studio's cache, credited); then the online search;
-  then sounds made by code for a cue none of them has (the order of 04/11, code first, made Test 38's sounds dull and off the picture). One file
-  plays at most three times a film by every name, and a sound heard again is a little higher or lower each time. The code: the owner's
+  then sounds made by code for a cue none of them has (the order of 04/11, code first, made Test 38's sounds dull and off the picture). A sound heard
+  again is a little higher or lower each time; it may play as often as the film needs (#1113). The code: the owner's
   film styles' own sounds (a style's signature sounds stay in its own style), new ones made by their recipes and by the app's (impacts by material,
   steps by ground, paper by action, a crayon, a marker, a pencil or chalk by stroke, doors, water, fire, wind, rain, bells, machines,
   electronics, magic, birds, frogs, crickets, a heartbeat…), each film with its own takes. It decides the source itself; you name the sound by the thing on

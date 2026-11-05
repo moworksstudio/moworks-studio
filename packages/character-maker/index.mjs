@@ -151,20 +151,21 @@ export function prepareLab(job, root = APP_ROOT) {
   return { lab, brief: fill(c.prompts["brush-kit"], vars), allowed: ["Bash(node tools/brush-sheets.mjs:*)"] };
 }
 
+const LAB_TOOLS = "Read,Edit,Write,Glob,Grep,Bash";          // a lab's tools (the Idea Library's pitch adds the web: idea-library/pitch.mjs)
 /** The Claude Code arguments of a lab run. The brief is not among them: it goes on stdin (the description and the change are the
  *  owner's own words, of any length; on the command line they could pass Windows' 32,767 characters, T27-14). */
-export function labArgs({ allowed, model, effort, stage = null }) {
+export function labArgs({ allowed, model, effort, stage = null, tools = LAB_TOOLS }) {
   // the anidoodle engine is linked from the shared stage (runtime/stage): Claude reads it there and never edits it
   const shared = stage ? ["--add-dir", stage, "--settings", JSON.stringify({ permissions: { deny: [`Edit(${rulePath(stage)}/**)`] } })] : [];
   return ["-p", "--output-format", "stream-json", "--verbose", "--model", model, "--effort", effort, "--permission-mode", "acceptEdits",
-    "--tools", "Read,Edit,Write,Glob,Grep,Bash", "--allowedTools", ...allowed, ...shared, "--strict-mcp-config", "--disable-slash-commands", "--no-session-persistence"];
+    "--tools", tools, "--allowedTools", ...allowed, ...shared, "--strict-mcp-config", "--disable-slash-commands", "--no-session-persistence"];
 }
 
 /** One Claude Code run in the lab (stream-json): onEvent({ kind: "tool"|"text", ... }) as it works. { ok, result, turns, costUsd, usage, ms }. */
-export function runClaude({ lab, brief, allowed, root = APP_ROOT, model, effort, env = {}, signal = null, onEvent = () => {} }) {
+export function runClaude({ lab, brief, allowed, root = APP_ROOT, model, effort, tools = LAB_TOOLS, env = {}, signal = null, onEvent = () => {} }) {
   const exe = findClaude(root);
   if (!exe) return Promise.resolve({ ok: false, error: "Claude Code is not installed" });
-  const args = labArgs({ allowed, model, effort, stage: stageRoot(root) });
+  const args = labArgs({ allowed, model, effort, tools, stage: stageRoot(root) });
   try { checkArgv(exe, args); } catch (e) { return Promise.resolve({ ok: false, error: e.message }); }
   const t0 = Date.now();
   return new Promise((ok) => {

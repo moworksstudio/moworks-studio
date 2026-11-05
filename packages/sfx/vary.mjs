@@ -37,9 +37,12 @@ export async function varyFile(dir, file, { root = APP_ROOT } = {}) {
  *  variants of the sound ({ id: <file's id>~p1, file, of: the original's file }). The owner's own sounds stay as they are. Returns the names varied. */
 export async function varySounds(dir, counts, { root = APP_ROOT } = {}) {
   const st = readState(dir), done = [];
+  // a file heard more than once by any names (T38b-10: three names each once on one tick played it three times the same): every name on it varies
+  const byFile = new Map();
+  for (const [name, n] of counts) { const f = st.sounds[name]?.file; if (f) byFile.set(f, (byFile.get(f) ?? 0) + n); }
   for (const [name, n] of counts) {
     const s = st.sounds[name];
-    if (!s || n < 2 || s.source === "owner" || !s.file) continue;
+    if (!s || s.source === "owner" || !s.file || Math.max(n, byFile.get(s.file) ?? 0) < 2) continue;
     const own = (s.variants ?? []).filter((v) => !v.of);
     if (own.length >= 3 || (s.variants ?? []).some((v) => v.of)) continue;
     const base = own.length ? own : [{ id: String(s.id).replace(/^[a-z]+:/, ""), title: s.title, family: s.family, file: s.file, durationS: s.durationS ?? null, lufs: s.lufs ?? null, onset: s.onset ?? 0, credit: s.credit ?? null }];

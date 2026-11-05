@@ -6,10 +6,12 @@
 // - My ideas, the user's own: New idea opens a dialog with three fields only, Name, Brief and a suggested Film style (#939); Edit and
 //   Delete. Kept on this computer outside every project (GET/POST/PUT/DELETE /api/ideas).
 // - On an idea: Start a project (New project with only the brief and the film style filled in) and Copy.
+// - Pitch 10 ideas (#1101, IdeaPitch.jsx): Claude pitches ten ideas in a film style's own way; the owner keeps the ones they want in My
+//   ideas. Write the script on an idea of My ideas: Claude writes its narration, kept on the idea; Start a project takes it with the idea.
 // New project's Idea Library button (the old Writing ideas, #942) opens the same library over the dialog (IdeaPicker), with Add to the brief.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, Copy, Pencil, Plus, SlidersHorizontal, Sparkles, Trash2, X } from "lucide-react";
+import { Check, Copy, Lightbulb, Pencil, Plus, SlidersHorizontal, Sparkles, Trash2, X } from "lucide-react";
 import { del, get, post, put } from "../api.js";
 import { BackButton, Banner, Dialog, NoPreview, Pager, useGalleryGrid } from "../components.jsx";
 import { go, useData, useToast } from "../lib.jsx";
@@ -17,6 +19,7 @@ import { useT } from "../i18n.jsx";
 import { useThemeId } from "../theme.jsx";
 import { CreditLine, thumbOf, useStyles } from "./StyleGallery.jsx";
 import { useDialogFrame } from "../workflow/StyleChooser.jsx";
+import { PitchDialog, ScriptButton } from "./IdeaPitch.jsx";
 
 /** Where an idea comes from: the user's own, a film style's sample brief, an OPUSCAR 98 prompt. */
 export const SOURCES = [["mine", "My ideas"], ["sample", "Film style samples"], ["opuscar98", "OPUSCAR 98"]];
@@ -35,7 +38,7 @@ export function useIdeas() {
     const op = q.data.opuscar ?? {};
     const opCredit = op.credit ? { author: op.credit.author, licence: op.credit.licence, link: op.credit.link, commit: op.credit.commit } : null;
     const mine = (q.data.mine ?? []).map((x) => { const s = S.get(x.styleId) ?? null;
-      return { id: x.id, source: "mine", own: true, name: x.name, brief: x.brief, styleId: x.styleId ?? null, style: s, render: s?.dim ?? null, tone: null, era: null, image: null, credit: null, updated: x.updated }; });
+      return { id: x.id, source: "mine", own: true, name: x.name, brief: x.brief, script: x.script ?? null, pitched: !!x.pitch, styleId: x.styleId ?? null, style: s, render: s?.dim ?? null, tone: null, era: null, image: null, credit: null, updated: x.updated }; });
     const app = [];
     for (const x of q.data.ideas ?? []) {
       const s = x.styleId ? S.get(x.styleId) ?? null : null;
@@ -116,6 +119,8 @@ function IdeaDetails({ x, actions }) {
       <p className="sgb-sub"><span className="au-tag">{t(TAG[x.source])}</span>{x.source === "opuscar98" && <span>{t("Written for {film}", { film: `${x.film} (${x.year})` })}</span>}</p></div>
     <dl className="kv sgb-kv idl-kv"><dt>{t("Film style")}</dt><dd>{x.style?.title ?? t("No film style")}</dd></dl>
     <div className="plx-prompt">{x.brief}</div>
+    {x.script && <section className="idl-script" aria-label={t("Script")}><h3>{t("Script")}<span className="num">{t("{n} words · about {s} s", { n: x.script.words, s: x.script.seconds })}</span></h3>
+      <div className="plx-prompt">{x.script.text}</div></section>}
     {x.credit && <CreditLine author={x.credit.author} licence={x.credit.licence} link={x.credit.link} commit={x.credit.commit} />}
     <div className="sgb-acts">{actions}</div>
   </>;
@@ -123,10 +128,16 @@ function IdeaDetails({ x, actions }) {
 
 const copyText = async (text, toast, t) => { try { await navigator.clipboard.writeText(text); toast(t("Copied")); } catch { toast(t("Could not copy to the clipboard"), "error"); } };
 
+/** What Start a project and Copy hand over: the brief, and the script Claude wrote for it when there is one (the narration, read as written). */
+export const briefOf = (x) => (x.script?.text ? `Narration (the script, to be read as written):
+${x.script.text}
+
+The idea:
+${x.brief}` : x.brief);
 // Start a project: New project opens with this brief and film style; the hand-over survives the route change for this tab only
 const START_KEY = "mw-idea-start";
 export function startProject(x) {
-  try { sessionStorage.setItem(START_KEY, JSON.stringify({ brief: x.brief, styleId: x.styleId ?? null })); } catch { /* private */ }
+  try { sessionStorage.setItem(START_KEY, JSON.stringify({ brief: briefOf(x), styleId: x.styleId ?? null })); } catch { /* private */ }
   go("/new");
 }
 /** The idea New project was opened with (once), or null. */
@@ -195,6 +206,7 @@ export default function IdeaLibrary() {
   const [edit, setEdit] = useState(null);          // the New idea / Edit idea dialog: { value } or null
   const [ask, setAsk] = useState(null);            // the idea asked to be deleted
   const [panel, setPanel] = useState(null);        // a narrow window: the filters or the idea over the grid
+  const [pitching, setPitching] = useState(false);  // the Pitch 10 ideas dialog
   const grid = useGalleryGrid({ fewer: 1 }), size = grid.size;
   const [pg, setPg] = useState(0);
   useEffect(() => { setPg(0); }, [flt.f]);
@@ -205,9 +217,9 @@ export default function IdeaLibrary() {
   const saved = (idea) => { setEdit(null); setCur(idea.id); reload(); };
   const head = studio
     ? <div className="st-head"><h1>{t("Idea Library")}</h1><span className="st-aside">{t("briefs to start a film from: the app's own, and yours")}</span>
-      <div className="st-acts"><button className="btn primary" onClick={() => setEdit({ value: null })}><Plus size={15} />{t("New idea")}</button></div></div>
+      <div className="st-acts"><button className="btn" onClick={() => setPitching(true)}><Lightbulb size={15} />{t("Pitch 10 ideas")}</button><button className="btn primary" onClick={() => setEdit({ value: null })}><Plus size={15} />{t("New idea")}</button></div></div>
     : <div className="page-head"><div><BackButton /><h1>{t("Idea Library")}</h1><p className="lead">{t("Briefs to start a film from: the app's own, and yours.")}</p></div>
-      <div className="actions"><button className="btn primary" onClick={() => setEdit({ value: null })}><Plus size={15} />{t("New idea")}</button></div></div>;
+      <div className="actions"><button className="btn" onClick={() => setPitching(true)}><Lightbulb size={15} />{t("Pitch 10 ideas")}</button><button className="btn primary" onClick={() => setEdit({ value: null })}><Plus size={15} />{t("New idea")}</button></div></div>;
   return <div className={"page gal-page idl-page" + (studio ? " st-motionlib st-ideas" : "")}>
     {head}
     {error && <Banner kind="error" action={<button className="btn sm" onClick={reload}>{t("Retry")}</button>}>{error.message}</Banner>}
@@ -230,13 +242,15 @@ export default function IdeaLibrary() {
         {panel === "style" && <BackButton className="insp" onClick={() => setPanel(null)} />}
         {sel ? <div className="insp-in" key={sel.id}><IdeaDetails x={sel} actions={<>
           <button type="button" className="btn primary" onClick={() => startProject(sel)}><Sparkles size={14} />{t("Start a project")}</button>
-          <button type="button" className="btn" onClick={() => copyText(sel.brief, toast, t)}><Copy size={14} />{t("Copy")}</button>
+          <button type="button" className="btn" onClick={() => copyText(briefOf(sel), toast, t)}><Copy size={14} />{t("Copy")}</button>
+          {sel.own && <ScriptButton key={sel.id} x={sel} onWritten={reload} />}
           {sel.own && <button type="button" className="btn" onClick={() => setEdit({ value: sel })}><Pencil size={14} />{t("Edit")}</button>}
           {sel.own && <button type="button" className="btn ghost icon" onClick={() => setAsk(sel)} aria-label={t("Delete {name}", { name: sel.name })} title={t("Delete")}><Trash2 size={15} /></button>}</>} /></div>
           : <p className="hint">{t("Choose an idea to see it here.")}</p>}
       </aside>
     </div>}
     {edit && <IdeaDialog value={edit.value} onClose={() => setEdit(null)} onSaved={saved} />}
+    {pitching && <PitchDialog onClose={() => setPitching(false)} onSaved={reload} />}
     {ask && <DeleteIdea x={ask} onClose={() => setAsk(null)} onDeleted={() => { setAsk(null); setCur(null); reload(); }} />}
   </div>;
 }
@@ -259,7 +273,7 @@ export function IdeaPicker({ onAdd, onClose }) {
   useEffect(() => { box.current?.querySelector(".plx-back")?.focus(); }, []);
   const list = flt.list;
   const p = list.find((x) => x.id === cur) ?? list[0] ?? null;
-  const add = (x) => { onAdd(x.brief); toast(t("Added to the brief")); onClose(); };
+  const add = (x) => { onAdd(briefOf(x)); toast(t("Added to the brief")); onClose(); };
   return createPortal(<>
     <div className="scx-scrim" onMouseDown={onClose} />
     <div className={"plx" + (frame ? " framed" : "")} style={frame} role="dialog" aria-modal="true" aria-labelledby="plx-h" ref={box}>
@@ -277,7 +291,7 @@ export function IdeaPicker({ onAdd, onClose }) {
         </div>
         {p && <aside className="plx-detail"><IdeaDetails x={p} actions={<>
           <button type="button" className="btn primary" onClick={() => add(p)}><Plus size={14} />{t("Add to the brief")}</button>
-          <button type="button" className="btn" onClick={() => copyText(p.brief, toast, t)}><Copy size={14} />{t("Copy")}</button></>} /></aside>}
+          <button type="button" className="btn" onClick={() => copyText(briefOf(p), toast, t)}><Copy size={14} />{t("Copy")}</button></>} /></aside>}
       </div>}
     </div>
   </>, document.body);

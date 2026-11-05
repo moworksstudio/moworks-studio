@@ -84,6 +84,7 @@ export default function MixSheet({ projectId, project, onChanged }) {
   const q = useData(() => get(`/api/projects/${projectId}/mix`), [projectId]);
   const pipe = useData(() => get(`/api/projects/${projectId}/pipeline`).catch(() => null), [projectId]);          // is the film really ready
   const [busy, setBusy] = useState(null);
+  const [askClear, setAskClear] = useState(false);          // Remove them asks first (T38b-12: 132 effects and 25 ambience clips went at one click)
   const [mixAsk, setMixAsk] = useState(false);          // the Final mix button asks first
   const [waitSfx, setWaitSfx] = useState(false);
   const player = usePlayer();
@@ -162,7 +163,10 @@ export default function MixSheet({ projectId, project, onChanged }) {
         <span className="end mix-sfx-acts">
           <button className="btn ghost sm" disabled={!!busy || waitSfx} onClick={() => act("sfx", () => post(`/api/projects/${projectId}/mix/sfx`), () => setWaitSfx(true))}>
             {busy === "sfx" || waitSfx ? <Loader2 size={14} className="spin" /> : <Sparkles size={14} />}{d.sfx.length ? t("Place them again") : t("Place sound effects")}</button>
-          {d.sfx.length > 0 && <button className="btn ghost sm" disabled={!!busy} onClick={() => act("clear", () => post(`/api/projects/${projectId}/mix/sfx/clear`))}><Trash2 size={14} />{t("Remove them")}</button>}</span></div>
+          {d.sfx.length > 0 && <button className="btn ghost sm" disabled={!!busy} onClick={() => setAskClear(true)}><Trash2 size={14} />{t("Remove them")}</button>}</span></div>
+      {askClear && <div className="mix-confirm"><p>{t("Remove all {n} sound effects and the ambience?", { n: d.sfx.length })}<br />{t("Place sound effects brings them back.")}</p>
+        <span className="end"><button className="btn ghost sm" onClick={() => setAskClear(false)}>{t("Keep them")}</button>
+          <button className="btn danger sm" disabled={!!busy} onClick={() => { setAskClear(false); act("clear", () => post(`/api/projects/${projectId}/mix/sfx/clear`)); }}><Trash2 size={14} />{t("Remove")}</button></span></div>}
       <p className="secondary">{d.sfx.length ? t("Placed from the cuts and the Motion Plan.") : t("None placed yet.")}{added.length > 0 && <> {added.length === 1 ? t("The one you added stays when they are placed again.") : t("The {n} you added stay when they are placed again.", { n: added.length })}</>}</p>
       {/* what the last placement could not do, said here too (Test 26: "Place them again" changed nothing and said nothing) */}
       {(d.sfxPlacing || waitSfx) && <p className="hint"><Loader2 size={12} className="spin" /> {t("Placing the sound effects…")}</p>}
