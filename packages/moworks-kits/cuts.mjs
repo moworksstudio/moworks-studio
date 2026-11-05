@@ -4,7 +4,7 @@
 //   3D Cartoon          select gt(scene, 0.25); a hard cut at every shot change: SHOTS in src/videos/film/shots.ts, less one
 //   Stickman Explainer  select gt(scene, 0.25); a cut on every spoken line: the shot table S in src/videos/film/film.js (its keys, less `open`)
 //   Inner Voice Short   select gt(scene, 0.25); none: every change is a fade
-// Read on the film's own render (the pre-render, .moworks/cache/proxy) only while it is the film as it is now; nothing before there is one.
+// Read on the film's own render (the pre-render, .moworks/cache/proxy, else the last export) only while it is the film as it is now; nothing before there is one.
 // A warning in Tech checks (G-CUTS), never a block: a soft change may not register, and a jump that is not a cut is worth a look.
 import { execFile } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
@@ -64,14 +64,18 @@ export function declaredCuts(projectDir, styleId) {
   return { declared: n, table: s.table };
 }
 
-/** The film's render while it is the film as it is now (the pre-render), or null. */
+/** The film's render while it is the film as it is now: the pre-render, else the last export (the export's render did not refresh the
+ *  pre-render, and G-CUTS never showed for Test 38, T38-7), or null. */
 async function freshRender(projectDir) {
-  let st = null; try { st = JSON.parse(readFileSync(join(projectDir, ".moworks", "cache", "proxy", "proxy.json"), "utf8")); } catch { return null; }
-  if (!st?.file || !st.hash) return null;
-  const file = join(projectDir, ...st.file.split("/"));
-  if (!existsSync(file)) return null;
   const { filmHash } = await import("../server/proxy.mjs");          // late: the render's own module, only when there is a render
-  return filmHash(projectDir, st.fps ?? null) === st.hash ? file : null;
+  const read = (f) => { try { return JSON.parse(readFileSync(join(projectDir, ...f), "utf8")); } catch { return null; } };
+  const st = read([".moworks", "cache", "proxy", "proxy.json"]), ex = read([".moworks", "project.json"])?.lastExport ?? null;
+  for (const r of [st, ex ? { file: ex.file, hash: ex.hash, fps: Number(ex.fps) || null } : null]) {
+    if (!r?.file || !r.hash) continue;
+    const file = join(projectDir, ...r.file.split("/"));
+    if (existsSync(file) && filmHash(projectDir, r.fps ?? null) === r.hash) return file;
+  }
+  return null;
 }
 
 /** { ran: false } for any other style, or before there is a render of the film as it is; else { ran: true, cuts, declared, table, match } or

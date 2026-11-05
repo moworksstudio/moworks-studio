@@ -71,6 +71,12 @@ export function filmParts(dir, fps, { stamps = false } = {}) {
   if (existsSync(join(dir, "index.html"))) { both("index.html"); page(text(join(dir, "index.html"))); }
   if (existsSync(docPath(dir, "CHARACTERS.json"))) { both("CHARACTERS.json"); both(readFileSync(docPath(dir, "CHARACTERS.json"))); }
   walk(join(dir, "compositions"), true);
+  // a 2D Explainer film (kit style) keeps its code in story/, the page's own scripts, timed to the voice's words (STORY_WORDS, from
+  // transcript.json): both are its picture. Test 38's final render was Version 1's picture with none of the Review's fixes in it (T38-8)
+  if (existsSync(join(dir, "story"))) {
+    walk(join(dir, "story"), true);
+    if (existsSync(join(dir, "transcript.json"))) { both("transcript.json"); both(readFileSync(join(dir, "transcript.json"))); }
+  }
   walk(join(dir, "assets"), false);
   walk(join(dir, "audio"), false, "sound");
   return { picture: pic.digest("hex").slice(0, 16), sound: snd.digest("hex").slice(0, 16), drawn: drw.digest("hex").slice(0, 16), heard: hrd.digest("hex").slice(0, 16) };

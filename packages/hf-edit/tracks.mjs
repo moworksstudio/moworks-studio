@@ -339,6 +339,14 @@ export function placeTrack(dir, { kind, src, duration, start = null }) {
   if (same && kind === "music" && was["data-fade-out"] == null) delete a["data-fade-out"];
   if (was?.["data-hf-id"]) a["data-hf-id"] = was["data-hf-id"];
   if (start != null && Number.isFinite(Number(start))) a["data-start"] = String(r3(Math.max(0, Number(start))));          // where the user dropped it
+  // another track in the music's place (Final Mix's Use this, Assets' Use as the film's music): a level or a volume lane set by hand or by the
+  // Review (bed 0.25, dips that clear five words) is about the film, not the track: it stays when the new clip starts where the old one did.
+  // Swapping away and back rebuilt the lane from the default and the words were covered again (T38-4). Balance again resets them.
+  if (kind === "music" && was && !same && Number(was["data-start"] ?? 0) === Number(a["data-start"])) {
+    if (!gainIsOurs(was, "music")) for (const k of ["data-volume", "data-mw-gain", "data-mw-gain-mark"]) { if (was[k] != null) a[k] = was[k]; else delete a[k]; }
+    const had = was["data-automation"];
+    if (had != null && was["data-mw-duck"] !== sig(had)) { a["data-automation"] = had; if (was["data-mw-duck"] != null) a["data-mw-duck"] = was["data-mw-duck"]; }
+  }
   // the music stopped at a second (the twist) stays stopped when the same track is placed again; else it is fitted to the film
   const stop = kind === "music" && same && was["data-mw-stop"] != null ? Number(was["data-mw-stop"]) : null;
   const loops = kind !== "music" ? null : stop != null ? cutMusic(a, stop, beatTimes(dir, src)) : fitMusic(a, filmOf(html, dir), endingOf(dir), beatTimes(dir, src));

@@ -53,7 +53,7 @@ import { spawn } from "node:child_process";
 import { createJobs } from "./jobs.mjs";
 import { busyWatch } from "../system-status/busy.mjs";
 import { plainMessage } from "./plainError.mjs";
-import { RESUME, createAutopilot, createRenderQueue, estimateMinutes, estimateNow, filmHasSequence, hasCast, isFinished, renderMinutes, reviewEstimates, reviewRounds } from "./autopilot.mjs";
+import { RESUME, RESUME_IN, createAutopilot, createRenderQueue, estimateMinutes, estimateNow, filmHasSequence, hasCast, isFinished, renderMinutes, reviewEstimates, reviewRounds } from "./autopilot.mjs";
 import { productionRoutes } from "./production.mjs";
 import { approvedFrames, boardRoutes, etaWords, runningEstimate, stillsBehind } from "./boards.mjs";
 import { localFile as localSoundFile, readState as readSfxState } from "../sfx/index.mjs";
@@ -325,10 +325,12 @@ export function routes(ctx) {
     const lastTasks = {};          // each step's last Claude task (a Stop shows as "stopped")
     const all = ctx.agent.list(id);
     // `asked`: it ended with a question to the user and is the last task of the film (nobody answered yet)
+    // a question asked before the owner opened a version is about a film no longer there (T38-6: "answer Claude" stayed after Open Version 2)
+    const voidAt = p.meta?.pipeline?.asksVoid?.at ?? null, fresh = (t) => !voidAt || String(t.updatedAt ?? t.createdAt ?? "") > voidAt;
     for (const t of all) if (t.step) lastTasks[t.step] = { status: t.status, at: t.updatedAt ?? t.createdAt, id: t.id,
-      asked: !answering && t.status === "done" && t.id === all.at(-1)?.id && (pipe.appAsked(t) || pipe.asksOwner(t.resultText)) };
+      asked: !answering && t.status === "done" && t.id === all.at(-1)?.id && fresh(t) && (pipe.appAsked(t) || pipe.asksOwner(t.resultText)) };
     // the film's last task is a chat turn that ended with a question to the user (e.g. which font): nobody answered yet
-    const lastAll = all.at(-1), chatAsked = !answering && !!lastAll && !lastAll.step && lastAll.status === "done" && pipe.asksOwner(lastAll.resultText);
+    const lastAll = all.at(-1), chatAsked = !answering && !!lastAll && !lastAll.step && lastAll.status === "done" && fresh(lastAll) && pipe.asksOwner(lastAll.resultText);
     const facts = pipe.gatherFacts(p, { shots, head, jobs: ctx.jobs.list({ projectId: id }), runningTask: tid ? ctx.agent.get(tid) : answering ? { id: "starting", step: null, status: "running", starting: true } : null, lastTasks,
       workAt, qaStale,
       extra: { chatAsked, revisionAsked: !tid && !!pendingRevision(p.path) } });
@@ -964,7 +966,7 @@ export function routes(ctx) {
       const answered = (t) => { try { projects.closeChatWaits(mustProject(id, root).path); } catch { /* the card is best effort */ } return t; };
       { const n = await chatNotes(ctx, mustProject(id, root), b); if (n) return answered(await ctx.agent.start(id, { text: n.text, scope: b.scope, shown: n.shown, media: n.media })); }
       // "continue" after the user stopped a pipeline step carries that step on
-      if (RESUME.test(String(b.text ?? "")) && !ctx.agent.running.has(id)) {
+      if (RESUME_IN.test(String(b.text ?? "")) && !ctx.agent.running.has(id)) {
         const { state } = await pipelineOf(id);
         if (state.some((x) => x.stopped)) { const r0 = await ctx.autopilot.resume(id, String(b.text).replace(RESUME, "").trim()); if (r0?.task) return answered(r0.task); }
       }

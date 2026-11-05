@@ -32,6 +32,9 @@ const readJson = (f, fallback) => { try { return JSON.parse(readFileSync(f, "utf
 const now = () => new Date().toISOString();
 /** "chạy tiếp", "tiếp tục", "làm tiếp", "continue": the user's word to carry on a stopped step. */
 export const RESUME = /^\s*(chạy tiếp|chay tiep|tiếp tục|tiep tuc|làm tiếp|lam tiep|continue|go on|resume)\b/i;
+/** The same words at the start of any sentence of the message ("Mình thấy… Làm tiếp tới Version 1" went to a plain chat turn, T38-1); a word
+ *  inside a sentence ("đừng làm tiếp") is no Continue. */
+export const RESUME_IN = /(?:^|[.!?…\n]\s*)(chạy tiếp|chay tiep|tiếp tục|tiep tuc|làm tiếp|lam tiep|continue|go on|resume)(?![\p{L}\p{N}])/iu;
 
 /** Minutes the build and self-check take: from the film's length and its kind, not from the builds done before (a build
  *  run again and again pushed the mean to 38 and 64 minutes for a 10 s film; the real ones took 5-26). A film of HyperFrames frames (build,
@@ -233,12 +236,15 @@ export function createAutopilot(ctx) {
         if (text == null) rmSync(abs, { force: true });
         else { mkdirSync(dirname(abs), { recursive: true }); writeFileSync(abs, text); }
       }
-      meta(id, (m) => { for (const k of ["voice", "music", "approvals"]) { if (was[k] === undefined) delete m[k]; else m[k] = was[k]; } });
+      // its checks too: the Tech checks row said 49 of the newer film's until Run checks (T38-6)
+      meta(id, (m) => { for (const k of ["voice", "music", "approvals", "lastQa"]) { if (was[k] === undefined) delete m[k]; else m[k] = was[k]; } });
       last = (await rev.saveAsync(p.path, `Opened version: ${v.name} (its voice and music)`)) ?? at;
     }
     // the version's own render comes back with it (no render again for a film that may have taken an hour); the player follows the film again
     try { ctx.restoreVersionFile?.(projects.getProject(id, root) ?? p, v); } catch { /* the next render makes it */ }
-    meta(id, (m) => { const x = m.pipeline?.version1; if (x) delete x.holding; });
+    // Claude's question on the film before (a voice to time to): no longer this film's; its "Answer Claude" card closes (T38-6)
+    meta(id, (m) => { const x = m.pipeline?.version1; if (x) delete x.holding; (m.pipeline ??= {}).asksVoid = { at: now(), version: v.id }; });
+    try { projects.closeChatWaits(p.path); } catch { /* the card is best effort */ }
     return { opened: v, revision: last };
   }
 

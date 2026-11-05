@@ -460,7 +460,9 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     // always the film's own rate: HyperFrames renders the timeline at any rate it is given, but the player,
     // frame-stepped motion and the film's data-fps follow the project's; a separate choice only disagreed with the timeline. b.fps is ignored.
     const fps = projects.projectFps(projects.getProject(p.id, root) ?? p);
-    const name = safeName(b.filename, basename(p.path));
+    // a name typed with the format's ending ("film.mp4") loses it: the date and the ending are the app's ("…_film.mp4_0529.mp4", T38-10)
+    const ext = FORMATS[format], typed = safeName(b.filename, basename(p.path));
+    const name = typed.toLowerCase().endsWith(ext.toLowerCase()) && typed.length > ext.length ? typed.slice(0, -ext.length).trim() || basename(p.path) : typed;
     const dir = join(p.path, "renders");
     mkdirSync(dir, { recursive: true });
     moveOldGates(p.path);
@@ -532,7 +534,9 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
         loud = await loudness(out, { root, target: { lufs: (target ?? MASTER.kit).lufs, peak: (target ?? MASTER.kit).tp, tolerance: 1 } }).catch((e) => ({ error: e.message }));
         if (loud && !loud.error) loud.master = target ? master : "off";
       }
-      meta(p.id, (m) => { (m.stages ??= {}).export = { status: "done" }; m.lastExport = { file: relativeTo(p.path, out), at: new Date().toISOString(), size, format, fps, quality, loudness: loud, ...(web?.capped ? { web } : {}) };
+      // the film's hash beside it: a check that reads a render (G-CUTS) reads this one while the film is as it was rendered (T38-7)
+      let filmAt = null; try { filmAt = filmHash(p.path, Number(fps) || null); } catch { /* no hash: never read as the film's */ }
+      meta(p.id, (m) => { (m.stages ??= {}).export = { status: "done" }; m.lastExport = { file: relativeTo(p.path, out), at: new Date().toISOString(), size, format, fps, quality, loudness: loud, ...(web?.capped ? { web } : {}), ...(filmAt ? { hash: filmAt } : {}) };
         (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "export", text: `Exported ${basename(out)}` }); });
       note(p, { kind: "render", text: "Render finished: {file}", vars: { file: basename(out) }, file: relativeTo(p.path, out), warnings: verdict.warnings.length });
       try { await ctx.autopilot?.saveVersion(p.id, "render"); } catch { /* a version is best effort */ }          // each render is a version
@@ -719,11 +723,16 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     return out.hf.words;
   }
 
+  /** Another voice than the one Version 1 was timed to, put in by the owner (the Voice screen's Create voice-over or an upload there, as Assets'
+   *  Use as the film's voice-over): recorded, so Claude is not started to re-time the film and the Review looks for the picture off it (owner #920;
+   *  T38-5: a voice made on the Voice screen after Version 1 started a Claude turn). { replaced } to keep in m.voice, or {}. */
+  const swapOf = (m, rel) => (m.pipeline?.version1?.at && m.voice?.file && m.voice.file !== rel ? { replaced: { at: new Date().toISOString(), from: m.voice.file, afterVersion1: true } }
+    : m.voice?.replaced ? { replaced: m.voice.replaced } : {});          // still not the voice Version 1 was timed to
   /** The project's voice-over is now this file: recorded in the project, committed, and transcribed at once. Resolves once committed
    *  (the transcription's files go in a later revision of their own). */
   async function useVoice(p, dest, info, { source = "upload", size = 0, from = null } = {}) {
     const rel = relativeTo(p.path, dest);
-    meta(p.id, (m) => { m.voice = { source, file: rel, name: basename(dest), size, info, addedAt: new Date().toISOString(), transcript: { status: "pending" }, ...(from ? { from } : {}) };
+    meta(p.id, (m) => { const was = swapOf(m, rel); m.voice = { source, file: rel, name: basename(dest), size, info, addedAt: new Date().toISOString(), transcript: { status: "pending" }, ...(from ? { from } : {}), ...was };
       (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "voice", text: `Voice-over added: ${basename(dest)}` }); });
     await commit(p, `Voice-over added: ${basename(dest)}`);
     let job = null, needsModel = null;
@@ -1071,8 +1080,8 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
         const info = await probe(out, root);
         const rel = relativeTo(p.path, out);
         transcript.saveAlignment(p.path, rel, made?.alignment ?? null);
-        meta(id, (m) => { m.voice = { source: provider, file: rel, name: basename(out), size: statSync(out).size, info, voiceId: b.voiceId ?? null, voiceName: b.voiceName ?? null,
-          model: model ?? null, settings, script: text, addedAt: new Date().toISOString(), transcript: { status: "pending" } };
+        meta(id, (m) => { const was = swapOf(m, rel); m.voice = { source: provider, file: rel, name: basename(out), size: statSync(out).size, info, voiceId: b.voiceId ?? null, voiceName: b.voiceName ?? null,
+          model: model ?? null, settings, script: text, addedAt: new Date().toISOString(), transcript: { status: "pending" }, ...was };
           (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "voice", text: `Voice-over generated with ${PROVIDERS[provider].title}` }); });
         await commit(p, `Voice-over generated (${PROVIDERS[provider].title})`);
         let next = null; try { next = startTranscribe(projects.getProject(id, root)).id; } catch (e) { job.log(`transcription not started: ${e.message}`); }

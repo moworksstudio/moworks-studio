@@ -211,7 +211,8 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
     {source === "kokoro" && d && d.kokoro.blocked && <section className="panel"><p className="secondary">{t("Kokoro has no Vietnamese voice. Choose ElevenLabs or upload a recording.")}</p></section>}
     {source === "kokoro" && d && !d.kokoro.blocked && !d.kokoro.installed && <KokoroInstall size={d.kokoro.mb} onDone={() => { v.reload(); }} />}
     {(source === "elevenlabs" || (source === "kokoro" && d?.kokoro.installed && !d.kokoro.blocked)) && d && <TtsPanel id={id} provider={source} keySaved={source === "kokoro" || d.keys[source].saved} brief={project.data?.meta?.brief} draft={d.scriptDraft?.text ?? ""} language={d.settings.language} onJob={follow} running={running}
-      current={voice ?? project.data?.meta?.voice} ownScript={d.ownScript} nudge={nudge} />}
+      current={voice ?? project.data?.meta?.voice} ownScript={d.ownScript} nudge={nudge}
+      afterV1={!!project.data?.meta?.pipeline?.version1?.at && !!(voice ?? project.data?.meta?.voice)?.file} />}
     <AudioFiles id={id} voiceFile={voice?.file} voiceName={voice?.voiceName} voiceTyped={!!voice?.script} onJob={follow} running={running} focus={path}
       stamp={`${voice?.transcript?.status ?? ""}|${voice?.transcript?.at ?? ""}|${voice?.transcript?.savedAt ?? ""}|${running?.id ?? ""}`} />
 
@@ -415,7 +416,7 @@ const firstLines = (text) => {
   return two.length <= 240 ? two : two.slice(0, 240).replace(/\s+\S*$/, "").trim();
 };
 
-function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", onJob, running, current = null, ownScript = null, nudge = 0 }) {
+function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", onJob, running, current = null, ownScript = null, nudge = 0, afterV1 = false }) {
   const t = useT();
   const toast = useToast();
   const name = SERVICE[provider], local = provider === "kokoro";          // on this computer: nothing to pay, nothing to confirm
@@ -524,7 +525,7 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
           {" "}<button type="button" className="clink" onClick={() => setText(ownScript.text)}>{t("Use your script")}</button></p>
           : draft && !ownWords && text === draft && <p className="hint"><Bot size={12} /> {t("Claude's draft: edit it before you make the voice-over")}</p>}
         <div className="vo-go"><span className="muted num">{t("{n} characters", { n: text.length.toLocaleString(locale()) })}</span><span className="spacer" />
-          <button className="btn primary" onClick={() => (local ? generate() : setAsk(true))} disabled={!text.trim() || !voiceId || !!running}>{running?.kind === "tts" ? <Loader2 size={15} className="spin" /> : <Sparkles size={15} />}{t("Create voice-over")}</button></div>
+          <button className="btn primary" onClick={() => (local && !afterV1 ? generate() : setAsk(true))} disabled={!text.trim() || !voiceId || !!running}>{running?.kind === "tts" ? <Loader2 size={15} className="spin" /> : <Sparkles size={15} />}{t("Create voice-over")}</button></div>
         {running?.kind === "tts" && <p className="hint">{t("{name} is reading the script. Transcription starts when the audio arrives.", { name })}</p>}
       </div>
     </div>
@@ -533,7 +534,10 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
       <button className="btn primary" onClick={generate}>{t("Create voice-over")}</button></>}>
       {/* One sentence with the cost (red); the changed settings only when there are some */}
       <div className="dlg-lines">
-        <p className="dlg-warn">{t("“{voice}” reads {n} characters, from your {name} credit.", { name, n: text.length.toLocaleString(locale()), voice: voice?.name ?? "" })}</p>
+        {/* after Version 1 the new voice becomes the film's: the same warning as Assets' Use as the film's voice-over (owner #920, T38-5) */}
+        {afterV1 && <p>{t("The picture was timed to the old voice.")}<br />{t("With this one it may be off in places.")}</p>}
+        {afterV1 && <p className="hint">{t("Claude does not re-time the film. The Review says where it finds the picture off the voice.")}</p>}
+        {!local && <p className="dlg-warn">{t("“{voice}” reads {n} characters, from your {name} credit.", { name, n: text.length.toLocaleString(locale()), voice: voice?.name ?? "" })}</p>}
         {changedText && <p className="hint">{t("Your voice settings: {what}", { what: changedText })}</p>}
       </div>
     </Dialog>}

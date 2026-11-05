@@ -20,6 +20,7 @@ import { appSounds } from "../project-service/layout.mjs";
 import { checklistOf } from "../project-service/design.mjs";
 import { docPath } from "../project-service/docs.mjs";
 import { humanHandOf } from "../style-catalog/hands.mjs";
+import { KIT_STYLES } from "../sfx/code-recipes.mjs";
 import { scriptDraft } from "../voice/script.mjs";
 
 const SATISFIED = new Set(["done", "skipped"]);
@@ -70,7 +71,10 @@ function assetFacts(dir) {
 /** A style whose film is one page of code: Lemo-Opuscar, mg-styles-15, anidoodle and Brush cartoon films are a single index.html
  *  (and its script), with no HyperFrames sub-composition mounted per frame, so "every frame mounted" never holds for them. */
 // What If (its Build once ran twice and was never "built") is one page of code too: whatif/ bundled to film.js
-export const isCodeFilm = (styleId) => /^(lemo-|mg-|anidoodle-)/.test(String(styleId ?? "")) || styleId === "brush-cartoon" || styleId === "what-if";
+// The owner's five kit styles are one page too (moworks-kits: the kit's page or its bundled composition in index.html): Test 38's 2D
+// Explainer film was never "built", so Sound and Version 1 never started (T38-2)
+export const isCodeFilm = (styleId) => /^(lemo-|mg-|anidoodle-)/.test(String(styleId ?? "")) || styleId === "brush-cartoon" || styleId === "what-if"
+  || KIT_STYLES.includes(String(styleId ?? ""));
 
 /** The last Tech checks as the steps judge them. A script check that ran out of time found nothing and blocks nothing,
  *  in reports saved before that rule too: the blocking count is read again from the report's gates. */
@@ -198,6 +202,7 @@ export function gatherFacts(project, { shots = [], head = null, jobs = [], runni
     voice: { file: m.voice?.file ?? null, transcript: m.voice?.transcript ?? null, transcribing: running("transcribe") || running("tts") },
     voiceWait: voiceWaitOf(dir, m, running),          // what the Storyboard waits for before it draws
     marks: m.pipeline?.marks ?? {}, skips: m.pipeline?.skips ?? {}, ran: m.pipeline?.ran ?? {}, keeps: m.pipeline?.keeps ?? {},
+    autoRun: m.pipeline?.autoRun ?? null,          // the step the autopilot ran twice and stopped running (its note told the user: Continue)
     built: { ok: built, at: workAt !== undefined && workAt !== null ? workAt : compAt },        // workAt: from git, without Studio's id revisions
     buildError: m.pipeline?.buildError?.error ?? null,          // the film's source did not compile at the last finalize
     qa: qaFacts(m.lastQa, dir), head, qaStale, qaRunning: running("qa"),
@@ -482,6 +487,10 @@ export function computePipeline(steps, f) {
     // the user's Stop (the chat's Stop button) on this step's last task, and it is not done since
     const last = f.lastTasks?.[step.id];
     if (last?.status === "cancelled" && !["done", "skipped", "running"].includes(s.status)) { s.stopped = { at: last.at }; }
+    // the autopilot ran it twice and stopped running it by itself: its note says "press Continue", so the row is stopped and has Continue
+    // (it read "ready" with no Continue button, T38-1); Continue (autopilot.resume) clears autoRun and runs it again
+    const held = f.autoRun;
+    if (!s.stopped && held?.told && held.step === step.id && !["done", "skipped", "running"].includes(s.status)) s.stopped = { at: held.told, twice: true };
     // the step's last task ended with a question to the user and nothing ran since: the pipeline waits for the answer
     // (it said "Ready to render" while the Review asked how to fix a still); a step already waiting for an approval keeps its own wait
     if (last?.asked && ["done", "ready"].includes(s.status)) s.asking = true;

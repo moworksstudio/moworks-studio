@@ -21,6 +21,7 @@ import { fitEffects } from "./voicefit.mjs";
 import { SUSTAINED_MIN_S, familyOf, findAmbience, pickVariant, sustainedCue } from "./library.mjs";
 import { DEFAULT_DENSITY, briefOf, isOff, readPrefs, soundPolicy } from "./prefs.mjs";
 import { isSongFilm } from "../style-catalog/traits.mjs";
+import { codeRuns, isKitStyle } from "./code.mjs";
 import { fadeOfTotal, planEnding } from "../hf-edit/ending.mjs";
 import { filmWords, trackClips } from "../hf-edit/tracks.mjs";
 import { ffmpegExe } from "../library/preview-media.mjs";
@@ -349,7 +350,9 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   const near = (res.near ?? []).filter((x) => cues.some((c) => c.name === x.name));          // what the film plays, not a name thinned away
   const endFade = filmEnd ? endFadeOf(dir, filmEnd) : 0;         // the ending's fade: the beds and the sounds in it fade with the film
   const placed = mount(dir, cues, { filmEnd, endFade, cueKey: cueKey(shots ?? []), times: timeKey(shots ?? []), left: { missing: res.missing, near } });
-  const beds = policy.ambience ? await placeAmbience(dir, shots, { prefs, filmEnd, endFade, words, shift: lv?.shift ?? 0, root: opts.root }) : (mountAmbience(dir, []), []);
+  // a kit style's film: every sound by code while this computer runs it (owner #909); the beds are library loops, so none (T38-3)
+  const codeOnly = isKitStyle(opts.styleId) && opts.code !== false && process.env.MW_CODE_SFX !== "none" && await codeRuns(opts.root);
+  const beds = policy.ambience && !codeOnly ? await placeAmbience(dir, shots, { prefs, filmEnd, endFade, words, shift: lv?.shift ?? 0, root: opts.root }) : (mountAmbience(dir, []), []);
   // every effect under the voice where a word is spoken, and the whole mix under the master's ceiling: nothing later has to fix them
   const fitted = await fitEffects(dir, { root: opts.root }).catch(() => null);
   const report = coverage(shots ?? [], plan, cues, thinned, readState(dir).sounds, o);

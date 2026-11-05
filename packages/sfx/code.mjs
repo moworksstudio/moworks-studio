@@ -73,7 +73,10 @@ const recipeFiles = (folder, kind) => (existsSync(folder) ? readdirSync(folder).
  *  matchLocal ({ dir, sounds }); each entry keeps its recipe and, for a kit's sound, its file (path). */
 export function codeLibrary({ kit = null, root = APP_ROOT, dir = null, run = true } = {}) {
   const libDir = libraryDir(root), all = catalogOf(libDir);          // the catalog with no style left out: the kits' sounds are picked here
-  const prebuilt = all.filter((s) => s.source?.kind === "code" && kitRecipe(s.id) && (s.kit === kit || !SIGNATURE.has(s.id)))
+  // a kit style's film takes its own kit's sounds only (owner #909: "the kit's sounds, then new ones by its code"; Test 38's 2D Explainer had
+  // Stickman's chime and jet, Inner Voice's whisper, T38-3); any other film the kits' neutral ones
+  const own = isKitStyle(kit);
+  const prebuilt = all.filter((s) => s.source?.kind === "code" && kitRecipe(s.id) && (s.kit === kit || (!own && !SIGNATURE.has(s.id))))
     .map((s) => ({ ...s, recipe: kitRecipe(s.id), prebuilt: true, own: s.kit === kit, kitDir: KIT_DIR[s.id.slice(0, 2)], params: {} }));
   const sounds = run ? [...prebuilt, ...RECIPES.map((e) => ({ ...e })), ...recipeFiles(keptRecipesDir(root), "kept"), ...(dir ? recipeFiles(filmRecipesDir(dir), "film") : [])]
     : prebuilt;
