@@ -12,7 +12,7 @@ import { stampName } from "../../../packages/render-names/index.mjs";
 import { useStage } from "./stage.jsx";
 
 // plain words for each check, English keys for t
-export const CHECK_WORDS = { "G-AUDIO-FILES": "Sound files that are missing", "G-HF-LINT": "Composition files", "G-HF-SCRIPT": "Script errors in the preview", "G-REMOTE": "Loads something from the internet",
+export const CHECK_WORDS = { "G-AUDIO-FILES": "Sound files that are missing", "G-CANVAS-TEXT": "Text drawn into the picture", "G-FLICKER": "Flicker in the render", "G-HF-LINT": "Composition files", "G-HF-SCRIPT": "Script errors in the preview", "G-REMOTE": "Loads something from the internet",
   "G-FONT": "A font that is not on this computer", "G-GLYPH": "A font without Vietnamese letters",
   "G-GLYPH-CODE": "A font without Vietnamese letters in the film's code", "G-VI-MARKS": "Vietnamese written without its marks", "G-BLANK": "Scenes that look empty",
   "G-HF-LAYOUT": "Layout: text overlapping, hidden or cut", "G-HF-CONTRAST": "Contrast too low to read", "G-HF-MOTION": "Motion",
@@ -28,7 +28,7 @@ export function checkLabel(g, t) {
   if (g.id === "G-HF-SCRIPT" && notChecked(g)) return t("Not checked: scripts in the preview");
   return notChecked(g) ? t("Not checked: {what}", { what: t(NOT_CHECKED_WORDS[g.id] ?? name) }) : name;
 }
-const NOT_CHECKED_WORDS = { "G-HF-LAYOUT": "layout", "G-HF-CONTRAST": "contrast", "G-HF-MOTION": "motion" };
+const NOT_CHECKED_WORDS = { "G-HF-LAYOUT": "layout", "G-HF-CONTRAST": "contrast", "G-HF-MOTION": "motion", "G-FLICKER": "flicker (waiting for the preview)" };
 /** The server's reasons name the file in brackets ("… (compositions/scene-2.html)"); the UI shows no paths. */
 export const noPaths = (s) => String(s ?? "").replace(/\s*\([^()]*[\\/][^()]*\)/g, "").trim();
 /** Why a check did not run, in plain words (no "HF", no "browser stages"): the lint error itself, without its file. */

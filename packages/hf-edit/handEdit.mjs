@@ -168,12 +168,23 @@ function inCode(el) {
 }
 const onlyMarks = (t) => /^[\p{P}\p{S}\s]+$/u.test(t);
 
-export async function textsOf(dir, file, { version = null } = {}) {
+/** The film time an element shows at: its own data-start and data-duration, else its nearest timed parent's (never the root composition's). */
+function timedSpan(el) {
+  for (let x = el; x && x.tagName; x = x.parentElement) {
+    if (x.hasAttribute?.("data-composition-id")) return null;
+    if (x.hasAttribute?.("data-start")) { const s = Number(x.getAttribute("data-start")) || 0, d = Number(x.getAttribute("data-duration")); return { start: s, end: Number.isFinite(d) ? s + d : Infinity }; }
+  }
+  return null;
+}
+/** The words of a file, for the Editor's Shots tab. from / to (seconds): only the words shown in that span (a one-page film, whose shots have no
+ *  file of their own: T38b-18, every shot said "no words to edit" though its 56 texts were on the page). */
+export async function textsOf(dir, file, { version = null, from = null, to = null } = {}) {
   const { sm } = await hfSource(version);
   const { abs, rel } = safeFile(dir, file);
   const { src, document } = load(sm, abs);
   const store = readStore(dir);
-  const out = wordsIn(sm, src, document).filter(({ x, text }) => !onlyMarks(text) && !inCode(x))
+  const inSpan = (x) => { if (from == null || to == null) return true; const sp = timedSpan(x); return !!sp && sp.start < to - 0.001 && sp.end > from + 0.001; };
+  const out = wordsIn(sm, src, document).filter(({ x, text }) => !onlyMarks(text) && !inCode(x) && inSpan(x))
     .map(({ id, x, text, line }) => ({ hfId: id, tag: x.tagName.toLowerCase(), text, ...(line ? { line: true } : {}), edited: !!store[`${rel}#${id}`] }));
   return { file: rel, texts: out };
 }

@@ -39,7 +39,7 @@ source skill itself"); music is the app's; the fresh-eyes review is the app's Re
 | `index.html` | A copy of `app/index.html`: the root `#main` with `data-skill="cartoon-3d"`, 1080×1920 (a short) or 1920×1080 (a What-If), **30 fps**, its length |
 | `src/videos/film/Video.tsx`, `world.ts`, `shots.ts`, `vo.ts` | The video's four files from the source skill's `templates/video/` filled in as `new-video.mjs` would (`__COMP__` → `Film`, `__W__`, `__H__`); their imports reach the source skill's code as shipped (`../../skill/ToonVideo`, `../../skill/sets/office`…). `Video.tsx` exports `Film`, `FPS`, `FRAMES`, `WIDTH`, `HEIGHT`, `SOUND` |
 
-`compositions/film/film.js` is the app's (finalize bundles the video with the source skill's code, React and three.js 0.187.0, the latest (owner #1071; the source skill asks for 0.186.0)); never write
+`compositions/film/film.js` is the app's (the app bundles it again before every qc_sheets and film_frames, so you can look at your change in the same turn (T40-12); and finalize bundles the video with the source skill's code, React and three.js 0.187.0, the latest (owner #1071; the source skill asks for 0.186.0)); never write
 it. `vo.ts`'s `WORDS` and `CAPTIONS` come from the voice's words: `import WORDS from "mw:words"` gives `[{ word, start, end }]` (seconds), the times the source skill's
 `vo-words.mjs` would measure; write `vo.ts` from them in the source skill's own shape. `FRAMES` = the last word's end + at least 0.5 s of finished still.
 

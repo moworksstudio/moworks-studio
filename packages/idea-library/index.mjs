@@ -9,7 +9,7 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "
 import { dirname, join } from "node:path";
 import { randomBytes } from "node:crypto";
 import { samplePrompts } from "../lemo-styles/index.mjs";
-import { claudeStandIn, clearPitch, pitchIdeas, readPitch, savePitched, scriptIdea } from "./pitch.mjs";
+import { claudeStandIn, clearPitch, countWords, pitchIdeas, readPitch, savePitched, scenesOf, scriptIdea, spoken } from "./pitch.mjs";
 
 const DATA = JSON.parse(readFileSync(new URL("./samples.json", import.meta.url), "utf8"));
 export const SAMPLES = DATA;
@@ -68,13 +68,61 @@ export function updateIdea(root, id, b) {
   writeIdeas(root, list);
   return list[i];
 }
-/** The script Claude wrote for an idea (pitch.mjs scriptIdea), kept on it: { text, words, seconds, lang, lengthSec, styleId, style, author, at }. */
-export function setScript(root, id, script) {
+const MAX_VERSIONS = 10;          // a script's earlier versions kept on its idea (Write again, Edit), newest first
+const gone = () => Object.assign(new Error("That idea is not here any more."), { code: "NOT_FOUND" });
+const withIdea = (root, id, fn) => {
   const list = readIdeas(root), i = list.findIndex((x) => x.id === id);
-  if (i < 0) throw Object.assign(new Error("That idea is not here any more."), { code: "NOT_FOUND" });
-  list[i] = { ...list[i], script, updated: new Date().toISOString() };
+  if (i < 0) throw gone();
+  list[i] = { ...fn(list[i]), updated: new Date().toISOString() };
   writeIdeas(root, list);
   return list[i];
+};
+/** A new script for an idea (pitch.mjs scriptIdea, or the owner's edit): { scenes, text, words, seconds, lang, lengthSec, styleId, style,
+ *  author, at, by }. The one before goes to its versions (at most ten), so Undo can bring it back. */
+export function setScript(root, id, script) {
+  return withIdea(root, id, (x) => {
+    const was = x.script ? [{ ...x.script, versions: undefined }, ...(x.script.versions ?? [])].slice(0, MAX_VERSIONS) : [];
+    return { ...x, script: { ...script, versions: was } };
+  });
+}
+/** The owner's own edit of a script's scenes: the narration and the picture of each, the times as they are. */
+export function editScript(root, id, scenes) {
+  const x = readIdeas(root).find((y) => y.id === id);
+  if (!x) throw gone();
+  if (!x.script) throw Object.assign(new Error("This idea has no script yet."), { code: "INVALID" });
+  const was = scenesOf(x.script);
+  if (!Array.isArray(scenes) || scenes.length !== was.length) throw Object.assign(new Error("The script changed meanwhile: open it again."), { code: "CONFLICT" });
+  const next = was.map((sc, k) => ({ ...sc, narration: String(scenes[k]?.narration ?? "").replace(/\r\n/g, "\n").trim().slice(0, 4000), picture: String(scenes[k]?.picture ?? "").trim().slice(0, 2000) }));
+  const text = next.map((sc) => sc.narration).filter(Boolean).join("\n");
+  const { versions, ...rest } = x.script;
+  return setScript(root, id, { ...rest, scenes: next, text, words: countWords(spoken(text)), at: new Date().toISOString(), by: "owner" });
+}
+/** Undo: the script before the last change back; the last one is dropped. */
+export function undoScript(root, id) {
+  return withIdea(root, id, (x) => {
+    const [prev, ...older] = x.script?.versions ?? [];
+    if (!prev) throw Object.assign(new Error("There is nothing to undo."), { code: "INVALID" });
+    return { ...x, script: { ...prev, versions: older } };
+  });
+}
+/** A film started from an idea (New project's Start a project, #1111): kept on the idea, so it reads "In a project". */
+export function linkProject(root, id, project) {
+  return withIdea(root, id, (x) => ({ ...x, projects: [{ id: String(project.id), title: String(project.title ?? ""), at: new Date().toISOString() },
+    ...(x.projects ?? []).filter((y) => y.id !== String(project.id))].slice(0, 20) }));
+}
+/** A pitched idea as its card (title, hook, the style's items, truth, sources, length); one saved before the card was kept is read back
+ *  from its brief (pitch.mjs ideaBrief's lines). Null for an idea the owner wrote. */
+export function cardOf(x) {
+  if (!x?.pitch) return null;
+  if (x.pitch.card) return x.pitch.card;
+  const lines = String(x.brief ?? "").split("\n"), paras = String(x.brief ?? "").split(/\n\s*\n/);
+  const fields = [];
+  for (const l of lines.slice(2)) {
+    const m = /^([^:\n]{1,60}):\s(.+)$/.exec(l);
+    if (!m || /^(True or legend|Thật hay truyền thuyết|Length|Độ dài|Sources|Nguồn)$/.test(m[1]) || /^-\s/.test(l)) continue;
+    fields.push({ label: m[1], text: m[2] });
+  }
+  return { title: x.name, hook: (paras[1] ?? "").trim(), fields, truth: x.pitch.truth ?? "unchecked", sources: x.pitch.sources ?? [], lengthSec: x.pitch.lengthSec ?? null };
 }
 export function deleteIdea(root, id) {
   const list = readIdeas(root);
@@ -84,33 +132,54 @@ export function deleteIdea(root, id) {
 }
 
 // Pitch 10 ideas (#1101): one pitch and one script at a time, as background jobs; the round in hand is the server's (GET /ideas/pitch)
-const PITCH_ESTIMATE = { minutes: [2, 6] }, SCRIPT_ESTIMATE = { minutes: [1, 3] };          // guesses until a real run measures them (audit/102 §12)
+const PITCH_ESTIMATE = { minutes: [5, 10] }, SCRIPT_ESTIMATE = { minutes: [2, 5] };          // Test 40: a first pitch took 9 minutes
+const IDEA_JOBS = new Set(["idea-pitch", "idea-script"]), RECENT_MS = 15 * 60000;
 export function ideaRoutes(ctx, { r }) {
   const root = ctx.root, ID = "([0-9a-f]{12})";
   const claude = async (opts) => (claudeStandIn() ?? (await import("../character-maker/index.mjs")).runClaude)(opts);
-  const jobArgs = (j, prefix) => ({ root, jobId: `${prefix}-${Date.now().toString(36)}`, claude, signal: j.signal, onStep: (stage, progress) => j.update({ stage, progress }), log: (l) => j.log(l) });
+  const jobArgs = (j, prefix) => ({ root, jobId: `${prefix}-${Date.now().toString(36)}`, claude, signal: j.signal, onStep: (stage, progress) => j.update({ stage, progress }),
+    onSteps: (steps) => j.update({ steps }), log: (l) => j.log(l) });
   const busy = (kind) => ctx.jobs.running().some((j) => j.kind === kind);
+  // the end of a run, said on whatever screen the owner is on (App's notices, #1115): the run goes on when they leave the page
+  const said = (n) => { try { ctx.notices?.add?.({ title: "Writers' Room", ...n }); } catch { /* the page shows it too */ } };
+  const ended = (ok, fail) => (job) => { if (job.status === "done") said(ok(job)); else if (job.status === "failed") said(fail(job)); };
+  // the films an idea went into that are still in the projects list
+  const known = async () => { try { const { listProjects } = await import("../project-service/index.mjs"); return new Set(listProjects(root).map((p) => p.id)); } catch { return null; } };
   return { routes: [
-    r("GET", "/ideas/jobs", () => ({ jobs: ctx.jobs.running().filter((j) => j.kind === "idea-pitch" || j.kind === "idea-script") })),
+    // the runs of the Writers' Room: running, and those that ended in the last minutes (the page picks up a run it was away from)
+    r("GET", "/ideas/jobs", () => ({ jobs: ctx.jobs.list().filter((j) => IDEA_JOBS.has(j.kind) && (j.status === "running" || Date.now() - Date.parse(j.endedAt ?? 0) < RECENT_MS)) })),
     r("GET", "/ideas/pitch", () => ({ pitch: readPitch(root), job: ctx.jobs.running().find((j) => j.kind === "idea-pitch") ?? null })),
     r("POST", "/ideas/pitch", (_p, b) => {
       if (busy("idea-pitch")) throw Object.assign(new Error("Claude is pitching already: wait for it"), { code: "BUSY" });
       const more = b?.more === true;
       if (!more && !b?.styleId) throw Object.assign(new Error("Choose a film style"), { code: "INVALID" });
-      const job = ctx.jobs.start("idea-pitch", { title: more ? "Pitching 10 more ideas" : "Pitching 10 ideas", estimate: PITCH_ESTIMATE, more },
+      const job = ctx.jobs.start("idea-pitch", { title: more ? "Pitching 10 more ideas" : "Pitching 10 ideas", estimate: PITCH_ESTIMATE, more,
+        onEnd: ended(() => ({ href: "#/ideas/research", text: more ? "Ten more ideas are ready" : "Ten ideas are ready" }),
+          (job) => ({ href: "#/ideas/research", text: "The pitch stopped: {why}", vars: { why: job.error?.message ?? "" } })) },
         async (j) => { const p = await pitchIdeas(b ?? {}, jobArgs(j, "pitch")); return { rounds: p.rounds, ideas: p.ideas.length }; });
       return { job, estimate: PITCH_ESTIMATE };
     }),
     r("POST", "/ideas/pitch/save", async (_p, b) => savePitched(root, { ids: Array.isArray(b?.ids) ? b.ids.map(String) : [], all: b?.all === true })),
     r("DELETE", "/ideas/pitch", () => clearPitch(root)),
     r("POST", `/ideas/${ID}/script`, ([id], b) => {
-      if (!readIdeas(root).some((x) => x.id === id)) throw Object.assign(new Error("That idea is not here any more."), { code: "NOT_FOUND" });
+      const idea = readIdeas(root).find((x) => x.id === id);
+      if (!idea) throw gone();
       if (busy("idea-script")) throw Object.assign(new Error("Claude is writing a script already: wait for it"), { code: "BUSY" });
-      const job = ctx.jobs.start("idea-script", { title: "Writing the script", estimate: SCRIPT_ESTIMATE, ideaId: id },
-        async (j) => { const idea = await scriptIdea(id, b ?? {}, jobArgs(j, "script")); return { ideaId: idea.id, words: idea.script.words }; });
+      const href = `#/ideas/scripts?id=${id}`, vars = { name: idea.name };
+      const job = ctx.jobs.start("idea-script", { title: "Writing the script", estimate: SCRIPT_ESTIMATE, ideaId: id, ideaName: idea.name,
+        onEnd: ended(() => ({ href, text: "The script of “{name}” is written", vars }), (job) => ({ href, text: "The script of “{name}” stopped: {why}", vars: { ...vars, why: job.error?.message ?? "" } })) },
+        async (j) => { const x = await scriptIdea(id, b ?? {}, jobArgs(j, "script")); return { ideaId: x.id, words: x.script.words }; });
       return { job, estimate: SCRIPT_ESTIMATE };
     }),
-    r("GET", "/ideas", () => ({ ...appIdeas(root), mine: readIdeas(root) })),
+    r("PUT", `/ideas/${ID}/script`, ([id], b) => ({ idea: editScript(root, id, b?.scenes) })),
+    r("POST", `/ideas/${ID}/script/undo`, ([id]) => ({ idea: undoScript(root, id) })),
+    // My ideas with each one's card and the films made from it that are still there (its status: Idea, Script ready, In a project)
+    r("GET", "/ideas", async () => {
+      const ids = await known();
+      const mine = readIdeas(root).map((x) => ({ ...x, card: cardOf(x), ...(x.script ? { script: { ...x.script, scenes: scenesOf(x.script) } } : {}),
+        projects: (x.projects ?? []).filter((p) => !ids || ids.has(p.id)) }));
+      return { ...appIdeas(root), mine };
+    }),
     r("POST", "/ideas", (_p, b) => ({ idea: createIdea(root, b) })),
     r("PUT", `/ideas/${ID}`, ([id], b) => ({ idea: updateIdea(root, id, b) })),
     r("DELETE", `/ideas/${ID}`, ([id]) => deleteIdea(root, id)),

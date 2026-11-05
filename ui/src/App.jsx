@@ -12,7 +12,7 @@ import Projects from "./screens/Projects.jsx";
 import StyleGallery from "./screens/StyleGallery.jsx";
 import Looks from "./screens/Looks.jsx";
 import Characters from "./screens/Characters.jsx";
-import IdeaLibrary from "./screens/IdeaLibrary.jsx";
+import WritersRoom from "./screens/WritersRoom.jsx";
 import Editor from "./screens/Editor.jsx";
 import Settings from "./screens/Settings.jsx";
 import Library from "./screens/Library.jsx";
@@ -43,7 +43,7 @@ function Rail({ path, count, updateReady = false }) {
       {item("/styles", <Sparkles size={18} />, t("Film Styles"))}
       {item("/library", <LibraryIcon size={18} />, t("Motion Library"))}
       {item("/characters", <Smile size={18} />, t("Characters"))}
-      {item("/ideas", <Lightbulb size={18} />, t("Idea Library"))}          {/* audit/97: just under Characters */}
+      {item("/ideas", <Lightbulb size={18} />, t("Writers' Room"))}          {/* audit/97, audit/104: just under Characters */}
       <div className="rail-bottom">{item("/settings", <Gear size={18} />, t("Settings"), <UpdateDot on={updateReady} />)}</div>
     </nav>
   );
@@ -51,7 +51,7 @@ function Rail({ path, count, updateReady = false }) {
 
 // The Studio theme: no left rail; the top bar is the peg bar, an animator's peg bar with its three pegs, the pages
 // hanging from it as paper tabs (the page in hand is the lit sheet); Settings is the gear beside the Claude lamp.
-const PEG_TABS = [["/projects", "Projects"], ["/styles", "Film Styles"], ["/characters", "Characters"], ["/ideas", "Idea Library"], ["/looks", "Brand Kits"], ["/library", "Motion Library"]];
+const PEG_TABS = [["/projects", "Projects"], ["/styles", "Film Styles"], ["/characters", "Characters"], ["/ideas", "Writers' Room"], ["/looks", "Brand Kits"], ["/library", "Motion Library"]];
 function Pegs({ path }) {
   const t = useT();
   const on = (to) => (to === "/projects" ? path === "/projects" || path.startsWith("/projects/") || path === "/new" : path.startsWith(to));
@@ -73,19 +73,30 @@ const busyTip = (tasks, jobs, st, t) => {
   if (!pick) return "";
   const name = String(pick.label ?? pick.title ?? "").replace(/\s*\(.*?\)\s*/g, " ").replace(/\s+/g, " ").trim().slice(0, 48);
   const more = tasks.length + jobs.length - 1;
-  return [pick.project ? `${pick.project}: ${name}` : name, pick.progress != null ? `${pick.progress}%` : "", more > 0 ? t("{n} more running", { n: more }) : ""].filter(Boolean).join(" · ");
+  // two at once: both by name (a pitch and a script of the Writers' Room, T41-2); more than two: the first and how many more
+  const second = more === 1 ? (st === "working" ? [...tasks.map((x) => ({ title: t("Claude is working on {title}", { title: x.title }) })), ...jobs].filter((x) => x !== pick && x.title !== pick.title)[0] : null) : null;
+  const nameOf = (x) => String(x?.label ?? x?.title ?? "").replace(/\s*\(.*?\)\s*/g, " ").replace(/\s+/g, " ").trim().slice(0, 48);
+  return [pick.project ? `${pick.project}: ${name}` : name, pick.progress != null ? `${Math.round(pick.progress)}%` : "", second ? nameOf(second) : more > 0 ? t("{n} more running", { n: more }) : ""].filter(Boolean).join(" · ");
 };
 
 /** A film's new version, for whoever is on another screen: one line with its Open, no jump (owner 31/10). On that film's own Editor it is passed over: the Editor takes the user to the version. */
+const NOTICE_MS = 12000;          // how long a Writers' Room notice stays
 export function VersionNotices({ notices, path, onSeen }) {
   const t = useT();
-  const here = (n) => path.split("?")[0].startsWith(`/projects/${n.projectId}`);
+  // a film's notice opens the film; another (the Writers' Room's runs, #1115) carries its own address
+  const link = (n) => n.href ?? `#/projects/${n.projectId}`;
+  const here = (n) => (n.href ? path.split("?")[0] === n.href.replace(/^#/, "").split("?")[0] : path.split("?")[0].startsWith(`/projects/${n.projectId}`));
   useEffect(() => { for (const n of notices) if (here(n)) onSeen(n); }, [notices, path]); // eslint-disable-line react-hooks/exhaustive-deps
-  const shown = notices.filter((n) => !here(n));
+  // a Writers' Room notice (it has its own address) is like a toast (T40-6): only the newest shows, an older one is seen at once, and
+  // it goes by itself after a while; a film's new version stays until it is opened or closed
+  const room = notices.filter((n) => n.href), newest = room.at(-1);
+  useEffect(() => { for (const n of room) if (n !== newest) onSeen(n); }, [notices]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!newest) return undefined; const k = setTimeout(() => onSeen(newest), NOTICE_MS); return () => clearTimeout(k); }, [newest?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  const shown = notices.filter((n) => !here(n) && (!n.href || n === newest));
   if (!shown.length) return null;
   return <div className="vnotices" role="status" aria-live="polite">{shown.slice(-3).map((n) => <div key={n.id} className="vnotice">
     <span className="t"><b>{n.title}</b>{t(n.text, n.vars)}</span>
-    <a className="btn sm primary" href={`#/projects/${n.projectId}`} onClick={() => onSeen(n)}>{t("Open")}</a>
+    <a className="btn sm primary" href={link(n)} onClick={() => onSeen(n)}>{t("Open")}</a>
     <button type="button" className="btn ghost icon sm" onClick={() => onSeen(n)} aria-label={t("Close")}><X size={14} /></button></div>)}</div>;
 }
 
@@ -168,7 +179,7 @@ export function Shell({ update: firstUpdate = null } = {}) {
   else if (seg[0] === "styles") screen = <StyleGallery />;
   else if (seg[0] === "looks") screen = <Looks kitId={seg.slice(1).join("/") || null} />;
   else if (seg[0] === "characters") screen = <Characters />;
-  else if (seg[0] === "ideas") screen = <IdeaLibrary />;
+  else if (seg[0] === "ideas") screen = <WritersRoom tab={seg[1] ?? "research"} id={new URLSearchParams(path.split("?")[1] ?? "").get("id")} />;
   else if (seg[0] === "library") screen = <Library />;
   else if (seg[0] === "settings") screen = <Settings section={seg[1] ?? "general"} claude={claude?.status ?? { loggedIn: false }} onRecheckClaude={() => claude?.refresh(true)} updateReady={update.ready} />;
   else screen = <Projects />;

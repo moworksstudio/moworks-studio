@@ -21,7 +21,10 @@ async function call(url, init = {}, timeout = TIMEOUT) {
       // a voice the plan does not allow (an instantly cloned voice on a plan without cloning) is refused with 401/403 too:
       // that is the plan, never "the key"
       const planNo = /current plan|your plan|subscription|upgrade|not available on/i.test(String(detail));
+      // a quota used up comes as 401 too ("exceeds your quota of 10000. You have 19 credits remaining"): the credits, never the key (T39-3)
+      const quota = /quota|credits? remaining|insufficient|exceeds your/i.test(String(detail));
       const plain = planNo ? "This voice is not available on the account's ElevenLabs plan: choose another voice"
+        : quota ? "The ElevenLabs credits are used up: add credits to the account, wait for its monthly reset, or record the voice and upload it"
         : r.status === 401 || r.status === 403 ? "The key was refused (check it in Settings)" : r.status === 402 ? "The account has no credit left for this"
         : r.status === 429 ? "Too many requests; try again in a minute" : `The service answered ${r.status}`;
       throw Object.assign(new Error(detail ? `${plain}: ${String(detail).slice(0, 200)}` : plain), { code: "PROVIDER", status: r.status });

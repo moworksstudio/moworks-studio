@@ -314,7 +314,10 @@ export function shiftPlaced(dir, from, delta) {
  *  assets/3_audio/sfx/<id>.ogg, shared by every name that uses it; the first is the name's sound, all of them its variants (a film's
  *  repeats of one sound vary). weak: the library only had a loose match, looked up online again the next time the search may answer. */
 export function useLibrarySound(dir, name, choices, { weak = false } = {}) {
-  const list = (choices ?? []).filter((e) => e?.path && existsSync(e.path)).slice(0, 4);
+  // one sound and its own numbered takes only, never a neighbour of its family (T38b-15: a pop that appears rotated to one that drops); the
+  // copies a little higher and lower give the variety (vary.mjs)
+  const own = (e) => String(e?.id ?? "").replace(/-\d+$/, "");
+  const list = (choices ?? []).filter((e) => e?.path && existsSync(e.path)).filter((e, _, xs) => own(e) === own(xs[0])).slice(0, 4);
   if (!list.length) return null;
   mkdirSync(join(dir, "assets", "3_audio", "sfx"), { recursive: true });
   const vs = list.map((e) => {
@@ -412,7 +415,7 @@ function closestItem(results, name) {
  *  Returns { added: [names], missing: [names], offline, near: [{ name, as, lasting? }] } (near: the cues on a stand-in now; lasting: a stand-in
  *  for a sound that lasts). */
 export const shorterQuery = (name) => { const ws = String(name ?? "").trim().split(/\s+/); return ws.length > 2 ? ws.slice(-2).join(" ") : null; };
-export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root = APP_ROOT, online = true, timeoutMs = SEARCH_TIMEOUT_MS, library = false, style = null, families = null, keep = null, tone = false, styleId = null, code = true } = {}) {
+export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root = APP_ROOT, online = true, timeoutMs = SEARCH_TIMEOUT_MS, library = false, style = null, families = null, keep = null, tone = false, styleId = null, code = true, exclude = null } = {}) {
   let st = readState(dir);
   const local = bundled(root), added = [], missing = [], failed = [], near = [];
   const has = (name) => !!st.sounds[name] && existsSync(join(dir, st.sounds[name].file));
@@ -420,7 +423,7 @@ export async function resolveCues(dir, cues, { fetchImpl = fetch, signal, root =
   const lib = new Map();
   const libOf = (name) => {
     if (!library) return null;
-    if (!lib.has(name)) { let m = null; try { m = matchLocal(LIBRARY_QUERY[name] ?? name, { family: families?.get?.(name) ?? null, style, root, filmStyle: styleId, oneShot: true, minDuration: sustainedCue(name) ? SUSTAINED_MIN_S : 0 }); } catch { /* no library */ } lib.set(name, m); }
+    if (!lib.has(name)) { let m = null; try { m = matchLocal(LIBRARY_QUERY[name] ?? name, { family: families?.get?.(name) ?? null, style, root, filmStyle: styleId, oneShot: true, exclude: exclude ?? [], minDuration: sustainedCue(name) ? SUSTAINED_MIN_S : 0 }); } catch { /* no library */ } lib.set(name, m); }
     return lib.get(name);
   };
   // code-made sounds first (code.mjs, owner #909): a film of the owner's styles takes the code only while this computer can run it (their source skills forbid the
@@ -821,18 +824,20 @@ export function creditLine(s) {
  *  content of the file is kept). */
 export function writeCredits(dir) {
   const st = readState(dir), f = docPath(dir, "CREDITS.md");
-  const rows = new Map();
+  const rows = new Map(), copies = new Map();
   const add = (name, file) => {
     const s = st.sounds[name];
     if (!s) return;
     const v = (s.variants ?? []).find((x) => x.file === file), rec = v ? { ...s, ...v } : s;
     const key = v?.of ?? rec.file;          // a copy a little higher or lower (vary.mjs) is credited once, as its original
     if (!rows.has(key)) rows.set(key, [name, v?.of ? { ...rec, file: v.of } : rec]);
+    if (v?.of) copies.set(key, new Set([...(copies.get(key) ?? []), v.file]));
   };
   for (const m of st.mounted ?? []) add(m.name, m.file);
   for (const a of st.ambience?.placed ?? []) add(a.name, a.file);
   for (const a of addedNow(dir)) add(a.name, a.file);
-  const body = [...rows.values()].map(([n, s]) => `- **${n.startsWith(ADDED) ? s.title : n}** (\`${s.file}\`): ${creditLine(s)}`);
+  const body = [...rows.entries()].map(([k, [n, s]]) => { const cp = [...(copies.get(k) ?? [])].sort();
+    return `- **${n.startsWith(ADDED) ? s.title : n}** (\`${s.file}\`${cp.length ? `, also played a little higher or lower as ${cp.map((x) => `\`${x}\``).join(", ")}` : ""}): ${creditLine(s)}`; });
   const section = `<!-- mw:sfx-credits -->\n## Sound effects\n\n${body.length ? body.join("\n") : "None."}\n<!-- /mw:sfx-credits -->`;
   const old = existsSync(f) ? readFileSync(f, "utf8") : "# Credits\n";
   const next = /<!-- mw:sfx-credits -->[\s\S]*?<!-- \/mw:sfx-credits -->/.test(old)

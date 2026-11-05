@@ -38,7 +38,7 @@ const hash = (x) => createHash("sha1").update(JSON.stringify(x)).digest("hex").s
 
 /** The names Claude is asked about: named (the storyboard's or the Motion Plan's), not the owner's, not kept as the user left them, and with
  *  no exact sound in the library. Each with its moments, its family and the library's candidates. */
-export function pickAsks(dir, cues, shots, { root = APP_ROOT, style = null, styleId = null, families = null, keep = null } = {}) {
+export function pickAsks(dir, cues, shots, { root = APP_ROOT, style = null, styleId = null, families = null, keep = null, exclude = [] } = {}) {
   const st = readState(dir), by = new Map();
   for (const c of cues) if ((c.prio ?? 0) < 2) by.set(c.name, [...(by.get(c.name) ?? []), c]);
   const out = [];
@@ -46,7 +46,7 @@ export function pickAsks(dir, cues, shots, { root = APP_ROOT, style = null, styl
     const s = st.sounds[name];
     if (s?.source === "owner" || (keep?.has(name) && s)) continue;
     const family = families?.get?.(name) ?? familyOf(name);
-    const opts = { family, style, root, filmStyle: styleId, oneShot: true, minDuration: sustainedCue(name) ? SUSTAINED_MIN_S : 0 };
+    const opts = { family, style, root, filmStyle: styleId, oneShot: true, minDuration: sustainedCue(name) ? SUSTAINED_MIN_S : 0, exclude };
     let m = null; try { m = matchLocal(name, opts); } catch { /* no library */ }
     // the library's own sound only when its tags say every word of the name (T38b-14: "magnet clack" took a typewriter on "clack",
     // "paper sheet rustle" a cloth on "rustle", and Claude never saw them)
@@ -65,9 +65,9 @@ export const askOf = (name, list, shots, candidates, family = null) => ({ name, 
 
 /** Claude's answers for some asks (one short run), or, with no Claude, a sound made from the name's own words where `makeAll` (or the library
  *  has nothing of its kind): Map name -> { pick } | { make, seconds }. */
-export async function askClaude(asks, { ask = null, maker = null, dir, style = null, root = APP_ROOT, filmStyle = null, makeAll = false } = {}) {
+export async function askClaude(asks, { ask = null, maker = null, dir, style = null, root = APP_ROOT, filmStyle = null, makeAll = false, never = [] } = {}) {
   if (!asks.length) return new Map();
-  if (ask) return readPicks(await ask(pickPrompt(asks, { style }), { cwd: join(dir, ".moworks") }).catch(() => null), asks);
+  if (ask) return readPicks(await ask(pickPrompt(asks, { style, never }), { cwd: join(dir, ".moworks") }).catch(() => null), asks);
   const out = new Map();
   if (maker) for (const a of asks) { let m = null; if (!makeAll) try { m = matchLocal(a.name, { family: a.family, root, filmStyle, oneShot: true }); } catch { /* none */ }
     if (makeAll || !m?.good) out.set(a.name, { make: a.name, seconds: a.seconds }); }
@@ -95,11 +95,11 @@ export async function settleAsks(dir, asks, answers, { root = APP_ROOT, maker = 
 }
 
 /** The prompt of one run: every name, its moments and candidates; the answer is JSON only. */
-export function pickPrompt(asks, { style = null } = {}) {
+export function pickPrompt(asks, { style = null, never = [] } = {}) {
   const rows = asks.map((a, i) => ({ n: i + 1, name: a.name, family: a.family ?? undefined, moments: a.moments, seconds: a.seconds,
     library: a.candidates.map((e) => ({ id: e.id, is: [...new Set([...(e.tags ?? []), e.family].filter(Boolean))].slice(0, 8).join(", "), s: e.duration != null ? Math.round(e.duration * 10) / 10 : undefined })) }));
   return `You are the sound designer of a short motion-graphics film${style ? ` (its style: ${style})` : ""}. Each cue below is a sound the storyboard names, with the moment it plays (the shot and what moves) and the closest sounds of the studio's library (id, what the sound is, its length in seconds).
-For each cue, pick the library sound you would really use for that moment: it must be that kind of sound made by that thing (a bicycle pump's squeak is not an animal's squeak; a soft pop for a coin landing is wrong). If none of them is, answer "make" with a short English description of the exact sound for a sound-effect generator (what makes it, how it sounds, how many hits; no music, no voice) and its length in seconds (0.5 to 6).
+${never.length ? `This film style never plays these kinds of sound, so never pick or describe one: ${never.join(", ")}.\n` : ""}For each cue, pick the library sound you would really use for that moment: it must be that kind of sound made by that thing (a bicycle pump's squeak is not an animal's squeak; a soft pop for a coin landing is wrong). If none of them is, answer "make" with a short English description of the exact sound for a sound-effect generator (what makes it, how it sounds, how many hits; no music, no voice) and its length in seconds (0.5 to 6).
 Answer with JSON only, no other text: {"cues":[{"n":1,"pick":"<library id>"},{"n":2,"make":"<description>","seconds":1.2}]}
 
 ${JSON.stringify(rows)}`;
@@ -145,19 +145,37 @@ export const pickAsker = (root = APP_ROOT) => (process.env.NODE_TEST_CONTEXT || 
 /** Settle the named sounds the library has no exact sound for (above). ask(prompt): Claude's answer text (pickAsker), or null: then a name
  *  the library matches only loosely (not `good`) is made when it can be; maker: generate.mjs soundMaker, or null. Returns { settled: Set of
  *  names now on Claude's pick or a made sound, asked, picked, made: [names], none: [names Claude said none for that nothing made] }. */
-export async function pickSounds(dir, cues, shots, { root = APP_ROOT, ask = null, maker = null, style = null, styleTitle = null, styleId = null, families = null, keep = null } = {}) {
-  const asks = pickAsks(dir, cues, shots, { root, style, styleId, families, keep });
+export async function pickSounds(dir, cues, shots, { root = APP_ROOT, ask = null, maker = null, style = null, styleTitle = null, styleId = null, families = null, keep = null, exclude = [], never = [] } = {}) {
+  const asks = pickAsks(dir, cues, shots, { root, style, styleId, families, keep, exclude });
   const settled = new Set(), picked = [], made = [], none = [];
   if (!asks.length) return { settled, asked: 0, picked, made, none };
   const st = readState(dir);
   const has = (n) => !!st.sounds[n] && existsSync(join(dir, ...String(st.sounds[n].file).split("/")));
   // Claude's earlier answer for the same moment and candidates stands (no second run), while its sound is in the film
-  const fresh = asks.filter((a) => !(st.picks?.[a.name]?.ctx === a.ctx && has(a.name) && st.sounds[a.name].picked));
-  for (const a of asks) if (!fresh.includes(a)) settled.add(a.name);
-  const answers = fresh.length ? await askClaude(fresh, { ask, maker, dir, style: styleTitle ?? style, root, filmStyle: styleId }) : new Map();
+  // Claude's earlier answer for the same moment and candidates stands, with no second run; and it is what plays (T38b-15: a remembered
+  // pick lost its place to an online stand-in, a shovel for an eye closing): a name whose sound is no longer its answer gets the answer back
+  const cached = asks.filter((a) => st.picks?.[a.name]?.ctx === a.ctx && (st.picks[a.name].pick || st.picks[a.name].make));
+  const fresh = asks.filter((a) => !cached.includes(a));
+  const back = cached.filter((a) => !isAnswer(st.sounds[a.name], st.picks[a.name]) || !has(a.name));
+  for (const a of cached) if (!back.includes(a)) settled.add(a.name);
+  const answers = fresh.length ? await askClaude(fresh, { ask, maker, dir, style: styleTitle ?? style, root, filmStyle: styleId, never }) : new Map();
+  for (const a of back) answers.set(a.name, st.picks[a.name].pick ? { pick: st.picks[a.name].pick } : { make: st.picks[a.name].make, seconds: st.picks[a.name].seconds });
   const asked = ask ? fresh.length : 0;
-  const done = await settleAsks(dir, fresh, answers, { root, maker });
+  const done = await settleAsks(dir, [...fresh, ...back], answers, { root, maker });
   for (const n of done.settled) settled.add(n);
   picked.push(...done.picked); made.push(...done.made); none.push(...done.none);
-  return { settled, asked, picked, made, none };
+  return { settled, asked, picked, made, none, asks };
+}
+
+/** Is a name's sound record its kept answer (a library pick, or a sound made from those words)? */
+export const isAnswer = (s, p) => !!s && !!p && (p.pick ? s.id === `library:${p.pick}` : s.source === "elevenlabs" && s.prompt === p.make);
+
+/** After the rest of the placement (the library's pass, the search, the code): every name Claude answered plays its answer (T38b-15: 31 of 125
+ *  played another file). Returns the names put back. */
+export async function holdPicks(dir, picks, { root = APP_ROOT, maker = null } = {}) {
+  if (!picks?.settled?.size) return [];
+  const st = readState(dir), asks = (picks.asks ?? []).filter((a) => picks.settled.has(a.name) && st.picks?.[a.name] && !isAnswer(st.sounds[a.name], st.picks[a.name]));
+  if (!asks.length) return [];
+  const answers = new Map(asks.map((a) => [a.name, st.picks[a.name].pick ? { pick: st.picks[a.name].pick } : { make: st.picks[a.name].make, seconds: st.picks[a.name].seconds }]));
+  return [...(await settleAsks(dir, asks, answers, { root, maker })).settled];
 }

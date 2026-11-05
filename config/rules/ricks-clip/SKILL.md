@@ -40,7 +40,7 @@ app does each part (§4).
 | `film/roman.js` | When the film needs new outfits, headgear, props, faces or views: a copy of the source skill's `engine/roman.js` with the additions in the same hand (§4.4, and §3 below) |
 | `film/paint.js`, `film/motion.js` | Only to add painters or helpers, in the source skill's style |
 
-`compositions/film/film.js` is the app's (finalize bundles `film/` with the source skill's engine, `toon.js` (toon.ts and the cast, as the source skill's `setup.sh` builds
+`compositions/film/film.js` is the app's (the app bundles it again before every qc_sheets and film_frames, so you can look at your change in the same turn (T40-12); and finalize bundles `film/` with the source skill's engine, `toon.js` (toon.ts and the cast, as the source skill's `setup.sh` builds
 it) and three.js 0.187.0); never write it. The source skill was written for three.js r160: the app makes the one change r187 needs when it bundles (§2 of the
 app's README).
 
@@ -97,14 +97,22 @@ a hard cut only on a jump in place or time, with the flash; every hold creeps, n
 The source skill's sound character (SKILL.md §4.7, its `audio.py` cue table): **whooshes on big camera moves**, a thunk on stamps, rumble and crash on collapses,
 a scrape on metal, a ting on reveals, a sting on the twist, creaks, snaps, splashes, snores, leaves, a water bed; SFX on events, written in frames / 30.
 The music is the app's (a short march-like loop fits: kick, snare, plucked bass, brass) and **stops at the twist line**, then a low drone carries to the
-end: call the app's `music_stop` with the twist's second (in a pause of the voice), and take the drone from the library (or code). Lock the picture's
+end (take it from the library, or code). How (T39-10): in the **Motion Plan**, set `musicStop` to the twist's second, in the pause of the voice
+just before the twist sentence (between two words of transcript.json), and leave `musicStopAsked` empty: the app applies it itself when Final Mix
+places the music (this style's own rule, like What If's). When the music is already on the timeline (a change after Final Mix), call the app's
+`music_stop` with that second. The **Review** checks it: Final Mix shows the stop at the twist; if it does not, call `music_stop`. Lock the picture's
 timing before the sound. **The levels are the house's** (moworks-studio §7, owner #1066): the source skill's own numbers (music at 50 % of the voice with no
 ducking, effects at 50 %, the whole at -14 LUFS) are replaced by them; the app's Final Mix sets them.
 
 ## 6. Text over the canvas
 
-The film has no captions. Words in the world (signs, carvings, banners) are the drawing's own, painted on canvas textures (moworks-studio §8), and read
-the right way round.
+The film has no captions. Words in the world (signs, carvings, banners, a flag's letters, the Z of a snore) are the drawing's own, painted on canvas
+textures, and read the right way round: they are **this style's performed text** (moworks-studio §8a, owner #1134 step 3): they stay painted in the
+world, never moved to HTML; Tech checks' G-CANVAS-TEXT counts the words drawn in `film/` as such. Plain text over the picture (a title card, a
+caption the owner asks for) is an HTML element over the canvas, editable as in every style.
+
+The source skill's camera **kicks** (a 7-frame shake on a hit, `camFromKeys`) stay as shipped; on a light flicker they can read as a judder (T39-9):
+keep a kick off a flicker's frames, or say in docs/NOTES.md that the two land together on purpose.
 
 ## 7. The ending
 

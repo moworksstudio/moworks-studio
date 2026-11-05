@@ -53,6 +53,14 @@ const STUDIO_HINTS = { brief: "Prepare: the brief, the files read, the design", 
   "qc-review": "What Claude found and changed in your film", qa: "The app's own checks of the film" };
 
 /** The pipeline, read again every 3 s while something runs (Claude, a render anywhere), else every 8 s. */
+/** Where a shot starts on the film: its own start, else (a one-page film's shot, timed by the page's words) the planned lengths of the shots
+ *  before it; the playhead goes there when the shot is picked (T40-14: a shot clicked in the Shots tab did not move it). */
+export const shotStart = (s, shots = []) => {
+  if (Number.isFinite(s?.start)) return s.start;
+  let t = 0; for (const x of shots ?? []) { if (x === s || (x.number != null && x.number === s?.number)) return t; t += Number(x.duration) || 0; }
+  return 0;
+};
+
 function usePipeline(id) {
   const [data, setData] = useState(null);
   const [n, setN] = useState(0);
@@ -622,6 +630,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   // every style and both themes: what the edit card cannot change by hand is pinned as a note, in The Studio too
   const notesOn = !unbuilt;
   const playerEl = filmShown ? <Player key={filmKey} projectId={id} pv={pv} shots={shots ?? []} shot={shot} onShot={setShot} locked={locked} planned={unbuilt ? p.plannedDuration ?? 0 : null}
+    styleCaptions={!!tl?.captions?.some((c) => c.own)} onVoice={() => openSheet("voice")}
     range={range} onFilesChanged={(reload) => filesChanged(!!reload)} pinning={pinning} onPin={notesOn ? () => { pv.send("pause"); pv.send("clear"); pv.setPicked([]); setPinning((x) => !x); } : null}>
     {notesOn && <NotesLayer notes={pins} time={pv.state.time} pinning={pinning} aspect={aw && ah ? aw / ah : 16 / 9} onPlace={placeNote} onRemove={removePin} />}</Player>
     : <div className="pv"><div className="pv-stage"><div className="pv-wait"><Loader2 size={18} className="spin" />{t("Opening the project…")}</div></div></div>;
@@ -675,7 +684,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
         onTranscript={(path) => openSheet("voice", { path })} onTimelineChanged={() => { loadTimeline(); pv.send("reload"); }}
         onShot={(n) => { const s = shots?.find((x) => x.number === n); if (s) { setShot(s); pv.send("seek", { time: s.start }); setLeftTab("shots"); } }} />
         : <ShotList projectId={id} shots={unbuilt ? shots?.map((s) => ({ ...s, start: null })) : shots} blank={blankShot} posters={shotPosters} shot={shot} locked={locked} send={pv.send} version={version}
-          onShot={(s) => { setShot(s); if (s) pv.send("seek", { time: s.start }); }} onChanged={(structure) => filesChanged(!!structure)} />}
+          onShot={(s) => { setShot(s); if (s) pv.send("seek", { time: shotStart(s, shots) }); }} onChanged={(structure) => filesChanged(!!structure)} />}
     </section></div>
     <section className="ed-box ed-pipe">
       <Pipeline projectId={id} data={pipeline} starting={starting} onChanged={reloadPipeline} onOpen={openSheet} onAssets={showAssets} cast={p?.meta?.characters?.ids?.length > 0} music={!!p?.styleInfo?.music} warnings={qcWarnings} actions={actions} />
@@ -749,7 +758,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
             onShot={(n) => { const s = shots?.find((x) => x.number === n); if (s) { setShot(s); pv.send("seek", { time: s.start }); setLeftTab("shots"); } }} /></>
           : tab === "film" ? <FilmCard id={id} project={p} locked={locked} onRestored={reloadFilm} />
             : <ShotList projectId={id} shots={unbuilt ? shots?.map((s) => ({ ...s, start: null })) : shots} blank={blankShot} posters={shotPosters} shot={shot} locked={locked} send={pv.send} version={version}
-              onShot={(s) => { setShot(s); if (s) pv.send("seek", { time: s.start }); }} onChanged={(structure) => filesChanged(!!structure)} />}
+              onShot={(s) => { setShot(s); if (s) pv.send("seek", { time: shotStart(s, shots) }); }} onChanged={(structure) => filesChanged(!!structure)} />}
       </section>
     </aside>;
     const line = <Pipeline projectId={id} data={pipeline} starting={starting} onChanged={reloadPipeline} onOpen={openSheet} onAssets={showAssets} cast={p?.meta?.characters?.ids?.length > 0} music={!!p?.styleInfo?.music} warnings={qcWarnings}

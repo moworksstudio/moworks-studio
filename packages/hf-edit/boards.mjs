@@ -281,6 +281,11 @@ export async function takeStills(dir, { signal = null, force = false, by = "owne
     // stopped twice: no round of empty pictures (the dialog showed one, and Approve was on); the caller says STILLS_BUSY with a Retry
     if (r.busy) {
       rmSync(join(dir, ROUNDS, id), { recursive: true, force: true });
+      // the page itself never got ready (its code stopped on an error): the board's fault, not a busy computer (T39-7)
+      const tail = String(r.stderr ?? (r.stderrTail ?? []).join("\n"));
+      if (/buildReady never resolved|Uncaught|ReferenceError|TypeError|SyntaxError|no character/i.test(tail))
+        throw Object.assign(new Error("The board's page did not load: its code stops on an error. Ask Claude to fix the board, then take the pictures again."),
+          { code: "BOARD_PAGE", detail: tail.split(/\r?\n/).filter(Boolean).slice(-3).join(" ").slice(0, 300) });
       throw Object.assign(new Error(STILLS_BUSY), { code: "STILLS_BUSY" });
     }
     done += count;

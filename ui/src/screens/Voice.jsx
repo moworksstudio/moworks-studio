@@ -284,6 +284,15 @@ export function draftInBrief(draft, briefText) {
   const lines = String(draft ?? "").split(/\n+/).map(plainWords).filter(Boolean), all = plainWords(briefText);
   return lines.length > 0 && !!all && lines.every((l) => all.includes(l));
 }
+/** The words to read in a script brief: a brief the Writers' Room made gives its narration lines only (never its scene notes, the idea,
+ *  its sources or its length: T41-3); a script the owner typed is read as it is. */
+export function narrationOf(briefText) {
+  const t = String(briefText ?? "").replace(/\r\n/g, "\n");
+  const m = /^Narration \(the script, to be read as written\):\n([\s\S]*?)(?:\n\n(?:Scenes \(picture notes|The idea:)|$)/.exec(t);
+  // the words only: a spoken line's speaker label ("EM: …", [EM: "…"]) is not read (T40-7)
+  return (m ? m[1] : t).trim().split("\n").map((l) => { const k = SPEAKER.exec(l); return k ? l.slice(k[0].length).replace(/^["“]|["”]\s*\]?\s*$/g, "").trim() : l; }).join("\n");
+}
+const SPEAKER = /^\s*(?:\[\s*([^\]:\n]{1,30}):\s*|(\p{Lu}[\p{L}\p{N}.'’-]*(?: [\p{L}\p{N}.'’-]+){0,2}):\s+(?=["“])|(\p{Lu}[\p{Lu}\p{N} .'’-]{0,24}):\s+)/u;
 export const projectLanguage = (brief, fallback = "vi") => (brief?.text ? (VI_LETTERS.test(brief.text) ? "vi" : "en") : fallback);
 /** The voices in the order the list shows them: the project's language first, then the user's own, then the rest, each as the service gave them. */
 // A voice the account's plan does not allow (usable: false, an instantly cloned one) goes last, never first
@@ -430,13 +439,17 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
   useEffect(() => { triedAgain.current = false; }, [provider]);          // each service gets its own try
   const [voiceId, setVoiceId] = useState("");
   const [model, setModel] = useState("");
-  const [text, setText] = useState(kept[provider]?.text ?? (brief?.mode === "script" ? brief.text ?? "" : ""));
+  // the Script box: what was typed here, else the words Claude wrote for the voice (docs/VOICEOVER.md, with its delivery tags), else a
+  // script brief's own narration (T41-3: never the whole brief with its scene notes and sources)
+  const fromBrief = brief?.mode === "script" ? narrationOf(brief.text) : "";
+  const [text, setText] = useState(kept[provider]?.text ?? (draft || fromBrief));
   // what is chosen here outlives a switch of the source card
   useEffect(() => { if (list && voiceId) kept[provider] = { ...kept[provider], voiceId, model }; }, [voiceId, model, list]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { kept[provider] = { ...kept[provider], text }; }, [text]); // eslint-disable-line react-hooks/exhaustive-deps
   const chooseVoice = (v) => { kept.last = v; setVoiceId(v); };
   // An empty Script box takes the words Claude wrote for the voice-over, one line per sentence
-  useEffect(() => { if (draft) setText((x) => (x.trim() ? x : draft)); }, [draft]);
+  // (it also takes the place of the brief's narration put there before it arrived: the voice-over's words, with its tags, win)
+  useEffect(() => { if (draft) setText((x) => (!x.trim() || x === fromBrief ? draft : x)); }, [draft]); // eslint-disable-line react-hooks/exhaustive-deps
   // A script brief is the user's own words, not Claude's draft; so is a draft whose every line is in the brief as written
   // (an idea brief that carries its narration)
   const ownWords = brief?.mode === "script" || draftInBrief(draft, brief?.text);
@@ -499,7 +512,7 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
       <div className="vo-tts-l">
         {list && <><div className="field"><span id="vo-voice-l">{t("Voice")}</span><VoicePick voices={list.voices} value={voiceId} onChange={chooseVoice} /></div>
           {list.models.length > 1 && <label className="field"><span>{t("Model")}</span><select className="select" value={model} onChange={(e) => setModel(e.target.value)}>
-            {list.models.map((m) => <option key={m.id} value={m.id}>{m.name}{m.vietnamese ? " · " + t("Vietnamese") : ""}</option>)}</select></label>}</>}
+            {list.models.map((m) => <option key={m.id} value={m.id}>{m.name}{m.vietnamese && language === "vi" ? " · " + t("Vietnamese") : ""}</option>)}</select></label>}</>}          {/* a model's Vietnamese only matters on a film in Vietnamese (T41-10) */}
         {voice?.preview && <audio controls src={voice.preview} preload="none" style={{ width: "100%" }} aria-label={t("Voice sample")} />}
         {/* the chosen voice on the script's own first lines; what it costs is said before the click */}
         {list && <div className="vo-sample" style={{ display: "grid", gap: "0.3333rem" }}>

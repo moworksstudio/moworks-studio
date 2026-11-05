@@ -323,6 +323,20 @@ mood"):
   seconds after your turn ends. Tell the owner it will be in the mix in a moment; never say it is not in the mix or ask them to press Place
   them again. A sound the owner moved or took off on the timeline stays as they left it.
 
+## 8a. Editable first, in every film style (owner 05/11/2026 #1134)
+
+The owner changes films after they are built, in HyperFrames Studio and in After Effects. Every film is made as editable as its style allows,
+in this order, and goes down a step only when its style cannot do the one above:
+
+| Step | What it means | When |
+|---|---|---|
+| 1. **Fully editable** | Every thing on screen is its own element on the page (HTML, SVG, CSS): text, shapes, icons, characters' parts. Studio selects and changes each one; After Effects gets each as a layer | the default for every style |
+| 2. **The text editable** | The picture is drawn on a canvas (the style's own engine draws it, or three.js) because the style cannot be made of elements, but every plain text is an element over it (below) | a style whose look needs a canvas |
+| 3. **Nothing editable** | All of it is one drawn picture | only text the style performs (below), and what the style's own rules name as such |
+
+A film that goes down a step says why in `docs/NOTES.md` (one dated line). The app checks it: Tech checks' G-CANVAS-TEXT names the text
+drawn into the picture (a warning). A film style's own rules may name its performed text; where they name none, all of its text is plain text.
+
 ## 8. Text over a canvas film (owner 27/10)
 
 **3D (owner 04/11):** when the owner asks for 3D, never answer that the app cannot do it. three.js is on this computer: offer it as one of the choices, a 3D scene built by code (shapes, materials, lights, a moving camera) in the film style's colours. Say plainly that it is not photoreal like a 3D render or a photo, and that it reaches After Effects as one picture. HTML / CSS / GSAP stays the default when the owner did not ask for 3D.
@@ -335,6 +349,10 @@ holds as it ships (fly or push into the subject rather than orbit it; one hero o
 something to measure the depth by (things near and far that move against each other as the camera moves, something passing in front),
 a camera that travels rather than turning in place, and form that reads (a silhouette that changes as it turns, a cast shadow, a lit rim).
 The 2D shots around it take their depth the style's own way.
+
+- **No surface fights another (owner 05/11/2026, T39-8):** two surfaces never share a plane: water on a stone's top, a decal on a wall, a floor
+  under a rug sit at least a few centimetres apart (or the upper one takes polygonOffset), or the picture flickers frame by frame as they trade
+  places. Tech checks' G-FLICKER reads the render for a frame that jumps to another picture and back.
 
 Only when the film draws on a canvas: its film style's After Effects badge is "video" (measured on the style's demo), or the film's own
 code draws its picture on a canvas (a 2D or WebGL canvas, three.js, an engine's page). The app says so in the step's message. Such a film
@@ -404,8 +422,23 @@ A request about one changes that one only: "more text" or "a bigger title" adds 
 into a subtitle or shrunk to one to make room. A film may have both. The word "caption" alone, or a
 request that fits both: decide from what it points at (spoken words: a subtitle; words of the film's own: a super); if that does not settle it, ask in one line before changing anything.
 
+**Two kinds of subtitle; the owner chooses (owner 05/11/2026 #1174).** When the owner asks for subtitles and does not say which kind, ask in one
+line with the two as choices, then make the one chosen:
+
+| Kind | What it is |
+|---|---|
+| **Plain** | The rules below: one line, white, thin, still, like YouTube's |
+| **Word pop** | The words pop on one at a time as they are spoken, the way faceless channels caption (Test 41's 3D Cartoon film, its source skill's ToonCaptions) |
+
+**Word pop**, when chosen: groups of 1-3 words, each word appearing on its own spoken time (the transcript's words) with a quick pop (scale 0.8 to 1
+in about 0.12 s, no bounce past 1.05); the word being spoken stands out (white with a colour accent of the film's palette, or bold), the others of
+the group white; a bold sans that draws Vietnamese (Be Vietnam Pro or Roboto Flex at 800), 6-7 % of the frame's shorter side; a dark outline or soft
+shadow so it reads on any ground; centred, in the lower third (16:9) or a little under the middle (9:16), kept off faces and the film's own words.
+It lives in the captions composition like the plain kind, each group its own timed element, so it stays editable. The rules below do not apply to it,
+except one group at a time and never covering what matters.
+
 Subtitles or captions of the voice are not part of the film's design: they look the same in every film and every style, whatever §2 or the
-style's own rules say of other text. Only the owner's own words can ask for a styled caption (karaoke, popping words); a lyric video's lyrics and
+style's own rules say of other text. Only the owner's own words can ask for a styled caption (karaoke, popping words, or the Word pop kind above); a lyric video's lyrics and
 the film's own words on screen are the film's design, not subtitles. HyperFrames' `references/captions.md` holds for words, timings and structure;
 its sizes, places, blends and motion give way to this:
 

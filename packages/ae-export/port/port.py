@@ -73,9 +73,39 @@ def rgba(css):
     return [round(c / 255, 4) for c in v[:3]], (v[3] if len(v) > 3 else 1.0)
 
 
+def css_tokens(s):
+    """a CSS value list split on its spaces, a function's parentheses kept whole ("-30px calc(100% - 300px) 0" -> 3 values)"""
+    out, cur, depth = [], "", 0
+    for ch in s or "":
+        if ch == "(": depth += 1
+        elif ch == ")": depth = max(0, depth - 1)
+        if ch.isspace() and depth == 0:
+            if cur: out.append(cur); cur = ""
+        else: cur += ch
+    if cur: out.append(cur)
+    return out
+
+
+_CALC_OK = re.compile(r"^[\d.\s+\-*/()]+$")
+
+
 def px(v, ref=0.0):
     v = (v or "").strip()
-    if v.endswith("%"): return float(v[:-1]) / 100 * ref
+    # calc(), min(), max() of px and %: evaluated against the reference length (T40-18: a typed line's clip-path inset(… calc(100% - Npx) …))
+    m = re.match(r"^(calc|min|max)\((.*)\)$", v, re.S)
+    if m:
+        inner = re.sub(r"(-?[\d.]+)%", lambda q: repr(float(q.group(1)) / 100 * ref), m.group(2))
+        inner = re.sub(r"(-?[\d.]+)px", lambda q: q.group(1), inner)
+        if m.group(1) in ("min", "max"):
+            parts = [px(x.strip(), ref) for x in inner.split(",")]
+            return (min if m.group(1) == "min" else max)(parts) if parts else 0.0
+        if _CALC_OK.match(inner):
+            try: return float(eval(inner, {"__builtins__": {}}, {}))
+            except Exception: return 0.0
+        return 0.0
+    if v.endswith("%"):
+        try: return float(v[:-1]) / 100 * ref
+        except ValueError: return 0.0
     m = re.match(r"(-?[\d.]+)", v); return float(m.group(1)) if m else 0.0
 
 
@@ -177,7 +207,7 @@ def clip_shape(cp, w, h, br="0px"):
     if m:
         body = m.group(1); rad = 0.0
         if " round " in body: body, r = body.split(" round ", 1); rad = px(r.split()[0], min(w, h))
-        p = body.split(); p = p + [p[0]] * (1 - len(p)) if len(p) == 1 else p
+        p = css_tokens(body)          # "calc(100% - 300px)" is one value (T40-18: split on its spaces, px() met 'calc(100')
         if len(p) == 1: p = p * 4
         elif len(p) == 2: p = [p[0], p[1], p[0], p[1]]
         elif len(p) == 3: p = [p[0], p[1], p[2], p[1]]

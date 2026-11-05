@@ -40,6 +40,8 @@ import { gatePose } from "../anidoodle-styles/posecheck.mjs";
 import { gateCollision } from "../moworks-styles/collision.mjs";
 import { gateCuts } from "../moworks-styles/cuts.mjs";
 import { gateAudioFiles } from "../hf-edit/tracks.mjs";
+import { gateCanvasText } from "../agent/canvas-text.mjs";
+import { gateFlicker } from "./flicker.mjs";
 import { gateVoice } from "../sfx/voicecheck.mjs";
 import { freshFilm } from "../hf-edit/codeFilm.mjs";
 import { gateCodeGlyphs } from "./codeGlyphs.mjs";
@@ -262,7 +264,7 @@ export async function gateBuild(projectDir) {
 
 /** The checks run again when only the sound changed (T32-7): the sound's, and the cuts, which read the film's render (a render made since
  *  the picture's checks gave G-CUTS nothing to read then; T38b-2: it never showed after the final render). */
-export const SOUND_GATES = new Set(["G-VOICE", "G-SFX", "G-CUTS", "G-AUDIO-FILES"]);
+export const SOUND_GATES = new Set(["G-VOICE", "G-SFX", "G-CUTS", "G-AUDIO-FILES", "G-FLICKER"]);
 /** The last checks with the sound's in place of theirs. */
 export const withSoundChecks = (last, fresh) => [...last.filter((c) => !SOUND_GATES.has(c.id)), ...fresh.filter(Boolean)];
 
@@ -276,16 +278,18 @@ export async function runGates(projectDir, { workDir, blank = true, onStep = () 
     ["The voice against the sound", async () => [await gateVoice(projectDir)]],
     ["A sound on every action", async () => [await gateSfx(projectDir)]],
     ["The cuts on the shot table", async () => [await gateCuts(projectDir)]],
+    ["Flicker in the render", async () => [await gateFlicker(projectDir)]],
   ] : [
     ["Building the film's code", async () => [await gateBuild(projectDir)]],          // first: the checks below look at the film as its source is now
     ["HyperFrames' check of the film", (again) => hfCheck(projectDir, { onRetry: () => again("HyperFrames' check of the film, once more (the computer is busy)") })],
-    ["Files and fonts", async () => [gateRemote(projectDir), gateAudioFiles(projectDir), ...(await gateFonts(projectDir)), gateCodeGlyphs(projectDir), gateViMarks(projectDir)]],
+    ["Files and fonts", async () => [gateRemote(projectDir), gateAudioFiles(projectDir), gateCanvasText(projectDir), ...(await gateFonts(projectDir)), gateCodeGlyphs(projectDir), gateViMarks(projectDir)]],
     // a 3D Cartoon film: its source skill's collision check on every frame (a warning; nothing for any other film)
     ["The film's drawing rules", async () => [gateContract(projectDir), await gatePose(projectDir), await gateCollision(projectDir)]],
     ["The voice against the sound", async () => [await gateVoice(projectDir)]],          // a warning; nothing without a voice-over
     ["A sound on every action", async () => [await gateSfx(projectDir)]],          // a warning; nothing before the sound effects are placed
     ["The moves on their words", async () => [await gateSync(projectDir)]],          // a warning; nothing when no row names a word
     ["The cuts on the shot table", async () => [await gateCuts(projectDir)]],          // a warning; the owner's film styles, on a render of the film as it is
+    ["Flicker in the render", async () => [await gateFlicker(projectDir)]],          // a warning (T39-8), on a render of the film as it is
     ["The image sequence", () => gateSequence(projectDir)],          // warnings; nothing without a sequence
     ["The sung words", async () => [await gateSung(projectDir)]],          // a warning; nothing without timed lyrics
     ...(blank && workDir ? [["Blank scenes", () => [gateBlank(projectDir, workDir)]]] : []),

@@ -36,7 +36,7 @@ preference of the owner goes in `docs/NOTES.md` and in your reply ("this can go 
 | `src/videos/film/*.json` | A chart's real, sourced data, beside the composition (STYLE §7) |
 | `assets/…` | The user's images and the cut-outs: `staticFile("graphics/…")` or `staticFile("library/…")` is `assets/graphics/…`, `assets/library/…` |
 
-`compositions/film/film.js` is the app's (finalize bundles the composition with the source skill's code and React); never write it. `staticFile("textures/…")` is
+`compositions/film/film.js` is the app's (the app bundles it again before every qc_sheets and film_frames, so you can look at your change in the same turn (T40-12); and finalize bundles the composition with the source skill's code and React); never write it. `staticFile("textures/…")` is
 the source skill's own paper and grain, made by its own code and placed by the app. The beats `B` come from the voice's words: `import WORDS from "mw:words"`
 gives `[{ word, start, end }]` (seconds), the transcript the source skill's `transcript.md` would hold.
 

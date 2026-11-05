@@ -18,13 +18,13 @@ import { VARIANT_KEY, cueKey, cuesOf, handMoves, mount, mountAmbience, patchStat
 import { BED_UNDER, DENSITY, REF_BED, TYPING, ambienceBeds, boostOf, duckLane, hitVolume, motionCues, mixShift, placeOf, speechSpans, styleHint, thin, tiles, volumeFor } from "./actions.mjs";
 import { levelTracks, loudnessOf } from "./mixlevels.mjs";
 import { fitEffects } from "./voicefit.mjs";
-import { SUSTAINED_MIN_S, familyOf, findAmbience, pickVariant, sustainedCue } from "./library.mjs";
+import { SUSTAINED_MIN_S, familyOf, findAmbience, loadLibrary, pickVariant, sustainedCue } from "./library.mjs";
 import { DEFAULT_DENSITY, briefOf, isOff, readPrefs, soundPolicy } from "./prefs.mjs";
 import { isSongFilm } from "../style-catalog/traits.mjs";
 import { fadeOfTotal, planEnding } from "../hf-edit/ending.mjs";
 import { filmWords, trackClips } from "../hf-edit/tracks.mjs";
 import { ffmpegExe } from "../library/preview-media.mjs";
-import { pickAsker, pickSounds } from "./pick.mjs";
+import { holdPicks, pickAsker, pickSounds } from "./pick.mjs";
 import { soundMaker } from "./generate.mjs";
 import { varySounds } from "./vary.mjs";
 import { rankLocal, variantsOf } from "./library.mjs";
@@ -345,17 +345,21 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   const keep = new Set(every.filter((c) => o.hand.has(c.id)).map((c) => c.name));
   const owned = await applyOwnerSounds(dir, every, opts);
   const families = new Map(every.filter((c) => c.family).map((c) => [c.name, c.family]));
+  const never = [...new Set([...banned, ...(whoosh ? [] : ["whoosh"])])];
+  let exclude = []; try { exclude = never.length ? loadLibrary(opts.root).sounds.filter((s) => never.includes(s.family)).map((s) => s.id) : []; } catch { /* no library */ }
   // the named sounds the library has no exact sound for: Claude picks from the library's closest, or the sound is made with ElevenLabs (owner
   // #1096 C and B: the library's exact sound, then Claude's pick, then made, then online, then code); what they settle stays through the placement
   const maker = opts.maker !== undefined ? opts.maker : soundMaker(dir, { root: opts.root, signal: opts.signal });
   const ask = opts.ask !== undefined ? opts.ask : pickAsker(opts.root);
-  const picks = await pickSounds(dir, every, shots, { root: opts.root, ask, maker, style, styleTitle: opts.styleTitle ?? null, styleId: opts.styleId, families, keep }).catch((e) => { if (opts.signal?.aborted) throw e; return null; });
+  const picks = await pickSounds(dir, every, shots, { root: opts.root, ask, maker, style, styleTitle: opts.styleTitle ?? null, styleId: opts.styleId, families, keep, exclude, never }).catch((e) => { if (opts.signal?.aborted) throw e; return null; });
   for (const n of picks?.settled ?? []) keep.add(n);
-  const res = await resolveCues(dir, every, { ...opts, library: true, style, families, keep, tone: graveFilm(opts.styleId, opts.styleTitle, palette) });
+  const res = await resolveCues(dir, every, { ...opts, library: true, style, families, keep, exclude, tone: graveFilm(opts.styleId, opts.styleTitle, palette) });
   if (codeAllowed && res.missing?.length) {          // what the library and the search have not: made by code
-    const left = new Set(res.missing), more = await resolveCues(dir, every.filter((c) => left.has(c.name)), { ...opts, code: true, library: true, style, families, keep, tone: graveFilm(opts.styleId, opts.styleTitle, palette) });
+    const left = new Set(res.missing), more = await resolveCues(dir, every.filter((c) => left.has(c.name)), { ...opts, code: true, library: true, style, families, keep, exclude, tone: graveFilm(opts.styleId, opts.styleTitle, palette) });
     res.added = [...(res.added ?? []), ...(more.added ?? [])]; res.missing = more.missing ?? []; res.failed = [...(res.failed ?? []), ...(more.failed ?? [])]; res.code = more.code ?? res.code;
   }
+  // Claude's answers are final: whatever the library's pass or the search did to a name it answered, it plays the answer (T38b-15)
+  await holdPicks(dir, picks, { root: opts.root, maker }).catch(() => []);
   // a sound heard more than once gets its copies a little higher and lower. No cap on how often one file plays (owner 05/11 #1113: "phải ưu
   // tiên âm thanh nó đúng, cho dù nó xuất hiện đi lại nhiều lần"; the 3-times rule of 30/10 swapped right sounds for wrong ones, T38b-14)
   const spread = [];

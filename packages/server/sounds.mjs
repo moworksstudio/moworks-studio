@@ -43,12 +43,12 @@ export function soundRoutes(ctx, { r, P, mustProject, HttpError }) {
       free(id);
       let html = ""; try { html = readFileSync(join(p.path, "index.html"), "utf8"); } catch { /* no film page yet */ }
       if (!html || isStarterPage(html)) throw new HttpError(409, "NOT_BUILT", "Sounds go on the film once it is built");
-      const item = await details(String(b.id ?? ""), { root }).catch(() => { throw new HttpError(502, "PROVIDER", "The online sound service is not answering. Try again, or pick one of the app's own sounds."); });
+      const item = await details(String(b.id ?? ""), { root, signal: AbortSignal.timeout(30000) }).catch(() => { throw new HttpError(502, "PROVIDER", "The online sound service is not answering. Try again, or pick one of the app's own sounds."); });
       if (!item) throw new HttpError(400, "INVALID", "That sound is not available any more");
-      try { return await ctx.mix.change(p, `sound "${item.title}" added`, () => addSound(p.path, item, { at: b.at, root }).then(({ tag: _tag, ...x }) => x)); }
+      try { return await ctx.mix.change(p, `sound "${item.title}" added`, () => addSound(p.path, item, { at: b.at, root, signal: AbortSignal.timeout(90000) }).then(({ tag: _tag, ...x }) => x)); }
       catch (e) {
         if (e.code === "SFX_LIMIT") throw new HttpError(429, e.code, "That service's downloads for today are used up. Try tomorrow, or pick one of the app's own sounds.");
-        if (e.code === "SFX_DOWNLOAD" || e.name === "TimeoutError") throw new HttpError(502, "PROVIDER", "The sound could not be downloaded. Try again, or pick another one.");
+        if (e.code === "SFX_DOWNLOAD" || e.name === "TimeoutError" || e.name === "AbortError") throw new HttpError(502, "PROVIDER", "The sound could not be downloaded. Try again, or pick another one.");
         throw e;
       }
     })),

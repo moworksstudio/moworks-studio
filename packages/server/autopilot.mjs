@@ -26,6 +26,9 @@ import { unheardSongs } from "../project-service/scan.mjs";
 import { createHash } from "node:crypto";
 import { STILLS_BUSY } from "../hf-qa/cli.mjs";
 import { WAIT_MOMENT } from "./attention.mjs";
+import { execFile } from "node:child_process";
+/** Is commit a in b's history (git merge-base --is-ancestor)? false on any doubt. */
+const inHistory = (dir, a, b) => new Promise((ok) => { if (!a || !b) return ok(false); execFile("git", ["merge-base", "--is-ancestor", a, b], { cwd: dir, windowsHide: true }, (e) => ok(!e)); });
 
 const readJson = (f, fallback) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return fallback; } };
 
@@ -245,6 +248,13 @@ export function createAutopilot(ctx) {
     // Claude's question on the film before (a voice to time to): no longer this film's; its "Answer Claude" card closes (T38-6)
     meta(id, (m) => { const x = m.pipeline?.version1; if (x) delete x.holding; (m.pipeline ??= {}).asksVoid = { at: now(), version: v.id }; });
     try { projects.closeChatWaits(p.path); } catch { /* the card is best effort */ }
+    // a chat change that was undone and is in the version opened is back (T40-14: its card still said "Undone"): the version holds the
+    // change's commit and not its undo; one undone again, or not in this version, says Undone again
+    try {
+      const back = {};
+      for (const t of ctx.agent.list?.(id) ?? []) if (t.reverted && t.revAfter && await inHistory(p.path, t.revAfter, v.rev) && !(await inHistory(p.path, t.reverted.rev, v.rev))) back[t.id] = { at: now(), version: v.name };
+      meta(id, (m) => { (m.pipeline ??= {}).restoredTasks = back; });
+    } catch { /* the cards say Undone */ }
     return { opened: v, revision: last };
   }
 
@@ -926,7 +936,7 @@ export function createAutopilot(ctx) {
   }
 
   return { startStep, advance, afterQa, finished, taskEnded, transcriptLanded, voiceCheckDue, storyboardApproved, motionApproved, resume, saveVersion, openVersion, briefChanged, filesAdded, resumeOnOpen,
-    chooseReview, chatInstead, renderAnswer, openNext, keepFirst, stopVersion, continueVersion };
+    chooseReview, chatInstead, renderAnswer, openNext, keepFirst, stopVersion, continueVersion, closeReview };
 }
 
 /** Did a task change a storyboard option's own files (boards/<option>/…, not the rounds' copies)? */

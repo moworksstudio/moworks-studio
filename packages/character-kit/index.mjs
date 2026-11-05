@@ -282,7 +282,8 @@ export function readCast(projectDir) {
   const list = Array.isArray(j) ? j : Array.isArray(j?.characters) ? j.characters : [];
   if (!list.length) return { characters: [], problems: [`${CAST_FILE} has no characters ({ "characters": [ … ] })`] };
   // an anidoodle film's cast member is a module of the human engine, not a definition for this layer: its gate checks it
-  const problems = list.filter((c) => c?.engine !== HUMAN_ENGINE).flatMap((c, i) => checkCharacter(c).map((p) => `${c?.id ?? `character ${i + 1}`}: ${p}`));
+  // a Ricks Clip cast member is its cast layer's module too, checked by the film's gate (T39-2: 26 red lines in the Characters box)
+  const problems = list.filter((c) => c?.engine !== HUMAN_ENGINE && c?.engine !== RICKS_ENGINE).flatMap((c, i) => checkCharacter(c).map((p) => `${c?.id ?? `character ${i + 1}`}: ${p}`));
   const ids = list.map((c) => c?.id); if (new Set(ids).size !== ids.length) problems.push("two characters have the same id");
   return { characters: list, problems };
 }

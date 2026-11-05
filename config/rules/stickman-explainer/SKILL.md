@@ -36,7 +36,7 @@ and in your reply ("this can go into the source skill itself"); music is the app
 | `src/videos/film/Video.tsx` | The composition, from the source skill's `templates/stickman/Video.template.tsx` filled in as `new-video.mjs` would (`__NAME__`, `__SLUG__` → `film`): it exports the component, `FPS`, `FRAMES`, `WIDTH`, `HEIGHT` and `SOUND` |
 | `src/videos/film/film.js` | The shots and the shot table `S`, from `templates/stickman/video.template.js`, drawn with `../../stickman/kit.js` (the source skill's code as shipped). `draw(x, t, frame)` picks the shot |
 
-`compositions/film/film.js` is the app's (finalize bundles the composition with the source skill's code and React); never write it. The shot table comes from
+`compositions/film/film.js` is the app's (the app bundles it again before every qc_sheets and film_frames, so you can look at your change in the same turn (T40-12); and finalize bundles the composition with the source skill's code and React); never write it. The shot table comes from
 the voice's words: `import WORDS from "mw:words"` gives `[{ word, start, end }]` (seconds), what the source skill's `words.json` held; one spoken line is one shot,
 starting on its line's first word.
 

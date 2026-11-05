@@ -38,7 +38,8 @@ meet, the style asks for fewer than ten, or for no sources: ten cards all the sa
 
 ## 3. ideas.json (the round's ten cards)
 
-Write `ideas.json` in the lab folder, UTF-8, in the language of the request (the field names stay in English):
+Write `ideas.json` in the lab folder, UTF-8: the titles, hooks and texts in the language of the request; the field names and every
+`label` in English:
 
 ```json
 {
@@ -56,8 +57,8 @@ Write `ideas.json` in the lab folder, UTF-8, in the language of the request (the
 }
 ```
 
-- `fields`: the style's own items for a card, in its order and with its names (translated into the request's language when it is not
-  English). At least one.
+- `fields`: the style's own items for a card, in its order and with its names. Each `label` is in **English**, whatever the request's
+  language (the app's interface is English: "The twist", "Why it animates well"); its `text` is in the request's language. At least one.
 - `truth`: `true` (documented), `disputed`, `legend`, `fiction` (made up for the film), `unchecked` (the web was off).
 - `sources`: required for `true` and `disputed` (https links you opened); for a legend, where the legend is told; may be empty for fiction.
 - `rules`: `[]` when the style says nothing about ideas (the general way).
@@ -67,13 +68,32 @@ with one short line: how many ideas, and which of the style's files you followed
 
 ## 4. The script (Write the script)
 
-The request gives the idea the owner kept, its film style, the language and the length. Write the narration with the style's script
-formula and pace (its files, as in §1); with none, a hook in the first line, one clear line of thought, an ending that lands. Narration
-only: what the voice says, never what the viewer sees. Keep every fact to what the idea's sources say. Size it to the length:
+An idea is not a script (owner #1111): the script is the film told scene by scene, written from the idea the owner kept. The request gives
+the idea, its numbered sources, its film style, the language and the length. Follow the style's script formula and pace (its files, as in
+§1); with none, a hook in the first line, one clear line of thought, an ending that lands. Keep every fact to what the idea's sources say.
+
+Size the narration to the length:
 
 - English: the style's pace, or about 2.6 words a second.
 - Vietnamese: the style's pace when it gives one for Vietnamese; else about 3.5-4 syllables a second (one syllable is one written word).
 
-Write `script.md` in the lab folder: the narration alone, one sentence or short phrase a line, no headings, no stage directions, no notes.
-Then `node tools/check-script.mjs` (it counts the words against the length); fix and run it again until it says OK. Reply with one line:
-the word count and the length it reads in.
+Write `script.json` in the lab folder, UTF-8, in the request's language (the field names stay in English):
+
+```json
+{
+  "scenes": [
+    { "start": 0, "end": 4.5, "narration": "what the voice says in this scene", "picture": "what the viewer sees, in one line", "sources": [1] }
+  ]
+}
+```
+
+- Scenes follow one another with no gap: the first starts at 0, each starts where the one before ends, the last ends at about the length.
+  Split them where the style cuts (often one shot a sentence); a scene's narration fits its seconds at the pace above.
+- `narration`: only what is said, word for word as it will be read: no headings, no stage directions, never what the viewer already
+  sees. A scene may have none (a beat held on the picture). When the idea or the style has more than one voice (characters who speak, a
+  dialogue), each spoken line starts with its speaker as the idea writes it, `EM: "Anh còn sống không đấy?"`, one line each; who speaks
+  stays in the narration, never only in the picture. A film with one narrator needs no label.
+- `picture`: a suggestion for the storyboard, in the style's own look and cast (its Storyboard step decides the shots).
+- `sources`: the numbers of the idea's sources this scene's facts come from (empty when it states none).
+
+Then `node tools/check-script.mjs`; fix and run it again until it says OK. Reply with one line: the scenes, the word count and the length.

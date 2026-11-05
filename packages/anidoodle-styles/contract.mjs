@@ -20,7 +20,9 @@ const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^
 function ownModules(projectDir) {
   const out = [];
   const walk = (d) => { if (!existsSync(d)) return; for (const n of readdirSync(d)) { const p = join(d, n); if (statSync(p).isDirectory()) { if (!n.startsWith(".") && n !== "node_modules") walk(p); } else if (/\.tsx?$/.test(n)) out.push(p); } };
-  walk(join(projectDir, "anidoodle")); walk(join(projectDir, "boards"));
+  walk(join(projectDir, "anidoodle"));
+  // only an anidoodle film's boards (boards/<option>/page.ts): a 3D Cartoon board's React code is its source skill's, never this contract's (T41-6)
+  if (existsSync(join(projectDir, "boards"))) for (const o of readdirSync(join(projectDir, "boards"))) if (existsSync(join(projectDir, "boards", o, "page.ts"))) walk(join(projectDir, "boards", o));
   return out;
 }
 

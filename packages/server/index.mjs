@@ -566,6 +566,8 @@ export function routes(ctx) {
       // a style whose catalog turns design off (look: false) takes no Look, whatever the dialog sent
       const p = await projects.createProject({ ...b, style: selection(style), designLocked: style.look === false || styleDesign(style) === "author" }, { root });          // only General and the seven HyperFrames type styles take a design (DESIGN_OPEN)
       try { await rev.ensureRepoAsync(p.path); } catch { /* git missing: revisions unavailable, the project still works */ }
+      // started from an idea of the Writers' Room (#1111): the idea keeps the film, so it reads "In a project"
+      if (/^[0-9a-f]{12}$/.test(String(b.ideaId ?? ""))) { try { (await import("../idea-library/index.mjs")).linkProject(root, b.ideaId, { id: p.id, title: p.title }); } catch { /* the idea was deleted meanwhile */ } }
       return p;
     }),
     // Import project the folder stays where it is, the app only remembers its path. A project on Google Drive with its own
@@ -792,6 +794,9 @@ export function routes(ctx) {
         // Version 1 and the one question after it: what the chat's card shows, with the time each answer takes
         version1: (() => {
           const card = pipe.versionCard(p.meta, state, { claudeBusy: ctx.agent.running.has(id), rendering: ctx.jobs.list({ projectId: id }).some((j) => j.kind === "preview-proxy" && j.status === "running") });
+          // the Review and its checks ended while nothing asked the app to close it (T41-8: the card said "Claude is checking your film" with the app
+          // idle): nothing runs for the film, so the app closes it now (closeReview checks everything again); the next read shows its card
+          if (card?.kind === "working" && !card.stopping && !ctx.agent.running.has(id) && !ctx.jobs.list({ projectId: id }).some((j) => j.status === "running")) ctx.autopilot?.closeReview?.(id).catch(() => {});
           const v1 = p.meta?.pipeline?.version1;
           // its render, with its Stop
           if (!v1?.at) return state.find((x) => x.id === "firstVersion")?.status === "running" ? { n: 1, choice: null, holding: false, next: null, card: { kind: "preparing", n: 1 } } : null;
@@ -944,7 +949,9 @@ export function routes(ctx) {
     }),
 
     // Claude tasks (and the app's short lines in the chat: files added, render finished…)
-    r("GET", `/projects/${P}/tasks`, ([id]) => { const p = mustProject(id, root); const tasks = ctx.agent.list(id);
+    r("GET", `/projects/${P}/tasks`, ([id]) => { const p = mustProject(id, root);
+      // a change undone, then brought back by opening a version that holds it (autopilot openVersion: T40-14), says so on its card
+      const back = p.meta?.pipeline?.restoredTasks ?? {}, tasks = ctx.agent.list(id).map((t) => (t.reverted && back[t.id] && back[t.id].at > t.reverted.at ? { ...t, restored: back[t.id] } : t));
       return { tasks, notes: projects.readNotes(p.path).slice(-100), running: ctx.agent.running.get(id) ?? null, usage: usageTotals(tasks),
         settings: effectiveSettings(p.meta ?? {}, root), own: p.meta?.settings ?? {} }; }),
     // the user's answer to a question Claude is waiting on: allow (this once), project (the web for this project), deny

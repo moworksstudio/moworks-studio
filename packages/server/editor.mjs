@@ -43,6 +43,9 @@ function qcDots(dir) {
   return out.slice(0, 200);
 }
 
+/** A film style's own captions are on: the 3D Cartoon source skill's vo.ts (`export const CAPTIONS = true`, its ToonCaptions over the canvas). */
+const styleCaptions = (dir) => { try { return /export const CAPTIONS\s*=\s*true\b/.test(readFileSync(join(dir, "src", "videos", "film", "vo.ts"), "utf8")); } catch { return false; } };
+
 export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
   const root = ctx.root;
   const busy = (id) => {
@@ -87,7 +90,8 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
     }),
     r("GET", `/projects/${P}/edit/texts`, async ([id], _b, q) => {
       const p = mustProject(id, root);
-      try { return await hand.textsOf(p.path, q.get("file")); } catch (e) { fail(e); }
+      const num = (k) => (q.get(k) != null && q.get(k) !== "" && Number.isFinite(Number(q.get(k))) ? Number(q.get(k)) : null);
+      try { return await hand.textsOf(p.path, q.get("file"), { from: num("from"), to: num("to") }); } catch (e) { fail(e); }
     }),
     r("POST", `/projects/${P}/edit/text`, async ([id], b) => {
       const p = mustProject(id, root); busy(id);
@@ -244,11 +248,18 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
         const cues = file ? await hand.captionCues(p.path, file).catch(() => []) : [];
         return { id: attr(t, "id"), file, start, duration: attr(t, "data-duration") != null ? Number(attr(t, "data-duration")) : null, cues: cues.map((c) => ({ ...c, start: r3(start + c.start) })) };
       }));
+      // a film style's own captions, drawn by its code over the canvas (3D Cartoon's ToonCaptions, word by word, when its vo.ts sets CAPTIONS:
+      // T41-9 read "No captions" on a film that had them): one band over the voice's span, changed by asking Claude
+      const voiceOn = tr?.segments?.length && !p.meta?.voice?.offTimeline ? transcript.onFilm(tr.segments, voiceClips) : [];
+      if (!captions.length && voiceOn.length && styleCaptions(p.path)) {
+        const a = Math.min(...voiceOn.map((x) => x.start)), b = Math.max(...voiceOn.map((x) => x.end ?? x.start));
+        captions.push({ id: "style-captions", own: true, start: r3(a), duration: r3(b - a), cues: [] });
+      }
       return {
         duration: total ?? Math.max(0, ...mounted.map((x) => (x.start ?? 0) + (x.duration ?? 0))),
         shots: mounted.map((x) => ({ number: x.number, index: x.index, title: x.title, start: x.start, duration: x.duration, src: x.src, mountId: x.mountId,
           rate: rates[x.src] ?? 1, ...(x.planned ? { planned: true } : {}) })),
-        voice: tr?.segments?.length && !p.meta?.voice?.offTimeline ? transcript.onFilm(tr.segments, voiceClips) : [],
+        voice: voiceOn,
         levels: readLanes(p.path),
         muted: readMuted(p.path),
         audio: clips.map((c) => ({ id: c.id, hfId: c.hfId, src: c.src, start: c.start, duration: c.duration, lane: laneOf(c), gains: c.gains, track: c.track, name: (c.src ?? "").split("/").pop(), title: titles.get(c.src) ?? null, effect: effect(c) })),

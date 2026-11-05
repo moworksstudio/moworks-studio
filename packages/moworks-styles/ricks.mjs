@@ -44,6 +44,10 @@ export function ricksSkill(root = APP_ROOT) {
 /** The app's cast layer (ricks-cast.js): the three views and the pose layer, in toon.js's module scope. */
 export const CAST_LAYER = join(HERE, "ricks-cast.js");
 /** A film's characters from the library: film/cast/<id>.js, in id order. */
+/** The characters a page of the film draws: its own film/cast/, then the film root's for any it has not (T39-6: a board, boards/<x>/film, had no
+ *  cast of its own, and castDraw found no character). */
+export const filmCast = (film, projectDir) => { const own = castFiles(film), base = (f) => f.split(/[\\/]/).pop(), names = new Set(own.map(base));
+  return [...own, ...castFiles(join(projectDir, "film")).filter((f) => !names.has(base(f)))]; };
 export const castFiles = (film) => (existsSync(join(film, "cast")) ? readdirSync(join(film, "cast")).filter((n) => /^[a-z][a-z0-9-]*\.js$/.test(n)).sort().map((n) => join(film, "cast", n)) : []);
 /** toon.js as one module's text: toon.ts (as pinned), roman.js (the source skill's, or the film's own copy), the app's cast layer, then each character
  *  file, each part marked with where it comes from. */
@@ -73,7 +77,7 @@ export async function buildRicksFilm(projectDir, { root = APP_ROOT, force = fals
   if (!existsSync(three)) return { built: false, out: outRel, three: version, own: [], error: `three.js ${version} is not installed (offline assets)` };
   const out = join(projectDir, ...outRel.split("/"));
   const own = readdirSync(film).filter((n) => /\.js$/.test(n)).sort();
-  const latest = newest([film, src.engine, src.toon, HOST, CAST_LAYER, fileURLToPath(import.meta.url), join(projectDir, "transcript.json")], out);
+  const latest = newest([film, src.engine, src.toon, HOST, CAST_LAYER, fileURLToPath(import.meta.url), join(projectDir, "transcript.json"), join(projectDir, "film", "cast")], out);
   if (!force && existsSync(out) && statSync(out).mtimeMs >= latest) return { built: false, out: outRel, three: version, own };
   const pick = (name) => (existsSync(join(film, name)) ? join(film, name) : join(src.engine, name));
   const fromFilm = (p) => p.startsWith(src.engine) || p.startsWith(film);
@@ -93,7 +97,7 @@ export async function buildRicksFilm(projectDir, { root = APP_ROOT, force = fals
     });
     // toon.js: the Pen library (types stripped) and the cast in one module scope, as setup.sh builds it, then the app's cast layer (three views,
     // one pose layer) and the film's characters from the library (film/cast/<id>.js, packages/character-kit/ricks.mjs)
-    b.onLoad({ filter: /.*/, namespace: "rc-toon" }, () => ({ loader: "ts", resolveDir: src.engine, contents: toonText({ root, roman: pick("roman.js"), cast: castFiles(film) }) }));
+    b.onLoad({ filter: /.*/, namespace: "rc-toon" }, () => ({ loader: "ts", resolveDir: src.engine, contents: toonText({ root, roman: pick("roman.js"), cast: filmCast(film, projectDir) }) }));
     b.onLoad({ filter: /[\\/]main\.js$/ }, (a) => (fromFilm(a.path) ? { loader: "js", contents: port(readFileSync(a.path, "utf8")) } : undefined));
   } };
   mkdirSync(dirname(out), { recursive: true });

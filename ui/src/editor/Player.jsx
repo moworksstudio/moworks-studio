@@ -204,7 +204,7 @@ export function CodeStyle({ projectId, item, locked, onSaved }) {
     {why.map((w) => <p key={w} className="pe-hint">{t(w)}</p>)}</>;
 }
 
-function EditCard({ projectId, item, box, locked, send, onSaved, onClose, onPin = null, shotNumber = null }) {
+function EditCard({ projectId, item, box, locked, send, onSaved, onClose, onPin = null, shotNumber = null, styleCaptions = false, onVoice = null }) {
   const t = useT();
   const toast = useToast();
   const [parts, setParts] = useState(null);
@@ -274,6 +274,10 @@ function EditCard({ projectId, item, box, locked, send, onSaved, onClose, onPin 
       : codeItem ? <><CodeWord projectId={projectId} item={codeItem} locked={locked} onSaved={(label) => label && onSaved(label, true)} />
         <p className="pe-hint">{t("Saved when you leave the field.")}</p>
         <CodeStyle projectId={projectId} item={codeItem} locked={locked} onSaved={(label) => { reloadCode(); onSaved(label, true); }} /></>
+      // a caption the film style draws from the voice-over, word by word (3D Cartoon's): its words are the voice's own, changed in the Voice
+      // screen's transcript, which the caption follows (Test 41 read "Not editable here" on one)
+      : !editable && styleCaptions && /^\S{1,40}$/.test(String(item.textContent ?? "").trim()) ? <><p className="pe-note">{t("A caption: the film style shows the voice-over's words one by one. Change a word in the Voice screen's transcript and the caption follows.")}</p>
+        {onVoice && <button type="button" className="btn sm" onClick={() => { onClose(); onVoice(); }}>{t("Open Voice")}</button>}</>
       : !editable ? <><p className="pe-note">{onPin ? t("Not editable here. Pin a note for Claude.")
           : item.textContent ? t("These words come from code: ask Claude to change them. Claude will work on this element.") : t("Nothing to type here. Claude will work on this element.")}</p>
         {onPin && <PinButton onPin={onPin} onBefore={onClose} />}</>
@@ -376,7 +380,7 @@ const QUALITY = { full: "Full", half: "Half", quarter: "Quarter", auto: "Auto" }
 const SCALE_LEVEL = { 1: "full", 0.5: "half", 0.25: "quarter" };
 
 /** planned: the film is not built yet (GET /projects/:id built false), its planned length in seconds (0 when unknown); null once built. */
-export default function Player({ projectId, pv, shots, shot, onShot, locked, range, onFilesChanged, planned = null, pinning = false, onPin = null, children }) {
+export default function Player({ projectId, pv, shots, shot, onShot, locked, range, onFilesChanged, planned = null, pinning = false, onPin = null, styleCaptions = false, onVoice = null, children }) {
   const t = useT();
   const toast = useToast();
   const { info, state, picked, setPicked, pickN, boxes, frame, send, keyHandler, dbl } = pv;
@@ -467,7 +471,7 @@ export default function Player({ projectId, pv, shots, shot, onShot, locked, ran
           <button type="button" className="btn sm" onClick={() => setSkipWait(true)}>{t("Show the film")}</button></>}</div>}
       {state.error && <div className="pv-wait err">{state.error}</div>}
       {one && card && <EditCard projectId={projectId} item={one} box={boxes.boxes.at(-1)} locked={locked} send={send}
-        onSaved={(label, reload) => { toast(label); onFilesChanged?.(reload); send("describe"); }} onClose={() => setCard(false)} onPin={onPin && !pinning ? onPin : null} shotNumber={cur?.number ?? null} />}
+        onSaved={(label, reload) => { toast(label); onFilesChanged?.(reload); send("describe"); }} onClose={() => setCard(false)} onPin={onPin && !pinning ? onPin : null} shotNumber={cur?.number ?? null} styleCaptions={styleCaptions} onVoice={onVoice} />}
       {picked.length > 1 && <div className="pe-card multi" style={{ right: 12, top: 12 }}>{t("{n} elements selected for Claude", { n: picked.length })}
         <button className="btn ghost icon sm" onClick={() => { send("clear"); setPicked([]); }} aria-label={t("Clear the selection")}><X size={13} /></button></div>}
       {children}

@@ -70,6 +70,10 @@ export async function gateSync(dir) {
   try { r = await syncReport(dir); }
   catch (e) { return { id: "G-SYNC", blocking: false, pass: false, notChecked: true, findings: [{ severity: "warning", code: "not_checked", message: `The check of the moves against the voice could not run: ${String(e.message ?? e).split("\n")[0]}` }] }; }
   if (!r?.named) return null;
-  const findings = [...r.off.map(offText), ...r.unsaid.map(unsaidText)].map((m) => ({ severity: "warning", message: m, plain: `${m}. Ask Claude to move it onto the word.` }));
-  return { id: "G-SYNC", blocking: false, pass: findings.length === 0, warnings: findings.length, findings };
+  // one warning a kind, each move listed inside it (owner #1098, T39-12: five lines of one kind)
+  const all = [...r.off.map(offText), ...r.unsaid.map(unsaidText)];
+  if (!all.length) return { id: "G-SYNC", blocking: false, pass: true, warnings: 0, findings: [] };
+  const group = (xs, what) => { if (!xs.length) return null; const line = xs.length === 1 ? `${xs[0]}. Ask Claude to move it onto the word.` : `${xs.length} ${what}: ${xs.slice(0, 2).join("; ")}${xs.length > 2 ? "; …" : ""}. Ask Claude to move them onto their words.`; return { severity: "warning", count: xs.length, message: line, plain: line, places: xs }; };
+  const findings = [group(r.off.map(offText), "moves are off their words"), group(r.unsaid.map(unsaidText), "moves name a word the voice never says")].filter(Boolean);
+  return { id: "G-SYNC", blocking: false, pass: false, warnings: findings.length, findings };
 }

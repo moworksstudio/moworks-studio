@@ -37,6 +37,11 @@ import { gpuShort } from "./proxy.mjs";
 import { styleNevers } from "../style-catalog/index.mjs";
 import { styleTraits } from "../style-catalog/traits.mjs";
 import { collisionCheck, collisionText } from "../moworks-styles/collision.mjs";
+import { placeStyle } from "../moworks-styles/index.mjs";
+import { gateFlicker } from "../hf-qa/flicker.mjs";
+/** A film of the owner's film styles bundled again from its source before its pictures are taken (T41-7: a 3D Cartoon film was rebuilt only
+ *  when the task ended, so the Build and the Review looked at the picture before their own fixes). Nothing for any other film. */
+const freshStyleFilm = async (dir, root) => { try { await placeStyle(dir, "index.html", { root }); } catch { /* the pictures say what they show */ } };
 import { cutoutText, makeCutout } from "../moworks-styles/cutout.mjs";
 
 const TYPES = { ".png": "image/png", ".jpg": "image/jpeg", ".pdf": "application/pdf" };
@@ -134,6 +139,8 @@ export function stillsBehind(ctx, p, option) {
   return { code: "STILLS_OLD", message: `Option ${option} changed after its pictures were taken, so they do not show the latest changes. The app is taking them again now: approve once they are in.` };
 }
 
+/** The film styles whose own rules stop the music at the turn (the plan's musicStop is applied for them with no ask): What If animation, Ricks Clip. */
+export const STOP_AT_TURN = new Set(["what-if", "ricks-clip"]);
 export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
   const { root } = ctx;
   const url = (id, rel) => `${ctx.preview.base}/p/${id}/${rel}`;
@@ -372,10 +379,11 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
   /** The plan's musicStop, once the music is on the timeline (the app once put the music on after Claude's music step and it played
    *  all 40 s past the plan's stop at 26.5 s, so Claude told the user to set it in Final Mix), unless a stop
    *  is set already or someone chose "play to the end". Its second, or null. */
-  /** A music cut at the twist is What If's own rule: the plan's musicStop counts only in a What If film (the film kind, or
-   *  the What If animation style) or when the plan quotes the brief's or the user's words asking for it; otherwise the music plays to the
+  /** A music cut at the twist is What If's and Ricks Clip's own rule: the plan's musicStop counts only in a What If film (the film kind, or
+   *  the What If animation style), a Ricks Clip film, or when the plan quotes the brief's or the user's words asking for it; otherwise the music plays to the
    *  end, with its fade out. Final Mix's "Stop the music at" and Claude's music_stop tool are not gated. */
-  const planStopAllowed = (p, mp) => filmKind(p.path)?.id === "whatIf" || p.meta?.style?.id === "what-if" || !!mp.musicStopAsked;
+  // a film style whose own source stops the music at the turn: What If animation, Ricks Clip (its SKILL.md §4.7: at the twist line; T39-10)
+  const planStopAllowed = (p, mp) => filmKind(p.path)?.id === "whatIf" || STOP_AT_TURN.has(p.meta?.style?.id) || !!mp.musicStopAsked;
   const stopFromPlan = async (p) => {
     const now0 = projects.getProject(p.id, root);
     const m = now0?.meta?.music;
@@ -456,6 +464,10 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       let res;
       try { res = await takeStills(project.path, { signal: ctx.stopping.signal, by: "claude", taskId: task?.id ?? null, retake, filmTimes: styleTraits(project.meta?.style?.id, root).filmBoards }); }
       catch (e) {
+        // the board's page stops on an error (T39-7): Claude reads what HyperFrames said and fixes the board
+        if (e.code === "BOARD_PAGE") return `${e.message}
+HyperFrames said: ${e.detail ?? "(nothing)"}
+Open the board's page code, fix the error, then call board_stills again.`;
         if (e.code !== "STILLS_BUSY") throw e;
         // stopped twice on a busy computer (T25: two calls of 11.5 min each, every round empty): said once, no second try in this task; the
         // app takes the pictures when the step ends, and the Storyboard dialog says it with a Retry if that fails too
@@ -502,6 +514,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       return at == null ? "The music plays to its end again." : `The music now stops at ${r0.at} s (it starts at ${r0.start} s)${r0.asked != null ? `: ${r0.asked} s fell on the spoken "${r0.word}", so the app moved the stop into the pause${r0.after ? ` after "${r0.after}"` : ""}` : ""}.`;
     },
     qc_sheets: async ({ task, project }) => {
+      await freshStyleFilm(project.path, root);
       const { shots, root: comp } = await readShots(project.path);
       // qcRound bundles a code film from its source first and says when it does not compile
       // a one-page film (no frame mounted) is sampled over its whole length by the storyboard's planned shots, not its first 1.1 s
@@ -527,10 +540,14 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
       // a 3D Cartoon film: its source skill's collision check on every frame (no one through furniture, no prop through a hand)
       const collision = collisionText(await collisionCheck(project.path, { root }));
       // a Vietnamese film's words on screen written without their marks (Test 24: the Review never saw "NHAT KY · TRAM HON GIO")
-      return [qcText(res, fresh), pose, collision, glyphText(codeGlyphs(project.path)), viMarksText(viMarks(project.path))].filter(Boolean).join("\n\n");
+      // a frame that jumps to another picture and back, read from the film's render while it is the film as it is (T39-8: z-fighting nobody saw)
+      const flick = await gateFlicker(project.path).catch(() => null);
+      const flickText = flick && !flick.pass && !flick.notChecked ? `Flicker (G-FLICKER): ${flick.findings[0].message} Find the two surfaces at the same height in those shots and move one a few centimetres, or give it polygonOffset.` : "";
+      return [qcText(res, fresh), pose, collision, flickText, glyphText(codeGlyphs(project.path)), viMarksText(viMarks(project.path))].filter(Boolean).join("\n\n");
     },
     // one moment of the film, whole, with its text: what the sheets are too small for (T28-6)
     film_frames: async ({ project, args = {} }) => {
+      await freshStyleFilm(project.path, root);
       const { root: comp } = await readShots(project.path);
       return framesText(await filmFrames(project.path, args.at, { total: comp?.duration ?? null, signal: ctx.stopping.signal }));
     },

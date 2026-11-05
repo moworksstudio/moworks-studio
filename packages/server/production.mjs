@@ -70,6 +70,8 @@ export function gateHash(projectDir, fps = null, root = APP_ROOT_DIR) {
     }
   };
   walk(join(projectDir, "assets", "_app")); walk(join(projectDir, "audio"));
+  // the boards: the film's checks read them too (G-CONTRACT on an anidoodle board), so a board fixed is checked again (T41-6)
+  walk(join(projectDir, "boards"));
   try { h.update(resolveRuntime(null, root).version ?? ""); } catch { /* no runtime: the hash still changes with the film */ }
   h.update(checksCode(root));
   return h.digest("hex").slice(0, 16);
@@ -212,6 +214,9 @@ export const CHECKS = {
   "G-BLANK": { title: "Empty-looking scenes", explain: "Takes a few stills of each scene and flags a scene whose stills are all flat. A heuristic: it can miss or misjudge.", kind: "heuristic" },
   "G-END": { title: "The ending", explain: "Compares a still half a second before the end with the last frame: a film whose picture is still full and lit on its last frame stops dead. The picture should fade out with the music (or after the end card). In a style whose author's ending the Motion Plan names and plays, a dark screen, a dot or a held end card ends the film too.", kind: "deterministic" },
   "G-SYNC": { title: "Moves on their words", explain: "A move of the Motion Plan that names a spoken word starts or lands on it, within about 3 frames, and the word is said in that shot. A warning, never a block.", kind: "deterministic" },
+  "G-FLICKER": { title: "Flicker in the render", explain: "Reads every frame of the film's render: a part of the picture that jumps to another picture for one frame and back, again and again (two surfaces at the same height in 3D, a light that blinks). It needs a render of the film as it is: the preview made after the Build and after each change. A warning, never a block.", kind: "deterministic" },
+  "G-CANVAS-TEXT": { title: "Text drawn into the picture", explain: "Finds text the film's code draws into its picture (a canvas), which Studio and After Effects cannot edit. Text the film style performs (its own drawing) may stay, with a line saying so in the film's notes. A warning, never a block.", kind: "deterministic" },
+  "G-AUDIO-FILES": { title: "Sound files that are missing", explain: "Every sound the film plays has its file. A missing one is left out of the render and said; place it again, relink it, or remove it. A warning, never a block.", kind: "deterministic" },
   "G-LYRIC": { title: "The sung words", explain: "In a lyrics video: each word sung is on screen, with the count sung, and shows around its sung time (the times are a draft, so only clear misses are named). A warning, never a block.", kind: "deterministic" },
   "G-SEQ-CRAWL": { title: "Image sequence: smooth turns", explain: "A product sequence turning under 1 picture a film frame, or one picture held where the product is mid-turn: it looks like it stutters. A warning, never a block.", kind: "deterministic" },
   "G-SEQ-JUMP": { title: "Image sequence: no sudden jump", explain: "One film frame that skips far more pictures than the frames around it, where the two pictures differ. Fast turns are fine; a cut of the film is fine. A warning, never a block.", kind: "deterministic" },

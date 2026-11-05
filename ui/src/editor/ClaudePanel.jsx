@@ -205,8 +205,8 @@ export function TaskBlock({ t: task, projectId, toast, onChanged, onRetry, steps
         <span className="msg-meta"><button type="button" className="chip num" disabled={!onSeek} onClick={() => onSeek?.(m.t ?? 0)} title={onSeek ? t("Go to this moment") : undefined}>
           {fmtTime(m.t ?? 0, fps)}</button>{m.shot != null && <span>{t("Shot {n}", { n: m.shot })}</span>}</span>
         {m.text && <span className="fn-media-t">{m.text}</span>}</li>)}</ul>}</div>}
-    <div className={"cstatus " + task.status + (task.reverted ? " undone" : "")}>
-      {running ? <Loader2 size={12} className="spin" /> : task.status === "done" && !task.reverted ? <CheckCircle2 size={13} className="cs-ok" aria-hidden="true" /> : <span className="cdot" aria-hidden="true" />}
+    <div className={"cstatus " + task.status + (task.reverted && !task.restored ? " undone" : "")}>
+      {running ? <Loader2 size={12} className="spin" /> : task.status === "done" && (!task.reverted || task.restored) ? <CheckCircle2 size={13} className="cs-ok" aria-hidden="true" /> : <span className="cdot" aria-hidden="true" />}
       <span className="cs-t">{label}</span>
       <span className="cs-m">{running ? <Elapsed since={task.createdAt} /> : task.durationMs != null ? secs(task.durationMs) : ago(task.createdAt)}</span>
       {!running && files.length > 0 && <span className="cs-m">· {files.length === 1 ? t("1 file") : t("{n} files", { n: files.length })}</span>}
@@ -215,7 +215,7 @@ export function TaskBlock({ t: task, projectId, toast, onChanged, onRetry, steps
         return <span className="cs-bad" title={t("To fix before the build: {what}", { what: words })}><ShieldAlert size={12} />{task.qa.blocking.length === 1 ? t("To fix: {what}", { what: words }) : t("{n} checks to fix", { n: task.qa.blocking.length })}</span>; })()}
       {(detail.length > 0 || files.length > 0) && <button className="clink" onClick={() => setOpen((x) => !x)} aria-expanded={open}>{open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}{t("Details")}</button>}
       {!running && files.length > 0 && !task.reverted && <button className="clink" disabled={busy} onClick={undo}>{busy ? <Loader2 size={12} className="spin" /> : <RotateCcw size={12} />}{t("Undo")}</button>}
-      {task.reverted && <span className="cs-m">· {t("Undone")}</span>}
+      {task.reverted && <span className="cs-m">· {task.restored ? t("Back with {version}", { version: task.restored.version }) : t("Undone")}</span>}
     </div>
     {running && (() => { const n = nowOf(task), steps = (task.events ?? []).filter((e) => e.kind === "tool").length; return n && <div className="cnow" role="status" aria-live="polite">
       <span className="cnow-dot" aria-hidden="true" /><span className="cnow-t">{t("Now: {what}", { what: t(n.text) })}</span>

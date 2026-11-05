@@ -382,6 +382,19 @@ async function castFromLibrary(dir, input, root) {
   let has = false;
   try { const { stylePipeline } = await import("../style-catalog/index.mjs"); has = (stylePipeline(input.style.id, root) ?? []).some((s) => s.id === "character"); } catch { return []; }
   let kit; try { kit = await import("../character-kit/index.mjs"); } catch { return []; }
+  // a Ricks Clip film: its own characters themselves (film/cast/, as Characters › Use in a project does), any other as a reference (T39-1:
+  // New project dropped the Ricks characters picked there, and the film had no cast)
+  if (input.style?.id === "ricks-clip") {
+    try {
+      const ricks = await import("../character-kit/ricks.mjs"), mine = ricks.ricksCharacters(root);
+      const picked0 = (Array.isArray(input.characters) ? input.characters : input.characters?.ids ?? []).map(String);
+      const own = [...new Set([...picked0.filter((id) => mine.some((c) => c.id === id)), ...mine.filter((c) => namedIn(input.brief, c.name)).map((c) => c.id)])];
+      const added = own.length ? ricks.useRicks(dir, own, { root }) : [];
+      const others = picked0.filter((id) => !mine.some((c) => c.id === id));
+      let refs = []; if (others.length) { try { const { stageReference } = await import("../character-kit/reference.mjs"); refs = stageReference(dir, others, root); } catch { /* the own ones are in */ } }
+      return [...added, ...(Array.isArray(refs) ? refs : [])];
+    } catch { return []; }
+  }
   // the character layer's selectable ones, and the user's anidoodle humans (a reference in most films, a cast member in a human-hand one)
   const lib = [...(() => { try { return kit.characters(root); } catch { return []; } })().filter((c) => c.selectable),
     ...(() => { try { return kit.humanCharacters(root).map((c) => ({ ...c, group: "yours" })); } catch { return []; } })()];

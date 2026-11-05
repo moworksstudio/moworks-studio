@@ -39,7 +39,10 @@ function CompactPick({ list, value, onChange, film, label = true }) {
   useEffect(() => {
     if (!open) return undefined;
     const off = (e) => { if (!ref.current?.contains(e.target)) setOpen(false); };
-    document.addEventListener("mousedown", off); return () => document.removeEventListener("mousedown", off);
+    // Escape closes the list only, never the dialog under it with what was typed (T40-3): caught first, and marked as handled
+    const esc = (e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); setOpen(false); } };
+    document.addEventListener("mousedown", off); document.addEventListener("keydown", esc, true);
+    return () => { document.removeEventListener("mousedown", off); document.removeEventListener("keydown", esc, true); };
   }, [open]);
   const picked = list.filter((c) => value.includes(c.id));
   const toggle = (id) => onChange(value.includes(id) ? value.filter((x) => x !== id) : [...value, id]);

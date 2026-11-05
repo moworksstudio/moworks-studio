@@ -77,6 +77,9 @@ export function filmParts(dir, fps, { stamps = false } = {}) {
     walk(join(dir, "story"), true);
     if (existsSync(join(dir, "transcript.json"))) { both("transcript.json"); both(readFileSync(join(dir, "transcript.json"))); }
   }
+  // the 3D Cartoon's film code (src/videos/…) and Ricks Clip's (film/): their picture too (T41-6: a Review fix in them was checked with old answers)
+  walk(join(dir, "src"), true);
+  walk(join(dir, "film"), true);
   walk(join(dir, "assets"), false);
   walk(join(dir, "audio"), false, "sound");
   return { picture: pic.digest("hex").slice(0, 16), sound: snd.digest("hex").slice(0, 16), drawn: drw.digest("hex").slice(0, 16), heard: hrd.digest("hex").slice(0, 16) };

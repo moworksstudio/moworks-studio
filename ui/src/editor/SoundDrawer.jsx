@@ -46,14 +46,15 @@ function usePreview(onFail) {
   return { on, toggle };
 }
 
-const Row = memo(function Row({ row, playing, adding, added, off, onToggle, onAdd }) {
+const Row = memo(function Row({ row, playing, adding, added, failed, off, onToggle, onAdd }) {
   const t = useT();
   const online = row.source === "openverse" || row.source === "sfxmint";
   return <li className={"sdr-item" + (playing ? " on" : "")} title={row.licence ? `${row.title} · ${row.licence}` : row.title}>
     <button type="button" className="btn ghost icon sm sdr-play" onClick={() => onToggle(row)} aria-pressed={playing} aria-label={playing ? t("Stop {name}", { name: row.title }) : t("Play {name}", { name: row.title })}>
       {playing ? <Square size={13} fill="currentColor" /> : <Play size={14} />}</button>
     <span className="sdr-t"><span className="sdr-name">{row.title}</span>
-      <span className="sdr-sub"><span className="num">{lengthOf(row.durationS)}</span>{online && <span>{t("Online")}</span>}</span></span>
+      <span className="sdr-sub"><span className="num">{lengthOf(row.durationS)}</span>{online && <span>{t("Online")}</span>}</span>
+      {failed && <span className="sdr-err" role="alert">{failed}</span>}</span>
     <button type="button" className="btn sm sdr-add" disabled={!!off || adding} onClick={() => onAdd(row)} title={off ?? t("Add at the playhead")}>
       {adding ? <Loader2 size={13} className="spin" /> : added ? <Check key="ok" size={13} className="icon-pop" /> : <Plus size={13} />}{t("Add")}</button>
   </li>;
@@ -104,10 +105,13 @@ export default function SoundDrawer({ time = 0, duration = 0, clips = [], off = 
     return () => c.abort();
   }, [dq, again]);
   const rows = useMemo(() => [...(local ?? []), ...net.results], [local, net.results]);
+  // why a sound could not be added stays on its row (T41-11: an online sound whose service had used up its downloads for the day said
+  // nothing a tester saw); a toast says it too
+  const [failed, setFailed] = useState({});
   const add = async (row) => {
-    setAdding(row.id);
+    setAdding(row.id); setFailed((x) => ({ ...x, [row.id]: null }));
     try { await onAdd(row, now.current); setDone(row.id); setTimeout(() => setDone((x) => (x === row.id ? null : x)), 1600); }
-    catch (e) { toast(e.message, "error"); }
+    catch (e) { setFailed((x) => ({ ...x, [row.id]: e.message })); toast(e.message, "error"); }
     finally { setAdding(null); }
   };
   const more = (e) => { const el = e.currentTarget; if (el.scrollTop + el.clientHeight > el.scrollHeight - 200 && n < rows.length) setN((x) => x + PAGE); };
@@ -125,7 +129,7 @@ export default function SoundDrawer({ time = 0, duration = 0, clips = [], off = 
     <ul className="plain mdr-row sdr-list" ref={list} onScroll={more} aria-busy={local === null || net.status === "running"}>
       {off && <li className="sdr-note">{off}</li>}
       {local === null && Array.from({ length: 6 }, (_, i) => <li key={i} className="sdr-item skeleton" />)}
-      {rows.slice(0, n).map((row) => <Row key={row.id} row={row} playing={on === row.id} adding={adding === row.id} added={done === row.id} off={off} onToggle={toggle} onAdd={add} />)}
+      {rows.slice(0, n).map((row) => <Row key={row.id} row={row} playing={on === row.id} adding={adding === row.id} added={done === row.id} failed={failed[row.id] ?? null} off={off} onToggle={toggle} onAdd={add} />)}
       {net.status === "running" && <li className="sdr-note" role="status"><Loader2 size={13} className="spin" />{t("Searching online…")}</li>}
       {net.status === "down" && <li className="sdr-note warn" role="status"><CloudOff size={13} />{t("The online sound services are not answering. The app's own sounds still work.")}
         <button type="button" className="clink" onClick={() => setAgain((x) => x + 1)}>{t("Try again")}</button></li>}

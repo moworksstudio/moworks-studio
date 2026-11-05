@@ -58,7 +58,7 @@ export default function Qa({ id, setCrumbs = () => {} }) {
     <span className="what">{f.from != null && f.to != null && <span className="num muted">{f.from.toFixed(1)}–{f.to.toFixed(1)} s · </span>}{say(f, c)}
       {f.count > 1 && <span className="num muted"> · {t("{n} places", { n: f.count })}</span>}</span>
     <span className="acts">{f.shot && <button className="btn ghost sm" onClick={() => stage.close()}><Film size={13} />{t("Open shot")}</button>}
-      <button className="btn ghost sm" onClick={() => fix(c, f)}><Bot size={13} />{t("Fix with Claude")}</button></span></li>;
+      {!c.intended && <button className="btn ghost sm" onClick={() => fix(c, f)}><Bot size={13} />{t("Fix with Claude")}</button>}</span></li>;          {/* "Meant this way" is nothing to fix (T39-12) */}
   // the header counts the lines below it; no "Exact" / "Hint" tag, the group's name says which it is
   const group = ({ title, icon, items, children = null }) => items.length === 0 ? null : <section className="panel qa-group" aria-label={title}>
     <div className="panel-head">{icon}<h2>{title}</h2><span className="muted end num">{items.reduce((n, c) => n + (c.notSeen ? 1 : c.items.length || 1), 0)}</span></div>

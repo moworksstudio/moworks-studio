@@ -18,18 +18,21 @@ function Words({ projectId, shot, locked, send, onChanged, version }) {
   const toast = useToast();
   const [list, setList] = useState(null);
   const [vals, setVals] = useState({});
+  // a shot with no file of its own (a one-page film, T38b-18): the page's words shown in the shot's time
+  const file = shot.src ?? (shot.start != null ? "index.html" : null);
+  const span = !shot.src && shot.start != null ? `&from=${shot.start}&to=${shot.start + (shot.duration ?? 0)}` : "";
   const load = useCallback(() => {
-    if (!shot.src) { setList([]); return; }
-    get(`/api/projects/${projectId}/edit/texts?file=${encodeURIComponent(shot.src)}`).then((r) => { setList(r.texts); setVals(Object.fromEntries(r.texts.map((x) => [x.hfId, x.text]))); }).catch(() => setList([]));
-  }, [projectId, shot.src]);
+    if (!file) { setList([]); return; }
+    get(`/api/projects/${projectId}/edit/texts?file=${encodeURIComponent(file)}${span}`).then((r) => { setList(r.texts); setVals(Object.fromEntries(r.texts.map((x) => [x.hfId, x.text]))); }).catch(() => setList([]));
+  }, [projectId, file, span]);
   useEffect(load, [load, version]);
   if (list === null) return <div className="skeleton" style={{ height: "1.6rem" }} />;
   if (!list.length) return <p className="sl-note">{t("This shot has no words to edit here. For words made by code, ask Claude.")}</p>;
   return <div className="sl-words">{list.map((x) => <input key={x.hfId} className={"input sm sl-word" + (x.edited ? " edited" : "")} value={vals[x.hfId] ?? ""} disabled={locked} aria-label={t("Words")}
-    onFocus={() => send("select", { hfId: x.hfId, file: shot.src })}
+    onFocus={() => send("select", { hfId: x.hfId, file })}
     onChange={(e) => { setVals((v) => ({ ...v, [x.hfId]: e.target.value })); send("live", { hfId: x.hfId, text: e.target.value }); }}
     onBlur={async (e) => { const v = e.target.value.trim(); if (!v || v === x.text) { send("live", { hfId: x.hfId, text: x.text }); setVals((o) => ({ ...o, [x.hfId]: x.text })); return; }
-      try { const r = await post(`/api/projects/${projectId}/edit/text`, { file: shot.src, hfId: x.hfId, text: v }); toast(t("Words saved")); onChanged(!!r.reload); send("describe"); load(); } catch (er) { toast(er.message, "error"); load(); } }}
+      try { const r = await post(`/api/projects/${projectId}/edit/text`, { file, hfId: x.hfId, text: v }); toast(t("Words saved")); onChanged(!!r.reload); send("describe"); load(); } catch (er) { toast(er.message, "error"); load(); } }}
     onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }} />)}</div>;
 }
 
