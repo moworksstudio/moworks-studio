@@ -680,14 +680,14 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
         {!text && !targetLabel && <div className="csuggest">{suggestions.map((s) => <button key={s} className="cchip sug" onClick={() => { setText(s); taRef.current?.focus(); }} title={s}><Wand2 size={12} /><span className="t">{s}</span></button>)}</div>}
         <textarea ref={taRef} className="textarea composer-input" rows={3} value={text} readOnly={sending} onChange={(e) => setText(e.target.value)} aria-label={t("Message to Claude")}
           onSelect={(e) => { caret.current = e.currentTarget.selectionStart; }} onBlur={(e) => { caret.current = e.currentTarget.selectionStart; }}
-          placeholder={placeholder} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} />
+          placeholder={placeholder} onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !e.nativeEvent?.isComposing) { e.preventDefault(); send(); } }} />
         <div className="composer-actions">
           {onOpenMotions && <button className={"btn ghost sm" + (motionsOpen ? " on" : "")} onClick={onOpenMotions} aria-expanded={motionsOpen} title={t("Motions (opens under the film)")}><Library size={14} /><span className="lbl">{t("Motions")}</span></button>}
           {onOpenSounds && <button className={"btn ghost sm" + (soundsOpen ? " on" : "")} onClick={onOpenSounds} aria-expanded={soundsOpen} title={t("Sounds (opens under the film)")}><AudioLines size={14} /><span className="lbl">{t("Sounds")}</span></button>}
           {text && <button className="clink" onClick={() => { setText(""); setMotionCtx(null); }}>{t("Clear")}</button>}
           <span className="gap" />
           {running && <button className="btn sm cstop" onClick={stop} disabled={stopping} title={t("Stop what Claude is doing; what is done is kept")}>{stopping ? <Loader2 size={13} className="spin" /> : <CircleStop size={14} />}<span className="lbl">{t("Stop")}</span></button>}
-          <button className="btn sm csend" onClick={send} disabled={!text.trim() || sending || signedOut} title={signedOut ? t("Sign in to Claude first") : t("Enter sends · Shift+Enter makes a new line")}>
+          <button className="btn sm csend" onClick={send} disabled={!text.trim() || sending || signedOut} title={signedOut ? t("Sign in to Claude first") : t("Ctrl+Enter sends · Enter makes a new line")}>
             {sending ? <Loader2 size={14} className="spin" /> : <Send size={14} />}<span className="lbl">{wait ? t("Queue") : t("Send")}</span></button>
         </div>
       </section>

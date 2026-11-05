@@ -1,6 +1,7 @@
 // The words to read for a voice-over that Claude wrote, for the Voice screen's Script box.
 import { readFileSync } from "node:fs";
 import { docPath } from "../project-service/docs.mjs";
+import { spokenText } from "./tags.mjs";
 
 export const SCRIPT_FILE = "VOICEOVER.md";
 /** What a sample reads: the script's first two sentences or lines, 240 characters at most, cut at a word (the idea of Showhow's audition, Sirio Berati, MIT). */
@@ -52,7 +53,7 @@ export function briefScript(text) {
 }
 /** Words only, for holding two texts against each other: case, marks of punctuation, quotes and spacing aside (never the letters' own
  *  Vietnamese marks). */
-const plain = (s) => ` ${String(s ?? "").normalize("NFC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim()} `;
+const plain = (s) => ` ${spokenText(s).normalize("NFC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim()} `;
 /** The owner's script against the words Claude wrote to read (VOICEOVER.md): { total, left: [the script's lines not read as written] },
  *  null when the brief has no script, the film has no words to read yet, or every line is there word for word. A line counts as read when
  *  each of its sentences is in the words to read, in its own words (a line split in two, or punctuation changed, still counts). */

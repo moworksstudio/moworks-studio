@@ -1,7 +1,7 @@
 // R-KIT for the owner's Remotion kits (Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon): the project's composition
 // (src/videos/film/Video.tsx, laid out as the kit lays out a video: src/videos/<slug>/, so the kit's own relative imports work as shipped) is
 // bundled with the kit's code exactly as pinned (bundle/styles/moworks-kits/<kit>/src: a file the project does not have is the kit's), the
-// author's React (codeLibs, the What If pin), three.js 0.186.1 for the 3D Cartoon, and the app's stand-in for Remotion (the What If bridge:
+// author's React (codeLibs, the What If pin), three.js 0.187.0 (the default, #1071) for the 3D Cartoon, and the app's stand-in for Remotion (the What If bridge:
 // what-if-styles/shims; staticFile and @remotion/paths from hosts/) into one page script, compositions/film/film.js. The film's index.html
 // loads it beside <div id="stage">; R-LEMO drives it (window.render(t), READY). No Remotion package anywhere, no new bridge.
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
@@ -16,7 +16,7 @@ import { TWINS } from "./fonts.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url)), HOSTS = join(HERE, "hosts");
 export const ENTRY = "src/videos/film/Video.tsx", OUT = "compositions/film/film.js";
-export const THREE = "0.186.1";
+export const THREE = "0.187.0";
 const EXT = ["", ".tsx", ".ts", ".jsx", ".js", "/index.tsx", "/index.ts", "/index.js"];
 const resolveFile = (p) => { for (const s of EXT) if (existsSync(p + s) && statSync(p + s).isFile()) return p + s; return null; };
 const inside = (dir, p) => { const r = relative(dir, p); return !!r && !r.startsWith("..") && !/^[a-zA-Z]:/.test(r); };

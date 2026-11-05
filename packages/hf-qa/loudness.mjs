@@ -32,7 +32,11 @@ export async function loudness(file, { root, target = TARGET } = {}) {
  *  copied untouched; the file is replaced only when the new one is written. Returns { applied, target, measured } or { silent: true }. */
 /** The range the master's loudnorm may keep: the film's own, at least the rule's, at most 20 (loudnorm's top). */
 export const keptRange = (measured, rule) => Math.min(20, Math.max(rule, Math.ceil(Number(measured) || 0)));
-export const MASTER = { kit: { lufs: -16, tp: -1, lra: 11 }, loud: { lufs: -14, tp: -1, lra: 11 } };
+// the render's master (owner 05/11/2026 #1073): Standard -14 LUFS, the web's own level (YouTube turns louder films down to about -14 and never
+// a quieter one up: a -16 film played 2 dB under the rest); Quieter -16 LUFS (a podcast, a platform that asks for less). "loud" (-14, "when
+// the client asks") was the old name of today's Standard: kept so a render asked for with it still masters the same
+export const MASTER = { kit: { lufs: -14, tp: -1, lra: 11 }, quiet: { lufs: -16, tp: -1, lra: 11 } };
+MASTER.loud = MASTER.kit;
 export async function masterLoudness(file, { target = MASTER.kit, root } = {}) {
   const ff = ffmpegExe(root);
   // a range of its own stays: a film with silences has its quiet parts raised less (T32-8: a film's opening went from -23 to -16.5 dB)

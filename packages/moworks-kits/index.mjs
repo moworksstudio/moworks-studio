@@ -5,6 +5,8 @@
 //                  timeline (EX.run), the film's story/ scripts; the voice's words as story/words.js wants them
 //   the others     Remotion kits: the project's composition on the kit's own code, bundled by build.mjs with the app's stand-in for Remotion
 //                  (the What If bridge, R-LEMO: window.render(t), READY)
+//   Ricks Clip     (owner 05/11/2026 #1065-#1073) the owner's skill cartoon-audio-short and its code kit: ES modules drawing frame f, the film's
+//                  film/ files with the kit's engine, toon.js and three.js bundled by ricks.mjs (R-LEMO: window.render(t), READY)
 // Faces without Vietnamese letters are drawn by their twins (fonts.mjs). The kits' own commands (doctor, render, qc, npm, uv) are not used: the
 // app runs every step; the kits' code-made sounds are in the offline library (tools/make-code-sfx.mjs). Credit: Moworks Studio, the owner's own.
 import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
@@ -15,6 +17,7 @@ import { gsapFile } from "../offline-assets/index.mjs";
 import { ensureShared, linkOrCopy, sharedDir } from "../project-service/shared-stage.mjs";
 import { buildKitFilm, transcriptWords } from "./build.mjs";
 import { declareTwins, twinnedIn } from "./fonts.mjs";
+import { CAST_LAYER, FILM_DIR, buildRicksFilm } from "./ricks.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
@@ -26,6 +29,8 @@ export const KIT_STYLES = Object.freeze({
   "inner-voice-short": { id: "inner-voice-short", kit: "story", engine: "react", faces: ["Comic Sans MS", "Comic Neue", "Chalkboard SE"], skills: ["inner-voice-short", "style-note"], examples: ["src/examples/firstchord.js", "src/examples/ExampleFirstChord.tsx", "templates/inner-voice/video.template.js", "templates/inner-voice/Video.template.tsx"] },
   "cartoon-3d": { id: "cartoon-3d", kit: "cartoon-3d", engine: "react", three: true, faces: ["Outfit", "Caveat Brush"], skills: ["cartoon-video", "cartoon-shorts", "cartoon-whatif", "character-builder", "idea-lab", "render-review", "style-note"], examples: ["src/examples/what-if-no-pain/shots.ts", "src/examples/cheese-bank-vault/shots.ts", "templates/video/Video.tsx", "templates/video/world.ts"] },
   "explainer-2d": { id: "explainer-2d", kit: "explainer-2d", engine: "page", faces: ["Figtree"], skills: ["explainer-video", "explainer-shorts", "explainer-longform", "script-writer", "art-modules", "sound-design", "voice-over", "render-review", "style-note"], examples: ["examples/where-the-needle-stops/STORYBOARD.md", "examples/where-the-needle-stops/story/story.js", "templates/video/story/story.js", "engine/CONTRACT.md"] },
+  // a skill folder (owner 05/11/2026 #1065-#1073): SKILL.md and its code kit at kit/; the engine is ES modules drawing frame f (ricks.mjs)
+  "ricks-clip": { id: "ricks-clip", kit: "ricks-clip", engine: "module", faces: ["DejaVu Serif", "Arial Black"], skills: [], examples: ["kit/example/soldier/story.js", "kit/example/soldier/stills.jpg", "kit/example/soldier/audio.py"] },
 });
 export const isKitStyle = (id) => Object.hasOwn(KIT_STYLES, String(id ?? ""));
 export const kitStyle = (id) => KIT_STYLES[String(id ?? "")] ?? null;
@@ -58,6 +63,11 @@ export function stageGuide(projectDir, styleId, root = APP_ROOT) {
     if (existsSync(b) && statSync(b).mtimeMs >= statSync(a).mtimeMs) continue;
     mkdirSync(to, { recursive: true }); copyFileSync(a, b); files.push(`.moworks/library/${styleId}/app/${n}`);
   }
+  // Ricks Clip: the app's cast layer (the three views and the pose layer) beside its page, for Claude to read (the film's bundle takes it from the app)
+  if (s.engine === "module") {
+    const b = join(to, "ricks-cast.js");
+    if (!(existsSync(b) && statSync(b).mtimeMs >= statSync(CAST_LAYER).mtimeMs)) { mkdirSync(to, { recursive: true }); copyFileSync(CAST_LAYER, b); files.push(`.moworks/library/${styleId}/app/ricks-cast.js`); }
+  }
   return { files };
 }
 /** What each step reads of the kit (project-relative), for agent/reads.mjs. */
@@ -65,6 +75,7 @@ export function kitReads(styleId) {
   const s = kitStyle(styleId);
   if (!s) return { look: [], method: [], examples: [], app: [], sound: [], review: [] };
   const lib = `.moworks/library/${styleId}`, k = `${lib}/kit`;
+  if (s.engine === "module") return ricksReads(s, lib, k);
   const skill = (n) => `${k}/.claude/skills/${n}/SKILL.md`;
   const LOOK = { "paper-collage": [`${k}/.claude/skills/motion-graphic/references/STYLE.md`, `${k}/.claude/skills/motion-graphic/references/RECIPES.md`],
     "stickman-explainer": [`${k}/.claude/skills/stickman-explainer/references/STYLE.md`, `${k}/.claude/skills/stickman-explainer/references/SCRIPT.md`],
@@ -113,6 +124,31 @@ export function kitReads(styleId) {
   out.steps = { ...STEPS, sound: out.sound };
   return out;
 }
+/** Ricks Clip: one SKILL.md (its stages are the steps: Stage 1-3 the brief, 4.2-4.4 the board, 4.5 the plan, 4.3-4.6 the build, 4.7 the sound,
+ *  4.6 and 4.8 the review) and its kit's code, every file of the pinned copy read by a step but the kit's own tools (RICKS_UNREAD). */
+function ricksReads(s, lib, k) {
+  const skill = `${k}/SKILL.md`, at = (p) => `${k}/kit/${p}`, ex = s.examples.map((e) => `${k}/${e}`);
+  const engine = ["engine/main.js", "engine/paint.js", "engine/roman.js", "engine/motion.js", "engine/index.html"].map(at), toon = at("vendor/toon.ts");
+  const layer = `${lib}/app/ricks-cast.js`;          // the app's cast layer: the three views, the pose layer, castDraw (#1076)
+  const out = { look: [skill, at("README.md")], method: [skill], examples: ex, app: [`${lib}/app/README.md`, layer], sound: [skill, at("example/soldier/audio.py")], review: [skill] };
+  out.steps = {
+    brief: [skill, at("README.md")],
+    storyboard: [skill, ex[0], ex[1], at("engine/roman.js"), at("engine/paint.js"), toon, layer],
+    motionSpec: [skill, at("engine/motion.js"), ex[0], layer],
+    build: [skill, ...engine, toon, layer, ...ex],
+    review: [skill, ex[1]],
+    sound: out.sound,
+  };
+  return out;
+}
+/** Ricks Clip's files no step reads, and why: the kit's own commands, which the app runs its own way. */
+export const RICKS_UNREAD = Object.freeze({
+  "kit/tools/setup.sh": "the kit's project setup; the app stages the engine and bundles the film",
+  "kit/tools/timing.py": "word timings; the app's transcript gives them",
+  "kit/tools/render.mjs": "the kit's frame renderer; HyperFrames renders",
+  "kit/tools/sheet.py": "contact sheets; the app's storyboard stills",
+  "kit/tools/finish.sh": "encode, loudness and QA; the app's render, Final Mix and Tech checks",
+});
 /** The kit's skill files no step reads, and why (test: every other one is read by a step). */
 export const KIT_UNREAD = Object.freeze({
   "kit-setup/SKILL.md": "the kit's own install; the app sets up everything",
@@ -148,6 +184,11 @@ export async function placeKit(projectDir, pageRel = "index.html", { root = APP_
     const text = `window.STORY_WORDS = ${JSON.stringify(transcriptWords(projectDir))};\n`, w = join(pageDir, own, "words.js");
     let was = null; try { was = readFileSync(w, "utf8"); } catch { /* first time */ }
     if (was !== text) { mkdirSync(dirname(w), { recursive: true }); writeFileSync(w, text); files.push(rel(`${own}/words.js`)); }
+  } else if (s.engine === "module") {
+    // Ricks Clip: the film's own files (film/, or a board's boards/<X>/film/ when it has its story.js) with the kit's engine, toon.js and
+    // three.js, bundled beside the page (ricks.mjs)
+    const board = base.startsWith("boards/") && existsSync(join(dirname(page), "film", "story.js"));
+    build = await buildRicksFilm(projectDir, { root, force, filmDir: board ? `${base}/film` : FILM_DIR, out: base.startsWith("boards/") ? `${base}/film.js` : "compositions/film/film.js" });
   } else {
     // a Remotion kit: its own public files (Paper Collage's textures), then the film (or the board) bundled beside the page
     const tex = join(HERE, "assets", id, "textures");

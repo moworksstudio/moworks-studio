@@ -154,6 +154,10 @@ export function dynamicOf(dir) {
 
 /** A lyrics video's quota: nothing still for more than 0.5 s (moworks-alive/lyric-video.md §1). */
 const LYRIC_STILL = 0.5;
+/** A style's own limit for a still stretch, its author's number (local, audit/101): Moworks 2D Explainer's STYLE.md counts a frame that does
+ *  not change in 0.5 s as a bug (T38b-4: 0.6 s and 0.67 s stood unseen under the house floor of 2 s). */
+const STYLE_STILL = Object.freeze({ "explainer-2d": 0.5 });
+const styleStill = (dir) => { try { return STYLE_STILL[JSON.parse(readFileSync(join(dir, ".moworks", "project.json"), "utf8")).style?.id] ?? null; } catch { return null; } };
 const lyricFilm = (dir) => { try { return isLyricVideo(JSON.parse(readFileSync(join(dir, ".moworks", "project.json"), "utf8")), { dir }); } catch { return false; } };
 /** The pictures stopped twice (STILLS_BUSY): the round is said as busy, with no sheet and no check, never as a round that worked; its
  *  folder goes (the next round takes its number). */
@@ -238,7 +242,7 @@ export async function qcRound(dir, { shots, total, signal = null, parallel = fal
   };
   const stretches = async () => {
     if (!(total > 0)) return { failed: [] };
-    try { return { still: await measureStills(dir, { shots, total, dynamic: dynamicOf(dir), nearLimit: lyricFilm(dir) ? LYRIC_STILL : null, signal: partSignal, workDir: join(out, "still"), snap, pauseMs }), failed: [] }; }
+    try { return { still: await measureStills(dir, { shots, total, dynamic: dynamicOf(dir), nearLimit: lyricFilm(dir) ? LYRIC_STILL : styleStill(dir), signal: partSignal, workDir: join(out, "still"), snap, pauseMs }), failed: [] }; }
     catch (e) { if (signal?.aborted) throw e; return { failed: [`still stretches: ${String(e.message).split(/\r?\n/)[0]}`] }; }
   };
   const checked = async () => {

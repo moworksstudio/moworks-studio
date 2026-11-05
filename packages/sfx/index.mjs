@@ -32,7 +32,9 @@ export const SEARCH_TIMEOUT_MS = 7000, DOWNLOAD_TIMEOUT_MS = 30000;
 export const DOWN_AFTER = 3;
 /** One placement asks online for at most this many names the library only has something like, and downloads at most this many sounds: SFXMint lets one network have 20
  *  different sounds a day (past that its download answers 429), and Openverse is often down. What it does not get stays on the library's stand-in, said so. */
-export const ONLINE_LOOKUPS = 24, ONLINE_DOWNLOADS = 6;
+// how many of a placement's names the library only half answers are looked up online, and downloaded (T38b-5: 24 and 6 left 75 of a 3-minute
+// film's 132 sounds on stand-ins, "bicycle pump squeak" playing a cute animal); a sound once found online stays, so a film pays this once
+export const ONLINE_LOOKUPS = 120, ONLINE_DOWNLOADS = 40;
 /** The caller's signal and a time limit, as one. */
 const within = (signal, ms) => (signal ? AbortSignal.any([signal, AbortSignal.timeout(ms)]) : AbortSignal.timeout(ms));
 const UA = { "User-Agent": "MoworksStudio/1.0 (personal studio app)" };
@@ -578,7 +580,7 @@ export function placedNote(res) {
   const vars = { n: res.placed ?? 0, names: names.length ? shown : "none", ...(res.ambience ? { beds: res.ambience } : {}) };
   if (near.length) { parts.push("A close sound stands in for now: {near}"); vars.near = some(near.map((x) => `"${x.name}" (${x.as})`)); }
   // said plainly, name by name: these are not the sound the film asks for (Test 28: fifteen marbles were ticks and the note only said "close")
-  if (lasting.length) { parts.push("The app has no such sound of its own and the sound search found none, so these are stand-ins, not the real sound: {lasting}. Press Place them again in Final Mix when the search is back, or add your own"); vars.lasting = lasting.map((x) => `"${x.name}" plays ${x.as}`).join(", "); }
+  if (lasting.length) { parts.push("The app has no such sound of its own and the sound search found none, so these are stand-ins, not the real sound: {lasting}. Press Place them again in Final Mix to search again, or add your own"); vars.lasting = lasting.map((x) => `"${x.name}" plays ${x.as}`).join(", "); }
   if (failed.length) { parts.push("Left out because the sound search did not answer: {failed}. Press Place them again in Final Mix later"); vars.failed = quote(failed); }
   if (none.length) { parts.push("No sound found for {missing}: ask Claude for other names"); vars.missing = quote(none); }
   return parts.length > 1 ? { text: `${parts.join(". ")}.`, vars, status: "warning" } : { text: parts[0], vars };

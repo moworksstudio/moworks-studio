@@ -270,6 +270,11 @@ const gainIsOurs = (a, kind) => {
   if (a["data-mw-gain-mark"] != null) return a["data-mw-gain-mark"] === gainMark(a["data-volume"]);
   return a["data-mw-gain"] != null ? a["data-volume"] === a["data-mw-gain"] : (a["data-volume"] ?? "1") === DEFAULT_GAIN[kind];
 };
+/** Whether the owner set the level of the film's voice-over or music themselves (Final Mix, Studio): a level the app did not write. */
+export function levelIsOwners(dir, kind) {
+  let html = ""; try { html = readFileSync(join(dir, "index.html"), "utf8"); } catch { return false; }
+  return [...html.matchAll(/<audio\b[^>]*>/gi)].map((m) => attrsOf(m[0])).some((a) => audioKind(a) === kind && !gainIsOurs(a, kind));
+}
 /** Set the app's level on every clip of the voice-over or the music whose level is the app's (gain: a number). Returns how many changed. */
 export function setTrackGain(dir, kind, gain) {
   const f = join(dir, "index.html");

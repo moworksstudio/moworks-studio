@@ -1,7 +1,7 @@
 {
   "about": "What Moworks Studio ships with the repository instead of downloading (audit 60 §6). Made by tools/make-bundle.mjs.",
-  "made": "2026-11-04T04:11:09.884Z",
-  "bytes": 374403344,
+  "made": "2026-11-05T06:34:05.008Z",
+  "bytes": 375309858,
   "parts": [
     {
       "name": "fonts",
@@ -177,8 +177,8 @@
     {
       "name": "sfx",
       "path": "sfx",
-      "files": 361,
-      "bytes": 9296128,
+      "files": 376,
+      "bytes": 9624473,
       "source": "Kenney audio packs (kenney.nl), OpenGameArt.org CC0 sets and Wikimedia Commons, cut and re-encoded by tools/make-sfx-library.mjs (tools/sfx-library-packs.json)",
       "commit": null,
       "licence": "CC0 1.0 and public domain (each sound's source in sfx/catalog.json and sfx/CREDITS.md)"
@@ -218,6 +218,15 @@
       "source": "2D Explainer Animation Toolkit 1.0.0 (2D-EXPLAINER-ANIMATION-TOOLKIT.md, SHA-256 e1e2df8e064e0efbd5faa0832e890b6bb3e8074dd73545934376d9771ef66c53)",
       "commit": null,
       "licence": "the owner's own (Moworks Studio)"
+    },
+    {
+      "name": "moworks-kit-ricks-clip",
+      "path": "styles/moworks-kits/ricks-clip",
+      "files": 17,
+      "bytes": 578169,
+      "source": "Ricks Clip (the owner's skill cartoon-audio-short: SKILL.md SHA-256 2ac0bf5f2ab7a689b3751050df664920d7763392a9287b0ce8d7254ea4cfc2ed, cartoon-short-kit.zip SHA-256 784c07e36df5e91ddf93c78a1dde6b98b3aa3e3c37cadff03c5603d3971ce788; kit/vendor/toon.ts from mromidev/claude-animated-shorts@e3b817b6)",
+      "commit": null,
+      "licence": "the owner's own (Moworks Studio); toon.ts: MIT, Copyright (c) 2026 Mr omi"
     }
   ]
 }

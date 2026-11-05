@@ -2,6 +2,7 @@
 // the project's revisions), and HyperFrames' transcript.json (word level) written from it through HF's own import. Editing text keeps the
 // timing: same number of words -> each word keeps its time; otherwise the words are spread over the segment's own start..end.
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { spokenText } from "./tags.mjs";
 import { join } from "node:path";
 import { importTranscript } from "../hf-audio/index.mjs";
 
@@ -42,7 +43,8 @@ export const wordKey = key;
  *  changed word keeps its heard word's times; a word Whisper missed shares the time between its neighbours). Returns { segments, changed,
  *  missed, extra, match } (match: the share of the script's words Whisper heard the same); segments: Whisper's, each word now the script's. */
 export function fromScript(segments, script) {
-  const said = nfc(String(script ?? "")).split(/\s+/).filter((w) => key(w));
+  // the delivery tags are never said (tags.mjs): a script with them is held against the voice without them
+  const said = nfc(spokenText(script)).split(/\s+/).filter((w) => key(w));
   const heard = segments.flatMap((s, si) => (s.words ?? []).map((w) => ({ ...w, seg: si }))).filter((w) => key(w.text));
   const n = said.length, m = heard.length;
   if (!n || !m) return null;
@@ -127,8 +129,11 @@ export function readAlignment(dir, file) {
 /** The characters' times as words: [{ text, start, end }]. */
 export function alignedWords(a) {
   const out = [];
-  let cur = null;
+  let cur = null, inTag = false;
   (a?.characters ?? []).forEach((c, i) => {
+    // a delivery tag's characters ("[excited]") are in ElevenLabs' alignment but never said: no word of the voice
+    if (c === "[") { inTag = true; cur = null; return; }
+    if (inTag) { if (c === "]") inTag = false; return; }
     if (/\s/.test(c)) { cur = null; return; }
     if (!cur) out.push(cur = { text: c, start: a.character_start_times_seconds[i], end: a.character_end_times_seconds[i] });
     else { cur.text += c; cur.end = a.character_end_times_seconds[i]; }

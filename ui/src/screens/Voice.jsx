@@ -340,7 +340,7 @@ export function settingsChanged(fields, values, defaults) {
   const out = {};
   for (const f of fields ?? []) {
     const v = values?.[f.id], d = defaults?.[f.id];
-    if (v === undefined || v === null || Number.isNaN(v)) continue;
+    if (f.disabled || v === undefined || v === null || Number.isNaN(v)) continue;
     if (f.type === "boolean" ? !!v !== !!(d ?? false) : d === undefined || Math.abs(Number(v) - Number(d)) > 1e-9) out[f.id] = v;
   }
   return out;
@@ -471,7 +471,8 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
   if (!keySaved) return <section className="panel"><Banner kind="warning" action={<button className="btn sm" onClick={() => go("/settings/runtime")}>{t("Add key")}</button>}>{t("Add your {name} key in Settings › General › Voice-over to choose a voice.", { name })}</Banner></section>;
   const voice = list?.voices.find((x) => x.id === voiceId);
   // the voice settings are left at the service's defaults: only what the user changed is sent
-  const fields = list?.settings ?? [];
+  // a setting the chosen model does not have (Eleven v4: Speed, Style) stays in its place, off (owner #1063: keep the layout)
+  const fields = (list?.settings ?? []).map((f) => ({ ...f, disabled: !!f.off?.includes(model) }));
   const changed = settingsChanged(fields, vs, defaultsOf(voiceId));
   const changedText = fields.filter((f) => f.id in changed).map((f) => `${t(f.label)} ${f.type === "boolean" ? t(changed[f.id] ? "on" : "off") : changed[f.id]}`).join(" · ");
   const generate = async () => {
@@ -511,9 +512,9 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
           <summary>{t("Voice settings")}{changedText ? ` · ${changedText}` : ` · ${t("{name}'s defaults", { name })}`}</summary>
           <div className="vo-set-row">{fields.map((f) => { const hint = SETTING_HINTS[f.id] ? t(SETTING_HINTS[f.id]) : undefined; return f.type === "boolean"
             ? <label key={f.id} className="vo-bool" title={hint ? `${t(f.label)}: ${hint}` : t(f.label)}>          {/* the tick and its name on one line */}
-              <input type="checkbox" checked={!!vs[f.id]} onChange={(e) => setVs({ ...vs, [f.id]: e.target.checked })} />{t(SHORT_LABEL[f.id] ?? f.label)}{hint && <Info size={11} className="vo-info" aria-hidden="true" />}</label>
+              <input type="checkbox" checked={!!vs[f.id]} disabled={f.disabled} onChange={(e) => setVs({ ...vs, [f.id]: e.target.checked })} />{t(SHORT_LABEL[f.id] ?? f.label)}{hint && <Info size={11} className="vo-info" aria-hidden="true" />}</label>
             : <label key={f.id} className="field vo-set"><span title={hint ? `${t(f.label)}: ${hint}` : t(f.label)}>{t(SHORT_LABEL[f.id] ?? f.label)}{hint && <Info size={11} className="vo-info" aria-hidden="true" />}</span>
-              <input className="input num" type="number" min={f.min} max={f.max} step={f.step ?? 0.01} value={vs[f.id] ?? ""} placeholder={t("Default")} title={hint}
+              <input className="input num" type="number" min={f.min} max={f.max} step={f.step ?? 0.01} value={f.disabled ? "" : vs[f.id] ?? ""} placeholder={f.disabled ? t("Not in this model") : t("Default")} title={hint} disabled={f.disabled}
                 onChange={(e) => setVs({ ...vs, [f.id]: e.target.value === "" ? undefined : Number(e.target.value) })} /></label>; })}</div>
           {changedText && <button className="clink" onClick={() => setVs(defaultsOf(voiceId))}>{t("Reset to {name} defaults", { name })}</button>}
         </details>}

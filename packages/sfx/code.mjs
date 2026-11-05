@@ -53,7 +53,7 @@ export async function codeRuns(root = APP_ROOT) {
 // ---- the recipes a film may use
 const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
 const pins = (root) => { try { return loadPins(root).moworksKits?.kits ?? {}; } catch { return {}; } };
-const KIT_DIR = { pc: "paper-collage", sm: "story", iv: "story", c3: "cartoon-3d", x2: "explainer-2d" };
+const KIT_DIR = { pc: "paper-collage", sm: "story", iv: "story", c3: "cartoon-3d", x2: "explainer-2d", rc: "ricks-clip" };
 /** A recipe file's own words: { family, tags, duration } from its sidecar (<name>.json), or from its FAMILY / TAGS lines. */
 function recipeMeta(file) {
   const side = readJson(file.replace(/\.py$/i, ".json"), null);
@@ -141,8 +141,10 @@ function creditOf(entry, root) {
   if (entry.prebuilt || String(entry.recipe).startsWith("kit:")) {
     const [, builder, fn] = /^kit:([^:]+):(.+)$/.exec(entry.recipe) ?? [];
     const kitDir = String(builder ?? "").split("/")[0], pin = p[kitDir] ?? {};
+    // Ricks Clip's synths are in its worked example's audio.py (the skill folder's kit/), the others in each kit's own builder
+    const file = kitDir === "ricks-clip" ? "ricks-clip/kit/example/soldier/audio.py" : `${builder}.py`;
     return { name: `the owner's ${pin.title ?? kitDir} ${pin.version ?? ""}`.replace(/\s+/g, " ").trim(), author: "Moworks Studio (the owner's own code)", licence: "the owner's own",
-      how: `made by code from the owner's synthesis: the kit's own recipe ${fn} (bundle/styles/moworks-kits/${builder}.py, the kit pinned at SHA-256 ${String(pin.sha256 ?? "").slice(0, 12)}), numpy/scipy, the film's own seed` };
+      how: `made by code from the owner's synthesis: the kit's own recipe ${fn} (bundle/styles/moworks-kits/${file}, the kit pinned at SHA-256 ${String(pin.sha256 ?? "").slice(0, 12)}), numpy/scipy, the film's own seed` };
   }
   const story = p.story ?? {};
   const own = entry.kept || entry.film;

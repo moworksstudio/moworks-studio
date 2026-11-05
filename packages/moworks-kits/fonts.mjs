@@ -7,6 +7,8 @@
 //   Comic Sans MS, Comic Neue, Chalkboard SE (Inner Voice Short) → Pangolin (google/fonts, OFL, fetched once into the machine cache)
 //   Caveat Brush (3D Cartoon marker)    → Sedgwick Ave Display (bundled, OFL), the marker the Map Explainer uses
 //   Special Elite (Paper Collage)       → Special Elite VN (the app's: Special Elite with the Vietnamese letters added, Apache-2.0)
+//   DejaVu Serif (Ricks Clip's painted and carved words) → Source Serif 4 (bundled, OFL), a sturdy text serif drawn bold
+//   Arial Black (Ricks Clip's sleeping Z)                → Archivo (bundled, OFL), drawn at 900
 // The faces that have Vietnamese stay themselves (Anton, Playfair Display, Open Sans, Patrick Hand): R-FONTS installs them.
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
@@ -19,6 +21,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 export const TWINS = Object.freeze({
   "Figtree": "Hanken Grotesk", "Outfit": "Lexend", "Comic Sans MS": "Pangolin", "Comic Neue": "Pangolin", "Chalkboard SE": "Pangolin",
   "Caveat Brush": "Sedgwick Ave Display", "Special Elite": "Special Elite VN",
+  "DejaVu Serif": "Source Serif 4", "Arial Black": "Archivo",
 });
 /** Where a page finds the twins' files, beside itself. */
 export const FONT_DIR = "assets/_app/kit-fonts";

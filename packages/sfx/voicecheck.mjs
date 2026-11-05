@@ -7,7 +7,7 @@
 // after the word, or lower it), never a block.
 import { APP_ROOT } from "../version-manager/index.mjs";
 import { readMounts } from "../hf-edit/shots.mjs";
-import { audioKind } from "../hf-edit/tracks.mjs";
+import { audioKind, levelIsOwners } from "../hf-edit/tracks.mjs";
 import { EFFECTS_MARGIN_DB, MUSIC_MARGIN_DB } from "./actions.mjs";
 import { spokenWords } from "./auto.mjs";
 import { decodeClips, powerOf, renderStem } from "./voicefit.mjs";
@@ -59,6 +59,22 @@ export async function gateVoice(projectDir) {
   const r = await voiceCheck(projectDir).catch((err) => ({ ran: true, error: String(err.message ?? err).split("\n")[0], masked: [] }));
   if (!r.ran) return null;
   if (r.error) return { id: "G-VOICE", blocking: false, pass: false, notChecked: true, findings: [{ severity: "warning", code: "not_checked", message: `The voice check could not run: ${r.error}` }] };
-  return { id: "G-VOICE", blocking: false, pass: r.masked.length === 0, warnings: r.masked.length,
-    findings: r.masked.map((x) => ({ severity: "warning", code: "voice_masked", time: x.at, message: `"${x.word}" at ${x.at} s: the ${x.by} come within ${x.by === "effects" ? EFFECTS_MARGIN_DB : MUSIC_MARGIN_DB} dB of the voice` })) };
+  // one warning a kind, the music and the effects, with how many words and where (owner #1098: 30 warnings for one music level read as 30
+  // faults); a level the owner set in Final Mix is said as theirs. The Review reads every word from voiceText (above)
+  const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+  const findings = [];
+  for (const by of ["music", "effects"]) {
+    const xs = r.masked.filter((x) => x.by === by);
+    if (!xs.length) continue;
+    const first = Math.min(...xs.map((x) => x.at)), last = Math.max(...xs.map((x) => x.at));
+    const where = xs.length === 1 ? `at ${clock(first)}` : `between ${clock(first)} and ${clock(last)}`;
+    const words = xs.slice(0, 3).map((x) => `"${x.word}"`).join(", ");
+    const owner = by === "music" && levelIsOwners(projectDir, "music");
+    const what = by === "music" ? `The music is within ${MUSIC_MARGIN_DB} dB of the voice` : `The sound effects are within ${EFFECTS_MARGIN_DB} dB of the voice`;
+    const fix = owner ? "You set the music's level in Final Mix: lower it there if those words are hard to hear, or keep it"
+      : by === "music" ? "Press Balance again in Final Mix, or ask Claude to lower the music under those words" : "Ask Claude to move those effects into the pauses, or lower them";
+    const line = `${what} on ${xs.length} word${xs.length === 1 ? "" : "s"} ${where} (${words}${xs.length > 3 ? "…" : ""}). ${fix}.`;
+    findings.push({ severity: "warning", code: `voice_masked_${by}`, time: first, count: xs.length, ownerLevel: owner || undefined, message: line, plain: line });
+  }
+  return { id: "G-VOICE", blocking: false, pass: r.masked.length === 0, warnings: findings.length, findings };
 }

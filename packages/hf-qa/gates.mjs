@@ -259,8 +259,9 @@ export async function gateBuild(projectDir) {
   return { id: "G-BUILD", blocking: true, pass: !r.error, findings: r.error ? [{ code: "build_error", message: `The film's code does not compile: ${r.error}` }] : [] };
 }
 
-/** The checks that read the sound: all a film needs when only its sound changed (T32-7). */
-export const SOUND_GATES = new Set(["G-VOICE", "G-SFX"]);
+/** The checks run again when only the sound changed (T32-7): the sound's, and the cuts, which read the film's render (a render made since
+ *  the picture's checks gave G-CUTS nothing to read then; T38b-2: it never showed after the final render). */
+export const SOUND_GATES = new Set(["G-VOICE", "G-SFX", "G-CUTS"]);
 /** The last checks with the sound's in place of theirs. */
 export const withSoundChecks = (last, fresh) => [...last.filter((c) => !SOUND_GATES.has(c.id)), ...fresh.filter(Boolean)];
 
@@ -272,6 +273,7 @@ export async function runGates(projectDir, { workDir, blank = true, onStep = () 
   const parts = soundOnly ? [
     ["The voice against the sound", async () => [await gateVoice(projectDir)]],
     ["A sound on every action", async () => [await gateSfx(projectDir)]],
+    ["The cuts on the shot table", async () => [await gateCuts(projectDir)]],
   ] : [
     ["Building the film's code", async () => [await gateBuild(projectDir)]],          // first: the checks below look at the film as its source is now
     ["HyperFrames' check of the film", (again) => hfCheck(projectDir, { onRetry: () => again("HyperFrames' check of the film, once more (the computer is busy)") })],

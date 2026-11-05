@@ -95,9 +95,9 @@ export function rewriteRemoteLibs(text, { prefix = "" } = {}) {
 }
 
 /** The three.js versions a text uses: the default for bare 'three' / 'three/addons/', <v> for three@<v> or a copied classic file. */
-export function threeIn(text) {
+export function threeIn(text, def = threeVersions().default) {
   const out = new Set();
-  if (usesDefaultThree(text)) out.add(threeVersions().default);
+  if (usesDefaultThree(text)) out.add(def);
   for (const m of text.matchAll(/["']three@(\d+\.\d+\.\d+)(?:\/[^"']*)?["']/g)) out.add(m[1]);
   for (const m of text.matchAll(/assets\/_app\/vendor\/three\/(\d+\.\d+\.\d+)\//g)) out.add(m[1]);
   return out;
@@ -124,8 +124,8 @@ export function vendorInto(projectDir, needs) {
 
 /** The film's import map for three.js: 'three' + 'three/addons/' = the default version, three@<v> for each version, each version's own
  *  files scoped to its folder (an addon's `import "three"` stays in its version). Versions without an ES module build (0.147) need none. */
-export function threeImportMap(versionsUsed, prefix = "./") {
-  const { default: def, versions } = threeVersions();
+export function threeImportMap(versionsUsed, prefix = "./", def = threeVersions().default) {
+  const { versions } = threeVersions();
   const base = `${prefix}${VENDOR}/three`;
   const imports = {}, scopes = {};
   const mods = [...new Set([def, ...versionsUsed])].filter((v) => versions[v]?.includes("build/three.module.min.js")).sort();
@@ -142,13 +142,24 @@ export function threeImportMap(versionsUsed, prefix = "./") {
 const MAP_TAG = /<script type="importmap" data-mw="three">[\s\S]*?<\/script>\n?/;
 /** R-THREE on a document's text: its import map for the versions given, before its first script (an import map must come before any
  *  module). No versions: the map is removed. */
-export function withThreeMap(html, versionsUsed, prefix = "./") {
-  const tag = versionsUsed.size ? `<script type="importmap" data-mw="three">${JSON.stringify(threeImportMap(versionsUsed, prefix))}</script>\n` : "";
+export function withThreeMap(html, versionsUsed, prefix = "./", def = threeVersions().default) {
+  const tag = versionsUsed.size ? `<script type="importmap" data-mw="three">${JSON.stringify(threeImportMap(versionsUsed, prefix, def))}</script>\n` : "";
   if (MAP_TAG.test(html)) return html.replace(MAP_TAG, tag);
   if (!tag) return html;
   const at = html.search(/<script\b/i);
   if (at >= 0) return html.slice(0, at) + tag + html.slice(at);
   return html.includes("</head>") ? html.replace("</head>", `${tag}</head>`) : tag + html;
+}
+
+/** The three.js version a film's page already serves bare 'three' from (its own import map), when the app has it pinned: a film stays on
+ *  the version it was built with when the app's default moves on (T38b-8: a film built on 0.184.0 was mapped to 0.187.0, which it did not
+ *  have, and every 3D shot failed to load). null: no map yet, a new film takes the app's default. */
+export function filmThreeDefault(html) {
+  const m = MAP_TAG.exec(String(html ?? ""));
+  if (!m) return null;
+  let at = null; try { at = JSON.parse(m[0].replace(/^<script[^>]*>|<\/script>\n?$/g, "")).imports?.three ?? null; } catch { return null; }
+  const v = /\/three\/(\d+\.\d+\.\d+)\//.exec(String(at ?? ""))?.[1];
+  return v && threeVersions().versions[v]?.includes("build/three.module.min.js") ? v : null;
 }
 
 /** The film's own scripts (not the app's copies, not minified or vendored libraries): where Claude may write a scene module. */
@@ -161,18 +172,19 @@ export function scriptFiles(projectDir) {
       else if (/\.m?js$/.test(n) && !/\.min\.js$/.test(n)) out.push(rel);
     }
   };
-  for (const d of ["compositions", "assets"]) if (existsSync(join(projectDir, d))) walk(join(projectDir, d));
+  // story/ and film/: where the 2D Explainer and Ricks Clip keep their film's code (T38b-8: its bare import "three" was never seen)
+  for (const d of ["compositions", "assets", "story", "film"]) if (existsSync(join(projectDir, d))) walk(join(projectDir, d));
   return out;
 }
 
 /** The same rewrite on the film's own script files; returns the needs and the files changed. */
-export function rewriteScripts(projectDir) {
+export function rewriteScripts(projectDir, def = threeVersions().default) {
   const changed = [], needs = [];
   for (const f of scriptFiles(projectDir)) {
     const p = join(projectDir, ...f.split("/"));
     const before = readFileSync(p, "utf8");
     const r = rewriteRemoteLibs(before);
-    needs.push(r.needs, { three: threeIn(r.text) });
+    needs.push(r.needs, { three: threeIn(r.text, def) });
     if (r.text !== before) { writeFileSync(p, r.text); changed.push(f); }
   }
   return { changed, needs };

@@ -591,7 +591,7 @@
       "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-kits/cartoon-3d",
       "licence": "the owner's own (Moworks Studio)",
       "made": "as shipped",
-      "madeNote": "the owner's kit as shipped (its three.js runtime and post chain, its cast and sets, its rules, its code-made sounds), run on HyperFrames through the app's stand-in for Remotion, three.js 0.186.1 (the patch of the kit's 0.186.0); Outfit and Caveat Brush drawn by Lexend and Sedgwick Ave Display for the Vietnamese letters",
+      "madeNote": "the owner's kit as shipped (its three.js runtime and post chain, its cast and sets, its rules, its code-made sounds), run on HyperFrames through the app's stand-in for Remotion, three.js 0.187.0 (the latest, owner #1071; the kit asks for 0.186.0); Outfit and Caveat Brush drawn by Lexend and Sedgwick Ave Display for the Vietnamese letters",
       "kit": {
        "id": "cartoon-3d",
        "title": "3D Cartoon Animation Toolkit",
@@ -663,6 +663,71 @@
        "id": "explainer-2d",
        "title": "2D Explainer Animation Toolkit",
        "version": "1.0.0"
+      }
+     }
+    },
+    {
+     "id": "ricks-clip",
+     "title": "Ricks Clip",
+     "defaultLength": 25,
+     "description": "Vertical narrated cartoon shorts: flat bean-head characters drawn as cards with plum outlines in a colourful 3D world with black ink lines, painted textures, depth of field and gliding cameras; one surprising story told on its words, with an ironic twist on the last line.",
+     "category": "Story",
+     "tags": [
+      "3d",
+      "cartoon",
+      "toon",
+      "story shorts",
+      "history",
+      "three.js"
+     ],
+     "aspects": [
+      "9:16"
+     ],
+     "fps": {
+      "default": 30,
+      "allowed": [
+       30
+      ],
+      "_about": "the skill's 1080x1920 at 30 fps (SKILL.md, its opening paragraph)"
+     },
+     "rules": {
+      "kind": "moworks",
+      "files": [
+       "config/rules/ricks-clip/SKILL.md",
+       "config/rules/general-style/SKILL.md"
+      ],
+      "uses": [
+       "hyperframes",
+       "hyperframes-cli",
+       "media-use"
+      ],
+      "readFirst": [
+       "ricks-clip",
+       "general-style"
+      ]
+     },
+     "pipelineFrom": "general",
+     "boards": "second",
+     "intendedUse": "A 20-30 s vertical story short (45-60 s allowed) on one surprising true story or legend, told by one narrator, ending on a twist.",
+     "preview": {
+      "image": "/styles/ricks-clip.jpg",
+      "placeholder": false,
+      "label": "Preview: the skill's own worked example, made in the app",
+      "credit": "Moworks Studio · a frame of the skill's example, drawn by the app"
+     },
+     "look": false,
+     "dim": "3D",
+     "renderer": "webgl",
+     "credit": {
+      "author": "Moworks Studio",
+      "link": "https://github.com/moworksstudio/moworks-studio/tree/main/bundle/styles/moworks-kits/ricks-clip",
+      "licence": "the owner's own (Moworks Studio); its toon.ts by Mr omi, MIT",
+      "made": "as shipped",
+      "madeNote": "the owner's skill cartoon-audio-short and its code kit as shipped (its three.js engine, ink and lens passes, painted textures, its cast on toon.ts from mromidev/claude-animated-shorts, MIT, its rules, its worked example), run on HyperFrames through R-LEMO; its r160 code on three.js 0.187.0 (owner #1071; PCFSoftShadowMap, removed in r186, as PCFShadowMap); DejaVu Serif and Arial Black drawn by Source Serif 4 and Archivo for the Vietnamese letters",
+      "kit": {
+       "id": "ricks-clip",
+       "title": "Ricks Clip",
+       "version": null
       }
      }
     },

@@ -17,7 +17,7 @@ import { promisify } from "node:util";
 import { ffmpegExe } from "../library/preview-media.mjs";
 import { readMounts } from "../hf-edit/shots.mjs";
 import { audioKind, duckMusic, filmWords } from "../hf-edit/tracks.mjs";
-import { EFFECTS_MARGIN_DB, MAX_GAIN, dipLane, sig } from "./actions.mjs";
+import { EFFECTS_MARGIN_DB, HIT_UNDER_VOICE, MAX_GAIN, dipLane, sig } from "./actions.mjs";
 import { patchState, readState } from "./index.mjs";
 
 const run = promisify(execFile);
@@ -29,6 +29,7 @@ const FIT_MARGIN_DB = EFFECTS_MARGIN_DB + 0.5;
 export const MIX_PEAK = -2.5;
 const LOWEST_FIT = 0.25;          // the peak rule takes at most 12 dB off one effect: over that the music itself is the peak
 const LOWEST_DIP = 0.01;
+const FIT_VERSION = 2;          // 2: the pauses rule (T38b-1)
 const r3 = (n) => Math.round(n * 1000) / 1000;
 
 /** The file's samples as the film plays it: 48 kHz stereo, interleaved Float32. A mono file goes to both channels at its full level, as HF's mixer
@@ -141,7 +142,8 @@ export async function fitEffects(dir, { root } = {}) {
   const total = Number(comp?.duration) || Math.max(...audio.map((c) => (Number(c.start) || 0) + (Number(c.duration) || 0)));
   // what the fit hears; the music's own lane follows the words and this fit, so only a lane the user drew counts
   const drawn = (c) => { const a = tags.get(c.id); return a?.["data-automation"] != null && a["data-mw-duck"] !== sig(a["data-automation"]) ? c.lane : null; };
-  const key = sig(JSON.stringify([total, words.map((w) => [w.start, w.end]), others.map((c) => [c.src, c.start, c.mediaStart, c.duration, c.volume, audioKind(c) === "music" ? drawn(c) : c.lane, c.fadeIn, c.fadeOut]),
+  // FIT_VERSION: a fit made before the pauses rule is made again
+  const key = sig(JSON.stringify([FIT_VERSION, total, words.map((w) => [w.start, w.end]), others.map((c) => [c.src, c.start, c.mediaStart, c.duration, c.volume, audioKind(c) === "music" ? drawn(c) : c.lane, c.fadeIn, c.fadeOut]),
     ours.map((c) => [c.src, c.start, c.duration, placed.get(c.id).base ?? placed.get(c.id).volume, c.fadeIn, c.fadeOut])]));
   if (st.fit?.key === key) return { fitted: 0, skipped: "unchanged" };
   const pcms = await decodeClips(dir, audio, root);
@@ -183,6 +185,37 @@ export async function fitEffects(dir, { root } = {}) {
   }
 
   await breathe();
+
+  // ---- the pauses (owner 05/11/2026 #1027, T38b-1): the effects heard together, over any 400 ms, stay HIT_UNDER_VOICE dB under the voice's
+  //      own level (the median of its words). Each sound was set 6 dB under by itself, and two hits at one moment summed to 2 dB over the voice
+  if (voiceStem && words.length && clips.length) {
+    const wp = words.map((w) => powerOf(voiceStem, w.start, w.end)).filter((v) => v > 1e-6).sort((a, b) => a - b);
+    const ref = wp.length ? wp[Math.floor(wp.length / 2)] : 0;
+    const N = Math.ceil(total * SR) * 2, W = Math.round(0.4 * SR) * 2, HOP = Math.round(0.1 * SR) * 2;
+    const limit = ref * 10 ** (-HIT_UNDER_VOICE / 10);
+    for (let pass = 0; ref > 0 && pass < 4; pass++) {
+      const fx = new Float32Array(N);
+      for (const c of clips) for (let i = 0; i < c.sound.buf.length && c.sound.i0 + i < N; i++) fx[c.sound.i0 + i] += c.sound.buf[i];
+      const cum = new Float64Array(N + 1);
+      for (let i = 0; i < N; i++) cum[i + 1] = cum[i] + fx[i] * fx[i];
+      const asked = new Map();
+      for (let i = 0; i + W <= N; i += HOP) {
+        const pw = (cum[i + W] - cum[i]) / W;
+        if (pw <= limit) continue;
+        const scale = Math.sqrt(limit / pw);
+        for (const c of clips) { const a = c.sound.i0, b = a + c.sound.buf.length; if (b > i && a < i + W) asked.set(c, Math.min(asked.get(c) ?? 1, scale)); }
+      }
+      let changed = false;
+      for (const [c, s0] of asked) {
+        const sc = Math.max(s0, LOWEST_FIT / c.fit);
+        if (sc >= 0.999) continue;
+        for (let i = 0; i < c.sound.buf.length; i++) c.sound.buf[i] *= sc;
+        c.fit *= sc; changed = true;
+      }
+      if (!changed) break;
+      await breathe();
+    }
+  }
 
   // ---- the peak: the mix with every effect in place, the effects that make a peak lowered by what it takes
   const music = renderStem(songs, total, pcms);

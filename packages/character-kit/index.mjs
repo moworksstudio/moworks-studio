@@ -14,6 +14,7 @@ import { workRoot } from "../project-service/index.mjs";
 import { docPath, writeDoc } from "../project-service/docs.mjs";
 import { encodePoster } from "../library/preview-media.mjs";
 import { FRONT_FILE, fillFrontBoxes, frontBoxes } from "./frontBox.mjs";
+import { RICKS_ENGINE, ricksCharacters, ricksDir } from "./ricks.mjs";
 
 const HERE = import.meta.dirname;
 const readText = (p) => { try { return readFileSync(p, "utf8"); } catch { return ""; } };
@@ -192,17 +193,17 @@ export function humanRecord(id, root = APP_ROOT) {
 // a new shipped character takes the prefix moworks- (test/characters-apart.test.mjs holds it to that), and no user's id takes the prefix.
 export const SHIPPED_PREFIX = "moworks-";
 // a folder of the store, never a character
-const RESERVED_IDS = ["user", HUMAN_ENGINE];
+const RESERVED_IDS = ["user", HUMAN_ENGINE, RICKS_ENGINE];
 /** Every id the app ships, in either engine. */
 export function shippedIds(root = APP_ROOT) {
-  const media = existsSync(shippedRoot(root)) ? readdirSync(shippedRoot(root)).filter((n) => n !== HUMAN_ENGINE) : [];
+  const media = existsSync(shippedRoot(root)) ? readdirSync(shippedRoot(root)).filter((n) => n !== HUMAN_ENGINE && n !== RICKS_ENGINE) : [];
   return [...new Set([...media, ...shippedHumans(root).keys(), ...definitions(join(HERE, "characters")).map((c) => c.id), ...definitions(join(HERE, "demo")).map((c) => c.id)])];
 }
 /** An id for a new character of the user's from `base`: `base`, or base-2, base-3…, not shipped, not the user's, and no folder of the store. */
 export function freeId(base, root = APP_ROOT) {
   const clean = String(base ?? "").replace(/^moworks-+/, "").replace(/^[^a-z]+/, "") || "character";
-  const taken = new Set([...RESERVED_IDS, ...shippedIds(root), ...characters(root).map((c) => c.id), ...humanCharacters(root).map((c) => c.id)]);
-  const used = (id) => taken.has(id) || existsSync(join(mediaRoot(root), id)) || existsSync(join(humanDir(root), id));
+  const taken = new Set([...RESERVED_IDS, ...shippedIds(root), ...characters(root).map((c) => c.id), ...humanCharacters(root).map((c) => c.id), ...ricksCharacters(root).map((c) => c.id)]);
+  const used = (id) => taken.has(id) || existsSync(join(mediaRoot(root), id)) || existsSync(join(humanDir(root), id)) || existsSync(join(ricksDir(root), id));
   let id = clean.slice(0, 28);
   for (let n = 2; used(id); n++) id = `${clean.slice(0, 25)}-${n}`;
   return id;
@@ -494,6 +495,10 @@ export function apiCharacters(root = APP_ROOT) {
         history: characterHistory(c.id, root), versions: characterVersions(c.id, root) })),
       ...humanCharacters(root).map((c) => ({ id: c.id, name: c.name, about: c.about, kind: c.kind, ...heightFields(c, root), group: c.group, engine: c.engine, demo: false, selectable: true, why: null, hand: c.hand ?? c.hands?.[0] ?? null,
         label: null, credit: c.credit, made: c.made ?? null, hands: c.hands ?? [], media: { ...c.media, ...frontOf(c, root) }, version: c.version ?? null,
+        history: characterHistory(c.id, root), versions: characterVersions(c.id, root) })),
+      // Ricks Clip's (owner #1076): the user's own, on the kit's cast and the app's cast layer (ricks.mjs)
+      ...ricksCharacters(root).map((c) => ({ id: c.id, name: c.name, about: c.about, kind: c.kind, ...heightFields(c, root), group: c.group, engine: RICKS_ENGINE, demo: false, selectable: true, why: null, hand: "ricks",
+        label: null, credit: c.credit, made: c.credit?.made ?? null, hands: ["ricks"], media: c.media, version: c.version ?? null,
         history: characterHistory(c.id, root), versions: characterVersions(c.id, root) })),
     ] };
 }

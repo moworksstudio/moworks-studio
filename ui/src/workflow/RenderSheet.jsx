@@ -48,7 +48,7 @@ export const fixText = (t, blocking) => t("The render is blocked. Fix only these
 /** The render's loudness in words ("Standard for web and social ✓"); the LUFS and peak numbers only in the details under it. */
 export function LoudLine({ l, master }) {
   const t = useT();
-  const words = master === "off" ? "Kept as mixed" : l.ok ? (master === "loud" ? "Louder, as the client asked" : "Standard for web and social")
+  const words = master === "off" ? "Kept as mixed" : l.ok ? (master === "quiet" ? "Quieter, as chosen" : "Standard for web and social")
     : l.truePeak != null && l.target?.peak != null && l.truePeak > l.target.peak ? "Peaks a little too loud" : l.lufs != null && l.target?.lufs != null && l.lufs < l.target.lufs ? "Quieter than the standard" : "Louder than the standard";
   return <details className="loud-line"><summary>{t(words)}{l.ok && master !== "off" ? <Check size={13} className="ok" aria-label={t("on target")} /> : null}</summary>
     <span className="hint num">{l.lufs} LUFS · {t("peak")} {l.truePeak} dBTP{l.target?.lufs != null ? ` · ${t("target {lufs} LUFS, peak under {peak} dBTP", { lufs: l.target.lufs, peak: l.target.peak ?? -1 })}` : ""}</span></details>;
@@ -149,8 +149,8 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
           <option value="draft">{t("Draft (fast check)")}</option><option value="standard">{t("Standard")}</option><option value="high">{t("High")}</option></select></label>
         {/* the film renders at its own rate, the one its timeline is built at: shown, not chosen */}
         <div className="field"><span>{t("Frame rate")}</span><span className="input ro num" aria-readonly="true">{t("{n} fps · as the film", { n: ex.data.defaults.fps ?? 30 })}</span></div>
-        {hasSound && <label className="field" title={t("Evens out the sound to the studio's level: -16 LUFS, true peak at most -1 dBTP")}><span>{t("Loudness")}</span><select className="select" value={form.master} onChange={(e) => set("master", e.target.value)} disabled={running || form.format === "webm"}>
-          <option value="kit">{t("Standard, for web and social (recommended)")}</option><option value="loud">{t("Louder, when the client asks")}</option><option value="off">{t("Keep the mix as it is")}</option></select></label>}
+        {hasSound && <label className="field" title={t("Evens out the sound to the web's level: -14 LUFS, true peak at most -1 dBTP")}><span>{t("Loudness")}</span><select className="select" value={form.master} onChange={(e) => set("master", e.target.value)} disabled={running || form.format === "webm"}>
+          <option value="kit">{t("Standard, for web and social (recommended)")}</option><option value="quiet">{t("Quieter, -16 LUFS (a podcast, or when asked)")}</option><option value="off">{t("Keep the mix as it is")}</option></select></label>}
       </div>
       {mix.data?.music?.licence && /mixkit/i.test(mix.data.music.licence) && <Banner kind="warning">{t("Mixkit music is for online use only (YouTube, social, websites, online ads). For TV, radio, cinema, DVD or games, use broadcast-licensed music.")}</Banner>}
       {pipe.data?.version1?.card?.brand && <Banner kind="warning">{t("Moworks Studio has not checked this film against your brand guideline. Please check it yourself before you send it.")}</Banner>}

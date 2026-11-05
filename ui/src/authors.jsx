@@ -14,7 +14,7 @@ export const AUTHORS = {
 };
 export const AUTHOR_ORDER = ["moworks", "heygen", "lemomo", "vincentwei", "alexgreensh", "johnheibel", "freshstack"];
 /** Which author a character belongs to, by the engine that draws it (actors stay with their author). */
-export const ENGINE_AUTHOR = { "brush-kit": "johnheibel", "anidoodle-human": "alexgreensh" };
+export const ENGINE_AUTHOR = { "brush-kit": "johnheibel", "anidoodle-human": "alexgreensh", "ricks-clip": "moworks" };
 
 /** An author with its display fields: { id, title, by, tag, count, comingSoon }, from the server's entry `a` (or just an id). */
 export function authorView(a, count) {

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Ricks Clip: board</title>
+    <style>
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+      #main { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+      #c { position: absolute; inset: 0; display: block; width: 1080px; height: 1920px; }
+    </style>
+  </head>
+  <body>
+    <!-- A storyboard option (boards/<X>/index.html): the film's own drawing at the seconds in data-kit-board, one frame per second of the board
+         (data-duration = how many). The board draws boards/<X>/film/ when it has one (its story.js), else the project's film/; the app builds it
+         into film.js beside this page when it takes the stills (never write film.js). -->
+    <div id="main" data-composition-id="board-A" data-kit="ricks-clip" data-kit-board="0.5,2,4" data-start="0" data-duration="3" data-width="1080" data-height="1920" data-fps="30">
+      <canvas id="c" class="clip" width="1080" height="1920" data-start="0" data-duration="3" data-track-index="1"></canvas>
+    </div>
+    <script>window.addEventListener("error", function (e) { window.err = String(e.message); console.log("ERR " + e.message); });</script>
+    <script src="film.js"></script>
+  </body>
+</html>

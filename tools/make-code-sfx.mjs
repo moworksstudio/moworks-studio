@@ -2,10 +2,10 @@
 // seeds, no samples), built from the pinned kits (bundle/styles/moworks-kits) and added to the offline library (bundle/sfx) in its format:
 //   one-shots  silence trimmed (4 ms kept before the attack), -16 LUFS-I with true peak at most -1.5 dBTP (plain gain), mono, 44.1 kHz,
 //              Ogg Vorbis q4, at most 4 s (beds 8 s); a 20 s bed is a loop at -28 LUFS, stereo, q3 (as tools/make-sfx-library.mjs)
-// as bundle/sfx/<family>/<id>.ogg, ids by kit (pc- Paper Collage, sm- Stickman Explainer, iv- Inner Voice Short, c3- 3D Cartoon, x2- 2D
+// as bundle/sfx/<family>/<id>.ogg, ids by kit (pc- Paper Collage, sm- Stickman Explainer, iv- Inner Voice Short, c3- 3D Cartoon, rc- Ricks Clip, x2- 2D
 // Explainer) and `kit` the style id (only that style's films get them, first), each entry's source.kind "code" (credit: the owner's own code, made by synthesis); catalog.json keeps every other entry, and
 // tools/make-sfx-library.mjs keeps these when it remakes the packs. The kits' "opt-in" whooshes stay whooshes (family whoosh).
-// Usage: node tools/make-code-sfx.mjs   (needs uv; Python 3.11 with numpy, scipy, and for the 2D Explainer soundfile and pyloudnorm)
+// Usage: node tools/make-code-sfx.mjs [--only rc,c3]   (needs uv; Python 3.11 with numpy, scipy, and for the 2D Explainer soundfile and pyloudnorm)
 import { execFile } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -27,7 +27,27 @@ const BUILDS = [
   ["story", "tools/sfx/build_inner_voice.py", "public/sfx/inner-voice", "iv", "inner voice short, inner voice", "Inner Voice Short"],
   ["cartoon-3d", "tools/sfx/build_sounds.py", "public/sfx/kit", "c3", "3d cartoon, toon", "3D Cartoon"],
   ["explainer-2d", "tools/audio/sfx.py", "public/sfx/explainer", "x2", "2d explainer, explainer", "2D Explainer"],
+  ["ricks-clip", "kit/example/soldier/audio.py", "public/sfx/ricks", "rc", "ricks clip, cartoon", "Ricks Clip"],
 ];
+// Ricks Clip synthesises its effects inside its worked example's audio.py (owner 05/11/2026 #1073): its synth definitions (everything above its cue
+// table, `F = lambda`) are run as shipped, then each synth alone at the cue table's own arguments; the music bed is not taken (the music is the app's, #1071)
+const RC_KINDS = { whoosh: "whoosh(0.6)", leaves: "leaves(2.2)", thunk: "thunk(85, 0.35)", rumble: "rumble(2.2)", crash: "crash(1.4)", cuckoo: "cuckoo()", snore: "snore(1.15)",
+  scrape: "scrape(0.9)", ting: "ting()", sting: "sting()", creak: "creak(0.55, 120)", "creak-low": "creak(0.8, 90)", snap: "snap()", splash: "splash(1.0)", water: "water(20.0)" };
+const RC_USE = { whoosh: "a soft low-passed air sweep: a big camera move (a pull-back, a crane, a time jump)", leaves: "rustling leaves blowing past: years going by, wind in trees",
+  thunk: "a low wooden thunk: a spear or a foot stamps, a door shuts", rumble: "a long low rumble: something huge starts to fall, an empire collapses",
+  crash: "a run of heavy thunks and debris: a collapse lands", cuckoo: "a two-note cuckoo call: someone is called crazy", snore: "a buzzing snore: a sleeping guard",
+  scrape: "a metal scrape with a ring: a helmet lifted, iron dragged", ting: "a bright metallic ting: a reveal, a carving glints", sting: "a low brass sting and hit: the twist line",
+  creak: "a wooden creak: a beam or a deck strains", "creak-low": "a deeper, longer creak: an old support about to give", snap: "a sharp wooden snap: a brace breaks",
+  splash: "a splash into water: something falls in a river", water: "a flowing river bed: water ambience under a bridge" };
+/** The Python that renders each Ricks Clip synth alone: the kit's synth definitions as shipped, then one WAV per kind (peak 0.89, 48 kHz mono). */
+const rcDriver = (audioPy, outDir) => {
+  const text = readFileSync(audioPy, "utf8"), cut = text.indexOf("\nF = lambda");
+  if (cut < 0) throw new Error("Ricks Clip audio.py: its cue table (F = lambda) is not where it was");
+  return `${text.slice(0, cut)}\n\n# ---- Moworks Studio: each synth alone, at the cue table's arguments\nimport os\n_OUT = ${JSON.stringify(outDir)}\n`
+    + `def _write(name, s):\n    s = np.asarray(s, np.float64); p = float(np.max(np.abs(s))) or 1.0\n    pcm = (s / p * 0.89 * 32767).astype(np.int16)\n`
+    + `    with wave.open(os.path.join(_OUT, name + ".wav"), "wb") as w:\n        w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR); w.writeframes(pcm.tobytes())\n`
+    + Object.entries(RC_KINDS).map(([k, call]) => `_write(${JSON.stringify(k)}, ${call})\n`).join("");
+};
 // the 2D Explainer synthesises its effects per film from a cue sheet: one instance of each kind, rendered alone (t 1.5 s in a 5 s sheet)
 const X2_KINDS = { pop: 0.4, pop_big: 0.4, tick: 0.4, counter_roll: 1.0, whoosh_pullback: 1.2, whoosh_dive: 1.1, impact: 0.4, reveal: 2.0, light_hit: 0.4, sparkle: 0.4, swish: 0.4, title: 4.0 };
 const X2_USE = { pop: "soft bubbly UI pop: a label pill pops in", pop_big: "a heavier pop with a low thump: a big pill or the title word slams", tick: "a short soft woody, glassy tick",
@@ -54,10 +74,12 @@ const FAMILY = {
   "c3-win": "bell", "c3-glitch": "electronic", "c3-slice": "impact", "c3-chip": "pop", "c3-resolve": "bell", "c3-click": "click",
   "x2-pop": "pop", "x2-pop-big": "pop", "x2-tick": "click", "x2-counter-roll": "click", "x2-whoosh-pullback": "whoosh", "x2-whoosh-dive": "whoosh", "x2-impact": "impact",
   "x2-reveal": "magic", "x2-light-hit": "magic", "x2-sparkle": "magic", "x2-swish": "whoosh", "x2-title": "bell",
+  "rc-whoosh": "whoosh", "rc-leaves": "wind", "rc-thunk": "impact", "rc-rumble": "impact", "rc-crash": "impact", "rc-cuckoo": "animal", "rc-snore": "cloth",
+  "rc-scrape": "mechanical", "rc-ting": "bell", "rc-sting": "impact", "rc-creak": "door", "rc-creak-low": "door", "rc-snap": "impact", "rc-splash": "water", "rc-water": "water",
 };
 // the film style whose films get each kit's sounds (packages/sfx/library.mjs loadLibrary({ kit })): a style's own sounds stay in its own films
-const KIT_OF = { pc: "paper-collage", sm: "stickman-explainer", iv: "inner-voice-short", c3: "cartoon-3d", x2: "explainer-2d" };
-const LOOPS = new Set(["iv-room"]), BEDS = new Set(["sm-traffic", "sm-office", "sm-dawn", "sm-wind", "sm-crowd", "sm-cheer", "sm-cloud", "iv-dread", "sm-boom", "sm-reveal"]);
+const KIT_OF = { pc: "paper-collage", sm: "stickman-explainer", iv: "inner-voice-short", c3: "cartoon-3d", x2: "explainer-2d", rc: "ricks-clip" };
+const LOOPS = new Set(["iv-room", "rc-water"]), BEDS = new Set(["sm-traffic", "sm-office", "sm-dawn", "sm-wind", "sm-crowd", "sm-cheer", "sm-cloud", "iv-dread", "sm-boom", "sm-reveal"]);
 
 const FF = ffmpegExe(), FFPROBE = FF.replace(/ffmpeg(\.exe)?$/i, (m, e) => `ffprobe${e ?? ""}`);
 const r1 = (n) => Math.round(n * 10) / 10, r3 = (n) => Math.round(n * 1000) / 1000;
@@ -119,7 +141,7 @@ async function make({ id, wav, family, tags, kitTitle, builder, use, kit }) {
   }
   const pin = loadPins().moworksKits?.kits?.[kit] ?? {};
   return { id, file: `${family}/${id}.ogg`, family, kit: KIT_OF[id.slice(0, 2)], tags, duration: r3(await duration(out)), loop, onset: loop ? 0 : await onset(out), lufs: r1(fin.I), peak: r1(fin.TP),
-    source: { kind: "code", name: `${kitTitle}: the kit's sound kit (${pin.title ?? kit} ${pin.version ?? ""})`.trim(), url: null, author: "Moworks Studio (the owner's own code)",
+    source: { kind: "code", name: `${kitTitle}: the kit's sound kit (${[pin.title ?? kit, pin.version].filter(Boolean).join(" ")})`, url: null, author: "Moworks Studio (the owner's own code)",
       licence: "the owner's own", licenceUrl: null, file: `bundle/styles/moworks-kits/${kit}/${builder} › ${id.slice(3)}`, use, read: READ, how } };
 }
 
@@ -128,12 +150,21 @@ if (isMain) {
   const TMP = mkdtempSync(join(tmpdir(), "mw-code-sfx-")), py = ["run", "--python", "3.11", "--with", "numpy", "--with", "scipy"];
   const env = { ...process.env, PYTHONUTF8: "1", PYTHONIOENCODING: "utf-8" };
   const jobs = [];
+  // --only rc,c3: remake those kits' sounds only, every other code-made sound kept as it is
+  const oi = process.argv.indexOf("--only"), only = oi > 0 ? new Set(String(process.argv[oi + 1] ?? "").split(",").filter(Boolean)) : null;
   for (const [kit, builder, outRel, pre, styleWords, title] of BUILDS) {
+    if (only && !only.has(pre)) continue;
     const root = join(TMP, kit);
-    if (!existsSync(join(root, "tools"))) cpSync(join(KITS, kit, "tools"), join(root, "tools"), { recursive: true });
+    if (pre !== "rc" && !existsSync(join(root, "tools"))) cpSync(join(KITS, kit, "tools"), join(root, "tools"), { recursive: true });
     const outDir = join(root, ...outRel.split("/"));
     let use = {};
-    if (pre === "x2") {
+    if (pre === "rc") {
+      mkdirSync(outDir, { recursive: true });
+      const driver = join(root, "rc_sounds.py");
+      writeFileSync(driver, rcDriver(join(KITS, kit, ...builder.split("/")), outDir));
+      await run("uv", ["run", "--python", "3.11", "--with", "numpy", "python", "-I", "-B", driver], { cwd: root, env, windowsHide: true, maxBuffer: 64 << 20 });
+      use = RC_USE;
+    } else if (pre === "x2") {
       mkdirSync(outDir, { recursive: true });
       for (const [k, d] of Object.entries(X2_KINDS)) {
         const sheet = join(root, `${k}.json`), dir = join(root, "one", k);
@@ -162,14 +193,17 @@ if (isMain) {
   // the catalog: every other entry as it was, these replaced (the same ids again) and sorted by family like the packs
   const file = join(OUT, "catalog.json"), cat = JSON.parse(readFileSync(file, "utf8"));
   const ids = new Set(made.map((m) => m.id)), order = (s) => FAMILIES.indexOf(s.family);
-  cat.sounds = [...cat.sounds.filter((s) => !ids.has(s.id) && s.source?.kind !== "code"), ...made].sort((a, b) => order(a) - order(b) || a.id.localeCompare(b.id, "en", { numeric: true }));
-  if (!/owner's own code/.test(cat.about)) cat.about += " Sounds whose source.kind is \"code\" are the owner's own code-made effects (the kits' Python synthesis, made by tools/make-code-sfx.mjs; ids pc-, sm-, iv-, c3-, x2-).";
+  const remade = (s) => s.source?.kind === "code" && (!only || only.has(String(s.id).slice(0, 2)));
+  cat.sounds = [...cat.sounds.filter((s) => !ids.has(s.id) && !remade(s)), ...made].sort((a, b) => order(a) - order(b) || a.id.localeCompare(b.id, "en", { numeric: true }));
+  if (!/owner's own code/.test(cat.about)) cat.about += " Sounds whose source.kind is \"code\" are the owner's own code-made effects (the kits' Python synthesis, made by tools/make-code-sfx.mjs; ids pc-, sm-, iv-, c3-, x2-, rc-).";
+  else if (!/\brc-\)/.test(cat.about)) cat.about = cat.about.replace("ids pc-, sm-, iv-, c3-, x2-)", "ids pc-, sm-, iv-, c3-, x2-, rc-)");
   writeFileSync(file, JSON.stringify(cat, null, 1) + "\n");
+  const code = cat.sounds.filter((s) => s.source?.kind === "code");
   // CREDITS.md: one block for the code-made sounds, replaced each time
   const credits = join(OUT, "CREDITS.md"), block = ["<!-- mw:code-sfx -->", "## The owner's code-made sounds (Moworks Studio)", "",
-    `- ${made.length} sounds synthesised by the Python code of the owner's own kits (numpy / scipy, fixed seeds, no samples or recordings), built on ${READ} by \`tools/make-code-sfx.mjs\` from the pinned kits in \`bundle/styles/moworks-kits\` (config/pins.json moworksKits).`,
+    `- ${code.length} sounds synthesised by the Python code of the owner's own kits (numpy / scipy, fixed seeds, no samples or recordings), built on ${READ} by \`tools/make-code-sfx.mjs\` from the pinned kits in \`bundle/styles/moworks-kits\` (config/pins.json moworksKits).`,
     "- Licence: the owner's own work. Credit: Moworks Studio.",
-    ...BUILDS.map(([kit, builder, , pre, , title]) => `- ${title}, \`${kit}/${builder}\`: ${made.filter((m) => m.id.startsWith(`${pre}-`)).map((m) => `\`${m.id}\``).sort().join(", ")}`), "<!-- /mw:code-sfx -->"].join("\n");
+    ...BUILDS.map(([kit, builder, , pre, , title]) => `- ${title}, \`${kit}/${builder}\`: ${code.filter((m) => m.id.startsWith(`${pre}-`)).map((m) => `\`${m.id}\``).sort().join(", ")}`), "<!-- /mw:code-sfx -->"].join("\n");
   let text = readFileSync(credits, "utf8");
   const re = /<!-- mw:code-sfx -->[\s\S]*?<!-- \/mw:code-sfx -->/;
   writeFileSync(credits, re.test(text) ? text.replace(re, block) : `${text.trimEnd()}\n\n${block}\n`);

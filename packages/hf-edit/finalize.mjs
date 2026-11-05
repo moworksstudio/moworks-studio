@@ -31,8 +31,17 @@ import { dirname, join, relative, sep } from "node:path";
 import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
 import { fetchGoogleFamily, installGoogleFamily, slug } from "./googleFonts.mjs";
 import { installViFamily, placeViFamily } from "./googleFontsVi.mjs";
-import { fontsDir, motionPathFile } from "../offline-assets/index.mjs";
-import { rewriteRemoteLibs, rewriteScripts, scriptFiles, threeIn, vendorInto, withThreeMap } from "./vendorLibs.mjs";
+import { fontsDir, motionPathFile, threeVersions } from "../offline-assets/index.mjs";
+import { filmThreeDefault, rewriteRemoteLibs, rewriteScripts, scriptFiles, threeIn, vendorInto, withThreeMap } from "./vendorLibs.mjs";
+/** The film's three.js default: the version its root page's map already serves, else the app's (vendorLibs filmThreeDefault). */
+const filmDefaultThree = (projectDir) => {
+  const app = threeVersions(), has = (v) => existsSync(join(projectDir, "assets", "_app", "vendor", "three", v, "build", "three.module.min.js"));
+  let v = null; try { v = filmThreeDefault(readFileSync(join(projectDir, "index.html"), "utf8")); } catch { /* no page yet */ }
+  if (v && has(v)) return v;
+  // a map that points at a version the film never got (the films a default change broke, T38b-8): the newest one it does have
+  const own = Object.keys(app.versions).filter((x) => app.versions[x]?.includes("build/three.module.min.js") && has(x)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  return own.at(-1) ?? v ?? app.default;
+};
 import { lemoBoard, lemoFilm } from "./lemoPage.mjs";
 import { buildAnidoodle } from "./anidoodleBuild.mjs";
 import { buildWhatIf } from "./whatIfBuild.mjs";
@@ -299,7 +308,9 @@ export async function finalize(projectDir, { version = null, googleFonts = true,
   const lemo = lemoFilm(projectDir, scriptFiles(projectDir));
   if (lemo) report.lemo = { source: lemo.source, files: lemo.files, copied: lemo.copied.length, missing: lemo.missing };
   // R-VENDOR + R-THREE first, over the film's own scripts and every composition: the root's import map needs every version the film uses
-  const scripts = rewriteScripts(projectDir);
+  // the three.js version the film was built with stays its bare 'three' (T38b-8); a film with no map yet takes the app's default
+  const threeDef = filmDefaultThree(projectDir);
+  const scripts = rewriteScripts(projectDir, threeDef);
   const three = new Set(lemo?.three ?? []);
   if (three.size) vendorInto(projectDir, { three });
   for (const n of scripts.needs) { vendorInto(projectDir, n); for (const v of n.three ?? []) three.add(v); }
@@ -309,16 +320,18 @@ export async function finalize(projectDir, { version = null, googleFonts = true,
     const before = readFileSync(join(projectDir, file), "utf8");
     const r = rewriteRemoteLibs(before);
     vendorInto(projectDir, r.needs);
-    for (const v of [...r.needs.three, ...threeIn(r.text)]) three.add(v);
+    for (const v of [...r.needs.three, ...threeIn(r.text, threeDef)]) three.add(v);
     texts.set(file, { before, html: r.text });
   }
+  // the map's bare 'three' is always there in the film's own copies (it once pointed at a version never copied in)
+  if (three.size) { three.add(threeDef); vendorInto(projectDir, { three }); }
   report.three = [...three].sort();
   for (const file of files) {
     const path = join(projectDir, file);
     let { before, html } = texts.get(file);
     html = spacedTags(html);
     const isRoot = file === "index.html";
-    if (isRoot) html = withThreeMap(html, three);
+    if (isRoot) html = withThreeMap(html, three, "./", threeDef);
     html = await applyFonts(projectDir, file, html, report, hf.fontAliases, { googleFonts });
     // background layers: DOM edit with linkedom. A <template> file is edited through its inner markup parsed as its own document
     const tm = /(<template[^>]*>)([\s\S]*)(<\/template>)/i.exec(html);
@@ -442,10 +455,12 @@ export async function boardFonts(projectDir, file, { version = null, googleFonts
   const lemo = lemoBoard(projectDir, file);
   const lib = rewriteRemoteLibs(lemo ? readFileSync(path, "utf8") : html, { prefix: up });
   vendorInto(projectDir, { ...lib.needs, three: new Set([...lib.needs.three, ...(lemo?.three ?? [])]) });
-  const three = new Set([...lib.needs.three, ...threeIn(lib.text), ...(lemo?.three ?? [])]);
+  const threeDef = filmDefaultThree(projectDir);
+  const three = new Set([...lib.needs.three, ...threeIn(lib.text, threeDef), ...(lemo?.three ?? [])]);
+  if (three.size) { three.add(threeDef); vendorInto(projectDir, { three }); }
   if (lemo) report.lemo = { source: lemo.source, files: lemo.files, copied: lemo.copied.length, missing: lemo.missing };
   report.three = [...three].sort();
-  let out = withThreeMap(lib.text, three, up || "./");
+  let out = withThreeMap(lib.text, three, up || "./", threeDef);
   const vendored = out;
   out = await applyFonts(projectDir, file, out, report, hf.fontAliases, { googleFonts });
   if (out !== vendored) out = out.replace(/<style data-mw="fonts">[\s\S]*?<\/style>/, (b) => b.replace(/url\((["']?)assets\//g, `url($1${up}assets/`));

@@ -46,6 +46,7 @@ import { applyLanes } from "../sfx/lanes.mjs";
 import { resolveRuntime } from "../version-manager/index.mjs";
 import { filmHash, filmParts } from "./proxy.mjs";
 import { withSoundChecks } from "../hf-qa/gates.mjs";
+import { gateCuts } from "../moworks-kits/cuts.mjs";
 import { freshFilm } from "../hf-edit/codeFilm.mjs";
 import { fetchSlides, saveSlides, slidesLinks } from "./slides.mjs";
 
@@ -417,6 +418,16 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   };
 
   const note = (p, n) => { try { projects.addNote(p.path, n); } catch { /* notes are best effort */ } };
+  /** G-CUTS from the film's render, in the last Tech checks report (a style with a cut table only; nothing when there is none to read). */
+  async function cutsIntoChecks(p) {
+    const g = await gateCuts(p.path);
+    if (!g) return null;
+    const f = workDir(p, "qa", "last.json"), last = readJson(f, null);
+    if (!last?.checks?.length) return null;
+    const c = { ...g, ...(CHECKS[g.id] ?? { title: g.id, explain: "", kind: "deterministic" }) };
+    writeJson(f, { ...last, checks: [...last.checks.filter((x) => x.id !== g.id), c] });
+    return g;
+  }
   /** The user's music track on the timeline, its beats measured by HyperFrames (off the server's thread), recorded as the film's music. */
   const placeMusic = async (p, rel, info, { start = null } = {}) => {
     placeTrack(p.path, { kind: "music", src: rel, duration: Number(info?.duration) || 1, start });
@@ -456,7 +467,8 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   function startExport(p, b) {
     const format = FORMATS[b.format] ? b.format : "mp4";
     const quality = QUALITIES.includes(b.quality) ? b.quality : "standard";
-    const master = ["kit", "loud", "off"].includes(b.master) ? b.master : "kit";          // the sound master: the kit's -16 LUFS by default
+    // the sound master: Standard -14 LUFS by default, Quieter -16, or the mix as it is (#1073); "loud", the old name of -14, is Standard
+    const master = b.master === "loud" ? "kit" : ["kit", "quiet", "off"].includes(b.master) ? b.master : "kit";
     // always the film's own rate: HyperFrames renders the timeline at any rate it is given, but the player,
     // frame-stepped motion and the film's data-fps follow the project's; a separate choice only disagreed with the timeline. b.fps is ignored.
     const fps = projects.projectFps(projects.getProject(p.id, root) ?? p);
@@ -526,7 +538,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       }
       const size = existsSync(out) ? statSync(out).size : 0;
       job.update({ stage: "loudness" });
-      // the master to the studio rule (-16 LUFS, true peak at most -1 dBTP; -14 when the client asks), HyperFrames' two-pass loudnorm; then measured
+      // the master to the studio rule (-14 LUFS, true peak at most -1 dBTP; -16 when Quieter is chosen), HyperFrames' two-pass loudnorm; then measured
       let loud = null;
       if (format === "mp4" || format === "mov") {
         const target = MASTER[master] ?? null;
@@ -536,11 +548,16 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       }
       // the film's hash beside it: a check that reads a render (G-CUTS) reads this one while the film is as it was rendered (T38-7)
       let filmAt = null; try { filmAt = filmHash(p.path, Number(fps) || null); } catch { /* no hash: never read as the film's */ }
+      // a render of the film as it is now goes on with the new version waiting for a press (Version 2 after a Review), as a chat message does:
+      // the Editor stopped showing Version 1 and the chat saying Version 2 was not rendered (T38b-3)
+      meta(p.id, (m) => { const x = m.pipeline?.version1; if (x?.holding && x.next) { delete x.holding; x.next.opened = new Date().toISOString(); x.next.render = "done"; } });
       meta(p.id, (m) => { (m.stages ??= {}).export = { status: "done" }; m.lastExport = { file: relativeTo(p.path, out), at: new Date().toISOString(), size, format, fps, quality, loudness: loud, ...(web?.capped ? { web } : {}), ...(filmAt ? { hash: filmAt } : {}) };
         (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "export", text: `Exported ${basename(out)}` }); });
       note(p, { kind: "render", text: "Render finished: {file}", vars: { file: basename(out) }, file: relativeTo(p.path, out), warnings: verdict.warnings.length });
       try { await ctx.autopilot?.saveVersion(p.id, "render"); } catch { /* a version is best effort */ }          // each render is a version
-      if (loud?.notes?.length) note(p, { kind: "render", status: "warning", text: "Sound: {lufs} LUFS, peak {peak} dBTP ({notes}); the mix target is -16 LUFS, peak at most -1", vars: { lufs: loud.lufs, peak: loud.truePeak, notes: loud.notes.join(", ") } });
+      // the cuts read from this render into the last Tech checks at once (T38b-2), in the background: the render is done whatever they find
+      cutsIntoChecks(p).catch(() => null);
+      if (loud?.notes?.length) note(p, { kind: "render", status: "warning", text: "Sound: {lufs} LUFS, peak {peak} dBTP ({notes}); the target is {target} LUFS, peak at most -1", vars: { lufs: loud.lufs, peak: loud.truePeak, notes: loud.notes.join(", "), target: (MASTER[master] ?? MASTER.kit).lufs } });
       // "Took" is the whole wait from pressing Render (the checks, the GPU test, the frames, the sound), not the frames alone
       const whole = job.startedAt ? Date.now() - Date.parse(job.startedAt) : res.wallMs;
       return { loudness: loud, file: out, size, frames: res.totalFrames ?? null, duration: res.duration ?? null, wallMs: whole, renderMs: res.wallMs, hfVersion: res.hfVersion, logFile: res.logFile,

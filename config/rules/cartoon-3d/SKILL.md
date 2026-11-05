@@ -39,7 +39,7 @@ kit itself"); music is the app's; the fresh-eyes review is the app's Review (`mo
 | `index.html` | A copy of `app/index.html`: the root `#main` with `data-kit="cartoon-3d"`, 1080×1920 (a short) or 1920×1080 (a What-If), **30 fps**, its length |
 | `src/videos/film/Video.tsx`, `world.ts`, `shots.ts`, `vo.ts` | The video's four files from the kit's `templates/video/` filled in as `new-video.mjs` would (`__COMP__` → `Film`, `__W__`, `__H__`); their imports reach the kit's code as shipped (`../../kit/ToonVideo`, `../../kit/sets/office`…). `Video.tsx` exports `Film`, `FPS`, `FRAMES`, `WIDTH`, `HEIGHT`, `SOUND` |
 
-`compositions/film/film.js` is the app's (finalize bundles the video with the kit's code, React and three.js 0.186.1, the patch of the kit's 0.186.0); never write
+`compositions/film/film.js` is the app's (finalize bundles the video with the kit's code, React and three.js 0.187.0, the latest (owner #1071; the kit asks for 0.186.0)); never write
 it. `vo.ts`'s `WORDS` and `CAPTIONS` come from the voice's words: `import WORDS from "mw:words"` gives `[{ word, start, end }]` (seconds), the times the kit's
 `vo-words.mjs` would measure; write `vo.ts` from them in the kit's own shape. `FRAMES` = the last word's end + at least 0.5 s of finished still.
 

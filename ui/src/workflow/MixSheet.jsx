@@ -168,7 +168,7 @@ export default function MixSheet({ projectId, project, onChanged }) {
       {(d.sfxPlacing || waitSfx) && <p className="hint"><Loader2 size={12} className="spin" /> {t("Placing the sound effects…")}</p>}
       {left.length > 0 && <p className="hint warn"><AlertTriangle size={12} /> {t("Not placed: {names}. Press Place them again later, or ask Claude for other names.", { names: quoted(left) })}</p>}
       {/* said plainly, as the chat's note does: these are not the sound the film asks for */}
-      {near.length > 0 && <p className="hint">{t("Stand-ins, not the real sound: {names}. Press Place them again when the sound search is back, or add your own.", { names: `${near.slice(0, 10).map((x) => (plain(x.as) ? `“${x.name}” (${plain(x.as)})` : `“${x.name}”`)).join(", ")}${near.length > 10 ? ` ${t("and {n} more", { n: near.length - 10 })}` : ""}` })}</p>}
+      {near.length > 0 && <p className="hint">{t("Stand-ins, not the real sound: {names}. Press Place them again to search for more, or add your own.", { names: `${near.slice(0, 10).map((x) => (plain(x.as) ? `“${x.name}” (${plain(x.as)})` : `“${x.name}”`)).join(", ")}${near.length > 10 ? ` ${t("and {n} more", { n: near.length - 10 })}` : ""}` })}</p>}
       <div className="row mix-density">
         <label className="hint" htmlFor="mix-density">{t("Sounds on")}</label>
         <select id="mix-density" className="select sm" value={prefs.density} disabled={placing} onChange={(e) => setPref({ density: e.target.value })}>

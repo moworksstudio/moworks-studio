@@ -1,6 +1,7 @@
 // Text-to-speech providers: ElevenLabs (its key comes from the secret store and is sent only to its own API; errors never echo it; a voice-over
 // costs the user credits, so it runs only on an explicit request from the Voice screen) and Kokoro, the free voice on this computer (kokoro.mjs).
 import { createHash } from "node:crypto";
+import { spokenText } from "./tags.mjs";
 import { createWriteStream, mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { Readable } from "node:stream";
@@ -79,14 +80,16 @@ export const isVietnamese = (text) => /[ăâđêôơưạảấầẩẫậắ�
  *  (hexgrad's VOICES.md), so such a film's Voice screen greys it and Claude never offers it. */
 export const filmVietnamese = (meta) => (meta?.language?.id ? meta.language.id === "vi" : isVietnamese(meta?.brief?.text));
 /** ElevenLabs models that read Vietnamese, best first (an account's eleven_multilingual_v2 may list no Vietnamese; /v1/models names
- *  eleven_v3, eleven_v4… with a vi language). */
-export const EL_VI_ORDER = ["eleven_v3", "eleven_v4", "eleven_v4_turbo", "eleven_turbo_v2_5", "eleven_flash_v2_5", "eleven_v3_conversational"];
+ *  eleven_v3, eleven_v4… with a vi language). Eleven v4 first (owner 05/11/2026 #1063; ElevenLabs: "a net upgrade over Eleven v3"); v3 stays a choice. */
+export const EL_VI_ORDER = ["eleven_v4", "eleven_v3", "eleven_v4_turbo", "eleven_turbo_v2_5", "eleven_flash_v2_5", "eleven_v3_conversational"];
+/** The model an English film starts on when the account has it. */
+export const EL_EN_FIRST = ["eleven_v4"];
 /** The model to read the text with: the asked one when it reads the text's language, else (Vietnamese) the best Vietnamese one; null when
  *  the account has none for it. models: [{ id, vietnamese }]. */
 export function pickModel(models, { text = "", asked = null, lang = null } = {}) {
   const list = models ?? [];
   // the film's language decides when it is set (an English film's text may quote a Vietnamese name), else the text
-  if (lang === "en" || (lang !== "vi" && !isVietnamese(text))) return asked ?? list[0]?.id ?? null;
+  if (lang === "en" || (lang !== "vi" && !isVietnamese(text))) return asked ?? EL_EN_FIRST.find((id) => list.some((m) => m.id === id)) ?? list[0]?.id ?? null;
   const vi = list.filter((m) => m.vietnamese);
   if (asked && vi.some((m) => m.id === asked)) return asked;
   return EL_VI_ORDER.find((id) => vi.some((m) => m.id === id)) ?? vi[0]?.id ?? null;
@@ -96,10 +99,11 @@ export function pickModel(models, { text = "", asked = null, lang = null } = {})
  *  the user sets them (everything else stays at the service's own default); the app never picks a value of its own. Ranges from each service's API reference (read 26/10/2026). */
 export const SETTINGS = {
   elevenlabs: [
-    { id: "speed", label: "Speed", type: "number", min: 0.7, max: 1.2, step: 0.01 },
+    // Eleven v4 has only Stability and Similarity ("Style and Speed sliders are not available in Eleven v4", its docs): the two are off on it
+    { id: "speed", label: "Speed", type: "number", min: 0.7, max: 1.2, step: 0.01, off: ["eleven_v4", "eleven_v4_turbo"] },
     { id: "stability", label: "Stability", type: "number", min: 0, max: 1, step: 0.01 },
     { id: "similarity_boost", label: "Similarity", type: "number", min: 0, max: 1, step: 0.01 },
-    { id: "style", label: "Style exaggeration", type: "number", min: 0, max: 1, step: 0.01 },
+    { id: "style", label: "Style exaggeration", type: "number", min: 0, max: 1, step: 0.01, off: ["eleven_v4", "eleven_v4_turbo"] },
     { id: "use_speaker_boost", label: "Speaker boost", type: "boolean" },
   ],
   // kokoro-onnx refuses a speed outside 0.5-2 (its _prepare, 0.6.1)
@@ -113,10 +117,11 @@ function pickSettings(provider, raw) {
 }
 /** The settings the user set, checked against the service's ranges: null when none (the service's own defaults apply); a value out of
  *  range or of the wrong kind is refused with the field's name, never moved into range. */
-export function voiceSettings(provider, settings) {
+export function voiceSettings(provider, settings, model = null) {
   if (!settings || typeof settings !== "object") return null;
   const out = {};
   for (const f of SETTINGS[provider] ?? []) {
+    if (model && f.off?.includes(model)) continue;          // a setting the model does not have is never sent
     const v = settings[f.id];
     if (v == null || v === "") continue;
     if (f.type === "boolean") {
@@ -166,8 +171,10 @@ export const PROVIDERS = {
     },
     async generate(key, { voiceId, text, model = "eleven_multilingual_v2", out, signal, settings = null }) {
       // only the settings the user set on the Voice screen go; none sent, ElevenLabs uses its own
-      const vs = voiceSettings("elevenlabs", settings);
-      const body = JSON.stringify({ text, model_id: model, ...(vs ? { voice_settings: vs } : {}) }), voice = `${EL}/v1/text-to-speech/${encodeURIComponent(voiceId)}`;
+      const vs = voiceSettings("elevenlabs", settings, model);
+      // the delivery tags only for the models that follow them (Eleven v3, v4); an older model would read "[excited]" aloud
+      const said = /^eleven_v[34]/.test(String(model)) ? text : spokenText(text);
+      const body = JSON.stringify({ text: said, model_id: model, ...(vs ? { voice_settings: vs } : {}) }), voice = `${EL}/v1/text-to-speech/${encodeURIComponent(voiceId)}`;
       mkdirSync(dirname(out), { recursive: true });
       // the audio and the time of every character it read (written from Showhow's voice.py, Sirio Berati, MIT): the film is timed to these (transcript.mjs exactTimes)
       try {
@@ -190,7 +197,7 @@ export const PROVIDERS = {
     async models() { return [{ id: "kokoro-v1.0", name: "Kokoro v1.0" }]; },
     async defaultSettings() { return Object.fromEntries(SETTINGS.kokoro.map((f) => [f.id, f.default])); },
     async generate(_key, { voiceId, text, out, signal, settings = null, root, onProgress }) {
-      return kokoro.speak(root, { voice: voiceId, text, out, signal, onProgress, speed: voiceSettings("kokoro", settings)?.speed ?? 1 });
+      return kokoro.speak(root, { voice: voiceId, text: spokenText(text), out, signal, onProgress, speed: voiceSettings("kokoro", settings)?.speed ?? 1 });
     },
   },
 };

@@ -467,7 +467,8 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     close: () => { putSheet(null); refreshAll(); pv.send("reload"); },
     askClaude: (text, { send = false } = {}) => { putSheet(null); setNarrowTab("claude"); setInject({ text, send, n: Date.now() }); },
   }), [id, pv.send]); // eslint-disable-line react-hooks/exhaustive-deps
-  const openSheet = (kind, opts = {}) => switchSheet({ kind, opts });
+  // the Render (and After Effects) dialog stops the film first: it never plays on behind a render (owner #1085)
+  const openSheet = (kind, opts = {}) => { if (kind === "render" || kind === "ae") pv.send("pause"); switchSheet({ kind, opts }); };
 
   // the kickoff: once the film is open and Claude is signed in, the first step starts with the brief; the app runs the rest
   const [starting, setStarting] = useState(false);

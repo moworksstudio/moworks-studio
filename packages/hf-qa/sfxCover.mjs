@@ -15,6 +15,7 @@ import { isSongFilm } from "../style-catalog/traits.mjs";
 import { motionCues, placeOf } from "../sfx/actions.mjs";
 import { whooshInto } from "../sfx/auto.mjs";
 import { readMuted } from "../sfx/lanes.mjs";
+import { shotsWords } from "./look.mjs";
 
 export const NEAR_S = 0.3;
 const r2 = (n) => Math.round(n * 100) / 100;
@@ -77,6 +78,13 @@ export async function gateSfx(projectDir) {
   if (!r.ran) return r.why ? { id: "G-SFX", blocking: false, pass: true, findings: [], skipped: r.why === "owner" ? "The owner asked for no sound effects" : r.why === "style" ? "The film style asks for no sound effects" : r.why === "song" ? "A film made for its song has no sound effects" : "The brief asks for no sound effects" } : null;
   // each finding's own sentence is what Tech checks shows (`plain`; Tests 25 and 26 read "Something here may look wrong" for each, while
   // Render named the motion and its sound); no kind code, so the shots are never merged under one motion's words
+  // one warning for every move without a sound, with its shots (owner #1098); each move's own line stays for the Review and Render
+  if (r.findings.length > 1) {
+    const shots = [...new Set(r.findings.map((x) => x.shot).filter((x) => x != null))].sort((a, b) => a - b);
+    const line = `${r.findings.length} moves have no sound, in ${shotsWords(shots).replace(/^S/, "s")} (${r.findings.slice(0, 2).map((x) => x.motion ? `"${x.motion}"` : KIND[x.type] ?? "a motion").join(", ")}…). Place the sound effects again in Final Mix, or ask Claude to name their sounds.`;
+    return { id: "G-SFX", blocking: false, pass: false, warnings: 1, places: r.findings.map((x) => ({ shot: x.shot, time: x.time, message: message(x) })),
+      findings: [{ severity: "warning", code: "sfx_missing", shot: shots.length === 1 ? shots[0] : null, time: r.findings[0].time, count: r.findings.length, message: line, plain: line }] };
+  }
   return { id: "G-SFX", blocking: false, pass: r.findings.length === 0, warnings: r.findings.length,
     findings: r.findings.map((x) => ({ severity: "warning", shot: x.shot, time: x.time, message: message(x), plain: `${message(x)}.` })) };
 }

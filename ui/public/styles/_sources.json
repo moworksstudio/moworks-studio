@@ -59,6 +59,18 @@
   "item": "2D Explainer Animation Toolkit 1.0.0 · its worked example \"Where the Needle Stops\", 6 s",
   "made": "a frame of the kit's worked example drawn by the app (HyperFrames), as a 960 px JPEG"
  },
+ "ricks-clip": {
+  "file": "styles/ricks-clip.jpg",
+  "bytes": 98721,
+  "size": [
+   960,
+   540
+  ],
+  "author": "Moworks Studio",
+  "licence": "the owner's own",
+  "item": "Ricks Clip (skill cartoon-audio-short) · its worked example \"The Soldier Who Never Left\", 19.7 s",
+  "made": "three frames of the skill's worked example (0.4 s, 9 s, 14.2 s) drawn by the app (HyperFrames, three.js 0.187.0), side by side as a 960 px JPEG"
+ },
  "map-explainer": {
   "file": "styles/map-explainer.jpg",
   "bytes": 93271,

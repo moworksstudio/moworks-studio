@@ -1,7 +1,8 @@
 """Make sound effects by code for one film (packages/sfx/code.mjs runs it at Final Mix): every job is one sound, from
 
     a recipe of the app's own        "impact", "writing", "door"…      (tools/sfx-code/recipes.py)
-    a recipe of the owner's kits     "kit:story/build_stickman:pop"   (bundle/styles/moworks-kits, run as they ship)
+    a recipe of the owner's kits     "kit:story/build_stickman:pop"   (bundle/styles/moworks-kits, run as they ship; Ricks Clip's
+                                     "kit:ricks-clip/audio:thunk", a synth of its worked example's audio.py)
     a recipe Claude wrote            "user:<file>.py"                 (sandbox.py: only sound, nothing else)
 
 with its parameters and a seed, then pitched (pitch, semitones), brightened or darkened (bright, -1 to 1), DC-blocked, its silence before the
@@ -60,9 +61,37 @@ X2_DUR = {"pop": 0.4, "pop_big": 0.4, "tick": 0.4, "counter_roll": 1.0, "whoosh_
           "light_hit": 0.4, "sparkle": 0.4, "swish": 0.4, "title": 4.0}
 
 
+# Ricks Clip (the owner's skill cartoon-audio-short): its synths live in its worked example's audio.py, above its cue table (`F = lambda`);
+# they are run as shipped, each called as the cue table calls it (tools/make-code-sfx.mjs RC_KINDS), their module rng the take's own
+RC_CALLS = {"whoosh": ("whoosh", (0.6,)), "leaves": ("leaves", (2.2,)), "thunk": ("thunk", (85, 0.35)), "rumble": ("rumble", (2.2,)), "crash": ("crash", (1.4,)),
+            "cuckoo": ("cuckoo", ()), "snore": ("snore", (1.15,)), "scrape": ("scrape", (0.9,)), "ting": ("ting", ()), "sting": ("sting", ()),
+            "creak": ("creak", (0.55, 120)), "creak-low": ("creak", (0.8, 90)), "snap": ("snap", ()), "splash": ("splash", (1.0,)), "water": ("water", (8.0,))}
+
+
+def ricks_synths(kits):
+    if "ricks-clip" not in _mods:
+        text = (Path(kits) / "ricks-clip" / "kit" / "example" / "soldier" / "audio.py").read_text(encoding="utf-8")
+        cut = text.index("\nF = lambda")
+        ns = {"__name__": "mwkit_ricks_clip_audio"}
+        exec(compile(text[:cut], "ricks-clip/kit/example/soldier/audio.py", "exec"), ns)
+        _mods["ricks-clip"] = ns
+    return _mods["ricks-clip"]
+
+
 def recipe_of(job, kits):
     """(fn(rng, p) -> array, the recipe's own seed or None, its own loudness target or None)"""
     r = job["recipe"]
+    if r.startswith("kit:ricks-clip/"):
+        name = r.split(":", 2)[2]
+        ns, (fn, args) = ricks_synths(kits), RC_CALLS[name]
+
+        def run(rng, p, ns=ns, fn=fn, args=args):
+            import numpy as np
+
+            ns["rng"] = rng
+            return np.asarray(ns[fn](*args), dtype=np.float64)
+
+        return run, None, None
     if r.startswith("kit:"):
         kit_mod, name = r[4:].split(":", 1)
         kit, mod = kit_mod.split("/", 1)

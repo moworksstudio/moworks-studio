@@ -120,7 +120,8 @@ copyPart("what-if-animation", wi.root, join(OUT, "styles", "what-if-animation"),
 // (before them, the owner's own kits: written as shipped by tools/intake-moworks-kit.mjs, pinned by the SHA-256 of each kit's .md; the pin is
 // the bundled folder itself, kept and counted)
 for (const [id, k] of Object.entries(pins.moworksKits?.kits ?? {}))
-  copyPart(`moworks-kit-${id}`, join(pins.moworksKits.root, k.dir), join(OUT, "styles", "moworks-kits", id), { source: `${k.title} ${k.version} (${k.file}, SHA-256 ${k.sha256})`, licence: pins.moworksKits.licence });
+  copyPart(`moworks-kit-${id}`, join(pins.moworksKits.root, k.dir), join(OUT, "styles", "moworks-kits", id), { source: k.skill ? `${k.title} (the owner's skill ${k.skill}: ${k.file} SHA-256 ${k.sha256}, ${k.zip} SHA-256 ${k.zipSha256}; ${Object.entries(k.vendor ?? {}).map(([p, v]) => `${p} from ${v.repo}@${v.commit.slice(0, 8)}`).join(", ")})` : `${k.title} ${k.version} (${k.file}, SHA-256 ${k.sha256})`,
+    licence: k.vendor ? `${pins.moworksKits.licence}; ${Object.values(k.vendor).map((v) => `${v.path.split("/").pop()}: ${v.licence}`).join("; ")}` : pins.moworksKits.licence });
 const lib = join(work, "library");
 const current = (store) => { try { return JSON.parse(readFileSync(join(lib, store, "current.json"), "utf8")).dir; } catch { return null; } };
 const pinned = { blocks: blocksStore, intake: () => current("intake"), looks: looksStore };

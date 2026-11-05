@@ -929,6 +929,49 @@
    }
   },
   {
+   "id": "rc-whoosh",
+   "file": "whoosh/rc-whoosh.ogg",
+   "family": "whoosh",
+   "kit": "ricks-clip",
+   "tags": [
+    "whoosh",
+    "soft",
+    "low",
+    "passed",
+    "air",
+    "sweep",
+    "big",
+    "camera",
+    "move",
+    "pull",
+    "back",
+    "crane",
+    "time",
+    "jump",
+    "ricks clip",
+    "cartoon",
+    "code made",
+    "synth"
+   ],
+   "duration": 0.571,
+   "loop": false,
+   "onset": 0,
+   "lufs": -16.9,
+   "peak": -2.3,
+   "source": {
+    "kind": "code",
+    "name": "Ricks Clip: the kit's sound kit (Ricks Clip)",
+    "url": null,
+    "author": "Moworks Studio (the owner's own code)",
+    "licence": "the owner's own",
+    "licenceUrl": null,
+    "file": "bundle/styles/moworks-kits/ricks-clip/kit/example/soldier/audio.py › whoosh",
+    "use": "a soft low-passed air sweep: a big camera move (a pull-back, a crane, a time jump)",
+    "read": "2026-11-05",
+    "how": "made by synthesis with the owner's code (kit/example/soldier/audio.py, numpy/scipy, a fixed seed), then silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
+   }
+  },
+  {
    "id": "sm-flythrough",
    "file": "whoosh/sm-flythrough.ogg",
    "family": "whoosh",
@@ -2556,6 +2599,186 @@
    }
   },
   {
+   "id": "rc-crash",
+   "file": "impact/rc-crash.ogg",
+   "family": "impact",
+   "kit": "ricks-clip",
+   "tags": [
+    "crash",
+    "run",
+    "heavy",
+    "thunks",
+    "debris",
+    "collapse",
+    "lands",
+    "ricks clip",
+    "cartoon",
+    "code made",
+    "synth"
+   ],
+   "duration": 1.049,
+   "loop": false,
+   "onset": 0,
+   "lufs": -19.7,
+   "peak": -1.4,
+   "source": {
+    "kind": "code",
+    "name": "Ricks Clip: the kit's sound kit (Ricks Clip)",
+    "url": null,
+    "author": "Moworks Studio (the owner's own code)",
+    "licence": "the owner's own",
+    "licenceUrl": null,
+    "file": "bundle/styles/moworks-kits/ricks-clip/kit/example/soldier/audio.py › crash",
+    "use": "a run of heavy thunks and debris: a collapse lands",
+    "read": "2026-11-05",
+    "how": "made by synthesis with the owner's code (kit/example/soldier/audio.py, numpy/scipy, a fixed seed), then silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
+   }
+  },
+  {
+   "id": "rc-rumble",
+   "file": "impact/rc-rumble.ogg",
+   "family": "impact",
+   "kit": "ricks-clip",
+   "tags": [
+    "rumble",
+    "long",
+    "low",
+    "something",
+    "huge",
+    "starts",
+    "fall",
+    "empire",
+    "collapses",
+    "ricks clip",
+    "cartoon",
+    "code made",
+    "synth"
+   ],
+   "duration": 2.195,
+   "loop": false,
+   "onset": 0,
+   "lufs": -21.4,
+   "peak": -1.6,
+   "source": {
+    "kind": "code",
+    "name": "Ricks Clip: the kit's sound kit (Ricks Clip)",
+    "url": null,
+    "author": "Moworks Studio (the owner's own code)",
+    "licence": "the owner's own",
+    "licenceUrl": null,
+    "file": "bundle/styles/moworks-kits/ricks-clip/kit/example/soldier/audio.py › rumble",
+    "use": "a long low rumble: something huge starts to fall, an empire collapses",
+    "read": "2026-11-05",
+    "how": "made by synthesis with the owner's code (kit/example/soldier/audio.py, numpy/scipy, a fixed seed), then silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
+   }
+  },
+  {
+   "id": "rc-snap",
+   "file": "impact/rc-snap.ogg",
+   "family": "impact",
+   "kit": "ricks-clip",
+   "tags": [
+    "snap",
+    "sharp",
+    "wooden",
+    "brace",
+    "breaks",
+    "ricks clip",
+    "cartoon",
+    "code made",
+    "synth"
+   ],
+   "duration": 0.323,
+   "loop": false,
+   "onset": 0,
+   "lufs": -20,
+   "peak": -1.9,
+   "source": {
+    "kind": "code",
+    "name": "Ricks Clip: the kit's sound kit (Ricks Clip)",
+    "url": null,
+    "author": "Moworks Studio (the owner's own code)",
+    "licence": "the owner's own",
+    "licenceUrl": null,
+    "file": "bundle/styles/moworks-kits/ricks-clip/kit/example/soldier/audio.py › snap",
+    "use": "a sharp wooden snap: a brace breaks",
+    "read": "2026-11-05",
+    "how": "made by synthesis with the owner's code (kit/example/soldier/audio.py, numpy/scipy, a fixed seed), then silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
+   }
+  },
+  {
+   "id": "rc-sting",
+   "file": "impact/rc-sting.ogg",
+   "family": "impact",
+   "kit": "ricks-clip",
+   "tags": [
+    "sting",
+    "low",
+    "brass",
+    "hit",
+    "twist",
+    "line",
+    "ricks clip",
+    "cartoon",
+    "code made",
+    "synth"
+   ],
+   "duration": 2,
+   "loop": false,
+   "onset": 0,
+   "lufs": -19.6,
+   "peak": -1.8,
+   "source": {
+    "kind": "code",
+    "name": "Ricks Clip: the kit's sound kit (Ricks Clip)",
+    "url": null,
+    "author": "Moworks Studio (the owner's own code)",
+    "licence": "the owner's own",
+    "licenceUrl": null,
+    "file": "bundle/styles/moworks-kits/ricks-clip/kit/example/soldier/audio.py › sting",
+    "use": "a low brass sting and hit: the twist line",
+    "read": "2026-11-05",
+    "how": "made by synthesis with the owner's code (kit/example/soldier/audio.py, numpy/scipy, a fixed seed), then silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
+   }
+  },
+  {
+   "id": "rc-thunk",
+   "file": "impact/rc-thunk.ogg",
+   "family": "impact",
+   "kit": "ricks-clip",
+   "tags": [
+    "thunk",
+    "low",
+    "wooden",
+    "spear",
+    "foot",
+    "stamps",
+    "door",
+    "shuts",
+    "ricks clip",
+    "cartoon",
+    "code made",
+    "synth"
+   ],
+   "duration": 0.35,
+   "loop": false,
+   "onset": 0,
+   "lufs": -21.1,
+   "peak": -1.5,
+   "source": {
+    "kind": "code",
+    "name": "Ricks Clip: the kit's sound kit (Ricks Clip)",
+    "url": null,
+    "author": "Moworks Studio (the owner's own code)",
+    "licence": "the owner's own",
+    "licenceUrl": null,
+    "file": "bundle/styles/moworks-kits/ricks-clip/kit/example/soldier/audio.py › thunk",
+    "use": "a low wooden thunk: a spear or a foot stamps, a door shuts",
+    "read": "2026-11-05",
+    "how": "made by synthesis with the owner's code (kit/example/soldier/audio.py, numpy/scipy, a fixed seed), then silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
+   }
+  },
+  {
    "id": "sm-bite",
    "file": "impact/sm-bite.ogg",
    "family": "impact",
@@ -3493,6 +3716,39 @@
     "file": "MoreSounds.zip › Velcro/Velcro_01.wav",
     "read": "2026-10-30",
     "how": "adapted: silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
+   }
+  },
+  {
+   "id": "rc-snore",
+   "file": "cloth/rc-snore.ogg",
+   "family": "cloth",
+   "kit": "ricks-clip",
+   "tags": [
+    "snore",
+    "buzzing",
+    "sleeping",
+    "guard",
+    "ricks clip",
+    "cartoon",
+    "code made",
+    "synth"
+   ],
+   "duration": 1.102,
+   "loop": false,
+   "onset": 0,
+   "lufs": -15.9,
+   "peak": -2.5,
+   "source": {
+    "kind": "code",
+    "name": "Ricks Clip: the kit's sound kit (Ricks Clip)",
+    "url": null,
+    "author": "Moworks Studio (the owner's own code)",
+    "licence": "the owner's own",
+    "licenceUrl": null,
+    "file": "bundle/styles/moworks-kits/ricks-clip/kit/example/soldier/audio.py › snore",
+    "use": "a buzzing snore: a sleeping guard",
+    "read": "2026-11-05",
+    "how": "made by synthesis with the owner's code (kit/example/soldier/audio.py, numpy/scipy, a fixed seed), then silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
    }
   },
   {
@@ -4678,6 +4934,78 @@
    }
   },
   {
+   "id": "rc-creak",
+   "file": "door/rc-creak.ogg",
+   "family": "door",
+   "kit": "ricks-clip",
+   "tags": [
+    "creak",
+    "wooden",
+    "beam",
+    "deck",
+    "strains",
+    "ricks clip",
+    "cartoon",
+    "code made",
+    "synth"
+   ],
+   "duration": 0.546,
+   "loop": false,
+   "onset": 0,
+   "lufs": -17.7,
+   "peak": -1.7,
+   "source": {
+    "kind": "code",
+    "name": "Ricks Clip: the kit's sound kit (Ricks Clip)",
+    "url": null,
+    "author": "Moworks Studio (the owner's own code)",
+    "licence": "the owner's own",
+    "licenceUrl": null,
+    "file": "bundle/styles/moworks-kits/ricks-clip/kit/example/soldier/audio.py › creak",
+    "use": "a wooden creak: a beam or a deck strains",
+    "read": "2026-11-05",
+    "how": "made by synthesis with the owner's code (kit/example/soldier/audio.py, numpy/scipy, a fixed seed), then silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
+   }
+  },
+  {
+   "id": "rc-creak-low",
+   "file": "door/rc-creak-low.ogg",
+   "family": "door",
+   "kit": "ricks-clip",
+   "tags": [
+    "creak low",
+    "creak",
+    "low",
+    "deeper",
+    "longer",
+    "old",
+    "support",
+    "about",
+    "give",
+    "ricks clip",
+    "cartoon",
+    "code made",
+    "synth"
+   ],
+   "duration": 0.794,
+   "loop": false,
+   "onset": 0,
+   "lufs": -16.1,
+   "peak": -1.8,
+   "source": {
+    "kind": "code",
+    "name": "Ricks Clip: the kit's sound kit (Ricks Clip)",
+    "url": null,
+    "author": "Moworks Studio (the owner's own code)",
+    "licence": "the owner's own",
+    "licenceUrl": null,
+    "file": "bundle/styles/moworks-kits/ricks-clip/kit/example/soldier/audio.py › creak-low",
+    "use": "a deeper, longer creak: an old support about to give",
+    "read": "2026-11-05",
+    "how": "made by synthesis with the owner's code (kit/example/soldier/audio.py, numpy/scipy, a fixed seed), then silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
+   }
+  },
+  {
    "id": "sm-door",
    "file": "door/sm-door.ogg",
    "family": "door",
@@ -4940,6 +5268,75 @@
     "file": "kenney_interface-sounds.zip › Audio/toggle_001.ogg",
     "read": "2026-10-30",
     "how": "adapted: silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
+   }
+  },
+  {
+   "id": "rc-splash",
+   "file": "water/rc-splash.ogg",
+   "family": "water",
+   "kit": "ricks-clip",
+   "tags": [
+    "splash",
+    "water",
+    "something",
+    "falls",
+    "river",
+    "ricks clip",
+    "cartoon",
+    "code made",
+    "synth"
+   ],
+   "duration": 1,
+   "loop": false,
+   "onset": 0,
+   "lufs": -19.1,
+   "peak": -1,
+   "source": {
+    "kind": "code",
+    "name": "Ricks Clip: the kit's sound kit (Ricks Clip)",
+    "url": null,
+    "author": "Moworks Studio (the owner's own code)",
+    "licence": "the owner's own",
+    "licenceUrl": null,
+    "file": "bundle/styles/moworks-kits/ricks-clip/kit/example/soldier/audio.py › splash",
+    "use": "a splash into water: something falls in a river",
+    "read": "2026-11-05",
+    "how": "made by synthesis with the owner's code (kit/example/soldier/audio.py, numpy/scipy, a fixed seed), then silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
+   }
+  },
+  {
+   "id": "rc-water",
+   "file": "water/rc-water.ogg",
+   "family": "water",
+   "kit": "ricks-clip",
+   "tags": [
+    "water",
+    "flowing",
+    "river",
+    "bed",
+    "ambience",
+    "bridge",
+    "ricks clip",
+    "cartoon",
+    "code made",
+    "synth"
+   ],
+   "duration": 18.45,
+   "loop": true,
+   "onset": 0,
+   "lufs": -28.2,
+   "peak": -17.3,
+   "source": {
+    "kind": "code",
+    "name": "Ricks Clip: the kit's sound kit (Ricks Clip)",
+    "url": null,
+    "author": "Moworks Studio (the owner's own code)",
+    "licence": "the owner's own",
+    "licenceUrl": null,
+    "file": "bundle/styles/moworks-kits/ricks-clip/kit/example/soldier/audio.py › water",
+    "use": "a flowing river bed: water ambience under a bridge",
+    "read": "2026-11-05",
+    "how": "made by synthesis with the owner's code (kit/example/soldier/audio.py, numpy/scipy, a fixed seed), then a 18.5 s loop (its next 1.5 s cross-faded into the start), -28 LUFS, stereo, Ogg Vorbis q3"
    }
   },
   {
@@ -5503,6 +5900,43 @@
     "use": "breath under the red inner-voice words (1.1 s)",
     "read": "2026-11-04",
     "how": "made by synthesis with the owner's code (tools/sfx/build_inner_voice.py, numpy/scipy, a fixed seed), then silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
+   }
+  },
+  {
+   "id": "rc-leaves",
+   "file": "wind/rc-leaves.ogg",
+   "family": "wind",
+   "kit": "ricks-clip",
+   "tags": [
+    "leaves",
+    "rustling",
+    "blowing",
+    "past",
+    "years",
+    "going",
+    "wind",
+    "trees",
+    "ricks clip",
+    "cartoon",
+    "code made",
+    "synth"
+   ],
+   "duration": 2.185,
+   "loop": false,
+   "onset": 0.005,
+   "lufs": -16.2,
+   "peak": -4.6,
+   "source": {
+    "kind": "code",
+    "name": "Ricks Clip: the kit's sound kit (Ricks Clip)",
+    "url": null,
+    "author": "Moworks Studio (the owner's own code)",
+    "licence": "the owner's own",
+    "licenceUrl": null,
+    "file": "bundle/styles/moworks-kits/ricks-clip/kit/example/soldier/audio.py › leaves",
+    "use": "rustling leaves blowing past: years going by, wind in trees",
+    "read": "2026-11-05",
+    "how": "made by synthesis with the owner's code (kit/example/soldier/audio.py, numpy/scipy, a fixed seed), then silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
    }
   },
   {
@@ -6544,6 +6978,41 @@
     "use": "done / approved / a tick appears",
     "read": "2026-11-04",
     "how": "made by synthesis with the owner's code (tools/sfx/build_kit.py, numpy/scipy, a fixed seed), then silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
+   }
+  },
+  {
+   "id": "rc-ting",
+   "file": "bell/rc-ting.ogg",
+   "family": "bell",
+   "kit": "ricks-clip",
+   "tags": [
+    "ting",
+    "bright",
+    "metallic",
+    "reveal",
+    "carving",
+    "glints",
+    "ricks clip",
+    "cartoon",
+    "code made",
+    "synth"
+   ],
+   "duration": 0.974,
+   "loop": false,
+   "onset": 0,
+   "lufs": -17.3,
+   "peak": -1.7,
+   "source": {
+    "kind": "code",
+    "name": "Ricks Clip: the kit's sound kit (Ricks Clip)",
+    "url": null,
+    "author": "Moworks Studio (the owner's own code)",
+    "licence": "the owner's own",
+    "licenceUrl": null,
+    "file": "bundle/styles/moworks-kits/ricks-clip/kit/example/soldier/audio.py › ting",
+    "use": "a bright metallic ting: a reveal, a carving glints",
+    "read": "2026-11-05",
+    "how": "made by synthesis with the owner's code (kit/example/soldier/audio.py, numpy/scipy, a fixed seed), then silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
    }
   },
   {
@@ -8575,6 +9044,42 @@
    }
   },
   {
+   "id": "rc-scrape",
+   "file": "mechanical/rc-scrape.ogg",
+   "family": "mechanical",
+   "kit": "ricks-clip",
+   "tags": [
+    "scrape",
+    "metal",
+    "ring",
+    "helmet",
+    "lifted",
+    "iron",
+    "dragged",
+    "ricks clip",
+    "cartoon",
+    "code made",
+    "synth"
+   ],
+   "duration": 0.9,
+   "loop": false,
+   "onset": 0,
+   "lufs": -16.3,
+   "peak": -3,
+   "source": {
+    "kind": "code",
+    "name": "Ricks Clip: the kit's sound kit (Ricks Clip)",
+    "url": null,
+    "author": "Moworks Studio (the owner's own code)",
+    "licence": "the owner's own",
+    "licenceUrl": null,
+    "file": "bundle/styles/moworks-kits/ricks-clip/kit/example/soldier/audio.py › scrape",
+    "use": "a metal scrape with a ring: a helmet lifted, iron dragged",
+    "read": "2026-11-05",
+    "how": "made by synthesis with the owner's code (kit/example/soldier/audio.py, numpy/scipy, a fixed seed), then silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
+   }
+  },
+  {
    "id": "sm-honk",
    "file": "mechanical/sm-honk.ogg",
    "family": "mechanical",
@@ -10544,6 +11049,41 @@
     "file": "sheep_baa.flac",
     "read": "2026-10-30",
     "how": "adapted: silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
+   }
+  },
+  {
+   "id": "rc-cuckoo",
+   "file": "animal/rc-cuckoo.ogg",
+   "family": "animal",
+   "kit": "ricks-clip",
+   "tags": [
+    "cuckoo",
+    "note",
+    "call",
+    "someone",
+    "called",
+    "crazy",
+    "ricks clip",
+    "cartoon",
+    "code made",
+    "synth"
+   ],
+   "duration": 0.51,
+   "loop": false,
+   "onset": 0,
+   "lufs": -15.9,
+   "peak": -5.8,
+   "source": {
+    "kind": "code",
+    "name": "Ricks Clip: the kit's sound kit (Ricks Clip)",
+    "url": null,
+    "author": "Moworks Studio (the owner's own code)",
+    "licence": "the owner's own",
+    "licenceUrl": null,
+    "file": "bundle/styles/moworks-kits/ricks-clip/kit/example/soldier/audio.py › cuckoo",
+    "use": "a two-note cuckoo call: someone is called crazy",
+    "read": "2026-11-05",
+    "how": "made by synthesis with the owner's code (kit/example/soldier/audio.py, numpy/scipy, a fixed seed), then silence trimmed, -16 LUFS (true peak at most -1.5 dBTP), mono, Ogg Vorbis q4"
    }
   },
   {

@@ -1,7 +1,7 @@
 ---
 name: moworks-qc
 description: Moworks Studio quality review, for every video style - after Version 1, when the owner asks for it, look at stills of the film like a strict director, score it on seven criteria, fix until every score is 8 or more (or fix hard mistakes only), with HyperFrames' check folded in.
-version: 1.3.3
+version: 1.3.4
 derived-from: Moworks Motion kit 2.0.4 (commit 30b7dcb, MIT, Moworks) - engine/skill/moworks-motion/workflow/review.md, rewritten for Moworks Studio. Folds in the layout and contrast findings of HyperFrames' check (Apache-2.0, 0.8.214 at 4719543), read as shipped. Criterion 6 (Brand / design) keeps the checklist of HyperFrames' design adherence at 0.8.163 (Apache-2.0, as shipped: https://github.com/heygen-com/hyperframes/blob/490ecafbc4d1fba3dd9246d516390d4a1a188089/skills/hyperframes-creative/references/design-adherence.md); HF retired that file in 0.8.185, so the studio keeps it as its own rule.
 ---
 
@@ -62,7 +62,8 @@ Any film with an image sequence (`.moworks/rules/moworks-alive/sequence.md`), fr
 - the product cut by the frame outside a marked close-up: Composition 6 at most.
 
 A film with a voice-over, from the qc_sheets answer's "The voice against the music and the effects" block:
-- **words the music or the effects cover**: Sync 6 at most; lower the music or the effect in this round, or name it for the owner. Never score Sync over 7 with this block not measured.
+- **words the music or the effects cover**: Sync 6 at most. An effect: move it into the pause after the word, or lower that effect. The music: never its level
+  (moworks-studio §7 sets it for every film: the Review once took 4 dB off a whole song, T38b-7); a short dip on the music at those words only, or name it for the owner. Never score Sync over 7 with this block not measured.
 
 Any film (`.moworks/rules/moworks-alive/SKILL.md` rules 8 to 10):
 - **no living detail** (no sticker, icon, bubble, burst or playful word made for this film; a film that only moves its text and pictures): Motion 7 at most;

@@ -225,6 +225,17 @@ The house rules were first made on films of 15-30 s. A film of a minute or more 
 - **Before the Storyboard,** for a film longer than its style's demo, say in one line how the length is filled (how many chapters, about
   how many shots), so the owner sees it before frames are drawn.
 
+### 6d. Delivery tags for a voice ElevenLabs makes (owner 05/11/2026 #1063)
+
+When the app's ElevenLabs makes the voice (Eleven v4 by default, v3 too), the words to read in `docs/VOICEOVER.md` carry delivery tags:
+short directions in square brackets, in English, just before the words they colour (`[curious]`, `[excited]`, `[whispers]`, `[laughs softly]`,
+`[building energy]`, `[warm, smiling]`). Read what each beat says and how it should feel (the film kind, the brief, then the style's voice
+tone, which is the author's) and put a tag where the delivery should change: a question, a surprise, a secret, a joke, the twist, the build to
+the peak; never on every line. Only tags about the voice, never one for a sound (`[applause]`, `[explosion]`: the effects are the app's).
+CAPITALS on one stressed word and an ellipsis for a pause work too. On a script the owner wrote, add tags the same way and change no word:
+say in one line how many tags you added and where; the owner sees them in the Voice screen's Script box and may take them out. A voice the
+owner records has none. The app never speaks or shows a tag: what is written on screen is the words without them.
+
 ## 6b. Feedback
 
 - **Feedback against the film style** (darker and older on a style whose author says "clean", "not a ruin"): say so in one line before you change the picture, and ask; the style's author decided it. A note that does not touch what the style fixes: just do it.
@@ -249,7 +260,8 @@ Only when the film has a voice-over with its reviewed transcript (transcript.jso
   `SKILL.md`); never stop the music at a twist on your own.
 - **The mix levels (owner 05/11/2026 #1027, every film style, over any style's own numbers):** the voice-over at -16 LUFS; the music
   1.5 dB under the voice between the words and 10 dB under it while words are spoken; the sound effects at their loudest 6 dB under the
-  voice, and 8 dB under it on a spoken word; the whole mix at -16 LUFS. The app sets them (Final Mix, Balance again); a kit's own mix
+  voice, and 8 dB under it on a spoken word; the render masters the whole film to -14 LUFS, true peak -1 dBTP (Render's Standard, the web's level;
+  Quieter -16 LUFS when chosen, owner #1073). The app sets them (Final Mix, Balance again); a kit's own mix
   numbers (a music bed far under the voice, a louder master) give way to these. A level the owner sets stays theirs.
 - **The voice stays on top:** the app's voice check lists every spoken word where the effects come within 8 dB of the voice or the music
   within 3 dB (a warning, never a block); fix each by moving the effect into the pause after the word or lowering it.
