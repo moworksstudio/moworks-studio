@@ -15,6 +15,7 @@ import { docPath, writeDoc } from "../project-service/docs.mjs";
 import { encodePoster } from "../library/preview-media.mjs";
 import { FRONT_FILE, fillFrontBoxes, frontBoxes } from "./frontBox.mjs";
 import { RICKS_ENGINE, ricksCharacters, ricksDir } from "./ricks.mjs";
+import { C3D_ENGINE, c3dCharacters, c3dDir } from "./c3d.mjs";
 
 const HERE = import.meta.dirname;
 const readText = (p) => { try { return readFileSync(p, "utf8"); } catch { return ""; } };
@@ -193,17 +194,17 @@ export function humanRecord(id, root = APP_ROOT) {
 // a new shipped character takes the prefix moworks- (test/characters-apart.test.mjs holds it to that), and no user's id takes the prefix.
 export const SHIPPED_PREFIX = "moworks-";
 // a folder of the store, never a character
-const RESERVED_IDS = ["user", HUMAN_ENGINE, RICKS_ENGINE];
+const RESERVED_IDS = ["user", HUMAN_ENGINE, RICKS_ENGINE, C3D_ENGINE];
 /** Every id the app ships, in either engine. */
 export function shippedIds(root = APP_ROOT) {
-  const media = existsSync(shippedRoot(root)) ? readdirSync(shippedRoot(root)).filter((n) => n !== HUMAN_ENGINE && n !== RICKS_ENGINE) : [];
+  const media = existsSync(shippedRoot(root)) ? readdirSync(shippedRoot(root)).filter((n) => n !== HUMAN_ENGINE && n !== RICKS_ENGINE && n !== C3D_ENGINE) : [];
   return [...new Set([...media, ...shippedHumans(root).keys(), ...definitions(join(HERE, "characters")).map((c) => c.id), ...definitions(join(HERE, "demo")).map((c) => c.id)])];
 }
 /** An id for a new character of the user's from `base`: `base`, or base-2, base-3…, not shipped, not the user's, and no folder of the store. */
 export function freeId(base, root = APP_ROOT) {
   const clean = String(base ?? "").replace(/^moworks-+/, "").replace(/^[^a-z]+/, "") || "character";
-  const taken = new Set([...RESERVED_IDS, ...shippedIds(root), ...characters(root).map((c) => c.id), ...humanCharacters(root).map((c) => c.id), ...ricksCharacters(root).map((c) => c.id)]);
-  const used = (id) => taken.has(id) || existsSync(join(mediaRoot(root), id)) || existsSync(join(humanDir(root), id)) || existsSync(join(ricksDir(root), id));
+  const taken = new Set([...RESERVED_IDS, ...shippedIds(root), ...characters(root).map((c) => c.id), ...humanCharacters(root).map((c) => c.id), ...ricksCharacters(root).map((c) => c.id), ...c3dCharacters(root).map((c) => c.id)]);
+  const used = (id) => taken.has(id) || existsSync(join(mediaRoot(root), id)) || existsSync(join(humanDir(root), id)) || existsSync(join(ricksDir(root), id)) || existsSync(join(c3dDir(root), id));
   let id = clean.slice(0, 28);
   for (let n = 2; used(id); n++) id = `${clean.slice(0, 25)}-${n}`;
   return id;
@@ -283,7 +284,7 @@ export function readCast(projectDir) {
   if (!list.length) return { characters: [], problems: [`${CAST_FILE} has no characters ({ "characters": [ … ] })`] };
   // an anidoodle film's cast member is a module of the human engine, not a definition for this layer: its gate checks it
   // a Ricks Clip cast member is its cast layer's module too, checked by the film's gate (T39-2: 26 red lines in the Characters box)
-  const problems = list.filter((c) => c?.engine !== HUMAN_ENGINE && c?.engine !== RICKS_ENGINE).flatMap((c, i) => checkCharacter(c).map((p) => `${c?.id ?? `character ${i + 1}`}: ${p}`));
+  const problems = list.filter((c) => c?.engine !== HUMAN_ENGINE && c?.engine !== RICKS_ENGINE && c?.engine !== C3D_ENGINE).flatMap((c, i) => checkCharacter(c).map((p) => `${c?.id ?? `character ${i + 1}`}: ${p}`));
   const ids = list.map((c) => c?.id); if (new Set(ids).size !== ids.length) problems.push("two characters have the same id");
   return { characters: list, problems };
 }
@@ -500,6 +501,10 @@ export function apiCharacters(root = APP_ROOT) {
       // Ricks Clip's (owner #1076): the user's own, on the kit's cast and the app's cast layer (ricks.mjs)
       ...ricksCharacters(root).map((c) => ({ id: c.id, name: c.name, about: c.about, kind: c.kind, ...heightFields(c, root), group: c.group, engine: RICKS_ENGINE, demo: false, selectable: true, why: null, hand: "ricks",
         label: null, credit: c.credit, made: c.credit?.made ?? null, hands: ["ricks"], media: c.media, version: c.version ?? null,
+        history: characterHistory(c.id, root), versions: characterVersions(c.id, root) })),
+      // 3D Cartoon's (owner #1267): the user's own, on the source skill's CharDef and buildCharacter (c3d.mjs)
+      ...c3dCharacters(root).map((c) => ({ id: c.id, name: c.name, about: c.about, kind: c.kind, ...heightFields(c, root), group: c.group, engine: C3D_ENGINE, demo: false, selectable: true, why: null, hand: "cartoon",
+        label: null, credit: c.credit, made: c.credit?.made ?? null, hands: ["cartoon"], media: c.media, version: c.version ?? null, colors: c.def ? [c.def.top, c.def.skin, c.def.hair].filter(Boolean) : undefined,
         history: characterHistory(c.id, root), versions: characterVersions(c.id, root) })),
     ] };
 }

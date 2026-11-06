@@ -383,7 +383,8 @@
   addEventListener("resize", draw);
 
   // ---- the UI's commands ----
-  const fileOf = (el) => el.closest("[data-composition-src]")?.getAttribute("data-composition-src") ?? "index.html";
+  // (the root page the host shows: index.html, or one of the film's other sizes, index.9x16.html)
+  const fileOf = (el) => el.closest("[data-composition-src]")?.getAttribute("data-composition-src") ?? (document.body.dataset.root || "index.html");
   // a line of letters while it is typed in: what it was made of, kept so a line typed short or empty loses no letter (the film's next load reads the file)
   const typed = new WeakMap();
   const typeLine = (el, text) => {

@@ -25,6 +25,7 @@ import { thumbUrl } from "./thumbs.mjs";
 import { aeBadge, localFile as aeLocal, measurements as aeMeasured, shippedFile as aeShipped } from "../style-ae/badge.mjs";
 import { styleFpsRule } from "./fps.mjs";
 import { humanHandOf } from "./hands.mjs";
+import { withAdaptation } from "../project-service/sizes.mjs";
 import { STYLE_ID as BRUSH_ID, kitSource } from "../character-kit/index.mjs";
 import { AUTHOR as WI_AUTHOR, DEMO as WI_DEMO, mediaFile as wiMedia, whatIfSource, treeLink as wiTreeLink } from "../what-if-styles/index.mjs";
 
@@ -72,6 +73,8 @@ function layerRules(src, root, qc) {
     ...(qc?.file ? [moworksRule(src, root, qc.file, qc.derivedFrom, "qc")] : []),
     ...(qc?.alive?.file ? [{ ...moworksRule(src, root, qc.alive.file, qc.alive.derivedFrom, "alive"), source: "Moworks Studio, written from the Moworks Motion kit's rules (owner 24/10/2026)" }] : []),
     ...(qc?.vocab?.file ? [{ ...moworksRule(src, root, qc.vocab.file, [], "vocab"), source: qc.vocab.source ?? "Motion Prompt (Shohei Ohtaki, MIT)" }] : []),
+    // the Adaptation step's rules (one film, another size: audit/105 §8.3), read only in that step
+    ...(qc?.adaptation?.file ? [{ ...moworksRule(src, root, qc.adaptation.file, [], "adaptation"), source: qc.adaptation.source ?? "Moworks Studio" }] : []),
     ...(qc?.kinds ?? []).filter((k) => k.file).map((k) => ({ ...moworksRule(src, root, k.file, [], "kind"), kindId: k.id, source: k.source ?? "Moworks Studio" }))];
 }
 
@@ -90,9 +93,10 @@ const lookCount = (root) => { try { return lookItems(root).length; } catch { ret
 const lemoUses = (root) => { try { return JSON.parse(readFileSync(join(root, "config", "lemo-pipeline.json"), "utf8")).uses ?? []; } catch { return []; } }; // the HF skills a lemo film is built with
 const LEMO_PACK = "config/rules/lemo-opuscar/SKILL.md";
 const LEMO_ASPECTS = ["16:9", "9:16", "1:1", "4:5"];          // 1920×1080 by default; other sizes laid out from the frame (TECHNIQUE §2)
-const readPipeline = (root, file, id) => { try { const j = JSON.parse(readFileSync(join(root, "config", file), "utf8")); return (id ? (Array.isArray(j.styles) ? j.styles.find((s) => s.id === id)?.pipeline : j.styles?.[id]) : j.pipeline) ?? []; } catch { return []; } };
+// (every pipeline carries the Adaptation step after its Review: project-service/sizes.mjs)
+const readPipeline = (root, file, id) => { try { const j = JSON.parse(readFileSync(join(root, "config", file), "utf8")); return withAdaptation((id ? (Array.isArray(j.styles) ? j.styles.find((s) => s.id === id)?.pipeline : j.styles?.[id]) : j.pipeline) ?? []); } catch { return []; } };
 /** A config/styles.json style's pipeline: its own, or its shared file's (config/hf-pipeline.json: the style's own steps, else the shared ones). */
-const ownPipeline = (root, s) => s.pipeline ?? (s.pipelineFrom ? readJsonCfg(root, "styles.json")?.styles?.find((x) => x.id === s.pipelineFrom)?.pipeline ?? [] : null) ?? (s.rules?.pipeline ? (readPipeline(root, s.rules.pipeline, s.id).length ? readPipeline(root, s.rules.pipeline, s.id) : readPipeline(root, s.rules.pipeline)) : []);
+const ownPipeline = (root, s) => withAdaptation(s.pipeline ?? (s.pipelineFrom ? readJsonCfg(root, "styles.json")?.styles?.find((x) => x.id === s.pipelineFrom)?.pipeline ?? [] : null) ?? (s.rules?.pipeline ? (readPipeline(root, s.rules.pipeline, s.id).length ? readPipeline(root, s.rules.pipeline, s.id) : readPipeline(root, s.rules.pipeline)) : []));
 
 /** A Lemo-Opuscar style's own frame rate: the author's "1920×1080 at 24 fps by default; an output frame
  *  rate set in the style wins" (DIRECTOR.md L14); the rate its demo film was made at, as its DEMO.md says the output ("1920×1080, 60 fps",
@@ -397,7 +401,7 @@ export function formatOf(id, root = APP_ROOT) { const s = getStyle(id, root); re
 }
 function buildCatalog(root) {
   const cat = JSON.parse(readFileSync(join(root, "config", "styles.json"), "utf8"));
-  if (cat.alive || cat.studio || cat.kinds || cat.vocab) cat.qc = { ...cat.qc, alive: cat.alive, studio: cat.studio, kinds: cat.kinds, vocab: cat.vocab };          // the studio packs travel together (layerRules)
+  if (cat.alive || cat.studio || cat.kinds || cat.vocab || cat.adaptation) cat.qc = { ...cat.qc, alive: cat.alive, studio: cat.studio, kinds: cat.kinds, vocab: cat.vocab, adaptation: cat.adaptation };          // the studio packs travel together (layerRules)
   const src = sources(root);
   const hfRepo = src.pins.hyperframes.repo, hfCommit = src.pins.hyperframes.source?.commit ?? `v${src.pins.hyperframes.default}`;
   const own = cat.styles.map((s) => {
@@ -451,10 +455,11 @@ function buildCatalog(root) {
 /** A style's pipeline, cheap enough to read on every poll (no rule hashing): config/styles.json, or the Lemo-Opuscar template. */
 export function stylePipeline(id, root = APP_ROOT) {
   const want = id;
-  return lemoSlug(want) ? readPipeline(root, "lemo-pipeline.json") : mgSlug(want) ? readPipeline(root, "mg-pipeline.json")
+  // every style's steps carry the Adaptation step after the Review (one film, several sizes: project-service/sizes.mjs)
+  return withAdaptation(lemoSlug(want) ? readPipeline(root, "lemo-pipeline.json") : mgSlug(want) ? readPipeline(root, "mg-pipeline.json")
     : anidoodleId(want) ? readPipeline(root, "anidoodle-pipeline.json") : want === BRUSH_ID ? readPipeline(root, "brush-pipeline.json")
     : want === WHAT_IF_ID ? readPipeline(root, "what-if-pipeline.json")
-    : (() => { const s = readJsonCfg(root, "styles.json")?.styles?.find((x) => x.id === want); return s ? ownPipeline(root, s) : []; })();
+    : (() => { const s = readJsonCfg(root, "styles.json")?.styles?.find((x) => x.id === want); return s ? ownPipeline(root, s) : []; })());
 }
 const readJsonCfg = (root, f) => { try { return JSON.parse(readFileSync(join(root, "config", f), "utf8")); } catch { return null; } };
 

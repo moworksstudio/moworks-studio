@@ -210,6 +210,8 @@ const ENGINE_OF = { johnheibel: ["brush-kit"], alexgreensh: ["anidoodle-human"] 
 function castRule(style) {
   // Ricks Clip takes its own characters as they are (its cast layer, #1076), never "redrawn" (T39-1)
   if (style?.id === "ricks-clip") return { mode: "own", allow: (c) => c.engine === "ricks-clip" };
+  // 3D Cartoon likewise: its own characters, built by its rig (#1267)
+  if (style?.id === "cartoon-3d") return { mode: "own", allow: (c) => c.engine === "cartoon-3d" };
   const au = style ? authorOf(style) : null;
   if (ENGINE_OF[au]) return { mode: "own", allow: (c) => ENGINE_OF[au].includes(c.engine) && (au !== "alexgreensh" || c.kind !== "human" || style.characterEngine === "anidoodle-human") };
   if (REDRAW_OK.includes(style?.category)) return { mode: "redraw", allow: () => true };

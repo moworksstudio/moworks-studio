@@ -62,6 +62,7 @@ import { assetRoutes } from "./assets.mjs";
 import { soundRoutes } from "./sounds.mjs";
 import { characterRoutes } from "./characters.mjs";
 import { proxyRoutes } from "./proxy.mjs";
+import { sizeRoutes, sizesOf } from "./sizes.mjs";
 import { styleAeRoutes } from "./styleAe.mjs";
 import { prefsRoutes } from "./prefs.mjs";
 import { ideaRoutes } from "../idea-library/index.mjs";
@@ -333,7 +334,8 @@ export function routes(ctx) {
     const lastAll = all.at(-1), chatAsked = !answering && !!lastAll && !lastAll.step && lastAll.status === "done" && fresh(lastAll) && pipe.asksOwner(lastAll.resultText);
     const facts = pipe.gatherFacts(p, { shots, head, jobs: ctx.jobs.list({ projectId: id }), runningTask: tid ? ctx.agent.get(tid) : answering ? { id: "starting", step: null, status: "running", starting: true } : null, lastTasks,
       workAt, qaStale,
-      extra: { chatAsked, revisionAsked: !tid && !!pendingRevision(p.path) } });
+      // the film's other sizes (the Adaptation step): each against the master's picture now
+      extra: { chatAsked, revisionAsked: !tid && !!pendingRevision(p.path), sizes: sizesOf(ctx, p) } });
     const state = pipe.computePipeline(steps, facts);
     return { p, steps, state, facts };
   };
@@ -729,7 +731,9 @@ export function routes(ctx) {
     }),
     r("GET", `/projects/${P}/posters`, ([id]) => ctx.posters.get(id)),
     r("POST", `/projects/${P}/posters`, ([id]) => ctx.posters.start(id)),
-    r("GET", `/projects/${P}/preview`, ([id]) => { mustProject(id, root); return { url: `${ctx.preview.base}/p/${id}/__preview`, origin: ctx.preview.origin }; }),
+    // ?size=9x16: one of the film's other sizes (the Film Editor's size switch); the master otherwise
+    r("GET", `/projects/${P}/preview`, ([id], _b, q) => { mustProject(id, root); const want = q?.get?.("size") ?? "", size = /^(16x9|9x16|1x1|4x5)$/.test(want) ? want : null;
+      return { url: `${ctx.preview.base}/p/${id}/__preview${size ? `?size=${size}` : ""}`, origin: ctx.preview.origin, size }; }),
     r("GET", `/projects/${P}/revisions`, async ([id]) => { const p = mustProject(id, root); return { revisions: existsSync(join(p.path, ".git")) ? await rev.logAsync(p.path, 100) : [] }; }),
 
     // ---- the pipeline in the Editor state from the server, the Editor only shows it
@@ -812,7 +816,9 @@ export function routes(ctx) {
         // the sound effects as last placed: the Editor reads Final Mix and the timeline again when `at` changes (the dialog showed
         // 26 after only 6 were left: it read them once, 4 s after Place, while the placement still searched)
         sfx: (() => { const s = readSfxState(p.path); return { placed: (s.mounted ?? []).length, at: s.placedAt ?? null }; })(),
-        render: ctx.renders.status() };
+        render: ctx.renders.status(),
+        // the film's sizes (the Adaptation step and the Film Editor's size switch): the master, and each other size against it
+        sizes: { master: p.meta?.format?.aspect ?? null, rows: facts.sizes ?? [] } };
     }),
     // a step's own work: its Claude task (the text the Editor sends, else the step's prompt, the way's own one for General) or its job (the checks)
     r("POST", `/projects/${P}/pipeline/([a-zA-Z]+)/run`, async ([id, stepId], b) => {
@@ -1192,7 +1198,9 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
   ctx.table.push(...soundRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject, HttpError }).routes);          // the Editor's Sounds drawer
   const chars = characterRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject, HttpError });
   ctx.table.push(...chars.routes);
-  ctx.table.push(...proxyRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject }).routes);          // a code film's smooth preview
+  ctx.table.push(...proxyRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject }).routes);
+  // the film's other sizes: the Adaptation step (one film, several sizes)
+  ctx.table.push(...sizeRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject, HttpError }));          // a code film's smooth preview
   ctx.table.push(...styleAeRoutes(ctx).routes);          // the styles' After Effects badges (measured in the background, no route)
   ctx.table.push(...prefsRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn] }).routes);          // the UI's settings on this computer (the port changes each start)
   ctx.table.push(...ideaRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn] }).routes);          // the Idea Library: the app's ideas and the user's own (audit/97)

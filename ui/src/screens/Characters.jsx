@@ -42,6 +42,7 @@ export const usable = (c) => !c.demo && (c.selectable || c.engine === "anidoodle
  * or a project's humanHand); film.layer: the style has a Character step. A human is animated by its own engine in a human-hand film, a
  * Brush character by the character layer in a Brush film; anywhere else it is a reference drawn in the film's style. */
 export const howIn = (c, film) => (c.engine === "ricks-clip" ? (film.ricks ? "Animated with Ricks Clip's cast" : "Drawn in this film's style")
+  : c.engine === "cartoon-3d" ? (film.c3d ? "Animated with 3D Cartoon's rig" : "Drawn in this film's style")
   : c.engine === "anidoodle-human" ? (film.human ? "Animated with the human engine" : "Drawn in this film's style")
   : film.layer && !film.human ? null : "Drawn in this film's style");
 /** Characters Claude made for the user can be changed and deleted; the app's and the authors' as shipped cannot. */
@@ -150,7 +151,7 @@ function CharacterDetails({ c, job, onRedraw, onDeleted, onChange, onReload }) {
       <span className="cap">{x.label}</span></button>)}</div>}
     <div className="ch-acts ch-acts-row">
       {usable(c) && <button className="btn primary" onClick={() => setUse(true)}><FolderPlus size={14} />{t("Use in a project")}</button>}
-      {g === "yours" && c.engine !== "anidoodle-human" && c.engine !== "ricks-clip" && !m.views && !job && <button className="btn" onClick={() => onRedraw(c)}><RefreshCw size={14} />{t("Redraw")}</button>}
+      {g === "yours" && c.engine !== "anidoodle-human" && c.engine !== "ricks-clip" && c.engine !== "cartoon-3d" && !m.views && !job && <button className="btn" onClick={() => onRedraw(c)}><RefreshCw size={14} />{t("Redraw")}</button>}
       {ownOf(c) && <button className="btn" onClick={() => onChange(c)} disabled={!!job} title={t("Change it with Claude")}><Pencil size={14} />{t("Edit")}</button>}
       {ownOf(c) && <button className="btn ghost icon" onClick={() => setAsk(true)} aria-label={t("Delete {name}", { name: c.name })} title={t("Delete")}><Trash2 size={15} /></button>}
     </div>
@@ -191,7 +192,7 @@ function UseInProject({ c, onClose }) {
       : list.length === 0 ? <p className="hint">{t("No project yet.")}</p>
       : <ul className="plain ch-projects" role="radiogroup" aria-label={t("Projects")}>{list.map((p) => <li key={p.id}>
         <button type="button" role="radio" aria-checked={pid === p.id} className={pid === p.id ? "on" : ""} onClick={() => setPid(p.id)}>
-          <b>{p.title}</b><span className="muted">{[p.style?.title ?? p.style, (() => { const h = howIn(c, { human: !!p.humanHand, layer: !!p.characters, ricks: !!p.ricks }); return h && t(h); })()].filter(Boolean).join(" · ")}</span>{pid === p.id && <Check size={14} />}</button></li>)}</ul>}
+          <b>{p.title}</b><span className="muted">{[p.style?.title ?? p.style, (() => { const h = howIn(c, { human: !!p.humanHand, layer: !!p.characters, ricks: !!p.ricks, c3d: !!p.c3d }); return h && t(h); })()].filter(Boolean).join(" · ")}</span>{pid === p.id && <Check size={14} />}</button></li>)}</ul>}
   </Dialog>;
 }
 
@@ -247,7 +248,7 @@ function CreateDialog({ styles, changing, onClose, onStarted }) {
   useEffect(() => { if (st?.rigs?.length && !st.rigs.some((r) => r.id === rig)) setRig(st.rigs[0].id); }, [st?.engine, st?.hand]); // eslint-disable-line react-hooks/exhaustive-deps
   const pickEngine = (e) => { const first = styles.find((x) => x.engine === e); if (first) setStyle(`${first.engine}:${first.hand}`); };
   // a change costs about what making it in its own style did
-  const ownStyle = changing ? styles.find((x) => x.engine === changing.engine && (x.hand === changing.hand || x.engine === "brush-kit" || x.engine === "ricks-clip")) : null;
+  const ownStyle = changing ? styles.find((x) => x.engine === changing.engine && (x.hand === changing.hand || x.engine === "brush-kit" || x.engine === "ricks-clip" || x.engine === "cartoon-3d")) : null;
   const est = (changing ? ownStyle : st)?.estimate;
   const addImage = async (f) => { if (!f) return; if (!/^image\/(png|jpe?g|webp)$/i.test(f.type)) { toast(t("Use a PNG, JPEG or WebP picture"), "error"); return; } setImage({ name: f.name, url: await readImage(f) }); };
   const start = async () => {
@@ -326,7 +327,7 @@ function MakingTile({ run, onOpen }) {
 }
 
 const F0 = { authors: [], rigs: [], libs: [], styles: [], q: "" };
-const styleKeyOf = (c) => (c.engine === "anidoodle-human" ? `anidoodle-human:${c.hand ?? c.hands?.[0] ?? ""}` : c.engine === "ricks-clip" ? "ricks-clip:ricks" : "brush-kit:brush");
+const styleKeyOf = (c) => (c.engine === "anidoodle-human" ? `anidoodle-human:${c.hand ?? c.hands?.[0] ?? ""}` : c.engine === "ricks-clip" ? "ricks-clip:ricks" : c.engine === "cartoon-3d" ? "cartoon-3d:cartoon" : "brush-kit:brush");
 function Box({ on }) { return <span className="sgb-box" aria-hidden="true">{on && <Check size={11} />}</span>; }
 
 export default function Characters() {

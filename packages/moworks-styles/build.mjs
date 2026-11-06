@@ -15,6 +15,10 @@ import { familyOf, googleFontModule } from "../hf-edit/whatIfBuild.mjs";
 import { TWINS } from "./fonts.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url)), HOSTS = join(HERE, "hosts");
+/** The app's camera timed to words (owner #1267, audit/111 H1): `import { camOnWords } from "mw:camtime"` in a 3D Cartoon film's shots.ts. */
+export const CAMTIME = join(HERE, "camtime.js");
+/** The 3D Cartoon's collision module as a film imports it: the source skill's, with the app's held-prop check beside it (owner #1267, hosts/held.ts). */
+export const HELD_STYLE = "cartoon-3d", HELD_HOST = join(HOSTS, "collision.tsx");
 export const ENTRY = "src/videos/film/Video.tsx", OUT = "compositions/film/film.js";
 export const THREE = "0.187.0";
 const EXT = ["", ".tsx", ".ts", ".jsx", ".js", "/index.tsx", "/index.ts", "/index.js"];
@@ -43,7 +47,7 @@ export async function buildStyleFilm(projectDir, style, { root = APP_ROOT, force
   // the film's own src/ (the project's, or a board's own copy beside it): a relative import that leaves it for a file it does not have is the source skill's
   const srcRoot = (() => { let d = dirname(entry); while (inside(projectDir, d) && d.split(sep).pop() !== "src") d = dirname(d); return d.split(sep).pop() === "src" ? d : join(projectDir, "src"); })();
   const words = join(projectDir, "transcript.json");
-  const latest = newest([srcRoot, skillSrc, HOSTS, SHIMS, words], out);
+  const latest = newest([srcRoot, skillSrc, HOSTS, SHIMS, CAMTIME, words], out);
   if (!force && existsSync(out) && statSync(out).mtimeMs >= latest) return { built: false, out: outRel, ...readBanner(out) };
   const families = new Set(), twinned = new Set();
   const three = style.three ? join(threeDir(root), THREE) : null;
@@ -58,16 +62,27 @@ export async function buildStyleFilm(projectDir, style, { root = APP_ROOT, force
     b.onResolve({ filter: /^@remotion\// }, (a) => ({ errors: [{ text: `${a.path} is not available in a Moworks film (no Remotion package): use the source skill's own code` }] }));
     // the voice's words, from the project's transcript: [{ word, start, end }] in the order spoken
     b.onResolve({ filter: /^mw:words$/ }, () => ({ path: "words", namespace: "style-words" }));
+    b.onResolve({ filter: /^mw:camtime$/ }, () => ({ path: CAMTIME }));
     b.onLoad({ filter: /.*/, namespace: "style-words" }, () => ({ loader: "js", contents: `export default ${JSON.stringify(transcriptWords(projectDir))};\nexport const WORDS = ${JSON.stringify(transcriptWords(projectDir))};\n` }));
     if (three) {
       b.onResolve({ filter: /^three$/ }, () => ({ path: join(three, "build", "three.module.min.js") }));
       b.onResolve({ filter: /^three\/addons\// }, (a) => { const p = join(three, "examples", "jsm", ...a.path.slice("three/addons/".length).split("/")); return existsSync(p) ? { path: p } : { errors: [{ text: `${a.path} is not in three.js ${THREE} (config/pins.json three)` }] }; });
     }
+    // the 3D Cartoon's collision module: the source skill's, as shipped, behind the app's held-prop check (hosts/collision.tsx, #1267)
+    const skillCollision = join(skillSrc, "kit", "collision.tsx"), held = style.id === HELD_STYLE && existsSync(skillCollision);
+    if (held) b.onResolve({ filter: /^mw-skill-collision$/ }, () => ({ path: skillCollision }));
+    const own = (p) => (held && p === skillCollision ? HELD_HOST : p);
+    // a 3D Cartoon character from the library (src/videos/film/cast/<id>.ts, owner #1267) imports the source skill's kit by name: "cartoon-3d/kit/…"
+    // (the film's own copy of a kit file first, as a relative import finds it)
+    if (style.id === HELD_STYLE) b.onResolve({ filter: /^cartoon-3d\/kit\// }, (a) => {
+      const rest = a.path.slice("cartoon-3d/".length), k = resolveFile(join(srcRoot, rest)) ?? resolveFile(join(skillSrc, rest));
+      return k ? { path: own(k) } : { errors: [{ text: `${a.path} is not in the 3D Cartoon source skill's kit (src/kit/)` }] };
+    });
     b.onResolve({ filter: /^\.\.?\// }, (a) => {
       if (a.namespace !== "file" || !a.importer) return undefined;
       const want = resolve(a.resolveDir, a.path);
-      if (resolveFile(want)) return { path: resolveFile(want) };
-      if (inside(srcRoot, want) || want === srcRoot) { const k = resolveFile(join(skillSrc, relative(srcRoot, want))); if (k) return { path: k }; }
+      if (resolveFile(want)) return { path: own(resolveFile(want)) };
+      if (inside(srcRoot, want) || want === srcRoot) { const k = resolveFile(join(skillSrc, relative(srcRoot, want))); if (k) return { path: own(k) }; }
       return undefined;
     });
   } };

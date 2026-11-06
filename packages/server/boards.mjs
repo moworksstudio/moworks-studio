@@ -8,12 +8,14 @@ import { isSongFilm } from "../style-catalog/traits.mjs";
 import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, statSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, join, resolve, sep } from "node:path";
 import * as projects from "../project-service/index.mjs";
+import { ASPECTS, aspectOfTag, entryOf, extraSizes, filmSizes, masterAspect, sizeStage } from "../project-service/sizes.mjs";
 import { docPath } from "../project-service/docs.mjs";
 import { rememberAssets } from "../project-service/assets.mjs";
 import { currentOptions, firstRoundOf, isOption, listRounds, makeRevision, optionLabel, optionName, ownerRounds, parseFeedback, recordPick, roundPdf, takeStills } from "../hf-edit/boards.mjs";
 import { CHECK_ARGS_PLAIN, checkFindings, filmFrames, framesText, qcRound, qcText } from "../hf-qa/qc.mjs";
 import { runHfJsonAsync, STILLS_BUSY } from "../hf-qa/cli.mjs";
-import { placedShots, readShots, untimedFrames } from "../hf-edit/shots.mjs";
+import { frameSeconds, placedShots, readShots, untimedFrames } from "../hf-edit/shots.mjs";
+import { boardPace, paceText, stylePace } from "../style-catalog/pace.mjs";
 import { effectiveSettings, freshEyes, styleSound } from "../agent/index.mjs";
 import { filmKind } from "../agent/reads.mjs";
 import { librarySearch, searchText } from "../library/search-tool.mjs";
@@ -42,6 +44,13 @@ import { gateFlicker } from "../hf-qa/flicker.mjs";
 /** A film of the owner's film styles bundled again from its source before its pictures are taken (T41-7: a 3D Cartoon film was rebuilt only
  *  when the task ended, so the Build and the Review looked at the picture before their own fixes). Nothing for any other film. */
 const freshStyleFilm = async (dir, root) => { try { await placeStyle(dir, "index.html", { root }); } catch { /* the pictures say what they show */ } };
+/** One of the film's other sizes for the stills: { aspect } when the film has it and its root page is written, else the words for Claude. */
+function sizeAt(project, size) {
+  const aspect = ASPECTS[size] ? size : aspectOfTag(size);
+  if (!aspect || !extraSizes(project.meta).some((x) => x.aspect === aspect)) return `The film has no ${size} size: the sizes are ${filmSizes(project.meta).join(", ")}.`;
+  if (!existsSync(join(project.path, entryOf(aspect)))) return `${entryOf(aspect)} is not written yet: write the ${aspect} root page first, then call this again.`;
+  return { aspect };
+}
 import { cutoutText, makeCutout } from "../moworks-styles/cutout.mjs";
 
 const TYPES = { ".png": "image/png", ".jpg": "image/jpeg", ".pdf": "application/pdf" };
@@ -139,8 +148,9 @@ export function stillsBehind(ctx, p, option) {
   return { code: "STILLS_OLD", message: `Option ${option} changed after its pictures were taken, so they do not show the latest changes. The app is taking them again now: approve once they are in.` };
 }
 
-/** The film styles whose own rules stop the music at the turn (the plan's musicStop is applied for them with no ask): What If animation, Ricks Clip. */
-export const STOP_AT_TURN = new Set(["what-if", "ricks-clip"]);
+/** The film styles whose own rules stop the music at the turn (the plan's musicStop is applied for them with no ask): What If animation, Ricks Clip,
+ *  and 3D Cartoon (owner #1267, audit/111 B5: learned from Ricks Clip, a choice of each film's Motion Plan, at the pause before "You see," or the kicker). */
+export const STOP_AT_TURN = new Set(["what-if", "ricks-clip", "cartoon-3d"]);
 export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
   const { root } = ctx;
   const url = (id, rel) => `${ctx.preview.base}/p/${id}/${rel}`;
@@ -382,7 +392,8 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
   /** A music cut at the twist is What If's and Ricks Clip's own rule: the plan's musicStop counts only in a What If film (the film kind, or
    *  the What If animation style), a Ricks Clip film, or when the plan quotes the brief's or the user's words asking for it; otherwise the music plays to the
    *  end, with its fade out. Final Mix's "Stop the music at" and Claude's music_stop tool are not gated. */
-  // a film style whose own source stops the music at the turn: What If animation, Ricks Clip (its SKILL.md §4.7: at the twist line; T39-10)
+  // a film style whose own rule stops the music at the turn: What If animation, Ricks Clip (its SKILL.md §4.7: at the twist line; T39-10), 3D Cartoon
+  // (the app's pack, #1267: when the film's plan sets it)
   const planStopAllowed = (p, mp) => filmKind(p.path)?.id === "whatIf" || STOP_AT_TURN.has(p.meta?.style?.id) || !!mp.musicStopAsked;
   const stopFromPlan = async (p) => {
     const now0 = projects.getProject(p.id, root);
@@ -396,6 +407,23 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
   const planStop = (p) => { const mp = plan.read(p.path); return mp.exists && !mp.error && mp.plan.musicStop > 0 && planStopAllowed(p, mp.plan) && p.meta?.music?.stopAt == null && !p.meta?.music?.toEnd ? snapped(p, mp.plan.musicStop).at : null; };
   ctx.mix = { useOption, placeSfx, stopFromPlan, cuesAgain, timesAgain, change: mixChange, undo: undoSound };
   // the app tools (Agent.callTool)
+  /** The stills of one of the film's other sizes (the Adaptation step's look, rule 9): its root page through its own folder (sizeStage),
+   *  the same sheets and HyperFrames check as a Review round, with what stands outside the safe zone for that size to look for. */
+  const sizeSheets = async ({ task, project, size }) => {
+    const at = sizeAt(project, size);
+    if (typeof at === "string") return at;
+    await freshStyleFilm(project.path, root);
+    await placeStyle(project.path, entryOf(at.aspect), { root }).catch(() => null);
+    const dir = sizeStage(project.path, at.aspect);
+    const { shots, root: comp } = await readShots(dir);
+    const res = await qcRound(dir, { shots: placedShots(shots, comp?.duration), total: comp?.duration ?? null, signal: ctx.stopping.signal, parallel: !gpuShort() });
+    if (res.busy) return `${STILLS_BUSY}\nHyperFrames did not finish the ${at.aspect} stills in time: nothing is wrong with the film. Stop and say so in one short line.`;
+    task.sizeSheets = { aspect: at.aspect, at: new Date().toISOString() };
+    const look = at.aspect === "9:16" ? "nothing in the top 168 px, every word and the product inside y 168-1330, no text right of x 940, faces and words best inside x 65-890, y 270-1250"
+      : at.aspect === "16:9" ? "HyperFrames' 90 % action-safe and 80 % title-safe boxes" : "an 8 % margin on each side";
+    return [`The ${at.aspect} size (${entryOf(at.aspect)}), as the render draws it. Look for text outside the safe zone (${look}), cut faces, the set's edges showing and type under 28 px or smaller than the rules' scale.`,
+      qcText(res, null)].join("\n\n");
+  };
   const tools = {
     psd_layers: async ({ project, args }) => {
       const file = String(args.file ?? "").replace(/\\/g, "/");
@@ -410,7 +438,7 @@ export function boardRoutes(ctx, { r, P, mustProject, HttpError }) {
     },
     // a What If film's shot list on the voice (the author's plan.py, in JavaScript)
     // a 3D Cartoon film: its source skill's own collision check on every frame (moworks-styles/collision.mjs)
-    collision_check: async ({ project }) => collisionText(await collisionCheck(project.path, { root })) || "This is not a 3D Cartoon film: the collision check is the 3D Cartoon film style's own and runs only on its films.",
+    collision_check: async ({ project }) => collisionText(await collisionCheck(project.path, { root })) || "This is neither a 3D Cartoon nor a Ricks Clip film: the collision check runs only on those two film styles' films.",
     // a Paper Collage film: its source skill's own cut-out tools on one picture, into a new file (moworks-styles/cutout.mjs)
     paper_cutout: async ({ project, args = {} }) => cutoutText(await makeCutout(project.path, args, { root })),
     whatif_plan: async ({ project }) => {
@@ -480,8 +508,11 @@ Open the board's page code, fix the error, then call board_stills again.`;
       projects.addNote(project.path, { kind: "boards", text: "Claude checked its storyboard draft" });
       const timing = {};          // a frame with no seconds
       for (const o of res.round?.options ?? []) { try { timing[o.option] = await untimedFrames(join(project.path, "boards", o.option, "STORYBOARD.md")); } catch { /* HF's parser missing: the stills stand */ } }
+      // the style's own pace (#1267): a board much slower than it is said, never stopped
+      const pace = stylePace(project.meta?.style?.id, masterAspect(project.meta) ?? project.meta?.format?.aspect, root), paced = [];
+      if (pace) for (const o of res.round?.options ?? []) { try { const t = paceText(o.option, boardPace(await frameSeconds(join(project.path, "boards", o.option, "STORYBOARD.md")), pace)); if (t) paced.push(t); } catch { /* HF's parser missing: the stills stand */ } }
       // Vietnamese letters the film's code draws in a face that lacks them (G-GLYPH reads only the HTML)
-      return [stillsText(project, res, checks, timing), glyphText(codeGlyphs(project.path)), viMarksText(viMarks(project.path, { boards: true }))].filter(Boolean).join("\n\n");
+      return [stillsText(project, res, checks, timing), paced.join("\n"), glyphText(codeGlyphs(project.path)), viMarksText(viMarks(project.path, { boards: true }))].filter(Boolean).join("\n\n");
     },
     // the voice kept clear: every spoken word against the effects and the music
     voice_check: async ({ project }) => voiceText(await voiceCheck(project.path, { root })),
@@ -513,7 +544,9 @@ Open the board's page code, fix the error, then call board_stills again.`;
       const r0 = await musicStop(project, at, { snap: true });
       return at == null ? "The music plays to its end again." : `The music now stops at ${r0.at} s (it starts at ${r0.start} s)${r0.asked != null ? `: ${r0.asked} s fell on the spoken "${r0.word}", so the app moved the stop into the pause${r0.after ? ` after "${r0.after}"` : ""}` : ""}.`;
     },
-    qc_sheets: async ({ task, project }) => {
+    qc_sheets: async ({ task, project, args = {} }) => {
+      // one of the film's other sizes (the Adaptation step): its root page's stills, through a folder HyperFrames reads it from
+      if (args.size) return sizeSheets({ task, project, size: String(args.size) });
       await freshStyleFilm(project.path, root);
       const { shots, root: comp } = await readShots(project.path);
       // qcRound bundles a code film from its source first and says when it does not compile
@@ -547,9 +580,13 @@ Open the board's page code, fix the error, then call board_stills again.`;
     },
     // one moment of the film, whole, with its text: what the sheets are too small for (T28-6)
     film_frames: async ({ project, args = {} }) => {
+      const at = args.size ? sizeAt(project, String(args.size)) : null;
+      if (args.size && typeof at === "string") return at;
       await freshStyleFilm(project.path, root);
-      const { root: comp } = await readShots(project.path);
-      return framesText(await filmFrames(project.path, args.at, { total: comp?.duration ?? null, signal: ctx.stopping.signal }));
+      if (at) await placeStyle(project.path, entryOf(at.aspect), { root }).catch(() => null);
+      const dir = at ? sizeStage(project.path, at.aspect) : project.path;
+      const { root: comp } = await readShots(dir);
+      return framesText(await filmFrames(dir, args.at, { total: comp?.duration ?? null, signal: ctx.stopping.signal }));
     },
   };
 

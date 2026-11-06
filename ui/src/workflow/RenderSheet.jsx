@@ -1,6 +1,7 @@
 // Render: the top bar's button, available any time with whatever is on the timeline; not a pipeline step. A quick
 // check runs first and only what would break the render stops it (script errors, missing files, remote URLs, fonts that are missing or
 // lack Vietnamese letters), with "Ask Claude to fix"; quality findings are warnings next to the result. Then HyperFrames' render worker.
+// A film of several sizes (the Adaptation step) ticks the sizes to render, every made size by default: one file each, named with its size.
 import { useEffect, useRef, useState } from "react";
 import { Bot, Check, CheckCircle2, Film, FolderOpen, Hand, Loader2, Play, RefreshCw, Square, XCircle } from "lucide-react";
 import { get, post, watchJob } from "../api.js";
@@ -115,20 +116,30 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
   const film = useData(() => get(`/api/projects/${projectId}`), [projectId]);          // its length and aspect, for the line under the fields
   const pipe = useData(() => get(`/api/projects/${projectId}/pipeline`), [projectId]);          // a Brand Kit film nobody checked; a new version the user has not opened
   const framesSince = useRef(null);          // when the frames began, for the time left
+  const queued = useRef(0);          // the renders of this press still to come (one per size)
   const [now, setNow] = useState(() => new Date());          // the minute the name preview shows
   useEffect(() => { const h = setInterval(() => setNow(new Date()), 20000); return () => clearInterval(h); }, []);
   const [job, setJob] = useState(null);
   useEffect(() => {
-    if (ex.data && !form) setForm({ filename: ex.data.defaults.filename, format: initialFormat, quality: "standard", master: "standard", subtitles: false });
-    const r = ex.data?.jobs.find((j) => j.status === "running"); if (r && r.id !== job?.id) follow(r);
+    if (ex.data && !form) setForm({ filename: ex.data.defaults.filename, format: initialFormat, quality: "standard", master: "standard", subtitles: false,
+      sizes: ex.data.sizes ? [ex.data.sizes.master, ...ex.data.sizes.rows.filter((r) => r.status === "ready").map((r) => r.aspect)] : null });
+    // several sizes queue one render each: the one rendering now first, else the next one waiting
+    const run = ex.data?.jobs.filter((j) => j.status === "running") ?? [];
+    const r = run.find((j) => j.stage !== "waiting") ?? run.at(-1); if (r && r.id !== job?.id) follow(r);
     else if (!r && !job && ex.data?.jobs?.[0]) setJob(ex.data.jobs[0]);          // the last render, its result and its checks stay here after reopening
   }, [ex.data]); // eslint-disable-line react-hooks/exhaustive-deps
   const follow = (j) => { framesSince.current = null; setJob(j); watchJob(j.id, (x) => { if (!x) return;
     // the frames begin at HF's capture (its "rendering: capture" stage, at about 25 %): the setup before it is quick and said nothing of the frames
     if (framesSince.current == null && /^rendering: (capture|encode)/.test(x.stage ?? "")) framesSince.current = { at: Date.now(), from: Math.max(0, Math.min(100, Number(x.progress) || 0)) };
-    setJob(x); if (x.status !== "running") ex.reload(); }, 1000); };
+    setJob(x); if (x.status !== "running") { ex.reload(); if (queued.current > 1) { queued.current -= 1; setTimeout(() => ex.reload(), 1500); } } }, 1000); };
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-  const start = async () => { try { follow(await post(`/api/projects/${projectId}/exports`, { filename: form.filename, format: form.format, quality: form.quality, master: form.master, subtitles: !!form.subtitles })); } catch (e) { toast(e.message, "error"); } };
+  const start = async () => {
+    try {
+      const j = await post(`/api/projects/${projectId}/exports`, { filename: form.filename, format: form.format, quality: form.quality, master: form.master, subtitles: !!form.subtitles, ...(form.sizes ? { sizes: form.sizes } : {}) });
+      queued.current = j.queue?.length ?? 1;
+      follow(j);
+    } catch (e) { toast(e.message, "error"); }
+  };
   const stop = async () => { try { await post(`/api/jobs/${job.id}/cancel`); } catch (e) { toast(e.message, "error"); } };
   const file = (how, path) => post(`/api/projects/${projectId}/files/${how}`, { path }).catch((e) => toast(e.message, "error"));
   // in the Editor a render plays in the app; elsewhere the system's player opens it
@@ -141,13 +152,18 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
   const busy = job?.status === "failed" && job.error?.code === "CHECK_BUSY";
   const verdict = job?.error?.detail?.verdict;
   const d = ex.data.defaults;
+  // the film's sizes: the master and each other size made; one not up to date is said, never left out by the app
+  const sz = ex.data.sizes, sizeList = sz ? [{ aspect: sz.master, status: "master" }, ...sz.rows.filter((r) => r.status === "ready" || r.status === "stale")] : [];
+  const toggleSize = (a, on) => set("sizes", sizeList.map((x) => x.aspect).filter((x) => (x === a ? on : form.sizes?.includes(x))));
   // the loudness setting only means something when the film has music, a voice or sound effects
   const hasSound = !mix.data || !!(mix.data.music || mix.data.voice || mix.data.sfx?.length);
   return <div className="render-sheet">
     <section className="panel">
       <div className="form-cols">
         <label className="field"><span>{t("File name")}</span><input className="input" value={form.filename} onChange={(e) => set("filename", e.target.value)} maxLength={80} disabled={running} />
-          {form.filename.trim() && <span className="hint num render-name" title={t("The date and time of the render are added to the name")}>{stampedPreview(form.filename, form.format, now)}</span>}</label>
+          {/* a film of several sizes: one name per size ticked, each with its size (the server's rule: <film>_9x16) */}
+          {form.filename.trim() && <span className="hint num render-name" title={t("The date and time of the render are added to the name")}>{(ex.data.sizes && form.sizes?.length
+            ? form.sizes.map((a) => stampedPreview(`${form.filename.trim()}_${a.replace(":", "x")}`, form.format, now)) : [stampedPreview(form.filename, form.format, now)]).join(" · ")}</span>}</label>
         <label className="field"><span>{t("Format")}</span><select className="select" value={form.format} onChange={(e) => set("format", e.target.value)} disabled={running}>
           <option value="mp4">MP4 (H.264)</option><option value="mov">MOV</option><option value="webm">WebM</option></select></label>
         <label className="field"><span>{t("Quality")}</span><select className="select" value={form.quality} onChange={(e) => set("quality", e.target.value)} disabled={running}>
@@ -157,6 +173,11 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
         {hasSound && <label className="field" title={t("Evens out the sound to the web's level: -14 LUFS, true peak at most -1 dBTP")}><span>{t("Loudness")}</span><select className="select" value={form.master} onChange={(e) => set("master", e.target.value)} disabled={running || form.format === "webm"}>
           <option value="standard">{t("Standard, for web and social (recommended)")}</option><option value="quiet">{t("Quieter, -16 LUFS (a podcast, or when asked)")}</option><option value="off">{t("Keep the mix as it is")}</option></select></label>}
       </div>
+      {/* a film of several sizes: which to render, one file each named with its size (owner 06/11, #1232) */}
+      {sizeList.length > 1 && <fieldset className="render-sizes"><legend>{t("Sizes")}</legend>
+        {sizeList.map((x) => <label key={x.aspect} className="check"><input type="checkbox" checked={!!form.sizes?.includes(x.aspect)} disabled={running} onChange={(e) => toggleSize(x.aspect, e.target.checked)} />
+          <span className="num">{x.aspect}</span>{x.status === "master" ? <span className="hint">{t("Master")}</span> : x.status === "stale" ? <span className="hint render-stale">{t("Out of date")}</span> : null}</label>)}
+        <span className="hint">{t("One file for each size, named with its size.")}</span></fieldset>}
       {/* the subtitles as files beside the film, only when asked (owner 06/11 #1244) */}
       <label className="check render-subs"><input type="checkbox" checked={!!form.subtitles} disabled={running} onChange={(e) => set("subtitles", e.target.checked)} />
         <span>{t("Also save the subtitles (.srt and .vtt) for YouTube and Facebook")}</span></label>
@@ -166,14 +187,14 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
       <p className="hint num render-spec">{specLine(d, { aspect: film.data?.aspect ?? film.data?.meta?.format?.aspect, duration: film.data?.duration ?? film.data?.meta?.targetDurationSec }, form.format)}</p>
       <div className="row"><span className="spacer" />
         {running ? <button className="btn" onClick={stop}><Square size={14} />{t("Stop")}</button>
-          : <button className="btn primary" onClick={start} disabled={!form.filename.trim()}><Film size={16} />{job ? t("Render again") : t("Render")}</button>}</div>
+          : <button className="btn primary" onClick={start} disabled={!form.filename.trim() || (sizeList.length > 1 && !form.sizes?.length)}><Film size={16} />{job ? t("Render again") : t("Render")}</button>}</div>
     </section>
 
     {job && <section className="panel" aria-live="polite">
       <div className="panel-head">
         {running ? <Loader2 size={16} className="spin" /> : job.status === "done" ? <CheckCircle2 size={16} color="var(--status-ok)" className="icon-pop" /> : job.status === "cancelled" ? <Square size={16} />
           : busy ? <Hand size={16} color="var(--status-pending)" /> : <XCircle size={16} color="var(--status-stop)" />}
-        <h2>{running ? (job.stage === "checks" ? t("Quick check…") : t("Rendering")) : job.status === "done" ? t("Render finished") : job.status === "cancelled" ? t("Render stopped") : busy ? t("Waiting for you")
+        <h2>{job.settings?.size && sizeList.length > 1 ? <span className="num render-size">{job.settings.size}</span> : null}{running ? (job.stage === "checks" ? t("Quick check…") : t("Rendering")) : job.status === "done" ? t("Render finished") : job.status === "cancelled" ? t("Render stopped") : busy ? t("Waiting for you")
           : job.error?.code === "RENDER_BLOCKED" ? t("The render is blocked") : t("Render failed")}</h2>
         {running && <span className="muted end num">{leftText(renderProgress(job, framesSince.current).left, t) ?? t("working out the time left")}</span>}</div>
       {/* the percentage under the bar, the time left in the head (owner 03/11: HyperFrames' steps and why the check runs were more than anyone reads) */}

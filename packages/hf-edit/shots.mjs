@@ -162,6 +162,13 @@ export async function untimedFrames(file, { version = null } = {}) {
   return sb.frames.filter((f) => !(Number(f.durationSeconds) > 0)).map((f, i) => ({ number: f.number ?? f.index ?? i + 1, title: f.title ?? "", duration: f.duration ?? null }));
 }
 
+/** Each frame's length in seconds, in order (0 for a frame with none), as HyperFrames' storyboard parser reads it: for the pace warning (#1267). */
+export async function frameSeconds(file, { version = null } = {}) {
+  if (!existsSync(file)) return [];
+  const sb = (await loadHf(version)).storyboard.parseStoryboard(readFileSync(file, "utf8"));
+  return sb.frames.map((f) => (Number(f.durationSeconds) > 0 ? Number(f.durationSeconds) : 0));
+}
+
 /** The second each board still is taken at, as HyperFrames' storyboard.md says ("each shot's seconds", in film order): a frame's
  *  poster (its key moment, in film seconds or from the frame's own start) or the middle of its span. Null when a frame has no length
  *  in seconds: the board keeps the one-second rule. */

@@ -5,7 +5,7 @@
 // wrote). Below the frame: one frame back / play / one frame on (PageUp / PageDown jump a shot), time and shot, then tools named
 // in words: View (safe margins, grid, still, full screen), Loop, the speed, Sound.
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Camera, ChevronDown, Eye, Grid3x3, Loader2, Lock, MapPin, Maximize, Pause, Play, Repeat, RotateCcw, Scan, Sparkles, StepBack, StepForward, Volume2, VolumeX, X } from "lucide-react";
+import { AlertTriangle, Camera, ChevronDown, Eye, Grid3x3, Loader2, Lock, MapPin, Maximize, Pause, Play, RefreshCw, Repeat, RotateCcw, Scan, Sparkles, StepBack, StepForward, Volume2, VolumeX, X } from "lucide-react";
 import { Menu } from "../components.jsx";
 import { get, post } from "../api.js";
 import { usePref, useToast } from "../lib.jsx";
@@ -38,14 +38,16 @@ export function videoHandlers(setState, frame = (f) => requestAnimationFrame(f),
   };
 }
 
-export function usePreview(projectId) {
+/** size: one of the film's other sizes as its tag ("9x16"), shown from its own root page; null for the master. */
+export function usePreview(projectId, size = null) {
   const [info, setInfo] = useState(null);           // { url, origin }
   // ready: HF's runtime runs the film; assets: its pictures, video and fonts are in (HF's assetsready, host.js): the film shows only then
   const [state, setState] = useState({ ready: false, assets: false, time: 0, duration: 0, paused: true, error: null });
   // a film that cannot play live (Brush cartoon; the server decides: GET /preview-proxy's mode "prerendered") is shown as the
   // app's render of it, a plain video: the live page is not loaded, the commands drive the video (a step is one frame of the film's rate)
   const proxy = useProxy(projectId);
-  const videoOnly = proxy?.mode === "prerendered";
+  // (another size plays live from its own page: the render is the master's)
+  const videoOnly = proxy?.mode === "prerendered" && !size;
   const video = useRef(null);
   const [picked, setPicked] = useState([]);         // described elements (host.js describe())
   const [pickN, setPickN] = useState(0);            // counts the user's own picks (a click, a word in the Shots column): the same words picked again open their card again
@@ -53,7 +55,13 @@ export function usePreview(projectId) {
   const frame = useRef(null);
   const keyHandler = useRef(null);
   const dbl = useRef(null);
-  useEffect(() => { let alive = true; get(`/api/projects/${projectId}/preview`).then((r) => alive && setInfo(r)).catch((e) => alive && setState((s) => ({ ...s, error: e.message }))); return () => { alive = false; }; }, [projectId]);
+  useEffect(() => {
+    let alive = true;
+    // another size is another page: it loads (and is waited for) as the film does
+    setState((s) => ({ ...s, ready: false, assets: false, error: null }));
+    get(`/api/projects/${projectId}/preview${size ? `?size=${size}` : ""}`).then((r) => alive && setInfo(r)).catch((e) => alive && setState((s) => ({ ...s, error: e.message })));
+    return () => { alive = false; };
+  }, [projectId, size]);
   const send = useCallback((type, data = {}) => {
     if (videoOnly) {
       const v = video.current;
@@ -99,7 +107,24 @@ export function usePreview(projectId) {
     addEventListener("message", on);
     return () => removeEventListener("message", on);
   }, [info]);
-  return { info, state, picked, setPicked, pickN, boxes, frame, send, keyHandler, dbl, proxy, videoOnly, video, videoEvents };
+  return { info, state, picked, setPicked, pickN, boxes, frame, send, keyHandler, dbl, proxy, videoOnly, video, videoEvents, size };
+}
+
+/** The film's sizes at the left end of the playback bar (owner 06/11, #1236): shown only with two or more, one radio each; the arrow keys move
+ *  between them (and never step a frame meanwhile), the choice is remembered per film by the Editor. */
+function SizeSwitch({ sizes, size, onSize }) {
+  const t = useT();
+  const keys = (e) => {
+    const i = sizes.indexOf(size), d = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
+    if (!d && e.key !== "Home" && e.key !== "End") return;
+    e.preventDefault(); e.stopPropagation();
+    const next = e.key === "Home" ? 0 : e.key === "End" ? sizes.length - 1 : (i + d + sizes.length) % sizes.length;
+    onSize(sizes[next]);
+    e.currentTarget.querySelectorAll("button")[next]?.focus();
+  };
+  return <div className="segmented compact pv-sizes" role="radiogroup" aria-label={t("Size")} onKeyDown={keys}>
+    {sizes.map((a) => <button key={a} type="button" role="radio" aria-checked={a === size} aria-pressed={a === size} tabIndex={a === size ? 0 : -1}
+      className="num" onClick={() => onSize(a)} title={t("Show the film at {size}", { size: a })}>{a}</button>)}</div>;
 }
 
 /** Fonts for the edit card as one dropdown: the families this project uses, the font files the user added to it
@@ -380,7 +405,8 @@ const QUALITY = { full: "Full", half: "Half", quarter: "Quarter", auto: "Auto" }
 const SCALE_LEVEL = { 1: "full", 0.5: "half", 0.25: "quarter" };
 
 /** planned: the film is not built yet (GET /projects/:id built false), its planned length in seconds (0 when unknown); null once built. */
-export default function Player({ projectId, pv, shots, shot, onShot, locked, range, onFilesChanged, planned = null, pinning = false, onPin = null, styleCaptions = false, onVoice = null, children }) {
+export default function Player({ projectId, pv, shots, shot, onShot, locked, range, onFilesChanged, planned = null, pinning = false, onPin = null, styleCaptions = false, onVoice = null,
+  sizes = null, size = null, onSize = null, notice = null, children }) {
   const t = useT();
   const toast = useToast();
   const { info, state, picked, setPicked, pickN, boxes, frame, send, keyHandler, dbl } = pv;
@@ -399,7 +425,9 @@ export default function Player({ projectId, pv, shots, shot, onShot, locked, ran
   useEffect(() => { send("lock", { locked: !!locked }); }, [locked, send]);
   useEffect(() => { if (state.ready) send("quality", { level: quality }); }, [state.ready, quality, send]);
   const { proxy, videoOnly } = pv;
-  useEffect(() => { if (state.ready && !videoOnly) send("proxy", { url: proxy?.url ?? null, fresh: proxy?.status === "fresh" || !!proxy?.stems, duration: proxy?.duration ?? null, stems: proxy?.stems ?? null, levels: proxy?.levels ?? null, muted: proxy?.muted ?? null }); },
+  // another size has no render of its own yet: it plays live from its page (the master's render is not its picture)
+  useEffect(() => { if (state.ready && !videoOnly && pv.size) send("proxy", { url: null, fresh: false, duration: null, stems: null, levels: null, muted: null }); }, [state.ready, pv.size, send]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (state.ready && !videoOnly && !pv.size) send("proxy", { url: proxy?.url ?? null, fresh: proxy?.status === "fresh" || !!proxy?.stems, duration: proxy?.duration ?? null, stems: proxy?.stems ?? null, levels: proxy?.levels ?? null, muted: proxy?.muted ?? null }); },
     [state.ready, proxy?.url, proxy?.status, proxy?.duration, proxy?.stems?.key, JSON.stringify(proxy?.muted ?? null), send]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { setCard(true); }, [picked[0]?.hfId, picked[0]?.label, pickN]);
   const seek = (s) => send("seek", { time: Math.max(0, Math.min(state.duration || 0, s)) });
@@ -436,6 +464,7 @@ export default function Player({ projectId, pv, shots, shot, onShot, locked, ran
     const k = (e) => {
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName ?? "") || document.activeElement?.isContentEditable) return;
       if (document.querySelector(".sheet-overlay")) return;
+      if (document.activeElement?.closest?.(".pv-sizes")) return;          // the size switch's own arrow keys
       if (["Space", "ArrowLeft", "ArrowRight", "PageUp", "PageDown", "Home", "End"].includes(e.code)) { e.preventDefault(); onKey({ code: e.code, shift: e.shiftKey }); }
       else if (onPin && !e.ctrlKey && !e.metaKey && !e.altKey && (e.code === "KeyN" || (e.code === "Escape" && pinning))) { e.preventDefault(); onKey({ code: e.code }); }
     };
@@ -458,6 +487,9 @@ export default function Player({ projectId, pv, shots, shot, onShot, locked, ran
 
   const one = picked.length === 1 ? picked[0] : null;
   return <div className="pv" ref={stage}>
+    {/* the size shown is out of date (the master's picture changed after it was made): said here, above the film, never a block (#1236) */}
+    {notice && <div className="pv-notice" role="status"><AlertTriangle size={14} aria-hidden="true" /><span className="pv-notice-text">{notice.text}</span>
+      {notice.onAction && <button type="button" className="btn sm" disabled={notice.busy} onClick={notice.onAction}>{notice.busy ? <Loader2 size={13} className="spin" /> : <RefreshCw size={13} />}{notice.action}</button>}</div>}
     <div className="pv-stage">
       {/* no title: the app's tooltip would show "Film" over the picture; the frame is named for screen readers */}
       {/* before the Build the page is the new project's 3 s starter; it is not shown as the film */}
@@ -477,6 +509,7 @@ export default function Player({ projectId, pv, shots, shot, onShot, locked, ran
       {children}
     </div>
     <div className="pv-bar" role="toolbar" aria-label={t("Playback")}>
+      {sizes?.length > 1 && onSize && <SizeSwitch sizes={sizes} size={size ?? sizes[0]} onSize={onSize} />}
       <button className="btn ghost icon sm" disabled={loading || (videoOnly && !proxy?.url)} onClick={() => step(-1)} aria-label={t("One frame back")} title={t("One frame back (←) · previous shot: PageUp")}><StepBack size={15} /></button>
       <button className="btn icon sm pv-play" onClick={toggle} disabled={loading || (videoOnly && !proxy?.url)} aria-label={state.paused ? t("Play") : t("Pause")} title={t("Play / pause (Space)")}>{state.paused ? <Play size={15} /> : <Pause size={15} />}</button>
       <button className="btn ghost icon sm" disabled={loading || (videoOnly && !proxy?.url)} onClick={() => step(1)} aria-label={t("One frame on")} title={t("One frame on (→) · next shot: PageDown")}><StepForward size={15} /></button>

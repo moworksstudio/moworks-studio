@@ -9,6 +9,7 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import * as projects from "../project-service/index.mjs";
+import { adaptEnded } from "./sizes.mjs";
 import { docPath } from "../project-service/docs.mjs";
 import { filmLength } from "../hf-edit/ending.mjs";
 import * as pipe from "../pipeline/index.mjs";
@@ -655,6 +656,8 @@ export function createAutopilot(ctx) {
   async function taskEnded(id, task) {
     const p = projects.getProject(id, root);
     if (!p || p.missing || !task) return;
+    // an Adaptation task: its size is Ready when its root page is there, made from the master as it is now (sizes.mjs)
+    const adapted = task.step === "adaptation" ? adaptEnded(ctx, p, task) : null;
     // the files Claude wrote into assets/ are the app's own, never files "the user added" (T22-2)
     const wrote = (task.changed ?? []).map((c) => String(c?.path ?? c).replace(/\\/g, "/")).filter((x) => /^(assets|sources)\//.test(x));
     if (wrote.length) { try { rememberAssets(p.path, wrote); } catch { /* the Assets tab shows them as new once */ } }
@@ -720,6 +723,12 @@ export function createAutopilot(ctx) {
       // the user answered a step that ended with a question (a Review asking how to fix a still): the stage goes on from there
       const prev = ctx.agent.list?.(id)?.filter((t) => t.id !== task.id).at(-1);
       return advance(id, { afterChat: !(prev?.step && prev.status === "done" && pipe.asksOwner(prev.resultText)) });
+    }
+    // the Adaptation step is the owner's, size by size: nothing runs after it by itself
+    if (step === "adaptation") {
+      const size = task.size ?? "";
+      note(p, adapted ? "The {size} size is ready. Choose it under the player to watch it." : "Claude finished, but the {size} size's page is not there: press Adapt again.", { size });
+      return null;
     }
     if (step === "brief") {          // General: the way of working settled in docs/ASSETS.md ("Way: keep"), unless the user chose one
       const w = pipe.chosenWay(p.path);

@@ -5,13 +5,16 @@
 //   GET /<key>/runtime.js           HF runtime (fallback for projects without an embedded runtime)
 //   GET /<key>/host.js              the host page script (picking, marks, commands from the UI)
 //   GET /<key>/split-text.js        words animated letter by letter as one line (read by host.js; the server's hand edits use the same file)
-//   GET /<key>/p/<id>/__preview     host page with the player
+//   GET /<key>/p/<id>/__preview     host page with the player (?size=9x16: one of the film's other sizes, its own root page)
 //   GET /<key>/p/<id>/<file>        a project file (not .git, .claude, .moworks except its posters and its kept versions)
 import { createServer } from "node:http";
 import { randomBytes } from "node:crypto";
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { extname, join, normalize, resolve, sep } from "node:path";
 import { resolveRuntime } from "../version-manager/index.mjs";
+import { ASPECTS, aspectOfTag, entryOf } from "../project-service/sizes.mjs";
+
+const SIZE_TAG = /^(16x9|9x16|1x1|4x5)$/;
 
 const HOST_JS = join(import.meta.dirname, "host.js"), SPLIT_JS = join(import.meta.dirname, "splitText.js");
 
@@ -28,8 +31,8 @@ export function playerFiles(version = null) {
 }
 
 /** The host page: HF's player filling the page, the overlay that takes clicks for picking and draws the app's marks, and host.js. */
-function hostPage({ key, id, uiOrigin, width, height }) {
-  const src = `/${key}/p/${id}/index.html`;
+function hostPage({ key, id, uiOrigin, width, height, page = "index.html" }) {
+  const src = `/${key}/p/${id}/${page}`;
   return `<!doctype html><html><head><meta charset="utf-8"><title>Preview</title>
 <style>html,body{margin:0;height:100%;background:#2b2b2d;overflow:hidden}hyperframes-player{display:block;width:100%;height:100%;background:#2b2b2d}
 #ov{position:fixed;inset:0;cursor:default}#marks{position:fixed;inset:0;pointer-events:none}
@@ -37,7 +40,7 @@ function hostPage({ key, id, uiOrigin, width, height }) {
 #marks .sel.locked{border-style:dashed;border-color:#A8A298}#marks .safe{border:1px dashed rgba(255,255,255,.75);mix-blend-mode:difference}#marks .safe.title{border-style:dotted}
 #marks .grid{background:rgba(255,255,255,.6);mix-blend-mode:difference}</style>
 <script src="/${key}/player.js"></script></head>
-<body data-ui="${uiOrigin}" data-w="${width}" data-h="${height}" data-src="${src}">
+<body data-ui="${uiOrigin}" data-w="${width}" data-h="${height}" data-src="${src}" data-root="${page}">
 <hyperframes-player id="p" src="${src}" runtime-src="/${key}/runtime.js" width="${width}" height="${height}" disable-click-to-play assets-loading-ui="none" shader-loading="none"></hyperframes-player>
 <div id="ov" tabindex="0" aria-label="Film"></div><div id="marks"></div>
 <script src="/${key}/split-text.js"></script><script src="/${key}/host.js"></script></body></html>`;
@@ -84,6 +87,12 @@ export function startPreviewServer({ resolveProject, uiOrigin, version = null, p
       if (parts[3] === "__preview") {
         res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store",
           "Content-Security-Policy": `frame-ancestors ${uiOrigin}`, "X-Content-Type-Options": "nosniff" });
+        // one of the film's other sizes (?size=9x16, the Adaptation step): its root page at its own size, once it is written
+        const tag = SIZE_TAG.test(url.searchParams.get("size") ?? "") ? url.searchParams.get("size") : null, aspect = tag ? aspectOfTag(tag) : null;
+        if (aspect && existsSync(join(proj.dir, entryOf(aspect)))) {
+          const [w, h] = ASPECTS[aspect];
+          return res.end(hostPage({ key, id: parts[2], uiOrigin, width: w, height: h, page: entryOf(aspect) }));
+        }
         return res.end(hostPage({ key, id: parts[2], uiOrigin, width: proj.width ?? 1920, height: proj.height ?? 1080 }));
       }
       const rel = normalize(parts.slice(3).join("/"));

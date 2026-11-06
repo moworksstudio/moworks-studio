@@ -902,3 +902,19 @@ ul.pick-list { width: min(30rem, 80vw); }
 /* a Motion Plan shot's still takes the film's shape (--mo-ar from the project), a tall film's tile narrower, so nothing is cut */
 .mo2 .mo-still { aspect-ratio: var(--mo-ar, 16 / 9); width: min(100%, calc(9rem * var(--mo-ar, 1.7778))); align-self: center; }          /* at most 9rem tall */
 .mo2 .mo-tile .mo-still img { object-fit: contain; }
+
+/* The Adaptation sheet: the master, then one row per other size (its state in words with its status dot, its one action) */
+.sz-sheet { display: flex; flex-direction: column; gap: var(--sp-3); max-width: 40rem; }
+.sz-intro { margin: 0; }
+.sz-list { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: var(--r-lg); }
+.sz-row { display: grid; grid-template-columns: 4rem minmax(0, 1fr) auto auto; align-items: center; gap: var(--sp-3); min-height: 3rem; padding: 0.375rem var(--sp-3); }
+.sz-row + .sz-row { border-top: 1px solid var(--border); }
+.sz-row.master { grid-template-columns: 4rem minmax(0, 1fr); color: var(--text-secondary); }
+.sz-aspect { font-weight: var(--strong-weight); font-variant-numeric: tabular-nums; }
+.sz-state { display: flex; flex-wrap: wrap; align-items: center; gap: 0.375rem; min-width: 0; }
+.sz-row.stale .sz-state { color: var(--state-stop); }
+.sz-why { flex-basis: 100%; color: var(--text-secondary); font-size: var(--fs-meta); }
+.sz-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
+.sz-foot .menu-wrap > .btn.icon.sm { width: auto; padding: 0 0.75rem; border: 1.5px solid var(--btn-line, var(--border-strong)); }
+.sz-add { display: inline-flex; align-items: center; gap: 0.375rem; }
+.sz-wait { margin: 0; }

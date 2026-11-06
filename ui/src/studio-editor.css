@@ -388,3 +388,10 @@
 [data-theme="studio"] .st-chat .cnow .cs-m { grid-column: 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* a good state on paper (Key saved, Words checked, Saved, Default) is inked like a done station, never the registration red */
 [data-theme="studio"] .lt-sheet .chip.teal { border-color: var(--ink); color: var(--ink); background: transparent; }
+
+/* One film, several sizes on the light table: the pressed size is inked like the bar's other pressed tools; the out-of-date notice is a
+   paper slip above the film, its warning in the paper's red ink (the stamp red stays for the one action) */
+[data-theme="studio"] .lt-film .pv-sizes button[aria-checked="true"] { background: var(--ink); color: var(--paper); }
+[data-theme="studio"] .lt-film .pv-notice { margin-bottom: 0.6rem; border: 1px solid var(--state-stop-line); border-radius: var(--st-r-sm, 0.3rem); background: var(--paper-white); color: var(--ink); }
+[data-theme="studio"] .lt-film .pv-notice .btn { color: var(--ink); }
+[data-theme="studio"] .st-tl > .ed-shared { color: var(--room-ink-3, var(--text-muted)); border-top-color: var(--border); }

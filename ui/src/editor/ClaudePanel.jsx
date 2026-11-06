@@ -469,7 +469,7 @@ function Note({ n, projectId, toast, onPlay = null, onFix = null, onDetails = nu
 
 export default function ClaudePanel({ projectId, selectedShot, onClearTarget, onChanged, prefill, selection = null, inject = null, reloadKey = 0, motionPick = null, version1 = null, onVersionChanged = null,
   onOpenMotions = null, motionsOpen = false, onOpenSounds = null, soundsOpen = false, steps = null, rendering = false, actions = [], onWaiting = null, stage = null, interrupted = null, onPlay = null, onOpenSheet = null, checks = null,
-  waiting = null, pins = null, onPinsSent = null, onSeek = null, fps = 24 }) {
+  waiting = null, pins = null, onPinsSent = null, onSeek = null, fps = 24, editing = null }) {
   const t = useT();
   const toast = useToast();
   const claude = useClaude();
@@ -568,6 +568,8 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
       : { kind: "project" });
   const submit = async (msg, kind, motion, scope = null, heldPins = null) => {
     scope = scope ?? scopeOf(kind);
+    // the Film Editor shows one of the film's other sizes: the request is for that size (the agent names its root page)
+    if (editing && !scope.size) scope = { ...scope, size: editing };
     if (motion && msg.includes(motion.title)) scope.motion = { id: motion.id, name: motion.title, kind: motion.kind, version: motion.version ?? motion.credit?.commit ?? null, library: motion.library ?? "motion" };
     // the notes pinned on the film whose lines the message still holds go with it (each line's time, shot, place and words)
     // (a queued message keeps the notes it was queued with: their lines have left the box, and with them the pins)
@@ -669,7 +671,9 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
           <span className="t">{pinned.length === 1 ? t("Taking the picture of your note") : t("Taking the pictures of your {n} notes", { n: pinned.length })}</span><span className="cs-m"><Elapsed since={sentAt} /></span></div>}
         {queue.length > 0 && <div className="cqueue">{queue.map((q, i) => <span key={i} className="cchip"><span className="t">{t("Queued:")} {q.text}</span>
           <button className="btn ghost icon sm" onClick={() => setQueue((x) => x.filter((_, j) => j !== i))} aria-label={t("Remove from the queue")}><X size={12} /></button></span>)}</div>}
-        {(targetLabel || pinned.length > 0 || (motionCtx && text.includes(motionCtx.title))) && <div className="ctarget">
+        {(targetLabel || editing || pinned.length > 0 || (motionCtx && text.includes(motionCtx.title))) && <div className="ctarget">
+          {/* another size is shown: what Claude changes is that size, never the master by mistake (#1235) */}
+          {editing && <span className="cchip cpick csize" title={t("Claude changes the {size} size. The master and the sound stay as they are.", { size: editing })}><span className="t num">{t("Editing: {size}", { size: editing })}</span></span>}
           {pinned.length > 0 && <span className="cchip cpick" title={t("Each note goes with its frame and its place on the picture.")}><MapPin size={12} />
             <span className="t">{noteShots.length ? t(noteShots.length === 1 ? "Notes on shot {list}" : "Notes on shots {list}", { list: noteShots.join(", ") }) : t("Notes on the film")}</span></span>}
           {targetLabel && <span className="cchip cpick" title={t("Claude works on this. Clear it to work on the whole film.")}><span className="t">{t("Selected: {target}", { target: targetLabel })}</span>

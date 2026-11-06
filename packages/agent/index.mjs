@@ -208,9 +208,10 @@ export const APP_TOOLS = {
     inputSchema: { type: "object", properties: { option: { type: "string", description: "Only with frames: the option you fixed, e.g. \"B\"" },
       frames: { type: "array", items: { type: "number" }, description: "Only the frame numbers you changed, e.g. [2, 4]; leave out for every frame of every option" } } } },
   film_frames: { description: "Takes whole frames of the film at the seconds you name, as the render draws them with all their text, at the film's size, and returns their paths. Use it to look closer at one moment than the sheets show; hf_script's keyframes is a motion debug view (guide lines, no HTML text), never a frame of the film.",
-    inputSchema: { type: "object", properties: { at: { type: "array", items: { type: "number" }, maxItems: 6, description: "The film's seconds, e.g. [12.5, 98.7]; at most 6 a call" } }, required: ["at"] } },
-  qc_sheets: { description: "One QC round: takes stills of the film and returns the paths of the beats, cuts and phone sheets (a long film takes several pages of each: every shot and cut is on one), with every finding of HyperFrames' check (layout, contrast, motion, lint, script errors). The first round of a task adds a fresh-eyes look. Call it once per review round.",
-    inputSchema: { type: "object", properties: {} } },
+    inputSchema: { type: "object", properties: { at: { type: "array", items: { type: "number" }, maxItems: 6, description: "The film's seconds, e.g. [12.5, 98.7]; at most 6 a call" },
+      size: { type: "string", description: "Only for one of the film's other sizes (the Adaptation step), e.g. \"9:16\": its root page's frames; leave out for the master" } }, required: ["at"] } },
+  qc_sheets: { description: "One QC round: takes stills of the film and returns the paths of the beats, cuts and phone sheets (a long film takes several pages of each: every shot and cut is on one), with every finding of HyperFrames' check (layout, contrast, motion, lint, script errors). The first round of a task adds a fresh-eyes look. Call it once per review round. In the Adaptation step, give size (e.g. \"9:16\") for the stills of that size's root page.",
+    inputSchema: { type: "object", properties: { size: { type: "string", description: "Only in the Adaptation step: the size whose root page to take, e.g. \"9:16\"; leave out for the master" } } } },
   library_search: { description: "Searches the whole Motion Library (HyperFrames registry blocks and components, the studio's motions, Magic UI, Codrops, HyperFrames looks) for what a shot needs, in plain words. Returns 5-10 items: the id to cite in docs/MOTION-PLAN.json (the app copies that item's code into the project), its name and what it is. Call it for each shot before writing any new move for it: once for what the shot needs, once for what would make it more fun and alive.",
     inputSchema: { type: "object", properties: { query: { type: "string", description: "What the shot needs, e.g. \"headline letters slam in one by one\"" },
       kind: { type: "string", enum: ["motion", "block", "look", "vocab", "any"], description: "motion (how things move), block (a whole layout), look (a Brand Kit), vocab (a move's name and the author's numbers for it, from the motion vocabulary file: words and numbers to write from, never code to copy); default any (never vocab)" },
@@ -227,7 +228,7 @@ export const APP_TOOLS = {
       ambience: { type: "boolean", description: "false: no ambience beds under the scenes" },
       density: { type: "string", enum: ["low", "normal", "lively"], description: "How many sounds: low (only the big actions), normal, lively (every action, the default)" },
       restore: { type: "boolean", description: "true: bring back every single sound the owner took out in Final Mix" } } } },
-  music_stop: { description: "Stops the film's music track at a second of the film, or plays it to its end again (with its fade out) with at: null. The music plays to the film's end by default: stop it only in a What If film (at the turn), a Ricks Clip film (at its twist line: its own rule) or when the owner or the brief asks for it. Only when the film has music on the timeline; the owner can change it in Final Mix.",
+  music_stop: { description: "Stops the film's music track at a second of the film, or plays it to its end again (with its fade out) with at: null. The music plays to the film's end by default: stop it only in a What If film (at the turn), a Ricks Clip film (at its twist line: its own rule), a 3D Cartoon film whose Motion Plan chose it (in the pause before \"You see,\" or the kicker) or when the owner or the brief asks for it. Only when the film has music on the timeline; the owner can change it in Final Mix.",
     inputSchema: { type: "object", properties: { at: { type: ["number", "null"], description: "The second of the film where the music stops; null to let it play to its end" } }, required: ["at"] } },
   font_check: { description: "Checks fonts before you name them anywhere (BRIEF.md, docs/ASSETS.md, design.md, frame.md, a board, the film): for each family, whether the app can serve it in this project (bundled, on Google Fonts, or a font file in assets/) and whether it draws Vietnamese letters, with Vietnamese fonts the app bundles to choose from. Call it in Prepare and whenever you choose a font (Test 10 #435).",
     inputSchema: { type: "object", properties: { families: { type: "array", items: { type: "string" }, maxItems: 12 } }, required: ["families"] } },
@@ -239,7 +240,7 @@ export const APP_TOOLS = {
     inputSchema: { type: "object", properties: {} } },
   pose_check: { description: "Draws EVERY frame of the project's anidoodle film (anidoodle/page.ts) without a browser and lists each pose outside its joint limits, each error the film throws or logs (console.error is a script error for HyperFrames and stops the render) and each rig point that is not a number, with the times. Call it after the Build and after fixing a pose; the Review's qc_sheets includes it.",
     inputSchema: { type: "object", properties: {} } },
-  collision_check: { description: "A 3D Cartoon film only: its source skill's own collision check (its qa) on EVERY frame of the film: each character's body against the solid furniture (box and cylinder meshes) and against the other characters, and feet below the floor, with the seconds and the depth. Call it after every change to the blocking (positions, walks, poses, props) and before the film is done; fix what it names in the film's own world.ts and shots.ts until it says COLLISION none. The Review and Tech checks run it too.",
+  collision_check: { description: "A 3D Cartoon or a Ricks Clip film only. A Ricks Clip film: the app's check of its cards (each actor of actorsAt a stand-in about its drawn body's width, 2.25 m tall) against the world's box and cylinder set pieces and the other characters, on every frame, with the seconds and the depth; fix what it names in film/story.js or film/main.js until it says COLLISION none (a warning). A 3D Cartoon film: its source skill's own collision check (its qa) on EVERY frame of the film: each character's body against the solid furniture (box and cylinder meshes) and against the other characters, and feet below the floor, with the seconds and the depth. Call it after every change to the blocking (positions, walks, poses, props) and before the film is done; fix what it names in the film's own world.ts and shots.ts until it says COLLISION none. Beside it, on the same frames, the app's held-prop check: a hand more than about 2 cm off a held prop's userData.grip, a held prop inside a table or through a body (HELD lines, a warning). The Review and Tech checks run it too.",
     inputSchema: { type: "object", properties: {} } },
   paper_cutout: { description: "A Paper Collage film only: makes the look's cut-out of one picture with its source skill's own tools (cutout.py, then halftone.py): its flat green or white background taken out (a transparent PNG keeps its own), then a black-and-white halftone print with a thin white paper edge (mode halftone), or the picture without its background in its own colours (mode clean). The owner's picture is never changed: the new file goes in assets/graphics/cutouts/ with a row in its INDEX.md. The kit's IMAGES.md order holds: an object on a transparent or flat background → a cut-out; a photo → PhotoPrint with the original; a screenshot or a logo untouched; never a real person's face. Returns the new file's path and size.",
     inputSchema: { type: "object", properties: { file: { type: "string", description: "The picture's path in the project, e.g. assets/images/globe.png" },
@@ -381,7 +382,7 @@ export function prepareRules(dir, styleId, root = APP_ROOT) {
     writeJson(join(to, "index.json"), { key, styleId: style.id, rules: want.map(({ name, hash, kind, role }) => ({ name, hash, kind, ...(role ? { role } : {}) })), at: new Date().toISOString() });
   }, (d) => existsSync(join(d, "index.json")) && want.every((w) => existsSync(join(d, w.name, "SKILL.md"))));
   linkOrCopy(base, shared);          // the link, or on a drive with no links a copy (kept while it is of the same rules)
-  const path = (w) => `.moworks/rules/${w.name}/SKILL.md`;  const main = want.filter((w) => w.role !== "qc" && w.role !== "kind" && w.role !== "vocab");          // a film kind's rule is read only when the kind is chosen (reads.mjs)
+  const path = (w) => `.moworks/rules/${w.name}/SKILL.md`;  const main = want.filter((w) => w.role !== "qc" && w.role !== "kind" && w.role !== "vocab" && w.role !== "adaptation");          // a film kind's rule is read only when the kind is chosen (reads.mjs)
   return { style, files: main.map(path), first: main.filter((w) => style.readFirst?.includes(w.name)).map(path), qc: want.filter((w) => w.role === "qc").map(path) };
 }
 
@@ -913,7 +914,7 @@ export class Agent {
   // label: what the chat calls the task when it is not a step's own (the turn answering a revision's question is "Storyboard · revision")
   // continues: the step whose question this chat turn answers: the Pipeline shows that step at work; the turn stays a chat turn
   // resumeOf: the task whose reply was cut at the output limit before it was done (T23-2): this one goes on in its conversation
-  async start(projectId, { text, scope = { kind: "project" }, step = null, kickoff = false, retryOf = null, shown = null, label = null, media = null, asks = null, continues = null, resumeOf = null, by = null }) {
+  async start(projectId, { text, scope = { kind: "project" }, step = null, kickoff = false, retryOf = null, shown = null, label = null, media = null, asks = null, continues = null, resumeOf = null, by = null, size = null }) {
     const msg = String(text ?? "").trim();
     if (!msg) throw Object.assign(new Error("Write what you want Claude to do"), { code: "INVALID" });
     if (this.running.has(projectId)) throw Object.assign(new Error("Claude is still working on this project. Stop it or wait for it to finish."), { code: "BUSY" });
@@ -943,6 +944,8 @@ export class Agent {
       stage: "preparing", text: msg, scope, events: [], resultText: "", error: null, changed: [], qa: null, model: null, modelSetting: settings.model, outcome: null,
       settings: { mode: settings.mode, effort: settings.effort, ...(se.rule ? { effortRule: se.rule } : {}), web: settings.web }, session: { key, fresh: !!step || freshChat || !conv.sessions[key] },
       ...(step ? { step } : {}), ...(by === "app" ? { by } : {}), ...(kickoff ? { kickoff: true } : {}), ...(retryOf ? { retryOf } : {}), ...(resumeOf ? { resumeOf } : {}), ...(shown ? { shown: String(shown).slice(0, 20000) } : {}), ...(label ? { label: String(label).slice(0, 80) } : {}), ...(asks ? { asks: String(asks).slice(0, 80) } : {}), ...(continues && !step ? { continues: String(continues).slice(0, 40) } : {}),
+      // the Adaptation step's size (server/sizes.mjs): the pipeline shows it running, its end marks it Ready
+      ...(size && step === "adaptation" ? { size: String(size).slice(0, 8) } : {}),
       // pictures the chat card shows with the user's words (each film note's frame: { url, t, shot, text }), never a file path
       ...(Array.isArray(media) && media.length ? { media: media.slice(0, 200) } : {}) };
     this.tasks.set(task.id, task);
@@ -1009,6 +1012,10 @@ export class Agent {
         : scope.kind === "shot" && scope.shot
         ? `Target: Shot ${scope.shot.number} "${scope.shot.title}" (${scope.shot.src ?? "no file yet"}, ${scope.shot.start ?? "?"}-${scope.shot.start != null && scope.shot.duration != null ? +(scope.shot.start + scope.shot.duration).toFixed(2) : "?"} s)${scope.object ? `, object: ${scope.object}` : ""}. Change only this shot unless the request says otherwise.`
         : "Target: the whole project.";
+      // the Film Editor's size switch on one of the film's other sizes (the Adaptation step): the request is for that size's picture
+      const sizeTo = scope.size && /^(9:16|16:9|1:1|4:5)$/.test(String(scope.size)) && scope.size !== meta.format?.aspect ? String(scope.size) : null;
+      const sizeLine = sizeTo ? `
+Size: the owner is editing the ${sizeTo} size: change its root page index.${sizeTo.replace(":", "x")}.html and the files of that size alone (".${sizeTo.replace(":", "x")}." in their names), as .moworks/rules/adaptation/SKILL.md says; the master (index.html) and the other sizes stay as they are. A change to the sound is the master's and every size's: the sound is shared.` : "";
       let motion = "";
       if (scope.motion?.id && scope.motion.library === "blocks") {     // a HyperFrames registry block / component, used as shipped
         const entry = registryItems(this.root).find((e) => e.id === scope.motion.id);
@@ -1042,7 +1049,7 @@ export class Agent {
       task.lang = lang;
       // the pipeline and the news live in the request only (they change every task; the system prompt carries what holds for the project);
       // the request ends with the language of the replies (replyLanguage)
-      const prompt = taskRequest({ target, motion, pipeline, news: newsText, before, msg, lang });
+      const prompt = taskRequest({ target: target + sizeLine, motion, pipeline, news: newsText, before, msg, lang });
       const tools = this.permitUrl ? Object.keys(this.appTools).filter((n) => APP_TOOLS[n]) : [];
       // the rule files this step must read (reads.mjs, after HF's own mandatory reads): named in the prompt, checked before the first edit
       const required = requiredReads(dir, { styleId: meta.style?.id, first, step });

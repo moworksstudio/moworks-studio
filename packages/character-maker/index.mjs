@@ -7,6 +7,9 @@
 //   the Character step draws them; saved in <work>/library/characters/user/ like a character saved from a film.
 // - ricks-clip (Ricks Clip, owner 05/11/2026 #1076, audit/102 §9): a person as one file on the owner's source skill and the app's cast layer
 //   (front, back, profile, one pose layer), its checks and sheet by the lab's rc-check / rc-sheet; saved in <work>/library/characters/ricks-clip/<id>/.
+// - cartoon-3d (3D Cartoon, owner #1267, audit/111 B6): a person as one module on the owner's 3D Cartoon source skill (its CharDef and buildCharacter,
+//   a costume and accessories in its character-builder's way), its checks and sheet by the lab's c3-check / c3-sheet; saved in
+//   <work>/library/characters/cartoon-3d/<id>/.
 // Change with Claude is the same run, starting from the saved character (the version before is kept). The prompts, styles and the
 // measured estimates are in config/character-maker.json. Renders run light (the caller's workers, below-normal priority), as the lab
 // tools do. The HyperFrames calls stay in the lab tools (child processes) or come from the caller, so this package is outside that
@@ -21,6 +24,7 @@ import { APP_ROOT, loadPins } from "../version-manager/index.mjs";
 import * as kit from "../character-kit/index.mjs";
 import { brushGate } from "../character-kit/brushgate.mjs";
 import { RICKS_ENGINE, ricksCharacters, ricksDir, ricksFolder, ricksModule, ricksRecord } from "../character-kit/ricks.mjs";
+import { C3D_CAST_DIR, C3D_ENGINE, c3dDir, c3dFolder, c3dModule, c3dRecord } from "../character-kit/c3d.mjs";
 import { anidoodleSource, stageEngine } from "../anidoodle-styles/index.mjs";
 import { stageGuide as stageRicks } from "../moworks-styles/index.mjs";
 import { claudeEnv, findClaude } from "../system-status/index.mjs";
@@ -54,7 +58,7 @@ export function rigOf(engine, asked, saved, root = APP_ROOT) {
   const ok = rigsFor(engine, root).map((x) => x.id);
   if (saved) return saved;
   if (asked == null || asked === "") return ok[0] ?? null;
-  if (!ok.includes(asked)) throw Object.assign(new Error(`${engine === "brush-kit" ? "Brush cartoon" : engine === RICKS_ENGINE ? "Ricks Clip" : "anidoodle"} does not draw this kind of character: ${asked} (it draws ${ok.join(", ")})`), { code: "INVALID" });
+  if (!ok.includes(asked)) throw Object.assign(new Error(`${engine === "brush-kit" ? "Brush cartoon" : engine === RICKS_ENGINE ? "Ricks Clip" : engine === C3D_ENGINE ? "3D Cartoon" : "anidoodle"} does not draw this kind of character: ${asked} (it draws ${ok.join(", ")})`), { code: "INVALID" });
   return asked;
 }
 /** The styles the creator offers: { engine, hand, label, example?, thumb, thumbCredit, rigs } (the 9 anidoodle hands and Brush cartoon),
@@ -64,9 +68,10 @@ export function styles(root = APP_ROOT) {
   return (c.styles ?? []).map((s) => ({ ...s, estimate: c.estimate?.[s.engine] ?? null, rigs: rigsFor(s.engine, root),
     thumb: s.engine === "brush-kit" ? "/media/characters/clawd/poster.webp" : thumbFile(`${s.hand}.webp`) ? `/media/character-styles/${s.hand}.webp` : null,
     thumbCredit: s.engine === "brush-kit" ? "Clawd, the demo character of ClaudeAnimationBase (John Heibel, MIT; Anthropic's mascot), drawn by the app's character layer to show the look: never in a film"
-      : s.engine === RICKS_ENGINE ? "the legionary of the Ricks Clip film style's source skill (its worked example), front, back and profile, drawn by its own code" : "Mira, anidoodle's character by Alex Greenshpun (Apache-2.0), in this hand" }));
+      : s.engine === RICKS_ENGINE ? "the legionary of the Ricks Clip film style's source skill (its worked example), front, back and profile, drawn by its own code"
+      : s.engine === C3D_ENGINE ? "Mika, Ravi, June and Otto, the 3D Cartoon film style's own cast (the owner's source skill), drawn by its own code" : "Mira, anidoodle's character by Alex Greenshpun (Apache-2.0), in this hand" }));
 }
-export const styleOf = (engine, hand, root = APP_ROOT) => styles(root).find((s) => s.engine === engine && (engine === "brush-kit" || engine === RICKS_ENGINE || s.hand === hand)) ?? null;
+export const styleOf = (engine, hand, root = APP_ROOT) => styles(root).find((s) => s.engine === engine && (engine === "brush-kit" || engine === RICKS_ENGINE || engine === C3D_ENGINE || s.hand === hand)) ?? null;
 
 /** A free id for a new character from its name or description: lowercase letters, digits and dashes, never one the app ships (Mira → mira-2),
  *  never one of the user's. */
@@ -137,6 +142,16 @@ export function prepareLab(job, root = APP_ROOT) {
     cpSync(join(root, "config", "rules", "ricks-clip-character", "CONTRACT.md"), join(lab, ".moworks", "rules", "ricks-clip-character", "CONTRACT.md"));
     if (from) cpSync(ricksModule(from, root), join(lab, "characters", `${id}.js`));          // Change with Claude: the saved file back in place
     return { lab, brief: fill(c.prompts[RICKS_ENGINE], vars), allowed: ["Bash(node tools/rc-check.mjs:*)", "Bash(node tools/rc-sheet.mjs:*)"] };
+  }
+  if (engine === C3D_ENGINE) {
+    for (const d of ["characters", "out", "reference"]) mkdirSync(join(lab, d), { recursive: true });
+    copyTools(lab, ["c3-check.mjs", "c3-sheet.mjs"], root);
+    // the source skill read-only where a film reads it (the shared stage), the app's page beside it, the contract in the rules
+    stageRicks(lab, C3D_ENGINE, root);
+    mkdirSync(join(lab, ".moworks", "rules", "cartoon-3d-character"), { recursive: true });
+    cpSync(join(root, "config", "rules", "cartoon-3d-character", "CONTRACT.md"), join(lab, ".moworks", "rules", "cartoon-3d-character", "CONTRACT.md"));
+    if (from) cpSync(c3dModule(from, root), join(lab, "characters", `${id}.ts`));          // Change with Claude: the saved file back in place
+    return { lab, brief: fill(c.prompts[C3D_ENGINE], vars), allowed: ["Bash(node tools/c3-check.mjs:*)", "Bash(node tools/c3-sheet.mjs:*)"] };
   }
   copyTools(lab, ["brush-sheets.mjs"], root);
   kit.stageGuide(lab, root);
@@ -211,7 +226,7 @@ const toWebp = (root, src, out, w = 1600) => ff(root, ["-i", src, "-vf", `scale=
 
 /** Make (or change) a character: the whole run. onStep(stage, progress) for the job; log(line). Returns the saved character's summary. */
 export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = null, onStep = () => {}, log = () => {}, env = {}, renderDemo = null, claude = runClaude, runTool = tool } = {}) {
-  const engine = ["brush-kit", RICKS_ENGINE].includes(input.engine) ? input.engine : kit.HUMAN_ENGINE, hand = engine === "brush-kit" ? "brush" : engine === RICKS_ENGINE ? "ricks" : input.hand;
+  const engine = ["brush-kit", RICKS_ENGINE, C3D_ENGINE].includes(input.engine) ? input.engine : kit.HUMAN_ENGINE, hand = engine === "brush-kit" ? "brush" : engine === RICKS_ENGINE ? "ricks" : engine === C3D_ENGINE ? "cartoon" : input.hand;
   const c = config(root), est = c.estimate?.[engine] ?? null, expectMs = est ? ((est.minutes[0] + est.minutes[1]) / 2) * 60000 : 20 * 60000;
   const from = input.from ?? null;
   // a character the app ships is changed as the user's own copy (copy on write: saveHuman writes only to the user's folder). The author's rigs
@@ -223,10 +238,11 @@ export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = nu
   }
   if (from && engine === "brush-kit" && kit.getCharacter(from, root)?.group !== "yours") throw Object.assign(new Error("Only your own Brush characters can be changed"), { code: "INVALID" });
   if (from && engine === RICKS_ENGINE && !ricksModule(from, root)) throw Object.assign(new Error("No such character"), { code: "NOT_FOUND" });
+  if (from && engine === C3D_ENGINE && !c3dModule(from, root)) throw Object.assign(new Error("No such character"), { code: "NOT_FOUND" });
   const id = from ?? newId(input.name || input.description, root);
   if (!String(input.description ?? "").trim() && !from) throw Object.assign(new Error("Describe the character first"), { code: "INVALID" });
   const savedRec = from && engine === kit.HUMAN_ENGINE ? kit.humanCharacters(root).find((x) => x.id === from) : null, savedHand = savedRec ? savedRec.hand ?? savedRec.hands?.[0] ?? null : null;
-  const beforeRec = from ? (engine === kit.HUMAN_ENGINE ? kit.humanRecord(from, root) : engine === RICKS_ENGINE ? ricksRecord(from, root) : kit.getCharacter(from, root)) : null;
+  const beforeRec = from ? (engine === kit.HUMAN_ENGINE ? kit.humanRecord(from, root) : engine === RICKS_ENGINE ? ricksRecord(from, root) : engine === C3D_ENGINE ? c3dRecord(from, root) : kit.getCharacter(from, root)) : null;
   const rig = rigOf(engine, input.rig, from ? beforeRec?.kind ?? (engine === "brush-kit" ? "thing" : "human") : null, root);
   const job = { jobId, engine, rig, hand: savedHand ?? hand, id, name: input.name || beforeRec?.name || null, description: input.description || beforeRec?.description || beforeRec?.about || "",
     image: input.image ?? null, change: from ? (input.text || input.change || "") : null, from };
@@ -240,7 +256,7 @@ export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = nu
   const run = await claude({ lab, brief, allowed, root, model: c.model ?? "claude-opus-5-5", effort: c.effort ?? "medium", env, signal, onEvent: (e) => {
     if (e.kind === "tool") {
       const cmd = e.command ?? "";
-      const stage = /gate\.mjs|rc-check/.test(cmd) ? "Claude is running the character gate" : /still\.mjs|brush-sheets|rc-sheet/.test(cmd) ? "Claude is drawing the model sheet"
+      const stage = /gate\.mjs|rc-check|c3-check/.test(cmd) ? "Claude is running the character gate" : /still\.mjs|brush-sheets|rc-sheet|c3-sheet/.test(cmd) ? "Claude is drawing the model sheet"
         : /render\.mjs/.test(cmd) ? "Claude is rendering a test" : ["Write", "Edit"].includes(e.name) ? "Claude is writing the character" : "Claude is studying the examples";
       onStep(stage, pct());
       log(`${e.name}${cmd ? `: ${cmd}` : e.file ? `: ${basename(e.file)}` : ""}`);
@@ -255,6 +271,9 @@ export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = nu
   if (from) {
     if (engine === RICKS_ENGINE) {
       const a = readFileSync(ricksModule(from, root), "utf8"), f = join(lab, "characters", `${from}.js`), b = existsSync(f) ? readFileSync(f, "utf8") : a;
+      changes = a === b ? [] : ["module"];
+    } else if (engine === C3D_ENGINE) {
+      const a = readFileSync(c3dModule(from, root), "utf8"), f = join(lab, "characters", `${from}.ts`), b = existsSync(f) ? readFileSync(f, "utf8") : a;
       changes = a === b ? [] : ["module"];
     } else if (engine === kit.HUMAN_ENGINE) {
       const a = filesOf(join(kit.humanFolder(from, root), "module", from)), b = filesOf(join(lab, "anidoodle", "characters", from));
@@ -277,6 +296,7 @@ export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = nu
   }
   const saved = engine === kit.HUMAN_ENGINE ? await saveHuman({ job, lab, run, runInfo, root, env, signal, onStep, log, before: beforeRec, runTool })
     : engine === RICKS_ENGINE ? await saveRicks({ job, lab, runInfo, root, env, signal, onStep, log, before: beforeRec, runTool })
+    : engine === C3D_ENGINE ? await saveC3d({ job, lab, runInfo, root, env, signal, onStep, log, before: beforeRec, runTool })
     : await saveBrush({ job, lab, runInfo, root, env, signal, onStep, log, renderDemo, before: beforeRec });
   const outcome = !from ? "created" : says.couldNot ? "partly" : "changed";
   const history = kit.addHistory(id, { kind: from ? "change" : "create", text: job.change ?? job.description, outcome, changes, says, ...runInfo }, root);
@@ -363,6 +383,41 @@ export async function saveRicks({ job, lab, runInfo, root, env, signal, onStep, 
   return { id, engine: RICKS_ENGINE, kind: "human", hand: "ricks", name: record.name, gate };
 }
 
+/** The 3D Cartoon character (#1267): its checks again (the app's own run), its sheet and life clip drawn by the source skill, everything into the store. */
+export async function saveC3d({ job, lab, runInfo, root, env, signal, onStep, log, before = null, runTool = tool }) {
+  const { id } = job, file = join(lab, "characters", `${id}.ts`);
+  if (!existsSync(file)) throw Object.assign(new Error(`Claude did not write characters/${id}.ts`), { code: "CLAUDE_FAILED", detail: { lab } });
+  onStep("checking the character gate", 87);
+  const g = await runTool(lab, ["tools/c3-check.mjs", `characters/${id}.ts`, "--json", "out/check.json"], { root, env, signal });
+  const m = /(\d+) passed, (\d+) failed/.exec(g.out), gate = m ? { passed: +m[1], failed: +m[2] } : { passed: 0, failed: null };
+  log(`gate: ${m ? m[0] : "did not run"}`);
+  if (g.code !== 0 || !m || gate.failed) throw Object.assign(new Error(`The character gate did not pass: ${g.out.split(/\r?\n/).filter((l) => l.startsWith("FAIL")).map((l) => l.slice(6)).join(" | ") || g.out.trim().split(/\r?\n/).pop()}`), { code: "GATE_FAILED", detail: { lab } });
+  onStep("drawing the model sheet", 90);
+  const s = await runTool(lab, ["tools/c3-sheet.mjs", `characters/${id}.ts`, "out/sheet.png", "--life", "out/life"], { root, env, signal });
+  if (s.code !== 0) throw Object.assign(new Error(`The model sheet could not be drawn: ${s.out.trim().split(/\r?\n/).pop()}`), { code: "RENDER_FAILED", detail: { lab } });
+  onStep("saving to the library", 96);
+  if (kit.userStoreInRepo(root)) throw Object.assign(new Error("The characters store is inside the app's repository: a user's characters are never kept there"), { code: "INVALID" });
+  const dir = join(c3dDir(root), id);
+  kit.removeFromStore(dir, root);          // a change: the version before was kept first (snapshot)
+  mkdirSync(join(dir, "module"), { recursive: true });
+  cpSync(file, join(dir, "module", `${id}.ts`));
+  cpSync(join(lab, "out", "check.json"), join(dir, "check.json"));
+  await toWebp(root, join(lab, "out", "sheet.png"), join(dir, "sheet.webp"), 2400);
+  const { LIFE_FPS } = await import("../moworks-styles/c3d-page.mjs");
+  await ff(root, ["-framerate", String(LIFE_FPS), "-i", join(lab, "out", "life", "frame-%04d.png"), "-vf", "scale=960:-2", "-r", "30", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20", "-movflags", "+faststart", join(dir, "life.mp4")]);
+  await ff(root, ["-ss", "0", "-i", join(dir, "life.mp4"), "-frames:v", "1", "-vf", "crop=ih*0.8:ih,scale=480:-1", "-c:v", "libwebp", "-quality", "82", join(dir, "poster.webp")]);
+  const own = readJson(join(lab, "out", "check.json"), {})?.record ?? {}, pin = loadPins(root).moworksStyles?.sources?.[C3D_ENGINE] ?? {};
+  const savedName = job.name || before?.name || own.name || id;
+  const record = { id, name: savedName, about: alignAbout(own.about || before?.about || job.description, savedName), engine: C3D_ENGINE, kind: "human",
+    ...(Number(own.heightM) > 0 ? { heightM: Number(own.heightM), heightBy: "inferred", heightNote: null } : {}), hand: "cartoon", hands: ["cartoon"], def: own.def ?? null,
+    description: job.description, version: (before?.version ?? 0) + 1, changes: [...(before?.changes ?? []), ...(job.change ? [{ at: new Date().toISOString(), text: job.change }] : [])],
+    credit: { author: "The owner (made by Claude on 3D Cartoon's cast)", link: null, licence: "the owner's own; built on the owner's 3D Cartoon source skill", made: "written from the idea",
+      engine: { source: C3D_ENGINE, title: pin.title ?? null, version: pin.version ?? null, sha256: pin.sha256 ?? null }, run: before?.credit?.run ?? runInfo, gate },
+    module: [`${id}.ts`], savedAt: new Date().toISOString() };
+  writeFileSync(join(dir, "character.json"), JSON.stringify(record, null, 2) + "\n");
+  return { id, engine: C3D_ENGINE, kind: "human", hand: "cartoon", name: record.name, gate };
+}
+
 /** The Brush character: its sheets drawn (when Claude did not), saved as a character from a film is, its showreel made. */
 async function saveBrush({ job, lab, runInfo, root, env, signal, onStep, log, renderDemo, before = null }) {
   const { id } = job, cast = kit.readCast(lab);
@@ -397,7 +452,7 @@ async function saveBrush({ job, lab, runInfo, root, env, signal, onStep, log, re
 }
 
 // ---- versions and Undo: before a change is saved, the character as it was goes to <store>/_versions/<id>/<n>/ (the last 5 kept)
-const engineOf = (id, root) => (ricksFolder(id, root) ? RICKS_ENGINE : kit.humanCharacters(root).some((c) => c.id === id) ? kit.HUMAN_ENGINE : kit.getCharacter(id, root)?.group === "yours" ? "brush-kit" : null);
+const engineOf = (id, root) => (ricksFolder(id, root) ? RICKS_ENGINE : c3dFolder(id, root) ? C3D_ENGINE : kit.humanCharacters(root).some((c) => c.id === id) ? kit.HUMAN_ENGINE : kit.getCharacter(id, root)?.group === "yours" ? "brush-kit" : null);
 /** Keep the character as it is now as a version: its n. A character the app ships with no copy of the user's yet needs nothing kept: it stays in
  *  bundle/, and Undo takes the user's copy away again (the version says "shipped"). */
 export function snapshot(id, label, root = APP_ROOT) {
@@ -408,11 +463,12 @@ export function snapshot(id, label, root = APP_ROOT) {
   mkdirSync(d, { recursive: true });
   if (engine === kit.HUMAN_ENGINE) { if (!shipped) cpSync(join(kit.humanDir(root), id), join(d, "human"), { recursive: true }); }
   else if (engine === RICKS_ENGINE) cpSync(ricksFolder(id, root), join(d, "ricks"), { recursive: true });
+  else if (engine === C3D_ENGINE) cpSync(c3dFolder(id, root), join(d, "c3d"), { recursive: true });
   else {
     cpSync(join(kit.userDir(root), `${id}.json`), join(d, "user.json"));
     if (existsSync(join(kit.mediaRoot(root), id))) cpSync(join(kit.mediaRoot(root), id), join(d, "media"), { recursive: true, filter: (s) => !/[\\/]work([\\/]|$)/.test(s.slice(join(kit.mediaRoot(root), id).length)) });
   }
-  const rec = engine === kit.HUMAN_ENGINE ? kit.humanRecord(id, root) : engine === RICKS_ENGINE ? ricksRecord(id, root) : kit.getCharacter(id, root);
+  const rec = engine === kit.HUMAN_ENGINE ? kit.humanRecord(id, root) : engine === RICKS_ENGINE ? ricksRecord(id, root) : engine === C3D_ENGINE ? c3dRecord(id, root) : kit.getCharacter(id, root);
   writeFileSync(join(d, "version.json"), JSON.stringify({ at: new Date().toISOString(), label, engine, version: rec?.version ?? null, ...(shipped ? { shipped: true } : {}) }, null, 2) + "\n");
   for (const v of kit.characterVersions(id, root).slice(0, -5)) rmSync(join(vd, String(v.n)), { recursive: true, force: true });
   return n;
@@ -426,6 +482,7 @@ export function undo(id, root = APP_ROOT) {
   if (v.shipped) kit.removeFromStore(join(kit.humanDir(root), id), root);          // back to the app's own, read in place
   else if (existsSync(join(d, "human"))) { kit.removeFromStore(join(kit.humanDir(root), id), root); cpSync(join(d, "human"), join(kit.humanDir(root), id), { recursive: true }); }
   else if (existsSync(join(d, "ricks"))) { kit.removeFromStore(join(ricksDir(root), id), root); cpSync(join(d, "ricks"), join(ricksDir(root), id), { recursive: true }); }
+  else if (existsSync(join(d, "c3d"))) { kit.removeFromStore(join(c3dDir(root), id), root); cpSync(join(d, "c3d"), join(c3dDir(root), id), { recursive: true }); }
   else {
     cpSync(join(d, "user.json"), join(kit.userDir(root), `${id}.json`));
     kit.removeFromStore(join(kit.mediaRoot(root), id), root);
@@ -473,7 +530,18 @@ export const kindOf = (c) => (c?.rig && c.made === "as shipped" && kit.AUTHOR_RI
 export async function filmGate(projectDir, { root = APP_ROOT, signal = null } = {}) {
   // a bare list in CHARACTERS.json is the cast too (kit.readCast reads both)
   const all = kit.readCast(projectDir).characters, runs = new Map(), out = [];
-  const cast = all.filter((c) => c?.engine === kit.HUMAN_ENGINE), ricks = all.filter((c) => c?.engine === RICKS_ENGINE), brush = all.filter((c) => c && c.engine !== kit.HUMAN_ENGINE && c.engine !== RICKS_ENGINE);
+  const cast = all.filter((c) => c?.engine === kit.HUMAN_ENGINE), ricks = all.filter((c) => c?.engine === RICKS_ENGINE), c3d = all.filter((c) => c?.engine === C3D_ENGINE),
+    brush = all.filter((c) => c && c.engine !== kit.HUMAN_ENGINE && c.engine !== RICKS_ENGINE && c.engine !== C3D_ENGINE);
+  // a 3D Cartoon member: its own module in the film, checked as the lab checked it (c3d-page.mjs)
+  if (c3d.length) {
+    const { checkCharacter } = await import("../moworks-styles/c3d-page.mjs");
+    for (const c of c3d) {
+      const rel = c.file ?? `${C3D_CAST_DIR}/${c.id}.ts`, f = join(projectDir, ...rel.split("/"));
+      if (!existsSync(f)) { out.push({ id: c.id, kind: "c3d", check: null, passed: 0, failed: 1, lines: [`FAIL  its file is missing: ${rel} (take it again from the library)`], ownStyle: true }); continue; }
+      const r = await checkCharacter(f, { root });
+      out.push({ id: c.id, kind: "c3d", check: "c3-check", passed: r.passed, failed: r.failed, lines: r.lines.filter((l) => l.startsWith("FAIL")).slice(0, 40), ownStyle: true });
+    }
+  }
   // a Ricks Clip member: its own file in the film, checked as the lab checked it (ricks-page.mjs)
   if (ricks.length) {
     const { checkCharacter } = await import("../moworks-styles/ricks-page.mjs");
@@ -542,6 +610,7 @@ export function alignAbout(about, name) {
 }
 
 export { deleteRicks } from "../character-kit/ricks.mjs";
+export { deleteC3d } from "../character-kit/c3d.mjs";
 /** Delete one of the user's anidoodle characters. The user's copy of a character the app ships goes too, and the shipped one shows again; the
  *  shipped one itself, in bundle/, stays. */
 export function deleteHuman(id, root = APP_ROOT) {

@@ -136,10 +136,13 @@ export default function Pipeline({ projectId, data, starting = false, onOpen, on
             // one row: only the step that runs stands out
             const mark = st === "running" ? <Loader2 size={11} className="spin" /> : null;
             if (id === "build" || id === "firstVersion") return <span key={id} className={"pl-sub" + (st ? " " + st : "")} title={t(SUB[id])}>{mark}{t(SUB_SHORT[id] ?? SUB[id])}</span>;
-            const open = id === "qcReview" ? (data?.qc ? () => onOpen("qc-review") : null)
+            const sz = sizesOf(data);
+            const open = id === "qcReview" ? (data?.qc ? () => onOpen("qc-review") : null) : id === "adaptation" ? (sz.open ? () => onOpen("sizes") : null)
               : id === "sound" ? (actions?.find((a) => a.key === "mix")?.off === false || st === "done" ? () => onOpen("mix") : null) : data?.checks?.at || st === "running" ? () => onOpen("qa") : null;
             return <button key={id} type="button" className={"clink pl-sub" + (st ? " " + st : "")} disabled={!open} onClick={open ?? undefined}
-              title={!open ? (id === "qcReview" || id === "checks" ? t("Runs only if you ask Claude to check your film") : t("Opens once {step} is done", { step: t("Build") })) : id === "checks" && warnings > 0 ? `${t(SUB[id])} · ${warnWords(t, warnings)}` : t(SUB[id])}>{mark}{t(SUB_SHORT[id] ?? SUB[id])}
+              title={!open ? (id === "qcReview" || id === "checks" ? t("Runs only if you ask Claude to check your film") : t("Opens once {step} is done", { step: t("Build") })) : id === "checks" && warnings > 0 ? `${t(SUB[id])} · ${warnWords(t, warnings)}`
+                : id === "adaptation" ? (sz.stale ? `${t(SUB[id])} · ${t("The master film has changed.")}` : `${t(SUB[id])} · ${sz.n === 1 ? t("One size") : t("{n} sizes", { n: sz.n })}`) : t(SUB[id])}>{mark}{t(SUB_SHORT[id] ?? SUB[id])}
+              {id === "adaptation" && sz.n > 1 && <span className={"num" + (sz.stale ? " pl-warn" : "")}>{` ${sz.n}`}</span>}
               {id === "qcReview" && data?.qc?.final != null && <b className="num">{` ${data.qc.final}/10`}</b>}
               {id === "checks" && warnings > 0 && <span className="pl-warn num">{` ${warnings}`}</span>}</button>;
           })}
@@ -161,9 +164,13 @@ export default function Pipeline({ projectId, data, starting = false, onOpen, on
 // whose sheet lies on the light table is lifted and lit by the lamp. A station opens its sheet on the table (Build and review: the film
 // itself); every action of the column above is here: Waiting for you, Continue, Keep it as it is / Approve again, Run checks again, the
 // Prepare links, "Press Stop in the chat to change this" and the brief that changed after the build.
-const SUB = { build: "Build", sound: "Final Mix", firstVersion: "Version 1", qcReview: "Review", checks: "Tech checks" };
+const SUB = { build: "Build", sound: "Final Mix", firstVersion: "Version 1", qcReview: "Review", adaptation: "Adaptation", checks: "Tech checks" };
 // The Desk's column holds them in one row: the whole name on hover
-const SUB_SHORT = { checks: "Checks" };
+const SUB_SHORT = { checks: "Checks", adaptation: "Sizes" };
+/** The Adaptation step opens its sheet once the film is built (sizes are added there; Adapt itself waits for the Review); how many sizes
+ *  the film has, and how many are out of date (the master changed after they were made: said, never a block). */
+const sizesOf = (data) => ({ open: data?.steps?.find((x) => x.id === "build")?.status === "done" || (data?.sizes?.rows?.length ?? 0) > 0,
+  n: 1 + (data?.sizes?.rows?.length ?? 0), stale: (data?.sizes?.rows ?? []).filter((r) => r.status === "stale").length });
 /** The time left of a running step, as the server's etaWords says it (packages/server/boards.mjs), from now: "about N min left" down
  *  to its estimate, then "taking longer than usual · N min so far". The time left never grows (T26-4: past the middle it jumped to the
  *  time to the slowest, and the Build's went past the top of the range its confirm gave). Both themes' Pipeline say it. */
@@ -208,13 +215,15 @@ function StudioLine({ data, stages, view, running, hasCast, here, actions, onOpe
       const subs = s.id === "build" || s.id === "review" ? (s.steps?.length ? s.steps.filter((x) => SUB[x]) : Object.keys(SUB)) : [];
       const pill = (id) => {
         const st = stepOf(id)?.status ?? null;
-        const open = id === "build" || id === "firstVersion" ? () => onPlayer?.() : id === "qcReview" ? (data?.qc ? () => onOpen("qc-review") : null)
+        const sz = sizesOf(data);
+        const open = id === "build" || id === "firstVersion" ? () => onPlayer?.() : id === "qcReview" ? (data?.qc ? () => onOpen("qc-review") : null) : id === "adaptation" ? (sz.open ? () => onOpen("sizes") : null)
           : id === "sound" ? (actions?.find((a) => a.key === "mix")?.off === false || st === "done" ? () => onOpen("mix") : null) : data?.checks?.at || st === "running" ? () => onOpen("qa") : null;
         return <button key={id} type="button" className={"sp-pill" + (st ? " " + st : "")} disabled={!open} onClick={open ?? undefined}
           title={!open ? (id === "qcReview" || id === "checks" ? t("Runs only if you ask Claude to check your film") : t("Opens once {step} is done", { step: t("Build") })) : undefined}>
           {st === "running" ? <Loader2 size={11} className="spin" /> : st === "done" ? <Check size={11} /> : null}{t(SUB[id])}
           {id === "qcReview" && data?.qc?.final != null && <b className="num">{` ${data.qc.final}/10`}</b>}
-          {id === "checks" && warnings > 0 && <span className="sp-warn num">{" · " + warnWords(t, warnings)}</span>}</button>;
+          {id === "checks" && warnings > 0 && <span className="sp-warn num">{" · " + warnWords(t, warnings)}</span>}
+          {id === "adaptation" && sz.n > 1 && <span className={"num" + (sz.stale ? " sp-warn" : "")}>{` · ${sz.n}`}</span>}</button>;
       };
       // the whole station opens what its head opens (T24-5, T26-9: a click on "05 Final Mix" beside its title did nothing); its own
       // buttons inside keep theirs, and the head stays the control for the keyboard

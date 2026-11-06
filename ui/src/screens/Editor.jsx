@@ -6,7 +6,7 @@
 // wait too, and one render runs at a time in the whole app. The stages open as sheets over the Editor; after Create
 // project the brief goes to Claude as soon as the film is open (the kickoff); from there the app runs the steps by itself.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Film, LayoutList, Library, Loader2, Plus, Sliders, Smile } from "lucide-react";
+import { ArrowLeft, Film, LayoutList, Library, Loader2, Plus, Sliders, Smile, Volume2 } from "lucide-react";
 import { get, patch, post } from "../api.js";
 import { Banner, Dialog, Panes } from "../components.jsx";
 import { clock, go, usePref, useData, useToast } from "../lib.jsx";
@@ -28,6 +28,7 @@ import MixSheet from "../workflow/MixSheet.jsx";
 import { NotesLayer, nextPinNo, pinTag } from "../editor/FilmNotes.jsx";
 import { AnalysisSheet, BriefSheet, DocSheet, ImportSheet, QcReviewSheet } from "../workflow/sheets.jsx";
 import RenderSheet from "../workflow/RenderSheet.jsx";
+import SizesSheet from "../workflow/SizesSheet.jsx";
 import LyricsSheet from "../workflow/LyricsSheet.jsx";
 import MusicMapSheet from "../workflow/MusicMapSheet.jsx";
 import CharacterSheet from "../workflow/CharacterSheet.jsx";          // Brush cartoon's character step
@@ -266,7 +267,20 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const [asking, setAsking] = useState(null);          // a question Claude waits on: shown over an open sheet too
   const [version, setVersion] = useState(0);          // bumps when the files change (the shot list reads its words again)
   const kicked = useRef(false);
-  const pv = usePreview(id);
+  // the film's sizes (the Adaptation step): the master and every other size made; the one shown is remembered per film (owner 06/11, #1236)
+  const [viewSize, setViewSize] = usePref(`editor:size:${id}`, null);
+  const sizeRows = pipeline?.sizes?.rows ?? [];
+  const masterSize = pipeline?.sizes?.master ?? "16:9";
+  const viewable = [masterSize, ...sizeRows.filter((r) => r.status === "ready" || r.status === "stale" || (r.status === "adapting" && r.madeFrom)).map((r) => r.aspect)];
+  const size = viewable.includes(viewSize) ? viewSize : masterSize;
+  const sizeTag = size !== masterSize ? size.replace(":", "x") : null;
+  const sizeRow = sizeTag ? sizeRows.find((r) => r.aspect === size) ?? null : null;
+  const [updating, setUpdating] = useState(false);
+  const updateSize = async () => {
+    setUpdating(true);
+    try { await post(`/api/projects/${id}/sizes/${sizeTag}/adapt`, {}); toast(t("Claude is making the {size} size", { size })); reloadPipeline(); } catch (e) { toast(e.message, "error"); } finally { setUpdating(false); }
+  };
+  const pv = usePreview(id, sizeTag);
   const [assets, reloadAssets] = useAssets(id);
   const p = project.data;
   useEffect(() => { setCrumbs(null); }, [p]); // eslint-disable-line react-hooks/exhaustive-deps // no "/ Projects / name" above the strip
@@ -293,7 +307,8 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     return () => { alive = false; clearTimeout(slow); };
   }, [id]);
   const filmShown = prepared || prepareSlow;
-  const loadTimeline = useCallback(() => get(`/api/projects/${id}/timeline`).then(setTl).catch(() => {}), [id]);
+  // the shot row follows the size shown (a vertical may add cuts); the sound lanes are the master's, shared by every size
+  const loadTimeline = useCallback(() => get(`/api/projects/${id}/timeline${sizeTag ? `?size=${sizeTag}` : ""}`).then(setTl).catch(() => {}), [id, sizeTag]);
   useEffect(() => { loadTimeline(); }, [loadTimeline]);
   // shot pictures: HF stills of each shot, made again after a change (only when Claude is not working)
   const loadPosters = useCallback(async () => {
@@ -618,7 +633,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   // (T23-9: shot 1 was a white box until the Build)
   const shotPosters = unbuilt ? posters?.filter((x) => x.board) ?? null : posters;
   // a note pinned on the picture lands in the Notes tab with its words field ready (The Desk)
-  const [aw, ah] = String(p?.meta?.format?.aspect ?? "16:9").split(":").map(Number);
+  const [aw, ah] = String(sizeTag ? size : p?.meta?.format?.aspect ?? "16:9").split(":").map(Number);
   const placeNote = (place) => {
     const now = pv.state.time, fps = pv.state.fps || 24, at = Math.round(now * fps) / fps, sh = [...(shots ?? [])].reverse().find((s) => now >= (s.start ?? 0) - 1 / (pv.state.fps || 24))?.number ?? null;          // within a frame: a seek to a shot lands on the frame before its start
     const no = nextPinNo(pins), pin = { id: `p${Date.now()}-${no}`, no, t: at, fps, shot: sh, ...place }, tag = pinTag(pin);
@@ -631,6 +646,8 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const notesOn = !unbuilt;
   const playerEl = filmShown ? <Player key={filmKey} projectId={id} pv={pv} shots={shots ?? []} shot={shot} onShot={setShot} locked={locked} planned={unbuilt ? p.plannedDuration ?? 0 : null}
     styleCaptions={!!tl?.captions?.some((c) => c.own)} onVoice={() => openSheet("voice")}
+    sizes={viewable} size={size} onSize={setViewSize}
+    notice={sizeRow?.status === "stale" ? { text: t("The master film has changed."), action: t("Update {size}", { size }), onAction: busy ? null : updateSize, busy: updating } : null}
     range={range} onFilesChanged={(reload) => filesChanged(!!reload)} pinning={pinning} onPin={notesOn ? () => { pv.send("pause"); pv.send("clear"); pv.setPicked([]); setPinning((x) => !x); } : null}>
     {notesOn && <NotesLayer notes={pins} time={pv.state.time} pinning={pinning} aspect={aw && ah ? aw / ah : 16 / 9} onPlace={placeNote} onRemove={removePin} />}</Player>
     : <div className="pv"><div className="pv-stage"><div className="pv-wait"><Loader2 size={18} className="spin" />{t("Opening the project…")}</div></div></div>;
@@ -665,10 +682,13 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     : <MotionDrawer projectId={id} shot={shot} target={selection?.label ?? shotTarget} targetText={selection ? picked.map((x) => x.textContent ?? "").join(" ") : null} onPick={pickMotion} onClose={() => setDrawer(null)} />;
   // the button in the chat opens its drawer, or closes it; on a narrow window the drawer is in the Film tab
   const toggleDrawer = (kind) => { setDrawer((d) => (d === kind ? null : kind)); if (kind === "sounds") setNarrowTab("film"); };
+  // another size shown: the sound lanes are the master's, and a change there is every size's
+  const sharedEl = sizeTag ? <p className="ed-shared"><Volume2 size={13} aria-hidden="true" />{t("Sounds are shared by every size")}</p> : null;
   const centerPane = <div className="ed-center" ref={centerRef}>
     {playerEl}
     {hsplit}
     {drawer ? drawerEl : timelineEl}
+    {sharedEl}
   </div>;
   const leftPane = <div className="ed-left"><div className="ed-box ed-lib">
     <div className="ed-ltabs" role="tablist" aria-label={t("Shots and assets")}>
@@ -690,7 +710,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
       <Pipeline projectId={id} data={pipeline} starting={starting} onChanged={reloadPipeline} onOpen={openSheet} onAssets={showAssets} cast={p?.meta?.characters?.ids?.length > 0} music={!!p?.styleInfo?.music} warnings={qcWarnings} actions={actions} />
     </section>
   </div>;
-  const rightPane = <ClaudePanel projectId={id} version1={pipeline?.version1 ?? null} onVersionChanged={reloadPipeline} fps={pv.state.fps || 24} selectedShot={chatShot} selection={selection} onClearTarget={() => { setDismissed(selection?.key ?? null); pv.send("clear"); pv.setPicked([]); setShot(null); }}
+  const rightPane = <ClaudePanel projectId={id} editing={sizeTag ? size : null} version1={pipeline?.version1 ?? null} onVersionChanged={reloadPipeline} fps={pv.state.fps || 24} selectedShot={chatShot} selection={selection} onClearTarget={() => { setDismissed(selection?.key ?? null); pv.send("clear"); pv.setPicked([]); setShot(null); }}
     onChanged={onClaudeChanged} inject={inject} reloadKey={chatKey} motionPick={motionPick} onOpenMotions={() => toggleDrawer("motions")} motionsOpen={drawer === "motions"} onOpenSounds={() => toggleDrawer("sounds")} soundsOpen={drawer === "sounds"}
     steps={pipeline?.steps} rendering={rendering} actions={actions} onWaiting={setAsking} stage={currentStage(pipeline?.stages)} interrupted={pipeline?.interrupted ?? null} onPlay={(path) => setViewer(path)} onOpenSheet={openSheet} checks={pipeline?.checks ?? null}
     waiting={pipeline?.stages?.find((s) => s.status === "waiting" && s.id !== "feedback") ?? null}
@@ -698,7 +718,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
   const askBar = sheet && asking && <div className="ed-ask" role="alert"><Question q={asking.q} projectId={id} taskId={asking.taskId} toast={toast} t={t} /></div>;
 
   const sheetEl = sheet && <StageCtx.Provider value={stage}><ErrorBoundary key={sheet.kind} name={t(SHEET_TITLES[sheet.kind] ?? sheet.kind)} onClose={stage.close}>
-    <Sheet title={sheet.kind === "doc" ? docTitle(sheet.opts.path, t) : t(SHEET_TITLES[sheet.kind] ?? sheet.kind)} onClose={stage.close} narrow={["assets", "doc", "render", "ae", "brief", "voice"].includes(sheet.kind)} handle={sheetHandle}
+    <Sheet title={sheet.kind === "doc" ? docTitle(sheet.opts.path, t) : t(SHEET_TITLES[sheet.kind] ?? sheet.kind)} onClose={stage.close} narrow={["assets", "doc", "render", "ae", "brief", "voice", "sizes"].includes(sheet.kind)} handle={sheetHandle}
       hint={studio && STUDIO_HINTS[sheet.kind] ? t(STUDIO_HINTS[sheet.kind]) : null}>
       {sheet.kind === "storyboard" && <Storyboard id={id} />}
       {sheet.kind === "motion-plan" && <MotionPlan id={id} />}
@@ -706,6 +726,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
       {sheet.kind === "qa" && <Qa id={id} />}
       {sheet.kind === "ae" && <PortAE id={id} />}
       {sheet.kind === "render" && <RenderSheet projectId={id} format={sheet.opts.format} />}
+      {sheet.kind === "sizes" && <SizesSheet projectId={id} pipeline={pipeline} onChanged={reloadPipeline} />}
       {sheet.kind === "brief" && <BriefSheet projectId={id} project={p} onChanged={refreshAll} briefChanged={!!sheet.opts.briefChanged} />}
       {sheet.kind === "doc" && <DocSheet projectId={id} path={sheet.opts.path} approve={sheet.opts.approve} onChanged={refreshAll} />}
       {sheet.kind === "analysis" && <AnalysisSheet projectId={id} onChanged={refreshAll} />}
@@ -771,7 +792,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
     </section>;
     // the Motions and Sounds drawers belong to the film, so opening one lays the film back on the table first
     const openDrawer = (kind) => { if (drawer !== kind && sheetRef.current) switchSheet(null); toggleDrawer(kind); };
-    const chat = <ClaudePanel projectId={id} version1={pipeline?.version1 ?? null} onVersionChanged={reloadPipeline} fps={pv.state.fps || 24} selectedShot={chatShot} selection={selection} onClearTarget={() => { setDismissed(selection?.key ?? null); pv.send("clear"); pv.setPicked([]); setShot(null); }}
+    const chat = <ClaudePanel projectId={id} editing={sizeTag ? size : null} version1={pipeline?.version1 ?? null} onVersionChanged={reloadPipeline} fps={pv.state.fps || 24} selectedShot={chatShot} selection={selection} onClearTarget={() => { setDismissed(selection?.key ?? null); pv.send("clear"); pv.setPicked([]); setShot(null); }}
       onChanged={onClaudeChanged} inject={inject} reloadKey={chatKey} motionPick={motionPick} onOpenMotions={() => openDrawer("motions")} motionsOpen={drawer === "motions"} onOpenSounds={() => openDrawer("sounds")} soundsOpen={drawer === "sounds"}
       steps={pipeline?.steps} rendering={rendering} actions={[]} onWaiting={setAsking} stage={currentStage(pipeline?.stages)} interrupted={pipeline?.interrupted ?? null} onPlay={(path) => setViewer(path)} onOpenSheet={openSheet} checks={pipeline?.checks ?? null}
       waiting={pipeline?.stages?.find((s) => s.status === "waiting" && s.id !== "feedback") ?? null}
@@ -789,7 +810,7 @@ export default function Editor({ id, setCrumbs, open: openFromRoute = null }) {
         <ErrorBoundary name={t("Shots, assets and this film")}>{sidePane}</ErrorBoundary>
         <ErrorBoundary name={t("Film")}>{table}</ErrorBoundary>
         {hsplit}
-        <div className="st-tl"><ErrorBoundary name={t("Timeline")}>{timelineEl}</ErrorBoundary></div>
+        <div className="st-tl"><ErrorBoundary name={t("Timeline")}>{timelineEl}</ErrorBoundary>{sharedEl}</div>
         <aside className="st-chat" aria-label={t("Conversation")}><ErrorBoundary name="Claude">{chat}</ErrorBoundary></aside>
       </div>{leaveDialog}{viewerEl}</div>;
   }

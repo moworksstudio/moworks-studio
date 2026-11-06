@@ -26,7 +26,9 @@ import { keptFor, keptOnPurpose } from "../hf-qa/look.mjs";
 import { measureStills, stillGate } from "../hf-qa/stillness.mjs";
 import { endingGate, measureEnding } from "../hf-qa/ending.mjs";
 import { filmEnding } from "../hf-edit/ending.mjs";
-import { render } from "../hf-render-worker/client.mjs";
+import { remixAudio, render } from "../hf-render-worker/client.mjs";
+import { extraSizes, masterAspect, sizeStage, tagOf, updateSize } from "../project-service/sizes.mjs";
+import { sizesOf } from "./sizes.mjs";
 import { chooseGpu } from "../hf-render-worker/gpu.mjs";
 import { aeRunningAsync, canvasCount, plainLog } from "../ae-export/index.mjs";
 import * as secrets from "../secrets/index.mjs";
@@ -44,8 +46,8 @@ import { analyseBeats, dropMissingAudio, fitMusicToFilm, gateAudioFiles, musicRe
 import { levelTracks } from "../sfx/mixlevels.mjs";
 import { refreshBridge } from "../hf-edit/lemoPage.mjs";
 import { applyLanes } from "../sfx/lanes.mjs";
-import { resolveRuntime } from "../version-manager/index.mjs";
-import { filmHash, filmParts } from "./proxy.mjs";
+import { expandEnv, loadPins, resolveRuntime } from "../version-manager/index.mjs";
+import { filmHash, filmParts, soundOnRoot } from "./proxy.mjs";
 import { withSoundChecks } from "../hf-qa/gates.mjs";
 import { gateCuts } from "../moworks-styles/cuts.mjs";
 import { freshFilm } from "../hf-edit/codeFilm.mjs";
@@ -472,7 +474,23 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   };
 
   // ---- Render (top bar): a quick check first (render-breaking issues only), then the HF render worker
-  function startExport(p, b) {
+  /** Render the film in each size the Render dialog ticked (one film, several sizes: owner #1232-#1236). One job per size, one after the
+   *  other (a film has one export at a time: the next starts when one ends, none after a Stop), each file named with its size (<film>_16x9,
+   *  <film>_9x16); the master renders as before, another size from its own root page with the master's mix put onto its picture (remix.mjs:
+   *  no second mix). No size given, or a film of one size: the render as before. */
+  function startExports(p, b) {
+    const own = masterAspect(p.meta) ?? p.meta?.format?.aspect ?? null;
+    const made = new Set(sizesOf(ctx, p).filter((r) => r.status === "ready" || r.status === "stale").map((r) => r.aspect));
+    const want = Array.isArray(b?.sizes) ? [...new Set(b.sizes.map(String))].filter((a) => a === own || made.has(a)) : [];
+    if (!made.size || !want.length) return startExport(p, b);
+    // the master first, then the others in the order they were made
+    const order = [own, ...extraSizes(p.meta).map((x) => x.aspect)].filter((a) => want.includes(a));
+    // the next size when one ends (its record may still read "running" for a moment: tried again for a few seconds)
+    const again = (fn, n = 20) => { try { fn(); } catch (e) { if (e.code === "BUSY" && n > 0) setTimeout(() => again(fn, n - 1), 500); } };
+    const run = (i) => startExport(projects.getProject(p.id, root) ?? p, b, { size: order[i], sized: true, then: i + 1 < order.length ? () => again(() => run(i + 1)) : null });
+    return { ...run(0), queue: order.map((size) => ({ size })) };
+  }
+  function startExport(p, b, { size = null, sized = false, then = null } = {}) {
     const format = FORMATS[b.format] ? b.format : "mp4";
     const quality = QUALITIES.includes(b.quality) ? b.quality : "standard";
     // the sound master: Standard -14 LUFS by default, Quieter -16, or the mix as it is (#1073); "loud" and "kit", older names of -14, are Standard
@@ -482,7 +500,10 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     const fps = projects.projectFps(projects.getProject(p.id, root) ?? p);
     // a name typed with the format's ending ("film.mp4") loses it: the date and the ending are the app's ("…_film.mp4_0529.mp4", T38-10)
     const ext = FORMATS[format], typed = safeName(b.filename, basename(p.path));
-    const name = typed.toLowerCase().endsWith(ext.toLowerCase()) && typed.length > ext.length ? typed.slice(0, -ext.length).trim() || basename(p.path) : typed;
+    const name0 = typed.toLowerCase().endsWith(ext.toLowerCase()) && typed.length > ext.length ? typed.slice(0, -ext.length).trim() || basename(p.path) : typed;
+    // a film of several sizes: each file says its size (<film>_16x9, <film>_9x16); `other`: one of the sizes made from the master
+    const other = !!size && size !== (masterAspect(p.meta) ?? p.meta?.format?.aspect);
+    const name = sized && size ? `${name0}_${tagOf(size)}` : name0;
     const dir = join(p.path, "renders");
     mkdirSync(dir, { recursive: true });
     moveOldGates(p.path);
@@ -491,10 +512,56 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     if (ctx.agent?.running?.has(p.id)) throw err("BUSY", "Claude is changing the film: render when it finishes");
     // the subtitles beside the film, only when the Render dialog's box is ticked (owner 06/11 #1244): <film>.srt and <film>.vtt for YouTube and Facebook
     const subtitles = b.subtitles === true;
-    return jobs.start("export", { projectId: p.id, title: `Export ${basename(out)}`, output: out, settings: { format, quality, fps, filename: name, master, subtitles } }, async (job) => {
-      const release = ctx.renders ? await ctx.renders.acquire(p.id, p.title ?? basename(p.path), (other) => job.update({ stage: "waiting", waitingFor: other.title })) : () => {};
-      try { return await renderNow(job); } finally { release(); }
+    let verdict = null;          // the checks' verdict of this render (the master's or one size's): set before the return below, or the render functions under it read it uninitialised (#1281)
+    return jobs.start("export", { projectId: p.id, title: `Export ${basename(out)}`, output: out, settings: { format, quality, fps, filename: name, master, subtitles, ...(size ? { size } : {}) } }, async (job) => {
+      const release = ctx.renders ? await ctx.renders.acquire(p.id, p.title ?? basename(p.path), (o) => job.update({ stage: "waiting", waitingFor: o.title })) : () => {};
+      let go = !!then;
+      try { return await (other ? renderSizeNow(job) : renderNow(job)); }
+      catch (e) { if (e.code === "CANCELLED" || job.signal?.aborted) go = false; throw e; }          // a Stop stops the sizes after it too
+      finally { release(); if (go) setTimeout(then, 300); }
     });
+    /** One of the film's other sizes: its root page through its own folder (sizeStage), checked there (Tech checks per root page), rendered,
+     *  then the master's own mix put onto its picture; delivered as the master's render is (web size, subtitles, loudness). */
+    async function renderSizeNow(job) {
+      projects.keepRootFps(projects.getProject(p.id, root) ?? p);
+      fitMusicToFilm(p.path); await levelTracks(p.path, { root }).catch(() => null); applyLanes(p.path);          // the master's sound, as for its own render
+      await commit(p, "Changes before render");
+      const stageDir = sizeStage(p.path, size);
+      if (!stageDir) throw err("NOT_FOUND", `The ${size} size is not made yet: adapt it first`);
+      job.update({ stage: "checks", revision: await rev.headAsync(p.path) });
+      const gates = await gatesFor({ ...p, path: stageDir }, job, { blank: false }).catch((e) => {
+        if (e.code === "CHECK_BUSY") note(p, { kind: "render", status: "warning", text: e.message, open: "render" });
+        throw e;
+      });
+      verdict = renderVerdict(gates);
+      writeJson(gatesFile(p.path, out), { ...gates, verdict, size });
+      job.update({ gates: { pass: verdict.pass, blockingFailures: verdict.blocking.map((g) => g.id), ...(gates.reused ? { reused: gates.reused } : {}) }, warnings: verdict.warnings });
+      if (!verdict.pass) throw Object.assign(err("RENDER_BLOCKED", `Render of ${size} stopped: ${verdict.blocking.map((g) => CHECKS[g.id]?.title ?? g.id).join(", ")}`), { detail: { verdict } });
+      job.update({ stage: "gpu check" });
+      const gpu = await chooseGpu(stageDir, { root, signal: job.signal });
+      job.update({ gpu: { mode: gpu.mode, reason: gpu.reason, renderer: gpu.renderer }, stage: "rendering", progress: 0 });
+      // the master's mix onto the picture where it can be (every sound on the master's root page, an MP4 or MOV); else the page's own copy of it
+      const remix = format !== "webm" && soundOnRoot(p.path);
+      const pic = remix ? out.replace(/(\.[^.\\/]+)$/, ".picture$1") : out;
+      const res = await render({ projectDir: stageDir, outputPath: pic, fps, format, quality, workers: FG_WORKERS, browserGpuMode: gpu.mode }, { signal: job.signal, root,
+        logFile: join(root, "runtime", "logs", `export-${Date.now()}.log`),
+        onEvent: (e) => {
+          if (e.type === "progress") job.update({ stage: e.stage ? `rendering: ${e.stage}` : "rendering", progress: typeof e.pct === "number" ? Math.round(e.pct) : job.progress });
+          if (e.type === "log" && e.level === "error") job.log(e.message);
+        } });
+      job.update({ logFile: res.logFile });
+      if (res.type === "cancelled") throw err("CANCELLED", "Export stopped");
+      if (res.type !== "done") throw Object.assign(err(res.code ?? "RENDER_FAILED", res.message ?? "The render failed"), { detail: { retryable: res.retryable ?? null, logFile: res.logFile, hf: res.hf ?? null } });
+      if (remix) {
+        job.update({ stage: "the master's sound" });
+        const mixed = await remixAudio({ projectDir: p.path, picture: pic, outputPath: out, fps, duration: res.duration ?? null, workDir: join(p.path, ".moworks", "cache", "sizes", `remix-${tagOf(size)}`) },
+          { signal: job.signal, root, ffmpeg: join(expandEnv(loadPins(root).ffmpeg.dir), "ffmpeg.exe") });
+        rmSync(pic, { force: true });
+        if (mixed.type === "cancelled") throw err("CANCELLED", "Export stopped");
+        if (mixed.type !== "done") throw err("REMIX_FAILED", mixed.message ?? "The master's sound could not be put onto this size");
+      }
+      return delivered(res, gpu);
+    }
     async function renderNow(job) {
       projects.keepRootFps(projects.getProject(p.id, root) ?? p);          // the film's data-fps back on the root before HF reads it
       fitMusicToFilm(p.path);          // the music ends with the film, fading down with the picture (ending.mjs)
@@ -512,7 +579,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
         if (e.code === "CHECK_BUSY") note(p, { kind: "render", status: "warning", text: e.message, open: "render" });
         throw e;
       });
-      const verdict = renderVerdict(gates);
+      verdict = renderVerdict(gates);
       writeJson(gatesFile(p.path, out), { ...gates, verdict });          // never in renders/
       job.update({ gates: { pass: verdict.pass, blockingFailures: verdict.blocking.map((g) => g.id), ...(gates.reused ? { reused: gates.reused } : {}) }, warnings: verdict.warnings });
       if (!verdict.pass) throw Object.assign(err("RENDER_BLOCKED", `Render stopped: ${verdict.blocking.map((g) => CHECKS[g.id]?.title ?? g.id).join(", ")}`), { detail: { verdict } });
@@ -549,7 +616,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
         job.update({ stage: "web size" });
         web = await capWebBitrate(out, { root, signal: job.signal }).catch((e) => { job.log?.(`web size: ${e.message}`); return null; });
       }
-      const size = existsSync(out) ? statSync(out).size : 0;
+      const fileSize = existsSync(out) ? statSync(out).size : 0;
       let subs = null;
       if (subtitles && existsSync(out)) {
         job.update({ stage: "subtitles" });
@@ -572,20 +639,22 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
         if (loud && !loud.error) loud.master = target ? master : "off";
       }
       // the film's hash beside it: a check that reads a render (G-CUTS) reads this one while the film is as it was rendered (T38-7)
-      let filmAt = null; try { filmAt = filmHash(p.path, Number(fps) || null); } catch { /* no hash: never read as the film's */ }
+      let filmAt = null; try { if (!other) filmAt = filmHash(p.path, Number(fps) || null); } catch { /* no hash: never read as the film's */ }
       // a render of the film as it is now goes on with the new version waiting for a press (Version 2 after a Review), as a chat message does:
       // the Editor stopped showing Version 1 and the chat saying Version 2 was not rendered (T38b-3)
-      meta(p.id, (m) => { const x = m.pipeline?.version1; if (x?.holding && x.next) { delete x.holding; x.next.opened = new Date().toISOString(); x.next.render = "done"; } });
-      meta(p.id, (m) => { (m.stages ??= {}).export = { status: "done" }; m.lastExport = { file: relativeTo(p.path, out), at: new Date().toISOString(), size, format, fps, quality, loudness: loud, ...(web?.capped ? { web } : {}), ...(filmAt ? { hash: filmAt } : {}) };
+      if (!other) meta(p.id, (m) => { const x = m.pipeline?.version1; if (x?.holding && x.next) { delete x.holding; x.next.opened = new Date().toISOString(); x.next.render = "done"; } });
+      // one of the other sizes: its own last export, beside the master's
+      if (other) meta(p.id, (m) => { updateSize(m, size, (x) => { x.lastExport = { file: relativeTo(p.path, out), at: new Date().toISOString(), size: fileSize, format, fps, quality, loudness: loud }; }); });
+      else meta(p.id, (m) => { (m.stages ??= {}).export = { status: "done" }; m.lastExport = { file: relativeTo(p.path, out), at: new Date().toISOString(), size: fileSize, format, fps, quality, loudness: loud, ...(web?.capped ? { web } : {}), ...(filmAt ? { hash: filmAt } : {}) };
         (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "export", text: `Exported ${basename(out)}` }); });
       note(p, { kind: "render", text: "Render finished: {file}", vars: { file: basename(out) }, file: relativeTo(p.path, out), warnings: verdict.warnings.length });
       try { await ctx.autopilot?.saveVersion(p.id, "render"); } catch { /* a version is best effort */ }          // each render is a version
       // the cuts read from this render into the last Tech checks at once (T38b-2), in the background: the render is done whatever they find
-      cutsIntoChecks(p).catch(() => null);
+      if (!other) cutsIntoChecks(p).catch(() => null);
       if (loud?.notes?.length) note(p, { kind: "render", status: "warning", text: "Sound: {lufs} LUFS, peak {peak} dBTP ({notes}); the target is {target} LUFS, peak at most -1", vars: { lufs: loud.lufs, peak: loud.truePeak, notes: loud.notes.join(", "), target: (MASTER[master] ?? MASTER.standard).lufs } });
       // "Took" is the whole wait from pressing Render (the checks, the GPU test, the frames, the sound), not the frames alone
       const whole = job.startedAt ? Date.now() - Date.parse(job.startedAt) : res.wallMs;
-      return { loudness: loud, file: out, size, ...(subs ? { subtitles: subs } : {}), frames: res.totalFrames ?? null, duration: res.duration ?? null, wallMs: whole, renderMs: res.wallMs, hfVersion: res.hfVersion, logFile: res.logFile,
+      return { loudness: loud, file: out, size: fileSize, ...(size ? { filmSize: size } : {}), ...(subs ? { subtitles: subs } : {}), frames: res.totalFrames ?? null, duration: res.duration ?? null, wallMs: whole, renderMs: res.wallMs, hfVersion: res.hfVersion, logFile: res.logFile,
         gpu: { mode: gpu.mode, reason: gpu.reason, renderer: gpu.renderer, checkMs: gpu.ms }, ...(web?.capped ? { web } : {}), ...(res.reused ? { reused: true, reusedFrom: res.reusedFrom ?? null } : {}) };
     }
     }
@@ -1150,10 +1219,13 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       const files = existsSync(dir) ? readdirSync(dir).filter((f) => Object.values(FORMATS).includes(extname(f).toLowerCase()))
         .map((f) => { const s = statSync(join(dir, f)); return { name: f, path: join(dir, f), size: s.size, at: s.mtime.toISOString(), gates: existsSync(gatesFile(p.path, f)) || existsSync(join(dir, f + ".gates.json")) }; })
         .sort((a, b) => (a.at < b.at ? 1 : -1)) : [];
-      return { files, folder: dir, jobs: jobs.list({ kind: "export", projectId: id }).slice(0, 5), lastQa: p.meta?.lastQa ?? null,
+      // the film's sizes for the dialog's boxes: the master, and each other size made (ready or out of date) with its state
+      const sizes = extraSizes(p.meta).length ? { master: masterAspect(p.meta) ?? p.meta?.format?.aspect ?? null, rows: sizesOf(ctx, p).map(({ aspect, tag, width, height, status }) => ({ aspect, tag, width, height, status })) } : null;
+      return { files, folder: dir, jobs: jobs.list({ kind: "export", projectId: id }).slice(0, 5), lastQa: p.meta?.lastQa ?? null, sizes,
         defaults: { width: p.width ?? p.meta?.format?.width, height: p.height ?? p.meta?.format?.height, fps: projects.projectFps(p), filename: basename(p.path) } };          // the rate the render uses
     }),
-    r("POST", `/projects/${P}/exports`, ([id], b) => startExport(mustProject(id, root), b)),
+    // b.sizes: the sizes to render (the master and the other sizes made); none, or a film of one size: the render as before
+    r("POST", `/projects/${P}/exports`, ([id], b) => startExports(mustProject(id, root), b)),
     r("POST", `/projects/${P}/files/(reveal|open)`, ([id, how], b) => {
       const p = mustProject(id, root);
       const f = resolve(p.path, String(b.path ?? ""));

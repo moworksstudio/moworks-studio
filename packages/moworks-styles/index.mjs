@@ -10,16 +10,18 @@
 // Faces without Vietnamese letters are drawn by their twins (fonts.mjs). The source skills' own commands (doctor, render, qc, npm, uv) are not used: the
 // app runs every step; the source skills' code-made sounds are in the offline library (tools/make-code-sfx.mjs). Credit: Moworks Studio, the owner's own.
 import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { APP_ROOT, loadPins } from "../version-manager/index.mjs";
 import { gsapFile } from "../offline-assets/index.mjs";
 import { ensureShared, linkOrCopy, sharedDir } from "../project-service/shared-stage.mjs";
 import { buildStyleFilm, transcriptWords } from "./build.mjs";
 import { declareTwins, twinnedIn } from "./fonts.mjs";
-import { CAST_LAYER, FILM_DIR, buildRicksFilm } from "./ricks.mjs";
+import { CAMTIME, CAST_LAYER, FILM_DIR, buildRicksFilm } from "./ricks.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
+/** The styles whose films may time their camera to the voice's words with the app's camtime.js (owner #1267). */
+export const CAMTIME_STYLES = Object.freeze(["ricks-clip", "cartoon-3d"]);
 
 /** The styles: their source skill, how the film runs, the source skill's faces that need a Vietnamese twin (fonts.mjs), its skill folders Claude reads,
  *  and the worked examples. */
@@ -63,10 +65,12 @@ export function stageGuide(projectDir, styleId, root = APP_ROOT) {
     if (existsSync(b) && statSync(b).mtimeMs >= statSync(a).mtimeMs) continue;
     mkdirSync(to, { recursive: true }); copyFileSync(a, b); files.push(`.moworks/library/${styleId}/app/${n}`);
   }
-  // Ricks Clip: the app's cast layer (the three views and the pose layer) beside its page, for Claude to read (the film's bundle takes it from the app)
-  if (s.engine === "module") {
-    const b = join(to, "ricks-cast.js");
-    if (!(existsSync(b) && statSync(b).mtimeMs >= statSync(CAST_LAYER).mtimeMs)) { mkdirSync(to, { recursive: true }); copyFileSync(CAST_LAYER, b); files.push(`.moworks/library/${styleId}/app/ricks-cast.js`); }
+  // Ricks Clip: the app's cast layer (the three views and the pose layer) beside its page, and Ricks Clip and 3D Cartoon: the app's camera timed to
+  // words (camtime.js, #1267), for Claude to read (the film's bundle takes them from the app)
+  const own = [...(s.engine === "module" ? [CAST_LAYER] : []), ...(CAMTIME_STYLES.includes(styleId) ? [CAMTIME] : [])];
+  for (const from of own) {
+    const n = basename(from), b = join(to, n);
+    if (!(existsSync(b) && statSync(b).mtimeMs >= statSync(from).mtimeMs)) { mkdirSync(to, { recursive: true }); copyFileSync(from, b); files.push(`.moworks/library/${styleId}/app/${n}`); }
   }
   return { files };
 }
@@ -105,8 +109,8 @@ export function skillReads(styleId) {
       brief: [sk("cartoon-video/SKILL.md"), sk("cartoon-shorts/SKILL.md"), sk("cartoon-shorts/references/SCRIPT.md"), sk("cartoon-shorts/references/FORMATS.md"), sk("cartoon-whatif/SKILL.md"),
         sk("cartoon-whatif/references/SCRIPT.md"), sk("cartoon-whatif/references/FORMATS.md"), sk("cartoon-whatif/references/EPISODES.md"), sk("idea-lab/SKILL.md"), sk("cartoon-video/references/VOICE.md"), ...LOOK.slice(0, 1)],
       storyboard: [...LOOK, sk("cartoon-video/references/PIPELINE.md"), sk("character-builder/SKILL.md"), ...ex.slice(0, 2)],
-      motionSpec: [...LOOK],
-      build: [...LOOK, sk("cartoon-video/references/PIPELINE.md"), sk("character-builder/SKILL.md"), ...ex],
+      motionSpec: [...LOOK, `${lib}/app/camtime.js`],
+      build: [...LOOK, sk("cartoon-video/references/PIPELINE.md"), sk("character-builder/SKILL.md"), ...ex, `${lib}/app/camtime.js`],
       review: [...out.review, sk("render-review/SKILL.md")] },
     "paper-collage": {
       brief: [sk("motion-graphic/SKILL.md"), sk("motion-graphic/references/VOICE.md"), LOOK[0]],
@@ -130,12 +134,13 @@ function ricksReads(s, lib, k) {
   const skill = `${k}/SKILL.md`, at = (p) => `${k}/kit/${p}`, ex = s.examples.map((e) => `${k}/${e}`);
   const engine = ["engine/main.js", "engine/paint.js", "engine/roman.js", "engine/motion.js", "engine/index.html"].map(at), toon = at("vendor/toon.ts");
   const layer = `${lib}/app/ricks-cast.js`;          // the app's cast layer: the three views, the pose layer, castDraw (#1076)
+  const camtime = `${lib}/app/camtime.js`;           // the app's camera timed to words (#1267)
   const out = { look: [skill, at("README.md")], method: [skill], examples: ex, app: [`${lib}/app/README.md`, layer], sound: [skill, at("example/soldier/audio.py")], review: [skill] };
   out.steps = {
     brief: [skill, at("README.md")],
     storyboard: [skill, ex[0], ex[1], at("engine/roman.js"), at("engine/paint.js"), toon, layer],
-    motionSpec: [skill, at("engine/motion.js"), ex[0], layer],
-    build: [skill, ...engine, toon, layer, ...ex],
+    motionSpec: [skill, at("engine/motion.js"), ex[0], layer, camtime],
+    build: [skill, ...engine, toon, layer, camtime, ...ex],
     review: [skill, ex[1]],
     sound: out.sound,
   };

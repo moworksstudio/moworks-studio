@@ -396,6 +396,16 @@ export function judge(done, f, id = null) {
       const changed = f.qaStale !== undefined ? f.qaStale : !!f.head && q.revision !== f.head;
       return { met: true, at: time(q.at), changed, why: changed ? { key: "The film changed after the last check" } : null };
     }
+    case "sizes": {       // the Adaptation step: every extra size made and made from the master as it is now (project-service/sizes.mjs sizeRows)
+      const xs = Array.isArray(f.sizes) ? f.sizes : [];
+      if (!xs.length) return { met: true, at: null, single: true };          // one size: nothing to adapt
+      const open = xs.filter((x) => x.status !== "ready" && x.status !== "stale" && x.status !== "adapting");
+      if (open.length) return { met: false, why: open.length === 1 ? { key: "{size} not made yet", vars: { size: open[0].aspect } } : { key: "{n} sizes not made yet", vars: { n: open.length } } };
+      // the master's picture changed after a size was made: said, never a block (#1232)
+      const stale = xs.filter((x) => x.status === "stale");
+      if (stale.length) return { met: true, at: null, changed: true, why: { key: "The master film has changed.", vars: { sizes: stale.map((x) => x.aspect).join(", ") } } };
+      return { met: !xs.some((x) => x.status === "adapting"), at: null };
+    }
     case "audioAsset": return { met: f.assets.audioAt != null, at: f.assets.audioAt };
     case "videoAsset": return { met: f.assets.videoAt != null, at: f.assets.videoAt };
     default: return { met: false };
@@ -461,7 +471,8 @@ export function computePipeline(steps, f) {
       // motion: the build draws the cast as it is now, and a storyboard redrawn for a new look is the user's call (Storyboard, "Draw again")
       // Prepare once ran again for the voice answer and the approved cast showed "Approve again", which did nothing: the cast is
       // approved once; an earlier step that ran again does not ask for it again
-      const moved = !source && step.id !== "character" && [...needs, ...after].filter((x) => x.id !== "character").find((x) => x.status === "redo" || (x.doneAt != null && s.doneAt != null && x.doneAt > s.doneAt + 1000));
+      // (the Adaptation step judges its sizes against the master's picture itself: an earlier step's change never asks it again)
+      const moved = !source && step.id !== "character" && step.done?.kind !== "sizes" && [...needs, ...after].filter((x) => x.id !== "character").find((x) => x.status === "redo" || (x.doneAt != null && s.doneAt != null && x.doneAt > s.doneAt + 1000));
       // the music stays when the picture changes (the user changes it in Final Mix), and once the film is handed
       // over the background checks (quiet) run again before a render on their own: neither turns "redo" for a change the user made
       // Version 1 stays what it was, whatever changes the film after it
@@ -481,6 +492,8 @@ export function computePipeline(steps, f) {
     }
     else if (j.failed) { s.status = "failed"; s.reason = j.why; }
     else if (j.partial) { s.status = "needs-you"; s.reason = j.why; }
+    // the Adaptation step: one size says so; a size added and not made says which (an optional step: no wait for the user)
+    if (step.done?.kind === "sizes" && !s.reason) s.reason = s.status === "done" && j.single ? { key: "One size" } : s.status === "ready" ? j.why ?? null : s.reason;
     if (s.status === "ready" && f.claudeBusy && step.action?.kind === "claude") s.reason = { key: "Claude is working: this waits for it" };
     if (step.quiet && s.status === "failed") s.hiddenInList = false;
     if (j.asking) s.asking = true;
@@ -579,7 +592,7 @@ export const STAGES = [
 /** Every line of the Pipeline is for someone who knows nothing yet: where the film is and what to do, one line at best, two at most (owner 31/10, #697, #698).
  *  The Pipeline lines of the waits for the user, also the chat's reminder cards (autopilot). */
 /** The steps of a row that is not one stage of the steps' own numbers (they stay as the autopilot runs them). */
-const ROW_STEPS = { build: ["build", "sound", "firstVersion"], review: ["qcReview", "checks"] };
+const ROW_STEPS = { build: ["build", "sound", "firstVersion"], review: ["qcReview", "adaptation", "checks"] };
 export const WAITING = {
   character: "Waiting for you: approve the new characters", storyboard: "Waiting for you: approve the storyboard",
   motion: "Waiting for you: Approve and build in the Motion Plan", asking: "Waiting for you: answer Claude in the chat",
@@ -612,10 +625,11 @@ export function stagesOf(state, f = {}) {
     else if ((asking || waiting) && f.claudeBusy && !busyShown) { row.status = "running"; row.line = "Claude is working. Please wait..."; busyShown = true; continue; }
     else if (asking || waiting) row.status = "waiting";
     else if (redo) row.status = "redo";
-    else if (xs.every((s) => ok(s) || (s.optional && s.status !== "running") || (!!ROW_STEPS[st.id] && s.status === "redo") || s === quietFail)) row.status = st.id === "review" && !xs.some(ok) ? "todo" : "done";
+    // (the Adaptation step of a film with one size is done by itself: it never makes the Review row done)
+    else if (xs.every((s) => ok(s) || (s.optional && s.status !== "running") || (!!ROW_STEPS[st.id] && s.status === "redo") || s === quietFail)) row.status = st.id === "review" && !xs.some((s) => ok(s) && s.id !== "adaptation") ? "todo" : "done";
     else row.status = "todo";
     const sub = { build: "Making your film. Please wait...", sound: "Adding sound. Please wait...", firstVersion: "Preparing Version 1. Please wait...",
-      qcReview: "Checking your film. Please wait...", checks: "Last checks. Please wait..." };
+      qcReview: "Checking your film. Please wait...", adaptation: "Making the other sizes. Please wait...", checks: "Last checks. Please wait..." };
     switch (st.id) {
       case "prepare": {
         row.open = "brief";

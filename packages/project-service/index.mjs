@@ -17,7 +17,8 @@ import { styleFpsRule } from "../style-catalog/fps.mjs";
 import { isLyricVideo } from "../style-catalog/traits.mjs";
 export { A as LAYOUT, APP_OWN, LAYOUT_VERSION } from "./layout.mjs";
 
-export const ASPECTS = { "16:9": [1920, 1080], "9:16": [1080, 1920], "1:1": [1080, 1080], "4:5": [1080, 1350] };
+import { ASPECTS, extraSizes, filmSizes } from "./sizes.mjs";
+export { ASPECTS };          // one table with the sizes a film is adapted to (sizes.mjs)
 export const STAGES = ["brief", "storyboard", "motionPlan", "build", "review", "export"];
 /** General style only: how Claude uses what the user imported (the kit's "what did the user give"). */
 export const INPUT_MODES = ["auto", "keep", "relayout", "free", "reference", "remake"];
@@ -104,7 +105,9 @@ function summary(entry) {
     title: m.title ?? entry.title ?? basename(dir),
     style: m.style ? { id: m.style.id, title: m.style.title } : null,
     // a film not built yet is as long as New project planned it (the 3 s starter said 0:03 on a 40 s film's card); the ending's fade is no part of what the user set (T30-10)
-    aspect: m.format?.aspect ?? null, width: r.width, height: r.height, duration: r.starter && m.targetDurationSec ? plannedLength(m, { dir }) : r.duration, scenes: r.scenes,
+    aspect: m.format?.aspect ?? null, width: r.width, height: r.height,
+    // the film's sizes when it has more than its own (the Adaptation step): the cards say "16:9 · 9:16"
+    ...(extraSizes(m).length ? { sizes: filmSizes(m) } : {}), duration: r.starter && m.targetDurationSec ? plannedLength(m, { dir }) : r.duration, scenes: r.scenes,
     // before the Build the root is the 3 s starter: the Editor can say "not built yet" with the planned length, not a white 3 s film
     built: r.starter === undefined ? null : !r.starter, ...(r.starter ? { plannedDuration: plannedLength(m, { dir }) } : {}),
     status: statusOf(m, dir), stage: currentStage(m), progress: m.pipelineSummary ? { done: m.pipelineSummary.done, total: m.pipelineSummary.total, needsYou: m.pipelineSummary.needsYou ?? 0, unit: m.pipelineSummary.unit ?? "steps" } : null,
@@ -384,9 +387,11 @@ async function castFromLibrary(dir, input, root) {
   let kit; try { kit = await import("../character-kit/index.mjs"); } catch { return []; }
   // a Ricks Clip film: its own characters themselves (film/cast/, as Characters › Use in a project does), any other as a reference (T39-1:
   // New project dropped the Ricks characters picked there, and the film had no cast)
-  if (input.style?.id === "ricks-clip") {
+  // a 3D Cartoon film likewise (#1267): its own characters' modules into src/videos/film/cast/
+  if (input.style?.id === "ricks-clip" || input.style?.id === "cartoon-3d") {
     try {
-      const ricks = await import("../character-kit/ricks.mjs"), mine = ricks.ricksCharacters(root);
+      const c3 = input.style.id === "cartoon-3d", lib = c3 ? await import("../character-kit/c3d.mjs") : await import("../character-kit/ricks.mjs");
+      const ricks = { useRicks: c3 ? lib.useC3d : lib.useRicks }, mine = c3 ? lib.c3dCharacters(root) : lib.ricksCharacters(root);
       const picked0 = (Array.isArray(input.characters) ? input.characters : input.characters?.ids ?? []).map(String);
       const own = [...new Set([...picked0.filter((id) => mine.some((c) => c.id === id)), ...mine.filter((c) => namedIn(input.brief, c.name)).map((c) => c.id)])];
       const added = own.length ? ricks.useRicks(dir, own, { root }) : [];

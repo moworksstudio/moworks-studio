@@ -21,6 +21,7 @@ import { isCodeFilm, reviewPending } from "../pipeline/index.mjs";
 import { expandEnv, loadPins, renderSettings } from "../version-manager/index.mjs";
 import * as projects from "../project-service/index.mjs";
 import { docPath } from "../project-service/docs.mjs";
+import { SIZE_FILE } from "../project-service/sizes.mjs";
 import { refreshBridge } from "../hf-edit/lemoPage.mjs";
 import { applyLanes, readLanes, readMuted } from "../sfx/lanes.mjs";
 import { fitMusicToFilm } from "../hf-edit/tracks.mjs";
@@ -60,6 +61,8 @@ export function filmParts(dir, fps, { stamps = false } = {}) {
     for (const n of readdirSync(d).sort()) {
       const p = join(d, n), s = statSync(p), rel = relative(dir, p).split(sep).join("/");
       if (s.isDirectory()) { if (!n.startsWith(".") && n !== "_app" && n !== "rounds") walk(p, deep, only); continue; }
+      // a file of one other size only (compositions/shot-03.9x16.html): no part of the master's picture (project-service/sizes.mjs)
+      if (SIZE_FILE.test(n)) continue;
       const sound = AUDIO_FILE.test(n);
       if (only === "sound" && !sound) continue;
       const add = sound ? (x) => { snd.update(x); hrd.update(x); } : both;

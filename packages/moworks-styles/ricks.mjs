@@ -43,6 +43,8 @@ export function ricksSkill(root = APP_ROOT) {
 
 /** The app's cast layer (ricks-cast.js): the three views and the pose layer, in toon.js's module scope. */
 export const CAST_LAYER = join(HERE, "ricks-cast.js");
+/** The app's camera timed to words (camtime.js, owner #1267, audit/111 H1): `import { camOnWords } from "./camtime.js"` in film/story.js. */
+export const CAMTIME = join(HERE, "camtime.js");
 /** A film's characters from the library: film/cast/<id>.js, in id order. */
 /** The characters a page of the film draws: its own film/cast/, then the film root's for any it has not (T39-6: a board, boards/<x>/film, had no
  *  cast of its own, and castDraw found no character). */
@@ -77,13 +79,22 @@ export async function buildRicksFilm(projectDir, { root = APP_ROOT, force = fals
   if (!existsSync(three)) return { built: false, out: outRel, three: version, own: [], error: `three.js ${version} is not installed (offline assets)` };
   const out = join(projectDir, ...outRel.split("/"));
   const own = readdirSync(film).filter((n) => /\.js$/.test(n)).sort();
-  const latest = newest([film, src.engine, src.toon, HOST, CAST_LAYER, fileURLToPath(import.meta.url), join(projectDir, "transcript.json"), join(projectDir, "film", "cast")], out);
+  const latest = newest([film, src.engine, src.toon, dirname(HOST), CAST_LAYER, CAMTIME, fileURLToPath(import.meta.url), join(projectDir, "transcript.json"), join(projectDir, "film", "cast")], out);
   if (!force && existsSync(out) && statSync(out).mtimeMs >= latest) return { built: false, out: outRel, three: version, own };
   const pick = (name) => (existsSync(join(film, name)) ? join(film, name) : join(src.engine, name));
   const fromFilm = (p) => p.startsWith(src.engine) || p.startsWith(film);
   const plugin = { name: "moworks-ricks", setup(b) {
     b.onResolve({ filter: /^mw-film-main$/ }, () => ({ path: pick("main.js") }));
-    b.onResolve({ filter: /^\.\/lib\/three\.module\.js$/ }, (a) => (fromFilm(a.importer) ? { path: three } : undefined));
+    // three.js as the engine imports it: the app's 0.187.0, with one addition for the cards' collision check (#1267): a renderer made while
+    // globalThis.__mwSkipDraw is set (only a ?skill-check=1 page) draws nothing and keeps the scene its colour pass names; any other renderer is three's own
+    b.onResolve({ filter: /^\.\/lib\/three\.module\.js$/ }, (a) => (fromFilm(a.importer) ? { path: "three", namespace: "rc-three" } : undefined));
+    b.onResolve({ filter: /^mw-three$/ }, () => ({ path: three }));          // three.js itself (the host's, and the shim's)
+    b.onLoad({ filter: /.*/, namespace: "rc-three" }, () => ({ loader: "js", resolveDir: film, contents:
+      'import * as T from "mw-three";\nexport * from "mw-three";\nexport class WebGLRenderer extends T.WebGLRenderer {\n  constructor(o) {\n    super(o);\n'
+      + '    if (globalThis.__mwSkipDraw) this.render = (s, c) => { if (c && c.isPerspectiveCamera && !globalThis.__mwScene) globalThis.__mwScene = s; };\n  }\n}\n' }));
+    b.onResolve({ filter: /^mw-film-story$/ }, () => ({ path: join(film, "story.js") }));
+    b.onLoad({ filter: /.*/, namespace: "rc-story" }, () => ({ loader: "js", resolveDir: film, contents:
+      'import * as S from "mw-film-story";\nexport * from "mw-film-story";\nexport const actorsAt = (f, T) => { const a = S.actorsAt(f, T); globalThis.__mwActors = a; return a; };\n' }));
     b.onResolve({ filter: /^\.\/toon\.js$/ }, (a) => (fromFilm(a.importer) ? { path: "toon.js", namespace: "rc-toon" } : undefined));
     // the voice's words, from the project's transcript: [{ word, start, end }] seconds, in the order spoken
     b.onResolve({ filter: /^\.\/words\.js$/ }, (a) => (fromFilm(a.importer) && !existsSync(join(film, "words.js")) ? { path: "words.js", namespace: "rc-words" } : undefined));
@@ -91,7 +102,9 @@ export async function buildRicksFilm(projectDir, { root = APP_ROOT, force = fals
     b.onResolve({ filter: /^\.\/[\w.-]+\.js$/ }, (a) => {
       if (!fromFilm(a.importer)) return undefined;
       const name = a.path.slice(2);
-      if (name === "story.js") return { path: join(film, "story.js") };
+      // story.js as shipped, behind a pass-through that keeps the last actorsAt list for the cards' collision check (hosts/ricks-cards.ts, #1267)
+      if (name === "story.js") return { path: "story.js", namespace: "rc-story" };
+      if (name === "camtime.js" && !existsSync(join(film, name))) return { path: CAMTIME };          // the app's camera timed to words
       const p = pick(name);
       return existsSync(p) ? { path: p } : { errors: [{ text: `${name} is neither the film's (${filmDir}/${name}) nor the source skill's engine` }] };
     });

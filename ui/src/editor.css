@@ -998,3 +998,24 @@ ol.plain.conversation, .conversation { padding: var(--sp-3); gap: 0.875rem; }
 .ed-pipe { container-type: inline-size; }
 @container (max-width: 270px) { .pl-subs:not(.more) span.pl-sub:not(.running) { display: none; } }
 .pl-subs.full span.pl-sub:not(.running) { display: none; }          /* a score and a count take their room */
+
+/* One film, several sizes (owner 06/11, #1236): the size switch at the left end of the playback bar, and the notice above the film when the
+   size shown is out of date. A switch used many times a session: no motion but the press and the segments' own highlight */
+.pv-sizes { flex: none; margin-right: var(--sp-2); }
+.pv-sizes button { min-width: 2.75rem; justify-content: center; font-variant-numeric: tabular-nums; }
+.pv-sizes button:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 1px; }
+.pv-notice { flex: none; display: flex; align-items: center; gap: var(--sp-2); min-height: 2.5rem; padding: 0.25rem var(--sp-3); border-bottom: 1px solid var(--state-stop-line);
+  background: var(--state-stop-soft); color: var(--text-primary); font-size: var(--fs-control); }
+.pv-notice > svg { flex: none; color: var(--state-stop); }
+.pv-notice-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.pv-notice .btn { flex: none; }
+/* the line under the timeline's lanes while another size is shown: the sound is the master's and every size's */
+.ed-shared { flex: none; display: flex; align-items: center; gap: 0.375rem; padding: 0.25rem var(--sp-3); color: var(--text-muted); font-size: var(--fs-meta); border-top: 1px solid var(--border); }
+.ed-shared svg { flex: none; }
+/* the Render dialog of a film of several sizes: one box per size made (the master first), one file each */
+.render-sizes { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-2) var(--sp-4); margin: 0; padding: 0; border: 0; }
+.render-sizes legend { float: left; margin-right: var(--sp-2); color: var(--text-secondary); font-size: var(--fs-label); }
+.render-sizes .check { display: inline-flex; align-items: center; gap: 0.375rem; }
+.render-sizes > .hint { flex-basis: 100%; margin: 0; }
+.render-stale { color: var(--state-stop); }
+.render-size { margin-right: 0.5rem; color: var(--accent-ink); font-variant-numeric: tabular-nums; }

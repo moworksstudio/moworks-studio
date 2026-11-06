@@ -194,7 +194,7 @@ export default function Projects() {
             <div className="card-title one-line" title={p.title}>{p.title}</div>
             {p.missing ? <div className="card-meta"><span className="status warning"><AlertTriangle size={13} />{t("Folder not found")}</span></div>
               : <div className="card-tags">
-                <span className="chip tag-aspect num">{p.aspect ?? (p.width ? `${p.width}×${p.height}` : "–")}</span>
+                <span className="chip tag-aspect num" title={p.sizes ? t("This film in {n} sizes", { n: p.sizes.length }) : undefined}>{p.sizes?.join(" · ") ?? p.aspect ?? (p.width ? `${p.width}×${p.height}` : "–")}</span>
                 {p.style && <span className="chip tag-style" title={t(p.style.title)}>{t(p.style.title)}</span>}</div>}
             {/* on the smaller card the date sits on the progress line, the foot keeps the state and the buttons */}
             <div className="card-prog">{!p.missing && <Gauge stage={p.stage} progress={p.progress} done={statusOf(p) === "exported"} label={false} />}<span className="when">{ago(p.updatedAt).replace(` ${new Date().getFullYear()}`, "")}</span></div>
@@ -211,7 +211,7 @@ export default function Projects() {
           <div className="list-thumb">{p.thumbnailUrl && <img className="card-img" src={p.thumbnailUrl} alt="" loading="lazy" />}</div>
           <div style={{ minWidth: 0 }}><div className="card-title">{p.title}</div><div className="card-meta">{p.missing ? t("Folder not found") : <Gauge stage={p.stage} progress={p.progress} done={statusOf(p) === "exported"} />}</div></div>
           <div className="hide-sm">{p.style ? <span className="chip tag-style" title={t(p.style.title)}>{t(p.style.title)}</span> : <span className="muted">{t("No style")}</span>}</div>
-          <div className="hide-sm">{p.aspect ? <span className="chip tag-aspect num">{p.aspect}</span> : <span className="muted">–</span>}</div>
+          <div className="hide-sm">{p.aspect ? <span className="chip tag-aspect num">{p.sizes?.join(" · ") ?? p.aspect}</span> : <span className="muted">–</span>}</div>
           <div className="hide-sm num secondary">{p.duration > 0 ? clock(p.duration) : "–"}</div>
           <div className="hide-sm when">{ago(p.updatedAt)}</div>
           <div style={{ display: "flex", justifyContent: "flex-end" }}><ProjectMenu p={p} toast={toast} onRename={() => setDlg({ kind: "rename", p })}

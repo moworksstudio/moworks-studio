@@ -2,6 +2,7 @@
 // HyperFrames' source mutation (packages/hf-edit/handEdit.mjs), the timeline the Editor draws (shots, voice-over lines, sound effects,
 // music with its waveform), a still of the frame on screen saved into the project, and the font lists of the edit card.
 // Nothing here edits while Claude works on the same project (409 CLAUDE_BUSY): the user's edit and Claude's would cross.
+import { aspectOfTag, extraSizes, sizeStage } from "../project-service/sizes.mjs";
 import { readLanes, readMuted } from "../sfx/lanes.mjs";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
@@ -206,9 +207,11 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
       } catch (e) { fail(e); }
     }),
     // what the Editor's timeline draws: shots, voice-over lines, sound effects and the music (waveform cached per file)
-    r("GET", `/projects/${P}/timeline`, async ([id]) => {
+    r("GET", `/projects/${P}/timeline`, async ([id], _b, q) => {
       const p = mustProject(id, root);
-      const s = await readShots(p.path);
+      // ?size=9x16: the shot row of one of the film's other sizes (its own root page: a vertical may add cuts); the sound is the master's, shared
+      const sizeA = aspectOfTag(q?.get?.("size")), sizeDir = sizeA && extraSizes(p.meta).some((x) => x.aspect === sizeA) ? sizeStage(p.path, sizeA) : null;
+      const s = await readShots(sizeDir ?? p.path);
       const html = existsSync(join(p.path, "index.html")) ? readFileSync(join(p.path, "index.html"), "utf8") : "";
       const tags = html.match(/<audio\b[^>]*>/g) ?? [];
       // the attribute itself, never the end of a longer name: the id of `<audio data-hf-id="hf-k4k5" id="el-sfx-3">` is el-sfx-3, the src of a scene's

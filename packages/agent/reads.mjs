@@ -176,6 +176,14 @@ export function requiredReads(dir, { styleId, first = [], step = null } = {}) {
   const lemo = /^lemo-([a-z0-9-]+)$/.exec(String(styleId ?? ""))?.[1], mg = /^mg-(\d\d-[a-z0-9-]+)$/.exec(String(styleId ?? ""))?.[1];
   const ani = /^anidoodle-([A-Za-z0-9]+)$/.exec(String(styleId ?? ""))?.[1];
   let list;
+  // the Adaptation step (one film, another size): its rules, HyperFrames' vertical, captions and overlays references, the style's own pack
+  // or source skill's look (its staging and format rules come first, #1198), the film's design and the alive rule
+  if (key === "adaptation") {
+    const own = isMoworksStyle(styleId) ? (() => { const k = skillReads(styleId); return [R(styleId, "SKILL.md"), ...k.look]; })() : styleId === "general" || styleId === "map-explainer" ? [R("general-style", "SKILL.md")] : first;
+    list = [R("adaptation", "SKILL.md"), ...own, R(HF_SKILL, "references", "types", "vertical.md"), R(HF_SKILL, "references", "captions.md"), R(HF_SKILL, "references", "overlays.md"),
+      "frame.md", "design.md", R("moworks-alive", "SKILL.md")];
+    return [...new Set([R("moworks-studio", "SKILL.md"), ...list])].filter((p) => existsSync(join(dir, ...p.split("/"))));
+  }
   if (styleId === "general") list = GENERAL[key] ?? GENERAL.chat;
   else if (styleId === "map-explainer") list = MAP[key] ?? MAP.chat;
   else if (isMoworksStyle(styleId)) { const t = SKILL(styleId); list = t[key] ?? t.chat; }

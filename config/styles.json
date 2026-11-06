@@ -584,6 +584,11 @@
       "credit": "Moworks Studio · a frame of its source skill's demo, drawn by the app"
      },
      "look": false,
+     "pace": {
+      "shotSeconds": { "9:16": 2, "16:9": 3.5 },
+      "from": { "9:16": "cartoon-shorts SKILL.md, short-specific numbers: 1.5-2.5 s a shot on average", "16:9": "the What-If example what-if-no-pain: 13 shots in 49.7 s, about 3-4 s a shot" },
+      "_about": "the Storyboard's pace warning (owner #1267, audit/111 A7): the source skill's own pace, local; board_stills says when a board's average shot is over 1.5 times it"
+     },
      "dim": "3D",
      "renderer": "webgl",
      "credit": {
@@ -716,6 +721,11 @@
       "credit": "Moworks Studio · a frame of the skill's example, drawn by the app"
      },
      "look": false,
+     "pace": {
+      "shotSeconds": { "9:16": 2.5 },
+      "from": { "9:16": "SKILL.md's worked example: 8 shots in 19.7 s" },
+      "_about": "the Storyboard's pace warning (owner #1267, audit/111 A7): the source skill's own pace, local; board_stills says when a board's average shot is over 1.5 times it"
+     },
      "dim": "3D",
      "renderer": "webgl",
      "credit": {
@@ -1058,6 +1068,10 @@
   "vocab": {
     "file": "config/rules/motion-vocab/SKILL.md",
     "source": "Motion Prompt (Shohei Ohtaki, MIT; showheyohtaki/motion-prompt at 7819d38): the names of the film packs, generated from the Library's Vocabulary (audit 79)"
+  },
+  "adaptation": {
+    "file": "config/rules/adaptation/SKILL.md",
+    "source": "Moworks Studio, written from the idea (owner 06/11/2026, audit/105 §8.3), on HyperFrames' vertical, captions and overlays references (Apache-2.0, 4719543)"
   },
   "qc": {
     "file": "config/rules/moworks-qc/SKILL.md",
