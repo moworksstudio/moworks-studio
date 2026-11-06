@@ -132,7 +132,7 @@ giấy phép và đúng commit nguồn. File style của bên thứ ba được 
 |---|---|---|---|---|
 | **General Style** | Moworks | 1 | bộ luật riêng của app | viết lại cho app từ quy trình của bộ kit Moworks Motion |
 | **Map Explainer** | Moworks | 1: bản đồ giấy và mặt đất thật dưới một camera liền, bút đỏ vẽ lên trên | bộ luật riêng của app, dữ liệu bản đồ từ [Natural Earth](https://www.naturalearthdata.com) và [world-atlas](https://github.com/topojson/world-atlas/tree/v2.0.2), ảnh vệ tinh từ [EOX](https://cloudless.eox.at) (CC BY 4.0) | làm riêng cho app; mọi nguồn ở [THIRD-PARTY.md](THIRD-PARTY.md) |
-| **Film style Moworks** | Moworks | 5: Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon và Moworks 2D Explainer, mỗi style có bước kiểm riêng của skill gốc trong Review và tiếng động làm bằng code | sản phẩm riêng của app | các skill gốc riêng của Moworks Studio, ghim trong app; mọi phần bên ngoài ghi ở [THIRD-PARTY.md](THIRD-PARTY.md) |
+| **Film style Moworks** | Moworks | 6: Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, Moworks 2D Explainer và Ricks Clip, mỗi style có bước kiểm riêng của skill gốc trong Review và tiếng động làm bằng code | sản phẩm riêng của app | các skill gốc riêng của Moworks Studio, ghim trong app; mọi phần bên ngoài ghi ở [THIRD-PARTY.md](THIRD-PARTY.md) |
 | **HyperFrames** | HeyGen | 8: Slideshow và bảy loại phim trong skill của HyperFrames (Explainer, Launch, Music video, Data, Vertical, 3D, Character) | Apache-2.0 | [heygen-com/hyperframes @ `4719543`](https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/skills) (v0.8.214) |
 | **Lemo-Opuscar** | Lemomo (LemoLab) | 66 style phim dựng bằng code (các thời kỳ điện ảnh, tư liệu, editorial, dữ liệu…; Memphis Diorama do EianLu đóng góp) | MIT; ảnh mẫu CC BY 4.0 | [lemomo-ai/lemo-opuscar @ `ea34ff9`](https://github.com/lemomo-ai/lemo-opuscar/tree/ea34ff9546f675f9fd65a3c84e869a1da7471ad7) |
 | **mg-styles-15** | Vincentwei1021 | 14 style motion design (style 3D dựng bằng Blender không có trong app) | MIT | [Vincentwei1021/mg-styles-15 @ `49052d8`](https://github.com/Vincentwei1021/mg-styles-15/tree/49052d80bfaf9fa8412cc9710530e5e95a3b8d8c) |
@@ -186,7 +186,7 @@ Mọi style còn theo hai bộ luật chung của app: **phim luôn sống độ
 | **Film Styles** | Thư viện style ở trên, kèm phim mẫu, ghi công và huy hiệu AE |
 | **Motion Library** | Thư viện riêng của studio: Motions (889), Blocks (454 block và component) và Vocabulary (168 thuật ngữ chuyển động), xếp theo loại và nhóm. Giấy phép của các nguồn được dùng nằm trong [THIRD-PARTY.md](THIRD-PARTY.md) |
 | **Characters** | Nhân vật của dự án: vẽ bằng Character maker, hoặc lấy từ các rig nhân vật của tác giả Anidoodle |
-| **Idea Library** | Các brief để bắt đầu một phim: brief mẫu của mọi film style, 98 prompt OPUSCAR và ý tưởng của riêng bạn. Lọc theo nguồn, film style, 2D hay 3D, tông và thời kỳ; **Start a project** mở New project với brief và film style của ý tưởng, còn **Save as idea** trong New project giữ lại brief bạn đang viết |
+| **Writers Room** | Research đưa 10 ý tưởng theo đúng cách của từng film style, có nguồn đã kiểm; Ideas giữ ý tưởng của bạn và các mẫu (brief mẫu của mọi film style, 98 prompt OPUSCAR); Scripts viết kịch bản từ ý tưởng theo từng cảnh, và **Start a project with this script** mở New project với kịch bản đó. Việc chạy tiếp khi bạn sang trang khác |
 | **Settings** | General (tài khoản Claude, thư mục dự án, giao diện, render, thông báo khi app chờ bạn), Director (model và effort của Claude), System (thành phần, lời đọc, backup và tình trạng máy), Update (cả Uninstall) |
 
 <table>
@@ -195,8 +195,8 @@ Mọi style còn theo hai bộ luật chung của app: **phim luôn sống độ
 <td width="50%" valign="top"><img src="images/desk-brand-kits.jpg" alt="Brand Kits: 13 frame preset của HyperFrames và Brand Kit của bạn"><br><sub>Brand Kits: 13 frame preset của HyperFrames và Brand Kit của bạn</sub></td>
 </tr>
 <tr>
-<td width="50%" valign="top"><img src="images/desk-ideas.jpg" alt="The Desk · Idea Library: các brief để bắt đầu một phim"><br><sub>The Desk · Idea Library: các brief để bắt đầu một phim</sub></td>
-<td width="50%" valign="top"><img src="images/studio-ideas.jpg" alt="The Studio · Idea Library dạng thẻ ghi chú"><br><sub>The Studio · Idea Library dạng thẻ ghi chú</sub></td>
+<td width="50%" valign="top"><img src="images/desk-writers-room.jpg" alt="The Desk · Writers Room: mười ý tưởng tìm theo một film style"><br><sub>The Desk · Writers Room: mười ý tưởng tìm theo một film style</sub></td>
+<td width="50%" valign="top"><img src="images/studio-writers-room.jpg" alt="The Studio · Writers Room dạng thẻ trên bàn"><br><sub>The Studio · Writers Room dạng thẻ trên bàn</sub></td>
 </tr>
 </table>
 

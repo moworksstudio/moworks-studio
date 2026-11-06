@@ -47,7 +47,7 @@ const commitInfo = async (root, rev) => {
   const [hash, date, subject] = (await git(root, ["log", "-1", "--format=%H%x00%cI%x00%s", rev])).split("\0");
   return { hash, short: hash.slice(0, 8), date, subject, version: await versionAt(root, rev) };
 };
-/** The app's version at a revision: the changelog's newest heading ("## 0.8.214.5 (2026-11-05)"), docs/ then the root; null when none. */
+/** The app's version at a revision: the changelog's newest heading ("## 0.8.214.6 (2026-11-06)"), docs/ then the root; null when none. */
 async function versionAt(root, rev) {
   for (const f of ["docs/CHANGELOG.md", "CHANGELOG.md"]) {
     try { const v = /^## (\d[\w.-]*)/m.exec(await git(root, ["show", `${rev}:${f}`]))?.[1]; if (v) return v; } catch { /* not at this revision */ }

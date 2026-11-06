@@ -266,7 +266,7 @@ export default function NewProjectDialog({ onClose }) {
     // Start a project from the Idea Library: only the brief and the film style are filled in; the rest stays as usual. The brief is the
     // user's choice, not a sample to type over (ideaText).
     const idea = takeStartIdea();
-    // an idea of the Writers' Room goes with the film (it then reads "In a project"), its script read as the owner's (#1111)
+    // an idea of the Writers Room goes with the film (it then reads "In a project"), its script read as the owner's (#1111)
     if (idea?.brief) { setD((x) => ({ ...x, ...(idea.styleId ? { styleId: idea.styleId } : {}), sampleKind: null, brief: idea.brief, ideaText: idea.brief, ideaId: idea.ideaId ?? null, briefMode: idea.briefMode ?? null,
       // the script's own length (T41-4: a draft's 50 s stayed under a 45 s script)
       ...(Number(idea.lengthSec) > 0 ? { length: toTimecode(Number(idea.lengthSec), x.fps) } : {}),
@@ -378,7 +378,7 @@ export default function NewProjectDialog({ onClose }) {
       // the size: one of the four presets as its aspect, else "custom" with the typed width and height
       const p = await post("/api/projects", { title: d.title.trim(), styleId: d.styleId, aspect: aspect ?? "custom", width: d.width, height: d.height, fps: Number(d.fps) || 30, durationSec: seconds,
         brief: d.brief, look: d.look ? { id: d.look } : null,
-        // the idea it came from, while the brief is still the one the Writers' Room handed over
+        // the idea it came from, while the brief is still the one the Writers Room handed over
         ...(d.ideaId && d.brief === d.ideaText ? { ideaId: d.ideaId, ...(d.briefMode === "script" ? { briefMode: "script" } : {}) } : {}),
         settings: { model: d.model, effort: d.effort, web: d.web }, location: loc?.path,
         characters: cast.mode !== "locked" && d.characters?.length ? d.characters : undefined,          // the box's own rule decides; written into the film at creation
@@ -506,7 +506,7 @@ export default function NewProjectDialog({ onClose }) {
               : <button type="button" className="btn ghost sm np2-act" onClick={() => (isSample(d.brief) ? fillSample() : setAskReplace(true))}
               title={credit ? `${t("Fill the box with this style's sample brief")} · ${t(credit.text)}` : t("Fill the box with this style's sample brief")}><FileText size={13} />{t("Sample brief")}</button>}
               <button type="button" className="btn ghost sm np2-act" onClick={() => setSaveIdea(true)} disabled={!!phase || !d.brief.trim()} aria-haspopup="dialog"
-                title={d.brief.trim() ? t("Keep this brief in My ideas, in the Writers' Room") : t("Write a brief first")}><BookmarkPlus size={13} />{t("Save as idea")}</button></span>}>
+                title={d.brief.trim() ? t("Keep this brief in My ideas, in the Writers Room") : t("Write a brief first")}><BookmarkPlus size={13} />{t("Save as idea")}</button></span>}>
               {saveIdea && <IdeaDialog value={{ name: "", brief: d.brief, styleId: d.styleId }} onClose={() => setSaveIdea(false)} onSaved={() => setSaveIdea(false)} />}
               {askReplace && <div className="np-ask" role="alert"><span>{t("Replace with this style's sample brief?")}</span>
                 <button type="button" className="btn sm" onClick={() => setAskReplace(false)}>{t("Keep")}</button>
@@ -534,7 +534,7 @@ export default function NewProjectDialog({ onClose }) {
         {reason ? <span className="np-why" role="status" id="np-why"><AlertCircle size={14} />{t(reason)}</span>
           : <span className="hint kbd-hint"><kbd>Ctrl</kbd><kbd>Enter</kbd> {t("to create")}</span>}
         <span className="spacer" />
-        <button type="button" className="btn ghost" onClick={() => setIdeas(true)} disabled={!!phase} aria-haspopup="dialog"><Lightbulb size={15} />{t("Writers' Room")}</button>
+        <button type="button" className="btn ghost" onClick={() => setIdeas(true)} disabled={!!phase} aria-haspopup="dialog"><Lightbulb size={15} />{t("Writers Room")}</button>
         <button className="btn" onClick={close} disabled={!!phase}>{t("Cancel")}</button>
         {phase === "copying" && <button className="btn" onClick={() => job.current?.cancel()}>{t("Stop copying")}</button>}
         {ideas && <IdeaPicker onAdd={addToBrief} onClose={() => setIdeas(false)} />}

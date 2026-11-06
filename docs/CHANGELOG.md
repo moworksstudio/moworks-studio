@@ -3,6 +3,44 @@
 One entry per version, newest first. The version is the HyperFrames version the app runs (0.8.214 runs HyperFrames 0.8.214); fixes to the
 app alone on the same engine are 0.8.214.1, 0.8.214.2…
 
+## 0.8.214.6 (2026-11-06)
+
+Still on HyperFrames 0.8.214: the Writers Room for ideas and scripts, a sixth Moworks film style, ElevenLabs v4 voices with emotion,
+sound effects picked for each moment, and new Tech checks.
+
+### New
+- **Writers Room** (in place of the Idea Library):
+  - **Research:** pitches 10 ideas in any film style's own way, with checked sources for true stories; save a card, save all, or ask for 10 more.
+  - **Ideas:** your saved ideas and the samples, each marked Idea, Script ready or In a project.
+  - **Scripts:** a script written from an idea, scene by scene (time, narration, picture, sources). Copy, Edit, Write again, or **Start a project with this script**.
+  - Runs go on while you use other pages; a notice says when they are done.
+- **Ricks Clip:** a new Moworks film style (vertical shorts of odd true stories with a twist), with its own character maker in Characters (front, back and profile).
+- **ElevenLabs v4:** the default voice model. Claude adds emotion tags to the words to read, your own script included (its words unchanged).
+- **Subtitles in two kinds:** Plain (one still line) or Word pop (each word pops on as it is spoken). Claude asks which.
+- **Sound effects:**
+  - Claude picks the library's sound for each moment from the closest ones;
+  - with an ElevenLabs key, a sound the library lacks is made from its description;
+  - a sound heard again plays a little higher or lower.
+- **Tech checks:** Flicker in the render, Text drawn into the picture, Sound files that are missing.
+
+### Improvements
+- **Editable first:** a film's plain text is editable in Studio and After Effects, also over a drawn picture.
+- **Render:** Standard masters to -14 LUFS, Quieter to -16 LUFS, or Keep the mix. Opening Render pauses the film.
+- **Final Mix:** voice, music and effects levels set the same way in every film style; Remove them asks first; the note says which sounds Claude picked or made.
+- **Tech checks:** one line per kind of warning, with how many and where; a level you set yourself is said as yours.
+- **A film style's own sounds:** a sound its source skill never uses (a whoosh, a pop) is never placed.
+- **New project** takes a script's length and the idea's name; Ricks Clip characters come into the film as they are.
+- **Chat:** Enter makes a new line; Ctrl+Enter sends.
+- **Shots tab:** a one-page film lists each shot's words.
+
+### Fixes
+- A sound whose file is gone no longer stops the render; it is left out and said.
+- The After Effects export no longer fails on a clip shape written with calc().
+- The Review and chat changes look at the film as just changed in every Moworks film style.
+- Claude answers in your language after Fix with Claude.
+- A 3D film keeps the three.js version it was built with.
+- A Ricks Clip board draws its characters.
+
 ## 0.8.214.5 (2026-11-05)
 
 Still on HyperFrames 0.8.214: five new film styles, sound effects made by code, Assets and Timeline that show where each sound plays,

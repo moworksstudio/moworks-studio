@@ -926,7 +926,7 @@ details.diag pre { white-space: pre-wrap; overflow-wrap: anywhere; background: v
 .idl-form { display: flex; flex-direction: column; gap: 1rem; }
 .idl-form .hint { font-size: var(--fs-meta); }
 .textarea.idl-brief { min-height: 16rem; max-height: 50vh; }
-/* ---- Writers' Room (#1111 #1114 #1115 #1117 #1118, audit/104 §7): Research, Ideas, Scripts. Operate: the app's tabs, panels, cards ---- */
+/* ---- Writers Room (#1111 #1114 #1115 #1117 #1118, audit/104 §7): Research, Ideas, Scripts. Operate: the app's tabs, panels, cards ---- */
 .wr-tabs { margin: 0 0 var(--sp-4); border-bottom: 1px solid var(--border); }
 .wr-tabs button .wr-n { margin-left: 0.15rem; color: var(--text-muted); }
 .wr-tabs button .dot { width: 0.45rem; height: 0.45rem; margin-left: 0.15rem; }

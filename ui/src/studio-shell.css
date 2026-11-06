@@ -733,7 +733,7 @@
 [data-theme="studio"] .bk-sheet .bk-inferred { color: var(--paper-run, #A87406); background: rgba(217, 154, 22, 0.14); }
 [data-theme="studio"] .bk-sheet .bk-tok { background: var(--paper-2, #EFE8D9); }
 
-/* ---- the Writers' Room (audit/104): the ask, the cards and the script are paper on the room (.studio-paper re-points their tokens);
+/* ---- the Writers Room (audit/104): the ask, the cards and the script are paper on the room (.studio-paper re-points their tokens);
    paper casts its soft shadow, the running panel and the list stay flat on the room ---- */
 [data-theme="studio"] .wr-page .wr-tabs { border-bottom-color: var(--room-line); }
 [data-theme="studio"] :is(.wr-ask, .wr-card, .wr-sheet) { border-color: var(--paper-edge); border-radius: var(--st-r-md); background: var(--paper-white);

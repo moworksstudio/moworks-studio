@@ -566,7 +566,7 @@ export function routes(ctx) {
       // a style whose catalog turns design off (look: false) takes no Look, whatever the dialog sent
       const p = await projects.createProject({ ...b, style: selection(style), designLocked: style.look === false || styleDesign(style) === "author" }, { root });          // only General and the seven HyperFrames type styles take a design (DESIGN_OPEN)
       try { await rev.ensureRepoAsync(p.path); } catch { /* git missing: revisions unavailable, the project still works */ }
-      // started from an idea of the Writers' Room (#1111): the idea keeps the film, so it reads "In a project"
+      // started from an idea of the Writers Room (#1111): the idea keeps the film, so it reads "In a project"
       if (/^[0-9a-f]{12}$/.test(String(b.ideaId ?? ""))) { try { (await import("../idea-library/index.mjs")).linkProject(root, b.ideaId, { id: p.id, title: p.title }); } catch { /* the idea was deleted meanwhile */ } }
       return p;
     }),

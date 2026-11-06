@@ -284,7 +284,7 @@ export function draftInBrief(draft, briefText) {
   const lines = String(draft ?? "").split(/\n+/).map(plainWords).filter(Boolean), all = plainWords(briefText);
   return lines.length > 0 && !!all && lines.every((l) => all.includes(l));
 }
-/** The words to read in a script brief: a brief the Writers' Room made gives its narration lines only (never its scene notes, the idea,
+/** The words to read in a script brief: a brief the Writers Room made gives its narration lines only (never its scene notes, the idea,
  *  its sources or its length: T41-3); a script the owner typed is read as it is. */
 export function narrationOf(briefText) {
   const t = String(briefText ?? "").replace(/\r\n/g, "\n");

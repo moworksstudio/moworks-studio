@@ -1,4 +1,4 @@
-// The Writers' Room's shared parts (audit/104 §7): an idea's truth tag, its sources as numbered chips, the running panel of a pitch or a
+// The Writers Room's shared parts (audit/104 §7): an idea's truth tag, its sources as numbered chips, the running panel of a pitch or a
 // script, and the hook that follows the room's runs from the server (they go on while the page is closed: #1115).
 // Two parts are ported from Lucian UX/UI Prompt (Seokwoooo, MIT, https://github.com/Seokwoooo/lucian-uxui-prompt/tree/7e339faa1cc5e87496cb7ce556a5b22aadbe76f8):
 // Lucian UX/UI Prompt #083 · MIT License (c) 2026 Seokwoooo · https://lucianlabs.dev/uxui-prompt/#083 (the queue bar that turns into progress,

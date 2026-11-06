@@ -141,12 +141,12 @@ export function ideaRoutes(ctx, { r }) {
     onSteps: (steps) => j.update({ steps }), log: (l) => j.log(l) });
   const busy = (kind) => ctx.jobs.running().some((j) => j.kind === kind);
   // the end of a run, said on whatever screen the owner is on (App's notices, #1115): the run goes on when they leave the page
-  const said = (n) => { try { ctx.notices?.add?.({ title: "Writers' Room", ...n }); } catch { /* the page shows it too */ } };
+  const said = (n) => { try { ctx.notices?.add?.({ title: "Writers Room", ...n }); } catch { /* the page shows it too */ } };
   const ended = (ok, fail) => (job) => { if (job.status === "done") said(ok(job)); else if (job.status === "failed") said(fail(job)); };
   // the films an idea went into that are still in the projects list
   const known = async () => { try { const { listProjects } = await import("../project-service/index.mjs"); return new Set(listProjects(root).map((p) => p.id)); } catch { return null; } };
   return { routes: [
-    // the runs of the Writers' Room: running, and those that ended in the last minutes (the page picks up a run it was away from)
+    // the runs of the Writers Room: running, and those that ended in the last minutes (the page picks up a run it was away from)
     r("GET", "/ideas/jobs", () => ({ jobs: ctx.jobs.list().filter((j) => IDEA_JOBS.has(j.kind) && (j.status === "running" || Date.now() - Date.parse(j.endedAt ?? 0) < RECENT_MS)) })),
     r("GET", "/ideas/pitch", () => ({ pitch: readPitch(root), job: ctx.jobs.running().find((j) => j.kind === "idea-pitch") ?? null })),
     r("POST", "/ideas/pitch", (_p, b) => {

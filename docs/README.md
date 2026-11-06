@@ -132,7 +132,7 @@ licence and the exact source commit. Third-party style files are used as their a
 |---|---|---|---|---|
 | **General Style** | Moworks | 1 | the app's own rules | rewritten for the app from the Moworks Motion kit's process |
 | **Map Explainer** | Moworks | 1: a paper map and the real ground under one continuous camera, a red marker on top | the app's own rules, map data from [Natural Earth](https://www.naturalearthdata.com) and [world-atlas](https://github.com/topojson/world-atlas/tree/v2.0.2), satellite pictures from [EOX](https://cloudless.eox.at) (CC BY 4.0) | made for the app; every source in [THIRD-PARTY.md](THIRD-PARTY.md) |
-| **Moworks film styles** | Moworks | 5: Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon and Moworks 2D Explainer, each with its source skill's own checks in Review and sounds made by code | the app's own work | Moworks Studio's own source skills, pinned in the app; every outside part in [THIRD-PARTY.md](THIRD-PARTY.md) |
+| **Moworks film styles** | Moworks | 6: Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, Moworks 2D Explainer and Ricks Clip, each with its source skill's own checks in Review and sounds made by code | the app's own work | Moworks Studio's own source skills, pinned in the app; every outside part in [THIRD-PARTY.md](THIRD-PARTY.md) |
 | **HyperFrames** | HeyGen | 8: Slideshow and the seven film types of HyperFrames' skill (Explainer, Launch, Music video, Data, Vertical, 3D, Character) | Apache-2.0 | [heygen-com/hyperframes @ `4719543`](https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/skills) (v0.8.214) |
 | **Lemo-Opuscar** | Lemomo (LemoLab) | 66 code-built film styles (cinema eras, documentary, editorial, data…; Memphis Diorama contributed by EianLu) | MIT; demo stills CC BY 4.0 | [lemomo-ai/lemo-opuscar @ `ea34ff9`](https://github.com/lemomo-ai/lemo-opuscar/tree/ea34ff9546f675f9fd65a3c84e869a1da7471ad7) |
 | **mg-styles-15** | Vincentwei1021 | 14 motion-design styles (the Blender-based 3D style is not offered) | MIT | [Vincentwei1021/mg-styles-15 @ `49052d8`](https://github.com/Vincentwei1021/mg-styles-15/tree/49052d80bfaf9fa8412cc9710530e5e95a3b8d8c) |
@@ -186,7 +186,7 @@ named under each still.
 | **Film Styles** | The gallery above, with demo films, credits and AE badges |
 | **Motion Library** | The studio's own library of Motions (889), Blocks (454 blocks and components) and Vocabulary (168 motion terms), arranged by type and category. The licences of the sources it draws on are in [THIRD-PARTY.md](THIRD-PARTY.md) |
 | **Characters** | The project's characters: drawn with the Character maker, or from the Anidoodle author's own character rigs |
-| **Idea Library** | Briefs to start a film from: every film style's sample brief, the OPUSCAR 98 prompts and your own ideas. Filter by source, film style, 2D or 3D, tone and era; **Start a project** opens New project with the idea's brief and film style, and New project's **Save as idea** keeps the brief you are writing |
+| **Writers Room** | Research pitches 10 ideas in any film style's own way, with checked sources; Ideas keeps yours and the samples (every film style's sample brief, the OPUSCAR 98 prompts); Scripts writes an idea's script scene by scene, and **Start a project with this script** opens New project with it. Runs go on while you work elsewhere |
 | **Settings** | General (Claude account, projects folder, appearance, render, notifications when the app waits for you), Director (Claude model and effort), System (components, voice-over, backups and health), Update (and Uninstall) |
 
 <table>
@@ -195,8 +195,8 @@ named under each still.
 <td width="50%" valign="top"><img src="images/desk-brand-kits.jpg" alt="Brand Kits: HyperFrames' 13 frame presets and your own"><br><sub>Brand Kits: HyperFrames' 13 frame presets and your own</sub></td>
 </tr>
 <tr>
-<td width="50%" valign="top"><img src="images/desk-ideas.jpg" alt="The Desk · Idea Library: briefs to start a film from"><br><sub>The Desk · Idea Library: briefs to start a film from</sub></td>
-<td width="50%" valign="top"><img src="images/studio-ideas.jpg" alt="The Studio · Idea Library as index cards"><br><sub>The Studio · Idea Library as index cards</sub></td>
+<td width="50%" valign="top"><img src="images/desk-writers-room.jpg" alt="The Desk · Writers Room: ten ideas researched in a film style"><br><sub>The Desk · Writers Room: ten ideas researched in a film style</sub></td>
+<td width="50%" valign="top"><img src="images/studio-writers-room.jpg" alt="The Studio · Writers Room as cards on the desk"><br><sub>The Studio · Writers Room as cards on the desk</sub></td>
 </tr>
 </table>
 

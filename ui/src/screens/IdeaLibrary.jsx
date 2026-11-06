@@ -1,4 +1,4 @@
-// The Writers' Room's Ideas tab (audit/97, audit/104 §7d; WritersRoom.jsx is the page): the briefs to start a film from, laid out like the
+// The Writers Room's Ideas tab (audit/97, audit/104 §7d; WritersRoom.jsx is the page): the briefs to start a film from, laid out like the
 // other library pages: a filter column, the shared grid with its pager, the idea in hand beside it.
 // - The app's library, shipped with the app and read-only: every film style's sample brief (the same data the Sample brief button reads,
 //   packages/idea-library/samples.json) and OPUSCAR 98's 98 style prompts (Lemomo, MIT). Credits as before.
@@ -357,7 +357,7 @@ export function IdeaPicker({ onAdd, onClose }) {
     <div className={"plx" + (frame ? " framed" : "")} style={frame} role="dialog" aria-modal="true" aria-labelledby="plx-h" ref={box}>
       <div className="dialog-head">
         <BackButton onClick={onClose} />
-        <h2 id="plx-h">{t("Writers' Room")}</h2>
+        <h2 id="plx-h">{t("Writers Room")}</h2>
         <span className="count num">{items ? (list.length === 1 ? t("1 idea") : t("{n} ideas", { n: list.length })) : ""}</span>
         <button className="btn ghost icon sm x" onClick={onClose} aria-label={t("Close")}><X size={16} /></button></div>
       {error && <div className="plx-pad"><Banner kind="error">{error.message}</Banner></div>}

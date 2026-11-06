@@ -31,7 +31,7 @@ export const claudeStandIn = () => STAND_IN;
 const stateDir = (root) => process.env.MW_STATE_DIR ?? join(root, "runtime", "state");
 export const pitchFile = (root) => join(stateDir(root), "pitch.json");
 const labsDir = (root) => join(stateDir(root), "idea-labs");
-/** Every run of the Writers' Room, kept whatever the round in hand becomes (T41-17): [{ at, kind: "pitch"|"script", styleId, round?, ideaId?,
+/** Every run of the Writers Room, kept whatever the round in hand becomes (T41-17): [{ at, kind: "pitch"|"script", styleId, round?, ideaId?,
  *  ms, costUsd }], the newest last, at most 500. Claude Code's own figure of the run's cost (its total_cost_usd). */
 export const runsFile = (root) => join(stateDir(root), "idea-runs.json");
 export function readRuns(root) { try { const j = JSON.parse(readFileSync(runsFile(root), "utf8")); return Array.isArray(j?.runs) ? j.runs : []; } catch { return []; } }
@@ -217,7 +217,7 @@ Write script.json, run node tools/check-script.mjs until it says OK, then reply 
 }
 
 const ALLOWED = ["Bash(node tools/check-ideas.mjs:*)", "Bash(node tools/check-script.mjs:*)"];
-// the steps a run shows (Writers' Room's running panel, audit/104 §7c): plain words, a count of the pages read, never a command or a path
+// the steps a run shows (Writers Room's running panel, audit/104 §7c): plain words, a count of the pages read, never a command or a path
 const STEPS = {
   pitch: [["style", "Reading the film style"], ["web", "Searching the web"], ["write", "Writing the ideas"], ["check", "Checking the ideas"]],
   script: [["style", "Reading the film style"], ["write", "Writing the scenes"], ["check", "Checking the script"]],

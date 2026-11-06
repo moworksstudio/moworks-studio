@@ -1,4 +1,4 @@
-// The Writers' Room (owner #1111, #1114, #1115, #1117, #1118; audit/104): where a film's idea is researched and its script written, before
+// The Writers Room (owner #1111, #1114, #1115, #1117, #1118; audit/104): where a film's idea is researched and its script written, before
 // any project. One page, three tabs, the three steps of the flow (§0): Research (Claude pitches ten ideas in a film style's own way; the
 // owner keeps the ones they want), Ideas (the ideas kept, the app's samples and OPUSCAR 98: IdeaLibrary.jsx), Scripts (the scripts written
 // from kept ideas, scene by scene: time, narration, picture). An idea is not a script: Write the script turns one into the other, and
@@ -37,14 +37,14 @@ export default function WritersRoom({ tab = "research", id = null }) {
   const n = { ideas: lib.items?.all.length ?? null, scripts: mine.filter((x) => x.script).length };
   const openScript = (x) => go(`/ideas/scripts?id=${x.id}`);
   const head = studio
-    ? <div className="st-head"><h1>{t("Writers' Room")}</h1><span className="st-aside">{t("ideas first, then the script")}</span>
+    ? <div className="st-head"><h1>{t("Writers Room")}</h1><span className="st-aside">{t("ideas first, then the script")}</span>
       <div className="st-acts"><button className="btn primary" onClick={() => setEdit({ value: null })}><Plus size={15} />{t("New idea")}</button></div></div>
-    : <div className="page-head"><div><BackButton /><h1>{t("Writers' Room")}</h1><p className="lead">{t("Research ideas, keep the good ones, write their scripts.")}</p></div>
+    : <div className="page-head"><div><BackButton /><h1>{t("Writers Room")}</h1><p className="lead">{t("Research ideas, keep the good ones, write their scripts.")}</p></div>
       <div className="actions"><button className="btn primary" onClick={() => setEdit({ value: null })}><Plus size={15} />{t("New idea")}</button></div></div>;
   const busy = { research: !!jobs.pitch || jobs.scripts.length > 0, scripts: jobs.scripts.length > 0 };
   return <div className={"page gal-page idl-page wr-page" + (studio ? " st-motionlib st-ideas" : "")}>
     {head}
-    <div className="tabs wr-tabs" role="tablist" aria-label={t("Writers' Room")}>
+    <div className="tabs wr-tabs" role="tablist" aria-label={t("Writers Room")}>
       {TABS.map(([k, l, Icon]) => <button key={k} type="button" role="tab" aria-selected={cur === k} onClick={() => go(`/ideas/${k}`)}>
         <Icon size={14} />{t(l)}{n[k] != null && <span className="num wr-n">{n[k]}</span>}{busy[k] && <span className="dot busy" aria-label={t("Running")} />}</button>)}
     </div>
