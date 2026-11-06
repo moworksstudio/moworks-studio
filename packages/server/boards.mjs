@@ -23,7 +23,7 @@ import { creditMusic, optionsText, readOptions, saveOptions } from "../sfx/music
 import { planEpisode, planText } from "../what-if-plan/index.mjs";
 import { autoSfx, whooshAllowed } from "../sfx/auto.mjs";
 import { addedNow, cuesChanged, mount, mountAmbience, mountedNow, placedNote, readState, timesChanged, unmuteAll, writeCredits } from "../sfx/index.mjs";
-import { DEFAULT_DENSITY, DENSITIES, prefsText, readPrefs, updatePrefs } from "../sfx/prefs.mjs";
+import { DEFAULT_DENSITY, DENSITIES, prefsText, readPrefs, soundPolicy, updatePrefs } from "../sfx/prefs.mjs";
 import * as plan from "../motion-plan/index.mjs";
 import { snapStop, stopContext } from "../sfx/stop-snap.mjs";
 import * as pipe from "../pipeline/index.mjs";
@@ -637,7 +637,9 @@ Open the board's page code, fix the error, then call board_stills again.`;
         // the scenes' ambience beds (one row a bed, however many clips its loop takes), and the owner's sound choices
         ambience: [...new Map((sfx.ambience?.placed ?? []).map((x) => [x.key, x])).values()].map((x) => ({ id: x.key, name: String(x.name ?? "").replace(/^ambience:\s*/, ""),
           start: Math.min(...sfx.ambience.placed.filter((y) => y.key === x.key).map((y) => y.start)) })),
-        sfxPrefs: { density: prefs.density ?? sfx.policy?.density ?? DEFAULT_DENSITY, ambience: prefs.ambience !== false, off: prefs.off ?? [], skipped: (prefs.skip ?? []).length },
+        // styleDensity: the film style's own (its source skill's "key moments only": key), for the choice that goes back to it (T43-15)
+        sfxPrefs: { density: prefs.density ?? sfx.policy?.density ?? DEFAULT_DENSITY, styleDensity: soundPolicy({ palette: styleSound(p.meta, root) ?? "" }).density, own: !!prefs.density,
+          ambience: prefs.ambience !== false, off: prefs.off ?? [], skipped: (prefs.skip ?? []).length },
         // the last placement: when (the dialog follows it), the named sounds it left out and those on a stand-in ({ name, as })
         sfxAt: sfx.placedAt ?? null, sfxMissing: sfx.left?.missing ?? [], sfxNear: sfx.left?.near ?? [],
         sfxPlacing: ctx.jobs.list({ kind: "mix-sfx" }).some((j) => j.projectId === id && j.status === "running") };
@@ -674,7 +676,7 @@ Open the board's page code, fix the error, then call board_stills again.`;
       const patch = {};
       if (typeof b.skip === "string" && b.skip.trim()) patch.skip = [b.skip.trim()];
       if (b.unskip === true) patch.unskip = true;
-      if (b.density != null) { if (!DENSITIES.includes(b.density)) throw new HttpError(400, "INVALID", "The density is low, normal or lively"); patch.density = b.density; }
+      if (b.density != null) { if (!DENSITIES.includes(b.density) && b.density !== "style") throw new HttpError(400, "INVALID", "The density is low, normal, lively or the film style's own"); patch.density = b.density; }
       if (typeof b.ambience === "boolean") patch.ambience = b.ambience;
       if (!Object.keys(patch).length) throw new HttpError(400, "INVALID", "Nothing to change");
       const prefs = updatePrefs(p.path, patch);

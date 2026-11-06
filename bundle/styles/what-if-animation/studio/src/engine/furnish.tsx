@@ -90,8 +90,8 @@ export const RoomShell: React.FC<{ r: Room; id: string; floor?: 'boards' | 'tile
  * A window in the back wall onto the dusk (screen box x0..x1, y0..y1 on the back wall), with frame, mullions, sill,
  * the sun's bloom, optional curtains and its light falling on the floor. `sun` is where the sun sits in it.
  */
-export const BackWindow: React.FC<{ r: Room; id: string; t: number; x0: number; x1: number; y0: number; y1: number; sun?: Pt; cols?: number; curtains?: boolean; red?: number }> = ({
-  r, id, t, x0, x1, y0, y1, sun, cols = 2, curtains = true, red = 0,
+export const BackWindow: React.FC<{ r: Room; id: string; t: number; x0: number; x1: number; y0: number; y1: number; sun?: Pt; cols?: number; curtains?: boolean; red?: number; night?: boolean }> = ({
+  r, id, t, x0, x1, y0, y1, sun, cols = 2, curtains = true, red = 0, night = false,
 }) => {
   const B = r.back;
   const u0 = (x0 - B.x0) / (B.x1 - B.x0);
@@ -101,7 +101,7 @@ export const BackWindow: React.FC<{ r: Room; id: string; t: number; x0: number; 
   const s = sun ?? { x: x0 + w * 0.7, y: y1 - 12 };
   return (
     <g>
-      <SkyView id={`${id}win`} clip={`M ${x0} ${y0} L ${x1} ${y0} L ${x1} ${y1} L ${x0} ${y1} Z`} box={{ x: x0, y: y0, w, h }} t={t} sun={s} sunR={Math.min(40, w * 0.1)} red={red} />
+      <SkyView id={`${id}win`} clip={`M ${x0} ${y0} L ${x1} ${y0} L ${x1} ${y1} L ${x0} ${y1} Z`} box={{ x: x0, y: y0, w, h }} t={t} sun={s} sunR={Math.min(40, w * 0.1) * (night ? 0.75 : 1)} red={red} night={night} />
       <g fill="#1E1824">
         <rect x={x0 - 12} y={y0 - 12} width={w + 24} height={14} />
         <rect x={x0 - 12} y={y1 - 2} width={w + 24} height={10} />
@@ -113,8 +113,8 @@ export const BackWindow: React.FC<{ r: Room; id: string; t: number; x0: number; 
         <rect x={x0} y={y0 + h * 0.32} width={w} height={7} />
       </g>
       <polygon points={r.Q([[u0 - 0.02, (y1 + 4 - B.y0) / (B.y1 - B.y0), 0], [u1 + 0.02, (y1 + 4 - B.y0) / (B.y1 - B.y0), 0], [u1 + 0.02, (y1 + 4 - B.y0) / (B.y1 - B.y0), 0.03], [u0 - 0.02, (y1 + 4 - B.y0) / (B.y1 - B.y0), 0.03]])} fill="#6A5056" />
-      <path d={`M ${x0 - 10} ${y1 + 8} L ${x1 + 10} ${y1 + 8}`} stroke={S3.warm} strokeWidth={2} opacity={0.6} />
-      <circle cx={s.x} cy={s.y} r={w * 1.3} fill="url(#kitBloom)" opacity={0.42 * (1 - red)} />
+      <path d={`M ${x0 - 10} ${y1 + 8} L ${x1 + 10} ${y1 + 8}`} stroke={night ? '#A9C6FF' : S3.warm} strokeWidth={2} opacity={night ? 0.45 : 0.6} />
+      <circle cx={s.x} cy={s.y} r={w * (night ? 0.9 : 1.3)} fill={night ? 'url(#kitMoonBloom)' : 'url(#kitBloom)'} opacity={(night ? 0.3 : 0.42) * (1 - red)} />
       {curtains
         ? [
             { x: x0 - 88, flip: 1 },
@@ -125,12 +125,12 @@ export const BackWindow: React.FC<{ r: Room; id: string; t: number; x0: number; 
               {[0.22, 0.5, 0.78].map((k, j) => (
                 <rect key={j} x={c.x + 94 * k - 6} y={y0 - 18} width={12} height={h + 126} fill={j % 2 ? '#40263A' : '#5E3A50'} opacity={0.8} />
               ))}
-              <rect x={c.flip > 0 ? c.x + 90 : c.x} y={y0 - 18} width={4} height={h + 126} fill={S3.warm} opacity={0.55} />
+              <rect x={c.flip > 0 ? c.x + 90 : c.x} y={y0 - 18} width={4} height={h + 126} fill={night ? '#A9C6FF' : S3.warm} opacity={night ? 0.4 : 0.55} />
             </g>
           ))
         : null}
       {curtains ? <rect x={x0 - 100} y={y0 - 26} width={w + 200} height={8} rx={4} fill="#1A1420" /> : null}
-      <polygon points={r.Q([[u0 + 0.02, 1, 0.02], [u1 - 0.02, 1, 0.02], [u1 + 0.08, 1, 0.55], [u0 - 0.08, 1, 0.55]])} fill="#FFB46A" opacity={0.1} style={{ mixBlendMode: 'screen' }} />
+      <polygon points={r.Q([[u0 + 0.02, 1, 0.02], [u1 - 0.02, 1, 0.02], [u1 + 0.08, 1, 0.55], [u0 - 0.08, 1, 0.55]])} fill={night ? '#9FC0FF' : '#FFB46A'} opacity={night ? 0.08 : 0.1} style={{ mixBlendMode: 'screen' }} />
     </g>
   );
 };

@@ -428,7 +428,9 @@ window.__aimkRec = (() => {
       const t = times[k]; await A.seek(t);
       const st = new Map();
       for (const x of NEED) {
-        const cs = getComputedStyle(x), o = cs.transformOrigin.split(" ").map(parseFloat);
+        // an element whose transform-origin reads "" (one not rendered at this time) has no origin: 0 0, not [NaN] (T43-10: s.o[1] was
+        // undefined and toFixed stopped the whole export, twice)
+        const cs = getComputedStyle(x), o0 = String(cs.transformOrigin || "").split(" ").map(parseFloat), o = [Number.isFinite(o0[0]) ? o0[0] : 0, Number.isFinite(o0[1]) ? o0[1] : 0];
         st.set(x, { m: tf(cs), o, op: parseFloat(cs.opacity), vis: cs.visibility === "visible", blur: blurOf(cs.filter), f: cs.filter === "none" ? "" : cs.filter.replace(/blur\([^)]*\)/g, "").trim(), cp: cs.clipPath, br: cs.borderRadius, ov: cs.overflowX + cs.overflowY });
       }
       const sigs = {}, texts = {}, cols = {}, srcs = {}, vos = {};

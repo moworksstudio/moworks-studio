@@ -57,10 +57,11 @@ man in a suit: combed hair, charcoal suit, red tie). Render the cast sheet with
 | `tilt`, `spin`, `headTilt` | lean at the hips, whole-body rotation about the chest (tumbles), head tilt |
 | `armL, armR, legL, legR` | `{ a, b }`: upper segment angle from straight down, bend of the lower segment (degrees) |
 | `handL, handR` | `'open'` (mitten with a thumb) or `'point'` |
-| `expr` | neutral, happy, smug, shock, worried, oops, cool, dizzy |
-| `blink, look, glasses` | 0..1 eyelids, -1..1 eye direction, 0..1 shades dropping on |
+| `expr` | neutral, happy, smug, shock, worried, oops, cool, dizzy, tired (heavy lids, dark rings) |
+| `blink, look, glasses` | 0..1 eyelids (1 draws a shut lid's curve: blinks and sleep), -1..1 eye direction, 0..1 shades dropping on |
 | `squash` | + squashes (landing), - stretches (jump), about the feet |
 | `sway` | how far loose things (drawstrings, bunches) swing |
+| `glint`, `glintColor` | 0..1 the eyes light up in the power's colour (default cyan); set it after `poseAt`, it isn't interpolated |
 
 Helpers: `poseAt(t, keys)` (eased keys, faces hold until their key), `faceAt(t, [[f, expr]...])` (a blink at each
 swap), `walkPose(x, phase, ground, scale, extra, facing)` (phase about 0.6 a frame; `ground` a number or a function
@@ -71,7 +72,13 @@ target)` (the arm angle that points at a world point).
 
 `Cat` (moods sleep, alert, peek; the tail never stops), `Mug` (with steam), `Cookie` (side view, `bite`),
 `CookieTop` (from above), `CookieStack`, `Plate` and `PlateTop`, `Paper` (from above: `done` with ticks and a grade,
-`fill` writes it in, or blank), `PaperStack`. Add props here when an episode needs them, drawn in the same style:
+`fill` writes it in, or blank), `PaperStack`. For night episodes: `AlarmClock` (a digital bedside clock, `text` on its
+display), `WallCalendar` (a month, `crossed` days with red crosses, the next one drawing on with `drawing`;
+`calendarDay` gives a day's cell for a hand holding the marker), `OpenBook` (`turn` flips a page), `BookFlat`,
+`BookTower`, `LaptopBack` (a lid from behind, its screen light spilling round it). From the preview run:
+`PizzaSlice` (from above, x y the tip, `bite` eats back from the tip, `drip` hangs cheese; squash it in y for a
+three-quarter view), `PizzaBox` (open and empty, `lid` stands the lid up), `Phone` (dark and glossy, or `on` with an
+incoming call: `caller`, `buzz`), `PaperBall`. Add props here when an episode needs them, drawn in the same style:
 flat fills, a darker shade on the side away from the light, a warm rim line on the lit edge, a contact shadow.
 
 For inserts, `Tabletop` (`furnish.tsx`) fills the frame with a surface seen from high above (wood or stone), its lit
@@ -86,11 +93,12 @@ idle motion carries across cuts.
 
 | Set | Coordinates and parts | Props |
 |---|---|---|
-| `Study` (`sets/study.tsx`) | `STUDY = makeRoom({980,500}, back 530-1430 x 335-740)`. Window 782-1178 x 380-606 with the sun at (1085, 596); bookcase on the left wall, door and print on the right, pendant at u 0.32 w 0.42, wall light on the left. `Desk x0 x1 y` stands mid-room (the proof clip: x0 560, x1 1360, y 700, Pip behind it at hips (960, 712) scale 1). | `veil` (0.28 for a wide that must show the floor) |
+| `Study` (`sets/study.tsx`) | `STUDY = makeRoom({980,500}, back 530-1430 x 335-740)`. `night` puts the moon in the window and turns the pendant off (the `Desk` lamp becomes the light); `shelf` (0..1) empties the bookcase, books flying from `STUDY_SHELF_V`. Window 782-1178 x 380-606 with the sun at (1085, 596); bookcase on the left wall, door and print on the right, pendant at u 0.32 w 0.42, wall light on the left. `Desk x0 x1 y` stands mid-room (the proof clip: x0 560, x1 1360, y 700, Pip behind it at hips (960, 712) scale 1). | `veil` (0.28 for a wide that must show the floor) |
 | `Stairwell` (`sets/stairwell.tsx`) | Side-on: 7 steps of 150 x 70 down to the right from a landing at y 420 (`SW`). `stepTop(x)`, `hipGround(x)`. Lit doorway upper left, arched window lower right, lantern, sconces. `Banister` is the near layer, drawn after the characters. Walk at scale 0.9. | |
 | `Classroom` (`sets/classroom.tsx`) | `CLS = makeRoom({900,470}, back 300-1500 x 130-720)`. Board 426-1054 x 196-524, windows on the left wall, two rows of desks with `Kid`s from behind. `SchoolDesk x` is the hero's desk (y 750); the proof clip's Pip stood at (1260, 760), yaw -0.35. `Kid` with `turn` and `laugh` works as a blurred foreground figure for over-the-shoulder shots. | `board` (your own chalk), `solved`, `wrong`, `laugh` |
 | `Rooftop` (`sets/rooftop.tsx`) | Parapet at y 790, deck below (feet at about y 820). The sun at (`sunX`, `sunY`), r 170, optionally a clock (`clock`, `spin`, `crack`). City in three depths, string lights between poles at x 140 and 1780. | `red` (the turn's red sky), `lightsOut`, `blackout` (city windows go dark in a sweep from the left), `cityLit` (more lit windows: about 2.5 for a blackout), `low` (camera lower: the city and roof drop by `low`, so feet go lower too) |
 | `Kitchen` (`sets/kitchen.tsx`) | Built with the room kit: `KITCHEN = makeRoom({960,500}, back 500-1420 x 330-745, 3.4)`. Counter run along the back wall with a sink under the window (sun at 860, 530), hob and kettle, splashback, open shelves with jars, fridge on the right, wall cabinets and a wall light on the left, two pendants. Characters stand behind the island at w 0.4 (`stand(KITCHEN, u, 0.4)`), then draw `KitchenIsland` (with two bar stools) so it hides their legs; `islandTop(u, d)` is a point on its top. | `veil`, `red` |
+| `Bedroom` (`sets/bedroom.tsx`) | At night, built with the room kit: `BEDROOM = makeRoom({940,500}, back 480-1440 x 320-742, 3.4)`. Bed in the back left corner (headboard on the back wall, u 0.03-0.4, foot at w 0.47), nightstand with the lamp (`LAMP`) and the clock, `WINDOW` 1070-1330 x 374-600 onto the moon and the lit city, fairy lights and posters over the bed, `CAL` (the wall calendar), a dresser under the window, wardrobe on the right wall, door ajar on the left with the hall light, rug, beanbag, trainers. In bed: draw it with `duvet={false}`, then the character at `bedSit(u)`, then `BedDuvet` (with `knees`) over their legs. `bedTop(u, w)` is a point on the mattress. | `clock`, `lamp` (0..1: flicker it, kill it), `crossed` (the calendar), `veil` |
 | `Schematic` (`sets/schematic.tsx`) | The science beat's ground: a dark blueprint grid with registration marks. On it: `DrawOn` (a path drawing on), `Arrow`, `SchLabel` (mono, pops on), `CountUp` (a number counting, with commas), `PlantIcon` (tower, wind, solar, dam, factory; lit orange when `on`). `SCH` holds its colours. | |
 
 ## The room kit (`room.tsx`, `furnish.tsx`)
@@ -113,8 +121,10 @@ For a new interior, in this order:
 
 `Glow` (screen-blended radial light: warm, cool, red), `Cone` (a lamp's soft cone), `LightVeil` (the contrast
 pass), `Dust` (specks in a beam), `WallTexture`, `RoomCorners`, `SkyView` (a window onto the dusk: sky, sun, far
-city). `DuskSky`, `Sun`, `Rays`, `Haze`, `Bokeh`, `Shaft`, `Skyline`, `Foreground` (blur 3, 6, 10 or 16).
-Filters for characters: `rimR`, `rimL`, `rimRed`.
+city; `night` for a deep blue sky, stars, the moon where the sun was, the city lit; `BackWindow` takes `night` too).
+`DuskSky`, `Sun`, `Rays`, `Haze`, `Bokeh`, `Shaft`, `Skyline`, `Foreground` (blur 3, 6, 10 or 16), and for night
+`NightSky`, `Moon`, `Stars`. Filters for characters: `rimR`, `rimL`, `rimRed`, and `rimBlue`, `rimBlueL` for
+moonlight and screen light.
 
 ## UI and marks (`ui.tsx`)
 
@@ -123,7 +133,7 @@ All in the mono face on a dark translucent pill, cream text, orange for the live
 | Block | Use |
 |---|---|
 | `TitleCard t lines accent accentT` | the premise over a wide, inside the camera group |
-| `HudChip f label icon` | names the power while it runs (rewind, pause, copy, paste, dot) |
+| `HudChip f label icon` | names the power while it runs (rewind, pause, copy, paste, skip, dot) |
 | `Dial p readout` | a stopwatch, a countdown, a battery |
 | `Gauge x y p label` | a level going up or down (energy, money, risk) |
 | `Tag x y t text mark` | a short answer or value, with a cross or a tick drawn on |

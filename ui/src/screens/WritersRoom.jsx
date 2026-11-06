@@ -6,15 +6,17 @@
 // Runs (a pitch, a script) are the server's: the page follows them (IdeaParts useIdeaJobs) and shows them in the Research tab's running
 // panel whatever idea is in hand; the end of a run is said on every screen (the app's notices), so leaving the page loses nothing (#1115).
 // Laid out for Operate (Impeccable): the app's tabs, panels and cards in both themes; The Studio lays the cards and the script on paper.
+// One window high in both themes, never a page scroll (DESIGN.md Layout, owner #1215): each tab fills what is left under the tabs and only
+// a long list scrolls inside its own frame (the ten ideas, the idea in hand, the scenes); under 1100 px the columns stack and the page may scroll.
 import { useEffect, useMemo, useState } from "react";
-import { Check, ChevronDown, Copy, FileText, Lightbulb, Pencil, Plus, RotateCcw, Sparkles, Undo2 } from "lucide-react";
+import { Check, FileText, Lightbulb, Pencil, Plus, RotateCcw, Sparkles, Undo2 } from "lucide-react";
 import { get, post, put } from "../api.js";
-import { BackButton, Banner } from "../components.jsx";
+import { BackButton, Banner, Dialog } from "../components.jsx";
 import { ago, go, useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 import { useThemeId } from "../theme.jsx";
 import { useStyles } from "./StyleGallery.jsx";
-import { CardBody, IdeaDialog, IdeasTab, StatusTag, clock, copyText, startProject, useIdeas } from "./IdeaLibrary.jsx";
+import { CardBody, CopyButton, IdeaDialog, IdeasTab, StatusTag, clock, startProject, useIdeas } from "./IdeaLibrary.jsx";
 import { RunPanel, Sources, Truth, stopJob, useIdeaJobs, useWriteScript } from "./IdeaParts.jsx";
 
 /** A run's time and Claude's cost of it, as Claude Code counts it: "9 min, about $0.84" (T41-17). */
@@ -64,7 +66,7 @@ function ResearchTab({ lib, jobs, write, pitchAt, onOpenScript }) {
   const [pitch, setPitch] = useState(undefined);      // undefined: loading; null: none in hand
   const [err, setErr] = useState(null), [saving, setSaving] = useState(false);
   const [form, setForm] = useState(null);
-  const [open, setOpen] = useState(null);             // the one card open (More)
+  const [cur, setCur] = useState(null);               // the idea in hand (its whole card in the pane on the right)
   const load = () => get("/api/ideas/pitch").then((r) => setPitch(r.pitch)).catch(setErr);
   useEffect(() => { load(); }, [pitchAt]); // eslint-disable-line react-hooks/exhaustive-deps
   // the ask starts from the round in hand (or Ricks Clip, whose source skill the pitch came from), its style's own length
@@ -90,11 +92,17 @@ function ResearchTab({ lib, jobs, write, pitchAt, onOpenScript }) {
     } catch (e) { toast(e.message, "error"); } finally { setSaving(false); }
   };
   const style = styles.find((s) => s.id === form?.styleId);
+  // how long a pitch takes, from the rounds measured on this computer (T42-3: "5–10 minutes" was said while runs took 3–5)
+  const mins = (pitch?.runs ?? []).map((r) => r.ms).filter((ms) => ms > 0).map((ms) => Math.max(1, Math.round(ms / 60000)));
+  const lo = mins.length ? Math.min(...mins) : null, hi = mins.length ? Math.max(...mins) : null;
+  const took = lo == null ? t("Takes a few minutes.") : lo === hi ? (mins.length === 1 ? t("Last time it took {n} min.", { n: lo }) : t("Usually about {n} min.", { n: lo })) : t("Usually {a}–{b} min.", { a: lo, b: hi });
   const left = pitch?.ideas.filter((x) => !x.savedAs).length ?? 0;
   const mine = new Map((lib.items?.mine ?? []).map((x) => [x.id, x]));
   const runSub = (p) => [p.styleTitle, LANG_NAME[p.lang] ? t(LANG_NAME[p.lang]) : p.lang, t("about {n} s", { n: p.lengthSec }), p.topic && `“${p.topic}”`].filter(Boolean).join(" · ");
   const askSub = form && style ? [style.title, t(LANG_NAME[form.lang]), t("about {n} s", { n: form.lengthSec }), form.topic.trim() && `“${form.topic.trim()}”`].filter(Boolean).join(" · ") : "";
-  return <div className="wr-research">
+  const sel = pitch ? pitch.ideas.find((x) => x.id === cur) ?? pitch.ideas[0] ?? null : null;
+  const selSaved = sel?.savedAs ? mine.get(sel.savedAs) ?? null : null;
+  return <div className={"wr-research" + (pitch ? " has-pick" : "")}>
     <aside className="wr-ask studio-paper" aria-label={t("The ask")}>
       <h2 className="wr-h">{t("The ask")}</h2>
       {!form ? <div className="skeleton" style={{ height: "18rem" }} /> : <div className="idl-form">
@@ -115,7 +123,7 @@ function ResearchTab({ lib, jobs, write, pitchAt, onOpenScript }) {
         </div>
         {left > 0 && !run && <p className="hint wr-warn">{left === 1 ? t("The one idea you did not save goes when the new ten come in.") : t("The {n} ideas you did not save go when the new ten come in.", { n: left })}</p>}
         <button className="btn primary lg wr-go" onClick={() => start(false)} disabled={!!run || !style}>{run ? <><span className="dot busy" aria-hidden="true" />{t("Pitching…")}</> : <><Lightbulb size={15} />{t("Pitch 10 ideas")}</>}</button>
-        <p className="hint">{t("Takes 5–10 minutes. You can leave this page; it goes on.")}</p>
+        <p className="hint">{took} {t("You can leave this page; it goes on.")}</p>
       </div>}
     </aside>
     <section className="wr-work" aria-label={t("Ideas")}>
@@ -135,37 +143,45 @@ function ResearchTab({ lib, jobs, write, pitchAt, onOpenScript }) {
           <button className="btn sm" onClick={() => start(true)} disabled={!!run}><RotateCcw size={13} />{t("10 more")}</button>
           <button className="btn sm primary" onClick={() => save({ all: true })} disabled={!!run || saving || !left}><Check size={14} />{left ? t("Save all ({n})", { n: left }) : t("All saved")}</button>
         </div>
-        <ol className="wr-cards">{pitch.ideas.map((x, i) => <PitchCard key={x.id} x={x} n={i + 1} open={open === x.id} onToggle={() => setOpen((o) => (o === x.id ? null : x.id))}
-          saved={x.savedAs ? mine.get(x.savedAs) ?? null : null} saving={saving} running={x.savedAs ? jobs.scriptRun(x.savedAs) : null}
-          onSave={() => save({ ids: [x.id] })} onScript={(idea) => write(idea)} onOpenScript={onOpenScript} />)}</ol>
+        <ol className="wr-cards" aria-label={t("Ideas")}>{pitch.ideas.map((x, i) => <PitchCard key={x.id} x={x} n={i + 1} on={sel?.id === x.id} onPick={() => setCur(x.id)}
+          saved={x.savedAs ? mine.get(x.savedAs) ?? null : null} running={x.savedAs ? jobs.scriptRun(x.savedAs) : null} />)}</ol>
       </>}
     </section>
+    {pitch && sel && <PitchDetail key={sel.id} x={sel} n={pitch.ideas.indexOf(sel) + 1} saved={selSaved} saving={saving} running={sel.savedAs ? jobs.scriptRun(sel.savedAs) : null}
+      onSave={() => save({ ids: [sel.id] })} onScript={(idea) => write(idea)} onOpenScript={onOpenScript} />}
   </div>;
 }
 
-/** One pitched idea (#1114): read in ten seconds closed (number, title, truth, hook, the first item in two lines), the rest under More in
- *  sections with their own headings (Lucian #044's unfolding: the rows grow, the text arrives after them), the sources as numbered chips. */
-function PitchCard({ x, n, open, onToggle, saved, saving, running, onSave, onScript, onOpenScript }) {
+/** One pitched idea in the list (#1114): read in ten seconds (number, title, truth, the hook in two lines, where it stands); a click puts it in
+ *  hand. Every card is the same height, so ten fit the frame with no hole beside an open one (owner #1215: the old More grew the row). */
+function PitchCard({ x, n, on, onPick, saved, running }) {
   const t = useT();
-  const teaser = x.fields[0];
-  return <li className={"wr-card studio-paper" + (x.savedAs ? " kept" : "") + (open ? " open" : "")}>
-    <header><span className="wr-n num">{n}</span><h3>{x.title}</h3><Truth truth={x.truth} /></header>
-    <p className="wr-hook">{x.hook}</p>
-    {teaser && !open && <p className="wr-teaser"><b>{teaser.label}</b> {teaser.text}</p>}
-    <div className="wr-more" aria-hidden={!open}><div className="wr-more-in">
-      {open && <CardBody card={{ hook: "", fields: x.fields }} />}
-    </div></div>
-    {x.sources.length > 0 && <Sources sources={x.sources} />}
-    <footer>
-      <button type="button" className="btn ghost sm wr-more-btn" aria-expanded={open} onClick={onToggle}>{t(open ? "Less" : "More")}<ChevronDown size={13} className="chev" /></button>
-      <span className="spacer" />
-      {!x.savedAs ? <button type="button" className="btn sm" onClick={onSave} disabled={saving}><Plus size={13} />{t("Save")}</button>
-        : <><span className="wr-kept"><Check size={13} />{t("Saved")}</span>
+  return <li className="wr-card-li"><button type="button" className={"wr-card studio-paper" + (x.savedAs ? " kept" : "") + (on ? " on" : "")} aria-current={on || undefined} onClick={onPick}>
+    <span className="wr-card-h"><span className="wr-n num">{n}</span><b className="wr-card-t">{x.title}</b><Truth truth={x.truth} /></span>
+    <span className="wr-hook">{x.hook}</span>
+    <span className="wr-card-f">{!x.savedAs ? <span className="wr-state">{t("Not saved")}</span>
+      : <span className="wr-kept">{running ? <><span className="dot busy" aria-hidden="true" />{t("Writing…")}</> : <><Check size={13} />{saved?.script ? t("Script ready") : t("Saved")}</>}</span>}
+      {x.sources.length > 0 && <span className="wr-state num">{x.sources.length === 1 ? t("1 source") : t("{n} sources", { n: x.sources.length })}</span>}</span>
+  </button></li>;
+}
+
+/** The idea in hand: its whole card (every field with its heading), its sources, and Save / Write the script / Open the script at the foot. */
+function PitchDetail({ x, n, saved, saving, running, onSave, onScript, onOpenScript }) {
+  const t = useT();
+  return <aside className="wr-insp studio-paper" aria-label={x.title}>
+    <div className="wr-insp-in">
+      <header className="wr-insp-h"><span className="wr-n num">{n}</span><h2>{x.title}</h2><Truth truth={x.truth} /></header>
+      <CardBody card={{ hook: x.hook, fields: x.fields }} />
+      {x.sources.length > 0 && <div className="wr-insp-src"><span className="sgb-fl">{t("Sources")}</span><Sources sources={x.sources} max={6} /></div>}
+    </div>
+    <footer className="wr-insp-f">
+      {!x.savedAs ? <button type="button" className="btn primary" onClick={onSave} disabled={saving}><Plus size={14} />{t("Save")}</button>
+        : <><span className="wr-kept"><Check size={13} />{t("Saved")}</span><span className="spacer" />
           {running ? <span className="wr-kept run"><span className="dot busy" aria-hidden="true" />{t("Writing…")}</span>
-            : saved?.script ? <button type="button" className="btn sm" onClick={() => onOpenScript(saved)}><FileText size={13} />{t("Open the script")}</button>
-              : saved && <button type="button" className="btn sm" onClick={() => onScript(saved)}><FileText size={13} />{t("Write the script")}</button>}</>}
+            : saved?.script ? <button type="button" className="btn primary" onClick={() => onOpenScript(saved)}><FileText size={14} />{t("Open the script")}</button>
+              : saved && <button type="button" className="btn primary" onClick={() => onScript(saved)}><FileText size={14} />{t("Write the script")}</button>}</>}
     </footer>
-  </li>;
+  </aside>;
 }
 
 /** A scene's narration a line at a time, each speaker's name in bold before their words (T40-7: who speaks stays in the narration). */
@@ -209,7 +225,9 @@ function ScriptView({ x, run, onWrite, reload }) {
   const sc = x.script?.scenes ?? [];
   const [draft, setDraft] = useState(null);          // the scenes being edited: [{ narration, picture }]
   const [busy, setBusy] = useState(false);
+  const [askWrite, setAskWrite] = useState(false);    // Write again over the owner's own edits asks first (T42-4)
   const sources = x.card?.sources ?? [];
+  const writeAgain = () => (x.script?.by === "owner" ? setAskWrite(true) : onWrite());
   const saveEdit = async () => {
     setBusy(true);
     try { await put(`/api/ideas/${x.id}/script`, { scenes: draft }); setDraft(null); reload(); toast(t("Script saved")); }
@@ -243,12 +261,16 @@ function ScriptView({ x, run, onWrite, reload }) {
     <div className="wr-sheet-foot">
       {draft ? <><button className="btn" onClick={() => setDraft(null)} disabled={busy}>{t("Cancel")}</button><span className="spacer" />
         <button className="btn primary" onClick={saveEdit} disabled={busy}><Check size={14} />{t("Save the script")}</button></>
-        : <><button className="btn" onClick={() => copyText(x.script.text, toast, t)}><Copy size={14} />{t("Copy")}</button>
+        : <><CopyButton text={x.script.text} />
           <button className="btn" onClick={() => setDraft(sc.map((s) => ({ narration: s.narration, picture: s.picture })))} disabled={!!run}><Pencil size={14} />{t("Edit")}</button>
           {x.script.versions?.length > 0 && <button className="btn ghost" onClick={undo} disabled={!!run}><Undo2 size={14} />{t("Undo")}</button>}
-          <button className="btn ghost" onClick={onWrite} disabled={!!run}><RotateCcw size={14} />{t("Write again")}</button>
+          <button className="btn ghost" onClick={writeAgain} disabled={!!run}><RotateCcw size={14} />{t("Write again")}</button>
           <span className="spacer" />
           <button className="btn primary" onClick={() => startProject(x)}><Sparkles size={14} />{t("Start a project with this script")}</button></>}
     </div>
+    {askWrite && <Dialog title={t("Write the script again?")} onClose={() => setAskWrite(false)} footer={<><span className="spacer" />
+      <button className="btn" onClick={() => setAskWrite(false)}>{t("Keep my edits")}</button>
+      <button className="btn primary" onClick={() => { setAskWrite(false); onWrite(); }}><RotateCcw size={14} />{t("Write again")}</button></>}>
+      <div className="dlg-lines"><p className="dlg-warn">{t("Claude's new script replaces your edits.")}</p><p>{t("Undo brings this one back.")}</p></div></Dialog>}
   </section>;
 }

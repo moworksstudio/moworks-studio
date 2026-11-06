@@ -689,7 +689,15 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       await levelTracks(p.path, { root }).catch(() => null);
       await commit(p, "Changes before Export to AE");
       // the Log the user reads has no addresses (plainLog); the whole log as written stays in the film's cache (port.log)
-      const raw = [], log = (line) => { raw.push(line); job.log(plainLog(line)); };
+      // a Python traceback is one plain line in it (T40-17: the dialog showed the traceback's code lines); the whole of it stays in port.log
+      let inTrace = false;
+      const raw = [], log = (line) => {
+        raw.push(line);
+        if (/^Traceback \(most recent call last\)/.test(line)) { inTrace = true; job.log("The export's code stopped with an error."); return; }
+        // its frames are left out; its last line, the error itself, stays (T43-10: the Log kept the frames' place and lost what went wrong)
+        if (inTrace) { if (/^\s/.test(line) || !line.trim()) return; inTrace = false; job.log(plainLog(line.replace(/^[\w.]+(?:Error|Exception):\s*/, ""))); return; }
+        job.log(plainLog(line));
+      };
       // Stop is the user's, not a failure: no exit code, said plainly
       const STOPPED = { status: "cancelled", code: "CANCELLED", message: "You stopped the export." };
       const port = (film) => job.signal.aborted ? Promise.resolve(STOPPED) : new Promise((ok) => {
@@ -720,7 +728,10 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       let result = await port(film);
       if (result.code === "NEEDS_FILM" && !film && !job.signal.aborted) { const f = await rendered(true); if (f) result = await port(f); }
       if (job.signal.aborted) result = { ...STOPPED, outDir: result.outDir };
+      // an exit code is no answer for the user (T40-17): said plainly; the notes carry no addresses either (T40-19: a font file's full path)
+      if (/^port exit \d+$/.test(result.message ?? "")) result = { ...result, message: "The export stopped with an error. Export again; if it happens again, tell Claude in the chat." };
       if (result.message) result = { ...result, message: plainLog(result.message) };
+      if (result.notes?.length) result = { ...result, notes: result.notes.map(plainLog) };
       try { writeFileSync(workDir(p, "ae", estimate ? "estimate.log" : "port.log"), raw.join("\n") + "\n"); } catch { /* the cache folder is made by the export */ }
       // the size check is kept with the film it measured: the dialog says what AE gets (a canvas film) without checking again
       if (estimate && result.estimate) writeJson(workDir(p, "ae", "estimate.json"), { ...result.estimate, at: new Date().toISOString(), hash: filmHash(p.path, Number(fps)) });

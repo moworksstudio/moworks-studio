@@ -29,7 +29,6 @@ export const kindOf = (s) => s.kind ?? "workflow";
 export function authorsOf(data) {
   const list = [...(data?.authors ?? BUILT_IN)];
   for (const s of data?.styles ?? []) if (!list.some((a) => a.id === authorOf(s))) list.push({ id: authorOf(s), name: authorOf(s) });
-  if (!list.some((a) => a.id === "freshstack")) list.push({ id: "freshstack", comingSoon: true, count: 0 });
   const n = (id) => (data?.styles ?? []).filter((s) => authorOf(s) === id).length;
   const rank = (id) => { const i = AUTHOR_ORDER.indexOf(id); return i < 0 ? 99 : i; };
   return list.map((a) => authorView(a, n(a.id))).sort((a, b) => rank(a.id) - rank(b.id));
@@ -226,7 +225,7 @@ function DeskGallery() {
   const f = { ...F0, ...fp };
   const set = (x) => setFp((o) => ({ ...F0, ...o, ...x }));
   const soon = (data?.comingSoon ?? []).map((x) => ({ ...WHAT_IF, ...x, author: x.author === "FreshStack" ? "freshstack" : x.author, available: false, comingSoon: true }));          // top-level comingSoon
-  const styles = useMemo(() => (data ? [...data.styles, ...(soon.length ? soon : data.styles.some((s) => authorOf(s) === "freshstack") ? [] : [WHAT_IF])] : []), [data]); // eslint-disable-line react-hooks/exhaustive-deps
+  const styles = useMemo(() => (data ? [...data.styles, ...(soon.length ? soon : data.styles.some((s) => s.id === "what-if") ? [] : [WHAT_IF])] : []), [data]); // eslint-disable-line react-hooks/exhaustive-deps
   const authors = useMemo(() => authorsOf(data), [data]);
   const A = useMemo(() => Object.fromEntries(authors.map((a) => [a.id, a])), [authors]);
   const list = useMemo(() => {

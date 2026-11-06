@@ -9,6 +9,8 @@ import { dirname, join } from "node:path";
 import { build } from "esbuild";
 import { APP_ROOT } from "../version-manager/index.mjs";
 import { anidoodleSource, stageEngine } from "../anidoodle-styles/index.mjs";
+/** The three.js anidoodle pins for its 3D pages (its engine/vendor/three/PROVENANCE.md at 0.10.1). */
+export const ANIDOODLE_THREE = "0.170.0";
 
 export const ENTRY = "anidoodle/page.ts", OUT = "compositions/anidoodle/film.js";
 
@@ -28,10 +30,13 @@ export async function buildAnidoodle(projectDir, { root = APP_ROOT, force = fals
   const latest = Math.max(...sources.map((p) => { try { return statSync(p).isDirectory() ? newest(p) : statSync(p).mtimeMs; } catch { return 0; } }));
   if (!force && existsSync(out) && statSync(out).mtimeMs >= latest) return { built: false, out: outRel };
   mkdirSync(dirname(out), { recursive: true });
+  // anidoodle 0.10's 3D pages import "three": the app's own three.js at the author's pinned version (0.170.0, engine/vendor/three/PROVENANCE.md),
+  // so the author's vendored copy (3.6 MB) stays out of the app (#1214). A 2D film never asks for it
+  const three = join(root, "runtime", "vendor", "three", ANIDOODLE_THREE, "build", "three.module.min.js");
   try {
     await build({
       absWorkingDir: projectDir, entryPoints: [entry], outfile: out, bundle: true, format: "iife", target: "es2020", minify: true, legalComments: "none",
-      alias: { anidoodle: "./.moworks/library/anidoodle/engine/src" }, logLevel: "silent",
+      alias: { anidoodle: "./.moworks/library/anidoodle/engine/src", ...(existsSync(three) ? { three } : {}) }, logLevel: "silent",
       banner: { js: `/* anidoodle engine by Alex Greenshpun (10x Company), Apache-2.0 with NOTICE: https://github.com/${src.repo}/tree/${src.commit}; bundled by Moworks Studio */` },
     });
     return { built: true, out: outRel };

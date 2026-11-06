@@ -65,6 +65,14 @@ def save_json(p, data):
 KEY_NAMES = ['ELEVENLABS_API_KEY']
 
 
+def read_env(p):
+    """A .env as text, however it was saved: UTF-8 with or without a BOM, or UTF-16 (Windows PowerShell's `>`)."""
+    raw = p.read_bytes()
+    if raw[:2] in (b'\xff\xfe', b'\xfe\xff'):
+        return raw.decode('utf-16', errors='ignore')
+    return raw.decode('utf-8-sig', errors='ignore')
+
+
 def api_key():
     """The ElevenLabs key, by name only: from the environment, or the nearest .env above the studio. Never printed."""
     for n in KEY_NAMES:
@@ -73,7 +81,7 @@ def api_key():
     for d in [STUDIO, *STUDIO.parents]:
         p = d / '.env'
         if p.exists():
-            for line in p.read_text(encoding='utf-8', errors='ignore').splitlines():
+            for line in read_env(p).splitlines():
                 for n in KEY_NAMES:
                     if line.strip().startswith(n + '='):
                         return line.split('=', 1)[1].strip().strip('"').strip("'")

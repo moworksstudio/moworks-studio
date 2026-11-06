@@ -14,6 +14,17 @@ export const D = {
   night: '#120E26',
 };
 
+/** The night palette: a deep blue sky with a cool moon, for episodes set after dark (lamps and screens do the work). */
+export const N = {
+  skyTop: '#060A1C',
+  skyMid: '#111A3E',
+  horizon: '#33305E',
+  moon: '#F1F3FF',
+  moonShade: '#C6CEEC',
+  glow: '#9FC0FF',
+  rim: '#A9C6FF',
+};
+
 const rnd = (seed: number, i: number) => Math.abs(Math.sin(seed * 31.7 + i * 12.9898) * 43758.5453) % 1;
 
 /** Filters shared by every shot: rim light from the left or right, blurs for depth of field. */
@@ -31,6 +42,20 @@ export const KitDefs: React.FC = () => (
       <feDropShadow dx={0} dy={-2} stdDeviation={2} floodColor="#FF4A4A" floodOpacity={1} />
       <feDropShadow dx={0} dy={0} stdDeviation={16} floodColor="#FF2A3A" floodOpacity={0.45} />
     </filter>
+    {/* moonlight and screen light: a cool rim for night shots, from the right or the left */}
+    <filter id="rimBlue" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx={4} dy={-1} stdDeviation={1.8} floodColor={N.rim} floodOpacity={1} />
+      <feDropShadow dx={0} dy={0} stdDeviation={14} floodColor="#6A8CFF" floodOpacity={0.3} />
+    </filter>
+    <filter id="rimBlueL" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx={-4} dy={-1} stdDeviation={1.8} floodColor={N.rim} floodOpacity={1} />
+      <feDropShadow dx={0} dy={0} stdDeviation={14} floodColor="#6A8CFF" floodOpacity={0.3} />
+    </filter>
+    <radialGradient id="kitMoonBloom">
+      <stop offset="0%" stopColor="#E6EEFF" stopOpacity={0.75} />
+      <stop offset="30%" stopColor={N.glow} stopOpacity={0.25} />
+      <stop offset="100%" stopColor={N.glow} stopOpacity={0} />
+    </radialGradient>
     {[3, 6, 10, 16].map((b) => (
       <filter key={b} id={`blur${b}`} x="-20%" y="-20%" width="140%" height="140%">
         <feGaussianBlur stdDeviation={b} />
@@ -160,3 +185,39 @@ export const Skyline: React.FC<{ y: number; seed: number; color?: string; h?: nu
     </g>
   );
 };
+
+/** A night sky that fills the frame (world units around the given box): deep blue, a faint city glow at the horizon. */
+export const NightSky: React.FC<{ id: string; x0?: number; y0?: number; w?: number; h?: number; horizonY: number }> = ({ id, x0 = -400, y0 = -400, w = 2720, h = 1880, horizonY }) => (
+  <g>
+    <defs>
+      <linearGradient id={id} x1="0" y1={y0} x2="0" y2={horizonY + 60} gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor={N.skyTop} />
+        <stop offset="60%" stopColor={N.skyMid} />
+        <stop offset="100%" stopColor={N.horizon} />
+      </linearGradient>
+    </defs>
+    <rect x={x0} y={y0} width={w} height={h} fill={`url(#${id})`} />
+  </g>
+);
+
+/** Stars that twinkle slowly, scattered over a box. */
+export const Stars: React.FC<{ seed: number; x0: number; y0: number; w: number; h: number; t: number; n?: number; o?: number }> = ({ seed, x0, y0, w, h, t, n = 40, o = 0.8 }) => (
+  <g>
+    {Array.from({ length: n }).map((_, i) => {
+      const tw = 0.55 + 0.45 * Math.sin(t / (7 + rnd(seed + 3, i) * 9) + i * 2.1);
+      return <circle key={i} cx={x0 + rnd(seed, i) * w} cy={y0 + rnd(seed + 1, i) * h} r={0.8 + rnd(seed + 2, i) * 1.8} fill="#EAF0FF" opacity={o * tw} />;
+    })}
+  </g>
+);
+
+/** The moon: a cool bloom, the disc lit from one side, a few soft craters. */
+export const Moon: React.FC<{ x: number; y: number; r: number; bloom?: number }> = ({ x, y, r, bloom = 1 }) => (
+  <g>
+    <circle cx={x} cy={y} r={r * 6} fill="url(#kitMoonBloom)" opacity={bloom} />
+    <circle cx={x} cy={y} r={r} fill={N.moon} />
+    <path d={`M ${x + r * 0.15} ${y - r} A ${r} ${r} 0 0 1 ${x + r * 0.15} ${y + r} A ${r * 0.8} ${r} 0 0 0 ${x + r * 0.15} ${y - r} Z`} fill={N.moonShade} opacity={0.55} />
+    {[[-0.35, -0.2, 0.22], [0.1, 0.35, 0.16], [0.3, -0.35, 0.12], [-0.25, 0.4, 0.1]].map(([dx, dy, k], i) => (
+      <circle key={i} cx={x + dx * r} cy={y + dy * r} r={k * r} fill={N.moonShade} opacity={0.7} />
+    ))}
+  </g>
+);

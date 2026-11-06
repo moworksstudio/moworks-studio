@@ -31,10 +31,26 @@ const draw = (f: number) => {
 // a board holds each shot's frame for one second of HF's time (as anidoodle's boards do); a film plays at its rate
 const frameAt = (t: number) => Math.max(0, Math.min(config.durationInFrames - 1, Math.floor((board ? t : t * fps) + 1e-6)));
 
-declare global { interface Window { render?: (t: number) => void; READY?: boolean; __wiFrame?: () => number } }
+declare global { interface Window { render?: (t: number) => void; renderAt?: (t: number) => Promise<void>; READY?: boolean; __wiFrame?: () => number } }
 // the R-LEMO contract, written out as finalize looks for it: window.render = ..., window.READY = true
 window.render = (t: number) => { const f = frameAt(t); if (f !== drawn) draw(f); };
 window.__wiFrame = () => drawn;
+// the frame drawn and every picture in it loaded and decoded before HyperFrames takes it (the bridge awaits renderAt through hf-seek's
+// waitUntil). A photo whose scene starts mid-film mounts its <img> on that frame: drawn at once, it was a white sheet for one or two frames
+// in every render, at a different place each time (T43-11, Paper Collage's PhotoPrint). Each picture is waited for once.
+const decoded = new WeakSet<HTMLImageElement>(), PICTURE_WAIT_MS = 15000;
+window.renderAt = async (t: number) => {
+  window.render!(t);
+  try { await whenRendered(); } catch { /* cancelRender: the page says its error; the frame is taken as drawn */ }
+  const fresh = [...document.images].filter((i) => !decoded.has(i) && i.getAttribute("src"));
+  if (!fresh.length) return;
+  // a picture done loading (or failed: complete with no width, a 404) goes on at once; none waits more than PICTURE_WAIT_MS (T43-13: a picture
+  // whose file had moved failed before the wait began, and the film never got ready)
+  const one = (i: HTMLImageElement) => (i.complete ? Promise.resolve() : new Promise<void>((ok) => { i.addEventListener("load", () => ok(), { once: true }); i.addEventListener("error", () => ok(), { once: true }); }))
+    .then(() => (i.naturalWidth && typeof i.decode === "function" ? i.decode().catch(() => undefined) : undefined))
+    .then(() => { if (i.complete) decoded.add(i); });
+  await Promise.race([Promise.all(fresh.map(one)), new Promise<void>((ok) => setTimeout(ok, PICTURE_WAIT_MS))]);
+};
 
 // every face the page declares, then every delayRender handle, before the first frame is called ready
 const faces = [...document.fonts].map((f) => `${f.style} ${f.weight.split(" ")[0]} 40px "${f.family.replace(/"/g, "")}"`);

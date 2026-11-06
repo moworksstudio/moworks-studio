@@ -1057,7 +1057,7 @@
   },
   "vocab": {
     "file": "config/rules/motion-vocab/SKILL.md",
-    "source": "Motion Prompt (Shohei Ohtaki, MIT; showheyohtaki/motion-prompt at bd6bf08): the names of the film packs, generated from the Library's Vocabulary (audit 79)"
+    "source": "Motion Prompt (Shohei Ohtaki, MIT; showheyohtaki/motion-prompt at 7819d38): the names of the film packs, generated from the Library's Vocabulary (audit 79)"
   },
   "qc": {
     "file": "config/rules/moworks-qc/SKILL.md",

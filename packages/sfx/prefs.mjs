@@ -42,7 +42,8 @@ export function updatePrefs(dir, patch = {}) {
   if (patch.unskip === true) skip = [];
   else if (Array.isArray(patch.unskip)) { const u = new Set(list(patch.unskip)); skip = skip.filter((s) => !u.has(s)); }
   const next = cleanPrefs({ off, skip, ambience: typeof patch.ambience === "boolean" ? patch.ambience : cur.ambience,
-    density: DENSITIES.includes(patch.density) ? patch.density : cur.density, songSounds: list(patch.off).includes("all") ? false : patch.songSounds ?? cur.songSounds });
+    // "style": back to the film style's own density (T43-15: once Every, Most or Only big was picked, the style's key moments could not come back)
+    density: patch.density === "style" ? undefined : DENSITIES.includes(patch.density) ? patch.density : cur.density, songSounds: list(patch.off).includes("all") ? false : patch.songSounds ?? cur.songSounds });
   mkdirSync(join(dir, ".moworks"), { recursive: true });
   writeFileSync(prefsFile(dir) + ".tmp", JSON.stringify({ ...next, at: new Date().toISOString() }, null, 2) + "\n");
   renameSync(prefsFile(dir) + ".tmp", prefsFile(dir));
@@ -84,11 +85,17 @@ const NO_AMBIENCE = /\bno\s+(ambien(ce|t)|room tone|background (sound|noise)s?)\
 /** What the film's sound effects follow: { silent: null | "owner" | "style" | "brief" | "song", density, ambience }. The owner's prefs first, then
  *  the style's sound section, then the brief, then a film made for its song (`song`: none, and few if the owner asks for some); otherwise every
  *  action sounds (lively) with ambience under every place. */
+// a source skill's own rule (owner 06/11 #1198: where the source skill has a rule, the app follows it): its sounds on key moments only
+// (Paper Collage, 3D Cartoon: about one cue per 3-4 s), and its plain words on screen silent
+const KEY_ONLY = /\bkey moments only\b/i;
+const TEXT_SILENT = /\b(plain text|captions|in-world text|typed labels|rising words)\b[^.\n]{0,160}\bstay silent\b|\bsilent on purpose\b|\bnone on plain text\b/i;
+/** What the film's sound effects follow: { silent, density, ambience, textSilent }. textSilent: no sound on a Motion Plan row of plain words
+ *  (type "text") unless the plan names one. The owner's choice in Final Mix wins over the style's density. */
 export function soundPolicy({ prefs = {}, brief = "", palette = "", song = false } = {}) {
   const silent = (prefs.off ?? []).includes("all") ? "owner" : SILENT.test(palette) ? "style" : SILENT.test(brief) ? "brief" : song && !prefs.songSounds ? "song" : null;
-  const density = prefs.density ?? (song || FEWER.test(palette) || FEWER.test(brief) ? "low" : DEFAULT_DENSITY);
+  const density = prefs.density ?? (song || FEWER.test(palette) || FEWER.test(brief) ? "low" : KEY_ONLY.test(palette) ? "key" : DEFAULT_DENSITY);
   const ambience = typeof prefs.ambience === "boolean" ? prefs.ambience : !silent && !NO_AMBIENCE.test(palette) && !NO_AMBIENCE.test(brief);
-  return { silent, density, ambience };
+  return { silent, density, ambience, textSilent: TEXT_SILENT.test(palette) };
 }
 
 /** The brief's words: New project's brief and direction, and BRIEF.md. */

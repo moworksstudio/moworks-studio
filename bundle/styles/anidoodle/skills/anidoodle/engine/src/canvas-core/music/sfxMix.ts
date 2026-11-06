@@ -2,7 +2,7 @@
 // ducked under the cues that matter, one final master (a look-ahead true-peak ceiling), and an
 // audibility guarantee: every cue is measured against the ducked score at its own moment and the
 // mix FAILS if a cue sits more than minDb under it (a cue nobody hears is a bug, not a choice).
-import { renderSfx, validateSfx, sfxNeeds, SFX, SFX_KINDS, type SfxKind, type SfxOpts, type SfxSound } from "./sfxKit";
+import { renderSfx, validateSfx, sfxNeeds, sfxDuckDb, SFX, SFX_KINDS, type SfxKind, type SfxOpts, type SfxSound } from "./sfxKit";
 import { kWeight, winLufs, mixSeed, strSeed, secs, type SfxStereo } from "./sfxCore";
 import { Biquad, db } from "./dsp";
 import { MODES } from "./theory";
@@ -26,6 +26,10 @@ export type SfxCue = SfxOpts & {
 };
 export type SfxPlan = {
   fps: number; frames: number; cues: SfxCue[];
+  /** Keep archived plans on the original effect models. */
+  legacy?: boolean;
+  /** Set on newly authored plans to select version 2 effects. */
+  sfxVersion?: 2;
   /** seeds every cue that has no seed of its own; per-cue seeds depend on (kind, frame), not on list order. */
   seed?: number;
   /** tempo grid: bpm, the time of beat 1 in seconds (beatZeroS), beats per bar. */
@@ -85,6 +89,8 @@ export const validateSfxPlan = (plan: SfxPlan) => {
   const p = resolveSfxPlan(plan);
   if (!Number.isSafeInteger(p.fps) || p.fps <= 0) throw new Error(`sfx plan: fps must be a positive integer, got ${String(p.fps)}`);
   if (!Number.isSafeInteger(p.frames) || p.frames <= 0) throw new Error(`sfx plan: frames must be a positive integer, got ${String(p.frames)}`);
+  if (p.legacy !== undefined && typeof p.legacy !== "boolean") throw new Error("sfx plan: legacy must be boolean");
+  if (p.sfxVersion !== undefined && p.sfxVersion !== 2) throw new Error("sfx plan: sfxVersion must be 2");
   if (p.seed !== undefined && (!Number.isSafeInteger(p.seed) || p.seed < 0 || p.seed > 0xffffffff)) throw new Error(`sfx plan: seed must be an integer 0..4294967295, got ${String(p.seed)}`);
   if (p.bpm !== undefined && (!Number.isFinite(p.bpm) || p.bpm < 20 || p.bpm > 300)) throw new Error(`sfx plan: bpm must be 20..300, got ${String(p.bpm)}`);
   if (p.minDb !== undefined && !Number.isFinite(p.minDb)) throw new Error("sfx plan: minDb must be a finite number");
@@ -106,7 +112,7 @@ export const validateSfxPlan = (plan: SfxPlan) => {
     if (need.bpm && o.bpm === undefined) throw new Error(`sfx plan: ${name(c, i)} is tempo-synced: set plan.bpm, cue.bpm, or plan.score (the film's piece); there is no default tempo`);
   });
 };
-const optsOf = (p: SfxPlan, c: SfxCue, seed: number): SfxOpts => ({ seed: c.seed ?? seed, variant: c.variant, pitch: c.pitch, lengthS: c.lengthS, beats: c.beats, bpm: c.bpm ?? p.bpm, key: c.key ?? p.key, dir: c.dir, gainDb: c.gainDb });
+const optsOf = (p: SfxPlan, c: SfxCue, seed: number): SfxOpts => ({ seed: c.seed ?? seed, legacy: c.legacy ?? p.legacy, sfxVersion: c.sfxVersion ?? p.sfxVersion, variant: c.variant, pitch: c.pitch, lengthS: c.lengthS, beats: c.beats, bpm: c.bpm ?? p.bpm, key: c.key ?? p.key, dir: c.dir, gainDb: c.gainDb });
 
 /** Render and place every cue. Throws if a cue's pre-roll (whoosh approach, riser build) would start before 0. */
 export const placeSfx = (plan: SfxPlan, sr: number): PlacedCue[] => {
@@ -137,7 +143,7 @@ export const placeSfx = (plan: SfxPlan, sr: number): PlacedCue[] => {
 export const sfxDuck = (placed: PlacedCue[], n: number, sr: number, o: SfxPlan["duck"] = {}) => {
   const g = new Float32Array(n).fill(1), att = secs(sr, o.attackS ?? 0.04), maxDb = o.maxDb ?? 9;
   for (const pc of placed) {
-    const depth = Math.min(maxDb, pc.cue.duckDb ?? SFX[pc.cue.kind].duckDb); if (depth <= 0) continue;
+    const depth = Math.min(maxDb, pc.cue.duckDb ?? sfxDuckDb(pc.cue.kind, pc.sound.variant)); if (depth <= 0) continue;
     const rel = secs(sr, pc.cue.kind === "impact" ? 1.2 : o.releaseS ?? 0.28), lo = db(-depth), [a, b] = pc.window;
     for (let i = Math.max(0, a - att); i < Math.min(n, b + rel); i++) {
       const s = i < a ? 0.5 - 0.5 * Math.cos((Math.PI * (i - (a - att))) / att) : i < b ? 1 : 0.5 + 0.5 * Math.cos((Math.PI * (i - b)) / rel);

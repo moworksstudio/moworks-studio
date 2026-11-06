@@ -33,8 +33,23 @@ shot or a character.
   (about 2.5) or the sweep is invisible.
 - **Long titles:** line 2 over about 20 characters needs `size` 88 to 100 to keep margins (more if you set a
   wider title face than the default).
+- **Things that count must match the night.** A calendar's crosses, a clock, a pile that grows: the first demo of
+  "skip sleep" showed nine crossed days on night one. Set the count per shot (`crossed={0}`).
+- **Front-on sitting doesn't read.** Legs swing in the facing direction, so a seated figure facing camera looks like
+  it's standing in front of the furniture. Seat characters in profile: thighs forward (`a` about 80), shins back
+  down (`b` about -80), hips on the edge.
+- **Focus rings scale with the camera.** At zoom 2 they fill the frame; wrap them in a `scale(0.4)` about the head.
 - **Unique ids.** A set that draws gradients, masks or clip paths takes an `id` prop; give each shot its own (`sh4`),
   and a different one again if the same set renders twice in one frame (a blurred copy behind a close-up).
+- **A hand can't touch the head.** The head is drawn after the arms, so a mitten raised to a temple or a mouth
+  disappears behind it, and an arm raised beside the head reads as a wave. In a close-up, leave the rig's arms down
+  and draw the arm yourself after the character: a sleeve path from off frame and a mitten at the prop, as the inserts
+  in `episodes/copy-paste/shots.tsx` do (that's how the preview run fed Mo a slice and put a phone to Pip's ear). In a
+  medium, act it with the head and a jolt instead.
+- **A grade on a whole shot needs a screen-sized filter box.** Filter the outer group with `filterUnits="userSpaceOnUse"`
+  and a 0..1920 x 0..1080 region: the default box is the content's, and sets draw far past the frame.
+- **A colour grade lifts black.** The preview look's matrix turned a black screen navy; draw true black outside the
+  graded group.
 
 ## Motion
 
@@ -49,7 +64,13 @@ shot or a character.
 
 - **A pop on a word covers the word.** Land illustrative hits in the pause after their word (see `sound.md`).
 - **Beds bury facts.** A rising hum under the science line masked it; beds under key lines stay low (0.1 to 0.15).
+- **A hit's tail runs into the next word.** A 0.6 s beep after "Midnight" still sounded under "Skip": give short
+  hits an `until` cue at the next shot. Time the picture's action into the pause too (the skip episode snaps awake
+  about 10 frames into each skip shot, after the word).
 - **Levelling is per stem.** `sfx.py` levels the whole effects stem, so lowering one event raises the rest.
+- **mixcheck's windows are 0.4 s,** longer than most pauses, so a hit placed correctly in the 0.3 s after a word
+  still gets flagged with it. When a flag sits on a word's last syllable, check that word in 0.1 s windows before
+  moving anything: a fricative tail ("face", "catch") under a bed or a hit that follows it is not a covered word.
 
 ## Pipeline
 

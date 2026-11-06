@@ -132,13 +132,12 @@ licence and the exact source commit. Third-party style files are used as their a
 |---|---|---|---|---|
 | **General Style** | Moworks | 1 | the app's own rules | rewritten for the app from the Moworks Motion kit's process |
 | **Map Explainer** | Moworks | 1: a paper map and the real ground under one continuous camera, a red marker on top | the app's own rules, map data from [Natural Earth](https://www.naturalearthdata.com) and [world-atlas](https://github.com/topojson/world-atlas/tree/v2.0.2), satellite pictures from [EOX](https://cloudless.eox.at) (CC BY 4.0) | made for the app; every source in [THIRD-PARTY.md](THIRD-PARTY.md) |
-| **Moworks film styles** | Moworks | 6: Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, Moworks 2D Explainer and Ricks Clip, each with its source skill's own checks in Review and sounds made by code | the app's own work | Moworks Studio's own source skills, pinned in the app; every outside part in [THIRD-PARTY.md](THIRD-PARTY.md) |
+| **Moworks film styles** | Moworks | 7: Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, Moworks 2D Explainer, Ricks Clip and What If (on FreshStack's MIT engine), each with its source skill's own checks in Review and sounds made by code | the app's own work | Moworks Studio's own source skills, pinned in the app; every outside part in [THIRD-PARTY.md](THIRD-PARTY.md) |
 | **HyperFrames** | HeyGen | 8: Slideshow and the seven film types of HyperFrames' skill (Explainer, Launch, Music video, Data, Vertical, 3D, Character) | Apache-2.0 | [heygen-com/hyperframes @ `4719543`](https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/skills) (v0.8.214) |
-| **Lemo-Opuscar** | Lemomo (LemoLab) | 66 code-built film styles (cinema eras, documentary, editorial, data…; Memphis Diorama contributed by EianLu) | MIT; demo stills CC BY 4.0 | [lemomo-ai/lemo-opuscar @ `ea34ff9`](https://github.com/lemomo-ai/lemo-opuscar/tree/ea34ff9546f675f9fd65a3c84e869a1da7471ad7) |
+| **Lemo-Opuscar** | Lemomo (LemoLab) | 66 code-built film styles (cinema eras, documentary, editorial, data…; Memphis Diorama contributed by EianLu) | MIT; demo stills CC BY 4.0 | [lemomo-ai/lemo-opuscar @ `bebbbe1`](https://github.com/lemomo-ai/lemo-opuscar/tree/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00) |
 | **mg-styles-15** | Vincentwei1021 | 14 motion-design styles (the Blender-based 3D style is not offered) | MIT | [Vincentwei1021/mg-styles-15 @ `49052d8`](https://github.com/Vincentwei1021/mg-styles-15/tree/49052d80bfaf9fa8412cc9710530e5e95a3b8d8c) |
-| **Anidoodle** | Alex Greenshpun (10x Company) | 35 hand-drawn media (32 media + 3 house styles) | Apache-2.0 with NOTICE | [alexgreensh/anidoodle @ `f746cbd`](https://github.com/alexgreensh/anidoodle/tree/f746cbd8a7032463bd0bc88ee8ff852599193b8c) (v0.9.6) |
+| **Anidoodle** | Alex Greenshpun (10x Company) | 35 hand-drawn media (32 media + 3 house styles) | Apache-2.0 with NOTICE | [alexgreensh/anidoodle @ `4ae27d2`](https://github.com/alexgreensh/anidoodle/tree/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795) (v0.10.1) |
 | **Brush cartoon** | John Heibel | 1: a brush-drawn cartoon acted by the project's own characters | MIT (p5.js LGPL-2.1, p5.brush MIT) | [JohnHeibel/ClaudeAnimationBase @ `0ac8bf2`](https://github.com/JohnHeibel/ClaudeAnimationBase/tree/0ac8bf2b31942376cb6b8c4074715595d512acd2) |
-| **What If** | FreshStack (kelano86) | 1: short "What if…" episodes | MIT | [kelano86/what-if-animation @ `3725a22`](https://github.com/kelano86/what-if-animation/tree/3725a22d2d101320cae5b7d761af8d75120c4987) |
 
 Every style also follows two app-wide rule packs: **films stay alive** (no frame holds still for more than two seconds) and **stop and
 ask** (a conflict or a missing asset is a question for you, never a silent guess).
@@ -160,7 +159,7 @@ named under each still.
 <td width="33%" valign="top"><img src="images/film-papercraft.jpg" alt="A toy-theatre town"><br><sub><b>A toy-theatre town</b> · Toy-theatre paper collage · style by Alex Greenshpun</sub></td>
 </tr>
 <tr>
-<td width="33%" valign="top"><img src="images/film-clouds.jpg" alt="What if you could fold clouds?"><br><sub><b>What if you could fold clouds?</b> · What If · style by FreshStack</sub></td>
+<td width="33%" valign="top"><img src="images/film-clouds.jpg" alt="What if you could fold clouds?"><br><sub><b>What if you could fold clouds?</b> · What If · Moworks Studio</sub></td>
 <td width="33%" valign="top"><img src="images/film-slideshow.jpg" alt="A day's hike"><br><sub><b>A day's hike</b> · Slideshow · style by HeyGen</sub></td>
 <td width="33%" valign="top"><img src="images/film-puzzle-cube.jpg" alt="A puzzle cube comes apart"><br><sub><b>A puzzle cube comes apart</b> · 3D · style by HeyGen</sub></td>
 </tr>

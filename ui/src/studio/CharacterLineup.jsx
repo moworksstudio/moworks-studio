@@ -90,8 +90,6 @@ export default function CharacterLineup({ list, shown, passes, kindOf, groupOf, 
             <div className="st-people">{people.map(fig)}</div></div>}
           {(rest.length > 0 || (ai === 0 && making)) && <div className="st-toons">{ai === 0 && making}{rest.map(fig)}</div>}
         </div>; })}
-        <div className="st-lu-au st-soon"><div className="st-lu-head"><AuthorName a="freshstack" count={false} /></div>
-          <p className="st-hand">{t("Its stick-figure cast comes with the engine.")}</p></div>
       </div>
       {kit && <div className="st-kit"><CreditLine author={t("Character layer: ClaudeAnimationBase")} licence={kit.licence} link={kit.link} commit={kit.commit} /></div>}
     </section>}

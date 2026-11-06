@@ -465,15 +465,15 @@
   "cn": "纸雕灯影",
   "cat": "东方传统",
   "cat_en": "East Asian Traditions",
-  "film": "A Mooncake's Longing",
-  "line": "A single mooncake tells the Mid-Autumn story of reunion and longing inside a glowing paper-cut lightbox.",
-  "line_cn": "一枚月饼讲中秋的团圆与思念，纸雕灯箱层层透光。",
+  "film": "The Last Night Train",
+  "line": "An old night train makes its last run, from a snowy mountain halt through a long tunnel to the sea, its lit windows going out one by one at the end of the line.",
+  "line_cn": "一列老夜车跑最后一趟：从雪山小站穿过长隧道开到海边，到站后车窗一扇扇熄灭。",
   "uses": [
-   "Festivals",
-   "Gift brands",
-   "Cultural stories"
+   "Journeys and travel",
+   "Farewells and anniversaries",
+   "Places and their stories"
   ],
-  "dur": 121.8
+  "dur": 51.0
  },
  {
   "slug": "risograph",
@@ -550,15 +550,15 @@
   "cn": "丝印旅行海报",
   "cat": "印刷与版画",
   "cat_en": "Print & Printmaking",
-  "film": "Three Trails",
-  "line": "Three trail posters are screen-printed one ink at a time, then climbed in one long take from noon to dusk.",
-  "line_cn": "三条步道各一张丝印海报，一色一刮印出来，再沿山脊一镜到底从正午爬到黄昏。",
+  "film": "The Long Way Home",
+  "line": "A traveller crosses the world one full-bleed screen print at a time, a ticket stub counting the distance from home, until the far side turns into the way back.",
+  "line_cn": "一张满屏丝印海报一座城，票根数着离家的公里数，走到世界的另一头，才发现那是回家的路。",
   "uses": [
    "Destination guides",
    "Tourism",
    "Event posters"
   ],
-  "dur": 38.4
+  "dur": 50.0
  },
  {
   "slug": "printed-long-take",
@@ -669,15 +669,15 @@
   "cn": "象形运动图形",
   "cat": "图形与排版",
   "cat_en": "Graphic & Type",
-  "film": "Aichi-Nagoya 2026 — All 43 Sports",
-  "line": "All 43 sports of the 2026 Asian Games as beat-locked geometric pictograms.",
-  "line_cn": "2026 亚运会 43 个大项，几何象形人卡着节拍快闪。",
+  "film": "Left Behind",
+  "line": "A yellow umbrella left on a bus waits out a sunny day on the lost-property shelf, then opens with 312 others when the storm comes back: objects, vehicles, weather and signs as beat-locked geometric pictograms.",
+  "line_cn": "一把被落在公交车上的黄伞，晴天里在失物招领的货架上等了一整天，暴雨回来时和另外 312 把一起撑开：物件、交通、天气和标识，都是卡着节拍的几何象形符号。",
   "uses": [
-   "Sports events",
-   "Visual identity",
-   "Event openers"
+   "Public services and city stories",
+   "Brand and event identity films",
+   "Explainers told through signs and objects"
   ],
-  "dur": 163.6
+  "dur": 50.0
  },
  {
   "slug": "ascii-crt",

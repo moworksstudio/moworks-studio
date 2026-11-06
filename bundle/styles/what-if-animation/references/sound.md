@@ -60,6 +60,8 @@ boom or a drone on the turn can stay. The proof clip had 30 such moments at 0 dB
 
 The voice's exact cost is in the account's generation history, which `voice.py` reads: the 356-character copy-paste
 take cost 78 credits (about 0.22 a character on this account; the proof clip's 280-character takes cost 61 and 62).
+By 29 Oct 2026 the same voice and model cost about 0.44 a character (the 358-character preview-minute take: 158), so
+count the characters and re-check the rate before the call.
 Sound clips don't appear in the history, so `sfx.py` reads the account counter before and after, and the counter can
 lag: re-read it before you report a number, or check the usage page. The copy-paste run's 12 new clips (13.5 s in
 all) moved the counter by 74 credits. The proof clip's sound cost more (775 credits for five clips including 19 s of

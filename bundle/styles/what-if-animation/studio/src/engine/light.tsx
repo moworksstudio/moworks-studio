@@ -1,6 +1,6 @@
 import React from 'react';
 import { rnd } from './anim';
-import { DuskSky, Sun } from './kit';
+import { DuskSky, Sun, NightSky, Stars, Moon } from './kit';
 import { Pt } from './room';
 
 // Light for the sets: shared gradients and filters, glows, cones, the contrast veil, dust in the beams, paint texture,
@@ -117,9 +117,12 @@ export const Dust: React.FC<{ t: number; seed: number; x0: number; y0: number; w
 /** A soft cone of light from a lamp, fading downward. */
 export const Cone: React.FC<{ d: string; o?: number }> = ({ d, o = 0.5 }) => <path d={d} fill="url(#g3cone)" opacity={o} style={{ mixBlendMode: 'screen' }} />;
 
-/** A window onto the dusk: sky, low sun, a far skyline, then frame and mullions. `clip` is the opening's shape. */
-export const SkyView: React.FC<{ id: string; clip: string; box: { x: number; y: number; w: number; h: number }; t: number; sun?: Pt; sunR?: number; red?: number }> = ({
-  id, clip, box, t, sun, sunR = 40, red = 0,
+/**
+ * A window onto the dusk: sky, low sun, a far skyline, then frame and mullions. `clip` is the opening's shape.
+ * `night`: a deep blue sky with stars, the moon where the sun would be (`sun`, `sunR`), and the far city lit up.
+ */
+export const SkyView: React.FC<{ id: string; clip: string; box: { x: number; y: number; w: number; h: number }; t: number; sun?: Pt; sunR?: number; red?: number; night?: boolean }> = ({
+  id, clip, box, t, sun, sunR = 40, red = 0, night = false,
 }) => (
   <g>
     <defs>
@@ -128,24 +131,34 @@ export const SkyView: React.FC<{ id: string; clip: string; box: { x: number; y: 
       </clipPath>
     </defs>
     <g clipPath={`url(#${id}clip)`}>
-      <DuskSky id={`${id}sky`} x0={box.x} y0={box.y} w={box.w} h={box.h} horizonY={box.y + box.h * 0.9} red={red} />
-      {sun ? <Sun x={sun.x} y={sun.y} r={sunR} t={t} red={red} /> : null}
-      <FarCity x0={box.x} x1={box.x + box.w} base={box.y + box.h} h={box.h * 0.3} seed={id.length + 3} />
+      {night ? (
+        <g>
+          <NightSky id={`${id}sky`} x0={box.x} y0={box.y} w={box.w} h={box.h} horizonY={box.y + box.h * 0.9} />
+          <Stars seed={id.length + 11} x0={box.x} y0={box.y} w={box.w} h={box.h * 0.7} t={t} n={Math.round((box.w * box.h) / 2600)} />
+          {sun ? <Moon x={sun.x} y={sun.y} r={sunR} /> : null}
+        </g>
+      ) : (
+        <g>
+          <DuskSky id={`${id}sky`} x0={box.x} y0={box.y} w={box.w} h={box.h} horizonY={box.y + box.h * 0.9} red={red} />
+          {sun ? <Sun x={sun.x} y={sun.y} r={sunR} t={t} red={red} /> : null}
+        </g>
+      )}
+      <FarCity x0={box.x} x1={box.x + box.w} base={box.y + box.h} h={box.h * 0.3} seed={id.length + 3} night={night} />
     </g>
   </g>
 );
 
 /** Distant buildings seen through a window, hazy, with a few lit windows. */
-const FarCity: React.FC<{ x0: number; x1: number; base: number; h: number; seed: number }> = ({ x0, x1, base, h, seed }) => {
+const FarCity: React.FC<{ x0: number; x1: number; base: number; h: number; seed: number; night?: boolean }> = ({ x0, x1, base, h, seed, night = false }) => {
   const out: React.ReactNode[] = [];
   let x = x0 - 10;
   let i = 0;
   while (x < x1) {
     const bw = 24 + rnd(seed, i) * 50;
     const bh = h * (0.3 + rnd(seed + 1, i) * 0.7);
-    out.push(<rect key={`b${i}`} x={x} y={base - bh} width={bw + 1} height={bh} fill="#3A2747" opacity={0.85} />);
+    out.push(<rect key={`b${i}`} x={x} y={base - bh} width={bw + 1} height={bh} fill={night ? '#141634' : '#3A2747'} opacity={night ? 0.95 : 0.85} />);
     for (let k = 0; k < 3; k++) {
-      if (rnd(seed + 2, i * 5 + k) > 0.55) out.push(<rect key={`w${i}-${k}`} x={x + 5 + k * 8} y={base - bh + 8 + rnd(seed + 3, i + k) * (bh - 16)} width={4} height={5} fill="#FFC27A" opacity={0.7} />);
+      if (rnd(seed + 2, i * 5 + k) > (night ? 0.72 : 0.55)) out.push(<rect key={`w${i}-${k}`} x={x + 5 + k * 8} y={base - bh + 8 + rnd(seed + 3, i + k) * (bh - 16)} width={4} height={5} fill="#FFC27A" opacity={night ? 0.85 : 0.7} />);
     }
     x += bw;
     i++;

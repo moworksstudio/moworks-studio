@@ -1,4 +1,4 @@
-// Vocabulary: Motion Prompt (Shohei Ohtaki, MIT), 168 names in 7 packs for the things you ask
+// Vocabulary: Motion Prompt (Shohei Ohtaki, MIT), 192 names in 8 packs for the things you ask
 // an AI to make, each with a one-line meaning, an example ask, its numbers in words (3-6 spec lines) and the author's own Canvas 2D sample.
 // The Library's fourth type, beside Motions, Blocks and Looks, under the author's name. It is words and numbers for Claude, not a runnable
 // motion: a film that uses an item is written with GSAP from the item's numbers, and the item says so (credit.madeNote).
@@ -228,7 +228,7 @@ export function media(rel, root = APP_ROOT) {
 
 /** The short names table the Motion Plan reads (config/rules/motion-vocab/SKILL.md): the film packs only (motion, motion2, camera), name and
  *  meaning, with the studio's notes; every other item stays one `library_search` away (kind "vocab"). Generated, never typed by hand. */
-export const GLOSSARY_PACKS = ["motion", "motion2", "camera"];
+export const GLOSSARY_PACKS = ["motion", "motion2", "camera", "camera2"];          // camera2: 24 more camera moves and transitions (Motion Prompt 29/10, #1209)
 export function glossaryText(list, src) {
   const lines = [];
   lines.push("# Motion vocabulary: names and numbers for the Motion Plan",

@@ -243,8 +243,8 @@
   "lemo": {
     "_about": "Lemo-Opuscar (Lemomo, LemoLab): 66 film styles, each a STYLE.md and a demo film made in code. The read-only clone at the pinned commit; the app reads styles/*/style.json, STYLE.md, DEMO.md, demo/ and core/ from it and never edits it. Demo films are linked (release web), never downloaded. MIT (style prompts, code, docs); demo films and stills CC BY 4.0, credit LemoLab. A style the author merged from someone else names that contributor in its style.json \"by\" (Memphis Diorama: EianLu)",
     "repo": "lemomo-ai/lemo-opuscar",
-    "commit": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
-    "date": "2026-10-29",
+    "commit": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
+    "date": "2026-10-31",
     "root": "{app}/bundle/styles/lemo-opuscar",
     "three": "0.170.0",
     "demoUrl": "https://github.com/lemomo-ai/lemo-opuscar/releases/download/web/{slug}.mp4"
@@ -321,10 +321,10 @@
     "demoUrl": "https://vincentwei1021.github.io/mg-styles-15/#{id}"
   },
   "motionPrompt": {
-    "_about": "Motion Prompt (Shohei Ohtaki, MIT): 168 names in 7 packs for the things you ask an AI to make (motion graphics, camera moves, UI, landing page, photo looks), each with a one-line meaning, an example ask, its numbers in words and the author's Canvas 2D sample (SOURCES M08). The Library's fourth type \"Vocabulary\" under author Shohei Ohtaki: words and numbers for Claude, not runnable motions. The read-only clone at the pinned commit; the app reads api/v1 (catalog.json, en/e/<id>.txt, kit/<pack>.js), LICENSE and THIRD-PARTY-NOTICES.md from it, as shipped, and never edits it. Not used: the author's skill and CLI, the gallery, make-your-own, examples/found.json (other people's posts). Update: git fetch in the clone, git diff --stat <pin>..origin/main -- packs api, run tools/intake-motion-prompt.mjs (replaces items by number), re-pin after the maintainer's OK",
+    "_about": "Motion Prompt (Shohei Ohtaki, MIT): 192 names in 8 packs for the things you ask an AI to make (motion graphics, camera moves (camera, camera2), UI, landing page, photo looks), each with a one-line meaning, an example ask, its numbers in words and the author's Canvas 2D sample (SOURCES M08). The Library's fourth type \"Vocabulary\" under author Shohei Ohtaki: words and numbers for Claude, not runnable motions. The read-only clone at the pinned commit; the app reads api/v1 (catalog.json, en/e/<id>.txt, kit/<pack>.js), LICENSE and THIRD-PARTY-NOTICES.md from it, as shipped, and never edits it. Not used: the author's skill and CLI, the gallery, make-your-own, examples/found.json (other people's posts). Update: git fetch in the clone, git diff --stat <pin>..origin/main -- packs api, run tools/intake-motion-prompt.mjs (replaces items by number), re-pin after the maintainer's OK",
     "repo": "showheyohtaki/motion-prompt",
-    "commit": "bd6bf08d8d412cc82c1bbc8f1a81638617a45cfb",
-    "date": "2026-10-23",
+    "commit": "7819d3879eb7d5a1475c11c001bedffb5cab64af",
+    "date": "2026-10-29",
     "licence": "MIT (Copyright (c) 2026 Shohei Ohtaki)",
     "root": "{app}/bundle/styles/motion-prompt",
     "demoUrl": "https://showheyohtaki.github.io/motion-prompt/#{id}"
@@ -332,17 +332,17 @@
   "anidoodle": {
     "_about": "anidoodle (Alex Greenshpun, 10x Company): a skill and a TypeScript engine that draw pictures and films entirely in code in 32 media (SOURCES M10). The read-only clone at the pinned commit; the app reads skills/anidoodle (SKILL.md, references/, the engine's src/) from it, never edits it, and bundles a film's own module with the engine through esbuild. Apache-2.0 with NOTICE.",
     "repo": "alexgreensh/anidoodle",
-    "commit": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
-    "date": "2026-10-23",
-    "version": "0.9.6",
+    "commit": "4ae27d2c281fcfd01bce87ab13dc5ad4df81a795",
+    "date": "2026-11-05",
+    "version": "0.10.1",
     "root": "{app}/bundle/styles/anidoodle",
     "skill": "skills/anidoodle"
   },
   "whatIf": {
     "_about": "What If animation (FreshStack, MIT): the sixth author of the Style Gallery. The stick-figure engine (studio/src/engine: React + SVG, one rig, rooms, light) is used as shipped through the app's stand-in for Remotion (packages/what-if-styles/shims, written from Remotion's docs; no Remotion package), bundled with the author's React (codeLibs react, react-dom, scheduler). Its knowledge also lives in config/rules (what-if, moworks-studio). The copy in bundle/styles/what-if-animation is the pinned commit's skill, references, scripts and studio/src, never edited; no sound (the author's voices and effects are ElevenLabs-made: studio/public and studio/library are left out). Update: git fetch in a clone, read the diff of studio/src and references, copy the same paths at the new commit, run test/what-if-engine.test.mjs and test/what-if.test.mjs, re-pin after the maintainer's OK",
     "repo": "kelano86/what-if-animation",
-    "commit": "3725a22d2d101320cae5b7d761af8d75120c4987",
-    "date": "2026-10-21",
+    "commit": "8092fb5e825e55456d1d47fec0ebf595cb93cc0d",
+    "date": "2026-10-30",
     "licence": "MIT (Copyright (c) 2026 FreshStack)",
     "root": "{app}/bundle/styles/what-if-animation",
     "react": "19.0.0"

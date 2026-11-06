@@ -5,10 +5,14 @@ import { WallTexture, RoomCorners, SkyView, Glow, Cone, LightVeil, Dust } from '
 
 // The study at dusk: a window with the low sun behind the desk, a bookcase on the left wall, a door on the right,
 // a pendant lamp and a wall light. Pass `veil` lower (0.28) for a wide that must show the floor.
+// `night`: the moon and the lit city in the window, the pendant off, cool moonlight on the floor (the desk lamp in
+// `Desk` becomes the main light). `shelf` (0..1) is how many of the books are still on the shelves.
+/** The bookcase's shelf heights (v, top to bottom) on the left wall at u 0.07, w 0.135 to 0.5: books fly from here. */
+export const STUDY_SHELF_V = [0.16, 0.36, 0.56, 0.76, 0.985];
 export const STUDY = makeRoom({ x: 980, y: 500 }, { x0: 530, x1: 1430, y0: 335, y1: 740 }, 3.5);
 const BOOKS = ['#7A4A4A', '#4A5A7A', '#8A7A4A', '#4A6A5A', '#6A4A6A', '#9A6A4A', '#3E4A62', '#7A6252'];
 
-export const Study: React.FC<{ t: number; id?: string; veil?: number }> = ({ t, id = 'off', veil = 0.44 }) => {
+export const Study: React.FC<{ t: number; id?: string; veil?: number; night?: boolean; shelf?: number }> = ({ t, id = 'off', veil = 0.44, night = false, shelf = 1 }) => {
   const r = STUDY;
   const { P, Q } = r;
   // floorboards run toward the window; their end joints are staggered
@@ -25,8 +29,9 @@ export const Study: React.FC<{ t: number; id?: string; veil?: number }> = ({ t, 
     }
   }
   // books along the shelves of the bookcase on the left wall (the shelf front faces into the room, u = 0.07)
-  const shelfV = [0.16, 0.36, 0.56, 0.76, 0.985];
+  const shelfV = STUDY_SHELF_V;
   const books: React.ReactNode[] = [];
+  let bi = 0;
   shelfV.slice(1).forEach((vb, si) => {
     let w = 0.135;
     let k = 0;
@@ -38,7 +43,8 @@ export const Study: React.FC<{ t: number; id?: string; veil?: number }> = ({ t, 
         continue;
       }
       const top = vb - (shelfV[si + 1] - shelfV[si]) * (0.55 + rnd(si + 7, k) * 0.32);
-      books.push(<polygon key={`bk${si}-${k}`} points={Q([[0.07, top, w], [0.07, top, w + dw], [0.07, vb, w + dw], [0.07, vb, w]])} fill={BOOKS[(k + si * 3) % BOOKS.length]} />);
+      // books leave the shelves in a scattered order as `shelf` drops
+      if (rnd(77, bi++) < shelf) books.push(<polygon key={`bk${si}-${k}`} points={Q([[0.07, top, w], [0.07, top, w + dw], [0.07, vb, w + dw], [0.07, vb, w]])} fill={BOOKS[(k + si * 3) % BOOKS.length]} />);
       w += dw + 0.002;
       k++;
     }
@@ -93,7 +99,7 @@ export const Study: React.FC<{ t: number; id?: string; veil?: number }> = ({ t, 
       <polygon points={Q([[1, 0.965, 0], [1, 0.965, 1], [1, 1, 1], [1, 1, 0]])} fill={S3.trim} />
       <path d={`M 530 337 L 1430 337`} stroke="#2A2331" strokeWidth={5} />
       {/* the window, the sun low in it, and its light into the room */}
-      <SkyView id={`${id}win`} clip="M 782 380 L 1178 380 L 1178 606 L 782 606 Z" box={{ x: 782, y: 380, w: 396, h: 226 }} t={t} sun={{ x: 1085, y: 596 }} sunR={38} />
+      <SkyView id={`${id}win`} clip="M 782 380 L 1178 380 L 1178 606 L 782 606 Z" box={{ x: 782, y: 380, w: 396, h: 226 }} t={t} sun={night ? { x: 1070, y: 432 } : { x: 1085, y: 596 }} sunR={night ? 24 : 38} night={night} />
       <g fill="#1E1824">
         <rect x={770} y={368} width={420} height={14} />
         <rect x={770} y={604} width={420} height={10} />
@@ -105,8 +111,8 @@ export const Study: React.FC<{ t: number; id?: string; veil?: number }> = ({ t, 
         <rect x={782} y={452} width={396} height={7} />
       </g>
       <polygon points={Q([[0.26, 0.665, 0], [0.74, 0.665, 0], [0.74, 0.665, 0.03], [0.26, 0.665, 0.03]])} fill="#6A5056" />
-      <path d="M 772 612 L 1188 612" stroke={S3.warm} strokeWidth={2} opacity={0.6} />
-      <circle cx={1085} cy={596} r={520} fill="url(#kitBloom)" opacity={0.42} />
+      <path d="M 772 612 L 1188 612" stroke={night ? '#A9C6FF' : S3.warm} strokeWidth={2} opacity={night ? 0.45 : 0.6} />
+      {night ? <circle cx={1070} cy={432} r={360} fill="url(#kitMoonBloom)" opacity={0.3} /> : <circle cx={1085} cy={596} r={520} fill="url(#kitBloom)" opacity={0.42} />}
       {/* curtains, lit on their inner edge */}
       {[
         { x: 692, w: 94, flip: 1 },
@@ -117,7 +123,7 @@ export const Study: React.FC<{ t: number; id?: string; veil?: number }> = ({ t, 
           {[0.22, 0.5, 0.78].map((k, j) => (
             <rect key={j} x={c.x + c.w * k - 6} y={362} width={12} height={360} fill={j % 2 ? '#40263A' : '#5E3A50'} opacity={0.8} />
           ))}
-          <rect x={c.flip > 0 ? c.x + c.w - 4 : c.x} y={362} width={4} height={360} fill={S3.warm} opacity={0.55} />
+          <rect x={c.flip > 0 ? c.x + c.w - 4 : c.x} y={362} width={4} height={360} fill={night ? '#A9C6FF' : S3.warm} opacity={night ? 0.4 : 0.55} />
         </g>
       ))}
       <rect x={680} y={354} width={600} height={8} rx={4} fill="#1A1420" />
@@ -128,7 +134,7 @@ export const Study: React.FC<{ t: number; id?: string; veil?: number }> = ({ t, 
       ))}
       <rect x={830} y={638} width={300} height={3} fill={S3.warm} opacity={0.35} />
       {/* window light on the floor */}
-      <polygon points={Q([[0.28, 1, 0.02], [0.72, 1, 0.02], [0.82, 1, 0.55], [0.18, 1, 0.55]])} fill="#FFB46A" opacity={0.1} style={{ mixBlendMode: 'screen' }} />
+      <polygon points={Q([[0.28, 1, 0.02], [0.72, 1, 0.02], [0.82, 1, 0.55], [0.18, 1, 0.55]])} fill={night ? '#9FC0FF' : '#FFB46A'} opacity={night ? 0.07 : 0.1} style={{ mixBlendMode: 'screen' }} />
       {/* the rug */}
       <polygon points={Q([[0.2, 1, 0.3], [0.8, 1, 0.3], [0.8, 1, 0.82], [0.2, 1, 0.82]])} fill="#4A2C3A" />
       <polygon points={Q([[0.24, 1, 0.34], [0.76, 1, 0.34], [0.76, 1, 0.78], [0.24, 1, 0.78]])} fill="none" stroke="#6A4252" strokeWidth={5} />
@@ -182,16 +188,27 @@ export const Study: React.FC<{ t: number; id?: string; veil?: number }> = ({ t, 
       <g transform={`rotate(${Math.sin(t / 28) * 1.2} ${pend.x} ${pend.y})`}>
       <path d={`M ${pend.x} ${pend.y} L ${shade.x} ${shade.y - 30}`} stroke="#120E16" strokeWidth={3} />
       <path d={`M ${shade.x - 16} ${shade.y - 32} L ${shade.x + 16} ${shade.y - 32} L ${shade.x + 44} ${shade.y} L ${shade.x - 44} ${shade.y} Z`} fill="#1C1620" />
-      <ellipse cx={shade.x} cy={shade.y} rx={44} ry={8} fill="#FFE2B0" />
-      <Cone d={`M ${shade.x - 40} ${shade.y} L ${shade.x + 40} ${shade.y} L ${shade.x + 240} ${shade.y + 520} L ${shade.x - 240} ${shade.y + 520} Z`} o={0.28} />
-      <Glow x={shade.x} y={shade.y + 6} r={220} o={0.55} />
+      <ellipse cx={shade.x} cy={shade.y} rx={44} ry={8} fill={night ? '#3A3242' : '#FFE2B0'} />
+      {night ? null : <Cone d={`M ${shade.x - 40} ${shade.y} L ${shade.x + 40} ${shade.y} L ${shade.x + 240} ${shade.y + 520} L ${shade.x - 240} ${shade.y + 520} Z`} o={0.28} />}
+      {night ? null : <Glow x={shade.x} y={shade.y + 6} r={220} o={0.55} />}
       </g>
-      <LightVeil id={`${id}veil`} lights={[[980, 500, 780], [shade.x, shade.y + 40, 460], [sconce.x, sconce.y - 24, 360], [980, 980, 520]]} o={veil} />
-      <circle cx={1085} cy={596} r={380} fill="url(#kitBloom)" opacity={0.3} />
-      <Glow x={shade.x} y={shade.y + 6} r={260} o={0.35} />
-      <Glow x={sconce.x} y={sconce.y - 24} r={190} o={0.35} />
-      <Dust t={t} seed={3} x0={760} y0={400} w={560} h={560} n={46} />
-      <Dust t={t} seed={8} x0={shade.x - 160} y0={shade.y + 20} w={320} h={380} n={22} o={0.5} />
+      {night ? (
+        <g>
+          <LightVeil id={`${id}veil`} lights={[[1000, 470, 380], [sconce.x, sconce.y - 24, 300], [1100, 760, 420]]} o={veil} />
+          <circle cx={1070} cy={432} r={260} fill="url(#kitMoonBloom)" opacity={0.25} />
+          <Glow x={sconce.x} y={sconce.y - 24} r={170} o={0.3} />
+          <Dust t={t} seed={3} x0={780} y0={420} w={420} h={420} n={22} o={0.35} />
+        </g>
+      ) : (
+        <g>
+          <LightVeil id={`${id}veil`} lights={[[980, 500, 780], [shade.x, shade.y + 40, 460], [sconce.x, sconce.y - 24, 360], [980, 980, 520]]} o={veil} />
+          <circle cx={1085} cy={596} r={380} fill="url(#kitBloom)" opacity={0.3} />
+          <Glow x={shade.x} y={shade.y + 6} r={260} o={0.35} />
+          <Glow x={sconce.x} y={sconce.y - 24} r={190} o={0.35} />
+          <Dust t={t} seed={3} x0={760} y0={400} w={560} h={560} n={46} />
+          <Dust t={t} seed={8} x0={shade.x - 160} y0={shade.y + 20} w={320} h={380} n={22} o={0.5} />
+        </g>
+      )}
     </g>
   );
 };

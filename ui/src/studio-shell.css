@@ -736,11 +736,13 @@
 /* ---- the Writers Room (audit/104): the ask, the cards and the script are paper on the room (.studio-paper re-points their tokens);
    paper casts its soft shadow, the running panel and the list stay flat on the room ---- */
 [data-theme="studio"] .wr-page .wr-tabs { border-bottom-color: var(--room-line); }
-[data-theme="studio"] :is(.wr-ask, .wr-card, .wr-sheet) { border-color: var(--paper-edge); border-radius: var(--st-r-md); background: var(--paper-white);
+[data-theme="studio"] :is(.wr-ask, .wr-card, .wr-sheet, .wr-insp) { border-color: var(--paper-edge); border-radius: var(--st-r-md); background: var(--paper-white);
   box-shadow: 0 0.6rem 1.4rem rgba(0, 0, 0, 0.35), 0 0 2rem rgba(255, 214, 150, 0.06); }
-[data-theme="studio"] .wr-card.kept { border-color: var(--state-done-line); }
-[data-theme="studio"] .wr-card.open { border-color: var(--pencil); }
-[data-theme="studio"] .wr-card h3, [data-theme="studio"] .wr-sheet-head h2 { font-family: var(--font-studio-display, Fraunces, Georgia, serif); font-weight: 500; letter-spacing: -0.01em; }
+[data-theme="studio"] .wr-card.on { border-color: var(--lamp); box-shadow: 0 0 0 2px var(--lamp), 0 0 1.4rem rgba(255, 200, 114, 0.4); }
+[data-theme="studio"] .wr-card-t, [data-theme="studio"] .wr-insp-h h2 { font-family: var(--font-studio-display, Fraunces, Georgia, serif); font-weight: 500; letter-spacing: -0.01em; }
+[data-theme="studio"] .wr-insp-h h2 { font-size: 1.6rem; line-height: 1.1; }
+[data-theme="studio"] .wr-scene-h { background: var(--paper-white); }
+[data-theme="studio"] .wr-sheet-head h2 { font-family: var(--font-studio-display, Fraunces, Georgia, serif); font-weight: 500; letter-spacing: -0.01em; }
 [data-theme="studio"] .wr-sheet-head h2 { font-size: 2.1rem; line-height: 1.05; }
 [data-theme="studio"] .wr-sheet-foot { background: var(--paper-white); border-radius: 0 0 var(--st-r-md) var(--st-r-md); }
 [data-theme="studio"] .wr-run { border-color: var(--room-line); background: var(--room-2); }

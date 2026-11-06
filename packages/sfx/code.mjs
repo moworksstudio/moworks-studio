@@ -222,6 +222,9 @@ export async function makeCodeSounds(dir, asks, { root = APP_ROOT, signal = null
     if (e.film && e.file) keepRecipe(e.file, root);
   }
   mkdirSync(join(dir, ".moworks"), { recursive: true });
+  // the app's files stay the app's (index.mjs keepAppFiles, T43-9)
+  { const files = Object.values(st.sounds ?? {}).filter((s) => s && s.source !== "owner").flatMap((s) => [s.file, ...(s.variants ?? []).map((v) => v.file)]).filter(Boolean);
+    if (files.length) st.retired = [...new Set([...(st.retired ?? []), ...files])].slice(-2000); }
   writeFileSync(join(dir, ".moworks", "sfx.json"), JSON.stringify(st, null, 2) + "\n");
   return { used, failed, made: jobs.length - bad.size, broken: [...bad].length, errors: res.failed };
 }

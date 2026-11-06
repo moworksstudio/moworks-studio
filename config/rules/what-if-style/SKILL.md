@@ -2,7 +2,7 @@
 name: what-if-style
 description: How Moworks Studio makes a film in the What If animation style - the author's dusk-lit stick-figure world drawn in code on the pinned engine (one rig, rooms in perspective, light from lamps and windows), the episode written the author's way (episode.json, shots.tsx, the timeline on the voice), bundled and driven inside HyperFrames; the voice from the app's Voice-over or no narration, the sound from the app. Read in every step of a What If film.
 version: 1.0.0
-derived-from: What If animation by FreshStack (kelano86), MIT, commit 3725a22d2d101320cae5b7d761af8d75120c4987 - SKILL.md (the rules, the eight steps, where an episode lives), references/formula.md, look.md, kit.md, traps.md, sound.md, scripts/plan.py (the cue forms), studio/src/engine (defineEpisode, the timeline the engine reads); rewritten for Moworks Studio. https://github.com/kelano86/what-if-animation/tree/3725a22d2d101320cae5b7d761af8d75120c4987
+derived-from: What If animation by FreshStack (kelano86), MIT, commit 8092fb5e825e55456d1d47fec0ebf595cb93cc0d - SKILL.md (the rules, the eight steps, where an episode lives), references/formula.md, look.md, kit.md, traps.md, sound.md, scripts/plan.py (the cue forms), studio/src/engine (defineEpisode, the timeline the engine reads); rewritten for Moworks Studio. https://github.com/kelano86/what-if-animation/tree/8092fb5e825e55456d1d47fec0ebf595cb93cc0d
 ---
 
 # What If animation: the rules of this project

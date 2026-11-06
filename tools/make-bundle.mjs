@@ -99,7 +99,11 @@ copyPart("mg-styles-15", mg.root, join(OUT, "styles", "mg-styles-15"), {
   source: `https://github.com/${mg.repo}`, commit: mg.commit, licence: "MIT; a few images CC0 / public domain; no audio" });
 const ani = style("anidoodle");
 copyPart("anidoodle", ani.root, join(OUT, "styles", "anidoodle"), {
-  keep: (r) => /^skills\/anidoodle\//.test(r) || ["LICENSE", "NOTICE", "README.md"].includes(r),
+  // not the author's own engine tests, tools, reviews or vendored three.js (0.10: 3.6 MB; the app has its own three and never stages them:
+  // anidoodle-styles STAGED), owner 06/11 #1214: what the app never reads stays out. engine/tools/character-check.entry.ts stays: the
+  // Characters maker and the human cast copy it as the reference gate (character-maker/index.mjs, character-kit/humans.mjs)
+  keep: (r) => /^skills\/anidoodle\//.test(r) && (!/^skills\/anidoodle\/engine\/(vendor|test|tools|reviews)\//.test(r) || r === "skills/anidoodle/engine/tools/character-check.entry.ts")
+    || ["LICENSE", "NOTICE", "README.md"].includes(r),
   source: `https://github.com/${ani.repo}`, commit: ani.commit, licence: "Apache-2.0 with NOTICE" });
 const mp = style("motionPrompt");
 copyPart("motion-prompt", mp.root, join(OUT, "styles", "motion-prompt"), {

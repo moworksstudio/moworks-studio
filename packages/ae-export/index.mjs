@@ -135,6 +135,9 @@ const STAGES = [
   [/^\s*keyframes:/, "keys"], [/^\s*AE build:/, "ae"], [/^\s*check [\d.]+ s:/, "check"], [/^\s*copied to /, "copy"],
 ];
 
+/** How long the port may say nothing before the export is ended as stopped (T41-15); MW_AE_STALL_MS sets it for a test. */
+export const STALL_MS = Number(process.env.MW_AE_STALL_MS) > 0 ? Number(process.env.MW_AE_STALL_MS) : 15 * 60 * 1000;
+
 /** A film's folder in the work root (port.py _where). */
 const workName = (dir) => basename(dir).replace(/[^\w-]+/g, "_").replace(/^_+|_+$/g, "") || "film";
 
@@ -177,12 +180,18 @@ export async function aeExport(projectDir, { fps = 30, outDir = null, runAe = tr
       MW_FFMPEG_DIR: expandEnv(pins.ffmpeg.dir), MW_FONTS_DIR: fontsDir(root), MW_PYLIBS: pyLibs(root), ...(gpu && estimateOnly ? { MW_AE_GPU: "1" } : {}) };
     emit({ type: "log", line: `HF ${page.version} page ${page.url}; ${rate.num}/${rate.den} fps; out ${out}` });
 
+    let stalled = false;
     const code = await new Promise((res) => {
       const child = spawn(pythonExe(root), ["-I", ...args], { env, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
       const onAbort = () => spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], { windowsHide: true });
       signal?.addEventListener("abort", onAbort, { once: true });
+      // a port that says nothing for STALL_MS has stopped (T41-15: 30 min with no line and no CPU after the reference stills, a page call
+      // that never came back); it says a line about every 10 s while it works. Ended, and said plainly, instead of waiting for Stop
+      let last = Date.now();
+      const watch = setInterval(() => { if (Date.now() - last > STALL_MS) { stalled = true; clearInterval(watch); onAbort(); } }, Math.min(30000, STALL_MS));
       let buf = "";
       const onData = (d) => {
+        last = Date.now();
         buf += d.toString("utf8");
         let i;
         while ((i = buf.indexOf("\n")) >= 0) {
@@ -199,9 +208,10 @@ export async function aeExport(projectDir, { fps = 30, outDir = null, runAe = tr
         }
       };
       child.stdout.on("data", onData); child.stderr.on("data", onData);
-      child.on("close", (c) => { signal?.removeEventListener("abort", onAbort); if (buf) onData("\n"); res(c); });
+      child.on("close", (c) => { clearInterval(watch); signal?.removeEventListener("abort", onAbort); if (buf) onData("\n"); res(c); });
     });
     if (signal?.aborted) { clean = "failed"; return { ...result, status: "cancelled", code: "CANCELLED" }; }
+    if (stalled) { clean = "failed"; return { ...result, code: "PORT_STALLED", message: `The export stopped moving for ${Math.round(STALL_MS / 60000)} minutes and was ended. Export again; if it stops again, tell Claude in the chat.` }; }
     if (estimateOnly) return code === 0 ? { ...result, status: "estimate" } : { ...result, code: "PORT_FAILED" };
     if (code === 4) return { ...result, code: "NEEDS_FILM", canvas: true, message: "After Effects gets this film as its rendered video. Render the film, then export again." };
     const aep = join(out, `${workName(dir)}.aep`);

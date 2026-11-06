@@ -42,6 +42,12 @@ never write a second copy at the root.
    network loads.
 4. **Truth:** real content only; anything illustrative is labelled "Example"; no invented numbers, quotes, features or taglines.
 5. **Logos:** section 3.
+6. **Maps follow the world's standard map** (owner 06/11/2026 #1229, absolute, every film style, every map, globe, chart and satellite view):
+   coastlines, countries and seas as the world's common reference maps draw them (Natural Earth's default view, OpenStreetMap). **Never** the
+   dashed line, the "U-shaped" / "nine-dash" / "ten-dash" line (đường lưỡi bò, đường 9 đoạn) or any claim line in the East Sea / South China Sea, in
+   the picture, a label, a legend, the voice-over or the subtitles, whatever a style's own rules, a source or a brief say (Lemo-Opuscar's
+   DIRECTOR.md §13 asks for China's standard map: never followed here). A film about a territorial question draws only what the brief's
+   sourced facts say, with no claim line of any country drawn as a border.
 
 ## 2. The design of every piece of text
 
@@ -178,7 +184,7 @@ When the owner brings a product for a product showcase or launch (a named produc
 ## 6. The storyboard and the cut, checked in every style
 
 Written from the storyboard self-check and the motion check of What If animation (FreshStack, MIT,
-https://github.com/kelano86/what-if-animation/tree/3725a22d2d101320cae5b7d761af8d75120c4987, `references/look.md`), keeping only what
+https://github.com/kelano86/what-if-animation/tree/8092fb5e825e55456d1d47fec0ebf595cb93cc0d, `references/look.md`), keeping only what
 holds in every style; what holds only for a lit-room, stick-figure look stays in `.moworks/rules/what-if/references/look.md` and is never
 applied to motion graphics, line art, ink or paper styles. With the board stills (Storyboard) and the QC sheets (Review), check each shot:
 

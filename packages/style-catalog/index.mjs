@@ -276,7 +276,9 @@ function whatIfEntries(src, root, qc) {
   return [{
     id: WHAT_IF_ID, title: "What If", titleOriginal: null, description: "A What If episode: one premise, seven beats, a dusk-lit stick-figure world drawn in code",
     category: "Cartoon & Anime", tags: ["episode", "stick figures"], uses: [], aspects: ["16:9"], intendedUse: "a 15-25 s What If episode on one premise",
-    author: WI_AUTHOR.id, kind: "video-style", ruleSource: "What If animation skill", rules, readFirst: [own.name, "what-if-style"],
+    // a Moworks Studio film style (owner 06/11 #1203): shown as the studio's own; FreshStack's engine runs as shipped, under its MIT
+    // licence, credited in Settings › System › Open-source licences (docs/THIRD-PARTY.md) and recorded here as basedOn
+    author: MW_AUTHOR.id, kind: "video-style", ruleSource: "What If animation skill", rules, readFirst: [own.name, "what-if-style"],
     available: rules.every((r) => r.available), look: false, hidden: !WHAT_IF_READY, ...(WHAT_IF_READY ? {} : { comingSoon: true }),
     dim: "2D", renderer: "svg", needsFootage: false, vnFont: null, vnFontNote: null, characters: true, characterEngine: "what-if",
     // the style's demo film, made by the app in this style: its title shot as the card, the film to play
@@ -286,7 +288,8 @@ function whatIfEntries(src, root, qc) {
       demo: wiMedia(WI_DEMO.video, root) ? { url: `/media/what-if/${WI_DEMO.video}`, title: WI_DEMO.title, dur: WI_DEMO.dur } : null,
     } : { preview: { image: null, poster: null, placeholder: true }, demo: null }),
     warnings: [{ kind: "route", text: "16:9 only. The narration is your own voice-over." }],
-    credit: { author: WI_AUTHOR.name, link: tree, url: tree, commit: wi.commit, licence: "MIT", made: "adapted",
+    credit: null,
+    basedOn: { author: WI_AUTHOR.name, link: tree, url: tree, commit: wi.commit, licence: "MIT", made: "adapted",
       madeNote: "the engine, the cast, the rooms and the two worked episodes as shipped; the steps rewritten for the app (no Remotion, no Python, no ElevenLabs)" },
     pipeline: readPipeline(root, "what-if-pipeline.json"),
   }];
@@ -349,7 +352,7 @@ export function styleList(root = APP_ROOT) {
 
 /** Styles shown but not chosen yet: What If opens when its engine is made; its character keeps the name Pip. */
 export const COMING_SOON = WHAT_IF_READY ? [] : [{ id: "what-if", title: "What If", author: "FreshStack", tag: "FS", comingSoon: true,
-  credit: { author: "FreshStack (kelano86)", licence: "MIT", url: "https://github.com/kelano86/what-if-animation/tree/3725a22d2d101320cae5b7d761af8d75120c4987", commit: "3725a22d2d101320cae5b7d761af8d75120c4987" } }];
+  credit: { author: "FreshStack (kelano86)", licence: "MIT", url: "https://github.com/kelano86/what-if-animation/tree/8092fb5e825e55456d1d47fec0ebf595cb93cc0d", commit: "8092fb5e825e55456d1d47fec0ebf595cb93cc0d" } }];
 
 /** Where a film's design comes from: "open" (the user picks a Brand Kit in
  *  New project) only for General and HyperFrames' film types; every other style follows its author's design ("author": the brief or the
@@ -440,10 +443,7 @@ function buildCatalog(root) {
       repo: { url: `https://github.com/${kitPin.repo}/tree/${kitPin.commit}`, sha: kitPin.commit, commit: kitPin.commit.slice(0, 7), date: kitPin.date ?? null },
       licence: "MIT · p5.js LGPL-2.1, p5.brush MIT", kind: "video-style", engine: "HyperFrames + character layer (p5.brush)", languages: ["en"], needsDownload: false,
       count: count(BRUSH_AUTHOR.id), intact: kitPin.intact }] : []),
-    ...(wiPin && wi.length ? [{ id: WI_AUTHOR.id, name: WI_AUTHOR.name, org: "FreshStack", source: WI_AUTHOR.source,
-      repo: { url: wiTreeLink(wiPin), sha: wiPin.commit, commit: wiPin.commit.slice(0, 7), date: wiPin.date ?? null },
-      licence: "MIT · React 19 MIT (Meta)", kind: "video-style", engine: "HyperFrames + What If engine (React + SVG, bundled)", languages: ["en"], needsDownload: false,
-      count: count(WI_AUTHOR.id), intact: wiPin.intact }] : []),
+    // What If is a Moworks Studio film style (owner 06/11 #1203): no author of its own here; FreshStack's engine is credited in the licences
   ].map((a) => ({ ...a, ...(AUTHOR_DISPLAY[a.id] ?? {}), ...(a.id === "freshstack" ? { comingSoon: !WHAT_IF_READY } : {}) }));          // the gallery's own "Coming soon" goes with it
   return { categories: [...new Set([...cat.categories, ...lemo.map((s) => s.category).filter(Boolean), ...mg.map((s) => s.category), ...ani.map((s) => s.category), ...brush.map((s) => s.category), ...wi.map((s) => s.category)])], authors, styles };
 }

@@ -1,6 +1,6 @@
 # Motion vocabulary: names and numbers for the Motion Plan
 
-From Motion Prompt (Shohei Ohtaki, MIT, https://github.com/showheyohtaki/motion-prompt/tree/bd6bf08d8d412cc82c1bbc8f1a81638617a45cfb). This file is generated from the Library's Vocabulary (the app's intake of it, audit 79); do not edit it.
+From Motion Prompt (Shohei Ohtaki, MIT, https://github.com/showheyohtaki/motion-prompt/tree/7819d3879eb7d5a1475c11c001bedffb5cab64af). This file is generated from the Library's Vocabulary (the app's intake of it, audit 79); do not edit it.
 
 Use the names: a name is the word people in the field use, so put it in a row's `behavior` when it names the move ("dolly in 5.8 m over 2.9 s"), and in the shot's `says`. The numbers are not in this file:
 call **library_search** with kind "vocab" and the name ("dolly zoom") to read the author's numbers for it, then write your own numbers for this film. A vocabulary item is words and numbers, never code to paste.
@@ -103,5 +103,37 @@ call **library_search** with kind "vocab" and the name ("dolly zoom") to read th
 - #046 Smash cut: Abrupt cut to a contrasting scene.
 - #047 J-cut: Next scene's audio starts first.
 - #048 L-cut: Previous scene's audio carries over.
+
+## Camera moves & transitions, part 2 (#169-192)
+
+**Camera Movement**
+- #169 Pedestal: Move the whole camera straight up or down.
+- #170 Barrel roll: Roll the camera a full turn on its axis.
+- #171 Hyperlapse: A time-lapse shot while the camera travels.
+- #172 Long take: One continuous shot with no cuts.
+- #173 Steadicam: Smooth, floating movement with no shake.
+- #174 Follow shot: Follow behind the subject as they move.
+- #175 Locked-off shot: Camera fixed; only the subject moves.
+- #176 Fly-through: Fly through an opening into the next space.
+
+**Angles & Framing**
+- #177 Low angle: Shoot from low down, looking up.
+- #178 High angle: Shoot from above, looking down.
+- #179 POV shot: See through a character's eyes.
+- #180 Over-the-shoulder: Frame one person over another's shoulder.
+- #181 Bird's-eye view: Straight down from directly overhead.
+- #182 Deep focus: Near and far all in sharp focus.
+- #183 Establishing shot: A wide opening shot that shows the place.
+- #184 Extreme close-up: Fill the frame with one small detail.
+
+**Transitions & Editing**
+- #185 Insert shot: Cut in to a detail of the same scene.
+- #186 Morph cut: Blend two takes so the join disappears.
+- #187 Fade to black: The picture darkens to black.
+- #188 Iris out: A circle closes down to black.
+- #189 Cutaway: Cut to something else, then back.
+- #190 Cross-cutting: Alternate between two simultaneous scenes.
+- #191 Bullet time: Time stands still while the camera circles.
+- #192 Montage: A run of short shots condensing time.
 
 Items outside these three packs (UI components, landing-page and web effects, photo looks and lighting) are in the Library too: call library_search with kind "vocab" when a shot needs one. Credit: every item carries its author, link at the commit and licence in the Library; the files copied into the project keep the author's `// Motion Prompt #ID · MIT License` line.

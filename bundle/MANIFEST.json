@@ -1,7 +1,7 @@
 {
   "about": "What Moworks Studio ships with the repository instead of downloading (audit 60 §6). Made by tools/make-bundle.mjs.",
-  "made": "2026-11-05T06:34:05.008Z",
-  "bytes": 375309858,
+  "made": "2026-11-06T06:15:27.192Z",
+  "bytes": 374826569,
   "parts": [
     {
       "name": "fonts",
@@ -42,10 +42,10 @@
     {
       "name": "lemo-opuscar",
       "path": "styles/lemo-opuscar",
-      "files": 2419,
-      "bytes": 64688144,
+      "files": 2378,
+      "bytes": 62262130,
       "source": "https://github.com/lemomo-ai/lemo-opuscar",
-      "commit": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+      "commit": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
       "licence": "MIT; demo stills CC BY 4.0; Poly Haven assets CC0; OPUSCAR 98 frames as shipped in the repo"
     },
     {
@@ -60,10 +60,10 @@
     {
       "name": "anidoodle",
       "path": "styles/anidoodle",
-      "files": 592,
-      "bytes": 8196188,
+      "files": 572,
+      "bytes": 9303076,
       "source": "https://github.com/alexgreensh/anidoodle",
-      "commit": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+      "commit": "4ae27d2c281fcfd01bce87ab13dc5ad4df81a795",
       "licence": "Apache-2.0 with NOTICE"
     },
     {
@@ -132,17 +132,17 @@
     {
       "name": "motion-prompt",
       "path": "styles/motion-prompt",
-      "files": 684,
-      "bytes": 2235765,
+      "files": 781,
+      "bytes": 2648449,
       "source": "https://github.com/showheyohtaki/motion-prompt",
-      "commit": "bd6bf08d8d412cc82c1bbc8f1a81638617a45cfb",
+      "commit": "7819d3879eb7d5a1475c11c001bedffb5cab64af",
       "licence": "MIT (Copyright (c) 2026 Shohei Ohtaki)"
     },
     {
       "name": "library-vocab",
       "path": "library/vocab",
-      "files": 851,
-      "bytes": 9211829,
+      "files": 900,
+      "bytes": 9584477,
       "source": "built by Moworks Studio from Motion Prompt (Vocabulary, audit 79)",
       "commit": null,
       "licence": "MIT (Copyright (c) 2026 Shohei Ohtaki)"
@@ -150,10 +150,10 @@
     {
       "name": "what-if-animation",
       "path": "styles/what-if-animation",
-      "files": 52,
-      "bytes": 352594,
+      "files": 53,
+      "bytes": 402917,
       "source": "https://github.com/kelano86/what-if-animation",
-      "commit": "3725a22d2d101320cae5b7d761af8d75120c4987",
+      "commit": "8092fb5e825e55456d1d47fec0ebf595cb93cc0d",
       "licence": "MIT (Copyright (c) 2026 FreshStack)"
     },
     {
@@ -167,7 +167,7 @@
     },
     {
       "name": "library-lemo",
-      "path": "library/lemo/lemo-ea34ff9",
+      "path": "library/lemo/lemo-bebbbe1",
       "files": 1,
       "bytes": 14149,
       "source": "the Vietnamese check of the fonts each Lemo-Opuscar style names, made by Moworks Studio (packages/lemo-styles importLemo)",

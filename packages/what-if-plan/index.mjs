@@ -1,5 +1,5 @@
 // The shot list on the voice: What If animation's scripts/plan.py (FreshStack, MIT, at the pinned commit
-// https://github.com/kelano86/what-if-animation/blob/3725a22d2d101320cae5b7d761af8d75120c4987/skills/what-if-animation/scripts/plan.py, with
+// https://github.com/kelano86/what-if-animation/blob/8092fb5e825e55456d1d47fec0ebf595cb93cc0d/skills/what-if-animation/scripts/plan.py, with
 // its cue helpers in scripts/wi.py) rewritten in JavaScript for the app, which has no Python: the edit's cues resolved against the word
 // timings into the timeline the engine reads, the shot list and the pace report. The same cue forms and the same numbers (Python's
 // rounding included). Differences: the words come from the app's checked voice-over transcript (transcript.json, HyperFrames' word

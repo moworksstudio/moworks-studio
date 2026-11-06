@@ -2,7 +2,7 @@
 name: lemo-opuscar
 description: How Moworks Studio makes a film in a Lemo-Opuscar style - the style's STYLE.md kept whole, the story the brief's own, the picture drawn in code as one render(t) page inside HyperFrames, sound from the app.
 version: 1.0.0
-derived-from: Lemo-Opuscar by Lemomo (LemoLab), commit ea34ff9546f675f9fd65a3c84e869a1da7471ad7, MIT - AGENTS.md (Style and story, Workflow), DIRECTOR.md §1-12, TECHNIQUE.md §2, §9-11, core/README.md (the page contract), rewritten for Moworks Studio. https://github.com/lemomo-ai/lemo-opuscar/tree/ea34ff9546f675f9fd65a3c84e869a1da7471ad7
+derived-from: Lemo-Opuscar by Lemomo (LemoLab), commit bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00, MIT - AGENTS.md (Style and story, Workflow), DIRECTOR.md §1-12 (§13 Maps, new at bebbbe1, never taken: it asks for China's standard map and its dashed line; the owner, #1229: maps follow the world's standard map, moworks-studio §1 rule 6), TECHNIQUE.md §2, §9-11, core/README.md (the page contract), rewritten for Moworks Studio. https://github.com/lemomo-ai/lemo-opuscar/tree/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00
 ---
 
 # Lemo-Opuscar style: the rules of this project
@@ -89,5 +89,5 @@ first), with the other points in one message, and stop for the owner's choice; n
 
 ## 5. Credit
 
-Lemo-Opuscar, Lemomo (LemoLab), https://github.com/lemomo-ai/lemo-opuscar at ea34ff9; style prompts, code and docs MIT; demo films and
+Lemo-Opuscar, Lemomo (LemoLab), https://github.com/lemomo-ai/lemo-opuscar at bebbbe1; style prompts, code and docs MIT; demo films and
 stills CC BY 4.0 (credit LemoLab). Code copied from the library keeps its MIT notice (the app adds it to the files it copies).

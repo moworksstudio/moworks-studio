@@ -111,7 +111,9 @@ export async function readShots(dir, { version = null } = {}) {
     if (m) used.add(m);
     return { index: f.index, number: f.number ?? i + 1, title: untimedTitle(f.title) || `Shot ${i + 1}`, status: f.status ?? "outline", scene: f.scene ?? "",
       narrative: f.narrative ?? "", voiceover: f.voiceover ?? "", plannedDuration: f.durationSeconds ?? null,
-      start: m?.start ?? null, duration: m?.duration ?? f.durationSeconds ?? null, src: m?.src ?? src, mountId: m?.id ?? null, block: f.extra?.block ?? null,
+      // a film of one page (no scene mounted, not the starter) has no file a shot: a frame's planned src is a file the film never plays (T38b-20:
+      // the starter's placeholder title card listed as the shot's words)
+      start: m?.start ?? null, duration: m?.duration ?? f.durationSeconds ?? null, src: m?.src ?? (!scenes.length && !root.starter ? null : src), mountId: m?.id ?? null, block: f.extra?.block ?? null,
       sfx: f.extra?.sfx ?? null,          // the app's per-frame sound-effect cues ("whoosh, pop"), resolved and mounted by packages/sfx
       // what the sound effects also read: a `- sound:` line (cues when it is a list of names), HF's `transition_in`, a `- location:`
       sound: f.extra?.sound ?? null, transitionIn: f.transitionIn ?? null, location: f.extra?.location ?? null,
@@ -128,9 +130,15 @@ export async function readShots(dir, { version = null } = {}) {
   // any other film that is one page of code (mg, lemo): its own cut table, a SHOTS array of { a, b } seconds, when it has one shot a frame
   // (once the Motion Plan moved the cuts, 55 → 46 s, and the Review, the Shots column and the timeline kept the storyboard's
   // stretched seconds: shot 7, the climax, was never in a Review sheet)
-  if (!wi && !mounts.length && frames.length) {
+  if (!wi && !scenes.length && frames.length) {          // its captions (a layer, never a scene) count for nothing here (Test 38b)
     const cuts = codeCuts(dir);
     if (cuts?.length === shots.length) shots.forEach((s, i) => Object.assign(s, { start: cuts[i][0], duration: Math.round((cuts[i][1] - cuts[i][0]) * 1000) / 1000 }));
+    // no cut table to read (a film whose shots are its own code's scenes, Test 38b): where each shot is planned, from the storyboard's
+    // seconds, for the Shots tab's words (T38b-20); `start` stays unknown for what needs the real cut
+    if (!root.starter && !scenes.length && shots.every((s) => s.start == null) && shots.every((s) => Number(s.plannedDuration) > 0)) {
+      let t = 0;
+      for (const s of shots) { s.plannedStart = Math.round(t * 1000) / 1000; t += Number(s.plannedDuration); }
+    }
   }
   // a layer over the film: the captions, or a scene on a track no mounted frame is on that lies over them (a closing card on track 3)
   const framed = mounts.filter((m) => used.has(m)), tracks = new Set(framed.map((m) => m.track));

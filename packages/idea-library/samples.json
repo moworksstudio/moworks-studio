@@ -83,7 +83,7 @@
    },
    "credit": {
     "text": "Written from the What If formula of What If animation by FreshStack, MIT",
-    "link": "https://github.com/kelano86/what-if-animation/blob/3725a22d2d101320cae5b7d761af8d75120c4987/references/formula.md"
+    "link": "https://github.com/kelano86/what-if-animation/blob/8092fb5e825e55456d1d47fec0ebf595cb93cc0d/references/formula.md"
    },
    "vi": "Chủ đề: Nếu bạn tàng hình được, nhưng chỉ khi đang nín thở thì sao?\nMở đầu bằng ba cảnh thử nhanh, mỗi lần đều nói từ của năng lực (\"Nín.\"): bạn vượt hàng dài nhất phố, bạn lấy miếng bánh cuối ngay trước mũi em trai, bạn đứng ngay sau lưng bạn thân khi họ đang nói về bạn.\nThẻ tiêu đề: NẾU BẠN CÓ THỂ / BIẾN MẤT TRONG MỘT HƠI?\nCú ngoặt: một sự thật có con số về việc mắt tàng hình thật ra thấy được gì, vì mắt chỉ nhìn thấy nhờ giữ lại ánh sáng (tìm và ghi nguồn; không có nguồn thì không dùng số), rồi: \"Đó là thật.\" và \"Vậy giờ bạn đang thấy gì?\"\nNgôi thứ hai, mỗi câu 3 đến 8 chữ, mỗi câu một hình, khoảng 20 giây.",
    "en": "Topic: What if you could turn invisible, but only while you hold your breath?\nCold open, three quick demos, the power's word every time (\"Hold.\"): you skip the longest queue in town, you take the last slice of cake from under your brother's nose, you stand right behind your best friend while they talk about you.\nTitle card: WHAT IF YOU COULD / VANISH ON ONE BREATH?\nThe turn: one true fact with a number about what an invisible eye could really see, since an eye only sees by catching light (find it and cite the source; no source, no number), then: \"That's real.\" and \"So what do you see right now?\"\nSecond person, lines of 3 to 8 words, each line one picture, about 20 seconds."
@@ -107,7 +107,7 @@
    "en": "Topic: one of the earliest photographs of a person, and he never knew. Daguerre's 1838 view of the Boulevard du Temple in Paris shows a busy street looking empty, because the long exposure lost everyone who kept moving.\nStory: a light table switches on over the plate. The street looks deserted. A loupe travels down the pavement, stops on a dark shape at the corner, and the image turns positive inside the lens: a man having his boots polished, standing still just long enough. We fall into the picture and the film ends on him.\nStyle: real archive scans only, every fact sourced. Loupes, negative-to-positive turns and catalogue cards carry the story.\nMood: patient, precise, quietly astonished. About 40 seconds, calm narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/archive-lighttable/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/archive-lighttable/STYLE.md"
    }
   },
   "lemo-art-deco": {
@@ -120,7 +120,7 @@
    "en": "Topic: the maiden voyage of a great ocean liner, 1930, on the night the lights go out in the middle of the gala.\nStory: a stoker's apprentice carries one spare fuse from the engine room up through three decks, a horn for each, past the pistons, the dining saloon and the grand staircase, while the band plays on in the dark. On the top deck the fuse goes in, the lights rise on the band's last chord, and black lacquer warms to a pale dawn over the sea.\nStyle: gold on black, fans and sunbursts, stepped geometry, type that is part of the architecture. The music carries the plot.\nMood: glamorous, urgent, joyful. About 55 seconds, no narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/art-deco/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/art-deco/STYLE.md"
    }
   },
   "lemo-ascii-crt": {
@@ -133,7 +133,7 @@
    "en": "Topic: two night operators on an old computer network, in two cities, on its last night before it is switched off.\nStory: a chat log, one night long, with timestamps as scene headers. They have typed to each other for years and never met. Between the last jobs each one draws the other the view from their window, in characters. At midnight one types a real name for the first time, the screen's one colour change; the other's reply never finishes, and the cursor stops blinking.\nStyle: the whole picture is made of text characters on a green CRT, with scanlines, glow and bloom. Font size works as the camera, typing rhythm sets the cut, and one single colour change is the peak.\nMood: lonely, tender, bittersweet. About 60 seconds, no voice; room hum, keys and a sparse analog-synth drone that opens one chord on the colour change.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/ascii-crt/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/ascii-crt/STYLE.md"
    }
   },
   "lemo-backrooms": {
@@ -146,7 +146,7 @@
    "en": "Topic: a real-estate walkthrough of a house that keeps adding rooms.\nStory: a cheerful agent films the tour on an old camcorder and sells every room as a feature: a second pantry, a spare corridor, \"and here's a bonus room\". The floor plan on her clipboard stops matching. The rooms get plainer and the same wallpaper comes back. Near the end the autofocus starts hunting, the tape tracking breaks up, and she reads out a room that is not on her list, still smiling in her voice.\nStyle: first-person VHS, 4:3, faded wallpaper, beige carpet, humming ceiling lights. Nothing chases anyone; the dread comes from emptiness, repetition and the camera's own failures.\nMood: uneasy, quiet, a chill on the neck. About 60 seconds, the operator's own voice.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/backrooms/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/backrooms/STYLE.md"
    }
   },
   "lemo-blueprint": {
@@ -159,7 +159,7 @@
    "en": "Topic: two rival engineers on opposite banks of a river, each drawing half a bridge.\nStory: two sheets lie on one table, drawn in parallel, each sure the other is wrong. Lines, dimensions and numbered call-outs race each other, and each half ends in mid-air. A hand slides the sheets together and the two halves fit to the millimetre. A coffee ring lands on the title block, and its tide line becomes the last circle of the design.\nStyle: white line work on Prussian blue, drafting order, dimension lines, numbered call-outs and figure numbers as transitions. The camera reads the sheets like an eye.\nMood: clever, warm, a little whimsical. About 45 seconds, light narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/blueprint/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/blueprint/STYLE.md"
    }
   },
   "lemo-brick-toy": {
@@ -172,7 +172,7 @@
    "en": "Topic: two small builders and one gap.\nStory: a hand pours a bin of bricks onto a real table and the pile settles. Two brick figures on either side of the gap between two stacks of books start building, each ignoring the other: one a crooked tower, one a long crane arm. Their builds grow toward each other, collide and fall. They sort the fallen pieces together and finish one bridge from both. One piece is left over, held up in close-up, and neither knows where it goes.\nStyle: plastic bricks that snap together, stop-motion poses at 12 a second with a smooth 24 fps camera, a toy world on a real table; even dust and sparks are bricks.\nMood: playful, stubborn, proud. About 55 seconds, no narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/brick-toy/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/brick-toy/STYLE.md"
    }
   },
   "lemo-briefing-board": {
@@ -185,7 +185,7 @@
    "en": "Topic: how wide can a ship get? For most of a century the answer was set by one canal's locks.\nStory: one number is written large on the briefing wall: the width of the lock. A steel ruler lays each decade's biggest ship against it on the same elevation, and the ship grows until it touches the wall; a red stamp lands. The rule is written up. Then new, wider locks open, the old number is struck through, and the last tag flips from a question to an answer.\nStyle: an engineering briefing wall with real photographs, dimension lines, a steel ruler, stamps and comparison frames. Every number is sourced.\nMood: clear, decisive, satisfying. About 40 seconds, crisp narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/briefing-board/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/briefing-board/STYLE.md"
    }
   },
   "lemo-caption-news": {
@@ -198,7 +198,7 @@
    "en": "Topic: the ozone hole, the one global environmental alarm that is actually closing.\nStory: the biggest number lands in the first seconds over NASA's satellite picture: the size of the hole at its worst. A freeze frame asks the viewer's question in silence: didn't we fix this? Then the UN-backed scientific assessment of 2023 turns it around, and a two-column ledger of what was banned and what recovered explains how. It ends on the year the assessment expects the hole over Antarctica to close.\nStyle: a social news short that works with the sound off: bold captions on real footage and photos, highlighted quotes, counters and a short verdict frame. Every claim is sourced.\nMood: urgent, then surprising, then clear. About 60 seconds, captions first, light narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/caption-news/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/caption-news/STYLE.md"
    }
   },
   "lemo-cel-anime-80s": {
@@ -211,7 +211,7 @@
    "en": "Topic: one rooftop, four seasons, and a girl learning the trumpet.\nStory: in spring she squeaks through one scale and the pigeons leave. In summer a boy across the street leans out and laughs. In autumn he starts answering on a harmonica. On a snowy winter night the whole block opens its windows, the two of them play the song through, and the camera pans slowly up from the quiet roof to a starry sky.\nStyle: hand-painted cels, flat shadows, a new colour model for each season, warm evening light on wet roofs, a short held key frame at the climax, soft VHS colour.\nMood: nostalgic, hopeful, gentle. About 60 seconds, music-led, no narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/cel-anime-80s/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/cel-anime-80s/STYLE.md"
    }
   },
   "lemo-chalkboard": {
@@ -224,7 +224,7 @@
    "en": "Topic: 危机, the Chinese word for crisis, which everyone \"knows\" means danger plus opportunity.\nStory: a freshly wiped classroom board; a pupil has left the question in the corner in yellow chalk: does it really? The board writes the popular explanation, part by part, and it sounds convincing. Then one wipe takes it away, and the same spot is written again: 机 from its oldest form to today, the one component the answer turns on tracked in orange. After a short beat the answer goes under the pupil's question: here 机 means a crucial point, not a chance.\nStyle: chalk on a dark green board: strokes that dry, a second hand for the pupil, write, wipe and rewrite in the same place, a sliding panel that reveals the back board, chalk used as a ruler. Every fact sourced.\nMood: curious, patient, a small \"aha\". About 50 seconds, a teacher's calm narration with subtitles.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/chalkboard/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/chalkboard/STYLE.md"
    }
   },
   "lemo-circuit-board": {
@@ -237,7 +237,7 @@
    "en": "Topic: your voice on a phone call, raced down three routes at once: copper, glass fibre and a satellite.\nStory: a single word leaves a handset as a pulse of light on the board. Three parallel buses carry it: along a copper line, through fibre under the sea, and up to a satellite and back. A counter runs beside each. The first two arrive almost together; the satellite route comes last by a clear fraction of a second, and we hear why long-distance calls once had that pause. The camera pulls out to many identical boards in a rack.\nStyle: the story drawn as a printed circuit board seen from above: signals running along the traces, the map as a board, each route told by the shape of its light, real figures with their sources.\nMood: clear, fast, quietly amazed. About 60 seconds, friendly narration with subtitles.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/circuit-board/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/circuit-board/STYLE.md"
    }
   },
   "lemo-city-symphony": {
@@ -250,7 +250,7 @@
    "en": "Topic: one day in London, from orbit to night.\nStory: from space the city is a web of orange light; the film falls into it and watches it wake. One window turns night to dawn in two seconds, a station clock cuts to a bigger clock, a crowd becomes trails of light. At noon the screen splits into a grid that fills on the beat, then everything stops for one slow moment, and an old film of Tower Bridge plays beside today (no free old film of it: tell me and we pick another bridge).\nStyle: time-lapse and archive footage cut to a strict musical grid, split screens, light trails, old and new side by side. Real material, credited.\nMood: rhythmic, grand, a little nostalgic. About 50 seconds, music only.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/city-symphony/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/city-symphony/STYLE.md"
    }
   },
   "lemo-countdown": {
@@ -263,7 +263,7 @@
    "en": "Topic: the last minute before Apollo 11 left the ground, told in real time.\nStory: the count passes from the ground to the rocket, which counts itself down; a single cell of the pad opens into a grid of nine views (control room, gantry, engines, crowd). At ignition every cell merges into one, then opens again for what follows. Each hand-over of control is heard in the original audio.\nStyle: a live split-screen countdown with a big clock header, a control strip that tracks who is in charge, and NASA's own public-domain footage and audio.\nMood: tense, precise, then elated. About 60 seconds, the mission's own voices.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/countdown/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/countdown/STYLE.md"
    }
   },
   "lemo-crayon-book": {
@@ -276,7 +276,7 @@
    "en": "Topic: a brother, a sister, two crayons and only one page.\nStory: red draws a dragon; blue draws a knight to fight it. Each scribbles over the other, and the page fills up with an argument in wax. The knight's sword turns into a flower by accident, the dragon takes it, and red and blue go over each other into one purple. A stray splash of water runs across the page and finds a message drawn in white crayon all along: \"your turn\". The page is taped to a fridge among the others.\nStyle: crayon and wax on paper, drawn live as we watch, child logic, colouring as an action; the wax-resist reveal is the peak.\nMood: soft, funny, warm. About 50 seconds, gentle narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/crayon-book/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/crayon-book/STYLE.md"
    }
   },
   "lemo-dark-keynote": {
@@ -289,7 +289,7 @@
    "en": "Topic: a launch film for a fictional calendar app that finds the one hour a whole team is free.\nStory: the number first: a huge example figure rolls out of glyph noise on black, the messages it took to book one meeting. Then a split screen: on the left the old way drowns in invitations; on the right one small cursor drags one block and the whole week snaps into a grid. Three short feature beats follow in words only, and the film ends on a single confirmation toast, then darkness and the name.\nStyle: a dark keynote stage with soft light, UI generated without limit, a snap grid, screens that pause, one number that rolls out of glyph noise.\nMood: calm, premium, confident. About 40 seconds, a few big words, no narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/dark-keynote/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/dark-keynote/STYLE.md"
    }
   },
   "lemo-data-physical": {
@@ -302,7 +302,7 @@
    "en": "Topic: the height of the world's tallest building, decade by decade, told as objects you could hold.\nStory: an empty walnut dial waits with its inlay. Each decade's record is a stack of real brass plates, one plate per ten storeys. The stacks rise as the camera tracks along a spiral, slowly for most of a century, then the last decades jump. The camera slows to a crawl as the last plates are fed in one by one while a counter rolls, and a single plate is lifted off to show what one unit is.\nStyle: data made physical: plates, brass, wood, macro detail, every number from a public dataset.\nMood: measured, tactile, quietly dramatic. About 40 seconds, short narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/data-physical/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/data-physical/STYLE.md"
    }
   },
   "lemo-dataviz": {
@@ -315,7 +315,7 @@
    "en": "Topic: a hundred summers in central England, from the Met Office's long temperature record.\nStory: the film opens cold on a single data point. Early years arrive slowly, then steadily; then the points come faster and the pencil hurries. Just before the last value everything stops: the only cut in the film, into silence. The last point lands alone, then the whole series in one view, and it morphs into warming stripes, ending on an empty cell: next summer?\nStyle: the chart tells the story: dots, a line, a red-and-blue pencil drawing every mark, stripes. One cut, one colour flip at the peak, numbers that are true.\nMood: calm, then alarming, then reflective. About 50 seconds, sparse narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/dataviz/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/dataviz/STYLE.md"
    }
   },
   "lemo-desktop-flythrough": {
@@ -328,7 +328,7 @@
    "en": "Topic: what really happens when you press undo.\nStory: you delete a whole paragraph by mistake, press undo, and it is simply back. The film rewinds that instant and follows it: every change you made has been waiting on a stack of small cards; undo lifts the top card, hands it to the document, and the words climb back into place. The ending: undo does not bring back the past, it replays a list, and closing the app throws the list away.\nStyle: app cards standing on a sunlit desk, one camera flying after what moves between them; the hero is the deleted paragraph as a small voxel toy that hops the whole route; titles are objects on the desk.\nMood: playful, curious, clear. About 60 seconds, narration with subtitles.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/desktop-flythrough/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/desktop-flythrough/STYLE.md"
    }
   },
   "lemo-engraving": {
@@ -341,7 +341,7 @@
    "en": "Topic: a museum label for the screen beside a case: the Rosetta Stone, and three things you did not know about it.\nStory: the first frame is a burin cutting copper, a curl of metal rising ahead of the point. The plate is proofed and the whole engraving of the stone appears; three magnified details fly out to their slots, each with one sourced fact. After a breath of silence, hand colouring washes in, and the label ends with where to see the real thing: the British Museum.\nStyle: copperplate engraving: cross-hatching, burin lines, the press, plate marks and a tissue guard. Information arrives in museum-label order.\nMood: scholarly, precise, gently wondrous. About 40 seconds, short captions.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/engraving/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/engraving/STYLE.md"
    }
   },
   "lemo-game-show": {
@@ -354,7 +354,7 @@
    "en": "Topic: the thirty years that made the modern bicycle, from the 1860s boneshaker to the air-filled tyre, staged as a rhythm game show.\nStory: the cast drops onto the set on the beat and counts in. Then comes a run of levels: each level is a title card with a machine's name and years, then eight bars of play where a pattern is set up, answered and judged with a slam and \"Perfect!\". Near the end a remix level piles every machine onto one stage, and a report card closes the show.\nStyle: flat game-show graphics, call-and-response, judgement words, stats as game UI, thumbnails of finished levels. Fictional host and cast; the machines and dates are real and sourced.\nMood: loud, fun, fast. About 90 seconds, a show host's shouts.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/game-show/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/game-show/STYLE.md"
    }
   },
   "lemo-glass-product": {
@@ -367,7 +367,7 @@
    "en": "Topic: a fictional glass kettle whose water shows its own heat.\nStory: light on a dark floor first, a caustic trembling; we follow it up to the object. Strip lights sweep and the shell lifts off layer by layer until only the coil and the water stand. On the bass drop the coil lights up from inside and the glow climbs through the water as it warms. The kettle leaves the frame; its caustic keeps pulsing on the floor, with the name and one line.\nStyle: a glass product render: caustics, refraction, strip lights, slow macro moves, one inner glow. The invisible thing made visible.\nMood: pure, premium, intimate. About 30 seconds, no narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/glass-product/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/glass-product/STYLE.md"
    }
   },
   "lemo-halftone-dossier": {
@@ -380,7 +380,7 @@
    "en": "Topic: a missing-person file for a garden gnome.\nStory: the file opens on the last sighting and works backwards: a postcard from a beach, signed with one small footprint; Exhibit B, a ticket stub for two; Exhibit C, a neighbour's statement that he \"seemed restless\". \"In summary\", the photo at the top of the file shows him back on his own lawn, looking perfectly innocent. The stamp comes down and misses; it lands on the table, and the gnome walks free out of frame.\nStyle: a retro halftone dossier: case numbers, exhibit cards, red stamps; dot density shows emotion. One idea and one gag per card.\nMood: deadpan, silly, affectionate. About 30 seconds, captions and a stern narrator.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/halftone-dossier/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/halftone-dossier/STYLE.md"
    }
   },
   "lemo-hd-2d": {
@@ -393,7 +393,7 @@
    "en": "Topic: a small market town where the clock has stopped and nobody knows the hour.\nStory: at bright noon, with no lamps at all, an apprentice is sent to mend the clock and has to ask around. She goes from place to place as the sun falls, the bakery's oven, the forge at dusk, the tavern at night, each lit by its own fire, and each person gives her one part. At night she climbs the tower with a lantern and sets the hands; the bell rings and window after window answers. She rests at a small save point at the top.\nStyle: pixel sprites in a small 3D tabletop world, with depth of field, bloom and tilt-shift. Every light comes from something you can see, and at night the light she carries is the main one. RPG grammar: map moves, a dialog box, a save point.\nMood: brave, cosy, epic in miniature. About 75 seconds, short dialog boxes, no voice.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/hd-2d/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/hd-2d/STYLE.md"
    }
   },
   "lemo-hologram-hud": {
@@ -406,7 +406,7 @@
    "en": "Topic: an upgrade: this year's fictional mountain-rescue sled against last year's. The numbers are examples.\nStory: two versions share one pad. A part is locked in close-up and the rest scans out from it. Three parts in turn, the runners, the brake and the harness: each old part goes dim and is scan-erased, the new one scans in, and its number rolls from old to new and docks in a side rail. At the end the edges cool and the panels switch off until one value at eye level remains: the one that matters.\nStyle: a sci-fi hologram HUD: target boxes, leaders, scan lines, cyan glow, values held long enough to read.\nMood: precise, futuristic, confident. About 40 seconds, no narration, a pulsing score.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/hologram-hud/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/hologram-hud/STYLE.md"
    }
   },
   "lemo-impasto": {
@@ -419,7 +419,7 @@
    "en": "Topic: one bowl, many hands.\nStory: a wet knife stroke on bare canvas is the first event: a potter's thumb opens a lump of clay. The bowl passes from hand to hand, one painted plate each: the kiln, a market stall, a wedding table, a child who drops it, a grandmother who glues it. The music grows from one solo string to an ensemble, each hand a new instrument. At the end we pull back: the painting hangs over a kitchen table, and the mended bowl sits under it.\nStyle: thick oil paint, palette-knife strokes, visible texture, light that rakes across the ridges of the paint.\nMood: tender, warm, then overflowing. About 40 seconds, music and the sounds of knife, clay and table, no narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/impasto/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/impasto/STYLE.md"
    }
   },
   "lemo-ink-wash": {
@@ -432,7 +432,7 @@
    "en": "Topic: the character 永, \"forever\", and a river from its spring to the sea.\nStory: the film is one large character written stroke by stroke. Each of its five strokes opens into a small scene of the same river: a drop under a stone, a stream past a pine, a ferry in a flood, a quiet bend in mist, the open sea. Between strokes there is silence. There is no pull-back: the film closes on the last stroke drying beside a red seal.\nStyle: Chinese ink wash: wet and dry brush, empty paper, one stroke as the event, a red seal at the end.\nMood: still, flowing, serene. About 50 seconds, a closing line of poetry.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/ink-wash/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/ink-wash/STYLE.md"
    }
   },
   "lemo-iso-infographic": {
@@ -445,7 +445,7 @@
    "en": "Topic: the round trip of one glass of water, from the reservoir to your tap and back to the river.\nStory: the whole film is one isometric map, a diorama board; each step is a station on a closed loop, joined by a dashed route line. The camera rides the route without a single cut: reservoir, filter beds, pump tower, kitchen tap, drain, treatment works, river. Each station gets one action, one label and one number built from small icons, sourced from a public water utility. The route comes back to its start with one number changed: how much was lost on the way. It ends on a close-up of a single drop icon.\nStyle: flat true isometric, no outlines, three tones per face, cutaways, isotype numbers, focus plus context.\nMood: clear, friendly, satisfying. About 60 seconds, warm narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/iso-infographic/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/iso-infographic/STYLE.md"
    }
   },
   "lemo-isometric-picture-book": {
@@ -458,7 +458,7 @@
    "en": "Topic: why one long queue at the post office beats four short ones.\nStory: four counters, four short lines, and you always pick the slow one. The film shows why: one customer with a tricky parcel stops a whole line while the others run on. Rewind. The same people, the same counters, one shared queue: the next person goes to the next free counter, and nobody gets stuck behind the parcel. The longest waits of each way stand side by side on the floor at the end.\nStyle: a clean isometric world where the order things move in explains the idea: words and numbers printed on the floor, people standing up like dominoes, lids lifted off rooms, arrows and lights that show the order, bars on the ground.\nMood: tidy, clever, satisfying. About 60 seconds, calm narration with subtitles.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/isometric-picture-book/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/isometric-picture-book/STYLE.md"
    }
   },
   "lemo-kino-montage": {
@@ -471,7 +471,7 @@
    "en": "Topic: who really dug the Panama Canal. The official histories name the engineers; the site photographs and films answer.\nStory: a title on a red crane jib over a worker riding a steam shovel. The official map, the cut circled in red, opens onto the excavation. The machine: shovels fill a grid, the cut deepens in split strips, trainloads of spoil a day, hours from blast to bucket. The turn: the pay rolls, gold for some and silver for the rest, circled. Faces, then tens of thousands, and the first ship goes through.\nStyle: constructivist montage: red and black, diagonals, rhythmic cuts, typography that shouts, real archive footage and photos, credited.\nMood: heroic, rhythmic, proud. About 60 seconds, captions over a driving score.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/kino-montage/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/kino-montage/STYLE.md"
    }
   },
   "lemo-lidar-survey": {
@@ -484,7 +484,7 @@
    "en": "Topic: from the air it is only fields in northern England; under them the ground still remembers a lost Roman road.\nStory: an aerial photo of nothing but pasture and hedges. A scan line turns it into a laser point cloud. A horizontal plane steps down through the trees on the beat, and every return above it lifts away and glows. Near-silence over the bare ground, then a second scan turns it into a raking-lit surface, and a straight line nobody had mapped lights up, mile after mile.\nStyle: a LiDAR survey: point clouds, scan lines, height rulers, raking light, England's open Environment Agency survey data (or my own scan in Assets), every figure sourced.\nMood: quiet, revealing, a little haunting. About 40 seconds, short narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/lidar-survey/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/lidar-survey/STYLE.md"
    }
   },
   "lemo-living-screencast": {
@@ -497,7 +497,7 @@
    "en": "Topic: one day with a fictional shared shopping-list app, led by its little pixel mascot.\nStory: morning: a half-written list, the mascot already pushing the cursor's selection. Noon: a friend adds something and the mascot catches the notification as it lands. Afternoon: someone ticks an item in the shop and it strikes through in both windows. Evening: the theme and the music turn warm, the list is done, and the mascot goes to sleep on the last item as the window dims.\nStyle: a living screencast: the app's own UI drawn crisply, a recording-software camera that zooms and pans, a sacred pixel grid, the mascot walking on the top edges of windows, information in layers.\nMood: friendly, clear, a little cheeky. About 60 seconds, short captions.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/living-screencast/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/living-screencast/STYLE.md"
    }
   },
   "lemo-lowpoly-island": {
@@ -510,7 +510,7 @@
    "en": "Topic: two small islands that trade until they are one place.\nStory: two islands, one with trees and no people, one with people and no trees, an empty channel between them. A boat carries a sapling across; a house comes back the other way. Each piece that lands is a note, each island has its own tune, and as they trade the tunes start to answer each other. At dawn the last piece is a bridge, and the two tunes resolve on the first sunlit facet.\nStyle: low-poly isometric 3D, soft pastel light, each piece a musical note.\nMood: calm, gentle, then quietly moving. About 55 seconds, music and the small sounds of each piece landing, no narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/lowpoly-island/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/lowpoly-island/STYLE.md"
    }
   },
   "lemo-memphis-diorama": {
@@ -523,7 +523,7 @@
    "en": "Topic: one market square at dawn, noon, dusk and night, in a single take.\nStory: no hero; the place is the subject. Stalls, awnings, a fountain, a striped clock tower and a tram stop pass through four hours, about ten seconds each. Every change of hour is the same gesture: the clock tower squashes down for half a second, springs back, and a wave of the next hour's colours spreads out from it while small things act as the ring passes. The lights go out one by one until only the clock is lit.\nStyle: a Memphis-style miniature diorama: bold pastel blocks, dots and squiggles, toy-like shapes, one slow camera; time told only by colour and small motions.\nMood: cheerful, cosy, looping. About 45 seconds, warm music and the small sounds of the square, no narration, with short type in two languages at the bottom.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/memphis-diorama/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/memphis-diorama/STYLE.md"
    }
   },
   "lemo-microgame": {
@@ -536,7 +536,7 @@
    "en": "Topic: a clumsy new waiter's first day in a very busy restaurant, hour by hour.\nStory: a string of microgames, each one an hour of the day: a shouted command word (POUR! DODGE! SMILE!), three seconds, one action and one result, a success or a funny failure. Between games we cut back to the host, a scoreboard of lives and a clock. The lunch rush and the dinner rush speed everything up. The final boss at closing time mixes all the earlier rules: one last table that wants everything at once.\nStyle: each microgame in a different visual medium (crayon, ink, terminal, risograph, pixel, blueprint, Swiss type), lives as UI, a SPEED UP sting, a boss that mixes the rules.\nMood: frantic, funny, triumphant. About 60 seconds, a host's shouts.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/microgame/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/microgame/STYLE.md"
    }
   },
   "lemo-microscope": {
@@ -549,7 +549,7 @@
    "en": "Topic: one stained onion root tip, thinner than a thread, and two small circles on it that tell different stories.\nStory: the slide sits on a bench with its label. One continuous dive brings us down to the root, with a dimension line for scale. Inside the first circle, near the tip, a scan front lights every counted pixel and a share of dark stain appears; the camera trucks to a second circle further up the root and counts again. After a silence both circles are framed side by side, and the film says which holds more and by how much. The last move goes down to a single dividing cell.\nStyle: microscopy: a real CC0 or public-domain micrograph (or my own in Assets), scan fronts, measured counts, dimension lines, every number computed from the image.\nMood: exact, curious, quietly astonishing. About 40 seconds, short narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/microscope/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/microscope/STYLE.md"
    }
   },
   "lemo-midcentury-toon": {
@@ -562,7 +562,7 @@
    "en": "Topic: a set-up guide for a fictional countertop bread maker, for a product page or a QR code on the box.\nStory: \"Meet Crumb.\" The box opens on a mustard background. One scene per step, each a wide shot plus a round detail call-out: stand it on a flat counter with space on each side, pour in water up to the line, tip in the mix and hold the start button for one second. Then the payoff: a cutaway shows the dough rising, the loaf lifts out, and an iris closes on the product.\nStyle: a 1950s classroom cartoon: flat shapes, limited palette, a cheerful narrator, irises through a medallion, a pull-back with counter-rotation.\nMood: cheerful, tidy, reassuring. About 40 seconds, friendly narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/midcentury-toon/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/midcentury-toon/STYLE.md"
    }
   },
   "lemo-news-package": {
@@ -575,7 +575,7 @@
    "en": "Topic: results night for a small town's giant vegetable show, as a full on-air news package (a fictional town and channel).\nStory: the sting becomes the channel bug and a countdown of results runs from fifth place to first. Each one is entered with a band wipe and announced by the category tab on the headline strap: the heaviest pumpkin, the longest marrow, a disputed weigh-in, the surprise winner. A results board and a weigh-in card belong to each picture. At the end the last stamp lands and becomes the end card.\nStyle: broadcast news graphics: a headline strap, a rundown, a results board, a spec card, a source line and a corner tag that belong to each picture.\nMood: brisk, authoritative, quietly funny. About 55 seconds, a news anchor's narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/news-package/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/news-package/STYLE.md"
    }
   },
   "lemo-newsreel": {
@@ -588,7 +588,7 @@
    "en": "Topic: the crossword craze of 1924, which a great American newspaper called a sinful waste of time.\nStory: searchlights snap on with a fanfare. The warning spreads: spinning headlines, a grease pencil circling a clue, a map and the months rolling by. Then the other side of the story: the first crossword book selling out, in its publisher's own printed words. A split-screen duel follows, each side with its own band, trading bars faster and faster, and the last caption lands the joke: the paper that scoffed printed a crossword of its own in 1942.\nStyle: a 1920s newsreel: silver film, place-and-date captions, spinning newspapers, flip-books, real archive footage and print, credited.\nMood: brassy, comic, knowing. About 55 seconds, a period announcer's voice.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/newsreel/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/newsreel/STYLE.md"
    }
   },
   "lemo-one-line": {
@@ -601,7 +601,7 @@
    "en": "Topic: two strangers crossing one city, each drawn with their own single line.\nStory: two pens touch down in opposite corners of warm white paper and never lift, drawn in turn. One line becomes a bed, a bus, an office window; the other a bicycle, a bakery, a rainy street. Twice they pass without knowing. Near the end both slow down at one bus stop and the lines meet; the ink runs out and the last stroke fades into dry scratches.\nStyle: continuous lines, no fills and no shading, the camera following the nib like a tracking shot, the pen's soft shadow, at most one accent colour used once.\nMood: tender, simple, bittersweet. About 45 seconds, gentle music, no narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/one-line/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/one-line/STYLE.md"
    }
   },
   "lemo-paper-lantern": {
@@ -614,7 +614,7 @@
    "en": "Topic: one window through one year, told inside a glowing paper-cut lightbox.\nStory: darkness and a single pinprick of light that widens until it fills the frame. Inside, layered paper scenes change season by season, with light the only transition: in spring an old tailor sews at the window; in summer a child outside learns to fly a kite; in autumn the child comes in with a torn coat; in winter snow covers the step and one lamp stays on. The lights go out one by one, the last window last.\nStyle: a paper-cut lightbox: stacked paper layers, depth as distance, silhouettes, windows, light that turns on.\nMood: warm, nostalgic, gentle. About 90 seconds, soft narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/paper-lantern/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/paper-lantern/STYLE.md"
    }
   },
   "lemo-paper-popup": {
@@ -627,7 +627,7 @@
    "en": "Topic: how paper itself is made, told by a pop-up book.\nStory: a storybook on a real wooden desk opens to one spread that is pulled again and again, each pull one step: a tree falls on a slide tab, a wheel turns it to chips, a vat stirs, a frame dips and lifts, a wet sheet hangs to dry, and the last pull folds that sheet into this very book. A little paper sprite rides each mechanism. Then the book closes, the pieces folding in reverse, with a puff of air.\nStyle: a paper pop-up book: folds and mechanisms you can see, paper as the character, the edge of the page, real desk light that was there all along.\nMood: wondrous, playful, curious. About 90 seconds, a storyteller's voice.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/paper-popup/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/paper-popup/STYLE.md"
    }
   },
   "lemo-papercut-red": {
@@ -640,7 +640,7 @@
    "en": "Topic: a letter cut from red paper, sent home for the New Year.\nStory: a small folded square arrives at a door. It unfolds panel by panel, and each panel is a scene cut by the writer's own hand: the long road, the city's crowds, a small room, a lantern bought with the last coin, the train home. A grandfather reads it by candlelight through the paper. The last panel is a door, and there is a knock. The whole world folds back into a small square, handed over at that door.\nStyle: red paper-cut: folded symmetry, one cut that unfolds, red on light, candlelight through paper. The craft of cutting is the plot.\nMood: festive, tender, warm. About 50 seconds, a storyteller's voice.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/papercut-red/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/papercut-red/STYLE.md"
    }
   },
   "lemo-pictogram-motion": {
@@ -653,7 +653,7 @@
    "en": "Topic: one whole day of one busy person, told in pictograms, every hour on the beat.\nStory: one figure, one card per hour: waking, brushing teeth, running for a bus, typing, lifting boxes, eating, napping, cycling, cooking, dancing, reading, sleeping. The palette moves from dawn hues to night hues, and the pace climbs a ladder from one card per bar to one per beat at rush hour. A long take follows the figure through lunchtime; the finale fills the screen with a grid of every hour, and the figure walks off.\nStyle: pictogram motion: one card = one item, flat geometric figures, strict rhythm, colours as hours, a finale grid. No narration.\nMood: energetic, cheerful, precise. About 60 seconds, a driving 150 BPM track.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/pictogram-motion/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/pictogram-motion/STYLE.md"
    }
   },
   "lemo-pixel-rpg": {
@@ -666,7 +666,7 @@
    "en": "Topic: a hero's whole life, told only through what they bought and sold at one village shop.\nStory: the shop screen. A young hero buys a wooden sword and one potion. Years pass in item lists: a better sword, a ring, two tickets, a cradle. On every visit the shopkeeper's dialog box says a little less, and the palette shifts with each age. Then an old hero comes back, sells the great sword, the last item in the inventory, and buys a fishing rod. Credits scroll over the overworld as they walk home.\nStyle: a 16-bit pixel RPG at low native resolution: an indexed palette, ordered dither, small sprites, dialog boxes with portraits, menus and an inventory that tell the story.\nMood: nostalgic, gentle, moving. About 55 seconds, chip music with echo and text blips, no voice.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/pixel-rpg/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/pixel-rpg/STYLE.md"
    }
   },
   "lemo-printed-long-take": {
@@ -679,7 +679,7 @@
    "en": "Topic: the black robin, a small New Zealand bird that came back from five.\nStory: a cold dawn on a rock island in the Chatham Islands; the last birds roost in the scrub at the top of a cliff. They wake one by one and the take follows them down to the shore, where a board records how few were left in 1980. Eggs were moved into foster nests; the same cliff is printed again and again as the numbers grow, until the board is cut with today's count and the old figure is struck out.\nStyle: a scratchboard print in one unbroken take: knife cuts in black, paper white, one single red, the same place printed again as time passes, words cut into the world, a plate of type in the sky for the title and the end. Every count sourced.\nMood: hushed, windy, hopeful. About 60 seconds, eleven short narrated lines with subtitles.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/printed-long-take/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/printed-long-take/STYLE.md"
    }
   },
   "lemo-risograph": {
@@ -692,7 +692,7 @@
    "en": "Topic: two neighbours who have never met, one floor apart, and one song through the ceiling.\nStory: blue ink: a man upstairs practises the cello on a Sunday morning. Pink ink: a woman downstairs waters her plants and hums along without noticing. The film cuts between them, one plate a shot, the ceiling between them. In the stairwell they finally cross, and where the two plates meet the third colour appears for the first time. The print turns out to be a concert poster pasted up in that stairwell.\nStyle: risograph print: two spot inks, misregistration, grain, an overprint colour that only appears where the plates meet.\nMood: relaxed, charming, sunny. About 40 seconds, music and the printing machine's own sounds at each plate, no narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/risograph/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/risograph/STYLE.md"
    }
   },
   "lemo-rubber-hose": {
@@ -705,7 +705,7 @@
    "en": "Topic: a talent show in a 1930s cartoon broom cupboard.\nStory: a curtain rises on a band tuning up. A boastful mop, a vain feather duster and a bucket with a tuba voice take turns on stage, and each act goes wrong on the beat. The smallest contestant, a thimble nobody noticed, taps one tiny rhythm; the band picks it up and the whole cupboard dances. The thimble is handed the trophy, which it cannot lift.\nStyle: 1930s rubber-hose animation: bendy limbs, pie-cut eyes, white gloves, everything bouncing on the beat, a radio announcer calling the show like a horse race.\nMood: zany, warm, joyful. About 50 seconds, jazz band and an announcer.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/rubber-hose/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/rubber-hose/STYLE.md"
    }
   },
   "lemo-satellite-briefing": {
@@ -718,7 +718,7 @@
    "en": "Topic: Lake Chad, which an old atlas still shows as one huge sheet of water, and what orbit shows today.\nStory: a printed atlas page with the lake's name in serif type. We dive into the map until it fills the frame, and a scanner bar tears it away to reveal reeds, sand and dry bed, then silence. Time rewinds and plays forward in one locked frame from the first Landsat years, each year leaving its shoreline as a ring. A range line gives the human scale from the old lakeside town of Baga to today's water. Then water is heard before it is seen: the part that still comes back with the rains.\nStyle: a satellite briefing: real public satellite imagery, map overlays, range lines, year counters, every figure sourced.\nMood: sober, striking, a glimmer of hope. About 40 seconds, short narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/satellite-briefing/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/satellite-briefing/STYLE.md"
    }
   },
   "lemo-scifi-toon": {
@@ -731,7 +731,7 @@
    "en": "Topic: a tech-support call between two universes.\nStory: a jaded genius, on holiday in another universe, takes a call from a nervous assistant at home: the portal in the lab has started eating the furniture. On a split screen one voice talks the other through the fix, step by step (\"have you tried turning it off?\"), and every step makes it worse at home while something strange comes through on his side. They finally fix it by swapping places: the genius is home with the mess, the assistant is on a beach.\nStyle: a sci-fi sitcom cartoon: thick outlines, bright flat colours, portal swirls the only thing that glows, deadpan acting with quick lip sync, one gag per step.\nMood: cynical, absurd, very funny. About 55 seconds, two-character dialogue.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/scifi-toon/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/scifi-toon/STYLE.md"
    }
   },
   "lemo-shadow-puppet": {
@@ -744,7 +744,7 @@
    "en": "Topic: a puppet that performs its own making.\nStory: backstage first: rim-lit hands and rods. On the lit cloth a blank sheet of hide is scraped, carved, dyed red and green, and jointed with rivets; each step is one scene of a short play. Finished, the puppet stands up, bows, and acts out being cut, dyed and joined, as the story of how it came to be. The maker's hand reaches in to adjust it, and it pushes the hand away. At the end the puppets rest, laid flat on a dim table, and the lamp is carried away.\nStyle: shadow puppetry: translucent coloured leather, jointed limbs on rods, a cloth screen, a lamp that is the light of the story itself.\nMood: folk, playful, tender. About 55 seconds, a storyteller's voice and folk percussion.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/shadow-puppet/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/shadow-puppet/STYLE.md"
    }
   },
   "lemo-silent-film": {
@@ -757,7 +757,7 @@
    "en": "Topic: a silent trick film about a stage magician whose rabbit keeps taking his place.\nStory: one stage. The magician waves his wand, and by substitution cuts the rabbit becomes a bouquet, a chair, then his own top hat, which hops away. He chases it around a single wide frame; every trick he tries backfires, until he vanishes himself and the rabbit, in his hat, takes the bow. A final card addresses the audience directly.\nStyle: a 1920s silent film as it looks projected: 4:3 in a gate between theatre curtains, ink drawing with washed greys, flicker, weave, scratches, intertitle cards, an iris, a cinema piano.\nMood: comic, deadpan, sweet. About 55 seconds, piano only.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/silent-film/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/silent-film/STYLE.md"
    }
   },
   "lemo-silkscreen-poster": {
@@ -770,7 +770,7 @@
    "en": "Topic: a misprint story: one poster for a fictional open-air cinema, run after run.\nStory: light through a blank mesh, a stencil exposed. The poster is pulled one ink at a time, sky, hills, the screen, the crowd, each run faster than the last, and the registration drifts further each time until the date lands in the wrong place. The camera climbs through the layers in one long take. On the last pull the ink lands true on the date, and the prints hang swaying on the drying rack.\nStyle: silkscreen posters: flat spot colours printed layer by layer, bold lettering, a crane through multi-plane parallax.\nMood: inviting, sunny, a little funny. About 40 seconds, the squeegee's sounds and light music, no narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/silkscreen-poster/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/silkscreen-poster/STYLE.md"
    }
   },
   "lemo-spy-titles": {
@@ -783,7 +783,7 @@
    "en": "Topic: the opening titles of an imaginary 1960s spy film, told as a heist in reverse.\nStory: a stolen violin is being returned, location by location, to where it belongs: a night train, a casino, a rooftop, a concert hall, with silhouettes trying to stop it. Each credit lands as part of the picture, a doorway, a staircase, a playing card. In the end the violin is back in its case, and the title never quite assembles: one piece is missing, and the hero walks off with it.\nStyle: a 1960s title sequence: flat opaque inks on paper, hand-cut edges, silhouettes, a diagonal grid, graphic match cuts, type that is the set. All credits are fictional roles.\nMood: cool, sly, jazzy. About 45 seconds, a big-band score.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/spy-titles/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/spy-titles/STYLE.md"
    }
   },
   "lemo-stained-glass": {
@@ -796,7 +796,7 @@
    "en": "Topic: a town's twelve trades, in a rose window that works like a clock.\nStory: the sun crosses a rose window in a stone guild hall, and the petals light in turn like hours: the baker at first light, the weaver, the smith, the ferryman, on round the dial. Wherever the light falls, that pane's little scene moves, and each worker hands something to the next. At dusk the light reaches the centre: all twelve at one table. Clouds cover the sun, every pane fades to grey, and one lead line lingers.\nStyle: stained glass: coloured panes held by lead lines, light passing through, the sun's path as the camera. A town's working life, no religious images.\nMood: legendary, warm, then gentle. About 55 seconds, a narrator and choir-like music.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/stained-glass/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/stained-glass/STYLE.md"
    }
   },
   "lemo-swiss-motion": {
@@ -809,7 +809,7 @@
    "en": "Topic: one day at a small railway station, as a timetable that sets itself.\nStory: a single dot on white paper; the grid grows from it, 24 rows, one hour a row. Each row fills on the beat: the first train, the school run, lunch, the last train, nothing at 3 a.m. Everything snaps to the columns. Then the exception: a night train that is not on the timetable crosses the gutter in signal red, off the grid, and leaves the frame, and the system closes over the space it left.\nStyle: Swiss motion graphics: a modular grid, black type and bars on white, one signal red, extreme scale contrast, every move snapping on the beat, nothing bouncing.\nMood: rigorous, witty, confident. About 45 seconds, a minimal electronic beat.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/swiss-motion/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/swiss-motion/STYLE.md"
    }
   },
   "lemo-teardown": {
@@ -822,7 +822,7 @@
    "en": "Topic: a small open-hardware gadget, opened to show what is inside. Find one whose CAD and board files are public under a free licence, and tell me which one before you start.\nStory: a grazing macro over its top and one real press. In one orbit the layers lift apart, top first, each layer labelled. The camera dives into the gap between board and case to look up at the chip, then rises through the case to the switch. A fast pull back closes it bottom first, and the closed gadget shows its real dimensions.\nStyle: an exploded teardown: real published design files, one continuous orbit, layer labels, dimension callouts, every number public.\nMood: precise, satisfying, a little nerdy. About 40 seconds, short narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/teardown/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/teardown/STYLE.md"
    }
   },
   "lemo-telestrator": {
@@ -835,7 +835,7 @@
    "en": "Topic: how my Sunday-league team came back from 0–3 at half-time, three goals in twelve minutes. The clips are mine, in Assets: the three goals, the last one filmed from two phones.\nStory: a show sting and a match-record card set up the score and bracket the three second-half goals. The first two are shown quickly; the third gets the full treatment: freeze in play, lines and arrows drawn on the pitch, a split screen of the two phones, the runs traced. A shot map shows where the three were struck, a data card follows, and the end card closes.\nStyle: a sports telestrator: short freezes, hand-drawn lines on live play, circles and arrows, a shot map, broadcast cards.\nMood: analytical, building, thrilling. About 55 seconds, a pundit's commentary.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/telestrator/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/telestrator/STYLE.md"
    }
   },
   "lemo-tilt-shift": {
@@ -848,7 +848,7 @@
    "en": "Topic: a building site that looks like a model, from an empty lot to opening day.\nStory: an empty lot at dawn. In time-lapse, diggers, cranes and tiny workers swarm and a building climbs floor by floor. Once per stage, time crashes to real speed: a worker sharing lunch with a stray dog, a lost balloon drifting past the crane, the first window being washed. On opening day a small crowd gathers, the band of focus widens to full sharpness, and the model becomes a real place.\nStyle: a tilt-shift miniature: a thin band of focus, saturated toy colours, sped-up motion, a system of many small actors bending around one tiny one.\nMood: cute, busy, then tender. About 40 seconds, music, then the real sounds of the place when time drops to real speed.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/tilt-shift/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/tilt-shift/STYLE.md"
    }
   },
   "lemo-transit-map": {
@@ -861,7 +861,7 @@
    "en": "Topic: the rise and fall of the tram network in a fictional river city, and the one line that survived. The city is made up, so its figures are labelled \"Example\".\nStory: a coin in close-up match-cuts to a station dot on a blank sheet. A pen draws the first line, and year by year five more reach the docks, cross the river and climb the hill while a counter ticks up the kilometres. Then the cars come: lines close one by one, struck through on the printed sheet as the counter falls. One line survives; a tram leaves its last station, and the camera rises to the whole network, its closed lines ghosted, with the end title printed in the margin.\nStyle: a printed map that grows line by line under a moving camera: flat colour lines, interchange rings, water bodies and ferry lines that read at a distance, a paper veil; every word and number printed on the sheet, in two languages.\nMood: steady, wistful, building. About 50 seconds, music and the tuned sounds of lines and stops, no narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/transit-map/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/transit-map/STYLE.md"
    }
   },
   "lemo-ukiyoe": {
@@ -874,7 +874,7 @@
    "en": "Topic: one street in four impressions: dawn, rain, festival night and snow.\nStory: a close crop of a paper lantern fills the sheet; we pull back and find the print. The same key block of one street is reprinted four times with new colours. A noodle seller's cart stands at the same corner in each: opening at dawn, under oiled umbrellas in the rain, in the crowd on festival night, alone in the snow. The last print is left unfinished: key line only, the colour blocks never land, except the seller's lamp.\nStyle: ukiyo-e woodblock prints: flat colour blocks, bokashi gradients, keyblock lines, cartouches, seals. The story is told by what each impression changes.\nMood: contemplative, festive, serene. About 45 seconds, Japanese instruments and the sounds of paper and wood, no narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/ukiyoe/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/ukiyoe/STYLE.md"
    }
   },
   "lemo-urban-sketch": {
@@ -887,7 +887,7 @@
    "en": "Topic: a recipe drawn from life at a morning market.\nStory: a blank page with a handwritten date. One thin ink line finds the first stall: tomatoes, a fishmonger's scale, herbs in a basket, each drawn while the crowd moves around it. Colour arrives only on what goes into the basket. Last of all the finished dish is painted in full in the corner of the page, and the sketchbook closes on it.\nStyle: urban sketch, pen and wash: one thin wobbly ink line that overshoots corners and breaks mid-stroke, then loose watercolour laid separately on top.\nMood: breezy, light, hungry. About 30 seconds, no narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/urban-sketch/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/urban-sketch/STYLE.md"
    }
   },
   "lemo-visual-investigation": {
@@ -900,7 +900,7 @@
    "en": "Topic: the fall of the Tacoma Narrows Bridge on 7 November 1940, rebuilt minute by minute from every kind of surviving evidence.\nStory: it opens on the decisive frame and rewinds. Film, photographs, witness accounts and the official inquiry are laid on one clock; the clock narrows through three scales, the hours of that morning, then the seconds of the fall, then the months of the inquiry, each carried by a readout inside the picture. The independent sources point to the same spot: the middle of the main span.\nStyle: a visual investigation: synced archive footage, a red sync line, 2×2 evidence grids, timestamps, annotations, every source cited.\nMood: forensic, gripping, respectful. About 60 seconds, a measured narrator.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/visual-investigation/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/visual-investigation/STYLE.md"
    }
   },
   "lemo-watercolor": {
@@ -913,7 +913,7 @@
    "en": "Topic: a garden journal kept for one year on a single sheet.\nStory: one sheet of warm paper, locked, a month's date in the corner. A pear tree is painted into bare winter branches, and each month paints over the last: buds, blossom, a blackbird's nest, small green fruit, the first ripe pear with a hand-lettered note of the day, falling leaves, frost. Each month has one specimen labelled by hand and one small event. In the last month the page is left unfinished, the brush lifted mid-stroke.\nStyle: watercolour brush: translucent strokes with dry-brush flying white, a field-journal annotation layer, colour that carries the seasons.\nMood: calm, curious, precise. About 90 seconds, warm documentary narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/watercolor/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/watercolor/STYLE.md"
    }
   },
   "lemo-white-model": {
@@ -926,7 +926,7 @@
    "en": "Topic: how Arnhem, left in ruins by the battle of 1944, grew back decade by decade, told from the open Dutch building data.\nStory: a white architectural model under gallery light. The lights go out and a projector picks out every building still standing from before the war: there is a hole in the middle. Layer by layer, faster each time, the post-war decades pop on while a year counter rolls to today, and the city crosses the Rhine. Then a level of light climbs every facade, and the tallest new tower's winter shadow runs across the old roofs.\nStyle: projection on a white model: projector light on plain white blocks, layers by era, year counters, real city data, every figure sourced.\nMood: sober, hopeful, impressive. About 40 seconds, short narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/white-model/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/white-model/STYLE.md"
    }
   },
   "lemo-whiteboard": {
@@ -939,7 +939,7 @@
    "en": "Topic: why the sky is blue and the sunset is red, and why it is the same reason.\nStory: a lesson on one physical whiteboard, built as a proof. The claim is written at the top and the board fills downward step by step, each step boxed when proven: sunlight holds every colour, air scatters blue far more than red, and at sunset the long path through the air has already lost its blue. The eraser rewinds one idea to show the sky with no air: black, as on the Moon. The answer is circled twice and the pen is capped.\nStyle: a whiteboard explainer: dry-erase marker in real stroke order, one board and one camera, the pen leading the camera, magnets, an eraser that rewinds.\nMood: curious, clear, delightful. About 90 seconds, friendly teacher's narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/whiteboard/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/whiteboard/STYLE.md"
    }
   },
   "lemo-woodcut": {
@@ -952,7 +952,7 @@
    "en": "Topic: a miner underground and his daughter at the pit-top, two blocks printed in turn.\nStory: two places alternate impressions: the dark seam and the pit-head in snow. He swings the pick; she walks the road with his meal. A roof fall is one huge black print. Men dig, and their lamps carve light out of the black, cut by cut. On the last impression both blocks print on one sheet, and she finds him at the cage. The film holds on a corner of black wood the knife never reached.\nStyle: woodcut print: light that is carved out of black, carving as the passing of time, the mirrored block turning into the true print, snow as stab cuts, one colour plate for the lamps, told like a wordless novel.\nMood: stark, devoted, triumphant. About 60 seconds, no narration.",
    "credit": {
     "text": "Written from Lemomo (LemoLab) STYLE.md, MIT",
-    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/ea34ff9546f675f9fd65a3c84e869a1da7471ad7/styles/woodcut/STYLE.md"
+    "link": "https://github.com/lemomo-ai/lemo-opuscar/blob/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00/styles/woodcut/STYLE.md"
    }
   },
   "mg-01-flat-vector": {
@@ -1160,7 +1160,7 @@
    "en": "Topic: a crayon dog who runs off the page.\nStory: a child's scribbled dog fills in colour by colour and wags; a crayon ball rolls past, and the dog chases it over the fold of the paper; the sheet turns and the dog is waiting on the next page with the ball in its mouth.\nMedium: wax crayon on toothed paper: back-and-forth scribble fills that skip the paper's valleys, a darker crayon on the shade side, a white one for highlights, contours gone over twice.\nMood: playful, warm, homemade. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/engine/src/canvas-core/balloon.ts"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/engine/src/canvas-core/balloon.ts"
    }
   },
   "anidoodle-blueprint": {
@@ -1173,7 +1173,7 @@
    "en": "Topic: how a bicycle's gears work, for a fictional bike workshop, \"Spoke & Co\".\nStory: on blue stock the frame is ruled in white, then the chainring and sprocket are drawn with the compass; the chain links on, the pedal turns once and dimension lines show the ratio; a title block fills in with the shop's name.\nMedium: ruling pen and compass in white ink on Prussian-blue cyanotype: hairline construction lines first, then the weighted outline, hatched sections, lettered callouts.\nMood: precise, calm, engineered. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/blueprint.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/blueprint.md"
    }
   },
   "anidoodle-brokenColour": {
@@ -1186,7 +1186,7 @@
    "en": "Topic: a morning at a riverside flower market, for a fictional florist, \"Bloomside\".\nStory: dabs of unmixed colour build the river and the stalls; buckets of tulips and sunflowers appear stroke by stroke, a boat slides by and the light warms as the sun rises; the shop's name is painted in dabs on an awning.\nMedium: opaque oil dabs from a loaded flat hog brush on primed linen, pure colours set side by side for the eye to mix, no blending.\nMood: fresh, luminous, unhurried. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/brokenColour.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/brokenColour.md"
    }
   },
   "anidoodle-charcoalErasure": {
@@ -1199,7 +1199,7 @@
    "en": "Topic: a city street from dawn to night on one sheet, for a fictional documentary series, \"One Corner\".\nStory: a street corner is drawn in charcoal; the light shifts, so parts are wiped and lifted with the eraser and redrawn, leaving ghosts of morning under the evening; street lamps are lifted out last as white.\nMedium: vine and compressed charcoal on heavy rag paper, smudged with a stump, lifted with a kneaded eraser, redrawn over its own residue.\nMood: thoughtful, quiet, the passing of time. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/charcoalErasure.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/charcoalErasure.md"
    }
   },
   "anidoodle-colouredPencil": {
@@ -1212,7 +1212,7 @@
    "en": "Topic: a hedgehog baking a cake, for a fictional children's bakery, \"Prickle Bakes\".\nStory: the hedgehog cracks an egg, stirs, and slides a tin into a small oven; the cake rises and the hedgehog tops it with one strawberry; the name is hatched in on the cake board.\nMedium: wax coloured pencils hatched in one diagonal on toothy cream paper, hues layered over each other, darks cross-hatched.\nMood: cosy, gentle, a little funny. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/colouredPencil.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/colouredPencil.md"
    }
   },
   "anidoodle-dreamGlaze": {
@@ -1225,7 +1225,7 @@
    "en": "Topic: a teaser for a fictional sleep podcast, \"Half Awake\".\nStory: in an empty plain at dusk a door stands alone; it opens onto a night sky, a staircase of clouds unrolls out of it and a single paper boat sails up the stairs; the title appears in a calm serif.\nMedium: thin oil glazes laid with a very small soft brush on a smooth white ground: no visible stroke, every form turned smoothly under one low light, surreal but exact.\nMood: dreamlike, still, uncanny. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/dreamGlaze.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/dreamGlaze.md"
    }
   },
   "anidoodle-embroidery": {
@@ -1238,7 +1238,7 @@
    "en": "Topic: a stitched bird, and the thread that runs out one feather short.\nStory: in a wooden hoop, a needle stitches a small bird's outline, then satin-stitch wings and one French-knot eye; the thread runs out at the last feather; the needle goes away, comes back with new thread, finishes the feather and ties off.\nMedium: stranded cotton floss stitched through natural plain-weave linen in a beech hoop: running, back, satin and stem stitch, knots; each stitch goes in where the last came out.\nMood: handmade, calm, a little funny. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/embroidery.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/embroidery.md"
    }
   },
   "anidoodle-flatVector": {
@@ -1251,7 +1251,7 @@
    "en": "Topic: an app explainer for a fictional bike-sharing service, \"Pedl\".\nStory: a city map draws itself path by path; docking stations arrive as closed paths whose flat fill lands the moment each one closes; a rider unlocks a bike with a phone and rides the route as a thin ribbon of colour grows behind them; the logo closes out in flat colour.\nMedium: pen-tool paths in a vector app, flat fills that land when a path closes, long-shadow shapes with a transparency ramp, a fine grain brush over the shading.\nMood: clean, upbeat, modern. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/flatVector.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/flatVector.md"
    }
   },
   "anidoodle-folkTale": {
@@ -1264,7 +1264,7 @@
    "en": "Topic: the opening of a fictional bedtime-story app, \"Once, Long Ago\".\nStory: a girl with a lantern walks a path from a cottage into a dark pine wood; an owl watches, the lantern lights a ring of mushrooms and the title floats in over the trees.\nMedium: gouache and watercolour over an HB pencil drawing on cream paper: opaque, dry-brushed paint in the foreground thinning to a pale wash and then to bare pencil at the edges.\nMood: storybook, tender, a little mysterious. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/folkTale.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/folkTale.md"
    }
   },
   "anidoodle-fox": {
@@ -1277,7 +1277,7 @@
    "en": "Topic: an autumn campaign for a fictional outdoor shop, \"Trailfold\".\nStory: torn-paper hills stack up, a cut-paper deer steps out from the trees, leaves of torn orange and red drift down and pile into the shop's name.\nMedium: cut-paper collage with no drawn lines: torn pieces with a white fibrous edge, scissor-cut pieces crisp, each lifting a soft shadow off the piece below.\nMood: crisp, earthy, crafted. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/foxDraw.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/foxDraw.md"
    }
   },
   "anidoodle-halftone": {
@@ -1290,7 +1290,7 @@
    "en": "Topic: a \"breaking news\" opener for a fictional city newspaper, \"The Dawn Courier\".\nStory: the press rolls; the orange spot colour comes up first on a headline photo of a crowd under umbrellas, then the black dots print over it; the masthead slams in.\nMedium: web-offset newspaper print: black on a 45 degree halftone screen plus one orange spot colour at 15 degrees, ink gaining into unbleached newsprint.\nMood: urgent, retro, punchy. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/halftone.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/halftone.md"
    }
   },
   "anidoodle-isometric": {
@@ -1303,7 +1303,7 @@
    "en": "Topic: how a fictional coworking space, \"Stackhouse\", works, floor by floor.\nStory: a three-floor building is cut away in isometric: a café at the bottom lights up, desks fill on the middle floor, a meeting room on top switches its screen on; a lift travels up through all three and the name lands on the roof.\nMedium: flat vector planes on a true 2:1 isometric grid, three tones per material, crisp edges, drawn in pen-tool order.\nMood: tidy, clever, inviting. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/isometric.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/isometric.md"
    }
   },
   "anidoodle-koi": {
@@ -1316,7 +1316,7 @@
    "en": "Topic: a young noodle cook and the toss that went too high.\nStory: the cook tosses noodles far too high; they hang in the air in a dragon shape while the cook stares; the dragon drops into a steaming bowl, a big comic sound word splashes out, and the cook bows to the empty shop.\nMedium: marker comic: alcohol-marker cel fills with a hard shadow edge under one heavy contour that thickens away from the light.\nMood: energetic, bold, fun. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/koiDraw.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/koiDraw.md"
    }
   },
   "anidoodle-lighthouse": {
@@ -1329,7 +1329,7 @@
    "en": "Topic: a poster that comes alive for a fictional music festival, \"Tidefest\".\nStory: the inks print one drum at a time: yellow for the sun and sand, pink over it for the hills, overprints turning coral and orange where they meet; blue comes last as the key plate, bringing the sea, the crowd by a stage and the festival's name in one sweep.\nMedium: risograph: one soy-ink layer per drum, multiplied through its own small registration offset; every other colour is an overprint, tone a halftone screen per ink angle.\nMood: indie, cheerful, summery. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/lighthouseDraw.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/lighthouseDraw.md"
    }
   },
   "anidoodle-lowPoly": {
@@ -1342,7 +1342,7 @@
    "en": "Topic: a travel teaser for a fictional island resort, \"Cay Verde\".\nStory: the camera glides over a low-poly sea toward an island; palms rise facet by facet, a small seaplane lands and the sun sets, flipping every facet's shade; the name appears over the water.\nMedium: triangle meshes projected through a simple pinhole camera, each facet flat-shaded by its angle to one low sun, sorted far to near.\nMood: bright, escapist, smooth. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/lowPoly.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/lowPoly.md"
    }
   },
   "anidoodle-mellan": {
@@ -1355,7 +1355,7 @@
    "en": "Topic: the title of a fictional jewellery brand, \"Unbroken\".\nStory: one line starts at the centre and spirals out, thickening and thinning, until a ring with a single stone appears out of the line; the line runs on to write the brand's name and ends.\nMedium: single-line engraving: one unbroken engraved line whose width follows the tone of the picture: the whole image is one stroke.\nMood: elegant, precise, quiet luxury. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/engine/src/canvas-core/mellan.ts"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/engine/src/canvas-core/mellan.ts"
    }
   },
   "anidoodle-midCentury": {
@@ -1368,7 +1368,7 @@
    "en": "Topic: an ad for a fictional old-style toy shop, \"Tick-Tock Toys\".\nStory: a boy winds up a toy train; it chugs around the shop past a rocking horse and a spinning top, the shelves sway to the rhythm and the train stops at a sign with the shop's name.\nMedium: 1950s-60s storybook: opaque matte gouache on warm board, a dry brush dragged over the flats, a loose brush-and-ink line printed slightly off register.\nMood: nostalgic, sunny, charming. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/midCentury.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/midCentury.md"
    }
   },
   "anidoodle-moonPhases": {
@@ -1381,7 +1381,7 @@
    "en": "Topic: a science lesson opener: why we have seasons, for a fictional school channel, \"Chalk Talk\".\nStory: a felt eraser sweeps the slate, leaving ghosts of older lessons, and the channel name is written at the top; then the sun is chalked, the Earth orbits it with a tilted axis, and summer and winter are labelled with arrows.\nMedium: chalkboard: side-of-the-chalk scumble on slate, lit sides worked twice, every stroke broken by the board's tooth, dust either side, ghosts of old lessons.\nMood: curious, clear, classroom. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/moonPhasesDraw.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/moonPhasesDraw.md"
    }
   },
   "anidoodle-paintedOil": {
@@ -1394,7 +1394,7 @@
    "en": "Topic: a menu reveal for a fictional wine bar, \"Cellar Nine\".\nStory: a still life builds on the canvas: a bottle, a glass, a wedge of cheese and grapes; the paint goes from a lean block-in to thick highlights, the glass fills with a deep burnt-sienna wine and the name is painted on the bottle's label.\nMedium: opaque oil paint with hog-bristle brushes on a toned linen canvas, lean block-in first, then fat impasto.\nMood: rich, warm, classic. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/paintedOil.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/paintedOil.md"
    }
   },
   "anidoodle-paperCraft": {
@@ -1407,7 +1407,7 @@
    "en": "Topic: the trailer for a fictional puppet theatre, \"Little Curtain\".\nStory: on a cardboard stage, rows of paper waves slide side to side, a paper whale rises on a stick, a moon is lowered on a string and the curtain closes on the theatre's name.\nMedium: toy-theatre paper collage: patterned papers cut and torn, gouache-painted cut-outs with a white sticker margin, every piece with a card edge and a shadow.\nMood: whimsical, theatrical, handmade. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/paperCraft.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/paperCraft.md"
    }
   },
   "anidoodle-pixelArt": {
@@ -1420,7 +1420,7 @@
    "en": "Topic: a tiny fisher on a pier at dusk, and the catch that was too big.\nStory: the fisher casts and pulls up an old boot, casts again, then the rod bends double and a fish bigger than the pier rises up, looks at the fisher, and sinks back with the boot.\nMedium: pixel art: a small square grid of cells, each one of 16 declared colours, laid one cell at a time and scaled up by a whole number, no smoothing.\nMood: retro, lively, deadpan. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/pixelArt.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/pixelArt.md"
    }
   },
   "anidoodle-pocketWatch": {
@@ -1433,7 +1433,7 @@
    "en": "Topic: a notebook-style explainer for a fictional design studio, \"Margin Notes\".\nStory: a ballpoint sketches an idea: a lightbulb, then a chair taking shape from it with arrows and notes; it's crossed out, redrawn better, circled, and the studio's name is underlined twice.\nMedium: one blue ballpoint on cream paper, near-constant weight; tone only from where the hatching sits, plus the small blob where a firm stroke stops.\nMood: candid, thoughtful, creative. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/pocketWatchDraw.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/pocketWatchDraw.md"
    }
   },
   "anidoodle-ranunculus": {
@@ -1446,7 +1446,7 @@
    "en": "Topic: a spring collection teaser for a fictional stationery shop, \"Petal Post\".\nStory: a pencil outlines an envelope and a sprig of sweet peas; washes of pink and green float in, never quite filling the lines; the envelope opens and the shop's name is written in pencil over the paint.\nMedium: graphite and pan watercolour on cold-press paper: washes that never quite fill their outline, form shaded toward one light, graphite drawn over the paint.\nMood: delicate, fresh, feminine. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/ranunculusDraw.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/ranunculusDraw.md"
    }
   },
   "anidoodle-rubberHose": {
@@ -1459,7 +1459,7 @@
    "en": "Topic: a 1930s-style cartoon ad for a fictional soda, \"Fizzy Pop\".\nStory: a bottle with noodle arms pops its cap, does a little dance on a diner counter, bubbles bounce out in rhythm and spell the brand's name; it tips its cap at the camera.\nMedium: India ink at one pressure on a clear cel over a blue-pencil rough, flat grey paint on the back, photographed on black-and-white film.\nMood: bouncy, cheeky, vintage. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/rubberHose.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/rubberHose.md"
    }
   },
   "anidoodle-scrapbook": {
@@ -1472,7 +1472,7 @@
    "en": "Topic: a museum explainer: how a letter crossed the ocean in 1890, for a fictional postal museum, \"Stamp Hall\".\nStory: on an old album page a stamped envelope is taped in; a card carrying a tinted engraving of a steamship slides across the page, a map is clipped on with a clothespin, a typed label explains each step, and cut-out letters spell the museum's name.\nMedium: archival scrapbook: foxed rag-paper album page; torn cards, tape, a clothespin on twine; hand-tinted copperplate engravings, typewriter and ransom-note cut letters.\nMood: curious, nostalgic, layered. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/scrapbook.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/scrapbook.md"
    }
   },
   "anidoodle-scratchboard": {
@@ -1485,7 +1485,7 @@
    "en": "Topic: a night watchman and the one window still lit.\nStory: from solid black, a knife scratches a street lamp into light, then a rain-wet alley and a watchman in a long coat; he looks up at the one lit office window; it goes dark, and a second figure is scratched into the light behind him.\nMedium: scratchboard: white clay under black ink; every mark is ink scraped away with a knife or scratch nib, light built out of darkness.\nMood: noir, tense, dramatic. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/scratchboard.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/scratchboard.md"
    }
   },
   "anidoodle-stipple": {
@@ -1498,7 +1498,7 @@
    "en": "Topic: a product reveal for a fictional skincare line, \"Pure Botanica\", built around one ingredient.\nStory: dots gather over the whole sheet pass by pass: first the darkest shadows of a sprig of lavender and a glass dropper bottle beside it, then the mid tones, then a few sparse dots on the lit sides; the name is set below in a fine serif.\nMedium: pen-and-ink stipple: one fine technical pen dotted straight down onto smooth bristol; tone is dot density only.\nMood: clean, scientific, refined. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/stipple.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/stipple.md"
    }
   },
   "anidoodle-storybook": {
@@ -1511,7 +1511,7 @@
    "en": "Topic: a small rabbit in a scarf who opens a book too big for her.\nStory: she is drawn in pencil and washes of colour fill her in; she heaves the big book open, the pages flutter and letters float up; one lands on her nose, she sneezes, and every letter falls back into the book.\nMedium: storybook graphite and gentle pan watercolour, drawn so the same character can come back film after film (keep her proportions, colours and scarf the same).\nMood: friendly, soft, funny. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/storybookDraw.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/storybookDraw.md"
    }
   },
   "anidoodle-sumiE": {
@@ -1524,7 +1524,7 @@
    "en": "Topic: a fisherman, a lake, and the fish he does not see.\nStory: one loaded brush sweeps a mountain ridge in pale ink, a darker stroke for the reeds, then a man in a small boat in a few strokes; behind him a single fish leaps and one ring spreads; he never looks round; a red seal is stamped in the empty paper.\nMedium: sumi-e: one soft brush of sumi ink in five dilutions on absorbent unsized paper, each stroke placed once, never retouched, with a cinnabar seal.\nMood: calm, spare, gently funny. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/sumiE.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/sumiE.md"
    }
   },
   "anidoodle-toyBrick": {
@@ -1537,7 +1537,7 @@
    "en": "Topic: a little brick crane that cannot lift the last brick.\nStory: on a baseplate, bricks snap in one by one to build a small crane and a tower; the crane swings each brick up; the last one is too heavy and the crane tips forward; a small figure walks over, adds one counterweight brick, and the last brick seats with a click.\nMedium: moulded plastic toy bricks rendered flat in orthographic view: face tones by the cube rule, bevel highlights, seam hairlines, real studs, a soft contact shadow.\nMood: playful, constructive, bright. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/toyBrick.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/toyBrick.md"
    }
   },
   "anidoodle-woodcut": {
@@ -1550,7 +1550,7 @@
    "en": "Topic: the first lantern lit at a night market.\nStory: the keyblock prints the black lines of a street and a vendor at a cart; the colour blocks print lightest to darkest: yellow lanterns, the wooden cart, the vendor's grey coat; last, the bokashi sky darkens to the top; a gust sways the lanterns and the vendor steadies the first one.\nMedium: ukiyo-e colour woodblock: water-based pigment printed by baren from carved cherry blocks onto damp washi: a black keyblock, flat colour blocks, bokashi gradient wipes.\nMood: festive, graceful, traditional. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/woodcut.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/woodcut.md"
    }
   },
   "anidoodle-wren": {
@@ -1563,7 +1563,7 @@
    "en": "Topic: a nature trail guide opener for a fictional park, \"Willow Marsh\".\nStory: wet washes flood in first for water and reeds and settle along their edges; then a flexible nib draws a heron standing in the shallows, thick on the press, hair-thin on the lift; the park's name is lettered in ink.\nMedium: ink and line-wash: wet washes first that flood past the line and settle along each shape's bottom edge, backruns, then a flexible nib line over them.\nMood: airy, natural, observant. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle medium reference by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/styles/wrenDraw.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/styles/wrenDraw.md"
    }
   },
   "anidoodle-adaptAlmond": {
@@ -1576,7 +1576,7 @@
    "en": "Topic: a sparrow's visit to a garden table on the first warm morning.\nStory: the pale blue ground is laid in patches of short strokes that turn against each other; a sprig of leaves goes on thick and ridged, one cup sits below; a sparrow lands on the rim, drinks and leaves; the blue-green contour is drawn last.\nMedium: opaque oil with a loaded bristle brush, short finger-long strokes, a flat decorative high-key ground, one step of shadow on the forms, a broken dark blue-green contour laid last; no black anywhere.\nMood: fresh, calm, hopeful. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle house style recipe by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/styles/house/almond-blossom.json"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/styles/house/almond-blossom.json"
    }
   },
   "anidoodle-adaptAquarelle": {
@@ -1589,7 +1589,7 @@
    "en": "Topic: a calm background for a fictional meditation app, \"Tidepool\".\nStory: the palest big puddles of watercolour spread on cream paper and dry with crisp rims; smaller, stronger puddles glaze over them and mix where they overlap; a jellyfish is painted in the same puddles a full step darker, with bare paper around it, and drifts slowly; white sparkles go on last.\nMedium: pastel blotches: one loaded round brush set down and pushed about, flat puddles with jagged edges that dry hard with a darker rim and a paler bloom, no drawn line, bare paper between the islands.\nMood: soft, dreamy, slow. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle house style recipe by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/styles/house/pastel-blotch.json"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/styles/house/pastel-blotch.json"
    }
   },
   "anidoodle-adaptScrapbook": {
@@ -1602,7 +1602,7 @@
    "en": "Topic: an explainer opener about how a seed becomes a tree, for a fictional school science channel, \"Margin Lab\".\nStory: on a pale warm page, a big card is laid down, then small coloured label chips; a clean pen diagram of a seed, a sprout and a sapling is inked on the card; typed labels strike on one letter at a time; one small vintage engraving of a leaf sits in the corner; a red pen circles the sprout and a blue pencil adds one arrow.\nMedium: a quiet archival scrapbook: flat pieces of coloured stock with a fine even deckle, each throwing the same soft shadow down-right, thin unhatched technical-pen diagrams, typewriter labels, one engraving as ornament, red and blue notes used once or twice; a mostly empty page.\nMood: curious, tidy, thoughtful. About 12 seconds.",
    "credit": {
     "text": "Written from the anidoodle house style recipe by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/styles/house/quiet-scrapbook.json"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/styles/house/quiet-scrapbook.json"
    }
   },
   "brush-cartoon": {
@@ -1674,7 +1674,7 @@
    },
    "credit": {
     "text": "Written from the anidoodle workflow by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/workflows/drawing-process.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/workflows/drawing-process.md"
    },
    "en": "Kind: a picture that draws itself. Subject: a lotus pond at dawn for a tea brand, \"Sen\". The film: one picture made mark by mark, in the order an artist in this medium works: the bare paper first, then the first mass of the water, the lotus leaves, the flowers, the shadows and the last highlights; the finished picture holds at the end with the words \"Sen. Slow tea.\" Every mark grows where the tool touches, nothing fades in; a slow camera push over the whole drawing. Mood: calm, patient. About 15 seconds.",
    "vi": "Kiểu phim: một bức tranh tự vẽ ra. Chủ đề: hồ sen lúc bình minh cho thương hiệu trà \"Sen\". Phim là một bức tranh vẽ từng nét theo đúng thứ tự người vẽ chất liệu này: giấy trắng trước, rồi mảng đầu tiên của mặt hồ, lá sen, hoa, bóng đổ và những điểm sáng cuối cùng; bức tranh hoàn chỉnh dừng ở cuối cùng dòng chữ \"Sen. Trà chậm.\" Mỗi nét mọc ra từ chỗ công cụ chạm, không gì hiện mờ dần; máy quay đẩy vào chậm suốt bức vẽ. Cảm giác: tĩnh, kiên nhẫn. Khoảng 15 giây."
@@ -1688,7 +1688,7 @@
    },
    "credit": {
     "text": "Written from the anidoodle workflow by Alex Greenshpun (10x Company), Apache-2.0",
-    "link": "https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/references/workflows/launch-video.md"
+    "link": "https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/references/workflows/launch-video.md"
    },
    "en": "Kind: a product launch film. Product: \"Lumi\", a pocket reading lamp (a made-up product; its facts below are examples to replace with your own). The film: the problem in one shot (reading in the dark, squinting), the product revealed, three facts each on its own beat (it clips on any book; 20 hours on one charge; three warm light levels), then the name and \"Read anywhere.\" on the end card. Label anything made up \"Example\". Drawn in the medium's own hand. Mood: bright, confident. About 20 seconds.",
    "vi": "Kiểu phim: phim ra mắt sản phẩm. Sản phẩm: \"Lumi\", đèn đọc sách bỏ túi (sản phẩm giả định; các ý dưới đây là ví dụ để thay bằng của bạn). Phim: vấn đề trong một cảnh (đọc trong tối, nheo mắt), sản phẩm hiện ra, ba ý mỗi ý một nhịp (kẹp vào mọi cuốn sách; 20 giờ cho một lần sạc; ba mức ánh sáng ấm), rồi tên và \"Đọc ở bất cứ đâu.\" ở khung cuối. Điều gì tự đặt ra thì ghi nhãn \"Example\". Vẽ bằng nét của chính chất liệu. Cảm giác: sáng, tự tin. Khoảng 20 giây."
@@ -1701,7 +1701,7 @@
    },
    "credit": {
     "text": "Written from the What If formula of What If animation by FreshStack, MIT",
-    "link": "https://github.com/kelano86/what-if-animation/blob/3725a22d2d101320cae5b7d761af8d75120c4987/references/formula.md"
+    "link": "https://github.com/kelano86/what-if-animation/blob/8092fb5e825e55456d1d47fec0ebf595cb93cc0d/references/formula.md"
    },
    "en": "Topic: What if you could talk to animals?\nCold open, three quick demos, the power's word every time: your cat says the food is late (\"Listen.\"), a pigeon gives you directions, the neighbour's dog tells you a secret about the neighbour.\nTitle card: WHAT IF YOU COULD / TALK TO ANIMALS?\nThe turn: one true fact with a number about how many animals live around one person in a city (find it and cite the source; no source, no number), then: \"And they all want to talk to you.\"\nOur own characters. Second person, short lines, about 20 seconds.",
    "vi": "Chủ đề: Nếu bạn nói chuyện được với động vật thì sao?\nMở đầu bằng ba cảnh thử nhanh, mỗi lần đều nói từ của năng lực: con mèo bảo cơm muộn rồi (\"Nghe này.\"), chim bồ câu chỉ đường cho bạn, con chó nhà bên kể một bí mật về chủ nó.\nThẻ tiêu đề: NẾU BẠN CÓ THỂ / NÓI CHUYỆN VỚI ĐỘNG VẬT?\nCú ngoặt: một sự thật có con số về số con vật sống quanh một người ở thành phố (tìm và ghi nguồn; không có nguồn thì không dùng số), rồi: \"Và tất cả đều muốn nói chuyện với bạn.\"\nNhân vật của riêng phim. Ngôi thứ hai, câu ngắn, khoảng 20 giây."
@@ -1712,7 +1712,7 @@
    },
    "credit": {
     "text": "Written from the What If formula of What If animation by FreshStack, MIT",
-    "link": "https://github.com/kelano86/what-if-animation/blob/3725a22d2d101320cae5b7d761af8d75120c4987/references/formula.md"
+    "link": "https://github.com/kelano86/what-if-animation/blob/8092fb5e825e55456d1d47fec0ebf595cb93cc0d/references/formula.md"
    },
    "en": "Topic: What if your phone never ran out of battery?\nCold open, three quick demos, the power's word every time (\"Full.\"): a call that never drops, a night of maps on a road trip, a video that plays for a week.\nTitle card: WHAT IF YOUR PHONE / NEVER DIED?\nThe turn: one true fact with a number about how much energy that would take (find it and cite the source; no source, no number), then: \"So where is it coming from?\"\nSecond person, lines of 3 to 8 words, each line one picture, about 20 seconds.",
    "vi": "Chủ đề: Nếu điện thoại của bạn không bao giờ hết pin thì sao?\nMở đầu bằng ba cảnh thử nhanh, mỗi lần đều nói từ của năng lực (\"Đầy pin.\"): cuộc gọi không bao giờ rớt, cả đêm dùng bản đồ trên đường đi, một video chạy suốt một tuần.\nThẻ tiêu đề: NẾU ĐIỆN THOẠI / KHÔNG BAO GIỜ TẮT?\nCú ngoặt: một sự thật có con số về lượng năng lượng cần có (tìm và ghi nguồn; không có nguồn thì không dùng số), rồi: \"Vậy nó lấy từ đâu ra?\"\nNgôi thứ hai, mỗi câu 3 đến 8 chữ, mỗi câu một hình, khoảng 20 giây."

@@ -63,7 +63,7 @@ export default function StyleCrates() {
   const [vn, setVn] = usePref("studio:styles:vn", "all");
   const [apply, setApply] = useState(null);
   const soon = (data?.comingSoon ?? []).map((x) => ({ ...WHAT_IF, ...x, author: x.author === "FreshStack" ? "freshstack" : x.author, available: false, comingSoon: true }));
-  const styles = useMemo(() => (data ? [...data.styles, ...(soon.length ? soon : data.styles.some((s) => authorOf(s) === "freshstack") ? [] : [WHAT_IF])] : []), [data]); // eslint-disable-line react-hooks/exhaustive-deps
+  const styles = useMemo(() => (data ? [...data.styles, ...(soon.length ? soon : data.styles.some((s) => s.id === "what-if") ? [] : [WHAT_IF])] : []), [data]); // eslint-disable-line react-hooks/exhaustive-deps
   const authors = useMemo(() => authorsOf(data), [data]);
   const A = useMemo(() => Object.fromEntries(authors.map((a) => [a.id, a])), [authors]);
   const rank = useMemo(() => styleRank(styles), [styles]);

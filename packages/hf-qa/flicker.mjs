@@ -52,7 +52,7 @@ export function flickers(frames, fps, { jump = JUMP, cells = CELLS, small = SMAL
 const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 /** Tech checks' G-FLICKER: "not checked" (said) before there is a render of the film as it is; else pass, or one warning with where. file: a video to read (tests). */
 export async function gateFlicker(projectDir, { file = null } = {}) {
-  const video = file ?? await freshRender(projectDir).catch(() => null);
+  const video = file ?? await freshRender(projectDir, { picture: true }).catch(() => null);          // the picture only (T40-17)
   // no render of the film as it is yet (it was just changed; the preview is made after the Build and after each change): said, never silent (owner #1175)
   if (!video) { const why = "Waiting for the preview of the film as it is now: it is made after the Build and after each change, then this check runs.";
     return { id: "G-FLICKER", blocking: false, pass: true, notChecked: true, why, findings: [{ severity: "info", code: "not_checked", message: why, plain: why }] }; }

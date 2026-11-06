@@ -1,4 +1,4 @@
-# Motion Prompt catalog (ja) · 168 elements · https://showheyohtaki.github.io/motion-prompt/ · columns: id	pack	category	title	tags	summary
+# Motion Prompt catalog (ja) · 192 elements · https://showheyohtaki.github.io/motion-prompt/ · columns: id	pack	category	title	tags	summary
 001	motion	登場・文字の演出	ポップイン (Pop-in)	pop,pop-in,spring,bounce,scale,icon,badge,entrance	アプリのアイコンがポンと弾んで現れ、通知バッジが遅れてポンと出る。
 002	motion	登場・文字の演出	スタガー (Stagger)	stagger,sequence,delay,cascade,bar-chart,list,entrance	グラフの棒が、少しずつ時間をずらして左から順に立ち上がる。
 003	motion	登場・文字の演出	バースト (Burst)	burst,explosion,radial,like,heart,celebrate,accent,sparkle	「いいね」のハートが点くと同時に、まわりに輪・線・粒が弾ける。
@@ -167,3 +167,27 @@
 166	lp2	見せ場の演出	いいねアニメーション (Like button animation)	like-button,heart,microinteraction,burst,favorite,counter	ハートを押すと赤く塗られてポンと弾み、周りに小さな粒が散って、横の数字が1つ増える。もう一度押すと元に戻る。
 167	lp2	見せ場の演出	スクロールダウンの合図 (Scroll-down cue)	scroll-cue,scroll-indicator,scroll-down,hero,arrow,loop	ファーストビューの下で、「SCROLL」の文字とマウスの形の中の点、両わきの矢印が、下へ促す動きをくり返す。
 168	lp2	見せ場の演出	背景動画 (Background video)	background-video,hero,video,autoplay,loop,first-view	ファーストビューの背景で雲と波が流れ続け、その上に見出しとボタンが動かずに乗っている。
+169	camera2	カメラの動き	ペデスタル (Pedestal)	pedestal,boom,vertical move,rise,elevate,camera move,no tilt	カメラが向きを変えずに真上へ平行移動する。地平線は画面の中央のまま、人物と建物が下へ流れる。
+170	camera2	カメラの動き	バレルロール (Barrel roll)	barrel roll,roll,360,rotate,spin,aerial,camera move	カメラがレンズの軸でぐるりと1回転し、地平線が一周して元に戻る。
+171	camera2	カメラの動き	ハイパーラプス (Hyperlapse)	hyperlapse,time-lapse,moving timelapse,fast forward,travel,city,camera move	街路を前へ進みながら、太陽・雲・人影が早送りで動く。タイムラプスとカメラの移動を同時に行う。
+172	camera2	カメラの動き	長回し (Long take)	long take,oner,one shot,continuous,no cut,sequence shot,camera move	歩く人物をカットなしで追い続ける1ショット。画面下の帯は切れ目のない1本のまま。
+173	camera2	カメラの動き	ステディカム (Steadicam)	steadicam,gimbal,stabilizer,smooth,glide,floating,camera move	細かい揺れのない、ゆっくり大きなうねりだけで前へ進み、歩く人物を追う。手持ちとの違いが分かる。
+174	camera2	カメラの動き	フォローショット (Follow shot)	follow shot,follow,behind,third person,trail,walk,camera move	蛇行して歩く人物の後ろを、同じ道筋で少し遅れてついていく。人物は中央付近に留まり、背中が見える。
+175	camera2	カメラの動き	ロックオフ (Locked-off shot)	locked-off,locked off,static shot,fixed camera,tripod,static,still camera	三脚で固定したカメラの前を人物が横切り、奥を車が通る。カメラは1pxも動かない。
+176	camera2	カメラの動き	フライスルー (Fly-through)	fly-through,flythrough,through the window,pass through,drone,interior,camera move	窓のあいた壁へ向かって進み、窓を通り抜けて向こう側の場所へ出る。
+177	camera2	アングル・画づくり	ローアングル (Low angle)	low angle,worm's eye,look up,from below,power,heroic,angle	カメラを地面近くまで下げて見上げる。人物が大きく、建物が高くそびえて見える。
+178	camera2	アングル・画づくり	ハイアングル (High angle)	high angle,look down,from above,overhead,vulnerable,angle	カメラを高い位置へ上げて見下ろす。人物が小さく、地面が画面の大半を占める。
+179	camera2	アングル・画づくり	POVショット (POV shot)	pov,point of view,first person,subjective,eyes,hands,angle	登場人物の目で見た画。歩く揺れと画面下の両手で一人称だと分かり、前の人物がこちらに手を振る。
+180	camera2	アングル・画づくり	オーバーザショルダー (Over-the-shoulder)	over-the-shoulder,ots,dialogue,conversation,shoulder,two shot,angle	手前の人物の後頭部と肩を画面の端に入れ、その肩越しに相手を撮る。手前はぼけ、相手にピント。
+181	camera2	アングル・画づくり	バーズアイ (Bird's-eye view)	bird's-eye,birds eye,top-down,overhead,straight down,aerial,angle	真上から真下を見下ろす。道・人・車・木がすべて上から見た形になり、上がるほど広い範囲が見える。
+182	camera2	アングル・画づくり	ディープフォーカス (Deep focus)	deep focus,depth of field,everything sharp,f/16,small aperture,pan focus,focus	手前の花から奥の人物・建物まで、同時に全部にピントが合っていく。
+183	camera2	アングル・画づくり	エスタブリッシングショット (Establishing shot)	establishing shot,wide shot,location,opening,scene setting,aerial,framing	広角・高い位置から街全体を見せる引きの画。ゆっくり寄りながら、場所の表示が左下に出る。
+184	camera2	アングル・画づくり	エクストリームクローズアップ (Extreme close-up)	extreme close-up,ecu,close-up,eye,detail,macro,framing	顔のクローズアップから、目だけが画面を埋めるまで寄る。
+185	camera2	切り替え・編集	インサートショット (Insert shot)	insert shot,insert,detail,close-up,cut in,prop,edit	人物の場面に、同じ場面の手元の時計の大写しを1.3秒だけ差し込み、元の画へ戻る。
+186	camera2	切り替え・編集	モーフカット (Morph cut)	morph cut,morph,seamless,interview,talking head,edit,transition	同じ人物の2つのテイクを、位置と姿勢をなめらかに補間してつなぐ。ジャンプカットのように飛ばない。
+187	camera2	切り替え・編集	フェードアウト (Fade to black)	fade to black,fade out,fade in,black,ending,transition	画面全体が黒へ沈んで終わり、黒から次の場面が明けてくる。
+188	camera2	切り替え・編集	アイリスアウト (Iris out)	iris out,iris in,iris wipe,circle,old film,cartoon,transition	人物を中心に丸い窓が閉じて黒になり、次の場面は丸い窓が開いて現れる。
+189	camera2	切り替え・編集	カットアウェイ (Cutaway)	cutaway,reaction shot,b-roll,cut away,audience,edit	話す人物の場面から、聞いている客席へ切り替えて戻る。差し込むのは別の対象。
+190	camera2	切り替え・編集	クロスカッティング (Cross-cutting)	cross-cutting,parallel editing,intercut,parallel action,chase,edit	同時に進む2つの場面（走る人物と走る車）を、だんだん短く交互に見せる。
+191	camera2	切り替え・編集	バレットタイム (Bullet time)	bullet time,time slice,frozen moment,orbit,slow motion,matrix,effect	跳躍の頂点で時間がほぼ止まり、その間にカメラが人物の周りを回り込む。
+192	camera2	切り替え・編集	モンタージュ (Montage)	montage,sequence,training montage,time passing,quick cuts,edit	7つの短いカットで30日分の練習を見せる。つなぎは直結で、右上の日付が飛ぶ。

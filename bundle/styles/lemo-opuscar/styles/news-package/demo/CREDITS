@@ -17,7 +17,8 @@ Data
 
 Map data
 - Natural Earth 1:50m Admin 0 countries — public domain (naturalearthdata.com), via world-atlas 2.0.2 (ISC licence,
-  https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json)
+  https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-50m.json). Only the 27 EU member states are drawn as
+  separate shapes; all other land is merged into one shape with no borders inside it (tools/prep.py).
 
 Music samples
 - VS Chamber Orchestra: Community Edition, Versilian Studios / Sam Gossner — CC0 1.0 (github.com/sgossner/VSCO-2-CE)

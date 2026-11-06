@@ -51,7 +51,7 @@ export const LOOKS: Record<CastName, Look> = {
 // ---------- the hero ----------
 /** Mitten hands: open (a palm and a thumb) or pointing (a fist with the index finger out). */
 export type HandKind = 'open' | 'point';
-export type Expr = 'neutral' | 'happy' | 'smug' | 'shock' | 'worried' | 'oops' | 'cool' | 'dizzy';
+export type Expr = 'neutral' | 'happy' | 'smug' | 'shock' | 'worried' | 'oops' | 'cool' | 'dizzy' | 'tired';
 export type Limb = { a: number; b: number }; // a: upper segment angle, b: bend of the lower segment (degrees)
 export type Pose = {
   x: number;
@@ -74,6 +74,8 @@ export type Pose = {
   handL: HandKind;
   handR: HandKind;
   sway: number; // secondary motion: how far loose things (the hood's drawstrings) swing, degrees-ish
+  glint?: number; // 0..1 the eyes light up in the power's colour (set it after poseAt: it isn't interpolated)
+  glintColor?: string;
 };
 
 export const basePose: Pose = {
@@ -217,19 +219,28 @@ export const reachAngle = (pose: Pose, target: P) => {
   return world - pose.tilt;
 };
 
-const Face: React.FC<{ expr: Expr; blink: number; look: number; glasses: number; yaw?: number; ink?: string }> = ({ expr, blink, look, glasses, yaw = 0, ink = C.ink }) => {
+const Face: React.FC<{ expr: Expr; blink: number; look: number; glasses: number; yaw?: number; ink?: string; glint?: number; glintColor?: string }> = ({ expr, blink, look, glasses, yaw = 0, ink = C.ink, glint = 0, glintColor = '#8FF0FF' }) => {
   const ex = look * 7;
   const ay = Math.min(1, Math.abs(yaw));
   const farHidden = ay > 0.72;
   const farSide = yaw > 0 ? -1 : 1; // facing screen-right hides the screen-left eye
   const eyeY = HEAD.y - 4;
-  const lid = expr === 'smug' || expr === 'cool' ? 0.45 : 0;
+  // heavy lids: half shut when smug or cool, more than half when tired (with dark rings under the eyes)
+  const lid = expr === 'smug' || expr === 'cool' ? 0.45 : expr === 'tired' ? 0.58 : 0;
   const open = Math.max(0.08, 1 - Math.max(blink, lid));
   const eye = (cx: number) => {
     if (farHidden && Math.sign(cx) === farSide) return null;
     if (expr === 'happy') return <path d={`M ${cx - 10} ${eyeY + 3} Q ${cx} ${eyeY - 9} ${cx + 10} ${eyeY + 3}`} stroke={ink} strokeWidth={6} fill="none" strokeLinecap="round" />;
     if (expr === 'oops') return <path d={`M ${cx - 9} ${eyeY - 6} L ${cx + 4} ${eyeY} L ${cx - 9} ${eyeY + 6}`} transform={cx > 0 ? `translate(${2 * cx},0) scale(-1,1)` : undefined} stroke={ink} strokeWidth={6} fill="none" strokeLinecap="round" strokeLinejoin="round" />;
     if (expr === 'dizzy') return <g stroke={ink} strokeWidth={5} strokeLinecap="round"><path d={`M ${cx - 7} ${eyeY - 7} L ${cx + 7} ${eyeY + 7} M ${cx + 7} ${eyeY - 7} L ${cx - 7} ${eyeY + 7}`} /></g>;
+    // shut (a blink's middle frame, or asleep): the closed lid's curve, with the tired rings kept
+    if (blink >= 0.95)
+      return (
+        <g>
+          <path d={`M ${cx - 12} ${eyeY + 1} Q ${cx} ${eyeY + 8} ${cx + 12} ${eyeY + 1}`} stroke={ink} strokeWidth={5} fill="none" strokeLinecap="round" />
+          {expr === 'tired' ? <path d={`M ${cx - 12} ${eyeY + 15} Q ${cx} ${eyeY + 22} ${cx + 12} ${eyeY + 15}`} stroke="#8C7AA6" strokeWidth={4.5} fill="none" strokeLinecap="round" opacity={0.85} /> : null}
+        </g>
+      );
     const big = expr === 'shock';
     const rx = big ? 11 : 7;
     const ry = (big ? 13 : 10) * open;
@@ -237,7 +248,8 @@ const Face: React.FC<{ expr: Expr; blink: number; look: number; glasses: number;
       <g>
         <ellipse cx={cx + ex} cy={eyeY + (lid ? 3 : 0)} rx={rx} ry={ry} fill={ink} />
         {big && open > 0.5 ? <circle cx={cx + ex + 3.5} cy={eyeY - 4} r={3.4} fill="#fff" /> : null}
-        {lid ? <path d={`M ${cx - 12} ${eyeY - 4} L ${cx + 12} ${eyeY - 2}`} stroke={ink} strokeWidth={4} strokeLinecap="round" /> : null}
+        {lid ? <path d={expr === 'tired' ? `M ${cx - 13} ${eyeY - 1} Q ${cx} ${eyeY - 5} ${cx + 13} ${eyeY - 1}` : `M ${cx - 12} ${eyeY - 4} L ${cx + 12} ${eyeY - 2}`} stroke={ink} strokeWidth={4} strokeLinecap="round" fill="none" /> : null}
+        {expr === 'tired' ? <path d={`M ${cx - 12} ${eyeY + 14} Q ${cx} ${eyeY + 21} ${cx + 12} ${eyeY + 14}`} stroke="#8C7AA6" strokeWidth={4.5} fill="none" strokeLinecap="round" opacity={0.85} /> : null}
       </g>
     );
   };
@@ -250,6 +262,7 @@ const Face: React.FC<{ expr: Expr; blink: number; look: number; glasses: number;
     oops: `M -32 ${eyeY - 20} L -12 ${eyeY - 16} M 12 ${eyeY - 16} L 32 ${eyeY - 20}`,
     cool: '',
     dizzy: '',
+    tired: `M -33 ${eyeY - 17} Q -22 ${eyeY - 21} -11 ${eyeY - 19} M 11 ${eyeY - 19} Q 22 ${eyeY - 21} 33 ${eyeY - 17}`,
   };
   const mY = HEAD.y + 28;
   const mouth: Record<Expr, React.ReactNode> = {
@@ -261,6 +274,7 @@ const Face: React.FC<{ expr: Expr; blink: number; look: number; glasses: number;
     oops: <g><rect x={-18} y={mY - 6} width={36} height={16} rx={6} fill={ink} /><path d={`M -14 ${mY + 2} L 14 ${mY + 2}`} stroke="#fff" strokeWidth={3} /></g>,
     cool: <path d={`M -12 ${mY + 2} Q 4 ${mY + 8} 16 ${mY - 6}`} stroke={ink} strokeWidth={5} fill="none" strokeLinecap="round" />,
     dizzy: <path d={`M -14 ${mY + 4} Q -7 ${mY - 4} 0 ${mY + 4} Q 7 ${mY + 12} 14 ${mY + 4}`} stroke={ink} strokeWidth={5} fill="none" strokeLinecap="round" />,
+    tired: <path d={`M -11 ${mY + 4} Q 0 ${mY} 11 ${mY + 4}`} stroke={ink} strokeWidth={5} fill="none" strokeLinecap="round" />,
   };
   return (
     <g transform={`translate(${yaw * 30} 0) scale(${1 - 0.28 * ay} 1)`}>
@@ -269,6 +283,19 @@ const Face: React.FC<{ expr: Expr; blink: number; look: number; glasses: number;
       {brows[expr] ? <path d={brows[expr]} stroke={ink} strokeWidth={5} fill="none" strokeLinecap="round" /> : null}
       {mouth[expr]}
       {expr === 'shock' || expr === 'oops' ? <path d={`M 52 ${HEAD.y - 30} q 6 10 0 16 q -6 -6 0 -16 Z`} fill="#8FD3FF" /> : null}
+      {/* a power lighting the eyes: a soft halo, a bright iris, a white catchlight (none while the lids are shut) */}
+      {glint > 0.01 && blink < 0.95
+        ? [-21, 21].map((cx) =>
+            farHidden && Math.sign(cx) === farSide ? null : (
+              <g key={`gl${cx}`} opacity={Math.min(1, glint)}>
+                <circle cx={cx + ex} cy={eyeY} r={17} fill={glintColor} opacity={0.2} />
+                <circle cx={cx + ex} cy={eyeY} r={12} fill={glintColor} opacity={0.28} />
+                <ellipse cx={cx + ex} cy={eyeY + (lid ? 3 : 0)} rx={8} ry={Math.max(2, 11 * open)} fill={glintColor} />
+                <circle cx={cx + ex + 2.5} cy={eyeY - 3} r={2.6} fill="#FFFFFF" />
+              </g>
+            ),
+          )
+        : null}
       {glasses > 0.01 ? (
         <g opacity={glasses} transform={`translate(0 ${(1 - glasses) * -60})`}>
           {/* classic shades: a full bar across, two big lenses, one bright glint so it reads at feed size */}
@@ -371,7 +398,7 @@ export const Hero: React.FC<{ pose: Pose; shadow?: number; rimId?: string; look?
         // short combed-back hair with a hard side parting
         <path transform={`translate(${-pose.yaw * 14} 0)`} d={`M -60 ${HEAD.y - 18} Q -64 ${HEAD.y - 70} 4 ${HEAD.y - 68} Q 64 ${HEAD.y - 64} 60 ${HEAD.y - 18} Q 52 ${HEAD.y - 44} 18 ${HEAD.y - 46} L 12 ${HEAD.y - 54} L 6 ${HEAD.y - 46} Q -44 ${HEAD.y - 46} -60 ${HEAD.y - 18} Z`} fill={L.hair} />
       ) : null}
-      <Face expr={pose.expr} blink={pose.blink} look={pose.look} glasses={pose.glasses} yaw={pose.yaw} ink={L.face} />
+      <Face expr={pose.expr} blink={pose.blink} look={pose.look} glasses={pose.glasses} yaw={pose.yaw} ink={L.face} glint={pose.glint} glintColor={pose.glintColor} />
       {L.extra === 'curls'
         ? [-150, -125, -100, -78, -55, -30].map((deg, k) => {
             const a = (deg * Math.PI) / 180;

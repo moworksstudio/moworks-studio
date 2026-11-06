@@ -1,7 +1,7 @@
 # A lit-room, stick-figure look (reference only)
 
 Written from What If animation's `references/look.md` (FreshStack, MIT,
-https://github.com/kelano86/what-if-animation/blob/3725a22d2d101320cae5b7d761af8d75120c4987/references/look.md), the look its author
+https://github.com/kelano86/what-if-animation/blob/8092fb5e825e55456d1d47fec0ebf595cb93cc0d/references/look.md), the look its author
 measured on one kind of channel. **Only for a film whose style or brief asks for this look** (rooms in perspective, lit at dusk, simple
 characters). Never apply it to motion graphics, line art, ink, Sumi-e, paper or any style with its own light and texture: the film
 style's own look wins there.

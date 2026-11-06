@@ -611,7 +611,23 @@ export const safeFileName = (s, fallback = "file") => String(s ?? "").normalize(
 
 /** The path a new file takes in the project: its kind's folder, with " (2)", " (3)"… when the name is taken. */
 export function assetDestination(dir, name, role = null) {
-  const c = classifyAsset(name, role);
+  let c = classifyAsset(name, role);
+  // a sequence's frame only beside another frame of its name (in its footage folder, or still with the pictures): one still whose name
+  // ends in a number (a year: fluyt-ship-1642.jpg) is a picture (T43-1); the next frame of that name makes it a sequence, and the
+  // layout moves the first one to it (layout.mjs migrateLayout)
+  if (c.sequence) {
+    const base = sequenceOf(name).base.toLowerCase();
+    const has = (rel) => { try { return readdirSync(join(dir, "assets", ...rel.split("/"))).some((f) => f !== name && sequenceOf(f)?.base.toLowerCase() === base); } catch { return false; } };
+    if (!has(c.folder) && !has(`${DESIGN_DIR}/images`)) c = { area: "assets", folder: `${DESIGN_DIR}/images`, kind: "image" };
+    else if (!has(c.folder)) {
+      // the second frame of a sequence being imported: the first, put with the pictures a moment ago, joins it (one taken in earlier stays)
+      const pics = join(dir, "assets", DESIGN_DIR, "images"), to = join(dir, "assets", ...c.folder.split("/"));
+      for (const f of readdirSync(pics)) {
+        if (f === name || sequenceOf(f)?.base.toLowerCase() !== base) continue;
+        try { if (Date.now() - statSync(join(pics, f)).mtimeMs < 10 * 60 * 1000) { mkdirSync(to, { recursive: true }); renameSync(join(pics, f), join(to, f)); } } catch { /* the layout moves it later */ }
+      }
+    }
+  }
   const clean = safeFileName(name);
   const folder = c.area === "sources" ? join(dir, "sources") : join(dir, "assets", ...c.folder.split("/"));
   mkdirSync(folder, { recursive: true });

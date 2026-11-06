@@ -128,7 +128,9 @@ export function keptFor(f, kept) {
 export function lookAt(report) {
   const checks = report?.checks ?? report?.gates ?? [];
   const blocking = checks.filter((c) => c.blocking && !c.pass && !unchecked(c)).map((c) => ({ ...c, items: groupFindings(c.findings) }));
-  const skipped = checks.filter((c) => !c.pass && (unchecked(c) || outOfTime(c)));
+  // a check that could not run is said as not checked whatever its pass (G-FLICKER waiting for the preview passes, so the render is not held:
+  // T43-3, the dialog said nothing of it)
+  const skipped = checks.filter((c) => c.notChecked === true || (!c.pass && (unchecked(c) || outOfTime(c))));
   const meant = [];
   const flagged = checks.filter((c) => !(c.blocking && !c.pass) && !unchecked(c) && !outOfTime(c))
     .map((c) => {

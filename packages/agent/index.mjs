@@ -1396,9 +1396,30 @@ export class Agent {
     const log = await rev.logAsync(p.path, 400);
     const span = []; let inside = false;
     for (const c of log) { if (c.rev === t.revAfter) inside = true; if (c.rev === t.revBefore) break; if (inside) span.push(c.rev); }
+    // the app's own follow-up to the change: the sound effects it placed again right after it (autopilot: cuesAgain / timesAgain, a commit
+    // of their own). They go with it, newest first (T41-12: the twinkle Claude's change had named stayed after its Undo). Only the ones
+    // straight after the change, within 10 minutes of it, with nothing newer on top: a Final Mix the user ran later stays
+    const end = log.findIndex((c) => c.rev === t.revAfter);
+    if (span.length && end > 0) {
+      const at0 = Date.parse(log[end].at), follow = [];
+      for (let i = end - 1; i >= 0; i--) {
+        const c = log[i];
+        if (!String(c.message).startsWith(`${rev.SOUND_MIX}: sound effects`) || !(Date.parse(c.at) - at0 <= 10 * 60 * 1000)) break;
+        follow.unshift(c.rev);
+      }
+      if (follow.length && follow[0] === log[0].rev) span.unshift(...follow);
+    }
     let r = null;
     for (const c of span) r = await rev.revertAsync(p.path, c);     // newest first
     t.reverted = { at: new Date().toISOString(), rev: r };
+    // the approvals the change had moved with it follow the Undo back (T43-5, T41-13: after an Undo the Storyboard and the Motion Plan
+    // asked to be approved again): the Undo is the user's own request, as the change was
+    const pm = this.getProject(projectId)?.meta ?? {};
+    if (pm.approvals?.storyboard || pm.approvals?.motionPlan) {
+      const order = [...(this.stepOf?.(pm, null, true) ?? []).map((x) => x.id), "feedback"];
+      const sb = existsSync(join(p.path, "STORYBOARD.md")) ? readFileSync(join(p.path, "STORYBOARD.md"), "utf8") : null;
+      try { this.updateMeta?.(projectId, (m) => { followApprovals(m, { storyboardText: sb, motionPlanHash: readMotionPlan(p.path).hash, stepId: "feedback", taskId: t.id, order, what: "Undo" }); }); } catch { /* the Pipeline asks again */ }
+    }
     const live = this.tasks.get(taskId); if (live) live.reverted = t.reverted;
     this.persist(live ?? { ...t, events: t.events ?? [] });
     return t;

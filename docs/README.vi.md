@@ -132,13 +132,12 @@ giấy phép và đúng commit nguồn. File style của bên thứ ba được 
 |---|---|---|---|---|
 | **General Style** | Moworks | 1 | bộ luật riêng của app | viết lại cho app từ quy trình của bộ kit Moworks Motion |
 | **Map Explainer** | Moworks | 1: bản đồ giấy và mặt đất thật dưới một camera liền, bút đỏ vẽ lên trên | bộ luật riêng của app, dữ liệu bản đồ từ [Natural Earth](https://www.naturalearthdata.com) và [world-atlas](https://github.com/topojson/world-atlas/tree/v2.0.2), ảnh vệ tinh từ [EOX](https://cloudless.eox.at) (CC BY 4.0) | làm riêng cho app; mọi nguồn ở [THIRD-PARTY.md](THIRD-PARTY.md) |
-| **Film style Moworks** | Moworks | 6: Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, Moworks 2D Explainer và Ricks Clip, mỗi style có bước kiểm riêng của skill gốc trong Review và tiếng động làm bằng code | sản phẩm riêng của app | các skill gốc riêng của Moworks Studio, ghim trong app; mọi phần bên ngoài ghi ở [THIRD-PARTY.md](THIRD-PARTY.md) |
+| **Film style Moworks** | Moworks | 7: Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, Moworks 2D Explainer, Ricks Clip và What If (chạy engine MIT của FreshStack), mỗi style có bước kiểm riêng của skill gốc trong Review và tiếng động làm bằng code | sản phẩm riêng của app | các skill gốc riêng của Moworks Studio, ghim trong app; mọi phần bên ngoài ghi ở [THIRD-PARTY.md](THIRD-PARTY.md) |
 | **HyperFrames** | HeyGen | 8: Slideshow và bảy loại phim trong skill của HyperFrames (Explainer, Launch, Music video, Data, Vertical, 3D, Character) | Apache-2.0 | [heygen-com/hyperframes @ `4719543`](https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/skills) (v0.8.214) |
-| **Lemo-Opuscar** | Lemomo (LemoLab) | 66 style phim dựng bằng code (các thời kỳ điện ảnh, tư liệu, editorial, dữ liệu…; Memphis Diorama do EianLu đóng góp) | MIT; ảnh mẫu CC BY 4.0 | [lemomo-ai/lemo-opuscar @ `ea34ff9`](https://github.com/lemomo-ai/lemo-opuscar/tree/ea34ff9546f675f9fd65a3c84e869a1da7471ad7) |
+| **Lemo-Opuscar** | Lemomo (LemoLab) | 66 style phim dựng bằng code (các thời kỳ điện ảnh, tư liệu, editorial, dữ liệu…; Memphis Diorama do EianLu đóng góp) | MIT; ảnh mẫu CC BY 4.0 | [lemomo-ai/lemo-opuscar @ `bebbbe1`](https://github.com/lemomo-ai/lemo-opuscar/tree/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00) |
 | **mg-styles-15** | Vincentwei1021 | 14 style motion design (style 3D dựng bằng Blender không có trong app) | MIT | [Vincentwei1021/mg-styles-15 @ `49052d8`](https://github.com/Vincentwei1021/mg-styles-15/tree/49052d80bfaf9fa8412cc9710530e5e95a3b8d8c) |
-| **Anidoodle** | Alex Greenshpun (10x Company) | 35 chất liệu vẽ tay (32 chất liệu + 3 house style) | Apache-2.0 kèm NOTICE | [alexgreensh/anidoodle @ `f746cbd`](https://github.com/alexgreensh/anidoodle/tree/f746cbd8a7032463bd0bc88ee8ff852599193b8c) (v0.9.6) |
+| **Anidoodle** | Alex Greenshpun (10x Company) | 35 chất liệu vẽ tay (32 chất liệu + 3 house style) | Apache-2.0 kèm NOTICE | [alexgreensh/anidoodle @ `4ae27d2`](https://github.com/alexgreensh/anidoodle/tree/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795) (v0.10.1) |
 | **Brush cartoon** | John Heibel | 1: hoạt hình nét cọ, do chính các nhân vật của dự án diễn | MIT (p5.js LGPL-2.1, p5.brush MIT) | [JohnHeibel/ClaudeAnimationBase @ `0ac8bf2`](https://github.com/JohnHeibel/ClaudeAnimationBase/tree/0ac8bf2b31942376cb6b8c4074715595d512acd2) |
-| **What If** | FreshStack (kelano86) | 1: các tập phim ngắn "What if…" | MIT | [kelano86/what-if-animation @ `3725a22`](https://github.com/kelano86/what-if-animation/tree/3725a22d2d101320cae5b7d761af8d75120c4987) |
 
 Mọi style còn theo hai bộ luật chung của app: **phim luôn sống động** (không khung hình nào đứng yên quá 2 giây) và **dừng lại hỏi**
 (mâu thuẫn hoặc thiếu chất liệu là câu hỏi cho bạn, không bao giờ là một phỏng đoán âm thầm).
@@ -160,7 +159,7 @@ Mọi style còn theo hai bộ luật chung của app: **phim luôn sống độ
 <td width="33%" valign="top"><img src="images/film-papercraft.jpg" alt="Thị trấn sân khấu giấy"><br><sub><b>Thị trấn sân khấu giấy</b> · Toy-theatre paper collage · style của Alex Greenshpun</sub></td>
 </tr>
 <tr>
-<td width="33%" valign="top"><img src="images/film-clouds.jpg" alt="Nếu ta gấp được mây thì sao?"><br><sub><b>Nếu ta gấp được mây thì sao?</b> · What If · style của FreshStack</sub></td>
+<td width="33%" valign="top"><img src="images/film-clouds.jpg" alt="Nếu ta gấp được mây thì sao?"><br><sub><b>Nếu ta gấp được mây thì sao?</b> · What If · Moworks Studio</sub></td>
 <td width="33%" valign="top"><img src="images/film-slideshow.jpg" alt="Một ngày leo núi"><br><sub><b>Một ngày leo núi</b> · Slideshow · style của HeyGen</sub></td>
 <td width="33%" valign="top"><img src="images/film-puzzle-cube.jpg" alt="Khối lập phương tách rời"><br><sub><b>Khối lập phương tách rời</b> · 3D · style của HeyGen</sub></td>
 </tr>

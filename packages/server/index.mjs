@@ -993,7 +993,10 @@ export function routes(ctx) {
     r("POST", `/tasks/${T}/cancel`, ([tid]) => ctx.agent.cancel(tid)),
     // a task Exit stopped, run again as it was ("Resume / Send again")
     r("POST", `/projects/${P}/tasks/${T}/again`, async ([id, tid]) => { mustProject(id, root); return { task: await ctx.agent.again(id, tid) }; }),
-    r("POST", `/projects/${P}/tasks/${T}/revert`, ([id, tid]) => ctx.agent.revert(id, tid)),
+    // after an Undo the sound effects follow the shots as they are now (T43-4: two sounds the change had moved stayed where it put them;
+    // Place them again fixed it): the user's own moves are kept, nothing happens when no shot moved (timesAgain)
+    r("POST", `/projects/${P}/tasks/${T}/revert`, async ([id, tid]) => { const t = await ctx.agent.revert(id, tid); const p = projects.getProject(id, root);
+      if (p && !p.missing) { try { await ctx.mix?.timesAgain?.(p); } catch { /* Final Mix's Place them again */ } } return t; }),
   ];
 }
 

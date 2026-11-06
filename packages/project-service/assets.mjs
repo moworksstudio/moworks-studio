@@ -71,6 +71,22 @@ export function referencedFiles(dir) {
       (refs.get(rel) ?? refs.set(rel, []).get(rel)).push(h);
     }
   }
+  // a film style's own code names its files from assets/ (a Moworks film style's staticFile("1_design/images/ship.jpg") in src/videos/film/
+  // Video.tsx; Ricks Clip's film/, a story film's story/, What If's whatif/, anidoodle's anidoodle/): those files play in the film's one page
+  // (T43-14: every picture of Test 43 read as used nowhere)
+  const code = [];
+  const walkCode = (d) => { if (!existsSync(d)) return; for (const n of readdirSync(d)) { const f = join(d, n); let st; try { st = statSync(f); } catch { continue; }
+    if (st.isDirectory()) { if (!/^(node_modules|\.git|cache)$/.test(n)) walkCode(f); } else if (/\.(tsx?|jsx?|mjs)$/i.test(n) && st.size < 4 << 20) code.push(f); } };
+  for (const top of ["src", "film", "story", "whatif", "anidoodle"]) walkCode(join(dir, top));
+  for (const f of code) {
+    let text = ""; try { text = readFileSync(f, "utf8"); } catch { continue; }
+    for (const m of text.matchAll(/["'`]((?:assets\/)?(?:1_design|2_footage|3_audio)\/[^"'`\n]+?)["'`]/g)) {
+      const rel = m[1].startsWith("assets/") ? m[1] : `assets/${m[1]}`;
+      if (!existsSync(join(dir, ...rel.split("/")))) continue;
+      const list = refs.get(rel) ?? refs.set(rel, []).get(rel);
+      if (!list.includes("index.html")) list.push("index.html");
+    }
+  }
   return refs;
 }
 
@@ -119,6 +135,9 @@ export function listAssets(dir, { shots = [], layers = [], meta = {}, remember =
   const usedIn = (p) => users(refs.get(p) ?? []);
   const items = [];
   const sequences = new Map(), appFonts = new Map();
+  // a sequence is two frames or more of one name in one folder: a lone still whose name ends in a number is a picture (T43-14, as T43-1)
+  const frameCount = new Map();
+  for (const f of files) { const nm = f.path.split("/").pop(), sq = IMAGE.test(nm) && sequenceOf(nm); if (sq) { const k = `${f.path.split("/").slice(0, -1).join("/")}/${sq.base}`; frameCount.set(k, (frameCount.get(k) ?? 0) + 1); } }
   const placed = appSounds(dir), made = appMade(dir, meta), uses = soundUses(dir);
   for (const f of files) {
     const name = f.path.split("/").pop();
@@ -134,7 +153,7 @@ export function listAssets(dir, { shots = [], layers = [], meta = {}, remember =
       continue;
     }
     const folder = f.path.split("/").slice(0, -1).join("/");
-    if (IMAGE.test(name) && sequenceOf(name)) {          // a numbered sequence: one row per folder and name, with its frame count
+    if (IMAGE.test(name) && sequenceOf(name) && (frameCount.get(`${folder}/${sequenceOf(name).base}`) ?? 0) >= 2) {          // a numbered sequence: one row per folder and name, with its frame count
       const key = `${folder}/${sequenceOf(name).base}`;
       const g = sequences.get(key) ?? { path: `${folder}/`, name: sequenceOf(name).base, folder, kind: "sequence", size: 0, frames: 0, status: "ok", usedIn: [], first: f.path };
       g.size += f.size; g.frames++;

@@ -1,6 +1,6 @@
 // G-CONTRACT: an anidoodle film's own modules hold the author's contract, read statically before the render.
-// The list of forbidden calls and the comment stripping are the author's, copied from engine/tools/gate.mjs L37-45 at the pinned commit
-// (https://github.com/alexgreensh/anidoodle/blob/f746cbd8a7032463bd0bc88ee8ff852599193b8c/skills/anidoodle/engine/tools/gate.mjs#L37-L45,
+// The list of forbidden calls and the comment stripping are the author's, copied from engine/tools/gate.mjs L48-56 at the pinned commit
+// (https://github.com/alexgreensh/anidoodle/blob/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795/skills/anidoodle/engine/tools/gate.mjs#L48-L56,
 // Alex Greenshpun, Apache-2.0); the app scans only the project's own TypeScript (anidoodle/, boards/), never the pinned engine.
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";

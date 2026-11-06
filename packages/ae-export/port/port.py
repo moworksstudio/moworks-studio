@@ -44,6 +44,8 @@ import asyncio, bisect, json, math, os, re, shutil, subprocess, sys, time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+# CSS generic font families: no font to install; AE gets the nearest Windows face (T42-13)
+GENERIC_FAMILIES = ("sans-serif", "system-ui", "serif", "monospace", "cursive", "fantasy", "emoji", "math", "fangsong", "ui-sans-serif", "ui-serif", "ui-monospace", "ui-rounded")
 if str(HERE) not in sys.path: sys.path.insert(0, str(HERE))
 import appenv                                                          # noqa: E402
 from appenv import WORK, bundled_font, film_dir, film_name, renders, say  # noqa: E402
@@ -509,14 +511,14 @@ def ae_font(family_css, weight, style, notes, size=None):
             cand = [f for f in F if f["fam"].replace(" ", "") in {x.lower().replace(" ", "") for x in names}]
             if cand: return min(cand, key=lambda f: (abs(f["w"] - w), f["italic"] != it))["ps"]
             notes.add(f"font \"{wf['family']}\" (the film's \"{fam}\") is not installed in Windows: AE substitutes it. Install its files "
-                      f"({wf['file'].parent}), then run the port again.")
+                      f"(the font files in the film's fonts folder, {wf['file'].parent.name}), then run the port again.")
             continue
         if wf:                                        # a variable web font of the film: the same font must be installed in Windows for AE
             real = wf["family"]; ps_base = real.replace(" ", "")
             sub = min(wf["inst"], key=lambda x: abs(x[0] - w))[1].replace(" ", "") if wf["inst"] else "Regular"
             if not any(f["fam"] == real.lower() for f in F):
                 kit_ttf = bundled_font(wf["file"].stem)
-                where = f"{kit_ttf} (right-click > Install)" if kit_ttf else f"{wf['file']} (right-click > Install)"
+                where = f"the font file {Path(kit_ttf or wf['file']).name} from the film's fonts folder (right-click > Install)"          # no address on screen (T40-19)
                 notes.add(f"font \"{real}\" (the film's \"{fam}\") is not installed in Windows: AE substitutes it. Install {where}, then run the port again.")
             if wf["inst"] and min(abs(x[0] - w) for x in wf["inst"]) > 0:
                 notes.add(f"font weight {w} of \"{real}\" becomes the nearest named weight {sub} in AE (AE text uses named weights)")
@@ -534,9 +536,11 @@ def ae_font(family_css, weight, style, notes, size=None):
         if cand:
             best = min(cand, key=lambda f: (abs(f["w"] - w), f["italic"] != it))
             return best["ps"]
-        if fam.lower() in ("sans-serif", "system-ui", "serif", "monospace"): continue
+        # CSS's generic families are no font to install (T42-13: "cursive" at 700 was reported as a missing font)
+        if fam.lower() in GENERIC_FAMILIES: continue
         notes.add(f"font \"{fam}\" (weight {w}) is not installed in Windows: AE substitutes it. Install the font, then run the port again.")
-    alias = {"sans-serif": "ArialMT", "system-ui": "SegoeUI", "serif": "TimesNewRomanPSMT", "monospace": "ConsolasRegular"}
+    alias = {"sans-serif": "ArialMT", "system-ui": "SegoeUI", "serif": "TimesNewRomanPSMT", "monospace": "ConsolasRegular", "cursive": "ComicSansMS",
+             "fantasy": "Impact", "ui-sans-serif": "SegoeUI", "ui-serif": "TimesNewRomanPSMT", "ui-monospace": "ConsolasRegular", "ui-rounded": "SegoeUI"}
     for fam in fams:
         if fam.lower() in alias: return alias[fam.lower()]
     return "ArialMT"
@@ -570,7 +574,9 @@ def film_kind(st, canvas, later=0):
     paint = [nd for nd in st["nodes"] if nd["kind"] != "clip"]
     cv = sum(1 for nd in paint if nd.get("tag") == "canvas")
     if canvas["count"] and cv == len(paint): return "canvas"
-    if later and later >= max(1, len(paint)): return "dynamic"
+    # half: a film that mounts its pictures as it plays (Paper Collage's React scenes: 82 elements only later beside 106 layers, most of them
+    # its captions' two layers each) recorded what stood at 0 s and gave After Effects a black film with its captions (T43-17)
+    if later and later >= max(1, len(paint) * 0.5): return "dynamic"
     if not paint: return "empty"
     return "mostly-canvas" if cv and canvas["area"] >= 0.5 else "layers"
 

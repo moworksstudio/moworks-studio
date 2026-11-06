@@ -40,7 +40,8 @@ export function sfxCover(dir, shots, plan) {
   // (fewer sounds asked for, normal or low: what was thinned for it counts as placed, as before)
   const lively = (st.policy?.density ?? "lively") === "lively";
   // (a repeat past MAX_REPEATS left out is the owner's own rule against one file over and over, Test 26: counted as placed)
-  const merged = (st.thinned ?? []).filter((m) => !lively || m.why === "same moment" || m.why === "named" || m.why === "repeat");
+  // a place's sound left to the scene's ambience bed (auto.mjs planCues, T42-12) is heard there
+  const merged = (st.thinned ?? []).filter((m) => !lively || m.why === "same moment" || m.why === "named" || m.why === "repeat" || m.why === "ambience");
   const times = [...(st.mounted ?? []).map((m) => m.start), ...clips, ...merged.map((m) => m.start), ...(st.muted ?? []).map((m) => m.start)];
   const ids = new Set([...(st.mounted ?? []), ...merged].map((m) => m.id).filter(Boolean));
   const skip = new Set(prefs.skip ?? []);
@@ -49,7 +50,7 @@ export function sfxCover(dir, shots, plan) {
     if (sfxNone(s)) return;          // the storyboard says this shot is silent
     const motions = plan.shots.find((x) => x.shot === s.number)?.motions ?? [];
     const cut = i > 0 && whooshInto(s, placed[i - 1], plan);
-    for (const c of motionCues(s, motions, { allow, surface: placeOf(s)?.surface ?? null, skipCut: cut })) {
+    for (const c of motionCues(s, motions, { allow, surface: placeOf(s)?.surface ?? null, skipCut: cut, textSilent: !!st.policy?.textSilent })) {
       const base = c.id.replace(/:\d+$/, "");          // a walk's steps are one motion
       if (c.alt || (c.small && !lively) || seen.has(base) || isOff(prefs, c) || skip.has(c.id) || skip.has(base)) continue;
       if (ids.has(c.id) || times.some((t) => Math.abs(t - c.start) <= NEAR_S)) { seen.add(base); continue; }

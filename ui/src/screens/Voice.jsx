@@ -210,7 +210,7 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
 
     {source === "kokoro" && d && d.kokoro.blocked && <section className="panel"><p className="secondary">{t("Kokoro has no Vietnamese voice. Choose ElevenLabs or upload a recording.")}</p></section>}
     {source === "kokoro" && d && !d.kokoro.blocked && !d.kokoro.installed && <KokoroInstall size={d.kokoro.mb} onDone={() => { v.reload(); }} />}
-    {(source === "elevenlabs" || (source === "kokoro" && d?.kokoro.installed && !d.kokoro.blocked)) && d && <TtsPanel id={id} provider={source} keySaved={source === "kokoro" || d.keys[source].saved} brief={project.data?.meta?.brief} draft={d.scriptDraft?.text ?? ""} language={d.settings.language} onJob={follow} running={running}
+    {(source === "elevenlabs" || (source === "kokoro" && d?.kokoro.installed && !d.kokoro.blocked)) && d && <TtsPanel id={id} provider={source} keySaved={source === "kokoro" || d.keys[source].saved} brief={project.data?.meta?.brief} draft={d.scriptDraft?.text ?? ""} language={project.data?.meta?.language?.id ?? d.settings.language} onJob={follow} running={running}
       current={voice ?? project.data?.meta?.voice} ownScript={d.ownScript} nudge={nudge}
       afterV1={!!project.data?.meta?.pipeline?.version1?.at && !!(voice ?? project.data?.meta?.voice)?.file} />}
     <AudioFiles id={id} voiceFile={voice?.file} voiceName={voice?.voiceName} voiceTyped={!!voice?.script} onJob={follow} running={running} focus={path}

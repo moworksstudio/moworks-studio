@@ -96,7 +96,11 @@ export function renderProgress(job, framesSince, now = Date.now()) {
   if (job.stage === "gpu check") return { pct: 6, left: null };
   const p = Math.max(0, Math.min(100, Number(job.progress) || 0));
   const pct = Math.round(8 + p * 0.92);
-  const left = framesSince && p >= 3 ? Math.round(((now - framesSince) / 1000) * (100 - p) / p) : null;
+  // framesSince: when the frames began ({ at, from: the progress then }, or a time): the rate is measured from there. HF's progress is
+  // already at 25 when its capture starts, and counting from 0 said "about 5 min" for a render that took 18 more (T39-13, #1160)
+  const at = typeof framesSince === "object" ? framesSince?.at : framesSince, from = typeof framesSince === "object" ? Number(framesSince?.from) || 0 : 0;
+  const done = p - from;
+  const left = at != null && done >= 3 ? Math.round(((now - at) / 1000) * (100 - p) / done) : null;
   return { pct, left };
 }
 const leftText = (s, t) => (s == null ? null : s < 60 ? t("about {n} s left", { n: Math.max(5, Math.round(s / 5) * 5) }) : t("about {n} min left", { n: Math.round(s / 60) }));
@@ -120,7 +124,8 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
     else if (!r && !job && ex.data?.jobs?.[0]) setJob(ex.data.jobs[0]);          // the last render, its result and its checks stay here after reopening
   }, [ex.data]); // eslint-disable-line react-hooks/exhaustive-deps
   const follow = (j) => { framesSince.current = null; setJob(j); watchJob(j.id, (x) => { if (!x) return;
-    if (x.stage === "rendering" && framesSince.current == null) framesSince.current = Date.now();
+    // the frames begin at HF's capture (its "rendering: capture" stage, at about 25 %): the setup before it is quick and said nothing of the frames
+    if (framesSince.current == null && /^rendering: (capture|encode)/.test(x.stage ?? "")) framesSince.current = { at: Date.now(), from: Math.max(0, Math.min(100, Number(x.progress) || 0)) };
     setJob(x); if (x.status !== "running") ex.reload(); }, 1000); };
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const start = async () => { try { follow(await post(`/api/projects/${projectId}/exports`, { filename: form.filename, format: form.format, quality: form.quality, master: form.master })); } catch (e) { toast(e.message, "error"); } };

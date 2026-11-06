@@ -16,7 +16,7 @@ import { join } from "node:path";
 import { promisify } from "node:util";
 import { VARIANT_KEY, cueKey, cuesOf, handMoves, mount, mountAmbience, patchState, readState, resolveCues, setVolumes, sfxNone, slug, timeKey, useLibrarySound, useOwnerSound, writeCredits } from "./index.mjs";
 import { BED_UNDER, DENSITY, REF_BED, TYPING, ambienceBeds, boostOf, duckLane, hitVolume, motionCues, mixShift, placeOf, speechSpans, styleHint, thin, tiles, volumeFor } from "./actions.mjs";
-import { levelTracks, loudnessOf } from "./mixlevels.mjs";
+import { levelTracks, loudnessOf, playedLoudness } from "./mixlevels.mjs";
 import { fitEffects } from "./voicefit.mjs";
 import { SUSTAINED_MIN_S, familyOf, findAmbience, loadLibrary, pickVariant, sustainedCue } from "./library.mjs";
 import { DEFAULT_DENSITY, briefOf, isOff, readPrefs, soundPolicy } from "./prefs.mjs";
@@ -75,7 +75,7 @@ export function bannedFamilies(palette) {
 /** The automatic cues, unthinned: a whoosh into each real cut and every motion row's own sound (motionCues), each { id, shot, index,
  *  name, family, start, offset: 0, prio, gain, auto | plan, cut? }. whoosh: false leaves the cuts to the storyboard's own sounds
  *  (whooshAllowed); allow(family): false for a family the style or the owner keeps out; style: the library's hint. A shot whose `- sfx:` line says none gets none. */
-export function autoCues(shots, plan = null, { whoosh = true, allow = null, style = null, density = DEFAULT_DENSITY } = {}) {
+export function autoCues(shots, plan = null, { whoosh = true, allow = null, style = null, density = DEFAULT_DENSITY, textSilent = false } = {}) {
   const placed = shots.filter((s) => s.start != null && s.duration).sort((a, b) => a.start - b.start);
   const ok = allow ?? ((f) => f !== "whoosh" || whoosh);
   const step = (DENSITY[density] ?? DENSITY.lively).step;
@@ -86,7 +86,7 @@ export function autoCues(shots, plan = null, { whoosh = true, allow = null, styl
     if (cutHere && whoosh && ok("whoosh")) out.push({ id: `cut:${s.number}`, shot: s.number, index: s.index, name: "whoosh", family: "whoosh", offset: 0,
       start: r3(Math.max(0, s.start - 0.2)), prio: 2, gain: 1, auto: true, cut: true });          // lands on the cut
     const motions = plan?.shots?.find((x) => x.shot === s.number)?.motions ?? [];
-    out.push(...motionCues(s, motions, { allow: ok, surface: placeOf(s)?.surface ?? null, style, step, skipCut: cutHere }));
+    out.push(...motionCues(s, motions, { allow: ok, surface: placeOf(s)?.surface ?? null, style, step, skipCut: cutHere, textSilent }));
   });
   return out.sort((a, b) => a.start - b.start);
 }
@@ -104,9 +104,9 @@ function namedCues(shots) {
   });
 }
 /** Every cue a placement may use (named, the plan's, automatic, unthinned) less those the owner keeps out: the names to find sounds for. */
-function everyCue(shots, plan, { whoosh = true, prefs = {}, style = null, density = DEFAULT_DENSITY } = {}) {
+function everyCue(shots, plan, { whoosh = true, prefs = {}, style = null, density = DEFAULT_DENSITY, textSilent = false } = {}) {
   const skip = new Set(prefs.skip ?? []), allow = (f) => (f !== "whoosh" || whoosh) && !isOff(prefs, { family: f });
-  return [...namedCues(shots), ...autoCues(shots, plan, { whoosh, allow, style, density })].filter((c) => !skip.has(c.id) && !isOff(prefs, c));
+  return [...namedCues(shots), ...autoCues(shots, plan, { whoosh, allow, style, density, textSilent })].filter((c) => !skip.has(c.id) && !isOff(prefs, c));
 }
 
 /** The mix: { kept, thinned }. The storyboard's own cues, the plan's and the automatic ones, less what the owner keeps out (prefs: off,
@@ -115,13 +115,17 @@ function everyCue(shots, plan, { whoosh = true, prefs = {}, style = null, densit
  *  found none (Test 24: the automatic "typing" gave way to a named "keyboard typing" that then got no sound). familyOfSound(name): the
  *  family of the sound found for a name (a named cue's own words may not say it). drop: repeats left out (capRepeats); a named one still holds its moment, so no
  *  automatic sound takes its place (T29-11). hand: the cues the user moved (handMoves): they stay, and count where they are now. */
-export function planCues(shots, plan, { sounded = null, whoosh = true, prefs = {}, density = null, words = null, style = null, familyOfSound = null, drop = null, hand = null } = {}) {
+export function planCues(shots, plan, { sounded = null, whoosh = true, prefs = {}, density = null, words = null, style = null, familyOfSound = null, drop = null, hand = null, textSilent = false } = {}) {
   const dens = density ?? prefs.density ?? DEFAULT_DENSITY;
   const moved = (c) => { const h = hand?.get(c.id); return h && (!h.name || h.name === c.name) ? h : null; };
-  const all = everyCue(shots, plan, { whoosh, prefs, style, density: dens }).filter((c) => (!sounded || sounded(c.name) || moved(c)) && (c.prio === 0 || !drop?.has(useKey(c))))
+  const all = everyCue(shots, plan, { whoosh, prefs, style, density: dens, textSilent }).filter((c) => (!sounded || sounded(c.name) || moved(c)) && (c.prio === 0 || !drop?.has(useKey(c))))
     .map((c) => ({ ...c, family: familyOfSound?.(c.name) ?? c.family ?? null }));
-  const { kept, thinned } = thin(afterWords(all, words).flatMap((c) => (moved(c) ? [{ ...c, pinned: true, planned: c.start, start: r3(c.start + moved(c).by) }, { ...c, left: true }] : [c])), dens);
-  return { kept: kept.filter((c) => !drop?.has(useKey(c))).map(({ planned, ...c }) => (c.pinned ? { ...c, start: planned } : c)).sort((a, b) => a.start - b.start), thinned };
+  // a place's own sound (room tone, night air, a hush) is the scene's ambience bed, never a cue on an action (house rules §7b; T42-12: ten
+  // "night room air" and "night air hush" cues played over the bed as action sounds); one the user moved stays theirs
+  const place = (c) => c.family === "ambience" && !moved(c);
+  const { kept, thinned } = thin(afterWords(all.filter((c) => !place(c)), words).flatMap((c) => (moved(c) ? [{ ...c, pinned: true, planned: c.start, start: r3(c.start + moved(c).by) }, { ...c, left: true }] : [c])), dens);
+  return { kept: kept.filter((c) => !drop?.has(useKey(c))).map(({ planned, ...c }) => (c.pinned ? { ...c, start: planned } : c)).sort((a, b) => a.start - b.start),
+    thinned: [...thinned, ...all.filter(place).map((c) => ({ ...c, why: "ambience" }))].sort((a, b) => a.start - b.start) };
 }
 /** One cue of the mix, told apart from the stand-by sound of the same motion row (which shares its id). */
 const useKey = (c) => `${c.id}|${c.name}`;
@@ -330,7 +334,7 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   const words = spokenWords(dir), whoosh = opts.whoosh !== false && !isOff(prefs, { family: "whoosh" }) && !bannedFamilies(palette).has("whoosh");
   const ends = (shots ?? []).map((s) => Number(s.start) + Number(s.duration)).filter((x) => Number.isFinite(x) && x > 0);
   const filmEnd = ends.length ? Math.max(...ends) : null;
-  const note = (extra) => patchState(dir, (st) => { st.policy = { density: policy.density, whoosh, silent: policy.silent, ambience: policy.ambience, style, ...(banned.length ? { banned } : {}) }; Object.assign(st, extra); });
+  const note = (extra) => patchState(dir, (st) => { st.policy = { density: policy.density, whoosh, silent: policy.silent, ambience: policy.ambience, style, ...(policy.textSilent ? { textSilent: true } : {}), ...(banned.length ? { banned } : {}) }; Object.assign(st, extra); });
   if (policy.silent) {          // the owner, the style, the brief or the song asks for no sound effects: none of the app's own
     mount(dir, [], { cueKey: cueKey(shots ?? []), times: timeKey(shots ?? []), left: { missing: [], near: [] } });
     mountAmbience(dir, []);
@@ -338,7 +342,7 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
     writeCredits(dir);
     return { cues: 0, placed: 0, owned: [], added: [], missing: [], failed: [], near: [], offline: false, names: [], ambience: 0, thinned: 0, density: policy.density, silent: policy.silent };
   }
-  const o = { whoosh, prefs, density: policy.density, style };
+  const o = { whoosh, prefs, density: policy.density, style, textSilent: !!policy.textSilent };
   const every = everyCue(shots, plan, o);
   // a sound the user moved stays where they put it, with its file: whatever else the placing does, it is not the app's to take back (T29-3)
   o.hand = handMoves(dir, every);
@@ -427,7 +431,7 @@ export async function levels(dir, names, { root } = {}) {
   const track = (kind) => { const c = trackClips(html, kind).find((x) => x.src && existsSync(join(dir, ...x.src.split("/"))));
     return c ? { src: c.src, vol: c.volume } : null; };
   const music = track("music"), voice = track("voice");
-  const bed = music ? await loudnessOf(dir, music.src, { root }) : null;
+  const bed = music ? await playedLoudness(dir, html, "music", { root, words: voice ? filmWords(dir) : null }) : null;          // as levelTracks reads it (#1181)
   const vo = voice ? await loudnessOf(dir, voice.src, { root }) : null;
   const mix = { bed: bed != null ? bed + db(music.vol) : null, voice: vo != null ? vo + db(voice.vol) : null };
   const shift = mixShift(mix), under = mix.bed ?? (mix.voice != null ? mix.voice - BED_UNDER : REF_BED);

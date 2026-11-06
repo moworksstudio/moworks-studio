@@ -6,7 +6,9 @@ import { P, octi, offset, measure, at, sub, frameAt } from './geo.js';
 import { textWidth } from './font.js';
 import { bridge, ground, tag, box, xformer, reactor, capBank, chamferBox } from './parts.js';
 
-export const BOARD = { x0: -60, y0: -90, x1: 2140, y1: 1010, r: 36, inset: 14 };
+// the south-east corner is cut off at 45° (open sea there): a square corner would reach 25.1° N at 122.9° E and take in
+// the northern tip of Taiwan with nothing drawn on it; the cut keeps the whole island and its islets off the board
+export const BOARD = { x0: -60, y0: -90, x1: 2140, y1: 1010, r: 36, inset: 14, cut: 210 };
 const LL = pts => pts.map(p => (typeof p[0] === 'number' && p.length >= 2 && Math.abs(p[0]) < 200 && Math.abs(p[1]) < 90 && p[0] > 90) ? [...P(p[0], p[1]), p[2]] : p);
 
 // ---------- Baihetan: the dam complex (local units scaled by DS around D) ----------
@@ -268,9 +270,9 @@ export const STUBS = TPS.map(tp => ({ id: 'stub' + tp.km, pts: tp.stub, w: 1.2, 
 TRACES.push(...STUBS.map(t => ({ ...t, m: measure(t.pts) })), ...OTHERS.map(t => ({ ...t, m: measure(t.pts) })));
 
 // board furniture for the closing reveal: holes, fiducials, the title block (title, sheet line, sign-off)
-export const HOLES = [[BOARD.x0 + 60, BOARD.y0 + 60], [BOARD.x1 - 60, BOARD.y0 + 60], [BOARD.x0 + 60, BOARD.y1 - 60], [BOARD.x1 - 60, BOARD.y1 - 60]];
+export const HOLES = [[BOARD.x0 + 60, BOARD.y0 + 60], [BOARD.x1 - 60, BOARD.y0 + 60], [BOARD.x0 + 60, BOARD.y1 - 60], [BOARD.x1 - 60, BOARD.y1 - BOARD.cut - 30]];
 export const TITLE = { x: 1120, y: -60, w: 620, h: 270 };
-export const FIDS = [[BOARD.x0 + 130, BOARD.y0 + 46], [BOARD.x1 - 46, BOARD.y1 - 130], [BOARD.x0 + 46, BOARD.y1 - 130]];
+export const FIDS = [[BOARD.x0 + 130, BOARD.y0 + 46], [BOARD.x1 - BOARD.cut / 2 - 33, BOARD.y1 - BOARD.cut / 2 - 33], [BOARD.x0 + 46, BOARD.y1 - 130]];
 SILK.push(
   { pts: box(TITLE.x, TITLE.y, TITLE.x + TITLE.w, TITLE.y + TITLE.h), w: 3.2, plot: 'tbBox' },
   { pts: [[TITLE.x, TITLE.y + 190], [TITLE.x + TITLE.w, TITLE.y + 190]], w: 2, plot: 'tbBox' },

@@ -19,8 +19,10 @@ function Words({ projectId, shot, locked, send, onChanged, version }) {
   const [list, setList] = useState(null);
   const [vals, setVals] = useState({});
   // a shot with no file of its own (a one-page film, T38b-18): the page's words shown in the shot's time
-  const file = shot.src ?? (shot.start != null ? "index.html" : null);
-  const span = !shot.src && shot.start != null ? `&from=${shot.start}&to=${shot.start + (shot.duration ?? 0)}` : "";
+  // with no cut table, where the storyboard plans the shot (plannedStart, T38b-20)
+  const at = shot.start ?? shot.plannedStart ?? null;
+  const file = shot.src ?? (at != null ? "index.html" : null);
+  const span = !shot.src && at != null ? `&from=${at}&to=${at + (shot.duration ?? 0)}` : "";
   const load = useCallback(() => {
     if (!file) { setList([]); return; }
     get(`/api/projects/${projectId}/edit/texts?file=${encodeURIComponent(file)}${span}`).then((r) => { setList(r.texts); setVals(Object.fromEntries(r.texts.map((x) => [x.hfId, x.text]))); }).catch(() => setList([]));

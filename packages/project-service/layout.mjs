@@ -14,7 +14,8 @@ import { existsSync, lstatSync, mkdirSync, readFileSync, readdirSync, renameSync
 import { basename, dirname, extname, join, relative, sep } from "node:path";
 import { moveDocs } from "./docs.mjs";
 
-export const LAYOUT_VERSION = 3;
+// 4: a lone still taken for a sequence's frame goes back with the pictures on open, its paths in the film's code too (T43-1, T43-13)
+export const LAYOUT_VERSION = 4;
 export const A = {
   design: "assets/1_design", images: "assets/1_design/images", fonts: "assets/1_design/fonts",
   footage: "assets/2_footage", voiceover: "assets/3_audio/voiceover", sfx: "assets/3_audio/sfx", music: "assets/3_audio/music",
@@ -94,8 +95,10 @@ const textFiles = (dir) => {
       if (s.isDirectory()) { if (!/^(cache|\.git|node_modules)$/.test(n)) walk(r, rx); } else if (rx.test(n)) out.push(r);
     }
   };
-  walk("compositions", /\.(html|css|js|json|md)$/i);
-  walk("boards", /\.(html|css|js|json|md)$/i);
+  // the film's code in every place a film style keeps it: compositions/, boards/ (a board's own src/ too), a Moworks film style's src/ (its
+  // Video.tsx loads pictures by staticFile("2_footage/…"), T43-13), Ricks Clip's film/, a story film's story/, What If's whatif/
+  const CODE = /\.(html|css|js|mjs|jsx|ts|tsx|json|md)$/i;
+  for (const top of ["compositions", "boards", "src", "film", "story", "whatif"]) walk(top, CODE);
   walk(".moworks", /\.(json|md)$/i);
   walk("docs", /\.(json|md)$/i);
   for (const n of readdirSync(dir)) if (/\.(md|json)$/i.test(n) && statSync(join(dir, n)).isFile()) out.push(n);
@@ -107,6 +110,14 @@ const escRx = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 export function rewritePaths(dir, pairs) {
   const map = new Map();
   for (const [from, to] of pairs) { map.set(from, to); if (encodeURI(from) !== from) map.set(encodeURI(from), encodeURI(to)); }          // a path written URL-encoded (Logo%20tr%E1%BA%AFng.png) follows too
+  // a path the film's code writes from assets/ (a film style's staticFile("2_footage/ship/ship-1642.jpg") is assets/2_footage/…): it follows
+  // too (T43-13: the pictures moved and the film's Video.tsx still loaded them where they were). The full path, longer, is matched first
+  for (const [from, to] of pairs) {
+    if (!/^assets\/[^/]+\/./.test(from) || !/^assets\//.test(to)) continue;
+    const f = from.slice("assets/".length), t = to.slice("assets/".length);
+    if (!map.has(f)) map.set(f, t);
+    if (encodeURI(f) !== f && !map.has(encodeURI(f))) map.set(encodeURI(f), encodeURI(t));
+  }
   for (const k of [...map.keys()]) if (map.get(k) === k) map.delete(k);
   if (!map.size) return [];
   const rx = new RegExp([...map.keys()].sort((a, b) => b.length - a.length).map(escRx).join("|"), "g");
@@ -180,9 +191,17 @@ const filesUnder = (dir, top) => {
 export function migrateLayout(dir, { classify, sequenceOf } = {}) {
   const moved = [], failed = [];
   const files = [...filesUnder(dir, "assets"), ...filesUnder(dir, "sources")];
+  // a sequence is two frames or more of one name: one still whose name ends in a number (a year: fluyt-ship-1642.jpg) is a picture (T43-1)
+  const IMG = /\.(png|jpe?g|webp|tiff?|exr)$/i, frames = new Map();
+  const keyOf = (name) => sequenceOf?.(name)?.base?.toLowerCase() ?? null;
+  for (const rel of files) if (/^assets\/(1_design\/images|2_footage)\//.test(rel) && IMG.test(rel)) { const k = keyOf(basename(rel)); if (k) frames.set(k, (frames.get(k) ?? 0) + 1); }
+  const seqOf = (name) => { const s = sequenceOf?.(name); return s && (frames.get(s.base.toLowerCase()) ?? 0) >= 2 ? s : null; };
   for (const rel of files) {
     if (/\.(tmp|part)$/i.test(rel)) continue;
-    let to = newPathOf(rel, { classify, sequenceOf });
+    // a lone still taken for a sequence's frame (its own footage folder, nothing else in it): back with the pictures
+    const k = keyOf(basename(rel));
+    const lone = /^assets\/2_footage\/[^/]+\/[^/]+$/.test(rel) && IMG.test(rel) && k && frames.get(k) === 1 && filesUnder(dir, dirname(rel)).length === 1;
+    let to = lone ? `assets/1_design/images/${basename(rel)}` : newPathOf(rel, { classify, sequenceOf: seqOf });
     if (!to) continue;
     const ext = extname(to), base = to.slice(0, to.length - ext.length);
     for (let i = 2; existsSync(join(dir, ...to.split("/"))); i++) to = `${base} (${i})${ext}`;
@@ -205,7 +224,13 @@ export function migrateLayout(dir, { classify, sequenceOf } = {}) {
   const folderPairs = [...dirs].filter(([k, e]) => e.ok && !["assets", "sources", "."].includes(k)
     && moved.every(([f, t]) => !f.startsWith(`${k}/`) || t === `${e.to}/${f.slice(k.length + 1)}`)
     && !failed.some((f) => f.path.startsWith(`${k}/`)) && !left(k)).map(([k, e]) => [`${k}/`, `${e.to}/`]);
-  const changed = moved.length ? rewritePaths(dir, [...moved, ...folderPairs]) : [];
+  // a lone still already with the pictures whose film still names it in its footage folder (moved before the film's code was rewritten:
+  // T43-13): the old path is pointed at it again. Its footage folder is named as classifyAsset names it (the name before the number)
+  const safe = (s) => String(s ?? "").normalize("NFC").replace(/[<>:"/\\|?*\u0000-\u001f]+/g, " ").replace(/\s+/g, " ").trim().replace(/^\.+/, "").slice(0, 120) || "sequence";
+  const pics = join(dir, "assets", "1_design", "images");
+  const repair = (existsSync(pics) ? readdirSync(pics) : []).filter((n) => IMG.test(n) && keyOf(n) && frames.get(keyOf(n)) === 1)
+    .map((n) => [`assets/2_footage/${safe(sequenceOf(n).base).slice(0, 60)}/${n}`, `assets/1_design/images/${n}`]);
+  const changed = moved.length || repair.length ? rewritePaths(dir, [...moved, ...folderPairs, ...repair]) : [];
   // HyperFrames writes a track's beats to beats/<its path>.json
   for (const [from, to] of moved) {
     const b = join(dir, "beats", ...`${from}.json`.split("/"));

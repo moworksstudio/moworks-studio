@@ -2,7 +2,7 @@
 name: anidoodle
 description: How Moworks Studio makes a film in an anidoodle medium - the medium's marks, edge and order kept, the story the brief's own, the film written as the author's TypeScript film module on the pinned engine, bundled and driven inside HyperFrames, sound from the app.
 version: 1.2.0
-derived-from: anidoodle by Alex Greenshpun (10x Company), commit f746cbd8a7032463bd0bc88ee8ff852599193b8c, Apache-2.0 with NOTICE - skills/anidoodle/SKILL.md (the seven laws, the workflows), references/determinism-and-contract.md, engine/src/canvas-core/film.ts and hosts/page.ts (the film and page contract), rewritten for Moworks Studio; the engine's moves, the film kinds, the worked example, the house styles, Bit and the cheetah and the contract check (references/motion-deck.json, camera.md, motion-grammar.md, workflows/drawing-process.md, launch-video.md, launch-video-kit.md, facts.md; engine/tools/gate.mjs FORBIDDEN). https://github.com/alexgreensh/anidoodle/tree/f746cbd8a7032463bd0bc88ee8ff852599193b8c
+derived-from: anidoodle by Alex Greenshpun (10x Company), commit 4ae27d2c281fcfd01bce87ab13dc5ad4df81a795, Apache-2.0 with NOTICE - skills/anidoodle/SKILL.md (the seven laws, the workflows), references/determinism-and-contract.md, engine/src/canvas-core/film.ts and hosts/page.ts (the film and page contract), rewritten for Moworks Studio; the engine's moves, the film kinds, the worked example, the house styles, Bit and the cheetah and the contract check (references/motion-deck.json, camera.md, motion-grammar.md, workflows/drawing-process.md, launch-video.md, launch-video-kit.md, facts.md; engine/tools/gate.mjs FORBIDDEN). https://github.com/alexgreensh/anidoodle/tree/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795
 ---
 
 # anidoodle medium: the rules of this project
@@ -110,6 +110,13 @@ film is the default. When the brief asks for a picture that draws itself (one pi
 (`references/workflows/facts.md`), `meta.kind: "launch"`. An older film whose New project named the kind: the system prompt still says it.
 The app's five stages stay the same for every kind.
 
+**3D (the author's 0.10, #1214).** When the brief asks for 3D (extruded type, objects, puppets, a camera through space): read
+`references/workflows/three-d.md` at every step and build on the engine's `three-core/` (stage, camera, look, mograph, rig, checks3d), one medium
+per film as the author says. `import * as THREE from "three"` works as in the author's pages: the app bundles its own three.js at the author's pinned
+0.170.0 (the author's vendored copy is not in the app). **Narration, a voice-over, word timing and subtitles** are the app's: the Voice step's
+voice-over and its transcript, and the subtitles in the house's two kinds (moworks-studio §10); `references/workflows/narration.md` is read for its
+craft only (the author's narration tools, providers and Whisper timing are not run here).
+
 ## 3e. Bit and the cheetah (the author's own, from the owner's library)
 
 When `docs/CHARACTERS.json` lists Bit (`rig: "bit"`) or the cheetah (`rig: "cheetah"`), they are the author's characters as shipped, each with
@@ -197,5 +204,5 @@ The app's Tech checks scan the film's own modules (`anidoodle/`, `boards/`) with
 
 ## 5. Credit
 
-anidoodle, Alex Greenshpun (10x Company), https://github.com/alexgreensh/anidoodle at f746cbd, Apache-2.0 with NOTICE (kept with the
+anidoodle, Alex Greenshpun (10x Company), https://github.com/alexgreensh/anidoodle at 4ae27d2, Apache-2.0 with NOTICE (kept with the
 staged engine and named in the bundle's banner).

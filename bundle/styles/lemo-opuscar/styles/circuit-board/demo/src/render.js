@@ -70,7 +70,16 @@ export class Board {
     this.stitch = world.stitch ? world.stitch() : [];
   }
   pattern(ctx, img, M, unit) { const pat = ctx.createPattern(img, 'repeat'), k = unit / img.width; pat.setTransform(new DOMMatrix([M[0] * k, M[1] * k, M[2] * k, M[3] * k, M[4], M[5]])); return pat; }
-  boardPath(ctx, inset = 0) { const B = this.w.BOARD, i = inset; ctx.beginPath(); ctx.roundRect(B.x0 + i, B.y0 + i, B.x1 - B.x0 - 2 * i, B.y1 - B.y0 - 2 * i, Math.max(0.5, B.r - i)); }
+  boardPath(ctx, inset = 0) {
+    const B = this.w.BOARD, i = inset, r = Math.max(0.5, B.r - i);
+    if (!B.cut) { ctx.beginPath(); ctx.roundRect(B.x0 + i, B.y0 + i, B.x1 - B.x0 - 2 * i, B.y1 - B.y0 - 2 * i, r); return; }
+    // board with its south-east corner cut off at 45° (B.cut units along each edge), every corner rounded
+    const k = B.cut + i * Math.SQRT2 - 2 * i, x0 = B.x0 + i, y0 = B.y0 + i, x1 = B.x1 - i, y1 = B.y1 - i;
+    const v = [[x0, y0], [x1, y0], [x1, y1 - k], [x1 - k, y1], [x0, y1]];
+    ctx.beginPath(); ctx.moveTo((x0 + x1) / 2, y0);
+    for (let n = 1; n <= v.length; n++) { const a = v[n % v.length], b = v[(n + 1) % v.length]; ctx.arcTo(a[0], a[1], b[0], b[1], r); }
+    ctx.closePath();
+  }
 
   // copper pour minus every clearance, `e` = extra clearance (the rim pass uses e > 0)
   copper(g, M, vb, z, e, color) {
@@ -103,7 +112,7 @@ export class Board {
     const { ctx } = this, P = PAL, M = camMatrix(cam), z = cam.z, vb = viewBox(cam, 60 / z), Wd = this.w, B = Wd.BOARD;
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.filter = 'none';
     const bw = (B.x1 - B.x0) * 0.04;
-    const edgeVisible = vb[0] < B.x0 + bw || vb[2] > B.x1 - bw || vb[1] < B.y0 + bw || vb[3] > B.y1 - bw;
+    const edgeVisible = vb[0] < B.x0 + bw || vb[2] > B.x1 - bw || vb[1] < B.y0 + bw || vb[3] > B.y1 - bw || (B.cut && vb[2] + vb[3] > B.x1 + B.y1 - B.cut - 2 * bw);
     if (edgeVisible) {
       this.desk(ctx, cam, M, z, sc);
       ctx.save(); ctx.setTransform(...M); this.boardPath(ctx); ctx.restore(); ctx.save(); ctx.clip();

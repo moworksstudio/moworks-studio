@@ -569,8 +569,15 @@ export function createAutopilot(ctx) {
   async function afterSound(id) {
     const p = projects.getProject(id, root);
     if (!p || p.missing) return;
+    // a film style whose source skill has music only when the owner asks for it (Inner Voice Short: "Music only when the owner asks"): no
+    // track goes on by itself unless the brief asks for music (T42-5: Mixkit's "Rebecca on the Shore" went on a film that asked for none);
+    // Claude's three tracks stay in Final Mix for the owner to put on
+    const { styleSound } = await import("../agent/index.mjs");
+    const palette = styleSound(p.meta, root) ?? "";
+    const brief = [p.meta?.brief?.text, p.meta?.brief?.direction, existsSync(join(p.path, "BRIEF.md")) ? readFileSync(join(p.path, "BRIEF.md"), "utf8") : ""].filter(Boolean).join("\n");
+    const askedOnly = /\bmusic only when (the owner|the user|asked|someone)/i.test(palette) && !/\b(music|soundtrack|score|piano|song)\b|nhạc/i.test(brief);
     const work = async () => {
-      if (!musicOnFilm(p.path, p.meta)) {
+      if (!musicOnFilm(p.path, p.meta) && !askedOnly) {
         const round = readOptions(p.path).rounds.at(-1);
         const track = round?.tracks?.[0];
         if (track) await ctx.mix.useOption(p, track).catch(() => null);

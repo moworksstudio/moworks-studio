@@ -66,14 +66,18 @@ export function declaredCuts(projectDir, styleId) {
 
 /** The film's render while it is the film as it is now: the pre-render, else the last export (the export's render did not refresh the
  *  pre-render, and G-CUTS never showed for Test 38, T38-7), or null. */
-export async function freshRender(projectDir) {
-  const { filmHash } = await import("../server/proxy.mjs");          // late: the render's own module, only when there is a render
+export async function freshRender(projectDir, { picture = false } = {}) {
+  const { filmHash, filmParts } = await import("../server/proxy.mjs");          // late: the render's own module, only when there is a render
   const read = (f) => { try { return JSON.parse(readFileSync(join(projectDir, ...f), "utf8")); } catch { return null; } };
   const st = read([".moworks", "cache", "proxy", "proxy.json"]), ex = read([".moworks", "project.json"])?.lastExport ?? null;
   for (const r of [st, ex ? { file: ex.file, hash: ex.hash, fps: Number(ex.fps) || null } : null]) {
     if (!r?.file || !r.hash) continue;
     const file = join(projectDir, ...r.file.split("/"));
-    if (existsSync(file) && filmHash(projectDir, r.fps ?? null) === r.hash) return file;
+    if (!existsSync(file)) continue;
+    if (filmHash(projectDir, r.fps ?? null) === r.hash) return file;
+    // picture: a check that reads the picture only (G-FLICKER, G-CUTS) takes a render whose picture is the film's: the sound levelled
+    // again since (the checks level the tracks first) made it wait for a preview it had (T40-17)
+    if (picture && r.picture && filmParts(projectDir, r.fps ?? null).picture === r.picture) return file;
   }
   return null;
 }
@@ -84,7 +88,7 @@ export async function cutCheck(projectDir, { file = null } = {}) {
   let html = ""; try { html = readFileSync(join(projectDir, "index.html"), "utf8"); } catch { return { ran: false }; }
   const style = pageStyle(html), s = CUT_STYLES[style];
   if (!s) return { ran: false };
-  const video = file ?? await freshRender(projectDir).catch(() => null);
+  const video = file ?? await freshRender(projectDir, { picture: true }).catch(() => null);
   if (!video) return { ran: false };
   let cuts;
   try { cuts = await hardCuts(video, s.find); } catch (e) { return { ran: true, style, error: e.message }; }

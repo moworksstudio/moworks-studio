@@ -153,7 +153,7 @@ export default function CharacterSheet({ projectId, onChanged }) {
     {/* The credit of the engine that draws this film's cast, one line each, in the standard form; anidoodle's people never
         read as ClaudeAnimationBase's */}
     {(() => { const anidoodle = human || chars.some((c) => c.engine === "anidoodle-human"), brush = chars.some((c) => c.engine === "brush-kit") || (!anidoodle && !chars.length);
-      return <>{anidoodle && <CreditLine author="anidoodle · Alex Greenshpun (10x Company)" licence="Apache-2.0 (NOTICE)" link="https://github.com/alexgreensh/anidoodle/tree/f746cbd8a7032463bd0bc88ee8ff852599193b8c" commit="f746cbd8a7032463bd0bc88ee8ff852599193b8c" />}
+      return <>{anidoodle && <CreditLine author="anidoodle · Alex Greenshpun (10x Company)" licence="Apache-2.0 (NOTICE)" link="https://github.com/alexgreensh/anidoodle/tree/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795" commit="4ae27d2c281fcfd01bce87ab13dc5ad4df81a795" />}
         {brush && <CreditLine author="ClaudeAnimationBase · John Heibel" licence="MIT" link="https://github.com/JohnHeibel/ClaudeAnimationBase/tree/0ac8bf2b31942376cb6b8c4074715595d512acd2" commit="0ac8bf2b31942376cb6b8c4074715595d512acd2" />}</>; })()}
   </div>;
 }

@@ -175,10 +175,11 @@ export default function MixSheet({ projectId, project, onChanged }) {
       {near.length > 0 && <p className="hint">{t("Stand-ins, not the real sound: {names}. Press Place them again to search for more, or add your own.", { names: `${near.slice(0, 10).map((x) => (plain(x.as) ? `“${x.name}” (${plain(x.as)})` : `“${x.name}”`)).join(", ")}${near.length > 10 ? ` ${t("and {n} more", { n: near.length - 10 })}` : ""}` })}</p>}
       <div className="row mix-density">
         <label className="hint" htmlFor="mix-density">{t("Sounds on")}</label>
-        <select id="mix-density" className="select sm" value={prefs.density} disabled={placing} onChange={(e) => setPref({ density: e.target.value })}>
+        <select id="mix-density" className="select sm" value={prefs.own || prefs.styleDensity !== "key" ? prefs.density : "style"} disabled={placing} onChange={(e) => setPref({ density: e.target.value })}>
           <option value="lively">{t("Every action")}</option>
           <option value="normal">{t("Most actions")}</option>
           <option value="low">{t("Only the big actions")}</option>
+          {(prefs.styleDensity === "key" || prefs.density === "key") && <option value="style">{t("Key moments, as the film style asks")}</option>}
         </select>
         <label className="mix-amb"><input type="checkbox" checked={prefs.ambience !== false} disabled={placing} onChange={(e) => setPref({ ambience: e.target.checked })} />{t("Ambience under each place")}</label>
         {prefs.skipped > 0 && <button className="btn ghost sm end" disabled={placing} onClick={() => setPref({ unskip: true })}><RotateCcw size={14} />{t("Bring back {n} removed", { n: prefs.skipped })}</button>}

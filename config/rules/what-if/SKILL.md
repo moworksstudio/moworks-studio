@@ -2,7 +2,7 @@
 name: what-if
 description: Moworks Studio's "What If" film kind, for every film style - a short episode built on one premise ("What if you could…?"): the seven-beat story, the short-script rules, the twist built on one true, sourced fact, the opening pace, all in the chosen style's own look and pace. Read in every step when the owner picks the What If film kind in New project.
 version: 1.1.0
-derived-from: What If animation by FreshStack (MIT, Copyright (c) 2026 FreshStack), https://github.com/kelano86/what-if-animation/tree/3725a22d2d101320cae5b7d761af8d75120c4987 - references/formula.md (the seven beats, the 15-25 s shape, the writing rules, choosing a topic), references/look.md (pace), references/sound.md. Ideas and rules only, rewritten for Moworks Studio; no code, no sounds, no channel names.
+derived-from: What If animation by FreshStack (MIT, Copyright (c) 2026 FreshStack), https://github.com/kelano86/what-if-animation/tree/8092fb5e825e55456d1d47fec0ebf595cb93cc0d - references/formula.md (the seven beats, the 15-25 s shape, the writing rules, choosing a topic), references/look.md (pace), references/sound.md. Ideas and rules only, rewritten for Moworks Studio; no code, no sounds, no channel names.
 ---
 
 # The What If film kind

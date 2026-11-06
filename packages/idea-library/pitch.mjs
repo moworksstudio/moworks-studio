@@ -97,12 +97,17 @@ export function checkIdeas(data, { web = true, avoid = [] } = {}) {
 /** A narration's spoken words: each line without its speaker label ("EM: …", [EM: "…"]) and the quotes around the words (T40-7). */
 export const SPEAKER = /^\s*(?:\[\s*([^\]:\n]{1,30}):\s*|(\p{Lu}[\p{L}\p{N}.'’-]*(?: [\p{L}\p{N}.'’-]+){0,2}):\s+(?=["“])|(\p{Lu}[\p{Lu}\p{N} .'’-]{0,24}):\s+)/u;
 export const spoken = (text) => String(text ?? "").split("\n").map((l) => { const m = SPEAKER.exec(l); return m ? l.slice(m[0].length).replace(/^["“]|["”]\s*\]?\s*$/g, "").trim() : l; }).join("\n");
+/** A film style's own rules for each line of its script, from its source skill (T42-1, T42-2: Inner Voice Short's STORY.md "Line rules"). */
+export const STYLE_LINES = Object.freeze({
+  "inner-voice-short": { narratorWords: 7, voiceWords: 4, voiceLabel: "BÓNG ĐEN", voice: /^(bóng đen|bong den|shadow|the shadow|inner voice|giọng (trong đầu|bên trong)|tiếng (trong đầu|lòng))$/i },
+});
 /** The words a script has (Vietnamese: one syllable a word). */
 export const countWords = (text) => (String(text ?? "").match(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu) ?? []).length;
 /** script.json's checks (#1111: a script is scenes, each with its time, the narration and the picture): { ok, problems, scenes, words,
- *  seconds, text }. round: { lang, lengthSec, sources (how many sources the idea has) }. */
-export function checkScript(data, { lang = "vi", lengthSec = 30, sources = 0 } = {}) {
+ *  seconds, text }. round: { lang, lengthSec, sources (how many sources the idea has), styleId }. */
+export function checkScript(data, { lang = "vi", lengthSec = 30, sources = 0, styleId = null } = {}) {
   const problems = [], [lo, hi] = PACE[lang] ?? PACE.en;
+  const rule = STYLE_LINES[styleId] ?? null;
   const list = Array.isArray(data?.scenes) ? data.scenes : null;
   if (!list || !list.length) return { ok: false, problems: ['script.json has no "scenes" list'], scenes: [], words: 0, seconds: 0, text: "" };
   if (list.length > MAX_SCENES) problems.push(`${list.length} scenes: keep to ${MAX_SCENES}`);
@@ -114,6 +119,16 @@ export function checkScript(data, { lang = "vi", lengthSec = 30, sources = 0 } =
     if (/^\s*[([].*[)\]]\s*$/m.test(narration)) problems.push(`${n}: the narration has a line in brackets (a stage direction?): put it in the picture`);
     const refs = Array.isArray(x?.sources) ? x.sources.map(Number) : [];
     for (const k of refs) if (!Number.isInteger(k) || k < 1 || k > sources) problems.push(`${n}: source ${k} is not one of the idea's ${sources} sources`);
+    // the style's own line rules (Inner Voice Short's STORY.md: a white line at most 7 words, a red one at most 4, lower case, ending "." or "…")
+    if (rule) for (const line of narration.split("\n").map((l) => l.trim()).filter(Boolean)) {
+      const m = SPEAKER.exec(line), label = (m?.[1] ?? m?.[2] ?? m?.[3] ?? "").trim(), said = spoken(line), wn = countWords(said);
+      if (!wn) continue;
+      const red = rule.voice.test(label);
+      if (red && wn > rule.voiceWords) problems.push(`${n}: the ${label} line "${said}" has ${wn} words: a red line is at most ${rule.voiceWords}`);
+      if (red && (said !== said.toLowerCase() || !/[.…]$/.test(said))) problems.push(`${n}: the ${label} line "${said}" is lower case and ends "." or "…"`);
+      if (!red && wn > rule.narratorWords) problems.push(`${n}: the line "${said}" has ${wn} words: a white line is at most ${rule.narratorWords} (one per screen)`);
+      if (!red && wn <= rule.voiceWords && said === said.toLowerCase() && /[.…]$/.test(said) && label) problems.push(`${n}: "${said}" reads as a red line (short, lower case): label it ${rule.voiceLabel}, not ${label}`);
+    }
     const w = countWords(spoken(narration)), dur = end - start;          // a speaker's label is not read
     if (Number.isFinite(dur) && dur > 0 && w > dur * hi * 1.25 + 3) problems.push(`${n}: ${w} words do not fit in ${Math.round(dur * 10) / 10} s: lengthen the scene or say less`);
     return { start: Math.round(start * 100) / 100, end: Math.round(end * 100) / 100, narration, picture, sources: refs.filter((k) => Number.isInteger(k) && k >= 1 && k <= sources) };
@@ -365,7 +380,7 @@ export async function scriptIdea(id, input, { root, jobId, claude, signal = null
   const { agentSettings } = await import("../agent/index.mjs");
   const sources = idea.pitch?.sources ?? [];
   // the script is written from the idea and the style's own rules (the steps show no search: the facts were checked at the pitch)
-  const web = agentSettings(root).web !== "off", round = { lang, lengthSec, sources: sources.length };
+  const web = agentSettings(root).web !== "off", round = { lang, lengthSec, sources: sources.length, styleId };
   const res = await run({ kind: "script", root, jobId, styleId, round, file: "script.json", web, claude, signal, onStep, onSteps, log,
     request: (reads) => scriptRequest({ style, reads, idea, sources, lang, lengthSec }), check: (f) => checkScript(readJsonFile(f), round) });
   keepRun(root, { at: new Date().toISOString(), kind: "script", styleId, ideaId: id, ms: res.ms, costUsd: res.costUsd });

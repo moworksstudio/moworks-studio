@@ -152,7 +152,7 @@ export default function PortAE({ id, setCrumbs = () => {} }) {
       <div className="panel-head"><Loader2 size={16} className="spin" /><h2>{t("Exporting to AE")}</h2><button className="btn sm end" onClick={() => stop(running)}><Square size={13} />{t("Stop")}</button></div>
       <div className="progress-line big"><div style={{ flex: 1 }}><div className="bar"><span style={{ width: `${running.progress ?? 5}%` }} /></div>
         <span className="hint">{STAGE[running.stage] ? t(STAGE[running.stage]) : running.stage}{running.progress != null ? ` · ${running.progress}%` : ""}</span></div></div>
-      <details className="diag" open><summary>{t("Log")}</summary><pre className="mono log">{running.log.slice(-14).join("\n")}</pre></details>
+      <details className="diag"><summary>{t("Log")}</summary><pre className="mono log">{running.log.slice(-14).join("\n")}</pre></details>
     </section>}
 
     {last && <section className="panel" aria-label={t("Result")}>

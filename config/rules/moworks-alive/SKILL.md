@@ -13,6 +13,10 @@ the final logo hold; where a style's text asks for a longer still hold, the floo
 how far and how fast the camera moves, how long a move takes and how often something new comes are the film style's own (its STYLE.md, prompt,
 source skill or HyperFrames' film type). The numbers below are the defaults for a style that gives none. It never replaces how the style draws: a style
 that draws in code (canvas, an engine) does it with its own technique. A film longer than its style's demo: moworks-studio §6c.
+**The camera is the style's too:** a style whose source skill keeps the camera still (Inner Voice Short: a static camera, no camera moves for
+energy) keeps it still in every shot, in the Motion Plan, the Build and the Review alike; its holds stay alive by the style's own means (breathing,
+a blink, a phone's flicker, a drifting moon, dust in the light), never by a push or a drift it forbids (T42-6: the Review pushed the camera in every
+shot to meet the 2 s floor). Where rule 1 below says "and the camera", it means a camera the style moves.
 
 ## 1. The rules
 

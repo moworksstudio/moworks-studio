@@ -188,7 +188,18 @@ export function IdeaDetails({ x, actions, note = null }) {
   </>;
 }
 
-export const copyText = async (text, toast, t) => { try { await navigator.clipboard.writeText(text); toast(t("Copied")); } catch { toast(t("Could not copy to the clipboard"), "error"); } };
+/** Copy to the clipboard with a toast; true when it worked. */
+export const copyText = async (text, toast, t) => { try { await navigator.clipboard.writeText(text); toast(t("Copied")); return true; } catch { toast(t("Could not copy to the clipboard"), "error"); return false; } };
+/** Copy that says so on the button itself for a moment (T42-4: the toast alone was missed), the toast as well. */
+export function CopyButton({ text, className = "btn", label = "Copy" }) {
+  const t = useT();
+  const toast = useToast();
+  const [done, setDone] = useState(false);
+  useEffect(() => { if (!done) return undefined; const h = setTimeout(() => setDone(false), 1600); return () => clearTimeout(h); }, [done]);
+  return <button type="button" className={className + (done ? " is-copied" : "")} onClick={async () => { if (await copyText(text, toast, t)) setDone(true); }}>
+    {done ? <><Check size={14} />{t("Copied")}</> : <><Copy size={14} />{t(label)}</>}</button>;
+}
+
 
 export const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 /** What Start a project and Copy hand over: an idea with a script gives the narration word for word (the project reads it as the owner's
@@ -323,7 +334,7 @@ export function IdeasTab({ lib, edit, scriptRun, onScript, onOpenScript, pick: w
           <button type="button" className="btn primary" onClick={() => begin(sel)}><Sparkles size={14} />{t("Start a project")}</button>
           {sel.own && !run && (sel.script ? <button type="button" className="btn" onClick={() => onOpenScript(sel)}><FileText size={14} />{t("Open the script")}</button>
             : <button type="button" className="btn" onClick={() => onScript(sel)}><Lightbulb size={14} />{t("Write the script")}</button>)}
-          <button type="button" className="btn" onClick={() => copyText(briefOf(sel), toast, t)}><Copy size={14} />{t("Copy")}</button>
+          <CopyButton text={briefOf(sel)} />
           {sel.own && <button type="button" className="btn" onClick={() => edit(sel)}><Pencil size={14} />{t("Edit")}</button>}
           {sel.own && <button type="button" className="btn ghost icon" onClick={() => setAsk(sel)} aria-label={t("Delete {name}", { name: sel.name })} title={t("Delete")}><Trash2 size={15} /></button>}</>} /></div>
         : <p className="hint">{t("Choose an idea to see it here.")}</p>}
@@ -369,7 +380,7 @@ export function IdeaPicker({ onAdd, onClose }) {
         </div>
         {p && <aside className="plx-detail"><IdeaDetails x={p} actions={<>
           <button type="button" className="btn primary" onClick={() => add(p)}><Plus size={14} />{t("Add to the brief")}</button>
-          <button type="button" className="btn" onClick={() => copyText(briefOf(p), toast, t)}><Copy size={14} />{t("Copy")}</button></>} /></aside>}
+          <CopyButton text={briefOf(p)} /></>} /></aside>}
       </div>}
     </div>
   </>, document.body);

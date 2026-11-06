@@ -7,7 +7,7 @@
 // site states it, onlineSources), and the Pixabay sounds HF ships in its media-use skill (Pixabay's, under the Pixabay Content License; HF
 // only bundles them). Every sound is credited (title, author, page, licence, Openverse's attribution line, the date read) in
 // .moworks/sfx.json and CREDITS.md.
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { docPath } from "../project-service/docs.mjs";
 import { APP_ROOT, expandEnv, loadPins, sourceHead } from "../version-manager/index.mjs";
@@ -228,7 +228,15 @@ const stateFile = (dir) => join(dir, ".moworks", "sfx.json");
 export const readState = (dir) => readJson(stateFile(dir), { sounds: {} });
 /** The start of a sound's name in sfx.json when the user added it from the Sounds drawer: never a storyboard cue's, which a placement replaces. */
 export const ADDED = "added:";
-function saveState(dir, st) { mkdirSync(join(dir, ".moworks"), { recursive: true }); writeFileSync(stateFile(dir), JSON.stringify(st, null, 2) + "\n"); }
+/** Every file the app put in the film for a sound it found (a library copy, a download, a made sound, their copies) stays the app's for good
+ *  (st.retired): a record replaced or dropped since left its file in assets/3_audio/sfx, and the next placement read it as the owner's own
+ *  sound (T43-9: SFXMint's CC0 "Playing Card Flick 01" became "provided by the owner"). */
+function keepAppFiles(st) {
+  const files = Object.values(st?.sounds ?? {}).filter((s) => s && s.source !== "owner").flatMap((s) => [s.file, ...(s.variants ?? []).map((v) => v.file)]).filter(Boolean);
+  if (files.length) st.retired = [...new Set([...(st.retired ?? []), ...files])].slice(-2000);
+}
+export { keepAppFiles };
+function saveState(dir, st) { keepAppFiles(st); mkdirSync(join(dir, ".moworks"), { recursive: true }); writeFileSync(stateFile(dir), JSON.stringify(st, null, 2) + "\n"); }
 /** The sounds the user added from the Sounds drawer as the film has them now (a move in Studio or on the timeline counts): [{ id, name, title, file,
  *  start, duration, volume }], by time. A clip taken off, or gone with an earlier version, is left out; its record stays, so a version brought
  *  back still finds its credit and its level (sfx.json is the app's own record: Versions leaves it as it is). */
@@ -840,11 +848,32 @@ export function writeCredits(dir) {
     return `- **${n.startsWith(ADDED) ? s.title : n}** (\`${s.file}\`${cp.length ? `, also played a little higher or lower as ${cp.map((x) => `\`${x}\``).join(", ")}` : ""}): ${creditLine(s)}`; });
   const section = `<!-- mw:sfx-credits -->\n## Sound effects\n\n${body.length ? body.join("\n") : "None."}\n<!-- /mw:sfx-credits -->`;
   const old = existsSync(f) ? readFileSync(f, "utf8") : "# Credits\n";
-  const next = /<!-- mw:sfx-credits -->[\s\S]*?<!-- \/mw:sfx-credits -->/.test(old)
+  let next = /<!-- mw:sfx-credits -->[\s\S]*?<!-- \/mw:sfx-credits -->/.test(old)
     ? old.replace(/<!-- mw:sfx-credits -->[\s\S]*?<!-- \/mw:sfx-credits -->/, section) : `${old.trimEnd()}\n\n${section}\n`;
+  next = withPictureCredits(dir, next);
   mkdirSync(dirname(f), { recursive: true });          // docs/ in a film that has none yet
   writeFileSync(f, next);
   return rows.size;
+}
+
+/** The film's pictures in its credits: the credit tables a film keeps beside its pictures (assets/…/IMAGE-CREDITS.md, CREDITS.md,
+ *  image-credits.md: their table rows) under "Pictures" (T43-8: Test 43's eight Wikimedia pictures were credited only beside them, and
+ *  the film's docs/CREDITS.md, as its ASSETS.md said, never got them). The section goes when no such file is left. */
+export function withPictureCredits(dir, text) {
+  const found = [];
+  const walk = (d, rel) => { let es = []; try { es = readdirSync(d, { withFileTypes: true }); } catch { return; }
+    for (const e of es) { if (e.isDirectory()) { if (e.name !== "_app") walk(join(d, e.name), `${rel}/${e.name}`); } else if (/^(image-credits|images?-credits|credits)\.md$/i.test(e.name)) found.push(join(d, e.name)); } };
+  walk(join(dir, "assets"), "assets");
+  const rows = [];
+  for (const file of found) {
+    let src = ""; try { src = readFileSync(file, "utf8"); } catch { continue; }
+    const table = src.split(/\r?\n/).filter((l) => /^\s*\|/.test(l));
+    if (table.length >= 3) rows.push(...(rows.length ? table.slice(2) : table));          // one header, the rows of every file after it
+  }
+  const re = /<!-- mw:picture-credits -->[\s\S]*?<!-- \/mw:picture-credits -->\n?/;
+  if (!rows.length) return text.replace(re, "");
+  const section = `<!-- mw:picture-credits -->\n## Pictures\n\n${rows.join("\n")}\n<!-- /mw:picture-credits -->\n`;
+  return re.test(text) ? text.replace(re, section) : `${text.trimEnd()}\n\n${section}`;
 }
 
 /** The whole pass for a project: cues from the storyboard shots, sounds found, elements written, credits. */

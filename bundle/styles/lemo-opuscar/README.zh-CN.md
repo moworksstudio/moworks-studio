@@ -144,7 +144,7 @@ agent 会读三份指南，像一个小工作室一样开工。<br>
 ### 开始之前
 
 - 一支片子 agent 大约要做 30–60 分钟，token 用量不小。
-- 需要 Node 20+、ffmpeg 和 Python 3.11+（或 [uv](https://docs.astral.sh/uv/)），其余由 agent 安装。
+- 需要 Node 20+、ffmpeg 7+ 和 Python 3.11+（或 [uv](https://docs.astral.sh/uv/)），其余由 agent 安装。Ubuntu 24.04 自带的 ffmpeg 是 6.1，版本太旧，请换成[静态版](https://johnvansickle.com/ffmpeg/)。
 - 默认输出 1920×1080、24 fps，其他尺寸可以指定。
 
 ### 更新和卸载
@@ -256,7 +256,7 @@ claude plugin uninstall lemo-opuscar@lemolab
 <td width="33%" valign="top"><a href="styles/papercut-red/STYLE.md"><img src="docs/frames/papercut-red.jpg" alt="红色窗花剪纸"></a><br><b>红色窗花剪纸</b><br>Red Paper-cut<br><i>Nian Comes to Town</i><br><sub>除夕年兽进村，小女孩剪出的大窗花照亮全村，把它吓跑。</sub></td>
 </tr>
 <tr>
-<td width="33%" valign="top"><a href="styles/paper-lantern/STYLE.md"><img src="docs/frames/paper-lantern.jpg" alt="纸雕灯影"></a><br><b>纸雕灯影</b><br>Paper-cut Lightbox<br><i>A Mooncake&#x27;s Longing</i><br><sub>一枚月饼讲中秋的团圆与思念，纸雕灯箱层层透光。</sub></td>
+<td width="33%" valign="top"><a href="styles/paper-lantern/STYLE.md"><img src="docs/frames/paper-lantern.jpg" alt="纸雕灯影"></a><br><b>纸雕灯影</b><br>Paper-cut Lightbox<br><i>The Last Night Train</i><br><sub>一列老夜车跑最后一趟：从雪山小站穿过长隧道开到海边，到站后车窗一扇扇熄灭。</sub></td>
 </tr>
 </table>
 
@@ -270,7 +270,7 @@ claude plugin uninstall lemo-opuscar@lemolab
 </tr>
 <tr>
 <td width="33%" valign="top"><a href="styles/engraving/STYLE.md"><img src="docs/frames/engraving.jpg" alt="铜版画"></a><br><b>铜版画</b><br>Copperplate Engraving<br><i>The Honeybee, Plate VII</i><br><sub>一张博物志图版自己刻出来：雕刀推开铜版，蜜蜂一线线成形，最后手工水彩上色。</sub></td>
-<td width="33%" valign="top"><a href="styles/silkscreen-poster/STYLE.md"><img src="docs/frames/silkscreen-poster.jpg" alt="丝印旅行海报"></a><br><b>丝印旅行海报</b><br>Silkscreen Travel Poster<br><i>Three Trails</i><br><sub>三条步道各一张丝印海报，一色一刮印出来，再沿山脊一镜到底从正午爬到黄昏。</sub></td>
+<td width="33%" valign="top"><a href="styles/silkscreen-poster/STYLE.md"><img src="docs/frames/silkscreen-poster.jpg" alt="丝印旅行海报"></a><br><b>丝印旅行海报</b><br>Silkscreen Travel Poster<br><i>The Long Way Home</i><br><sub>一张满屏丝印海报一座城，票根数着离家的公里数，走到世界的另一头，才发现那是回家的路。</sub></td>
 </tr>
 </table>
 
@@ -285,7 +285,7 @@ claude plugin uninstall lemo-opuscar@lemolab
 <tr>
 <td width="33%" valign="top"><a href="styles/blueprint/STYLE.md"><img src="docs/frames/blueprint.jpg" alt="蓝图 / 工程制图"></a><br><b>蓝图 / 工程制图</b><br>Blueprint<br><i>Patent Pending: The Cloud Catcher</i><br><sub>发明家的蓝图自己画出一台接云机器，修订云线变成了真的雨云。</sub></td>
 <td width="33%" valign="top"><a href="styles/stained-glass/STYLE.md"><img src="docs/frames/stained-glass.jpg" alt="彩色玻璃窗"></a><br><b>彩色玻璃窗</b><br>Stained Glass<br><i>The Dragon of the East Window</i><br><sub>阳光从清晨移到黄昏，照到哪一格花窗，哪一格的故事就动起来。</sub></td>
-<td width="33%" valign="top"><a href="styles/pictogram-motion/STYLE.md"><img src="docs/frames/pictogram-motion.jpg" alt="象形运动图形"></a><br><b>象形运动图形</b><br>Pictogram Motion<br><i>Aichi-Nagoya 2026 — All 43 Sports</i><br><sub>2026 亚运会 43 个大项，几何象形人卡着节拍快闪。</sub></td>
+<td width="33%" valign="top"><a href="styles/pictogram-motion/STYLE.md"><img src="docs/frames/pictogram-motion.jpg" alt="象形运动图形"></a><br><b>象形运动图形</b><br>Pictogram Motion<br><i>Left Behind</i><br><sub>一把被落在公交车上的黄伞，晴天里在失物招领的货架上等了一整天，暴雨回来时和另外 312 把一起撑开：物件、交通、天气和标识，都是卡着节拍的几何象形符号。</sub></td>
 </tr>
 <tr>
 <td width="33%" valign="top"><a href="styles/ascii-crt/STYLE.md"><img src="docs/frames/ascii-crt.jpg" alt="ASCII / CRT 终端"></a><br><b>ASCII / CRT 终端</b><br>ASCII / CRT Terminal<br><i>Tranquility.log</i><br><sub>月球基地的 AI 沉睡 40 年后被唤醒，用字符画出“家”来回复。</sub></td>

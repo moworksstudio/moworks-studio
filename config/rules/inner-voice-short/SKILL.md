@@ -48,6 +48,17 @@ noodle limbs, the face high on the capsule), the black shadow figure with its re
 Holds are long and stay alive by breathing, a phone's flicker, a slow moon. **Don't:** saturated colour outside the red, gradients or outlines on the
 character, busy backgrounds, camera moves for energy, whooshes, pops.
 
+**The hero's arms and the set around him** (owner 06/11, Test 42, #1218):
+- **Elbows hang down.** `hero`'s arms bend by `bend: ±1` (two-bone IK, kit.js `ik`; hip-local, +x right, +y down; shoulders at x -34 and 34,
+  y -148). A hand at or above its shoulder, or reaching forward (to the face, a phone, a wheel, a desk), puts the elbow **below** the line from shoulder
+  to hand: `bend: -1` when the hand is right of its shoulder, `bend: 1` when it is left of it. A hand hanging by the side keeps the elbow out,
+  away from the body (the kit's default). A hand that moves across its shoulder works its bend out each frame (`bend: hand[0] > 34 ? -1 : 1` for the
+  front arm). Never an elbow up beside the face or pointing back over the shoulder: Test 42's `hand: [74, -190], bend: 1` (the kit's default bend
+  kept for a raised hand) did that in most shots. Check each pose in the stills: the forearm comes up from a low elbow.
+- **What he sits or lies on is behind him.** A bed, a duvet, a sofa, a chair, a cushion is drawn before the hero (in `o.behind` or earlier in the
+  scene), so his legs and body lie over it. Only covers he is under are drawn after him, and then over his legs only, never across the body
+  where he sits up (Test 42: a duvet drawn over the hero sitting on the bed's edge).
+
 **Faces:** Comic Sans MS and Comic Neue have no Vietnamese letters, so the app draws the source skill's `HAND` stack with Pangolin, a hand face of the same
 casual build that has them (a declared name, so no system font is ever used); the source skill's code keeps its names.
 
