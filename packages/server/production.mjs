@@ -17,6 +17,7 @@ import { rememberAssets } from "../project-service/assets.mjs";
 import { ARCHIVE, archiveMessage, unpackArchive } from "../project-service/archive.mjs";
 import * as rev from "../revisions/index.mjs";
 import { placedShots, readShots } from "../hf-edit/shots.mjs";
+import { filmSubtitles, toSrt, toVtt } from "../hf-edit/subtitles.mjs";
 import { qaFacts } from "../pipeline/index.mjs";
 import { snapshotAtAsync } from "../hf-qa/cli.mjs";
 import { dynamicOf } from "../hf-qa/qc.mjs";
@@ -214,6 +215,8 @@ export const CHECKS = {
   "G-BLANK": { title: "Empty-looking scenes", explain: "Takes a few stills of each scene and flags a scene whose stills are all flat. A heuristic: it can miss or misjudge.", kind: "heuristic" },
   "G-END": { title: "The ending", explain: "Compares a still half a second before the end with the last frame: a film whose picture is still full and lit on its last frame stops dead. The picture should fade out with the music (or after the end card). In a style whose author's ending the Motion Plan names and plays, a dark screen, a dot or a held end card ends the film too.", kind: "deterministic" },
   "G-SYNC": { title: "Moves on their words", explain: "A move of the Motion Plan that names a spoken word starts or lands on it, within about 3 frames, and the word is said in that shot. A warning, never a block.", kind: "deterministic" },
+  "G-ANATOMY": { title: "Anatomy", explain: "Reads the film's code for the characters' bodies. Today: in an Inner Voice Short film, a hand raised to or above the shoulder bends its elbow down, under the forearm (the film style's rule). More body parts and film styles to come. A warning, never a block.", kind: "deterministic" },
+  "G-SOUND-SHAPE": { title: "The sound from start to end", explain: "Reads the sound of the film's render in 100 ms steps: it should start with the picture, never drop out to silence in the middle (a room tone or a quiet bed counts as sound), and last to the film's end. It needs a render of the film as it is. A warning, never a block.", kind: "deterministic" },
   "G-FLICKER": { title: "Flicker in the render", explain: "Reads every frame of the film's render: a part of the picture that jumps to another picture for one frame and back, again and again (two surfaces at the same height in 3D, a light that blinks). It needs a render of the film as it is: the preview made after the Build and after each change. A warning, never a block.", kind: "deterministic" },
   "G-CANVAS-TEXT": { title: "Text drawn into the picture", explain: "Finds text the film's code draws into its picture (a canvas), which Studio and After Effects cannot edit. Text the film style performs (its own drawing) may stay, with a line saying so in the film's notes. A warning, never a block.", kind: "deterministic" },
   "G-AUDIO-FILES": { title: "Sound files that are missing", explain: "Every sound the film plays has its file. A missing one is left out of the render and said; place it again, relink it, or remove it. A warning, never a block.", kind: "deterministic" },
@@ -486,7 +489,9 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     const out = join(dir, stampedName(dir, name, FORMATS[format]));          // the date and time in the name, never ""
     // not while Claude changes the film (the render would catch it half-done); one render at a time in the app
     if (ctx.agent?.running?.has(p.id)) throw err("BUSY", "Claude is changing the film: render when it finishes");
-    return jobs.start("export", { projectId: p.id, title: `Export ${basename(out)}`, output: out, settings: { format, quality, fps, filename: name, master } }, async (job) => {
+    // the subtitles beside the film, only when the Render dialog's box is ticked (owner 06/11 #1244): <film>.srt and <film>.vtt for YouTube and Facebook
+    const subtitles = b.subtitles === true;
+    return jobs.start("export", { projectId: p.id, title: `Export ${basename(out)}`, output: out, settings: { format, quality, fps, filename: name, master, subtitles } }, async (job) => {
       const release = ctx.renders ? await ctx.renders.acquire(p.id, p.title ?? basename(p.path), (other) => job.update({ stage: "waiting", waitingFor: other.title })) : () => {};
       try { return await renderNow(job); } finally { release(); }
     });
@@ -545,6 +550,18 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
         web = await capWebBitrate(out, { root, signal: job.signal }).catch((e) => { job.log?.(`web size: ${e.message}`); return null; });
       }
       const size = existsSync(out) ? statSync(out).size : 0;
+      let subs = null;
+      if (subtitles && existsSync(out)) {
+        job.update({ stage: "subtitles" });
+        try {
+          const lines = await filmSubtitles(p.path);
+          if (lines.length) {
+            const base = out.replace(/\.[^./\\]+$/, "");
+            writeFileSync(`${base}.srt`, toSrt(lines)); writeFileSync(`${base}.vtt`, toVtt(lines));
+            subs = { lines: lines.length, files: [`${base}.srt`, `${base}.vtt`] };
+          } else subs = { lines: 0, files: [], why: "The film has no words to subtitle." };
+        } catch (e) { job.log?.(`subtitles: ${e.message}`); subs = { lines: 0, files: [], why: "The subtitles could not be made." }; }
+      }
       job.update({ stage: "loudness" });
       // the master to the studio rule (-14 LUFS, true peak at most -1 dBTP; -16 when Quieter is chosen), HyperFrames' two-pass loudnorm; then measured
       let loud = null;
@@ -568,7 +585,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       if (loud?.notes?.length) note(p, { kind: "render", status: "warning", text: "Sound: {lufs} LUFS, peak {peak} dBTP ({notes}); the target is {target} LUFS, peak at most -1", vars: { lufs: loud.lufs, peak: loud.truePeak, notes: loud.notes.join(", "), target: (MASTER[master] ?? MASTER.standard).lufs } });
       // "Took" is the whole wait from pressing Render (the checks, the GPU test, the frames, the sound), not the frames alone
       const whole = job.startedAt ? Date.now() - Date.parse(job.startedAt) : res.wallMs;
-      return { loudness: loud, file: out, size, frames: res.totalFrames ?? null, duration: res.duration ?? null, wallMs: whole, renderMs: res.wallMs, hfVersion: res.hfVersion, logFile: res.logFile,
+      return { loudness: loud, file: out, size, ...(subs ? { subtitles: subs } : {}), frames: res.totalFrames ?? null, duration: res.duration ?? null, wallMs: whole, renderMs: res.wallMs, hfVersion: res.hfVersion, logFile: res.logFile,
         gpu: { mode: gpu.mode, reason: gpu.reason, renderer: gpu.renderer, checkMs: gpu.ms }, ...(web?.capped ? { web } : {}), ...(res.reused ? { reused: true, reusedFrom: res.reusedFrom ?? null } : {}) };
     }
     }

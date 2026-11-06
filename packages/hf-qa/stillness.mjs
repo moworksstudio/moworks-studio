@@ -43,6 +43,35 @@ export async function greyFrames(input, { fps = 1 / STILL.step, long = STILL.lon
   return { w, h, frames: Array.from({ length: n }, (_, i) => stdout.subarray(i * w * h, (i + 1) * w * h)) };
 }
 
+// ---- Cuts like a slideshow (owner 06/11/2026 #1244; the idea of anidoodle's tools/motionscan.mjs "slidecut", Alex Greenshpun, Apache-2.0,
+// written here): a still picture replaced at once by another still picture, with nothing moving for about a second on either side. One such
+// cut is a choice (a title card, the twist); SLIDES_MIN of them in one film read as a slide deck however well each card is drawn
+export const SLIDE = Object.freeze({ cut: 0.55, still: 0.03, around: 4, block: 16, level: 14 });
+export const SLIDES_MIN = 3;
+/** The share of the picture's blocks whose mean grey changed by more than SLIDE.level from frame a to frame b (0-1). */
+function changed(a, b, w, h, { block = SLIDE.block, level = SLIDE.level } = {}) {
+  let n = 0, hit = 0;
+  for (let y0 = 0; y0 + block <= h; y0 += block) for (let x0 = 0; x0 + block <= w; x0 += block) {
+    let d = 0;
+    for (let y = y0; y < y0 + block; y++) for (let x = x0, o = y * w + x; x < x0 + block; x++, o++) d += a[o] - b[o];
+    n++; if (Math.abs(d) / (block * block) > level) hit++;
+  }
+  return n ? hit / n : 0;
+}
+/** The times (s) of the cuts that replace one still picture by another: frames every `step` s. */
+export function slideCuts(frames, times, w, h, opts = {}) {
+  const S = { ...SLIDE, ...opts }, ch = [];
+  for (let i = 1; i < frames.length; i++) ch.push(changed(frames[i - 1], frames[i], w, h, S));
+  const out = [];
+  for (let i = 0; i < ch.length; i++) {
+    if (ch[i] < S.cut) continue;
+    const before = ch.slice(Math.max(0, i - S.around), i), after = ch.slice(i + 1, i + 1 + S.around);
+    if (before.length < S.around || after.length < S.around) continue;          // the film's first and last second
+    if (before.every((c) => c < S.still) && after.every((c) => c < S.still)) out.push(times[i + 1]);
+  }
+  return out;
+}
+
 /** Can this block show a move? Only blocks with corners or texture can: one that changes when shifted by `shift` + 1 px both across and
  *  down (a plain edge looks the same along itself, a flat patch everywhere). */
 function trackable(a, w, h, x0, y0, { block = STILL.block, level = STILL.level, shift = STILL.shift } = {}) {
@@ -165,6 +194,7 @@ export async function measureStills(dir, { shots = [], total, dynamic = null, ne
     const g = await greyFrames(files.map((x) => x.f), { workDir });
     const kept = files.slice(0, g.frames.length);
     const report = stillReport(blockAges(g.frames, kept.map((x) => x.t), g.w, g.h), { shots, total, step: st, dynamic, nearLimit, source: "stills", measured: kept.length });
+    report.slides = slideCuts(g.frames, kept.map((x) => x.t), g.w, g.h);
     return { ...report, ...(failed.length || kept.length < times.length ? { failed: failed.length ? failed : [`${kept.length} of ${times.length} stills`] } : {}) };
   } finally { rmSync(workDir, { recursive: true, force: true }); }
 }
@@ -173,7 +203,9 @@ export async function measureStills(dir, { shots = [], total, dynamic = null, ne
 export async function measureVideo(file, { shots = [], total = null, dynamic = null, step = STILL.step, tune = {} } = {}) {
   const g = await greyFrames(file, { fps: 1 / step, long: tune.long ?? STILL.long });
   const times = g.frames.map((_, i) => r2(i * step));
-  return stillReport(blockAges(g.frames, times, g.w, g.h, tune), { shots, total: total ?? (times.length ? times.at(-1) : 0), step, dynamic, source: "video", measured: g.frames.length, tune });
+  const report = stillReport(blockAges(g.frames, times, g.w, g.h, tune), { shots, total: total ?? (times.length ? times.at(-1) : 0), step, dynamic, source: "video", measured: g.frames.length, tune });
+  report.slides = slideCuts(g.frames, times, g.w, g.h);
+  return report;
 }
 
 const where = (x) => `${x.shot != null ? `shot ${x.shot}${x.title ? ` "${x.title}"` : ""}: ` : ""}${x.from}–${x.to} s`;
@@ -194,8 +226,11 @@ export function stillLines(r) {
 /** The Tech checks entry (a heuristic warning, never blocking): one finding per held stretch over the limit. */
 export function stillGate(r, error = null) {
   if (!r) return { id: "G-STILL", blocking: false, pass: true, findings: [], skipped: error ? `Not measured: ${error}` : undefined };
-  return { id: "G-STILL", blocking: false, pass: r.stretches.length === 0, warnings: r.stretches.length,
-    findings: r.stretches.map((x) => ({ shot: x.shot, from: x.from, to: x.to, seconds: x.seconds, held: x.held, where: x.where,
-      message: `Held still for ${x.seconds} s (${x.from}–${x.to} s): ${what(x)}. Nothing should hold still for more than ${r.limit} s, except the final hold.` })),
+  const slides = (r.slides ?? []).length >= SLIDES_MIN ? r.slides : [];
+  const slideFinding = slides.length ? [{ code: "slides", time: slides[0], count: slides.length,
+    message: `${slides.length} cuts read like a slideshow (${slides.slice(0, 5).map((t) => `${t} s`).join(", ")}${slides.length > 5 ? "…" : ""}): a still picture is replaced at once by another still picture. Carry a movement across the cut (a push, a move that continues, an object that travels into the next shot), as the storyboard's frames carry something from the one before.` }] : [];
+  return { id: "G-STILL", blocking: false, pass: r.stretches.length === 0 && !slides.length, warnings: r.stretches.length + slideFinding.length,
+    findings: [...r.stretches.map((x) => ({ shot: x.shot, from: x.from, to: x.to, seconds: x.seconds, held: x.held, where: x.where,
+      message: `Held still for ${x.seconds} s (${x.from}–${x.to} s): ${what(x)}. Nothing should hold still for more than ${r.limit} s, except the final hold.` })), ...slideFinding],
     finalHold: r.finalHold };
 }

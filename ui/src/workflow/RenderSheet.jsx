@@ -12,7 +12,7 @@ import { stampName } from "../../../packages/render-names/index.mjs";
 import { useStage } from "./stage.jsx";
 
 // plain words for each check, English keys for t
-export const CHECK_WORDS = { "G-AUDIO-FILES": "Sound files that are missing", "G-CANVAS-TEXT": "Text drawn into the picture", "G-FLICKER": "Flicker in the render", "G-HF-LINT": "Composition files", "G-HF-SCRIPT": "Script errors in the preview", "G-REMOTE": "Loads something from the internet",
+export const CHECK_WORDS = { "G-AUDIO-FILES": "Sound files that are missing", "G-CANVAS-TEXT": "Text drawn into the picture", "G-FLICKER": "Flicker in the render", "G-SOUND-SHAPE": "The sound from start to end", "G-HF-LINT": "Composition files", "G-HF-SCRIPT": "Script errors in the preview", "G-REMOTE": "Loads something from the internet",
   "G-FONT": "A font that is not on this computer", "G-GLYPH": "A font without Vietnamese letters",
   "G-GLYPH-CODE": "A font without Vietnamese letters in the film's code", "G-VI-MARKS": "Vietnamese written without its marks", "G-BLANK": "Scenes that look empty",
   "G-HF-LAYOUT": "Layout: text overlapping, hidden or cut", "G-HF-CONTRAST": "Contrast too low to read", "G-HF-MOTION": "Motion",
@@ -28,7 +28,7 @@ export function checkLabel(g, t) {
   if (g.id === "G-HF-SCRIPT" && notChecked(g)) return t("Not checked: scripts in the preview");
   return notChecked(g) ? t("Not checked: {what}", { what: t(NOT_CHECKED_WORDS[g.id] ?? name) }) : name;
 }
-const NOT_CHECKED_WORDS = { "G-HF-LAYOUT": "layout", "G-HF-CONTRAST": "contrast", "G-HF-MOTION": "motion", "G-FLICKER": "flicker (waiting for the preview)" };
+const NOT_CHECKED_WORDS = { "G-HF-LAYOUT": "layout", "G-HF-CONTRAST": "contrast", "G-HF-MOTION": "motion", "G-FLICKER": "flicker (waiting for the preview)", "G-SOUND-SHAPE": "the sound from start to end (waiting for the preview)" };
 /** The server's reasons name the file in brackets ("… (compositions/scene-2.html)"); the UI shows no paths. */
 export const noPaths = (s) => String(s ?? "").replace(/\s*\([^()]*[\\/][^()]*\)/g, "").trim();
 /** Why a check did not run, in plain words (no "HF", no "browser stages"): the lint error itself, without its file. */
@@ -119,7 +119,7 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
   useEffect(() => { const h = setInterval(() => setNow(new Date()), 20000); return () => clearInterval(h); }, []);
   const [job, setJob] = useState(null);
   useEffect(() => {
-    if (ex.data && !form) setForm({ filename: ex.data.defaults.filename, format: initialFormat, quality: "standard", master: "standard" });
+    if (ex.data && !form) setForm({ filename: ex.data.defaults.filename, format: initialFormat, quality: "standard", master: "standard", subtitles: false });
     const r = ex.data?.jobs.find((j) => j.status === "running"); if (r && r.id !== job?.id) follow(r);
     else if (!r && !job && ex.data?.jobs?.[0]) setJob(ex.data.jobs[0]);          // the last render, its result and its checks stay here after reopening
   }, [ex.data]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -128,7 +128,7 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
     if (framesSince.current == null && /^rendering: (capture|encode)/.test(x.stage ?? "")) framesSince.current = { at: Date.now(), from: Math.max(0, Math.min(100, Number(x.progress) || 0)) };
     setJob(x); if (x.status !== "running") ex.reload(); }, 1000); };
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
-  const start = async () => { try { follow(await post(`/api/projects/${projectId}/exports`, { filename: form.filename, format: form.format, quality: form.quality, master: form.master })); } catch (e) { toast(e.message, "error"); } };
+  const start = async () => { try { follow(await post(`/api/projects/${projectId}/exports`, { filename: form.filename, format: form.format, quality: form.quality, master: form.master, subtitles: !!form.subtitles })); } catch (e) { toast(e.message, "error"); } };
   const stop = async () => { try { await post(`/api/jobs/${job.id}/cancel`); } catch (e) { toast(e.message, "error"); } };
   const file = (how, path) => post(`/api/projects/${projectId}/files/${how}`, { path }).catch((e) => toast(e.message, "error"));
   // in the Editor a render plays in the app; elsewhere the system's player opens it
@@ -157,6 +157,9 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
         {hasSound && <label className="field" title={t("Evens out the sound to the web's level: -14 LUFS, true peak at most -1 dBTP")}><span>{t("Loudness")}</span><select className="select" value={form.master} onChange={(e) => set("master", e.target.value)} disabled={running || form.format === "webm"}>
           <option value="standard">{t("Standard, for web and social (recommended)")}</option><option value="quiet">{t("Quieter, -16 LUFS (a podcast, or when asked)")}</option><option value="off">{t("Keep the mix as it is")}</option></select></label>}
       </div>
+      {/* the subtitles as files beside the film, only when asked (owner 06/11 #1244) */}
+      <label className="check render-subs"><input type="checkbox" checked={!!form.subtitles} disabled={running} onChange={(e) => set("subtitles", e.target.checked)} />
+        <span>{t("Also save the subtitles (.srt and .vtt) for YouTube and Facebook")}</span></label>
       {mix.data?.music?.licence && /mixkit/i.test(mix.data.music.licence) && <Banner kind="warning">{t("Mixkit music is for online use only (YouTube, social, websites, online ads). For TV, radio, cinema, DVD or games, use broadcast-licensed music.")}</Banner>}
       {pipe.data?.version1?.card?.brand && <Banner kind="warning">{t("Moworks Studio has not checked this film against your brand guideline. Please check it yourself before you send it.")}</Banner>}
       {pipe.data?.version1?.holding && pipe.data.version1.next && <p className="hint">{t("Render makes Version {n}, the newest. To render Version {k}, open it in Versions first.", { n: pipe.data.version1.next.n, k: pipe.data.version1.n })}</p>}
@@ -184,7 +187,8 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
           {/* the time the copy took, and why, when the checks ran first */}
           {job.endedAt && job.startedAt && <><dt>{t("Took")}</dt><dd className="num">{Math.max(1, Math.round((Date.parse(job.endedAt) - Date.parse(job.startedAt)) / 1000))} s</dd></>}</>
           : <><dt>{t("Took")}</dt><dd className="num">{Math.round(job.result.wallMs / 1000)} s</dd></>}
-        {job.result.loudness && !job.result.loudness.silent && !job.result.loudness.error && <><dt>{t("Loudness")}</dt><dd><LoudLine l={job.result.loudness} master={job.settings?.master} /></dd></>}</dl>
+        {job.result.loudness && !job.result.loudness.silent && !job.result.loudness.error && <><dt>{t("Loudness")}</dt><dd><LoudLine l={job.result.loudness} master={job.settings?.master} /></dd></>}
+        {job.result.subtitles && <><dt>{t("Subtitles")}</dt><dd>{job.result.subtitles.lines ? t("{n} lines, saved beside the film as .srt and .vtt", { n: job.result.subtitles.lines }) : t(job.result.subtitles.why ?? "None made.")}</dd></>}</dl>
         <div className="row"><button className="btn primary sm" onClick={() => play(job.result.file)}><Play size={14} />{t("Play")}</button>
           <button className="btn sm" onClick={() => file("reveal", job.result.file)}><FolderOpen size={14} />{t("Show in folder")}</button>
           <button className="btn sm" onClick={() => stage.open("ae")}>{t("Export to AE")}</button></div></>}

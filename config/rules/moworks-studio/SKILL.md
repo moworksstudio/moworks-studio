@@ -207,6 +207,10 @@ applied to motion graphics, line art, ink or paper styles. With the board stills
 
    This is about what the film claims, not how lively it is. A style's own world (a cartoon, floating graphics, a surreal film) keeps its logic, the always-on drift of moworks-alive stays, and
    no move is made tamer for it (moworks-alive rule 8).
+8. **Each frame carries something from the one before** (owner 06/11/2026 #1244; the idea of anidoodle's `tools/board.mjs` CARRY column,
+   Alex Greenshpun, Apache-2.0): an object, a colour, a shape, a movement, a line of the voice or a word on screen goes on into the next
+   frame, or the next one answers it. Write it in the frame (`- carries: the red thread from frame 3`). A board whose frames carry nothing is a
+   slide deck however well it is animated later; the first frame and a deliberate hard turn (the twist, a new chapter) are exempt, and say so.
 
 The Review scores these under its own criteria (moworks-qc: Composition, Motion, Sync); moworks-alive keeps the still-stretch numbers.
 
