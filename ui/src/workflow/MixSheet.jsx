@@ -10,12 +10,15 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AlertTriangle, AudioLines, Check, Info, Loader2, Music, Pause, Play, RefreshCw, RotateCcw, ShieldCheck, SlidersHorizontal, Sparkles, Trash2, X } from "lucide-react";
 import { get, post } from "../api.js";
 import { Banner, Dialog } from "../components.jsx";
-import { useData, useToast } from "../lib.jsx";
+import { useData, useToast, usePoll } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 
 // what the music button asks Claude (an English key for t; Claude reads the English)
 export const FIND_MUSIC = "Find three music tracks on mixkit.co that fit this film: its brief, its pace and its length ({length}). For each, its page and the direct .mp3 link of the track. Hand them to me with the app's music_options tool, then stop.";
 export const FIND_OTHERS = "Find three other music tracks on mixkit.co for this film, different from the ones I heard ({heard}). Hand them to me with the app's music_options tool, then stop.";
+
+/** Ready to export, as the Pipeline says it: its last row's line (pipeline/index.mjs stagesOf, "review"), never a row of its own. */
+export const mixReady = (data) => data?.stages?.find((s) => s.id === "review")?.line === "Your film is ready to export.";
 
 const mmss = (s) => { const v = Math.max(0, Math.round(s || 0)); return `${Math.floor(v / 60)}:${String(v % 60).padStart(2, "0")}`; };
 
@@ -85,7 +88,7 @@ export default function MixSheet({ projectId, project, onChanged }) {
   const pipe = useData(() => get(`/api/projects/${projectId}/pipeline`).catch(() => null), [projectId]);          // is the film really ready
   const [busy, setBusy] = useState(null);
   const [askClear, setAskClear] = useState(false);          // Remove them asks first (T38b-12: 132 effects and 25 ambience clips went at one click)
-  const [mixAsk, setMixAsk] = useState(false);          // the Final mix button asks first
+  const [mixAsk, setMixAsk] = useState(false);          // Balance again asks first (its name the one the checks and the rules say: audit/112a A5)
   const [waitSfx, setWaitSfx] = useState(false);
   const player = usePlayer();
   const root = useRef(null);
@@ -102,7 +105,7 @@ export default function MixSheet({ projectId, project, onChanged }) {
   }, [!!q.data]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (waitSfx) { const h = setTimeout(() => { q.reload(); setWaitSfx(false); }, 4000); return () => clearTimeout(h); } }, [waitSfx]); // eslint-disable-line react-hooks/exhaustive-deps
   // read again while the app places them: one read saw "placing" and the line stayed 7 minutes after the sounds were in (T36-8)
-  useEffect(() => { if (q.data?.sfxPlacing) { const h = setInterval(() => q.reload(), 3000); return () => clearInterval(h); } }, [q.data?.sfxPlacing]); // eslint-disable-line react-hooks/exhaustive-deps
+  usePoll(() => q.reload(), 3000, !!q.data?.sfxPlacing);          // read again while the app places the sound effects
   if (q.error) return <Banner kind="error">{q.error.message}</Banner>;
   if (!q.data) return <div className="skeleton" style={{ height: "16rem" }} />;
   const d = q.data;
@@ -118,6 +121,9 @@ export default function MixSheet({ projectId, project, onChanged }) {
   const placing = !!busy || waitSfx;
   const added = d.added ?? [];
   const sounds = [...(d.ambience ?? []).map((x) => ({ ...x, bed: true })), ...d.sfx, ...added.map((x) => ({ ...x, mine: true }))].sort((a, b) => a.start - b.start);
+  // a sound only the page has (no cue of its own: sfx.json no longer lists it, T38b-13): its × takes it off the timeline, as a sound you
+  // added; a skip by its page id would not hold, the next placement brings it back (audit/112a F1)
+  const pageOnly = (x) => !!x.fromPage && /^el-sfx-\d+$/.test(String(x.id ?? ""));
   const takeOff = (x) => act("off" + x.id, () => post(`/api/projects/${projectId}/edit/audio/remove`, { id: x.id, src: x.file, name: x.name }), () => toast(t("Taken off the timeline: {name} (it stays in Assets)", { name: x.name })));
   const ownSong = !!project?.styleInfo?.music && !!d.music && !round;          // the film is built on the song the user gave: no stock tracks offered
   // The Mixkit licence only for a Mixkit track (or while Mixkit tracks are offered and none is placed), never the user's own file
@@ -129,11 +135,10 @@ export default function MixSheet({ projectId, project, onChanged }) {
   return <div className="mix" ref={root}>
     {/* Final Mix hands the film over: no score, no Tech checks; a change asked in the chat is rebuilt and rendered by itself */}
     {/* Not "ready" while something stops the render or Claude waits for an answer */}
-    {/* the same rule as the Pipeline: ready only when nothing blocks and Final Mix row is done ("Your film is ready to export.") */}
+    {/* the same rule as the Pipeline: ready only when its last row says so ("Your film is ready to export.") */}
     {(() => { const ck = pipe.data?.checks, blocking = ck?.pass === false ? ck.blocking ?? 0 : 0;
       const waits = pipe.data?.stages?.some((s) => s.status === "waiting") || !!pipe.data?.question;
-      const mixRow = pipe.data?.stages?.find((s) => s.id === "finalMix");
-      return blocking > 0 || waits || (mixRow && mixRow.status !== "done")
+      return blocking > 0 || waits || !mixReady(pipe.data)
         ? <p className="hint">{blocking > 0 ? t("The film is not ready yet: {n} problem(s) to fix before the render. Claude asks you in the chat; you can already listen and change the music or the sound effects here.", { n: blocking })
           : pipe.data?.version1?.card?.kind === "ask" ? t("Version {n} is ready. Change the music or the sound effects here if you like, then answer the question in the chat.", { n: pipe.data.version1.n })
           : waits ? t("The film is not ready yet: Claude waits for your answer in the chat. You can already listen and change the music or the sound effects here.")
@@ -163,8 +168,8 @@ export default function MixSheet({ projectId, project, onChanged }) {
         <span className="end mix-sfx-acts">
           <button className="btn ghost sm" disabled={!!busy || waitSfx} onClick={() => act("sfx", () => post(`/api/projects/${projectId}/mix/sfx`), () => setWaitSfx(true))}>
             {busy === "sfx" || waitSfx ? <Loader2 size={14} className="spin" /> : <Sparkles size={14} />}{d.sfx.length ? t("Place them again") : t("Place sound effects")}</button>
-          {d.sfx.length > 0 && <button className="btn ghost sm" disabled={!!busy} onClick={() => setAskClear(true)}><Trash2 size={14} />{t("Remove them")}</button>}</span></div>
-      {askClear && <div className="mix-confirm"><p>{t("Remove all {n} sound effects and the ambience?", { n: d.sfx.length })}<br />{t("Place sound effects brings them back.")}</p>
+          {(d.sfx.length > 0 || (d.ambience ?? []).length > 0) && <button className="btn ghost sm" disabled={!!busy} onClick={() => setAskClear(true)}><Trash2 size={14} />{t("Remove them")}</button>}</span></div>
+      {askClear && <div className="mix-confirm"><p>{d.sfx.length ? t("Remove all {n} sound effects and the ambience?", { n: d.sfx.length }) : t("Remove the ambience?")}<br />{t("Place sound effects brings them back.")}</p>
         <span className="end"><button className="btn ghost sm" onClick={() => setAskClear(false)}>{t("Keep them")}</button>
           <button className="btn danger sm" disabled={!!busy} onClick={() => { setAskClear(false); act("clear", () => post(`/api/projects/${projectId}/mix/sfx/clear`)); }}><Trash2 size={14} />{t("Remove")}</button></span></div>}
       <p className="secondary">{d.sfx.length ? t("Placed from the cuts and the Motion Plan.") : t("None placed yet.")}{added.length > 0 && <> {added.length === 1 ? t("The one you added stays when they are placed again.") : t("The {n} you added stay when they are placed again.", { n: added.length })}</>}</p>
@@ -186,18 +191,18 @@ export default function MixSheet({ projectId, project, onChanged }) {
       </div>
       {sounds.length > 0 && <details className="mix-sfx-list" open={listOpen} onToggle={(e) => { const o = e.currentTarget.open; setListOpen(o); kept.set(projectId, { ...kept.get(projectId), list: o }); }}><summary>{t("Where they are")}</summary>
         <ul className="plain mix-sfx">{sounds.map((x, i) => <li key={i}><span className="num">{x.start.toFixed(2)} s</span> {x.bed ? t("{name} (ambience)", { name: x.name }) : x.mine ? t("{name} (you added it)", { name: x.name }) : x.name}
-          {x.id && <button type="button" className="btn icon ghost mix-sfx-x" disabled={placing} onClick={() => (x.mine ? takeOff(x) : setPref({ skip: x.id }))}
+          {x.id && <button type="button" className="btn icon ghost mix-sfx-x" disabled={placing} onClick={() => (x.mine || pageOnly(x) ? takeOff(x) : setPref({ skip: x.id }))}
             aria-label={t("Take out {name} at {s} s", { name: x.name, s: x.start.toFixed(2) })} title={t("Take this sound out")}><X size={12} /></button>}</li>)}</ul></details>}
 
     </section>
     {(d.music || d.voice) && <section className="panel">
       <div className="panel-head"><h2><SlidersHorizontal size={16} /> {t("Levels")}</h2>
-        <button className="btn sm end" disabled={!!busy} onClick={() => setMixAsk(true)}>{busy === "balance" ? <Loader2 size={14} className="spin" /> : <SlidersHorizontal size={14} />}{t("Final mix")}</button></div>
+        <button className="btn sm end" disabled={!!busy} onClick={() => setMixAsk(true)}>{busy === "balance" ? <Loader2 size={14} className="spin" /> : <SlidersHorizontal size={14} />}{t("Balance again")}</button></div>
       <p className="secondary">{t("Balances the film's sound again: the voice, the music and the sound effects back to the app's levels, every fader back to 0 dB.")}</p>
     </section>}
-    {mixAsk && <Dialog title={t("Final mix")} onClose={() => setMixAsk(false)} footer={<>
+    {mixAsk && <Dialog title={t("Balance again")} onClose={() => setMixAsk(false)} footer={<>
       <button className="btn ghost" onClick={() => setMixAsk(false)}>{t("Cancel")}</button>
-      <button className="btn primary" onClick={() => { setMixAsk(false); act("balance", () => post(`/api/projects/${projectId}/mix/balance`), () => toast(t("The film's sound is balanced again."))); }}>{t("Final mix")}</button></>}>
+      <button className="btn primary" onClick={() => { setMixAsk(false); act("balance", () => post(`/api/projects/${projectId}/mix/balance`), () => toast(t("The film's sound is balanced again."))); }}>{t("Balance again")}</button></>}>
       <p>{t("The app balances the film's final sound again.")}<br />{t("The voice, the music and the sound effects go back to the app's levels, every fader to 0 dB.")}</p>
     </Dialog>}
   </div>;

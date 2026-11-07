@@ -10,11 +10,15 @@
 // - cartoon-3d (3D Cartoon, owner #1267, audit/111 B6): a person as one module on the owner's 3D Cartoon source skill (its CharDef and buildCharacter,
 //   a costume and accessories in its character-builder's way), its checks and sheet by the lab's c3-check / c3-sheet; saved in
 //   <work>/library/characters/cartoon-3d/<id>/.
+// - what-if (What If, owner #1287-#1293): a person as one module on FreshStack's What If rig (its Look: colours and one extra piece), its checks and
+//   sheet by the lab's wi-check / wi-sheet (the rig and the app's cast layer, wi-cast.tsx); saved in <work>/library/characters/what-if/<id>/.
+// - stickman-explainer (Stickman Explainer, owner #1302): a look as one small file of the Story source skill's figure() options (outfit, build,
+//   hair, shoes), its checks and sheet by the lab's hh-check / hh-sheet (the house page); saved in <work>/library/characters/stickman-explainer/<id>/.
 // Change with Claude is the same run, starting from the saved character (the version before is kept). The prompts, styles and the
 // measured estimates are in config/character-maker.json. Renders run light (the caller's workers, below-normal priority), as the lab
 // tools do. The HyperFrames calls stay in the lab tools (child processes) or come from the caller, so this package is outside that
 // boundary.
-import { execFile, spawn, spawnSync } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, extname, isAbsolute, join, relative, resolve } from "node:path";
@@ -25,14 +29,35 @@ import * as kit from "../character-kit/index.mjs";
 import { brushGate } from "../character-kit/brushgate.mjs";
 import { RICKS_ENGINE, ricksCharacters, ricksDir, ricksFolder, ricksModule, ricksRecord } from "../character-kit/ricks.mjs";
 import { C3D_CAST_DIR, C3D_ENGINE, c3dDir, c3dFolder, c3dModule, c3dRecord } from "../character-kit/c3d.mjs";
+import { WI_CAST_DIR, WI_ENGINE, wiDir, wiFolder, wiModule, wiRecord } from "../character-kit/whatif.mjs";
+import { stageEngine as stageWhatIf } from "../what-if-styles/index.mjs";
+import { houseFolder, houseModule, houseRecord, houseUserDir } from "../character-kit/house.mjs";
 import { anidoodleSource, stageEngine } from "../anidoodle-styles/index.mjs";
 import { stageGuide as stageRicks } from "../moworks-styles/index.mjs";
-import { claudeEnv, findClaude } from "../system-status/index.mjs";
+import { findClaude } from "../system-status/index.mjs";
+import { claudeRunEnv, killTree } from "../system-status/claude-run.mjs";
 import { checkArgv } from "../agent/argv.mjs";
 import { ffmpegExe } from "../library/preview-media.mjs";
+import { readJson } from "../util/json.mjs";
+/** The house heroes' ways (owner #1302): Stickman Explainer, a look of the Story source skill's figure() (outfit, build, hair, shoes); the
+ *  2D Explainer, a recurring character in a palette of its own on the kit's house hero (STYLE.md §2). One small file each; the source skill's
+ *  files Claude reads (read-only copies in the lab), its contract, its hand, its thumb. */
+const HOUSE_WAYS = Object.freeze({
+  "stickman-explainer": { label: "Stickman Explainer", hand: "stickman", rules: "stickman-character", source: "story", thumb: "/media/characters/stickman-explainer/moworks-hoodie-hero/poster.webp",
+    credit: "the Hoodie Hero, the Stickman Explainer film style's own hero (the owner's Story source skill), drawn by its own figure()",
+    read: [[".claude/skills/stickman-explainer/SKILL.md", "SKILL.md"], ["src/stickman/kit.js", "kit.js"]], by: "Stickman Explainer's figure()" },
+  "explainer-2d": { label: "2D Explainer", hand: "explainer", rules: "explainer-2d-character", source: "explainer-2d", thumb: "/media/characters/explainer-2d/moworks-red-hoodie-kid/poster.webp",
+    credit: "the Red Hoodie Kid, the 2D Explainer film style's own house hero (the owner's source skill), drawn by its own code",
+    read: [["STYLE.md", "STYLE.md"], ["engine/CONTRACT.md", "CONTRACT.md"], ["engine/house-hero.js", "house-hero.js"], ["engine/house-pal.js", "house-pal.js"]], by: "the 2D Explainer's house hero" },
+});
+const STICK_ENGINE = "stickman-explainer";
+const isHouse = (e) => Object.hasOwn(HOUSE_WAYS, e);
+/** The engine a run makes the character with: one of the ways the creator offers (Brush, Ricks Clip, 3D Cartoon, What If, the house heroes),
+ *  else anidoodle's human engine with the hand asked for. The server's create route asks the same. */
+export const makerEngine = (e) => (["brush-kit", RICKS_ENGINE, C3D_ENGINE, WI_ENGINE].includes(e) || isHouse(e) ? e : kit.HUMAN_ENGINE);
 
 const TOOLS = join(import.meta.dirname, "lab-tools");
-const readJson = (f, d = null) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
+
 export const config = (root = APP_ROOT) => readJson(join(root, "config", "character-maker.json"), {});
 export const labRoot = (root = APP_ROOT) => join(kit.mediaRoot(root), "_lab");
 /** Labs left behind (a stopped run, a server that ended mid-run): gone after a day; a failed run's lab stays that long for a look. */
@@ -58,7 +83,7 @@ export function rigOf(engine, asked, saved, root = APP_ROOT) {
   const ok = rigsFor(engine, root).map((x) => x.id);
   if (saved) return saved;
   if (asked == null || asked === "") return ok[0] ?? null;
-  if (!ok.includes(asked)) throw Object.assign(new Error(`${engine === "brush-kit" ? "Brush cartoon" : engine === RICKS_ENGINE ? "Ricks Clip" : engine === C3D_ENGINE ? "3D Cartoon" : "anidoodle"} does not draw this kind of character: ${asked} (it draws ${ok.join(", ")})`), { code: "INVALID" });
+  if (!ok.includes(asked)) throw Object.assign(new Error(`${engine === "brush-kit" ? "Brush cartoon" : engine === RICKS_ENGINE ? "Ricks Clip" : engine === C3D_ENGINE ? "3D Cartoon" : engine === WI_ENGINE ? "What If" : isHouse(engine) ? HOUSE_WAYS[engine].label : "anidoodle"} does not draw this kind of character: ${asked} (it draws ${ok.join(", ")})`), { code: "INVALID" });
   return asked;
 }
 /** The styles the creator offers: { engine, hand, label, example?, thumb, thumbCredit, rigs } (the 9 anidoodle hands and Brush cartoon),
@@ -66,12 +91,14 @@ export function rigOf(engine, asked, saved, root = APP_ROOT) {
 export function styles(root = APP_ROOT) {
   const c = config(root);
   return (c.styles ?? []).map((s) => ({ ...s, estimate: c.estimate?.[s.engine] ?? null, rigs: rigsFor(s.engine, root),
-    thumb: s.engine === "brush-kit" ? "/media/characters/clawd/poster.webp" : thumbFile(`${s.hand}.webp`) ? `/media/character-styles/${s.hand}.webp` : null,
+    thumb: s.engine === "brush-kit" ? "/media/characters/clawd/poster.webp" : isHouse(s.engine) ? HOUSE_WAYS[s.engine].thumb : thumbFile(`${s.hand}.webp`) ? `/media/character-styles/${s.hand}.webp` : null,
     thumbCredit: s.engine === "brush-kit" ? "Clawd, the demo character of ClaudeAnimationBase (John Heibel, MIT; Anthropic's mascot), drawn by the app's character layer to show the look: never in a film"
       : s.engine === RICKS_ENGINE ? "the legionary of the Ricks Clip film style's source skill (its worked example), front, back and profile, drawn by its own code"
-      : s.engine === C3D_ENGINE ? "Mika, Ravi, June and Otto, the 3D Cartoon film style's own cast (the owner's source skill), drawn by its own code" : "Mira, anidoodle's character by Alex Greenshpun (Apache-2.0), in this hand" }));
+      : s.engine === C3D_ENGINE ? "Mika, Ravi, June and Otto, the 3D Cartoon film style's own cast (the owner's source skill), drawn by its own code"
+      : s.engine === WI_ENGINE ? "Pip, the What If film style's hero (FreshStack's What If engine, MIT), drawn by its own rig"
+      : isHouse(s.engine) ? HOUSE_WAYS[s.engine].credit : "Mira, anidoodle's character by Alex Greenshpun (Apache-2.0), in this hand" }));
 }
-export const styleOf = (engine, hand, root = APP_ROOT) => styles(root).find((s) => s.engine === engine && (engine === "brush-kit" || engine === RICKS_ENGINE || engine === C3D_ENGINE || s.hand === hand)) ?? null;
+export const styleOf = (engine, hand, root = APP_ROOT) => styles(root).find((s) => s.engine === engine && (engine === "brush-kit" || engine === RICKS_ENGINE || engine === C3D_ENGINE || engine === WI_ENGINE || isHouse(engine) || s.hand === hand)) ?? null;
 
 /** A free id for a new character from its name or description: lowercase letters, digits and dashes, never one the app ships (Mira → mira-2),
  *  never one of the user's. */
@@ -153,6 +180,29 @@ export function prepareLab(job, root = APP_ROOT) {
     if (from) cpSync(c3dModule(from, root), join(lab, "characters", `${id}.ts`));          // Change with Claude: the saved file back in place
     return { lab, brief: fill(c.prompts[C3D_ENGINE], vars), allowed: ["Bash(node tools/c3-check.mjs:*)", "Bash(node tools/c3-sheet.mjs:*)"] };
   }
+  if (engine === WI_ENGINE) {
+    for (const d of ["characters", "out", "reference"]) mkdirSync(join(lab, d), { recursive: true });
+    copyTools(lab, ["wi-check.mjs", "wi-sheet.mjs"], root);
+    // the engine read-only where a film reads it (.moworks/library/what-if: the rig, the cast sheet, the worked episodes), the contract in the rules
+    stageWhatIf(lab, root);
+    mkdirSync(join(lab, ".moworks", "rules", "what-if-character"), { recursive: true });
+    cpSync(join(root, "config", "rules", "what-if-character", "CONTRACT.md"), join(lab, ".moworks", "rules", "what-if-character", "CONTRACT.md"));
+    if (from) cpSync(wiModule(from, root), join(lab, "characters", `${id}.ts`));          // Change with Claude: the saved file back in place
+    return { lab, brief: fill(c.prompts[WI_ENGINE], vars), allowed: ["Bash(node tools/wi-check.mjs:*)", "Bash(node tools/wi-sheet.mjs:*)"] };
+  }
+  if (isHouse(engine)) {
+    const w = HOUSE_WAYS[engine];
+    for (const d of ["characters", "out", "reference"]) mkdirSync(join(lab, d), { recursive: true });
+    copyTools(lab, ["hh-check.mjs", "hh-sheet.mjs"], root);
+    // the source skill read-only where Claude reads it (its files as pinned in the bundle), the contract in the rules
+    const src = join(root, "bundle", "styles", "moworks-styles", w.source), lib = join(lab, ".moworks", "library", engine);
+    mkdirSync(lib, { recursive: true });
+    for (const [from_, to] of w.read) cpSync(join(src, ...from_.split("/")), join(lib, to));
+    mkdirSync(join(lab, ".moworks", "rules", w.rules), { recursive: true });
+    cpSync(join(root, "config", "rules", w.rules, "CONTRACT.md"), join(lab, ".moworks", "rules", w.rules, "CONTRACT.md"));
+    if (from) cpSync(houseModule(from, root), join(lab, "characters", `${id}.js`));          // Change with Claude: the saved file back in place
+    return { lab, brief: fill(c.prompts[engine], vars), allowed: ["Bash(node tools/hh-check.mjs:*)", "Bash(node tools/hh-sheet.mjs:*)"] };
+  }
   copyTools(lab, ["brush-sheets.mjs"], root);
   kit.stageGuide(lab, root);
   const rules = join(lab, ".moworks", "rules");
@@ -184,7 +234,7 @@ export function runClaude({ lab, brief, allowed, root = APP_ROOT, model, effort,
   try { checkArgv(exe, args); } catch (e) { return Promise.resolve({ ok: false, error: e.message }); }
   const t0 = Date.now();
   return new Promise((ok) => {
-    const c = spawn(exe, args, { cwd: lab, env: { ...claudeEnv(), MW_APP_ROOT: root, ...env }, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
+    const c = spawn(exe, args, { cwd: lab, env: claudeRunEnv(root, { MW_APP_ROOT: root, ...env }), windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
     c.stdin.on("error", () => { /* a run that ended at once: its close says why */ });
     c.stdin.end(brief, "utf8");
     let buf = "", final = null, err = "";
@@ -202,7 +252,7 @@ export function runClaude({ lab, brief, allowed, root = APP_ROOT, model, effort,
       }
     });
     c.stderr.on("data", (d) => { err = (err + d).slice(-4000); });
-    const kill = () => spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true });
+    const kill = () => killTree(c);
     signal?.addEventListener("abort", kill, { once: true });
     c.on("close", (code) => {
       signal?.removeEventListener("abort", kill);
@@ -217,7 +267,7 @@ function tool(lab, args, { root, env = {}, signal = null, timeout = 1200000 } = 
   return new Promise((ok) => {
     const c = execFile(process.execPath, args, { cwd: lab, env: { ...process.env, MW_APP_ROOT: root, ...env }, windowsHide: true, timeout, maxBuffer: 16 * 1024 * 1024 },
       (e, out, errOut) => ok({ code: e ? (e.code ?? 1) : 0, out: `${out ?? ""}${errOut ?? ""}` }));
-    signal?.addEventListener("abort", () => { try { spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true }); } catch { /* gone */ } }, { once: true });
+    signal?.addEventListener("abort", () => killTree(c), { once: true });
   });
 }
 // resolves true when FFmpeg made the file; off the event loop (the creator runs in the server's own process)
@@ -225,8 +275,43 @@ const ff = (root, args) => new Promise((ok) => execFile(ffmpegExe(root), ["-v", 
 const toWebp = (root, src, out, w = 1600) => ff(root, ["-i", src, "-vf", `scale='min(${w},iw)':-1`, "-c:v", "libwebp", "-quality", "82", out]);
 
 /** Make (or change) a character: the whole run. onStep(stage, progress) for the job; log(line). Returns the saved character's summary. */
-export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = null, onStep = () => {}, log = () => {}, env = {}, renderDemo = null, claude = runClaude, runTool = tool } = {}) {
-  const engine = ["brush-kit", RICKS_ENGINE, C3D_ENGINE].includes(input.engine) ? input.engine : kit.HUMAN_ENGINE, hand = engine === "brush-kit" ? "brush" : engine === RICKS_ENGINE ? "ricks" : engine === C3D_ENGINE ? "cartoon" : input.hand;
+// What the run is doing, said to the user in plain words (owner 06/11: the steps showed commands and file names, "reading the code",
+// which nobody making a character understands): the part of the character being drawn, never a command, a file or the word code. A
+// stage word of the app's own (onStep) is turned the same way; a line said twice in a row is said once.
+const PLAIN_STAGE = { "preparing the lab": "Getting ready", "Claude is reading the recipe": "Reading the drawing style", "done": "Done",
+  "keeping the version before": "Keeping the old version", "checking the character gate": "Checking the character", "drawing the model sheet": "Drawing the model sheet",
+  "drawing the model sheets": "Drawing the model sheets", "rendering the walk": "Making the walk", "saving to the library": "Saving it to your characters",
+  "rendering the showreel": "Making the short clip" };
+/** The plain words for one of Claude's actions in the lab, or null when it says nothing new (a file it only looks at, a note). */
+export function plainStep(e) {
+  const cmd = String(e?.command ?? ""), file = String(e?.file ?? "").split("\\").join("/"), base = file.split("/").pop() ?? "";
+  if (e?.name === "Bash") {
+    if (/gate\.mjs|rc-check|c3-check|wi-check/.test(cmd)) return "Checking the body: its proportions and joints";
+    if (/still\.mjs|brush-sheets|rc-sheet|c3-sheet|wi-sheet/.test(cmd)) return "Drawing the model sheet to look at it";
+    if (/render\.mjs/.test(cmd)) return "Making a short test clip";
+    return null;
+  }
+  if (/^(Write|Edit|MultiEdit)$/.test(e?.name ?? "")) {
+    if (/palette/i.test(base)) return "Choosing the colours";
+    if (/pose/i.test(base)) return "Setting up the poses";
+    if (/drawn|head|face|hair/i.test(base)) return "Drawing the face and hair";
+    if (/wardrobe|cloth|outfit|coat/i.test(base)) return "Dressing the character";
+    if (/^check\./.test(base)) return "Setting the checks for the body";
+    if (/films\/sheet/.test(file)) return "Laying out the model sheet";
+    if (/films\/walk/.test(file)) return "Making the walk";
+    if (/LEDGER/i.test(base)) return "Noting what to fix";
+    if (base === "character.json") return "Naming the character";
+    return "Drawing the character";
+  }
+  if (/^(Read|Glob|Grep)$/.test(e?.name ?? "")) return "Studying the drawing style";
+  return null;
+}
+export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = null, onStep: onStepRaw = () => {}, log: logRaw = () => {}, env = {}, renderDemo = null, claude = runClaude, runTool = tool } = {}) {
+  // every stage and line the user sees in plain words (PLAIN_STAGE, plainStep), a line said once however often Claude repeats the action
+  let lastLine = null, curStage = null;
+  const onStep = (stage, p) => { curStage = PLAIN_STAGE[stage] ?? stage; onStepRaw(curStage, p); };
+  const log = (line) => { if (line && line !== lastLine) { lastLine = line; logRaw(line); } };
+  const engine = makerEngine(input.engine), hand = engine === "brush-kit" ? "brush" : engine === RICKS_ENGINE ? "ricks" : engine === C3D_ENGINE ? "cartoon" : engine === WI_ENGINE ? "whatif" : isHouse(engine) ? HOUSE_WAYS[engine].hand : input.hand;
   const c = config(root), est = c.estimate?.[engine] ?? null, expectMs = est ? ((est.minutes[0] + est.minutes[1]) / 2) * 60000 : 20 * 60000;
   const from = input.from ?? null;
   // a character the app ships is changed as the user's own copy (copy on write: saveHuman writes only to the user's folder). The author's rigs
@@ -239,10 +324,12 @@ export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = nu
   if (from && engine === "brush-kit" && kit.getCharacter(from, root)?.group !== "yours") throw Object.assign(new Error("Only your own Brush characters can be changed"), { code: "INVALID" });
   if (from && engine === RICKS_ENGINE && !ricksModule(from, root)) throw Object.assign(new Error("No such character"), { code: "NOT_FOUND" });
   if (from && engine === C3D_ENGINE && !c3dModule(from, root)) throw Object.assign(new Error("No such character"), { code: "NOT_FOUND" });
+  if (from && engine === WI_ENGINE && !wiModule(from, root)) throw Object.assign(new Error("No such character"), { code: "NOT_FOUND" });
+  if (from && isHouse(engine) && !houseModule(from, root)) throw Object.assign(new Error("No such character"), { code: "NOT_FOUND" });
   const id = from ?? newId(input.name || input.description, root);
   if (!String(input.description ?? "").trim() && !from) throw Object.assign(new Error("Describe the character first"), { code: "INVALID" });
   const savedRec = from && engine === kit.HUMAN_ENGINE ? kit.humanCharacters(root).find((x) => x.id === from) : null, savedHand = savedRec ? savedRec.hand ?? savedRec.hands?.[0] ?? null : null;
-  const beforeRec = from ? (engine === kit.HUMAN_ENGINE ? kit.humanRecord(from, root) : engine === RICKS_ENGINE ? ricksRecord(from, root) : engine === C3D_ENGINE ? c3dRecord(from, root) : kit.getCharacter(from, root)) : null;
+  const beforeRec = from ? (engine === kit.HUMAN_ENGINE ? kit.humanRecord(from, root) : engine === RICKS_ENGINE ? ricksRecord(from, root) : engine === C3D_ENGINE ? c3dRecord(from, root) : engine === WI_ENGINE ? wiRecord(from, root) : isHouse(engine) ? houseRecord(from, root) : kit.getCharacter(from, root)) : null;
   const rig = rigOf(engine, input.rig, from ? beforeRec?.kind ?? (engine === "brush-kit" ? "thing" : "human") : null, root);
   const job = { jobId, engine, rig, hand: savedHand ?? hand, id, name: input.name || beforeRec?.name || null, description: input.description || beforeRec?.description || beforeRec?.about || "",
     image: input.image ?? null, change: from ? (input.text || input.change || "") : null, from };
@@ -254,13 +341,10 @@ export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = nu
   onStep("Claude is reading the recipe", 4);
   const t0 = Date.now(), pct = () => Math.min(85, 5 + Math.round(((Date.now() - t0) / expectMs) * 80));
   const run = await claude({ lab, brief, allowed, root, model: c.model ?? "claude-opus-5-5", effort: c.effort ?? "medium", env, signal, onEvent: (e) => {
-    if (e.kind === "tool") {
-      const cmd = e.command ?? "";
-      const stage = /gate\.mjs|rc-check|c3-check/.test(cmd) ? "Claude is running the character gate" : /still\.mjs|brush-sheets|rc-sheet|c3-sheet/.test(cmd) ? "Claude is drawing the model sheet"
-        : /render\.mjs/.test(cmd) ? "Claude is rendering a test" : ["Write", "Edit"].includes(e.name) ? "Claude is writing the character" : "Claude is studying the examples";
-      onStep(stage, pct());
-      log(`${e.name}${cmd ? `: ${cmd}` : e.file ? `: ${basename(e.file)}` : ""}`);
-    } else log(e.text);
+    // only Claude's actions, in plain words (its own messages are notes in its terms: files, commands, code; they stay out of the steps)
+    if (e.kind !== "tool") return;
+    const line = plainStep(e);
+    if (line) { onStep(line, pct()); log(line); } else onStepRaw(curStage, pct());          // the percent moves, the words stay
   } });
   if (signal?.aborted) throw Object.assign(new Error("Stopped"), { code: "CANCELLED" });
   if (!run.ok) throw Object.assign(new Error(`Claude could not make the character: ${run.error ?? "no result"}`), { code: "CLAUDE_FAILED", detail: { lab } });
@@ -272,8 +356,8 @@ export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = nu
     if (engine === RICKS_ENGINE) {
       const a = readFileSync(ricksModule(from, root), "utf8"), f = join(lab, "characters", `${from}.js`), b = existsSync(f) ? readFileSync(f, "utf8") : a;
       changes = a === b ? [] : ["module"];
-    } else if (engine === C3D_ENGINE) {
-      const a = readFileSync(c3dModule(from, root), "utf8"), f = join(lab, "characters", `${from}.ts`), b = existsSync(f) ? readFileSync(f, "utf8") : a;
+    } else if (engine === C3D_ENGINE || engine === WI_ENGINE) {
+      const a = readFileSync(engine === C3D_ENGINE ? c3dModule(from, root) : wiModule(from, root), "utf8"), f = join(lab, "characters", `${from}.ts`), b = existsSync(f) ? readFileSync(f, "utf8") : a;
       changes = a === b ? [] : ["module"];
     } else if (engine === kit.HUMAN_ENGINE) {
       const a = filesOf(join(kit.humanFolder(from, root), "module", from)), b = filesOf(join(lab, "anidoodle", "characters", from));
@@ -284,7 +368,7 @@ export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = nu
       const cast = kit.readCast(lab), after = cast.characters.find((x) => x.id === from) ?? cast.characters[0] ?? null;
       changes = after ? diffPaths(beforeRec, after) : [];
     }
-    log(changes.length ? `changed: ${changes.join(", ")}` : "nothing in the character changed");
+    log(changes.length ? "The drawing was changed" : "Nothing in the character changed");
     if (!changes.length) {          // nothing to save: the character stays as it was, and the user is told why
       const history = kit.addHistory(id, { kind: "change", text: job.change, outcome: "unchanged", says, ...runInfo }, root);
       rmSync(lab, { recursive: true, force: true });
@@ -297,6 +381,8 @@ export async function makeCharacter(input, { root = APP_ROOT, jobId, signal = nu
   const saved = engine === kit.HUMAN_ENGINE ? await saveHuman({ job, lab, run, runInfo, root, env, signal, onStep, log, before: beforeRec, runTool })
     : engine === RICKS_ENGINE ? await saveRicks({ job, lab, runInfo, root, env, signal, onStep, log, before: beforeRec, runTool })
     : engine === C3D_ENGINE ? await saveC3d({ job, lab, runInfo, root, env, signal, onStep, log, before: beforeRec, runTool })
+    : engine === WI_ENGINE ? await saveWhatIf({ job, lab, runInfo, root, env, signal, onStep, log, before: beforeRec, runTool })
+    : isHouse(engine) ? await saveHouse({ job, lab, runInfo, root, env, signal, onStep, log, before: beforeRec, runTool })
     : await saveBrush({ job, lab, runInfo, root, env, signal, onStep, log, renderDemo, before: beforeRec });
   const outcome = !from ? "created" : says.couldNot ? "partly" : "changed";
   const history = kit.addHistory(id, { kind: from ? "change" : "create", text: job.change ?? job.description, outcome, changes, says, ...runInfo }, root);
@@ -312,7 +398,7 @@ export async function saveHuman({ job, lab, run, runInfo, root, env, signal, onS
   onStep("checking the character gate", 87);
   const g = await runTool(lab, ["tools/gate.mjs", "check.ts"], { root, env, signal });
   const m = /(\d+) passed, (\d+) failed/.exec(g.out), gate = m ? { passed: +m[1], failed: +m[2] } : { passed: 0, failed: null };
-  log(`gate: ${m ? m[0] : "did not run"}`);
+  log(`Character checks: ${m ? m[0] : "not run"}`);
   if (g.code !== 0 || !m || gate.failed) throw Object.assign(new Error(`The character gate did not pass (${m ? m[0] : g.out.trim().split(/\r?\n/).pop()})`), { code: "GATE_FAILED", detail: { lab } });
   onStep("drawing the model sheet", 90);
   const s = await runTool(lab, ["tools/still.mjs", "films/sheet.ts", "out/sheet.png"], { root, env, signal });
@@ -355,7 +441,7 @@ export async function saveRicks({ job, lab, runInfo, root, env, signal, onStep, 
   onStep("checking the character gate", 87);
   const g = await runTool(lab, ["tools/rc-check.mjs", `characters/${id}.js`, "--json", "out/check.json"], { root, env, signal });
   const m = /(\d+) passed, (\d+) failed/.exec(g.out), gate = m ? { passed: +m[1], failed: +m[2] } : { passed: 0, failed: null };
-  log(`gate: ${m ? m[0] : "did not run"}`);
+  log(`Character checks: ${m ? m[0] : "not run"}`);
   if (g.code !== 0 || !m || gate.failed) throw Object.assign(new Error(`The character gate did not pass: ${g.out.split(/\r?\n/).filter((l) => l.startsWith("FAIL")).map((l) => l.slice(6)).join(" | ") || g.out.trim().split(/\r?\n/).pop()}`), { code: "GATE_FAILED", detail: { lab } });
   onStep("drawing the model sheet", 90);
   const s = await runTool(lab, ["tools/rc-sheet.mjs", `characters/${id}.js`, "out/sheet.png", "--life", "out/life"], { root, env, signal });
@@ -369,13 +455,17 @@ export async function saveRicks({ job, lab, runInfo, root, env, signal, onStep, 
   cpSync(join(lab, "out", "check.json"), join(dir, "check.json"));
   await toWebp(root, join(lab, "out", "sheet.png"), join(dir, "sheet.webp"), 2400);
   await ff(root, ["-framerate", "30", "-i", join(lab, "out", "life", "frame-%04d.jpg"), "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20", "-movflags", "+faststart", join(dir, "life.mp4")]);
-  await ff(root, ["-ss", "1.2", "-i", join(dir, "life.mp4"), "-frames:v", "1", "-vf", "scale=480:-1", "-c:v", "libwebp", "-quality", "82", join(dir, "poster.webp")]);
+  await ff(root, ["-ss", "0", "-i", join(dir, "life.mp4"), "-frames:v", "1", "-vf", "scale=480:-1", "-c:v", "libwebp", "-quality", "82", join(dir, "poster.webp")]);
   const own = readJson(join(lab, "out", "check.json"), {})?.record ?? {}, pin = loadPins(root).moworksStyles?.sources?.[RICKS_ENGINE] ?? {};
+  const { CAN, paletteOf } = await import("../moworks-styles/ricks-page.mjs");
   const savedName = job.name || before?.name || own.name || id;
   const record = { id, name: savedName, about: alignAbout(own.about || before?.about || job.description, savedName), engine: RICKS_ENGINE, kind: "human",
     ...(Number(own.heightM) > 0 ? { heightM: Number(own.heightM), heightBy: "inferred", heightNote: null } : {}), hand: "ricks", hands: ["ricks"],
+    palette: paletteOf(own.outfit), can: CAN, sheet: "MW Character Sheet v1",
     description: job.description, version: (before?.version ?? 0) + 1, changes: [...(before?.changes ?? []), ...(job.change ? [{ at: new Date().toISOString(), text: job.change }] : [])],
-    credit: { author: "The owner (made by Claude on Ricks Clip's cast)", link: null, licence: "the owner's own; drawn on toon.ts (Mr omi, MIT) and roman.js (the owner's)", made: "written from the idea",
+    // one the app ships, changed: the user's own copy, still credited to where it came from (adapted)
+    credit: { ...(["as shipped", "adapted"].includes(before?.credit?.made) ? { author: before.credit.author, link: before.credit.link ?? null, licence: before.credit.licence, source: before.credit.source ?? null, made: "adapted", madeNote: "the app's character from the source skill, changed by the owner with Claude" }
+        : { author: "The owner (made by Claude on Ricks Clip's cast)", link: null, licence: "the owner's own; drawn on toon.ts (Mr omi, MIT) and roman.js (the owner's)", made: "written from the idea" }),
       engine: { source: RICKS_ENGINE, sha256: pin.sha256 ?? null, toon: pin.vendor?.["kit/vendor/toon.ts"] ? `https://github.com/${pin.vendor["kit/vendor/toon.ts"].repo}/blob/${pin.vendor["kit/vendor/toon.ts"].commit}/${pin.vendor["kit/vendor/toon.ts"].path}` : null },
       run: before?.credit?.run ?? runInfo, gate },
     module: [`${id}.js`], savedAt: new Date().toISOString() };
@@ -390,7 +480,7 @@ export async function saveC3d({ job, lab, runInfo, root, env, signal, onStep, lo
   onStep("checking the character gate", 87);
   const g = await runTool(lab, ["tools/c3-check.mjs", `characters/${id}.ts`, "--json", "out/check.json"], { root, env, signal });
   const m = /(\d+) passed, (\d+) failed/.exec(g.out), gate = m ? { passed: +m[1], failed: +m[2] } : { passed: 0, failed: null };
-  log(`gate: ${m ? m[0] : "did not run"}`);
+  log(`Character checks: ${m ? m[0] : "not run"}`);
   if (g.code !== 0 || !m || gate.failed) throw Object.assign(new Error(`The character gate did not pass: ${g.out.split(/\r?\n/).filter((l) => l.startsWith("FAIL")).map((l) => l.slice(6)).join(" | ") || g.out.trim().split(/\r?\n/).pop()}`), { code: "GATE_FAILED", detail: { lab } });
   onStep("drawing the model sheet", 90);
   const s = await runTool(lab, ["tools/c3-sheet.mjs", `characters/${id}.ts`, "out/sheet.png", "--life", "out/life"], { root, env, signal });
@@ -403,19 +493,98 @@ export async function saveC3d({ job, lab, runInfo, root, env, signal, onStep, lo
   cpSync(file, join(dir, "module", `${id}.ts`));
   cpSync(join(lab, "out", "check.json"), join(dir, "check.json"));
   await toWebp(root, join(lab, "out", "sheet.png"), join(dir, "sheet.webp"), 2400);
-  const { LIFE_FPS } = await import("../moworks-styles/c3d-page.mjs");
+  const { CAN, LIFE_FPS, paletteOf } = await import("../moworks-styles/c3d-page.mjs");
   await ff(root, ["-framerate", String(LIFE_FPS), "-i", join(lab, "out", "life", "frame-%04d.png"), "-vf", "scale=960:-2", "-r", "30", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20", "-movflags", "+faststart", join(dir, "life.mp4")]);
   await ff(root, ["-ss", "0", "-i", join(dir, "life.mp4"), "-frames:v", "1", "-vf", "crop=ih*0.8:ih,scale=480:-1", "-c:v", "libwebp", "-quality", "82", join(dir, "poster.webp")]);
   const own = readJson(join(lab, "out", "check.json"), {})?.record ?? {}, pin = loadPins(root).moworksStyles?.sources?.[C3D_ENGINE] ?? {};
   const savedName = job.name || before?.name || own.name || id;
   const record = { id, name: savedName, about: alignAbout(own.about || before?.about || job.description, savedName), engine: C3D_ENGINE, kind: "human",
     ...(Number(own.heightM) > 0 ? { heightM: Number(own.heightM), heightBy: "inferred", heightNote: null } : {}), hand: "cartoon", hands: ["cartoon"], def: own.def ?? null,
+    palette: paletteOf(own.def), can: CAN, sheet: "MW Character Sheet v1",
     description: job.description, version: (before?.version ?? 0) + 1, changes: [...(before?.changes ?? []), ...(job.change ? [{ at: new Date().toISOString(), text: job.change }] : [])],
-    credit: { author: "The owner (made by Claude on 3D Cartoon's cast)", link: null, licence: "the owner's own; built on the owner's 3D Cartoon source skill", made: "written from the idea",
+    // one the app ships, changed: the user's own copy, still credited to where it came from (adapted)
+    credit: { ...(["as shipped", "adapted"].includes(before?.credit?.made) ? { author: before.credit.author, link: before.credit.link ?? null, licence: before.credit.licence, source: before.credit.source ?? null, made: "adapted", madeNote: "the app's character from the source skill, changed by the owner with Claude" }
+        : { author: "The owner (made by Claude on 3D Cartoon's cast)", link: null, licence: "the owner's own; built on the owner's 3D Cartoon source skill", made: "written from the idea" }),
       engine: { source: C3D_ENGINE, title: pin.title ?? null, version: pin.version ?? null, sha256: pin.sha256 ?? null }, run: before?.credit?.run ?? runInfo, gate },
     module: [`${id}.ts`], savedAt: new Date().toISOString() };
   writeFileSync(join(dir, "character.json"), JSON.stringify(record, null, 2) + "\n");
   return { id, engine: C3D_ENGINE, kind: "human", hand: "cartoon", name: record.name, gate };
+}
+
+/** The What If character (#1287-#1293): its checks again (the app's own run), its sheet and life clip drawn by the rig and the app's layer, into the store. */
+export async function saveWhatIf({ job, lab, runInfo, root, env, signal, onStep, log, before = null, runTool = tool }) {
+  const { id } = job, file = join(lab, "characters", `${id}.ts`);
+  if (!existsSync(file)) throw Object.assign(new Error(`Claude did not write characters/${id}.ts`), { code: "CLAUDE_FAILED", detail: { lab } });
+  onStep("checking the character gate", 87);
+  const g = await runTool(lab, ["tools/wi-check.mjs", `characters/${id}.ts`, "--json", "out/check.json"], { root, env, signal });
+  const m = /(\d+) passed, (\d+) failed/.exec(g.out), gate = m ? { passed: +m[1], failed: +m[2] } : { passed: 0, failed: null };
+  log(`Character checks: ${m ? m[0] : "not run"}`);
+  if (g.code !== 0 || !m || gate.failed) throw Object.assign(new Error(`The character gate did not pass: ${g.out.split(/\r?\n/).filter((l) => l.startsWith("FAIL")).map((l) => l.slice(6)).join(" | ") || g.out.trim().split(/\r?\n/).pop()}`), { code: "GATE_FAILED", detail: { lab } });
+  onStep("drawing the model sheet", 90);
+  const s = await runTool(lab, ["tools/wi-sheet.mjs", `characters/${id}.ts`, "out/sheet.png", "--life", "out/life"], { root, env, signal });
+  if (s.code !== 0) throw Object.assign(new Error(`The model sheet could not be drawn: ${s.out.trim().split(/\r?\n/).pop()}`), { code: "RENDER_FAILED", detail: { lab } });
+  onStep("saving to the library", 96);
+  if (kit.userStoreInRepo(root)) throw Object.assign(new Error("The characters store is inside the app's repository: a user's characters are never kept there"), { code: "INVALID" });
+  const dir = join(wiDir(root), id);
+  kit.removeFromStore(dir, root);
+  mkdirSync(join(dir, "module"), { recursive: true });
+  cpSync(file, join(dir, "module", `${id}.ts`));
+  cpSync(join(lab, "out", "check.json"), join(dir, "check.json"));
+  await toWebp(root, join(lab, "out", "sheet.png"), join(dir, "sheet.webp"), 2400);
+  const { CAN, LIFE_FPS, paletteOf } = await import("../what-if-styles/wi-page.mjs");
+  await ff(root, ["-framerate", String(LIFE_FPS), "-i", join(lab, "out", "life", "frame-%04d.png"), "-vf", "scale=960:-2", "-r", "30", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20", "-movflags", "+faststart", join(dir, "life.mp4")]);
+  await ff(root, ["-ss", "0", "-i", join(dir, "life.mp4"), "-frames:v", "1", "-vf", "crop=ih*0.8:ih,scale=480:-1", "-c:v", "libwebp", "-quality", "82", join(dir, "poster.webp")]);
+  const own = readJson(join(lab, "out", "check.json"), {})?.record ?? {}, src = (await import("../what-if-styles/index.mjs")).whatIfSource(root);
+  const savedName = job.name || before?.name || own.name || id;
+  const record = { id, name: savedName, about: alignAbout(own.about || before?.about || job.description, savedName), engine: WI_ENGINE, kind: "human",
+    ...(Number(own.heightM) > 0 ? { heightM: Number(own.heightM), heightBy: "inferred", heightNote: null } : {}), hand: "whatif", hands: ["whatif"], scale: own.scale ?? null, look: own.look ?? null,
+    palette: paletteOf(own.look), can: CAN, sheet: "MW Character Sheet v1",
+    description: job.description, version: (before?.version ?? 0) + 1, changes: [...(before?.changes ?? []), ...(job.change ? [{ at: new Date().toISOString(), text: job.change }] : [])],
+    credit: { ...(["as shipped", "adapted"].includes(before?.credit?.made) ? { author: before.credit.author, link: before.credit.link ?? null, licence: before.credit.licence, source: before.credit.source ?? null, made: "adapted", madeNote: "the engine's character, changed by the owner with Claude" }
+        : { author: "The owner (made by Claude on What If's rig)", link: null, licence: "the owner's own; drawn on FreshStack's What If engine (MIT)", made: "written from the idea" }),
+      engine: src ? { repo: src.repo, commit: src.commit, link: `https://github.com/${src.repo}/tree/${src.commit}` } : null, run: before?.credit?.run ?? runInfo, gate },
+    module: [`${id}.ts`], savedAt: new Date().toISOString() };
+  writeFileSync(join(dir, "character.json"), JSON.stringify(record, null, 2) + "\n");
+  return { id, engine: WI_ENGINE, kind: "human", hand: "whatif", name: record.name, gate };
+}
+
+/** A house hero's character (#1302: Stickman Explainer, the 2D Explainer): its checks again (the app's own run), its sheet and life clip drawn by the house page, into the store. */
+export async function saveHouse({ job, lab, runInfo, root, env, signal, onStep, log, before = null, runTool = tool }) {
+  const { id } = job, file = join(lab, "characters", `${id}.js`), engine = isHouse(job.engine) ? job.engine : STICK_ENGINE, w = HOUSE_WAYS[engine];
+  if (!existsSync(file)) throw Object.assign(new Error(`Claude did not write characters/${id}.js`), { code: "CLAUDE_FAILED", detail: { lab } });
+  onStep("checking the character gate", 87);
+  const g = await runTool(lab, ["tools/hh-check.mjs", `characters/${id}.js`, "--json", "out/check.json"], { root, env, signal });
+  const m = /(\d+) passed, (\d+) failed/.exec(g.out), gate = m ? { passed: +m[1], failed: +m[2] } : { passed: 0, failed: null };
+  log(`Character checks: ${m ? m[0] : "not run"}`);
+  if (g.code !== 0 || !m || gate.failed) throw Object.assign(new Error(`The character gate did not pass: ${g.out.split(/\r?\n/).filter((l) => l.startsWith("FAIL")).map((l) => l.slice(6)).join(" | ") || g.out.trim().split(/\r?\n/).pop()}`), { code: "GATE_FAILED", detail: { lab } });
+  onStep("drawing the model sheet", 90);
+  const s = await runTool(lab, ["tools/hh-sheet.mjs", `characters/${id}.js`, "out/sheet.png", "--life", "out/life"], { root, env, signal });
+  if (s.code !== 0) throw Object.assign(new Error(`The model sheet could not be drawn: ${s.out.trim().split(/\r?\n/).pop()}`), { code: "RENDER_FAILED", detail: { lab } });
+  onStep("saving to the library", 96);
+  if (kit.userStoreInRepo(root)) throw Object.assign(new Error("The characters store is inside the app's repository: a user's characters are never kept there"), { code: "INVALID" });
+  const dir = join(houseUserDir(engine, root), id);
+  kit.removeFromStore(dir, root);          // a change: the version before was kept first (snapshot)
+  mkdirSync(join(dir, "module"), { recursive: true });
+  cpSync(file, join(dir, "module", `${id}.js`));
+  cpSync(join(lab, "out", "check.json"), join(dir, "check.json"));
+  await toWebp(root, join(lab, "out", "sheet.png"), join(dir, "sheet.webp"), 2400);
+  const { HOUSE_CAN, LIFE_FRAMES } = await import("../moworks-styles/house-page.mjs");
+  await ff(root, ["-framerate", "30", "-i", join(lab, "out", "life", "frame-%04d.jpg"), "-frames:v", String(LIFE_FRAMES ?? 180), "-vf", "scale=540:-2", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "20", "-movflags", "+faststart", join(dir, "life.mp4")]);
+  await ff(root, ["-ss", "0", "-i", join(dir, "life.mp4"), "-frames:v", "1", "-vf", "scale=480:-1", "-c:v", "libwebp", "-quality", "82", join(dir, "poster.webp")]);
+  const own = readJson(join(lab, "out", "check.json"), {})?.record ?? {}, src = readFileSync(file, "utf8");
+  // its opts as the file says them (the record keeps them for a film's figure() call)
+  let opts = {}; try { opts = (await import(`data:text/javascript;base64,${Buffer.from(src).toString("base64")}`)).CHARACTER?.opts ?? {}; } catch { /* the gate read it */ }
+  const pin = loadPins(root).moworksStyles?.sources?.[w.source] ?? {}, savedName = job.name || before?.name || own.name || id;
+  const record = { id, name: savedName, about: alignAbout(own.about || before?.about || job.description, savedName), engine, kind: "human",
+    ...(Number(own.heightM) > 0 ? { heightM: Number(own.heightM), heightBy: "inferred", heightNote: null } : {}), hand: w.hand, hands: [w.hand], opts,
+    palette: own.palette ?? {}, can: HOUSE_CAN?.[engine] ?? null, sheet: "MW Character Sheet v1",
+    description: job.description, version: (before?.version ?? 0) + 1, changes: [...(before?.changes ?? []), ...(job.change ? [{ at: new Date().toISOString(), text: job.change }] : [])],
+    credit: { ...(["as shipped", "adapted"].includes(before?.credit?.made) ? { author: before.credit.author, link: before.credit.link ?? null, licence: before.credit.licence, source: before.credit.source ?? null, made: "adapted", madeNote: "the style's hero, changed by the owner with Claude" }
+        : { author: `The owner (made by Claude on ${w.by})`, link: null, licence: "the owner's own; drawn by the owner's source skill", made: "written from the idea" }),
+      engine: { source: w.source, title: pin.title ?? null, version: pin.version ?? null, sha256: pin.sha256 ?? null }, run: before?.credit?.run ?? runInfo, gate },
+    module: [`${id}.js`], savedAt: new Date().toISOString() };
+  writeFileSync(join(dir, "character.json"), JSON.stringify(record, null, 2) + "\n");
+  return { id, engine, kind: "human", hand: w.hand, name: record.name, gate };
 }
 
 /** The Brush character: its sheets drawn (when Claude did not), saved as a character from a film is, its showreel made. */
@@ -433,9 +602,9 @@ async function saveBrush({ job, lab, runInfo, root, env, signal, onStep, log, re
   }
   // the Brush gate: a new character is saved only after a pass, as an anidoodle one after its own gate
   onStep("checking the character gate", 90);
-  const { stillStd } = await import("../hf-qa/gates.mjs");
+  const { stillStd } = await import("../hf-qa/grey.mjs");
   const g = brushGate(def, { sheetsDir: join(lab, "characters", "sheets"), still: stillStd, drawn: true }), gate = { passed: g.passed, failed: g.failed };
-  log(`gate: ${g.passed} passed, ${g.failed} failed`);
+  log(`Character checks: ${g.passed} passed, ${g.failed} failed`);
   if (g.failed) throw Object.assign(new Error(`The character gate did not pass: ${g.lines.filter((l) => l.startsWith("FAIL")).map((l) => l.slice(6)).join(" | ")}`), { code: "GATE_FAILED", detail: { lab } });
   onStep("saving to the library", 92);
   const credit = { author: "The owner (made by Claude)", link: null, licence: "the owner's own", made: "written from the idea", madeNote: "a definition for the app's character layer on ClaudeAnimationBase's engine", run: runInfo };
@@ -447,12 +616,12 @@ async function saveBrush({ job, lab, runInfo, root, env, signal, onStep, log, re
   if (Number(def.heightM) > 0) { def.heightM = Number(def.heightM); def.heightBy = def.heightBy === "description" ? "description" : "inferred"; } else delete def.heightM;
   writeFileSync(join(lab, kit.CAST_FILE), JSON.stringify({ characters: [def] }, null, 2) + "\n");
   const saved = kit.saveCharacter(lab, id, root);
-  if (renderDemo) { onStep("rendering the showreel", 95); try { await renderDemo(id, { signal }); } catch (e) { log(`showreel: ${e.message}`); } }
+  if (renderDemo) { onStep("rendering the showreel", 95); try { await renderDemo(id, { signal }); } catch (e) { log(`The short clip was not made: ${e.message}`); } }
   return { id, engine: "brush-kit", kind: def.kind, hand: "brush", name: saved?.name ?? def.name, gate };
 }
 
 // ---- versions and Undo: before a change is saved, the character as it was goes to <store>/_versions/<id>/<n>/ (the last 5 kept)
-const engineOf = (id, root) => (ricksFolder(id, root) ? RICKS_ENGINE : c3dFolder(id, root) ? C3D_ENGINE : kit.humanCharacters(root).some((c) => c.id === id) ? kit.HUMAN_ENGINE : kit.getCharacter(id, root)?.group === "yours" ? "brush-kit" : null);
+const engineOf = (id, root) => (ricksFolder(id, root) ? RICKS_ENGINE : c3dFolder(id, root) ? C3D_ENGINE : wiFolder(id, root) ? WI_ENGINE : houseFolder(id, root) && isHouse(houseRecord(id, root)?.engine) && houseRecord(id, root)?.group === "yours" ? houseRecord(id, root).engine : kit.humanCharacters(root).some((c) => c.id === id) ? kit.HUMAN_ENGINE : kit.getCharacter(id, root)?.group === "yours" ? "brush-kit" : null);
 /** Keep the character as it is now as a version: its n. A character the app ships with no copy of the user's yet needs nothing kept: it stays in
  *  bundle/, and Undo takes the user's copy away again (the version says "shipped"). */
 export function snapshot(id, label, root = APP_ROOT) {
@@ -464,11 +633,13 @@ export function snapshot(id, label, root = APP_ROOT) {
   if (engine === kit.HUMAN_ENGINE) { if (!shipped) cpSync(join(kit.humanDir(root), id), join(d, "human"), { recursive: true }); }
   else if (engine === RICKS_ENGINE) cpSync(ricksFolder(id, root), join(d, "ricks"), { recursive: true });
   else if (engine === C3D_ENGINE) cpSync(c3dFolder(id, root), join(d, "c3d"), { recursive: true });
+  else if (engine === WI_ENGINE) cpSync(wiFolder(id, root), join(d, "whatif"), { recursive: true });
+  else if (isHouse(engine)) cpSync(houseFolder(id, root), join(d, "house"), { recursive: true });
   else {
     cpSync(join(kit.userDir(root), `${id}.json`), join(d, "user.json"));
     if (existsSync(join(kit.mediaRoot(root), id))) cpSync(join(kit.mediaRoot(root), id), join(d, "media"), { recursive: true, filter: (s) => !/[\\/]work([\\/]|$)/.test(s.slice(join(kit.mediaRoot(root), id).length)) });
   }
-  const rec = engine === kit.HUMAN_ENGINE ? kit.humanRecord(id, root) : engine === RICKS_ENGINE ? ricksRecord(id, root) : engine === C3D_ENGINE ? c3dRecord(id, root) : kit.getCharacter(id, root);
+  const rec = engine === kit.HUMAN_ENGINE ? kit.humanRecord(id, root) : engine === RICKS_ENGINE ? ricksRecord(id, root) : engine === C3D_ENGINE ? c3dRecord(id, root) : engine === WI_ENGINE ? wiRecord(id, root) : isHouse(engine) ? houseRecord(id, root) : kit.getCharacter(id, root);
   writeFileSync(join(d, "version.json"), JSON.stringify({ at: new Date().toISOString(), label, engine, version: rec?.version ?? null, ...(shipped ? { shipped: true } : {}) }, null, 2) + "\n");
   for (const v of kit.characterVersions(id, root).slice(0, -5)) rmSync(join(vd, String(v.n)), { recursive: true, force: true });
   return n;
@@ -483,6 +654,8 @@ export function undo(id, root = APP_ROOT) {
   else if (existsSync(join(d, "human"))) { kit.removeFromStore(join(kit.humanDir(root), id), root); cpSync(join(d, "human"), join(kit.humanDir(root), id), { recursive: true }); }
   else if (existsSync(join(d, "ricks"))) { kit.removeFromStore(join(ricksDir(root), id), root); cpSync(join(d, "ricks"), join(ricksDir(root), id), { recursive: true }); }
   else if (existsSync(join(d, "c3d"))) { kit.removeFromStore(join(c3dDir(root), id), root); cpSync(join(d, "c3d"), join(c3dDir(root), id), { recursive: true }); }
+  else if (existsSync(join(d, "whatif"))) { kit.removeFromStore(join(wiDir(root), id), root); cpSync(join(d, "whatif"), join(wiDir(root), id), { recursive: true }); }
+  else if (existsSync(join(d, "house"))) { const to = join(houseUserDir(isHouse(v.engine) ? v.engine : STICK_ENGINE, root), id); kit.removeFromStore(to, root); cpSync(join(d, "house"), to, { recursive: true }); }
   else {
     cpSync(join(d, "user.json"), join(kit.userDir(root), `${id}.json`));
     kit.removeFromStore(join(kit.mediaRoot(root), id), root);
@@ -530,8 +703,18 @@ export const kindOf = (c) => (c?.rig && c.made === "as shipped" && kit.AUTHOR_RI
 export async function filmGate(projectDir, { root = APP_ROOT, signal = null } = {}) {
   // a bare list in CHARACTERS.json is the cast too (kit.readCast reads both)
   const all = kit.readCast(projectDir).characters, runs = new Map(), out = [];
-  const cast = all.filter((c) => c?.engine === kit.HUMAN_ENGINE), ricks = all.filter((c) => c?.engine === RICKS_ENGINE), c3d = all.filter((c) => c?.engine === C3D_ENGINE),
-    brush = all.filter((c) => c && c.engine !== kit.HUMAN_ENGINE && c.engine !== RICKS_ENGINE && c.engine !== C3D_ENGINE);
+  const cast = all.filter((c) => c?.engine === kit.HUMAN_ENGINE), ricks = all.filter((c) => c?.engine === RICKS_ENGINE), c3d = all.filter((c) => c?.engine === C3D_ENGINE), wi = all.filter((c) => c?.engine === WI_ENGINE),
+    brush = all.filter((c) => c && c.engine !== kit.HUMAN_ENGINE && c.engine !== RICKS_ENGINE && c.engine !== C3D_ENGINE && c.engine !== WI_ENGINE);
+  // a What If member: its own module in the film, checked as the lab checked it (wi-page.mjs)
+  if (wi.length) {
+    const { checkCharacter } = await import("../what-if-styles/wi-page.mjs");
+    for (const c of wi) {
+      const rel = c.file ?? `${WI_CAST_DIR}/${c.id}.ts`, f = join(projectDir, ...rel.split("/"));
+      if (!existsSync(f)) { out.push({ id: c.id, kind: "whatif", check: null, passed: 0, failed: 1, lines: [`FAIL  its file is missing: ${rel} (take it again from the library)`], ownStyle: true }); continue; }
+      const r = await checkCharacter(f, { root });
+      out.push({ id: c.id, kind: "whatif", check: "wi-check", passed: r.passed, failed: r.failed, lines: r.lines.filter((l) => l.startsWith("FAIL")).slice(0, 40), ownStyle: true });
+    }
+  }
   // a 3D Cartoon member: its own module in the film, checked as the lab checked it (c3d-page.mjs)
   if (c3d.length) {
     const { checkCharacter } = await import("../moworks-styles/c3d-page.mjs");
@@ -553,7 +736,7 @@ export async function filmGate(projectDir, { root = APP_ROOT, signal = null } = 
     }
   }
   if (brush.length) {
-    const { stillStd } = await import("../hf-qa/gates.mjs");
+    const { stillStd } = await import("../hf-qa/grey.mjs");
     for (const c of brush) out.push({ ...brushGate(c, { sheetsDir: join(projectDir, "characters", "sheets"), still: stillStd, drawn: true }), kind: "brush", check: "brush-gate", ownStyle: !!c.ownStyle });
   }
   for (const c0 of cast) {
@@ -611,6 +794,8 @@ export function alignAbout(about, name) {
 
 export { deleteRicks } from "../character-kit/ricks.mjs";
 export { deleteC3d } from "../character-kit/c3d.mjs";
+export { deleteWhatIf } from "../character-kit/whatif.mjs";
+export { deleteHouse } from "../character-kit/house.mjs";
 /** Delete one of the user's anidoodle characters. The user's copy of a character the app ships goes too, and the shipped one shows again; the
  *  shipped one itself, in bundle/, stays. */
 export function deleteHuman(id, root = APP_ROOT) {

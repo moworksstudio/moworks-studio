@@ -97,6 +97,9 @@ window.__aimkRec = (() => {
     await window.__aimk.seek(0);
     idx(stage);
     GROUPS.push({ g: 0, kind: "main", root: idx(stage), name: "main", start: 0, dur: +stage.getAttribute("data-duration") || window.__aimk.timeline.duration() });
+    // Moworks Studio: the film's own background, painted on its root (#root { background }): a box layer at the bottom of the main comp, as a
+    // scene's painted inner root is below. Only the layers inside the root were read, so AE showed black there (audit/112d d13: 98.61 % off)
+    { const scs = getComputedStyle(stage); if (paints(scs, stage)) NODES.push({ n: NODES.length, e: idx(stage), kind: "box", g: 0, clip: -1, depth: 0, id: stage.id || "", tag: "div", cls: "root" }); }
     for (const c of stage.children) {
       // Moworks Studio: a scene is a kit clip (.clip with .inner) OR a mounted HF sub-composition (a host with data-composition-id, its
       // content in HF's [data-hf-inner-root]); HF's bundle keeps a host's length as data-hf-authored-duration
@@ -591,6 +594,8 @@ window.__aimkRec = (() => {
     isoF = [el.style.getPropertyValue("filter"), el.style.getPropertyPriority("filter")];
     iso = document.createElement("style");
     const all = nd.kind === "raster" || nd.kind === "image";
+    // the root itself (its background, a box layer: audit/112d d13) is shown by the compound rule below; the descendant rule never matched it,
+    // so a gradient root came out a transparent picture
     // keepT: the picture keeps the element's transforms (skew: AE layers cannot skew), except those of its comp root (the precomp layer has them)
     if (keepT) { const root = nd.g === 0 ? stage : ELS[GROUPS[nd.g].root]; for (let x = root; x; x = x.parentElement) x.dataset.aimkNt = "1"; }
     // the inside of an SVG keeps its own clip paths, opacities and masks (KI-12: the rig's shirt plaid, cut by a clipPath at 55 %
@@ -598,7 +603,8 @@ window.__aimkRec = (() => {
     iso.textContent = (keepT ? "[data-aimk-nt]{transform:none!important;translate:none!important;rotate:none!important;scale:none!important}" : NT) + `html,body{background:transparent!important;overflow:visible!important}
 #${CSS.escape(stage.id || "stage")}, #${CSS.escape(stage.id || "stage")} *{visibility:hidden!important}
 #${CSS.escape(stage.id || "stage")}, #${CSS.escape(stage.id || "stage")} *:not(svg *){opacity:1!important;overflow:visible!important;clip-path:none!important;filter:none!important;mix-blend-mode:normal!important;mask:none!important;-webkit-mask:none!important}
-#${CSS.escape(stage.id || "stage")} [data-aimk-iso]{visibility:visible!important}` + (all ? `#${CSS.escape(stage.id || "stage")} [data-aimk-iso] *{visibility:visible!important}` : "")   // same id weight as the hiding rule, so these win
+#${CSS.escape(stage.id || "stage")} [data-aimk-iso]{visibility:visible!important}
+#${CSS.escape(stage.id || "stage")}[data-aimk-iso]{visibility:visible!important}` + (all ? `#${CSS.escape(stage.id || "stage")} [data-aimk-iso] *{visibility:visible!important}` : "")   // same id weight as the hiding rule, so these win
       + (hideText ? `#${CSS.escape(stage.id || "stage")} [data-aimk-iso]{color:transparent!important;-webkit-text-fill-color:transparent!important;text-shadow:none!important;-webkit-text-stroke:0!important}` : "");   // the box only: its own text is a text layer
     // an element of a block's page: the iframe stays visible in the film, the page hides all but the element (same rules, its own document)
     const fr = el.ownerDocument !== document ? el.ownerDocument.defaultView.frameElement : null;

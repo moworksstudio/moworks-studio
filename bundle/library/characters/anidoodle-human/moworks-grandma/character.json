@@ -1,0 +1,75 @@
+{
+  "id": "moworks-grandma",
+  "name": "Grandma",
+  "about": "A small elderly woman of about 78 (1.52 m, a gentle stoop): grey hair in a bun, round gold glasses, a rose cardigan with a cream collar, a blue-grey skirt, brown shoes and a crook cane.",
+  "engine": "anidoodle-human",
+  "credit": {
+    "author": "Moworks Studio · made in the app",
+    "link": null,
+    "licence": "Moworks Studio's own; built on anidoodle (Apache-2.0)",
+    "made": "written from the idea",
+    "engine": {
+      "repo": "alexgreensh/anidoodle",
+      "commit": "4db69644b994ae9caf9e20936506954b2f5e4872",
+      "link": "https://github.com/alexgreensh/anidoodle/tree/4db69644b994ae9caf9e20936506954b2f5e4872"
+    },
+    "date": "2026-10-23"
+  },
+  "hands": [
+    "marker",
+    "storybook"
+  ],
+  "module": [
+    "check.ts",
+    "moworks-grandma/cane.ts",
+    "moworks-grandma/drawn.ts",
+    "moworks-grandma/index.ts",
+    "moworks-grandma/palettes.ts",
+    "moworks-grandma/poses.ts",
+    "moworks-grandma/spec.ts",
+    "moworks-grandma/walk.ts",
+    "LEDGER.md"
+  ],
+  "savedAt": "2026-10-23T17:30:54.875Z",
+  "can": {
+    "views": [
+      "front",
+      "three-quarter",
+      "profile",
+      "back"
+    ],
+    "viewNotes": "any yaw: a 3D skeleton drawn by the hand's renderer (toScene(pose, camera))",
+    "faces": [
+      "neutral",
+      "happy",
+      "laugh",
+      "surprised",
+      "worried",
+      "angry",
+      "talk",
+      "blink"
+    ],
+    "faceNotes": "the engine's named expressions (neutral, happy, laughing, surprised, worried, determined, curious) as blendable weights; angry, talk and blink are its own weights (browFurrow, mouthOpen, lidUpper)",
+    "poses": [
+      "stand",
+      "walk",
+      "point",
+      "wave",
+      "reach",
+      "sit"
+    ],
+    "poseNotes": "pose(p) on the skeleton inside its joint limits: reach and stand (balance.ts), the walk from footsteps; sit on a stool prop",
+    "hands": [
+      "relaxed",
+      "open",
+      "point",
+      "fist",
+      "grip",
+      "pinch"
+    ],
+    "walk": "planWalk / walkAt: feet planted from footsteps",
+    "talk": "mouthOpen by turns; no lip sync (word times too coarse)"
+  },
+  "sheet": "MW Character Sheet v1",
+  "sheetBy": "Moworks Studio: packages/anidoodle-styles/v1 (the app's sheet film; every figure drawn by the author's engine as pinned)"
+}

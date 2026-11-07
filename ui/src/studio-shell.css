@@ -220,8 +220,6 @@
 [data-theme="studio"] :is(.st-sleeve:focus-visible, .st-sleeve[aria-pressed="true"]) :is(.st-cap, .st-cap small) { white-space: normal; text-overflow: clip; }
 [data-theme="studio"] .st-sleeve:focus-visible + .st-sleeve { margin-left: -1.5rem; }
 [data-theme="studio"] .st-sleeve[aria-pressed="true"] { transform: rotate(0deg) translateY(-2.6rem); z-index: 4; box-shadow: 0 0 0 2px var(--lamp), 0 0 2rem rgba(255, 200, 114, 0.45); }
-[data-theme="studio"] .st-wi { display: grid; place-items: center; aspect-ratio: 4 / 3; border-radius: 0.3rem 0.3rem 0 0; background: repeating-linear-gradient(0deg, var(--paper-white) 0 15px, var(--rule-tint) 15px 16px);
-  font: 1.5rem var(--font-studio-hand); color: var(--pencil-ink); border-bottom: 1.5px dashed var(--pencil); }
 [data-theme="studio"] .st-warn { position: absolute; right: 0.35rem; top: 0.35rem; display: grid; place-items: center; width: 1.1rem; height: 1.1rem; border-radius: 50%;
   background: #FACC15; color: #1F1A00; font: 700 max(0.72rem, 12px) / 1 var(--font-body); }
 /* What After Effects gets of a film style (AeBadge.jsx): an ink stamp in the paper's state inks, green editable, yellow partly,
@@ -259,6 +257,9 @@
 [data-theme="studio"] .st-lu { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 1.5rem 2.4rem; align-items: start; }
 [data-theme="studio"] .st-lu-au { min-width: 0; }
 [data-theme="studio"] .st-lu-au.has-people { grid-row: span 3; }
+/* a big cast (more than 8 people) takes the room's width, on charts of at most 12 (CharacterLineup PER_CHART), so no figure is squeezed */
+[data-theme="studio"] .st-lu-au.has-people.wide { grid-column: 1 / -1; grid-row: auto; }
+[data-theme="studio"] .st-lu-au.wide .st-chart + .st-chart { margin-top: 2.2rem; }
 [data-theme="studio"] .st-lu-au:not(.has-people) { border-left: 1px dashed var(--paper-3); padding-left: 2.2rem; }
 [data-theme="studio"] .st-lu-head { display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap; }
 [data-theme="studio"] .st-lu-head .au-name { display: flex; align-items: baseline; gap: 0.7rem; }
@@ -286,6 +287,9 @@
 [data-theme="studio"] .st-fig.off { opacity: 0.25; filter: grayscale(1); }
 [data-theme="studio"] .st-tag { display: block; max-width: 100%; text-align: center; white-space: nowrap; margin-top: 0.5rem; font: 500 0.95rem var(--font-body); }
 [data-theme="studio"] .st-tag b { font-weight: 500; }
+/* a person's name under its figure: whole words only, on at most two balanced lines, centred under the figure; never run into the next */
+[data-theme="studio"] .st-fig.person .st-tag { left: 50%; transform: translateX(-50%); width: max-content; max-width: max(100%, 7rem); white-space: normal; text-wrap: balance; overflow-wrap: normal; line-height: 1.2; }
+[data-theme="studio"] .st-fig.person { min-width: 4.5rem; }
 [data-theme="studio"] .st-tag small { display: block; max-width: calc(var(--m) * 0.9); margin: 0 auto; white-space: normal; font: 0.95rem / 1.2 var(--font-studio-hand); color: var(--pencil-ink); }
 [data-theme="studio"] .st-fig.person .st-tag small { font: 400 max(0.72rem, 11px) / 1.35 var(--font-label); color: var(--ink-3); white-space: normal; max-width: 9rem; }
 [data-theme="studio"] .st-drawing { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 0.4rem; background: rgba(255, 253, 247, 0.78); color: var(--ink-2); font-size: max(0.8rem, 12px); }
@@ -662,10 +666,6 @@
 /* the deleted-items note reads as one line with its button */
 [data-theme="studio"] .st-motionlib .ml-note.ml-pv { flex-wrap: wrap; gap: 0.2rem 0.6rem; }
 [data-theme="studio"] .st-motionlib .ml-note.ml-pv .btn { margin-left: 0; }
-/* Use in a project: the film's name on its own line, the style and how it is drawn under it */
-[data-theme="studio"] .ch-projects button { flex-wrap: wrap; row-gap: 0.1rem; }
-[data-theme="studio"] .ch-projects button b { flex: 1 1 calc(100% - 2rem); white-space: normal; }
-[data-theme="studio"] .ch-projects button .muted { order: 3; flex-basis: 100%; }
 /* a cover that lifts under the pointer kept flickering when the pointer was on its name: it rose out from under it,
    lost the hover, dropped back. The strip it leaves below stays part of it, and a figure lifts only its picture (its name tag stays). */
 [data-theme="studio"] :is(.st-sleeve, .st-book)::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 1.8rem; }
@@ -746,6 +746,13 @@
 [data-theme="studio"] .wr-sheet-head h2 { font-size: 2.1rem; line-height: 1.05; }
 [data-theme="studio"] .wr-sheet-foot { background: var(--paper-white); border-radius: 0 0 var(--st-r-md) var(--st-r-md); }
 [data-theme="studio"] .wr-run { border-color: var(--room-line); background: var(--room-2); }
+/* what runs holds its place on paper too (#1324): a dashed card in the lamp's amber, its words in ink */
+[data-theme="studio"] .wr-card.wr-making { border: 1.5px dashed var(--lamp); }
+[data-theme="studio"] .wr-card.wr-making .wr-card-t, [data-theme="studio"] .wr-card.wr-making .wr-making-step { color: var(--ink); }
+[data-theme="studio"] .wr-card.wr-making .wr-making-sub { color: var(--ink-3); }
+[data-theme="studio"] .wr-card.wr-making :is(.wr-making-pct, .wr-making-ic) { color: #a87406; }
+[data-theme="studio"] .wr-making-bar > span { background: var(--lamp); }
+[data-theme="studio"] .wr-card.wr-making .wr-making-bar { background: var(--paper-edge); }
 [data-theme="studio"] .wr-sitem.on { background: var(--paper); color: var(--ink); box-shadow: none; }
 [data-theme="studio"] .wr-sitem.on b { color: var(--ink); }
 [data-theme="studio"] .wr-sitem.on small { color: var(--ink-3); }

@@ -11,9 +11,11 @@
 //   when: shown only for "assets" (the user gave files) or "way:<id>|<id>" (the way of working chosen at the Assets analysis; free until
 //   one is chosen); a hidden step counts as done.
 //   done.file: the file a step must leave; a confirmation or a finished task without it is not done.
+import { styleFamily } from "../style-catalog/family.mjs";
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
+import { renderVerdict } from "../hf-qa/checks.mjs";
 import { lookAt } from "../hf-qa/look.mjs";
 import * as plan from "../motion-plan/index.mjs";
 import { appSounds } from "../project-service/layout.mjs";
@@ -73,7 +75,7 @@ function assetFacts(dir) {
 // What If (its Build once ran twice and was never "built") is one page of code too: whatif/ bundled to film.js
 // The owner's film styles are one page too (moworks-styles: the source skill's page or its bundled composition in index.html): Test 38's 2D
 // Explainer film was never "built", so Sound and Version 1 never started (T38-2)
-export const isCodeFilm = (styleId) => /^(lemo-|mg-|anidoodle-)/.test(String(styleId ?? "")) || styleId === "brush-cartoon" || styleId === "what-if"
+export const isCodeFilm = (styleId) => ["lemo", "mg", "anidoodle", "brush", "what-if"].includes(styleFamily(styleId).family)
   || MOWORKS_STYLE_IDS.includes(String(styleId ?? ""));
 
 /** The last Tech checks as the steps judge them. A script check that ran out of time found nothing and blocks nothing,
@@ -83,8 +85,7 @@ export function qaFacts(lastQa, dir) {
   let r = null; try { r = JSON.parse(readFileSync(join(dir, ".moworks", "cache", "qa", "last.json"), "utf8")); } catch { return lastQa; }
   const gates = r?.checks ?? r?.gates;
   if (!Array.isArray(gates) || r.revision !== lastQa.revision) return lastQa;
-  const late = (f) => f.code === "check_timed_out" || (f.code === "check_runtime_failure" && /deadline|timed? ?out/i.test(String(f.message ?? "")));
-  const blocking = gates.filter((g) => g.blocking && !g.pass && !(g.id === "G-HF-SCRIPT" && (g.findings ?? []).length && g.findings.every(late))).length;
+  const blocking = renderVerdict({ gates }).blocking.length;          // the Render's verdict, a report saved before it too (audit/112b b1.1)
   return blocking === lastQa.blocking ? lastQa : { ...lastQa, blocking, pass: blocking === 0 };
 }
 
@@ -585,7 +586,7 @@ export function asksOwner(text) {
  *  status: todo | running | waiting | done | stopped | redo | failed. line: an English key for the Editor's t(), with lineVars. Every wait
  *  for the user reads "Waiting for you: …". */
 export const STAGES = [
-  { n: 1, id: "prepare", title: "Prepare" }, { n: 2, id: "storyboard", title: "Storyboard" }, { n: 3, id: "motion", title: "Motion Plan" },
+  { n: 1, id: "prepare", title: "Pre-production" }, { n: 2, id: "storyboard", title: "Storyboard" }, { n: 3, id: "motion", title: "Motion Plan" },
   // Production makes the film and its sound up to Version 1; the Review and the Tech checks run only when the user asks (owner 01/11). Final Mix is a dialog of Production; Render is a button, not a row
   { n: 4, id: "build", title: "Production" }, { n: 5, id: "review", title: "Review and checks" },
 ];

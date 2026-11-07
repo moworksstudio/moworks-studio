@@ -5,9 +5,9 @@
 // 3-4 rows a page; a click opens the kit's own page (BrandKit.jsx). Data: the server's /api/looks.
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, BookOpen, Check, FolderOpen, Loader2, Plus, Search, SlidersHorizontal, Upload, X } from "lucide-react";
-import { get, patch, post, upload, watchJob } from "../api.js";
+import { get, patch, post, upload } from "../api.js";
 import { BackButton, Banner, Dialog, Pager, useGalleryGrid } from "../components.jsx";
-import { ago, go, madeOn, sameNameLabels, useData, usePref, useToast } from "../lib.jsx";
+import { ago, go, madeOn, sameNameLabels, useData, usePref, useToast, useJobWatch, usePoll } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 import { useThemeId } from "../theme.jsx";
 import SwatchBooks from "../studio/SwatchBooks.jsx";
@@ -157,7 +157,7 @@ function KitOnTable({ id }) {
     <Fonts fonts={l.fonts} />
     <div className="sgb-acts">
       <button className="btn primary" onClick={() => go(`/looks/${id}`)}><BookOpen size={15} />{t("Open this Brand Kit")}</button>
-      <button className="btn" onClick={() => go(`/new?look=${encodeURIComponent(id)}`)} disabled={l.status !== "ready"}><Plus size={15} />{t("Use in a new project")}</button>
+      <button className="btn" onClick={() => go(`/new?look=${encodeURIComponent(id)}`)} disabled={l.status !== "ready"}><Plus size={15} />{t("Use in a new production")}</button>
     </div>
   </>;
 }
@@ -165,6 +165,7 @@ function KitOnTable({ id }) {
 /** Make a Look from a guideline: a name, the files (or a folder), then the scan with its stages. from: a kit of the user's: this is its new version, a kit of its own of the
  *  same name (the name can change); new files are scanned, with what is kept of the old kit's; no new files make a plain copy, with no Claude run. */
 export function CreateLook({ onClose, onDone, from = null }) {
+  const watch = useJobWatch();          // its job watches stop with it (audit/112c c5.1)
   const t = useT();
   const toast = useToast();
   const [title, setTitle] = useState(from?.title ?? "");
@@ -201,12 +202,13 @@ export function CreateLook({ onClose, onDone, from = null }) {
       setPhase("scanning");
       const j = await post(`/api/looks/${l.id}/scan`);
       setJob(j.job ?? j);
-      watchJob((j.job ?? j).id, (x) => {
+      watch((j.job ?? j).id, (x) => {
         if (!x) return;
         setJob(x);
         if (x.status === "done" && x.result?.stopped === "locked") { onDone(l.id, true); return; }          // the kit's panel opens with the popup
         if (x.status === "done") { const n = x.result?.unread?.length ?? 0; toast(n ? t("“{title}” is ready, {n} file(s) not read", { title: title.trim(), n }) : t("“{title}” is ready", { title: title.trim() })); onDone(l.id); }
         if (x.status === "failed") { setErr(x.error?.message ?? t("The scan did not finish.")); setPhase(null); }
+        if (x.status === "cancelled") setPhase(null);          // stopped from the top bar's list: the dialog is free again
       }, 1200);
     } catch (e) { setErr(e.message); setPhase(null); }
   };
@@ -251,7 +253,7 @@ export default function Looks({ kitId = null }) {
   const created = (id, locked = false) => { setMake(false); setCur(id); setAskLocked(locked ? id : null); q.reload(); go(`/looks/${id}`); };
   const [panel, setPanel] = useState(null);          // narrow window: "filters" over the grid
   const looks = q.data?.looks ?? [];
-  useEffect(() => { if (!looks.some((l) => l.status === "scanning")) return undefined; const h = setInterval(q.reload, 3000); return () => clearInterval(h); }, [looks]); // eslint-disable-line react-hooks/exhaustive-deps
+  usePoll(q.reload, 3000, looks.some((l) => l.status === "scanning"));          // eslint-disable-line // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (!panel) return undefined; const esc = (e) => { if (e.key === "Escape") setPanel(null); }; addEventListener("keydown", esc); return () => removeEventListener("keydown", esc); }, [panel]);
   // the sources with Looks in them (an empty "Yours" stays out of the column), HyperFrames first
   const sources = useMemo(() => { const n = new Map(); for (const l of looks) n.set(sourceOf(l), (n.get(sourceOf(l)) ?? 0) + 1);

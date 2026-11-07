@@ -44,7 +44,8 @@ export default function Storyboard({ id, setCrumbs = () => {} }) {
   const [sel, setSel] = useState(null);                // the chosen option's key
   const [board, setBoard] = useState(null);            // GET /boards, handed up by <Boards>
   const [chosenOnce, setChosenOnce] = useState(false);
-  const [ask, setAsk] = useState(null);                // the action waiting for its yes: "approve" | "more" | "revise"
+  const [ask, setAsk] = useState(null);
+  const [cast, setCast] = useState([]);                 // characters picked with the feedback (#1319 2b): [{ id, name }]                // the action waiting for its yes: "approve" | "more" | "revise"
   const [busy, setBusy] = useState(false);
   const [boardsKey, setBoardsKey] = useState(0);
   const notes = useNotes(id, board ? Object.fromEntries(optionsOf(board).filter((o) => o.feedback).map((o) => [o.label, { text: o.feedback }])) : null);
@@ -56,7 +57,7 @@ export default function Storyboard({ id, setCrumbs = () => {} }) {
     if (st === "missing") post(`/api/projects/${id}/posters`).then(() => setTimeout(posters.reload, 4000)).catch(() => {});
     else if (st === "running") { const h = setTimeout(posters.reload, 3000); return () => clearTimeout(h); }
   }, [posters.data?.status]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { setCrumbs(project.data ? [t("Projects"), project.data.title, t("Storyboard")] : null); }, [project.data, t]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setCrumbs(project.data ? [t("Productions"), project.data.title, t("Storyboard")] : null); }, [project.data, t]); // eslint-disable-line react-hooks/exhaustive-deps
   const options = optionsOf(board);
   useEffect(() => {        // start from the option picked before, else the newest; the user's own choice is never overwritten
     if (!board || chosenOnce || !options.length) return;
@@ -107,9 +108,10 @@ export default function Storyboard({ id, setCrumbs = () => {} }) {
   // the feedback (or a new, clearly different option) goes to Claude, the draft is cleared, the dialog closes, the chat shows the work
   const more = () => run(() => post(`/api/projects/${id}/boards/more`, draft.trim() ? { text: draft.trim() } : {}),
     () => { if (label) notes.set(label, "", true); toast(t("Claude is making Option {o}", { o: nextLetter(options) })); stage.close(); });
-  const revise = () => run(() => post(`/api/projects/${id}/boards/${label}/feedback`, { text: draft.trim() }),
-    () => { notes.set(label, "", true); toast(t("Claude is making Option {o}", { o: nextRevision(options, option.letter ?? label[0]) })); stage.close(); });
-  const fb = { open: fbOpen, focus: fbFocus, textOf: notes.textOf, set: notes.set, close: () => setFbOpen(false), submit: () => setAsk("revise"),
+  // characters picked with the note (#1319 2b): the app puts them in the film's cast when it goes
+  const revise = () => run(() => post(`/api/projects/${id}/boards/${label}/feedback`, { text: draft.trim(), ...(cast.length ? { characters: cast.map((c) => c.id) } : {}) }),
+    () => { notes.set(label, "", true); setCast([]); toast(t("Claude is making Option {o}", { o: nextRevision(options, option.letter ?? label[0]) })); stage.close(); });
+  const fb = { open: fbOpen, focus: fbFocus, textOf: notes.textOf, set: notes.set, close: () => setFbOpen(false), submit: () => setAsk("revise"), styleId: project.data?.meta?.style?.id ?? null, cast, setCast,
     add: (o, n, note = "") => { notes.set(o.label, appendNote(notes.textOf(o.label), n, note)); setFbOpen(true); if (!note) setFbFocus((k) => k + 1); } };
   const panelNotes = Object.values(noteCounts(draft)).reduce((a, b) => a + b, 0);
   const askClaude = () => { stage.askClaude(t(WRITE_SB)); };

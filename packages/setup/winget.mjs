@@ -2,6 +2,7 @@
 // for this user only (no administrator), with the same lines the install guide gives. Set up's one Install runs them (owner 30/10: no
 // line to copy when the app can do it); the app finds both where winget puts them (pins.ffmpeg.dir, pins.python.exe). Without winget
 // (an older Windows 10) the first-run screen shows each line to copy instead. MW_NO_WINGET: never run it (tests).
+import { killTree } from "../system-status/kill-tree.mjs";
 import { spawn, spawnSync } from "node:child_process";
 
 export const PACKAGES = {
@@ -27,7 +28,7 @@ export function install(args, { signal = null, onLine = () => {} } = {}) {
     const c = spawn("winget", [...args, ...QUIET], { windowsHide: true });
     const take = (d) => { for (const l of String(d).split(/\r?\n/)) { const s = l.replace(/[▀-▟█▒░\\|/-]+\s*$/u, "").trim(); if (s) onLine(s.slice(0, 120)); } };
     c.stdout.on("data", take); c.stderr.on("data", take);
-    const kill = () => spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true });
+    const kill = () => killTree(c);
     signal?.addEventListener("abort", kill, { once: true });
     c.on("error", (e) => no(Object.assign(new Error(`winget could not start: ${e.message}`), { code: "NO_WINGET" })));
     c.on("close", (code) => { signal?.removeEventListener("abort", kill); signal?.aborted ? no(Object.assign(new Error("Cancelled"), { code: "CANCELLED" })) : ok(code); });

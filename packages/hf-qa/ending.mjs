@@ -7,11 +7,10 @@
 // check skipped author styles): where the plan's author's ending stands (hf-edit/ending.mjs filmEnding: own), a held end card (the last
 // half second unchanged) is an ending too; a picture still moving there is not. A warning in Tech checks naming the time, never a block,
 // said only when it fails.
-import { execFileSync } from "node:child_process";
+import { greyStats, stillGrey } from "./grey.mjs";
 import { existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { snapshotAtAsync } from "./cli.mjs";
-import { ffmpegExe } from "../library/preview-media.mjs";
 
 /** before: how long before the end the earlier still is taken; flat: a contrast that is a plain picture; ratio: the share of the earlier
  *  contrast (or light) the last frame may keep and still read as faded (or dark); black: a light (0-255) that is black whatever came before;
@@ -19,20 +18,6 @@ import { ffmpegExe } from "../library/preview-media.mjs";
  *  still a held picture (grain stays under it; a cursor blinking, a line typing, a scanline rolling do not). */
 export const END = { before: 0.5, last: 0.02, flat: 3, ratio: 0.35, black: 2, block: 10, held: 6 };
 const r2 = (n) => Math.round(n * 100) / 100;
-
-/** A still's grey levels, 320 px wide: { w, h, px }. */
-export function stillGrey(png) {
-  const px = execFileSync(ffmpegExe(), ["-v", "error", "-i", png, "-vf", "scale=320:-1", "-f", "rawvideo", "-pix_fmt", "gray", "-"], { maxBuffer: 1 << 24, windowsHide: true });
-  return { w: 320, h: Math.floor(px.length / 320), px };
-}
-
-/** A picture's contrast (the spread of its grey levels, gates.mjs stillStd) and light (their mean), 0-255. */
-export function greyStats(px) {
-  let sum = 0, sq = 0;
-  for (const v of px) { sum += v; sq += v * v; }
-  const n = px.length || 1;
-  return { contrast: Math.sqrt(Math.max(0, sq / n - (sum / n) ** 2)), light: sum / n };
-}
 
 /** How much the picture changed between two stills of one size: the largest mean difference of any END.block px block (0-255); null
  *  when their sizes differ. */

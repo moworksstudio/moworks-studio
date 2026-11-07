@@ -107,7 +107,7 @@ export function ClaudeChip() {
       </dl>}
       {s?.loggedIn ? (confirmOut
         ? <div className="claude-pop-confirm"><div className="dlg-lines"><p>{t("Sign out of Claude Code on this PC?")}</p><p className="dlg-warn">{t("Claude Code in the terminal signs out too.")}</p>
-          <p className="hint">{t("New projects and the chat pause until you sign in again.")}</p></div>
+          <p className="hint">{t("New productions and the chat pause until you sign in again.")}</p></div>
           <div className="row"><button className="btn sm" onClick={() => setConfirmOut(false)}>{t("Cancel")}</button><button className="btn danger sm" onClick={out} disabled={busy}>{busy ? <Loader2 size={13} className="spin" /> : <LogOut size={13} />}{t("Sign out")}</button></div></div>
         : <button className="btn ghost sm" onClick={() => setConfirmOut(true)}><LogOut size={13} />{t("Sign out")}</button>)
         : <SignInFlow compact onDone={() => setOpen(false)} />}

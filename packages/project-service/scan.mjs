@@ -11,7 +11,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { extname, join } from "node:path";
 import { promisify } from "node:util";
-import { expandEnv, loadPins, APP_ROOT } from "../version-manager/index.mjs";
+import { APP_ROOT, ffmpegExe, ffprobeExe } from "../version-manager/index.mjs";
 import { isLyricVideo } from "../style-catalog/traits.mjs";
 import { inventory } from "./index.mjs";
 import { runPy } from "../setup/python.mjs";
@@ -19,7 +19,7 @@ import { runPy } from "../setup/python.mjs";
 const run = promisify(execFile);
 const SUNG_MIN = 12, SUNG_PER_MIN = 20;   // sung words kept only above both (a demo megamix: Turbo heard 0)
 const SCAN_V = 3;          // a file scanned by an older scan is read again (3: song mode for sung words)
-const bin = (name, root) => join(expandEnv(loadPins(root).ffmpeg.dir), `${name}.exe`);
+const bin = (name, root) => (name === "ffprobe" ? ffprobeExe(root) : ffmpegExe(root));          // version-manager
 const VIDEO = new Set([".mp4", ".mov", ".webm", ".mkv", ".m4v", ".avi"]);
 const AUDIO = new Set([".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".opus"]);
 const IMAGE = new Set([".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".avif"]);
@@ -76,7 +76,7 @@ async function wordsOf(file, outDir, root, { song = false } = {}) {
   const settings = asr.voiceSettings(root);
   const ok = (m) => m.installed && m.runtime.ok, all = asr.models(root);
   const card = all.find((m) => m.id === settings.defaultModel && ok(m)) || all.find(ok);
-  if (!card) return { skipped: "no speech model installed (Settings > System)" };
+  if (!card) return { skipped: "no speech model installed (Studio Settings › System)" };
   // a song's language is left to Whisper: a mixed song heard 0 words in Vietnamese song mode and part of it with the language open (Test 30)
   const r = await asr.transcribe(file, { model: card.id, language: song ? "auto" : settings.language ?? "vi", song, workDir: join(outDir, "asr"), root });
   rmSync(join(outDir, "asr"), { recursive: true, force: true });
@@ -129,8 +129,6 @@ const isPdf = (path) => PDF.has(extname(path).toLowerCase());
 const scanned = (dir) => { try { return JSON.parse(readFileSync(join(dir, ".moworks", "scan", "index.json"), "utf8")).items; } catch { return []; } };
 /** The PDFs with a password the scan found: the paths Claude cannot read, for its prompt. */
 export const lockedPdfs = (dir) => scanned(dir).filter((x) => x.password).map((x) => x.path);
-/** The film's image sequences, with what the scan read of them. */
-export const scannedSequences = (dir) => { try { return JSON.parse(readFileSync(join(dir, ".moworks", "scan", "index.json"), "utf8")).sequences ?? []; } catch { return []; } };
 /** The songs of a film set to its lyrics whose words Whisper could not hear: the owner is told, and gives them in the Lyrics dialog. */
 export const unheardSongs = (dir) => scanned(dir).filter((x) => x.wordsUnheard).map((x) => x.path);
 /** A locked PDF, with the password the owner gave in the chat: read whole, as any PDF is, into the scan; the password goes to that one reading and

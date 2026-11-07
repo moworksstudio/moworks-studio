@@ -5,9 +5,9 @@
 // Only Mixkit's own hosts are downloaded from. Mixkit's free music (mixkit.co/free-stock-music, read 18/10/2026): royalty free, online use
 // (YouTube, social, websites, podcasts, online ads), attribution appreciated not required; NOT in CDs, DVDs, video games or TV & radio
 // broadcasts. The app says so wherever a track is chosen and in the credit.
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { writeCreditSection } from "../project-service/credits.mjs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { docPath } from "../project-service/docs.mjs";
 import { peaks, probe } from "../voice/audio.mjs";
 import { slug } from "./index.mjs";
 
@@ -39,8 +39,10 @@ export async function saveOptions(dir, tracks, { fetchImpl = fetch, signal = nul
     const url = String(t?.url ?? "");
     if (!HOST.test(url) || !/\.(mp3|m4a|wav|ogg)(\?|$)/i.test(url)) { out.failed.push({ title: t?.title ?? url, why: "not a Mixkit audio file link (https://…mixkit.co/…mp3)" }); continue; }
     try {
-      const r = await fetchImpl(url, { signal });
+      // a minute at most (a hung download held Claude's music_options turn: audit/112a F3), a file too big refused before it is read
+      const r = await fetchImpl(url, { signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(60000)]) : AbortSignal.timeout(60000) });
       if (!r.ok) throw new Error(`download failed (${r.status})`);
+      if (Number(r.headers?.get?.("content-length")) > MAX) throw new Error("not a usable audio file");
       const buf = Buffer.from(await r.arrayBuffer());
       if (buf.length > MAX || buf.length < 1000) throw new Error("not a usable audio file");
       const ext = (/\.(mp3|m4a|wav|ogg)(\?|$)/i.exec(url)[1] ?? "mp3").toLowerCase();
@@ -61,13 +63,8 @@ export async function saveOptions(dir, tracks, { fetchImpl = fetch, signal = nul
 
 /** CREDITS.md: a "Music" section for the track on the timeline (other sections kept). */
 export function creditMusic(dir, track) {
-  const f = docPath(dir, "CREDITS.md");
-  mkdirSync(join(f, ".."), { recursive: true });
   const body = track ? `- **${track.title}**${track.artist ? ` by ${track.artist}` : ""} (\`${track.file}\`), ${track.licence ?? LICENCE.name} (${track.licenceUrl ?? LICENCE.url}; ${LICENCE.limits}).${track.page ? ` Source: ${track.page}` : ""}` : "None.";
-  const section = `<!-- mw:music-credits -->\n## Music\n\n${body}\n<!-- /mw:music-credits -->`;
-  const old = existsSync(f) ? readFileSync(f, "utf8") : "# Credits\n";
-  const re = /<!-- mw:music-credits -->[\s\S]*?<!-- \/mw:music-credits -->/;
-  writeFileSync(f, re.test(old) ? old.replace(re, section) : `${old.trimEnd()}\n\n${section}\n`);
+  writeCreditSection(dir, "music", `## Music\n\n${body}`);          // project-service/credits.mjs: the Pictures made again too
 }
 
 /** The text Claude reads after handing tracks over. In the music step the app, when the turn ends, puts track 1 on the timeline (a film

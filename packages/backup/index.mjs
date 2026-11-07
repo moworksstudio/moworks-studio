@@ -14,9 +14,9 @@ import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
 import * as rev from "../revisions/index.mjs";
 import { mediaRoot as charactersRoot } from "../character-kit/index.mjs";
 import { tarPath } from "../project-service/archive.mjs";
+import { readJson } from "../util/json.mjs";
 
 const git = (dir, args) => execFileSync("git", args, { cwd: dir, encoding: "utf8", windowsHide: true, maxBuffer: 64 * 1024 * 1024, stdio: ["ignore", "pipe", "pipe"] }).trim();
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
 
 export function backupRoot(root = APP_ROOT) {
   if (process.env.MW_BACKUP_ROOT) return process.env.MW_BACKUP_ROOT;    // tests

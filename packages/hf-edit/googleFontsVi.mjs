@@ -5,7 +5,6 @@
 // (googleFonts.mjs) serves it. Nothing is bundled: the 26 families of config/fonts.json stay the only ones that come with the app.
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
-import { createRequire } from "node:module";
 import { join } from "node:path";
 import { APP_ROOT } from "../version-manager/index.mjs";
 
@@ -109,9 +108,10 @@ const rawUrl = (commit, folder, file) => `https://raw.githubusercontent.com/goog
  *  the letters missing from at least one file; null when the font reader of the pinned runtime is not there. */
 async function vietnameseLetters(paths) {
   try {
-    const { VI } = await import("../hf-qa/gates.mjs"), { resolveRuntime } = await import("../version-manager/index.mjs");          // gates.mjs imports finalize, which imports this file: loaded late
-    const fk = createRequire(join(resolveRuntime().dir, "node_modules", "fontkit", "package.json"))("fontkit");
-    const marked = [...VI].filter((c) => !/^[a-zA-Z]$/.test(c)), lacking = new Set();
+    const { VI_MARKED, fontkitFor } = await import("../hf-qa/vietnamese.mjs");
+    const fk = fontkitFor();
+    if (!fk) return null;
+    const marked = VI_MARKED, lacking = new Set();
     for (const p of paths) { const f = fk.openSync(p); for (const c of marked) if (!f.hasGlyphForCodePoint(c.codePointAt(0))) lacking.add(c); }
     return { checked: marked.length, missing: [...lacking].join("") };
   } catch { return null; }

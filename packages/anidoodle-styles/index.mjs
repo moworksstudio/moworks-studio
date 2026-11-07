@@ -14,11 +14,12 @@ import { APP_ROOT, expandEnv, loadPins, sourceHead } from "../version-manager/in
 import { workRoot } from "../project-service/index.mjs";
 import { ffmpegExe } from "../library/preview-media.mjs";
 import { ensureShared, linkOrCopy, sharedDir } from "../project-service/shared-stage.mjs";
+import { readJson } from "../util/json.mjs";
 
 export const AUTHOR = { id: "alexgreensh", name: "Alex Greenshpun (10x Company)", source: "anidoodle" };
 export const LICENCE = "Apache-2.0 (with NOTICE)";
 const readText = (p) => { try { return readFileSync(p, "utf8"); } catch { return ""; } };
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
+
 const sha256 = (s) => createHash("sha256").update(s).digest("hex");
 // the author's style sheet: 8 × 4 tiles of 400 × 444 px (a 392 px picture over its label), in this order
 const SHEET = ["ranunculus", "colouredPencil", "koi", "scrapbook", "pixelArt", "sumiE", "woodcut", "toyBrick",

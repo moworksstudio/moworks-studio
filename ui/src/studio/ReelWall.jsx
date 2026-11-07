@@ -3,7 +3,7 @@
 // (blue pencil: not yet, ink: done, colour: rendered), then its status, name, length · shape · film style, how many steps are done, Open
 // and its menu (Rename, Show in folder, Locate, Duplicate, Remove from list). Below, two shelves with every film as a sleeve, newest
 // first, packed and fanned like the Film Styles crates; a click puts that film on top, a double click opens it. The label maker
-// searches; Sort sits beside it; Import project is a line under the pitch card. With no film yet, the logo intro takes the film in hand's place
+// searches; Sort sits beside it; Import production is a line under the pitch card. With no film yet, the logo intro takes the film in hand's place
 // on the light table and one bare shelf waits under it. A film whose folder is gone stands in dashed blue pencil
 // with "Locate…". The dialogs are The Desk's (screens/Projects.jsx passes them in), so every action works the same in both themes.
 // Mix v3 is the one view: the counts are props (`frames`, `tiers`, `perTier`) and the sizes are
@@ -62,7 +62,7 @@ export default function ReelWall({ data, error, loading, reload, onAction, intro
   const menu = (p) => <Menu trigger={<MoreHorizontal size={16} />} label={t("Actions for {title}", { title: p.title })} items={[
     { label: t("Rename"), icon: <Pencil size={14} />, onSelect: () => onAction("rename", p), disabled: p.missing },
     { label: t("Show in folder"), icon: <FolderOpen size={14} />, onSelect: () => reveal(p), disabled: p.missing },
-    ...(p.missing ? [{ label: t("Locate project…"), icon: <FolderSearch size={14} />, onSelect: () => onAction("locate", p) }] : []),
+    ...(p.missing ? [{ label: t("Locate production…"), icon: <FolderSearch size={14} />, onSelect: () => onAction("locate", p) }] : []),
     { label: t("Duplicate"), icon: <Plus size={14} />, onSelect: () => {}, disabled: true, title: t("Coming later") },
     "-",
     { label: t("Remove from list"), icon: <Trash2 size={14} />, onSelect: () => onAction("remove", p), danger: true },
@@ -73,20 +73,20 @@ export default function ReelWall({ data, error, loading, reload, onAction, intro
   const empty = !loading && !error && all.length === 0;
 
   return <div className="st-room st-projects">
-    <div className="st-head"><h1>{t("Projects")}</h1>{all.length > 0 && <span className="st-aside">{q.trim() ? t("{n} of {total} films", { n: list.length, total: all.length }) : t("{n} films", { n: all.length })}</span>}
+    <div className="st-head"><h1>{t("Productions")}</h1>{all.length > 0 && <span className="st-aside">{q.trim() ? t("{n} of {total} films", { n: list.length, total: all.length }) : t("{n} films", { n: all.length })}</span>}
       {all.length > 0 && <div className="st-acts">
         <span className="st-sort"><ArrowDownUp size={14} aria-hidden="true" /><select value={sort} onChange={(e) => setSort(e.target.value)} aria-label={t("Sort")}>{SORTS.map(([k, l]) => <option key={k} value={k}>{t(l)}</option>)}</select></span>
-        <label className="st-labelmaker"><Search size={15} aria-hidden="true" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Search projects")} aria-label={t("Search projects")} />
+        <label className="st-labelmaker"><Search size={15} aria-hidden="true" /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Search productions")} aria-label={t("Search productions")} />
           {q && <button type="button" onClick={() => setQ("")} aria-label={t("Clear")}><X size={13} /></button>}</label></div>}</div>
-    {error && <Banner kind="error" action={<button className="btn sm" onClick={reload}>{t("Retry")}</button>}>{t("Could not load the projects.")} {error.message}</Banner>}
+    {error && <Banner kind="error" action={<button className="btn sm" onClick={reload}>{t("Retry")}</button>}>{t("Could not load the productions.")} {error.message}</Banner>}
     <div className="st-mixwrap">
       <div className="st-mixtop">
         <div className="st-pitchcol">
-          <button type="button" className="st-pitch" onClick={() => go("/new")}><span className="st-tape" aria-hidden="true" /><span className="st-label">{t("New project")}</span>
-            <b>{t("Start a film")}</b><span className="st-pitch-p">{t("one sentence is enough, Claude does the rest with you")}</span><span className="btn primary"><Plus size={15} />{t("New project")}</span></button>
-          <button type="button" className="st-import" onClick={() => onAction("open")}><FolderInput size={14} />{t("Import project")}</button>
+          <button type="button" className="st-pitch" onClick={() => go("/new")}><span className="st-tape" aria-hidden="true" /><span className="st-label">{t("New production")}</span>
+            <b>{t("Start a film")}</b><span className="st-pitch-p">{t("one sentence is enough, Claude does the rest with you")}</span><span className="btn primary"><Plus size={15} />{t("New production")}</span></button>
+          <button type="button" className="st-import" onClick={() => onAction("open")}><FolderInput size={14} />{t("Import production")}</button>
         </div>
-        {loading && !data ? <div className="st-mixrow st-skel" role="status" aria-label={t("Opening your projects…")} />
+        {loading && !data ? <div className="st-mixrow st-skel" role="status" aria-label={t("Opening your productions…")} />
           : empty ? <div className="st-mixrow st-intro">{intro}</div>
           : pick ? <div className="st-mixrow" key={pick.id} onDoubleClick={() => open(pick)}>
             <Strip p={pick} n={frames} />
@@ -99,12 +99,12 @@ export default function ReelWall({ data, error, loading, reload, onAction, intro
                 : t("Not started")}{pick.progress?.needsYou > 0 && <em> · {t("Waiting for you")}</em>}</span>}
               {!pick.missing && <DevBar p={pick} />}
               <span className="st-when">{t("changed {when}", { when: ago(pick.updatedAt) })}</span>
-              <span className="st-open">{pick.missing ? <button className="btn primary" onClick={() => onAction("locate", pick)}><FolderSearch size={15} />{t("Locate project…")}</button>
+              <span className="st-open">{pick.missing ? <button className="btn primary" onClick={() => onAction("locate", pick)}><FolderSearch size={15} />{t("Locate production…")}</button>
                 : <button className="btn primary" onClick={() => open(pick)}><Clapperboard size={15} />{t("Open")}</button>}{menu(pick)}</span>
             </div></div>
-          : <div className="st-mixrow st-none"><p className="st-hand">{t("No project matches.")}</p><button className="btn" onClick={() => setQ("")}>{t("Clear filters")}</button></div>}
+          : <div className="st-mixrow st-none"><p className="st-hand">{t("No production matches.")}</p><button className="btn" onClick={() => setQ("")}>{t("Clear filters")}</button></div>}
       </div>
-      {all.length > 0 && <div className="st-tiers" style={{ "--tiers": tierCount }}>{tiers.map((part, ti) => <div key={ti} className={"st-box st-tier" + (part.length ? "" : " st-tier-empty")} data-name={ti === 0 ? t("Projects") : ""}>
+      {all.length > 0 && <div className="st-tiers" style={{ "--tiers": tierCount }}>{tiers.map((part, ti) => <div key={ti} className={"st-box st-tier" + (part.length ? "" : " st-tier-empty")} data-name={ti === 0 ? t("Productions") : ""}>
         <div className="st-sleeves" style={{ "--n": part.length }}>{part.map((p) => <button key={p.id} type="button" className={"st-sleeve st-film" + (p.missing ? " gone" : "")} aria-pressed={p.id === pick?.id}
           onClick={() => setPickId(p.id)} onDoubleClick={() => open(p)} title={p.title}>
           <span className="st-film-img">{p.missing ? <span className="st-gone-img"><FolderSearch size={18} />{t("Locate…")}</span>
@@ -113,7 +113,7 @@ export default function ReelWall({ data, error, loading, reload, onAction, intro
           {!p.missing && <DevBar p={p} />}</button>)}
           {ti > 0 && !part.length && <p className="st-hand st-next">{t("room for the next film")}</p>}</div></div>)}</div>}
       {/* no film yet: the logo intro lies on the light table above, and one bare shelf waits for the first film */}
-      {empty && <div className="st-tiers"><div className="st-box st-tier st-tier-empty" data-name={t("Projects")}>
+      {empty && <div className="st-tiers"><div className="st-box st-tier st-tier-empty" data-name={t("Productions")}>
         <div className="st-sleeves"><p className="st-hand st-next">{t("room for the first film")}</p></div></div></div>}
     </div>
     {dialogs}

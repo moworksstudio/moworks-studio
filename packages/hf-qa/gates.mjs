@@ -1,4 +1,5 @@
-// Pre-render gates. HF first: lint and script errors come from `hyperframes check`; Moworks adds only what HF lacks.
+// Pre-render gates. HF first: lint and script errors come from `hyperframes check`; Moworks adds only what HF lacks. Every check's words for
+// the owner and what stops a render are in checks.mjs (the list below is what each one looks at, not all of them).
 //   G-HF-LINT    HF lint errors (incl. missing_local_asset, font_family_without_font_face, placeholder_media_url)   blocking
 //   G-HF-SCRIPT  HF runtime errors (page_error) from the same check                                                 blocking
 //   G-REMOTE     any remote URL in a composition or stylesheet, or a quoted one in the film's own scripts (HF has no
@@ -15,7 +16,7 @@
 //                source skill's own collision check, moworks-styles/collision.mjs)                                       warning
 //   G-CUTS       a film of the owner's film styles (2D Explainer, 3D Cartoon, Stickman, Inner Voice), on a render of the film as it is: its
 //                hard cuts against the cuts its own shot table declares (the source skills' qc.mjs, moworks-styles/cuts.mjs)             warning
-//   G-VOICE      under a voice-over, effects or music within 3 dB of the voice on a spoken word        warning
+//   G-VOICE      under a voice-over, effects within 8 dB or music within 10 dB of the voice on a spoken word        warning
 //   G-GLYPH-CODE Vietnamese letters a code film's own code (whatif/*.tsx, anidoodle/*.ts) draws in a face that lacks them
 //                (G-GLYPH reads only the HTML; codeGlyphs.mjs)                                                warning
 //   G-VI-MARKS   a Vietnamese film's on-screen text written without its marks ("NHAT KY" for "NHẬT KÝ"; viMarks.mjs)    warning
@@ -24,15 +25,15 @@
 //   G-SYNC       a move of the Motion Plan that names a spoken word and does not land on it, or a word not said in its shot (wordSync.mjs)    warning
 //   G-LYRIC      a lyrics video's sung words: missing on screen, or shown clearly off their sung time (lyricSync.mjs)              warning
 //   G-SEQ-CRAWL, G-SEQ-JUMP, G-SEQ-PRODUCT  a film's image sequence: a crawl or a hold, a jump, the product cut by the frame (sequence.mjs)  warnings
-import { execFileSync } from "node:child_process";
+import { stillStd } from "./grey.mjs";
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
-import { createRequire } from "node:module";
 import { join, relative, resolve, sep } from "node:path";
-import { declaredFamilies, familyStacks, fontMap, htmlFiles } from "../hf-edit/finalize.mjs";
+import { declaredFamilies, familyStacks, htmlFiles } from "../hf-edit/finalize.mjs";
 import { scriptFiles } from "../hf-edit/vendorLibs.mjs";
 import { loadHf } from "../hf-edit/load.mjs";
-import { expandEnv, loadPins, resolveRuntime } from "../version-manager/index.mjs";
-import { check, snapshot, runHfJsonAsync } from "./cli.mjs";
+import { snapshot, runHfJsonAsync } from "./cli.mjs";
+import { SOUND_CHECKS, judge, lateFinding } from "./checks.mjs";
+import { VI, fontkitFor } from "./vietnamese.mjs";
 import { CHECK_BUSY, checkFindings, checkOnceMore, checkSamples, checkTimeoutMs, filmSeconds, withSeamsFallback } from "./qc.mjs";
 import { dropDecorationContrast } from "./contrastDecor.mjs";
 import { gateContract } from "../anidoodle-styles/contract.mjs";
@@ -44,7 +45,7 @@ import { gateCanvasText } from "../agent/canvas-text.mjs";
 import { gateFlicker } from "./flicker.mjs";
 import { gateSoundShape } from "./soundshape.mjs";
 import { gateAnatomy } from "./anatomy.mjs";
-import { gateVoice } from "../sfx/voicecheck.mjs";
+import { gateVoice } from "../sfx/mix/index.mjs";
 import { freshFilm } from "../hf-edit/codeFilm.mjs";
 import { gateCodeGlyphs } from "./codeGlyphs.mjs";
 import { gateViMarks } from "./viMarks.mjs";
@@ -53,9 +54,8 @@ import { gateSequence } from "./sequence.mjs";
 import { gateSung } from "./lyricSync.mjs";
 import { gateSync } from "./wordSync.mjs";
 
-const BASES = "aăâeêioôơuưyAĂÂEÊIOÔƠUƯY";
-const TONES = ["", "̀", "́", "̉", "̃", "̣"];
-export const VI = new Set([...[...BASES].flatMap((b) => TONES.map((t) => (b + t).normalize("NFC"))), "đ", "Đ"]);
+// the Vietnamese letters (vietnamese.mjs), kept importable from here
+export { VI };
 const ASCII_VI = new Set([..."aeiouyAEIOUY"]);          // plain vowels exist in every font; only marked letters are checked
 const REMOTE = /(?:https?:)?\/\/(?!www\.w3\.org)[a-z0-9.-]+\.[a-z]{2,}[^\s"'()<>]*/gi;
 const REMOTE_LITERAL = /(["'`])(https?:\/\/(?!www\.w3\.org)[a-z0-9.-]+\.[a-z]{2,}[^\s"'`]*)\1/gi;
@@ -125,12 +125,11 @@ export function stackUses(html, document) {
 
 async function gateFonts(projectDir) {
   const hf = await loadHf();
-  const kit = new Set(Object.keys(fontMap()).map((k) => k.toLowerCase()));
   const rootHtml = existsSync(join(projectDir, "index.html")) ? readFileSync(join(projectDir, "index.html"), "utf8") : "";
   const rootDeclared = declaredFamilies(rootHtml);
   const fontFindings = [], glyphFindings = [];
-  const require = createRequire(join(resolveRuntime().dir, "node_modules", "fontkit", "package.json"));
-  const fontkit = require("fontkit");
+  const fontkit = fontkitFor();
+  if (!fontkit) throw new Error("The pinned runtime has no font reader (fontkit)");
   const cmapCache = new Map();
   const hasGlyphs = (path, chars) => {
     if (!cmapCache.has(path)) { try { cmapCache.set(path, fontkit.openSync(path)); } catch { cmapCache.set(path, null); } }
@@ -175,7 +174,6 @@ async function gateFonts(projectDir) {
       if (missing.size) glyphFindings.push({ file: f, family: first, fonts: files, missing: [...missing].join("") });
     }
   }
-  void kit;
   return [
     { id: "G-FONT", blocking: true, pass: fontFindings.length === 0, findings: fontFindings },
     { id: "G-GLYPH", blocking: true, pass: glyphFindings.length === 0, findings: glyphFindings },
@@ -204,7 +202,7 @@ export function gatesFromCheckJson(j, projectDir) {
   const lintErr = j.lint.findings.filter((x) => x.severity === "error").map((x) => ({ code: x.code, file: x.sourceFile ? relative(projectDir, x.sourceFile).split(sep).join("/") : undefined, message: String(x.message).slice(0, 200) }));
   // a check that ran out of its time found no error: a warning, never a block. Real script
   // errors found within the time still block.
-  const outOfTime = (x) => x.code === "check_runtime_failure" && /deadline|timed? ?out/i.test(String(x.message ?? ""));
+  const outOfTime = lateFinding;
   const rtAll = (j.runtime?.findings ?? []).filter((x) => x.severity === "error");
   const rtErr = rtAll.filter((x) => !outOfTime(x)).map((x) => ({ code: x.code, message: String(x.message).slice(0, 200) }));
   const late = rtAll.some(outOfTime) ? [{ severity: "warning", code: "check_timed_out", message: "Could not finish checking the scripts in time: no script error was found before the check stopped." }] : [];
@@ -229,14 +227,6 @@ export function gatesFromCheckJson(j, projectDir) {
   ];
 }
 
-export function stillStd(png) {
-  const ff = join(expandEnv(loadPins().ffmpeg.dir), "ffmpeg.exe");
-  const raw = execFileSync(ff, ["-v", "error", "-i", png, "-vf", "scale=320:-1", "-f", "rawvideo", "-pix_fmt", "gray", "-"], { maxBuffer: 1 << 24, windowsHide: true });
-  let sum = 0, sq = 0;
-  for (const v of raw) { sum += v; sq += v * v; }
-  const n = raw.length;
-  return Math.sqrt(Math.max(0, sq / n - (sum / n) ** 2));
-}
 
 function gateBlank(projectDir, workDir) {
   const root = readFileSync(join(projectDir, "index.html"), "utf8");
@@ -266,7 +256,7 @@ export async function gateBuild(projectDir) {
 
 /** The checks run again when only the sound changed (T32-7): the sound's, and the cuts, which read the film's render (a render made since
  *  the picture's checks gave G-CUTS nothing to read then; T38b-2: it never showed after the final render). */
-export const SOUND_GATES = new Set(["G-VOICE", "G-SFX", "G-CUTS", "G-AUDIO-FILES", "G-FLICKER", "G-SOUND-SHAPE"]);
+export const SOUND_GATES = new Set(SOUND_CHECKS);          // checks.mjs
 /** The last checks with the sound's in place of theirs. */
 export const withSoundChecks = (last, fresh) => [...last.filter((c) => !SOUND_GATES.has(c.id)), ...fresh.filter(Boolean)];
 
@@ -306,6 +296,6 @@ export async function runGates(projectDir, { workDir, blank = true, onStep = () 
   }
   onStep(parts.length, parts.length, null);
   for (let i = gates.length - 1; i >= 0; i--) if (!gates[i]) gates.splice(i, 1);
-  const blockingFailures = gates.filter((g) => g.blocking && !g.pass).map((g) => g.id);
-  return { pass: blockingFailures.length === 0, blockingFailures, gates };
+  // judged as a Render judges it: what stops the render here stops it there, and nothing more (audit/112b b1.1)
+  return judge(gates);
 }

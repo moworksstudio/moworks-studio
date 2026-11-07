@@ -1,13 +1,13 @@
 // A sound heard again is never the very same (owner 05/11/2026 #1096 A, audit/103): a sound that plays more than once in a film gets two
 // copies a little higher or lower and softer, made once with FFmpeg next to it (assets/3_audio/sfx/<file>~p1.ogg, ~p2), and each repeat
 // takes one of them (auto.mjs withVariants). The copies are the same sound: the cap of repeats counts them as their original (auto.mjs
-// capRepeats, `of`), and the credit is the original's.
+// `of`), and the credit is the original's.
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { APP_ROOT } from "../version-manager/index.mjs";
-import { ffmpegExe } from "../library/preview-media.mjs";
+import { ffmpegExe } from "../version-manager/index.mjs";
 import { patchState, readState } from "./index.mjs";
 
 const run = promisify(execFile);

@@ -2,7 +2,7 @@
 // export's own size check (packages/style-ae). Run when the app starts (new styles, a pinned source at another commit: only those) and
 // for a film exported to AE whose style has no badge yet. The catalog picks the results up.
 import { basename } from "node:path";
-import { filmCandidate, measureStyles, measurements } from "../style-ae/index.mjs";
+import { filmCandidate, measureStyles, measurements, recordFilm } from "../style-ae/index.mjs";
 
 export function styleAeRoutes(ctx) {
   const measure = ({ only = null, force = false } = {}) => {
@@ -11,10 +11,12 @@ export function styleAeRoutes(ctx) {
     return ctx.jobs.start("style-ae", { title: "Measuring what After Effects gets of each film style" }, async (job) => measureStyles({ root: ctx.root, only, force, signal: job.signal,
       onProgress: ({ measured, failed, total, id }) => job.update({ stage: id, progress: total ? Math.round(((measured.length + failed.length) / total) * 100) : 100 }) }));
   };
-  // a film exported to AE whose style has no measurement yet ("video, not checked yet"): that film is measured, its style badge replaced
-  const filmPorted = (p) => {
+  // a film exported to AE whose style has no measurement yet ("AE not checked yet"): what the export measured of it is the style's badge
+  // (audit/112d d11: a second job measured the film again, at 25 fps); an export that brought no measure measures the film as before
+  const filmPorted = (p, est = null) => {
     const id = p.meta?.style?.id;
     if (!id || measurements(ctx.root)[id]) return null;
+    if (est && recordFilm(id, p.path, basename(p.path), est, { root: ctx.root })) return null;
     return ctx.jobs.start("style-ae", { title: "Measuring what After Effects gets of this film style" }, async (job) =>
       measureStyles({ root: ctx.root, signal: job.signal, list: [filmCandidate(id, p.path, basename(p.path), "exported to After Effects")] }));
   };

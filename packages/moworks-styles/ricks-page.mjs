@@ -4,6 +4,7 @@
 // roman.js and the cast layer exactly as a film does (ricks.mjs toonText), and draws its cards exactly as the film's engine does
 // (ricks-harness.js). The browser is the app's own headless shell, hidden, on port 0 (its DevToolsActivePort), no GPU; only the process
 // started here is ever stopped.
+import { killTree } from "../system-status/kill-tree.mjs";
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -21,7 +22,7 @@ export function shellExe(root = APP_ROOT) {
   if (process.env.MW_HEADLESS_SHELL) return process.env.MW_HEADLESS_SHELL;
   const dir = join(root, "runtime", "chromium");
   const v = existsSync(dir) ? readdirSync(dir).filter((n) => existsSync(join(dir, n, "chrome-headless-shell.exe"))).sort().at(-1) : null;
-  if (!v) throw Object.assign(new Error("The app's headless browser is not installed (Settings › System)"), { code: "NOT_FOUND" });
+  if (!v) throw Object.assign(new Error("The app's headless browser is not installed (Studio Settings › System)"), { code: "NOT_FOUND" });
   return join(dir, v, "chrome-headless-shell.exe");
 }
 /** Start the browser: { evaluate(expr), navigate(url), close() }. */
@@ -32,7 +33,7 @@ export async function launch(root = APP_ROOT) {
   let port = null;
   for (let i = 0; i < 200 && !port; i++) { await sleep(50); try { port = Number(readFileSync(join(profile, "DevToolsActivePort"), "utf8").split(/\r?\n/)[0]) || null; } catch { /* not yet */ } }
   const stop = () => {
-    try { spawnSync("taskkill", ["/PID", String(proc.pid), "/T", "/F"], { windowsHide: true, stdio: "ignore" }); } catch { /* gone */ }
+    killTree(proc);
     for (let i = 0; i < 20; i++) { try { rmSync(profile, { recursive: true, force: true }); break; } catch { spawnSync(process.execPath, ["-e", "setTimeout(()=>{},100)"], { windowsHide: true }); } }
   };
   if (!port) { stop(); throw new Error("the headless browser did not start"); }
@@ -81,7 +82,22 @@ export async function withCastPage(files, fn, { root = APP_ROOT } = {}) {
   } finally { b.close(); }
 }
 
-const EXPECT_FACES = ["neutral", "stern", "grin", "laugh", "nervous", "shock", "smile", "squint"];
+/** MW Character Sheet v1 (owner #1287-#1293): what a Ricks Clip character's card really drives in a film, kept in its character.json as `can`. */
+export const CAN = Object.freeze({
+  views: ["front", "three-quarter", "profile", "back"],
+  viewNotes: "a card turned to the camera on yaw; three-quarter is the front with its head turned (romanFront's facing) and its body narrowed (ricks-cast.js)",
+  faces: ["neutral", "happy", "laugh", "surprised", "worried", "angry", "talk", "blink"],
+  faceNotes: "STANDARD_FACES maps them to the cast's own (happy = grin, surprised = shock, worried = nervous, angry = stern; talk is the layer's; blink is a lid); all 18 of EXPRESSIONS by name too",
+  poses: ["stand", "walk", "point", "wave", "reach", "sit"],
+  poseNotes: "the 14 arm poses (ARM_POSES) in L and R; sit is the layer's, on a stool, front, three-quarter or profile (sit: true)",
+  hands: "n/a: ink-dot hands, a finger on point",
+  walk: "walk with phase, in every view",
+  talk: "talkExpr(t): the open mouth and the closed one by turns; no lip sync",
+});
+/** The palette a record shows: the outfit's own colours. */
+export const paletteOf = (outfit) => Object.fromEntries(Object.entries(outfit ?? {}).filter(([, v]) => typeof v === "string" && /^#[0-9a-f]{6}$/i.test(v)));
+
+const EXPECT_FACES =["neutral", "stern", "grin", "laugh", "nervous", "shock", "smile", "squint"];
 /** The checks of one character file (the gate): { id, passed, failed, lines: ["PASS  …" | "FAIL  …"], record: { id, name, about, heightM } }. */
 export async function checkCharacter(file, { root = APP_ROOT } = {}) {
   const src = readFileSync(file, "utf8"), want = basename(file).replace(/\.js$/, ""), lines = [];
@@ -142,8 +158,8 @@ export async function drawSheet(file, out, { root = APP_ROOT } = {}) {
   writeFileSync(out, Buffer.from(url.split(",")[1], "base64"));
   return out;
 }
-/** The life clip's frames (JPEG files frame-0000.jpg … in dir): 4.5 s at 30 fps, front, turn, back, a walk. */
-export async function drawLife(file, dir, { root = APP_ROOT, frames = 135 } = {}) {
+/** The life clip's frames (JPEG files frame-0000.jpg … in dir): 6 s at 30 fps (MW Character Sheet v1): idle, a turn, a walk, a talk. */
+export async function drawLife(file, dir, { root = APP_ROOT, frames = 180 } = {}) {
   const id = basename(file).replace(/\.js$/, "");
   await withCastPage([file], async (b) => {
     for (let f = 0; f < frames; f++) { const url = await b.evaluate(`RC.lifeFrame(${JSON.stringify(id)}, ${f})`); writeFileSync(join(dir, `frame-${String(f).padStart(4, "0")}.jpg`), Buffer.from(url.split(",")[1], "base64")); }

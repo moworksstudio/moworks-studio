@@ -3,6 +3,7 @@
 // character_sheet tool Claude calls, or the Character dialog's "Draw again"), the user approves the file (POST …/approve/characters, in
 // index.mjs). Characters come from the library too (the app's own, the user's saved ones; never the Clawd demo) and a project's character
 // can be saved to the user's library. The library itself (GET /api/characters, the demo media) is in index.mjs.
+import { styleFamily } from "../style-catalog/family.mjs";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -13,6 +14,8 @@ import { REF_DIR, stageReference } from "../character-kit/reference.mjs";
 import { useHumans } from "../character-kit/humans.mjs";
 import { RICKS_ENGINE, ricksCharacters, useRicks } from "../character-kit/ricks.mjs";
 import { C3D_ENGINE, c3dCharacters, useC3d } from "../character-kit/c3d.mjs";
+import { WI_ENGINE, wiCharacters, useWhatIf } from "../character-kit/whatif.mjs";
+import { HOUSE_MAKERS, houseCharacters } from "../character-kit/house.mjs";
 import { humanHandOf } from "../style-catalog/hands.mjs";
 import * as maker from "../character-maker/index.mjs";
 import { labelLines } from "../character-maker/sheetLabels.mjs";
@@ -53,7 +56,8 @@ export function characterRoutes(ctx, { r, P, mustProject, HttpError }) {
         ? { id: c.id, name: c.name, about: c.about ?? "", engine: c.engine, hand: c.hand ?? null, filmHand: c.filmHand ?? null, needsPalette: !!c.needsPalette, made: c.made ?? null,
             // in the user's library only when it is there (one taken from it, or one saved to it), never a new one before approval
             from: c.from ?? null, sheets: { sheet: sheet(c.id, "sheet"), poster: sheet(c.id, "poster") }, saved: savedHumans.has(c.id) }
-        : { id: c.id, name: c.name, about: c.about ?? "", colors: c.colors, from: c.from ?? null,
+        // a Brush cast member (a definition for the character layer, no engine of its own): named so the dialog credits ClaudeAnimationBase
+        : { id: c.id, name: c.name, about: c.about ?? "", engine: c.engine ?? "brush-kit", colors: c.colors, from: c.from ?? null,
             sheets: { views: sheet(c.id, "views"), emotions: sheet(c.id, "emotions") }, saved: !!kit.savedAs(c.id, root) }),
       humanHand: humanHandOf(p.meta?.style?.id, root),
       approval: a, drawing: busy.has(p.id) };
@@ -90,7 +94,7 @@ export function characterRoutes(ctx, { r, P, mustProject, HttpError }) {
   /** Is this project's cast drawn by anidoodle? Its cast says so (an entry on anidoodle's engine: a person, an animal or a
    *  thing of the Character step), or its style is an anidoodle medium; not only a medium whose hand draws people (humanHandOf): a Rubber
    *  hose or fox film's animals were sent to the Brush layer's sheet page and never drawn. */
-  const anidoodleCast = (p) => !!humanHandOf(p.meta?.style?.id, root) || /^anidoodle-/.test(p.meta?.style?.id ?? "")
+  const anidoodleCast = (p) => !!humanHandOf(p.meta?.style?.id, root) || styleFamily(p.meta?.style?.id).family === "anidoodle"
     || kit.readCast(p.path).characters.some((c) => c.engine === kit.HUMAN_ENGINE);
   /** The Character dialog's "Draw again" for an anidoodle cast, in the shape the dialog reads: a failure is said, per character. */
   const castSheets = async (p, only) => {
@@ -124,16 +128,18 @@ export function characterRoutes(ctx, { r, P, mustProject, HttpError }) {
   /** The creator's job (one at a time): its estimate (measured, config/character-maker.json) on the job for the page to show. */
   const create = (input, name = null) => {
     if (!input.from && !input.description) throw new HttpError(400, "INVALID", "Describe the character first");
-    // the five ways: anidoodle's hands, Brush cartoon, Ricks Clip (#1076), 3D Cartoon (#1267)
-    const engine = ["brush-kit", RICKS_ENGINE, C3D_ENGINE].includes(input.engine) ? input.engine : kit.HUMAN_ENGINE;
+    // every way the creator offers: anidoodle's hands, Brush cartoon, Ricks Clip (#1076), 3D Cartoon (#1267), What If (#1287-#1293), the house heroes (#1302)
+    const engine = maker.makerEngine(input.engine);
     if (engine === kit.HUMAN_ENGINE && !maker.styleOf(kit.HUMAN_ENGINE, input.hand, root)) throw new HttpError(400, "INVALID", "Choose a drawing style");
     // what it is: Human, Animal or Thing, as the engine draws them (a change keeps the saved kind)
     if (!input.from) try { maker.rigOf(engine, input.rig, null, root); } catch (e) { throw new HttpError(400, "INVALID", e.message); }
     const est = maker.styles(root).find((s) => s.engine === engine)?.estimate ?? null;
     const title = input.from ? `Changing ${name ?? input.from} with Claude` : `Making ${input.name || input.description.slice(0, 40)}`;
-    const job = ctx.jobs.start("character-create", { title, estimate: est, engine, hand: input.hand, rig: input.rig ?? null, from: input.from ?? null }, async (j) => {
+    // the character's own name on the job (audit/112c c1.7): the page and the end notice read it, never a guess from the title
+    const job = ctx.jobs.start("character-create", { title, name: input.from ? (name ?? input.from) : (input.name || input.description.slice(0, 40)), estimate: est, engine, hand: input.hand, rig: input.rig ?? null, from: input.from ?? null }, async (j) => {
       const res = await maker.makeCharacter(input, { root, jobId: `cc-${Date.now().toString(36)}`, signal: j.signal, env: { MW_BG_WORKERS: String(bgWorkers()) },
         onStep: (stage, progress) => j.update({ stage, progress }), log: (line) => j.log(line), renderDemo: ctx.characterDemo ?? null });
+      j.keep();          // the character is saved: a Stop during its showreel leaves it made, and the job says so
       j.update({ characterId: res.id });
       return res;
     });
@@ -181,6 +187,15 @@ export function characterRoutes(ctx, { r, P, mustProject, HttpError }) {
         if (added.length) projects.addNote(p.path, { kind: "characters", text: "{names} joined this film: Claude places, poses and gives them faces with 3D Cartoon's own rig", vars: { names: added.map((x) => c3dCharacters(root).find((c) => c.id === x)?.name ?? x).join(", ") } });
         return { ...view(mustProject(id, root)), reference: refs };
       }
+      // a What If film: its own characters themselves (their modules into whatif/cast/), any other as a reference (#1287-#1293)
+      if (p.meta?.style?.id === WI_ENGINE) {
+        const mine = new Set(wiCharacters(root).map((c) => c.id)), ids = b.ids.map(String);
+        const added = useWhatIf(p.path, ids.filter((x) => mine.has(x)), { root });
+        const refs = stageReference(p.path, ids.filter((x) => !mine.has(x)), root);
+        if (!added.length && !refs.length) throw new HttpError(400, "INVALID", "None of these characters can be used in a film");
+        if (added.length) projects.addNote(p.path, { kind: "characters", text: "{names} joined this film: Claude places, turns and poses them on the What If rig", vars: { names: added.map((x) => wiCharacters(root).find((c) => c.id === x)?.name ?? x).join(", ") } });
+        return { ...view(mustProject(id, root)), reference: refs };
+      }
       // an anidoodle film whose hand draws people: the human characters themselves (their modules), any other as a reference
       if (humanHandOf(p.meta?.style?.id, root)) {
         const humans = new Set(kit.humanCharacters(root).map((c) => c.id)), ids = b.ids.map(String);
@@ -207,7 +222,7 @@ export function characterRoutes(ctx, { r, P, mustProject, HttpError }) {
       const c = kit.saveCharacter(p.path, cid, root);
       return { character: { id: c.id, name: c.name, group: c.group } };
     }),
-    r("DELETE", "/characters/([a-z][a-z0-9-]*)", ([cid]) => (ricksCharacters(root).some((c) => c.id === cid) ? maker.deleteRicks(cid, root) : c3dCharacters(root).some((c) => c.id === cid) ? maker.deleteC3d(cid, root) : kit.humanCharacters(root).some((c) => c.id === cid) ? maker.deleteHuman(cid, root) : kit.deleteUserCharacter(cid, root))),
+    r("DELETE", "/characters/([a-z][a-z0-9-]*)", ([cid]) => (ricksCharacters(root).some((c) => c.id === cid) ? maker.deleteRicks(cid, root) : c3dCharacters(root).some((c) => c.id === cid) ? maker.deleteC3d(cid, root) : wiCharacters(root).some((c) => c.id === cid) ? maker.deleteWhatIf(cid, root) : houseCharacters(root).some((c) => c.id === cid && c.group === "yours") ? maker.deleteHouse(cid, root) : kit.humanCharacters(root).some((c) => c.id === cid) ? maker.deleteHuman(cid, root) : kit.deleteUserCharacter(cid, root))),
     // the Character creator: a character made outside any film by one Claude run, saved to the library
     r("GET", "/characters/styles", () => ({ styles: maker.styles(root) })),
     // Undo the last change of one of the user's characters: the version kept before it back in place
@@ -216,19 +231,23 @@ export function characterRoutes(ctx, { r, P, mustProject, HttpError }) {
       return maker.undo(cid, root);
     }),
     r("POST", "/characters/create", (_p, b) => create({ description: String(b.description ?? "").trim(), name: b.name ? String(b.name).trim() : null, image: b.image ?? null,
-      engine: b.engine, hand: b.hand ? String(b.hand) : null })),
+      engine: b.engine, hand: b.hand ? String(b.hand) : null, rig: b.rig ? String(b.rig) : null })),
     r("POST", "/characters/([a-z][a-z0-9-]*)/change", ([cid], b) => {
-      const ricks = ricksCharacters(root).find((c) => c.id === cid), c3d = ricks ? null : c3dCharacters(root).find((c) => c.id === cid);
-      const human = ricks || c3d ? null : kit.humanCharacters(root).find((c) => c.id === cid), brush = ricks || c3d || human ? null : kit.getCharacter(cid, root);
-      if (!ricks && !c3d && !human && brush?.group !== "yours") throw new HttpError(400, "INVALID", "Only your own characters can be changed with Claude");
+      const ricks = ricksCharacters(root).find((c) => c.id === cid), c3d = ricks ? null : c3dCharacters(root).find((c) => c.id === cid), wi = ricks || c3d ? null : wiCharacters(root).find((c) => c.id === cid);
+      const human = ricks || c3d || wi ? null : kit.humanCharacters(root).find((c) => c.id === cid);
+      // a house hero of the two house ways the creator makes (Stickman Explainer, 2D Explainer: #1302), changed as the user's own copy
+      const house = ricks || c3d || wi || human ? null : houseCharacters(root).find((c) => c.id === cid && HOUSE_MAKERS.includes(c.engine));
+      const brush = ricks || c3d || wi || human || house ? null : kit.getCharacter(cid, root);
+      if (house) { if (!String(b.text ?? "").trim()) throw new HttpError(400, "INVALID", "Say what to change"); return create({ from: cid, text: String(b.text).trim(), image: b.image ?? null, engine: house.engine, hand: null }, house.name); }
+      if (!ricks && !c3d && !wi && !human && brush?.group !== "yours") throw new HttpError(400, "INVALID", "Only your own characters can be changed with Claude");
       if (!String(b.text ?? "").trim()) throw new HttpError(400, "INVALID", "Say what to change");
-      return create({ from: cid, text: String(b.text).trim(), image: b.image ?? null, engine: ricks ? RICKS_ENGINE : c3d ? C3D_ENGINE : human ? kit.HUMAN_ENGINE : "brush-kit", hand: ricks ? "ricks" : c3d ? "cartoon" : human?.hand ?? human?.hands?.[0] ?? null }, ricks?.name ?? c3d?.name ?? human?.name ?? brush?.name);
+      return create({ from: cid, text: String(b.text).trim(), image: b.image ?? null, engine: ricks ? RICKS_ENGINE : c3d ? C3D_ENGINE : wi ? WI_ENGINE : human ? kit.HUMAN_ENGINE : "brush-kit", hand: ricks ? "ricks" : c3d ? "cartoon" : wi ? "whatif" : human?.hand ?? human?.hands?.[0] ?? null }, ricks?.name ?? c3d?.name ?? wi?.name ?? human?.name ?? brush?.name);
     }),
     // the Characters page's "Use in a project": every film; `characters` true where the style draws it with the character layer,
     // false where it becomes a reference drawn in the film's own design
     r("GET", "/characters/projects", () => ({ projects: projects.listProjects(root).filter((p) => !p.missing).map((p) => ({ p, full: projects.getProject(p.id, root) }))
       .filter(({ full }) => full).map(({ p, full }) => ({ id: p.id, title: p.title, style: full.meta?.style?.title ?? full.meta?.style?.id ?? null, characters: usesCharacters(full.meta, root),
-        humanHand: humanHandOf(full.meta?.style?.id, root), ricks: full.meta?.style?.id === RICKS_ENGINE, c3d: full.meta?.style?.id === C3D_ENGINE })) })),          // a Ricks Clip film takes Ricks Clip characters themselves          // a human-hand anidoodle film animates anidoodle humans with the engine
+        humanHand: humanHandOf(full.meta?.style?.id, root), ricks: full.meta?.style?.id === RICKS_ENGINE, c3d: full.meta?.style?.id === C3D_ENGINE, whatif: full.meta?.style?.id === WI_ENGINE })) })),          // a Ricks Clip film takes Ricks Clip characters themselves          // a human-hand anidoodle film animates anidoodle humans with the engine
   ];
   return { routes, tools };
 }

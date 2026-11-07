@@ -1,0 +1,92 @@
+{
+  "id": "moworks-suit",
+  "name": "The Suit",
+  "about": "The man in a suit from the What If cast, who notices the power: a dark suit and a red tie.",
+  "engine": "what-if",
+  "kind": "human",
+  "heightM": 1.8,
+  "heightBy": "inferred",
+  "heightNote": "the engine gives no height: the cast's sizes on the rig, as people",
+  "hand": "whatif",
+  "hands": [
+    "whatif"
+  ],
+  "scale": 0.84,
+  "look": {
+    "skin": "#D9C6AE",
+    "skinShade": "#C2AE96",
+    "hand": "#D9C6AE",
+    "jacket": "#2B2F3A",
+    "jacketShade": "#20232C",
+    "accent": "#A8323E",
+    "limb": "#2B2F3A",
+    "line": "#0E0F14",
+    "shoe": "#14151A",
+    "face": "#1D2033",
+    "hair": "#17141A",
+    "extra": "suit"
+  },
+  "palette": {
+    "jacket": "#2B2F3A",
+    "skin": "#D9C6AE",
+    "hair": "#17141A",
+    "accent": "#A8323E",
+    "shoe": "#14151A"
+  },
+  "can": {
+    "views": [
+      "front",
+      "three-quarter",
+      "profile",
+      "back"
+    ],
+    "viewNotes": "the rig's own yaw (-1 profile left, 0 front, 1 profile right); back is the app's (AppHero view \"back\", mw:wi-cast)",
+    "faces": [
+      "neutral",
+      "happy",
+      "laugh",
+      "surprised",
+      "worried",
+      "angry",
+      "talk",
+      "blink"
+    ],
+    "faceNotes": "the rig's Expr (happy, shock = surprised, worried, smug, oops, cool, dizzy, tired) and the app's laugh, angry and talk (AppHero face)",
+    "poses": [
+      "stand",
+      "walk",
+      "point",
+      "wave",
+      "reach",
+      "sit"
+    ],
+    "poseNotes": "limb angles on the rig's Pose (armL, armR, legL, legR), POSES from mw:wi-cast; the walk is the engine's walkPose; poseAt keys",
+    "hands": [
+      "open",
+      "point"
+    ],
+    "walk": "walkPose(x, phase, ground, scale) in profile",
+    "talk": "talkFace(t): the open mouth and the closed one by turns; no lip sync"
+  },
+  "sheet": "MW Character Sheet v1",
+  "credit": {
+    "author": "FreshStack (kelano86)",
+    "link": "https://github.com/kelano86/what-if-animation/blob/8092fb5e825e55456d1d47fec0ebf595cb93cc0d/studio/src/engine/rig.tsx",
+    "commit": "8092fb5e825e55456d1d47fec0ebf595cb93cc0d",
+    "licence": "MIT",
+    "made": "as shipped",
+    "madeNote": "the engine's own costume as shipped; the back view and the laugh, angry and talk faces are the app's layer (wi-cast.tsx)",
+    "source": {
+      "file": "studio/src/engine/rig.tsx LOOKS.suit"
+    },
+    "gate": {
+      "passed": 16,
+      "failed": 0
+    }
+  },
+  "version": 1,
+  "module": [
+    "moworks-suit.ts"
+  ],
+  "savedAt": "2026-11-06T15:13:55.936Z"
+}

@@ -31,7 +31,6 @@ export const THREE = () => loadPins().three.default;
 /** The r160 → r187 port, applied to main.js wherever it comes from (the source skill's, or a film's copy of it). */
 export const PORT = [[/\bTHREE\.PCFSoftShadowMap\b/g, "THREE.PCFShadowMap"]];
 export const port = (text) => PORT.reduce((s, [re, to]) => s.replace(re, to), String(text));
-const ENGINE = ["main.js", "paint.js", "motion.js", "roman.js"];
 
 /** The pinned source skill's folder (bundle/styles/moworks-styles/ricks-clip): { dir, engine, toon } or null. */
 export function ricksSkill(root = APP_ROOT) {
@@ -126,10 +125,3 @@ export async function buildRicksFilm(projectDir, { root = APP_ROOT, force = fals
     return { built: false, out: outRel, three: version, own, error: (e.errors ?? []).map((x) => `${x.location?.file ? relative(projectDir, x.location.file).replaceAll("\\", "/") : ""}:${x.location?.line ?? ""} ${x.text}`).join("; ").slice(0, 600) || String(e.message).slice(0, 600) };
   }
 }
-/** The source skill's engine files a film starts from (to copy into film/ when it changes one): the pinned copy, main.js with the r187 port. */
-export function engineFile(name, root = APP_ROOT) {
-  if (!ENGINE.includes(name)) throw Object.assign(new Error(`${name}: not one of the engine's files (${ENGINE.join(", ")})`), { code: "NOT_FOUND" });
-  const text = readFileSync(join(ricksSkill(root).engine, name), "utf8");
-  return name === "main.js" ? port(text) : text;
-}
-export const ENGINE_FILES = ENGINE;

@@ -1,0 +1,54 @@
+{
+  "id": "moworks-lantern",
+  "name": "Lantern",
+  "about": "Lantern, a small round paper-lantern spirit in warm saffron yellow: a plump lantern body, two stubby legs, tiny arms, big round shiny eyes, a gentle smile and rosy cheeks. Curious and a bit shy.",
+  "credit": {
+    "author": "Moworks Studio · made in the app",
+    "link": null,
+    "licence": "Moworks Studio's own",
+    "made": "written from the idea",
+    "madeNote": "a definition for the app's character layer, made in the app; faces, emotions and moves are ClaudeAnimationBase's (MIT)"
+  },
+  "colors": {
+    "col": "#F2B630",
+    "dk": "#B9791A",
+    "lt": "#FCE49A"
+  },
+  "body": {
+    "shape": "round",
+    "r": 0.42,
+    "w": 8.2,
+    "h": 8.2,
+    "bottom": -1.6
+  },
+  "face": {
+    "y": -5.9,
+    "dx": 2.2,
+    "mouth": 1.6,
+    "bx": 3.1
+  },
+  "head": {
+    "top": -9.8,
+    "width": 6.6
+  },
+  "legs": {
+    "xs": [
+      -2.2,
+      1.1
+    ],
+    "w": 1.1,
+    "h": 1.8
+  },
+  "arms": {
+    "x": 3.9,
+    "y": -4.4,
+    "len": 1.5,
+    "th": 0.8
+  },
+  "version": 2,
+  "description": "",
+  "savedAt": "2026-10-23T18:28:58.831Z",
+  "heightM": 0.45,
+  "heightBy": "inferred",
+  "heightNote": "a small paper-lantern spirit, about a hand-held paper lantern with its legs; the layer draws in pixels, with no real size"
+}

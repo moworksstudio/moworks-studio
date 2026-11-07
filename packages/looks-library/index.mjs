@@ -13,17 +13,16 @@ import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, r
 import { createRequire } from "node:module";
 import { dirname, join, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
-import { APP_ROOT, expandEnv, loadPins, resolveRuntime, sourceHead } from "../version-manager/index.mjs";
+import { APP_ROOT, expandEnv, loadPins, resolveRuntime, sourceHead, ffmpegExe } from "../version-manager/index.mjs";
 import { workRoot } from "../project-service/index.mjs";
 import { HF_SKILL } from "../hf-edit/hf-scripts.mjs";
-import { fontMap } from "../hf-edit/finalize.mjs";
 import { familyKey } from "../hf-edit/localFonts.mjs";
-import { googleHasVietnamese, WINDOWS_VI } from "../blocks-library/index.mjs";
+import { familyVi, googleHasVietnamese } from "../blocks-library/index.mjs";
 import { encodePosterAsync, PREVIEW } from "../library/preview-media.mjs";
 import { customMedia, customSlug, fontMedia, frameText, getCustom } from "./custom.mjs";
+import { readJson } from "../util/json.mjs";
 export { placeKit } from "./custom.mjs";
 
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
 export const storeRoot = (root = APP_ROOT) => process.env.MW_LOOKS_ROOT ?? join(workRoot(root), "library", "looks");
 const HF_AUTHOR = "HeyGen (HyperFrames)";
 const CATEGORY = "Brand Kits";          // the user-facing name of HF's frame presets; the kind stays "frame"
@@ -79,22 +78,17 @@ export function currentStore(root = APP_ROOT) {
  *  the look or the film has as files ([{ family, vi }], listLocalFonts): the file itself answers, before anything else. */
 export async function vietnameseCheck(fonts, { google = googleHasVietnamese, cache = new Map(), own = [] } = {}) {
   if (!fonts.length) return { status: null, families: [] };
-  const bundled = new Set(Object.keys(fontMap()).map((k) => k.toLowerCase()));
   const files = new Map(own.map((f) => [familyKey(f.family), f]));
   const families = [];
   for (const fam of fonts) {
-    const key = fam.toLowerCase(), file = files.get(familyKey(fam));
-    if (file) { families.push({ family: fam, vi: file.vi, via: "font file" }); continue; }
-    if (bundled.has(key)) { families.push({ family: fam, vi: true, via: "bundled with the app" }); continue; }
-    if (WINDOWS_VI.has(key)) { families.push({ family: fam, vi: true, via: "Windows font" }); continue; }
-    if (!cache.has(key)) cache.set(key, await google(fam));
-    families.push({ family: fam, vi: cache.get(key), via: cache.get(key) === null ? "not on Google Fonts" : "Google Fonts" });
+    const file = files.get(familyKey(fam));
+    families.push(file ? { family: fam, vi: file.vi, via: "font file" } : { family: fam, ...(await familyVi(fam, { google, cache })) });
   }
   const status = families.some((f) => f.vi === false) ? "missing" : families.some((f) => f.vi === null) ? "unknown" : "ok";
   return { status, families };
 }
 
-export function ffmpegExe(root) { return join(expandEnv(loadPins(root).ffmpeg.dir), "ffmpeg.exe"); }
+export { ffmpegExe };          // version-manager
 export function puppeteerOf(root) { return createRequire(join(resolveRuntime(null, root).dir, "node_modules", "puppeteer-core", "package.json"))("puppeteer-core"); }
 
 /** Previews: the first six 16:9 frames of HF's frame-showcase.html (poster + a 7 s slideshow). */

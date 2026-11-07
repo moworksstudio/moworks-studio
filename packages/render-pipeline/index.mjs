@@ -1,10 +1,12 @@
-// Gated render: the only way the app starts an export. Gates run first (hf-qa); a blocking failure means no worker is started.
+// Gated render of the libraries' previews (intake and vocab previews): the checks run first and are judged as a Render judges them
+// (hf-qa/checks.mjs judge, through runGates); what stops a render starts no worker. A film's export is production.mjs's, not this.
+// G-BLANK's stills are slow and say little of a short preview: off unless asked (audit/112b b2.5).
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { runGates } from "../hf-qa/gates.mjs";
 import { render } from "../hf-render-worker/client.mjs";
 
-export async function gatedRender(job, { onEvent, signal, version, workDir, blank = true } = {}) {
+export async function gatedRender(job, { onEvent, signal, version, workDir, blank = false } = {}) {
   const gates = await runGates(job.projectDir, { workDir: workDir ?? join(dirname(job.outputPath), ".gates"), blank });
   const reportPath = `${job.outputPath}.gates.json`;
   mkdirSync(dirname(reportPath), { recursive: true });

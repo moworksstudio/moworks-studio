@@ -6,7 +6,6 @@ import "./library.css";
 import "./production.css";
 import "./brandkit.css";
 import App from "./App.jsx";
-import { LangProvider } from "./i18n.jsx";
 import { applyStored } from "./theme.jsx";
 import { loadPrefs, mirrorPrefs } from "./prefs-sync.js";
 import "./motion.js";
@@ -17,5 +16,5 @@ import "./studio-editor.css";
 loadPrefs().finally(() => {
   mirrorPrefs();
   applyStored();
-  createRoot(document.getElementById("root")).render(<LangProvider><App /></LangProvider>);
+  createRoot(document.getElementById("root")).render(<App />);
 });

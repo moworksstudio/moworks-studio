@@ -3,26 +3,33 @@
 // the user's store, <work>/library/characters/ricks-clip/<id>/ (never inside the app's repository). A Ricks Clip film takes it as it is: the
 // file into film/cast/<id>.js (the film's bundle appends it to toon.js) and a line in CHARACTERS.json; Claude places, turns, poses and gives it
 // faces with castDraw and never redraws it. The app ships none: the source skill's own cast (roman.js OUTFITS) is drawn by the film's story.js as before.
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { docPath, writeDoc } from "../project-service/docs.mjs";
 import { APP_ROOT } from "../version-manager/index.mjs";
-import { forgetHistory, mediaRoot, removeFromStore } from "./index.mjs";
+import { forgetHistory, mediaRoot, removeFromStore, shippedRoot } from "./index.mjs";
+import { readJson } from "../util/json.mjs";
 
 export const RICKS_ENGINE = "ricks-clip";
 export const ricksDir = (root = APP_ROOT) => join(mediaRoot(root), RICKS_ENGINE);
-const readJson = (f, d = null) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
-// the life clip (a turn through the three views and a walk) is the card's walk, as anidoodle's walk plays there
-const MEDIA = [["sheet", "sheet.webp"], ["walk", "life.mp4"], ["poster", "poster.webp"]];
+/** The app's own (owner #1287-#1293): the source skill's eight outfits, named, made by tools/ship-characters.mjs, read in place. */
+export const ricksShippedDir = (root = APP_ROOT) => join(shippedRoot(root), RICKS_ENGINE);
 
-/** The user's Ricks Clip characters, by id, each with its media urls. */
+// the life clip (idle, a turn through the views, a walk, a talk) is the card's walk, as anidoodle's walk plays there
+const MEDIA = [["sheet", "sheet.webp"], ["walk", "life.mp4"], ["poster", "poster.webp"]];
+const recordsIn = (d) => (existsSync(d) ? readdirSync(d).flatMap((id) => { const c = readJson(join(d, id, "character.json")); return c?.id === id ? [c] : []; }) : []);
+
+/** The Ricks Clip characters, by id, each with its media urls: the user's own (group "yours"), then the app's shipped ones the user has no copy of
+ *  (group "app", Moworks: the owner's source skill's cast). */
 export function ricksCharacters(root = APP_ROOT) {
-  const d = ricksDir(root);
-  const list = existsSync(d) ? readdirSync(d).flatMap((id) => { const c = readJson(join(d, id, "character.json")); return c?.id === id ? [c] : []; }) : [];
-  return list.sort((a, b) => (a.id < b.id ? -1 : 1)).map((c) => ({ ...c, kind: c.kind ?? "human", engine: RICKS_ENGINE, group: "yours", demo: false, selectable: true, why: null,
-    media: Object.fromEntries(MEDIA.map(([k, f]) => [k, existsSync(join(d, c.id, f)) ? `/media/characters/${RICKS_ENGINE}/${c.id}/${f}` : null])) }));
+  const mine = recordsIn(ricksDir(root)), have = new Set(mine.map((c) => c.id));
+  const view = (c, group) => ({ ...c, kind: c.kind ?? "human", engine: RICKS_ENGINE, group, demo: false, selectable: true, why: null,
+    media: Object.fromEntries(MEDIA.map(([k, f]) => [k, existsSync(join(ricksFolder(c.id, root) ?? "", f)) ? `/media/characters/${RICKS_ENGINE}/${c.id}/${f}` : null])) });
+  return [...mine.map((c) => view(c, c.credit?.made === "as shipped" ? "app" : "yours")), ...recordsIn(ricksShippedDir(root)).filter((c) => !have.has(c.id)).map((c) => view(c, "app"))]
+    .sort((a, b) => (a.id < b.id ? -1 : 1));
 }
-export const ricksFolder = (id, root = APP_ROOT) => (readJson(join(ricksDir(root), id, "character.json"))?.id === id ? join(ricksDir(root), id) : null);
+/** A character's folder: the user's copy first, else the app's shipped one. */
+export const ricksFolder = (id, root = APP_ROOT) => [ricksDir(root), ricksShippedDir(root)].map((d) => join(d, id)).find((f) => readJson(join(f, "character.json"))?.id === id) ?? null;
 export const ricksRecord = (id, root = APP_ROOT) => { const f = ricksFolder(id, root); return f ? readJson(join(f, "character.json")) : null; };
 /** The character's file in its store. */
 export const ricksModule = (id, root = APP_ROOT) => { const f = ricksFolder(id, root); return f && existsSync(join(f, "module", `${id}.js`)) ? join(f, "module", `${id}.js`) : null; };
@@ -31,6 +38,7 @@ export const ricksModule = (id, root = APP_ROOT) => { const f = ricksFolder(id, 
 export function deleteRicks(id, root = APP_ROOT) {
   const f = ricksFolder(id, root);
   if (!f) throw Object.assign(new Error("No such character"), { code: "NOT_FOUND" });
+  if (f.startsWith(ricksShippedDir(root))) throw Object.assign(new Error("The app's own characters cannot be deleted"), { code: "INVALID" });
   removeFromStore(f, root); forgetHistory(id, root);
   return { deleted: id };
 }

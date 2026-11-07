@@ -72,20 +72,23 @@ export function sfxRows(all) {
 export const DropLine = ({ x, time, end = false }) => <div className={"tl-drop" + (end ? " end" : "")} style={{ left: x }} aria-hidden="true"><b className="num">{time}</b></div>;
 
 /** One lane's level: every clip of it at once. Heard as it moves (onLive), kept when it is let go (onDone); a double click brings it back to its place. */
-function LaneFader({ name, db, disabled, onLive, onDone }) {
+function LaneFader({ name, db, range, disabled, onLive, onDone }) {
+  const [lo, hi] = range;          // the server's LANE_MIN_DB, LANE_MAX_DB (112a B12)
   const t = useT();
   const [now, setNow] = useState(null);
   const [held, setHeld] = useState(null);          // the fader's place on screen while it is held: the level shows above its knob
   const v = now ?? db;
   const level = `${v > 0 ? "+" : ""}${v} dB`;
-  const done = (x) => { setNow(null); setHeld(null); if (x !== db) onDone(x); };
+  // the level let go stays on the fader until it is saved and the timeline read again (T43-7: the save takes seconds, so it sprang back to the
+  // old level and the mouse seemed to change nothing; the arrow keys hid it)
+  const done = (x) => { setHeld(null); if (x === db) { setNow(null); return; } setNow(x); Promise.resolve(onDone(x)).finally(() => setNow(null)); };
   return <>
-    <input type="range" className="tl-fader" min={-30} max={12} step={1} value={v} disabled={disabled} aria-label={t("{name} level", { name })} title={held ? undefined : `${name}: ${level}`}
+    <input type="range" className="tl-fader" min={lo} max={hi} step={1} value={v} disabled={disabled} aria-label={t("{name} level", { name })} title={held ? undefined : `${name}: ${level}`}
       onInput={(e) => { const x = Number(e.target.value); setNow(x); onLive(x); }}
       onPointerDown={(e) => { e.stopPropagation(); setHeld(e.currentTarget.getBoundingClientRect()); }} onPointerUp={(e) => { done(Number(e.target.value)); e.currentTarget.blur(); }} onPointerCancel={(e) => done(Number(e.target.value))}
       onKeyUp={(e) => { if (e.key.startsWith("Arrow")) done(Number(e.target.value)); }}
       onDoubleClick={(e) => { onLive(0); done(0); e.currentTarget.blur(); }} />
-    {held && createPortal(<output className="tl-fader-level num" style={{ left: held.left + (held.width * (v + 30)) / 42, top: held.top }}>{level}</output>, document.body)}
+    {held && createPortal(<output className="tl-fader-level num" style={{ left: held.left + (held.width * (v - lo)) / (hi - lo), top: held.top }}>{level}</output>, document.body)}
   </>;
 }
 
@@ -268,7 +271,7 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
   const clipsIn = (ln) => audio.map((c) => (move && keyOf(c) === move.key ? { ...c, start: move.start, lane: move.lane, moving: true } : held[keyOf(c)] ? { ...c, start: held[keyOf(c)].start, lane: held[keyOf(c)].lane } : c)).filter((c) => c.lane === ln);
   // a sound moves without a mouse too (WCAG 2.2, 2.5.7): focus it, ←/→ one frame, Shift+←/→ one second, ↑/↓ the lane
   // next to it; Delete takes it off. Each move is said in the live line below the lanes.
-  const LANES = ["voice", "sfx", "music"];
+  const LANES = data?.lanes ?? [];          // the server's lane order (112a B12)
   const nudge = (c) => (e) => {
     if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key) || locked || !onAudioMove || e.ctrlKey || e.metaKey || e.altKey) return;
     e.preventDefault(); e.stopPropagation();          // the player's own arrow keys (a frame of the film) do not run as well
@@ -349,10 +352,12 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
             aria-label={muted[k] ? t("Unmute {name}", { name: t(NAME[k]) }) : t("Mute {name}", { name: t(NAME[k]) })}
             title={muted[k] ? t("{name} is muted: not heard here or in the render. Click to hear it again.", { name: t(NAME[k]) }) : t("Mute {name}: not heard here or in the render", { name: t(NAME[k]) })}
             onPointerDown={(e) => e.stopPropagation()} onClick={() => onMute(k, !muted[k])}>{muted[k] ? <VolumeX size={11} /> : <Volume2 size={11} />}</button>}
-          {onLevel && <LaneFader name={t(NAME[k])} db={data?.levels?.[k] ?? 0} disabled={locked} onLive={(db) => onLevelLive?.(k, 10 ** (db / 20))} onDone={(db) => onLevel(k, db)} />}</span>}</div>; })}</div>
+          {onLevel && data?.laneRange && <LaneFader name={t(NAME[k])} db={data?.levels?.[k] ?? 0} range={data.laneRange} disabled={locked} onLive={(db) => onLevelLive?.(k, 10 ** (db / 20))} onDone={(db) => onLevel(k, db)} />}</span>}</div>; })}</div>
       <div className={"tl-lanes" + (readOnly ? " ro" : "")} ref={lane} style={{ width }} onPointerDown={down}
         onDragOver={canDrop ? dragOver : undefined} onDragLeave={canDrop ? dragLeave : undefined} onDrop={canDrop ? drop : undefined}>
-        <div className="tl-ruler num">{ticks.map((s) => <i key={s} style={{ left: px(s) }}>{s % 1 ? s.toFixed(1) : `${s}s`}</i>)}</div>
+        <div className="tl-ruler num">{ticks.map((s) => <i key={s} style={{ left: px(s) }}>{s % 1 ? s.toFixed(1) : `${s}s`}</i>)}
+          {(data?.qc ?? []).map((q, i) => <button key={i} className={"tl-qc" + (q.blocking ? " stop" : "")} style={{ left: px(q.time) }} title={qcSay(t, q)}
+            onPointerDown={(e) => { e.stopPropagation(); onSeek(q.time); }} aria-label={`${q.title} ${q.time}s`} />)}</div>
         <div className="tl-row shots">{(data?.shots ?? []).map((s) => { const pic = posters?.find((x) => x.number === s.number)?.url; return <button key={s.mountId ?? s.number} data-shot={s.number} className={"tl-shot" + (shot?.number === s.number || markedShots.includes(s.number) ? " sel" : "") + (pic ? " pic" : "") + (s.planned ? " planned" : "")}
           style={{ left: px(s.start) + 2, width: Math.max(2, px(s.duration ?? 0) - 4), ...(pic ? { backgroundImage: `url("${pic}")` } : null) }} title={`${t("Shot {n}", { n: s.number })} · ${s.title} · ${(s.duration ?? 0).toFixed(1)} s${s.rate !== 1 ? ` · ${s.rate}×` : ""}`}
           onPointerDown={(e) => { if (!e.shiftKey && e.button === 0) { onShot(s); if (readOnly) onSeek(s.start); } }}><span className="tl-chip"><b className="num">{s.number}</b> {s.title}</span></button>; })}</div>
@@ -384,11 +389,10 @@ export default function Timeline({ data, time, duration, shot, onSeek, onShot, r
   </div>;
 }
 
-/** A filled waveform path from peaks (0..1), half the clip's height. */
 /** A tech check's finding in plain words (`plain`); the checker's own wording (transformOrigin, svgOrigin…) is for Claude */
 export const qcSay = (t, q) => q.plain || (q.blocking ? t("A tech check found a problem here that stops the render. Open Tech checks for details.")
   : t("A tech check found something to look at here. Open Tech checks for details."));
-
+/** A filled waveform path from peaks (0..1), half the clip's height. */
 function wave(peaks, gainAt = () => 1) {
   const n = peaks.length;
   const h = (i) => Math.min(1, Math.abs(peaks[i]) * gainAt(i / n)) * 24;          // the level it plays at: a duck or a silence shows (T32-11)

@@ -82,12 +82,22 @@ def _place(buf, x, t):
 def clips(index_html):
     """the <audio> clips of a built film (attributes as kit.py build writes them, HyperFrames names)"""
     text = Path(index_html).read_text(encoding="utf-8")
+    # the audio group buses (HF core audioGroups; the timeline's lanes, sfx/lanes.mjs): a clip names its bus in data-audio-group, a muted bus
+    # (data-hidden) drops it, the bus's data-volume multiplies its level (audit/112d d1)
+    buses = {}
+    for tag in re.findall(r"<hf-audio-group\b[^>]*>", text):
+        g = {k: html.unescape(v) for k, v in re.findall(r'([\w-]+)="([^"]*)"', tag)}
+        try: vol = float(g.get("data-volume", 1) or 1)
+        except ValueError: vol = 1.0
+        if g.get("id"): buses[g["id"]] = {"volume": vol if math.isfinite(vol) else 1.0, "hidden": re.search(r"\sdata-hidden(?=[\s>=/])", tag) is not None}
     out = []
     for tag in re.findall(r"<audio\b[^>]*>", text):
         a = {k: html.unescape(v) for k, v in re.findall(r'([\w-]+)="([^"]*)"', tag)}
         if "src" not in a or "data-start" not in a: continue
+        bus = buses.get(a.get("data-audio-group", ""))
+        if bus and bus["hidden"]: continue
         out.append({"id": a.get("id", ""), "src": a["src"], "start": float(a["data-start"]), "dur": float(a.get("data-duration", 0) or 0),
-                    "media_start": float(a.get("data-media-start", 0) or 0), "volume": float(a.get("data-volume", 1) or 1),
+                    "media_start": float(a.get("data-media-start", 0) or 0), "volume": float(a.get("data-volume", 1) or 1) * (bus["volume"] if bus else 1.0),
                     "role": a.get("data-aimk-role") or a.get("data-timeline-role", ""), "fade_in": float(a.get("data-fade-in", 0) or 0),
                     "fade_out": float(a.get("data-fade-out", 0) or 0), "automation": a.get("data-automation", "")})
     return out

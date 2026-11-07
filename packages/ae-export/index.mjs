@@ -10,6 +10,7 @@
 //   film: the rendered film (MP4), what a film drawn on a canvas only (or made as it plays) goes into AE as one video layer; without it NEEDS_FILM
 //   events: { type: "stage", stage: "page" | "reference" | "record" | "pictures" | "keys" | "ae" | "check" | "copy", done?, total? }
 //           { type: "log", line }
+import { killTree } from "../system-status/kill-tree.mjs";
 import { spawn, spawnSync } from "node:child_process";
 import { createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
@@ -61,8 +62,9 @@ export function shotAt(shots, t) {
 
 /** What an export leaves behind goes (T29-23: 1.7 GB in the work folder beside the 1.6 GB handed over): the reference stills, and a film's folder from an export that
  *  stopped or failed. Other films' folders once they are a day old: their exports are over (a port running now writes into its folder all the time). */
-export function sweepWork(work, name, { failed = false, now = Date.now() } = {}) {
-  if (failed) for (const d of ["footage", "audio"]) { try { rmSync(join(work, name, d), { recursive: true, force: true }); } catch { /* AE may hold a file: the next export clears it */ } }
+export function sweepWork(work, name, { failed = false, aeBusy = false, now = Date.now() } = {}) {
+  // aeBusy: the export stopped while After Effects was building (it goes on with its script and may still import these): they stay (audit/112d d3)
+  if (failed && !aeBusy) for (const d of ["footage", "audio"]) { try { rmSync(join(work, name, d), { recursive: true, force: true }); } catch { /* AE may hold a file: the next export clears it */ } }
   let es = []; try { es = readdirSync(work, { withFileTypes: true }); } catch { return; }
   for (const e of es) {
     if (!e.isDirectory() || e.name === "_ref" || e.name === name) continue;
@@ -130,6 +132,10 @@ export function checkPython(root = APP_ROOT) {
   return r.status === 0 ? { ok: true, message: exe } : { ok: false, message: (r.stderr ?? "").trim().split(/\r?\n/).pop() };
 }
 
+/** A line of the port that says After Effects' build went wrong: its script's own catch or run_jsx.ps1 ("ERROR…" at the start of the line, after
+ *  the port's "AE: "), or the build's end line "FAILED in …". A layer named "ERROR 404" sits inside a line and is none (audit/112d d9). */
+export const aeErrorLine = (line) => /^\s*(?:AE:\s*)?(?:ERROR\b|FAILED in )/.test(String(line ?? ""));
+
 const STAGES = [
   [/^\s*port size:/, "record"], [/^\s*sampled (\d+)\/(\d+)/, "record"], [/^\s*pictures(?: to make| (\d+)\/(\d+))/, "pictures"],
   [/^\s*keyframes:/, "keys"], [/^\s*AE build:/, "ae"], [/^\s*check [\d.]+ s:/, "check"], [/^\s*copied to /, "copy"],
@@ -156,7 +162,7 @@ export async function aeExport(projectDir, { fps = 30, outDir = null, runAe = tr
 
   const pins = loadPins(root);
   const rec = recordRate(rate);
-  let page = null, clean = null;
+  let page = null, clean = null, aeStarted = false;          // aeStarted: After Effects was given its script (the "AE build:" line); the finally reads it
   try {
     emit({ type: "stage", stage: "page" });
     page = await servePage(dir, { version, fps: rec });
@@ -183,7 +189,7 @@ export async function aeExport(projectDir, { fps = 30, outDir = null, runAe = tr
     let stalled = false;
     const code = await new Promise((res) => {
       const child = spawn(pythonExe(root), ["-I", ...args], { env, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
-      const onAbort = () => spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], { windowsHide: true });
+      const onAbort = () => killTree(child);
       signal?.addEventListener("abort", onAbort, { once: true });
       // a port that says nothing for STALL_MS has stopped (T41-15: 30 min with no line and no CPU after the reference stills, a page call
       // that never came back); it says a line about every 10 s while it works. Ended, and said plainly, instead of waiting for Stop
@@ -198,13 +204,14 @@ export async function aeExport(projectDir, { fps = 30, outDir = null, runAe = tr
           const line = buf.slice(0, i).replace(/\r$/, ""); buf = buf.slice(i + 1);
           // what After Effects really built, for the dialog (the Log has the lines it comes from)
           const built = /^AE-LAYERS (\{.*\})$/.exec(line); if (built) { result.layers = JSON.parse(built[1]); continue; }
+          // the size check's numbers: data for the dialog and the style's badge, never a line of the Log
+          const est = /^ESTIMATE (\{.*\})$/.exec(line); if (est) { result.estimate = JSON.parse(est[1]); continue; }
           emit({ type: "log", line });
-          for (const [re, stage] of STAGES) { const m = re.exec(line); if (m) { emit({ type: "stage", stage, ...(m[2] ? { done: +m[1], total: +m[2] } : {}) }); break; } }
-          const est = /^ESTIMATE (\{.*\})$/.exec(line); if (est) result.estimate = JSON.parse(est[1]);
+          for (const [re, stage] of STAGES) { const m = re.exec(line); if (m) { if (stage === "ae") aeStarted = true; emit({ type: "stage", stage, ...(m[2] ? { done: +m[1], total: +m[2] } : {}) }); break; } }
           const ck = /^\s*check ([\d.]+) s: ([\d.]+)% of pixels/.exec(line); if (ck) result.checks.push({ t: +ck[1], diff: +ck[2] / 100, shot: shotAt(shots, +ck[1]) });
           const none = /^\s*check ([\d.]+): missing frame/.exec(line); if (none) result.checks.push({ t: +none[1], diff: null, shot: shotAt(shots, +none[1]) });
           const nt = /^\s*note: (.*)$/.exec(line); if (nt) result.notes.push(nt[1]);
-          if (/^\s*AE: .*ERROR|^\s+ERROR /.test(line)) result.message = line.trim();
+          if (aeErrorLine(line)) result.message = line.trim();
         }
       };
       child.stdout.on("data", onData); child.stderr.on("data", onData);
@@ -224,6 +231,6 @@ export async function aeExport(projectDir, { fps = 30, outDir = null, runAe = tr
   } finally {
     page?.close();
     log?.end();
-    if (clean && !estimateOnly && runAe) { try { rmSync(join(work, "_ref", basename(dir)), { recursive: true, force: true }); sweepWork(work, workName(dir), { failed: clean === "failed" }); } catch { /* the next export clears it */ } }
+    if (clean && !estimateOnly && runAe) { try { rmSync(join(work, "_ref", basename(dir)), { recursive: true, force: true }); sweepWork(work, workName(dir), { failed: clean === "failed", aeBusy: aeStarted && !existsSync(join(work, workName(dir), "build.done")) }); } catch { /* the next export clears it */ } }
   }
 }

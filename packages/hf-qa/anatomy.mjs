@@ -5,8 +5,9 @@
 // (a hand written as lerp(a, b, t) is checked at both ends); an arm whose hand is worked out by code is not judged. A warning.
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
+import { RAISED_PX } from "./anatomy-rule.mjs";
 
-export const SHOULDER = { x: [-34, 34], y: -148 }, RAISED = 30;          // hip-local; "raised": the hand at most RAISED px under the shoulder
+export const SHOULDER = { x: [-34, 34], y: -148 }, RAISED = RAISED_PX;          // hip-local; "raised": the hand at most RAISED px under the shoulder
 const STYLES = new Set(["inner-voice-short"]);
 
 /** The numbers an expression can be: lerp(a, b, t) is a and b; anything else must be plain arithmetic, or it is not judged. */

@@ -5,9 +5,9 @@
 // High quality is never touched.
 import { execFile } from "node:child_process";
 import { renameSync, rmSync } from "node:fs";
-import { dirname, join } from "node:path";
 import { promisify } from "node:util";
 import { ffmpegExe } from "../library/preview-media.mjs";
+import { ffprobeExe } from "../version-manager/index.mjs";
 
 const run = promisify(execFile);
 /** 12 Mbps at 1920 × 1080, 30 fps (a little over YouTube's 8 Mbps advice for an SDR 1080p upload), scaled to the film's pixels a second. */
@@ -17,7 +17,7 @@ export function webCeilingMbps({ width, height, fps }) {
 }
 
 async function probe(file, root) {
-  const { stdout } = await run(join(dirname(ffmpegExe(root)), "ffprobe.exe"), ["-v", "error", "-select_streams", "v:0", "-show_entries",
+  const { stdout } = await run(ffprobeExe(root), ["-v", "error", "-select_streams", "v:0", "-show_entries",
     "stream=width,height,avg_frame_rate,bit_rate,color_space,color_primaries,color_transfer:format=duration,size", "-of", "json", file], { windowsHide: true, timeout: 60000 });
   const j = JSON.parse(stdout), s = j.streams?.[0] ?? {};
   const [n, d] = String(s.avg_frame_rate ?? "30/1").split("/").map(Number);

@@ -3,15 +3,16 @@
 // rest placed on the beats), and the table shows each line's start for a check by ear.
 import { useEffect, useRef, useState } from "react";
 import { Bot, FileUp, Loader2, Save, Square, Timer } from "lucide-react";
-import { get, post, put, watchJob } from "../api.js";
+import { get, post, put } from "../api.js";
 import { Banner } from "../components.jsx";
-import { ago, useData, useToast } from "../lib.jsx";
+import { ago, useData, useToast, useJobWatch } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 import { useStage } from "./stage.jsx";
 
 const mmss = (s) => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, "0")}`;
 
 export default function LyricsSheet({ projectId, onChanged }) {
+  const watch = useJobWatch();          // its job watches stop with it (audit/112c c5.1)
   const t = useT();
   const toast = useToast();
   const stage = useStage(projectId);
@@ -27,7 +28,7 @@ export default function LyricsSheet({ projectId, onChanged }) {
   }, [q.data]); // eslint-disable-line react-hooks/exhaustive-deps
   const follow = (j) => {
     setJob(j);
-    watchJob(j.id, (x) => {
+    watch(j.id, (x) => {
       if (!x) return;
       setJob(x);
       if (x.status === "done") { q.reload(); onChanged?.(); toast(t("Lyrics timed: {h} of {n} words heard", { h: x.result?.heard ?? 0, n: (x.result?.heard ?? 0) + (x.result?.placed ?? 0) })); }

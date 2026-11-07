@@ -4,7 +4,7 @@
     {
       "id": "brief",
       "stage": 1,
-      "title": "Prepare",
+      "title": "Pre-production",
       "what": "Three storylines in words and you pick one, then the brief, files read, design and what the style needs; Claude asks only what is missing",
       "needs": [],
       "done": {
@@ -15,7 +15,7 @@
       },
       "action": {
         "kind": "claude",
-        "label": "Prepare",
+        "label": "Pre-production",
         "prompt": "Read the brief, the answers from the New project dialog and what the app found in my files (its scan). HyperFrames' work loop comes first: your type's file (when the style names one), then references/story.md, as it ships. When story.md applies (its opening says when to skip it; a script, storyboard or reference film of mine is followed as I gave it), write its three storylines (§2: three different films in words only, each with what §2 lists; your recommendation first, with its reason in one clause) to STORYLINES.md, show them to me in a few lines and stop once until I pick one in the chat (a mix, \"A's opening with C's middle\", is one storyline); in that message ask nothing else unless only I can answer it, and state the rest in one assumption line as §2 says. When I asked for no stops (the brief or the chat says to go on without asking), take your recommendation and name the other two in one line each in your reply. Once a storyline is picked (or story.md does not apply), write BRIEF.md from it: the one thing (story.md §1) and the picked storyline as STORYLINES.md has it. Do not ask what the dialog already answered. Write docs/ASSETS.md: each file I gave, what it is, where the film can use it, what is missing; for a brand guideline, its design rules. The design is set part by part in your instructions: what I chose in New project (a Brand Kit, written by the app to frame.md, which you never write or change) wins for its part (a brief that asks otherwise is a conflict: moworks-studio §2b); the rest follows the design my brief describes, and what it leaves open is yours (leave it to the storyboard options). A brand guideline in my files that differs from a chosen Brand Kit is a conflict (moworks-studio §2b); with no Brand Kit, follow the guideline (its design rules in docs/ASSETS.md) and suggest in your reply that I save it as a Brand Kit in the app. When I gave no files at all and the brief is enough, go on without asking: this style draws the film in code, so never stop only to ask whether I have files. Ask me once, in one short line, only when the brief names material it needs and I did not give it (our logo, the product's photos, footage, our own fonts or brand guideline: added with the Assets button), then stop without writing BRIEF.md; when I answer that there are none, go on without asking again. Every conflict and every missing thing (a link, the lyrics, a file, a logo the brief names; moworks-studio §2b: what each side says, two or three choices, your suggestion first) goes in one message, and then stop without writing BRIEF.md: the owner answers in the chat. Write BRIEF.md last. Change nothing in the film yet; then stop."
       },
       "review": {
@@ -94,7 +94,7 @@
     {
       "id": "sound",
       "stage": 4,
-      "title": "Music and sound effects",
+      "title": "Sound Design",
       "what": "Claude picks the music; the app places it and the sound effects",
       "needs": [
         "build"
@@ -221,7 +221,7 @@
       {
         "id": "brief",
         "stage": 1,
-        "title": "Prepare",
+        "title": "Pre-production",
         "what": "Three storylines in words and you pick one, then the brief, files read, design and what the style needs; Claude asks only what is missing",
         "needs": [],
         "done": {
@@ -232,7 +232,7 @@
         },
         "action": {
           "kind": "claude",
-          "label": "Prepare",
+          "label": "Pre-production",
           "prompt": "Read the brief, the answers from the New project dialog and what the app found in my files (its scan). HyperFrames' work loop comes first: references/story.md, as it ships. When story.md applies (its opening says when to skip it; a script, storyboard or reference film of mine is followed as I gave it), write its three storylines (§2: three different films in words only, each with what §2 lists; your recommendation first, with its reason in one clause) to STORYLINES.md, show them to me in a few lines and stop once until I pick one in the chat (a mix, \"A's opening with C's middle\", is one storyline); in that message ask nothing else unless only I can answer it, and state the rest in one assumption line as §2 says. When I asked for no stops (the brief or the chat says to go on without asking), take your recommendation and name the other two in one line each in your reply. Once a storyline is picked (or story.md does not apply), write BRIEF.md from it: the one thing (story.md §1) and the picked storyline as STORYLINES.md has it. Do not ask what the dialog already answered. Write docs/ASSETS.md: each file I gave, what it is, where the film can use it, what is missing; for a brand guideline, its design rules. This app always makes a timed MP4 video, never a navigable deck: do not ask which. The design is set part by part in your instructions: what I chose in New project (a Brand Kit, written by the app to frame.md, which you never write or change) wins for its part (a brief that asks otherwise is a conflict: moworks-studio §2b); the rest follows the design my brief describes, and what it leaves open is yours (leave it to the storyboard options). A brand guideline in my files that differs from a chosen Brand Kit is a conflict (moworks-studio §2b); with no Brand Kit, follow the guideline (its design rules in docs/ASSETS.md) and suggest in your reply that I save it as a Brand Kit in the app. When I gave no files at all and the brief is enough, go on without asking: this style draws the film in code, so never stop only to ask whether I have files. Ask me once, in one short line, only when the brief names material it needs and I did not give it (our logo, the product's photos, footage, our own fonts or brand guideline: added with the Assets button), then stop without writing BRIEF.md; when I answer that there are none, go on without asking again. Every conflict and every missing thing (a link, the lyrics, a file, a logo the brief names; moworks-studio §2b: what each side says, two or three choices, your suggestion first) goes in one message, and then stop without writing BRIEF.md: the owner answers in the chat. Write BRIEF.md last. Change nothing in the film yet; then stop."
         },
         "review": {
@@ -311,7 +311,7 @@
       {
         "id": "sound",
         "stage": 4,
-        "title": "Music and sound effects",
+        "title": "Sound Design",
         "what": "Claude picks the music; the app places it and the sound effects",
         "needs": [
           "build"

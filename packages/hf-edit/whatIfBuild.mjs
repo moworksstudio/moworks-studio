@@ -10,6 +10,8 @@ import { APP_ROOT } from "../version-manager/index.mjs";
 import { SHIMS, reactDirs, stageEngine, whatIfSource } from "../what-if-styles/index.mjs";
 
 export const ENTRY = "whatif/episode.tsx", OUT = "compositions/whatif/film.js";
+/** The app's cast layer for What If films: `import { AppHero, STANDARD_FACES, POSES } from "mw:wi-cast"`. */
+export const WI_CAST = join(SHIMS, "..", "wi-cast.tsx");
 
 /** "@remotion/google-fonts/BricolageGrotesque" → "Bricolage Grotesque" (the package names each family by its name without spaces). */
 export const familyOf = (spec) => String(spec.split("/").pop()).replace(/([a-z0-9])([A-Z])/g, "$1 $2").replace(/([A-Z])([A-Z][a-z])/g, "$1 $2");
@@ -27,7 +29,7 @@ export async function buildWhatIf(projectDir, { root = APP_ROOT, force = false, 
   stageEngine(projectDir, root);
   const out = join(projectDir, ...outRel.split("/")), lib = join(projectDir, ".moworks", "library", "what-if");
   const newest = (d) => { let m = 0; const walk = (x) => { for (const n of readdirSafe(x)) { const p = join(x, n), s = statSync(p); if (s.isDirectory()) walk(p); else if (p !== out) m = Math.max(m, s.mtimeMs); } }; walk(d); return m; };
-  const sources = [dirname(entry), join(lib, "PINNED"), SHIMS];
+  const sources = [dirname(entry), join(lib, "PINNED"), SHIMS, WI_CAST];
   const latest = Math.max(...sources.map((p) => { try { return statSync(p).isDirectory() ? newest(p) : statSync(p).mtimeMs; } catch { return 0; } }));
   if (!force && existsSync(out) && statSync(out).mtimeMs >= latest) return { built: false, out: outRel, families: readFamilies(out) };
   const families = new Set();
@@ -38,6 +40,8 @@ export async function buildWhatIf(projectDir, { root = APP_ROOT, force = false, 
     b.onResolve({ filter: /^@remotion\/google-fonts\// }, (a) => { const f = familyOf(a.path); families.add(f); return { path: f, namespace: "wi-google-font" }; });
     b.onLoad({ filter: /.*/, namespace: "wi-google-font" }, (a) => ({ loader: "js", contents: googleFontModule(a.path) }));
     b.onResolve({ filter: /^@remotion\// }, (a) => ({ errors: [{ text: `${a.path} is not available in a Moworks film (no Remotion package): use the engine's own calls` }] }));
+    // the app's cast layer (MW Character Sheet v1, #1287-#1293: the back view, the laugh, angry and talk faces, the standard's poses)
+    b.onResolve({ filter: /^mw:wi-cast$/ }, () => ({ path: WI_CAST }));
     b.onResolve({ filter: /^what-if(\/.*)?$/ }, (a) => {
       const p = resolveTs(join(lib, "engine", ...a.path.slice("what-if".length).split("/").filter(Boolean)));
       return p ? { path: p } : { errors: [{ text: `${a.path}: no such file in the engine` }] };

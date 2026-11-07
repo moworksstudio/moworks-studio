@@ -5,9 +5,9 @@
 // HyperFrames' kits stay as shipped: "Make my copy" gives one to change, with its credit.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, ArrowLeft, BookOpen, Boxes, Check, ChevronLeft, ChevronRight, Copy, CopyPlus, FileText, Film, History, Image as ImageIcon, LayoutTemplate, ListChecks, Loader2, Palette, Pencil, Plus, ScrollText, Trash2, Type, Undo2, Upload, X } from "lucide-react";
-import { del, get, patch, post, upload, watchJob } from "../api.js";
+import { del, get, patch, post, upload } from "../api.js";
 import { Banner, Dialog } from "../components.jsx";
-import { ago, go, madeOn, useData, usePref, useToast } from "../lib.jsx";
+import { ago, go, madeOn, useData, usePref, useToast, useJobWatch, usePoll } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 import { useThemeId } from "../theme.jsx";
 import Markdown from "../editor/Markdown.jsx";
@@ -438,7 +438,7 @@ function Versions({ look, onRestore, dirty }) {
     <ul className="plain bk-versions">{[...(look.versions ?? [])].reverse().map((x) => <li key={x.v}><b className="num">#{x.v}</b><span className="bk-meta">{ago(x.at)}{x.note ? ` · ${x.note}` : ""}</span>
       {x.v === look.version ? <span className="bk-state ok"><Check size={12} />{t("In use")}</span> : <button type="button" className="btn sm" disabled={dirty} title={dirty ? t("Save or discard your changes first") : undefined} onClick={() => onRestore(x.v)}>{t("Restore")}</button>}</li>)}</ul>
     {(look.files?.length ?? 0) > 0 && <p className="bk-meta">{t("{n} file(s) in this kit", { n: look.files.length })}</p>}
-    <p className="bk-meta">{t("Projects already made with a kit keep their own copy.")}</p>
+    <p className="bk-meta">{t("Productions already made with a kit keep their own copy.")}</p>
   </>;
 }
 
@@ -458,6 +458,7 @@ const TABS = [["overview", "Overview", BookOpen], ["colours", "Colours", Palette
   ["motion", "Motion", Film], ["rules", "Rules", ScrollText], ["checks", "Film checks", ListChecks], ["guideline", "Guideline", FileText], ["spec", "Design spec", Pencil], ["versions", "History", History]];
 
 export default function BrandKit({ id, askLocked = false, onChanged, onCreated, onDeleted }) {
+  const watch = useJobWatch();          // its job watches stop with it (audit/112c c5.1)
   const t = useT();
   const toast = useToast();
   const studio = useThemeId() === "studio";
@@ -478,7 +479,7 @@ export default function BrandKit({ id, askLocked = false, onChanged, onCreated, 
   const famKey = doc.families.join("|");
   // the page draws with the kit's own fonts: its files, the app's, or the app's one-time download
   useEffect(() => { if (!l) return undefined; let live = true; post("/api/looks/fonts", { id, families: doc.families }).then((r) => { if (live) setFonts(r); }).catch(() => {}); return () => { live = false; }; }, [id, famKey, !!l]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (l?.status !== "scanning" || scan) return undefined; const h = setInterval(q.reload, 3000); return () => clearInterval(h); }, [l?.status, !!scan]); // eslint-disable-line react-hooks/exhaustive-deps
+  usePoll(q.reload, 3000, l?.status === "scanning" && !scan);          // eslint-disable-line // eslint-disable-line react-hooks/exhaustive-deps
   if (q.error) return <div className="page"><Banner kind="error" action={<button className="btn sm" onClick={() => go("/looks")}>{t("Back to Brand Kits")}</button>}>{q.error.message}</Banner></div>;
   if (!l) return <div className={studio ? "st-room" : "page"}><div className="skeleton" style={{ height: "24rem" }} /></div>;
 
@@ -516,7 +517,7 @@ export default function BrandKit({ id, askLocked = false, onChanged, onCreated, 
     setLockedOpen(false); drafts.delete(id);
     try {
       const r = await post(`/api/looks/${id}/scan`, body); const j = r.job ?? r; setScan(j);
-      watchJob(j.id, (x) => { if (!x) return; setScan(x); if (x.status !== "running") { setScan(null); q.reload(); onChanged?.(); if (x.status === "failed") toast(x.error?.message ?? t("The scan did not finish."), "error"); if (x.result?.stopped === "locked") setLockedOpen(true); } }, 1200);
+      watch(j.id, (x) => { if (!x) return; setScan(x); if (x.status !== "running") { setScan(null); q.reload(); onChanged?.(); if (x.status === "failed") toast(x.error?.message ?? t("The scan did not finish."), "error"); if (x.result?.stopped === "locked") setLockedOpen(true); } }, 1200);
     } catch (e) { toast(e.message, "error"); }
   };
   const remove = async () => { try { await del(`/api/looks/${id}`); drafts.delete(id); toast(t("Deleted “{title}”", { title: l.title })); onDeleted?.(); go("/looks"); } catch (e) { toast(e.message, "error"); } };
@@ -565,7 +566,7 @@ export default function BrandKit({ id, askLocked = false, onChanged, onCreated, 
       {!l.unread?.length && <><button type="button" className="btn" onClick={() => addMore.current?.click()} disabled={!!scan || l.status === "scanning"} title={t("Add files to this kit and scan it again. A new guideline: use New version, so this one stays as it is.")}><Plus size={14} />{t("Add files")}</button>
         <input ref={addMore} type="file" multiple hidden accept={ACCEPT_ATTR} onChange={(e) => { addFiles([...e.target.files]); e.target.value = ""; }} /></>}</>}
     {!l.editable && <button type="button" className="btn" onClick={copyKit} disabled={copying}>{copying ? <Loader2 size={14} className="spin" /> : <Copy size={14} />}{copying ? t("Making your copy…") : t("Make my copy")}</button>}
-    <button type="button" className="btn primary" onClick={() => go(`/new?look=${encodeURIComponent(id)}`)} disabled={l.status !== "ready"}><Plus size={15} />{t("Use in a new project")}</button>
+    <button type="button" className="btn primary" onClick={() => go(`/new?look=${encodeURIComponent(id)}`)} disabled={l.status !== "ready"}><Plus size={15} />{t("Use in a new production")}</button>
   </>;
   const meta = <p className="bk-headmeta"><span className="au-tag">{l.group === "yours" ? t("Yours") : "HF"}</span>{l.createdAt && <span>{t("made {date}", { date: madeOn(l.createdAt) })}</span>}{typeof l.version === "number" && <span>{t("revision {v}", { v: l.version })}</span>}{l.updatedAt && <span>{ago(l.updatedAt)}</span>}</p>;
   const notes = <>
@@ -614,7 +615,7 @@ export default function BrandKit({ id, askLocked = false, onChanged, onCreated, 
     {lockedOpen && locked.length > 0 && !scan && <LockedDialog names={locked} canGoOn={(l.files ?? []).some((f) => !locked.includes(f.name))} onAdd={addFiles} onGoOn={() => rescan({ withoutLocked: true })} onClose={() => setLockedOpen(false)} />}
     {ask && <Dialog title={t("Delete “{title}”?", { title: l.title })} danger onClose={() => setAsk(false)} footer={<><span className="spacer" />
       <button className="btn" onClick={() => setAsk(false)}>{t("Cancel")}</button><button className="btn danger" onClick={remove}><Trash2 size={14} />{t("Delete")}</button></>}>
-      <div className="dlg-lines"><p className="dlg-warn">{t("“{title}” leaves your Brand Kits.", { title: l.title })}</p><p>{t("Projects already made with it keep their copy.")}</p></div></Dialog>}
+      <div className="dlg-lines"><p className="dlg-warn">{t("“{title}” leaves your Brand Kits.", { title: l.title })}</p><p>{t("Productions already made with it keep their copy.")}</p></div></Dialog>}
     {viewer && <Viewer items={viewer.items} at={viewer.at} onClose={() => setViewer(null)} />}
     {making && <CreateLook from={l} onClose={() => setMaking(false)} onDone={(newId, isLocked) => { setMaking(false); onChanged?.(); onCreated?.(newId, isLocked); }} />}
   </>;

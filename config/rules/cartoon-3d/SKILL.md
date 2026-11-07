@@ -62,7 +62,14 @@ def, build }`, made on the source skill's own `buildCharacter` with its costume 
 `import { CHARACTER as lena } from "./cast/lena"` and `const c = lena.build()`, add `c.root` to the scene and put `c` in the world's `cast`, so
 `FilmCheck`, the collision check and the held-prop check see it; then place, pose and give it faces with the source skill's rig as any cast member
 (`setPose`, `walkPose`, `poseReach`, `legIK`, `setExpr`). Never redraw, edit or copy its file: a change goes back through the Characters page
-(Change with Claude). The film's character gate (`character_gate`) checks each file as the Characters page did.
+(Change with Claude). The film's character gate (`character_gate`) checks each file as the Characters page did. The source skill's own cast (Mika, Ravi, June, Otto)
+and its examples' Bea, Leo and Noor are in the library too, as the app's (`moworks-mika` …), taken the same way.
+
+**The app's cast layer** (`app/c3d-cast.ts`, `import { setFace, POINT, WAVE, WAVE_AT, talkFace } from "mw:c3d-cast"`; MW Character Sheet v1, owner
+#1287-#1293): what the sheet standard asks for that the source skill's rig does not draw, in its own hand. `setFace(c, face)` gives any character
+the standard's faces: neutral, happy, laugh, surprised, worried, angry, talk, blink (laugh and angry are the app's, the rest the source skill's own
+`setExpr`); `POINT` and `WAVE` are arm poses on `STAND`; `talkFace(t)` flaps the mouth while a character speaks (no lip sync, as the source skill).
+A character's `can` list (its record) says what its rig drives.
 
 ## 4. Each step
 
@@ -79,10 +86,8 @@ def, build }`, made on the source skill's own `buildCharacter` with its costume 
 
 ## 5. Sound
 
-**Where the sounds come from** (owner 05/11/2026, #1034, in place of "code-made sounds only" of 04/11: Test 38's code-made sounds were dull
-and did not match the picture): as for every film, the library's exact sound first, then the app's pick (by Claude) of the library's closest sounds, then a sound made with ElevenLabs from its description (owner #1096), then the online search, then a sound made by code (the source skill's own
-sounds, new takes from its recipes and the app's) only for a cue none of them has. Name each sound by the thing on screen and its action, so the library
-finds the one that matches (moworks-studio §7b).
+**Where the sounds come from:** as for every film, in the house rules' order (moworks-studio §7b, owner #1034, #1096). Name each sound by
+the thing on screen and its action, so the library finds the one that matches.
 
 The source skill's own sounds are in the app's library, made by the source skill's code: `impact`, `blip-up` / `blip-down`, `glitch`, `win`, `chip`, `tick`, `count`, `lock`,
 `slice`, `vs`, `click`, `resolve` (SOUND.md's table and gains). Key moments only, about one cue per 3-4 s at most (3-5 in a short, one per 6-10 s in a long

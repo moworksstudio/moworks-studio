@@ -171,9 +171,9 @@ function FontField({ projectId, value, onPick, onLive, disabled }) {
     <span>{t("Font")}</span>
     {gv?.length > 0 && <input className="input sm pe-font-find" value={find} onChange={(e) => setFind(e.target.value)} placeholder={t("Find a Google font ({n})", { n: gv.length })} aria-label={t("Find a Google font")} spellCheck={false} />}
     <select className="select sm" value={cur} disabled={disabled || !fonts} onChange={(e) => { const f = e.target.value; if (!f || f === cur) return; pickFont(f); }}
-      title={t("Pick a font: this project's, your font files in Assets, the app's, or one installed on this PC")}>
+      title={t("Pick a font: this production's, your font files in Assets, the app's, or one installed on this PC")}>
       {cur && !fonts && <option value={cur}>{cur}</option>}
-      {fonts && group(t("In this project"), [cur, ...(fonts.project ?? [])])}
+      {fonts && group(t("In this production"), [cur, ...(fonts.project ?? [])])}
       {fonts && group(t("Your fonts in Assets"), (fonts.assets ?? []).map((f) => f.family))}
       {fonts && group(t("In the app"), fonts.bundled ?? [])}
       {fonts && group(t("On this PC"), local)}
@@ -246,7 +246,7 @@ function EditCard({ projectId, item, box, locked, send, onSaved, onClose, onPin 
     setSaving(true);
     try { const r = await post(`/api/projects/${projectId}/edit/${path}`, { file: item.file, hfId: item.hfId, ...body }); if (r.changed) onSaved(label, reload || !!r.reload);
       if (r.fonts?.unresolved?.length) toast(t("Font not found: {f}", { f: r.fonts.unresolved.join(", ") }), "error");
-      if (r.fonts?.local) toast(t("{f} was copied into the project from this PC. Check its licence before you send the project to anyone.", { f: r.fonts.local.family })); load(); }
+      if (r.fonts?.local) toast(t("{f} was copied into the production from this PC. Check its licence before you send the production to anyone.", { f: r.fonts.local.family })); load(); }
     catch (e) { toast(e.message, "error"); load(); } finally { setSaving(false); }
   };
   const cs = item.computedStyles ?? {};

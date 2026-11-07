@@ -3,6 +3,37 @@
 One entry per version, newest first. The version is the HyperFrames version the app runs (0.8.214 runs HyperFrames 0.8.214); fixes to the
 app alone on the same engine are 0.8.214.1, 0.8.214.2…
 
+## 0.8.214.7 (2026-11-07)
+
+Still on HyperFrames 0.8.214: Thumbnails, one film in several sizes, more ways and more characters to cast, a cleaner sound mix,
+and the fixes of a full review of the app's code.
+
+### New
+- **Thumbnails:** pick a frame of a built film; Claude lays it out at 16:9 or 9:16, on its own or with your Brand Kit.
+- **One film, several sizes:** Adaptation makes 9:16, 1:1 and other sizes of a film; each size renders with the film's own mix.
+- **Casting:** four more ways to make a character (3D Cartoon, What If, 2D Explainer, Stickman Explainer), every character on one
+  character sheet; more ready-made characters, Lantern, Tofu, Bơ, Firefighter and Grandma among them; a Characters drawer in the Film Editor.
+- **Subtitles as files:** an option saves .srt and .vtt beside the render.
+- **Tech checks:** characters' bodies (elbows), the sound from start to end, a run of stills that reads like a slideshow.
+- **Pages in a production's order**, the same in both themes: Productions, Writers' Room, Film Styles, Casting, Brand Kits,
+  Motion Library, Thumbnails, then Studio Settings.
+- **Sources updated:** anidoodle 0.10.1, Lemo-Opuscar, Motion Prompt (24 more camera moves and transitions), What If's engine.
+
+### Improvements
+- **Sound:** the voice-over's peaks are held at -1 dBTP; the voice check hears the music sentence by sentence; the chat says how many
+  sounds ElevenLabs will make, and about how many credits, before it makes them; Version 1 sounds as the export will.
+- **After Effects export:** each sound lane's level and mute come across; a film's background comes in as a layer; one export at a time,
+  never while Claude changes the film; a film style not measured yet says "AE not checked yet".
+- **Tech checks:** their marks are back on the timeline's ruler; what the Review kept on purpose is listed under "It's OK".
+- **Studio Settings:** the Uninstall box opens at once.
+- **Maps** follow the world's standard map.
+
+### Fixes
+- Rendering a second size (9:16, 1:1…) no longer fails at the end.
+- Tech checks no longer pass a film whose code does not build.
+- One Review makes one new version.
+- A page following a job the app lost no longer waits forever.
+
 ## 0.8.214.6 (2026-11-06)
 
 Still on HyperFrames 0.8.214: the Writers Room for ideas and scripts, a sixth Moworks film style, ElevenLabs v4 voices with emotion,

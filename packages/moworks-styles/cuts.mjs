@@ -67,7 +67,7 @@ export function declaredCuts(projectDir, styleId) {
 /** The film's render while it is the film as it is now: the pre-render, else the last export (the export's render did not refresh the
  *  pre-render, and G-CUTS never showed for Test 38, T38-7), or null. */
 export async function freshRender(projectDir, { picture = false } = {}) {
-  const { filmHash, filmParts } = await import("../server/proxy.mjs");          // late: the render's own module, only when there is a render
+  const { filmHash, filmParts } = await import("../project-service/film-hash.mjs");          // late: the render's own module, only when there is a render
   const read = (f) => { try { return JSON.parse(readFileSync(join(projectDir, ...f), "utf8")); } catch { return null; } };
   const st = read([".moworks", "cache", "proxy", "proxy.json"]), ex = read([".moworks", "project.json"])?.lastExport ?? null;
   for (const r of [st, ex ? { file: ex.file, hash: ex.hash, fps: Number(ex.fps) || null } : null]) {

@@ -11,54 +11,36 @@
 // the app's MCP tool (packages/agent/permit-mcp.mjs → the server's /api/agent/permit). Each pipeline step has its own Claude session;
 // a chat message continues the session of the step it follows. The style's rules are copied into .moworks/rules/ and named in the system
 // prompt. After Claude: the app's own finalize (Moworks rules: fonts, CSP, runtime, LCD layers) and the deterministic gates, then a revision.
-import { spawn, spawnSync } from "node:child_process";
-import { createHash, randomBytes, randomUUID } from "node:crypto";
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
+import { writeJson } from "../util/json.mjs";
+import { spawn } from "node:child_process";
+import { randomBytes, randomUUID } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { APP_ROOT } from "../version-manager/index.mjs";
 import { claudeEnv, findClaude } from "../system-status/index.mjs";
-import { getStyle, stylePipeline } from "../style-catalog/index.mjs";
+import { OAUTH_RACE, claudeJson, claudeRunEnv, killTree } from "../system-status/claude-run.mjs";
 import * as rev from "../revisions/index.mjs";
 import { finalize, fontMap } from "../hf-edit/finalize.mjs";
 import { fitMusicToFilm } from "../hf-edit/tracks.mjs";
-import { filmLength } from "../hf-edit/ending.mjs";
-import { frameFonts, vietnameseCheck } from "../looks-library/index.mjs";
 import { viLine, viOptionsText, viSuggest, viVerified } from "../hf-edit/googleFontsVi.mjs";
 import { stageForProject as stageVocab } from "../vocab-library/index.mjs";
 import { stageForProject as stageBlock, ensureHosted, registryItems } from "../blocks-library/index.mjs";
 import { stageForProject as stageLook } from "../looks-library/index.mjs";
 import { stageForProject as stageIntake } from "../intake-library/index.mjs";
-import { lemoSlug, ruleText as lemoRuleText, stageDemo as stageLemoDemo } from "../lemo-styles/index.mjs";
-import { mgSlug, ruleText as mgRuleText, stageDemo as stageMgDemo } from "../mg-styles/index.mjs";
-import { anidoodleId, ruleText as anidoodleRuleText, stageEngine as stageAnidoodle } from "../anidoodle-styles/index.mjs";
-import { readCast, ruleText as brushRuleText, stageGuide as stageBrushGuide } from "../character-kit/index.mjs";
-import { stageEngine as stageWhatIf, whatIfSource } from "../what-if-styles/index.mjs";
-import { MAP_STYLE_ID, placeEngine as placeMapEngine, stageGuide as stageMapGuide } from "../map-explainer/index.mjs";
-import { isMoworksStyle, placeStyle, stageGuide as stageStyleGuide } from "../moworks-styles/index.mjs";
-import { status as secretsStatus } from "../secrets/index.mjs";
-import { filmVietnamese } from "../voice/tts.mjs";
-import { packStatus as kokoroStatus } from "../voice/kokoro.mjs";
-import { PROMPT as MOTION_PLAN_PROMPT, SOUND_PROMPT as MOTION_PLAN_SOUND } from "../motion-plan/index.mjs";
-import * as sfx from "../sfx/index.mjs";
-import { MOWORKS_STYLE_IDS } from "../sfx/code-recipes.mjs";
+import { MAP_STYLE_ID, placeEngine as placeMapEngine } from "../map-explainer/index.mjs";
+import { isMoworksStyle, placeStyle } from "../moworks-styles/index.mjs";
 import { SIGNED_OUT_TEXT } from "../server/claude.mjs";
 /** Claude Code's own message when another of its processes is refreshing the sign-in at the same moment: passing, worth one retry. */
-export const OAUTH_RACE = /another Claude Code process is refreshing|Failed to refresh OAuth token/i;
+export { OAUTH_RACE };          // system-status/claude-run.mjs
 const RETRY_MS = Number(process.env.MW_CLAUDE_RETRY_MS ?? 5000);
-import { BRIEF_MAX, addNote, classifyAsset, inventory, readNotes, keepRootFps, sequenceOf } from "../project-service/index.mjs";
-import { cutNote, cutOf, followCut, limitLine, outputCap, readTranscriptCuts, resumeText } from "./output-limit.mjs";
-import { kitFilesOf, migrateLayout } from "../project-service/layout.mjs";
-import { lockedPdfs } from "../project-service/scan.mjs";
-import { listLocalFonts } from "../hf-edit/localFonts.mjs";
-import { DOC_DIR, docPath, moveDocs } from "../project-service/docs.mjs";
-import { briefRefusesLyrics, isLyricVideo, isSongFilm } from "../style-catalog/traits.mjs";
-import { heardDraft } from "../voice/lyrics.mjs";
-import { ensureShared, linkOrCopy, rulePath, sharedDir, stageRoot } from "../project-service/shared-stage.mjs";
-import { filmKind, requiredReads } from "./reads.mjs";
+import { addNote, classifyAsset, readNotes, keepRootFps, sequenceOf } from "../project-service/index.mjs";
+import { cutNote, cutOf, followCut, outputCap, readTranscriptCuts, resumeText } from "./output-limit.mjs";
+import { migrateLayout } from "../project-service/layout.mjs";
+import { moveDocs } from "../project-service/docs.mjs";
+import { rulePath, stageRoot } from "../project-service/shared-stage.mjs";
+import { missingLine, missingReads, requiredReads } from "./reads.mjs";
 import { briefAt, followApprovals, keepApprovedStoryboard, smallBriefEdit, storyboardHash } from "../pipeline/index.mjs";
 import { read as readMotionPlan } from "../motion-plan/index.mjs";
-import { voiceFitText } from "./voice-fit.mjs";
-import { canvasTextLine } from "./canvas-text.mjs";
 import { keepAlive } from "./keepalive.mjs";
 import { checkArgv, promptFile } from "./argv.mjs";
 
@@ -67,7 +49,7 @@ import { checkArgv, promptFile } from "./argv.mjs";
 export function gatesAsync(dir, { signal = null, script = join(import.meta.dirname, "..", "hf-qa", "gates-cli.mjs") } = {}) {
   return new Promise((ok, no) => {
     const c = spawn(process.execPath, [script, dir], { windowsHide: true });
-    const kill = () => { try { spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true }); } catch { c.kill(); } };
+    const kill = () => killTree(c);
     if (signal?.aborted) kill(); else signal?.addEventListener("abort", kill, { once: true });
     let out = "", err = "";
     c.stdout.on("data", (d) => { out += d; }); c.stderr.on("data", (d) => { err = (err + d).slice(-2000); });
@@ -99,70 +81,13 @@ export function musicSiteRequest(tool, input = {}) {
   }
   return false;
 }
-/** Only the 5.5 models (nothing older); the full id is passed so the version is certain. */
-export const MODELS = [["opus", "Opus 5.5", "claude-opus-5-5"], ["sonnet", "Sonnet 5.5", "claude-sonnet-5-5"], ["haiku", "Haiku 5.5", "claude-haiku-5-5"]];
-export const EFFORTS = ["low", "medium", "high", "xhigh", "max"];
-/** Claude Code's permission modes; bypassPermissions only when the user turned the experiment on (agent settings allowBypass). */
-export const MODES = [["auto", "Auto"], ["manual", "Manual"], ["acceptEdits", "Accept edits"], ["plan", "Plan"], ["bypassPermissions", "Bypass permissions"]];
-export const WEB = ["ask", "on", "off"];
+// the owner's Claude settings and the effort a step runs at: agent/settings.mjs (kept importable from here)
+import { MODELS, EFFORTS, MODES, WEB, agentSettings, saveAgentSettings, projectSettingsPatch, effectiveSettings, MIN_EFFORT, stepEffort } from "./settings.mjs";
+export { MODELS, EFFORTS, MODES, WEB, agentSettings, saveAgentSettings, projectSettingsPatch, effectiveSettings, MIN_EFFORT, stepEffort };
+
 const invalid = (m) => Object.assign(new Error(m), { code: "INVALID" });
 
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
-const writeJson = (p, v) => { mkdirSync(dirname(p), { recursive: true }); writeFileSync(p + ".tmp", JSON.stringify(v, null, 2) + "\n"); renameSync(p + ".tmp", p); };
 const stateDir = (root) => process.env.MW_STATE_DIR ?? join(root, "runtime", "state");
-
-/** The user's Claude settings for the app (Settings, the default of every project): model, effort, mode, web, the Bypass experiment. */
-export function agentSettings(root = APP_ROOT) {
-  // web on by default, so Claude can research; a project that stored "ask" keeps it
-  // high by default: only the Motion Plan runs at medium, by its own step
-  const s = { model: "opus", effort: "high", mode: "auto", web: "on", allowBypass: false, ...readJson(join(stateDir(root), "agent.json"), {}) };
-  if (!MODELS.some(([k]) => k === s.model)) s.model = "opus";             // "default" and older names: Opus 5.5
-  if (s.mode === "bypassPermissions" && !s.allowBypass) s.mode = "auto";
-  return s;
-}
-function checkSettings(patch, { allowBypass }) {
-  if (patch.model != null && !MODELS.some(([k]) => k === patch.model)) throw invalid("Unknown model");
-  if (patch.effort != null && !EFFORTS.includes(patch.effort)) throw invalid("Unknown effort level");
-  if (patch.mode != null && !MODES.some(([k]) => k === patch.mode)) throw invalid("Unknown mode");
-  if (patch.mode === "bypassPermissions" && !allowBypass) throw invalid("Bypass permissions is an experiment: turn it on in Settings first");
-  if (patch.web != null && !WEB.includes(patch.web)) throw invalid("Web is ask, on or off");
-}
-export function saveAgentSettings(patch, root = APP_ROOT) {
-  const cur = agentSettings(root);
-  const allowBypass = typeof patch.allowBypass === "boolean" ? patch.allowBypass : cur.allowBypass;
-  checkSettings(patch, { allowBypass });
-  const next = { ...cur, ...Object.fromEntries(Object.entries(patch).filter(([k]) => ["model", "effort", "mode", "web", "allowBypass"].includes(k))) };
-  if (next.mode === "bypassPermissions" && !next.allowBypass) next.mode = "auto";
-  writeJson(join(stateDir(root), "agent.json"), next);
-  return next;
-}
-/** A project's own choices over the global ones ("global" or null clears one). */
-export function projectSettingsPatch(meta, patch, root = APP_ROOT) {
-  const clean = Object.fromEntries(Object.entries(patch).filter(([k]) => ["model", "effort", "mode", "web"].includes(k)));
-  const set = Object.fromEntries(Object.entries(clean).filter(([, v]) => v != null && v !== "global"));
-  checkSettings(set, agentSettings(root));
-  const s = { ...(meta.settings ?? {}) };
-  for (const [k, v] of Object.entries(clean)) { if (v == null || v === "global") delete s[k]; else s[k] = v; }
-  return s;
-}
-/** What a task of this project runs with: the global settings, the project's own on top (a project's bypass needs the experiment on). */
-export function effectiveSettings(meta, root = APP_ROOT) {
-  const g = agentSettings(root), p = meta?.settings ?? {};
-  const s = { model: g.model, effort: g.effort, mode: g.mode, web: g.web };
-  for (const k of ["model", "effort", "mode", "web"]) if (p[k] != null && p[k] !== "global") s[k] = p[k];
-  if (!MODELS.some(([k]) => k === s.model)) s.model = "opus";
-  if (s.mode === "bypassPermissions" && !g.allowBypass) s.mode = "auto";
-  return s;
-}
-/** The effort a step runs at: a step that sets its own in the pipeline config runs at it (only the Motion Plan,
- *  "medium": it mostly reads the library); every other step and the chat run at the project's effort, never below "high" (storyboard and
- *  build are heavy tasks that need care). { effort, rule: "step" | "min" | null } (rule: why it is not the project's). */
-export const MIN_EFFORT = "high";
-export function stepEffort(effort, stepDef = null) {
-  if (stepDef?.effort && EFFORTS.includes(stepDef.effort)) return { effort: stepDef.effort, rule: stepDef.effort === effort ? null : "step" };
-  if (EFFORTS.indexOf(effort) < EFFORTS.indexOf(MIN_EFFORT)) return { effort: MIN_EFFORT, rule: "min" };
-  return { effort, rule: null };
-}
 
 /** The Claude Code arguments for a task (exported for the tests): tools, mode, web, the app's MCP permission tool when there is one, and
  *  the shared stage (`stage`: runtime/stage, the style's rules and engines the film's .moworks/ links to) as a working directory Claude
@@ -201,78 +126,6 @@ export function claudeArgs({ settings, systemPromptFile, sessionArgs, mcpConfig 
   return args;
 }
 
-/** The app's own tools on the MCP channel: the app does what Claude cannot (take stills, run HyperFrames' check,
- *  search the whole Motion Library) and answers in text with the paths of the pictures it made. Handlers live in the server. */
-export const APP_TOOLS = {
-  board_stills: { description: "Takes one still per frame of the storyboard options you wrote (boards/A, B…) at the film's size, runs HyperFrames' check on each board (layout, contrast, script errors), keeps them as a new draft (the owner never sees drafts: never name one in your reply), and returns each option's check result and its sheets (3 × 3 frames each). Call it once after writing the boards and read the sheets once; after fixing a real problem, call it again with option and frames (only the frames you changed).",
-    inputSchema: { type: "object", properties: { option: { type: "string", description: "Only with frames: the option you fixed, e.g. \"B\"" },
-      frames: { type: "array", items: { type: "number" }, description: "Only the frame numbers you changed, e.g. [2, 4]; leave out for every frame of every option" } } } },
-  film_frames: { description: "Takes whole frames of the film at the seconds you name, as the render draws them with all their text, at the film's size, and returns their paths. Use it to look closer at one moment than the sheets show; hf_script's keyframes is a motion debug view (guide lines, no HTML text), never a frame of the film.",
-    inputSchema: { type: "object", properties: { at: { type: "array", items: { type: "number" }, maxItems: 6, description: "The film's seconds, e.g. [12.5, 98.7]; at most 6 a call" },
-      size: { type: "string", description: "Only for one of the film's other sizes (the Adaptation step), e.g. \"9:16\": its root page's frames; leave out for the master" } }, required: ["at"] } },
-  qc_sheets: { description: "One QC round: takes stills of the film and returns the paths of the beats, cuts and phone sheets (a long film takes several pages of each: every shot and cut is on one), with every finding of HyperFrames' check (layout, contrast, motion, lint, script errors). The first round of a task adds a fresh-eyes look. Call it once per review round. In the Adaptation step, give size (e.g. \"9:16\") for the stills of that size's root page.",
-    inputSchema: { type: "object", properties: { size: { type: "string", description: "Only in the Adaptation step: the size whose root page to take, e.g. \"9:16\"; leave out for the master" } } } },
-  library_search: { description: "Searches the whole Motion Library (HyperFrames registry blocks and components, the studio's motions, Magic UI, Codrops, HyperFrames looks) for what a shot needs, in plain words. Returns 5-10 items: the id to cite in docs/MOTION-PLAN.json (the app copies that item's code into the project), its name and what it is. Call it for each shot before writing any new move for it: once for what the shot needs, once for what would make it more fun and alive.",
-    inputSchema: { type: "object", properties: { query: { type: "string", description: "What the shot needs, e.g. \"headline letters slam in one by one\"" },
-      kind: { type: "string", enum: ["motion", "block", "look", "vocab", "any"], description: "motion (how things move), block (a whole layout), look (a Brand Kit), vocab (a move's name and the author's numbers for it, from the motion vocabulary file: words and numbers to write from, never code to copy); default any (never vocab)" },
-      limit: { type: "number", description: "5-10, default 8" } }, required: ["query"] } },
-  character_sheet: { description: "Draws the model sheets of the project's characters (docs/CHARACTERS.json: the five views, the moves and hats; all 31 emotions) through HyperFrames and returns their paths, or says what is wrong with a definition. Call it once after writing docs/CHARACTERS.json; after fixing a real problem, call it again once (ids: only those characters).",
-    inputSchema: { type: "object", properties: { ids: { type: "array", items: { type: "string" }, description: "Only these characters, e.g. [\"bao\"]; leave out for all" } } } },
-  character_gate: { description: "Runs each character's OWN gate. A Brush cartoon character (a definition for the app's character layer): the Brush gate (the schema, colours that separate and read on a light and a dark ground, the face on the body, legs under it reaching the ground, arms at its sides, the key views, its sheets drawn and not blank). An anidoodle character (docs/CHARACTERS.json \"check\", a module under anidoodle/ exporting run()): for a person on the human engine the author's checks (canon, every library pose inside the joint limits and balanced, hands, identity per view, palette roles for the film's hand, planted feet); for an animal or a thing on its own rig, the rules its module checks (never the human ones). Returns PASS / FAIL per check and character, and why a gate could not run. Run it after making or changing a character; Build starts only when every gate passes.",
-    inputSchema: { type: "object", properties: { ids: { type: "array", items: { type: "string" }, description: "Only these characters, e.g. [\"mira\"]; leave out for the whole cast" } } } },
-  voice_check: { description: "Measures the film's mix under its voice-over: lists every spoken word (from the reviewed transcript) where the sound effects or the music come within 3 dB of the voice, with its second. A warning to fix (move the effect into the pause after its word, lower it, or lower or stop the music), never a block. Call it after the sound is placed and after a sound fix.",
-    inputSchema: { type: "object", properties: {} } },
-  sfx_prefs: { description: "Sets the owner's sound-effect choices for this film, which the app keeps on every placement: a family or a sound turned off (\"whoosh\", \"footstep\", \"door creak\"; \"all\" for no sound effects at all) or on again, the ambience beds on or off, the density (low, normal or lively: lively is the default, a sound on every action). A film made for its song (a lyrics or music video) has none until the owner asks: `on` brings them, few. Call it whenever the owner asks for no whoosh, fewer or more sounds, no ambience, or silence: never only edit the storyboard's `- sfx:` lines for that, the app would put its own sounds back. When the sounds are placed already, the app places them again at once with the choices and answers what it placed.",
-    inputSchema: { type: "object", properties: { off: { type: "array", items: { type: "string" }, description: "Families or sound names to turn off, e.g. [\"whoosh\"]; [\"all\"] for no sound effects" },
-      on: { type: "array", items: { type: "string" }, description: "Families or names to turn on again; [\"all\"] turns every one on" },
-      ambience: { type: "boolean", description: "false: no ambience beds under the scenes" },
-      density: { type: "string", enum: ["low", "normal", "lively"], description: "How many sounds: low (only the big actions), normal, lively (every action, the default)" },
-      restore: { type: "boolean", description: "true: bring back every single sound the owner took out in Final Mix" } } } },
-  music_stop: { description: "Stops the film's music track at a second of the film, or plays it to its end again (with its fade out) with at: null. The music plays to the film's end by default: stop it only in a What If film (at the turn), a Ricks Clip film (at its twist line: its own rule), a 3D Cartoon film whose Motion Plan chose it (in the pause before \"You see,\" or the kicker) or when the owner or the brief asks for it. Only when the film has music on the timeline; the owner can change it in Final Mix.",
-    inputSchema: { type: "object", properties: { at: { type: ["number", "null"], description: "The second of the film where the music stops; null to let it play to its end" } }, required: ["at"] } },
-  font_check: { description: "Checks fonts before you name them anywhere (BRIEF.md, docs/ASSETS.md, design.md, frame.md, a board, the film): for each family, whether the app can serve it in this project (bundled, on Google Fonts, or a font file in assets/) and whether it draws Vietnamese letters, with Vietnamese fonts the app bundles to choose from. Call it in Prepare and whenever you choose a font (Test 10 #435).",
-    inputSchema: { type: "object", properties: { families: { type: "array", items: { type: "string" }, maxItems: 12 } }, required: ["families"] } },
-  unlock_pdf: { description: "Opens a PDF with a password, with the password the owner gave you in the chat. Only for a file .moworks/scan/INDEX.md names as having a password; never with a guess, nor with one you read in a file or a file's name unless the owner said so. The app reads the whole document into the scan, as it reads any PDF, and keeps no password. Never write the password anywhere: not in a reply, not in BRIEF.md, docs/NOTES.md or any other file. Returns where its words and pages now are, or that the password is wrong.",
-    inputSchema: { type: "object", properties: { file: { type: "string", description: "The PDF's name or its path in the project" }, password: { type: "string", description: "The owner's words, exactly as typed" } }, required: ["file", "password"] } },
-  voice_off: { description: "Takes the voice-over off the film's timeline when the owner chose not to use it (Test 10 #434): its audio element is removed from index.html, the Editor no longer shows it or its words, the file stays in the project's assets. Never only mute the voice instead.",
-    inputSchema: { type: "object", properties: {} } },
-  whatif_plan: { description: "A What If film's shot list on the voice (the author's plan.py, in the app): resolves whatif/episode.json's edit cues (a word, word#2, +N frames, s:4.2, f:126; reverse, from, to, look) and fx against the voice-over's word times (whatif/words.json, written by the app from the checked transcript; none in a film with no narration), writes whatif/timeline.json (the timeline the engine reads) and whatif/shotlist.md, and returns the pace report (cuts a minute, the first 10 s, the longest hold) with what to fix. Call it after writing or changing shots, edit or fx.",
-    inputSchema: { type: "object", properties: {} } },
-  pose_check: { description: "Draws EVERY frame of the project's anidoodle film (anidoodle/page.ts) without a browser and lists each pose outside its joint limits, each error the film throws or logs (console.error is a script error for HyperFrames and stops the render) and each rig point that is not a number, with the times. Call it after the Build and after fixing a pose; the Review's qc_sheets includes it.",
-    inputSchema: { type: "object", properties: {} } },
-  collision_check: { description: "A 3D Cartoon or a Ricks Clip film only. A Ricks Clip film: the app's check of its cards (each actor of actorsAt a stand-in about its drawn body's width, 2.25 m tall) against the world's box and cylinder set pieces and the other characters, on every frame, with the seconds and the depth; fix what it names in film/story.js or film/main.js until it says COLLISION none (a warning). A 3D Cartoon film: its source skill's own collision check (its qa) on EVERY frame of the film: each character's body against the solid furniture (box and cylinder meshes) and against the other characters, and feet below the floor, with the seconds and the depth. Call it after every change to the blocking (positions, walks, poses, props) and before the film is done; fix what it names in the film's own world.ts and shots.ts until it says COLLISION none. Beside it, on the same frames, the app's held-prop check: a hand more than about 2 cm off a held prop's userData.grip, a held prop inside a table or through a body (HELD lines, a warning). The Review and Tech checks run it too.",
-    inputSchema: { type: "object", properties: {} } },
-  paper_cutout: { description: "A Paper Collage film only: makes the look's cut-out of one picture with its source skill's own tools (cutout.py, then halftone.py): its flat green or white background taken out (a transparent PNG keeps its own), then a black-and-white halftone print with a thin white paper edge (mode halftone), or the picture without its background in its own colours (mode clean). The owner's picture is never changed: the new file goes in assets/graphics/cutouts/ with a row in its INDEX.md. The kit's IMAGES.md order holds: an object on a transparent or flat background → a cut-out; a photo → PhotoPrint with the original; a screenshot or a logo untouched; never a real person's face. Returns the new file's path and size.",
-    inputSchema: { type: "object", properties: { file: { type: "string", description: "The picture's path in the project, e.g. assets/images/globe.png" },
-      mode: { type: "string", enum: ["halftone", "clean"], description: "halftone (the default): the look's cut-out; clean: the background out, its colours kept" },
-      key: { type: "string", enum: ["auto", "none", "green", "white"], description: "The background to take out (cutout.py): auto (the default) reads the corners" },
-      cell: { type: "number", description: "Halftone dot spacing in px (the source skill's 9; smaller is finer)" }, angle: { type: "number", description: "Screen angle (the source skill's 45)" },
-      border: { type: "number", description: "The white paper edge in px (the source skill's 14)" }, max: { type: "number", description: "The longest side in px (the source skill's 900)" },
-      name: { type: "string", description: "The new file's name, without .png" } }, required: ["file"] } },
-  film_language: { description: "Sets the film's language (the voice-over and the words on screen): vi or en. Call it only with the owner's answer when the brief did not say it and you asked (the app says when). Returns the language set.",
-    inputSchema: { type: "object", properties: { language: { type: "string", enum: ["vi", "en"] } }, required: ["language"] } },
-  product_research: { description: "Records the owner's answer to whether the app may search the web for this film's product (moworks-studio §2c): yes opens the search for this project, no keeps the film to what they gave; not-product when this film shows no product, so nothing needs asking. Call it only with the owner's own answer, or not-product. Returns what to do next.",
-    inputSchema: { type: "object", properties: { answer: { type: "string", enum: ["yes", "no", "not-product"] }, product: { type: "string", description: "The product, as the owner names it" } }, required: ["answer"] } },
-  project_format: { description: "Changes the film's output (aspect ratio, frame rate, length) after New project. Call it only when the owner, asked about a conflict between the New project fields and the brief or the voice-over's length, chose what the brief or the voice says. Returns the new output.",
-    inputSchema: { type: "object", properties: { aspect: { type: "string", enum: ["16:9", "9:16", "1:1", "4:5"] }, fps: { type: "number", description: "24, 25, 30, 50 or 60 (the film style may allow fewer)" },
-      durationSec: { type: "number", description: "The length in seconds" } } } },
-  psd_layers: { description: "Exports one frame of a Photoshop file (an artboard or a group, as named in the scan's PSD.md) as its visible layers, back to front, each a PNG at the film's width, with layout.json (position, size, opacity, blend mode, and the text, font, size and colour of text layers), into assets/psd/<frame>/. Use it to rebuild the owner's design (keep design, re-layout); a text layer is rebuilt as live text, not as its picture.",
-    inputSchema: { type: "object", properties: { file: { type: "string", description: "The PSD / PSB path in the project, e.g. sources/key.psb" }, frame: { type: "string", description: "The artboard or group name (\"document\" for the whole file)" },
-      width: { type: "number", description: "Pixels across the frame (default the film's width)" } }, required: ["file", "frame"] } },
-  music_options: { description: "Hands the owner up to three music tracks you found on mixkit.co for Final Mix: the app downloads them into the project for the owner to listen to (its answer says what the film's music will be). Give each track's title, artist, its page on mixkit.co and the direct https://assets.mixkit.co/… .mp3 link (the track page's preview link).",
-    inputSchema: { type: "object", properties: { tracks: { type: "array", maxItems: 3, items: { type: "object", properties: { title: { type: "string" }, artist: { type: "string" }, page: { type: "string" }, url: { type: "string" } }, required: ["title", "url"] } } }, required: ["tracks"] } },
-  hf_script: { description: "Runs one of the HyperFrames scripts the app allows (carve: the voiceover carve on the music bed; locate: find a point in an image, its `auto` mode goes online) or an allowed hyperframes CLI command (capture, beats, audio, normalize-audio, timeline, compositions, info, lint, validate, inspect, keyframes, media-treatment, add, catalog), as HyperFrames ships it, in the project folder. Other skill scripts are not run: the app makes the voice-over, the music and the sound mix itself. capture, add, catalog and locate auto follow the project's web setting. keyframes --shot draws one element's motion as a debug picture, kept in .moworks/cache/debug/ whatever path you give. Returns its output.",
-    inputSchema: { type: "object", properties: { script: { type: "string", description: "The script name (\"carve\") or \"hyperframes <command>\"" },
-      args: { type: "array", items: { type: "string" }, description: "Its arguments, paths relative to the project folder" } }, required: ["script"] } },
-  map_imagery: { description: "Map Explainer films only. Fetches the real satellite ground for the camera (Sentinel-2 cloudless 2016 by EOX) into the film and its boards: call it once the camera's views are known, and again if they change. Says what it fetched, or that it could not: then the film keeps the ground the engine draws, and you tell the owner so in your reply.",
-    inputSchema: { type: "object", properties: { center: { type: "number", description: "The film's map centre (film.js `center`), 0 by default" },
-      views: { type: "array", items: { type: "array", items: { type: "number" } }, description: "Every view of the camera, [lon, lat, z]: its start and each key" } }, required: ["views"] } },
-  copy_to_assets: { description: "Copies a file that is already in the project (a picture from the app's scan in .moworks/scan, a page or clip captured in capture/, a reference file) into assets/, where the film may use it. You cannot copy pictures or video yourself: use this. Without a folder the app sorts it (assets/1_design/images, 2_footage, 3_audio…). Returns the new path.",
-    inputSchema: { type: "object", properties: { from: { type: "string", description: "The file's path in the project, e.g. .moworks/scan/deck-pptx/media/image3.png" },
-      folder: { type: "string", description: "Optional folder under assets/, e.g. assets/1_design/images/pptx" }, name: { type: "string", description: "Optional new file name" } }, required: ["from"] } },
-};
-/** Fonts are the app's job: Claude names them, the app embeds them (finalize, and before board stills). */
-const FONTS_LINE = "Fonts: write the families you want in the CSS (any Google Fonts family, e.g. Be Vietnam Pro, or one the app bundles, e.g. Inter or Roboto Flex); the app downloads and embeds them (files under assets/_app/fonts, @font-face) after your task and before it takes board stills; the owner's own font files are in assets/1_design/fonts. Never ask the owner for the font files of a Google Fonts family; ask only for a commercial font the brand names. Before you name a font anywhere (BRIEF.md, docs/ASSETS.md, design.md, a board, the film), call the app's font_check with it (Test 10 #435). A font that fails (no Vietnamese letters, or the app cannot get it): when the owner's material asks for it (the brief, a guideline, their pictures or captions), that is a conflict: stop and ask (moworks-studio §2b) with 2-3 Vietnamese fonts the app can use, the nearest first; your own choice: choose one that passes.";
 /** What Claude reads back from font_check. */
 export function fontCheckText(r) {
   const fams = r?.families ?? [];
@@ -286,13 +139,6 @@ export function fontCheckText(r) {
   }),
   `Vietnamese fonts the app bundles: ${Object.keys(fontMap()).join(", ")}; or a Google Fonts family with Vietnamese.`, viOptionsText()].join("\n");
 }
-/** three.js is the app's job too: pinned in config/pins.json, copied and mapped by finalize R-THREE; the film may not go online. */
-const THREE_LINE = "three.js (for a real 3D scene, when the brief or the design needs one; DOM / CSS / GSAP stays the default because it reaches After Effects as layers, a WebGL canvas only as a picture: say so to the owner at the storyboard). When the owner asks for 3D (a 3D scene, a temple, a product, a camera flying through), never say the app cannot do it: offer three.js as one of the choices, a 3D scene built by code (shapes, materials, lights, a moving camera), in the film style's colours, not photoreal like a 3D render or a photo, and in After Effects one picture, not layers (owner 04/11: \"cannot build real 3D\" was said to a user). r184 is on this computer and the app copies it into the film and writes the import map after your task and before board stills. Import `three` and its addons by bare name, `import * as THREE from \"three\"` and `\"three/addons/<folder>/<File>.js\"`, never a CDN URL, even when a HyperFrames skill or lint hint shows one (the film is offline). Addons there: postprocessing EffectComposer, RenderPass, ShaderPass, MaskPass, UnrealBloomPass, OutputPass, FilmPass, BokehPass; shaders RGBShiftShader, VignetteShader, FilmShader, CopyShader, LuminosityHighPassShader, OutputShader, BokehShader; geometries RoundedBoxGeometry, TextGeometry; loaders GLTFLoader, FontLoader; environments RoomEnvironment; utils BufferGeometryUtils, SkeletonUtils. Ask the owner before any other addon. Follow HyperFrames' references/runtimes.md (Three.js, WebGPU, p5, canvas): draw every frame from HyperFrames time (the hf-seek event / window.__hfThreeTime, or one paused GSAP timeline), never requestAnimationFrame, Date.now() or a clock; anything that falls or flies is computed from t, every random value seeded, film grain seeded from t; data-duration on the root; renderer.setPixelRatio(1) at the film's size; set window.THREE = THREE when a loader fetches files; register window.__hf.buildReady for fonts, canvas textures and shader warm-up.";
-/** The project's folders (packages/project-service/layout.mjs). */
-const FOLDERS_LINE = "assets/ folders: 1_design/ (the owner's design files: PSD, PPTX, PDF, guidelines; the film does not play them) with 1_design/images/ (every picture and logo) and 1_design/fonts/; 2_footage/ (video; a numbered picture sequence in 2_footage/<name>/); 3_audio/voiceover/, 3_audio/sfx/, 3_audio/music/; _app/ holds the app's own copies (GSAP, three.js, runtime, embedded fonts): link to them, never edit them. Put a new file in its folder; a file anywhere else is moved there after your task.";
-// named in full: the steps and rules write the short name ("call library_search"), and Claude called it bare, "No such tool available",
-// up to 8 times a Motion Plan (QC hf214 films)
-const toolsLine = (names) => names.length ? `The app's tools (MCP server mw), use them instead of asking the owner for pictures. Call each by its full name, mcp__mw__<name>: the steps and rules write only the short name ("call library_search" means mcp__mw__library_search). ${names.map((n) => `mcp__mw__${n} (${APP_TOOLS[n].description.split(". ")[0].toLowerCase()})`).join("; ")}.` : "";
 
 /** The usage Claude Code reports at the end of a run: tokens by kind, the API-equivalent cost (its list price), time, turns. */
 export function usageOf(result) {
@@ -349,64 +195,15 @@ export function readConversation(dir) {
   return c.sessionId ? { sessions: { chat: { sessionId: c.sessionId, model: c.model ?? null, at: c.at ?? null } }, current: "chat" } : { sessions: {}, current: null };
 }
 
-/** The project style's rule files in .moworks/rules/, where Claude reads them: a link to the style's rules made once in the shared stage
- *  (project-service/shared-stage.mjs: runtime/stage/rules/<style>-<key>, the key changing with any rule or the app's own text over one), a
- *  copy on a drive that takes no link. Returns the SKILL.md paths to read: files (the style's rules), first (of those, the ones read
- *  before anything else, when the style names them) and qc (the Moworks QC review every style carries, read only in the QC step). A film
- *  with no style, or a style id the catalog does not have, has no rules: an earlier link or copy is removed, so nothing stale is named or read. */
-export function prepareRules(dir, styleId, root = APP_ROOT) {
-  const style = styleId ? getStyle(styleId, root) : null;
-  const base = join(dir, ".moworks", "rules");
-  if (!style) { rmSync(base, { recursive: true, force: true }); return { style: null, files: [], first: [], qc: [] }; }
-  const want = style.rules.map((r) => ({ name: r.name, from: dirname(r.path), hash: r.hash, kind: r.kind, role: r.role ?? null, slug: r.slug ?? null }));
-  // a Lemo-Opuscar style: its STYLE.md only, as SKILL.md under a credit header (its folder also holds the demo, staged at the build)
-  // (an mg-styles-15 style: its prompt the same way; an anidoodle medium: its reference)
-  // (the Brush cartoon style: ClaudeAnimationBase's ANIMATION_GUIDE.md, under a header on its Clawd demo)
-  // (the What If animation style: the author's SKILL.md under a credit header, its references/ beside it; never its studio or scripts)
-  const ownText = (w) => {
-    const own = { "lemo-style": lemoRuleText, "mg-style": mgRuleText, "anidoodle-style": anidoodleRuleText, "brush-style": (_slug, r) => brushRuleText(r),
-      "what-if-style": () => whatIfRuleText(w.from, root) }[w.kind];
-    return own ? own(w.slug, root) ?? "" : null;
-  };
-  const texts = want.map(ownText);
-  const key = createHash("sha256").update(JSON.stringify([style.id, want.map(({ name, hash, kind, role, slug }) => [name, hash, kind, role, slug]), texts])).digest("hex").slice(0, 12);
-  const shared = ensureShared(sharedDir(root, "rules", `${style.id}-${key}`), (to) => {
-    want.forEach((w, i) => {
-      if (texts[i] != null) {
-        mkdirSync(join(to, w.name), { recursive: true });
-        writeFileSync(join(to, w.name, "SKILL.md"), texts[i]);
-        if (w.kind === "what-if-style" && existsSync(join(w.from, "references"))) cpSync(join(w.from, "references"), join(to, w.name, "references"), { recursive: true });
-      }
-      else cpSync(w.from, join(to, w.name), { recursive: true, filter: (s) => !/desktop\.ini$/i.test(s) });
-    });
-    writeJson(join(to, "index.json"), { key, styleId: style.id, rules: want.map(({ name, hash, kind, role }) => ({ name, hash, kind, ...(role ? { role } : {}) })), at: new Date().toISOString() });
-  }, (d) => existsSync(join(d, "index.json")) && want.every((w) => existsSync(join(d, w.name, "SKILL.md"))));
-  linkOrCopy(base, shared);          // the link, or on a drive with no links a copy (kept while it is of the same rules)
-  const path = (w) => `.moworks/rules/${w.name}/SKILL.md`;  const main = want.filter((w) => w.role !== "qc" && w.role !== "kind" && w.role !== "vocab" && w.role !== "adaptation");          // a film kind's rule is read only when the kind is chosen (reads.mjs)
-  return { style, files: main.map(path), first: main.filter((w) => style.readFirst?.includes(w.name)).map(path), qc: want.filter((w) => w.role === "qc").map(path) };
-}
+// the style's rules and sources Claude reads: packages/agent/rules.mjs (kept importable from here)
+import { prepareRules, stageFor, whatIfRuleText } from "./rules.mjs";
+import { readJson } from "../util/json.mjs";
+import { APP_TOOLS } from "./tools.mjs";
+import { brandKitFonts, pickedCastLine, systemPrompt, taskLanguage, taskRequest, toolReminder } from "./prompt.mjs";
+export { APP_TOOLS } from "./tools.mjs";          // the app's tools and what Claude is told: their own files (audit/112 2.9)
+export * from "./prompt.mjs";
+export { prepareRules, stageFor, whatIfRuleText };
 
-/** The What If animation skill as Claude reads it in a project: the author's SKILL.md as shipped, under a header that says how the app
- *  runs its steps (the what-if-style pack: no Remotion, no Python, no ElevenLabs). */
-export function whatIfRuleText(dir, root = APP_ROOT) {
-  const src = whatIfSource(root), text = (() => { try { return readFileSync(join(dir, "SKILL.md"), "utf8"); } catch { return ""; } })();
-  return `<!-- What If animation by FreshStack (kelano86), MIT, ${src ? `https://github.com/${src.repo}/tree/${src.commit}` : "pinned copy"}, as shipped.
-In Moworks Studio its steps run as .moworks/rules/what-if-style/SKILL.md says: no Remotion, no Python scripts, no ElevenLabs; its
-references/ are beside this file; its engine is staged in .moworks/library/what-if/. -->
-
-${text}`;
-}
-
-/** How Claude uses what the user imported (General style), in the words Claude reads. */
-const INPUT_MODE = {
-  auto: "Choose yourself how to use the imported files and say which way you took.",
-  keep: "Keep the design the owner gave (their frames, PSD or slides): animate it as it is; do not change the layout.",
-  relayout: "Re-lay out the design the owner gave to fit this format and brief; keep its look and content.",
-  free: "Design freely; the imported files are material (logos, pictures, text), not a layout to follow.",
-  reference: "Follow the reference video or pictures for look and pacing; make it this brief's own film.",
-  remake: "Remake the reference 1:1, as close as the tools allow (the owner accepted that this costs more time).",
-};
-const kb = (n) => (n > 1e6 ? `${(n / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1e3))} KB`);
 // a secret the owner typed in the chat (a PDF's password) leaves the app's records of the film; a short one is no secret worth blanking every "2026" for
 const SECRET_MIN = 6, SECRET_MASK = "••••";
 const maskIn = (json, secret) => json.split(JSON.stringify(secret).slice(1, -1)).join(SECRET_MASK);
@@ -423,338 +220,6 @@ export function scrubRecords(dir, secret) {
 function maskTask(task, secret) {
   for (const k of ["text", "shown", "resultText"]) if (typeof task[k] === "string") task[k] = task[k].split(secret).join(SECRET_MASK);
   task.events = masked(task.events, secret);
-}
-
-export function inputsBlock(dir) {
-  const inv = inventory(dir);
-  if (!inv.total) return "Imported files: none yet.";
-  const parts = Object.entries(inv.assets).map(([k, xs]) => `assets/${k}/: ${xs.slice(0, 12).map((x) => x.path.split("/").pop()).join(", ")}${xs.length > 12 ? ` (+${xs.length - 12})` : ""}`);
-  if (inv.sources.length) parts.push(`sources/ (reference files the film does not play; read images and text; PDF, PSD, PSB, AI and PPTX are read through the app's scan, never ask for an export): ${inv.sources.slice(0, 12).map((x) => `${x.path.split("/").pop()} (${kb(x.size)})`).join(", ")}`);
-  const scan = existsSync(join(dir, ".moworks", "scan", "INDEX.md")) ? " The app scanned them for you (video contact sheets, lengths, sizes, every page of a PDF): .moworks/scan/INDEX.md." : "";
-  const locked = lockedPdfs(dir).map((p) => p.split("/").pop());
-  const lockedLine = locked.length ? ` With a password, so none of their pages reached you: ${locked.join(", ")}. Unless the chat or docs/NOTES.md already has the owner's answer, name them to the owner now and stop as moworks-studio §2b says.` : "";
-  return `Imported files (copied into this project): ${parts.join("; ")}.${scan}${lockedLine}`;
-}
-
-/** One line of what a rule file is for: its frontmatter's description, cut at the first sentence (the names and purposes are
- *  given, the files are opened when a step needs them). */
-export function rulePurpose(dir, rel) {
-  try {
-    const head = readFileSync(join(dir, ...rel.split("/")), "utf8").slice(0, 3000);
-    const d = /^description:\s*(.+)$/m.exec(head)?.[1]?.replace(/^["']|["']$/g, "").trim() ?? "";
-    const one = d.split(/(?<=[a-z0-9)])\.\s|\s-\s/i)[0].trim();
-    return one.length > 160 ? `${one.slice(0, 157)}…` : one;
-  } catch { return ""; }
-}
-
-/** Which rule files Claude reads when (after HF's own loading: an entry SKILL.md, mandatory reads per stage, the rest on demand):
- *  the files this step requires (reads.mjs; checked before the first edit), read in the first turn; every other rule file listed with its
- *  purpose and opened only when the work needs it, through each SKILL.md's own routing; the QC review only in its step. */
-function rulesLine(rules, first = [], qc = [], dir = null, required = []) {
-  const must = required.length ? required : first;
-  const rest = rules.filter((r) => !must.includes(r));
-  const named = (xs) => xs.map((r) => { const p = dir ? rulePurpose(dir, r) : ""; return p ? `${r} (${p})` : r; }).join("; ");
-  return [
-    must.length ? `Required for this task, read them all in your first turn, in one batch (the app checks them before your first edit; do not replace them with recollection): ${must.join(", ")}. Every other rule file, opened only when the work needs it (follow each SKILL.md's own "read X when Y" routing): ${named(rest)}.`
-      : rules.length ? `The style's rule files, each with what it is for; open only what the current step needs, and the files they link only when you need them: ${named(rules)}.` : "",
-    qc.length ? `The Moworks QC rules (${qc.join(", ")}) are read only in the pipeline's Review step or when the owner asks you to review the film; it never changes how this style designs or builds.` : "",
-  ].filter(Boolean).join("\n");
-}
-
-/** The text files a step reads or writes (each step is a fresh conversation: these carry the work across): HyperFrames' at the root,
- *  the app's documents in docs/ (docs.mjs). */
-const STEP_FILES = /^(BRIEF|STORY|SCRIPT|NOTES|ASSETS|STORYBOARD|STYLE-GUIDE|SHOTS|QC-REVIEW|CHARACTERS|DESIGN|VOICEOVER|SPEC|BEATMAP|RESEARCH)\.md$|^(frame|design)\.md$|^(MOTION-PLAN|QC-REVIEW|CHARACTERS)\.json$/;
-function projectFiles(dir) {
-  const list = (rel) => { try { return readdirSync(join(dir, rel)).filter((n) => STEP_FILES.test(n)).map((n) => (rel ? `${rel}/${n}` : n)).sort(); } catch { return []; } };
-  return [...list(""), ...list(DOC_DIR)];
-}
-/** What Claude may do, in words, for the task's mode and the project's web setting. */
-function powersLine(settings) {
-  if (settings.mode === "bypassPermissions") return "What you can do: this project runs in the owner's Bypass experiment: you may run commands, but keep every change inside this project folder.";
-  const web = settings.web === "off" ? "You cannot use the web in this project."
-    : `You may use WebFetch and WebSearch when the work needs it (research for the content, the client's website, a pull request)${settings.web === "ask" ? "; the owner is asked first and may say no: then go on without it (mixkit.co for the music is allowed without asking: fetch its pages, or search with site:mixkit.co)" : ""}.`;
-  // the web is for Claude's research; the film itself renders offline (G-REMOTE), which is a rule of the film, not of Claude
-  const offline = "The film itself renders offline: everything a composition loads (scripts, libraries, fonts, pictures, sound) must be a file inside the project, never a CDN or web URL. When this matters, say it that way (\"phim phải mang thư viện của nó bên trong project\"), never that you cannot use the web.";
-  return `What you can do: read and edit files in this folder only. You cannot run commands or install anything. ${web} ${offline}`;
-}
-
-/** The Brand Kit's fonts as the app can serve them: [{ family, available, vi }] from the project's frame.md;
- *  available: bundled, on Google Fonts or a font file in the project's assets; vi: true | false | null (not known). null without one. */
-export async function brandKitFonts(dir, { google } = {}) {
-  let text = ""; try { text = readFileSync(join(dir, "frame.md"), "utf8"); } catch { return null; }
-  const fams = frameFonts(text);
-  if (!fams.length) return null;
-  return checkFonts(dir, fams, { google });
-}
-/** Any fonts as the app can serve them in this project (Prepare once chose a font the film could not draw in Vietnamese, and
- *  only the checks an hour later said so): { families: [{ family, available, vi }] }, as brandKitFonts. */
-export async function checkFonts(dir, fams, { google } = {}) {
-  const files = [];
-  const walk = (x, depth) => { if (depth > 4) return; for (const n of (() => { try { return readdirSync(x); } catch { return []; } })()) {
-    const p = join(x, n); if (/\.(ttf|otf|woff2?)$/i.test(n)) files.push(n.toLowerCase().replace(/[^a-z0-9]/g, "")); else if (!/\./.test(n)) walk(p, depth + 1); } };
-  walk(join(dir, "assets"), 0);
-  // the film's own font files (a Brand Kit's, the owner's) answer for themselves, by the family name inside the file
-  let own = []; try { own = listLocalFonts({ dir: join(dir, "assets", "1_design", "fonts") }); } catch { /* no fontkit: by file name only */ }
-  const vc = await vietnameseCheck(fams, { ...(google ? { google } : {}), own });
-  return { families: vc.families.map((f) => {
-    const own = files.some((n) => n.includes(f.family.toLowerCase().replace(/[^a-z0-9]/g, "")));
-    // a family of the pinned list that was downloaded before: its letters were checked then (Google's "vietnamese" subset is not all of them)
-    const v = viVerified(f.family), lacks = v?.missing ? v.missing : null;
-    return { family: f.family, available: f.via !== "not on Google Fonts" || own, vi: lacks ? false : f.vi ?? null, ...(lacks ? { missing: lacks } : {}) };
-  }) };
-}
-
-/** The film's design. New project's Brand Kit field is "From brief" unless the user chose one there. A chosen Brand Kit wins for its
- *  parts (colours, type, layout) and the brief's design words for them are left aside (a brief that asks otherwise is a conflict: Claude
- *  stops and asks); the rest follows what the brief describes, or is Claude's to design when the brief says nothing. The chosen Brand Kit
- *  is written by the app into frame.md. */
-export function designLines(meta, dir, brandFonts = null) {
-  const has = (f) => !!dir && existsSync(join(dir, f));
-  if (meta.designLocked) {
-    const kit = meta.brandKitAsk?.id ? meta.brandKitAsk : null;
-    return [`Design: the style's author's own (its rules set the colours, type and layout); ${kit ? "no Brand Kit is applied to it" : "no Brand Kit is chosen for it"}. Brand colours, fonts or a look the brief or the chat asks for that differ from the author's are a conflict: stop, list each point with its choices and wait for the owner (moworks-studio §2b), then follow what they chose; apply a Brand Kit only when the owner asks, saying first what it changes.`,
-      // T25: the Brand Kit picked in New project was dropped without a word; it is kept for Prepare to ask about
-      ...(kit ? [`In New project the owner also chose the Brand Kit ${kit.title ? `"${kit.title}"` : kit.id}; this film style keeps its author's design, so the app did not apply it${kit.file && has(kit.file) ? ` (its design spec, a reference only: ${kit.file}; never copy it to frame.md)` : ""}. In Prepare, ask how to use it, as one numbered point with the step's other conflicts and gaps (moworks-studio §2b): name what in it differs from the author's design (colours, fonts, logo), then offer keep the author's design and leave the Brand Kit aside · its colours and fonts in the author's hand · only its logo (and end card), your suggestion first; wait, then follow what the owner chose and write it in docs/ASSETS.md.`] : []),
-      ...(kit?.files ? [`That Brand Kit's own files wait beside its spec, already in this project: ${[kit.files.logos?.length ? `logos ${kit.files.logos.map((x) => x.split("/").pop()).join(", ")} in .moworks/brand-kit/logos/` : "", kit.files.fonts?.length ? `fonts ${kit.files.fonts.map((f) => f.family).join(", ")} in .moworks/brand-kit/fonts/` : "", kit.files.guideline ? `its guideline, listed in ${kit.files.guideline}` : ""].filter(Boolean).join("; ")}. If the owner chooses to use them, copy_to_assets brings a file into the film; never ask the owner to add them.`] : [])];
-  }
-  const look = meta.look?.id ? meta.look : null;
-  const hint = "HyperFrames' frame presets are there as hints, as its references/look.md says (\"Presets\")";
-  if (!look) return [`Design: from the brief (no Brand Kit chosen): follow the design the brief describes (colours, type, look and feel, motion); what it leaves open is yours to design (${hint}). A brand guideline in the assets is followed (suggest the owner save it as a Brand Kit in the app).`];
-  const lines = [];
-  lines.push(look.frame && has("frame.md")
-    ? `Brand Kit chosen by the owner: ${look.title}: the film's colours, type and layout. The app wrote it to frame.md (HyperFrames' design spec): read it and design to it; never write or change frame.md. A brand guideline in the assets that differs from it is a conflict: stop and ask (moworks-studio §2b).`
-    : `Brand Kit chosen by the owner: ${look.title} (HyperFrames look ${look.id}; its files are in .moworks/library/looks/): the film's colours, type and layout. A brand guideline in the assets that differs from it is a conflict: stop and ask (moworks-studio §2b).`);
-  // what the app copied in from the Brand Kit: the film's own files, told apart from what the owner imports (never "files the owner just added")
-  const kitFiles = dir ? kitFilesOf(dir) : null;
-  if (kitFiles?.logos?.length || kitFiles?.fonts?.length) {
-    const folder = kitFiles.logos?.[0]?.split("/").slice(0, -1).join("/");
-    lines.push(`The Brand Kit's own files are already in this film, put there by the app when the film was made (not files the owner added, nothing to ask for): ${[
-      kitFiles.logos?.length ? `logos and pictures in ${folder}/: ${kitFiles.logos.slice(0, 40).map((x) => x.split("/").pop()).join(", ")}${kitFiles.logos.length > 40 ? ` (+${kitFiles.logos.length - 40})` : ""}; use these files, as frame.md's logo rules say, never redraw a logo` : "",
-      kitFiles.fonts?.length ? `fonts, declared in index.html and ready by their family names: ${kitFiles.fonts.map((f) => f.family).join(", ")}` : ""].filter(Boolean).join("; ")}.`);
-  }
-  if (kitFiles?.guideline) lines.push(`The guideline behind the Brand Kit is in this film too (${kitFiles.guideline} lists it; not files the owner added): where frame.md points to a page or does not answer, open that page; never guess a brand rule. frame.md's "Guideline checklist" is checked rule by rule (moworks-studio §2d).`);
-  // a Brand Kit value is never changed silently: a font with no Vietnamese letters, a font the app lacks or a colour asked to change is a
-  // stop, because a brand guideline matters and Claude asks before changing it
-  lines.push(`A Brand Kit value (a font, a colour) is never changed by you: a Brand Kit font that cannot draw the Vietnamese letters the film writes or that the app does not have, and a Brand Kit colour the brief, a guideline or the chat asks to change, are conflicts: stop and ask (moworks-studio §2b). For a font, offer 2-3 fonts that draw Vietnamese and the app can use, the nearest first, each with a short reason (bundled with the app: ${Object.keys(fontMap()).join(", ")}; or a Google Fonts family with Vietnamese), plus "upload the font file" when the app does not have it, plus "keep it and accept the missing accents" only when the font exists.`);
-  const bad = (brandFonts?.families ?? []).filter((f) => !f.available || f.vi === false);
-  if (bad.length) lines.push(`The app checked the Brand Kit's fonts: ${bad.map((f) => `${f.family}: ${!f.available ? "the app does not have it (no file in the project, not on Google Fonts)" : "it has no Vietnamese letters"}`).join("; ")}. Stop in Prepare with those choices before the storyboard. Nearest that draw Vietnamese, from the app's list of Google Fonts (each downloads when the film uses it): ${bad.map((f) => `for ${f.family}: ${viSuggest(f.family).map((x) => x.line).join("; ")}`).join(" | ")}.`);
-  // the motion, which the Brand Kit does not set, follows the brief
-  lines.push(`What the owner chose wins for its parts: leave the brief's design words for those parts aside (a brief that asks otherwise for one of them is a conflict: stop and ask, moworks-studio §2b). The rest (motion) comes from the brief: follow what it describes; what it leaves open is yours to design (${hint}).`);
-  return lines;
-}
-
-/** Pictures in the scene and actors: what Prepare checks in the brief, and what this style can do
- *  with an actor: its own character engine (Brush; anidoodle: people in its human-hand media, animals and things in all of them), a
- *  character drawn again in the film's design (with a word that it is redrawn), or, in Evidence Films and Edit & Documentary, none. */
-export const NO_REDRAW = ["Evidence Films", "Edit & Documentary"];
-export function actorsLine(meta) {
-  const id = String(meta?.style?.id ?? "");
-  if (!id) return "";
-  let s = null; try { s = getStyle(id); } catch { /* the style's words only */ }
-  const engine = id === "brush-cartoon" || !!anidoodleId(id) || !!s?.characters;
-  // the step that makes a new cast: Brush and every anidoodle medium have it; What If draws its cast on its own rig and has none. The
-  // reply never promises a step the film does not have (Test 21: "you will approve the three characters", and no step came)
-  let castStep = false; try { castStep = stylePipeline(id).some((x) => x.id === "character"); } catch { /* none */ }
-  const how = engine && castStep
-    ? "this style has its own character engine. When the brief has actors and none of them is in this film yet (docs/CHARACTERS.json, the characters the owner picked in New project), ask one question with three choices and stop: 1) pick them from the owner's library (the Characters page), 2) you make them with the Character creator, 3) go on without them (they appear as pictures in the scene). A character from the library used in its own author's style is never redrawn and never asked about again (#406). A new character is shown for approval only once its checks pass, and is approved once. When the owner chose that you make them, end Prepare by writing docs/CHARACTERS.json as {\"characters\": [ … ]} (that object, never a bare list: the app finds the cast there), one entry per new actor ({ \"id\", \"name\", \"about\", \"kind\": \"human\" | \"animal\" | \"thing\" }) plus the owner's library picks already in it: the app's Character step then makes them and the owner approves them once, before the Storyboard. Never make a character in the Storyboard or the Build (Test 11 #447)."
-      // the anidoodle-human value names anidoodle's engine for every actor; an animal's gate is its own rig
-      + (anidoodleId(id) ? " The Character step completes each entry. A person: no rig, its check \"check-<id>.ts\". An animal or a thing on anidoodle's engine: { id, name, about, engine: \"anidoodle-human\" (the app's name for anidoodle's engine, people and animals alike), kind: \"animal\" or \"thing\", rig: \"<id>\", import: \"./characters/<id>\", check: \"characters/<id>/check.ts\", hand }; its gate checks its own rig (bone lengths, its own joint ranges, planted feet), never the human limits." : "")
-    : engine
-      ? "this style draws its cast on its own rig, as its rules say, and has no Character step: a new actor is made on that rig with the film and is first seen on the storyboard, which the owner approves. Say so in one line; never promise a Character step or a separate approval of the characters."
-    : NO_REDRAW.includes(s?.category)
-      ? `this style's category (${s.category}) never redraws a character: an actor appears only from a real picture or footage the owner gave, else as a picture in the scene; say so in one line.`
-      : "this style has no character engine: an actor is drawn again in the film's own design (from the owner's saved character when there is one), and your reply says once that it is redrawn in this style, not the original.";
-  return `Pictures and actors (Prepare): sort the brief's people, animals and things into two kinds. Pictures in the scene (an object, a crowd, a figure that does not act) never stop the film: draw them in the style. Actors (a character who acts, speaks or is followed through the film): ${how} Never drop a character silently: when one cannot be an actor, say in one line in docs/ASSETS.md and in your reply how it appears instead.`;
-}
-
-/** The voices that can read this film's script here: a service with its key saved, and the free voice when it is installed and the film is
- *  not in Vietnamese (Kokoro has no Vietnamese voice: never named for such a film). */
-function voiceServices(meta, root) {
-  const out = [];
-  try { for (const [k, v] of Object.entries(secretsStatus(root))) if (v.saved) out.push(k === "elevenlabs" ? "ElevenLabs" : k); } catch { /* none */ }
-  try { if (!filmVietnamese(meta) && kokoroStatus(root).installed) out.push("Kokoro"); } catch { /* not there */ }
-  return out;
-}
-
-/** A What If film's narration as the app has it: a voice-over in the project, and whether a voice service can read the script. */
-export function narrationLine(meta, root = APP_ROOT) {
-  const keys = voiceServices(meta, root);
-  return `Narration (the app says): ${meta.voice?.file ? "a voice-over is in the project" : "no voice-over in the project yet"}; ${keys.length ? `a voice service can read the script (${keys.join(", ")})` : "no voice service is set up"}.`;
-}
-
-/** The characters already in the film: the user's saved ones come with their sheets; Claude uses them and never asks. */
-function castLine(dir) {
-  // saved characters given to a film without a character layer, as a reference to draw in the film's own design
-  const refDir = dir ? join(dir, "assets", "_app", "characters") : null;
-  const refs = refDir && existsSync(refDir) ? readdirSync(refDir).filter((n) => existsSync(join(refDir, n, "CHARACTER.md"))) : [];
-  const refLine = refs.length ? `The owner's saved characters for this film, as a reference: ${refs.map((n) => `assets/_app/characters/${n}/ (CHARACTER.md, poster and sheets)`).join("; ")}. Read each CHARACTER.md and look at its pictures, then draw the character in this film's own design (its Brand Kit, type, colours and motion), keeping its silhouette, distinguishing features and key colours. They are already here: never ask the owner to add them from the library.` : "";
-  if (!dir || !existsSync(docPath(dir, "CHARACTERS.json"))) return refLine;
-  let list = []; try { list = readCast(dir).characters ?? []; } catch { return ""; }
-  if (!list.length) return "";
-  const from = list.filter((c) => c.from?.library);
-  return `Characters already in this film (docs/CHARACTERS.json): ${list.map((c) => `${c.name ?? c.id}${c.from?.library ? " (from the owner's library)" : ""}`).join(", ")}.`
-    + (from.length ? " Use the ones from the owner's library as they are (their definitions and sheets stand): never ask whether to add, redraw or replace them; design only the characters the brief adds." : "")
-    // the author's rigged characters (Bit, the cheetah) come with their own rig, not the human engine
-    + (list.some((c) => c.rig && c.made === "as shipped") ? ` anidoodle's own rigged characters, as shipped: ${list.filter((c) => c.rig && c.made === "as shipped").map((c) => `${c.name ?? c.id} (rig ${c.rig}, import from ${c.import})`).join(", ")}. Pose them only through their own rig, never by hand; the cheetah's marks are this film's medium (her own painted look only when the owner asks), Bit keeps his own; a model sheet is anidoodle/films/sheet-<id>.ts with the rig's key poses (the anidoodle pack, §3e).` : "")
-    // an animal or a thing made for the film is on a rig of its own and checked by its own gate, never as a person
-    + (list.some((c) => c.rig && c.made !== "as shipped") ? ` Characters on a rig of their own, made for this film (not people): ${list.filter((c) => c.rig && c.made !== "as shipped").map((c) => `${c.name ?? c.id} (import from ${c.import ?? `./characters/${c.id}`}${c.check ? `, its gate anidoodle/${String(c.check).replace(/^anidoodle\//, "")}` : ", NO GATE YET"})`).join(", ")}. Pose them only through their rig; their gate checks that rig's own rules (bone lengths, its own joint ranges, planted feet), never the human limits (the anidoodle pack, §3e3).` : "")
-    + (list.some((c) => c.engine === "anidoodle-human" && !c.rig) ? ` Human characters on anidoodle's human engine: ${list.filter((c) => c.engine === "anidoodle-human" && !c.rig).map((c) => `${c.name ?? c.id} (import from ${c.import ?? c.module ?? `./characters/${c.id}`}${c.check ? `, its gate anidoodle/${c.check}` : ""}${c.needsPalette ? `; it has no palette for this film's hand${c.filmHand ? ` (${c.filmHand})` : ""}: add one in the film's copy, from its palette roles` : ""})`).join(", ")}. Pose them as the author's recipe says (references/workflows/character-consistency.md): toScene(pose, camera) with poses from the character's own library kept inside its joint limits, walks from footsteps (planWalk / walkAt), its palette for this film's hand; never redraw them by hand. Run the app's character_gate tool after changing a character: Build starts only when every gate passes.` : "");
-}
-
-/** The user's language: their last chat message, else the ones before, else their brief; Vietnamese letters → "vi", a
- *  sentence of English (3 words or more) → "en"; a short word with no accent ("ok", "B", "yes", "1") decides nothing (a reply
- *  of that kind once turned a Vietnamese chat to English), so the earlier messages and the brief do; none → "vi". */
-export function ownerLanguage(texts) {
-  for (const x of texts) {
-    const t = String(x ?? "").trim();
-    if (!t) continue;
-    if (/[ăâđêôơưàáạảãằắặẳẵầấậẩẫèéẹẻẽềếệểễìíịỉĩòóọỏõồốộổỗờớợởỡùúụủũừứựửữỳýỵỷỹ]/i.test(t)) return "vi";
-    if ((t.match(/[a-z]{2,}/gi) ?? []).length >= 3) return "en";
-  }
-  return "vi";
-}
-
-/** A task's reply language: the user's chat message, else their last chat message, else their brief. The words they typed (`shown`,
- *  not the notes the app wraps them in), never a step's prompt or a task the app itself sent in English (`by` "app": a fix after the
- *  characters' gate or the compiler, the brief changed, the voice's words corrected), which once turned the next steps English. */
-// the app's own prefilled requests, in English (Tech checks' "Fix with Claude", the Render's "Ask Claude to fix"): sent as they are, they are not
-// the owner's language (T40-16, T38b-19: Claude answered a Vietnamese film's owner in English)
-const APP_PREFILL = /^\s*(Fix this check finding|The render is blocked\. Fix only these issues)/;
-export function taskLanguage({ step = null, by = null, text = "", shown = null, earlier = [], brief = null }) {
-  const own = (s) => (s != null && APP_PREFILL.test(String(s)) ? null : s);
-  return ownerLanguage([(step || by === "app") ? null : own(shown ?? text), ...earlier.filter((x) => !x.step && x.by !== "app").map((x) => own(x.shown ?? x.text)).reverse(), brief]);
-}
-/** The language of Claude's words to the owner, said again where Claude writes them: at the end of every request and after each of the
- *  app's tools. The system prompt says it too, but after a long run of English (the rules, the code, the app's tools' answers) a step's
- *  notes and report came in English: the Build of Test 27 wrote "I've built the full 75 s film…" in a Vietnamese film whose every earlier
- *  step had answered in Vietnamese, its notes English from the first pose check on (T27-8). */
-export function replyLanguage(lang) {
-  return lang === "en"
-    ? "Write to the owner in English: every note between your tool calls and your report at the end."
-    : "Write to the owner in Vietnamese: every note between your tool calls and your report at the end, every sentence (the app's words, the rules and the tools' answers are in English; yours to the owner are not).";
-}
-/** The reminder after an app tool's answer (Vietnamese only: an English answer pulls the words that follow it into English). */
-export const toolReminder = (lang) => (lang === "en" ? "" : "(Your words to the owner stay in Vietnamese, the report at the end too.)");
-/** A task's request: the target, the Motion Library item, the pipeline, what is new, what came just before, the request itself, and
- *  the language of the replies last. */
-export function taskRequest({ target = "", motion = "", pipeline = "", news = "", before = "", msg, lang = "vi" }) {
-  return `${target}${motion}${pipeline ? `\n\n${pipeline}` : ""}${news ? `\n${news}` : ""}${before ? `\n\n${before}` : ""}\n\nRequest:\n${msg}\n\n${replyLanguage(lang)}`;
-}
-
-/** The film's length as Claude is told it (house rules §9): the content New project set, and the ending's fade after it or inside it. */
-export function lengthLine(meta, dir = null) {
-  const L = filmLength(meta, { dir });
-  if (!L.content) return "? s";
-  if (L.own) return `${L.content} s, the style author's own ending inside it (house rules §9: docs/MOTION-PLAN.json names it in ending.author and the last shot plays it, its row marked "ending": true; nothing added after it; the root's data-duration is ${L.total} s)`;
-  if (L.inside) return `${L.content} s exactly, the ending's ${L.fade} s fade inside it (the brief asks for no more: docs/MOTION-PLAN.json's ending.inside; the root's data-duration is ${L.total} s)`;
-  // an author's ending the plan only claims (T24-12: the picture stayed lit to its last frame and cut) is the house fade
-  const why = { style: "the film's style has no ending of its own", unnamed: "it names no ending of the author's (ending.author)", lastShot: "no row of its last shot plays it (\"ending\": true)" }[L.why];
-  const claimed = L.asked === "author" ? `docs/MOTION-PLAN.json's ending says "author" but ${why}, so the film ends with the house fade: the picture fades out with the music. ` : "";
-  return `${claimed}${L.content} s of content, then the ending's ${L.fade} s fade after it (house rules §9): the whole film, the root's data-duration, the storyboard's frames and the plan's shots add up to ${L.total} s. Only a brief that asks for exactly or at most ${L.content} s puts the fade inside it (docs/MOTION-PLAN.json's ending.inside: true)`;
-}
-
-export function systemPrompt({ meta, style, rules, first = [], qc = [], shots, dir, step = null, lang = "vi", motionSpec = true, settings = { mode: "auto", web: "off" }, tools = [], required = [], brandFonts = null }) {
-  const f = meta.format ?? {};
-  // the film's style as the catalog has it (prepareRules' style; looked up when not given): a style id the catalog does not have is
-  // a film with no style, so its name is not printed and no author's design is claimed for it
-  const known = style !== undefined ? style : (() => { try { return meta.style?.id ? getStyle(meta.style.id) : null; } catch { return null; } })();
-  const styleTitle = known ? meta.style?.title : null;
-  return [
-    "You are the production brain of Moworks Studio, a local motion graphics studio app. The working folder is one HyperFrames project:",
-    "index.html (root composition), compositions/*.html (one sub-composition per shot), STORYBOARD.md (HyperFrames storyboard format), assets/.",
-    `Project: "${meta.title ?? ""}". Format ${f.width ?? "?"}x${f.height ?? "?"} (${f.aspect ?? "?"}), ${f.fps ?? 30} fps (the root composition's data-fps="${f.fps ?? 30}" says so: keep it; frame-based timings are counted at this rate), target length ${lengthLine(meta, dir)}.`,
-    // the New project fields win over the brief, and Claude clarifies with the user when a field contradicts it
-    "The New project fields win over the brief: this format, rate and length, and the Brand Kit below. When the brief says otherwise for one of them (e.g. 16:9 or 60 fps against 9:16 and 30 fps here, another length, another brand's colours against the chosen Brand Kit), that is a conflict (moworks-studio §2b, owner 26/10): in one message, one numbered point per conflict with its choices as a bullet list under it (keep the New project field, follow the brief, a mix where it fits; your suggestion first), with every other conflict and missing thing of the step, then stop without writing BRIEF.md. When the owner picks the brief for the format, rate or length, call the app's project_format tool with the new values, then go on; for a design part, follow what they chose and write it in docs/ASSETS.md. No conflict: the fields, with no question.",
-    // the frame first (Style, then the design chosen), then the brief that goes into it
-    known ? `Style: ${meta.style.title} (${meta.style.source}).` : "No style chosen.",
-    ...designLines(known || !meta.style ? meta : { ...meta, designLocked: undefined }, dir, brandFonts),
-    castLine(dir),
-    !step || ["brief", "character"].includes(step) ? actorsLine(meta) : "",
-    meta.style?.id === "what-if" && (!step || step === "brief") ? narrationLine(meta) : "",
-    !step || step === "brief" ? voiceLine(meta) : "",          // making the voice here comes first when a key is saved
-    VOICE_SETTINGS_RULE,
-    (!step || step === "brief") ? linksLine(meta) : "",
-    step === "sound" ? musicLine(meta) : "",          // the style's own music palette and the story's arc
-    !step || ["brief", "storyboard", "motionSpec"].includes(step) ? lyricsLine(dir) : "",          // lyrics are timed by the app, never placed by guess
-    lyricVideoLine(meta, dir, step),          // a lyrics video: what it is held to, and the song's data
-    dir && isSongFilm(meta, { dir }) ? "This film is made for its song, and the song is what is heard: write `- sfx: none` and `- ambience: none` on every frame and `\"sound\": \"none\"` on every motion. The app places no sound effects and no ambience here. If the owner asks for some, call sfx_prefs with `on` first (house rules §7b)." : "",
-    researchLine(meta, dir, step),          // a product's features from the web: only after the owner's yes
-    // the owner put another voice in after Version 1 (owner #920): the Review says where the picture is off it, and re-times nothing by itself
-    step === "qcReview" && meta.voice?.replaced?.afterVersion1 ? `The owner replaced the voice-over after Version 1 (${String(meta.voice.replaced.from ?? "").split("/").pop()} became ${String(meta.voice.file ?? "").split("/").pop()}): the picture was timed to the old voice. In this Review, look for shots, words on screen and moves that are now off the new voice (Tech checks' G-SYNC measures the moves against its words) and say each one in docs/QC-REVIEW.md in one line, with its shot and time. Do not re-time the film for it unless the owner asks.` : "",
-    // a chat fix on a built film was once never looked at, and the user was told to render again though the app had
-    // already bundled the change and made the film's render again
-    !step && (meta.pipeline?.finished || meta.pipeline?.ran?.build) ? "A change you make to the built film in the chat: look at it before you reply. Call qc_sheets once (the app bundles the film as you left it first, in every film style: you can always see your change in this turn, so never say you cannot) and read the shots you changed; say what you saw, and fix what does not hold. After your turn the app makes the film ready to render again by itself (its preview and its checks): never tell the owner to render again or that the render is old; say the change is in the film and Render takes it." : "",
-    canvasTextLine(meta, dir, step),          // a canvas film's plain text in HTML over it, its performed text as the author ships it
-    meta.brief?.text ? `${meta.brief.mode === "script" ? "Brief (narration script)" : "Brief from the owner (one box: topic, idea, narration if any, notes, links, direction)"}: ${briefText(meta.brief.text)}` : "No brief yet.",
-    meta.brief?.direction ? `Direction from the owner: ${briefText(meta.brief.direction, 4000)}` : "",
-    // the film's kind (the brief's only kept answer): an anidoodle medium's own (config/anidoodle-pipeline.json) or one every style offers
-    // (What If, config/film-kinds.json)
-    (dir && ((k) => (k?.scope === "anidoodle" && !anidoodleId(meta.style?.id) ? "" : k?.says))(filmKind(dir))) || "",
-    meta.way?.id ? `Way of working the owner chose at the Assets analysis: ${meta.way.id}. ${INPUT_MODE[meta.way.id] ?? ""}`
-      : meta.inputMode ? `How to use the imported files: ${INPUT_MODE[meta.inputMode] ?? INPUT_MODE.auto}` : "",
-    meta.music?.file ? `Music: ${meta.music.file} is on the timeline (<audio id="el-music" data-timeline-role="music">, from 0 s)${meta.music.beats ? `; its beats, measured by HyperFrames, are in ${meta.music.beats}` : ""}. Time the film to it; never add another music element.` : "",
-    dir ? inputsBlock(dir) : "",
-    // the user chose not to use the voice-over; it stays a file, off the timeline (the voice_off tool), never only muted
-    meta.voice?.file && meta.voice.offTimeline ? `Voice-over: ${meta.voice.file} is off the timeline (the owner chose not to use it): the film has no narration; do not time the film to its words.`
-    : meta.voice?.file ? `Voice-over: ${meta.voice.file} (${meta.voice.info?.duration ?? "?"} s, ${meta.voice.source === "upload" ? "uploaded" : `read by ${meta.voice.source}`}). When the owner chooses not to use it, call the app's voice_off tool (it takes it off the timeline and keeps the file); never only mute it. ${meta.voice.transcript?.status === "saved"
-      ? "Its reviewed transcript is transcript.json (HyperFrames word timings: [{id, text, start, end}], seconds of the voice's file; they are film seconds only while the voice plays whole from 0. Cut or moved, its el-voice clips say where each part sits in the film: film time = the clip's data-start + word time - its data-media-start): time shots, captions and kinetic text to it; never edit it." + (meta.voice.from ? "" : " It is on the timeline already (<audio id=\"el-voice\">, from 0 s): never add another voice element.")
-      : "Its transcript is not reviewed yet: do not time the film to it until the owner saves it."}${meta.voice.transcript?.status === "saved" ? " With no SCRIPT.md, the transcript is the script." : ""}` : "",
-    voiceFitText(meta),          // a voice longer than the set length, or well short of it, is the user's choice: never a film stretched or a gap filled
-    rulesLine(rules, first, qc, dir, required),
-    // fewer turns: each turn re-reads the whole conversation
-    "Work in few turns: each turn re-reads the whole conversation. Put independent reads in one turn (several Read calls at once) and independent edits in one turn; never read a file again that you already read in this task unless it changed; never Glob or Grep for a rule file whose path you were given.",
-    limitLine(step),          // a reply that reaches its limit is lost whole (T23-2)
-    "Each pipeline step runs in its own conversation, so what an earlier step decided lives only in the project's files: read docs/NOTES.md and the",
-    "files of the earlier steps before you start, and write every decision a later step needs into docs/NOTES.md (one short dated line each) as you make it.",
-    `Project files now: ${projectFiles(dir).join(", ") || "none yet"}. The pipeline, what is new and the request come in the message.`,
-    `Shots now: ${shots.length ? shots.map((s) => `${s.number}. ${s.title} [${s.start ?? "?"}-${s.start != null && s.duration != null ? +(s.start + s.duration).toFixed(2) : "?"} s, ${s.src ?? "no file"}]`).join("; ") : "none"}.`,
-    powersLine(settings),
-    toolsLine(tools),
-    FONTS_LINE,
-    THREE_LINE,
-    FOLDERS_LINE,
-    // the tops of the letters showed at 0 s because the mask had padding and the rise was only yPercent 100
-    "Text that rises out of a clipping mask: give the mask no padding, or start the rise beyond 100% plus that padding, so no part of a letter shows before its entrance.",
-    "The app previews, renders, checks (HyperFrames lint, fonts, glyphs, remote URLs) and exports the film after your edits, and applies the studio's finalize rules.",
-    // a logo written as PNG%20Logo.png read as a missing file
-    "Write a file's path as its real name, letters and spaces as they are on disk (assets/1_design/images/PNG Logo.png), never URL-encoded (%20, %C3%A1).",
-    // Build once read the Motion step's five compositions again (106K, two of them twice); a file read twice is paid twice
-    "Read each file once in a task. To change part of a file you have read, Grep for that part and Edit it; never read the whole file again. A file you are about to rewrite whole needs no reading first.",
-    "Never mention or run hyperframes CLI, npx, kit.py or film.json. Keep every edit inside the requested scope; do not change other shots.",
-    "Files under .moworks/ are the app's: read .moworks/rules/ and .moworks/library/ but never edit anything under .moworks/ or .git/.",
-    // Claude Code's Glob does not follow a link from a pattern at the film's root (T28-14: "No files found" with the files there); Read, Grep and a Glob with `path` do
-    "Those two folders are links: to list or search in them, give the folder itself as Glob's or Grep's path (Glob with path .moworks/rules/hyperframes/references and pattern *.md). A Glob pattern from the film's root that goes through them answers \"No files found\" even when the files are there.",
-    "When the request is a question or needs the user's choice (an approval gate, missing information), answer or ask in text and change no file.",
-    motionSpec ? MOTION_PLAN_PROMPT : "",          // only styles whose pipeline has a motion spec
-    motionSpec ? MOTION_PLAN_SOUND : "",          // each motion row's own sound (house rules, "A sound on every action")
-    // a sound on every action (owner 30/10): the storyboard names them, the app places one for every action the names leave out
-    "Sound effects (the house rules, \"A sound on every action\"): every visible action of the film gets a sound and every scene that has a place a quiet ambience bed. Name them on each frame of STORYBOARD.md:",
-    "an `- sfx:` line with a short English name per action, comma-separated, at its moment (e.g. `- sfx: pop, door open@1.2, footstep wood@2`; `name@0.8` = 0.8 s into the shot; `none` = silent), and an `- ambience:` line with the place (`- ambience: rain`, `city street`, `room tone`, `forest night`; `none` for a shot with no place). Name what is heard, the thing and its sound (`thread rustle`, `wooden box lid`), never a motion verb alone (`pull`, `park`); the right sound first, however often it plays (#1113): a repeated action keeps its name, a different name only for a different sound.",
-    "Do not write <audio> elements for sound effects and do not edit assets/3_audio/sfx/ or docs/CREDITS.md: at Final Mix the app finds each sound (its offline library of CC0 sounds first, then free Freesound sounds, CC0 / CC BY), adds its own for every action the names leave out, places each at its moment at its family's level under the music and the voice, and credits it.",
-    "When the owner asks for no whoosh, fewer or more sounds, no ambience or silence, call the app's sfx_prefs tool (the app keeps the choice on every placement); editing `- sfx:` lines alone never stops the app's own sounds.",
-    "On a film whose sounds are already placed, the app places a `- sfx:` line you add or change in the chat by itself, a few seconds after your turn ends (finding the sound, its level, its credit). So tell the owner it will be in the mix in a moment; never say it is not in the mix, and never ask them to press Place them again. A sound the owner moved or took off on the timeline stays as they left it.",
-    // Answer in the language the user writes in, never from the UI's language or the app's own step messages (English).
-    // The app decides the language (Claude once chose per step and mixed them): one language in every reply
-    `Reply to the owner in ${lang === "en" ? "English" : "Vietnamese"} only (the language the owner writes in), every sentence of every reply; never mix languages in one reply. The app's own step messages are in English and do not change it.`,
-    "This is for your chat replies only: file names, code and comments stay in English, and the film's on-screen text and voice follow the film's language (below).",
-    // the film's language from the brief, or asked in Prepare when the brief does not say it; never a guess
-    filmLanguageLine(meta, step),
-    // frame titles once mixed the two languages ("Cáo asleep under the moon", "The workshop: 16 bước · 1 đội")
-    `The words the owner reads in the app's dialogs follow the same rule: the storyboard's frame titles and scene lines, each option's name, the Motion Plan's shot names and notes, a character's name and about line: in ${lang === "en" ? "English" : "Vietnamese"} only, never two languages in one title (a name the brief gives, a brand or a word on screen stays as it is).`,
-    // a note between tool calls showed live as "Now the engine code I need: the film contract, the page
-    // host, Mira's module…": every text you write is a reply the user reads at once, in any step and any film style
-    `Every line of text you write outside files, the short notes between your tool calls too, shows to the owner at once as your progress: write each in ${lang === "en" ? "English" : "Vietnamese"}, in plain words, saying who does what and why for the film (e.g. "${lang === "en" ? "I'm reading how the Storybook style draws and the author's Mira examples, so Mira comes out in the right hand." : "Tôi đang đọc cách vẽ kiểu Storybook và các mẫu Mira của tác giả để vẽ Mira đúng nét."}"). Never a file name, a path, code or the app's and engines' own words (contract, host, module, engine code, rig, gate, pipeline step ids) in them. Notes to yourself go in your thinking, not in text.`,
-    // short replies; never list the files read or written; "video style", never "skill"
-    "Keep replies short: at most about 60 words, 1-3 plain lines saying what you did; ask only what the pipeline needs from the owner.",
-    `No tables, no headings, no file names, never say which files you read or wrote, never say "skill" (say "film style${styleTitle ? ` ${styleTitle}` : ""}").`,
-    // one name per thing, the same as the app's menus, kept in English in a Vietnamese reply too
-    "Call the app's things by the names its screens use, in English as they are, in every language: Film style (the style the film is made in), Brand Kit (colours, type and layout of a brand), Motion Library, Characters, Storyboard, Motion Plan (never \"motion spec\"), Review (Claude's director's review of the film, never \"QC review\" or \"self-check\"), Tech checks, Final Mix, Render. The pipeline goes on by itself: never end a step asking the owner to tell you when to start the next one (the Storyboard starts by itself after Prepare), and write every sentence whole (Test 10 #442). The app runs the Tech checks again by itself after a change to a film that has failed them (and before a render): never ask the owner to run them, and never tell the owner to press a button or open a menu you have not seen on a screen (Test 10 #436).",
-    // questions the owner reads at a glance, in every style: each one short line, its choices a list under it (owner 30/10: choices run into one line were hard to read)
-    `When you ask the owner something: one line saying why you ask, then each question as one short line ending in a question mark, numbered 1., 2., 3. when there are several, and under it its choices as a bullet list, "- " at the start of each line, one choice a line, your suggestion first. Never write the choices inside the question's sentence, however a rule lists them (with "·" or numbers), and write nothing after the last choice. For example:\n1. ${lang === "en" ? "Which font for the title?" : "Tiêu đề dùng font nào?"}\n- **Oswald** (${lang === "en" ? "my suggestion: it has every Vietnamese letter" : "tôi gợi ý: đủ dấu tiếng Việt"})\n- Anton\n- ${lang === "en" ? "Upload the font file" : "Bạn tải file font lên"}`,
-    "Speak as \"tôi\" and call the owner \"bạn\". Every progress line says who does what and where the work stands: what you have finished, what you are doing now, what the owner gets and when to wait, e.g. \"Tôi đã đọc xong quy tắc và brief của bạn, giờ đang dựng 2 phương án storyboard A và B cho bạn duyệt, vui lòng chờ trong giây lát.\"",
-    "Write details and decisions into the project's files, not the chat. When you begin a long piece of work, say first in one such line what it is (e.g. \"Tôi đang dựng 4 shot theo motion bạn đã duyệt, xong tôi sẽ tự chấm và báo bạn.\").",
-    "In each message, bold 1-3 key words with Markdown **…**: an option's name (**A \"Đường sáng\"**), a number (**10 s**), the action the owner must take (**chọn A hoặc B**). Never bold a whole sentence; no other formatting.",
-  ].filter(Boolean).join("\n");
 }
 
 /** What Claude is doing now, for the Editor's progress (one line once stood 10-16 min and looked like a hang): a kind the UI words
@@ -960,43 +425,15 @@ export class Agent {
       // git beside the server's thread, in the project's queue (T22-5): every change asked for before is recorded first
       task.revBefore = await rev.saveAsync(dir, "Changes before Claude task " + task.id);
       task.briefAt = briefAt(dir, meta);
-      const { style, files: rules, first, qc } = prepareRules(dir, meta.style?.id, this.root);
+      // the style's rules and its own sources for this step, as the Writers' Room's and the Thumbnails' labs stage them (rules.mjs stageFor)
+      const { style, files: rules, first, qc, staged } = stageFor(dir, meta.style?.id, { step, root: this.root });
       const { shots } = await this.readShots(dir);
       if (meta.look?.id && !scope.motion) { try { stageLook(dir, meta.look.id, this.root); } catch { /* the look store is not imported: the name is enough */ } }
-      // a Lemo-Opuscar style's demo source, from the build on (its own rule: the treatment first, the demo only to learn techniques)
-      // (a style cut from real material has its demo's material tools from the first step: AGENTS.md, "Treatment first")
-      const lemoId = lemoSlug(meta.style?.id);
-      if (lemoId && ["build", "qcReview"].includes(step) && !existsSync(join(dir, ".moworks", "library", "lemo", lemoId, "DEMO.md"))) {
-        try { const st = stageLemoDemo(dir, lemoId, this.root); this.event(task, { kind: "status", text: `Lemo-Opuscar demo: ${st.item.en}` }); } catch { /* the style's rules are enough */ }
-      } else if (lemoId && !existsSync(join(dir, ".moworks", "library", "lemo", lemoId))) {
-        try { const st = stageLemoDemo(dir, lemoId, this.root, { toolsOnly: true }); if (st.files.length) this.event(task, { kind: "status", text: `Lemo-Opuscar material tools: ${st.item.en}` }); } catch { /* none */ }
-      }
-      // an mg-styles-15 style's demo source, from the build on
-      const mgId = mgSlug(meta.style?.id);
-      if (mgId && ["build", "qcReview"].includes(step) && !existsSync(join(dir, ".moworks", "library", "mg", mgId, "CREDIT.md"))) {
-        try { const st = stageMgDemo(dir, mgId, this.root); this.event(task, { kind: "status", text: `mg-styles-15 demo: ${st.item.en}` }); } catch { /* the style's rules are enough */ }
-      }
-      // an anidoodle medium: the pinned engine and the author's guides from the first step (the engine draws every board and the film)
-      if (anidoodleId(meta.style?.id)) {
-        try { if (stageAnidoodle(dir, this.root).files.length) this.event(task, { kind: "status", text: "anidoodle engine staged" }); } catch { /* the rules are enough */ }
-      }
-      // the What If animation style: the pinned engine, its settings, the two worked episodes and the cast sheet, from the first step
-      if (meta.style?.id === "what-if") {
-        try { if (stageWhatIf(dir, this.root).files.length) this.event(task, { kind: "status", text: "What If engine staged" }); } catch { /* the rules are enough */ }
-      }
-      // the Map Explainer style: the shared engine, the page to start from and the worked example, from the first step; the engine beside the film's page too, so a Build can see its frames before the app's finish
-      if (meta.style?.id === MAP_STYLE_ID) {
-        try { if (stageMapGuide(dir).files.length) this.event(task, { kind: "status", text: "map engine staged" }); placeMapEngine(dir); } catch { /* the rules are enough */ }
-      }
-      // the owner's film styles (Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, 2D Explainer, Ricks Clip): the source skill as shipped and the page to start
-      // from, from the first step; the engine and the faces beside the film's page too once it has one, so a Build can see its frames before the app's finish
-      if (isMoworksStyle(meta.style?.id)) {
-        try { if (stageStyleGuide(dir, meta.style.id, this.root).files.length) this.event(task, { kind: "status", text: "the film style's source skill staged" }); await placeStyle(dir, "index.html").catch(() => null); } catch { /* the rules are enough */ }
-      }
-      // the Brush cartoon style: the character layer (its guide, the layer's code, an example definition; never clawd.js) from the first step
-      if (meta.style?.id === "brush-cartoon") {
-        try { if (stageBrushGuide(dir, this.root).files.length) this.event(task, { kind: "status", text: "character layer staged" }); } catch { /* the rules are enough */ }
-      }
+      for (const text of staged) this.event(task, { kind: "status", text });
+      // the Map Explainer's engine, and the owner's styles' engine and faces, beside the film's page too once it has one, so a Build can see its
+      // frames before the app's finish
+      if (meta.style?.id === MAP_STYLE_ID) { try { placeMapEngine(dir); } catch { /* the staged engine is enough */ } }
+      if (isMoworksStyle(meta.style?.id)) await placeStyle(dir, "index.html").catch(() => null);
       const pipeline = this.pipeline ? await this.pipeline(projectId).catch(() => "") : "";
       const prev = this.list(projectId).filter((x) => x.id !== task.id).at(-1);
       const news = readNotes(dir).filter((n) => !prev || (n.updatedAt ?? n.at) > prev.createdAt).map((n) => n.kind === "assets" ? `the owner added ${n.files?.length ?? 0} file(s): ${(n.files ?? []).slice(0, 20).join(", ")}` : n.text.replace(/\{(\w+)\}/g, (m0, k) => n.vars?.[k] ?? m0));
@@ -1044,6 +481,7 @@ Size: the owner is editing the ${sizeTo} size: change its root page index.${size
           + " These are words and numbers, not code to paste: write the move with GSAP on the shot's own paused timeline from them (ease, durations, amounts scaled to the film's size).";
         this.event(task, { kind: "status", text: `Motion Library: ${staged.item.title}` });
       }
+      motion += pickedCastLine(scope.characters);
       // the user's language (taskLanguage), kept on the task for the reminder after each app tool
       const lang = taskLanguage({ step, by, text: msg, shown, earlier: this.list(projectId).filter((x) => x.id !== task.id), brief: meta.brief?.text });
       task.lang = lang;
@@ -1054,6 +492,12 @@ Size: the owner is editing the ${sizeTo} size: change its root page index.${size
       // the rule files this step must read (reads.mjs, after HF's own mandatory reads): named in the prompt, checked before the first edit
       const required = requiredReads(dir, { styleId: meta.style?.id, first, step });
       task.requiredReads = required;
+      // an app file the step should read and cannot (a rules file renamed, a source not staged): in the log and on the task, never dropped in silence
+      const missing = missingReads(dir, { styleId: meta.style?.id, first, step });
+      if (missing.length) {
+        task.missingReads = missing; console.error(`[rules] ${meta.style?.id ?? "no style"} ${step ?? "chat"}: not found ${missing.join(", ")}`);
+        this.event(task, { kind: "status", text: missingLine(missing.length) });          // said in the chat too, without a path (audit/112 3.3)
+      }
       // the Brand Kit's fonts, checked by the app before Prepare and the chat: a font it lacks or without Vietnamese stops
       const brandFonts = meta.look?.id && (!step || step === "brief")
         ? await Promise.race([brandKitFonts(dir), new Promise((ok) => setTimeout(() => ok(null), 8000))]).catch(() => null) : null;
@@ -1068,12 +512,9 @@ Size: the owner is editing the ${sizeTo} size: change its root page index.${size
       try { mkdirSync(stage, { recursive: true }); } catch { /* the rules were copied: nothing to read there */ }
       const webGuard = this.permitUrl ? `"${process.execPath}" "${join(import.meta.dirname, "web-guard.mjs")}"` : null;
       const args = claudeArgs({ settings, systemPromptFile: spFile.path, sessionArgs, mcpConfig, appTools: tools, guard, webGuard, stage });
-      const pins = loadPins(this.root);
-      const env = claudeEnv();
-      for (const k of Object.keys(env)) if (/^ANTHROPIC_(API_KEY|AUTH_TOKEN|BASE_URL)$/i.test(k) || (pins.stripEnv ?? []).includes(k.toUpperCase())) delete env[k];
-      // Claude's Bash sees this environment: never the app's session token (MW_TOKEN of a dev or test start), only the permit token,
-      // which the server takes for Claude's questions and the app's tools alone
-      delete env.MW_TOKEN;
+      // Claude's Bash sees this environment: the owner's sign-in only, never the app's session token (MW_TOKEN of a dev or test start), only
+      // the permit token, which the server takes for Claude's questions and the app's tools alone (system-status/claude-run.mjs)
+      const env = claudeRunEnv(this.root);
       Object.assign(env, { MW_REQUIRED_READS: JSON.stringify(required), MW_TASK: task.id, MW_PROJECT: dir });
       // the most one reply of this step may hold, its thinking included (Opus 5.5's thinking has no budget of its own: output-limit.mjs)
       const cap = outputCap(step);
@@ -1387,7 +828,7 @@ Size: the owner is editing the ${sizeTo} size: change its root page index.${size
     t.status = "cancelling"; t.stage = "cancelling";
     this.closeQuestions(taskId);
     const c = this.procs.get(taskId);
-    if (c) spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true });
+    if (c) killTree(c);
     return t;
   }
 
@@ -1436,121 +877,11 @@ Size: the owner is editing the ${sizeTo} size: change its root page index.${size
 /** Fresh eyes (moworks-qc §5): a separate short Claude run that sees only the given sheets (its folder is the QC round's), says in one
  *  sentence what the film tells and lists the 3 worst problems. Returns the text, or null when it could not run. */
 export async function freshEyes({ dir, sheets, root = APP_ROOT, model = "sonnet" }) {
-  const exe = findClaude(root);
-  if (!exe || !sheets.length) return null;
-  const env = claudeEnv();
-  for (const k of Object.keys(env)) if (/^ANTHROPIC_(API_KEY|AUTH_TOKEN|BASE_URL)$/i.test(k)) delete env[k];
+  if (!findClaude(root) || !sheets.length) return null;
   const names = sheets.map((f) => f.split("/").pop());
   const prompt = `You see a short film only as these contact sheets (read each with Read): ${names.join(", ")}. The beats sheet is one still per shot in order; the cuts sheet shows 4 frames across each shot change; a long film has more pages of each (beats-2, cuts-2…), in order. You know nothing else about the film. Answer in Vietnamese, in two parts: 1) one sentence: what does this film tell its viewer? 2) the 3 worst problems you see (which shot or cut, what, why), most serious first. Nothing else.`;
-  const args = ["-p", "--output-format", "json", "--restricted", "--tools", "Read", "--permission-mode", "auto", "--permission-prompts", "none", "--strict-mcp-config",
-    "--disable-slash-commands", "--model", MODELS.find(([k]) => k === model)?.[2] ?? "claude-sonnet-5-5", "--effort", "low", "--no-session-persistence"];
   const cwd = join(dir, ...sheets[0].split("/").slice(0, -1));
-  return new Promise((ok) => {
-    const c = spawn(exe, args, { cwd, env, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
-    let out = "";
-    const t = setTimeout(() => c.kill(), 5 * 60 * 1000);
-    c.stdout.on("data", (d) => { out += d; });
-    c.stderr.resume();
-    c.stdin.end(prompt, "utf8");
-    c.on("close", () => { clearTimeout(t); try { const j = JSON.parse(out); ok(j.is_error ? null : String(j.result ?? "").trim() || null); } catch { ok(null); } });
-    c.on("error", () => ok(null));
-  });
+  const r = await claudeJson(prompt, { cwd, root, tools: "Read", mode: "auto", model: MODELS.find(([k]) => k === model)?.[2] ?? "claude-sonnet-5-5", effort: "low", timeoutMs: 5 * 60 * 1000 });
+  return r.ok ? r.result || null : null;
 }
 
-/** The Google Slides links the app could not read : a missing thing for Prepare, with the two ways on. */
-export function linksLine(meta) {
-  const bad = Object.entries(meta?.links ?? {}).filter(([, v]) => v && !v.ok);
-  if (!bad.length) return "";
-  const why = (r) => (r === "not-shared" ? "not shared by link (Google answered with its sign-in page)" : r === "not-found" ? "no deck at this link" : r === "too-large" ? "over 300 MB" : "Google could not be reached");
-  return `Google Slides links in the brief the app could not read: ${bad.map(([url, v]) => `${url} (${why(v.reason)})`).join("; ")}. Each is a missing thing (moworks-studio §2b): offer the ways on (in Google Slides, Share › Anyone with the link, then say "done"; or upload the deck as a PPTX with the Assets button; or go on without it) with the other points in one message, and stop.`;
-}
-
-// the voice settings stay the user's choice (Claude once told the user to set speed 0.85)
-// T40-4: Prepare offered "a second voice for Em", which the Voice screen cannot make
-const ONE_VOICE_RULE = "The Voice screen makes one voice for the whole voice-over: never offer or plan a second voice made in the app. A character's line is read by the narrator (a delivery tag may colour it), or the owner records it and uploads it with the Assets button; offer only those.";
-const VOICE_SETTINGS_RULE = "The voice's settings (speed, stability and the rest) are the owner's to set on the Voice screen and start at the voice service's own defaults: never set, suggest or name a number for them unless the owner asks.";
-
-/** The brief as Claude reads it, whole (BRIEF_MAX, the longest the app keeps): Test 24's 4,369-character brief was cut at 4,000, inside
- *  its voice-over script, and Prepare wrote the script's first 9 of 12 lines as "the brief's script verbatim". A longer one says where
- *  the app cut it, so nothing past it is taken for the end. */
-export function briefText(text, max = BRIEF_MAX) {
-  const s = String(text ?? "");
-  return s.length <= max ? s : `${s.slice(0, max)}\n[The app cut the brief here: ${(s.length - max).toLocaleString("en")} more characters are not shown. Tell the owner the brief is too long to read whole and ask for the rest in the chat.]`;
-}
-
-// Test 24: the brief carried a 12-line voice-over script ("dùng đúng nguyên văn"); Prepare put 9 lines in VOICEOVER.md, left the rest
-// "to the screen text", wrote "the brief's script verbatim" and "No conflict", and asked nothing
-const OWN_SCRIPT_RULE = "A script the owner wrote (the brief's voice-over script, \"lời đọc\" or \"kịch bản\", or a brief that is the script) is read word for word: docs/VOICEOVER.md holds every line of it as the owner wrote it, in its order, nothing left out, merged, reworded or moved to the words on screen (ElevenLabs delivery tags added in square brackets change no word: moworks-studio §6d). Shortening it, splitting it, dropping a line or moving lines to the screen is a conflict (moworks-studio §2b): say what you would change and why, offer the choices as a bullet list (the whole script as written, your shorter version with its changed lines named, the lines you would put on screen instead), and stop until the owner chooses. Never call a script you changed \"verbatim\" or \"as written\", in BRIEF.md, docs/NOTES.md or your reply.";
-
-/** The ways to a voice-over the app offers, in every style (with the ElevenLabs key saved, Prepare once offered only "record and
- *  upload" or "no narration"; Claude once asked for a speed the Voice screen did not have). Empty when the film already has one. */
-export function voiceLine(meta, root = APP_ROOT) {
-  if (meta?.voice?.file) return "";
-  const keys = voiceServices(meta, root);
-  return `${keys.length
-    ? `Voice-over (the app says): none in the project yet, and ${keys.join(" and ")} ${keys.length > 1 ? "are" : "is"} set up. When the brief already says which way (e.g. the voice made in the app), take it without asking (QC4-4). A film with a narration (made here or recorded by the owner) gets its words to read in docs/VOICEOVER.md, the words with their delivery tags when ElevenLabs makes the voice (moworks-studio §6d), one line per scene: the app then holds the Storyboard until the voice is made and its words are timed, so the Storyboard is timed to them in one pass (D39); never ask the owner to tell you when it is made. A film with no narration gets no docs/VOICEOVER.md. When the brief wants a narration and does not say how, offer the ways on in this order: 1) make it here: the owner opens the Voice screen, picks a voice (a Vietnamese one for Vietnamese) and the app reads the script with ${keys.join(" or ")}${!keys.includes("Kokoro") && !filmVietnamese(meta) ? " (the Voice screen also offers the free voice Kokoro, which it installs there: no account, no Vietnamese)" : ""}; you write the words to read into docs/VOICEOVER.md (the words only, one line per scene: the Voice screen's Script box is filled with them); 2) upload a recording with the Assets button; 3) no narration.`
-    : `Voice-over (the app says): none in the project yet, and no voice service is set up. When the brief wants a narration, offer the ways on: upload a recording with the Assets button, add an ElevenLabs key in Settings › System › Voice-over${filmVietnamese(meta) ? "" : " or install the free voice Kokoro on the Voice screen (no account; it has no Vietnamese)"} to make it here, or no narration. A film with a narration (made here or recorded by the owner) gets its words to read in docs/VOICEOVER.md, the words only, one line per scene: the app then holds the Storyboard until the voice is made and its words are timed, so the Storyboard is timed to them in one pass (D39); never ask the owner to tell you when it is made. A film with no narration gets no docs/VOICEOVER.md.`} ${OWN_SCRIPT_RULE} ${ONE_VOICE_RULE}`;
-}
-
-/** A product's features from the web: Prepare asks, the yes opens the search, the facts and their sources are docs/RESEARCH.md for every later step (moworks-studio §2c). */
-export function researchLine(meta, dir, step = null) {
-  const r = meta?.research?.answer ?? null, wrote = !!dir && existsSync(docPath(dir, "RESEARCH.md"));
-  if (r === "not-product" || (r === "no" && step !== "brief")) return r === "no" ? "The owner said no to searching the web for the product: work from what they gave you." : "";
-  if (r === "no") return "The owner said no to searching the web for the product: work from what they gave you, and write no feature or figure they did not give.";
-  if (r === "yes" && wrote) return ["storyboard", "motionSpec", "build", "qcReview", null].includes(step) ? "The product's facts from the web, each with its source, are in docs/RESEARCH.md: a product film's Storyboard carries supers of its strongest features from them without being asked (moworks-studio §2c); every figure on screen is one of its rows, and a Brand Kit's or a guideline's rules on claims win over it." : "";
-  if (r === "yes") return "The owner said yes to searching the web for the product: moworks-studio §2c. Do it now, before anything that depends on it: write docs/RESEARCH.md, then go on.";
-  return !step || step === "brief" ? "If this film shows a product the owner brought (a product showcase or launch; a brief or files that name a product): moworks-studio §2c: unless the chat or docs/NOTES.md already has their answer, ask in this step's message whether the app may search the web for its features, and record the answer with the product_research tool. Never search for it before their yes." : "";
-}
-/** A lyrics video, said where the step works (style-catalog/traits.mjs): the rules it is held to, and the song's data. Empty for every other film. */
-export function lyricVideoLine(meta, dir, step = null) {
-  if (!dir || !isLyricVideo(meta, { dir })) return "";
-  const map = existsSync(docPath(dir, "BEATMAP.md"));
-  const data = ["storyboard", "motionSpec", "build"].includes(step)
-    ? (map ? " The song's beat map is docs/BEATMAP.md: beats, bars, hits, kicks and sections, in seconds; every shot, move and word of this step sits on it, and your rows name the beat, bar or hit they land on." : " The app has no beat map yet: the film has no song on it, or several songs and nobody said which. Ask, as moworks-studio §2b says.") : "";
-  // no lyrics yet: Prepare stops and asks, with what Whisper heard as a draft (moworks-studio §2b); a brief that says no lyrics needs no answer
-  let hasLyrics = false; try { hasLyrics = !!readFileSync(join(dir, "lyrics.txt"), "utf8").trim(); } catch { /* none */ }
-  const heard = heardDraft(dir, null);
-  const ask = hasLyrics || briefRefusesLyrics(meta.brief?.text) || !["brief", null].includes(step) ? ""
-    : ` The owner has given no lyrics${heard ? (heard.unheard ? `, and Whisper could hardly hear the song (${heard.words} words)` : `; Whisper heard ${heard.words} words, a rough draft that is in the Lyrics dialog for them to correct`) : ""}. Unless the chat or docs/NOTES.md already has their answer, this is a missing thing (moworks-studio §2b): in this message, ask them to give or correct the lyrics in the Lyrics dialog, or to choose a film with no sung words, and stop. Never fit words to the beats by guess.`;
-  return `This film is a lyrics video (a song and its words, cut to the beat): .moworks/rules/moworks-alive/lyric-video.md holds, in any film style, and its rules are stricter than moworks-alive §2.${data}${ask}`;
-}
-/** The user's lyrics (lyrics.txt) are placed only by the app's timing (LYRICS-TIMED.md, .moworks/lyrics/words.json), never by guess (Claude once
- *  planned to place each line on the beat for a song with no singing). Untimed or timed
- *  before the lyrics changed: say what the user presses and stop. Empty when the film has no lyrics. */
-export function lyricsLine(dir) {
-  let text = "", timedAt = null, textAt = 0;
-  try { text = readFileSync(join(dir, "lyrics.txt"), "utf8").trim(); textAt = statSync(join(dir, "lyrics.txt")).mtimeMs; } catch { return ""; }
-  if (!text) return "";
-  try { timedAt = Date.parse(JSON.parse(readFileSync(join(dir, ".moworks", "lyrics", "words.json"), "utf8")).at); } catch { /* not timed */ }
-  if (timedAt && textAt <= timedAt + 1000) return "The owner's lyrics are timed by the app: LYRICS-TIMED.md (each line's start) and .moworks/lyrics/words.json (each word). Place every line exactly at its time there; never move a line by guess.";
-  return "The owner gave lyrics (lyrics.txt) and the app has not timed them yet" + (timedAt ? " (they changed after the last timing)" : "") + ". Never place lyrics by guess, on the beat or anywhere, even for a track with no singing: the app times them to the track. Tell the owner in one line to open Lyrics and press Time the lyrics (it needs the music track in the film first), and stop; the storyboard places the lines once LYRICS-TIMED.md is there.";
-}
-
-/** The sound section of the film style's own file (its author's sound palette: music, foley, mix), "" when it has none, null when the
- *  style cannot be read. The music step and the sound effects follow it. */
-export function styleSound(meta, root = APP_ROOT) {
-  // the owner's film styles have no style file of their own: their pack (config/rules/<style>) holds their sound rules (owner #909)
-  let text = ""; try { const s = getStyle(meta?.style?.id, root); const r = s?.rules?.find((x) => /-style$/.test(x.kind) && x.path) ?? (MOWORKS_STYLE_IDS.includes(s?.id) ? s.rules?.find((x) => x.kind === "moworks-rule" && x.name === s.id && x.path) : null); text = r ? readFileSync(r.path, "utf8") : ""; } catch { return null; }
-  return /^#{2,3}[^\n]*(sound|music|audio)[^\n]*\n([\s\S]*?)(?=^#{1,3}\s|(?![\s\S]))/im.exec(text)?.[2] ?? "";
-}
-
-/** The style author's own music line (its sound palette), for the music step (once three wedding harps were chosen for an HD-2D adventure whose
- *  palette is strings, horns, low choir and timpani with an arc). Empty when the style's file has no sound section. */
-export function musicLine(meta, root = APP_ROOT) {
-  const sec = styleSound(meta, root);
-  if (sec == null) return "";
-  const music = sec.split(/\r?\n/).map((l) => l.replace(/[*_`]/g, "").replace(/^\s*[-•]\s*/, "").trim()).filter((l) => /^music\b|music:/i.test(l)).join(" ").slice(0, 600);
-  const palette = music ? `The style's author on the music: "${music}" ` : "";
-  return `${palette}Choose the three tracks for the story's arc (its opening, its rise, its climax and the quiet before the hit), searching mixkit.co by the palette's instruments and that arc (e.g. "cinematic", "adventure", "epic", "fantasy"), not by one instrument alone; three different moods for the owner to choose from, never a piece made for another occasion (a wedding, a baby, a corporate presentation) (Test 13 #479).`;
-}
-
-/** The film's language: the voice-over and the words on screen, set from the brief or by the user's answer. When nobody said
- *  it, Prepare (and a chat turn before it is set) asks it with its other questions and records it with film_language. */
-export function filmLanguageLine(meta, step = null) {
-  const id = meta?.language?.id;
-  // Test 24: a CRT film's inverted status strips showed "NHAT KY · TRAM HON GIO", and neither the Build nor the Review saw it
-  if (id) return `The film's language (the voice-over and every word on screen): ${id === "en" ? "English" : "Vietnamese"}.${id === "en" ? ""
-    : " Every Vietnamese word on screen keeps every mark, in every film style: an ASCII, CRT, monospace, pixel or all-caps look is never a reason to drop them, and a band, strip, highlight or inverted cell behind the text leaves room for the marks above and below (moworks-studio §4). The app's checks name on-screen text written without its marks."}`;
-  if (step && step !== "brief") return "The film's language is not set yet: write the words on screen in the brief's language and ask the owner in your reply which language the film speaks.";
-  return "The brief does not say the film's language. Ask it with your other questions in one message (moworks-studio §2b): \"Lời đọc và chữ trên phim: tiếng Việt hay tiếng Anh?\" (Vietnamese first when the owner writes Vietnamese), and stop; when the owner answers, call film_language with vi or en before you go on.";
-}

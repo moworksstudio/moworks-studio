@@ -2,7 +2,7 @@
 // order, "Anidoodle (35)" with "by Alex Greenshpun" and its tag; each style is a sleeve standing tilted on the crate's shelf, lifted on
 // hover and pulled out on a click. The style in hand develops on the light table on the left (blue pencil, ink, colour in 0.9 s) with the
 // same details as The Desk (description, what it is built with, warnings, used for, demo film, credit) and its actions. The label maker
-// searches, the paper tabs pick a category, Vietnamese letters is a chip. What If (FreshStack) waits in its own crate as "Coming soon".
+// searches, the paper tabs pick a category, Vietnamese letters is a chip.
 // Same data as The Desk's gallery (GET /api/styles/list); the crates fit the window and each turns sideways with the wheel (wheel.js).
 import { useMemo, useState } from "react";
 import { Check, Plus, Search, X } from "lucide-react";
@@ -12,7 +12,7 @@ import { useT } from "../i18n.jsx";
 import { AuthorName } from "../authors.jsx";
 import { styleRank, STYLE_ROWS } from "../styleRows.js";
 import AeBadge from "../workflow/AeBadge.jsx";
-import { ApplyStyleDialog, DemoLink, StyleDetails, WHAT_IF, authorOf, authorsOf, catLabel, catOf, markTall, thumbOf, usesOf, useStyles } from "../screens/StyleGallery.jsx";
+import { ApplyStyleDialog, DemoLink, StyleDetails, authorOf, authorsOf, catLabel, catOf, markTall, thumbOf, usesOf, useStyles } from "../screens/StyleGallery.jsx";
 
 const CAT_ORDER = STYLE_ROWS.map(([c]) => c);
 
@@ -29,7 +29,7 @@ function hit(s, q, cat, vn) {
 function Crate({ a, ss, cur, onPick }) {
   return <div className="st-crate" style={{ "--n": ss.length, flexGrow: ss.length + 4 }}>
     <div className="st-box"><div className="st-sleeves">{ss.map((s) => <Sleeve key={s.id} s={s} on={cur?.id === s.id} onPick={onPick} />)}</div>
-      <div className="st-plate"><AuthorName a={a} count={a.comingSoon ? false : ss.length} /></div></div>
+      <div className="st-plate"><AuthorName a={a} count={ss.length} /></div></div>
   </div>;
 }
 /** Shelves of even weight: an author with many styles fills a row of its own, the authors with few share one row (in their order). */
@@ -44,10 +44,9 @@ function rowsOf(crates) {
 function Sleeve({ s, on, onPick }) {
   const t = useT();
   return <button type="button" className="st-sleeve" aria-pressed={on} onClick={() => onPick(s)} title={t(s.title)}>
-    {s.comingSoon ? <span className="st-wi" aria-hidden="true">What If</span>
-      : thumbOf(s) ? <img src={thumbOf(s)} alt="" loading="lazy" decoding="async" onLoad={(e) => markTall(e.currentTarget)} ref={(el) => { if (el?.complete) markTall(el); }} />
+    {thumbOf(s) ? <img src={thumbOf(s)} alt="" loading="lazy" decoding="async" onLoad={(e) => markTall(e.currentTarget)} ref={(el) => { if (el?.complete) markTall(el); }} />
       : <span className="st-noimg"><NoPreview /></span>}
-    <span className="st-cap">{t(s.title)}{(s.comingSoon || catOf(t, s)) && <small>{s.comingSoon ? t("Coming soon") : catOf(t, s)}</small>}</span>
+    <span className="st-cap">{t(s.title)}{catOf(t, s) && <small>{catOf(t, s)}</small>}</span>
     {s.warnings?.length > 0 && <span className="st-warn" title={t("Read before use")}>!</span>}
     <AeBadge s={s} compact />
   </button>;
@@ -62,31 +61,30 @@ export default function StyleCrates() {
   const [cat, setCat] = usePref("studio:styles:cat", "");
   const [vn, setVn] = usePref("studio:styles:vn", "all");
   const [apply, setApply] = useState(null);
-  const soon = (data?.comingSoon ?? []).map((x) => ({ ...WHAT_IF, ...x, author: x.author === "FreshStack" ? "freshstack" : x.author, available: false, comingSoon: true }));
-  const styles = useMemo(() => (data ? [...data.styles, ...(soon.length ? soon : data.styles.some((s) => s.id === "what-if") ? [] : [WHAT_IF])] : []), [data]); // eslint-disable-line react-hooks/exhaustive-deps
+  const styles = useMemo(() => data?.styles ?? [], [data]); // eslint-disable-line react-hooks/exhaustive-deps
   const authors = useMemo(() => authorsOf(data), [data]);
   const A = useMemo(() => Object.fromEntries(authors.map((a) => [a.id, a])), [authors]);
   const rank = useMemo(() => styleRank(styles), [styles]);
-  const cats = useMemo(() => [...new Set(styles.filter((s) => !s.comingSoon).map((s) => s.category).filter(Boolean))]
+  const cats = useMemo(() => [...new Set(styles.map((s) => s.category).filter(Boolean))]
     .sort((a, b) => (CAT_ORDER.indexOf(a) + 1 || 99) - (CAT_ORDER.indexOf(b) + 1 || 99) || a.localeCompare(b)), [styles]);
   const vnKnown = styles.some((s) => s.vnFont != null);
-  const shown = styles.filter((s) => (s.comingSoon ? !cat && vn === "all" && (!q || "what if freshstack".includes(q.toLowerCase())) : hit(s, q, cat, vn)));
+  const shown = styles.filter((s) => hit(s, q, cat, vn));
   const crates = authors.map((a) => [a, shown.filter((s) => authorOf(s) === a.id).sort((x, y) => (rank.get(x.id)?.[0] ?? 99) - (rank.get(y.id)?.[0] ?? 99) || (rank.get(x.id)?.[1] ?? 999) - (rank.get(y.id)?.[1] ?? 999))])
     .filter(([, ss]) => ss.length);
   const cur = shown.find((s) => s.id === curId) ?? styles.find((s) => s.id === curId) ?? shown[0] ?? null;
-  const total = styles.filter((s) => !s.comingSoon).length, n = shown.filter((s) => !s.comingSoon).length;
+  const total = styles.length, n = shown.length;
   const clear = () => { setQ(""); setCat(""); setVn("all"); };
 
   return <div className="st-room st-styles">
     <div className="st-head"><h1>{t("Film Styles")}</h1><span className="st-aside">{t("How a whole film is made and how it looks, by author.")}</span></div>
-    {projectId && <Banner kind="info">{t("Choosing a new film style for this project.")}</Banner>}
+    {projectId && <Banner kind="info">{t("Choosing a new film style for this production.")}</Banner>}
     {error && <Banner kind="error" action={<button className="btn sm" onClick={reload}>{t("Retry")}</button>}>{error.message}</Banner>}
     {loading && !data ? <div className="st-digs" role="status" aria-label={t("Loading film styles…")}><div className="st-table st-viewer st-skel" /><div className="st-skel" /></div>
       : data && <div className="st-digs">
         <aside className="st-table st-viewer studio-paper" aria-live="polite" aria-label={cur ? t("Film style: {title}", { title: cur.title }) : t("Film style")}>
           {cur ? <div className="st-develop" key={cur.id}><StyleDetails s={cur} author={A[authorOf(cur)]} actions={<>
-            <button className="btn primary" onClick={() => go(`/new?style=${cur.id}`)} disabled={cur.available === false}><Plus size={15} />{cur.comingSoon ? t("Coming soon") : t("Use this film style")}</button>
-            {projectId && <button className="btn" onClick={() => setApply(cur)} disabled={cur.available === false}><Check size={14} />{t("Use in this project")}</button>}
+            <button className="btn primary" onClick={() => go(`/new?style=${cur.id}`)} disabled={cur.available === false}><Plus size={15} />{t("Use this film style")}</button>
+            {projectId && <button className="btn" onClick={() => setApply(cur)} disabled={cur.available === false}><Check size={14} />{t("Use in this production")}</button>}
             <DemoLink s={cur} /></>} /></div>
             : <p className="st-hand">{t("Choose a film style to see it here.")}</p>}
         </aside>

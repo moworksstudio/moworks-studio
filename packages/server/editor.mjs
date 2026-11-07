@@ -2,8 +2,10 @@
 // HyperFrames' source mutation (packages/hf-edit/handEdit.mjs), the timeline the Editor draws (shots, voice-over lines, sound effects,
 // music with its waveform), a still of the frame on screen saved into the project, and the font lists of the edit card.
 // Nothing here edits while Claude works on the same project (409 CLAUDE_BUSY): the user's edit and Claude's would cross.
+import { VI_MARKED_RE } from "../hf-qa/vi-letters.mjs";
+import { lookAt } from "../hf-qa/look.mjs";
 import { aspectOfTag, extraSizes, sizeStage } from "../project-service/sizes.mjs";
-import { readLanes, readMuted } from "../sfx/lanes.mjs";
+import { LANES, LANE_MAX_DB, LANE_MIN_DB, readLanes, readMuted } from "../sfx/lanes.mjs";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -13,7 +15,7 @@ import { isStarter } from "../pipeline/index.mjs";
 import * as hand from "../hf-edit/handEdit.mjs";
 import { readState as readSfxState, shiftPlaced, soundTitles } from "../sfx/index.mjs";
 import { soundMoved } from "../sfx/added.mjs";
-import { fitEffects } from "../sfx/voicefit.mjs";
+import { fitEffects } from "../sfx/mix/index.mjs";
 import { turnsPerFilm } from "./sounds.mjs";
 import { listLocalFonts, useLocalFont } from "../hf-edit/localFonts.mjs";
 import { declaredFamilies, finalize, fontMap, htmlFiles, usedFamilies } from "../hf-edit/finalize.mjs";
@@ -24,24 +26,31 @@ import * as library from "../library/index.mjs";
 import * as codeText from "../hf-edit/codeText.mjs";
 import { freshFilm } from "../hf-edit/codeFilm.mjs";
 import { codeGlyphs } from "../hf-qa/codeGlyphs.mjs";
+import { readJson } from "../util/json.mjs";
 
 const r3 = (n) => Math.round(n * 1000) / 1000;
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
 
 /** The folders of a project that hold the user's own font files (assets/1_design/fonts; older projects: 4_fonts, fonts/). */
 const fontDirs = (dir) => ["assets/1_design/fonts", "assets/4_fonts", "assets/fonts"].map((x) => join(dir, ...x.split("/"))).filter((d) => existsSync(d));
 
-/** Findings of the last Checks run that name a moment of the film: dots on the timeline (a click jumps there). */
-function qcDots(dir) {
+/** Findings of the last Tech checks that name a moment of the film: dots on the timeline (a click jumps there). Tech checks' own verdict
+ *  (hf-qa/look.mjs lookAt, as its sheet and the Pipeline's row read it): what stops the render and the warnings; never a finding the Review
+ *  kept on purpose or the check mis-measured ("It's OK"), a check that did not run or ran out of time, nor the report of an earlier build
+ *  (lastQa: the film's last checks; its revision must be the report's). audit/112c c8.1: the dot at 0:00 of Test 41 said "a problem" the
+ *  sheet had under "It's OK" (owner's question Q-c5 left open: none, as the audit proposed). */
+export function qcDots(dir, lastQa) {
   const last = readJson(join(dir, ".moworks", "cache", "qa", "last.json"), null);
-  if (!last?.checks) return [];
+  const gates = last?.checks ?? last?.gates;
+  if (!lastQa || !Array.isArray(gates) || (lastQa.revision && last.revision !== lastQa.revision)) return [];
+  const look = lookAt({ checks: gates }), stops = new Set(look.blocking.map((c) => c.id));
   const out = [];
-  for (const c of last.checks) for (const f of c.findings ?? []) {
+  for (const c of [...look.blocking, ...look.warnings, ...look.visual.filter((x) => !x.intended)]) for (const f of c.findings ?? []) {
+    if (f.intended || f.artefact) continue;
     const t = Number(f.time ?? f.t ?? f.at ?? f.seconds ?? NaN);
-    if (Number.isFinite(t)) out.push({ time: r3(t), check: c.id, title: c.title, blocking: !!c.blocking, text: String(f.message ?? f.text ?? f.summary ?? f.id ?? "").slice(0, 200),
+    if (Number.isFinite(t)) out.push({ time: r3(t), check: c.id, title: c.title, blocking: stops.has(c.id), text: String(f.message ?? f.text ?? f.summary ?? f.id ?? "").slice(0, 200),
       ...(f.plain ? { plain: f.plain } : {}), shot: f.shot ?? null });          // the user's line, and the shot it is in
   }
-  return out.slice(0, 200);
+  return out.sort((a, b) => a.time - b.time).slice(0, 200);
 }
 
 /** A film style's own captions are on: the 3D Cartoon source skill's vo.ts (`export const CAPTIONS = true`, its ToonCaptions over the canvas). */
@@ -67,7 +76,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
   const inTurn = (ctx.soundTurn ??= turnsPerFilm());
   const busySound = (id) => {
     busy(id);
-    if (ctx.jobs?.list?.({ kind: "mix-sfx" }).some((j) => j.projectId === id && j.status === "running")) throw new HttpError(409, "BUSY", "The sound effects are being placed: change this one when that finishes");
+    ctx.mix?.soundBusy?.(id, "change this one");          // the sound effects being placed (server/mix.mjs)
   };
 
   return { routes: [
@@ -147,7 +156,7 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
       if (font) {
         const { checkFonts } = await import("../agent/index.mjs");
         const f = (await checkFonts(p.path, [font]))?.families?.[0];
-        const vi = /[ăâđêôơưàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/iu.test(item.text);
+        const vi = VI_MARKED_RE.test(item.text);
         if (!f?.available) throw new HttpError(422, "NOT_EDITABLE", `${font} is not a font the app can get here (bundled, on Google Fonts or a file in the project's fonts)`);
         if (vi && f.vi === false) throw new HttpError(422, "NOT_EDITABLE", `${font} has no Vietnamese letters${f.missing ? ` (${f.missing})` : ""}: choose a font that draws them`);
       }
@@ -263,13 +272,13 @@ export function editorRoutes(ctx, { r, P, mustProject, HttpError }) {
         shots: mounted.map((x) => ({ number: x.number, index: x.index, title: x.title, start: x.start, duration: x.duration, src: x.src, mountId: x.mountId,
           rate: rates[x.src] ?? 1, ...(x.planned ? { planned: true } : {}) })),
         voice: voiceOn,
-        levels: readLanes(p.path),
+        levels: readLanes(p.path), lanes: [...LANES], laneRange: [LANE_MIN_DB, LANE_MAX_DB],          // the page keeps no copy (112a B12)
         muted: readMuted(p.path),
         audio: clips.map((c) => ({ id: c.id, hfId: c.hfId, src: c.src, start: c.start, duration: c.duration, lane: laneOf(c), gains: c.gains, track: c.track, name: (c.src ?? "").split("/").pop(), title: titles.get(c.src) ?? null, effect: effect(c) })),
         sfx: clips.filter((c) => !c.role && /\/sfx\//.test(c.src ?? "")).map((c) => ({ start: c.start, duration: c.duration, name: (c.src ?? "").split("/").pop().replace(/\.[^.]+$/, "") })),
         music: music ? { start: music.start, duration: music.duration, name: (music.src ?? "").split("/").pop(), peaks: musicPeaks } : null,
         captions,
-        qc: qcDots(p.path),
+        qc: qcDots(p.path, p.meta?.lastQa),
       };
     }),
     // a sound on the timeline: moved (start, lane) or taken off (the file stays in Assets); HF's own source mutation (handEdit.mjs)

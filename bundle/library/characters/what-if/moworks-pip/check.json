@@ -1,0 +1,22 @@
+{
+  "passed": 16,
+  "failed": 0,
+  "lines": [
+    "PASS  imports only the What If engine (\"what-if\")",
+    "PASS  one export: CHARACTER",
+    "PASS  deterministic: no random numbers, no clock",
+    "PASS  no words on the character (a film writes its own; never a brand)",
+    "PASS  nothing loaded from elsewhere",
+    "PASS  the file builds with the What If engine",
+    "PASS  the file exports CHARACTER",
+    "PASS  the character's id is its file's name",
+    "PASS  a name of 1-40 letters",
+    "PASS  about: one line on who it is (10-300 letters)",
+    "PASS  its real height in metres (heightM, 0.5-2.3)",
+    "PASS  its size on the rig (scale, 0.5-1.2: the cast is 0.68-0.82)",
+    "PASS  look: every colour of the rig's Look as #rrggbb",
+    "PASS  look: an extra piece the rig draws, or none (hood, curls, bunches, bob, suit)",
+    "PASS  a shipped character's id takes the prefix moworks-",
+    "PASS  every view (front, three-quarter, profile, back), face and pose of the sheet draws"
+  ]
+}

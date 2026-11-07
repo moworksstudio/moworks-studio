@@ -44,6 +44,9 @@ The kit itself is not modified.
 13. Check frames: one in every shot (`index.mjs`), read when AE has finished writing them.
 14. After the build AE closes the project in the work folder and opens the copy in the output folder (footage found beside it, saved so the links stay); the work folder
     keeps only `port.json` and the logs (`MW_AE_KEEP_WORK=1` keeps it all, for `--rebuild`).
+15. The kit's `kit.py ae --jsx` (a script on the project open in AE): `fix()` and `FIX_JSX` removed, the app never called them; the file's head
+    describes the app's run, not the kit's (audit/112d d12). After Effects' answer is read by its own words (`ae_failed`: a line that starts with
+    ERROR, or the build's FAILED end line), never by the word ERROR anywhere in the log, which a layer named after the film's words can hold (d9).
 
 Not taken: the kit's `engine/render/serve.py` (copied first as `port/serve.py`, later removed because nothing used it; the export uses
 HF's file server).

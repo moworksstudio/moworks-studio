@@ -5,9 +5,9 @@
 // two reminders about After Effects' state merged into one line), and "Check size" read out as a sentence with its key numbers in bold.
 import { useEffect, useState } from "react";
 import { AlertTriangle, CheckCircle2, Clapperboard, FolderOpen, Gauge, Loader2, RefreshCw, Square, XCircle, Info } from "lucide-react";
-import { get, post, watchJob } from "../api.js";
+import { get, post } from "../api.js";
 import { Banner, Dialog, StatusIcon } from "../components.jsx";
-import { ago, go, locale, useData, useToast } from "../lib.jsx";
+import { ago, go, locale, useData, useToast, useJobWatch } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 import { stampedPreview } from "../workflow/RenderSheet.jsx";
 import AeBadge, { AE_STATE, aeLevel } from "../workflow/AeBadge.jsx";
@@ -91,6 +91,7 @@ export function BuiltLine({ layers: b }) {
 }
 
 export default function PortAE({ id, setCrumbs = () => {} }) {
+  const watch = useJobWatch();          // its job watches stop with it (audit/112c c5.1)
   const t = useT();
   const toast = useToast();
   const project = useData(() => get(`/api/projects/${id}`), [id]);
@@ -100,11 +101,11 @@ export default function PortAE({ id, setCrumbs = () => {} }) {
   const [job, setJob] = useState(null);
   const [est, setEst] = useState(null);
   const [ask, setAsk] = useState(false);
-  useEffect(() => { setCrumbs(project.data ? [t("Projects"), project.data.title, t("Export to AE")] : null); }, [project.data, t]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setCrumbs(project.data ? [t("Productions"), project.data.title, t("Export to AE")] : null); }, [project.data, t]); // eslint-disable-line react-hooks/exhaustive-deps
   // the frame rate is the film's, everywhere: shown, never chosen here, and not sent; the server exports at the film's rate
   const fps = st.data?.fps ?? project.data?.meta?.format?.fps ?? 30;
   useEffect(() => { const r = st.data?.jobs.find((j) => j.status === "running"); if (r && r.id !== job?.id) follow(r); }, [st.data]); // eslint-disable-line react-hooks/exhaustive-deps
-  const follow = (j) => { (j.kind === "ae-estimate" ? setEst : setJob)(j); watchJob(j.id, (x) => { if (!x) return; (x.kind === "ae-estimate" ? setEst : setJob)(x); if (x.status !== "running") st.reload(); }, 1500); };
+  const follow = (j) => { (j.kind === "ae-estimate" ? setEst : setJob)(j); watch(j.id, (x) => { if (!x) return; (x.kind === "ae-estimate" ? setEst : setJob)(x); if (x.status !== "running") st.reload(); }, 1500); };
   const start = async (estimate) => { setAsk(false); try { follow(await post(`/api/projects/${id}/ae`, { estimate })); } catch (e) { toast(e.message, "error"); st.reload(); } };
   const stop = async (j) => { try { await post(`/api/jobs/${j.id}/cancel`); } catch (e) { toast(e.message, "error"); } };
   const reveal = (path) => post(`/api/projects/${id}/files/reveal`, { path }).catch((e) => toast(e.message, "error"));
@@ -145,7 +146,7 @@ export default function PortAE({ id, setCrumbs = () => {} }) {
       <div className="ae-acts">
         <AeBadge s={style} />
         <button className="btn" onClick={() => start(true)} disabled={!built || est?.status === "running" || !!running} title={t("Measures the film and says how long the real export takes")}>{est?.status === "running" ? <Loader2 size={14} className="spin" /> : <Gauge size={14} />}{t("Check size")}</button>
-        <button className="btn primary" onClick={() => setAsk(true)} disabled={!built || !d.running || !!running}><Clapperboard size={16} />{t("Export to AE")}</button></div>
+        <button className="btn primary" onClick={() => setAsk(true)} disabled={!built || !d.running || !!running || est?.status === "running"}><Clapperboard size={16} />{t("Export to AE")}</button></div>
     </section>
 
     {running && <section className="panel" aria-label={t("Progress")}>
@@ -181,7 +182,7 @@ export default function PortAE({ id, setCrumbs = () => {} }) {
         : size?.kind === "mostly-canvas" ? <p><b>{t("Most of the picture is drawn on a canvas:")}</b> {t("it comes as pictures; the other layers can be edited.")}</p>
         : !size && d.canvas > 0 ? <p><b>{t("This film draws on a canvas:")}</b> {t("what is drawn there comes as video or pictures, not as layers you can edit.")}</p> : null}
       {/* each export goes into its own folder named for the film and the date and time it was made (the server's stampedName) */}
-      <p className="hint">{t("{fps} fps. Saved with the project in a folder named like {name}; Show in folder opens it when it is done.", { fps, name: stampedPreview(projectName, "") })}</p>
+      <p className="hint">{t("{fps} fps. Saved with the production in a folder named like {name}; Show in folder opens it when it is done.", { fps, name: stampedPreview(projectName, "") })}</p>
     </Dialog>}
   </div>;
 }

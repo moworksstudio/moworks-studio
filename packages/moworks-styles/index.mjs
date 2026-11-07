@@ -18,6 +18,7 @@ import { ensureShared, linkOrCopy, sharedDir } from "../project-service/shared-s
 import { buildStyleFilm, transcriptWords } from "./build.mjs";
 import { declareTwins, twinnedIn } from "./fonts.mjs";
 import { CAMTIME, CAST_LAYER, FILM_DIR, buildRicksFilm } from "./ricks.mjs";
+import { C3D_CAST } from "./build.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 /** The styles whose films may time their camera to the voice's words with the app's camtime.js (owner #1267). */
@@ -67,7 +68,7 @@ export function stageGuide(projectDir, styleId, root = APP_ROOT) {
   }
   // Ricks Clip: the app's cast layer (the three views and the pose layer) beside its page, and Ricks Clip and 3D Cartoon: the app's camera timed to
   // words (camtime.js, #1267), for Claude to read (the film's bundle takes them from the app)
-  const own = [...(s.engine === "module" ? [CAST_LAYER] : []), ...(CAMTIME_STYLES.includes(styleId) ? [CAMTIME] : [])];
+  const own = [...(s.engine === "module" ? [CAST_LAYER] : []), ...(CAMTIME_STYLES.includes(styleId) ? [CAMTIME] : []), ...(styleId === "cartoon-3d" ? [C3D_CAST] : [])];
   for (const from of own) {
     const n = basename(from), b = join(to, n);
     if (!(existsSync(b) && statSync(b).mtimeMs >= statSync(from).mtimeMs)) { mkdirSync(to, { recursive: true }); copyFileSync(from, b); files.push(`.moworks/library/${styleId}/app/${n}`); }
@@ -109,8 +110,8 @@ export function skillReads(styleId) {
       brief: [sk("cartoon-video/SKILL.md"), sk("cartoon-shorts/SKILL.md"), sk("cartoon-shorts/references/SCRIPT.md"), sk("cartoon-shorts/references/FORMATS.md"), sk("cartoon-whatif/SKILL.md"),
         sk("cartoon-whatif/references/SCRIPT.md"), sk("cartoon-whatif/references/FORMATS.md"), sk("cartoon-whatif/references/EPISODES.md"), sk("idea-lab/SKILL.md"), sk("cartoon-video/references/VOICE.md"), ...LOOK.slice(0, 1)],
       storyboard: [...LOOK, sk("cartoon-video/references/PIPELINE.md"), sk("character-builder/SKILL.md"), ...ex.slice(0, 2)],
-      motionSpec: [...LOOK, `${lib}/app/camtime.js`],
-      build: [...LOOK, sk("cartoon-video/references/PIPELINE.md"), sk("character-builder/SKILL.md"), ...ex, `${lib}/app/camtime.js`],
+      motionSpec: [...LOOK, `${lib}/app/camtime.js`, `${lib}/app/c3d-cast.ts`],
+      build: [...LOOK, sk("cartoon-video/references/PIPELINE.md"), sk("character-builder/SKILL.md"), ...ex, `${lib}/app/camtime.js`, `${lib}/app/c3d-cast.ts`],
       review: [...out.review, sk("render-review/SKILL.md")] },
     "paper-collage": {
       brief: [sk("motion-graphic/SKILL.md"), sk("motion-graphic/references/VOICE.md"), LOOK[0]],
@@ -167,6 +168,13 @@ export const SKILL_UNREAD = Object.freeze({
 /** Which of the owner's film styles a page runs: the data-skill on its root (#main; an older film's data-kit too), or null. */
 export const pageStyle = (html) => { const m = /<[^>]+\bdata-(?:skill|kit)=["']([a-z0-9-]+)["']/.exec(String(html ?? "")); return m && isMoworksStyle(m[1]) ? m[1] : null; };
 const same = (from, to) => { try { const a = statSync(from), b = statSync(to); return a.size === b.size && b.mtimeMs >= a.mtimeMs; } catch { return false; } };
+/** Does the film's cast hold a 2D Explainer library character in a palette of its own (docs/CHARACTERS.json, opts.pal)? */
+function castHasPalette(projectDir) {
+  for (const f of [join(projectDir, "docs", "CHARACTERS.json"), join(projectDir, "CHARACTERS.json")]) {
+    try { const j = JSON.parse(readFileSync(f, "utf8")), list = Array.isArray(j) ? j : j?.characters ?? []; return list.some((c) => c?.engine === "explainer-2d" && c?.opts?.pal && Object.keys(c.opts.pal).length); } catch { /* none here */ }
+  }
+  return false;
+}
 const put = (from, to, rel, out) => { if (!existsSync(from) || same(from, to)) return; mkdirSync(dirname(to), { recursive: true }); copyFileSync(from, to); out.push(rel); };
 
 /** R-SKILL: the style's engine, own files, twinned faces and the voice's words in the project's assets/_app/ (a board's stills see them through the
@@ -184,8 +192,17 @@ export async function placeStyle(projectDir, pageRel = "index.html", { root = AP
   let build = null, faces = [...new Set([...s.faces, ...twinnedIn(html)])];
   if (s.engine === "page") {
     // 2D Explainer: the engine as shipped (ex/), GSAP, and story words as the engine reads them (window.STORY_WORDS, from transcript.json)
-    for (const n of readdirSync(join(src.dir, "engine")).filter((n) => /\.js$/.test(n))) put(join(src.dir, "engine", n), join(pageDir, own, "ex", n), rel(`${own}/ex/${n}`), files);
+    const keyed = castHasPalette(projectDir);
+    for (const n of readdirSync(join(src.dir, "engine")).filter((n) => /\.js$/.test(n) && !(keyed && n === "house-hero.js"))) put(join(src.dir, "engine", n), join(pageDir, own, "ex", n), rel(`${own}/ex/${n}`), files);
     put(gsapFile(root), join(pageDir, own, "ex", "gsap.min.js"), rel(`${own}/ex/gsap.min.js`), files);
+    // a cast with a library character in a palette of its own (#1302): the hero's copy keys its materials by the palette too (the two
+    // splices of house/explainer-2d-hooks.mjs paletteKeyed), so each character keeps its colours; any other film runs the file as shipped
+    if (keyed) {
+      const { paletteKeyed } = await import("./house/explainer-2d-hooks.mjs"), to = join(pageDir, own, "ex", "house-hero.js");
+      const text = paletteKeyed(readFileSync(join(src.dir, "engine", "house-hero.js"), "utf8"));
+      let was = null; try { was = readFileSync(to, "utf8"); } catch { /* first time */ }
+      if (was !== text) { writeFileSync(to, text); files.push(rel(`${own}/ex/house-hero.js`)); }
+    }
     const text = `window.STORY_WORDS = ${JSON.stringify(transcriptWords(projectDir))};\n`, w = join(pageDir, own, "words.js");
     let was = null; try { was = readFileSync(w, "utf8"); } catch { /* first time */ }
     if (was !== text) { mkdirSync(dirname(w), { recursive: true }); writeFileSync(w, text); files.push(rel(`${own}/words.js`)); }

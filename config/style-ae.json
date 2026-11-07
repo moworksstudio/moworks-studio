@@ -1444,214 +1444,220 @@
  },
  "failed": {
   "lemo-archive-lighttable": {
-   "demo": "lemo-opuscar/styles/archive-lighttable/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/archive-lighttable/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['missing assets/tex/p1.jpg']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-briefing-board": {
-   "demo": "lemo-opuscar/styles/briefing-board/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/briefing-board/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['The source image cannot be decoded.']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-caption-news": {
-   "demo": "lemo-opuscar/styles/caption-news/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/caption-news/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['missing assets/img/doc1.jpg']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-chalkboard": {
-   "demo": "lemo-opuscar/styles/chalkboard/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/chalkboard/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) [\"Cannot read properties of null (reading 'getAttribute')\"]",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-circuit-board": {
-   "demo": "lemo-opuscar/styles/circuit-board/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/circuit-board/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['A network error occurred.']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-city-symphony": {
-   "demo": "lemo-opuscar/styles/city-symphony/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/city-symphony/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): playwright._impl._errors.Error: Page.evaluate: TypeError: Cannot read properties of null (reading 'querySelectorAll')",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-dark-keynote": {
-   "demo": "lemo-opuscar/styles/dark-keynote/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/dark-keynote/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) []",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-data-physical": {
-   "demo": "lemo-opuscar/styles/data-physical/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/data-physical/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['fetch for \"the film's page\" responded with 404: Not Found']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-kino-montage": {
-   "demo": "lemo-opuscar/styles/kino-montage/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/kino-montage/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) [\"Cannot read properties of null (reading 'width')\"]",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-lidar-survey": {
-   "demo": "lemo-opuscar/styles/lidar-survey/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/lidar-survey/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['Event']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-living-screencast": {
-   "demo": "lemo-opuscar/styles/living-screencast/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/living-screencast/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) []",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-microscope": {
-   "demo": "lemo-opuscar/styles/microscope/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/microscope/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['missing assets/plates/slide.png']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-news-package": {
-   "demo": "lemo-opuscar/styles/news-package/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/news-package/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['assets/plate_datacenter.jpg']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-newsreel": {
-   "demo": "lemo-opuscar/styles/newsreel/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/newsreel/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['Unexpected token \\'N\\', \"Not found\" is not valid JSON']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-paper-popup": {
-   "demo": "lemo-opuscar/styles/paper-popup/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/paper-popup/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['fetch for \"the film's page\" responded with 404: Not Found']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-printed-long-take": {
-   "demo": "lemo-opuscar/styles/printed-long-take/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/printed-long-take/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['A network error occurred.']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-satellite-briefing": {
-   "demo": "lemo-opuscar/styles/satellite-briefing/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/satellite-briefing/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['image assets/plates/world.jpg']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-spy-titles": {
-   "demo": "lemo-opuscar/styles/spy-titles/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/spy-titles/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['Unsupported OpenType signature Not ']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-teardown": {
-   "demo": "lemo-opuscar/styles/teardown/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/teardown/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['fetch for \"the film's page\" responded with 404: Not Found']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-visual-investigation": {
-   "demo": "lemo-opuscar/styles/visual-investigation/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/visual-investigation/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['Unexpected token \\'N\\', \"Not found\" is not valid JSON']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-watercolor": {
-   "demo": "lemo-opuscar/styles/watercolor/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/watercolor/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['The source image cannot be decoded.']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "lemo-white-model": {
-   "demo": "lemo-opuscar/styles/white-model/demo@ea34ff9",
-   "source": "ea34ff9546f675f9fd65a3c84e869a1da7471ad7",
+   "demo": "lemo-opuscar/styles/white-model/demo@bebbbe1",
+   "source": "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00",
    "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['Event']",
    "sources": [
-    "ea34ff9546f675f9fd65a3c84e869a1da7471ad7"
+    "bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00"
    ],
-   "at": "2026-10-29"
+   "at": "2026-11-07"
   },
   "mg-03-isometric": {
-   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['Unsupported OpenType signature Not ']",
    "demo": "mg-styles-15/demos/03-isometric@49052d8",
    "source": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
-   "at": "2026-10-27"
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) ['Unsupported OpenType signature Not ']",
+   "sources": [
+    "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c"
+   ],
+   "at": "2026-11-07"
   },
   "mg-05-cel-boil": {
-   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) []",
    "demo": "mg-styles-15/demos/05-cel-boil@49052d8",
    "source": "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c",
-   "at": "2026-10-27"
+   "error": "no size check (PORT_FAILED): HyperFrames runtime not ready within 60 s (window.__hf.seek / duration) []",
+   "sources": [
+    "49052d80bfaf9fa8412cc9710530e5e95a3b8d8c"
+   ],
+   "at": "2026-11-07"
   }
  }
 }

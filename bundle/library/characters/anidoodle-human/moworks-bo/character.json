@@ -1,0 +1,88 @@
+{
+  "id": "moworks-bo",
+  "name": "Bơ",
+  "about": "Bơ is a small, quick, stubborn seven-year-old girl with a black bowl cut and blunt fringe, a little red fish hair clip, freckled round cheeks, big curious eyes and a gap-toothed grin, in a coral-red T-shirt, navy shorts, too-big banana-green wellies and a cream lunch bag slung across her body.",
+  "engine": "anidoodle-human",
+  "kind": "human",
+  "heightM": 1.15,
+  "heightBy": "inferred",
+  "heightNote": "standing, floor to the crown of the head (a small seven-year-old)",
+  "hand": "marker",
+  "hands": [
+    "marker"
+  ],
+  "description": "Bơ, cô bé 7 tuổi, nhỏ con, lanh lợi, cao khoảng 5 đầu. Tóc đen cắt ngố, mái bằng, cài một chiếc kẹp tóc đỏ hình con cá nhỏ. Mặt tròn, má lấm tấm tàn nhang, mắt to tò mò, cười hở một chiếc răng sún. Áo thun đỏ san hô cổ tròn, quần short xanh navy, đôi ủng cao su xanh lá chuối hơi rộng so với chân. Đeo chéo một túi vải nhỏ màu kem đựng hộp cơm. Tính cách: lì, hay bắt chước, không chịu bỏ cuộc.",
+  "version": 1,
+  "changes": [],
+  "credit": {
+    "author": "Moworks Studio · made in the app",
+    "link": null,
+    "licence": "Moworks Studio's own; built on anidoodle (Apache-2.0)",
+    "made": "written from the idea",
+    "engine": {
+      "repo": "alexgreensh/anidoodle",
+      "commit": "f746cbd8a7032463bd0bc88ee8ff852599193b8c",
+      "link": "https://github.com/alexgreensh/anidoodle/tree/f746cbd8a7032463bd0bc88ee8ff852599193b8c"
+    },
+    "gate": {
+      "passed": 74,
+      "failed": 0
+    }
+  },
+  "module": [
+    "moworks-bo",
+    "check.ts",
+    "films",
+    "LEDGER.md",
+    "moworks-bo\\drawn.ts",
+    "moworks-bo\\index.ts",
+    "moworks-bo\\palettes.ts",
+    "moworks-bo\\poses.ts",
+    "moworks-bo\\spec.ts",
+    "moworks-bo\\walk.ts",
+    "films\\sheet.ts",
+    "films\\walk.ts"
+  ],
+  "savedAt": "2026-10-29T20:33:56.017Z",
+  "can": {
+    "views": [
+      "front",
+      "three-quarter",
+      "profile",
+      "back"
+    ],
+    "viewNotes": "any yaw: a 3D skeleton drawn by the hand's renderer (toScene(pose, camera))",
+    "faces": [
+      "neutral",
+      "happy",
+      "laugh",
+      "surprised",
+      "worried",
+      "angry",
+      "talk",
+      "blink"
+    ],
+    "faceNotes": "the engine's named expressions (neutral, happy, laughing, surprised, worried, determined, curious) as blendable weights; angry, talk and blink are its own weights (browFurrow, mouthOpen, lidUpper)",
+    "poses": [
+      "stand",
+      "walk",
+      "point",
+      "wave",
+      "reach",
+      "sit"
+    ],
+    "poseNotes": "pose(p) on the skeleton inside its joint limits: reach and stand (balance.ts), the walk from footsteps; sit on a stool prop",
+    "hands": [
+      "relaxed",
+      "open",
+      "point",
+      "fist",
+      "grip",
+      "pinch"
+    ],
+    "walk": "planWalk / walkAt: feet planted from footsteps",
+    "talk": "mouthOpen by turns; no lip sync (word times too coarse)"
+  },
+  "sheet": "MW Character Sheet v1",
+  "sheetBy": "Moworks Studio: packages/anidoodle-styles/v1 (the app's sheet film; every figure drawn by the author's engine as pinned)"
+}

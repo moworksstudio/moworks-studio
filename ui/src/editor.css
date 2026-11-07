@@ -193,7 +193,8 @@ ol.plain.conversation, .conversation { flex: 1; overflow-y: auto; overflow-x: hi
 .tl-ruler { position: relative; height: 1.25rem; border-bottom: 1px solid var(--border); font-size: var(--fs-dense); color: var(--text-muted); }
 .tl-ruler i { position: absolute; top: 0.125rem; font-style: normal; padding-left: 3px; border-left: 1px solid var(--border-strong); line-height: 1; }
 /* a tech check's warning is red like a blocking one (yellow means waiting); The Studio keeps its own colours */
-.tl-qc { position: absolute; top: 0.25rem; width: 0.625rem; height: 0.625rem; margin-left: -0.3125rem; border-radius: 50%; border: 0; padding: 0; background: var(--status-stop); cursor: pointer; z-index: 2; }
+/* under the ruler's numbers, half over its bottom line: a dot never covers a second (audit/112c c8.1: the dot at 30.4 s hid the 3 of 30s) */
+.tl-qc { position: absolute; bottom: -0.4375rem; width: 0.5625rem; height: 0.5625rem; margin-left: -0.28125rem; border-radius: 50%; border: 0; padding: 0; background: var(--status-stop); cursor: pointer; z-index: 2; }
 [data-theme="studio"] .tl-qc:not(.stop) { background: var(--status-pending); }
 .tl-row { position: relative; height: 2.25rem; border-bottom: 1px solid var(--border); }
 .tl-row.shots { height: 2.75rem; }
@@ -238,6 +239,15 @@ ol.plain.conversation, .conversation { flex: 1; overflow-y: auto; overflow-x: hi
 .mdr-sep { flex: none; align-self: center; writing-mode: vertical-rl; transform: rotate(180deg); display: inline-flex; align-items: center; gap: 0.25rem;
   font: var(--label-weight) calc(var(--fs-dense) * var(--label-scale)) / 1 var(--font-label); text-transform: uppercase; letter-spacing: var(--label-track); color: var(--accent-ink); }
 .mdr-empty { align-self: center; color: var(--text-muted); font-size: var(--fs-meta); }
+/* the characters drawer (#1319 2b): portrait posters (a character stands), the pick marked by the accent ring and its line */
+.cdr-card { width: 6.75rem; }
+.cdr-card.skeleton { height: 9rem; border-radius: var(--r-md); }
+.cdr-media { aspect-ratio: 1 / 1; }
+.cdr-media img { object-fit: contain; }
+.cdr-card.on .cdr-media { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.cdr-h { color: var(--text-muted); font-size: var(--fs-dense); }
+.cdr-add { display: inline-flex; align-items: center; gap: 0.2rem; font-size: var(--fs-dense); color: var(--accent-ink); font-weight: var(--strong-weight); white-space: nowrap; }
+.cdr-note { align-self: center; margin: 0; }
 @media (prefers-reduced-motion: no-preference) { .mdr { animation: mdr-in 180ms var(--ease-out); } }
 @keyframes mdr-in { from { opacity: 0; transform: translateY(0.5rem); } }
 /* the hand search for sound effects, now inside Final Mix */
@@ -403,7 +413,6 @@ ol.plain.conversation, .conversation { flex: 1; overflow-y: auto; overflow-x: hi
 .pl-links, .pl-acts { grid-column: 2 / 4; display: flex; flex-wrap: wrap; gap: 0.25rem 0.5rem; }
 .pl-links .clink { padding: 0; font-size: var(--fs-dense); text-decoration: underline; text-underline-offset: 2px; color: var(--text-secondary); }
 .pl-acts { padding-top: 0.25rem; }
-.pl-hint { grid-column: 2 / 4; font-size: var(--fs-dense); color: var(--text-muted); }
 
 /* the Assets tab */
 .as { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; }

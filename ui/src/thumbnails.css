@@ -1,0 +1,136 @@
+/* ---- Thumbnails (owner #1312, #1313, #1318): the films on the left, the film in hand on the right (the way, its three frames, the two
+   pictures and their buttons). One window high in both themes, never a page scroll (DESIGN.md Layout): only the films' list and the work
+   area scroll, each inside its own frame; under 1100 px the columns stack and the page may scroll.
+   The frames' ring: Lucian UX/UI Prompt #015 "Plan radio cards" (MIT, (c) 2026 Seokwoooo, https://lucianlabs.dev/uxui-prompt/#015): its frame
+   sliding to the choice (.55s on the element's spring); the wait: #079 "Skeleton that blooms into a post" (https://lucianlabs.dev/uxui-prompt/#079):
+   one streak of light over the grey (1.6 s linear), and the picture coming into focus from a blur. ---- */
+.th-page { --th-spring: cubic-bezier(0.34, 1.45, 0.64, 1); --th-ease: cubic-bezier(0.2, 0.8, 0.2, 1); }
+.th-layout { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(16rem, 19rem) minmax(0, 1fr); gap: var(--sp-4); align-items: stretch; }
+.th-films { min-height: 0; overflow-y: auto; scrollbar-width: thin; padding: var(--sp-4) var(--sp-3); border: 1px solid var(--border); border-radius: var(--r-xl); background: var(--surface-1); }
+.th-films > .wr-h { padding-inline: var(--sp-1); }
+.th-flist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.25rem; }
+.th-film { width: 100%; display: grid; grid-template-columns: 5.5rem minmax(0, 1fr) auto; align-items: center; gap: var(--sp-3); padding: 0.4rem; border: 1px solid transparent;
+  border-radius: var(--r-lg); background: transparent; color: var(--text-primary); text-align: left; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease, transform 120ms var(--ease-out); }
+.th-film:active { transform: scale(0.985); }
+.th-film.on { border-color: var(--select); box-shadow: 0 0 0 1px var(--select) inset; background: var(--fill-active); }
+@media (hover: hover) and (pointer: fine) { .th-film:not(.on):hover { background: var(--surface-2); } }
+.th-film:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.th-film-pic { aspect-ratio: 16 / 9; border-radius: var(--r-sm); overflow: hidden; background: var(--surface-3); display: grid; place-items: center; }
+.th-film-pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.th-film-pic .th-slate { padding: 0.25rem; font-family: var(--font-display); font-size: max(0.7rem, 11px); line-height: 1.1; text-transform: uppercase; text-align: center; color: var(--text-secondary);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.th-film-t { min-width: 0; display: flex; flex-direction: column; gap: 0.125rem; }
+.th-film-t b { font-weight: var(--strong-weight); font-size: var(--fs-control); line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
+.th-film-t small { font-size: var(--fs-meta); color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.th-film .dot { width: 0.5rem; height: 0.5rem; margin-right: 0.25rem; }
+
+.th-work { min-width: 0; min-height: 0; overflow-y: auto; scrollbar-width: thin; display: flex; flex-direction: column; gap: var(--sp-4); padding: var(--sp-4) var(--sp-5) var(--sp-5);
+  border: 1px solid var(--border); border-radius: var(--r-xl); background: var(--surface-1); }
+.th-bar { display: flex; align-items: center; gap: var(--sp-3) var(--sp-4); flex-wrap: wrap; }
+.th-sec > .wr-h { margin-bottom: var(--sp-2); }
+.th-line { min-height: 1.5rem; margin: var(--sp-2) 0 0; display: flex; align-items: center; gap: 0.5rem; font-size: var(--fs-meta); color: var(--text-secondary); }
+.th-line .dot { width: 0.5rem; height: 0.5rem; }
+.th-mute { color: var(--text-muted); }
+
+/* the three frames: one row, a ring that slides to the one picked (#015) */
+.th-frames { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); width: min(100%, calc(3 * 20vh * 16 / 9 + 2 * var(--sp-3))); }          /* the row fills the width, its frames at most 20 % of the window high: the thumbnails are what the page makes, they get the room */
+.th-ring { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0; border-radius: var(--r-md); pointer-events: none; z-index: 2;
+  box-shadow: 0 0 0 2px var(--select), 0 0 0 5px color-mix(in srgb, var(--select) 22%, transparent);
+  transition: transform 0.55s var(--th-spring), width 0.55s var(--th-spring), opacity 0.2s var(--th-ease); }
+.th-frame { position: relative; aspect-ratio: 16 / 9; padding: 0; border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; background: var(--media-bg);
+  cursor: pointer; transition: transform 0.4s var(--th-spring), border-color 150ms ease; }
+.th-frame img { width: 100%; height: 100%; object-fit: cover; display: block; animation: th-focus 0.9s var(--th-ease) both; }
+@keyframes th-focus { from { filter: blur(16px); transform: scale(1.08); opacity: 0; } 40% { opacity: 1; } }
+.th-frame:active:not(:disabled) { transform: scale(0.98); }
+.th-frame:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 4px; }
+.th-frame:disabled { cursor: default; }
+.th-frame:disabled:not(.on) img { opacity: 0.6; }
+@media (hover: hover) and (pointer: fine) { .th-frame:not(:disabled):not(.on):hover { border-color: var(--accent-line); } }
+.th-frame-t { position: absolute; left: 0.5rem; bottom: 0.5rem; padding: 0.1rem 0.45rem; border-radius: var(--r-xs); background: var(--media-label); color: var(--on-media); font-size: max(0.75rem, 11px); }
+
+/* the wait (#079): one streak of light across the grey */
+.th-sk { border-color: transparent; animation: th-shine 1.6s linear infinite; animation-delay: var(--d, 0ms);
+  background: linear-gradient(100deg, transparent 28%, color-mix(in srgb, var(--surface-3), var(--text-primary) 7%) 45%, transparent 62%) 0 0 / 700px 100% no-repeat, var(--surface-2); }
+@keyframes th-shine { from { background-position: -700px 0, 0 0; } to { background-position: 700px 0, 0 0; } }
+
+/* the two pictures, the same height, side by side: sized by the height the window leaves under the frames (one window high), never
+   wider than the work area (256 : 81 of its width) */
+/* the two pictures fill what the window leaves under the frames (one window high, DESIGN.md Layout): the stage is a size container; the
+   pictures share one height, the larger that fits both its height (less the captions) and its width (16/9 + 9/16 = 2.3403 heights) */
+.th-out-sec { flex: 1 1 auto; min-height: 15rem; display: flex; flex-direction: column; }
+.th-stage { flex: 1 1 auto; min-height: 11rem; container-type: size; }
+.th-stage > * { --th-h: min(100cqh - 1.9rem, (100cqw - var(--sp-4)) / 2.3403); }
+.th-out { display: grid; grid-template-columns: calc(var(--th-h) * 16 / 9) calc(var(--th-h) * 9 / 16);
+  gap: var(--sp-4); align-items: start; }
+.th-pic { margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 0.375rem; }
+.th-pic img { width: 100%; display: block; border-radius: var(--r-md); background: var(--media-bg); box-shadow: 0 0 0 1px var(--hairline-light); animation: th-focus 0.9s var(--th-ease) both; }
+.th-pic.w img { aspect-ratio: 16 / 9; } .th-pic.h img { aspect-ratio: 9 / 16; }
+/* nothing made yet, and the empty slots of frames not taken: a dashed place */
+.th-none, .th-making { width: calc(var(--th-h) * 2.3403 + var(--sp-4)); max-width: 100%; height: calc(var(--th-h) + 1.9rem); }
+.th-none { display: grid; place-items: center; border: 1.5px dashed var(--border-strong); border-radius: var(--r-lg); color: var(--text-muted); font-size: var(--fs-meta); }
+.th-none p { margin: 0; }
+.th-frame.th-slot { border-style: dashed; border-color: var(--border-strong); background: transparent; cursor: default; }
+/* what runs (#1324, #1370): the Writers' Room's making card at the pictures' size, its Stop at its foot */
+.th-making { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.6rem; padding: var(--sp-5);
+  border: 1.5px dashed var(--state-run-line); border-radius: var(--r-lg); background: var(--state-run-soft); text-align: center; }
+.th-making-h { display: flex; align-items: center; gap: 0.6rem; }
+.th-making-h b { font-size: var(--fs-heading); font-weight: var(--strong-weight); color: var(--text-primary); }
+.th-making-ic { color: var(--state-run); }
+.th-making-pct { font-family: var(--font-num); font-size: 1.6rem; color: var(--state-run); min-width: 3ch; }
+.th-making-step { font-size: var(--fs-meta); color: var(--text-secondary); }
+.th-making-bar { width: min(22rem, 70%); }
+.th-making .btn { margin-top: var(--sp-2); }
+.th-pic figcaption { white-space: nowrap; font-family: var(--font-num); font-size: var(--fs-meta); letter-spacing: 0.04em; color: var(--text-muted); }
+.th-acts { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; margin-top: var(--sp-3); }
+.th-edit { flex: 0 1 26rem; min-width: 12rem; }
+.th-hint { font-size: var(--fs-meta); }
+.th-warns { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-3); }
+.th-empty { max-width: 36rem; }
+
+@media (max-width: 1100px) {
+  .page.gal-page.th-page { height: auto; }
+  .th-layout { grid-template-columns: minmax(0, 1fr); flex: none; }
+  .th-films, .th-work { overflow: visible; }
+  .th-out-sec { flex: none; } .th-stage { container-type: inline-size; min-height: 0; } .th-stage > * { --th-h: calc((100cqw - var(--sp-4)) / 2.3403); }
+  .th-flist { flex-direction: row; overflow-x: auto; }
+  .th-flist > li { flex: 0 0 16rem; }
+}
+@media (max-width: 760px) { .th-frames { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) {
+  .th-ring, .th-frame, .th-film { transition: none; }
+  .th-frame img, .th-pic img { animation: none; }
+  .th-sk { animation: none; }
+  .th-frame:active:not(:disabled), .th-film:active { transform: none; }
+}
+
+/* ---- The Studio: the films are index cards on the room; the film in hand lies on the light table, its frames as stills, the two
+   pictures as prints; the frame picked is ringed in registration red (a chooser, DESIGN.md) ---- */
+[data-theme="studio"] .st-thumbs .th-films { border-color: var(--paper-edge); border-radius: var(--st-r-md); background: var(--paper-white);
+  box-shadow: 0 0.6rem 1.4rem rgba(0, 0, 0, 0.35), 0 0 2rem rgba(255, 214, 150, 0.06); }
+[data-theme="studio"] .st-thumbs .th-film { border-radius: var(--st-r-sm); color: var(--ink); }
+[data-theme="studio"] .st-thumbs .th-film.on { border-color: var(--lamp); box-shadow: 0 0 0 1px var(--lamp) inset, 0 0 1rem rgba(255, 200, 114, 0.35); background: var(--paper); }
+@media (hover: hover) and (pointer: fine) { [data-theme="studio"] .st-thumbs .th-film:not(.on):hover { background: var(--paper); } }
+[data-theme="studio"] .st-thumbs .th-film-pic { border-radius: var(--st-r-xs); background: var(--paper-3); }
+[data-theme="studio"] .st-thumbs .th-film-pic .th-slate { font-family: var(--font-studio-display, Fraunces, Georgia, serif); text-transform: none; color: var(--ink-2); }
+[data-theme="studio"] .st-thumbs .th-film-t small { color: var(--ink-3); }
+[data-theme="studio"] .st-thumbs .th-work { border: 0; border-radius: var(--st-r-xl); color: var(--ink);
+  background: radial-gradient(120% 90% at 50% 40%, var(--lamp-paper) 0%, var(--paper) 45%, var(--paper-2) 100%);
+  box-shadow: 0 0 0 1px rgba(255, 240, 210, 0.25), 0 0 4rem rgba(255, 214, 150, 0.16), 0 1.5rem 3rem rgba(0, 0, 0, 0.45); }
+[data-theme="studio"] .st-thumbs .th-frame { border: 0.35rem solid var(--paper-white); border-radius: var(--st-r-xs); box-shadow: 0 0.4rem 0.9rem rgba(60, 44, 20, 0.25); }
+[data-theme="studio"] .st-thumbs .th-frame:nth-of-type(1) { rotate: -0.8deg; } [data-theme="studio"] .st-thumbs .th-frame:nth-of-type(3) { rotate: 0.7deg; }
+[data-theme="studio"] .st-thumbs .th-ring { border-radius: var(--st-r-xs); box-shadow: 0 0 0 2px var(--registration), 0 0.8rem 1.6rem rgba(60, 44, 20, 0.28); }
+[data-theme="studio"] .st-thumbs .th-frame.on { rotate: 0deg; }
+@media (hover: hover) and (pointer: fine) { [data-theme="studio"] .st-thumbs .th-frame:not(:disabled):not(.on):hover { translate: 0 -0.25rem; } }
+[data-theme="studio"] .st-thumbs .th-frame-t { font-family: var(--font-label); }
+[data-theme="studio"] .st-thumbs .th-sk { background: linear-gradient(100deg, transparent 28%, rgba(255, 255, 255, 0.55) 45%, transparent 62%) 0 0 / 700px 100% no-repeat, var(--paper-3); }
+[data-theme="studio"] .st-thumbs .th-pic img { border-radius: var(--st-r-xs); border: 0.45rem solid var(--paper-white); box-shadow: 0 0.6rem 1.2rem rgba(60, 44, 20, 0.28); }
+[data-theme="studio"] .st-thumbs .th-pic figcaption { font-family: var(--font-label); color: var(--ink-3); }
+[data-theme="studio"] .st-thumbs .th-none { border: 2px dashed var(--pencil); background: var(--pencil-soft); color: var(--pencil-ink); font: 1.25rem / 1.35 var(--font-studio-hand); }
+[data-theme="studio"] .st-thumbs .th-frame.th-slot { border: 2px dashed var(--pencil); background: var(--pencil-soft); box-shadow: none; }
+[data-theme="studio"] .st-thumbs .th-making { border: 1.5px dashed var(--lamp); background: rgba(255, 200, 114, 0.12); }
+[data-theme="studio"] .st-thumbs .th-making-h b { font-family: var(--font-studio-display, Fraunces, Georgia, serif); font-weight: 500; color: var(--ink); }
+[data-theme="studio"] .st-thumbs :is(.th-making-ic, .th-making-pct) { color: #a87406; }
+[data-theme="studio"] .st-thumbs .th-making-step { color: var(--ink-3); }
+[data-theme="studio"] .st-thumbs .th-making-bar { background: var(--paper-edge); } [data-theme="studio"] .st-thumbs .th-making-bar > span { background: var(--lamp); }
+[data-theme="studio"] .st-thumbs .th-line, [data-theme="studio"] .st-thumbs .th-mute { color: var(--ink-3); }
+@media (prefers-reduced-motion: reduce) { [data-theme="studio"] .st-thumbs .th-frame { rotate: 0deg; translate: none; } }

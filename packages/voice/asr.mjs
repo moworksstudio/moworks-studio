@@ -1,18 +1,19 @@
 // Speech-to-text engines: model cards, install after the user confirms (a download from Hugging Face pinned to
 // one commit; every file checked by size and SHA-256; the Moworks Motion kit is not used), remove, and transcription jobs. Engines are
 // pluggable: config/asr-models.json lists them; a script in tools/asr/ runs each. Models live in <work folder>/models, outside projects.
+import { killTree } from "../system-status/kill-tree.mjs";
 import { execFile, spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { createReadStream, createWriteStream, existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { createReadStream, createWriteStream, existsSync, mkdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
+import { APP_ROOT, expandEnv, ffmpegExe, loadPins } from "../version-manager/index.mjs";
 import { workRoot } from "../project-service/index.mjs";
 import * as cuda from "./cuda.mjs";
 import { install as installPython, pyLibs } from "../setup/python.mjs";
+import { readJson } from "../util/json.mjs";
 
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
 export const catalog = (root = APP_ROOT) => readJson(join(root, "config", "asr-models.json"), { models: [] }).models;
 export const modelsRoot = (root = APP_ROOT) => process.env.MW_MODELS_ROOT ?? join(workRoot(root), "models");
 const settingsFile = (root) => join(process.env.MW_STATE_DIR ?? join(root, "runtime", "state"), "voice-settings.json");
@@ -142,8 +143,8 @@ export function resegment(segments, { maxSeconds = 8, maxWords = 16, pause = 0.5
 export function readyModel(id, root = APP_ROOT) {
   const card = models(root).find((x) => x.id === id);
   if (!card) throw Object.assign(new Error("Unknown model"), { code: "INVALID" });
-  if (!card.installed) throw Object.assign(new Error(`${card.short} is not installed. Install it in Settings › System.`), { code: "MODEL_MISSING" });
-  if (!card.runtime.ok) throw Object.assign(new Error(`${card.short} cannot run yet: its engine is missing (${card.runtime.message}). Install the engine in Settings › System.`), { code: "RUNTIME_MISSING" });
+  if (!card.installed) throw Object.assign(new Error(`${card.short} is not installed. Install it in Studio Settings › System.`), { code: "MODEL_MISSING" });
+  if (!card.runtime.ok) throw Object.assign(new Error(`${card.short} cannot run yet: its engine is missing (${card.runtime.message}). Install the engine in Studio Settings › System.`), { code: "RUNTIME_MISSING" });
   return card;
 }
 
@@ -151,7 +152,7 @@ export function readyModel(id, root = APP_ROOT) {
  *  keeps the voice's range (200 Hz to 4.5 kHz) over the music. Resolves `out`; FFmpeg runs off the caller's event loop (a long
  *  voice-over or song takes seconds, inside the server's jobs). */
 export async function toWav(audioFile, out, { song = false, from = null, to = null, root = APP_ROOT } = {}) {          // from/to: only that part
-  const ff = join(expandEnv(loadPins(root).ffmpeg.dir), "ffmpeg.exe");
+  const ff = ffmpegExe(root);          // version-manager: the one way to find it (audit/112 r2.1)
   const part = [...(from > 0 ? ["-ss", String(from)] : []), ...(to > 0 ? ["-to", String(to)] : [])];
   const ok = await new Promise((done) => execFile(ff, ["-y", "-v", "error", ...part, "-i", audioFile, ...(song ? ["-af", "highpass=f=200,lowpass=f=4500,dynaudnorm"] : []), "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", out],
     { windowsHide: true }, (e) => done(!e)));
@@ -189,7 +190,7 @@ export async function transcribe(audioFile, { model: id, language = "vi", prompt
   const code = await new Promise((resolve) => {
     const child = spawn(python(root), ["-I", script, target, input, "--language", language, "--device", device, ...(hint ? ["--prompt-file", promptFile] : []), ...(song ? ["--song"] : [])], {
       env: { ...process.env, PYTHONIOENCODING: "utf-8", PYTHONUTF8: "1", HF_HUB_OFFLINE: "1", ELEVENLABS_API_KEY: "", MW_PYLIBS: pyLibs(root), ...cudaEnv }, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
-    const kill = () => spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], { windowsHide: true });
+    const kill = () => killTree(child);
     signal?.addEventListener("abort", kill, { once: true });
     let buf = "", err = "";
     child.stdout.on("data", (d) => {

@@ -1,8 +1,8 @@
 // The Studio's Characters: the line-up, by author, since an actor stays with its author.
 // Anidoodle's people stand at their real height in front of a height chart, its rigs (Bit, the cheetah) beside them; Brush Cartoon's
 // mascots stand on their own, Clawd with a dashed edge as the author kit's demo (never in a film); What If's cast comes with its engine.
-// The paper tabs filter by type (Human, Animal, Thing: the others fade); the label maker searches; Library and Drawing style are chips.
-// A click lays the character's model sheet on the table: The Desk's details (pictures, Use in a project, Edit, Redraw, History, Delete,
+// The paper tabs filter by type (Human, Animal, Thing: the others fade); the label maker searches; Library, Film style and Drawing style are chips.
+// A click lays the character's model sheet on the table: The Desk's details (pictures, Edit, Redraw, History, Delete,
 // credit) on paper. A character Claude is making stands as a pencil card at the head of the line-up and in the page head.
 // The state and the data are The Desk's (screens/Characters.jsx passes them in); only the layout is the studio's.
 import { useEffect, useState } from "react";
@@ -43,7 +43,9 @@ function Figure({ c, kind, tag, off, job, fresh, onOpen }) {
   </button>;
 }
 
-export default function CharacterLineup({ list, shown, passes, kindOf, groupOf, authorOfChar, usable, f, set, styleKeys, label, kit, run, jobs, fresh, canCreate, error, loading,
+// a height chart holds at most PER_CHART people; an author with more than WIDE_FROM takes the room's whole width
+const PER_CHART = 12, WIDE_FROM = 8;
+export default function CharacterLineup({ list, shown, passes, kindOf, groupOf, authorOfChar, usable, f, set, styleKeys, label, filmKeys = [], filmTitle = (k) => k, kit, run, jobs, fresh, canCreate, error, loading,
   onReload, onCreate, onSteps, sheetFor, dialogs }) {
   const t = useT();
   const [open, setOpen] = useState(null);
@@ -62,12 +64,12 @@ export default function CharacterLineup({ list, shown, passes, kindOf, groupOf, 
   const total = list.length;
 
   return <div className="st-room st-chars">
-    <div className="st-head"><h1>{t("Characters")}</h1><span className="st-aside">{t("who acts in your films, by author")}</span>
+    <div className="st-head"><h1>{t("Casting")}</h1><span className="st-aside">{t("who acts in your films, by author")}</span>
       <div className="st-acts">
         <div className="st-cats st-types" role="group" aria-label={t("Type")}>{[["", "All"], ...RIGS.filter(([k]) => list.some((c) => kindOf(c) === k))].map(([k, l]) =>
           <button key={k || "all"} type="button" aria-pressed={type === k && (!!k || !f.rigs.length)} onClick={() => set({ rigs: k ? [k] : [] })}>{t(l)}</button>)}</div>
         {run && <button type="button" className="chip-status" onClick={onSteps} title={t("See the steps")}><span className="dot busy" />{run.changing ? t("Editing {name}", { name: run.name ?? "" }) : t("Making {name}", { name: run.name ?? t("a new character") })}{run.job.progress != null ? ` · ${run.job.progress}%` : ""}</button>}
-        {canCreate && <button className="btn primary" onClick={onCreate} disabled={!!run} title={run ? t("Wait for the character being made") : undefined}><Plus size={15} />{t("Create a character")}</button>}
+        {canCreate && <button className="btn primary" onClick={onCreate} disabled={!!run} title={run ? t("Wait for the character being made") : undefined}><Plus size={15} />{t("Cast a character")}</button>}
       </div></div>
     {error?.status === 404 ? <p className="st-hand">{t("Characters are not available on this computer yet.")}</p>
       : error && <Banner kind="error" action={<button className="btn sm" onClick={onReload}>{t("Retry")}</button>}>{error.message}</Banner>}
@@ -76,6 +78,8 @@ export default function CharacterLineup({ list, shown, passes, kindOf, groupOf, 
         {f.q && <button type="button" onClick={() => set({ q: "" })} aria-label={t("Clear")}><X size={13} /></button>}</label>
       {libs.length > 1 && <div className="st-cats" role="group" aria-label={t("Library")}>{libs.map(([k, l]) =>
         <button key={k} type="button" aria-pressed={f.libs.includes(k)} onClick={() => set({ libs: f.libs.includes(k) ? f.libs.filter((x) => x !== k) : [...f.libs, k] })}>{t(l)}</button>)}</div>}
+      {filmKeys.length > 1 && <div className="st-cats" role="group" aria-label={t("Film style")}>{filmKeys.map((k) =>
+        <button key={k} type="button" aria-pressed={(f.films ?? []).includes(k)} onClick={() => set({ films: (f.films ?? []).includes(k) ? f.films.filter((x) => x !== k) : [...(f.films ?? []), k] })}>{filmTitle(k)}</button>)}</div>}
       {styleKeys.length > 1 && <div className="st-cats" role="group" aria-label={t("Drawing style")}>{styleKeys.map((k) =>
         <button key={k} type="button" aria-pressed={f.styles.includes(k)} onClick={() => set({ styles: f.styles.includes(k) ? f.styles.filter((x) => x !== k) : [...f.styles, k] })}>{label(k)}</button>)}</div>}
       <span className="st-count num" aria-live="polite">{shown.length === total ? t("{n} characters", { n: total }) : t("{n} of {total} characters", { n: shown.length, total })}</span>
@@ -84,10 +88,13 @@ export default function CharacterLineup({ list, shown, passes, kindOf, groupOf, 
       {authors.length === 0 && !making && <div className="st-empty"><p className="st-hand">{t("No character matches.")}</p></div>}
       <div className="st-lu">{authors.map((a, ai) => {
         const cs = visible.filter((c) => authorOfChar(c) === a), people = cs.filter((c) => kindOf(c) === "human"), rest = cs.filter((c) => kindOf(c) !== "human");
-        return <div key={a} className={"st-lu-au" + (people.length ? " has-people" : "")}>
+        // a big cast stands on several charts, at most PER_CHART people each, across the whole room (owner 06/11 #1319: 24 people on one
+        // chart squeezed every figure to a sliver and ran their names into each other)
+        const charts = Array.from({ length: Math.ceil(people.length / PER_CHART) }, (_, i) => people.slice(i * PER_CHART, (i + 1) * PER_CHART));
+        return <div key={a} className={"st-lu-au" + (people.length ? " has-people" : "") + (people.length > WIDE_FROM ? " wide" : "")}>
           <div className="st-lu-head"><AuthorName a={a} count={false} />{people.length > 0 && <span className="st-note">{t("people stand at their real height")}</span>}</div>
-          {people.length > 0 && <div className="st-chart">{[0.5, 1, 1.5, 2].map((m) => <span key={m} className="st-tick" style={{ "--at": m }}>{m.toFixed(1)} m</span>)}
-            <div className="st-people">{people.map(fig)}</div></div>}
+          {charts.map((row, i) => <div key={i} className="st-chart">{[0.5, 1, 1.5, 2].map((m) => <span key={m} className="st-tick" style={{ "--at": m }}>{m.toFixed(1)} m</span>)}
+            <div className="st-people">{row.map(fig)}</div></div>)}
           {(rest.length > 0 || (ai === 0 && making)) && <div className="st-toons">{ai === 0 && making}{rest.map(fig)}</div>}
         </div>; })}
       </div>

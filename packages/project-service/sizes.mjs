@@ -16,8 +16,6 @@ export const aspectOfTag = (tag) => { const a = String(tag ?? "").replace("x", "
 export const entryOf = (aspect) => `index.${tagOf(aspect)}.html`;
 /** A file that belongs to one size only (`compositions/shot-03.9x16.html`, `src/layout.9x16.js`): never part of the master's picture. */
 export const SIZE_FILE = /\.(16x9|9x16|1x1|4x5)\.[a-z0-9]+$/i;
-/** A size's root page at the film's root (index.9x16.html). */
-export const SIZE_ROOT = /^index\.(16x9|9x16|1x1|4x5)\.html$/i;
 
 /** The master's size: the film's own format. */
 export const masterAspect = (meta) => (ASPECTS[meta?.format?.aspect] ? meta.format.aspect : null);
@@ -105,7 +103,7 @@ export function sizeStage(dir, aspect) {
  *  Optional: a film with one size counts it as done; the autopilot never starts it (the owner presses Adapt for each size), and it never
  *  holds the Tech checks or the render. */
 export const ADAPTATION_STEP = Object.freeze({
-  id: "adaptation", title: "Adaptation", stage: 4, optional: true,
+  id: "adaptation", title: "Formats", stage: 4, optional: true,
   what: "Optional: the film laid out again for other sizes (9:16, 4:5, 1:1), on the same timeline and sound",
   needs: ["build", "qcReview"], done: { kind: "sizes" },
   action: { kind: "dialog", dialog: "sizes", label: "Open" }, review: { kind: "dialog", dialog: "sizes", label: "Open" },

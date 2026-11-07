@@ -1,45 +1,39 @@
-"""Moworks Studio copy of the Moworks Motion kit's engine/ae/port.py (kit commit 30b7dcb, MIT, Moworks): an editable After Effects project
-from a HyperFrames film. Changes for HyperFrames-native projects are listed in ../PROVENANCE.md (recorded on HF's own page through
-hf_driver.js, scenes = HF sub-compositions, comp fps from the film, root id from the document, audio of sub-compositions, app paths).
-Run by packages/ae-export/index.mjs:  python port.py <project> --url <HF page> --fps <n/d> --out <dir> [--run] [--check auto] [--ref-dir d]
+"""An editable After Effects project from a HyperFrames film: Moworks Studio's Export to AE and its Check size. It started as the Moworks
+Motion kit's After Effects port (kit commit 30b7dcb, MIT, Moworks; the kit is retired); every change since is in ../PROVENANCE.md.
 
-Kit documentation (paths and commands below are the kit's):
-kit.py ae <project>: an editable After Effects project from a v2 film (plan section 3, path A; G7).
+Run by packages/ae-export/index.mjs (the server's Export to AE and Check size, the CLI cli.mjs):
+  python port.py <project> --url <HF page> --fps <n/d> --rate <n/d> --out <the export's folder> [--run] [--check auto] [--ref-dir d]
+  --estimate      the size of a port (layers x samples, MB, minutes) before running it: seconds
+  --film <file>   a film drawn on canvases: its rendered film as one video layer
+  --rebuild       the AE step again from the saved recording (rec.json.gz), for whoever works on the port (the work folder is kept only with
+                  MW_AE_KEEP_WORK=1);  --no-save: build without saving the project
 
-  python engine/kit.py ae <project> [--run] [--check 1.5,4] [--no-save]
-  python engine/kit.py ae <project> --estimate          size of a port (layers x samples, MB, minutes) before running it: seconds
-  python engine/kit.py ae <project> --rebuild [--check auto]   the AE step again from the saved recording (rec.json.gz), no new recording:
-              after a change to the port code (a finished export keeps its recording and footage only with MW_AE_KEEP_WORK=1)
-  python engine/kit.py ae <project> --jsx <fix.jsx> [--check auto]   a script on the project open in AE (precomps, names, keys, fonts...):
-              saves a copy of the .aep first, renders the check frames before and after, compares them (and with the browser)
-
-  1. record   the film runs in Chromium; engine/ae/record.js finds the layers (text, box, image, raster, clip) and samples each one 120
-              times a second plus at every tween start / end: matrix, layout box, origin, opacity, blur, clip-path, text, paint hash
+  1. record   the film runs on HF's own page (hf_driver.js); record.js finds the layers (text, box, image, raster, clip) and samples each one
+              at the page's rate plus at every tween start / end: matrix, layout box, origin, opacity, blur, clip-path, text, paint hash
   2. pictures boxes AE can draw (solid colour, uniform radius and border) become shape layers; any other paint (gradients, shadows,
               pseudo-elements, SVG, background-clip text) is shot alone at 2x as a PNG; paint that changes over time becomes a PNG sequence
   3. fit      every channel (position x / y, scale, rotation, opacity, anchor, size, blur, matte rect) becomes sparse AE keys: cubic
               Hermite segments = AE bezier keys with influence 33.3 % and speed = slope, split where the error is above the tolerance
               (0.3 px, 0.2 %, 0.15 deg); steps (sets, steps() eases) become hold keys; changing text becomes Source Text keys
-  4. build    ae/port.json + ae/build.jsx (engine/ae/ae_runtime.jsx with the data in front) -> <film>/05_AE/<name>.aep (built in
-              %USERPROFILE%\\.aimotionkit\\work\\ae\\<project>, then copied to the film), report 05_AE/AE-PORT.md, mix + stems in 05_AE/Audio
-  5. --run    runs build.jsx inside the open After Effects (see "How Claude talks to After Effects" below); --check renders those
-              seconds in AE and in the browser -> ae/check/cmp_<t>.png side by side
+  4. build    port.json + build.jsx (ae_runtime.jsx with the data in front), built in the app's work folder (runtime/work/ae/<film>), then
+              the .aep, footage/, Audio/ (the mix and the stems) and AE-PORT.md in the export's folder (renders/ae/<date>_<film>_<time>)
+  5. --run    runs build.jsx inside the open After Effects (below); --check renders those seconds in AE and compares them with HF's stills
 
 Comps: one per scene (HyperFrames clip with data-start; its .inner is the comp), placed in the main comp at the clip's start; the inner's
 own motion (transitions) is on that precomp layer. Clipping (overflow hidden, clip-path) becomes a shape layer used as a track matte.
 Precomps: inside every comp, layers that come from one element and its children
 (a film-level layer, a chat bubble and its letters, a group) and runs of 3+ sibling layers named <prefix><number> (the cells of one
 transition) become precomps of the same size and length (folder <film>/Precomps), level by level; a matte always moves with its layers;
-a precomp holding a blend mode collapses transformations so it still blends with what is below. Image sequences (a film's 3D render and the
-kit's own captured sequences) are ONE footage each with Time Remap keys.
-Motion blur: the switch is on for every layer that moves, the comp switch is left off (plan: you turn it on with one click).
+a precomp holding a blend mode collapses transformations so it still blends with what is below. Image sequences (a film's 3D render and
+captured sequences) are ONE footage each with Time Remap keys.
+Motion blur: the switch is on for every layer that moves, the comp switch is left off (you turn it on with one click).
 
-How Claude talks to After Effects (no MCP, no plug-in, no network):
-  engine/ae/run_jsx.ps1 posts the menu command File > Scripts > Run Script File (WM_COMMAND 917505) to the After Effects window and
-  types the .jsx path into AE's own Open dialog; the script writes a "done" file that the caller waits for. Needs: AE (or AE Beta) open,
-  no dialog showing. Proven with AE Beta 27.0 on Windows 11. "AfterFX.exe -r" is ignored by a running AE Beta, which is why.
+How the app talks to After Effects (no MCP, no plug-in, no network):
+  run_jsx.ps1 posts the menu command File > Scripts > Run Script File (WM_COMMAND 917505) to the After Effects window and types the .jsx
+  path into AE's own Open dialog; the script writes a "done" file that the caller waits for. Needs: AE (or AE Beta) open, no dialog
+  showing. Proven with AE Beta 27.0 on Windows 11. "AfterFX.exe -r" is ignored by a running AE Beta, which is why.
   Rules learned the hard way: never call menu commands (app.executeCommand), openInViewer or layer styles inside a build
-  script: AE froze for over an hour. engine/ae/ae_windows.ps1 lists AE's open windows (a #32770 = a dialog that blocks scripts)."""
+  script: AE froze for over an hour. ae_windows.ps1 lists AE's open windows (a #32770 = a dialog that blocks scripts)."""
 import asyncio, bisect, json, math, os, re, shutil, subprocess, sys, time
 from pathlib import Path
 
@@ -571,7 +565,8 @@ def film_kind(st, canvas, later=0):
     or none paints and a canvas shows): one video layer, the rendered film, and no recording; "dynamic": most of its picture is made as it
     plays (more elements show later than there are layers at 0 s): one video layer too; "mostly-canvas": canvases cover half the frame or
     more beside other layers (the drawing comes as picture sequences, the rest as layers); "empty": nothing to record; "layers"."""
-    paint = [nd for nd in st["nodes"] if nd["kind"] != "clip"]
+    # the film's own background on its root (record.js, audit/112d d13) is no layer of its own here: a canvas film's render has it (n1)
+    paint = [nd for nd in st["nodes"] if nd["kind"] != "clip" and nd.get("cls") != "root"]
     cv = sum(1 for nd in paint if nd.get("tag") == "canvas")
     if canvas["count"] and cv == len(paint): return "canvas"
     # half: a film that mounts its pictures as it plays (Paper Collage's React scenes: 82 elements only later beside 106 layers, most of them
@@ -767,6 +762,7 @@ async def record(url, work, say=say, film_dir=None, estimate_only=False):
             except Exception as e: say(f"  the size check could not time this film: {str(e).splitlines()[0][:200]}")
         est = estimate(st, times, say, canvas=canvas, seek=seek, later=later, costs=costs)
         if estimate_only: await br.close(); return {"estimate": est}
+        if not estimate_only: say("ESTIMATE " + json.dumps(est))          # the film's style's AE badge, from this export (audit/112d d11)
         if est["kind"] in ("canvas", "dynamic", "empty"):          # nothing to record; the rendered film goes in as one video layer (run)
             audio = await pg.evaluate("window.__aimk.audio()")
             await br.close()
@@ -1871,7 +1867,8 @@ def open_copy(aep, work, say=say):
     """the project in the film's folder opened in After Effects: the one the user keeps, and no more reason to hold the work folder. -> "" or what went wrong"""
     K = {"aep": str(aep).replace("\\", "/")}
     res = small_jsx(work, "open", REOPEN_JSX, K, timeout=300, say=say)
-    if "ERROR" in res: return res.strip().splitlines()[-1][:200]
+    bad = ae_failed(res)
+    if bad: return bad[:200]
     m = re.search(r"missing (\d+)", res)
     if m and m[1] != "0": return f"{m[1]} footage item(s) not found"
     res = small_jsx(work, "resave", RESAVE_JSX, K, timeout=120, say=say)
@@ -2009,7 +2006,7 @@ def run(project, run_ae=False, check="", save=True, say=say, estimate_only=False
         if sound["lost"]: say(lost_note(sound["lost"], sound["clips"], [], len(comps)))
         return work
     res = run_jsx(work / "build.jsx", work / "build.done", say=say)
-    if "ERROR" in res:
+    if ae_failed(res):
         return res
     lost = ae_failures(work)
     n_layers = sum(len(c["layers"]) for c in comps)
@@ -2044,56 +2041,12 @@ def run(project, run_ae=False, check="", save=True, say=say, estimate_only=False
     return res
 
 
-FIX_JSX = r"""(function () {
-  var out = [], i, comp = null, P = app.project;
-  function log(s) { out.push(s); }
-  try {
-    if (!P || !P.file) throw new Error("no saved After Effects project is open (open the port's .aep first)");
-    P.save(); P.file.copy(K.backup); log("copy before the fix: " + K.backup);
-    for (i = 1; i <= P.numItems; i++) { var it = P.item(i); if (it instanceof CompItem && it.name === K.comp) { comp = it; break; } }
-    if (!comp) log("no comp named " + K.comp + ": no check frames");
-    if (comp) for (i = 0; i < K.times.length; i++) comp.saveFrameToPng(K.times[i], new File(K.before[i]));
-    app.beginUndoGroup("Moworks Motion fix: " + K.name);
-    $.evalFile(new File(K.script));
-    app.endUndoGroup();
-    if (comp) for (i = 0; i < K.times.length; i++) comp.saveFrameToPng(K.times[i], new File(K.after[i]));
-    P.save(); log("saved " + P.file.fsName); log("PROJECT " + P.file.fsName.replace(/\\/g, "/"));
-  } catch (e) { log("ERROR " + e.toString() + " (line " + e.line + ")"); }
-  var d = new File(K.done); d.encoding = "UTF-8"; d.open("w"); d.write(out.join("\n")); d.close();
-})();
-"""
-
-
-def fix(project, script, check="auto", say=say):
-    """kit.py ae <project> --jsx <file>: a script on the project open in AE (precomps and quick fixes in AE, no new port).
-    A copy of the .aep is kept first; the check frames are rendered before and after (what changed) and compared with the browser."""
-    from PIL import Image
-    import numpy as np
-    p, film, name, work = _where(project)
-    script = Path(script).resolve()
-    if not script.is_file(): raise SystemExit(f"no script {script}")
-    stamp = time.strftime("%Y%m%d-%H%M%S"); fx = work / "fix" / stamp; fx.mkdir(parents=True, exist_ok=True)
-    D = float(re.search(r'data-duration="([\d.]+)"', film.read_text(encoding="utf-8")).group(1))
-    ts = [round(D * k, 2) for k in (0.25, 0.5, 0.85)] if check in ("", "auto") else [float(x) for x in check.split(",") if x.strip()]
-    K = {"name": script.name, "comp": name, "times": ts, "script": script.as_posix(), "backup": (fx / f"{name}.before.aep").as_posix(),
-         "before": [(fx / f"before_{t:06.2f}.png").as_posix() for t in ts], "after": [(fx / f"ae_{t:06.2f}.png").as_posix() for t in ts],
-         "done": (fx / "fix.done").as_posix()}
-    (fx / "fix.jsx").write_text("var K = " + json.dumps(K, ensure_ascii=False) + ";\n" + FIX_JSX, encoding="utf-8")
-    say(f"AE fix of {film_name(p)}: {script.name} on the open project")
-    res = run_jsx(fx / "fix.jsx", fx / "fix.done", say=say)
-    if "ERROR" in res: return res
-    for t, a, b in zip(ts, K["before"], K["after"]):
-        if not (Path(a).exists() and Path(b).exists()): continue
-        A, B = (np.asarray(Image.open(x).convert("RGB")).astype(int) for x in (a, b))
-        say(f"  {t} s: {(np.abs(A - B).max(axis=2) > 40).mean():.2%} of pixels changed by the fix")
-    compare(p, fx, [{"t": t, "file": f} for t, f in zip(ts, K["after"])], say)
-    m = re.search(r"PROJECT (.+)", res)
-    if m:                                                 # the kit's work copy was fixed: the user's copy in renders/ae follows
-        proj = Path(m.group(1).strip()); dst = renders(p, "ae")
-        if str(proj).lower().startswith(str(work).lower()) and proj.exists():
-            dst.mkdir(parents=True, exist_ok=True); shutil.copy2(proj, dst / proj.name); say(f"  copied to {dst / proj.name}")
-    say(f"  the project before the fix: {K['backup']}")
-    return res
+def ae_failed(res):
+    """what went wrong in a script's answer from After Effects, or "": a line that starts with ERROR (run_jsx.ps1's "ERROR: ...", a script's own
+    catch "ERROR ..."), else the build's end line "FAILED in ..." (ae_runtime.jsx finish). A layer named after the film's words ("ERROR 404")
+    is inside a line, never its start, so a finished build that logs it is no failure (audit/112d d9)"""
+    lines = [x.strip() for x in str(res or "").splitlines() if x.strip()]
+    return next((x for x in lines if x.startswith("ERROR")), "") or next((x for x in lines if x.startswith("FAILED in ")), "")
 
 
 def run_jsx(jsx, done, timeout=3600, say=say):
@@ -2179,7 +2132,7 @@ def main(argv=None):
     res = run(a.project, run_ae=a.run, check=a.check, save=not a.no_save, estimate_only=a.estimate, rebuild=a.rebuild, url=a.url,
               fps=float(n) / float(d or 1), out=a.out, ref_dir=a.ref_dir, rate=float(rn) / float(rd or 1), film_file=a.film)
     if isinstance(res, dict): say("ESTIMATE " + json.dumps(res))
-    if isinstance(res, str) and "ERROR" in res: sys.exit(3)
+    if isinstance(res, str) and ae_failed(res): sys.exit(3)
 
 
 if __name__ == "__main__":

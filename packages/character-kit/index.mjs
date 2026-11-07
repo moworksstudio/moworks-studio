@@ -12,14 +12,25 @@ import { APP_ROOT, expandEnv, loadPins, sourceHead } from "../version-manager/in
 import { codeLibDir } from "../offline-assets/index.mjs";
 import { workRoot } from "../project-service/index.mjs";
 import { docPath, writeDoc } from "../project-service/docs.mjs";
-import { encodePoster } from "../library/preview-media.mjs";
+import { encodePoster, encodeSheet } from "../library/preview-media.mjs";
+import { cellsOf, composeSheet } from "./sheet-compose.mjs";
+/** The brush layer's sheet cells in order (character.js v1Rows: one a second in the "cells" scene). Hands n/a: the kit's arms end in stubs. */
+const BRUSH_SHEET_ROWS = Object.freeze([
+  { title: "Views", cols: ["front", "three-quarter", "profile", "back"] },
+  { title: "Faces", cols: ["neutral", "happy", "laugh", "surprised", "worried", "angry", "talk", "blink"] },
+  { title: "Poses", cols: ["stand", "walk", "point", "wave", "reach", "sit"] },
+  { title: "Walk", cols: ["contact", "down", "pass", "up"] },
+]);
 import { FRONT_FILE, fillFrontBoxes, frontBoxes } from "./frontBox.mjs";
 import { RICKS_ENGINE, ricksCharacters, ricksDir } from "./ricks.mjs";
 import { C3D_ENGINE, c3dCharacters, c3dDir } from "./c3d.mjs";
+import { WI_ENGINE, wiCharacters, wiDir } from "./whatif.mjs";
+import { HOUSE_ENGINES, houseCharacters } from "./house.mjs";
+import { readJson } from "../util/json.mjs";
 
 const HERE = import.meta.dirname;
 const readText = (p) => { try { return readFileSync(p, "utf8"); } catch { return ""; } };
-const readJson = (p) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return null; } };
+
 export const DEMO_LABEL = "Demo: Anthropic's mascot, not for use in films";
 
 /** The pinned kit: { repo, commit, root, libs, head, intact }. */
@@ -110,8 +121,9 @@ export const KINDS = ["human", "animal", "thing", "robot"];
 export const ownRig = (kind) => kind === "animal" || kind === "thing" || kind === "robot";
 export const humanDir = (root = APP_ROOT) => join(mediaRoot(root), HUMAN_ENGINE);
 export const shippedHumanDir = (root = APP_ROOT) => join(shippedRoot(root), HUMAN_ENGINE);
+// "walk": the MW Character Sheet v1 life clip (life.mp4) where there is one, else a walk of its own (the author's rigs' films)
 const HUMAN_MEDIA = [["sheetMarker", "sheet-marker.webp"], ["sheetStorybook", "sheet-storybook.webp"], ["sheet", "sheet.webp"], ["walkMarker", "walk-marker.mp4"],
-  ["walkStorybook", "walk-storybook.mp4"], ["walk", "walk.mp4"], ["poster", "poster.webp"]];
+  ["walkStorybook", "walk-storybook.mp4"], ["walk", "life.mp4"], ["walk", "walk.mp4"], ["poster", "poster.webp"]];
 // ---- a character's history: every run that made or changed it, and the versions kept for Undo (outside git like the store)
 export const versionsDir = (root = APP_ROOT) => join(mediaRoot(root), "_versions");
 const historyFile = (id, root) => join(mediaRoot(root), "_history", `${id}.json`);
@@ -154,7 +166,9 @@ function shippedHumans(root) {
   try { pin = loadPins(root).anidoodle; } catch { /* no pins here: no rigs */ }
   if (pin) for (const a of AUTHOR_RIGS) {
     const link = `https://github.com/${pin.repo}/blob/${pin.commit}/${pin.skill ?? "skills/anidoodle"}/${a.module[0]}`;
-    out.set(a.id, { id: a.id, name: a.name, about: a.about, engine: HUMAN_ENGINE, rig: a.rig, import: a.import, hands: a.hands,
+    // its sheet's record (MW Character Sheet v1, reduced: `can`, `sheet`) from bundle/, the rest built here
+    const kept = out.get(a.id) ?? {};
+    out.set(a.id, { ...(kept.can ? { can: kept.can, sheet: kept.sheet } : {}), id: a.id, name: a.name, about: a.about, engine: HUMAN_ENGINE, rig: a.rig, import: a.import, hands: a.hands,
       credit: { author: "Alex Greenshpun (10x Company)", link, commit: pin.commit, licence: "Apache-2.0 (with NOTICE)", made: "as shipped" }, module: a.module });
   }
   return out;
@@ -171,7 +185,8 @@ export function humanCharacters(root = APP_ROOT) {
   const list = [...mine.map((c) => [c, join(humanDir(root), c.id)]),
     ...[...shippedHumans(root).values()].filter((c) => !yours.has(c.id)).map((c) => [c, join(shippedHumanDir(root), c.id)])];
   return list.sort(([a], [b]) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)).map(([c, dir]) => {
-    const media = Object.fromEntries(HUMAN_MEDIA.map(([k, f]) => [k, existsSync(join(dir, f)) ? `/media/characters/${HUMAN_ENGINE}/${c.id}/${f}` : null]));
+    const media = {};
+    for (const [k, f] of HUMAN_MEDIA) media[k] ??= existsSync(join(dir, f)) ? `/media/characters/${HUMAN_ENGINE}/${c.id}/${f}` : null;
     // kind: "human" | "animal" | "thing" | "robot"; the author's rigs as listed in AUTHOR_RIGS, a record saved before kinds existed is a person
     const kind = c.kind ?? AUTHOR_RIGS.find((a) => a.id === c.rig)?.kind ?? "human";
     return { ...c, kind, engine: HUMAN_ENGINE, group: "anidoodle", demo: false, selectable: true, why: null, media };
@@ -194,17 +209,20 @@ export function humanRecord(id, root = APP_ROOT) {
 // a new shipped character takes the prefix moworks- (test/characters-apart.test.mjs holds it to that), and no user's id takes the prefix.
 export const SHIPPED_PREFIX = "moworks-";
 // a folder of the store, never a character
-const RESERVED_IDS = ["user", HUMAN_ENGINE, RICKS_ENGINE, C3D_ENGINE];
-/** Every id the app ships, in either engine. */
+const RESERVED_IDS = ["user", HUMAN_ENGINE, RICKS_ENGINE, C3D_ENGINE, WI_ENGINE];
+/** The store's (and the bundle's) folders of an engine, each holding that engine's characters, never a character itself. */
+export const ENGINE_DIRS = Object.freeze([HUMAN_ENGINE, RICKS_ENGINE, C3D_ENGINE, WI_ENGINE, ...HOUSE_ENGINES]);
+/** Every id the app ships, in any engine (the engines' own folders: their shipped ids, #1287-#1293). */
 export function shippedIds(root = APP_ROOT) {
-  const media = existsSync(shippedRoot(root)) ? readdirSync(shippedRoot(root)).filter((n) => n !== HUMAN_ENGINE && n !== RICKS_ENGINE && n !== C3D_ENGINE) : [];
-  return [...new Set([...media, ...shippedHumans(root).keys(), ...definitions(join(HERE, "characters")).map((c) => c.id), ...definitions(join(HERE, "demo")).map((c) => c.id)])];
+  const media = existsSync(shippedRoot(root)) ? readdirSync(shippedRoot(root)).filter((n) => !ENGINE_DIRS.includes(n)) : [];
+  const engines = ENGINE_DIRS.filter((e) => e !== HUMAN_ENGINE).flatMap((e) => (existsSync(join(shippedRoot(root), e)) ? readdirSync(join(shippedRoot(root), e)) : []));
+  return [...new Set([...media, ...shippedHumans(root).keys(), ...engines, ...definitions(join(HERE, "characters")).map((c) => c.id), ...definitions(join(HERE, "demo")).map((c) => c.id)])];
 }
 /** An id for a new character of the user's from `base`: `base`, or base-2, base-3…, not shipped, not the user's, and no folder of the store. */
 export function freeId(base, root = APP_ROOT) {
   const clean = String(base ?? "").replace(/^moworks-+/, "").replace(/^[^a-z]+/, "") || "character";
-  const taken = new Set([...RESERVED_IDS, ...shippedIds(root), ...characters(root).map((c) => c.id), ...humanCharacters(root).map((c) => c.id), ...ricksCharacters(root).map((c) => c.id), ...c3dCharacters(root).map((c) => c.id)]);
-  const used = (id) => taken.has(id) || existsSync(join(mediaRoot(root), id)) || existsSync(join(humanDir(root), id)) || existsSync(join(ricksDir(root), id)) || existsSync(join(c3dDir(root), id));
+  const taken = new Set([...RESERVED_IDS, ...shippedIds(root), ...characters(root).map((c) => c.id), ...humanCharacters(root).map((c) => c.id), ...ricksCharacters(root).map((c) => c.id), ...c3dCharacters(root).map((c) => c.id), ...wiCharacters(root).map((c) => c.id), ...houseCharacters(root).map((c) => c.id)]);
+  const used = (id) => taken.has(id) || existsSync(join(mediaRoot(root), id)) || existsSync(join(humanDir(root), id)) || existsSync(join(ricksDir(root), id)) || existsSync(join(c3dDir(root), id)) || existsSync(join(wiDir(root), id));
   let id = clean.slice(0, 28);
   for (let n = 2; used(id); n++) id = `${clean.slice(0, 25)}-${n}`;
   return id;
@@ -222,7 +240,8 @@ function onlyShipped(copy, shipped, id, rel = "") {
     const f = join(copy, e.name), s = join(shipped, e.name), r = `${rel}${e.name}`;
     if (e.isDirectory()) { if (!onlyShipped(f, s, id, `${r}/`)) return false; continue; }
     if (!e.isFile()) return false;
-    if (r === "character.json") { const c = JSON.parse(readFileSync(f, "utf8")); if (c?.id === id && c.credit?.made === "as shipped") continue; return false; }
+    // the app's own record: "as shipped", or the very file the app ships (an example's character the app adapted, #1287-#1293)
+    if (r === "character.json") { const c = JSON.parse(readFileSync(f, "utf8")); if (c?.id === id && (c.credit?.made === "as shipped" || (existsSync(s) && readFileSync(f).equals(readFileSync(s))))) continue; return false; }
     if (r === FRONT_FILE) { const j = JSON.parse(readFileSync(f, "utf8")); if (j && typeof j === "object" && Object.values(j).every((k) => typeof k?.file === "string" && "box" in k)) continue; return false; }
     if (!existsSync(s) || !readFileSync(f).equals(readFileSync(s))) return false;
   }
@@ -234,11 +253,14 @@ export function migrateShippedCopies(root = APP_ROOT) {
   const out = { removed: [], kept: [] }, store = mediaRoot(root), lab = join(store, "_lab");
   if (!existsSync(store) || userStoreInRepo(root)) return out;
   for (const n of existsSync(lab) ? readdirSync(lab).filter((x) => x.startsWith("old-")) : []) { try { removeFromStore(join(lab, n), root); } catch { /* the next start */ } }
-  const top = existsSync(shippedRoot(root)) ? readdirSync(shippedRoot(root)).filter((n) => n !== HUMAN_ENGINE) : [];
+  // an engine's folder (<store>/cartoon-3d/ holds the user's own 3D Cartoon characters) is never one character: its shipped ids are looked at one by one
+  const top = existsSync(shippedRoot(root)) ? readdirSync(shippedRoot(root)).filter((n) => !ENGINE_DIRS.includes(n)) : [];
+  const perEngine = ENGINE_DIRS.filter((e) => e !== HUMAN_ENGINE).flatMap((e) => { const d = join(shippedRoot(root), e); return existsSync(d) ? readdirSync(d).map((id) => [`${e}/${id}`, id, join(store, e, id), join(d, id)]) : []; });
   const copies = [
     // <store>/<id>/ is the media of a definition of the user's when there is one: that is the user's, whatever its id
     ...top.filter((id) => !existsSync(join(userDir(root), `${id}.json`))).map((id) => [id, id, join(store, id), join(shippedRoot(root), id)]),
     ...[...shippedHumans(root).keys()].map((id) => [`${HUMAN_ENGINE}/${id}`, id, join(store, HUMAN_ENGINE, id), join(shippedHumanDir(root), id)]),
+    ...perEngine,
   ];
   for (const [rel, id, copy, shipped] of copies) {
     try {
@@ -284,7 +306,7 @@ export function readCast(projectDir) {
   if (!list.length) return { characters: [], problems: [`${CAST_FILE} has no characters ({ "characters": [ … ] })`] };
   // an anidoodle film's cast member is a module of the human engine, not a definition for this layer: its gate checks it
   // a Ricks Clip cast member is its cast layer's module too, checked by the film's gate (T39-2: 26 red lines in the Characters box)
-  const problems = list.filter((c) => c?.engine !== HUMAN_ENGINE && c?.engine !== RICKS_ENGINE && c?.engine !== C3D_ENGINE).flatMap((c, i) => checkCharacter(c).map((p) => `${c?.id ?? `character ${i + 1}`}: ${p}`));
+  const problems = list.filter((c) => c?.engine !== HUMAN_ENGINE && c?.engine !== RICKS_ENGINE && c?.engine !== C3D_ENGINE && c?.engine !== WI_ENGINE).flatMap((c, i) => checkCharacter(c).map((p) => `${c?.id ?? `character ${i + 1}`}: ${p}`));
   const ids = list.map((c) => c?.id); if (new Set(ids).size !== ids.length) problems.push("two characters have the same id");
   return { characters: list, problems };
 }
@@ -369,7 +391,7 @@ export function clawdIn(files) {
 // ---- a page: one HyperFrames composition painted by the kit (a model sheet or the showreel of one character)
 const LIBS = [["p5", "lib/p5.min.js", ["license.txt"]], ["p5.brush", "dist/p5.brush.js", ["LICENSE.md"]]];
 /** Write a character page into dir: index.html (the HF root holding the kit's canvas), kit/ (the engine as shipped, the generic parts, the
- *  layer) and the pinned p5 libraries with their licences. scene: "showreel" | "views" | "emotions". Returns { files }. */
+ *  layer) and the pinned p5 libraries with their licences. scene: "showreel" | "views" | "emotions" | "sheet" (MW Character Sheet v1) | "life" (its life clip). Returns { files }. */
 /** The kit's runtime files a page loads, written into <dir>/<kitRel>/: the engine as shipped (core.js, timeline.js), the generic parts,
  *  the layer and the kit's licence. Never the kit's clawd.js. */
 export function copyKit(dir, kitRel = "compositions/kit", root = APP_ROOT) {
@@ -407,7 +429,7 @@ export function writePage(dir, character, { scene = "showreel", duration = 6, bp
   const libs = copyLibs(dir, root); files.push(...libs.files);
   const tags = [libs.tags()];
   const def = { ...c }; for (const k of ["selectable", "group", "from"]) delete def[k];
-  const call = scene === "views" ? "viewSheet" : scene === "emotions" ? "emotionSheet" : "showreel";
+  const call = { views: "viewSheet", emotions: "emotionSheet", sheet: "v1Sheet", cells: "v1Cell", life: "lifeClip" }[scene] ?? "showreel";
   const html = `<!doctype html>
 <!-- A character page of Moworks Studio's character layer (audit 57 row 8): ${c.name}, ${scene}. Painted by ClaudeAnimationBase's kit
      (John Heibel, MIT, ${fileLink(src, "")}) with p5.js (LGPL-2.1) and p5.brush (MIT); its time is HyperFrames' through the app's bridge.${c.demo ? `\n     ${DEMO_LABEL}.` : ""} -->
@@ -461,7 +483,8 @@ export function mediaFile(rel, root = APP_ROOT) {
 export function demoMedia(id, root = APP_ROOT) {
   const made = characterFile(id, "demo.json", root), m = made ? readJson(made) : null;
   const url = (n) => (characterFile(id, n, root) ? `/media/characters/${id}/${n}` : null);
-  return { views: url("views.webp"), emotions: url("emotions.webp"), clip: url("showreel.mp4"), poster: url("poster.webp"), madeAt: m?.at ?? null, commit: m?.commit ?? null };
+  // sheet and the clip: MW Character Sheet v1's sheet and life clip where it was drawn, else the showreel
+  return { views: url("views.webp"), emotions: url("emotions.webp"), sheet: url("sheet.webp"), clip: url("life.mp4") ?? url("showreel.mp4"), poster: url("poster.webp"), madeAt: m?.at ?? null, commit: m?.commit ?? null };
 }
 /** A person's height from its module: the spec's `canon: …, height: N` (the value its rig and gates use), or null. */
 function specHeight(id, root) {
@@ -500,7 +523,15 @@ export function apiCharacters(root = APP_ROOT) {
         history: characterHistory(c.id, root), versions: characterVersions(c.id, root) })),
       // Ricks Clip's (owner #1076): the user's own, on the kit's cast and the app's cast layer (ricks.mjs)
       ...ricksCharacters(root).map((c) => ({ id: c.id, name: c.name, about: c.about, kind: c.kind, ...heightFields(c, root), group: c.group, engine: RICKS_ENGINE, demo: false, selectable: true, why: null, hand: "ricks",
-        label: null, credit: c.credit, made: c.credit?.made ?? null, hands: ["ricks"], media: c.media, version: c.version ?? null,
+        label: null, credit: c.credit, made: c.credit?.made ?? null, hands: ["ricks"], media: c.media, version: c.version ?? null, colors: c.palette ? Object.values(c.palette).slice(0, 4) : undefined,
+        history: characterHistory(c.id, root), versions: characterVersions(c.id, root) })),
+      // the house heroes (owner #1287-#1293): a film style's own hero, drawn by its source skill, the app's only (house.mjs)
+      ...houseCharacters(root).map((c) => ({ id: c.id, name: c.name, about: c.about, kind: c.kind, ...heightFields(c, root), group: c.group, engine: c.engine, demo: false, selectable: true, why: null, hand: c.engine,
+        label: null, credit: c.credit, made: c.credit?.made ?? null, hands: [c.engine], media: c.media, version: c.version ?? null, colors: c.palette ? Object.values(c.palette).slice(0, 4) : undefined,
+        history: characterHistory(c.id, root), versions: characterVersions(c.id, root) })),
+      // What If's (owner #1287-#1293): the engine's cast and the user's own, on FreshStack's rig (whatif.mjs)
+      ...wiCharacters(root).map((c) => ({ id: c.id, name: c.name, about: c.about, kind: c.kind, ...heightFields(c, root), group: c.group, engine: WI_ENGINE, demo: false, selectable: true, why: null, hand: "whatif",
+        label: null, credit: c.credit, made: c.credit?.made ?? null, hands: ["whatif"], media: c.media, version: c.version ?? null, colors: c.palette ? Object.values(c.palette).slice(0, 4) : undefined,
         history: characterHistory(c.id, root), versions: characterVersions(c.id, root) })),
       // 3D Cartoon's (owner #1267): the user's own, on the source skill's CharDef and buildCharacter (c3d.mjs)
       ...c3dCharacters(root).map((c) => ({ id: c.id, name: c.name, about: c.about, kind: c.kind, ...heightFields(c, root), group: c.group, engine: C3D_ENGINE, demo: false, selectable: true, why: null, hand: "cartoon",
@@ -539,8 +570,22 @@ export async function renderDemo(id, { root = APP_ROOT, finalize, snapshotAt, re
   const work = join(out, "work");
   rmSync(work, { recursive: true, force: true }); mkdirSync(work, { recursive: true });
   const step = (stage, progress) => onProgress({ stage, progress });
+  // sheet: MW Character Sheet v1 (owner #1287-#1293) on the one frame every engine keeps: a still a cell (scene "cells"), laid out by composeSheet
+  step("Drawing the sheet", 5);
+  {
+    const d = join(work, "cells"), cells = cellsOf(BRUSH_SHEET_ROWS);
+    writePage(d, id, { scene: "cells", duration: cells.length + 1, root });
+    const rep = await finalize(d, { googleFonts: false, characterDemo: true });
+    if (rep.lemo?.missing?.length) throw new Error(`Files missing for the sheet page: ${rep.lemo.missing.join(", ")}`);
+    const snap = await snapshotAt(d, cells.map((c) => c.index + 0.5), join(work, "cells-snap"), { timeout: 120000 });
+    const pngs = existsSync(join(work, "cells-snap")) ? readdirSync(join(work, "cells-snap")).filter((f) => f.endsWith(".png")).sort() : [];
+    if (snap.exitCode !== 0 || pngs.length < cells.length) throw new Error(`The sheet's stills failed: ${(snap.stderrTail ?? []).join(" ")}`);
+    const rows = BRUSH_SHEET_ROWS.map((r) => ({ title: r.title, items: cells.filter((x) => x.row === r.title).map((x) => ({ label: x.label, file: join(work, "cells-snap", pngs[x.index]) })) }));
+    await composeSheet({ name: c.name, rows, crop: { x: 640, y: 0, w: 640, h: 1078 }, colours: { ground: "#F3EBDC", cell: "#ece2cf", ink: "#3a2f28" } }, join(work, "sheet.png"), { root });
+    encodeSheet(join(work, "sheet.png"), join(out, "sheet.webp"), { root });
+  }
   const sheets = [["views", 1.2], ["emotions", 1.2]];
-  let n = 0;
+  let n = 1;
   for (const [scene, at] of sheets) {
     step(`Drawing the ${scene} sheet`, 5 + n++ * 25);
     const d = join(work, scene);
@@ -558,6 +603,12 @@ export async function renderDemo(id, { root = APP_ROOT, finalize, snapshotAt, re
   await finalize(d, { googleFonts: false, characterDemo: true });
   const r = await render({ projectDir: d, outputPath: join(out, "showreel.mp4"), fps: { num: 24, den: 1 }, format: "mp4", workers: 2 }, { signal });
   if (r.type !== "done") throw new Error(`The showreel render failed: ${r.code ?? r.message ?? r.type}`);
+  step("Rendering the life clip", 75);          // MW Character Sheet v1's clip: idle, turn, walk, talk
+  const dl = join(work, "life");
+  writePage(dl, id, { scene: "life", duration: 6, root });
+  await finalize(dl, { googleFonts: false, characterDemo: true });
+  const rl = await render({ projectDir: dl, outputPath: join(out, "life.mp4"), fps: { num: 24, den: 1 }, format: "mp4", workers: 2 }, { signal });
+  if (rl.type !== "done") throw new Error(`The life clip render failed: ${rl.code ?? rl.message ?? rl.type}`);
   step("Poster", 95);
   const ps = await snapshotAt(d, [3], join(work, "poster-snap"), { timeout: 30000 });
   const pp = existsSync(join(work, "poster-snap")) ? readdirSync(join(work, "poster-snap")).find((f) => f.endsWith(".png")) : null;

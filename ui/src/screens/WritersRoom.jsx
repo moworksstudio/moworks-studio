@@ -17,15 +17,17 @@ import { useT } from "../i18n.jsx";
 import { useThemeId } from "../theme.jsx";
 import { useStyles } from "./StyleGallery.jsx";
 import { CardBody, CopyButton, IdeaDialog, IdeasTab, StatusTag, clock, startProject, useIdeas } from "./IdeaLibrary.jsx";
-import { RunPanel, Sources, Truth, stopJob, useIdeaJobs, useWriteScript } from "./IdeaParts.jsx";
+import { MakingCard, RunDialog, RunPanel, Sources, Truth, stopJob, useIdeaJobs, useWriteScript } from "./IdeaParts.jsx";
 
 /** A run's time and Claude's cost of it, as Claude Code counts it: "9 min, about $0.84" (T41-17). */
 const runCost = (r, t) => [r.ms ? t("{n} min", { n: Math.max(1, Math.round(r.ms / 60000)) }) : null, r.costUsd != null ? t("about {cost}", { cost: "$" + Number(r.costUsd).toFixed(2) }) : null].filter(Boolean).join(", ");
-const TABS = [["research", "Research", Lightbulb], ["ideas", "Ideas", Sparkles], ["scripts", "Scripts", FileText]];
+const TABS = [["research", "Research", Lightbulb], ["pitches", "Pitches", Sparkles], ["scripts", "Scripts", FileText]];
+// the tab's address as it reads (audit/112c c1.6); #/ideas/ideas, its name before the rename (e58b9f7f), still opens it
+export const tabOf = (tab) => (tab === "ideas" ? "pitches" : TABS.some(([k]) => k === tab) ? tab : "research");
 const LANGS = [["vi", "Vietnamese"], ["en", "English"]];
 const LANG_NAME = Object.fromEntries(LANGS);
 
-/** The page. tab: "research" | "ideas" | "scripts"; id: an idea to open in that tab (#/ideas/scripts?id=…, the notices' Open). */
+/** The page. tab: "research" | "pitches" | "scripts"; id: an idea to open in that tab (#/ideas/scripts?id=…, the notices' Open). */
 export default function WritersRoom({ tab = "research", id = null }) {
   const t = useT();
   const studio = useThemeId() === "studio";
@@ -34,26 +36,26 @@ export default function WritersRoom({ tab = "research", id = null }) {
   const jobs = useIdeaJobs((j) => { lib.reload(); if (j.kind === "idea-pitch") setPitchAt(Date.now()); });
   const write = useWriteScript(jobs);
   const [edit, setEdit] = useState(null);             // the New idea / Edit idea dialog: { value } or null
-  const cur = TABS.some(([k]) => k === tab) ? tab : "research";
+  const cur = tabOf(tab);
   const mine = lib.items?.mine ?? [];
-  const n = { ideas: lib.items?.all.length ?? null, scripts: mine.filter((x) => x.script).length };
+  const n = { pitches: lib.items?.all.length ?? null, scripts: mine.filter((x) => x.script).length };
   const openScript = (x) => go(`/ideas/scripts?id=${x.id}`);
   const head = studio
-    ? <div className="st-head"><h1>{t("Writers Room")}</h1><span className="st-aside">{t("ideas first, then the script")}</span>
+    ? <div className="st-head"><h1>{t("Writers' Room")}</h1><span className="st-aside">{t("ideas first, then the script")}</span>
       <div className="st-acts"><button className="btn primary" onClick={() => setEdit({ value: null })}><Plus size={15} />{t("New idea")}</button></div></div>
-    : <div className="page-head"><div><BackButton /><h1>{t("Writers Room")}</h1><p className="lead">{t("Research ideas, keep the good ones, write their scripts.")}</p></div>
+    : <div className="page-head"><div><BackButton /><h1>{t("Writers' Room")}</h1><p className="lead">{t("Research ideas, keep the good ones, write their scripts.")}</p></div>
       <div className="actions"><button className="btn primary" onClick={() => setEdit({ value: null })}><Plus size={15} />{t("New idea")}</button></div></div>;
   const busy = { research: !!jobs.pitch || jobs.scripts.length > 0, scripts: jobs.scripts.length > 0 };
   return <div className={"page gal-page idl-page wr-page" + (studio ? " st-motionlib st-ideas" : "")}>
     {head}
-    <div className="tabs wr-tabs" role="tablist" aria-label={t("Writers Room")}>
+    <div className="tabs wr-tabs" role="tablist" aria-label={t("Writers' Room")}>
       {TABS.map(([k, l, Icon]) => <button key={k} type="button" role="tab" aria-selected={cur === k} onClick={() => go(`/ideas/${k}`)}>
         <Icon size={14} />{t(l)}{n[k] != null && <span className="num wr-n">{n[k]}</span>}{busy[k] && <span className="dot busy" aria-label={t("Running")} />}</button>)}
     </div>
     {cur === "research" && <ResearchTab lib={lib} jobs={jobs} write={write} pitchAt={pitchAt} onOpenScript={openScript} />}
-    {cur === "ideas" && <IdeasTab lib={lib} edit={(x) => setEdit({ value: x })} scriptRun={jobs.scriptRun} onScript={write} onOpenScript={openScript} pick={id} />}
+    {cur === "pitches" && <IdeasTab lib={lib} edit={(x) => setEdit({ value: x })} scriptRun={jobs.scriptRun} onScript={write} onOpenScript={openScript} pick={id} />}
     {cur === "scripts" && <ScriptsTab lib={lib} jobs={jobs} write={write} pick={id} />}
-    {edit && <IdeaDialog value={edit.value} onClose={() => setEdit(null)} onSaved={(x) => { setEdit(null); lib.reload(); go(`/ideas/ideas?id=${x.id}`); }} />}
+    {edit && <IdeaDialog value={edit.value} onClose={() => setEdit(null)} onSaved={(x) => { setEdit(null); lib.reload(); go(`/ideas/pitches?id=${x.id}`); }} />}
   </div>;
 }
 
@@ -102,6 +104,14 @@ function ResearchTab({ lib, jobs, write, pitchAt, onOpenScript }) {
   const askSub = form && style ? [style.title, t(LANG_NAME[form.lang]), t("about {n} s", { n: form.lengthSec }), form.topic.trim() && `“${form.topic.trim()}”`].filter(Boolean).join(" · ") : "";
   const sel = pitch ? pitch.ideas.find((x) => x.id === cur) ?? pitch.ideas[0] ?? null : null;
   const selSaved = sel?.savedAs ? mine.get(sel.savedAs) ?? null : null;
+  // what runs holds its place at the head of the ideas (owner #1324): the pitch, then each script being written; a click opens its steps
+  const [open, setOpen] = useState(null);             // the id of the run whose steps are open
+  const making = [
+    ...(run ? [{ job: run, title: t(run.more ? "Pitching 10 more ideas" : "Pitching 10 ideas"), sub: run.more && pitch ? runSub(pitch) : askSub }] : []),
+    ...jobs.scripts.map((j) => ({ job: j, title: t("Writing the script"), sub: j.ideaName })),
+  ];
+  const opened = making.find((m) => m.job.id === open) ?? null;
+  const makingCards = making.map((m) => <MakingCard key={m.job.id} job={m.job} title={m.title} sub={m.sub} onOpen={() => setOpen(m.job.id)} />);
   return <div className={"wr-research" + (pitch ? " has-pick" : "")}>
     <aside className="wr-ask studio-paper" aria-label={t("The ask")}>
       <h2 className="wr-h">{t("The ask")}</h2>
@@ -128,10 +138,10 @@ function ResearchTab({ lib, jobs, write, pitchAt, onOpenScript }) {
     </aside>
     <section className="wr-work" aria-label={t("Ideas")}>
       {err && <Banner kind="error">{err.message}</Banner>}
-      {(run || failed) && <RunPanel job={run ?? failed} title={t(run?.more || failed?.more ? "Pitching 10 more ideas" : "Pitching 10 ideas")}
-        sub={run?.more && pitch ? runSub(pitch) : askSub} onStop={run ? () => stopJob(run, toast) : null} />}
-      {jobs.scripts.map((j) => <RunPanel key={j.id} job={j} title={t("Writing the script")} sub={j.ideaName} onStop={() => stopJob(j, toast)} />)}
+      {/* a pitch that stopped keeps its panel: what it got to and why it stopped */}
+      {failed && <RunPanel job={failed} title={t(failed.more ? "Pitching 10 more ideas" : "Pitching 10 ideas")} sub={askSub} onStop={null} />}
       {pitch === undefined && <div className="skeleton" style={{ height: "20rem" }} />}
+      {!pitch && pitch !== undefined && making.length > 0 && <ol className="wr-cards" aria-label={t("Ideas")}>{makingCards}</ol>}
       {pitch === null && !run && <div className="empty wr-empty"><Lightbulb size={22} aria-hidden="true" />
         <p><b>{t("Ten ideas, in a film style's own way.")}</b></p>
         <p>{t("Choose a film style and pitch. Claude reads the style's rules, checks every true story on the web and pitches ten. Keep the ones you like; write their scripts later.")}</p></div>}
@@ -143,12 +153,13 @@ function ResearchTab({ lib, jobs, write, pitchAt, onOpenScript }) {
           <button className="btn sm" onClick={() => start(true)} disabled={!!run}><RotateCcw size={13} />{t("10 more")}</button>
           <button className="btn sm primary" onClick={() => save({ all: true })} disabled={!!run || saving || !left}><Check size={14} />{left ? t("Save all ({n})", { n: left }) : t("All saved")}</button>
         </div>
-        <ol className="wr-cards" aria-label={t("Ideas")}>{pitch.ideas.map((x, i) => <PitchCard key={x.id} x={x} n={i + 1} on={sel?.id === x.id} onPick={() => setCur(x.id)}
+        <ol className="wr-cards" aria-label={t("Ideas")}>{makingCards}{pitch.ideas.map((x, i) => <PitchCard key={x.id} x={x} n={i + 1} on={sel?.id === x.id} onPick={() => setCur(x.id)}
           saved={x.savedAs ? mine.get(x.savedAs) ?? null : null} running={x.savedAs ? jobs.scriptRun(x.savedAs) : null} />)}</ol>
       </>}
     </section>
     {pitch && sel && <PitchDetail key={sel.id} x={sel} n={pitch.ideas.indexOf(sel) + 1} saved={selSaved} saving={saving} running={sel.savedAs ? jobs.scriptRun(sel.savedAs) : null}
       onSave={() => save({ ids: [sel.id] })} onScript={(idea) => write(idea)} onOpenScript={onOpenScript} />}
+    {opened && <RunDialog job={opened.job} title={opened.title} sub={opened.sub} onStop={() => stopJob(opened.job, toast)} onClose={() => setOpen(null)} />}
   </div>;
 }
 
@@ -197,8 +208,11 @@ function ScriptsTab({ lib, jobs, write, pick }) {
   const t = useT();
   const items = lib.items;
   const writing = jobs.scripts;
+  // a script being written first (owner #1324: its place with how far), then the rest, the latest first
   const list = useMemo(() => (items?.mine ?? []).filter((x) => x.script || writing.some((j) => j.ideaId === x.id))
-    .sort((a, b) => ((b.script?.at ?? "9") > (a.script?.at ?? "9") ? 1 : -1)), [items, writing]);
+    .sort((a, b) => (writing.some((j) => j.ideaId === b.id) - writing.some((j) => j.ideaId === a.id)) || ((b.script?.at ?? "9") > (a.script?.at ?? "9") ? 1 : -1)), [items, writing]);
+  const toast = useToast();
+  const [open, setOpen] = useState(null);             // the run whose steps are open
   const [cur, setCur] = useState(() => pick ?? (() => { try { return sessionStorage.getItem(SCRIPT_KEY); } catch { return null; } })());
   useEffect(() => { if (pick) setCur(pick); }, [pick]);
   useEffect(() => { try { if (cur) sessionStorage.setItem(SCRIPT_KEY, cur); } catch { /* private */ } }, [cur]);
@@ -206,14 +220,17 @@ function ScriptsTab({ lib, jobs, write, pick }) {
   if (!items) return <div className="skeleton" style={{ height: "24rem" }} />;
   const sel = list.find((x) => x.id === cur) ?? list[0] ?? null;
   if (!list.length) return <div className="empty wr-empty"><FileText size={22} aria-hidden="true" /><p><b>{t("No scripts yet.")}</b></p>
-    <p>{t("Keep an idea in Research or Ideas, then Write the script: Claude writes it scene by scene, in the idea's film style.")}</p>
+    <p>{t("Keep an idea in Research or Pitches, then Write the script: Claude writes it scene by scene, in the idea's film style.")}</p>
     <button className="btn" onClick={() => go("/ideas/research")}><Lightbulb size={14} />{t("Go to Research")}</button></div>;
   return <div className="wr-scripts">
     <nav className="wr-slist" aria-label={t("Scripts")}>{list.map((x) => { const run = jobs.scriptRun(x.id);
+      if (run && !x.script) return <MakingCard key={x.id} as="row" job={run} title={x.name} onOpen={() => { setCur(x.id); setOpen(run.id); }} />;
       return <button key={x.id} type="button" className={"wr-sitem" + (sel?.id === x.id ? " on" : "")} aria-current={sel?.id === x.id || undefined} onClick={() => setCur(x.id)}>
         <b>{x.name}</b><small>{[x.style?.title, x.script && t("about {n} s", { n: x.script.seconds }), run ? t("Writing…") : x.script && ago(x.script.at)].filter(Boolean).join(" · ")}</small>
         <StatusTag status={x.status} /></button>; })}</nav>
     {sel && <ScriptView key={sel.id} x={sel} run={jobs.scriptRun(sel.id)} onWrite={() => write(sel)} reload={lib.reload} />}
+    {(() => { const j = writing.find((w) => w.id === open); const x = j && list.find((i) => i.id === j.ideaId);
+      return j ? <RunDialog job={j} title={t("Writing the script")} sub={x?.name ?? j.ideaName} onStop={() => stopJob(j, toast)} onClose={() => setOpen(null)} /> : null; })()}
   </div>;
 }
 
@@ -242,7 +259,7 @@ function ScriptView({ x, run, onWrite, reload }) {
       <p className="wr-meta">{[x.style?.title ?? x.script.style, t("{n} scenes", { n: sc.length }), t("{n} words", { n: x.script.words }), t("about {n} s", { n: x.script.seconds }),
         x.script.by === "owner" ? t("edited {when}", { when: ago(x.script.at) }) : t("written {when}", { when: ago(x.script.at) }), x.script.run && x.script.by !== "owner" ? runCost(x.script.run, t) : null].filter(Boolean).join(" · ")}
         {x.card && <Truth truth={x.card.truth} />}</p>
-      <p className="wr-links"><a href={`#/ideas/ideas?id=${x.id}`}>{t("The idea")}</a>
+      <p className="wr-links"><a href={`#/ideas/pitches?id=${x.id}`}>{t("The idea")}</a>
         {x.projects?.map((p) => <a key={p.id} href={`#/projects/${p.id}`}>{t("Film: {title}", { title: p.title })}</a>)}</p>
       {run && <p className="wr-warn"><span className="dot busy" aria-hidden="true" /> {t("Claude is writing it again; this one stays until the new one is done.")}</p>}
     </div>
@@ -266,7 +283,7 @@ function ScriptView({ x, run, onWrite, reload }) {
           {x.script.versions?.length > 0 && <button className="btn ghost" onClick={undo} disabled={!!run}><Undo2 size={14} />{t("Undo")}</button>}
           <button className="btn ghost" onClick={writeAgain} disabled={!!run}><RotateCcw size={14} />{t("Write again")}</button>
           <span className="spacer" />
-          <button className="btn primary" onClick={() => startProject(x)}><Sparkles size={14} />{t("Start a project with this script")}</button></>}
+          <button className="btn primary" onClick={() => startProject(x)}><Sparkles size={14} />{t("Start a production with this script")}</button></>}
     </div>
     {askWrite && <Dialog title={t("Write the script again?")} onClose={() => setAskWrite(false)} footer={<><span className="spacer" />
       <button className="btn" onClick={() => setAskWrite(false)}>{t("Keep my edits")}</button>

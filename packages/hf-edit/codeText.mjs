@@ -12,6 +12,7 @@
 // What is not found here (a picture, a colour, words the code builds from parts) is pinned as a note for Claude (the Editor's Pin a note).
 // Saving replaces the literal in place (its quotes escaped, NFC) once the file still holds the words the user saw; the caller bundles the
 // film again (codeFilm.mjs freshFilm: What If 0.6 s, anidoodle 0.1 s; lemo and mg load their scripts as they are).
+import { VI_MARKED_RE } from "../hf-qa/vi-letters.mjs";
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -23,13 +24,12 @@ const walk = (d, ok) => (existsSync(d) ? readdirSync(d).flatMap((n) => { const f
 const relOf = (dir, f) => relative(dir, f).split(sep).join("/");
 const lineAt = (s, i) => s.slice(0, i).split("\n").length;
 const LETTER = /\p{L}/u;
-const VI = /[ăâđêôơưàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/iu;
 const TEXT_KEYS = new Set(["text", "label", "live", "title", "caption", "subtitle", "heading", "line", "lines", "name", "sub", "cap", "word", "words", "runs", "say", "says", "quote", "body", "cta", "button"]);
 const NOT_TEXT = new Set(["id", "set", "size", "note", "look", "kind", "font", "fontFamily", "family", "color", "colour", "fill", "stroke", "bg", "ease", "type", "cls", "className", "class", "src", "href", "file", "url", "slug", "voice", "model", "role", "key", "style", "d", "transform", "textAnchor", "anchor", "align", "at", "shot", "rig", "hand", "engine", "import", "check", "accent", "topic", "beat", "science", "source", "sample", "samples"]);
 const NOT_CALLS = new Set(["require", "import", "querySelector", "querySelectorAll", "getElementById", "$", "addEventListener", "removeEventListener", "setAttribute", "getAttribute", "add", "remove", "toggle", "contains", "createElement", "createElementNS", "matchMedia", "fetch", "log", "warn", "error", "Error", "loadFont", "normalize", "split", "join", "replace", "includes", "startsWith", "endsWith", "test", "match", "staticFile", "delayRender", "random", "rnd", "rng", "seed", "defineEpisode"]);
 const DRAW_CALLS = new Set(["writeOn", "caption", "setType", "letter", "fillText", "strokeText", "sentence"]);
 /** Words, not a name or a CSS value: Vietnamese letters, or two words of letters without CSS signs. */
-const wordsLike = (t) => LETTER.test(t) && (VI.test(t) || (/\p{L}{2,}[^\S\n]+\p{L}/u.test(t) && !/\d(?:px|%|s|ms|deg|em|rem|vh|vw)\b|[;{}]|:\s|^[.#]|\(|=>/.test(t)));
+const wordsLike = (t) => LETTER.test(t) && (VI_MARKED_RE.test(t) || (/\p{L}{2,}[^\S\n]+\p{L}/u.test(t) && !/\d(?:px|%|s|ms|deg|em|rem|vh|vw)\b|[;{}]|:\s|^[.#]|\(|=>/.test(t)));
 const shown = (t) => LETTER.test(t) && !/^#[0-9a-f]{3,8}$/i.test(t) && !/\.(?:png|jpe?g|webp|gif|svg|mp3|mp4|wav|m4a|json|m?js|ts|tsx|css|html|woff2?|ttf|otf)$/i.test(t.trim())
   && !/^https?:/.test(t) && !/<\/?[a-z][\w-]*[\s>/]/i.test(t);          // a file, a link, a piece of markup (SVG paths, innerHTML) are not words
 const unescape = (q, s) => (q === "jsx" || q === "attr" ? s : s.replace(/\\(u\{[0-9a-fA-F]+\}|u[0-9a-fA-F]{4}|x[0-9a-fA-F]{2}|.)/g, (_, e) => (e[0] === "u" && e.length > 1 ? String.fromCodePoint(parseInt(e.replace(/[u{}]/g, ""), 16)) : e[0] === "x" && e.length > 1 ? String.fromCharCode(parseInt(e.slice(1), 16)) : { n: "\n", t: "\t" }[e] ?? e)));
@@ -110,7 +110,7 @@ function isWords(x, { drawCalls = false, fonts = new Set() } = {}) {
   if (c.siblings?.some((k) => /^(fps|durationFrames|duration|width|height)$/.test(k)) && !c.call) return false;          // a film's meta, never drawn
   // words of the code itself, never shown: all lower case with no Vietnamese letter, outside JSX (class names mk("div", "layer flash"), a
   // cue's note "the skid", a check's message "the film is not 720 frames")
-  if (x.quote !== "jsx" && !c.attr && !VI.test(t) && !/\p{Lu}/u.test(t)) return false;
+  if (x.quote !== "jsx" && !c.attr && !VI_MARKED_RE.test(t) && !/\p{Lu}/u.test(t)) return false;
   if (c.call && NOT_CALLS.has(c.call)) return false;
   if (c.key && NOT_TEXT.has(c.key)) return false;
   if (x.quote === "jsx") return true;

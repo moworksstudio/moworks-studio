@@ -169,7 +169,7 @@ export function ImportNow({ projectId, onDone }) {
     <div className="row asset-actions">
       {job ? <><span className="hint"><Loader2 size={13} className="spin" /> {t("Copying {done} of {n}…", { done: items.filter((x) => x.status === "done").length, n: items.length })}</span>
         <button className="btn sm" onClick={() => job.cancel()}>{t("Cancel")}</button></>
-        : pending.length > 0 && <button className="btn primary sm" onClick={() => go(pending)}><Upload size={14} />{t("Copy {n} file(s) into the project", { n: pending.length })}</button>}
+        : pending.length > 0 && <button className="btn primary sm" onClick={() => go(pending)}><Upload size={14} />{t("Copy {n} file(s) into the production", { n: pending.length })}</button>}
     </div>
   </>;
 }

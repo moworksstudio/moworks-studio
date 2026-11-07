@@ -23,9 +23,10 @@ import * as blocks from "../blocks-library/index.mjs";
 import * as looks from "../looks-library/index.mjs";
 import * as vocab from "../vocab-library/index.mjs";
 import * as intake from "../intake-library/index.mjs";
+import { readJson } from "../util/json.mjs";
 
 const MB = 1048576;
-const readJson = (f, d) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
+
 const bundleDir = (root) => join(root, "bundle");
 // a pinned path is "{app}/bundle/..." with forward slashes after the fill: compared resolved
 const inBundle = (p, root) => resolve(String(p ?? "")).toLowerCase().startsWith(resolve(bundleDir(root)).toLowerCase() + sep);

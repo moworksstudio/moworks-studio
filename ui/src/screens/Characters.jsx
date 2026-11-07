@@ -1,8 +1,9 @@
 // Characters: the character layer's characters, each drawn by the app from a definition through
 // HyperFrames: a views sheet, a sheet of emotions and a short showreel. Clawd is Anthropic's mascot, the author kit's demo: labelled, and never offered for a project.
 // Laid out like the Look page: a grid in groups (Moworks, yours, demo), the character in hand beside it. Data: GET /api/characters.
-// The user's own characters (saved from a film's Characters dialog) sit here too; any usable character goes into a
-// project with "Use in a project", and the user's own can be deleted.
+// The user's own characters (saved from a film's Characters dialog) sit here too, and the user's own can be deleted. No "Use in a
+// project" (owner 06/11 #1319: putting a character into a film half made broke its storyboard): a character goes into a film from New
+// project's cast picker (workflow/CharacterPick.jsx), or from the film itself.
 // Laid out as a character tab: a create bar on top (a description and
 // "Design with Claude"), a grid of big character cards, the character in hand on the right. No "Draw demo": the app's
 // demo media are prebuilt and a character is drawn when it is made; one saved without sheets gets "Redraw". A drawing shows on its card.
@@ -10,24 +11,24 @@
 // The page becomes a Character creator: (1) describe the character, with an optional reference picture; (2) choose how
 // it is drawn: one of anidoodle's hands that draw people, or Brush cartoon (a mascot); (3) "Create with Claude" with an honest
 // estimate, then the run's stages and progress; (4) the character lands in the library (Yours / Moworks / anidoodle / Demo) with its
-// pictures, Use in a project, Change with Claude, Delete. The server's API: GET /api/characters/styles, POST /api/characters/create and …/change.
+// pictures, Change with Claude, Delete. The server's API: GET /api/characters/styles, POST /api/characters/create and …/change.
 // Laid out like the other galleries: a filter column (library, drawing style), the shared 3-row grid with its pager,
 // the character in hand beside it. "Create a character" (top right) opens a dialog: the brief, a name and a reference picture, the drawing
 // style; "Create" shows a short summary to confirm, and confirming starts Claude and closes the dialog. While Claude works, a tile holds
 // the character's place at the top of the grid (name, %, a slim bar) and a chip in the page head shows it too; both open the live steps.
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, Check, FolderPlus, History, ImagePlus, Loader2, Pencil, Play, Plus, RefreshCw, RotateCcw, Search, SlidersHorizontal, Sparkles, Trash2, X } from "lucide-react";
-import { del, get, post, watchJob } from "../api.js";
+import { AlertTriangle, Check, CircleStop, History, ImagePlus, Loader2, Pencil, Play, Plus, RefreshCw, RotateCcw, Search, SlidersHorizontal, Sparkles, Trash2, X } from "lucide-react";
+import { del, get, post } from "../api.js";
 import { BackButton, Banner, Dialog, Pager, useGalleryGrid } from "../components.jsx";
-import { ago, go, useData, usePref, useToast } from "../lib.jsx";
+import { ago, useData, usePref, useToast, useJobWatch } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
-import { CreditLine } from "./StyleGallery.jsx";
+import { CreditLine, useStyles } from "./StyleGallery.jsx";
 import { AUTHOR_ORDER, AuthorBadge, AuthorName, authorView, ENGINE_AUTHOR } from "../authors.jsx";
 import { useThemeId } from "../theme.jsx";
 import CharacterLineup from "../studio/CharacterLineup.jsx";
 
 // characters belong to the author whose engine draws them, and the page is sorted by author first; a rig
-// type says what the character is. What If's characters come with its engine ("Coming soon").
+// type says what the character is.
 const authorOfChar = (c) => ENGINE_AUTHOR[c.engine] ?? "moworks";
 const RIGS = [["human", "Human"], ["animal", "Animal"], ["thing", "Thing"], ["robot", "Robot"]];          // The four kinds (Bit is a robot)
 /** What the character is (the server sends `kind` on every character; `rig` is an author's rig id such as "cheetah", not the kind). */
@@ -43,6 +44,7 @@ export const usable = (c) => !c.demo && (c.selectable || c.engine === "anidoodle
  * Brush character by the character layer in a Brush film; anywhere else it is a reference drawn in the film's style. */
 export const howIn = (c, film) => (c.engine === "ricks-clip" ? (film.ricks ? "Animated with Ricks Clip's cast" : "Drawn in this film's style")
   : c.engine === "cartoon-3d" ? (film.c3d ? "Animated with 3D Cartoon's rig" : "Drawn in this film's style")
+  : c.engine === "what-if" ? (film.whatif ? "Animated with the What If rig" : "Drawn in this film's style")
   : c.engine === "anidoodle-human" ? (film.human ? "Animated with the human engine" : "Drawn in this film's style")
   : film.layer && !film.human ? null : "Drawn in this film's style");
 /** Characters Claude made for the user can be changed and deleted; the app's and the authors' as shipped cannot. */
@@ -123,11 +125,10 @@ const aboutOf = (c) => {
 };
 
 /** The character in hand, fitting its column with no scroll: a short preview, name and library, the description, colours, the
- *  pictures as thumbnails, one row of actions (Use in a project, Edit, Delete), History as a link, the credit. */
+ *  pictures as thumbnails, one row of actions (Edit, Delete), History as a link, the credit. */
 function CharacterDetails({ c, job, onRedraw, onDeleted, onChange, onReload }) {
   const t = useT();
   const toast = useToast();
-  const [use, setUse] = useState(false);          // "Use in a project": the project picker
   const [ask, setAsk] = useState(false);          // delete one of the user's own
   const [view, setView] = useState(null);         // a thumbnail open full size
   const [hist, setHist] = useState(false);
@@ -150,14 +151,12 @@ function CharacterDetails({ c, job, onRedraw, onDeleted, onChange, onReload }) {
       <span className="pic">{x.video ? <video src={x.src + "#t=0.5"} muted playsInline preload="metadata" /> : <img src={x.src} alt="" />}{x.video && <Play size={14} className="play" />}</span>
       <span className="cap">{x.label}</span></button>)}</div>}
     <div className="ch-acts ch-acts-row">
-      {usable(c) && <button className="btn primary" onClick={() => setUse(true)}><FolderPlus size={14} />{t("Use in a project")}</button>}
-      {g === "yours" && c.engine !== "anidoodle-human" && c.engine !== "ricks-clip" && c.engine !== "cartoon-3d" && !m.views && !job && <button className="btn" onClick={() => onRedraw(c)}><RefreshCw size={14} />{t("Redraw")}</button>}
+      {g === "yours" && c.engine !== "anidoodle-human" && c.engine !== "ricks-clip" && c.engine !== "cartoon-3d" && c.engine !== "what-if" && c.engine !== "stickman-explainer" && c.engine !== "explainer-2d" && !m.views && !job && <button className="btn" onClick={() => onRedraw(c)}><RefreshCw size={14} />{t("Redraw")}</button>}
       {ownOf(c) && <button className="btn" onClick={() => onChange(c)} disabled={!!job} title={t("Change it with Claude")}><Pencil size={14} />{t("Edit")}</button>}
       {ownOf(c) && <button className="btn ghost icon" onClick={() => setAsk(true)} aria-label={t("Delete {name}", { name: c.name })} title={t("Delete")}><Trash2 size={15} /></button>}
     </div>
     {/* no "Made by Claude in … min · $…": one credit line, in this column only */}
     {c.credit && <div className="ch-credits"><CreditLine author={c.credit.author} licence={c.credit.licence} link={c.credit.link} commit={c.credit.commit} made={c.credit.made} title={c.credit.summary || undefined} /></div>}
-    {use && <UseInProject c={c} onClose={() => setUse(false)} />}
     {view && <Viewer item={view} name={c.name} onClose={() => setView(null)} />}
     {hist && <RunHistory c={c} onUndone={onReload} onClose={() => setHist(false)} />}
     {ask && <Dialog title={t("Delete “{title}”?", { title: c.name })} danger onClose={() => setAsk(false)} footer={<><span className="spacer" />
@@ -168,43 +167,17 @@ function CharacterDetails({ c, job, onRedraw, onDeleted, onChange, onReload }) {
   </>;
 }
 
-/** The projects a character can go into: every film; `characters: false` means the film draws it as a reference. */
-const eligible = () => get("/api/characters/projects");
-
-/** Pick a project and put the character in it (POST /api/projects/<id>/characters/use): the film's CHARACTERS.json gets it. Only projects
- *  whose style acts with characters are offered. */
-function UseInProject({ c, onClose }) {
-  const t = useT();
-  const toast = useToast();
-  const q = useData(eligible, []);
-  const [pid, setPid] = useState(null);
-  const [busy, setBusy] = useState(false);
-  const list = (q.data?.projects ?? []).filter((p) => !p.missing);
-  const ok = async () => {
-    setBusy(true);
-    try { await post(`/api/projects/${pid}/characters/use`, { ids: [c.id] }); toast(t("{name} is in the project", { name: c.name })); onClose(); go(`/projects/${pid}/character`); }
-    catch (e) { toast(e.message, "error"); setBusy(false); }
-  };
-  return <Dialog title={t("Use {name} in a project", { name: c.name })} onClose={onClose} footer={<><span className="hint">{t("The project's Characters dialog opens with it.")}</span><span className="spacer" />
-    <button className="btn" onClick={onClose}>{t("Cancel")}</button>
-    <button className="btn primary" onClick={ok} disabled={!pid || busy}>{busy ? <Loader2 size={14} className="spin" /> : <FolderPlus size={14} />}{t("Use")}</button></>}>
-    {q.error ? <Banner kind="error">{q.error.message}</Banner> : !q.data ? <div className="skeleton" style={{ height: "8rem" }} />
-      : list.length === 0 ? <p className="hint">{t("No project yet.")}</p>
-      : <ul className="plain ch-projects" role="radiogroup" aria-label={t("Projects")}>{list.map((p) => <li key={p.id}>
-        <button type="button" role="radio" aria-checked={pid === p.id} className={pid === p.id ? "on" : ""} onClick={() => setPid(p.id)}>
-          <b>{p.title}</b><span className="muted">{[p.style?.title ?? p.style, (() => { const h = howIn(c, { human: !!p.humanHand, layer: !!p.characters, ricks: !!p.ricks, c3d: !!p.c3d }); return h && t(h); })()].filter(Boolean).join(" · ")}</span>{pid === p.id && <Check size={14} />}</button></li>)}</ul>}
-  </Dialog>;
-}
-
 /** The drawing styles a character can be made in: anidoodle's hands that draw people, and Brush cartoon (GET /api/characters/styles). */
 function StyleGrid({ styles, value, onPick }) {
   const t = useT();
   return <div className="cc-styles" role="radiogroup" aria-label={t("Drawing style")}>
     {styles.map((x) => { const id = `${x.engine}:${x.hand}`, on = value === id;
+      // the name and its gloss apart, as every gallery card of the app reads (sgb-card: the name on one line, a muted line under it):
+      // "What If (a stick figure on the What If rig)" is the name "What If" and the gloss, so no name is ever broken across two lines
+      const [, nm, gloss] = /^(.*?)\s*(?:\((.*)\))?$/.exec(t(x.label)) ?? [null, t(x.label), null];
       return <button key={id} type="button" role="radio" aria-checked={on} className={"cc-style" + (on ? " on" : "")} onClick={() => onPick(id)} title={x.example ? t(x.example) : undefined}>
         <span className="cc-pic">{x.thumb ? <img src={x.thumb} alt="" loading="lazy" /> : <span className="cc-noimg">{x.engine === "brush-kit" ? "Brush" : x.hand}</span>}{on && <span className="chk"><Check size={12} /></span>}</span>
-        <span className="cc-nm">{t(x.label)}</span><span className="cc-est num">{range(x.estimate?.minutes, " min")}</span></button>; })}
-    {(() => { const credit = styles.find((x) => x.thumbCredit)?.thumbCredit; return credit ? <p className="credit-line cc-credit">{t("Pictures: {credit}", { credit })}</p> : null; })()}
+        <span className="cc-nm">{nm}</span>{gloss && <span className="cc-gloss">{gloss}</span>}<span className="cc-est num">{range(x.estimate?.minutes, " min")}</span></button>; })}
   </div>;
 }
 
@@ -246,9 +219,12 @@ function CreateDialog({ styles, changing, onClose, onStarted }) {
   const engines = [...new Set(styles.map((x) => x.engine))];
   const kinds = st?.rigs?.length ? st.rigs : RIGS.map(([id, label]) => ({ id, label }));
   useEffect(() => { if (st?.rigs?.length && !st.rigs.some((r) => r.id === rig)) setRig(st.rigs[0].id); }, [st?.engine, st?.hand]); // eslint-disable-line react-hooks/exhaustive-deps
+  // a way's tab: anidoodle by its author (its drawing styles are the row below); every other way by its film style's name ("Ricks Clip (a
+  // bean-head card…)" → "Ricks Clip"): four of them are Moworks's, and four tabs reading "Moworks" told them apart by nothing (#1311)
+  const wayName = (e) => { if (e === "anidoodle-human") return authorView(ENGINE_AUTHOR[e] ?? e).title; const s = styles.find((x) => x.engine === e); return s ? t(s.label).replace(/\s*\([^)]*\)$/, "") : authorView(ENGINE_AUTHOR[e] ?? e).title; };
   const pickEngine = (e) => { const first = styles.find((x) => x.engine === e); if (first) setStyle(`${first.engine}:${first.hand}`); };
   // a change costs about what making it in its own style did
-  const ownStyle = changing ? styles.find((x) => x.engine === changing.engine && (x.hand === changing.hand || x.engine === "brush-kit" || x.engine === "ricks-clip" || x.engine === "cartoon-3d")) : null;
+  const ownStyle = changing ? styles.find((x) => x.engine === changing.engine && (x.hand === changing.hand || x.engine === "brush-kit" || x.engine === "ricks-clip" || x.engine === "cartoon-3d" || x.engine === "what-if" || x.engine === "stickman-explainer" || x.engine === "explainer-2d")) : null;
   const est = (changing ? ownStyle : st)?.estimate;
   const addImage = async (f) => { if (!f) return; if (!/^image\/(png|jpe?g|webp)$/i.test(f.type)) { toast(t("Use a PNG, JPEG or WebP picture"), "error"); return; } setImage({ name: f.name, url: await readImage(f) }); };
   const start = async () => {
@@ -259,7 +235,7 @@ function CreateDialog({ styles, changing, onClose, onStarted }) {
       onStarted({ job: r.job ?? r, name: changing ? changing.name : name.trim() || null, changing: changing?.id ?? null });
     } catch (e) { setErr(e.status === 409 ? t("Another character is being made; wait for it to finish.") : e.message); setBusy(false); }
   };
-  const title = changing ? t("Edit {name}", { name: changing.name }) : t("Create a character");
+  const title = changing ? t("Edit {name}", { name: changing.name }) : t("Cast a character");
   const footer = confirm
     ? <>{err && <span className="state-line stop"><AlertTriangle size={14} />{t(err)}</span>}<span className="spacer" />
       <button className="btn" onClick={() => setConfirm(false)} disabled={busy}>{t("Back")}</button>
@@ -291,9 +267,9 @@ function CreateDialog({ styles, changing, onClose, onStarted }) {
         </div>
       </div>
       {!changing && <div className="cc-right">
-        {engines.length > 1 && <div className="cc-rig"><span className="np2-l" id="cc-eng-l">{t("Author")}</span>
+        {engines.length > 1 && <div className="cc-rig"><span className="np2-l" id="cc-eng-l">{t("Film style")}</span>
           <span className="segmented sm" role="radiogroup" aria-labelledby="cc-eng-l">{engines.map((e) => <button key={e} type="button" role="radio" aria-checked={st?.engine === e} aria-pressed={st?.engine === e}
-            onClick={() => pickEngine(e)}>{authorView(ENGINE_AUTHOR[e] ?? e).title}</button>)}</span></div>}
+            onClick={() => pickEngine(e)}>{wayName(e)}</button>)}</span></div>}
         <div className="cc-rig"><span className="np2-l" id="cc-rig-l">{t("Type")}</span>
           <span className="segmented sm" role="radiogroup" aria-labelledby="cc-rig-l">{kinds.map((k) => <button key={k.id} type="button" role="radio" aria-checked={rig === k.id} aria-pressed={rig === k.id}
             onClick={() => setRig(k.id)} title={k.about ? t(k.about) : undefined}>{t(k.label ?? k.id)}</button>)}</span></div>
@@ -305,9 +281,16 @@ function CreateDialog({ styles, changing, onClose, onStarted }) {
 /** The run in progress, step by step: its stage, progress and the latest lines Claude wrote. */
 function RunSteps({ run, onClose }) {
   const t = useT();
+  const toast = useToast();
   const j = run.job;
+  const [stopping, setStopping] = useState(false);
+  // Stop (owner 06/11): Claude stops, the half-made character is not kept (the lab goes), the tile goes
+  const stop = async () => { setStopping(true); try { await post(`/api/jobs/${j.id}/cancel`); } catch (e) { setStopping(false); toast(e.message, "error"); } };
+  const halting = stopping || j.stage === "stopping";
   return <Dialog title={run.changing ? t("Editing {name}", { name: run.name }) : t("Making {name}", { name: run.name ?? t("a new character") })} onClose={onClose}
-    footer={<><span className="hint">{t("It goes on if you close this.")}</span><span className="spacer" /><button className="btn" onClick={onClose}>{t("Close")}</button></>}>
+    footer={<><span className="hint">{t("It goes on if you close this.")}</span><span className="spacer" />
+      <button className="btn" onClick={stop} disabled={halting} title={t("Stop: the character is not kept")}>{halting ? <Loader2 size={14} className="spin" /> : <CircleStop size={14} />}{halting ? t("Stopping…") : t("Stop")}</button>
+      <button className="btn" onClick={onClose}>{t("Close")}</button></>}>
     <p className="state-line run"><Loader2 size={14} className="spin" />{t(j.stage ?? "Starting…")}{j.progress != null ? ` · ${j.progress}%` : ""}</p>
     <div className="ch-bar"><span style={{ transform: `scaleX(${Math.max(3, j.progress ?? 3) / 100})` }} /></div>
     {Array.isArray(j.log) && j.log.length > 0 && <ol className="plain cc-log">{j.log.slice(-10).map((l, i) => <li key={i}>{l}</li>)}</ol>}
@@ -326,11 +309,18 @@ function MakingTile({ run, onOpen }) {
   </button>;
 }
 
-const F0 = { authors: [], rigs: [], libs: [], styles: [], q: "" };
-const styleKeyOf = (c) => (c.engine === "anidoodle-human" ? `anidoodle-human:${c.hand ?? c.hands?.[0] ?? ""}` : c.engine === "ricks-clip" ? "ricks-clip:ricks" : c.engine === "cartoon-3d" ? "cartoon-3d:cartoon" : "brush-kit:brush");
+const F0 = { authors: [], rigs: [], libs: [], styles: [], films: [], q: "" };
+/** The film styles a character belongs to (owner #1288: the library filtered by film style): the style its own engine is (3D Cartoon,
+ *  Ricks Clip, What If, the house heroes' styles), the style that draws with its engine (Brush cartoon), and for anidoodle's the media whose
+ *  hand draws it (a rig with no hand of its own, the cheetah: every medium with a Character step). Not castRule: a style that redraws any
+ *  character would list them all. */
+const filmsOf = (c, films) => films.filter((s) => s.id === c.engine
+  || (s.characters && s.characterEngine === c.engine && (!s.humanHand || !(c.hands ?? []).length || (c.hands ?? []).includes(s.humanHand)))).map((s) => s.id);
+const styleKeyOf = (c) => (c.engine === "anidoodle-human" ? `anidoodle-human:${c.hand ?? c.hands?.[0] ?? ""}` : c.engine === "ricks-clip" ? "ricks-clip:ricks" : c.engine === "cartoon-3d" ? "cartoon-3d:cartoon" : c.engine === "what-if" ? "what-if:whatif" : c.engine === "stickman-explainer" ? "stickman-explainer:stickman" : c.engine === "explainer-2d" ? "explainer-2d:explainer" : c.engine !== "brush-kit" && c.hand ? `${c.engine}:${c.hand}` : "brush-kit:brush");
 function Box({ on }) { return <span className="sgb-box" aria-hidden="true">{on && <Check size={11} />}</span>; }
 
 export default function Characters() {
+  const watch = useJobWatch();          // its job watches stop with it (audit/112c c5.1)
   const t = useT();
   const toast = useToast();
   const studio = useThemeId() === "studio";
@@ -347,12 +337,16 @@ export default function Characters() {
   const [result, setResult] = useState(null);         // the last change's outcome
   const sq = useData(() => get("/api/characters/styles").catch(() => ({ styles: [] })), []);
   const styles = sq.data?.styles ?? [];
+  const fq = useStyles(), films = fq.data?.styles ?? [];
   const list = q.data?.characters ?? [];
+  const filmIds = new Map(list.map((c) => [c.id + "/" + c.engine, filmsOf(c, films)])), filmsOfChar = (c) => filmIds.get(c.id + "/" + c.engine) ?? [];
+  const filmTitle = (id) => films.find((s) => s.id === id)?.title ?? id;
   const set = (x) => setFp((o) => ({ ...F0, ...o, ...x }));
   const toggle = (xs, x) => (xs.includes(x) ? xs.filter((y) => y !== x) : [...xs, x]);
-  const label = (k) => { const s = styles.find((x) => `${x.engine}:${x.hand}` === k); return s ? t(s.label).replace(/\s*\([^)]*\)$/, "") : k.split(":")[1] || t("Other"); };          // "Brush cartoon (a mascot…)" → "Brush cartoon"
+  const label = (k) => { const s = styles.find((x) => `${x.engine}:${x.hand}` === k); return s ? t(s.label).replace(/\s*\([^)]*\)$/, "") : filmTitle(k.split(":")[0]) !== k.split(":")[0] ? filmTitle(k.split(":")[0]) : k.split(":")[1] || t("Other"); };          // "Brush cartoon (a mascot…)" → "Brush cartoon"; a house hero: its film style's name
   const passes = (c, skip) => (skip === "authors" || !f.authors.length || f.authors.includes(authorOfChar(c))) && (skip === "rigs" || !f.rigs.length || f.rigs.includes(kindOf(c)))
     && (skip === "libs" || !f.libs.length || f.libs.includes(groupOf(c))) && (skip === "styles" || !f.styles.length || f.styles.includes(styleKeyOf(c)))
+    && (skip === "films" || !f.films.length || filmsOfChar(c).some((id) => f.films.includes(id)))
     && (!f.q || [c.name, c.about].join(" ").toLowerCase().includes(f.q.toLowerCase()));
   const rank = (c) => AUTHOR_ORDER.indexOf(authorOfChar(c)) * 10 + LIB.findIndex(([k]) => k === groupOf(c));
   const shown = list.filter((c) => passes(c)).sort((a, b) => rank(a) - rank(b));
@@ -360,6 +354,8 @@ export default function Characters() {
   const byLib = count("libs", groupOf), byStyle = count("styles", styleKeyOf), byAuthor = count("authors", authorOfChar), byRig = count("rigs", kindOf);
   const charAuthors = AUTHOR_ORDER.filter((a) => list.some((c) => authorOfChar(c) === a));
   const styleKeys = [...new Set(list.map(styleKeyOf))].sort((a, b) => label(a).localeCompare(label(b)));
+  const byFilm = new Map(); for (const c of list.filter((x) => passes(x, "films"))) for (const id of filmsOfChar(c)) byFilm.set(id, (byFilm.get(id) ?? 0) + 1);
+  const filmKeys = [...new Set(list.flatMap(filmsOfChar))].sort((a, b) => filmTitle(a).localeCompare(filmTitle(b)));
   const sel = shown.find((c) => c.id === cur) ?? shown.find(usable) ?? shown[0] ?? null;
   // the shared 3-row grid; the tile of a character being made takes the first place
   const grid = useGalleryGrid({ fewer: 1 }), slots = grid.size - (run && !run.changing ? 1 : 0);
@@ -371,31 +367,36 @@ export default function Characters() {
   // follow a run: started here, or already running when the page opens (another visit, another window)
   const follow = (r) => {
     setRun(r);
-    watchJob(r.job.id, (x) => {
+    watch(r.job.id, (x) => {
       if (!x) return;
       if (x.status === "running") { setRun((o) => (o ? { ...o, job: { ...o.job, ...x } } : o)); return; }
       setRun(null); setSteps(false); q.reload();
+      // the character being changed: as started here, else the job's own (a change picked up after a reload knows it only from the job)
+      const changing = r.changing ?? x.from ?? null;
       if (x.status === "done") {
-        const id = x.result?.id ?? x.characterId ?? r.changing, runInfo = x.result?.run;
-        if (r.changing) setResult({ ...x.result, id: r.changing, name: x.result?.name ?? r.name });
-        else toast(t("“{name}” is in your characters", { name: x.result?.name ?? r.name ?? "" }) + (runInfo ? ` · ${t("{min} min", { min: Math.max(1, Math.round(runInfo.minutes ?? 0)) })}` : ""));
+        const id = x.result?.id ?? x.characterId ?? changing, runInfo = x.result?.run;
+        if (changing) setResult({ ...x.result, id: changing, name: x.result?.name ?? r.name });
+        // the words the server says for this job's end (ENDED_SAY), as the notice says them on another screen
+        else toast((x.said ? t(x.said.text, x.said.vars) : x.result?.name ?? r.name ?? "") + (runInfo ? ` · ${t("{min} min", { min: Math.max(1, Math.round(runInfo.minutes ?? 0)) })}` : ""));
         if (id) { setCur(id); setFresh(id); setPg(0); }
       } else if (x.status === "failed") toast(x.error?.message ?? t("Claude could not finish the character."), "error");
+      else if (x.status === "cancelled") toast(changing ? t("Stopped: “{name}” stays as it was", { name: r.name ?? "" }) : t("Stopped: “{name}” was not made", { name: r.name ?? t("the character") }));
     }, 2000);
   };
   useEffect(() => {
-    get("/api/tasks/running").then((r) => { const j = (r.jobs ?? []).find((x) => x.kind === "character-create"); if (j) follow({ job: j, name: (j.title ?? "").replace(/^(Making|Changing) | with Claude$/g, "") || null, changing: /^Changing /.test(j.title ?? "") ? "?" : null }); }).catch(() => {});
+    get("/api/tasks/running").then((r) => { const j = (r.jobs ?? []).find((x) => x.kind === "character-create"); if (j) follow({ job: j, name: j.name ?? null, changing: j.from ?? null }); }).catch(() => {});
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const redraw = async (c) => {
     try {
       const r = await post(`/api/characters/${c.id}/demo`); const j = r.job ?? r; setJobs((x) => ({ ...x, [c.id]: j }));
-      watchJob(j.id, (x) => { if (!x) return; setJobs((o) => ({ ...o, [c.id]: x }));
+      watch(j.id, (x) => { if (!x) return; setJobs((o) => ({ ...o, [c.id]: x }));
         if (x.status !== "running") { setJobs((o) => { const n = { ...o }; delete n[c.id]; return n; }); q.reload(); if (x.status === "failed") toast(x.error?.message ?? t("The sheets were not drawn."), "error"); } }, 1500);
     } catch (e) { toast(e.message, "error"); }
   };
   const undo = async () => { try { await post(`/api/characters/${result.id}/undo`); toast(t("{name} is back as it was", { name: result.name })); setResult(null); q.reload(); } catch (e) { toast(e.message, "error"); } };
   const pills = [...f.authors.map((k) => [authorView(k).title, { authors: f.authors.filter((x) => x !== k) }]), ...f.rigs.map((k) => [t(RIGS.find(([x]) => x === k)?.[1] ?? k), { rigs: f.rigs.filter((x) => x !== k) }]),
     ...f.libs.map((k) => [t(LIB.find(([x]) => x === k)?.[1] ?? k), { libs: f.libs.filter((x) => x !== k) }]), ...f.styles.map((k) => [label(k), { styles: f.styles.filter((x) => x !== k) }]),
+    ...f.films.map((k) => [filmTitle(k), { films: f.films.filter((x) => x !== k) }]),
     ...(f.q ? [[`“${f.q}”`, { q: "" }]] : [])];
   const row = (key, on, onClick, text, n) => <button key={key} type="button" className={"sgb-opt" + (on ? " on" : "")} role="checkbox" aria-checked={on} onClick={onClick}>
     <Box on={on} /><span className="l">{text}</span><span className="n num">{n ?? 0}</span></button>;
@@ -405,16 +406,16 @@ export default function Characters() {
     {steps && run && <RunSteps run={run} onClose={() => setSteps(false)} />}</>;
   // The Studio: the same state and data, laid out as a line-up by author with a model sheet (studio/CharacterLineup.jsx)
   if (studio) return <CharacterLineup list={list} shown={shown} passes={passes} kindOf={kindOf} groupOf={groupOf} authorOfChar={authorOfChar} usable={usable} f={f} set={set}
-    styleKeys={styleKeys} label={label} run={run} jobs={jobs} fresh={fresh} canCreate={canCreate} error={q.error} loading={!q.data && !q.error} onReload={q.reload}
+    styleKeys={styleKeys} label={label} filmKeys={filmKeys} filmTitle={filmTitle} run={run} jobs={jobs} fresh={fresh} canCreate={canCreate} error={q.error} loading={!q.data && !q.error} onReload={q.reload}
     onCreate={() => setMake({ changing: null })} onSteps={() => setSteps(true)} dialogs={dialogs}
     sheetFor={(c, close) => <>{result && result.id === c.id && <ChangeResult r={result} onUndo={undo} onClose={() => setResult(null)} />}
       <CharacterDetails c={c} job={jobs[c.id] ?? (run?.changing === c.id ? run.job : null)} onRedraw={redraw} onDeleted={() => { close(); setCur(null); q.reload(); }} onReload={q.reload}
         onChange={(x) => setMake({ changing: x })} /></>} />;
   return <div className="page lk-page ch-page gal-page">
-    <div className="page-head"><div><BackButton /><h1>{t("Characters")}</h1><p className="lead">{t("Describe a character, choose how it is drawn, and Claude makes it: model sheets and a walk, the same in every shot.")}</p></div>
+    <div className="page-head"><div><BackButton /><h1>{t("Casting")}</h1><p className="lead">{t("Describe a character, choose how it is drawn, and Claude makes it: model sheets and a walk, the same in every shot.")}</p></div>
       <div className="actions">
         {run && <button type="button" className="chip-status ch-run-chip" onClick={() => setSteps(true)} title={t("See the steps")}><span className="dot busy" />{run.changing ? t("Editing {name}", { name: run.name ?? "" }) : t("Making {name}", { name: run.name ?? t("a new character") })}{run.job.progress != null ? ` · ${run.job.progress}%` : ""}</button>}
-        {canCreate && <button className="btn primary" onClick={() => setMake({ changing: null })} disabled={!!run} title={run ? t("Wait for the character being made") : undefined}><Plus size={15} />{t("Create a character")}</button>}
+        {canCreate && <button className="btn primary" onClick={() => setMake({ changing: null })} disabled={!!run} title={run ? t("Wait for the character being made") : undefined}><Plus size={15} />{t("Cast a character")}</button>}
       </div></div>
     {q.error?.status === 404 ? <div className="empty"><p>{t("Characters are not available on this computer yet.")}</p></div>
       : q.error && <Banner kind="error" action={<button className="btn sm" onClick={q.reload}>{t("Retry")}</button>}>{q.error.message}</Banner>}
@@ -422,6 +423,8 @@ export default function Characters() {
       {panel && <div className="sgb-scrim" onClick={() => setPanel(null)} />}
       <aside className="sgb-facets" aria-label={t("Filters")}>
         <div className="search"><Search size={14} /><input className="input" placeholder={t("Search characters")} value={f.q} onChange={(e) => set({ q: e.target.value })} aria-label={t("Search characters")} /></div>
+        {filmKeys.length > 0 && <div className="sgb-fg" role="group" aria-label={t("Film style")}><span className="sgb-fl">{t("Film style")}</span>
+          {filmKeys.map((k) => row(k, f.films.includes(k), () => set({ films: toggle(f.films, k) }), filmTitle(k), byFilm.get(k)))}</div>}
         <div className="sgb-fg" role="group" aria-label={t("Author")}><span className="sgb-fl">{t("Author")}</span>
           {charAuthors.map((k) => <button key={k} type="button" className={"sgb-opt au-opt" + (f.authors.includes(k) ? " on" : "")} role="checkbox" aria-checked={f.authors.includes(k)} onClick={() => set({ authors: toggle(f.authors, k) })}>
             <Box on={f.authors.includes(k)} /><AuthorName a={k} count={false} className="l" tagBeside /><span className="n num">{byAuthor.get(k) ?? 0}</span></button>)}</div>
@@ -432,7 +435,7 @@ export default function Characters() {
         <div className="sgb-fg" role="group" aria-label={t("Drawing style")}><span className="sgb-fl">{t("Drawing style")}</span>
           {styleKeys.map((k) => row(k, f.styles.includes(k), () => set({ styles: toggle(f.styles, k) }), label(k), byStyle.get(k)))}</div>
       </aside>
-      <section className="sgb-center" aria-label={t("Characters")}>
+      <section className="sgb-center" aria-label={t("The Cast")}>
         <div className="sgb-bar">
           <button type="button" className="btn sm sgb-filters-btn" onClick={() => setPanel("filters")}><SlidersHorizontal size={13} />{t("Filters")}{pills.length > 0 && <span className="num"> · {pills.length}</span>}</button>
           <span className="count num" aria-live="polite">{shown.length === list.length ? t("{n} characters", { n: list.length }) : t("{n} of {total} characters", { n: shown.length, total: list.length })}</span>

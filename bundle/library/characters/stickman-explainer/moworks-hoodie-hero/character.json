@@ -1,0 +1,74 @@
+{
+  "id": "moworks-hoodie-hero",
+  "name": "Hoodie Hero",
+  "about": "The Stickman Explainer's own hero: a black stick figure in a blue hoodie, curious about how things work.",
+  "engine": "stickman-explainer",
+  "kind": "human",
+  "heightM": 1.75,
+  "heightBy": "inferred",
+  "heightNote": "the source skill gives no height: an everyday adult's",
+  "hand": "stickman-explainer",
+  "hands": [
+    "stickman-explainer"
+  ],
+  "palette": {
+    "body": "#0a080c",
+    "hoodie": "#2f6fe0",
+    "strings": "#dfe7f5"
+  },
+  "can": {
+    "views": [
+      "front",
+      "three-quarter",
+      "profile",
+      "back"
+    ],
+    "viewNotes": "figure()'s face.look (0, 0.5, 1) and flip; back: face eyes and mouth \"none\"",
+    "faces": [
+      "neutral",
+      "happy",
+      "laugh",
+      "surprised",
+      "worried",
+      "angry",
+      "talk",
+      "blink"
+    ],
+    "faceNotes": "the kit's own eyes (dot, wide, smug, happy, closed), brows and mouths (smile, smirk, grin, flat, o, chatter)",
+    "poses": [
+      "stand",
+      "walk",
+      "point",
+      "wave",
+      "reach",
+      "sit"
+    ],
+    "poseNotes": "figure()'s pose: STAND, walk(phase), arm and leg angles, armIK; sit is the legs bent over a stool",
+    "hands": "n/a: round ends (robotHand for close-ups)",
+    "walk": "walk(phi, stride)",
+    "talk": "the mouth o and flat by turns (the kit's chatter for nerves); no lip sync"
+  },
+  "sheet": "MW Character Sheet v1",
+  "credit": {
+    "author": "Moworks Studio (the owner's Story source skill)",
+    "link": null,
+    "licence": "the owner's own",
+    "made": "as shipped",
+    "madeNote": "the source skill's own hero as shipped; its name is the app's (the source gives none); what its drawing lacks is drawn by the app (house/stickman-explainer.js)",
+    "source": {
+      "skill": "Story Animation Kit",
+      "version": "1.0.0",
+      "sha256": "2c6ad666af509acdbf061b1c4a226dc47cad2889bb88a2505285fee9d9fb79f7",
+      "file": "src/stickman/kit.js figure() (the hero's defaults)"
+    },
+    "gate": {
+      "passed": 15,
+      "failed": 0
+    }
+  },
+  "version": 1,
+  "module": [
+    "moworks-hoodie-hero.js"
+  ],
+  "savedAt": "2026-11-06T15:05:44.111Z"
+}

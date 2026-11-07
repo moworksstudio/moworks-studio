@@ -7,13 +7,13 @@
 // words: "TRAM" counts once the film writes "TRẠM", and a word the film itself writes without marks in a marked sentence ("chiều nay",
 // "bản tin") never counts. Two such words at least, half the text's words, one of four letters or more: an English line ("TO BE
 // CONTINUED", "THE END") is not taken for one.
+import { VI_MARKED_RE, metaIsVietnamese } from "./vi-letters.mjs";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { docPath } from "../project-service/docs.mjs";
 import { htmlFiles } from "../hf-edit/finalize.mjs";
 import { scriptFiles } from "../hf-edit/vendorLibs.mjs";
 
-const MARKED = /[ăâđêôơưàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/iu;
 /** A word with its Vietnamese marks taken off, in lower case ("TRẠM" → "tram", "đất" → "dat"). */
 export const unmark = (w) => String(w).normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[đĐ]/g, "d").toLowerCase();
 const wordsOf = (s) => String(s).normalize("NFC").match(/[\p{L}]+/gu) ?? [];
@@ -34,11 +34,11 @@ export function vocabulary(texts) {
   const lost = new Set(), plain = new Set();
   for (const t of [COMMON, ...texts]) {
     for (const line of String(t ?? "").split(/\r?\n|[.!?;·•|]+/)) {
-      if (t !== COMMON && !MARKED.test(line)) continue;          // a line written without marks says nothing about which words have them
-      for (const w of wordsOf(line)) (MARKED.test(w) ? lost : plain).add(MARKED.test(w) ? unmark(w) : w.toLowerCase());
+      if (t !== COMMON && !VI_MARKED_RE.test(line)) continue;          // a line written without marks says nothing about which words have them
+      for (const w of wordsOf(line)) (VI_MARKED_RE.test(w) ? lost : plain).add(VI_MARKED_RE.test(w) ? unmark(w) : w.toLowerCase());
     }
   }
-  for (const w of COMMON.split(/\s+/)) if (w && !MARKED.test(w)) plain.add(w);
+  for (const w of COMMON.split(/\s+/)) if (w && !VI_MARKED_RE.test(w)) plain.add(w);
   for (const w of plain) lost.delete(w);
   return { lost, plain };
 }
@@ -46,7 +46,7 @@ export function vocabulary(texts) {
 /** The words of one on-screen text that are Vietnamese with their marks taken off; [] when the text has a marked letter, is one word,
  *  or does not read as such (see the file's head). */
 export function unmarkedWords(text, vocab) {
-  if (MARKED.test(text)) return [];
+  if (VI_MARKED_RE.test(text)) return [];
   const ws = wordsOf(text).filter((w) => /^[a-z]+$/i.test(w));
   if (ws.length < 2) return [];
   const hit = ws.filter((w) => vocab.lost.has(w.toLowerCase()));
@@ -82,8 +82,7 @@ function codeTexts(src) {
 /** The film's language: the project's own, else Vietnamese when its brief writes Vietnamese letters. */
 export function filmIsVietnamese(projectDir) {
   let m = null; try { m = JSON.parse(read(join(projectDir, ".moworks", "project.json"))); } catch { return false; }
-  if (m?.language?.id) return m.language.id === "vi";
-  return MARKED.test(String(m?.brief?.text ?? ""));
+  return metaIsVietnamese(m);          // one rule with the voice's (vi-letters.mjs)
 }
 
 /** The on-screen texts of the film (and of the storyboard's boards with `boards`) written in Vietnamese without its marks:

@@ -1,0 +1,92 @@
+{
+  "id": "moworks-pip",
+  "name": "Pip",
+  "about": "The What If hero: a dark hoodie with mustard drawstrings, teal shoes, a tuft of dark hair.",
+  "engine": "what-if",
+  "kind": "human",
+  "heightM": 1.6,
+  "heightBy": "inferred",
+  "heightNote": "the engine gives no height: the cast's sizes on the rig, as people",
+  "hand": "whatif",
+  "hands": [
+    "whatif"
+  ],
+  "scale": 0.82,
+  "look": {
+    "skin": "#F6EFE3",
+    "skinShade": "#E2D3BE",
+    "hand": "#F6EFE3",
+    "jacket": "#2E2B3D",
+    "jacketShade": "#24212F",
+    "accent": "#F2B33D",
+    "limb": "#2E2B3D",
+    "line": "#121019",
+    "shoe": "#2FB7A6",
+    "face": "#1D2033",
+    "hair": "#1D2033",
+    "extra": "hood"
+  },
+  "palette": {
+    "jacket": "#2E2B3D",
+    "skin": "#F6EFE3",
+    "hair": "#1D2033",
+    "accent": "#F2B33D",
+    "shoe": "#2FB7A6"
+  },
+  "can": {
+    "views": [
+      "front",
+      "three-quarter",
+      "profile",
+      "back"
+    ],
+    "viewNotes": "the rig's own yaw (-1 profile left, 0 front, 1 profile right); back is the app's (AppHero view \"back\", mw:wi-cast)",
+    "faces": [
+      "neutral",
+      "happy",
+      "laugh",
+      "surprised",
+      "worried",
+      "angry",
+      "talk",
+      "blink"
+    ],
+    "faceNotes": "the rig's Expr (happy, shock = surprised, worried, smug, oops, cool, dizzy, tired) and the app's laugh, angry and talk (AppHero face)",
+    "poses": [
+      "stand",
+      "walk",
+      "point",
+      "wave",
+      "reach",
+      "sit"
+    ],
+    "poseNotes": "limb angles on the rig's Pose (armL, armR, legL, legR), POSES from mw:wi-cast; the walk is the engine's walkPose; poseAt keys",
+    "hands": [
+      "open",
+      "point"
+    ],
+    "walk": "walkPose(x, phase, ground, scale) in profile",
+    "talk": "talkFace(t): the open mouth and the closed one by turns; no lip sync"
+  },
+  "sheet": "MW Character Sheet v1",
+  "credit": {
+    "author": "FreshStack (kelano86)",
+    "link": "https://github.com/kelano86/what-if-animation/blob/8092fb5e825e55456d1d47fec0ebf595cb93cc0d/studio/src/engine/rig.tsx",
+    "commit": "8092fb5e825e55456d1d47fec0ebf595cb93cc0d",
+    "licence": "MIT",
+    "made": "as shipped",
+    "madeNote": "the engine's own costume as shipped; the back view and the laugh, angry and talk faces are the app's layer (wi-cast.tsx)",
+    "source": {
+      "file": "studio/src/engine/rig.tsx LOOKS.pipHood"
+    },
+    "gate": {
+      "passed": 16,
+      "failed": 0
+    }
+  },
+  "version": 1,
+  "module": [
+    "moworks-pip.ts"
+  ],
+  "savedAt": "2026-11-06T15:11:43.386Z"
+}

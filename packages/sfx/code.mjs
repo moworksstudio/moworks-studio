@@ -1,4 +1,5 @@
-// Sound effects made by code, the films' first source (owner 04/11/2026 #888, #889, #899, #909, #910). Nothing of it is on screen: a placed
+// Sound effects made by code, the last source of every film, for what the library, ElevenLabs and the search left (owner 04/11/2026 #888,
+// #889, #899, #909, #910; the order since #1034, #1042). Nothing of it is on screen: a placed
 // sound shows by its name like any other, and is credited in the film's CREDITS.md. Where each sound comes from, the app decides in code
 // (index.mjs resolveCues), never Claude. Since owner 05/11 #1034 every film asks the library and the search first (auto.mjs) and comes here only
 // for the cues they have not; for those:
@@ -19,6 +20,7 @@ import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
 import { pyLibs, pythonExe } from "../setup/python.mjs";
 import { MOWORKS_STYLE_IDS, RECIPES, SIGNATURE, styleRecipe } from "./code-recipes.mjs";
 import { FAMILIES, familyOf, fromCatalog, libraryDir, matchLocal, soundStyle, stepsRun, sustainedCue } from "./library.mjs";
+import { readJson } from "../util/json.mjs";
 
 /** Raised when a recipe changes what it makes: every film's takes are made again. */
 export const CODE_VERSION = 1;
@@ -51,7 +53,7 @@ export async function codeRuns(root = APP_ROOT) {
 }
 
 // ---- the recipes a film may use
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
+
 const pins = (root) => { try { return loadPins(root).moworksStyles?.sources ?? {}; } catch { return {}; } };
 const SOURCE_DIR = { pc: "paper-collage", sm: "story", iv: "story", c3: "cartoon-3d", x2: "explainer-2d", rc: "ricks-clip" };
 /** Each source skill as the owner's credits name it (its pinned title says "Kit": owner #1061 names none). */

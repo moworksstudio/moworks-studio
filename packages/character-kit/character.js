@@ -207,6 +207,70 @@ function viewSheet(def, t) {
   hats.forEach((hn, i) => { const x = 82 + i * 125.5; character(def, x, 985, u3, { ...charFeel(def, 'neutral', t, { seed: i }), hat: hn }); sheetLabel(hn, x, 1015, 17); });
   sheetFloor(985);
 }
+// ---------- MW Character Sheet v1 (owner #1287-#1293): the order every engine's sheet keeps, drawn by the kit's own parts ----------
+// Views front, three-quarter (q), profile (side), back; Faces neutral, happy, laugh, surprised, worried, angry, talk, blink (the kit's eyes and
+// mouths: worried is its nervous look, talk its open mouth, blink its closed eyes); Poses stand, walk, point (the side view's arm held forward),
+// wave (the kit's move), reach (both arms up), sit (on a plain stool the app paints, its legs hanging); Walk four frames of the side walk.
+// No hand shapes: the kit's arms end in rounded stubs.
+const V1_FACES = [['neutral', { eyes: 'normal' }], ['happy', { eyes: 'happy', mouth: 'smile', blush: .3 }], ['laugh', { eyes: 'squeeze', mouth: 'laugh', blush: .45 }],
+  ['surprised', { eyes: 'wide', mouth: 'O' }], ['worried', { eyes: 'look', mouth: 'wobble', lookX: -.5 }], ['angry', { eyes: 'angry', mouth: 'teeth' }],
+  ['talk', { eyes: 'normal', mouth: 'open' }], ['blink', { eyes: 'closed' }]];
+/** The sit pose: in profile on a plain stool the app paints in the kit's way (legs, then the body, then the seat over its lower edge), the
+ *  legs (the kit draws them straight down only) painted forward along the seat by the app. */
+function v1Sit(def, x, y, u, t) {
+  const B = def.body, LG = def.legs ?? {}, lw = LG.w ?? 1, lh = LG.h ?? 2.2, seat = 2.8 * u, gy = y - seat - B.bottom * u;
+  const V = charViews(def).side, w = (V.R - V.L + 1) * u, wood = "#B98C5E", dark = "#8A6440", far = mixCol(def.colors.dk, PAL.ink, .22);
+  for (const lx of [-w * .38, w * .38]) paint(rectPts(x + lx - .25 * u, y - seat, .5 * u, seat, u * .05), { wash: dark, washOp: 255, ink: PAL.ink, sw: .8 });
+  character(def, x, gy, u, { ...charFeel(def, "neutral", t), view: "side", aL: .2, noLegs: true, noShadow: true });
+  paint(rectPts(x - w / 2, y - seat - .2 * u, w, .6 * u, u * .05), { wash: wood, washOp: 255, ink: PAL.ink, sw: 1 });
+  for (const [dy, col] of [[-.9, far], [-.3, def.colors.dk]]) paint(rectPts(x + (V.R - .6) * u, y - seat + (dy - lw) * u, lh * 1.3 * u, lw * u, u * .05), { wash: col, washOp: 255, ink: PAL.ink, sw: .8 });
+}
+/** The v1 rows: [title, [[label, draw(x, y, u)]]] in the standard's order. */
+function v1Rows(def) {
+  return [
+    ['Views', [['front', 'front'], ['three-quarter', 'q'], ['profile', 'side'], ['back', 'back']].map(([l, v]) => [l, (x, y, u) => character(def, x, y, u, { ...charFeel(def, 'neutral', 1.2), view: v })])],
+    ['Faces', V1_FACES.map(([l, f]) => [l, (x, y, u) => character(def, x, y, u, { aL: .15, aR: .15, ...f })])],
+    ['Poses', [
+      ['stand', (x, y, u) => character(def, x, y, u, { aL: .15, aR: .15, eyes: 'normal' })],
+      ['walk', (x, y, u) => character(def, x, y, u, { ...move('walk', .25), view: 'side', eyes: 'normal' })],
+      ['point', (x, y, u) => character(def, x, y, u, { view: 'side', aL: .7, eyes: 'normal', mouth: 'smile' })],
+      ['wave', (x, y, u) => character(def, x, y, u, { ...move('wave', .3), eyes: 'happy', mouth: 'smile' })],
+      ['reach', (x, y, u) => character(def, x, y, u, { aL: 1.5, aR: 1.5, eyes: 'look', lookY: -.8, mouth: 'O' })],
+      ['sit', (x, y, u) => v1Sit(def, x, y, u, 1.2)],
+    ]],
+    ['Walk', ['contact', 'down', 'pass', 'up'].map((l, i) => [l, (x, y, u) => character(def, x, y, u, { walk: i / 4, view: 'side', eyes: 'normal' })])],
+  ];
+}
+/** One cell of the sheet a second (the one sheet frame of every engine, sheet-frame.js: index.mjs takes a still a cell and lays them out):
+ *  the character alone in the middle, big, its feet on a floor line. */
+function v1Cell(def, t) {
+  const cells = v1Rows(def).flatMap(([, items]) => items), k = Math.max(0, Math.min(cells.length - 1, Math.floor(t)));
+  const u = unitFor(def, 620, 560), gy = 960;
+  sheetFloor(gy, 620, 1300);
+  cells[k][1](960, gy, u);
+}
+function v1Sheet(def, t) {
+  const rows = v1Rows(def);
+  const cw = W / 8, rh = 250, u = unitFor(def, 120, cw * .62);
+  letter(def.name, 24, 28, 30, PAL.ink, { ink: false, align: 'left' });
+  rows.forEach(([title, items], r) => {
+    const top = 56 + r * rh, gy = top + rh - 54;
+    letter(title, 24, top + 12, 20, PAL.ink, { ink: false, align: 'left' });
+    items.forEach(([label, f], i) => { const cx = cw * i + cw / 2; f(cx, gy, u); sheetLabel(label, cx, gy + 30, 17); });
+    sheetFloor(gy, 0, cw * items.length + 20);
+  });
+}
+/** The v1 life clip, 6 s: idle with a blink (0-1.5 s), a turn through the key views (1.5-3.5), the side walk (3.5-5), a talk with a wave (5-6). */
+function lifeClip(def, t) {
+  const u = unitFor(def, 420, 1000), gy = 860;
+  sheetFloor(gy, 360, W - 360);
+  let o;
+  if (t < 1.5) o = { ...charFeel(def, 'neutral', t), ...(t > .8 && t < .95 ? { eyes: 'closed' } : {}) };
+  else if (t < 3.5) o = { ...charFeel(def, 'happy', t), ...spinView(Math.floor(((t - 1.5) / 2) * 8) / 8) };
+  else if (t < 5) o = { ...move('walk', t), view: 'side', eyes: 'normal' };
+  else o = { ...move('wave', t), eyes: 'happy', mouth: Math.floor(t * 8) % 2 ? 'open' : 'smile' };
+  character(def, 960, gy, u, o);
+}
 /** A short acted showreel (no lettering): the character reacts, gets an idea, turns, jumps and celebrates on the beat. */
 function showreel(def, t) {
   const u = unitFor(def, 470, 1100), gy = 900;

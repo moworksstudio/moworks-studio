@@ -5,11 +5,12 @@
 // rounding included). Differences: the words come from the app's checked voice-over transcript (transcript.json, HyperFrames' word
 // timings) instead of ElevenLabs; a film with no narration has no words and ends at `end` (or New project's length); the sound stays on
 // HyperFrames' timeline, so the timeline's `audio` is empty.
-import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { readJson } from "../util/json.mjs";
 
 export const EPISODE = "whatif/episode.json", WORDS = "whatif/words.json", TIMELINE = "whatif/timeline.json", SHOTLIST = "whatif/shotlist.md";
-const readJson = (f, d) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
+
 const fail = (message) => { throw Object.assign(new Error(message), { code: "INVALID" }); };
 
 /** Python's round(): half to even (plan.py's frames are Python's). */

@@ -9,16 +9,16 @@
 // render worker). Credit rule: author, permalink at the commit, commit and date read, licence, how it was made. No traceable source, no
 // entry: an item without one fails the build. The studio's own items (own: true) have no outside source to trace.
 import { execFileSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { pathToFileURL } from "node:url";
-import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
+import { APP_ROOT, ffmpegExe } from "../version-manager/index.mjs";
 import { workRoot } from "../project-service/index.mjs";
 import { buildItem, camel, useLine } from "./build.mjs";
 import { helperSource } from "./helpers.mjs";
 import { currentUid } from "./renamed.mjs";
+import { readJson } from "../util/json.mjs";
 
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
 export const storeRoot = (root = APP_ROOT) => process.env.MW_INTAKE_ROOT ?? join(workRoot(root), "library", "intake");
 const ITEMS_DIR = join(import.meta.dirname, "items");
 const STORE_DIR = "intake-2";
@@ -124,7 +124,7 @@ export async function buildStore({ root = APP_ROOT, only = null } = {}) {
       for (const a of it.assets ?? []) {        // demo media: written out, or made here with FFmpeg from a recipe (drawn, never downloaded)
         mkdirSync(dirname(join(tmp, "assets", a.path)), { recursive: true });
         if (a.data != null) writeFileSync(join(tmp, "assets", a.path), a.data);
-        else execFileSync(join(expandEnv(loadPins(root).ffmpeg.dir), "ffmpeg.exe"), ["-v", "error", "-y", ...a.ffmpeg, join(tmp, "assets", a.path)], { windowsHide: true, stdio: "ignore" });
+        else execFileSync(ffmpegExe(root), ["-v", "error", "-y", ...a.ffmpeg, join(tmp, "assets", a.path)], { windowsHide: true, stdio: "ignore" });
       }
       rmSync(join(dir, folder), { recursive: true, force: true });
       renameSync(tmp, join(dir, folder));

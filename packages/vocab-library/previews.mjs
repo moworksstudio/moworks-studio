@@ -14,9 +14,10 @@ import { finalize } from "../hf-edit/finalize.mjs";
 import { gatedRender } from "../render-pipeline/index.mjs";
 import { gsapFile } from "../offline-assets/index.mjs";
 import { currentStore, items, runScript, storeRoot } from "./index.mjs";
+import { readJson } from "../util/json.mjs";
 
 export const METHOD = "rendered here as a film: the author's Canvas sample on a HyperFrames page, the app's finalize and export checks, then the render worker (24 fps draft, web encode)";
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
+
 export const previewsDir = (root = APP_ROOT) => join(storeRoot(root), "previews");
 
 /** The HyperFrames page of one item: its canvas at the author's size, one cycle long, drawn at second t by his cell function. */

@@ -75,17 +75,17 @@ export function StyleChooser({ value, styles, authors, onClose, onPick }) {
     setTab(k); setCat("all");
     if (k !== "all" && authorOf(styles.find((s) => s.id === sel) ?? {}) !== k) setSel(styles.find((s) => authorOf(s) === k)?.id ?? null);
   };
-  // each author as "Anidoodle (35)" over "by Alex Greenshpun ANI"; What If shows, "Coming soon", and cannot be chosen
-  const tabs = [["all", null, styles.length], ...authors.filter((x) => x.comingSoon || styles.some((s) => authorOf(s) === x.id)).map((x) => [x.id, x, styles.filter((s) => authorOf(s) === x.id).length])];
+  // each author as "Anidoodle (35)" over "by Alex Greenshpun ANI"
+  const tabs = [["all", null, styles.length], ...authors.filter((x) => styles.some((s) => authorOf(s) === x.id)).map((x) => [x.id, x, styles.filter((s) => authorOf(s) === x.id).length])];
   return createPortal(<>
     <div className="scx-scrim" onMouseDown={onClose} />
     <div className={"scx" + (frame ? " framed" : "")} style={frame} role="dialog" aria-modal="true" aria-labelledby="scx-h" ref={box}>
       <div className="dialog-head scx-head"><BackButton onClick={onClose} /><h2 id="scx-h">{t("Choose a film style")}</h2>
         <button className="btn ghost icon sm x" onClick={onClose} aria-label={t("Close")}><X size={16} /></button></div>
       <div className="scx-tabs" role="tablist" aria-label={t("Author")}>
-        {tabs.map(([k, au, n]) => <button key={k} type="button" role="tab" aria-selected={tab === k} className={"scx-tab" + (tab === k ? " on" : "") + (au?.comingSoon ? " soon" : "")}
-          onClick={() => !au?.comingSoon && goTab(k)} aria-disabled={au?.comingSoon || undefined} title={au?.comingSoon ? t("Coming soon") : undefined}>
-          {au ? <AuthorName a={au} count={au.comingSoon ? false : n} className="tx" /> : <span className="tx"><b><LayoutGrid size={13} /> {t("All authors")}</b><small className="num">{n}</small></span>}</button>)}
+        {tabs.map(([k, au, n]) => <button key={k} type="button" role="tab" aria-selected={tab === k} className={"scx-tab" + (tab === k ? " on" : "")}
+          onClick={() => goTab(k)}>
+          {au ? <AuthorName a={au} count={n} className="tx" /> : <span className="tx"><b><LayoutGrid size={13} /> {t("All authors")}</b><small className="num">{n}</small></span>}</button>)}
       </div>
       <div className="scx-tools">
         <div className="search"><Search size={14} /><input className="input" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Search film styles")} aria-label={t("Search film styles")} /></div>

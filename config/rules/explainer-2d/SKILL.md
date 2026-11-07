@@ -59,6 +59,13 @@ is drawn in an art module), one or two scale moves (`EX.cameraAt` in log space, 
 (`EX.fx.flash`, a few times a film at most), the title in capitals over the wide end shot. Clouds, a bolt, a globe or an icon row are new art
 modules: the engine ships their colours, not their drawings.
 
+**Characters from the library (owner #1302).** A character made on the Characters page in the 2D Explainer's way is the house hero in a palette of
+its own: one file the app puts in `characters/house/<id>.js` (a line in `docs/CHARACTERS.json` names it and gives its `opts.pal`). Draw it with the
+engine's own `HOUSE.hero.draw(ctx, o)` with its colours for that draw only: `const base = HOUSE.pal; HOUSE.pal = { ...base, ...opts.pal };
+HOUSE.__palKey = "<id>";` draw, then `HOUSE.pal = base; HOUSE.__palKey = "";` (the app places the hero's copy that keys its colours by
+`__palKey` when the cast has such a character; several characters: one swap each, so the house hero and the others keep theirs). Its colours
+exactly as given.
+
 **Faces:** Figtree has no Vietnamese letters, so the app declares the source skill's "Figtree" with Hanken Grotesk, a grotesk of the same build that has them; the
 engine keeps the name and `HOUSE.ui.init()` waits for it as shipped.
 
@@ -75,10 +82,8 @@ engine keeps the name and `HOUSE.ui.init()` waits for it as shipped.
 
 ## 5. Sound
 
-**Where the sounds come from** (owner 05/11/2026, #1034, in place of "code-made sounds only" of 04/11: Test 38's code-made sounds were dull
-and did not match the picture): as for every film, the library's exact sound first, then the app's pick (by Claude) of the library's closest sounds, then a sound made with ElevenLabs from its description (owner #1096), then the online search, then a sound made by code (the source skill's own
-sounds, new takes from its recipes and the app's) only for a cue none of them has. Name each sound by the thing on screen and its action, so the library
-finds the one that matches (moworks-studio §7b).
+**Where the sounds come from:** as for every film, in the house rules' order (moworks-studio §7b, owner #1034, #1096). Name each sound by
+the thing on screen and its action, so the library finds the one that matches.
 
 The source skill's own effects are in the app's library, made by the source skill's code (`pop`, `pop-big`, `tick`, `counter-roll`, `impact`, `reveal`, `light-hit`, `sparkle`,
 `swish`, `title`, and the camera sweeps `whoosh-pullback`, `whoosh-dive`): small, warm and soft, on their word (`sound-design`). The source skill's music bed (a soft pad,

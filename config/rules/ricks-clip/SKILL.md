@@ -71,7 +71,12 @@ app draws them with Source Serif 4 and Archivo; write a new painted word in one 
 (`app/ricks-cast.js`): `T.castDraw(p, "<id>", { view, expr, L, R, walk, phase, tilt, headTilt, bob, blink, look, light })` in the actor's
 `draw`, the view chosen per shot as above; its card key from `T.castKey("<id>", opts)`. Never redraw, edit or copy its file: a change goes
 back through the Characters page (Change with Claude). The source skill's own cast (`OUTFITS`) is drawn the same way (`T.castDraw(p, "legion", …)`),
-which gives it a back and a profile too. The film's character gate (`character_gate`) checks each file as the Characters page did.
+which gives it a back and a profile too. The film's character gate (`character_gate`) checks each file as the Characters page did. The source skill's eight outfits are in the library too,
+named, as the app's (`moworks-legionary`, `moworks-veteran`, `moworks-senator`, `moworks-townsman`, `moworks-townswoman`, `moworks-stout-townsman`,
+`moworks-craftsman`, `moworks-workman`), taken the same way. **MW Character Sheet v1** (owner #1287-#1293): the cast layer draws every card in four
+views, `view: "front" | "three-quarter" | "profile" | "back"` (three-quarter: the front with its head turned and its body narrowed), `sit: true`
+(on a stool, front, three-quarter or profile; the profile reads best), the standard's faces by `T.STANDARD_FACES` (happy, laugh, surprised,
+worried, angry, talk, blink) and a talking mouth with `T.talkExpr(t)` (no lip sync). A character's `can` list (its record) says what its card drives.
 
 **16:9** (only when a Ricks Clip film is made in 16:9, #1233; learned from 3D Cartoon, #1264, audit/111 A6): the same vfov is 3.16× wider, so start
 from 3D Cartoon's STAGING §6 values; open every place on an establishing wide, then two-shot, close-up, insert; the sideways track along a row is

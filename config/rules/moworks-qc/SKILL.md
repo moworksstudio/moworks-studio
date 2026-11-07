@@ -62,8 +62,9 @@ Any film with an image sequence (`.moworks/rules/moworks-alive/sequence.md`), fr
 - the product cut by the frame outside a marked close-up: Composition 6 at most.
 
 A film with a voice-over, from the qc_sheets answer's "The voice against the music and the effects" block:
-- **words the music or the effects cover**: Sync 6 at most. An effect: move it into the pause after the word, or lower that effect. The music: never its level
-  (moworks-studio §7 sets it for every film: the Review once took 4 dB off a whole song, T38b-7); a short dip on the music at those words only, or name it for the owner. Never score Sync over 7 with this block not measured.
+- **a spoken passage the music covers, or words the effects cover**: Sync 6 at most. The music is measured a sentence at a time (cut short at a pause of 2 s), at the voice's level over it, as the app ducks it:
+  a small word read softly inside a passage is how a voice reads: no Sync off and no dip for it. An effect: move it into the pause after the word, or lower that effect. The music: never its level
+  (moworks-studio §7 sets it for every film: the Review once took 4 dB off a whole song, T38b-7); a dip on the music over that passage only, or name it for the owner. Never score Sync over 7 with this block not measured.
 
 Any film (`.moworks/rules/moworks-alive/SKILL.md` rules 8 to 10):
 - **no living detail** (no sticker, icon, bubble, burst or playful word made for this film; a film that only moves its text and pictures): Motion 7 at most;

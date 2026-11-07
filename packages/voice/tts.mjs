@@ -1,5 +1,6 @@
 // Text-to-speech providers: ElevenLabs (its key comes from the secret store and is sent only to its own API; errors never echo it; a voice-over
 // costs the user credits, so it runs only on an explicit request from the Voice screen) and Kokoro, the free voice on this computer (kokoro.mjs).
+import { VI_ONLY_RE, metaIsVietnamese } from "../hf-qa/vi-letters.mjs";
 import { createHash } from "node:crypto";
 import { spokenText } from "./tags.mjs";
 import { createWriteStream, mkdirSync, writeFileSync } from "node:fs";
@@ -15,7 +16,8 @@ const NO_TIMES = new Set([400, 404, 405, 422]);          // the way with times r
 async function call(url, init = {}, timeout = TIMEOUT) {
   const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), timeout);
   try {
-    const r = await fetch(url, { ...init, signal: init.signal ?? ctl.signal });
+    // the job's Stop and the time limit both end it (the job's signal once replaced the limit: a hung ElevenLabs ran forever, audit/112a A6)
+    const r = await fetch(url, { ...init, signal: init.signal ? AbortSignal.any([init.signal, ctl.signal]) : ctl.signal });
     if (!r.ok) {
       let detail = ""; try { const j = await r.json(); detail = j?.detail?.message ?? j?.detail?.status ?? j?.message ?? (typeof j?.detail === "string" ? j.detail : ""); } catch { /* not JSON */ }
       // a voice the plan does not allow (an instantly cloned voice on a plan without cloning) is refused with 401/403 too:
@@ -25,16 +27,19 @@ async function call(url, init = {}, timeout = TIMEOUT) {
       const quota = /quota|credits? remaining|insufficient|exceeds your/i.test(String(detail));
       const plain = planNo ? "This voice is not available on the account's ElevenLabs plan: choose another voice"
         : quota ? "The ElevenLabs credits are used up: add credits to the account, wait for its monthly reset, or record the voice and upload it"
-        : r.status === 401 || r.status === 403 ? "The key was refused (check it in Settings)" : r.status === 402 ? "The account has no credit left for this"
+        : r.status === 401 || r.status === 403 ? "The key was refused (check it in Studio Settings)" : r.status === 402 ? "The account has no credit left for this"
         : r.status === 429 ? "Too many requests; try again in a minute" : `The service answered ${r.status}`;
       throw Object.assign(new Error(detail ? `${plain}: ${String(detail).slice(0, 200)}` : plain), { code: "PROVIDER", status: r.status });
     }
     return r;
   } catch (e) {
     if (e.code === "PROVIDER") throw e;
+    if (init.signal?.aborted) throw Object.assign(new Error("Stopped"), { code: "CANCELLED" });          // the owner's Stop, never "did not answer"
     throw Object.assign(new Error(e.name === "AbortError" ? "The service did not answer in time" : `Could not reach the service (${netWhy(e)})`), { code: "PROVIDER_OFFLINE" });
   } finally { clearTimeout(t); }
 }
+/** The service call as the jobs make it, for the tests: its time limit and the job's Stop both end it. */
+export const callService = call;
 /** Node's "fetch failed" in plain words, from its cause. */
 function netWhy(e) {
   const c = String(e?.cause?.code ?? e?.code ?? "");
@@ -78,10 +83,10 @@ export function usableOn(v, sub) {
 }
 
 /** Vietnamese text: a letter only Vietnamese writes. */
-export const isVietnamese = (text) => /[ăâđêôơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]/i.test(String(text ?? ""));
+export const isVietnamese = (text) => VI_ONLY_RE.test(String(text ?? ""));
 /** A film in Vietnamese: its language when it has one, else its brief's letters (Prepare has not asked yet). Kokoro has no Vietnamese voice
  *  (hexgrad's VOICES.md), so such a film's Voice screen greys it and Claude never offers it. */
-export const filmVietnamese = (meta) => (meta?.language?.id ? meta.language.id === "vi" : isVietnamese(meta?.brief?.text));
+export const filmVietnamese = metaIsVietnamese;
 /** ElevenLabs models that read Vietnamese, best first (an account's eleven_multilingual_v2 may list no Vietnamese; /v1/models names
  *  eleven_v3, eleven_v4… with a vi language). Eleven v4 first (owner 05/11/2026 #1063; ElevenLabs: "a net upgrade over Eleven v3"); v3 stays a choice. */
 export const EL_VI_ORDER = ["eleven_v4", "eleven_v3", "eleven_v4_turbo", "eleven_turbo_v2_5", "eleven_flash_v2_5", "eleven_v3_conversational"];
@@ -223,10 +228,10 @@ export function voiceListError(e, title) {
 }
 /** The Voice screen's list for a service: { voices, models, settings, defaultSettings, defaultModel } (lang: the film's language, which picks
  *  the default model). Kept LIST_TTL_MS; fresh: read it again. */
-export async function voiceList(provider, key, { q = "", lang = "vi", timeout = LIST_TIMEOUT, fresh = false, now = Date.now } = {}) {
+export async function voiceList(provider, key, { lang = "vi", timeout = LIST_TIMEOUT, fresh = false, now = Date.now } = {}) {
   const P = PROVIDERS[provider];
   if (!P) throw Object.assign(new Error("Unknown voice service"), { code: "INVALID" });
-  const id = `${provider}|${keyTag(key)}|${lang === "en" ? "en" : "vi"}|${q}`;
+  const id = `${provider}|${keyTag(key)}|${lang === "en" ? "en" : "vi"}`;          // no search word: no service reads one (audit/112a D4)
   const hit = lists.get(id);
   if (!fresh && hit && (hit.pending || now() - hit.at < LIST_TTL_MS)) return hit.pending ?? hit.value;
   const pending = (async () => {
@@ -234,7 +239,7 @@ export async function voiceList(provider, key, { q = "", lang = "vi", timeout = 
       const [models, defaults, voices] = await Promise.all([P.models(key, { timeout }),
         // the settings the screen shows and the service's own defaults for each voice (its saved ones, else the service's)
         P.defaultSettings(key, { timeout }).catch(() => ({})),          // shown empty: the service still uses its own
-        P.voices(key, { q, timeout })]);
+        P.voices(key, { timeout })]);
       return { voices: voices.map(({ settings, ...v }) => ({ ...v, defaultSettings: { ...defaults, ...(settings ?? {}) } })), models,
         settings: SETTINGS[provider].map(({ default: _d, ...f }) => f), defaultSettings: defaults,
         // the picker's first choice reads the film's language (Vietnamese unless the brief says otherwise)

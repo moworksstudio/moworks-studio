@@ -14,8 +14,8 @@ import { cpSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeF
 import { dirname, join } from "node:path";
 import { APP_ROOT, expandEnv, loadPins, sourceHead } from "../version-manager/index.mjs";
 import { workRoot } from "../project-service/index.mjs";
+import { readJson } from "../util/json.mjs";
 
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
 export const storeRoot = (root = APP_ROOT) => process.env.MW_VOCAB_ROOT ?? join(workRoot(root), "library", "vocab");
 export const AUTHOR = "Shohei Ohtaki";
 export const MADE_NOTE = "the author's names, meanings, numbers and Canvas 2D sample, unchanged; a film that uses an item is written with GSAP from its numbers";

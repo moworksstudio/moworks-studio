@@ -10,10 +10,10 @@ import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
+import { APP_ROOT, ffmpegExe } from "../version-manager/index.mjs";
 
 export const PREVIEW = { width: 640, fps: 24, crf: 30, seconds: 10, posterQuality: 72, label: "D40: 640 px, 24 fps, H.264 CRF 30, 10 s at most, WebP poster q72" };
-export const ffmpegExe = (root = APP_ROOT) => join(expandEnv(loadPins(root).ffmpeg.dir), "ffmpeg.exe");
+export { ffmpegExe };          // version-manager
 const run = (root, args) => execFileSync(ffmpegExe(root), ["-v", "error", "-y", ...args], { windowsHide: true, stdio: "ignore" });
 const execFileP = promisify(execFile);
 const runAsync = async (root, args) => { await execFileP(ffmpegExe(root), ["-v", "error", "-y", ...args], { windowsHide: true }); };
@@ -29,6 +29,9 @@ export const encodeVideoAsync = (src, dst, { root = APP_ROOT } = {}) => runAsync
 
 /** A WebP poster from a picture, or from a video at `at` seconds. */
 export function encodePoster(src, dst, { root = APP_ROOT, at = null } = {}) { run(root, posterArgs(src, dst, at)); }
+/** A model sheet as WebP, at most 2400 wide as every engine's sheet is shipped (the one sheet frame, 2436 x 3000, comes out 2400 x 2956; a
+ *  sheet is read cell by cell: never the cards' 640 px), quality 82. */
+export function encodeSheet(src, dst, { root = APP_ROOT } = {}) { run(root, ["-i", src, "-frames:v", "1", "-vf", "scale='min(2400,iw)':-1", "-c:v", "libwebp", "-quality", "82", dst]); }
 /** encodePoster without holding the caller's event loop; rejects as encodePoster throws. */
 export const encodePosterAsync = (src, dst, { root = APP_ROOT, at = null } = {}) => runAsync(root, posterArgs(src, dst, at));
 

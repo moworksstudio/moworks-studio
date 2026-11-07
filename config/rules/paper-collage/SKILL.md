@@ -76,10 +76,8 @@ transparent PNG from the owner (or one generated on flat green, IMAGES.md §2).
 
 ## 6. Sound
 
-**Where the sounds come from** (owner 05/11/2026, #1034, in place of "code-made sounds only" of 04/11: Test 38's code-made sounds were dull
-and did not match the picture): as for every film, the library's exact sound first, then the app's pick (by Claude) of the library's closest sounds, then a sound made with ElevenLabs from its description (owner #1096), then the online search, then a sound made by code (the source skill's own
-sounds, new takes from its recipes and the app's) only for a cue none of them has. Name each sound by the thing on screen and its action, so the library
-finds the one that matches (moworks-studio §7b).
+**Where the sounds come from:** as for every film, in the house rules' order (moworks-studio §7b, owner #1034, #1096). Name each sound by
+the thing on screen and its action, so the library finds the one that matches.
 
 The source skill's own sounds are in the app's library, made by the source skill's code: the cues of `SFX` use the source skill's names (`tear` on each sheet, `paper-land`,
 `stamp` with `impact` under it on the power word, `strike`, `circle`, `count`, `pop`, `click`, `ding`…: SOUND.md's table and gains). Cues on key moments only,

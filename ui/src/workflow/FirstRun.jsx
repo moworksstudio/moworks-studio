@@ -11,9 +11,9 @@
 // never asks again (theme.jsx themeAsked); Settings › General changes it.
 import { useEffect, useRef, useState } from "react";
 import { Check, Copy, Cpu, Download, Loader2, Trash2, User } from "lucide-react";
-import { del, get, patch, post, watchJob } from "../api.js";
+import { del, get, patch, post } from "../api.js";
 import { StatusIcon } from "../components.jsx";
-import { useData, useToast } from "../lib.jsx";
+import { useData, useToast, useJob } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 import { FolderField } from "./folder.jsx";
 import { THEMES_SHOWN, markThemeAsked, themeAsked, useAppearance } from "../theme.jsx";
@@ -36,13 +36,12 @@ const yours = (d) => d.items.filter((it) => it.from === "yours" && it.id !== "wo
 export function useSetupJob(after) {
   const t = useT();
   const toast = useToast();
-  const [job, setJob] = useState(null);
+  // the download while it runs; gone at its end, which reads the list again and says what did not install
+  const [job, follow, setJob] = useJob((x) => { setJob(null); after?.(); if (x.status === "failed") toast(x.error?.message ?? t("The download stopped."), "error");
+    if (x.result?.skipped?.length) toast(t("The free voice could not be installed. Studio Settings › System can try again."), "error"); });
   const start = async (ids = null, extras = []) => {
     try {
-      const r = await post("/api/setup/first-run", { ...(ids ? { ids } : {}), ...(extras.length ? { extras } : {}) }); const j = r.job ?? r; setJob(j);
-      watchJob(j.id, (x) => { if (!x) return; setJob(x.status === "running" ? x : null);
-        if (x.status !== "running") { after?.(); if (x.status === "failed") toast(x.error?.message ?? t("The download stopped."), "error");
-          if (x.result?.skipped?.length) toast(t("The free voice could not be installed. Settings › System can try again."), "error"); } }, 1000);
+      const r = await post("/api/setup/first-run", { ...(ids ? { ids } : {}), ...(extras.length ? { extras } : {}) }); follow(r.job ?? r);
     } catch (e) { toast(e.message, "error"); }
   };
   return { job, start };
@@ -150,7 +149,7 @@ function ThemeAsk({ onDone }) {
           <span className="theme-swatch" data-t={x.id} aria-hidden="true"><i /><i /><i /><b>Aa</b></span>
           <span className="label-caps">{x.name}</span><span className="d">{t(x.desc)}</span></button>)}</div>
       </div>
-      <div className="dialog-foot"><span className="hint">{t("Settings › General changes it any time.")}</span><span className="spacer" />
+      <div className="dialog-foot"><span className="hint">{t("Studio Settings › General changes it any time.")}</span><span className="spacer" />
         <button ref={go} className="btn primary" onClick={done}><Check size={14} />{t("Continue")}</button></div>
     </div>
   </div>;
@@ -183,9 +182,9 @@ function SetUp({ d, reload, onLater }) {
       <div className="dialog-head"><h2 id="fr-h">{t("Set up Moworks Studio")}</h2></div>
       <div className="dialog-body">
         <ol className="plain fr-steps">
-          <li className="fr-step"><div className="fr-step-h"><span className="np2-n">1</span><b>{t("Projects folder")}</b></div>
-            <p className="fr-what">{t("Choose the folder that stores your projects.")}</p>
-            <FolderField value={work?.path ?? ""} title={t("Projects folder")} onChange={(path) => setWork(path)} /></li>
+          <li className="fr-step"><div className="fr-step-h"><span className="np2-n">1</span><b>{t("Productions folder")}</b></div>
+            <p className="fr-what">{t("Choose the folder that stores your productions.")}</p>
+            <FolderField value={work?.path ?? ""} title={t("Productions folder")} onChange={(path) => setWork(path)} /></li>
           <li className="fr-step"><div className="fr-step-h"><span className="np2-n">2</span><b>{t("Components")}</b></div>
             <p className="fr-what">{t("Everything the app needs to make films, installed in one go.")}</p>
             <ComponentsLine d={d} job={job} plusMb={extraMb} />
@@ -194,7 +193,7 @@ function SetUp({ d, reload, onLater }) {
               <span><b>{t("Free voice (Kokoro)")}</b>{" "}{t("A voice model that reads your script on this computer, free, with no account. About {size}. No Vietnamese.", { size: mb(voice.mb) })}</span></label>}</li>
         </ol>
       </div>
-      <div className="dialog-foot"><span className="hint">{t("Also in Settings › System.")}</span><span className="spacer" />
+      <div className="dialog-foot"><span className="hint">{t("Also in Studio Settings › System.")}</span><span className="spacer" />
         {!job && <button className="btn" onClick={onLater}>{t("Set up later")}</button>}
         {job ? <button className="btn primary" disabled><Loader2 size={14} className="spin" />{t("Installing…")}</button>
           : need ? <button className="btn primary" onClick={() => start(null, voice && freeVoice ? [voice.id] : [])}><Download size={14} />{total > 0 ? t("Install ({size})", { size: mb(total) }) : t("Install")}</button>

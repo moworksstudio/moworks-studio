@@ -12,13 +12,14 @@
 // The FRAME.md is written by a short Claude run that reads what the app made readable, beside one HF frame preset as the example of the
 // format; the app reads its tokens back for the swatches, fonts and stills. The Look is the film's design: the project's frame.md is a
 // plain copy of the current version (lookFrame in ./index.mjs), and the film gets its own copy of the kit's logos, fonts and guideline (placeKit).
-import { execFileSync, spawn } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { copyFileSync, cpSync, existsSync, linkSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { basename, extname, join, resolve, sep } from "node:path";
 import { inflateRawSync } from "node:zlib";
 import { APP_ROOT, resolveRuntime } from "../version-manager/index.mjs";
-import { claudeEnv, findClaude } from "../system-status/index.mjs";
+import { findClaude } from "../system-status/index.mjs";
+import { claudeJson } from "../system-status/claude-run.mjs";
 import { safeFileName } from "../project-service/index.mjs";
 import { ARCHIVE, MAX_UNPACK_BYTES, MAX_UNPACK_FILES, PROGRAM, unpackArchive } from "../project-service/archive.mjs";
 import { KIT_FILES } from "../project-service/layout.mjs";
@@ -31,6 +32,7 @@ import { fetchGoogleFamily, slug as googleSlug } from "../hf-edit/googleFonts.mj
 import { fontsDir } from "../offline-assets/index.mjs";
 import { roles } from "./frame-doc.mjs";
 import { currentStore, ffmpegExe, getItem, hfLookDir, items as hfItems, LOOK_GUIDE, puppeteerOf, storeRoot, vietnameseCheck } from "./index.mjs";
+import { readJson } from "../util/json.mjs";
 export { roles };
 
 // the same list as OK_FILES in ui/src/screens/Looks.jsx
@@ -50,7 +52,7 @@ const OWNER = { author: "The owner (uploaded guideline)", link: null, licence: "
 
 const now = () => new Date().toISOString();
 const err = (code, message) => Object.assign(new Error(message), { code });
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
+
 const uniq = (a) => [...new Set(a)];
 const customRoot = (root) => join(storeRoot(root), "custom");
 const dirOf = (slug, root) => join(customRoot(root), slug);
@@ -380,7 +382,7 @@ async function readFiles(m, dir, root, { signal = null, onProgress = () => {} } 
   const INTAKE = "tools/intake/intake.py";
   const fail = (f, reason, more = {}) => unread.push({ name: f.name, reason, ...more });
   const why = (r, f) => r.password ? PASSWORD_REASON
-    : /not installed|Python is not/i.test(r.error ?? "") ? "the app's Python components are missing: Install them in Settings › System"
+    : /not installed|Python is not/i.test(r.error ?? "") ? "the app's Python components are missing: Install them in Studio Settings › System"
       : f.kind === "ai" ? "saved without PDF content: add a PDF or PNG export of it" : DAMAGED_REASON;
   const pictures = new Map();
   for (const f of files) if (["image", "svg"].includes(f.kind)) { const k = baseOf(f.name); pictures.set(k, [...(pictures.get(k) ?? []), f]); }
@@ -508,10 +510,7 @@ const KIT_NEEDS = [
 /** The Claude run that writes work/FRAME.md from what the app made readable (cwd: the Look's folder; Read and Write only, nothing outside
  *  it). Returns the text, or throws with Claude's own answer. What the run took (time, turns, tokens, cost) stays in work/claude-run.json. */
 export async function claudeWriter({ dir, look, root = APP_ROOT, model = "claude-opus-5-5", effort = "medium", signal = null, timeoutMs = 20 * 60 * 1000, fix = null }) {
-  const exe = findClaude(root);
-  if (!exe) throw err("NO_CLAUDE", "Claude Code is not installed or not signed in");
-  const env = claudeEnv();
-  for (const k of Object.keys(env)) if (/^ANTHROPIC_(API_KEY|AUTH_TOKEN|BASE_URL)$/i.test(k)) delete env[k];
+  if (!findClaude(root)) throw err("NO_CLAUDE", "Claude Code is not installed or not signed in");
   const prompt = fix ? [
     `work/FRAME.md is the Brand Kit "${look.title}", written from a brand guideline, and it lacks what a film needs: ${fix.join("; ")}.`,
     "Read work/FRAME.md and work/READING.md, then the guideline's parts you need, and add only that. Keep all the rest word for word.",
@@ -535,34 +534,12 @@ export async function claudeWriter({ dir, look, root = APP_ROOT, model = "claude
     ...KIT_NEEDS,
     "Write only work/FRAME.md. Reply with one line: what you took from which file.",
   ].join("\n");
-  const args = ["-p", "--output-format", "json", "--restricted", "--tools", "Read,Write", "--permission-mode", "acceptEdits", "--permission-prompts", "none", "--strict-mcp-config",
-    "--disable-slash-commands", "--model", model, "--effort", effort, "--no-session-persistence"];
   const out = join(dir, "work", "FRAME.md");
   if (!fix) rmSync(out, { force: true });
-  const run = () => new Promise((ok, no) => {
-    const c = spawn(exe, args, { cwd: dir, env, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
-    let o = "";
-    const t = setTimeout(() => c.kill(), timeoutMs);
-    signal?.addEventListener("abort", () => c.kill(), { once: true });
-    c.stdout.on("data", (d) => { o += d; });
-    c.stderr.resume();
-    c.stdin.end(prompt, "utf8");
-    c.on("close", () => {
-      clearTimeout(t);
-      try {
-        const j = JSON.parse(o);
-        try { writeFileSync(join(dir, "work", fix ? "claude-run-more.json" : "claude-run.json"), JSON.stringify({ model, effort, ms: j.duration_ms, turns: j.num_turns, costUsd: j.total_cost_usd, usage: j.usage }, null, 1) + "\n"); } catch { /* only a record */ }
-        ok(String(j.result ?? "").trim());
-      } catch { ok(o.slice(-300)); }
-    });
-    c.on("error", (e) => no(e));
-  });
-  let answer = await run();
-  // two Claude Code processes refreshing the sign-in at once is passing (as the agent does): once more, a few seconds later
-  if (!existsSync(out) && /another Claude Code process is refreshing|Failed to refresh OAuth token/i.test(answer) && !signal?.aborted) {
-    await new Promise((r) => setTimeout(r, 5000));
-    answer = await run();
-  }
+  // one run, Read and Write in the Look's folder (system-status/claude-run.mjs: a sign-in race is tried once more there)
+  const r = await claudeJson(prompt, { cwd: dir, root, tools: "Read,Write", mode: "acceptEdits", model, effort, timeoutMs, signal });
+  const j = r.json, answer = r.result ?? "";
+  if (j) { try { writeFileSync(join(dir, "work", fix ? "claude-run-more.json" : "claude-run.json"), JSON.stringify({ model, effort, ms: j.duration_ms, turns: j.num_turns, costUsd: j.total_cost_usd, usage: j.usage }, null, 1) + "\n"); } catch { /* the kit is what matters */ } }
   if (!existsSync(out)) throw err("ERROR", `Claude wrote no Brand Kit${answer ? `: ${answer.slice(0, 300)}` : ""}`);
   return readFileSync(out, "utf8");
 }

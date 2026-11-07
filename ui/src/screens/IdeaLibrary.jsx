@@ -228,7 +228,7 @@ export function takeStartIdea() {
  *  (Claude writes the narration in the film's Prepare step). */
 export function StartAsk({ x, onScript, onClose }) {
   const t = useT();
-  return <Dialog title={t("Start a project from “{title}”", { title: x.name })} onClose={onClose} footer={<><span className="spacer" />
+  return <Dialog title={t("Start a production from “{title}”", { title: x.name })} onClose={onClose} footer={<><span className="spacer" />
     <button className="btn" onClick={() => { onClose(); startProject(x); }}>{t("Start from the idea")}</button>
     <button className="btn primary" onClick={() => { onClose(); onScript(); }}><FileText size={14} />{t("Write the script first")}</button></>}>
     <div className="dlg-lines"><p>{t("This idea has no script yet.")}</p><p>{t("Write it here first, or let Claude write it in the film's Prepare step.")}</p></div></Dialog>;
@@ -270,7 +270,7 @@ export function IdeaDialog({ value, onClose, onSaved }) {
           <option value="">{t("No film style")}</option>
           {v.styleId && !styles.some((s) => s.id === v.styleId) && <option value={v.styleId}>{v.styleId}</option>}
           {styles.map((s) => <option key={s.id} value={s.id}>{s.title}</option>)}</select>
-        <span className="hint">{t("Optional. Start a project picks this style for you.")}</span></label>
+        <span className="hint">{t("Optional. Start a production picks this style for you.")}</span></label>
     </div>
   </Dialog></div>, document.body);
 }
@@ -281,7 +281,7 @@ function DeleteIdea({ x, onClose, onDeleted }) {
   return <Dialog title={t("Delete “{title}”?", { title: x.name })} danger onClose={onClose} footer={<><span className="spacer" />
     <button className="btn" onClick={onClose}>{t("Cancel")}</button>
     <button className="btn danger" onClick={async () => { try { await del(`/api/ideas/${x.id}`); toast(t("Deleted “{title}”", { title: x.name })); onDeleted(); } catch (e) { toast(e.message, "error"); } }}><Trash2 size={14} />{t("Delete")}</button></>}>
-    <div className="dlg-lines"><p className="dlg-warn">{x.script ? t("“{title}” and its script leave My ideas.", { title: x.name }) : t("“{title}” leaves My ideas.", { title: x.name })}</p><p>{t("Projects started from it keep their brief.")}</p></div></Dialog>;
+    <div className="dlg-lines"><p className="dlg-warn">{x.script ? t("“{title}” and its script leave My ideas.", { title: x.name }) : t("“{title}” leaves My ideas.", { title: x.name })}</p><p>{t("Productions started from it keep their brief.")}</p></div></Dialog>;
 }
 
 const SEL_KEY = "mw-wr-idea";          // the idea in hand, kept while the app runs (the page is left and opened again: #1115)
@@ -331,7 +331,7 @@ export function IdeasTab({ lib, edit, scriptRun, onScript, onOpenScript, pick: w
       {sel ? <div className="insp-in" key={sel.id}><IdeaDetails x={sel}
         note={run && <a className="idl-running" href="#/ideas/research"><span className="dot busy" aria-hidden="true" />{t("Writing the script…")}<span className="go">{t("See progress")}</span></a>}
         actions={<>
-          <button type="button" className="btn primary" onClick={() => begin(sel)}><Sparkles size={14} />{t("Start a project")}</button>
+          <button type="button" className="btn primary" onClick={() => begin(sel)}><Sparkles size={14} />{t("Start a production")}</button>
           {sel.own && !run && (sel.script ? <button type="button" className="btn" onClick={() => onOpenScript(sel)}><FileText size={14} />{t("Open the script")}</button>
             : <button type="button" className="btn" onClick={() => onScript(sel)}><Lightbulb size={14} />{t("Write the script")}</button>)}
           <CopyButton text={briefOf(sel)} />
@@ -368,7 +368,7 @@ export function IdeaPicker({ onAdd, onClose }) {
     <div className={"plx" + (frame ? " framed" : "")} style={frame} role="dialog" aria-modal="true" aria-labelledby="plx-h" ref={box}>
       <div className="dialog-head">
         <BackButton onClick={onClose} />
-        <h2 id="plx-h">{t("Writers Room")}</h2>
+        <h2 id="plx-h">{t("Writers' Room")}</h2>
         <span className="count num">{items ? (list.length === 1 ? t("1 idea") : t("{n} ideas", { n: list.length })) : ""}</span>
         <button className="btn ghost icon sm x" onClick={onClose} aria-label={t("Close")}><X size={16} /></button></div>
       {error && <div className="plx-pad"><Banner kind="error">{error.message}</Banner></div>}

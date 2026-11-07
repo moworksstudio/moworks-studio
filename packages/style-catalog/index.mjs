@@ -244,7 +244,9 @@ function brushEntries(src, root, qc) {
   return [{
     id: BRUSH_ID, title: "Brush cartoon", titleOriginal: null, category: "Cartoon & Anime", tags: ["characters", "hand-painted"], uses: [],
     description: "Short hand-painted cartoons with your own characters: p5.brush watercolour and ink that boils, flat 2D key views, faces with 31 emotions that act on the beat, no text.",
-    aspects: ["16:9"], intendedUse: "a short story or explainer acted by the project's own characters", author: BRUSH_AUTHOR.id, kind: "video-style",
+    // a Moworks Studio film style (owner 06/11 #1311, as What If #1203): shown as the studio's own; ClaudeAnimationBase's engine runs as
+    // shipped, under its MIT licence, credited in Settings › System › Open-source licences (docs/THIRD-PARTY.md) and recorded here as basedOn
+    aspects: ["16:9"], intendedUse: "a short story or explainer acted by the project's own characters", author: MW_AUTHOR.id, kind: "video-style",
     ruleSource: "ClaudeAnimationBase guide", rules, readFirst: [own.name, "brush-cartoon-app"], available: rules.every((r) => r.available), look: false, hidden: false,
     dim: "2D", renderer: "canvas", needsFootage: false, vnFont: null, vnFontNote: null, characters: true, characterEngine: "brush-kit", fps,          // { allowed, default }
     preview: { image: "/media/characters/clawd/poster.webp", poster: "/media/characters/clawd/poster.webp", video: "/media/characters/clawd/showreel.mp4", placeholder: false,
@@ -254,19 +256,20 @@ function brushEntries(src, root, qc) {
     demo: null,
     // short; a "route" line is a note, not a warning
     warnings: [{ kind: "route", text: "16:9 only. Each film gets characters of its own." }],
-    credit: { author: BRUSH_AUTHOR.name, link: tree, url: tree, commit: kit.commit, licence: "MIT (p5.js LGPL-2.1, p5.brush MIT)", made: "adapted",
+    credit: null,
+    basedOn: { author: BRUSH_AUTHOR.name, link: tree, url: tree, commit: kit.commit, licence: "MIT (p5.js LGPL-2.1, p5.brush MIT)", made: "adapted",
       madeNote: "the kit's guide, engine, faces and emotions as shipped; the characters are each film's own, drawn by the app's character layer" },
     pipeline: readPipeline(root, "brush-pipeline.json"),
   }];
 }
 
+export { styleFamily } from "./family.mjs";
 export const WHAT_IF_ID = "what-if";
 const WI_PACK = "config/rules/what-if-style/SKILL.md";
 /** The What If animation style: the author's skill as shipped (its SKILL.md and references, staged
  *  as .moworks/rules/what-if-animation/) and the app's pack, its own pipeline (config/what-if-pipeline.json: no Character step, the cast is
- *  the engine's). 1920 × 1080 only (the engine draws that world). `ready`: false until the steps are wired end to end (step 4):
- *  hidden from New project and shown as "Coming soon". */
-export const WHAT_IF_READY = true;          // both demo films (no narration; ElevenLabs voice) ran end to end
+ *  the engine's). 1920 × 1080 only (the engine draws that world). Its two demo films ran end to end: a style like the others (its
+ *  "Coming soon" layer went, audit/112c c4.1). */
 function whatIfEntries(src, root, qc) {
   const wi = whatIfSource(root);
   if (!wi) return [];
@@ -283,7 +286,7 @@ function whatIfEntries(src, root, qc) {
     // a Moworks Studio film style (owner 06/11 #1203): shown as the studio's own; FreshStack's engine runs as shipped, under its MIT
     // licence, credited in Settings › System › Open-source licences (docs/THIRD-PARTY.md) and recorded here as basedOn
     author: MW_AUTHOR.id, kind: "video-style", ruleSource: "What If animation skill", rules, readFirst: [own.name, "what-if-style"],
-    available: rules.every((r) => r.available), look: false, hidden: !WHAT_IF_READY, ...(WHAT_IF_READY ? {} : { comingSoon: true }),
+    available: rules.every((r) => r.available), look: false, hidden: false,
     dim: "2D", renderer: "svg", needsFootage: false, vnFont: null, vnFontNote: null, characters: true, characterEngine: "what-if",
     // the style's demo film, made by the app in this style: its title shot as the card, the film to play
     ...(wiMedia(WI_DEMO.poster, root) ? {
@@ -350,13 +353,8 @@ export function styleList(root = APP_ROOT) {
   const c = catalog(root);
   return { categories: c.categories, authors: c.authors,
     styles: c.styles.map(({ pipeline, rules, readFirst, credit, ...s }) => ({ ...structuredClone(s), ruleCount: rules?.length ?? 0,
-      design: styleDesign(s), format: styleFormat(s), credit: listCredit(credit) })),
-    comingSoon: COMING_SOON.map((x) => structuredClone(x)) };
+      design: styleDesign(s), format: styleFormat(s), credit: listCredit(credit) })) };
 }
-
-/** Styles shown but not chosen yet: What If opens when its engine is made; its character keeps the name Pip. */
-export const COMING_SOON = WHAT_IF_READY ? [] : [{ id: "what-if", title: "What If", author: "FreshStack", tag: "FS", comingSoon: true,
-  credit: { author: "FreshStack (kelano86)", licence: "MIT", url: "https://github.com/kelano86/what-if-animation/tree/8092fb5e825e55456d1d47fec0ebf595cb93cc0d", commit: "8092fb5e825e55456d1d47fec0ebf595cb93cc0d" } }];
 
 /** Where a film's design comes from: "open" (the user picks a Brand Kit in
  *  New project) only for General and HyperFrames' film types; every other style follows its author's design ("author": the brief or the
@@ -416,7 +414,7 @@ function buildCatalog(root) {
   const lemo = lemoEntries(src, root, cat.qc), lemoPin = lemoSource(root), hfPin = src.pins.hyperframes;
   const mg = mgEntries(src, root, cat.qc), mgPin = mgSource(root);
   const ani = anidoodleEntries(src, root, cat.qc), aniPin = anidoodleSource(root);
-  const brush = brushEntries(src, root, cat.qc), kitPin = kitSource(root);
+  const brush = brushEntries(src, root, cat.qc);
   const wi = whatIfEntries(src, root, cat.qc), wiPin = whatIfSource(root);
   const styles = [...own, ...lemo, ...mg, ...ani, ...brush, ...wi];
   for (const s of styles) if (s.preview?.image) s.preview = { ...s.preview, thumb: thumbUrl(s.preview.image) };          // the gallery's tile
@@ -443,12 +441,9 @@ function buildCatalog(root) {
       repo: { url: aniTreeLink(aniPin), sha: aniPin.commit, commit: aniPin.commit.slice(0, 7), date: aniPin.date ?? null, version: aniPin.version ?? null },
       licence: "Apache-2.0 (NOTICE)", kind: "video-style", engine: "HyperFrames + anidoodle engine (bundled)", languages: ["en"], needsDownload: false,
       count: count(ANI_AUTHOR.id), intact: aniPin.intact }] : []),
-    ...(kitPin && brush.length ? [{ id: BRUSH_AUTHOR.id, name: BRUSH_AUTHOR.name, org: null, source: "claude-animation-base",
-      repo: { url: `https://github.com/${kitPin.repo}/tree/${kitPin.commit}`, sha: kitPin.commit, commit: kitPin.commit.slice(0, 7), date: kitPin.date ?? null },
-      licence: "MIT · p5.js LGPL-2.1, p5.brush MIT", kind: "video-style", engine: "HyperFrames + character layer (p5.brush)", languages: ["en"], needsDownload: false,
-      count: count(BRUSH_AUTHOR.id), intact: kitPin.intact }] : []),
+    // Brush cartoon is a Moworks Studio film style too (owner 06/11 #1311): ClaudeAnimationBase is credited in the licences
     // What If is a Moworks Studio film style (owner 06/11 #1203): no author of its own here; FreshStack's engine is credited in the licences
-  ].map((a) => ({ ...a, ...(AUTHOR_DISPLAY[a.id] ?? {}), ...(a.id === "freshstack" ? { comingSoon: !WHAT_IF_READY } : {}) }));          // the gallery's own "Coming soon" goes with it
+  ].map((a) => ({ ...a, ...(AUTHOR_DISPLAY[a.id] ?? {}) }));
   return { categories: [...new Set([...cat.categories, ...lemo.map((s) => s.category).filter(Boolean), ...mg.map((s) => s.category), ...ani.map((s) => s.category), ...brush.map((s) => s.category), ...wi.map((s) => s.category)])], authors, styles };
 }
 

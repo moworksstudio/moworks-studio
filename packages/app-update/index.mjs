@@ -6,9 +6,10 @@
 // The repo (GitHub `owner/name`, or a URL) and branch come from config/update.json; the sign-in is git's own (Git Credential Manager on Windows asks once).
 // The app also checks by itself while it runs (schedule.mjs), quietly: no sign-in window, an error only noted.
 import { execFile, spawn } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { APP_ROOT } from "../version-manager/index.mjs";
+import { readJson } from "../util/json.mjs";
 
 const REF = "refs/mw-update/latest";          // the fetched tip of the repo's branch, kept apart from the clone's own remotes
 // The studio's source copy: each release is made from its tree as a commit of its own on this line (`git commit-tree main^{tree} -p
@@ -17,7 +18,7 @@ const RELEASES = "refs/heads/public";
 const yes = (p) => p.then(() => true, () => false);
 const configFile = (root) => join(root, "config", "update.json");
 const stateFile = (root) => process.env.MW_UPDATE_STATE ?? join(root, "runtime", "state", "update.json");          // MW_UPDATE_STATE: tests
-const readJson = (f, d) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
+
 const writeState = (root, patch) => {
   const f = stateFile(root), next = { ...readJson(f, {}), ...patch };
   mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, JSON.stringify(next, null, 2) + "\n");
@@ -47,7 +48,7 @@ const commitInfo = async (root, rev) => {
   const [hash, date, subject] = (await git(root, ["log", "-1", "--format=%H%x00%cI%x00%s", rev])).split("\0");
   return { hash, short: hash.slice(0, 8), date, subject, version: await versionAt(root, rev) };
 };
-/** The app's version at a revision: the changelog's newest heading ("## 0.8.214.6 (2026-11-06)"), docs/ then the root; null when none. */
+/** The app's version at a revision: the changelog's newest heading ("## 0.8.214.7 (2026-11-07)"), docs/ then the root; null when none. */
 async function versionAt(root, rev) {
   for (const f of ["docs/CHANGELOG.md", "CHANGELOG.md"]) {
     try { const v = /^## (\d[\w.-]*)/m.exec(await git(root, ["show", `${rev}:${f}`]))?.[1]; if (v) return v; } catch { /* not at this revision */ }

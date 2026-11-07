@@ -19,6 +19,8 @@ const HERE = dirname(fileURLToPath(import.meta.url)), HOSTS = join(HERE, "hosts"
 export const CAMTIME = join(HERE, "camtime.js");
 /** The 3D Cartoon's collision module as a film imports it: the source skill's, with the app's held-prop check beside it (owner #1267, hosts/held.ts). */
 export const HELD_STYLE = "cartoon-3d", HELD_HOST = join(HOSTS, "collision.tsx");
+/** The app's cast layer for the 3D Cartoon (MW Character Sheet v1, owner #1287-#1293): `import { setFace, POINT, WAVE } from "mw:c3d-cast"`. */
+export const C3D_CAST = join(HERE, "c3d-cast.ts");
 export const ENTRY = "src/videos/film/Video.tsx", OUT = "compositions/film/film.js";
 export const THREE = "0.187.0";
 const EXT = ["", ".tsx", ".ts", ".jsx", ".js", "/index.tsx", "/index.ts", "/index.js"];
@@ -47,7 +49,7 @@ export async function buildStyleFilm(projectDir, style, { root = APP_ROOT, force
   // the film's own src/ (the project's, or a board's own copy beside it): a relative import that leaves it for a file it does not have is the source skill's
   const srcRoot = (() => { let d = dirname(entry); while (inside(projectDir, d) && d.split(sep).pop() !== "src") d = dirname(d); return d.split(sep).pop() === "src" ? d : join(projectDir, "src"); })();
   const words = join(projectDir, "transcript.json");
-  const latest = newest([srcRoot, skillSrc, HOSTS, SHIMS, CAMTIME, words], out);
+  const latest = newest([srcRoot, skillSrc, HOSTS, SHIMS, CAMTIME, C3D_CAST, words], out);
   if (!force && existsSync(out) && statSync(out).mtimeMs >= latest) return { built: false, out: outRel, ...readBanner(out) };
   const families = new Set(), twinned = new Set();
   const three = style.three ? join(threeDir(root), THREE) : null;
@@ -78,6 +80,7 @@ export async function buildStyleFilm(projectDir, style, { root = APP_ROOT, force
       const rest = a.path.slice("cartoon-3d/".length), k = resolveFile(join(srcRoot, rest)) ?? resolveFile(join(skillSrc, rest));
       return k ? { path: own(k) } : { errors: [{ text: `${a.path} is not in the 3D Cartoon source skill's kit (src/kit/)` }] };
     });
+    if (style.id === HELD_STYLE) b.onResolve({ filter: /^mw:c3d-cast$/ }, () => ({ path: C3D_CAST }));
     b.onResolve({ filter: /^\.\.?\// }, (a) => {
       if (a.namespace !== "file" || !a.importer) return undefined;
       const want = resolve(a.resolveDir, a.path);

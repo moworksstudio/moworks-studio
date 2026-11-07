@@ -3,6 +3,7 @@
 // names where the film's design comes from. A style that brings its own design (Slideshow, every author style) locks it; a Brand Kit
 // chosen all the same stays chosen and is sent, and Claude asks in Prepare how to use it (house rules §2b): the line says so.
 // The box's title names the one field, so the field's label is for screen readers only and the picker spans the box.
+import { VI_MARKED_RE } from "../../../packages/hf-qa/vi-letters.mjs";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown, Lock, Upload } from "lucide-react";
@@ -73,7 +74,7 @@ export function filmLanguage(text) {
   const en = /tiếng\s*anh|\benglish\b|\bin\s+eng\b|\beng\s+voice\b/i.test(s), vi = /tiếng\s*việt|\bvietnamese\b/i.test(s);
   if (en !== vi) return en ? "en" : "vi";
   if (en && vi) return null;
-  return /[ăâđêôơưàáạảãằắặẳẵầấậẩẫèéẹẻẽềếệểễìíịỉĩòóọỏõồốộổỗờớợởỡùúụủũừứựửữỳýỵỷỹ]/i.test(s) ? "vi" : null;
+  return VI_MARKED_RE.test(s) ? "vi" : null;
 }
 
 /** The design field; `value` is { look } (an id, "" for From brief); `brief` is the brief's text, which gives the film's language. */

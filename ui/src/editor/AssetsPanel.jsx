@@ -271,7 +271,7 @@ function Row({ a, items, projectId, project, fileUrl, locked, time, length, flas
       <button className="btn ghost" onClick={() => setDel(null)}>{t("Cancel")}</button>
       <button className="btn danger" onClick={async () => { const ok = await call("delete", del.inUse ? { force: true } : {}, t("Deleted: {name}", { name: a.name })); if (ok) setDel(null); }}>{t("Delete")}</button></>}>
       <p>{del.inUse ? t("The film uses it in shot {list}: those shots will show a missing file until you relink or change them.", { list: runsOfShots(a.usedIn).map(shotRunText).join(", ") || "?" })
-        : t("The file is removed from the project folder.")}</p>
+        : t("The file is removed from the production folder.")}</p>
     </Dialog>}
   </li>;
 }

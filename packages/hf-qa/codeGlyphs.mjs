@@ -5,14 +5,13 @@
 // Review's tool replies): each string literal or JSX text with Vietnamese marked letters, the face of the nearest font before it (a
 // fontFamily, a canvas font, a component whose own text is set in a face, anidoodle's drawn capitals), and the letters that face's files
 // lack. A face the film has no file for yet is not judged. moworks-studio §2b: a font conflict is a stop with choices.
+import { VI_MARKED_RE } from "./vi-letters.mjs";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { createRequire } from "node:module";
 import { dirname, join, relative, resolve, sep } from "node:path";
-import { resolveRuntime } from "../version-manager/index.mjs";
+import { fontkitFor } from "./vietnamese.mjs";
 
 // Vietnamese letters with a mark (the plain vowels and đ's base are in every latin face)
-const VI_MARKED = /[ăâđêôơưĂÂĐÊÔƠƯàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵÀÁẢÃẠẰẮẲẴẶẦẤẨẪẬÈÉẺẼẸỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌỒỐỔỖỘỜỚỞỠỢÙÚỦŨỤỪỨỬỮỰỲÝỶỸỴ]/u;
-const marked = (s) => [...new Set([...s.normalize("NFC")].filter((c) => VI_MARKED.test(c)))];
+const marked = (s) => [...new Set([...s.normalize("NFC")].filter((c) => VI_MARKED_RE.test(c)))];
 const DRAWN = "anidoodle's drawn capitals";
 const DRAWN_CALLS = /\b(writeOn|sentence|caption|letter|logo)\s*\(/g;
 
@@ -61,9 +60,9 @@ function viTexts(src) {
   const out = [];
   for (const m of src.matchAll(/"((?:\\.|[^"\\\n])*)"|'((?:\\.|[^'\\\n])*)'|`((?:\\.|[^`\\])*)`/g)) {
     const t = (m[1] ?? m[2] ?? m[3] ?? "").replace(/\$\{[^}]*\}/g, " ");
-    if (VI_MARKED.test(t)) out.push({ at: m.index, text: t });
+    if (VI_MARKED_RE.test(t)) out.push({ at: m.index, text: t });
   }
-  for (const m of src.matchAll(/>([^<>{}"'`]*)</g)) if (VI_MARKED.test(m[1])) out.push({ at: m.index + 1, text: m[1].trim() });
+  for (const m of src.matchAll(/>([^<>{}"'`]*)</g)) if (VI_MARKED_RE.test(m[1])) out.push({ at: m.index + 1, text: m[1].trim() });
   return out.sort((a, b) => a.at - b.at);
 }
 
@@ -106,12 +105,7 @@ function drawnLetters(projectDir) {
   return new Set([...b.matchAll(/(?:^|[,{\s])(?:"([^"]+)"|'([^']+)'|([A-Za-z0-9_]))\s*:\s*\{/g)].map((m) => m[1] ?? m[2] ?? m[3]));
 }
 
-let fontkit = null;
-function loadFontkit() {
-  if (fontkit !== null) return fontkit;
-  try { fontkit = createRequire(join(resolveRuntime().dir, "node_modules", "fontkit", "package.json"))("fontkit"); } catch { fontkit = false; }
-  return fontkit;
-}
+const loadFontkit = () => fontkitFor() ?? false;          // vietnamese.mjs
 
 /** The film's code read for Vietnamese letters its faces lack: { files, findings: [{ file, line, shot, text, face, missing, why }] }. */
 export function codeGlyphs(projectDir, { fontkitImpl = null } = {}) {

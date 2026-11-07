@@ -2,200 +2,186 @@
 
 <p align="center"><b>English</b> · <a href="README.vi.md">Tiếng Việt</a></p>
 
-<p align="center"><b>A desktop studio for motion films: Claude directs, Moworks Studio builds and checks every frame, you approve each step.</b></p>
+<p align="center"><b>A desktop studio for motion-graphic films: Claude directs, the app builds and checks every frame, you approve each step.</b></p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.8.214.5-1d3fd8" alt="version 0.8.214.5">
+  <img src="https://img.shields.io/badge/version-0.8.214.7-1d3fd8" alt="version 0.8.214.7">
   <img src="https://img.shields.io/badge/Claude-Opus_5.5_·_Sonnet_5.5-d97757" alt="Claude Opus 5.5 and Sonnet 5.5">
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-555" alt="Windows 10 | 11">
-  <img src="https://img.shields.io/badge/film_styles-132_from_7_authors-0a7" alt="132 film styles from 7 authors">
-  <img src="https://img.shields.io/badge/library-889_motions_·_454_blocks_·_168_terms-0a7" alt="Motion Library: 889 motions, 454 blocks, 168 motion terms">
+  <img src="https://img.shields.io/badge/film_styles-133-0a7" alt="133 film styles">
+  <img src="https://img.shields.io/badge/library-889_motions_·_454_blocks_·_192_terms-0a7" alt="Motion Library: 889 motions, 454 blocks, 192 motion terms">
   <img src="https://img.shields.io/badge/export-MP4_·_MOV_·_WebM_·_After_Effects-8a2be2" alt="MP4, MOV, WebM and After Effects">
 </p>
 
 <p align="center">
   <a href="#quick-start">Quick start</a> ·
-  <a href="#how-it-works">How it works</a> ·
   <a href="#how-a-film-is-made">How a film is made</a> ·
+  <a href="#features">Features</a> ·
   <a href="#film-styles">Film styles</a> ·
-  <a href="#walkthrough">Walkthrough</a> ·
   <a href="#troubleshooting">Troubleshooting</a> ·
-  <a href="CHANGELOG.md">Changelog</a> ·
-  <a href="KNOWN-ISSUES.md">Known issues</a> ·
-  <a href="THIRD-PARTY.md">Third-party</a>
+  <a href="CHANGELOG.md">Changelog</a>
 </p>
 
+Write a brief, add your material and pick a film style. Claude plans the film, draws a storyboard and writes a Motion Plan for you to
+approve; Moworks Studio then builds the film in code shot by shot, adds music and sound, checks it and renders it as MP4, MOV or WebM,
+in one size or several, or as an editable After Effects project. Everything runs on your Windows PC under your own Claude account.
+
 <p align="center"><img src="images/hero-films.jpg" alt="Stills from six demo films made in Moworks Studio"></p>
-<p align="center"><sub>Demo films made in the app. Top: a lamp launch (Launch · style by HeyGen) · an alarm clock (Character · style by HeyGen) · a sundial (Explainer · style by HeyGen).<br>Bottom: a garden in numbers (Data · style by HeyGen) · a bus stop (Isometric Picture Book · style by Lemomo) · a neon city (Music video · style by HeyGen). More in <a href="#made-in-the-app">Made in the app</a>.</sub></p>
+<p align="center"><sub>Demo films made in the app, each in a different film style.</sub></p>
 
-Moworks Studio is a desktop application for making motion-graphic films with Claude. You write a brief and add your material (artwork,
-PSD, deck, pictures, music, a voice-over script) and choose one of 132 film styles. Claude plans the film, draws a storyboard for you to
-approve and writes a Motion Plan in numbers; then the app builds the film shot by shot in code, adds music and sound effects and gives you
-Version 1 to watch. Claude reviews and fixes it if you choose, technical checks run, and the film renders as MP4, MOV or WebM. Films in most styles can also be exported to After
-Effects as editable layers.
+> **Status: preview.** The app still changes quickly; expect rough edges.
 
-**Change the film on the picture itself.** In the Editor, click any words in the frame to edit them on the spot, with their font, size
-and colour (each change is one step you can undo). Or press **Pin a note** (N), click a point or drag a box on the frame, and write what
-should change there: the note goes to Claude with the exact moment, the shot and that place of the picture.
+## New in 0.8.214.7
 
-Every step waits for you where it matters: you approve the storyboard and the Motion Plan, follow the build live in the Editor, and ask
-for changes in plain words. The app runs on your computer and drives Claude Code under your own Claude account; your projects, keys and
-client material stay on the machine.
+- **Thumbnails:** pick a frame of a film; Claude lays it out at 16:9 or 9:16, on its own or with your Brand Kit.
+- **One film, several sizes:** Adaptation makes 9:16, 1:1 and other sizes of a film; each renders with the film's own mix.
+- **Casting:** four more ways to make a character, one character sheet, more ready-made characters, and a Characters drawer in the Film Editor.
+- **Subtitles** saved as .srt and .vtt beside the render.
+- **Sound:** voice peaks held at −1 dBTP; Version 1 sounds as the export will.
+- **After Effects:** sound levels and mutes come across, the film's background comes in as a layer.
 
-> **Status: preview.** Moworks Studio is still changing quickly, so expect rough edges.
-
-## How it works
-
-<p align="center"><img src="images/diagram-how-it-works.en.png" width="760" alt="How it works: Claude (1 Rules, 2 Directing) → Moworks Studio (3 Steps and Editor, 4 Build, 5 Review and QA, 6 Mix and render, rendering with the HyperFrames engine unmodified) → Output (7 Film, 8 Checks, back to step 4 if not passed)"></p>
-
-Colours: orange = Claude · blue = Moworks Studio · green = output · grey = the open-source render engine.
-
-Claude directs: it follows the film style's rules and your brand, and stops to ask when something conflicts. Moworks Studio does the
-rest: it runs the steps and their approvals, builds each shot with its motion libraries and style bridges, reviews and scores the film,
-mixes the sound and renders. Rendering uses the open-source HyperFrames engine as shipped.
-
-## Why make films in code
-
-- **Deterministic:** every frame is a function of time. The same project renders the same frames every time.
-- **Local edits:** change one shot, one line of text or one beat without touching the rest.
-- **Edits in words:** "make the transition faster", "change the music", "bring the title in on the downbeat" are changes Claude makes in
-  minutes, inside the same project.
-- **Reviewable at every step:** the brief, storyboard and Motion Plan are files you read and approve before any motion is built.
+The full list is in the [CHANGELOG](CHANGELOG.md).
 
 ## How a film is made
 
-Every film style follows the same pipeline. Each step leaves a file in the project, and nothing moves on until its step is done or you
-skip it.
+<p align="center"><img src="images/diagram-workflow.en.png" width="620" alt="Plan: New production, 01 Pre-production, 02 Storyboard (you approve), 03 Motion Plan (you approve) → Make: 04 Production (Build, Final Mix, Version 1), 05 Review and checks (when you ask) → Deliver: Render, AE Export"></p>
 
-<p align="center"><img src="images/diagram-workflow.en.png" width="560" alt="Workflow: Set up once (1 Install, 2 First run) → Plan (3 New project, 4 Prepare, 5 Storyboard you approve, 6 Motion Plan you approve) → Build (7 Production, 8 Review and checks) → Output (9 Render, MP4 or Port to After Effects)"></p>
-
-Colours: grey = set-up · orange = Claude and the app · blue = you write, choose or approve · green = output.
-
-| Step | What happens | You |
-|---|---|---|
-| **Brief** | New project: title, film style, Brand Kit, characters, format (size, frame rate, length), Claude model and effort, the brief and your assets | write and choose |
-| **Prepare** | Claude reads the brief and your assets and writes `BRIEF.md`. When the brief and the style disagree (a silent-film style with a voice-over, 4:3 against 4:5…), it stops and asks, with options and a recommendation | answer |
-| **Voice-over** *(optional)* | ElevenLabs, or Kokoro for free on this computer (no Vietnamese), speaks the script; Whisper times every word so shots land on the words | pick a voice |
-| **Storyboard** | One storyboard option drawn as a board, shot by shot, with the reason for each shot (another option on request) | approve or comment |
-| **Motion Plan** | Every shot's motion in numbers: timings, distances, easings, sound cues. The approval dialog shows the estimated build time | approve and build |
-| **Production** | Claude builds the film in code, shot by shot; every shot is linted and checked as it lands. Music (three free Mixkit tracks to choose from, or your own) and sound effects, made by code for each film first, are placed on the picture and mixed to −16 LUFS. You get **Version 1**, rendered, to watch | watch |
-| **Review and checks** | One question: **Fix mistakes only**, **Fix mistakes and improve it** (Claude watches its own film, scores it out of 10 and fixes what it finds, in rounds) or **No, I'm happy with it**. Tech checks report contrast, text overlap, still frames, loudness and files in plain words | choose and read |
-| **Render** | MP4 (H.264: Standard for web and social, or High), MOV (QuickTime) or WebM, plus a Smooth preview copy for playback in the Editor | render |
-| **After Effects** | **Port to After Effects** builds an AE project with real text and shape layers where the style allows it | port |
-
-The **Editor** plays the film frame by frame as it will render, with the shots and the pipeline on the left, the timeline below the picture
-and Claude in a chat column on the right. Click an element in the film to make it Claude's target, or edit its words by hand.
-
-On the timeline, Narration, SFX and Music each have a level you hear as you drag it, and **Ctrl+Z** brings back a sound you just moved or
-took off. **Final Mix** changes the music and the effects, and **Balance the sound again** puts every level back by the app's rules.
-
-<p align="center"><img src="images/desk-editor.jpg" alt="The Editor (The Desk): shots and pipeline on the left, the film in the player, the timeline, and Claude's account of each step on the right"><br><sub>The Editor (The Desk): shots and pipeline on the left, the film in the player, the timeline, and Claude's account of each step on the right</sub></p>
-
-### After Effects badges
-
-Each film style carries a badge measured on a demo film of that style:
-
-| Badge | What After Effects gets |
+| Step | What happens |
 |---|---|
-| **AE editable** | Text and shapes as layers you can edit |
-| **AE partly editable** | Some parts come in as layers, others as video |
-| **AE video only** | The film as one video layer |
+| **New production** | Title, film style, size and length, Brand Kit, characters, the brief and your assets (artwork, PSD, deck, pictures, music, a script) |
+| **01 · Pre-production** | Claude reads everything and stops to ask when the brief and the style disagree. The voice-over is made here (ElevenLabs, or the free Kokoro voice) and timed word by word |
+| **02 · Storyboard** | A board drawn shot by shot, with the reason for each shot. You approve or comment |
+| **03 · Motion Plan** | Every shot's motion in numbers: timings, distances, easings, sound cues. You approve and build |
+| **04 · Production** | The film is built in code, shot by shot, then music and sound effects are mixed (Standard −14 LUFS, or Quieter −16 LUFS). You watch **Version 1** |
+| **05 · Review and checks** | Only when you ask: Claude watches its film, scores it out of 10 and fixes it; **Sizes** adds other frames; **Tech checks** report contrast, overlaps, stills and sound in plain words |
+| **Render · AE Export** | MP4, MOV or WebM with subtitles if you want them, or an After Effects project |
 
-### Two themes
+In the **Film Editor** the film plays frame by frame as it will render. Click any words in the frame to edit them, or press **Pin a
+note** (N) and mark a point on the picture: the note reaches Claude with the moment, the shot and the place. The timeline holds the
+narration, effects and music; their levels change as you drag them.
 
-The app has two complete themes with the same features; the first start asks which one to use, and Settings › General › Appearance changes it.
+<p align="center"><img src="images/desk-editor.jpg" alt="The Film Editor (The Desk): steps on the left, the film, the timeline and Claude's chat on the right"><br><sub>The Film Editor (The Desk)</sub></p>
 
-- **The Desk** (default): a dark, quiet workspace with a left navigation rail.
-- **The Studio**: a light-table workshop: paper, pegboard, handwritten labels, storyboards pinned to a board.
+**After Effects.** Each film style carries a badge measured on a demo film of that style:
+
+| Badge | What After Effects gets | Styles |
+|---|---|---|
+| **AE editable** | Text and shapes as layers you can edit | 6 |
+| **AE partly editable** | Some parts as layers, the rest as video | 93 |
+| **AE video only** | The film as one video layer | 10 |
+| **AE not checked yet** | Not measured yet: the export still works, the result is not known in advance | 24 |
+
+## Features
+
+| Page | What it does |
+|---|---|
+| **Productions** | Your films, newest first; each opens in the Film Editor. **New production** starts one |
+| **Writers' Room** | **Research** pitches ideas in a film style's own way, with checked sources; **Pitches** keeps yours and the samples; **Scripts** writes an idea scene by scene and starts a production from it |
+| **Film Styles** | 133 styles by author, each with a demo film, credits and its AE badge |
+| **Casting** | The characters who act in your films, at their real heights. Claude makes one from your brief in the drawing style of your film (hand-drawn media, Brush cartoon, 3D Cartoon, What If, 2D Explainer, Stickman Explainer, Ricks Clip…), or use one of the 34 that come with the app |
+| **Brand Kits** | A brand's colours, fonts, logos and components, worn by a whole film. HyperFrames' 13 frame presets ship ready; make your own from a brand's folder (PDF, PowerPoint, pictures, fonts, AI, PSD, ZIP) |
+| **Motion Library** | 889 motions, 454 blocks and components and 192 motion terms, each with a preview, by type and category |
+| **Thumbnails** | A cover picture for a film at 16:9 and 9:16, from a frame you pick |
+| **Studio Settings** | Claude account and model, projects folder, appearance, render, voice-over, components, updates |
+
+Two themes with the same features, chosen at the first start (Studio Settings › General › Appearance changes it): **The Desk**, a
+dark workspace with a left rail, and **The Studio**, a light-table workshop of paper, pegboard and pinned boards.
 
 <table>
 <tr>
-<td width="50%" valign="top"><img src="images/desk-projects.jpg" alt="The Desk · Projects"><br><sub>The Desk · Projects</sub></td>
-<td width="50%" valign="top"><img src="images/studio-projects.jpg" alt="The Studio · Projects"><br><sub>The Studio · Projects</sub></td>
+<td width="50%" valign="top"><img src="images/desk-productions.jpg" alt="Productions (The Desk)"><br><sub>Productions · The Desk</sub></td>
+<td width="50%" valign="top"><img src="images/studio-new-production.jpg" alt="New production (The Studio)"><br><sub>New production · The Studio</sub></td>
 </tr>
 <tr>
-<td width="50%" valign="top"><img src="images/desk-new-project.jpg" alt="The Desk · New project"><br><sub>The Desk · New project</sub></td>
-<td width="50%" valign="top"><img src="images/studio-new-project.jpg" alt="The Studio · New project"><br><sub>The Studio · New project</sub></td>
+<td width="50%" valign="top"><img src="images/desk-writers-room.jpg" alt="Writers' Room (The Desk)"><br><sub>Writers' Room · The Desk</sub></td>
+<td width="50%" valign="top"><img src="images/studio-casting.jpg" alt="Casting (The Studio)"><br><sub>Casting · The Studio</sub></td>
 </tr>
 <tr>
-<td width="50%" valign="top"><img src="images/desk-film-styles.jpg" alt="The Desk · Film Styles, by author"><br><sub>The Desk · Film Styles, by author</sub></td>
-<td width="50%" valign="top"><img src="images/studio-film-styles.jpg" alt="The Studio · Film Styles as crates by author"><br><sub>The Studio · Film Styles as crates by author</sub></td>
+<td width="50%" valign="top"><img src="images/desk-brand-kits.jpg" alt="Brand Kits (The Desk)"><br><sub>Brand Kits · The Desk</sub></td>
+<td width="50%" valign="top"><img src="images/studio-film-styles.jpg" alt="Film Styles (The Studio)"><br><sub>Film Styles · The Studio</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="images/desk-motion-library.jpg" alt="Motion Library (The Desk)"><br><sub>Motion Library · The Desk</sub></td>
+<td width="50%" valign="top"><img src="images/studio-thumbnails.jpg" alt="Thumbnails (The Studio)"><br><sub>Thumbnails · The Studio</sub></td>
 </tr>
 </table>
 
+<details>
+<summary>The same pages in the other theme</summary>
+
+<table>
+<tr>
+<td width="50%" valign="top"><img src="images/studio-productions.jpg" alt="Productions (The Studio)"><br><sub>Productions · The Studio</sub></td>
+<td width="50%" valign="top"><img src="images/desk-new-production.jpg" alt="New production (The Desk)"><br><sub>New production · The Desk</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="images/studio-writers-room.jpg" alt="Writers' Room (The Studio)"><br><sub>Writers' Room · The Studio</sub></td>
+<td width="50%" valign="top"><img src="images/desk-casting.jpg" alt="Casting (The Desk)"><br><sub>Casting · The Desk</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="images/studio-brand-kits.jpg" alt="Brand Kits (The Studio)"><br><sub>Brand Kits · The Studio</sub></td>
+<td width="50%" valign="top"><img src="images/desk-film-styles.jpg" alt="Film Styles (The Desk)"><br><sub>Film Styles · The Desk</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="images/studio-motion-library.jpg" alt="Motion Library (The Studio)"><br><sub>Motion Library · The Studio</sub></td>
+<td width="50%" valign="top"><img src="images/desk-thumbnails.jpg" alt="Thumbnails (The Desk)"><br><sub>Thumbnails · The Desk</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="images/studio-editor.jpg" alt="Film Editor (The Studio)"><br><sub>Film Editor · The Studio</sub></td>
+<td width="50%" valign="top"></td>
+</tr>
+</table>
+</details>
+
+**Characters that come with the app (34):** Mira, Theo, Bit, the cheetah, Bơ, Firefighter and Grandma (hand-drawn, Anidoodle); Mika,
+Ravi, June, Otto, Bea, Leo and Noor (3D Cartoon); Pip, Mo, Sis, Mum and Suit (What If); eight Romans of Ricks Clip; Hoodie Hero
+(Stickman Explainer); the hero and his shadow (Inner Voice Short); Red Hoodie Kid (2D Explainer); and the demo characters Clawd,
+Lantern and Tofu. They stay in the app's own folder, so an update never mixes them with the characters you make.
+
+**Sizes.** One film can have several frames: the master (16:9, for example) plus 9:16, 1:1 or 4:5, each re-laid out for its frame
+and rendered with the film's own mix.
+
+<p align="center"><img src="images/formats-films.jpg" alt="Square, portrait and vertical films"><br><sub>1:1 · 4:5 · 9:16 · 1:1</sub></p>
+
 ## Film styles
 
-A film style sets the whole look and the rules Claude follows. The Film Styles gallery groups them by author; each card names its author,
-licence and the exact source commit. Third-party style files are used as their authors ship them, pinned at one commit.
+A film style sets the whole look and the rules Claude follows. Third-party style files are used as their authors ship them, pinned at
+one commit; each card in Film Styles names its author, licence and source.
 
 | Set | Author | Styles | Licence | Source |
 |---|---|---|---|---|
-| **General Style** | Moworks | 1 | the app's own rules | rewritten for the app from the Moworks Motion kit's process |
-| **Map Explainer** | Moworks | 1: a paper map and the real ground under one continuous camera, a red marker on top | the app's own rules, map data from [Natural Earth](https://www.naturalearthdata.com) and [world-atlas](https://github.com/topojson/world-atlas/tree/v2.0.2), satellite pictures from [EOX](https://cloudless.eox.at) (CC BY 4.0) | made for the app; every source in [THIRD-PARTY.md](THIRD-PARTY.md) |
-| **Moworks film styles** | Moworks | 7: Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, Moworks 2D Explainer, Ricks Clip and What If (on FreshStack's MIT engine), each with its source skill's own checks in Review and sounds made by code | the app's own work | Moworks Studio's own source skills, pinned in the app; every outside part in [THIRD-PARTY.md](THIRD-PARTY.md) |
-| **HyperFrames** | HeyGen | 8: Slideshow and the seven film types of HyperFrames' skill (Explainer, Launch, Music video, Data, Vertical, 3D, Character) | Apache-2.0 | [heygen-com/hyperframes @ `4719543`](https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/skills) (v0.8.214) |
-| **Lemo-Opuscar** | Lemomo (LemoLab) | 66 code-built film styles (cinema eras, documentary, editorial, data…; Memphis Diorama contributed by EianLu) | MIT; demo stills CC BY 4.0 | [lemomo-ai/lemo-opuscar @ `bebbbe1`](https://github.com/lemomo-ai/lemo-opuscar/tree/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00) |
+| **Moworks** | Moworks | 3: **General Style**; **Map Explainer** (a paper map and the real ground under one camera); **Brush cartoon** (a brush-drawn cartoon acted by the project's characters) | the app's own work. Map data [Natural Earth](https://www.naturalearthdata.com), [world-atlas](https://github.com/topojson/world-atlas/tree/v2.0.2), satellite pictures [EOX](https://cloudless.eox.at) (CC BY 4.0). Brush cartoon is built on John Heibel's ClaudeAnimationBase (MIT; p5.js LGPL-2.1, p5.brush MIT) | made for the app; Brush cartoon from [JohnHeibel/ClaudeAnimationBase @ `0ac8bf2`](https://github.com/JohnHeibel/ClaudeAnimationBase/tree/0ac8bf2b31942376cb6b8c4074715595d512acd2) |
+| **Moworks film styles** | Moworks Studio | 7: Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, Moworks 2D Explainer, Ricks Clip, What If (on FreshStack's MIT engine) | the app's own work | the app's own source skills; outside parts in [THIRD-PARTY.md](THIRD-PARTY.md) |
+| **HyperFrames** | HeyGen | 8: Slideshow, Explainer, Launch, Music video, Data, Vertical, 3D, Character | Apache-2.0 | [heygen-com/hyperframes @ `4719543`](https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/skills) (v0.8.214) |
+| **Lemo-Opuscar** | Lemomo (LemoLab) | 66 code-built styles (cinema eras, documentary, editorial, data…; Memphis Diorama by EianLu) | MIT; demo stills CC BY 4.0 | [lemomo-ai/lemo-opuscar @ `bebbbe1`](https://github.com/lemomo-ai/lemo-opuscar/tree/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00) |
 | **mg-styles-15** | Vincentwei1021 | 14 motion-design styles (the Blender-based 3D style is not offered) | MIT | [Vincentwei1021/mg-styles-15 @ `49052d8`](https://github.com/Vincentwei1021/mg-styles-15/tree/49052d80bfaf9fa8412cc9710530e5e95a3b8d8c) |
 | **Anidoodle** | Alex Greenshpun (10x Company) | 35 hand-drawn media (32 media + 3 house styles) | Apache-2.0 with NOTICE | [alexgreensh/anidoodle @ `4ae27d2`](https://github.com/alexgreensh/anidoodle/tree/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795) (v0.10.1) |
-| **Brush cartoon** | John Heibel | 1: a brush-drawn cartoon acted by the project's own characters | MIT (p5.js LGPL-2.1, p5.brush MIT) | [JohnHeibel/ClaudeAnimationBase @ `0ac8bf2`](https://github.com/JohnHeibel/ClaudeAnimationBase/tree/0ac8bf2b31942376cb6b8c4074715595d512acd2) |
 
-Every style also follows two app-wide rule packs: **films stay alive** (no frame holds still for more than two seconds) and **stop and
+Every style also follows two app-wide rules: **the film stays alive** (no frame holds still for more than two seconds) and **stop and
 ask** (a conflict or a missing asset is a question for you, never a silent guess).
 
 ### Made in the app
 
-Stills from demo films made with Moworks Studio, each in a different style. The stories are original; the style and its author are
-named under each still.
-
 <table>
 <tr>
-<td width="33%" valign="top"><img src="images/film-pebble.jpg" alt="Pebble, a lamp launch"><br><sub><b>Pebble, a lamp launch</b> · Launch · style by HeyGen</sub></td>
-<td width="33%" valign="top"><img src="images/film-sundial.jpg" alt="How a sundial works"><br><sub><b>How a sundial works</b> · Explainer · style by HeyGen</sub></td>
-<td width="33%" valign="top"><img src="images/film-garden.jpg" alt="A community garden in numbers"><br><sub><b>A community garden in numbers</b> · Data · style by HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-pebble.jpg" alt="Pebble, a lamp launch"><br><sub><b>Pebble, a lamp launch</b> · Launch · HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-sundial.jpg" alt="How a sundial works"><br><sub><b>How a sundial works</b> · Explainer · HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-garden.jpg" alt="A community garden in numbers"><br><sub><b>A community garden in numbers</b> · Data · HeyGen</sub></td>
 </tr>
 <tr>
-<td width="33%" valign="top"><img src="images/film-isometric.jpg" alt="Two doors on the bus"><br><sub><b>Two doors on the bus</b> · Isometric Picture Book · style by Lemomo</sub></td>
-<td width="33%" valign="top"><img src="images/film-night-music.jpg" alt="A city lit to the beat"><br><sub><b>A city lit to the beat</b> · Music video · style by HeyGen</sub></td>
-<td width="33%" valign="top"><img src="images/film-papercraft.jpg" alt="A toy-theatre town"><br><sub><b>A toy-theatre town</b> · Toy-theatre paper collage · style by Alex Greenshpun</sub></td>
+<td width="33%" valign="top"><img src="images/film-isometric.jpg" alt="Two doors on the bus"><br><sub><b>Two doors on the bus</b> · Isometric Picture Book · Lemomo</sub></td>
+<td width="33%" valign="top"><img src="images/film-night-music.jpg" alt="A city lit to the beat"><br><sub><b>A city lit to the beat</b> · Music video · HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-papercraft.jpg" alt="A toy-theatre town"><br><sub><b>A toy-theatre town</b> · Toy-theatre paper collage · Alex Greenshpun</sub></td>
 </tr>
 <tr>
 <td width="33%" valign="top"><img src="images/film-clouds.jpg" alt="What if you could fold clouds?"><br><sub><b>What if you could fold clouds?</b> · What If · Moworks Studio</sub></td>
-<td width="33%" valign="top"><img src="images/film-slideshow.jpg" alt="A day's hike"><br><sub><b>A day's hike</b> · Slideshow · style by HeyGen</sub></td>
-<td width="33%" valign="top"><img src="images/film-puzzle-cube.jpg" alt="A puzzle cube comes apart"><br><sub><b>A puzzle cube comes apart</b> · 3D · style by HeyGen</sub></td>
-</tr>
-</table>
-
-<p align="center"><img src="images/formats-films.jpg" alt="Square, portrait and vertical films"><br>
-<sub>Every format the style allows: <b>Geometric Bauhaus</b> (style by Vincentwei1021) 1:1 · <b>a bakery opens</b> (General Style by Moworks) 4:5 ·
-<b>Spoke &amp; Brew</b> (Vertical · style by HeyGen) 9:16 · <b>a puzzle cube</b> (3D · style by HeyGen) 1:1</sub></p>
-
-<table>
-<tr>
-<td width="50%" valign="top"><img src="images/film-bolt.gif" alt="An alarm clock character wakes up"><br><sub><b>An alarm clock's first day</b> · Character · style by HeyGen</sub></td>
-<td width="50%" valign="top"><img src="images/film-lighthouse.gif" alt="A cat lights the lighthouse"><br><sub><b>The lighthouse cat</b> · Brush cartoon · style by John Heibel, acted by a character drawn in the app's Character maker</sub></td>
-</tr>
-</table>
-
-## More in the app
-
-| Screen | What it holds |
-|---|---|
-| **Projects** | Your films, newest first; each opens in the Editor |
-| **Brand Kits** | A brand's colours, fonts and components, worn by a whole film. HyperFrames' 13 frame presets ship ready to use; make your own from a brand's whole folder (PDF, PowerPoint, pictures, fonts, AI, PSD, ZIP) and check it before use; a film made with it gets its logos and fonts |
-| **Film Styles** | The gallery above, with demo films, credits and AE badges |
-| **Motion Library** | The studio's own library of Motions (889), Blocks (454 blocks and components) and Vocabulary (168 motion terms), arranged by type and category. The licences of the sources it draws on are in [THIRD-PARTY.md](THIRD-PARTY.md) |
-| **Characters** | The project's characters: drawn with the Character maker, or from the Anidoodle author's own character rigs |
-| **Writers Room** | Research pitches 10 ideas in any film style's own way, with checked sources; Ideas keeps yours and the samples (every film style's sample brief, the OPUSCAR 98 prompts); Scripts writes an idea's script scene by scene, and **Start a project with this script** opens New project with it. Runs go on while you work elsewhere |
-| **Settings** | General (Claude account, projects folder, appearance, render, notifications when the app waits for you), Director (Claude model and effort), System (components, voice-over, backups and health), Update (and Uninstall) |
-
-<table>
-<tr>
-<td width="50%" valign="top"><img src="images/desk-motion-library.jpg" alt="Motion Library: every item with a preview, by type and category"><br><sub>Motion Library: every item with a preview, by type and category</sub></td>
-<td width="50%" valign="top"><img src="images/desk-brand-kits.jpg" alt="Brand Kits: HyperFrames' 13 frame presets and your own"><br><sub>Brand Kits: HyperFrames' 13 frame presets and your own</sub></td>
+<td width="33%" valign="top"><img src="images/film-slideshow.jpg" alt="A day's hike"><br><sub><b>A day's hike</b> · Slideshow · HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-puzzle-cube.jpg" alt="A puzzle cube comes apart"><br><sub><b>A puzzle cube comes apart</b> · 3D · HeyGen</sub></td>
 </tr>
 <tr>
-<td width="50%" valign="top"><img src="images/desk-writers-room.jpg" alt="The Desk · Writers Room: ten ideas researched in a film style"><br><sub>The Desk · Writers Room: ten ideas researched in a film style</sub></td>
-<td width="50%" valign="top"><img src="images/studio-writers-room.jpg" alt="The Studio · Writers Room as cards on the desk"><br><sub>The Studio · Writers Room as cards on the desk</sub></td>
+<td width="33%" valign="top"><img src="images/film-bolt.gif" alt="An alarm clock character wakes up"><br><sub><b>An alarm clock's first day</b> · Character · HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-lighthouse.gif" alt="A cat lights the lighthouse"><br><sub><b>The lighthouse cat</b> · Brush cartoon · Moworks</sub></td>
+<td width="33%" valign="top"></td>
 </tr>
 </table>
 
@@ -203,47 +189,24 @@ named under each still.
 
 | | |
 |---|---|
-| **System** | Windows 10 or 11, 64-bit; several GB of free disk for the app and its components, plus room for your projects |
-| **Node.js** | 22 or newer ([nodejs.org](https://nodejs.org)) |
-| **Git** | [Git for Windows](https://git-scm.com/download/win) |
-| **Claude Code** | The Claude desktop app includes it, or the [native install](https://claude.com/claude-code); you need a Claude account that includes Claude Code, and you sign in inside the app |
-| **Python and FFmpeg** | Python 3.12 and FFmpeg 9.0. The app installs them for you when they are missing (with winget, for your user only) |
-| *Optional* | An ElevenLabs API key for voice-overs, or the free Kokoro voice (about 375 MB, a choice at first run or in Settings › System; no Vietnamese) · After Effects for the AE port · an NVIDIA graphics card (4 GB or more) to transcribe voice-overs faster |
+| **System** | Windows 10 or 11, 64-bit; several GB of free disk, plus room for your films |
+| **Needed first** | [Git for Windows](https://git-scm.com/download/win), [Node.js](https://nodejs.org) 22 or newer, and Claude Code (the Claude desktop app includes it) with a Claude account that includes it |
+| **Installed by the app** | HyperFrames 0.8.214 and its Chrome, Python 3.12, FFmpeg 9.0, the Python components and the speech-to-text model (Whisper turbo): about 2.6 GB in all |
+| *Optional* | An ElevenLabs key for voice-overs (or the free Kokoro voice, about 375 MB, no Vietnamese) · After Effects for AE Export · an NVIDIA card (4 GB or more) to time voice-overs faster |
 
 ## Quick start
 
-1. **Prerequisites** (details under [Requirements](#requirements)): Windows 10 or 11, [Git](https://git-scm.com/download/win),
-   [Node.js](https://nodejs.org) 22 or later, and Claude Code (the Claude desktop app includes it). The app installs the rest.
-2. **Clone this repository** into an `app` folder inside a folder of its own:
+1. Install Git, Node.js 22+ and Claude Code.
+2. Clone into an `app` folder inside a folder of its own, on a local disk (not Google Drive, OneDrive or Dropbox: sync locks files while films render):
    ```bash
    git clone https://github.com/moworksstudio/moworks-studio "Moworks Studio\app"
    ```
-   The app keeps your work next to the clone, so the folder ends up like this:
-   ```
-   Moworks Studio\
-     app\       ← the clone: code, installed HyperFrames, settings
-     projects\  ← films
-     library\   ← Brand Kits, your characters, the library
-     models\    ← only when Whisper is installed
-   ```
-   Use a local disk, not a synced folder (Google Drive, OneDrive, Dropbox): sync locks files while films render. The first-run
-   screen lets you choose another folder for your projects.
-3. **Double-click `Moworks Studio\app\Moworks Studio.bat`**. The first time, it installs the app's packages (about 80 MB) and builds the
-   interface, then opens the app window. Later starts take a few seconds.
-4. **Finish in the app**, one screen at a time. Choose a look (The Desk or The Studio); then **Set up Moworks Studio** asks for two
-   things: the folder that stores your projects, and **Install**, which gets every component the app needs in one go. Then click the
-   Claude chip in the top bar to sign in; Claude Code's own sign-in opens in the browser and the app never sees your password.
+3. Double-click `Moworks Studio\app\Moworks Studio.bat`. The first start installs the app's packages (about 80 MB) and opens the window.
+4. In the app: choose a theme, then **Set up Moworks Studio**: pick the folder for your films and press **Install**. Click the Claude chip
+   in the top bar to sign in (Claude Code's own sign-in; the app never sees your password).
+5. *Optional:* add an ElevenLabs key in Studio Settings › System › Voice-over. Then **Productions › New production**.
 
-   | Component | Size | |
-   |---|---|---|
-   | HyperFrames 0.8.214 and its Chrome | about 550 MB | installed by **Install** |
-   | Python components (After Effects export, PSD / PowerPoint / PDF reading, music beats, lyric timing) | up to 160 MB (less when your Python has some of them) | installed by **Install** |
-   | Speech-to-text model (Whisper turbo), for voice-over timing | about 1.7 GB with its engine | installed by **Install** |
-   | Whisper on an NVIDIA graphics card (CUDA libraries) | about 1.3 GB | optional, in Settings › System on a suitable card |
-   | FFmpeg 9.0 (and Python 3.12 when missing) | about 210 MB | installed by **Install** with winget, for your user only; without winget the screen shows the line to run |
-   | HyperFrames' skills and registry, fonts, code libraries, film-style sources, the library | in the repository | nothing to download |
-5. **Add a voice key** *(optional)*: Settings › System › Voice-over. The key is encrypted for your Windows account.
-6. **Make a film:** Projects › New project.
+Your work sits next to the app: `projects\` (films), `library\` (Brand Kits, your characters), `models\` (when Whisper is installed).
 
 ### Or let Claude do it
 
@@ -251,135 +214,50 @@ Paste this into Claude Code:
 
 > Install Moworks Studio from https://github.com/moworksstudio/moworks-studio: clone it and follow its .claude/CLAUDE.md.
 
-Claude follows the repository's `.claude/CLAUDE.md`: it checks Git, Node.js 22 and Claude Code (and asks before installing what is missing),
-clones into `Moworks Studio\app` and runs `Moworks Studio.bat`; the app's first-run screen does the rest.
-
-## Walkthrough
-
-A 30-second film, from brief to MP4:
-
-1. **New project.** Give it a title, choose a film style and the format (size and length), and paste a brief ("A 30-second story about
-   the 1904 Olympic marathon, 4:5, Vietnamese voice-over"). Add a Brand Kit, characters and assets if you have them. **Create project.**
-2. **Prepare.** Claude reads everything and may stop with a question ("The style is a silent film; keep the voice-over or use title
-   cards?"). Answer in the chat; Claude writes `BRIEF.md`.
-3. **Voice-over.** The Voice screen opens with the script filled in. Choose a voice and generate it; Whisper times the words automatically
-   and the storyboard starts on its own.
-4. **Storyboard.** Read the board. Comment on a panel (`@Panel_3: make the runner smaller`) or approve.
-5. **Motion Plan.** Check the timings and motion of every shot. **Approve and build** shows the estimated time.
-6. **Production** runs by itself: the build, the music and sound, then Version 1. The pipeline shows what is running and the time left; the
-   chat shows what Claude is doing.
-7. **Watch Version 1** and answer one question: should Claude fix mistakes, also improve the film, or leave it as it is?
-8. **Play** the film in the Editor. Ask Claude for changes in the chat (click an element first to point at it), or edit its words by hand.
-9. **Render** an MP4, and **Port to After Effects** if the style's badge allows it.
-
-<p align="center"><img src="images/studio-editor.jpg" alt="A finished film in the Editor (The Studio): the steps along the top, Claude's notes on the right"><br><sub>A finished film in the Editor (The Studio): the steps along the top, Claude's notes on the right</sub></p>
-
-As a reference, a 34-second film in a Lemo-Opuscar style took 1 h 17 min from Create to the finished MP4, of which 44 minutes from
-**Approve and build**; Claude usage for the whole film was worth about US$13 at API prices.
-
-## Where files live
-
-| Folder | Contents | In git |
-|---|---|---|
-| `app\` | This repository: the app's source, config, rule packs and the bundled third-party sources | yes |
-| `app\runtime\` | Settings, encrypted keys, installed HyperFrames versions, logs | no |
-| `projects\` (next to `app\`, in the work folder) | Your films: one folder each, with HyperFrames' own files at its top (`index.html`, `BRIEF.md`, `STORYBOARD.md`, compositions, assets), the app's documents in `docs\` (notes, credits, the Review, the cast, the Motion Plan), boards and `renders\` | no |
-| `library\`, `models\` (next to `app\`, in the work folder) | The library, Brand Kits and your characters; Whisper, when installed | no |
-
-The characters that come with the app (Clawd, Mira, Theo, Bit, the cheetah) stay in `app\bundle\library\characters\` and are read from there. `library\characters\` holds only the characters you made, so an update can neither change nor mix them. A new character with a name the app already uses gets its own id (`mira-2`).
-
-Settings › General › Projects folder changes where new projects are saved. Every film writes a `docs\CREDITS.md` that credits the music and sound effects it uses (title, author, source, licence); downloaded fonts travel with their licence files.
+Claude checks Git, Node.js and Claude Code (and asks before installing what is missing), clones the app and starts it; the first-run
+screen does the rest.
 
 ## Updates
 
-Settings › Update brings the app folder to the newest version of this repository: it fetches, fast-forwards, reinstalls packages when
-`package-lock.json` changed, rebuilds the interface, checks that the app starts and restarts it. If any step fails, the folder goes back
-to the commit it came from. Only files tracked by git change; your projects, library, settings and keys are never touched.
-
-You can also update by hand: close the app, run `git pull`, `npm install` and `npm run build` in the app folder, and start `Moworks Studio.bat` again.
+Studio Settings › Update brings the app to the newest version: it fetches, reinstalls packages if needed, rebuilds, checks that the app
+starts and restarts it. If a step fails, the app goes back to the version it came from. Your films, library, settings and keys are never
+touched.
 
 ## Uninstall
 
-Settings › Update › **Uninstall Moworks Studio…** removes the app from this PC, to install it clean again. It asks once, then everything
-goes to the Recycle Bin (Windows asks before it deletes for good anything too big for the bin):
-
-- the app folder: the app, HyperFrames, Chromium, the app window's data, its settings and keys;
-- only if you tick them: the downloaded models, and your films and library.
-
-Git, Node.js, Python, FFmpeg and Claude Code stay (other programs use them), and so do the work folder itself and films opened from
-other folders. A copy of the app with changes of its own that are not on GitHub stays, with the reason. The app closes, then a window
-shows what was removed. To install again, clone this repository and start `Moworks Studio.bat`.
-
-If the app does not start: run `tools\uninstall.bat` in the app folder (add `--models` or `--films` to remove those too).
+Studio Settings › Update › **Uninstall Moworks Studio…** moves the app to the Recycle Bin, and, only if you tick them, the downloaded
+models and your films and library. Git, Node.js, Python, FFmpeg and Claude Code stay. If the app does not start, run
+`tools\uninstall.bat` in the app folder (add `--models` or `--films` to remove those too).
 
 ## Troubleshooting
 
 | Problem | What to do |
 |---|---|
-| "Node.js was not found" | Install Node.js 22 or newer, then start `Moworks Studio.bat` again |
-| The first start stops at "Installing the app's packages" | Check the internet connection; the lines above the message say what failed. Run the .bat again |
-| "Claude is not connected" | Click the Claude chip in the top bar and sign in. In a terminal, `claude auth status` shows Claude Code's own state |
-| A component shows as missing | Settings › System lists every component with its state and the next step; FFmpeg needs the `winget` command shown there |
-| "The local service is not running" | The app's background service stopped. Start `Moworks Studio.bat` again; the log is `runtime\logs\app.log` |
-| A style shows a lock | One of its source files no longer matches the pinned version. Settings › System offers to fetch it again |
-| A voice-over cannot be made | Add or check the ElevenLabs key in Settings › System › Voice-over; the key needs the text-to-speech permission |
-| After Effects port fails | Install After Effects, close any dialog open in it, and port again; the error in the app names the step that failed |
+| "Node.js was not found" | Install Node.js 22 or newer and start `Moworks Studio.bat` again |
+| The first start stops while installing | Check the internet connection and run the .bat again; the lines above say what failed |
+| "Claude is not connected" | Click the Claude chip in the top bar and sign in |
+| A component is missing | Studio Settings › System shows each component's state and the next step |
+| "The local service is not running" | Start `Moworks Studio.bat` again |
+| A voice-over cannot be made | Check the ElevenLabs key in Studio Settings › System › Voice-over (it needs the text-to-speech permission) |
+| AE Export fails | Open After Effects, close any dialog in it and export again; the message names the step that failed |
 
-The known limitations are listed in [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
+Known limitations: [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
 
 ## Privacy
 
-- **Keys stay on this computer.** Service keys (ElevenLabs) are encrypted with Windows DPAPI for your Windows account. They
-  never reach the browser, the logs, project files or render processes.
-- **Claude** runs through Claude Code under your own account; the app never handles your password.
-- **Projects stay local.** Briefs, assets and films live in your projects folder. Claude reads them through Claude Code to do the work;
-  nothing else uploads them.
-- **App backup:** off unless a backup folder (`storage.backupRoot`) is set in this computer's local settings.
-- **No telemetry.** HyperFrames telemetry and update checks are turned off; the app sends no usage data. Network access is limited to the
-  services you use (Claude, the voice service, Mixkit and Openverse when you ask for music or sound effects, EOX for a Map Explainer film's satellite pictures, and component downloads).
+- **Local.** Briefs, assets and films stay in your projects folder; Claude reads them through Claude Code to do the work, nothing else uploads them.
+- **Keys** (ElevenLabs) are encrypted for your Windows account and never reach logs, project files or render processes.
+- **Claude** runs under your own account; the app never handles your password.
+- **No telemetry.** The app sends no usage data. It goes online only for the services you use: Claude, the voice service, music and
+  sound effects (Mixkit, Openverse), satellite pictures for Map Explainer (EOX) and component downloads.
 
-## For developers
-
-| Command | What it does |
-|---|---|
-| `npm start` | Starts the app's local server (the launcher does this for you) |
-| `npm run build` | Builds the interface into `ui/dist` |
-| `npm run dev:ui` | Interface with hot reload, for interface work |
-
-The public release does not include the test suite, so `npm test` has nothing to run.
-
-## Documentation
-
-| Document | Contents |
-|---|---|
-| [CHANGELOG.md](CHANGELOG.md) | What this version contains |
-| [KNOWN-ISSUES.md](KNOWN-ISSUES.md) | Open issues and limitations, with workarounds |
-| [THIRD-PARTY.md](THIRD-PARTY.md) | Every bundled or downloaded source: author, link at the pinned commit, licence, how it is used |
-
-## Technology
-
-| Component | Role |
-|---|---|
-| [HyperFrames](https://github.com/heygen-com/hyperframes) 0.8.214 (HeyGen, Apache-2.0) | The open-source render engine, pinned and used unmodified: composition format, player, lint, renderer, skills and registry |
-| Claude Code (Anthropic) | Runs every Claude task: Prepare, Storyboard, Motion Plan, Build, Review, the chat |
-| Node.js, React 18, Vite | The app's local server and interface |
-| GSAP, three.js, p5.js / p5.brush, d3 | Animation runtimes copied into each film so it plays and renders offline |
-| Chromium headless shell, FFmpeg | Frame capture and encoding |
-| faster-whisper (Whisper large-v3 turbo) | Word timings of voice-overs, on the CPU or an NVIDIA GPU |
-| ExtendScript + Python | The After Effects port |
-
-## Origin and credits
+## Credits and licence
 
 Renders with the open-source [HyperFrames](https://github.com/heygen-com/hyperframes) engine (HeyGen, Apache-2.0), pinned at 0.8.214
-and used unmodified.
+and used unmodified. Moworks Studio grew out of [Moworks Motion](https://github.com/moworksstudio/moworks-motion), Moworks' earlier
+motion kit for Claude Code. Every bundled or downloaded source, with its author, link at the exact commit and licence, is in
+[THIRD-PARTY.md](THIRD-PARTY.md). What each version contains: [CHANGELOG.md](CHANGELOG.md).
 
-Moworks Studio grew out of **[Moworks Motion](https://github.com/moworksstudio/moworks-motion)**, Moworks' earlier motion kit for Claude
-Code: its process, taste and review rules became the app's General Style and app-wide rule packs. The other film styles are the work of
-HeyGen, Lemomo, Vincentwei1021, Alex Greenshpun, John Heibel and FreshStack, used as their authors ship them. The full list, with links
-at the exact commits and licences, is in [THIRD-PARTY.md](THIRD-PARTY.md).
-
-## Licence
-
-Free for personal, non-commercial use; no redistribution, sale or sharing, including modified versions
-([LICENSE](LICENSE)). © 2026 Moworks. Third-party components keep their own licences, listed in [THIRD-PARTY.md](THIRD-PARTY.md);
-nothing in this licence limits them.
+Free for personal, non-commercial use; no redistribution, sale or sharing, including modified versions ([LICENSE](LICENSE)).
+© 2026 Moworks. Third-party components keep their own licences, listed in [THIRD-PARTY.md](THIRD-PARTY.md); nothing in this licence
+limits them.

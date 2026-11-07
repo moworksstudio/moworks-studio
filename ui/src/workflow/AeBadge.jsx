@@ -1,5 +1,6 @@
 // What After Effects gets of a film style: the server's `ae: { level }` on each style, said as a badge in the status colours, green
-// (text and shapes come as layers), yellow (some parts come as video), red (one video layer). A style without `ae` has no badge.
+// (text and shapes come as layers), yellow (some parts come as video), red (one video layer), and no colour for a style not checked yet
+// (audit/112d d6, owner: "AE not checked yet"). A style without `ae` has no badge.
 // The mark is the AE Export button's own "Ae" tile, tinted per level.
 import { useT } from "../i18n.jsx";
 
@@ -7,6 +8,7 @@ export const AE_LEVELS = {
   editable: { label: "AE editable", tip: "After Effects gets text and shapes as layers you can edit." },
   partial: { label: "AE partly editable", tip: "Some parts come into After Effects as video." },
   video: { label: "AE video only", tip: "After Effects gets this film as one video layer." },
+  unchecked: { label: "AE not checked yet", tip: "After Effects has not been tried with this film style yet." },
 };
 /** The style's level when it is one the app knows, else null (no badge). */
 export const aeLevel = (s) => (AE_LEVELS[s?.ae?.level] ? s.ae.level : null);
@@ -18,7 +20,7 @@ export const aeTip = (s, t = (x) => x) => {
   const k = aeLevel(s);
   if (!k) return "";
   const tip = k === "partial" && s.ae.textLayers ? "Titles and captions come as text layers; the drawing comes as video." : AE_LEVELS[k].tip;
-  return t(tip) + (s.ae.unmeasured ? " " + t("Not checked yet.") : "");
+  return t(tip) + (s.ae.unmeasured && k !== "unchecked" ? " " + t("Not checked yet.") : "");
 };
 
 /** The AE Export button's "Ae" tile (editor.css .ae-tile); in a badge it takes the badge's colour. */

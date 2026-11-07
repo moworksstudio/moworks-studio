@@ -18,5 +18,25 @@
     "engine/src/canvas-core/cheetahBody.ts",
     "engine/src/canvas-core/cheetahScenery.ts"
   ],
-  "savedAt": "2026-10-24T18:40:59.335Z"
+  "savedAt": "2026-10-24T18:40:59.335Z",
+  "can": {
+    "views": [
+      "profile"
+    ],
+    "viewNotes": "side only, facing either way (flipped); her head can turn toward the camera (cheetahTurn.ts) in her own film",
+    "faces": [],
+    "faceNotes": "n/a: the rig has no faces",
+    "poses": [
+      "stand",
+      "bow",
+      "crouch",
+      "skid"
+    ],
+    "poseNotes": "the rig's held poses (cheetahRig.ts), angles on bones that never stretch",
+    "hands": "n/a",
+    "walk": "the rotary gallop (gallopRig, gallopY)",
+    "talk": "n/a"
+  },
+  "sheet": "MW Character Sheet v1 (reduced)",
+  "sheetBy": "Moworks Studio: packages/anidoodle-styles/v1 (the app's sheet film; every figure drawn by the author's engine as pinned)"
 }

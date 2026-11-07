@@ -9,13 +9,12 @@ import { useT } from "../i18n.jsx";
 import Markdown from "../editor/Markdown.jsx";
 import DesignView, { PlanView } from "../editor/DesignView.jsx";          // design.md / frame.md read as colours, letters and rules
 import { ImportNow, size } from "./assets.jsx";
-import StyleQuestions, { answersFor, questionsFor } from "./answers.jsx";
 import { useCloseGuard, useStage } from "./stage.jsx";
 import { WAYS, canonicalWay } from "./ways.js";
 import BriefChanged from "./BriefChanged.jsx";
 import { qcSummary } from "./qcSummary.js";
 
-/** Brief & assets: the one brief, the style's questions and every file the project holds (assets/ and sources/), with Import assets. */
+/** Brief & assets: the one brief and every file the project holds (assets/ and sources/), with Import assets. */
 export function BriefSheet({ projectId, project, onChanged, briefChanged = false }) {
   const t = useT();
   const toast = useToast();
@@ -26,20 +25,17 @@ export function BriefSheet({ projectId, project, onChanged, briefChanged = false
   const pipe = useData(() => get(`/api/projects/${projectId}/pipeline`).catch(() => null), [projectId]);
   const [askChange, setAskChange] = useState(!!briefChanged);          // opened from the Pipeline's "brief changed" line: the question is shown at once
   const len0 = project?.meta?.targetDurationSec ? clock(project.meta.targetDurationSec) : "";
-  useEffect(() => { if (q.data && !f) setF({ text: q.data.brief?.text ?? "", answers: q.data.brief?.answers ?? {}, length: len0 }); }, [q.data]); // eslint-disable-line react-hooks/exhaustive-deps
-  const sid = project?.meta?.style?.id;
-  useCloseGuard(!!q.data && !!f && (f.text !== (q.data.brief?.text ?? "") || JSON.stringify(answersFor(sid, f.answers)) !== JSON.stringify(answersFor(sid, q.data.brief?.answers)) || (f.length !== len0 && parseLength(f.length) >= 5)));
+  useEffect(() => { if (q.data && !f) setF({ text: q.data.brief?.text ?? "", length: len0 }); }, [q.data]); // eslint-disable-line react-hooks/exhaustive-deps
+  useCloseGuard(!!q.data && !!f && (f.text !== (q.data.brief?.text ?? "") || (f.length !== len0 && parseLength(f.length) >= 5)));
   if (q.error) return <Banner kind="error">{q.error.message}</Banner>;
   if (!q.data || !f) return <div className="skeleton" style={{ height: "16rem" }} />;
   const b = q.data.brief ?? {};
   const sec = parseLength(f.length);
-  const styleId = project?.meta?.style?.id;
-  const answers = answersFor(styleId, f.answers);
-  const dirty = f.text !== (b.text ?? "") || JSON.stringify(answers) !== JSON.stringify(answersFor(styleId, b.answers)) || (f.length !== len0 && sec >= 5);
+  const dirty = f.text !== (b.text ?? "") || (f.length !== len0 && sec >= 5);
   const save = async () => {
     setBusy(true);
     try {
-      await patch(`/api/projects/${projectId}/brief`, { text: f.text, answers, durationSec: sec >= 5 ? sec : undefined }); toast(t("Brief saved")); q.reload(); onChanged?.();
+      await patch(`/api/projects/${projectId}/brief`, { text: f.text, durationSec: sec >= 5 ? sec : undefined }); toast(t("Brief saved")); q.reload(); onChanged?.();
       const p = await get(`/api/projects/${projectId}/pipeline`).catch(() => null);       // edited after a build: the pipeline now asks what to do with the film
       pipe.reload(); if (p?.question?.kind === "brief-changed") setAskChange(true);
     } catch (e) { toast(e.message, "error"); } finally { setBusy(false); }
@@ -55,7 +51,6 @@ export function BriefSheet({ projectId, project, onChanged, briefChanged = false
       {/* no word count under the brief */}
       <label className="field"><span>{t("Length")}</span><input className={"input num" + (f.length && !(sec >= 5) ? " invalid" : "")} value={f.length} onChange={(e) => setF({ ...f, length: e.target.value })} placeholder="1:30" style={{ width: "8rem" }} /></label>
       {b.direction && <p className="hint">{t("Direction (from an older brief): {text}", { text: b.direction })}</p>}
-      {Object.values(questionsFor(styleId)).some(Boolean) && <StyleQuestions styleId={styleId} value={f.answers} onChange={(v) => setF({ ...f, answers: v })} idPrefix="bs" />}
       <dl className="kv">
         <dt>{t("Film style")}</dt><dd>{t(project?.meta?.style?.title ?? "–")}</dd>
         {/* the Brand Kit as New project names it: the kit chosen, the film style's own, or the brief's (no kit) */}
@@ -115,9 +110,9 @@ export function ImportSheet({ projectId, project, onChanged }) {
   const t = useT();
   const toast = useToast();
   return <div className="import-sheet">
-    <p className="secondary">{t("Files are copied into the project and sorted by kind. Claude is told in the chat what was added.")}</p>
+    <p className="secondary">{t("Files are copied into the production and sorted by kind. Claude is told in the chat what was added.")}</p>
     <ImportNow projectId={projectId}
-      onDone={(r) => { onChanged?.(); if (r.ok) toast(t("{n} file(s) copied into the project; Claude is told", { n: r.ok })); if (r.same) toast(t("{n} identical file(s) left out: already there", { n: r.same })); if (r.voice?.job) toast(t("Transcribing the voice-over…"));
+      onDone={(r) => { onChanged?.(); if (r.ok) toast(t("{n} file(s) copied into the production; Claude is told", { n: r.ok })); if (r.same) toast(t("{n} identical file(s) left out: already there", { n: r.same })); if (r.voice?.job) toast(t("Transcribing the voice-over…"));
         for (const a of r.archives ?? []) if (!a.unpacked) toast(a.error, "error"); }} />
   </div>;
 }

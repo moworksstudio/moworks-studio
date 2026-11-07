@@ -1,0 +1,74 @@
+{
+  "id": "moworks-inner-voice-hero",
+  "name": "Bean",
+  "about": "Inner Voice Short's own hero: a cream bean of a person whose thoughts talk back.",
+  "engine": "inner-voice-short",
+  "kind": "human",
+  "heightM": 1.7,
+  "heightBy": "inferred",
+  "heightNote": "the source skill gives no height: an everyday adult's",
+  "hand": "inner-voice-short",
+  "hands": [
+    "inner-voice-short"
+  ],
+  "palette": {
+    "skin": "#d9d8cc",
+    "shade": "#a7a398",
+    "ink": "#151411"
+  },
+  "can": {
+    "views": [
+      "front",
+      "three-quarter",
+      "profile",
+      "back"
+    ],
+    "viewNotes": "the hero: its face's turn slides the features; back: no face. The shadow: a silhouette, its eyes look the way it turns",
+    "faces": [
+      "neutral",
+      "happy",
+      "laugh",
+      "surprised",
+      "worried",
+      "angry",
+      "talk",
+      "blink"
+    ],
+    "faceNotes": "the hero: the kit's eyes, brows and mouths. The shadow: the kit's slits and smile; the other faces are the app's, in its red line",
+    "poses": [
+      "stand",
+      "walk",
+      "point",
+      "wave",
+      "reach",
+      "sit"
+    ],
+    "poseNotes": "hands and feet as targets of the kit's two-bone limbs (arms, legs / feet); the walk is the app's cycle of those targets",
+    "hands": "n/a: round hands",
+    "walk": "the app's foot and hand cycle (the kit has no walk of its own)",
+    "talk": "the mouth o and line by turns; no lip sync"
+  },
+  "sheet": "MW Character Sheet v1",
+  "credit": {
+    "author": "Moworks Studio (the owner's Story source skill)",
+    "link": null,
+    "licence": "the owner's own",
+    "made": "as shipped",
+    "madeNote": "the source skill's own hero as shipped; its name is the app's (the source gives none); what its drawing lacks is drawn by the app (house/inner-voice-short.js)",
+    "source": {
+      "skill": "Story Animation Kit",
+      "version": "1.0.0",
+      "sha256": "2c6ad666af509acdbf061b1c4a226dc47cad2889bb88a2505285fee9d9fb79f7",
+      "file": "src/inner-voice/kit.js hero()"
+    },
+    "gate": {
+      "passed": 14,
+      "failed": 0
+    }
+  },
+  "version": 1,
+  "module": [
+    "moworks-inner-voice-hero.js"
+  ],
+  "savedAt": "2026-11-06T15:05:50.110Z"
+}

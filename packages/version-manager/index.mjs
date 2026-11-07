@@ -24,6 +24,9 @@ export function setLocalPins(patch, root = APP_ROOT) {
   return cur;
 }
 const PATH_KEYS = new Set(["root", "skillsRoot", "registryRoot", "dir", "exe", "path", "workRoot", "backupRoot"]);
+/** FFmpeg's and FFprobe's exe on this computer (the pinned folder as loadPins found it): every part of the app runs them from here. */
+export const ffmpegExe = (root = APP_ROOT) => join(expandEnv(loadPins(root).ffmpeg.dir), "ffmpeg.exe");
+export const ffprobeExe = (root = APP_ROOT) => join(expandEnv(loadPins(root).ffmpeg.dir), "ffprobe.exe");
 /** FFmpeg on this computer: the pinned folder, else WinGet's Gyan.FFmpeg, else ffmpeg.exe on PATH. */
 function findFfmpegDir(pinned) {
   if (pinned && existsSync(join(pinned, "ffmpeg.exe"))) return pinned;

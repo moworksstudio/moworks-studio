@@ -10,9 +10,9 @@
 // preview is a Canvas sample (card.canvas.page), still at 2 s, running under the pointer.
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, ArchiveRestore, BookOpenText, Blocks, Check, CheckCircle2, Clapperboard, Clock, Copy, Download, Heart, Info, LayoutGrid, Library, Loader2, Maximize2, Minimize2, RotateCcw, Search, Shapes, SlidersHorizontal, Tag, Trash2, Wand2, Wind, X } from "lucide-react";
-import { get, post, watchJob } from "../api.js";
+import { get, post } from "../api.js";
 import { BackButton, Dialog, NoPreview, Pager, useGalleryGrid } from "../components.jsx";
-import { ago, usePref, useToast } from "../lib.jsx";
+import { ago, usePref, useToast, useJobWatch } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 
 // labels are English keys for t(); category names come from the library and are looked up too (unknown ones stay as they are)
@@ -63,6 +63,7 @@ function Card({ it, fav, onFav, onPick, onDelete, busy, pickLabel, page }) {
 
 /** The library for the panel and the page: the filters (kept per user), favourites and recent, one page of `size` items from the server. */
 function useLibrary(size, onPick, kinds = KINDS) {
+  const watch = useJobWatch();          // its job watches stop with it (audit/112c c5.1)
   const t = useT();
   const toast = useToast();
   const author = "all", setAuthor = () => {};          // the whole library: no author filter
@@ -110,7 +111,7 @@ function useLibrary(size, onPick, kinds = KINDS) {
     try { const full = await get(`/api/library/item?uid=${encodeURIComponent(it.uid)}`); setRecent((r) => [it.uid, ...r.map(uidOf).filter((x) => x !== it.uid)].slice(0, 30)); return await onPick(full); }
     catch (e) { toast(e.message, "error"); return false; } finally { setBusy(null); }
   };
-  const runJob = (path, field, every = 1500) => async () => { setAsk(false); try { const j = await post(path); setData((d) => ({ ...d, [field]: j })); watchJob(j.id, (x) => { if (x && x.status !== "running") load(); else if (x) setData((d) => ({ ...d, [field]: x })); }, every); } catch (e) { toast(e.message, "error"); } };
+  const runJob = (path, field, every = 1500) => async () => { setAsk(false); try { const j = await post(path); setData((d) => ({ ...d, [field]: j })); watch(j.id, (x) => { if (x && x.status !== "running") load(); else if (x) setData((d) => ({ ...d, [field]: x })); }, every); } catch (e) { toast(e.message, "error"); } };
   const st = data?.stores ?? {};
   const pv = st.blocks?.previews ?? {}, temporary = Math.max(0, (pv.none ?? 0) - (pv.failed ?? 0));          // the blocks with no preview yet (none comes from the retired kit)
   const running = (j) => (j?.status === "running" ? j : null);

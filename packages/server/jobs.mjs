@@ -14,11 +14,13 @@ export function createJobs({ ended = null } = {}) {          // ended(job): ever
     if (busy) throw Object.assign(new Error(`${meta.title ?? kind} is already running`), { code: "BUSY" });
     const id = `${kind}-${Date.now().toString(36)}${(++seq).toString(36)}`;
     const ctl = new AbortController();
+    let kept = false;          // api.keep(): the work is saved, so a Stop from now on ends the job done (Casting's showreel after the character is in)
     const job = { id, kind, projectId: null, key: null, title: kind, ...meta, status: "running", stage: "starting", progress: null, startedAt: now(), endedAt: null,
       result: null, error: null, log: [] };
     jobs.set(id, { job, ctl });
     const api = {
       signal: ctl.signal,
+      keep() { kept = true; },
       update(patch) { Object.assign(job, patch); },
       log(line) { job.log.push(String(line).slice(0, 500)); if (job.log.length > 300) job.log.shift(); },
       lines: () => job.log.slice(),
@@ -27,7 +29,7 @@ export function createJobs({ ended = null } = {}) {          // ended(job): ever
     };
     Promise.resolve().then(() => fn(api)).then((result) => {
       job.result = result ?? null;
-      job.status = ctl.signal.aborted ? "cancelled" : "done";
+      job.status = ctl.signal.aborted && !kept ? "cancelled" : "done";
     }).catch((e) => {
       job.status = ctl.signal.aborted || e?.code === "CANCELLED" ? "cancelled" : "failed";
       job.error = { code: e?.code ?? "ERROR", message: plainMessage(e), detail: e?.detail ?? null };          // as the API's errors: no path of this computer
@@ -47,6 +49,13 @@ export function createJobs({ ended = null } = {}) {          // ended(job): ever
     list: ({ kind = null, projectId = null } = {}) => [...jobs.values()].map(({ job }) => job)
       .filter((j) => (!kind || j.kind === kind) && (!projectId || j.projectId === projectId)).sort((a, b) => (a.startedAt < b.startedAt ? 1 : -1)),
     running: () => [...jobs.values()].map(({ job }) => job).filter((j) => j.status === "running"),
+    /** The jobs running and those that ended in the last `minutes`, newest first (audit/112 2.6: three pages kept this rule, each its
+     *  own way): only `kinds` when given, only the ended ones with `ended`, and those `where` keeps. */
+    recent({ minutes, kinds = null, ended = false, where = null } = {}) {
+      const since = Date.now() - minutes * 60000, ks = kinds ? new Set(kinds) : null;
+      return this.list().filter((j) => (!ks || ks.has(j.kind)) && (!where || where(j))
+        && (j.status === "running" ? !ended : Date.parse(j.endedAt ?? 0) > since));
+    },
     cancel(id) {
       const e = jobs.get(id);
       if (!e) throw Object.assign(new Error("Job not found"), { code: "NOT_FOUND" });

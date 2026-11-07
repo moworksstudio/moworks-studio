@@ -1,0 +1,76 @@
+{
+  "id": "moworks-veteran",
+  "name": "Veteran",
+  "about": "An old soldier from the Ricks Clip cast: a worn helmet, a white beard and brows, armour and a spear.",
+  "engine": "ricks-clip",
+  "kind": "human",
+  "heightM": 1.68,
+  "heightBy": "inferred",
+  "heightNote": "the source skill gives no height: an everyday adult's",
+  "hand": "ricks",
+  "hands": [
+    "ricks"
+  ],
+  "palette": {
+    "tunic": "#9c4a3c",
+    "cape": "#6e3330",
+    "skin": "#f3d6bb",
+    "beard": "#f4f1ea",
+    "brows": "#f4f1ea"
+  },
+  "can": {
+    "views": [
+      "front",
+      "three-quarter",
+      "profile",
+      "back"
+    ],
+    "viewNotes": "a card turned to the camera on yaw; three-quarter is the front with its head turned (romanFront's facing) and its body narrowed (ricks-cast.js)",
+    "faces": [
+      "neutral",
+      "happy",
+      "laugh",
+      "surprised",
+      "worried",
+      "angry",
+      "talk",
+      "blink"
+    ],
+    "faceNotes": "STANDARD_FACES maps them to the cast's own (happy = grin, surprised = shock, worried = nervous, angry = stern; talk is the layer's; blink is a lid); all 18 of EXPRESSIONS by name too",
+    "poses": [
+      "stand",
+      "walk",
+      "point",
+      "wave",
+      "reach",
+      "sit"
+    ],
+    "poseNotes": "the 14 arm poses (ARM_POSES) in L and R; sit is the layer's, on a stool, front, three-quarter or profile (sit: true)",
+    "hands": "n/a: ink-dot hands, a finger on point",
+    "walk": "walk with phase, in every view",
+    "talk": "talkExpr(t): the open mouth and the closed one by turns; no lip sync"
+  },
+  "sheet": "MW Character Sheet v1",
+  "credit": {
+    "author": "Moworks Studio (the owner's Ricks Clip source skill)",
+    "link": null,
+    "licence": "the owner's own; drawn on toon.ts (Mr omi, MIT)",
+    "made": "as shipped",
+    "madeNote": "the source skill's outfit as shipped; its name is the app's (the source names its outfits by role only)",
+    "source": {
+      "skill": "cartoon-audio-short",
+      "sha256": "2ac0bf5f2ab7a689b3751050df664920d7763392a9287b0ce8d7254ea4cfc2ed",
+      "file": "kit/engine/roman.js OUTFITS.old",
+      "toon": "https://github.com/mromidev/claude-animated-shorts/blob/e3b817b6afc6cd413466d43f11ba31209e034bbf/templates/bridge/toon.ts"
+    },
+    "gate": {
+      "passed": 30,
+      "failed": 0
+    }
+  },
+  "version": 1,
+  "module": [
+    "moworks-veteran.js"
+  ],
+  "savedAt": "2026-11-06T15:05:00.904Z"
+}

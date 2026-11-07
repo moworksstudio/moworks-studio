@@ -5,9 +5,9 @@
 // not run and a visual hint that flagged something (with its shot, time and stills); nothing wrong is one line.
 import { useEffect, useState } from "react";
 import { AlertTriangle, Bot, ChevronDown, ChevronRight, Eye, Film, Loader2, ShieldCheck, XCircle } from "lucide-react";
-import { get, post, watchJob } from "../api.js";
+import { get, post } from "../api.js";
 import { Banner } from "../components.jsx";
-import { ago, clock, go, useData, useToast } from "../lib.jsx";
+import { ago, clock, go, useData, useToast, useJob } from "../lib.jsx";
 import { tr, useT } from "../i18n.jsx";
 import { useStage } from "../workflow/stage.jsx";
 import { checkLabel, notCheckedWhy, scriptTimedOut } from "../workflow/RenderSheet.jsx";
@@ -31,11 +31,10 @@ export default function Qa({ id, setCrumbs = () => {} }) {
   const toast = useToast();
   const project = useData(() => get(`/api/projects/${id}`), [id]);
   const qa = useData(() => get(`/api/projects/${id}/qa`), [id]);
-  const [job, setJob] = useState(null);
+  const [job, follow] = useJob((x) => { qa.reload(); if (x.status === "failed") toast(x.error?.message, "error"); }, 1200);
   const [opened, setOpened] = useState({});          // the kinds of finding the user opened or closed
-  useEffect(() => { setCrumbs(project.data ? [t("Projects"), project.data.title, t("Tech checks")] : null); }, [project.data, t]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setCrumbs(project.data ? [t("Productions"), project.data.title, t("Tech checks")] : null); }, [project.data, t]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { const j = qa.data?.job; if (j?.status === "running" && j.id !== job?.id) follow(j); }, [qa.data]); // eslint-disable-line react-hooks/exhaustive-deps
-  const follow = (j) => { setJob(j); watchJob(j.id, (x) => { if (!x) return; setJob(x); if (x.status !== "running") { qa.reload(); if (x.status === "failed") toast(x.error?.message, "error"); } }, 1200); };
   const run = async () => { try { follow(await post(`/api/projects/${id}/qa`)); } catch (e) { toast(e.message, "error"); } };
   // the request lands in the user's own chat box, which has no hidden part: the check's id and the file's path stay out (the shot,
   // the check's title and the finding say where)
@@ -58,7 +57,7 @@ export default function Qa({ id, setCrumbs = () => {} }) {
     <span className="what">{f.from != null && f.to != null && <span className="num muted">{f.from.toFixed(1)}–{f.to.toFixed(1)} s · </span>}{say(f, c)}
       {f.count > 1 && <span className="num muted"> · {t("{n} places", { n: f.count })}</span>}</span>
     <span className="acts">{f.shot && <button className="btn ghost sm" onClick={() => stage.close()}><Film size={13} />{t("Open shot")}</button>}
-      {!c.intended && <button className="btn ghost sm" onClick={() => fix(c, f)}><Bot size={13} />{t("Fix with Claude")}</button>}</span></li>;          {/* "Meant this way" is nothing to fix (T39-12) */}
+      {!c.intended && <button className="btn ghost sm" onClick={() => fix(c, f)}><Bot size={13} />{t("Fix with Claude")}</button>}</span></li>;          {/* "It's OK" is nothing to fix (T39-12) */}
   // the header counts the lines below it; no "Exact" / "Hint" tag, the group's name says which it is
   const group = ({ title, icon, items, children = null }) => items.length === 0 ? null : <section className="panel qa-group" aria-label={title}>
     <div className="panel-head">{icon}<h2>{title}</h2><span className="muted end num">{items.reduce((n, c) => n + (c.notSeen ? 1 : c.items.length || 1), 0)}</span></div>
@@ -88,7 +87,7 @@ export default function Qa({ id, setCrumbs = () => {} }) {
           : qa.data.changedSince ? t("Out of date: the film changed after these checks.")
           : problems === 1 ? t("1 thing to look at; it does not stop the render.") : problems ? t("{n} things to look at; they do not stop the render.", { n: problems })
           : skipped.length ? t("No problems found in what was checked.") : t("No problems found.")}
-        <span className="muted"> {t("Checked {ago}.", { ago: ago(r.at) })}{qa.data.changedSince && !r.pass ? " " + t("The project changed since; run them again.") : ""}</span></Banner>
+        <span className="muted"> {t("Checked {ago}.", { ago: ago(r.at) })}{qa.data.changedSince && !r.pass ? " " + t("The production changed since; run them again.") : ""}</span></Banner>
       {group({ title: t("Blocking"), icon: <XCircle size={16} color="var(--danger)" />, items: blocking })}
       {group({ title: t("Warnings"), icon: <AlertTriangle size={16} color="var(--status-stop)" />, items: warnings })}
       {group({ title: t("Not checked"), icon: <Eye size={16} />, items: skipped.map((c) => ({ ...c, notSeen: true })) })}

@@ -1,15 +1,15 @@
-// Loudness of a rendered film (the whole mix -16 LUFS integrated, true peak at most -1 dBTP), measured
-// on the MP4 with FFmpeg's EBU R128 filter. A film with no sound has nothing to measure.
+// Loudness of a rendered film (by default against the render's own master, MASTER.standard: -14 LUFS integrated, true peak at most
+// -1 dBTP), measured on the MP4 with FFmpeg's EBU R128 filter. A film with no sound has nothing to measure.
 import { execFile } from "node:child_process";
 import { renameSync, rmSync } from "node:fs";
 import { promisify } from "node:util";
 import { ffmpegExe } from "../library/preview-media.mjs";
 
 const run = promisify(execFile);
-export const TARGET = { lufs: -16, tolerance: 2, peak: -1 };
 
 /** { lufs, truePeak, lra, ok, notes: [] } or { silent: true } when the file has no audio stream. */
-export async function loudness(file, { root, target = TARGET } = {}) {
+// the default is the render's master (audit/112 4.9: a -16 here read as the app's aim while every render asked for MASTER.standard)
+export async function loudness(file, { root, target = { lufs: MASTER.standard.lufs, tolerance: 2, peak: MASTER.standard.tp } } = {}) {
   let stderr;
   try {
     ({ stderr } = await run(ffmpegExe(root), ["-hide_banner", "-nostats", "-i", file, "-map", "0:a:0?", "-af", "ebur128=peak=true", "-f", "null", "-"],

@@ -33,20 +33,39 @@ export function drawnText(dir) {
   }
   return out;
 }
+/** Words a Remotion style's film writes in its React code (src/videos/, the film's own code; the source skill's code beside it is not read):
+ *  a text prop given words (<Tag text="DUTCH" />, <TypeOn text="…" />) or words between a tag and its end (<h1>Title</h1>). The page builds them
+ *  at run time, so Studio picks them but cannot edit them (T43-6: "Not editable here"). [{ file, count }] */
+const REACT_PROP = /\b(?:text|title|label|caption|words?)=\{?\s*["'`]([^"'`\n]*\p{L}{2,}[^"'`\n]*)["'`]/gu;
+const REACT_CHILD = /<([A-Za-z][\w.]*)\b[^<>]*>\s*([^<>{}\n]*\p{L}{2,}[^<>{}\n]*?)\s*<\/\1>/gu;
+export function reactText(dir) {
+  const out = [], files = [];
+  const walk = (d) => { try { for (const e of readdirSync(join(dir, d), { withFileTypes: true })) { const r = join(d, e.name); if (e.isDirectory()) { if (!e.name.startsWith(".") && e.name !== "node_modules") walk(r); } else if (/\.(jsx|tsx)$/i.test(e.name)) files.push(r); } } catch { /* none */ } };
+  walk(join("src", "videos"));
+  for (const f of files) {
+    let s = ""; try { s = readFileSync(join(dir, f), "utf8"); } catch { continue; }
+    const n = (s.match(REACT_PROP) ?? []).length + (s.match(REACT_CHILD) ?? []).length;
+    if (n) out.push({ file: f.split("\\").join("/"), count: n });
+  }
+  return out;
+}
 /** A film style whose own rules name the text it draws as its performed text (moworks-studio §8a, owner #1134 step 3): the film's files where
  *  that text is drawn. Ricks Clip: the words painted in its 3D world (signs, carvings, banners), its engine's code in film/ (its pack §6; T39-12). */
 export const PERFORMED_TEXT = { "ricks-clip": ["film/"] };
 const styleOf = (dir) => { try { return JSON.parse(readFileSync(join(dir, ".moworks", "project.json"), "utf8"))?.style?.id ?? null; } catch { return null; } };
 /** Tech checks' G-CANVAS-TEXT (owner #1134, a warning): text drawn into the picture cannot be edited in Studio or After Effects. A dated line
  *  in docs/NOTES.md saying the text stays on the canvas (performed text, or why) answers it; so does the style's own naming of its performed
- *  text (PERFORMED_TEXT), for the files where that text is drawn (plain overlay text elsewhere still counts). */
-export function gateCanvasText(dir) {
-  const own = PERFORMED_TEXT[styleOf(dir)] ?? [];
-  const hits = drawnText(dir).filter((h) => !own.some((p) => h.file.startsWith(p)));
+ *  text (PERFORMED_TEXT), for the files where that text is drawn (plain overlay text elsewhere still counts). A film style that reaches After
+ *  Effects only as the rendered picture (Paper Collage, 3D Cartoon) counts the words its React code writes too (owner 06/11 #1355, T43-6):
+ *  neither Studio nor After Effects can edit them. */
+export function gateCanvasText(dir, root = APP_ROOT) {
+  const style = styleOf(dir), own = PERFORMED_TEXT[style] ?? [];
+  const react = style && canvasFilm({ style: { id: style } }, null, root) === "style" ? reactText(dir) : [];
+  const hits = [...drawnText(dir), ...react].filter((h) => !own.some((p) => h.file.startsWith(p)));
   let notes = ""; try { notes = readFileSync(join(dir, "docs", "NOTES.md"), "utf8"); } catch { /* none */ }
   const said = /stays? on the canvas|performed text|cannot be made to look the same in HTML/i.test(notes);
   if (!hits.length || said) return { id: "G-CANVAS-TEXT", blocking: false, pass: true, findings: [] };
-  const n = hits.reduce((k, h) => k + h.count, 0), files = hits.map((h) => h.file.split("/").pop()).join(", ");
+  const n = hits.reduce((k, h) => k + h.count, 0), files = [...new Set(hits.map((h) => h.file.split("/").pop()))].join(", ");
   const line = `${n} text${n === 1 ? " is" : "s are"} drawn into the picture (${files}), so ${n === 1 ? "it" : "they"} cannot be edited in Studio or After Effects. Ask Claude to move ${n === 1 ? "it" : "them"} to editable text over the picture.`;
   return { id: "G-CANVAS-TEXT", blocking: false, pass: false, warnings: 1, findings: [{ severity: "warning", code: "canvas_text", count: n, message: line, plain: line }] };
 }

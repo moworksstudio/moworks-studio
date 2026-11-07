@@ -22,7 +22,7 @@ const inside = (dir, p) => { const r = relative(dir, p); return !!r && !r.starts
 /** Run one of the source skill's scripts as shipped with the app's Python (its libraries on the path; -I: nothing from the folder it runs in). */
 function runSkillTool(root, script, args, { timeoutMs = 120000 } = {}) {
   const exe = pythonExe(root);
-  if (!exe) return Promise.resolve({ ok: false, error: "Python is not set up on this computer (Settings › System)" });
+  if (!exe) return Promise.resolve({ ok: false, error: "Python is not set up on this computer (Studio Settings › System)" });
   const file = join(skillTools(root), script), cwd = mkdtempSync(join(tmpdir(), "mw-cutout-"));
   const code = "import os, sys, runpy\np = os.environ.get('MW_PYLIBS')\nif p and os.path.isdir(p): sys.path.insert(0, p)\nsys.argv = sys.argv[1:]\nrunpy.run_path(sys.argv[0], run_name='__main__')";
   return new Promise((done) => execFile(exe, ["-I", "-B", "-c", code, file, ...args],

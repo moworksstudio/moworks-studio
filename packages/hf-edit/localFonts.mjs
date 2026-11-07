@@ -4,14 +4,11 @@
 // runtime) and checked for every Vietnamese marked letter, the same check as the export gate. A family used in a film is copied into the
 // project (assets/1_design/fonts/<family>/, the user's fonts) and declared in index.html, so the film renders offline and on another PC.
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
-import { createRequire } from "node:module";
 import { basename, extname, isAbsolute, join, relative, sep } from "node:path";
-import { resolveRuntime } from "../version-manager/index.mjs";
-import { VI } from "../hf-qa/gates.mjs";
+import { VI_MARKED, fontkitFor } from "../hf-qa/vietnamese.mjs";
 
 const EXT = /\.(ttf|otf|ttc|woff2?)$/i;
-// read when first needed: the export gates import the film's finishing step, which reads this file
-const marked = () => [...VI].filter((c) => !/^[a-zA-Z]$/.test(c));
+const marked = () => VI_MARKED;
 export const userFontDir = () => (process.env.LOCALAPPDATA ? join(process.env.LOCALAPPDATA, "Microsoft", "Windows", "Fonts") : null);
 const slug = (s) => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "font";
 /** The folder name a family gets in a film (assets/1_design/fonts/<it>/). */
@@ -21,7 +18,9 @@ export const familyKey = (s) => String(s ?? "").toLowerCase().replace(/[^a-z0-9]
 let cache = null;
 
 function fontkit() {
-  return createRequire(join(resolveRuntime().dir, "node_modules", "fontkit", "package.json"))("fontkit");
+  const fk = fontkitFor();          // hf-qa/vietnamese.mjs
+  if (!fk) throw new Error("The pinned runtime has no font reader (fontkit)");
+  return fk;
 }
 
 /** One font file as the file itself says: [{ family, vi, weight, italic }] (a .ttc holds several). Throws when it is no font. */

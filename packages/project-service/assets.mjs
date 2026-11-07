@@ -8,6 +8,7 @@ import { audioFolder, isDesignPath, sequenceOf } from "./index.mjs";
 import { appSounds, kitFiles } from "./layout.mjs";
 import { placedShots } from "../hf-edit/shots.mjs";
 import { filmLength } from "../hf-edit/ending.mjs";
+import { readJson } from "../util/json.mjs";
 
 const posix = (p) => p.split(sep).join("/");
 const IMAGE = /\.(png|jpe?g|webp|gif|avif|bmp|tiff?|heic|svg|exr)$/i, VIDEO = /\.(mp4|mov|webm|m4v|mkv|avi)$/i, AUDIO = /\.(mp3|wav|m4a|flac|ogg|aac|opus)$/i, FONT = /\.(ttf|otf|woff2?|eot)$/i;
@@ -37,7 +38,6 @@ export function groupOf(item) {
   return "other";
 }
 const seenFile = (dir) => join(dir, ".moworks", "assets-seen.json");
-const readJson = (f, fb) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return fb; } };
 
 /** Every file the tab lists, project-relative. */
 export function assetFiles(dir) {

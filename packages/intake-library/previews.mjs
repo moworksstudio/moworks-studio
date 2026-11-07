@@ -15,9 +15,10 @@ import { gatedRender } from "../render-pipeline/index.mjs";
 import { gsapFile } from "../offline-assets/index.mjs";
 import { VI } from "../hf-qa/gates.mjs";
 import { currentStore, slugOf } from "./index.mjs";
+import { readJson } from "../util/json.mjs";
 
 export const METHOD = "rendered here as a film: the app's finalize and export checks, then the render worker (24 fps draft, web encode)";
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
+
 
 /** The demo's visible text (scripts and styles removed), NFC. */
 export function demoText(html) {

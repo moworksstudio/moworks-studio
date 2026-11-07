@@ -20,6 +20,14 @@ differ, this file wins (the app has no Remotion, no Python and no ElevenLabs).
   (`references/traps.md`). The author's rules hold: original characters only (Pip, Mo and the rig's cast are the author's and ours to
   use; never a channel's hero, nothing like a famous cartoon), original stories, never a claim that any channel is made with Claude or
   another tool, every fact real and sourced in `science` first, the storyboard checked before any animation.
+- **Characters from the library** (owner #1287-#1293): a What If character from the Characters page is one module the app puts in
+  `whatif/cast/<id>.ts` (a line in `docs/CHARACTERS.json` names it): `CHARACTER = { id, name, about, heightM, scale, look }`, a costume on the
+  rig. The engine's own cast (Pip, Mo, Sis, Mum, The Suit) is in the library too, as `moworks-pip` …, taken the same way. Draw one with
+  `import { CHARACTER as rosa } from "./cast/rosa"` and `<AppHero look={rosa.look} pose={{ ...pose, scale: rosa.scale }} />`, or the rig's own
+  `<Hero look={rosa.look} …>`; never redraw, edit or copy its file (a change goes back through the Characters page). The app's cast layer
+  (`import { AppHero, STANDARD_FACES, POSES, posed, talkFace } from "mw:wi-cast"`, MW Character Sheet v1) adds what the rig does not draw:
+  `view: "back"` (from behind, no face), the faces `laugh`, `angry` and `talk` (`face=…`), the standard's poses (stand, point, wave, reach, sit)
+  and a talking flap (`talkFace(t)`, no lip sync). A character's `can` list (its record) says what its rig drives.
 - The film is 1920 × 1080 (the engine draws that world), at the episode's rate (30 fps unless New project says another of 24, 25, 30, 60).
 
 ## 2. Where the episode lives in the project

@@ -52,7 +52,7 @@ try {
     onRestart: () => { spawn(process.execPath, [join(APP_ROOT, "tools", "restart-app.mjs"), String(process.pid)], { cwd: APP_ROOT, detached: true, stdio: "ignore", windowsHide: true }).unref(); quit("exit"); },
     onWindowGone: () => quit("window closed"), thumbnails: true,
     onAttention: (on) => windowAttention(on), onFocusWindow: () => { focusAppWindow({ wait: false }); },
-    updateCheck: process.env.MW_NO_UPDATE_CHECK !== "1", housekeeping: process.env.MW_NO_HOUSEKEEPING !== "1" });          // MW_NO_UPDATE_CHECK=1: a test run of the app never asks GitHub
+    updateCheck: process.env.MW_NO_UPDATE_CHECK !== "1", housekeeping: process.env.MW_NO_HOUSEKEEPING !== "1", styleAeAtStart: true });          // MW_NO_UPDATE_CHECK=1: a test run of the app never asks GitHub
 } catch (e) {
   console.error(e?.stack ?? e);
   if (background) messageBox(`Moworks Studio could not start:\n\n${e?.message ?? e}\n\nDetails: ${logFile}`);

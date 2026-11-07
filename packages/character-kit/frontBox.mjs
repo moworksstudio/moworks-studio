@@ -11,6 +11,7 @@ import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "no
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { resolveRuntime } from "../version-manager/index.mjs";
+import { readJson } from "../util/json.mjs";
 
 const INK = 60;           // RGB distance from the paper
 const runs = (xs, min) => { const out = []; let s = -1; xs.forEach((v, i) => { if (v >= min && s < 0) s = i; if ((v < min || i === xs.length - 1) && s >= 0) { out.push([s, v >= min ? i : i - 1]); s = -1; } }); return out; };
@@ -57,7 +58,7 @@ export async function frontBoxOf(file, { sharp }) {
 // when its sheet changes. GET /api/characters reads it as it is and asks for a fill in the background when a sheet has none yet. A character
 // the app ships keeps its measures elsewhere (`keep`, the state folder): nothing is ever written to bundle/.
 export const FRONT_FILE = "front.json";
-const readJson = (f) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return null; } };
+
 let sharpMod = null;
 const loadSharp = () => (sharpMod ??= createRequire(join(resolveRuntime().dir, "node_modules", "sharp", "package.json"))("sharp"));
 const stamp = (f) => { const s = statSync(f); return { size: s.size, mtimeMs: Math.round(s.mtimeMs) }; };

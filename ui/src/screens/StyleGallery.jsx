@@ -23,9 +23,8 @@ const BUILT_IN = [
   { id: "heygen", name: "HyperFrames", org: "HeyGen", kind: "workflow", licence: "Apache-2.0" },
 ];
 export const authorOf = (s) => s.author?.id ?? s.author ?? (s.rules?.[0]?.kind === "moworks-rule" ? "moworks" : "heygen");
-export const kindOf = (s) => s.kind ?? "workflow";
-/** The authors in the user's order, each with its display fields and its count of styles; What If (FreshStack) last, as
- *  "Coming soon" until its engine exists. Any author a style names that the list does not comes after. */
+/** The authors in the user's order, each with its display fields and its count of styles; any author a style names that the list
+ *  does not comes after. */
 export function authorsOf(data) {
   const list = [...(data?.authors ?? BUILT_IN)];
   for (const s of data?.styles ?? []) if (!list.some((a) => a.id === authorOf(s))) list.push({ id: authorOf(s), name: authorOf(s) });
@@ -33,12 +32,8 @@ export function authorsOf(data) {
   const rank = (id) => { const i = AUTHOR_ORDER.indexOf(id); return i < 0 ? 99 : i; };
   return list.map((a) => authorView(a, n(a.id))).sort((a, b) => rank(a.id) - rank(b.id));
 }
-export const KINDS = { "video-style": "Aesthetic", workflow: "Format" };          // look-led styles / film formats; the keys stay
 const NOTE_KINDS = new Set(["route"]);          // what a style is for, said as a note, not a warning
 export const RENDERERS = { canvas: "Canvas 2D", webgl: "WebGL", three: "three.js", blender: "three.js" };          // a Blender demo is built in three.js here (its warning says so)
-// the author as a short tag under each style's name
-const TAGS = { moworks: "MW", heygen: "HF", lemomo: "LEMO", vincentwei: "MG", alexgreensh: "ANI", johnheibel: "JH" };
-export const authorTag = (a) => TAGS[a?.id] ?? String(a?.name ?? a?.id ?? "?").replace(/[^A-Za-z0-9]/g, "").slice(0, 4).toUpperCase();
 export const usesOf = (s) => s.uses ?? s.tags ?? [];
 /** A category as shown: translated, without the source in brackets ("Motion design (mg-styles-15)" → "Motion design"; the author tag says whose). */
 export const catLabel = (t, c) => t(c ?? "").replace(/\s*\([^)]*\)$/, "");
@@ -133,11 +128,10 @@ export function StyleDetails({ s, author, actions }) {
   </>;
 }
 
-const F0 = { authors: [], kinds: [], cats: [], vn: "all", q: "" };          // no 2D / 3D or Looks filter: each tile says it
+const F0 = { authors: [], cats: [], vn: "all", q: "" };          // no 2D / 3D or Looks filter: each tile says it
 /** Does style s pass the filters? `skip` leaves one facet out, so that facet's options can count what choosing them would show. */
 function passes(s, f, skip) {
   if (skip !== "authors" && f.authors.length && !f.authors.includes(authorOf(s))) return false;
-  if (skip !== "kinds" && f.kinds.length && !f.kinds.includes(kindOf(s))) return false;
   if (skip !== "cats" && f.cats.length && !f.cats.includes(s.category)) return false;
   if (skip !== "vn" && f.vn !== "all" && s.vnFont !== (f.vn === "ok")) return false;
   if (f.q) {
@@ -157,7 +151,7 @@ function Facets({ styles, authors, f, set }) {
   const t = useT();
   const [allCats, setAllCats] = useState(false);
   const pool = (skip) => styles.filter((s) => passes(s, f, skip));
-  const byAuthor = countBy(pool("authors"), authorOf), byKind = countBy(pool("kinds"), kindOf), byCat = countBy(pool("cats"), (s) => s.category);
+  const byAuthor = countBy(pool("authors"), authorOf), byCat = countBy(pool("cats"), (s) => s.category);
   const byVn = countBy(pool("vn"), (s) => (s.vnFont == null ? null : s.vnFont ? "ok" : "missing"));
   const row = (key, on, onClick, label, n, tag) => <button key={key} type="button" className={"sgb-opt" + (on ? " on" : "")} role="checkbox" aria-checked={on} onClick={onClick}>
     <Box on={on} /><span className="l">{label}</span>{tag}<span className="n num">{n ?? 0}</span></button>;          // the author's name, then its tag
@@ -168,7 +162,7 @@ function Facets({ styles, authors, f, set }) {
     <div className="search"><Search size={14} /><input className="input" placeholder={t("Search film styles")} value={f.q} onChange={(e) => set({ q: e.target.value })} aria-label={t("Search film styles")} /></div>
     <div className="sgb-fg" role="group" aria-label={t("Author")}><span className="sgb-fl">{t("Author")}</span>
       {authors.map((a) => <button key={a.id} type="button" className={"sgb-opt au-opt" + (f.authors.includes(a.id) ? " on" : "")} role="checkbox" aria-checked={f.authors.includes(a.id)}
-        onClick={() => set({ authors: toggle(f.authors, a.id) })}><Box on={f.authors.includes(a.id)} /><AuthorName a={a} count={false} className="l" tagBeside />{!a.comingSoon && <span className="n num">{byAuthor.get(a.id) ?? 0}</span>}</button>)}</div>
+        onClick={() => set({ authors: toggle(f.authors, a.id) })}><Box on={f.authors.includes(a.id)} /><AuthorName a={a} count={false} className="l" tagBeside /><span className="n num">{byAuthor.get(a.id) ?? 0}</span></button>)}</div>
     {vnKnown && <div className="sgb-fg"><span className="sgb-fl">{t("Vietnamese letters")}</span><div className="sgb-chips">
       {[["ok", t("Yes")], ["missing", t("No")]].map(([k, l]) => <button key={k} type="button" className="ml-chip" aria-pressed={f.vn === k}
         onClick={() => set({ vn: f.vn === k ? "all" : k })}>{l}<span className="num">{byVn.get(k) ?? 0}</span></button>)}</div></div>}
@@ -188,16 +182,13 @@ export function StyleTile({ s, author, on, onPick, className = "sgb-card", role,
       {s.dim && <span className="mark">{s.dim}</span>}{s.warnings?.some((w) => !NOTE_KINDS.has(w.kind)) && <span className="mark warn" title={t("Read before use")}><AlertTriangle size={11} /></span>}
       <AeBadge s={s} compact />{on && <span className="chk"><Check size={13} /></span>}</span>
     <span className="nm">{t(s.title)}</span>
-    <span className="by">{showAuthor && <AuthorTag author={author} />}{(s.comingSoon || catOf(t, s)) && <span className="cat" title={s.comingSoon ? t("Coming soon") : catOf(t, s)}>{s.comingSoon ? t("Coming soon") : catOf(t, s)}</span>}</span>
+    <span className="by">{showAuthor && <AuthorTag author={author} />}{catOf(t, s) && <span className="cat" title={catOf(t, s)}>{catOf(t, s)}</span>}</span>
   </button>;
 }
 
 // by author first, each author's styles in the app's category order; "By category" puts alike styles of
 // different authors next to each other, in the lines of the user's sign-off sheet (styleRows.js)
 const SORTS = { author: "By author", category: "By category", name: "Name A–Z", demo: "Demo length" };
-/** What If (FreshStack) shows as "Coming soon" until its engine exists: a tile that cannot be used. */
-export const WHAT_IF = { id: "what-if", title: "What If", author: "freshstack", category: "Cartoon & Anime", available: false, comingSoon: true, aspects: [],
-  description: "FreshStack's What If films: a question answered as a short animated story. Coming soon: it opens when its engine is ready." };
 
 /** The gallery while the catalog loads: the filter column, a grid of tiles and the details, drawn as quiet shapes. */
 function GallerySkeleton() {
@@ -224,8 +215,7 @@ function DeskGallery() {
   const [panel, setPanel] = useState(null);                 // narrow window: "filters" or "style" open over the grid
   const f = { ...F0, ...fp };
   const set = (x) => setFp((o) => ({ ...F0, ...o, ...x }));
-  const soon = (data?.comingSoon ?? []).map((x) => ({ ...WHAT_IF, ...x, author: x.author === "FreshStack" ? "freshstack" : x.author, available: false, comingSoon: true }));          // top-level comingSoon
-  const styles = useMemo(() => (data ? [...data.styles, ...(soon.length ? soon : data.styles.some((s) => s.id === "what-if") ? [] : [WHAT_IF])] : []), [data]); // eslint-disable-line react-hooks/exhaustive-deps
+  const styles = useMemo(() => data?.styles ?? [], [data]);          // What If is a style like the others (audit/112c c4.1)
   const authors = useMemo(() => authorsOf(data), [data]);
   const A = useMemo(() => Object.fromEntries(authors.map((a) => [a.id, a])), [authors]);
   const list = useMemo(() => {
@@ -243,18 +233,18 @@ function DeskGallery() {
   useEffect(() => { setPg(0); }, [fp, sort]);
   useEffect(() => { setPg(Math.max(0, Math.floor(list.findIndex((s) => s.id === cur?.id) / size))); }, [size, data]); // eslint-disable-line react-hooks/exhaustive-deps
   const shown = list.slice(pg * size, (pg + 1) * size);
-  const nFilters = f.authors.length + f.kinds.length + f.cats.length + (f.vn !== "all") + (f.q ? 1 : 0);
+  const nFilters = f.authors.length + f.cats.length + (f.vn !== "all") + (f.q ? 1 : 0);
   const filtersOn = nFilters > 0;
   const use = (s) => go(`/new?style=${s.id}`);
   const pickCard = (s) => { setCurId(s.id); if (matchMedia("(max-width: 1100px)").matches) setPanel("style"); };          // a narrow window shows the style over the grid
   useEffect(() => { if (!panel) return undefined; const esc = (e) => { if (e.key === "Escape") setPanel(null); }; addEventListener("keydown", esc); return () => removeEventListener("keydown", esc); }, [panel]);
-  const pills = [...f.authors.map((id) => [A[id]?.name ?? id, { authors: f.authors.filter((x) => x !== id) }]), ...f.kinds.map((k) => [t(KINDS[k] ?? k), { kinds: f.kinds.filter((x) => x !== k) }]),
+  const pills = [...f.authors.map((id) => [A[id]?.name ?? id, { authors: f.authors.filter((x) => x !== id) }]),
     ...f.cats.map((c) => [catLabel(t, c), { cats: f.cats.filter((x) => x !== c) }]),
     ...(f.vn !== "all" ? [[f.vn === "ok" ? t("Vietnamese letters") : t("No Vietnamese letters"), { vn: "all" }]] : []), ...(f.q ? [[`“${f.q}”`, { q: "" }]] : [])];
   return (
     <div className="page sgb-page gal-page">
       <div className="page-head"><div><BackButton /><h1>{t("Film Styles")}</h1><p className="lead">{t("How a whole film is made and how it looks, by author.")}</p></div></div>
-      {projectId && <Banner kind="info">{t("Choosing a new film style for this project.")}</Banner>}
+      {projectId && <Banner kind="info">{t("Choosing a new film style for this production.")}</Banner>}
       {error && <Banner kind="error" action={<button className="btn sm" onClick={reload}>{t("Retry")}</button>}>{error.message}</Banner>}
       {loading && !data ? <GallerySkeleton /> : data && (
         <div className={"sgb-layout" + (panel ? " panel-" + panel : "")}>
@@ -265,8 +255,7 @@ function DeskGallery() {
           <section className="sgb-center" aria-label={t("Film styles")}>
             <div className="sgb-bar">
               <button type="button" className="btn sm sgb-filters-btn" onClick={() => setPanel("filters")}><SlidersHorizontal size={13} />{t("Filters")}{nFilters > 0 && <span className="num"> · {nFilters}</span>}</button>
-              {/* One rule with the style picker: a "Coming soon" style shows but is not counted */}
-              {(() => { const n = list.filter((s) => !s.comingSoon).length, total = styles.filter((s) => !s.comingSoon).length;
+              {(() => { const n = list.length, total = styles.length;
                 return <span className="count num" aria-live="polite">{n === total ? t("{n} film styles", { n: total }) : t("{n} of {total} film styles", { n, total })}</span>; })()}
               {pills.map(([l, x], i) => <button key={i} type="button" className="sgb-pill" onClick={() => set(x)} aria-label={t("Remove filter {name}", { name: l })}>{l}<X size={12} /></button>)}
               {filtersOn && <button type="button" className="btn ghost sm" onClick={() => setFp(F0)}>{t("Clear filters")}</button>}
@@ -281,7 +270,7 @@ function DeskGallery() {
             {panel === "style" && <BackButton className="insp" onClick={() => setPanel(null)} />}
             {cur ? <div className="insp-in" key={cur.id}><StyleDetails s={cur} author={A[authorOf(cur)]} actions={<>
               <button className="btn primary" onClick={() => use(cur)} disabled={cur.available === false}><Plus size={15} />{t("Use this film style")}</button>
-              {projectId && <button className="btn" onClick={() => setApply(cur)} disabled={cur.available === false}><Check size={14} />{t("Use in this project")}</button>}
+              {projectId && <button className="btn" onClick={() => setApply(cur)} disabled={cur.available === false}><Check size={14} />{t("Use in this production")}</button>}
               <DemoLink s={cur} /></>} /></div>
               : <p className="hint">{t("Choose a film style to see it here.")}</p>}
           </aside>

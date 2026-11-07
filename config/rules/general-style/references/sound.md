@@ -1,4 +1,4 @@
-# Sound (Final Mix: after the picture is locked, only when the owner asks)
+# Sound (placed by the app right after the Build, before Version 1; changed in Final Mix whenever the owner asks)
 
 From the Moworks Motion kit 2.0.4 (`workflow/film.md` "Audio", "The sound pass"). The markup of audio in a composition is HyperFrames'
 (`hyperframes/references/sound.md` and `format.md`, `media-use/references/mixing.md`); the levels and the choices below are the studio's.
@@ -8,7 +8,9 @@ You cannot hear: measure every step (the app gives you beat maps, levels and cue
 
 - **Early (the owner's starting assets):** a voice-over or music the owner already has. The app places it on the timeline (voice-over and
   music each on their own track, from 0 s) and transcribes the voice / maps the beats; the picture is timed to it.
-- **Final Mix (after QC):** change or add music, add sound effects. Nothing here before the picture is locked.
+- **Sound (right after the Build, before Version 1):** the app places the music and a sound on every action, as the house rules §7b say
+  (owner #910); Version 1 is the film built with its full sound.
+- **Final Mix (any time after):** the owner changes or adds music and sound effects, or asks you to.
 
 ## 2. Music
 
@@ -27,9 +29,8 @@ You cannot hear: measure every step (the app gives you beat maps, levels and cue
 - **A film made for its song (a lyrics or music video) has none:** the song is what is heard (owner 31/10; the house rules §7b).
 - A sound on every action (the house rules §7b, owner 30/10): a whoosh for movement, pop for things appearing, click for clicks, typing
   for typing, riser into a reveal, impact on a slam, footsteps, doors, pages; and a quiet ambience bed under every scene with a place. The
-  app picks them by what happens on screen: its offline library of CC0 sounds first, then Freesound through Openverse (CC0 / CC BY) and
-  HyperFrames' bundled set, then a sound made by code (the owner's film styles' sounds and new ones from their recipes and the app's) only for what
-  neither has (owner 05/11/2026 #1034), every one credited; name them in the storyboard frames by the thing and its action (`- sfx: crayon stroke on paper, door
+  app picks them by what happens on screen, in the order the house rules §7b give ("Where the sounds come from": a sound made by code only
+  for what none of the others has), every one credited; name them in the storyboard frames by the thing and its action (`- sfx: crayon stroke on paper, door
   knock wood`, `- ambience: rain`).
 - **The light comes before the sound:** a sound's attack (the top of a whoosh's swell) lands one frame after its picture. The picture must
   work muted first: social feeds play without sound.
@@ -39,10 +40,11 @@ You cannot hear: measure every step (the app gives you beat maps, levels and cue
 
 - The voice is the loudest thing; the music drops 10 dB under it and holds there through a pause under 2 s, so it never rises and falls at each
   breath, then comes back up over 1 s after a longer one. This holds in every film and the app writes it (owner 31/10, chosen by ear): never a lane of your own for it unless the
-  owner asks. With a sound on every action the effects sit under the music and the voice, each kind at its own level
-  (an impact over a click), a small move quieter, the ambience lowest (the app sets them).
-- The master: **-16 LUFS, true peak at most -1 dBTP** (the app's render masters and measures it); louder (-14 LUFS)
-  only when the client asks.
+  owner asks. With a sound on every action the effects stay under the voice (8 dB under it on a spoken word); between the lines an
+  effect's loudest moment sits a little over the music (1.5 dB), each kind at its own level (an impact over a click), a small move quieter,
+  the ambience lowest (the app sets them; owner 03/11 by ear).
+- The master: **-14 LUFS (Standard), true peak at most -1 dBTP**; Quieter (-16 LUFS) when the owner chooses it in the Render dialog (the
+  house rules, #1073). The app's render masters and measures it.
 - The app applies these: at Final Mix it measures the music, the voice and each effect and sets every effect's level (EBU R128); when
   rendering it brings the master to the target with HyperFrames' two-pass `loudnorm` (media-use, "Publish loudness") and measures the
   result. Never set these levels by hand in the HTML.

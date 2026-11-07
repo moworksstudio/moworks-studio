@@ -167,7 +167,7 @@ copyPart("library-anidoodle", join(lib, "anidoodle"), join(OUT, "library", "anid
 // the app's own characters are read from here, so this folder is their source, never the work library (it holds only the user's): the kit's
 // demo (Clawd; tools/clawd-demo.mjs remakes its media) and anidoodle's own as shipped (tools/anidoodle-previews.mjs); never a user's character
 copyPart("library-characters", join(APP_ROOT, "bundle", "library", "characters"), join(OUT, "library", "characters"), {
-  keep: (r) => /^(clawd|moworks-[a-z0-9-]+)\//.test(r) || /^anidoodle-human\/(mira|theo|bit|cheetah|moworks-[a-z0-9-]+)\//.test(r),
+  keep: (r) => /^(clawd|moworks-[a-z0-9-]+)\//.test(r) || /^anidoodle-human\/(mira|theo|bit|cheetah|moworks-[a-z0-9-]+)\//.test(r) || /^(cartoon-3d|ricks-clip|what-if|stickman-explainer|inner-voice-short|explainer-2d)\/moworks-[a-z0-9-]+\//.test(r),
   source: "the Character page's demo media (Clawd: the kit's demo, a demo of the layer only, never in a film)", licence: "ClaudeAnimationBase MIT (Clawd is Anthropic's mascot); anidoodle Apache-2.0" });
 // What If's demo film: made in the app, not from a pinned source, so it is only kept and counted (packages/what-if-styles DEMO)
 copyPart("library-what-if", join(OUT, "library", "what-if"), join(OUT, "library", "what-if"), {

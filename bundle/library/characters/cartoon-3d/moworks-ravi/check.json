@@ -1,0 +1,32 @@
+{
+  "passed": 26,
+  "failed": 0,
+  "lines": [
+    "PASS  imports only three and the source skill's kit (\"cartoon-3d/kit/…\")",
+    "PASS  one export: CHARACTER",
+    "PASS  deterministic: no random numbers, no clock",
+    "PASS  no words on the character (a film writes its own; never a brand)",
+    "PASS  nothing loaded from elsewhere",
+    "PASS  the file builds with the source skill's code",
+    "PASS  the file exports CHARACTER",
+    "PASS  the character's id is its file's name",
+    "PASS  a name of 1-40 letters",
+    "PASS  about: one line on who it is (10-300 letters)",
+    "PASS  its real height in metres (heightM, 0.5-2.3)",
+    "PASS  def: the source skill's CharDef, with its name",
+    "PASS  def: top, skin and hair as #rrggbb",
+    "PASS  def: a hair style the source skill draws (tuft, glasses, bun, beanie)",
+    "PASS  a shipped character's id takes the prefix moworks-",
+    "PASS  build() returns the source skill's Character (root, parts, setPose, setExpr): made on buildCharacter",
+    "PASS  the same every time (no random number in it)",
+    "PASS  every part is the character's (userData.char = true), so the collision check sees it",
+    "PASS  flat-drawn: no lit or shaded material on the character (STYLE.md)",
+    "PASS  both hand spheres in place (held props are gripped by them)",
+    "PASS  stands on the floor as the cast does",
+    "PASS  about the cast's size (1.50-2.64 m tall in the world)",
+    "PASS  nothing sticks out far (within 1.6 m across)",
+    "PASS  every face of the source skill draws (neutral, calm, blink, smile, eager, wince, alarmed, talk)",
+    "PASS  every face of the sheet standard draws (neutral, happy, laugh, surprised, worried, angry, talk, blink)",
+    "PASS  every pose holds together (stand, sit, walk, point, wave, a reach with poseReach)"
+  ]
+}

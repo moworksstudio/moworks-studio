@@ -1,6 +1,7 @@
 // Small shared pieces: hash router, persisted UI prefs, data hook, toasts, formatting.
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { tr } from "./i18n.jsx";
+import { watchJob } from "./api.js";
 
 /* ---------- router: #/path ---------- */
 export function useRoute() {
@@ -10,6 +11,8 @@ export function useRoute() {
   return path;
 }
 export const go = (path) => { location.hash = path; };
+/** The same, in place of the address now (no new step in the history): a sheet closed takes its name off the address. */
+export const goReplace = (path) => { history.replaceState(null, "", "#" + path); dispatchEvent(new HashChangeEvent("hashchange")); };
 
 /* ---------- per-user UI prefs (panel widths, view mode, filters): browser storage, never project data ---------- */
 export function usePref(key, initial) {
@@ -33,17 +36,40 @@ export function useData(loader, deps = []) {
   return { ...state, reload: load };
 }
 
+/** Read `read` every `every` ms while `on`, the next read only once the last one is answered (setInterval stacked reads on a busy
+ *  computer whose service went quiet for 12-30 s: audit/112c c2.1); stops when `on` goes false or the component goes. */
+export function usePoll(read, every, on = true) {
+  const latest = useRef(read);
+  latest.current = read;
+  useEffect(() => {
+    if (!on) return undefined;
+    let alive = true, h = null;
+    const loop = async () => { try { await latest.current(); } catch { /* the next read tries again */ } if (alive) h = setTimeout(loop, every); };
+    h = setTimeout(loop, every);
+    return () => { alive = false; clearTimeout(h); };
+  }, [on, every]);
+}
+
 /* ---------- toasts ---------- */
+/** How long a toast stays: an error is read with care and has no other place to be read again, so it stays longer, and while the pointer
+ *  is on it (audit/112c c1.4); a done line passes quickly. */
+export const toastMs = (kind) => (kind === "error" ? 8000 : 3200);
 const ToastCtx = createContext(() => {});
 export function ToastProvider({ children, render }) {
   const [items, setItems] = useState([]);
+  const held = useRef(new Set());          // toasts under the pointer: they wait until it leaves
   const push = useCallback((text, kind = "ok") => {
     const id = Math.random().toString(36).slice(2);
     setItems((x) => [...x, { id, text, kind }]);
-    setTimeout(() => setItems((x) => x.map((i) => (i.id === id ? { ...i, leaving: true } : i))), 3200);
-    setTimeout(() => setItems((x) => x.filter((i) => i.id !== id)), 3200 + 200);
+    const leave = () => {
+      if (held.current.has(id)) { setTimeout(leave, 1000); return; }
+      setItems((x) => x.map((i) => (i.id === id ? { ...i, leaving: true } : i)));
+      setTimeout(() => setItems((x) => x.filter((i) => i.id !== id)), 200);
+    };
+    setTimeout(leave, toastMs(kind));
   }, []);
-  return <ToastCtx.Provider value={push}>{children}{render(items)}</ToastCtx.Provider>;
+  const hold = useCallback((id, on) => { if (on) held.current.add(id); else held.current.delete(id); }, []);
+  return <ToastCtx.Provider value={push}>{children}{render(items, hold)}</ToastCtx.Provider>;
 }
 export const useToast = () => useContext(ToastCtx);
 
@@ -96,3 +122,27 @@ export function parseLength(text) {
 export const words = (t) => (String(t ?? "").trim().match(/\S+/g) ?? []).length;
 // English keys for t(): STAGE_NAMES[k] is shown as t(STAGE_NAMES[k])
 export const STAGE_NAMES = { brief: "Brief", storyboard: "Storyboard", motionPlan: "Motion plan", build: "Build", review: "Review", export: "Export" };
+
+/** One job a component follows (audit/112 2.6: each page wrote this loop its own way): [job, follow, setJob]. follow(j) shows j (as the
+ *  server answered its start) and every state after it; onEnd(x) runs once when it ends (done, failed, cancelled, or lost). Its watch
+ *  stops with the component. */
+export function useJob(onEnd, every = 1000) {
+  const watch = useJobWatch();
+  const [job, setJob] = useState(null);
+  const end = useRef(onEnd); end.current = onEnd;
+  const follow = useCallback((j) => { setJob(j); watch(j.id, (x) => { if (!x) return; setJob(x); if (x.status !== "running") end.current?.(x); }, every); }, [watch, every]);
+  return [job, follow, setJob];
+}
+
+/** watchJob for a component: every watch it starts stops when the component goes (a sheet closed, a page left), and when its job ends
+ *  (audit/112c c5.1: no caller kept the stop, so a closed sheet's loop ran until its job ended). */
+export function useJobWatch() {
+  const stops = useRef(new Set());
+  useEffect(() => () => { for (const s of stops.current) s(); stops.current.clear(); }, []);
+  return useCallback((id, cb, every, opts) => {
+    let stop = null;
+    stop = watchJob(id, (x, e) => { if (x?.status !== "running" && stop) stops.current.delete(stop); cb(x, e); }, every, opts);
+    stops.current.add(stop);
+    return stop;
+  }, []);
+}

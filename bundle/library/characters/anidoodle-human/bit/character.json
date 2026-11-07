@@ -19,5 +19,36 @@
     "engine/src/canvas-core/bitRig.ts",
     "engine/src/canvas-core/storybook.ts"
   ],
-  "savedAt": "2026-10-24T18:40:59.333Z"
+  "savedAt": "2026-10-24T18:40:59.333Z",
+  "can": {
+    "views": [
+      "front"
+    ],
+    "viewNotes": "front only: sprites the storybook plate drew once",
+    "faces": [
+      "neutral",
+      "happy",
+      "laugh",
+      "surprised",
+      "worried",
+      "angry",
+      "talk",
+      "blink"
+    ],
+    "faceNotes": "his own eyes (open, happy, shut, blink, squint), brows (neutral, up, worried, none) and mouths (smile, grin, o, wobble, flat); angry is his squint and a flat mouth",
+    "poses": [
+      "stand",
+      "lean",
+      "arm up",
+      "both arms up",
+      "cheer",
+      "squash"
+    ],
+    "poseNotes": "BitPose: off, bob, squash, lean, head, look, arms (lift 0-0.8), the cheer's jump; no walk, point or sit",
+    "hands": "n/a: mitten hands on lifted arms",
+    "walk": "n/a (a bob and a jump)",
+    "talk": "his o and smile by turns; no lip sync"
+  },
+  "sheet": "MW Character Sheet v1 (reduced)",
+  "sheetBy": "Moworks Studio: packages/anidoodle-styles/v1 (the app's sheet film; every figure drawn by the author's engine as pinned)"
 }

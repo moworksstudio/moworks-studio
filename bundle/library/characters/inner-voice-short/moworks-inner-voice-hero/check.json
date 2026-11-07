@@ -1,0 +1,20 @@
+{
+  "passed": 14,
+  "failed": 0,
+  "lines": [
+    "PASS  one export, CHARACTER, and no import (options for the source skill's own drawing)",
+    "PASS  deterministic: no random numbers, no clock",
+    "PASS  no words, nothing loaded",
+    "PASS  the character's id is its file's name (moworks-inner-voice-hero)",
+    "PASS  the file exports CHARACTER",
+    "PASS  a name of 1-40 letters",
+    "PASS  about: one line on who it is (10-300 letters)",
+    "PASS  its real height in metres (heightM, 0.5-2.3)",
+    "PASS  drawn by its film style's own engine (inner-voice-short)",
+    "PASS  every cell of the sheet draws, the same every time",
+    "PASS  every cell shows the character",
+    "PASS  every cell inside its box",
+    "PASS  the four views differ",
+    "PASS  every face changes the front"
+  ]
+}

@@ -36,7 +36,7 @@ export default function ExitButton({ className = "chip-status" }) {
       <button className="btn danger" onClick={exit} disabled={state === "stopping"}>{state === "stopping" ? <Loader2 size={14} className="spin" /> : <Power size={14} />}{t("Exit")}</button></>}>
       {groups.size > 0 ? <ul className="plain exit-list">{[...groups].map(([project, xs]) => <li key={project}><b>{project}</b>
         <span>{xs.map((x) => t(KIND[x.kind] ?? x.label ?? x.kind)).join(" · ")}</span></li>)}</ul>
-        : <p>{t("Your projects are saved.")}</p>}
+        : <p>{t("Your productions are saved.")}</p>}
       {/* one idea a line; the work that stops, in red */}
       {work ? <div className="dlg-lines"><p className="dlg-warn">{t("Running work stops now.")}</p><p className="hint">{t("What changed so far is kept as an undoable revision.")}</p></div>
         : <p className="hint">{t("Closing the window does the same.")}</p>}

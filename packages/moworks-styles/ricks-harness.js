@@ -2,6 +2,7 @@
 // character's card exactly as the film's engine does (main.js Card: a 1200 x 2000 canvas, the 600 x 1000 design space scaled 2x, a new Pen)
 // and measures it. window.RC is the only thing it adds to the page.
 import * as T from "mw-ricks-toon";
+import { FRAME, drawFrame, fitInCell } from "../character-kit/sheet-frame.js";
 
 const CW = 1200, CH = 2000;
 const canvas = (w = CW, h = CH) => { const c = document.createElement("canvas"); c.width = w; c.height = h; return c; };
@@ -30,42 +31,36 @@ function cardImage(id, opts = {}) {
   return c;
 }
 
-/** The model sheet: the three views, the faces, the arm poses, a walk, each labelled; on the source skill's warm ground. */
+/** The model sheet, MW Character Sheet v1 (owner #1287-#1293): four rows in the standard's order, the views, the eight faces, the six poses, the walk's
+ *  phases; the character's name the only other text (#1290). Hands: none of their own here (ink dots), so no row. On the source skill's warm ground. */
 function sheet(id) {
-  const c = T.CAST[id], cell = 300, ch = 500, pad = 18;
+  const c = T.CAST[id], F = T.STANDARD_FACES;
   const rows = [
-    { title: "Views", items: T.VIEWS.map((v) => ({ label: v, opts: { view: v } })) },
-    { title: "Faces (front)", items: ["neutral", "smile", "grin", "laugh", "stern", "nervous", "shock", "squint"].map((e) => ({ label: e, opts: { view: "front", expr: e } })) },
-    { title: "Faces (profile)", items: ["neutral", "smile", "laugh", "shock"].map((e) => ({ label: e, opts: { view: "profile", expr: e } })) },
-    { title: "Arm poses (front)", items: ["point", "up", "wave", "hip", "belly", "temple", "reach", "cheek", "cross", "thumb"].map((a) => ({ label: a, opts: { view: "front", L: a } })) },
-    { title: "Walk (profile, back)", items: [0, 0.25, 0.5, 0.75].map((ph) => ({ label: `profile ${ph}`, opts: { view: "profile", walk: true, phase: ph } })).concat([0, 0.5].map((ph) => ({ label: `back ${ph}`, opts: { view: "back", walk: true, phase: ph } }))) },
+    { title: "Views", items: T.ALL_VIEWS.map((v) => ({ label: v, opts: { view: v } })) },
+    { title: "Faces", items: Object.entries(F).map(([k, e]) => ({ label: k, opts: { view: "front", expr: e, blink: k === "blink" ? 1 : 0 } })) },
+    { title: "Poses", items: [["stand", {}], ["walk", { walk: true, phase: 0.25 }], ["point", { R: "point" }], ["wave", { R: "wave", expr: "grin" }], ["reach", { R: "reach" }], ["sit", { sit: true, view: "profile" }]]
+      .map(([label, o]) => ({ label, opts: { view: "front", ...o } })) },
+    { title: "Walk", items: [0, 0.25, 0.5, 0.75].map((ph, i) => ({ label: i % 2 ? "pass" : "contact", opts: { view: "profile", walk: true, phase: ph } })) },
   ];
-  const cols = Math.max(...rows.map((r) => r.items.length)), W = pad * 2 + cols * cell, H = 90 + rows.reduce((a) => a + ch + 60, 0);
-  const s = canvas(W, H), g = s.getContext("2d");
-  g.fillStyle = "#f3ead8"; g.fillRect(0, 0, W, H);
-  g.fillStyle = "#241726"; g.font = "bold 34px sans-serif"; g.fillText(`${c?.name ?? id} · Ricks Clip`, pad, 52);
-  g.font = "20px sans-serif"; g.fillText(c?.about ?? "", pad + 2, 80);
-  let y = 100;
-  for (const r of rows) {
-    g.font = "bold 22px sans-serif"; g.fillText(r.title, pad, y + 22);
-    r.items.forEach((it, i) => {
-      const img = cardImage(id, it.opts), x = pad + i * cell;
-      g.fillStyle = "#e6dcc6"; g.fillRect(x + 4, y + 34, cell - 8, ch - 8);
-      g.drawImage(img, x + 4, y + 34, cell - 8, (cell - 8) * (CH / CW));
-      g.fillStyle = "#241726"; g.font = "18px sans-serif"; g.fillText(it.label, x + 10, y + 34 + ch - 16);
-    });
-    y += ch + 60;
-  }
+  // the one frame every engine's sheet keeps (../character-kit/sheet-frame.js); Hands n/a (ink dots)
+  const s = canvas(FRAME.W, FRAME.H), g = s.getContext("2d");
+  drawFrame(g, { name: c?.name ?? id, rows: [...rows, { title: "Hands", items: [] }] },
+    (gg, it, r) => { const f = fitInCell(r, 600, 1000); gg.drawImage(cardImage(id, it.opts), f.x, f.y, 600 * f.s, 1000 * f.s); });
   return s.toDataURL("image/png");
 }
-/** Frames of a short life clip: breathing (bob), blinks, a turn through the three views and a walk. Each a JPEG data URL. */
+/** The life clip, 6 s at 30 fps (the standard's order): idle with a blink (0-1.5 s), a turn through the views (1.5-3.5), a walk (3.5-5), a talk
+ *  with a wave (5-6). Each frame a JPEG data URL. */
+const LIFE_FRAMES = 180;          // ricks-page.mjs drawLife takes as many
 function lifeFrame(id, f, fps = 30) {
   const t = f / fps, c = canvas(540, 900), g = c.getContext("2d");
   g.fillStyle = "#f3ead8"; g.fillRect(0, 0, 540, 900);
-  const view = t < 1.6 ? "front" : t < 2.4 ? "profile" : t < 3.2 ? "back" : "profile";
-  const walk = t >= 3.2, blink = (f % 52) < 2 ? 0.5 : (f % 52) < 4 ? 1 : 0;
+  const turn = ["front", "three-quarter", "profile", "back"], blink = (t > 0.8 && t < 0.95) || (f % 52) < 2 ? 1 : 0;
+  let o = { view: "front", bob: 0.006 * Math.sin(f * 0.11), headTilt: 1.5 * Math.sin(f * 0.037), blink, expr: "neutral" };
+  if (t >= 1.5 && t < 3.5) o = { ...o, view: turn[Math.min(3, Math.floor((t - 1.5) / 0.5))], expr: t > 2.2 && t < 3 ? "grin" : "neutral" };
+  else if (t >= 3.5 && t < 5) o = { ...o, view: "profile", walk: true, phase: ((t - 3.5) * 1.2) % 1 };
+  else if (t >= 5) o = { ...o, R: "wave", wv: t * 9, expr: T.talkExpr(t) };
   g.setTransform(540 / 600, 0, 0, 900 / 1000, 0, 0);
-  T.castDraw(new T.Pen(g), id, { view, walk, phase: walk ? (t * 1.2) % 1 : 0, bob: 0.006 * Math.sin(f * 0.11), headTilt: 1.5 * Math.sin(f * 0.037), blink, expr: t > 0.8 && t < 1.6 ? "smile" : "neutral" });
+  T.castDraw(new T.Pen(g), id, o);
   return c.toDataURL("image/jpeg", 0.9);
 }
 

@@ -2,7 +2,8 @@
 // them). The text is lyrics.txt in the project; tools/asr/align_lyrics.py (the Moworks Motion kit's align method, with Whisper Turbo) gives
 // every word a time: .moworks/lyrics/words.json, LYRICS-TIMED.md for the user and Claude, and HyperFrames' transcript.json (its lyric and
 // caption skills read it) through HF's own import, unless the project already has a saved voice-over transcript there.
-import { spawn, spawnSync } from "node:child_process";
+import { killTree } from "../system-status/kill-tree.mjs";
+import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { APP_ROOT } from "../version-manager/index.mjs";
@@ -10,13 +11,14 @@ import { importTranscript } from "../hf-audio/index.mjs";
 import * as asr from "./asr.mjs";
 import * as transcript from "./transcript.mjs";
 import { pyLibs } from "../setup/python.mjs";
+import { readJson } from "../util/json.mjs";
 
 export const TEXT = "lyrics.txt";
 export const TIMED = "LYRICS-TIMED.md";
 export const WORDS = ".moworks/lyrics/words.json";
 const MAX = 20000;
 const at = (dir, f) => join(dir, ...f.split("/"));
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
+
 const err = (code, message) => Object.assign(new Error(message), { code });
 
 /** The lyrics as the user wrote them, and the last timing (null when not timed, stale when the text changed after it). */
@@ -118,7 +120,7 @@ export async function align(dir, { track, workDir, signal, onEvent = () => {}, r
   const code = await new Promise((resolve) => {
     const child = spawn(asr.python(root), ["-I", script, card.path, wav, lyr, "--rhythm-audio", plain, "--language", "auto", "--device", device], {
       env: { ...process.env, PYTHONIOENCODING: "utf-8", PYTHONUTF8: "1", HF_HUB_OFFLINE: "1", MW_PYLIBS: pyLibs(root), ...cudaEnv }, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
-    const kill = () => spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], { windowsHide: true });
+    const kill = () => killTree(child);
     signal?.addEventListener("abort", kill, { once: true });
     let buf = "";
     child.stdout.on("data", (d) => {

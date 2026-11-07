@@ -1,32 +1,25 @@
 %%{init: {"themeVariables": {"fontSize": "13px"}, "flowchart": {"nodeSpacing": 16, "rankSpacing": 26, "padding": 6}}}%%
 flowchart TB
-    subgraph P1["Set up, once"]
+    subgraph P1["Plan"]
         direction LR
-        S1["<b>1 · Install</b><br/>clone, Moworks Studio.bat"] --> S2["<b>2 · First run</b><br/>theme, components, Claude sign-in"]
+        S0["<b>New production</b><br/>brief, film style, assets"] --> S1["<b>01 · Pre-production</b><br/>Claude reads, asks, voice-over"] --> S2["<b>02 · Storyboard</b><br/>you approve"] --> S3["<b>03 · Motion Plan</b><br/>you approve"]
     end
-    subgraph P2["Plan"]
+    subgraph P2["Make"]
         direction LR
-        S3["<b>3 · New project</b><br/>brief, style, assets"] --> S4["<b>4 · Prepare</b><br/>Claude reads, asks, voice-over"] --> S5["<b>5 · Storyboard</b><br/>you approve"] --> S6["<b>6 · Motion Plan</b><br/>you approve"]
+        S4["<b>04 · Production</b><br/>Build, Final Mix, Version 1"] --> S5["<b>05 · Review and checks</b><br/>when you ask: Review, Sizes, Tech checks"]
     end
-    subgraph P3["Build"]
+    subgraph P3["Deliver"]
         direction LR
-        S7["<b>7 · Production</b><br/>shot by shot, music and sound, Version 1"] --> S8["<b>8 · Review and checks</b><br/>fixed if you choose, tech checks"]
+        S6["<b>Render</b><br/>MP4 · MOV · WebM · subtitles"] --- S7["<b>AE Export</b><br/>After Effects project"]
     end
-    subgraph P4["Output"]
-        direction LR
-        S9["<b>9 · Render</b><br/>MP4 · Port to After Effects"]
-    end
-    P1 --> P2 -- "approved" --> P3 -- "ready" --> P4
+    P1 -- "approved" --> P2 -- "ready" --> P3
 
-    classDef setup fill:#555555,stroke:#333333,color:#ffffff
     classDef claude fill:#d97757,stroke:#a8502f,color:#ffffff
     classDef user fill:#1d3fd8,stroke:#122a96,color:#ffffff
     classDef out fill:#0a8f6a,stroke:#06684d,color:#ffffff
-    class S1,S2 setup
-    class S4,S7,S8 claude
-    class S3,S5,S6 user
-    class S9 out
-    style P1 fill:#f2f2f2,stroke:#555555,color:#333333
+    class S1,S4,S5 claude
+    class S0,S2,S3 user
+    class S6,S7 out
+    style P1 fill:#e8edfc,stroke:#1d3fd8,color:#122a96
     style P2 fill:#fbeee8,stroke:#d97757,color:#a8502f
-    style P3 fill:#e8edfc,stroke:#1d3fd8,color:#122a96
-    style P4 fill:#e6f5f0,stroke:#0a8f6a,color:#06684d
+    style P3 fill:#e6f5f0,stroke:#0a8f6a,color:#06684d

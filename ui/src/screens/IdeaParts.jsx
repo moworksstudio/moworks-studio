@@ -6,7 +6,8 @@
 // Lucian UX/UI Prompt #224 · MIT License (c) 2026 Seokwoooo · https://lucianlabs.dev/uxui-prompt/#224 (a source chip's preview card that floats
 //   above it): Sources, the numbered chips (and "+N", from Perplexica's source list, audit/104 §5 lesson 7) without the per-sentence marks.
 import { useEffect, useRef, useState } from "react";
-import { Check, ExternalLink } from "lucide-react";
+import { Check, ExternalLink, Loader2 } from "lucide-react";
+import { Dialog } from "../components.jsx";
 import { get, post } from "../api.js";
 import { useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
@@ -65,6 +66,44 @@ export function RunPanel({ job, title, sub, onStop }) {
       <span>{t(x.label)}{x.id === "web" && x.count > 0 && <small className="num"> · {x.count === 1 ? t("1 page read") : t("{n} pages read", { n: x.count })}</small>}</span></li>)}</ol>
     {failed && job.error?.message && <p className="wr-run-err" role="alert">{job.error.message}</p>}
   </section>;
+}
+
+/** A run's percent as the server says it (T42-3: the step's share moves with its time), null before it says one. */
+const pctOf = (job) => (job?.progress != null && job.status === "running" ? Math.max(0, Math.min(99, Math.round(job.progress))) : null);
+/** The place of what Claude is pitching or writing (owner #1324: the form of the character being made, which the owner liked): a dashed
+ *  card with a spinner, how far in big figures and a thin bar, what it is and the step it is on; a click opens the steps. `as` is the
+ *  element it sits in (a card in the ideas' grid, a row in the scripts' list). */
+export function MakingCard({ job, title, sub, onOpen, as = "card" }) {
+  const t = useT();
+  const p = pctOf(job), step = job.stage && job.stage !== "starting" ? t(String(job.stage)) : t("Starting…");
+  const bar = <span className="wr-making-bar" aria-hidden="true"><span style={{ transform: `scaleX(${Math.max(3, p ?? 3) / 100})` }} /></span>;
+  if (as === "row") return <button type="button" className="wr-sitem wr-making-row" onClick={onOpen} title={t("See the steps")}>
+    <span className="wr-making-h"><Loader2 size={13} className="spin wr-making-ic" aria-hidden="true" /><b>{title}</b><span className="wr-making-pct num">{p != null ? `${p}%` : ""}</span></span>
+    <small>{step}</small>{bar}</button>;
+  return <li className="wr-card-li"><button type="button" className="wr-card wr-making studio-paper" onClick={onOpen} title={t("See the steps")}>
+    <span className="wr-making-h"><Loader2 size={15} className="spin wr-making-ic" aria-hidden="true" /><b className="wr-card-t">{title}</b>
+      <span className="wr-making-pct num">{p != null ? `${p}%` : ""}</span></span>
+    {sub && <span className="wr-making-sub">{sub}</span>}
+    <span className="wr-making-step">{step}</span>{bar}
+  </button></li>;
+}
+/** The steps of a run in a dialog (the Characters page's "Making …" dialog): the step and percent, the bar, the steps so far, and at the foot
+ *  that it goes on when closed, Stop and Close. */
+export function RunDialog({ job, title, sub, onStop, onClose }) {
+  const t = useT();
+  const p = pctOf(job), halting = job.stage === "stopping";
+  const steps = (job.steps ?? []).filter((x) => x.state !== "skip" && x.state !== "todo");
+  return <Dialog title={title} onClose={onClose}
+    footer={<><span className="hint">{t("It goes on if you close this.")}</span><span className="spacer" />
+      {onStop && <button className="btn" onClick={onStop} disabled={halting}>{halting ? <Loader2 size={14} className="spin" /> : null}{halting ? t("Stopping…") : t("Stop")}</button>}
+      <button className="btn" onClick={onClose}>{t("Close")}</button></>}>
+    {sub && <p className="hint wr-making-dsub">{sub}</p>}
+    <p className="state-line run"><Loader2 size={14} className="spin" />{t(job.stage && job.stage !== "starting" ? String(job.stage) : "Starting…")}{p != null ? ` · ${p}%` : ""} · <Elapsed from={job.startedAt} /></p>
+    <div className="ch-bar"><span style={{ transform: `scaleX(${Math.max(3, p ?? 3) / 100})` }} /></div>
+    {steps.length > 0 && <ol className="wr-run-log wr-making-log">{steps.map((x) => <li key={x.id} className={x.state === "done" ? "ok" : ""}>
+      <span className="st" aria-hidden="true">{x.state === "done" && <Check size={11} />}</span>
+      <span>{t(x.label)}{x.id === "web" && x.count > 0 && <small className="num"> · {x.count === 1 ? t("1 page read") : t("{n} pages read", { n: x.count })}</small>}</span></li>)}</ol>}
+  </Dialog>;
 }
 
 /** The room's runs from the server (GET /api/ideas/jobs: running, and those that ended in the last minutes), every 2 s while one runs,

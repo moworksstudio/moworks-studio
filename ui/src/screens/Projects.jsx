@@ -46,7 +46,7 @@ function ProjectMenu({ p, onRename, onRemove, onLocate, toast }) {
   return <Menu trigger={<MoreHorizontal size={16} />} label={t("Actions for {title}", { title: p.title })} items={[
     { label: t("Rename"), icon: <Pencil size={14} />, onSelect: onRename, disabled: p.missing },
     { label: t("Show in folder"), icon: <FolderOpen size={14} />, onSelect: reveal, disabled: p.missing },
-    ...(p.missing ? [{ label: t("Locate project…"), icon: <FolderInput size={14} />, onSelect: onLocate }] : []),
+    ...(p.missing ? [{ label: t("Locate production…"), icon: <FolderInput size={14} />, onSelect: onLocate }] : []),
     { label: t("Duplicate"), icon: <Plus size={14} />, onSelect: () => {}, disabled: true, title: t("Coming later") },
     "-",
     { label: t("Remove from list"), icon: <Trash2 size={14} />, onSelect: onRemove, danger: true },
@@ -59,7 +59,7 @@ function CardActions({ p, onRename, onRemove, onLocate, toast }) {
   const stop = (fn) => (e) => { e.stopPropagation(); fn(); };
   const reveal = async () => { try { await post(`/api/projects/${p.id}/reveal`); } catch (e) { toast(e.message, "error"); } };
   return <div className="card-icons" onClick={(e) => e.stopPropagation()}>
-    {p.missing ? <button className="btn ghost sm" onClick={stop(onLocate)}><FolderInput size={14} />{t("Locate project…")}</button>
+    {p.missing ? <button className="btn ghost sm" onClick={stop(onLocate)}><FolderInput size={14} />{t("Locate production…")}</button>
       : <><button className="btn ghost icon sm" onClick={stop(onRename)} aria-label={t("Rename")}><Pencil size={15} /></button>
         <button className="btn ghost icon sm" onClick={stop(reveal)} aria-label={t("Show in folder")}><FolderOpen size={15} /></button></>}
     <button className="btn ghost icon sm danger" onClick={stop(onRemove)} aria-label={t("Remove from list")}><Trash2 size={15} /></button>
@@ -76,7 +76,7 @@ function PathDialog({ title, icon, help, cta, onClose, onSubmit }) {
   return <Dialog icon={icon} title={title} onClose={onClose} footer={<><span className="spacer" /><button className="btn" onClick={onClose}>{t("Cancel")}</button>
     <button className="btn primary" onClick={submit} disabled={!path.trim() || busy}><FolderInput size={14} />{cta}</button></>}>
     <form onSubmit={submit} className="field">
-      <label htmlFor="pathIn">{t("Project folder")}</label>
+      <label htmlFor="pathIn">{t("Production folder")}</label>
       <FolderField id="pathIn" editable value={path} drive={drive} title={title} placeholder={t("The film's folder")}onChange={(v, dr) => { setPath(v); setDrive(!!dr); }} />
       <span className="hint">{help}</span>
       {err && <span className="error-text" role="alert">{err}</span>}
@@ -121,24 +121,24 @@ export default function Projects() {
     setDlg(null); go(`/projects/${p.id}`);
   };
   const moveGit = async (p) => { try { await post(`/api/projects/${p.id}/move-git`); toast(t("History moved to this PC")); } catch (e) { toast(e.message, "error"); } setDlg(null); go(`/projects/${p.id}`); };
-  const rename = async (p, title) => { await patch(`/api/projects/${p.id}`, { title }); setDlg(null); toast(t("Project renamed")); reload(); };
+  const rename = async (p, title) => { await patch(`/api/projects/${p.id}`, { title }); setDlg(null); toast(t("Production renamed")); reload(); };
   const remove = async (p) => { await del(`/api/projects/${p.id}`); setDlg(null); toast(t("“{title}” removed from the list; its folder stays", { title: p.title })); reload(); };
-  const locate = async (p, path) => { await post(`/api/projects/${p.id}/relocate`, { path }); setDlg(null); toast(t("Project found")); reload(); };
+  const locate = async (p, path) => { await post(`/api/projects/${p.id}/relocate`, { path }); setDlg(null); toast(t("Production found")); reload(); };
 
   const empty = !loading && !error && (data?.projects ?? []).length === 0;
   // a project whose folder was deleted or moved outside the app opens a small dialog on this page (Back / Relink…)
   const openProject = (p) => (p.missing ? setDlg({ kind: "gone", p }) : go(`/projects/${p.id}`));
   const dialogs = <>
-      {dlg?.kind === "open" && <PathDialog icon={<FolderInput size={18} />} title={t("Import project")} cta={t("Import")} onClose={() => setDlg(null)} onSubmit={openExisting}
-        help={t("A film project folder anywhere on this PC. It stays where it is.")} />}
-      {dlg?.kind === "move-git" && <Dialog icon={<FolderInput size={18} />} title={t("Keep this project's history on this PC?")} onClose={() => { setDlg(null); go(`/projects/${dlg.p.id}`); }} footer={<><span className="spacer" />
+      {dlg?.kind === "open" && <PathDialog icon={<FolderInput size={18} />} title={t("Import production")} cta={t("Import")} onClose={() => setDlg(null)} onSubmit={openExisting}
+        help={t("A film production folder anywhere on this PC. It stays where it is.")} />}
+      {dlg?.kind === "move-git" && <Dialog icon={<FolderInput size={18} />} title={t("Keep this production's history on this PC?")} onClose={() => { setDlg(null); go(`/projects/${dlg.p.id}`); }} footer={<><span className="spacer" />
         <button className="btn" onClick={() => { setDlg(null); go(`/projects/${dlg.p.id}`); }}>{t("Leave it on Drive")}</button>
         <button className="btn primary" onClick={() => moveGit(dlg.p)}>{t("Move the history")}</button></>}>
         {/* one idea a line; no folder is named (no paths in the UI) */}
-        <div className="dlg-lines"><p>{t("This project is on Google Drive.")}</p>
+        <div className="dlg-lines"><p>{t("This production is on Google Drive.")}</p>
           <p>{t("Its edit history stays on this PC, so Drive does not sync thousands of small files.")}</p><p>{t("The film itself stays on Drive.")}</p>
-          <p className="hint">{t("The history is copied to the app's own folder and checked before the project points to it.")}</p></div></Dialog>}
-      {dlg?.kind === "gone" && <Dialog icon={<AlertTriangle size={18} />} title={t("This project's folder is gone")} onClose={() => setDlg(null)} footer={<><span className="spacer" />
+          <p className="hint">{t("The history is copied to the app's own folder and checked before the production points to it.")}</p></div></Dialog>}
+      {dlg?.kind === "gone" && <Dialog icon={<AlertTriangle size={18} />} title={t("This production's folder is gone")} onClose={() => setDlg(null)} footer={<><span className="spacer" />
         <button className="btn" onClick={() => setDlg(null)}>{t("Back")}</button>
         <button className="btn primary" onClick={() => setDlg({ kind: "locate", p: dlg.p })}><FolderSearch size={14} />{t("Relink…")}</button></>}>
         <div className="dlg-lines"><p className="dlg-warn">{t("“{title}” was deleted, moved or renamed outside the app.", { title: dlg.p.title })}</p>
@@ -149,7 +149,7 @@ export default function Projects() {
       {dlg?.kind === "remove" && <Dialog icon={<ListX size={18} />} danger title={t("Remove from list?")} onClose={() => setDlg(null)} footer={<><span className="spacer" /><button className="btn" onClick={() => setDlg(null)}>{t("Cancel")}</button>
         <button className="btn danger" onClick={() => remove(dlg.p).catch((e) => toast(e.message, "error"))}><ListX size={14} />{t("Remove from list")}</button></>}>
         <div className="dlg-lines"><p className="dlg-warn">{t("“{title}” leaves this list.", { title: dlg.p.title })}</p><p>{t("Its folder stays on the computer.")}</p>
-          <p className="hint">{t("Bring it back with Import project.")}</p></div></Dialog>}
+          <p className="hint">{t("Bring it back with Import production.")}</p></div></Dialog>}
   </>;
   // The Studio: the same data and dialogs, as the reel wall (studio/ReelWall.jsx: the film in hand on top, every film on two shelves)
   if (studio) return <ReelWall data={data} error={error} loading={loading} reload={reload} intro={<Intro hint={t("Start a film with the card on the left.")} />} dialogs={dialogs}
@@ -157,15 +157,15 @@ export default function Projects() {
   return (
     <div className="page">
       <div className="page-head">
-        <div><h1>{t("Projects")}</h1></div>
+        <div><h1>{t("Productions")}</h1></div>
         <div className="actions">
-          <button className="btn" onClick={() => setDlg({ kind: "open" })}><FolderInput size={16} />{t("Import project")}</button>
-          <button className="btn primary" onClick={() => go("/new")}><Plus size={16} />{t("New project")}</button>
+          <button className="btn" onClick={() => setDlg({ kind: "open" })}><FolderInput size={16} />{t("Import production")}</button>
+          <button className="btn primary" onClick={() => go("/new")}><Plus size={16} />{t("New production")}</button>
         </div>
       </div>
 
       {!empty && <div className="toolbar">
-        <div className="search"><Search size={15} /><input className="input" placeholder={t("Search projects")} value={q} onChange={(e) => setQ(e.target.value)} aria-label={t("Search projects")} /></div>
+        <div className="search"><Search size={15} /><input className="input" placeholder={t("Search productions")} value={q} onChange={(e) => setQ(e.target.value)} aria-label={t("Search productions")} /></div>
         <div className="segmented" role="group" aria-label={t("Filter")}>{FILTERS.map(([k, l, I]) => <button key={k} aria-pressed={filter === k} onClick={() => setFilter(k)}><I size={13} />{t(l)}</button>)}</div>
         <span className="select-wrap"><ArrowDownUp size={14} /><select className="select" value={sort} onChange={(e) => setSort(e.target.value)} aria-label={t("Sort")}>
           {SORTS.map(([k, l]) => <option key={k} value={k}>{t(l)}</option>)}</select></span>
@@ -175,16 +175,16 @@ export default function Projects() {
         </div>
       </div>}
 
-      {error && <Banner kind="error" action={<button className="btn sm" onClick={reload}><RotateCw size={13} />{t("Retry")}</button>}>{t("Could not load the projects.")} {error.message}</Banner>}
+      {error && <Banner kind="error" action={<button className="btn sm" onClick={reload}><RotateCw size={13} />{t("Retry")}</button>}>{t("Could not load the productions.")} {error.message}</Banner>}
 
       {loading && !data && <>
-        <div className="loading-line" role="status"><span className="loading-mark" aria-hidden="true"><span className="brand-mark" /></span>{t("Opening your projects…")}</div>
+        <div className="loading-line" role="status"><span className="loading-mark" aria-hidden="true"><span className="brand-mark" /></span>{t("Opening your productions…")}</div>
         <div className="grid">{Array.from({ length: 6 }, (_, i) => <div key={i} className="skeleton" style={{ height: "18rem" }} />)}</div></>}
 
       {/* the empty Projects page: the logo intro; the top-right buttons create and import */}
       {empty && <Intro />}
 
-      {data && !empty && items.length === 0 && <div className="empty"><p>{t("No project matches.")}</p><button className="btn sm" onClick={() => { setQ(""); setFilter("all"); }}><FilterX size={13} />{t("Clear filters")}</button></div>}
+      {data && !empty && items.length === 0 && <div className="empty"><p>{t("No production matches.")}</p><button className="btn sm" onClick={() => { setQ(""); setFilter("all"); }}><FilterX size={13} />{t("Clear filters")}</button></div>}
 
       {view === "grid" && items.length > 0 && <div ref={grid.ref} style={grid.style} className={"grid project-grid" + (enter ? " enter" : "")}>{items.slice(pageNow * per, pageNow * per + per).map((p, i) => (
         <article key={p.id} className="card clickable project-card" style={{ "--i": i }} onClick={() => openProject(p)}
@@ -228,9 +228,9 @@ function RenameDialog({ p, onClose, onSubmit }) {
   const [name, setName] = useState(p.title);
   const [err, setErr] = useState(null);
   const submit = async (e) => { e?.preventDefault(); try { await onSubmit(name.trim()); } catch (x) { setErr(x.message); } };
-  return <Dialog icon={<Pencil size={18} />} title={t("Rename project")} onClose={onClose} footer={<><span className="spacer" /><button className="btn" onClick={onClose}>{t("Cancel")}</button>
+  return <Dialog icon={<Pencil size={18} />} title={t("Rename production")} onClose={onClose} footer={<><span className="spacer" /><button className="btn" onClick={onClose}>{t("Cancel")}</button>
     <button className="btn primary" onClick={submit} disabled={!name.trim()}><Pencil size={14} />{t("Rename")}</button></>}>
-    <form className="field" onSubmit={submit}><label htmlFor="rn">{t("Project name")}</label><input id="rn" className="input" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
+    <form className="field" onSubmit={submit}><label htmlFor="rn">{t("Production name")}</label><input id="rn" className="input" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
       <span className="hint">{t("The folder keeps its name.")}</span>{err && <span className="error-text">{err}</span>}</form>
   </Dialog>;
 }

@@ -1,18 +1,19 @@
-// The film's voice-over and music set to their levels (sfx/actions.mjs trackGains: the voice at about -16 LUFS, the music 4 dB under it
+// The film's voice-over and music set to their levels (sfx/actions.mjs trackGains: the voice at about -16 LUFS, the music 1.5 dB under it (BED_UNDER)
 // between the words and ducked under them; a film with no voice has its music at -16 LUFS) and the music's duck lanes written
 // (hf-edit/tracks.mjs duckMusic). Each file's loudness is measured once with the app's FFmpeg (EBU R128) and kept in .moworks/loudness.json
 // by its size and time. A level the user set by hand in Studio stays theirs (tracks.mjs setTrackGain). Run when the music or the voice is
 // placed, when the transcript is saved, before Final Mix places the effects, and before a render, the checks or an export to AE; each
 // time the effects already placed are fitted again to the voice and the mix as they are now (voicefit.mjs).
+import { attrsOf, audioLine } from "../hf-edit/tag.mjs";
 import { execFile } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { trackGains } from "./actions.mjs";
-import { audioKind, duckMusic, filmWords, setTrackGain, trackClips } from "../hf-edit/tracks.mjs";
+import { audioKind, duckMusic, filmWords, limitVoice, setTrackGain, trackClips } from "../hf-edit/tracks.mjs";
 import { LANES, setLane } from "./lanes.mjs";
 import { patchState, readState } from "./index.mjs";
-import { ffmpegExe } from "../library/preview-media.mjs";
+import { ffmpegExe } from "../version-manager/index.mjs";
 import { fitEffects } from "./voicefit.mjs";
 
 const run = promisify(execFile);
@@ -133,7 +134,7 @@ export async function levelTracks(dir, { root, fit = true } = {}) {
   const words = filmWords(dir);
   const voice = voiceSrc ? await loudnessOf(dir, voiceSrc, { root }) : null, music = musicSrc ? await playedLoudness(dir, html, "music", { root, words: voiceSrc ? words : null }) : null;
   const g = trackGains({ voice, music, words: !!words?.length });
-  if (g.voiceGain != null) setTrackGain(dir, "voice", g.voiceGain);
+  if (g.voiceGain != null) { setTrackGain(dir, "voice", g.voiceGain); limitVoice(dir); }          // its peaks held at -1 dBTP (owner Qa3)
   if (g.musicGain != null) setTrackGain(dir, "music", g.musicGain);
   duckMusic(dir);
   if (fit) await fitEffects(dir, { root }).catch(() => null);
@@ -148,14 +149,13 @@ export async function balanceAgain(dir, { root } = {}) {
   let html; try { html = readFileSync(f, "utf8"); } catch { return null; }
   const st = readState(dir), placed = new Map((st.mounted ?? []).map((m, i) => [`el-sfx-${i}`, m]));
   for (const m of st.added ?? []) placed.set(m.id, m);
-  const attrsOf = (tag) => Object.fromEntries([...tag.matchAll(/([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*"([^"]*)"/g)].map((x) => [x[1], x[2]]));
   const out = html.replace(/<audio\b[^>]*>/gi, (tag) => {
     const a = attrsOf(tag), kind = audioKind(a), m = placed.get(a.id);
     if (!kind && !m) return tag;
     for (const k of ["data-automation", "data-mw-duck", "data-fx-carve", "data-fx-chain"]) delete a[k];
     if (kind) { delete a["data-mw-gain-mark"]; a["data-mw-gain"] = a["data-volume"] ?? "1"; }
     else if (Number.isFinite(m.base ?? m.volume)) a["data-volume"] = String(m.base ?? m.volume);
-    return `<audio ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}>`;
+    return audioLine(a);
   });
   if (out !== html) writeFileSync(f, out);
   patchState(dir, (x) => {

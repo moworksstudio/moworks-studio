@@ -10,7 +10,7 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync, copyFileSync } from "node:fs";
 import { join } from "node:path";
 import { APP_ROOT } from "../version-manager/index.mjs";
-import { workRoot } from "../project-service/index.mjs";
+import { addNote, workRoot } from "../project-service/index.mjs";
 import { getSecret } from "../secrets/index.mjs";
 import { patchState, readState, slug } from "./index.mjs";
 import { familyOf } from "./library.mjs";
@@ -19,6 +19,8 @@ export const EL = "https://api.elevenlabs.io";
 export const EL_SFX_MODEL = "eleven_text_to_sound_v3";
 /** At most this many sounds, and this many seconds of sound, made in one placement (the owner's credits). */
 export const GEN_MAX = 30, GEN_MAX_S = 60;
+/** About what ElevenLabs takes for one second of made sound (the line the chat shows before a placement makes any: owner Qa2). */
+export const CREDITS_PER_S = 40;
 export const GEN_MIN_S = 0.5, GEN_TOP_S = 30;
 export const GEN_TIMEOUT_MS = 60000;
 
@@ -103,9 +105,21 @@ export function soundMaker(dir, { root = APP_ROOT, fetchImpl = fetch, signal, ke
       return null;
     }
   };
-  return { make, made, errors, get stopped() { return stopped; }, get seconds() { return secs; } };
+  // what is about to be made, said once in the film's chat before the first call: how many sounds, about how many credits (owner Qa2:
+  // "chỉ thông báo cho user trước khi làm"). Inform only: nothing waits on it. Sounds in the cache cost nothing and are not counted.
+  const announce = (list) => {
+    let c = 0, s = 0;
+    for (const { text, seconds } of list ?? []) {
+      const dur = clampS(seconds);
+      if (stopped || n + c >= GEN_MAX || secs + s + dur > GEN_MAX_S) continue;
+      if (existsSync(join(genCache(root), `${keyOf(text, dur, EL_SFX_MODEL)}.mp3`))) continue;
+      c++; s += dur;
+    }
+    if (!c) return null;
+    const vars = { n: c, credits: Math.round(CREDITS_PER_S * s) };
+    try { addNote(dir, { kind: "pipeline", text: c === 1 ? "Making 1 sound effect with ElevenLabs: about {credits} credits." : "Making {n} sound effects with ElevenLabs: about {credits} credits.", vars }); } catch { /* notes are best effort */ }
+    return vars;
+  };
+  return { make, announce, made, errors, get stopped() { return stopped; }, get seconds() { return secs; } };
 }
 
-/** A made sound's cache entry exists (tests, the drawer). */
-export const madeExists = (text, durationS, { root = APP_ROOT, model = EL_SFX_MODEL } = {}) => existsSync(join(genCache(root), `${keyOf(text, clampS(durationS), model)}.mp3`));
-export const _readMeta = (id, root = APP_ROOT) => { try { return JSON.parse(readFileSync(join(genCache(root), `${id}.json`), "utf8")); } catch { return null; } };

@@ -15,8 +15,12 @@ export function scriptDraft(dir) {
   const read = (f) => { try { return readFileSync(docPath(dir, f), "utf8").replace(/^﻿/, ""); } catch { return ""; } };
   const own = read(SCRIPT_FILE).split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !/^#/.test(l)).map((l) => l.replace(/^(\d+[.)]|[-*•])\s+/, ""));
   if (own.length) return { text: own.join("\n"), from: SCRIPT_FILE };
-  const lines = read("BRIEF.md").split(/\r?\n/);
-  const at = lines.findIndex((l) => /(script to read|words to read|voice-?over script|lời đọc|kịch bản đọc)/i.test(l));
+  // the brief's script as the script check reads it (112a B10: "Narration:" filled one and not the other); else a list under a line
+  // that names the script and goes on ("Script to read, one line per scene:")
+  const brief = read("BRIEF.md"), block = briefScript(brief);
+  if (block.length) return { text: block.join("\n"), from: "BRIEF.md" };
+  const lines = brief.split(/\r?\n/);
+  const at = lines.findIndex((l) => /(script to read|words to read|voice-?over script|narration|lời đọc|kịch bản đọc)/i.test(l));
   if (at < 0) return null;
   const out = [];
   let kind = null;          // the list's own marker (numbered or a bullet) and indent: the brief's next point is not a line to read

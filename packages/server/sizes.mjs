@@ -11,7 +11,7 @@ import { join } from "node:path";
 import * as projects from "../project-service/index.mjs";
 import { addSize, aspectOfTag, entryOf, extraSizes, filmSizes, masterAspect, removeSize, sizeChoices, sizeRows, updateSize } from "../project-service/sizes.mjs";
 import * as pipe from "../pipeline/index.mjs";
-import { filmParts } from "./proxy.mjs";
+import { filmParts } from "../project-service/film-hash.mjs";
 
 /** The master's picture hash now (its sound, the other sizes' own files and root pages not counted): what a size is made from. */
 export function masterPicture(p) {

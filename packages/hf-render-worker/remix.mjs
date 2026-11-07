@@ -4,9 +4,10 @@
 // processCompositionAudio with the page's master chain and the engine's config, the mix padded or trimmed to the picture's length as HF's
 // assemble does (its AAC, 192k), and muxVideoWithAudio onto the picture's own video stream (copied, never re-encoded). The app's loudness
 // master runs after, as for every export.
+import { ffprobeExe } from "../version-manager/index.mjs";
 import { execFile } from "node:child_process";
 import { mkdirSync, readFileSync, renameSync, rmSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 
@@ -24,7 +25,7 @@ process.on("message", async (msg) => {
 const ff = (ffmpeg, args) => run(ffmpeg, ["-v", "error", "-y", ...args], { windowsHide: true, timeout: 300000, maxBuffer: 1 << 26 });
 /** The picture's length as HF measures it for its sound: its frame count over its rate. */
 async function pictureSeconds(ffmpeg, video, fps, fallback) {
-  const probe = join(dirname(ffmpeg), "ffprobe.exe");
+  const probe = ffprobeExe();          // version-manager's (audit/112 r2.2), the pins the render's FFmpeg comes from
   try {
     const { stdout } = await run(probe, ["-v", "error", "-select_streams", "v:0", "-count_packets", "-show_entries", "stream=nb_read_packets", "-of", "csv=p=0", video], { windowsHide: true, timeout: 120000 });
     const n = Number(String(stdout).trim());
@@ -32,7 +33,7 @@ async function pictureSeconds(ffmpeg, video, fps, fallback) {
   } catch { return fallback; }
 }
 const secondsOf = async (ffmpeg, file) => {
-  const { stdout } = await run(join(dirname(ffmpeg), "ffprobe.exe"), ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", file], { windowsHide: true, timeout: 60000 });
+  const { stdout } = await run(ffprobeExe(), ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", file], { windowsHide: true, timeout: 60000 });
   return Number(String(stdout).trim());
 };
 const truePeak = async (ffmpeg, file) => {

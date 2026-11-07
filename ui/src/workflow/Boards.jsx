@@ -9,11 +9,12 @@
 // as a PDF for a client.
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, ChevronLeft, ChevronRight, Download, FolderOpen, Loader2, MessageSquarePlus, Plus, ShieldCheck, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Download, Drama, FolderOpen, Loader2, MessageSquarePlus, Plus, ShieldCheck, X } from "lucide-react";
 import { api, download, get, post } from "../api.js";
 import { Banner, Pager } from "../components.jsx";
 import { ago, useData, useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
+import { useCastRule } from "../editor/CharacterDrawer.jsx";
 
 const SHEET = 9;          // panels a page on a card, at least: more panels, more pages (the large view steps through all)
 
@@ -179,10 +180,36 @@ function Lightbox({ projectId, option, start, onClose, onNote = null }) {
   </div>, document.body);
 }
 
+/** The feedback's Characters (owner #1319 2b, the owner's idea): the characters this film's style can take, as the Film Editor's drawer lists
+ *  them; a click puts the name in the note at the caret and the character with the note (the app puts it in the film's cast when the note
+ *  goes); a second click takes it out of the note's list (the words stay). */
+function CastPick({ styleId, cast, onCast, onName }) {
+  const t = useT();
+  const rule = useCastRule(styleId);
+  const [all, setAll] = useState(null);
+  useEffect(() => { let on = true; get("/api/characters").then((r) => { if (on) setAll(r.characters ?? r ?? []); }).catch(() => { if (on) setAll([]); }); return () => { on = false; }; }, []);
+  const rows = (all ?? []).filter((c) => !c.demo && c.selectable !== false && (rule ? rule.allow(c) : false));
+  if (all !== null && !rows.length) return <p className="hint bd-cast-none">{t("No character in the library fits this film style yet.")}</p>;
+  return <div className="bd-cast" role="list" aria-label={t("Characters")}>{(all === null ? [] : rows).map((c) => { const on = cast.some((x) => x.id === c.id);
+    return <button key={c.id} type="button" role="listitem" className={"bd-cast-it" + (on ? " on" : "")} aria-pressed={on} title={c.about ?? c.name}
+      onClick={() => { if (on) onCast(cast.filter((x) => x.id !== c.id)); else { onCast([...cast, { id: c.id, name: c.name }]); onName(c.name); } }}>
+      <span className="bd-cast-pic">{c.media?.poster ? <img src={c.media.poster} alt="" loading="lazy" /> : null}</span>
+      <span className="bd-cast-n">{on && <Check size={11} strokeWidth={3} />}{c.name}</span></button>; })}</div>;
+}
+
 /** The feedback box under the chosen option: one draft, typing @ lists the panels (with their pictures) to insert "@Panel_N: ". */
-export function FeedbackBox({ option, text, onText, onSubmit, onClose, locked = false, focusKey = 0 }) {
+export function FeedbackBox({ option, text, onText, onSubmit, onClose, locked = false, focusKey = 0, styleId = null, cast = [], onCast = null }) {
   const t = useT();
   const ta = useRef(null);
+  const [castOpen, setCastOpen] = useState(false);
+  const castable = useCastRule(styleId);
+  /** A picked character's name into the note at the caret (or at its end). */
+  const putName = (name) => {
+    const el = ta.current, at = el ? el.selectionStart ?? text.length : text.length;
+    const before = text.slice(0, at), sp = before && !/\s$/.test(before) ? " " : "";
+    const next = `${before}${sp}${name} ${text.slice(at)}`;
+    onText(next); requestAnimationFrame(() => { if (el) { el.focus(); const c = before.length + sp.length + name.length + 1; el.setSelectionRange(c, c); } });
+  };
   const [at, setAt] = useState(null);                  // the @ being typed: { start, query }
   const [hi, setHi] = useState(0);
   const panels = option.stillUrls.map((u, i) => ({ n: i + 1, url: u, title: option.frames[i]?.title ?? "" }));
@@ -205,7 +232,7 @@ export function FeedbackBox({ option, text, onText, onSubmit, onClose, locked = 
   const bad = unknownPanels(text, panels.length);
   const n = Object.entries(noteCounts(text)).filter(([k]) => !bad.includes(Number(k))).reduce((a, [, v]) => a + v, 0);
   return <div className="bd-col bd-fb">
-    <div className="bd-fb-h"><b>{t("Feedback on Option {o}", { o: option.label })}</b><span className="muted">{text.trim() ? t("Saved in the project") : ""}</span><span className="spacer" />
+    <div className="bd-fb-h"><b>{t("Feedback on Option {o}", { o: option.label })}</b><span className="muted">{text.trim() ? t("Saved in the production") : ""}</span><span className="spacer" />
       <button className="btn ghost icon sm" onClick={onClose} aria-label={t("Close the feedback")}><X size={14} /></button></div>
     <div className="bd-fb-field">
       <textarea ref={ta} className="textarea" rows={4} value={text} spellCheck={false} aria-label={t("Feedback on Option {o}", { o: option.label })}
@@ -215,7 +242,10 @@ export function FeedbackBox({ option, text, onText, onSubmit, onClose, locked = 
       {list.length > 0 && <ul className="pick-list bd-at" role="listbox" aria-label={t("Panels")}>{list.map((p, k) => <li key={p.n} role="option" aria-selected={k === hi}>
         <button type="button" onMouseDown={(e) => { e.preventDefault(); pick(p); }}><img src={p.url} alt="" /><b>{t("Panel {n}", { n: p.n })}</b><span className="muted">{p.title}</span></button></li>)}</ul>}
     </div>
-    <div className="row">{bad.length ? <span className="hint bd-fb-warn" role="alert">{t("This board has {n} panels: there is no {list}. Fix the number before you submit.", { n: panels.length, list: bad.map((k) => t("Panel {n}", { n: k })).join(", ") })}</span>
+    {castOpen && onCast && <CastPick styleId={styleId} cast={cast} onCast={onCast} onName={putName} />}
+    <div className="row">{onCast && castable && castable.mode !== "locked" && <button type="button" className={"btn ghost sm" + (castOpen ? " on" : "")} aria-expanded={castOpen} onClick={() => setCastOpen((x) => !x)}
+        title={t("Characters for this film: a click puts one in your note")}><Drama size={13} />{t("Characters")}{cast.length > 0 && <span className="num"> · {cast.length}</span>}</button>}
+      {bad.length ? <span className="hint bd-fb-warn" role="alert">{t("This board has {n} panels: there is no {list}. Fix the number before you submit.", { n: panels.length, list: bad.map((k) => t("Panel {n}", { n: k })).join(", ") })}</span>
       : <span className="hint">{n > 0 ? (n === 1 ? t("1 note on a panel") : t("{n} notes on panels", { n })) : t("Panels without a note stay as they are.")}</span>}<span className="spacer" />
       <button className="btn primary sm" disabled={!text.trim() || locked || bad.length > 0} onClick={onSubmit} title={locked ? t("Claude is working; this waits until it finishes") : undefined}>{t("Submit")}</button></div>
   </div>;
@@ -320,11 +350,11 @@ export default function Boards({ projectId, sel, onSel, onData, locked = false, 
         {/* PDF at the right edge of every board; saved in the project, then "Show in folder" */}
         {saved[o.key] ? <><span className="muted bd-saved"><Check size={13} />{t("PDF saved")}</span>
           <button className="btn ghost sm" onClick={() => reveal(saved[o.key])}><FolderOpen size={13} />{t("Show in folder")}</button></>
-          : <button className="btn ghost sm" onClick={() => pdf(o)} disabled={!!busy} title={t("Save this option as a PDF in the project")}>{busy === "pdf" + o.key ? <Loader2 size={13} className="spin" /> : <Download size={13} />}PDF</button>}</div>
+          : <button className="btn ghost sm" onClick={() => pdf(o)} disabled={!!busy} title={t("Save this option as a PDF in the production")}>{busy === "pdf" + o.key ? <Loader2 size={13} className="spin" /> : <Download size={13} />}PDF</button>}</div>
       {(data.taking || stale) && !stillsErr && !busyLine && lacking(o) && <p className="state-line run" role="status"><Loader2 size={13} className="spin" />{taking}</p>}
       {/* the card on the left, its feedback box beside it on the right while open (the board's empty half) */}
       <div className="bd-cols"><Option o={o} approved={approved} chosen={sel === o.key} onChoose={onSel} onLight={setLight} counts={noteCounts(fb.textOf(o.label))} onNote={noteOn} busy={!!busyLine} />
-        {fb.open && sel === o.key && <FeedbackBox option={o} text={fb.textOf(o.label)} onText={(v) => fb.set(o.label, v)} onSubmit={() => fb.submit(o)} onClose={fb.close} locked={locked} focusKey={fb.focus} />}</div>
+        {fb.open && sel === o.key && <FeedbackBox option={o} text={fb.textOf(o.label)} onText={(v) => fb.set(o.label, v)} onSubmit={() => fb.submit(o)} onClose={fb.close} locked={locked} focusKey={fb.focus} styleId={fb.styleId ?? null} cast={fb.cast ?? []} onCast={fb.setCast ?? null} />}</div>
     </div>)}
     {light && <Lightbox projectId={projectId} option={light.option} start={light.i} onClose={() => setLight(null)} onNote={(n, note) => { onSel(light.option.key); fb.add(light.option, n, note); }} />}
   </section>;

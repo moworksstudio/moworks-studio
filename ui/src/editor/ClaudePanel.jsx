@@ -7,11 +7,11 @@
 // Claude works or while the project renders wait in a queue that sends itself. Without a Claude sign-in nothing is sent and what is
 // typed stays as a draft.
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AudioLines, Bot, Check, CheckCircle2, ChevronDown, ChevronRight, CircleStop, Clapperboard, FileUp, Film as FilmIcon, FolderOpen, Globe, Hand, Library,
+import { AudioLines, Bot, Check, CheckCircle2, ChevronDown, ChevronRight, CircleStop, Clapperboard, Drama, FileUp, Film as FilmIcon, FolderOpen, Globe, Hand, Library,
   Loader2, MapPin, Play, RefreshCw, RotateCcw, Send, ShieldAlert, ShieldCheck, Wand2, X, XCircle } from "lucide-react";
 import { get, patch, post } from "../api.js";
 import { Banner } from "../components.jsx";
-import { ago, useToast } from "../lib.jsx";
+import { ago, usePoll, useToast } from "../lib.jsx";
 import Markdown from "./Markdown.jsx";
 import { useT } from "../i18n.jsx";
 import { NeedsClaude, useClaude } from "../workflow/claude.jsx";
@@ -51,21 +51,14 @@ export function Question({ q, projectId, taskId, toast, t }) {
     <div className="tx"><b>{q.web ? t("Claude wants to use the web") : t("Claude asks to: {tool}", { tool: t(toolWords(q.tool)) })}</b>{q.what && <code>{q.what}</code>}</div>
     <div className="acts">
       <button className="btn sm primary" disabled={busy} onClick={() => go("allow")}>{t("Allow")}</button>
-      {q.web && <button className="btn sm" disabled={busy} onClick={() => go("project")}>{t("Allow the web for this project")}</button>}
+      {q.web && <button className="btn sm" disabled={busy} onClick={() => go("project")}>{t("Allow the web for this production")}</button>}
       <button className="btn sm ghost" disabled={busy} onClick={() => go("deny")}>{t("No")}</button>
     </div></div>;
 }
 
-/** What a tool line names, in short: a file by its name, a search by its last plain segment, the project's own folder
- *  as "project files"; the full path stays in the tooltip. */
-export function shortPath(path, t = (x) => x) {
-  const p = String(path ?? "").replace(/\\/g, "/").replace(/\/+$/, "");
-  if (/(^|\/)projects\/[^/]+$/.test(p) || p === "." || p === "") return t("project files");
-  const parts = p.split("/").filter((x) => x && !/[*?{}[\]]/.test(x));
-  const last = parts.at(-1) ?? "";
-  if (!last || /^\.?moworks$/.test(last)) return t("project files");
-  return last;
-}
+/** A file the user added, named as the one-file line names it (its name, never its folder): the one other way a path is said
+ *  (audit/112c c4.4: a second rule, shortPath, named some paths by a folder). */
+export const addedName = (path) => String(path ?? "").replace(/\\/g, "/").split("/").pop();
 
 /** Details speak in plain words. Claude's and the app's tools by what they do, never their ids ("mcp__mw__character_gate");
  *  files by what they are ("the storyboard", "a film file"), never their names or folders. */
@@ -267,17 +260,17 @@ function ModelChip({ projectId, info, choices, onSaved, disabled, task = null })
   const now = task?.settings?.effort ?? runs;
   const effLine = runs ? t("Effort: {e} · Motion Plan: {m}", { e: effName(runs).toLowerCase(), m: effName("medium").toLowerCase() }) : null;
   const set = async (k, v) => { try { onSaved(await patch(`/api/projects/${projectId}/settings`, { [k]: v })); } catch (e) { toast(e.message, "error"); } };
-  const usage = u?.tasks ? t("This project so far: {n} tasks, {tok} tokens, at API list price {usd} (your plan does not bill this)",
-    { n: u.tasks, tok: fmtTok((u.input ?? 0) + (u.cacheWrite ?? 0) + (u.cacheRead ?? 0) + (u.output ?? 0)), usd: u.costUsd != null ? `≈ ${fmtUsd(u.costUsd)}` : "" }) : t("Model and effort for this project");
+  const usage = u?.tasks ? t("This production so far: {n} tasks, {tok} tokens, at API list price {usd} (your plan does not bill this)",
+    { n: u.tasks, tok: fmtTok((u.input ?? 0) + (u.cacheWrite ?? 0) + (u.cacheRead ?? 0) + (u.output ?? 0)), usd: u.costUsd != null ? `≈ ${fmtUsd(u.costUsd)}` : "" }) : t("Model and effort for this production");
   return <span className="cmodel" ref={box}>
     <button className="cmodel-chip" onClick={() => setOpen((x) => !x)} disabled={disabled} aria-expanded={open}
       title={now !== runs ? t("This step runs at {e} effort", { e: effName(now).toLowerCase() }) : usage}>
       {[eff.model && modelName(eff.model), now && effName(now)].filter(Boolean).join(" · ") || t("Model")}<ChevronDown size={12} /></button>
     {open && <div className="cmodel-pop" role="dialog" aria-label={t("Model and effort")} onKeyDown={(e) => { if (e.key === "Escape") setOpen(false); }}>
       <label><span>{t("Model")}</span><select className="select sm" value={own.model ?? "global"} onChange={(e) => set("model", e.target.value)}>
-        <option value="global">{t("As in Settings")} ({modelName(choices.model)})</option>{choices.models.map(([k, n]) => <option key={k} value={k}>{n}</option>)}</select></label>
+        <option value="global">{t("As in Studio Settings")} ({modelName(choices.model)})</option>{choices.models.map(([k, n]) => <option key={k} value={k}>{n}</option>)}</select></label>
       <label><span>{t("Effort")}</span><select className="select sm" value={own.effort ?? "global"} onChange={(e) => set("effort", e.target.value)}>
-        <option value="global">{t("As in Settings")} ({effName(choices.effort)})</option>{choices.efforts.map((k) => <option key={k} value={k}>{effName(k)}</option>)}</select></label>
+        <option value="global">{t("As in Studio Settings")} ({effName(choices.effort)})</option>{choices.efforts.map((k) => <option key={k} value={k}>{effName(k)}</option>)}</select></label>
       {effLine && <p className="hint">{effLine}</p>}
       {u?.tasks > 0 && <p className="hint">{usage}</p>}
     </div>}
@@ -453,7 +446,7 @@ function Note({ n, projectId, toast, onPlay = null, onFix = null, onDetails = nu
   return <li className={"cnote" + (n.status === "error" ? " stop" : n.status === "warning" ? " warn" : done ? " ok" : "")}>
     {done ? <CheckCircle2 size={13} /> : <I size={13} />}
     {/* a finished render says so in two words; its long file name is in the tooltip, Play and Show open it */}
-    <span className="t" title={n.kind === "render" && n.vars?.file ? n.vars.file : undefined}>{n.kind === "assets" ? (files.length === 1 ? t("Added 1 file: {name}", { name: files[0].split("/").pop() }) : t("Added {n} files", { n: files.length }))
+    <span className="t" title={n.kind === "render" && n.vars?.file ? n.vars.file : undefined}>{n.kind === "assets" ? (files.length === 1 ? t("Added 1 file: {name}", { name: addedName(files[0]) }) : t("Added {n} files", { n: files.length }))
       : n.kind === "render" && n.text === "Render finished: {file}" ? t("Render finished") : t(noteWords(n.text), n.vars)}</span>
     {n.kind === "assets" && files.length > 1 && <button className="clink" onClick={() => setOpen((x) => !x)}>{open ? t("Hide") : t("Show")}</button>}
     {/* a render that waits for the user (its quick check did not finish on a busy machine): Render opens again, with its Retry */}
@@ -463,13 +456,13 @@ function Note({ n, projectId, toast, onPlay = null, onFix = null, onDetails = nu
     {n.retry && <RetryStep projectId={projectId} step={n.retry} toast={toast} />}
     {n.kind === "render" && n.file && <><button className="clink" onClick={() => (onPlay ? onPlay(n.file) : file("open"))}><Play size={12} /> {t("Play")}</button><button className="clink" onClick={() => file("reveal")}><FolderOpen size={12} /> {t("Show")}</button></>}
     <time>{ago(n.updatedAt ?? n.at)}</time>
-    {open && <ul className="plain cnote-files">{files.map((f) => <li key={f}>{shortPath(f, t)}</li>)}</ul>}
+    {open && <ul className="plain cnote-files">{files.map((f) => <li key={f}>{addedName(f)}</li>)}</ul>}
   </li>;
 }
 
-export default function ClaudePanel({ projectId, selectedShot, onClearTarget, onChanged, prefill, selection = null, inject = null, reloadKey = 0, motionPick = null, version1 = null, onVersionChanged = null,
+export default function ClaudePanel({ projectId, selectedShot, onClearTarget, onChanged, selection = null, inject = null, reloadKey = 0, motionPick = null, version1 = null, onVersionChanged = null,
   onOpenMotions = null, motionsOpen = false, onOpenSounds = null, soundsOpen = false, steps = null, rendering = false, actions = [], onWaiting = null, stage = null, interrupted = null, onPlay = null, onOpenSheet = null, checks = null,
-  waiting = null, pins = null, onPinsSent = null, onSeek = null, fps = 24, editing = null }) {
+  waiting = null, pins = null, onPinsSent = null, onSeek = null, fps = 24, editing = null, onOpenCharacters = null, charactersOpen = false, castPicked = [], onCastPicked = null }) {
   const t = useT();
   const toast = useToast();
   const claude = useClaude();
@@ -532,21 +525,21 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
     if (loadErr.current) { const was = loadErr.current; loadErr.current = null; setErr((x) => (x === was ? null : x)); }
     setRunInfo({ settings: r.settings, own: r.own, usage: r.usage }); return r; } catch (e) { if (signal?.aborted) return undefined; loadErr.current = e.message; setErr(e.message); } };
   useEffect(() => { load(); }, [projectId, reloadKey]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => {          // the app's lines (the pipeline's milestones, files added, a render finishing) arrive while Claude is idle too
-    if (running) return;
-    // also while the browser counts the window as hidden (another tab on top: the Pipeline kept polling and said "answer
-    // Claude in the chat" over an empty chat until a reload), and at once when it shows again
-    const h = setInterval(load, 5000);
+  // the app's lines (the pipeline's milestones, files added, a render finishing) arrive while Claude is idle too: read every 5 s once the
+  // last read answered (audit/112c c2.1: an interval asked again while a busy server had not answered), also while the browser counts the
+  // window as hidden (another tab on top: the Pipeline kept polling and said "answer Claude in the chat" over an empty chat until a reload)
+  usePoll(load, 5000, !running);
+  useEffect(() => {          // and at once when the window shows again
+    if (running) return undefined;
     const back = () => { if (!document.hidden) load(); };
     document.addEventListener("visibilitychange", back);
-    return () => { clearInterval(h); document.removeEventListener("visibilitychange", back); };
+    return () => document.removeEventListener("visibilitychange", back);
   }, [running, projectId]); // eslint-disable-line react-hooks/exhaustive-deps
   // a stage that starts, waits or ends on the Pipeline is a task or a line this chat may not have yet (the project's first task,
   // Prepare, started while the page opened): it is loaded now, not at the next poll
   const stepsKey = (steps ?? []).map((x) => `${x.id}:${x.status}`).join(",") + "|" + (waiting ? waiting.id ?? waiting.line ?? 1 : "");
   const seenSteps = useRef(stepsKey);
   useEffect(() => { if (seenSteps.current === stepsKey) return; seenSteps.current = stepsKey; if (tasks !== null) load(); }, [stepsKey]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (prefill) setText((x) => x || prefill); }, [prefill]);
   useEffect(() => { try { sessionStorage.setItem(`mw-draft:chat:${projectId}`, text); } catch {} }, [text, projectId]);
   // poll only while a task runs: a read that failed, or that a busy server did not answer in time, is given up and asked again a little
   // later, so the working state ends once the task has (T26-3: the reads stopped at the first failed one; T25-7: at one never answered)
@@ -566,8 +559,10 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
   const scopeOf = (kind) => (kind === "selection" && selection ? { kind: "selection", selection: selection.context, shot: selectedShot ? { number: selectedShot.number, title: selectedShot.title, src: selectedShot.src } : null }
     : kind === "shot" && selectedShot ? { kind: "shot", shot: { number: selectedShot.number, title: selectedShot.title, src: selectedShot.src, start: selectedShot.start, duration: selectedShot.duration } }
       : { kind: "project" });
-  const submit = async (msg, kind, motion, scope = null, heldPins = null) => {
+  const submit = async (msg, kind, motion, scope = null, heldPins = null, cast = null) => {
     scope = scope ?? scopeOf(kind);
+    // characters picked in the Characters drawer (#1319 2b): the app puts them in the film's cast when the message goes
+    if (cast?.length) scope = { ...scope, characters: cast.map((c) => c.id) };
     // the Film Editor shows one of the film's other sizes: the request is for that size (the agent names its root page)
     if (editing && !scope.size) scope = { ...scope, size: editing };
     if (motion && msg.includes(motion.title)) scope.motion = { id: motion.id, name: motion.title, kind: motion.kind, version: motion.version ?? motion.credit?.commit ?? null, library: motion.library ?? "motion" };
@@ -582,13 +577,13 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
   const send = async () => {
     if (!text.trim() || sending) return;
     if (signedOut) { setErr(t("Claude is not connected: sign in, then send. Your message stays here.")); return; }
-    if (wait) { setQueue((q) => [...q, { text, kind: scopeKind, motion: motionCtx, pins }]); setText(""); setMotionCtx(null);
+    if (wait) { setQueue((q) => [...q, { text, kind: scopeKind, motion: motionCtx, pins, cast: castPicked }]); setText(""); setMotionCtx(null); onCastPicked?.([]);
       toast(rendering && !running ? t("Queued: it goes when the render finishes") : t("Queued: it goes when Claude finishes")); return; }
     setSending(true); setErr(null); setSentAt(Date.now());
-    try { await submit(text, scopeKind, motionCtx); setText(""); setMotionCtx(null); }
+    try { await submit(text, scopeKind, motionCtx, null, null, castPicked); setText(""); setMotionCtx(null); onCastPicked?.([]); }
     catch (e) {
       // Claude had just started a step this panel had not seen yet (the idle poll is 5 s): the message waits in the queue
-      if (e.code === "BUSY") { setQueue((q) => [...q, { text, kind: scopeKind, motion: motionCtx, pins }]); setText(""); setMotionCtx(null); toast(t("Queued: it goes when Claude finishes")); load(); }
+      if (e.code === "BUSY") { setQueue((q) => [...q, { text, kind: scopeKind, motion: motionCtx, pins, cast: castPicked }]); setText(""); setMotionCtx(null); onCastPicked?.([]); toast(t("Queued: it goes when Claude finishes")); load(); }
       else { if (e.code === "CLAUDE_SIGNED_OUT") claude?.refresh(true); setErr(e.message); }
     } finally { setSending(false); }
   };
@@ -613,7 +608,7 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
     setQueue(rest);
     // the autopilot may start the next step the moment a task ends; a busy answer puts the message back at the front
     // (after a short wait, so the poll can see the new task), never drops it; any other error hands it back to the composer
-    submit(next.text, next.kind, next.motion, next.scope ?? null, next.pins ?? null).catch((e) => {
+    submit(next.text, next.kind, next.motion, next.scope ?? null, next.pins ?? null, next.cast ?? null).catch((e) => {
       if (e.code === "BUSY") setTimeout(() => { setQueue((q) => [next, ...q]); load(); }, 1500);
       else { setText((cur) => cur || next.text); setErr(e.message); }
     });
@@ -671,13 +666,15 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
           <span className="t">{pinned.length === 1 ? t("Taking the picture of your note") : t("Taking the pictures of your {n} notes", { n: pinned.length })}</span><span className="cs-m"><Elapsed since={sentAt} /></span></div>}
         {queue.length > 0 && <div className="cqueue">{queue.map((q, i) => <span key={i} className="cchip"><span className="t">{t("Queued:")} {q.text}</span>
           <button className="btn ghost icon sm" onClick={() => setQueue((x) => x.filter((_, j) => j !== i))} aria-label={t("Remove from the queue")}><X size={12} /></button></span>)}</div>}
-        {(targetLabel || editing || pinned.length > 0 || (motionCtx && text.includes(motionCtx.title))) && <div className="ctarget">
+        {(targetLabel || editing || pinned.length > 0 || castPicked.length > 0 || (motionCtx && text.includes(motionCtx.title))) && <div className="ctarget">
           {/* another size is shown: what Claude changes is that size, never the master by mistake (#1235) */}
           {editing && <span className="cchip cpick csize" title={t("Claude changes the {size} size. The master and the sound stay as they are.", { size: editing })}><span className="t num">{t("Editing: {size}", { size: editing })}</span></span>}
           {pinned.length > 0 && <span className="cchip cpick" title={t("Each note goes with its frame and its place on the picture.")}><MapPin size={12} />
             <span className="t">{noteShots.length ? t(noteShots.length === 1 ? "Notes on shot {list}" : "Notes on shots {list}", { list: noteShots.join(", ") }) : t("Notes on the film")}</span></span>}
           {targetLabel && <span className="cchip cpick" title={t("Claude works on this. Clear it to work on the whole film.")}><span className="t">{t("Selected: {target}", { target: targetLabel })}</span>
             <button className="btn ghost icon sm" onClick={() => onClearTarget?.()} aria-label={t("Clear: the whole film")} title={t("Clear: the whole film")}><X size={12} /></button></span>}
+          {castPicked.map((c) => <span key={c.id} className="cchip cpick" title={t("Goes with the message: the app puts this character in the film's cast")}><Drama size={12} /><span className="t">{c.name}</span>
+            <button className="btn ghost icon sm" onClick={() => onCastPicked?.((x) => x.filter((y) => y.id !== c.id))} aria-label={t("Take {name} out of the message", { name: c.name })}><X size={12} /></button></span>)}
           {motionCtx && text.includes(motionCtx.title) && <span className="cchip amber"><Library size={12} /><span className="t">{t(KIND_LABEL[motionCtx.kind] ?? "Motion")}: {motionCtx.title}</span>
             <button className="btn ghost icon sm" onClick={() => setMotionCtx(null)} aria-label={t("Detach the library item")} title={t("Detach (the text stays)")}><X size={12} /></button></span>}
         </div>}
@@ -688,6 +685,7 @@ export default function ClaudePanel({ projectId, selectedShot, onClearTarget, on
         <div className="composer-actions">
           {onOpenMotions && <button className={"btn ghost sm" + (motionsOpen ? " on" : "")} onClick={onOpenMotions} aria-expanded={motionsOpen} title={t("Motions (opens under the film)")}><Library size={14} /><span className="lbl">{t("Motions")}</span></button>}
           {onOpenSounds && <button className={"btn ghost sm" + (soundsOpen ? " on" : "")} onClick={onOpenSounds} aria-expanded={soundsOpen} title={t("Sounds (opens under the film)")}><AudioLines size={14} /><span className="lbl">{t("Sounds")}</span></button>}
+          {onOpenCharacters && <button className={"btn ghost sm" + (charactersOpen ? " on" : "")} onClick={onOpenCharacters} aria-expanded={charactersOpen} title={t("Characters (opens under the film)")}><Drama size={14} /><span className="lbl">{t("Characters")}</span></button>}
           {text && <button className="clink" onClick={() => { setText(""); setMotionCtx(null); }}>{t("Clear")}</button>}
           <span className="gap" />
           {running && <button className="btn sm cstop" onClick={stop} disabled={stopping} title={t("Stop what Claude is doing; what is done is kept")}>{stopping ? <Loader2 size={13} className="spin" /> : <CircleStop size={14} />}<span className="lbl">{t("Stop")}</span></button>}

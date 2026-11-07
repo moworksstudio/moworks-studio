@@ -178,7 +178,7 @@ export default function MotionPlan({ id, setCrumbs = () => {} }) {
   const cards = useData(() => (libIds ? get(`/api/library?ids=${encodeURIComponent(libIds)}&limit=60`) : Promise.resolve({ items: [] })), [libIds]);
   const cardOf = (uid) => cards.data?.items?.find((x) => x.uid === uid) ?? null;
   const base = useBaseline(id, mp.data);
-  useEffect(() => { setCrumbs(project.data ? [t("Projects"), project.data.title, t("Motion Plan")] : null); }, [project.data, t]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setCrumbs(project.data ? [t("Productions"), project.data.title, t("Motion Plan")] : null); }, [project.data, t]); // eslint-disable-line react-hooks/exhaustive-deps
   const shots = sb.data?.shots ?? [];
   const planOf = (n) => mp.data?.plan.shots.find((s) => s.shot === n)?.motions ?? [];
   const saysOf = (n) => String(mp.data?.plan.shots.find((s) => s.shot === n)?.says ?? "").trim();

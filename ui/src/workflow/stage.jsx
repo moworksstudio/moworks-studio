@@ -18,7 +18,7 @@ export function useStage(projectId) {
 }
 
 export const SHEET_TITLES = { storyboard: "Storyboard", "motion-plan": "Motion Plan", voice: "Voice-over & transcript", qa: "Tech checks", ae: "Export to After Effects", render: "Render",
-  brief: "Brief", doc: "Document", assets: "Import assets", analysis: "Assets analysis", "qc-review": "Review", mix: "Final Mix", lyrics: "Lyrics", "music-map": "Music map", character: "Characters", sizes: "Adaptation" };
+  brief: "Brief", doc: "Document", assets: "Import assets", analysis: "Assets analysis", "qc-review": "Review", mix: "Final Mix", lyrics: "Lyrics", "music-map": "Music map", character: "Characters", sizes: "Formats" };
 
 const GuardCtx = createContext(null);
 /** A sheet's content calls this with "has unsaved edits": closing the sheet (×, Escape, a click outside) then asks first. */
@@ -49,9 +49,11 @@ export function useClaudeDone(projectId, onDone, watch = null) {
         prev = busy; prevKey = key;
       } catch { /* the next tick tries again */ }
     };
-    tick();
-    const h = setInterval(tick, 4000);
-    return () => { alive = false; clearInterval(h); };
+    // the next read 4 s after this one answered (audit/112c c2.1: an interval asked again while a busy server had not answered)
+    let h = null;
+    const loop = async () => { await tick(); if (alive) h = setTimeout(loop, 4000); };
+    loop();
+    return () => { alive = false; clearTimeout(h); };
   }, [projectId]);
   return working;
 }

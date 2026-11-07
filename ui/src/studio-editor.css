@@ -75,7 +75,6 @@
 [data-theme="studio"] .sp-pill.running { color: #8A5E06; }
 [data-theme="studio"] .sp-pill.failed, [data-theme="studio"] .sp-pill.redo { color: var(--registration); }
 [data-theme="studio"] .sp-pill b { color: var(--registration); font-weight: 700; }
-[data-theme="studio"] .sp-hint { font: 1rem / 1.1 var(--font-studio-hand); color: var(--pencil-ink); }
 /* the materials: blue pencil (not yet) · half inked (at work, waiting) · ink (done) · colour (ready to render) */
 [data-theme="studio"] .sp-st.todo { background: rgba(22, 19, 15, 0.92); color: #93BEE6; box-shadow: inset 0 0 0 1px rgba(63, 134, 201, 0.55);
   background-image: repeating-linear-gradient(-45deg, transparent 0 7px, rgba(63, 134, 201, 0.08) 7px 8px); }

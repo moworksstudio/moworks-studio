@@ -4,6 +4,8 @@
 // own address (no DNS rebinding) and a write from another site's Origin is refused. The UI gets the token from the launch URL (?t=...).
 // Claude Code's MCP channel (packages/agent/permit-mcp.mjs) gets a token of its own, good for AGENT_API only: Claude's Bash sees that
 // environment, and with the session token it could call any API.
+import { setupRoutes } from "./setup.mjs";
+import { looksRoutes } from "./looks.mjs";
 import { createServer } from "node:http";
 import { createHash, randomBytes } from "node:crypto";
 import { copyFileSync, createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
@@ -12,9 +14,10 @@ import { extname, join, normalize, resolve, sep } from "node:path";
 import { APP_ROOT, GPU_CHOICES, renderSettings, saveRenderSettings } from "../version-manager/index.mjs";
 import * as projects from "../project-service/index.mjs";
 import { docPath } from "../project-service/docs.mjs";
+import { pictureCreditsAgain } from "../project-service/credits.mjs";
 import { styleTraits } from "../style-catalog/traits.mjs";
 import { filmLength, plannedLength } from "../hf-edit/ending.mjs";
-import { getStyle, listStyles, selection, styleDesign, styleList, stylePipeline, warmCatalog } from "../style-catalog/index.mjs";
+import { getStyle, selection, styleDesign, styleList, stylePipeline, warmCatalog } from "../style-catalog/index.mjs";
 import { thumbFile } from "../style-catalog/thumbs.mjs";
 import { runtimeStatusAsync } from "../system-status/index.mjs";
 import { cachedCheck } from "./checkCache.mjs";
@@ -22,7 +25,6 @@ import { showInExplorer } from "../project-service/explorer.mjs";
 import { ARCHIVE } from "../project-service/archive.mjs";
 import { earlyStills, placedShots, readShots } from "../hf-edit/shots.mjs";
 import { finalize } from "../hf-edit/finalize.mjs";
-import { viCatalog } from "../hf-edit/googleFontsVi.mjs";
 // a character demo's stills off the server's thread, at the priority the sync snapshotAt had (T27-3)
 import { snapshotAtAsync, snapshotAtForeground as snapshotAt } from "../hf-qa/cli.mjs";
 import { render as renderFilm } from "../hf-render-worker/client.mjs";
@@ -60,18 +62,16 @@ import { localFile as localSoundFile, readState as readSfxState } from "../sfx/i
 import { editorRoutes } from "./editor.mjs";
 import { assetRoutes } from "./assets.mjs";
 import { soundRoutes } from "./sounds.mjs";
+import { mixRoutes } from "./mix.mjs";
 import { characterRoutes } from "./characters.mjs";
 import { proxyRoutes } from "./proxy.mjs";
 import { sizeRoutes, sizesOf } from "./sizes.mjs";
 import { styleAeRoutes } from "./styleAe.mjs";
 import { prefsRoutes } from "./prefs.mjs";
 import { ideaRoutes } from "../idea-library/index.mjs";
+import { THUMB_JOBS, thumbnailRoutes } from "./thumbnails.mjs";
 import { chatNotes } from "./filmNotes.mjs";
-import * as hfSkills from "../setup/hf-skills.mjs";
-import * as pySetup from "../setup/python.mjs";
 import * as firstRun from "../setup/first-run.mjs";
-import * as cuda from "../voice/cuda.mjs";
-import * as kokoro from "../voice/kokoro.mjs";
 import { claudeService } from "./claude.mjs";
 import { pickFolder } from "./folder-picker.mjs";
 import { gitKind, isDrivePath, moveGitOutAsync } from "../revisions/drive.mjs";
@@ -129,7 +129,33 @@ const AGENT_API = /^\/api\/agent\/(?:permit|permit\/wait|tool)$/;
  *  every poll; the style catalog also hashes rule files). */
 /** the status button says only Idle, Working, Downloading or Updating. The app's own update wins, then a download
  *  (first run, models, the offline files, a style source, Python's components), then any Claude task or other job. */
-const DOWNLOADS = new Set(["first-run", "offline-assets", "style-source", "setup-python", "setup-hf-skills", "model-install"]);
+const DOWNLOADS = new Set(["first-run", "offline-assets", "setup-python", "setup-hf-skills", "model-install"]);
+// The top bar's list of work (owner #1322): where each job opens, the jobs a person started or waits for (not the app's own small helpers:
+// previews, scans, proxies), and which of them say "done" in a notice with its Open when they end on another screen. The Writers Room's runs
+// say their own (idea-library), a film's new version too.
+const JOB_HREF = { "character-create": "#/characters", "character-demo": "#/characters", "idea-pitch": "#/ideas/research",
+  "looks-import": "#/looks", "blocks-import": "#/library", "app-update": "#/settings" };
+export const jobHref = (j) => (j.kind === "idea-script" && j.ideaId ? `#/ideas/scripts?id=${j.ideaId}` : THUMB_JOBS.has(j.kind) ? `#/thumbnails${j.filmId ? `?id=${j.filmId}` : ""}` : JOB_HREF[j.kind]
+  ?? (j.projectId ? `#/projects/${j.projectId}` : DOWNLOADS.has(j.kind) ? "#/settings/runtime" : null));
+const QUIET_JOBS = new Set(["preview-proxy", "scan", "look-scan", "intake-previews", "blocks-previews", "setup-python", "setup-hf-skills"]);
+export const RECENT_JOBS_MS = 30 * 60 * 1000;
+const ENDED_SAY = {
+  "character-create": { title: "Casting", done: "“{name}” is in your characters", failed: "“{name}” could not be made: {why}" },
+  "character-demo": { title: "Casting", done: "The sheets of “{name}” are drawn", failed: "The sheets of “{name}” were not drawn: {why}" },
+  export: { done: "The film is rendered", failed: "The render stopped: {why}" },
+  qa: { done: "The Tech checks are done", failed: "The Tech checks stopped: {why}" },
+  ae: { done: "The After Effects project is ready", failed: "Port to After Effects stopped: {why}" },
+  "looks-import": { title: "Brand Kits", done: "The Brand Kit is in", failed: "The Brand Kit was not added: {why}" },
+  "blocks-import": { title: "Motion Library", done: "The blocks are in", failed: "The blocks were not added: {why}" },
+  "model-install": { title: "Studio Settings", done: "The model is installed", failed: "The model was not installed: {why}" },
+};
+/** The notice a job's end says (App's notices: one line with its Open), or null for a job that says nothing. */
+export function endedNotice(job, projectTitle = null) {
+  const say = ENDED_SAY[job.kind];
+  if (!say || (job.status !== "done" && job.status !== "failed")) return null;
+  const name = job.result?.name ?? job.name ?? String(job.title ?? "").replace(/^(Making|Changing|Drawing) /, "").replace(/ with Claude$/, "");          // a job of before its name was kept: its title
+  return { title: say.title ?? projectTitle ?? "", text: say[job.status], vars: { name, why: job.error?.message ?? "" }, href: jobHref(job) ?? "#/projects", kind: job.kind, jobId: job.id };
+}
 /** The app's own update check waits while one of these runs: the update itself, an export, the film's pre-render. */
 const UPDATE_WAITS_FOR = new Set(["app-update", "export", "preview-proxy"]);
 export const updateCheckWaits = (jobs, renders) => jobs.running().some((j) => UPDATE_WAITS_FOR.has(j.kind)) || !!renders?.status().running;
@@ -392,7 +418,7 @@ export function routes(ctx) {
     }),
     // Settings › Update › Uninstall: what goes and what stays, with sizes (measured off the server's thread); then the removal starts in
     // its own window, which waits for this service to stop, and the app stops (packages/setup/uninstall.mjs)
-    r("GET", "/app/uninstall", () => uninstallPlan(root)),
+    r("GET", "/app/uninstall", (_p, _b, q) => ctx.checks.uninstall.get({ fresh: q.get("fresh") === "1" })),
     r("POST", "/app/uninstall", async (_p, b) => {
       if (!ctx.onExit) throw new HttpError(404, "NOT_FOUND", "Uninstall works when the app was started from its launcher");
       const busy = ctx.running().filter((x) => !x.idle);
@@ -420,54 +446,14 @@ export function routes(ctx) {
     r("POST", "/agent/permit/wait", async (_p, b) => ctx.agent.waitAnswer(String(b.id ?? ""))),
     // one of the app's own tools, called by Claude through the same MCP server (packages/agent/permit-mcp.mjs)
     r("POST", "/agent/tool", async (_p, b) => ctx.agent.callTool(String(b.task ?? ""), String(b.name ?? ""), b.arguments ?? {})),
-    // off the server's thread; answered at once with the last result while it runs again (?fresh=1 waits for the new one)
-    r("GET", "/system", (_p, _b, q) => ctx.checks.system.get({ fresh: q.get("fresh") === "1" })),
-    // the Google Fonts that draw Vietnamese: the pinned list with each family's author, licence and size, for a font picker
-    r("GET", "/fonts/google-vi", () => viCatalog()),
-    r("POST", "/setup/assets", () => ctx.installAssets()),
-    // HyperFrames' skills and registry at the pinned commit (thin git fetch), and the app's Python components (pip, pinned)
-    r("POST", "/setup/hf-skills", () => ctx.jobs.start("setup-hf-skills", { title: "HyperFrames skills" }, async (job) => {
-      const r0 = await hfSkills.fetchSkills(root, { onLine: (l) => job.update({ stage: l }) });
-      const v = hfSkills.verifySkills(root, { fresh: true });
-      if (!v.ok) throw Object.assign(new Error("The fetched skills do not match HyperFrames' manifest"), { code: "INTEGRITY" });
-      return { ...r0, skills: Object.keys(v.skills).length };
-    })),
-    // first run on a new computer: the list of everything beyond the repository with sizes, one "Download all", the work
-    // folder, one style author's source at its pinned commit
-    // off the server's thread; the last list at once while it is checked again (?fresh=1 waits)
-    r("GET", "/setup/first-run", async (_p, _b, q) => ({ ...(await ctx.checks.firstRun.get({ fresh: q.get("fresh") === "1" })), bundle: firstRun.bundleManifest(root) })),
-    r("POST", "/setup/first-run", (_p, b) => ctx.jobs.start("first-run", { title: "Setting up Moworks Studio" }, async (job) =>
-      firstRun.firstRunAll({ root, ids: Array.isArray(b.ids) ? b.ids.map(String) : null, extras: Array.isArray(b.extras) ? b.extras.map(String) : [], signal: job.signal, onProgress: ({ id, stage, progress }) => job.update({ stage: `${id}: ${stage}`, progress }) }))),
-    // Whisper on the graphics card. GET: the card, the pack (name, source, size, licence), installed or not, `ask` (asked once on
-    // a computer past its first run), the device Whisper uses and the last run's. POST { answer: yes | no }: yes installs it (a job)
-    r("GET", "/setup/whisper-gpu", () => cuda.gpuState(root)),
-    r("POST", "/setup/whisper-gpu", (_p, b) => {
-      const a = String(b?.answer ?? "");
-      if (a === "yes" && !cuda.eligible(cuda.detectGpu())) throw new HttpError(409, "NO_GPU", "This computer has no NVIDIA card for it");
-      cuda.answer(a, root);
-      if (a !== "yes") return cuda.gpuState(root);
-      return ctx.jobs.start("first-run", { title: cuda.PACK.title }, async (job) =>
-        firstRun.firstRunAll({ root, ids: [cuda.PACK.id], signal: job.signal, onProgress: ({ id, stage, progress }) => job.update({ stage: `${id}: ${stage}`, progress }) }));
-    }),
-    r("DELETE", "/setup/whisper-gpu", () => ({ pack: cuda.remove(root) })),
-    // the free voice's Remove (its Install is POST /setup/first-run { ids: ["kokoro"] }); a voice-over being read holds it
-    r("DELETE", "/setup/kokoro", () => {
-      if (ctx.jobs.running().some((j) => j.kind === "tts")) throw new HttpError(409, "BUSY", "A voice-over is being read: wait until it ends");
-      return { pack: kokoro.remove(root) };
-    }),
-    r("POST", "/setup/style-source/(lemo|mgStyles|anidoodle|characterKit|whatIf)", ([key]) => ctx.jobs.start("style-source", { title: `Style source ${key}`, key }, async (job) =>
-      firstRun.fetchStyleSource(key, { root, onLine: (l) => job.update({ stage: l }) }))),
-    r("POST", "/setup/python", () => ctx.jobs.start("setup-python", { title: "Python components" }, async (job) => {
-      const r0 = await pySetup.install(root, { onLine: (l) => job.update({ stage: l.slice(0, 120) }), signal: job.signal });
-      return { installed: r0.installed, ready: (await pySetup.statusAsync(root)).ready };
-    })),
+    ...setupRoutes(ctx, { r, HttpError }),          // Settings › System and the first run (server/setup.mjs)
     // The whole library as the user arranges it: author, then kind (Motions / Blocks / Looks), then category
     r("GET", "/library", (_p, _b, q) => ({ ...library.search({ q: q.get("q") ?? "", author: q.get("author") ?? "all", kind: q.get("kind") ?? "all",
       category: q.get("category") ?? "all", ids: q.get("ids") ? q.get("ids").split(",") : null, offset: Number(q.get("offset") ?? 0), limit: Math.min(60, Number(q.get("limit") ?? 12)),
         kinds: q.get("kinds") ? q.get("kinds").split(",") : null }, root),
       stores: { blocks: blocks.currentStore(root)?.manifest ?? null, looks: looks.currentStore(root)?.manifest ?? null,
         intake: intake.currentStore(root)?.manifest ?? null, vocab: vocab.currentStore(root)?.manifest ?? null },
-      importing: false, blocksJob: ctx.jobs.list({ kind: "blocks-import" })[0] ?? null,
+      blocksJob: ctx.jobs.list({ kind: "blocks-import" })[0] ?? null,
       previewJob: ctx.jobs.list({ kind: "blocks-previews" })[0] ?? null, looksJob: ctx.jobs.list({ kind: "looks-import" })[0] ?? null })),
     r("GET", "/library/item", (_p, _b, q) => { const it = library.getItem(q.get("uid") ?? "", root); if (!it) throw new HttpError(404, "NOT_FOUND", "Library item not found"); return it; }),
     // Library intake (Magic UI, Codrops, the studio's own, written as HyperFrames components; built and rendered by its cli.mjs):
@@ -486,26 +472,7 @@ export function routes(ctx) {
       const st = await looks.importLooks({ root, onProgress: ({ done, total }) => job.update({ progress: Math.floor((done / total) * 100), stage: `${done} of ${total}` }) });
       return st.manifest;
     })),
-    // Looks HF's frame presets and the user's own Looks in one list; a user's Look is made from a guideline
-    // (create, upload its files, scan: a job) and kept with versions
-    r("GET", "/looks", () => customLooks.apiLooks(root)),
-    r("POST", "/looks/fonts", (_p, b) => customLooks.kitFontFaces(b, { root })),
-    r("GET", "/looks/((?:frame|custom)/[a-z0-9-]+)", ([id]) => customLooks.apiLook(id, root)),
-    r("GET", "/looks/(frame/[a-z0-9-]+)/frames", async ([id]) => ({ frames: await looks.showcaseFrames(id, root) })),
-    r("POST", "/looks/(frame/[a-z0-9-]+)/copy", async ([id]) => customLooks.publicLook(await customLooks.copyLook(id, { root }), root)),
-    r("POST", "/looks", (_p, b) => customLooks.publicLook(customLooks.createLook(b, root), root)),
-    r("POST", "/looks/(custom/[a-z0-9-]+)/new-version", async ([id], b) => customLooks.publicLook(await customLooks.newVersion(id, b, { root }), root)),
-    r("POST", "/looks/(custom/[a-z0-9-]+)/scan", ([id], b) => {
-      const m = customLooks.getCustom(id, root);
-      if (!m) throw new HttpError(404, "NOT_FOUND", "Brand Kit not found");
-      if (!m.files.length) throw new HttpError(400, "INVALID", "Add the guideline's files first");
-      return ctx.jobs.start("look-scan", { title: `Scanning ${m.title}`, key: id }, async (job) => customLooks.publicLook(await customLooks.scanLook(id, { root, signal: job.signal, withoutLocked: !!b?.withoutLocked,
-        onProgress: ({ stage, progress }) => job.update({ stage, progress }) })));
-    }),
-    r("PATCH", "/looks/(custom/[a-z0-9-]+)", async ([id], b) => customLooks.publicLook(await customLooks.patchLook(id, b, { root }))),
-    r("POST", "/looks/(custom/[a-z0-9-]+)/versions/(\d+)/restore", async ([id, v]) => customLooks.publicLook(await customLooks.restoreVersion(id, v, { root }))),
-    r("DELETE", "/looks/(custom/[a-z0-9-]+)/files", ([id], _b, q) => customLooks.publicLook(customLooks.removeFile(id, q.get("name") ?? "", root))),
-    r("DELETE", "/looks/(custom/[a-z0-9-]+)", ([id]) => customLooks.deleteLook(id, root)),
+    ...looksRoutes(ctx, { r, HttpError }),          // the Brand Kits (server/looks.mjs)
     // Characters the character layer's characters, each with its credit, whether a project may use it (Clawd: a demo
     // only, never), and its demo media (the views and emotions sheets, a short showreel) made through HyperFrames by a job
     r("GET", "/characters", () => characterKit.apiCharacters(root)),
@@ -533,13 +500,9 @@ export function routes(ctx) {
       return { made: res.ok, failed: res.failed.length, total: res.total };
     })),
     r("GET", "/backup", () => ctx.backups.info()),
-    r("POST", "/backup", () => { ctx.backups.all(); return ctx.backups.info(); }),
-    r("GET", "/styles", () => listStyles(root)),
     // the gallery's and New project's light list, and one style in full when it is picked
     r("GET", "/styles/list", () => styleList(root)),
     r("GET", "/styles/([A-Za-z0-9][A-Za-z0-9-]*)", ([id]) => { const s = getStyle(id, root); if (!s) throw new HttpError(404, "NOT_FOUND", "No such style"); return s; }),
-    // OPUSCAR 98's style prompts: New project's sample prompts (with the author's frame of each; not styles)
-    r("GET", "/library/lemo/sample-prompts", () => lemo.samplePrompts(root)),
     r("GET", "/projects", async () => {
       let list = projects.listProjects(root);
       // design review #1: a card saved with the old step count is counted again in the 5 stages, once
@@ -974,9 +937,17 @@ export function routes(ctx) {
       { const p0 = projects.getProject(id, root); if (Object.values(p0?.meta?.links ?? {}).some((v) => !v?.ok)) { try { await ctx.slidesFromBrief?.(p0); } catch { /* Claude is told what still fails */ } } }
       // a PDF added since the last scan is read before Claude answers, so a password on it reaches Claude and its row in Assets
       await readNewPdfs(ctx, mustProject(id, root), root);
+      // characters picked in the Film Editor's Characters (owner #1319 2b): into the film's cast first, then named to Claude with the message
+      if (Array.isArray(b.scope?.characters) && b.scope.characters.length) b.scope = { ...b.scope, characters: await projects.addLibraryCharacters(id, b.scope.characters.map((c) => c?.id ?? c), root) };
       // notes pinned on the film come in the message: a still of each note's frame, its shot and place for Claude, drawn on the card
       // the user's message answers Claude's question: its "Answer Claude" card closes (it stood after the answer)
-      const answered = (t) => { try { projects.closeChatWaits(mustProject(id, root).path); } catch { /* the card is best effort */ } return t; };
+      // the film going to After Effects now has it as it was when the export began (audit/112d d8, owner): said once under the message
+      const exporting = ctx.jobs.list({ kind: "ae" }).some((j) => j.projectId === id && j.status === "running");
+      const answered = (t) => {
+        try { projects.closeChatWaits(mustProject(id, root).path); } catch { /* the card is best effort */ }
+        if (exporting) { try { projects.addNote(mustProject(id, root).path, { kind: "ae", status: "warning", text: "The AE export running now does not get these changes." }); } catch { /* the line is best effort */ } }
+        return t;
+      };
       { const n = await chatNotes(ctx, mustProject(id, root), b); if (n) return answered(await ctx.agent.start(id, { text: n.text, scope: b.scope, shown: n.shown, media: n.media })); }
       // "continue" after the user stopped a pipeline step carries that step on
       if (RESUME_IN.test(String(b.text ?? "")) && !ctx.agent.running.has(id)) {
@@ -992,10 +963,13 @@ export function routes(ctx) {
     }),
     // the status button's one word (state: idle | working | downloading | updating) with what it is about (job title)
     r("GET", "/tasks/running", () => ({ notices: ctx.notices?.list() ?? [], attention: ctx.attention?.list() ?? [], ...appState({ machineBusy: !!ctx.machine?.busy() && (ctx.agent.running.size > 0 || ctx.jobs.running().length > 0), tasks: [...ctx.agent.running.entries()].map(([projectId, taskId]) => {
-      const t = ctx.agent.get(taskId); return { projectId, taskId, kind: "claude", stage: t?.stage ?? null, title: projects.getProject(projectId, root)?.title ?? "" }; }),
-      jobs: ctx.jobs.running().map((j) => ({ id: j.id, kind: j.kind, projectId: j.projectId, title: j.title, stage: j.stage, progress: j.progress,
-        project: j.projectId ? projects.getProject(j.projectId, root)?.title ?? "" : null })) }) })),
-    r("GET", `/tasks/${T}`, ([tid]) => { const t = ctx.agent.get(tid); if (!t) throw new HttpError(404, "NOT_FOUND", "Task not found"); return t; }),
+      const t = ctx.agent.get(taskId); return { projectId, taskId, kind: "claude", stage: t?.stage ?? null, title: projects.getProject(projectId, root)?.title ?? "", href: `#/projects/${projectId}` }; }),
+      jobs: ctx.jobs.running().map((j) => ({ id: j.id, kind: j.kind, projectId: j.projectId, title: j.title, name: j.name ?? null, from: j.from ?? null, stage: j.stage, progress: j.progress, href: jobHref(j), quiet: QUIET_JOBS.has(j.kind),
+        project: j.projectId ? projects.getProject(j.projectId, root)?.title ?? "" : null })) }),
+      // the work that ended in the last half hour, newest first, for the top bar's list (#1322): done, failed or stopped, each with where it opens
+      recent: ctx.jobs.recent({ minutes: RECENT_JOBS_MS / 60000, ended: true, where: (j) => !QUIET_JOBS.has(j.kind) }).slice(0, 8)
+        .map((j) => ({ id: j.id, kind: j.kind, title: j.title, status: j.status, endedAt: j.endedAt, href: jobHref(j), error: j.error?.message ?? null,
+          project: j.projectId ? projects.getProject(j.projectId, root)?.title ?? "" : null })) })),
     r("POST", `/tasks/${T}/cancel`, ([tid]) => ctx.agent.cancel(tid)),
     // a task Exit stopped, run again as it was ("Resume / Send again")
     r("POST", `/projects/${P}/tasks/${T}/again`, async ([id, tid]) => { mustProject(id, root); return { task: await ctx.agent.again(id, tid) }; }),
@@ -1009,7 +983,9 @@ export function routes(ctx) {
 export async function startServer({ port = 0, root = APP_ROOT, token = randomBytes(24).toString("hex"), uiDir = join(root, "ui", "dist"),
   autoBackup = process.env.MW_NO_BACKUP !== "1", autoLibrary = process.env.MW_NO_LIBRARY_IMPORT !== "1", autoAssets = process.env.MW_NO_ASSET_INSTALL !== "1",
   onExit = null, onRestart = null, onWindowGone = null, onAttention = null, onFocusWindow = null, windowGraceMs = Number(process.env.MW_WINDOW_GRACE_MS ?? 10000), thumbnails = false,
-  updateCheck = false, housekeeping = false } = {}) {          // updateCheck: the app checks for its own new version by itself (the launcher; never in tests)
+  updateCheck = false, housekeeping = false, styleAeAtStart = false } = {}) {          // updateCheck: the app checks for its own new version by itself (the launcher; never in tests)
+  // styleAeAtStart: the film styles' After Effects badges measured a minute after start (the launcher; never in tests: it ran the AE port on
+  // every style's demo in the app's own runtime folder, and a test's process never ended, #1423)
   // housekeeping: old logs, old work folders and unused HyperFrames versions cleaned once at start (the launcher; never in tests)
   const ctx = { root, preview: null, onExit, onRestart, onAttention, onFocusWindow, lastSeen: Date.now(), machine: busyWatch() };
   // the moments the app waits for the user, said in Windows while the window is not in use (attention.mjs; read with GET /tasks/running)
@@ -1160,7 +1136,7 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
   ctx.agent = new Agent({ root, getProject: (id) => projects.getProject(id, root), readShots: (d) => readShots(d),
     updateMeta: (id, fn) => projects.updateMeta(id, fn, root),
     // then a voice-over that landed during the task is checked (voiceCheckDue: only when nothing else started meanwhile)
-    onFinished: (id, task) => { ctx.backupProject(id); ctx.thumbs.ask(id); setTimeout(() => ctx.autopilot.taskEnded(id, task).catch(() => {}).then(() => ctx.autopilot.voiceCheckDue(id)).catch(() => {}), 0); },
+    onFinished: (id, task) => { ctx.backupProject(id); ctx.thumbs.ask(id); try { const p = projects.getProject(id, root); if (p) pictureCreditsAgain(p.path); } catch { /* the credits wait for the next write */ } setTimeout(() => ctx.autopilot.taskEnded(id, task).catch(() => {}).then(() => ctx.autopilot.voiceCheckDue(id)).catch(() => {}), 0); },
     // a project being rendered is not changed
     // a new change by Claude stops the code film's smooth preview (it would show the film half-changed), and a
     // preview never holds Claude back: only a real render does
@@ -1173,7 +1149,10 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
   ctx.jobs = createJobs({ ended: (job) => {
     // the Render dialog's export: its end is a moment the user waits for; a failed one too (a stopped one is the user's own)
     if (job.kind === "export" && job.projectId) { try { if (job.status === "done") ctx.attention.add(job.projectId, "render"); else if (job.status === "failed") ctx.attention.add(job.projectId, "error", { open: "render" }); } catch { /* the dialog says it */ } }
-    if (DOWNLOADS.has(job.kind) || job.kind === "app-update") { ctx.checks?.system.clear(); ctx.checks?.firstRun.clear(); } } });
+    if (DOWNLOADS.has(job.kind) || job.kind === "app-update") { ctx.checks?.system.clear(); ctx.checks?.firstRun.clear(); }
+    // a background job the user waits for (a character takes 30-45 minutes) says its end on whatever screen they are on (#1322)
+    // the same words on the job itself, for the page that started it (audit/112c c2.5: the Casting page wrote its own copy of them)
+    try { const n = endedNotice(job, job.projectId ? projects.getProject(job.projectId, root)?.title ?? null : null); job.said = n ? { text: n.text, vars: n.vars } : null; if (n) ctx.notices?.add(n); } catch { /* the page shows it too */ } } });
   // the app's own check for a new version: a minute after start, then every six hours; never while it updates itself or renders
   ctx.updates = createUpdateChecker({ root, log: (line) => console.log(line), busy: () => updateCheckWaits(ctx.jobs, ctx.renders) });
   if (updateCheck) ctx.updates.start();
@@ -1185,13 +1164,16 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
   });
   if (autoAssets && !offlineAssets.status(root).ready) try { ctx.installAssets(); } catch { /* already running */ }
   // Settings › System's slow checks, answered from their last result while they run again
-  ctx.checks = { system: cachedCheck("system", () => runtimeStatusAsync(root), { root }), firstRun: cachedCheck("first-run", () => firstRun.firstRunItemsAsync(root), { root }) };
+  ctx.checks = { system: cachedCheck("system", () => runtimeStatusAsync(root), { root }), firstRun: cachedCheck("first-run", () => firstRun.firstRunItemsAsync(root), { root }),
+    // Settings › Update › Uninstall's sizes: 6 s of measuring at every open (audit/112 1.14), now the last measure at once and a new one behind
+    uninstall: cachedCheck("uninstall", () => uninstallPlan(root), { root }) };
   if (thumbnails) setTimeout(() => ctx.checks.system.get().catch(() => {}), 5000).unref?.();          // the app (not tests): System ready before it is opened
   ctx.table = routes(ctx);
   const prod = productionRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject, HttpError });
   ctx.table.push(...prod.routes);
   const boards = boardRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject, HttpError });
   ctx.table.push(...boards.routes);
+  ctx.table.push(...mixRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject, HttpError }).routes);          // Final Mix
   ctx.table.push(...editorRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject, HttpError }).routes);
   const assets = assetRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], P: "([0-9a-f]+)", mustProject, HttpError });
   ctx.table.push(...assets.routes);
@@ -1204,6 +1186,7 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
   ctx.table.push(...styleAeRoutes(ctx).routes);          // the styles' After Effects badges (measured in the background, no route)
   ctx.table.push(...prefsRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn] }).routes);          // the UI's settings on this computer (the port changes each start)
   ctx.table.push(...ideaRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn] }).routes);          // the Idea Library: the app's ideas and the user's own (audit/97)
+  ctx.table.push(...thumbnailRoutes(ctx, { r: (m, path, fn) => [m, new RegExp(`^/api${path}$`), fn], mustProject }).routes);          // the Thumbnails page (#1312)
   ctx.agent.appTools = { ...boards.tools, ...assets.tools, ...chars.tools,
     // the user chose the brief's output over the New project fields (Claude asked in Prepare): the project's output changes
     // the film's language, the user's answer when the brief did not say it
@@ -1253,8 +1236,8 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
     try { await streamPipeline(req, limit, createWriteStream(dest + ".part")); } catch (e) { rmSync(dest + ".part", { force: true }); throw e; }
     renameSync(dest + ".part", dest);
     // an archive is unpacked, as in a project's Assets; what is in it joins the kit, what is not taken is listed on the kit's panel
-    if (ARCHIVE.test(dest)) return customLooks.publicLook(await customLooks.addArchive(id, dest, root));
-    return customLooks.publicLook(customLooks.fileAdded(id, dest, root));
+    if (ARCHIVE.test(dest)) return customLooks.publicLook(await customLooks.addArchive(id, dest, root), root);
+    return customLooks.publicLook(customLooks.fileAdded(id, dest, root), root);
   }];
   ctx.raw = [presence, lookFile, ...prod.raw, ...boards.raw];
   ctx.startQa = prod.startQa;
@@ -1287,7 +1270,7 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
     }
     tidyPreviews(root);          // the stores' old posters: this start serves the WebP that replaced them
     // the styles' After Effects badges: a new style or a pinned source at another commit is measured on its demo
-    setTimeout(() => { if (!ctx.stopping.signal.aborted) ctx.styleAe?.measure(); }, 60000).unref?.();
+    if (styleAeAtStart) setTimeout(() => { if (!ctx.stopping.signal.aborted) ctx.styleAe?.measure(); }, 60000).unref?.();
   });
   // Exit hung about 4.5 min while the app window held connections; every part stops within a few seconds, open connections
   // are cut (the app's own and the preview's), and a part that does not answer in time is left to the process's end
@@ -1295,6 +1278,11 @@ export async function startServer({ port = 0, root = APP_ROOT, token = randomByt
   const close = async () => {
     ctx.claude.stop();
     ctx.updates.stop();
+    // the background jobs still running are stopped with the server, their child processes with them (a style-AE measuring left running
+    // kept a test's process alive after its last test, #1423); Exit (shutdown) has stopped them already
+    ctx.stopping.abort();
+    for (const j of ctx.jobs.running()) { try { ctx.jobs.cancel(j.id); } catch { /* already ending */ } }
+    await within(new Promise((r) => { const t = setInterval(() => { if (!ctx.jobs.running().length) { clearInterval(t); r(); } }, 50); t.unref?.(); }), 5000);
     // the preview and the server stop side by side (one after the other, Exit took 17-27 s)
     await Promise.all([within(ctx.preview.close(), 3000),
       within(new Promise((r) => { server.close(() => r()); server.closeAllConnections?.(); }), 3000),

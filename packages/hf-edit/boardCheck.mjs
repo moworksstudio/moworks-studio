@@ -5,7 +5,7 @@
 // stills that are one colour, whatever the cause (a black still is caught even when every file is there).
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
-import { stillStd } from "../hf-qa/gates.mjs";
+import { stillStd } from "../hf-qa/grey.mjs";
 
 const FLAT = 2;          // the G-BLANK threshold: grey-level standard deviation of a 320 px wide still
 const SCHEME = /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i;          // data:, blob:, http(s):, "//" and "#": not a local file

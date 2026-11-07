@@ -6,13 +6,15 @@
 // download them unchecked into the user's real home otherwise); `python` holds the pinned wheels, hash-checked, no dependency resolved
 // (pip --no-deps --require-hashes), apart from the app's other Python parts, so no library of theirs moves.
 // Which model: the full kokoro-v1.0.onnx, the one HF's CLI knows; on this app's i9-9900K, loaded, it read faster than the int8 file (audit/88).
-import { execFile, spawn, spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { killTree } from "../system-status/kill-tree.mjs";
+import { execFile, spawn } from "node:child_process";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { APP_ROOT, expandEnv, loadPins, resolveRuntime } from "../version-manager/index.mjs";
+import { APP_ROOT, expandEnv, ffmpegExe, loadPins, resolveRuntime } from "../version-manager/index.mjs";
 import { cliEntry } from "../hf-qa/cli.mjs";
 import { downloadChecked, modelsRoot } from "./asr.mjs";
+import { readJson } from "../util/json.mjs";
 
 const MB = 1048576;
 const RELEASE = "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0";
@@ -81,7 +83,6 @@ export function whisperLanguage(voiceId) {
   return v ? ({ "en-us": "en", "en-gb": "en", "fr-fr": "fr", "pt-br": "pt" })[v.lang] ?? v.lang : null;
 }
 
-const readJson = (f, d) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
 export const packDir = (root = APP_ROOT) => join(modelsRoot(root), "kokoro");
 const homeDir = (root) => join(packDir(root), "home");
 const pyDir = (root) => join(packDir(root), "python");
@@ -118,7 +119,7 @@ export async function install(root = APP_ROOT, { signal = null, onProgress = () 
     let log = "";
     const take = (d) => { log = (log + d).slice(-20000); };
     c.stdout.on("data", take); c.stderr.on("data", take);
-    const kill = () => spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true });
+    const kill = () => killTree(c);
     signal?.addEventListener("abort", kill, { once: true });
     c.on("close", (code) => { signal?.removeEventListener("abort", kill);
       if (signal?.aborted) bad(Object.assign(new Error("Cancelled"), { code: "CANCELLED" }));
@@ -170,7 +171,7 @@ function runTts(root, rt, file, wav, voice, speed, signal) {
     let out = "", err = "";
     c.stdout.on("data", (d) => { out = (out + d).slice(-8000); });
     c.stderr.on("data", (d) => { err = (err + d).slice(-8000); });
-    const kill = () => spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true });
+    const kill = () => killTree(c);
     signal?.addEventListener("abort", kill, { once: true });
     const late = setTimeout(kill, 330000);          // HF stops its Python at 300 s
     c.on("close", (code) => {
@@ -212,7 +213,7 @@ export async function speak(root = APP_ROOT, { voice = "af_heart", text, out, sp
     mkdirSync(dirname(out), { recursive: true });
     const input = wavs.flatMap((w) => ["-i", w]);
     const filter = wavs.length > 1 ? ["-filter_complex", `${wavs.map((_, i) => (i < wavs.length - 1 ? `[${i}:a]apad=pad_dur=${GAP}[a${i}];` : `[${i}:a]anull[a${i}];`)).join("")}${wavs.map((_, i) => `[a${i}]`).join("")}concat=n=${wavs.length}:v=0:a=1[out]`, "-map", "[out]"] : [];
-    const ff = join(expandEnv(loadPins(root).ffmpeg.dir), "ffmpeg.exe");
+    const ff = ffmpegExe(root);          // version-manager: the one way to find it (audit/112 r2.1)
     await new Promise((ok, bad) => execFile(ff, ["-y", "-v", "error", ...input, ...filter, "-ac", "1", "-ar", "44100", "-c:a", "libmp3lame", "-b:a", "128k", out], { windowsHide: true, timeout: 300000 },
       (e, _o, stderr) => (e ? bad(Object.assign(new Error("Kokoro's sound could not be saved"), { code: "KOKORO_FAILED", detail: String(stderr ?? e.message).slice(-400) })) : ok())));
     onProgress({ part: 1 });

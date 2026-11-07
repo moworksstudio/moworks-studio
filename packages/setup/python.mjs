@@ -3,6 +3,7 @@
 // (runtime/python-libs), never into the system Python. A library the system Python already has at any version counts as present (the
 // scripts only need it to import); the pinned version is what the app installs when one is missing. Python itself is pins.python.exe
 // (the user installs Python 3.12 once: the first-run screen shows the winget line); every package is credited in the app's source registry.
+import { killTree } from "../system-status/kill-tree.mjs";
 import { execFile, spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
@@ -81,7 +82,7 @@ export async function install(root = APP_ROOT, { only = null, signal = null, onL
     let log = "";
     const take = (d) => { const s = String(d); log = (log + s).slice(-20000); for (const l of s.split(/\r?\n/)) if (l.trim()) onLine(l.trim()); };
     c.stdout.on("data", take); c.stderr.on("data", take);
-    const kill = () => spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true });
+    const kill = () => killTree(c);
     signal?.addEventListener("abort", kill, { once: true });
     c.on("close", (code) => { signal?.removeEventListener("abort", kill); code === 0 ? ok({ installed: want, log }) : bad(Object.assign(new Error(`pip failed (exit ${code}): ${log.trim().split(/\r?\n/).slice(-2).join(" ")}`), { code: "PIP_FAILED" })); });
   });
@@ -96,7 +97,7 @@ export function runPy(root, script, args, { timeoutMs = 10 * 60 * 1000, signal =
     let out = "", err = "";
     c.stdout.on("data", (d) => { out = (out + d).slice(-200000); });
     c.stderr.on("data", (d) => { err = (err + d).slice(-8000); });
-    const kill = () => spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true });
+    const kill = () => killTree(c);
     const t = setTimeout(kill, timeoutMs);
     signal?.addEventListener("abort", kill, { once: true });
     c.on("close", () => {

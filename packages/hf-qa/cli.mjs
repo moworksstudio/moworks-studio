@@ -2,6 +2,7 @@
 // The CLI is called as `node <cli entry>` with the opt-out environment (no shell, no telemetry, no update check).
 // The sync forms (runHfJson, snapshot, snapshotAt) are for the CLI tools and the gates' own child process: the app's server uses the
 // *Async ones, since a sync call holds its event loop (T27-3: every request took 20-60 s while a film's character sheets were drawn).
+import { killTree } from "../system-status/kill-tree.mjs";
 import { execFile, spawn, spawnSync } from "node:child_process";
 import { copyFileSync, existsSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -99,7 +100,7 @@ export function snapshotAtAsync(projectDir, times, outDir, { version = null, sig
     c.stderr.on("data", (d) => { err = (err + d).slice(-20000); });
     c.stdout.resume();
     // the whole tree (the CLI and its headless Chrome) ends on a timeout or when the app stops (nothing is left running)
-    const kill = () => spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true });
+    const kill = () => killTree(c);
     // the result says `timedOut` when the run was stopped at its limit (a killed tree exits 1 on Windows, not null)
     let timedOut = false;
     const t = setTimeout(() => { timedOut = true; kill(); }, timeoutMs);
@@ -168,7 +169,7 @@ export function runHfJsonAsync(command, projectDir, extraArgs = [], { version = 
     let out = "", err = "", timedOut = false;
     c.stdout.on("data", (d) => { out += d; });
     c.stderr.on("data", (d) => { err = (err + d).slice(-4000); });
-    const kill = () => spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true });
+    const kill = () => killTree(c);
     const t = setTimeout(() => { timedOut = true; kill(); }, timeoutMs);
     signal?.addEventListener("abort", kill, { once: true });
     c.on("close", (code) => {

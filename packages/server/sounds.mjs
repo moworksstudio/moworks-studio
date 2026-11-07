@@ -4,7 +4,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { isStarterPage } from "../hf-edit/shots.mjs";
-import { details, localSounds, onlineSources } from "../sfx/index.mjs";
+import { SOUND_GROUPS, SOUND_GROUP_TITLES, details, localSounds, onlineSources } from "../sfx/index.mjs";
 import { addSound } from "../sfx/added.mjs";
 
 /** A service that did not answer is left alone this long, so typing the next word does not wait on it; Try again asks it at once. */
@@ -25,10 +25,12 @@ export function soundRoutes(ctx, { r, P, mustProject, HttpError }) {
   const free = (id) => {
     if (ctx.agent?.running?.has(id)) throw new HttpError(409, "BUSY", "Claude is changing the film: add the sound when it finishes");
     if (ctx.renders?.isRendering(id)) throw new HttpError(409, "RENDERING", "The film is being rendered: add the sound when it finishes");
-    if (ctx.jobs?.list?.({ kind: "mix-sfx" }).some((j) => j.projectId === id && j.status === "running")) throw new HttpError(409, "BUSY", "The sound effects are being placed: add the sound when that finishes");
+    ctx.mix?.soundBusy?.(id, "add the sound");          // the sound effects being placed (server/mix.mjs)
   };
   return { routes: [
-    r("GET", "/sfx/search", (_p, _b, q) => ({ results: localSounds(q.get("q"), { group: q.get("group"), root }) })),
+    // the drawer's kinds with the rows ("all" first; the page keeps no copy: 112a B12)
+    r("GET", "/sfx/search", (_p, _b, q) => ({ results: localSounds(q.get("q"), { group: q.get("group"), root }),
+      groups: ["all", ...Object.keys(SOUND_GROUPS)].map((id) => ({ id, title: SOUND_GROUP_TITLES[id] ?? id })) })),
     // status: "ok" (results may be empty), or "down": no online service answered
     r("GET", "/sfx/search/online", async (_p, _b, q) => {
       const words = (q.get("q") ?? "").trim();

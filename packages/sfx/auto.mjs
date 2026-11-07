@@ -7,15 +7,17 @@
 // own level under the music and the voice, repeats of one sound varied (no cap on how often: the right sound first, #1113), the sounds in the
 // ending's fade faded with it, and a quiet ambience bed under every scene that has a place.
 // The owner's choices (prefs.mjs: no whoosh, no ambience, the density, single sounds taken out) hold on every placement. Sounds come
-// first from the code (code.mjs: the owner's film styles' sounds and new ones made by code for the film; a film of those styles from the code only),
-// then the app's offline library, then Openverse / Freesound, then HyperFrames' bundled set; mounted and credited by index.mjs. Each
+// first from the app's offline library (Claude picks among its close sounds), then ElevenLabs where a key is saved, then Openverse / Freesound
+// and HyperFrames' bundled set, and only then the code (code.mjs) for what is still missing, for every film (#1034, #1042; one order for
+// every film since a0953268); mounted and credited by index.mjs. Each
 // placement reports its coverage: the Motion Plan's moving rows that got a sound, and how many sounds came from each source (st.report).
 import { execFile } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { VARIANT_KEY, cueKey, cuesOf, handMoves, mount, mountAmbience, patchState, readState, resolveCues, setVolumes, sfxNone, slug, timeKey, useLibrarySound, useOwnerSound, writeCredits } from "./index.mjs";
-import { BED_UNDER, DENSITY, REF_BED, TYPING, ambienceBeds, boostOf, duckLane, hitVolume, motionCues, mixShift, placeOf, speechSpans, styleHint, thin, tiles, volumeFor } from "./actions.mjs";
+import { DENSITY, ambienceBeds, boostOf, duckLane, hitVolume, motionCues, mixShift, placeOf, speechSpans, styleHint, thin, tiles, volumeFor } from "./actions.mjs";
+import { BED_UNDER, REF_BED } from "./mix/levels.mjs";
 import { levelTracks, loudnessOf, playedLoudness } from "./mixlevels.mjs";
 import { fitEffects } from "./voicefit.mjs";
 import { SUSTAINED_MIN_S, familyOf, findAmbience, loadLibrary, pickVariant, sustainedCue } from "./library.mjs";
@@ -23,13 +25,12 @@ import { DEFAULT_DENSITY, briefOf, isOff, readPrefs, soundPolicy } from "./prefs
 import { isSongFilm } from "../style-catalog/traits.mjs";
 import { fadeOfTotal, planEnding } from "../hf-edit/ending.mjs";
 import { filmWords, trackClips } from "../hf-edit/tracks.mjs";
-import { ffmpegExe } from "../library/preview-media.mjs";
+import { ffmpegExe } from "../version-manager/index.mjs";
+import { probe } from "../voice/audio.mjs";
 import { holdPicks, pickAsker, pickSounds } from "./pick.mjs";
 import { soundMaker } from "./generate.mjs";
 import { varySounds } from "./vary.mjs";
-import { rankLocal, variantsOf } from "./library.mjs";
 
-export { TYPING };
 const run = promisify(execFile);
 const r3 = (n) => Math.round(n * 1000) / 1000;
 
@@ -113,24 +114,20 @@ function everyCue(shots, plan, { whoosh = true, prefs = {}, style = null, densit
  *  skip), moved off the spoken words (afterWords), then thinned to the density (actions.mjs thin: named, then plan, then auto).
  *  sounded(name) (once the sounds are found) keeps only the cues that got a sound, so an automatic cue fills where a named or planned one
  *  found none (Test 24: the automatic "typing" gave way to a named "keyboard typing" that then got no sound). familyOfSound(name): the
- *  family of the sound found for a name (a named cue's own words may not say it). drop: repeats left out (capRepeats); a named one still holds its moment, so no
- *  automatic sound takes its place (T29-11). hand: the cues the user moved (handMoves): they stay, and count where they are now. */
-export function planCues(shots, plan, { sounded = null, whoosh = true, prefs = {}, density = null, words = null, style = null, familyOfSound = null, drop = null, hand = null, textSilent = false } = {}) {
+ *  family of the sound found for a name (a named cue's own words may not say it). hand: the cues the user moved (handMoves): they stay, and
+ *  count where they are now. */
+export function planCues(shots, plan, { sounded = null, whoosh = true, prefs = {}, density = null, words = null, style = null, familyOfSound = null, hand = null, textSilent = false } = {}) {
   const dens = density ?? prefs.density ?? DEFAULT_DENSITY;
   const moved = (c) => { const h = hand?.get(c.id); return h && (!h.name || h.name === c.name) ? h : null; };
-  const all = everyCue(shots, plan, { whoosh, prefs, style, density: dens, textSilent }).filter((c) => (!sounded || sounded(c.name) || moved(c)) && (c.prio === 0 || !drop?.has(useKey(c))))
+  const all = everyCue(shots, plan, { whoosh, prefs, style, density: dens, textSilent }).filter((c) => !sounded || sounded(c.name) || moved(c))
     .map((c) => ({ ...c, family: familyOfSound?.(c.name) ?? c.family ?? null }));
   // a place's own sound (room tone, night air, a hush) is the scene's ambience bed, never a cue on an action (house rules §7b; T42-12: ten
   // "night room air" and "night air hush" cues played over the bed as action sounds); one the user moved stays theirs
   const place = (c) => c.family === "ambience" && !moved(c);
   const { kept, thinned } = thin(afterWords(all.filter((c) => !place(c)), words).flatMap((c) => (moved(c) ? [{ ...c, pinned: true, planned: c.start, start: r3(c.start + moved(c).by) }, { ...c, left: true }] : [c])), dens);
-  return { kept: kept.filter((c) => !drop?.has(useKey(c))).map(({ planned, ...c }) => (c.pinned ? { ...c, start: planned } : c)).sort((a, b) => a.start - b.start),
+  return { kept: kept.map(({ planned, ...c }) => (c.pinned ? { ...c, start: planned } : c)).sort((a, b) => a.start - b.start),
     thinned: [...thinned, ...all.filter(place).map((c) => ({ ...c, why: "ambience" }))].sort((a, b) => a.start - b.start) };
 }
-/** One cue of the mix, told apart from the stand-by sound of the same motion row (which shares its id). */
-const useKey = (c) => `${c.id}|${c.name}`;
-/** The cues the mix keeps, by time (planCues's kept). */
-export const mixCues = (shots, plan, opts = {}) => planCues(shots, plan, opts).kept;
 
 const AUDIO = /\.(wav|mp3|m4a|ogg|flac|aac)$/i;
 /** Cue names a brief line asks a sound for: whoosh / transition, typing / keyboard, else the entrance "pop" (a tick, a click, a ding). */
@@ -174,17 +171,17 @@ export async function applyOwnerSounds(dir, cues, { root } = {}) {
   }
   return set;
 }
+/** A sound file's length in seconds, null when it cannot be read: ffprobe, as the voice-over and the music read theirs (voice/audio.mjs probe;
+ *  audit/112a B9: this read FFmpeg's banner to the hundredth of a second). */
 export async function durationOf(file, root) {
-  const { stderr } = await run(ffmpegExe(root), ["-hide_banner", "-i", file], { windowsHide: true }).catch((e) => ({ stderr: String(e.stderr ?? "") }));
-  const m = /Duration:\s*(\d+):(\d+):([\d.]+)/.exec(stderr);
-  return m ? Math.round((Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3])) * 1000) / 1000 : null;
+  const p = await probe(file, root).catch(() => null);
+  return p?.duration > 0 ? p.duration : null;
 }
 
 /** A film no cartoon or game sound belongs in: a horror or found-footage style (T32-3). */
 export const graveFilm = (...said) => /\b(horror|liminal|found[- ]footage|backrooms|creepy|kinh d[ịi])\b/iu.test(said.filter(Boolean).join(" "));
 /** The film's spoken words, in film seconds, when it has a voice-over with its reviewed transcript (HyperFrames' transcript.json), else
  *  null: each word where the clip that plays it puts it, a voice cut into one clip a line (el-voice-01…, Test 22) too (tracks.mjs filmWords). */
-export const spokenWords = (dir) => filmWords(dir);
 /** Under a voice-over (from What If animation's references/sound.md, FreshStack, MIT): an effect that would land
  *  inside a spoken word goes into the pause just after it, so the word stays clear and the sound answers it. Returns the cues, moved. A sound
  *  that lasts starts with its action and runs under the words on its own lane (voicefit.mjs). */
@@ -224,8 +221,7 @@ export function withVariants(cues, sounds) {
   });
 }
 
-/** After the cap: the moments of one sound that stay take its copies in turn (vary.mjs: a little higher, a little lower), so the three a
- *  film keeps are never the very same (the cap keeps moments spread over the film, which may all have had the original). */
+/** The moments of one sound take its copies in turn (vary.mjs: a little higher, a little lower), so a sound heard again is never the very same. */
 export function rotateCopies(cues, sounds) {
   const turn = new Map();
   return cues.map((c) => {
@@ -238,52 +234,6 @@ export function rotateCopies(cues, sounds) {
     return { ...c, variant: members[k % members.length].id };
   });
 }
-
-/** How many times one sound file played at most a film under the rule of 30/10 (Test 26); the owner dropped the cap 05/11 (#1113): autoSfx no
- *  longer calls capRepeats, kept for the Review's own counts. */
-export const MAX_REPEATS = 3;
-/** The same file at most `max` times: the uses past it are left out ({ kept, thinned }, why "repeat"), the Motion Plan's kept before the automatic ones, each kept set
- *  spread over the film. What the storyboard names is not the app's to leave out for sharing a file: nine names of a clock's tick fell on two files of the library, and
- *  the tick the brief asked for became a soft pop (T29-11). Only one name written again and again counts (at most `max` times: a thread's pull twelve times, Test 26), and
- *  a name again in one shot is its rhythm, one use (`tick@2.6, tick@4.6`), as a walk's steps are. A cue the user moved and the owner's own sounds are never left out. */
-export function capRepeats(cues, sounds, max = MAX_REPEATS) {
-  const fileOf = (c) => { const s = sounds?.[c.name]; if (!s || s.source === "owner") return null;
-    // a copy a little higher or lower (vary.mjs) is its original's file: the cap counts the sound, not its copies (#1096)
-    const v = c.variant ? (s.variants ?? []).find((x) => x.id === c.variant) : null;
-    return v ? v.of ?? v.file : s.file ?? null; };
-  const walk = (c) => (c.family === "footstep" && /:\d+$/.test(String(c.id ?? "")) ? String(c.id).replace(/:\d+$/, "") : null);
-  const prio = (c) => c.prio ?? 2, out = new Set();
-  const useOf = (c) => walk(c) ?? (prio(c) === 0 && c.shot != null ? `${c.shot}|${c.name}` : c);
-  const usesOf = (list) => { const groups = new Map(); for (const c of list) { const k = useOf(c); groups.set(k, [...(groups.get(k) ?? []), c]); } return [...groups.values()].sort((a, b) => a[0].start - b[0].start); };
-  const spread = (tier, room) => Array.from({ length: room }, (_, i) => tier[room === 1 ? 0 : Math.round((i * (tier.length - 1)) / (room - 1))]);
-  const staying = (u) => u.some((c) => c.pinned);
-  // a name the storyboard writes more than `max` times
-  const byName = new Map();
-  for (const c of cues) if (prio(c) === 0 && fileOf(c)) byName.set(c.name, [...(byName.get(c.name) ?? []), c]);
-  for (const list of byName.values()) {
-    const uses = usesOf(list);
-    if (uses.length <= max) continue;
-    const keep = new Set(uses.filter(staying)), rest = uses.filter((u) => !keep.has(u)), room = max - keep.size;
-    if (room > 0) for (const u of spread(rest, room)) keep.add(u);
-    for (const u of uses) if (!keep.has(u)) for (const c of u) out.add(c);
-  }
-  const byFile = new Map();
-  for (const c of cues) { const f = out.has(c) ? null : fileOf(c); if (f) byFile.set(f, [...(byFile.get(f) ?? []), c]); }
-  for (const list of byFile.values()) {
-    const uses = usesOf(list);
-    if (uses.length <= max) continue;
-    const keep = new Set(uses.filter((u) => staying(u) || Math.min(...u.map(prio)) === 0));
-    for (const p of [1, 2]) {
-      const tier = uses.filter((u) => !keep.has(u) && Math.min(...u.map(prio)) === p), room = max - keep.size;
-      if (room <= 0) break;
-      if (tier.length <= room) for (const u of tier) keep.add(u);
-      else for (const u of spread(tier, room)) keep.add(u);
-    }
-    for (const u of uses) if (!keep.has(u)) for (const c of u) out.add(c);
-  }
-  return { kept: cues.filter((c) => !out.has(c)), thinned: cues.filter((c) => out.has(c)).map((c) => ({ ...c, why: "repeat" })) };
-}
-
 
 /** The ending's fade at the film's end, for the ambience: the music's own fade when it plays to the end (tracks.mjs fitted it to the
  *  plan's ending), else the plan's ending fade, else ending.mjs's for the film's length. */
@@ -331,7 +281,7 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   // a family the style's sound section forbids is off as the owner's own off would be (bannedFamilies: the film styles' "never a pop")
   const banned = [...bannedFamilies(palette)].filter((f) => f !== "whoosh");
   if (banned.length) prefs.off = [...new Set([...(prefs.off ?? []), ...banned])];
-  const words = spokenWords(dir), whoosh = opts.whoosh !== false && !isOff(prefs, { family: "whoosh" }) && !bannedFamilies(palette).has("whoosh");
+  const words = filmWords(dir), whoosh = opts.whoosh !== false && !isOff(prefs, { family: "whoosh" }) && !bannedFamilies(palette).has("whoosh");
   const ends = (shots ?? []).map((s) => Number(s.start) + Number(s.duration)).filter((x) => Number.isFinite(x) && x > 0);
   const filmEnd = ends.length ? Math.max(...ends) : null;
   const note = (extra) => patchState(dir, (st) => { st.policy = { density: policy.density, whoosh, silent: policy.silent, ambience: policy.ambience, style, ...(policy.textSilent ? { textSilent: true } : {}), ...(banned.length ? { banned } : {}) }; Object.assign(st, extra); });
@@ -357,16 +307,15 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   const ask = opts.ask !== undefined ? opts.ask : pickAsker(opts.root);
   const picks = await pickSounds(dir, every, shots, { root: opts.root, ask, maker, style, styleTitle: opts.styleTitle ?? null, styleId: opts.styleId, families, keep, exclude, never }).catch((e) => { if (opts.signal?.aborted) throw e; return null; });
   for (const n of picks?.settled ?? []) keep.add(n);
-  const res = await resolveCues(dir, every, { ...opts, library: true, style, families, keep, exclude, tone: graveFilm(opts.styleId, opts.styleTitle, palette) });
+  const res = await resolveCues(dir, every, { ...opts, style, families, keep, exclude, tone: graveFilm(opts.styleId, opts.styleTitle, palette) });
   if (codeAllowed && res.missing?.length) {          // what the library and the search have not: made by code
-    const left = new Set(res.missing), more = await resolveCues(dir, every.filter((c) => left.has(c.name)), { ...opts, code: true, library: true, style, families, keep, exclude, tone: graveFilm(opts.styleId, opts.styleTitle, palette) });
+    const left = new Set(res.missing), more = await resolveCues(dir, every.filter((c) => left.has(c.name)), { ...opts, code: true, style, families, keep, exclude, tone: graveFilm(opts.styleId, opts.styleTitle, palette) });
     res.added = [...(res.added ?? []), ...(more.added ?? [])]; res.missing = more.missing ?? []; res.failed = [...(res.failed ?? []), ...(more.failed ?? [])]; res.code = more.code ?? res.code;
   }
   // Claude's answers are final: whatever the library's pass or the search did to a name it answered, it plays the answer (T38b-15)
   await holdPicks(dir, picks, { root: opts.root, maker }).catch(() => []);
   // a sound heard more than once gets its copies a little higher and lower. No cap on how often one file plays (owner 05/11 #1113: "phải ưu
   // tiên âm thanh nó đúng, cho dù nó xuất hiện đi lại nhiều lần"; the 3-times rule of 30/10 swapped right sounds for wrong ones, T38b-14)
-  const spread = [];
   const uses = new Map(); for (const c of every) uses.set(c.name, (uses.get(c.name) ?? 0) + 1);
   await varySounds(dir, uses, { root: opts.root }).catch(() => []);
   // the mix once the sounds are known: a cue with no sound leaves its place to an automatic one; its repeats take the copies in turn
@@ -397,7 +346,7 @@ export async function autoSfx(dir, shots, plan, opts = {}) {
   const report = coverage(shots ?? [], plan, cues, thinned, readState(dir).sounds, o);
   note({ thinned: thinned.map((c) => ({ id: c.id, name: c.name, start: c.start, why: c.why })), report: { ...report, at: new Date().toISOString() } });
   writeCredits(dir);
-  return { levels: lv, fitted, report, code: res.code ?? null, picks: picks ? { asked: picks.asked, picked: picks.picked, made: picks.made, none: picks.none } : null, spread,
+  return { levels: lv, fitted, report, code: res.code ?? null, picks: picks ? { asked: picks.asked, picked: picks.picked, made: picks.made, none: picks.none } : null,
     madeSeconds: maker?.seconds ?? 0, makeStopped: maker?.stopped ?? null, cues: cues.length, placed: placed.length, owned, added: res.added, missing: res.missing, failed: res.failed ?? [],
     near, offline: !!res.offline, names: [...new Set(placed.map((p) => p.name))], ambience: beds.length, thinned: thinned.length, density: policy.density, silent: null };
 }

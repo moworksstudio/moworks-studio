@@ -2,200 +2,186 @@
 
 <p align="center"><a href="README.md">English</a> · <b>Tiếng Việt</b></p>
 
-<p align="center"><b>Xưởng làm phim motion trên máy tính: Claude đạo diễn, Moworks Studio dựng và kiểm từng khung hình, bạn duyệt từng bước.</b></p>
+<p align="center"><b>Xưởng làm phim motion graphic trên máy tính: Claude đạo diễn, app dựng và kiểm từng khung hình, bạn duyệt từng bước.</b></p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.8.214.5-1d3fd8" alt="version 0.8.214.5">
+  <img src="https://img.shields.io/badge/version-0.8.214.7-1d3fd8" alt="version 0.8.214.7">
   <img src="https://img.shields.io/badge/Claude-Opus_5.5_·_Sonnet_5.5-d97757" alt="Claude Opus 5.5 và Sonnet 5.5">
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-555" alt="Windows 10 | 11">
-  <img src="https://img.shields.io/badge/film_styles-132_từ_7_tác_giả-0a7" alt="132 film style từ 7 tác giả">
-  <img src="https://img.shields.io/badge/library-889_motion_·_454_block_·_168_thuật_ngữ-0a7" alt="Motion Library: 889 motion, 454 block, 168 thuật ngữ chuyển động">
+  <img src="https://img.shields.io/badge/film_styles-133-0a7" alt="133 film style">
+  <img src="https://img.shields.io/badge/library-889_motion_·_454_block_·_192_thuật_ngữ-0a7" alt="Motion Library: 889 motion, 454 block, 192 thuật ngữ chuyển động">
   <img src="https://img.shields.io/badge/export-MP4_·_MOV_·_WebM_·_After_Effects-8a2be2" alt="MP4, MOV, WebM và After Effects">
 </p>
 
 <p align="center">
   <a href="#bắt-đầu-nhanh">Bắt đầu nhanh</a> ·
-  <a href="#cách-app-hoạt-động">Cách hoạt động</a> ·
   <a href="#một-phim-được-làm-thế-nào">Quy trình</a> ·
+  <a href="#tính-năng">Tính năng</a> ·
   <a href="#film-style">Film style</a> ·
-  <a href="#làm-thử-một-phim">Làm thử</a> ·
   <a href="#xử-lý-sự-cố">Xử lý sự cố</a> ·
-  <a href="CHANGELOG.md">Thay đổi</a> ·
-  <a href="KNOWN-ISSUES.md">Giới hạn đã biết</a> ·
-  <a href="THIRD-PARTY.md">Bên thứ ba</a>
+  <a href="CHANGELOG.md">Thay đổi</a>
 </p>
 
+Viết brief, đưa chất liệu và chọn một film style. Claude lên kế hoạch, vẽ storyboard và viết Motion Plan để bạn duyệt; sau đó Moworks
+Studio dựng phim bằng code từng shot, thêm nhạc và âm thanh, kiểm tra và xuất ra MP4, MOV hoặc WebM, một khổ hay nhiều khổ, hoặc thành
+project After Effects chỉnh sửa được. Mọi thứ chạy trên máy Windows của bạn, bằng tài khoản Claude của chính bạn.
+
 <p align="center"><img src="images/hero-films.jpg" alt="Ảnh tĩnh từ sáu phim mẫu làm bằng Moworks Studio"></p>
-<p align="center"><sub>Phim mẫu làm bằng app. Hàng trên: ra mắt chiếc đèn (Launch · style của HeyGen) · đồng hồ báo thức (Character · style của HeyGen) · đồng hồ mặt trời (Explainer · style của HeyGen).<br>Hàng dưới: khu vườn qua những con số (Data · style của HeyGen) · trạm xe buýt (Isometric Picture Book · style của Lemomo) · thành phố neon (Music video · style của HeyGen). Xem thêm ở <a href="#làm-bằng-app">Làm bằng app</a>.</sub></p>
+<p align="center"><sub>Phim mẫu làm bằng app, mỗi phim một film style.</sub></p>
 
-Moworks Studio là ứng dụng máy tính để làm phim motion graphic cùng Claude. Bạn viết brief, đưa chất liệu (thiết kế, PSD, deck, ảnh,
-nhạc, kịch bản lời đọc) và chọn một trong 132 film style. Claude lên kế hoạch cho phim, vẽ storyboard để bạn duyệt và viết Motion Plan
-bằng số liệu; sau đó app dựng phim từng shot bằng code, thêm nhạc và hiệu ứng âm thanh và đưa bạn Version 1 để xem. Claude review và sửa
-nếu bạn chọn, app kiểm tra kỹ thuật rồi xuất phim ra MP4, MOV hoặc WebM. Phim ở phần lớn các style còn xuất được sang After Effects thành layer chỉnh sửa được.
+> **Trạng thái: bản xem trước.** App còn thay đổi nhanh, có thể còn chỗ chưa mượt.
 
-**Sửa phim ngay trên khung hình.** Trong Editor, bấm vào chữ bất kỳ trên khung hình để sửa tại chỗ, cả font, cỡ chữ và màu (mỗi lần sửa
-là một bước có thể hoàn tác). Hoặc bấm **Pin a note** (N), chấm một điểm hay kéo một khung trên hình rồi ghi cần sửa gì ở đó: ghi chú
-gửi tới Claude kèm đúng thời điểm, shot và vị trí trên hình.
+## Mới trong 0.8.214.7
 
-Mỗi bước dừng lại chờ bạn ở chỗ cần thiết: bạn duyệt storyboard và Motion Plan, theo dõi phim được dựng ngay trong Editor, và nhờ sửa bằng
-lời. App chạy trên máy của bạn và điều khiển Claude Code bằng tài khoản Claude của chính bạn; dự án, key và tài liệu của khách hàng nằm lại
-trên máy.
+- **Thumbnails:** chọn một khung hình của phim; Claude dàn thành ảnh bìa 16:9 hoặc 9:16, tự do hoặc theo Brand Kit của bạn.
+- **Một phim, nhiều khổ:** Adaptation làm thêm khổ 9:16, 1:1 và các khổ khác; mỗi khổ render với bản mix của chính phim.
+- **Casting:** thêm bốn cách tạo nhân vật, một tờ nhân vật duy nhất, thêm nhân vật có sẵn, và ngăn Characters trong Film Editor.
+- **Phụ đề** lưu thành file .srt và .vtt cạnh bản render.
+- **Âm thanh:** đỉnh giọng đọc giữ ở −1 dBTP; Version 1 nghe đúng như bản xuất.
+- **After Effects:** mức âm và tắt tiếng của từng làn được giữ, nền của phim thành một layer.
 
-> **Trạng thái: bản xem trước.** Moworks Studio vẫn đang thay đổi nhanh, nên có thể còn vài chỗ chưa mượt.
-
-## Cách app hoạt động
-
-<p align="center"><img src="images/diagram-how-it-works.vi.png" width="760" alt="Cách app hoạt động: Claude (1 Bộ luật, 2 Đạo diễn) → Moworks Studio (3 Các bước và Editor, 4 Dựng phim, 5 Review và QA, 6 Mix và render, render bằng engine HyperFrames giữ nguyên bản) → Thành phẩm (7 Phim, 8 Kiểm tra, chưa đạt thì về bước 4)"></p>
-
-Màu: cam = Claude · xanh dương = Moworks Studio · xanh lá = thành phẩm · xám = engine render mã nguồn mở.
-
-Claude đạo diễn: theo bộ luật của film style và thương hiệu của bạn, và dừng lại hỏi khi có mâu thuẫn. Moworks Studio làm phần còn lại:
-chạy các bước và việc duyệt, dựng từng shot với thư viện chuyển động và cầu nối style, review và chấm điểm phim, trộn âm thanh và render.
-Phần render dùng engine mã nguồn mở HyperFrames, nguyên như bản phát hành.
-
-## Vì sao dựng phim bằng code
-
-- **Tất định:** mỗi khung hình là một hàm của thời gian. Cùng một dự án luôn cho cùng các khung hình, dù render bao nhiêu lần.
-- **Sửa cục bộ:** thay một shot, một dòng chữ hay một nhịp mà không ảnh hưởng phần còn lại.
-- **Sửa bằng lời:** "chuyển cảnh nhanh hơn", "đổi nhạc", "tiêu đề vào đúng phách mạnh" là những thay đổi Claude làm trong vài phút, ngay
-  trong dự án đó.
-- **Duyệt được ở mọi bước:** brief, storyboard và Motion Plan là các file bạn đọc và duyệt trước khi chuyển động được dựng.
+Danh sách đầy đủ ở [CHANGELOG](CHANGELOG.md).
 
 ## Một phim được làm thế nào
 
-Mọi film style đi theo cùng một quy trình. Mỗi bước để lại một file trong dự án; bước sau chỉ chạy khi bước trước đã xong hoặc được bạn
-bỏ qua.
+<p align="center"><img src="images/diagram-workflow.vi.png" width="620" alt="Lên kế hoạch: New production, 01 Pre-production, 02 Storyboard (bạn duyệt), 03 Motion Plan (bạn duyệt) → Làm phim: 04 Production (Build, Final Mix, Version 1), 05 Review and checks (khi bạn yêu cầu) → Xuất phim: Render, AE Export"></p>
 
-<p align="center"><img src="images/diagram-workflow.vi.png" width="560" alt="Quy trình: Cài đặt một lần (1 Cài app, 2 Lần đầu mở) → Lên kế hoạch (3 New project, 4 Prepare, 5 Storyboard bạn duyệt, 6 Motion Plan bạn duyệt) → Dựng phim (7 Production, 8 Review and checks) → Thành phẩm (9 Render, MP4 hoặc Port to After Effects)"></p>
-
-Màu: xám = cài đặt · cam = Claude và app thực hiện · xanh dương = bạn viết, chọn hoặc duyệt · xanh lá = thành phẩm.
-
-| Bước | Việc diễn ra | Bạn |
-|---|---|---|
-| **Brief** | New project: tiêu đề, film style, Brand Kit, nhân vật, định dạng (khổ hình, số khung hình mỗi giây, độ dài), model Claude và mức effort, brief và chất liệu của bạn | viết và chọn |
-| **Prepare** | Claude đọc brief và chất liệu, viết `BRIEF.md`. Khi brief và style mâu thuẫn (style phim câm mà có lời đọc, khổ 4:3 so với 4:5…), Claude dừng lại hỏi, kèm các phương án và đề xuất | trả lời |
-| **Lời đọc** *(tuỳ chọn)* | ElevenLabs, hoặc Kokoro miễn phí ngay trên máy (không có tiếng Việt), đọc kịch bản; Whisper canh thời gian từng chữ để shot rơi đúng lời | chọn giọng |
-| **Storyboard** | Một phương án storyboard vẽ thành bảng, từng shot, ghi lý do của từng shot (thêm phương án khi bạn yêu cầu) | duyệt hoặc góp ý |
-| **Motion Plan** | Chuyển động của từng shot bằng số: thời điểm, quãng đường, ease, mốc âm thanh. Hộp duyệt cho biết thời gian dựng ước tính | duyệt và dựng |
-| **Production** | Claude dựng phim bằng code, từng shot; mỗi shot được lint và kiểm tra ngay khi xong. Nhạc (3 bài miễn phí từ Mixkit để chọn, hoặc nhạc của bạn) và hiệu ứng âm thanh (trước hết làm bằng code riêng cho từng phim) đặt theo hình, trộn về −16 LUFS. Bạn nhận **Version 1** đã render để xem | theo dõi |
-| **Review and checks** | Một câu hỏi: **Fix mistakes only**, **Fix mistakes and improve it** (Claude tự xem phim, chấm điểm trên 10 và sửa những gì tìm thấy, qua nhiều vòng) hoặc **No, I'm happy with it**. Tech checks báo độ tương phản, chữ chồng nhau, khung đứng hình, âm lượng và file bằng lời dễ hiểu | chọn và đọc |
-| **Render** | MP4 (H.264: Standard cho web và mạng xã hội, hoặc High), MOV (QuickTime) hoặc WebM, kèm một bản Smooth để phát mượt trong Editor | render |
-| **After Effects** | **Port to After Effects** dựng project AE với text layer và shape layer thật ở những style cho phép | port |
-
-**Editor** phát phim đúng từng khung hình như khi render: danh sách shot và quy trình ở bên trái, timeline dưới khung hình, Claude ở
-cột chat bên phải. Bấm vào một phần tử trong phim để Claude nhắm vào nó, hoặc tự sửa chữ của nó bằng tay.
-
-Trên timeline, Narration, SFX và Music mỗi lane có một thanh âm lượng, kéo là nghe ngay, và **Ctrl+Z** trả lại tiếng vừa kéo hoặc vừa xoá.
-**Final Mix** đổi nhạc và hiệu ứng âm thanh, còn **Balance the sound again** đưa mọi mức tiếng về theo luật của app.
-
-<p align="center"><img src="images/desk-editor.jpg" alt="Editor (The Desk): shot và quy trình bên trái, phim trong trình phát, timeline, và Claude thuật lại từng bước bên phải"><br><sub>Editor (The Desk): shot và quy trình bên trái, phim trong trình phát, timeline, và Claude thuật lại từng bước bên phải</sub></p>
-
-### Huy hiệu After Effects
-
-Mỗi film style có một huy hiệu, đo trên một phim mẫu của style đó:
-
-| Huy hiệu | After Effects nhận được gì |
+| Bước | Việc gì diễn ra |
 |---|---|
-| **AE editable** | Chữ và hình khối thành layer chỉnh sửa được |
-| **AE partly editable** | Một phần thành layer, phần còn lại thành video |
-| **AE video only** | Cả phim là một layer video |
+| **New production** | Tên phim, film style, khổ và độ dài, Brand Kit, nhân vật, brief và chất liệu (thiết kế, PSD, deck, ảnh, nhạc, kịch bản) |
+| **01 · Pre-production** | Claude đọc hết và dừng lại hỏi khi brief và style mâu thuẫn. Lời đọc làm ở bước này (ElevenLabs, hoặc giọng Kokoro miễn phí) và được canh giờ từng chữ |
+| **02 · Storyboard** | Bảng vẽ từng shot, kèm lý do của mỗi shot. Bạn duyệt hoặc góp ý |
+| **03 · Motion Plan** | Chuyển động của từng shot bằng số: thời điểm, quãng đường, easing, điểm âm thanh. Bạn duyệt và dựng |
+| **04 · Production** | Phim được dựng bằng code từng shot, rồi nhạc và hiệu ứng âm thanh được mix (Standard −14 LUFS, hoặc Quieter −16 LUFS). Bạn xem **Version 1** |
+| **05 · Review and checks** | Chỉ khi bạn yêu cầu: Claude xem phim của mình, chấm trên 10 và sửa; **Sizes** thêm khổ khác; **Tech checks** báo độ tương phản, chữ chồng, hình đứng yên và âm thanh bằng lời dễ hiểu |
+| **Render · AE Export** | MP4, MOV hoặc WebM, có phụ đề nếu bạn muốn, hoặc một project After Effects |
 
-### Hai giao diện
+Trong **Film Editor**, phim chạy từng khung hình đúng như khi render. Bấm vào chữ bất kỳ trên khung hình để sửa, hoặc bấm **Pin a note**
+(N) rồi chấm một điểm trên hình: ghi chú tới Claude kèm thời điểm, shot và vị trí. Timeline chứa lời đọc, hiệu ứng và nhạc; kéo là nghe
+mức âm thay đổi ngay.
 
-App có hai giao diện đầy đủ, tính năng như nhau; lần mở đầu tiên app hỏi bạn chọn giao diện nào, sau đó đổi ở Settings › General ›
-Appearance.
+<p align="center"><img src="images/desk-editor.jpg" alt="Film Editor (The Desk): các bước bên trái, phim, timeline và khung chat Claude bên phải"><br><sub>Film Editor (The Desk)</sub></p>
 
-- **The Desk** (mặc định): bàn làm việc tối màu, yên tĩnh, thanh điều hướng bên trái.
-- **The Studio**: xưởng bàn đèn sáng màu: giấy, bảng ghim, nhãn viết tay, storyboard ghim lên bảng.
+**After Effects.** Mỗi film style có một nhãn, đo trên phim mẫu của style đó:
+
+| Nhãn | After Effects nhận được gì | Số style |
+|---|---|---|
+| **AE editable** | Chữ và hình khối thành layer sửa được | 6 |
+| **AE partly editable** | Một phần thành layer, phần còn lại là video | 93 |
+| **AE video only** | Cả phim là một layer video | 10 |
+| **AE not checked yet** | Chưa đo: vẫn xuất được, nhưng chưa biết trước kết quả | 24 |
+
+## Tính năng
+
+| Trang | Làm gì |
+|---|---|
+| **Productions** | Các phim của bạn, mới nhất trước; mỗi phim mở trong Film Editor. **New production** để bắt đầu phim mới |
+| **Writers' Room** | **Research** đề xuất ý tưởng theo đúng cách của một film style, có nguồn đã kiểm; **Pitches** giữ ý tưởng của bạn và các mẫu; **Scripts** viết kịch bản từng cảnh và mở phim mới từ đó |
+| **Film Styles** | 133 style theo tác giả, mỗi style có phim mẫu, ghi công và nhãn AE |
+| **Casting** | Nhân vật diễn trong phim của bạn, đứng đúng chiều cao. Claude tạo nhân vật từ brief theo nét vẽ của phim (hand-drawn, Brush cartoon, 3D Cartoon, What If, 2D Explainer, Stickman Explainer, Ricks Clip…), hoặc dùng một trong 34 nhân vật có sẵn |
+| **Brand Kits** | Màu, font, logo và thành phần của một thương hiệu, áp cho cả phim. 13 frame preset của HyperFrames có sẵn; tự làm Brand Kit từ thư mục thương hiệu (PDF, PowerPoint, ảnh, font, AI, PSD, ZIP) |
+| **Motion Library** | 889 motion, 454 block và thành phần, 192 thuật ngữ chuyển động, mỗi mục có xem trước, xếp theo loại và nhóm |
+| **Thumbnails** | Ảnh bìa cho phim ở 16:9 và 9:16, từ khung hình bạn chọn |
+| **Studio Settings** | Tài khoản và model Claude, thư mục phim, giao diện, render, lời đọc, thành phần, cập nhật |
+
+Hai giao diện, cùng tính năng, chọn ở lần mở đầu (đổi ở Studio Settings › General › Appearance): **The Desk**, không gian tối có thanh
+điều hướng bên trái, và **The Studio**, xưởng bàn đèn với giấy, bảng ghim và storyboard ghim trên bảng.
 
 <table>
 <tr>
-<td width="50%" valign="top"><img src="images/desk-projects.jpg" alt="The Desk · Projects"><br><sub>The Desk · Projects</sub></td>
-<td width="50%" valign="top"><img src="images/studio-projects.jpg" alt="The Studio · Projects"><br><sub>The Studio · Projects</sub></td>
+<td width="50%" valign="top"><img src="images/desk-productions.jpg" alt="Productions (The Desk)"><br><sub>Productions · The Desk</sub></td>
+<td width="50%" valign="top"><img src="images/studio-new-production.jpg" alt="New production (The Studio)"><br><sub>New production · The Studio</sub></td>
 </tr>
 <tr>
-<td width="50%" valign="top"><img src="images/desk-new-project.jpg" alt="The Desk · New project"><br><sub>The Desk · New project</sub></td>
-<td width="50%" valign="top"><img src="images/studio-new-project.jpg" alt="The Studio · New project"><br><sub>The Studio · New project</sub></td>
+<td width="50%" valign="top"><img src="images/desk-writers-room.jpg" alt="Writers' Room (The Desk)"><br><sub>Writers' Room · The Desk</sub></td>
+<td width="50%" valign="top"><img src="images/studio-casting.jpg" alt="Casting (The Studio)"><br><sub>Casting · The Studio</sub></td>
 </tr>
 <tr>
-<td width="50%" valign="top"><img src="images/desk-film-styles.jpg" alt="The Desk · Film Styles, theo tác giả"><br><sub>The Desk · Film Styles, theo tác giả</sub></td>
-<td width="50%" valign="top"><img src="images/studio-film-styles.jpg" alt="The Studio · Film Styles thành từng thùng đĩa theo tác giả"><br><sub>The Studio · Film Styles thành từng thùng đĩa theo tác giả</sub></td>
+<td width="50%" valign="top"><img src="images/desk-brand-kits.jpg" alt="Brand Kits (The Desk)"><br><sub>Brand Kits · The Desk</sub></td>
+<td width="50%" valign="top"><img src="images/studio-film-styles.jpg" alt="Film Styles (The Studio)"><br><sub>Film Styles · The Studio</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="images/desk-motion-library.jpg" alt="Motion Library (The Desk)"><br><sub>Motion Library · The Desk</sub></td>
+<td width="50%" valign="top"><img src="images/studio-thumbnails.jpg" alt="Thumbnails (The Studio)"><br><sub>Thumbnails · The Studio</sub></td>
 </tr>
 </table>
+
+<details>
+<summary>Các trang này ở giao diện còn lại</summary>
+
+<table>
+<tr>
+<td width="50%" valign="top"><img src="images/studio-productions.jpg" alt="Productions (The Studio)"><br><sub>Productions · The Studio</sub></td>
+<td width="50%" valign="top"><img src="images/desk-new-production.jpg" alt="New production (The Desk)"><br><sub>New production · The Desk</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="images/studio-writers-room.jpg" alt="Writers' Room (The Studio)"><br><sub>Writers' Room · The Studio</sub></td>
+<td width="50%" valign="top"><img src="images/desk-casting.jpg" alt="Casting (The Desk)"><br><sub>Casting · The Desk</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="images/studio-brand-kits.jpg" alt="Brand Kits (The Studio)"><br><sub>Brand Kits · The Studio</sub></td>
+<td width="50%" valign="top"><img src="images/desk-film-styles.jpg" alt="Film Styles (The Desk)"><br><sub>Film Styles · The Desk</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="images/studio-motion-library.jpg" alt="Motion Library (The Studio)"><br><sub>Motion Library · The Studio</sub></td>
+<td width="50%" valign="top"><img src="images/desk-thumbnails.jpg" alt="Thumbnails (The Desk)"><br><sub>Thumbnails · The Desk</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="images/studio-editor.jpg" alt="Film Editor (The Studio)"><br><sub>Film Editor · The Studio</sub></td>
+<td width="50%" valign="top"></td>
+</tr>
+</table>
+</details>
+
+**Nhân vật có sẵn trong app (34):** Mira, Theo, Bit, chú báo, Bơ, Firefighter và Grandma (vẽ tay, Anidoodle); Mika, Ravi, June, Otto,
+Bea, Leo và Noor (3D Cartoon); Pip, Mo, Sis, Mum và Suit (What If); tám người La Mã của Ricks Clip; Hoodie Hero (Stickman Explainer);
+nhân vật chính và cái bóng của anh (Inner Voice Short); Red Hoodie Kid (2D Explainer); và các nhân vật mẫu Clawd, Lantern và Tofu.
+Chúng nằm trong thư mục riêng của app, nên một bản cập nhật không bao giờ trộn lẫn với nhân vật bạn tự tạo.
+
+**Sizes.** Một phim có thể có nhiều khổ: bản gốc (ví dụ 16:9) cộng thêm 9:16, 1:1 hoặc 4:5, mỗi khổ được dàn lại cho vừa khung và
+render với bản mix của chính phim.
+
+<p align="center"><img src="images/formats-films.jpg" alt="Phim khổ vuông, khổ dọc 4:5 và khổ đứng"><br><sub>1:1 · 4:5 · 9:16 · 1:1</sub></p>
 
 ## Film style
 
-Film style quyết định toàn bộ diện mạo phim và bộ luật Claude làm theo. Thư viện Film Styles nhóm style theo tác giả; mỗi thẻ ghi tác giả,
-giấy phép và đúng commit nguồn. File style của bên thứ ba được dùng nguyên như tác giả phát hành, ghim ở một commit.
+Film style quyết định toàn bộ diện mạo và các luật Claude tuân theo. File style của bên thứ ba được dùng đúng như tác giả phát hành,
+ghim ở một commit; mỗi thẻ trong Film Styles ghi tác giả, giấy phép và nguồn.
 
-| Bộ | Tác giả | Số style | Giấy phép | Nguồn |
+| Bộ | Tác giả | Style | Giấy phép | Nguồn |
 |---|---|---|---|---|
-| **General Style** | Moworks | 1 | bộ luật riêng của app | viết lại cho app từ quy trình của bộ kit Moworks Motion |
-| **Map Explainer** | Moworks | 1: bản đồ giấy và mặt đất thật dưới một camera liền, bút đỏ vẽ lên trên | bộ luật riêng của app, dữ liệu bản đồ từ [Natural Earth](https://www.naturalearthdata.com) và [world-atlas](https://github.com/topojson/world-atlas/tree/v2.0.2), ảnh vệ tinh từ [EOX](https://cloudless.eox.at) (CC BY 4.0) | làm riêng cho app; mọi nguồn ở [THIRD-PARTY.md](THIRD-PARTY.md) |
-| **Film style Moworks** | Moworks | 7: Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, Moworks 2D Explainer, Ricks Clip và What If (chạy engine MIT của FreshStack), mỗi style có bước kiểm riêng của skill gốc trong Review và tiếng động làm bằng code | sản phẩm riêng của app | các skill gốc riêng của Moworks Studio, ghim trong app; mọi phần bên ngoài ghi ở [THIRD-PARTY.md](THIRD-PARTY.md) |
-| **HyperFrames** | HeyGen | 8: Slideshow và bảy loại phim trong skill của HyperFrames (Explainer, Launch, Music video, Data, Vertical, 3D, Character) | Apache-2.0 | [heygen-com/hyperframes @ `4719543`](https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/skills) (v0.8.214) |
-| **Lemo-Opuscar** | Lemomo (LemoLab) | 66 style phim dựng bằng code (các thời kỳ điện ảnh, tư liệu, editorial, dữ liệu…; Memphis Diorama do EianLu đóng góp) | MIT; ảnh mẫu CC BY 4.0 | [lemomo-ai/lemo-opuscar @ `bebbbe1`](https://github.com/lemomo-ai/lemo-opuscar/tree/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00) |
-| **mg-styles-15** | Vincentwei1021 | 14 style motion design (style 3D dựng bằng Blender không có trong app) | MIT | [Vincentwei1021/mg-styles-15 @ `49052d8`](https://github.com/Vincentwei1021/mg-styles-15/tree/49052d80bfaf9fa8412cc9710530e5e95a3b8d8c) |
+| **Moworks** | Moworks | 3: **General Style**; **Map Explainer** (bản đồ giấy và mặt đất thật dưới một camera liền mạch); **Brush cartoon** (hoạt hình nét cọ do chính nhân vật của dự án diễn) | sản phẩm của app. Dữ liệu bản đồ [Natural Earth](https://www.naturalearthdata.com), [world-atlas](https://github.com/topojson/world-atlas/tree/v2.0.2), ảnh vệ tinh [EOX](https://cloudless.eox.at) (CC BY 4.0). Brush cartoon dựng trên ClaudeAnimationBase của John Heibel (MIT; p5.js LGPL-2.1, p5.brush MIT) | làm cho app; Brush cartoon từ [JohnHeibel/ClaudeAnimationBase @ `0ac8bf2`](https://github.com/JohnHeibel/ClaudeAnimationBase/tree/0ac8bf2b31942376cb6b8c4074715595d512acd2) |
+| **Moworks film styles** | Moworks Studio | 7: Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, Moworks 2D Explainer, Ricks Clip, What If (trên engine MIT của FreshStack) | sản phẩm của app | skill gốc của app; phần bên ngoài ở [THIRD-PARTY.md](THIRD-PARTY.md) |
+| **HyperFrames** | HeyGen | 8: Slideshow, Explainer, Launch, Music video, Data, Vertical, 3D, Character | Apache-2.0 | [heygen-com/hyperframes @ `4719543`](https://github.com/heygen-com/hyperframes/tree/4719543e972548a261b8354f0a8dada479ae5d93/skills) (v0.8.214) |
+| **Lemo-Opuscar** | Lemomo (LemoLab) | 66 style dựng bằng code (các thời kỳ điện ảnh, tài liệu, editorial, dữ liệu…; Memphis Diorama của EianLu) | MIT; ảnh mẫu CC BY 4.0 | [lemomo-ai/lemo-opuscar @ `bebbbe1`](https://github.com/lemomo-ai/lemo-opuscar/tree/bebbbe1aa92a3cb4bb6f83500e61b23a17d1aa00) |
+| **mg-styles-15** | Vincentwei1021 | 14 style motion design (style 3D dựng bằng Blender không đưa vào) | MIT | [Vincentwei1021/mg-styles-15 @ `49052d8`](https://github.com/Vincentwei1021/mg-styles-15/tree/49052d80bfaf9fa8412cc9710530e5e95a3b8d8c) |
 | **Anidoodle** | Alex Greenshpun (10x Company) | 35 chất liệu vẽ tay (32 chất liệu + 3 house style) | Apache-2.0 kèm NOTICE | [alexgreensh/anidoodle @ `4ae27d2`](https://github.com/alexgreensh/anidoodle/tree/4ae27d2c281fcfd01bce87ab13dc5ad4df81a795) (v0.10.1) |
-| **Brush cartoon** | John Heibel | 1: hoạt hình nét cọ, do chính các nhân vật của dự án diễn | MIT (p5.js LGPL-2.1, p5.brush MIT) | [JohnHeibel/ClaudeAnimationBase @ `0ac8bf2`](https://github.com/JohnHeibel/ClaudeAnimationBase/tree/0ac8bf2b31942376cb6b8c4074715595d512acd2) |
 
-Mọi style còn theo hai bộ luật chung của app: **phim luôn sống động** (không khung hình nào đứng yên quá 2 giây) và **dừng lại hỏi**
-(mâu thuẫn hoặc thiếu chất liệu là câu hỏi cho bạn, không bao giờ là một phỏng đoán âm thầm).
+Mọi style còn theo hai luật chung của app: **phim luôn sống** (không khung hình nào đứng yên quá hai giây) và **dừng lại hỏi** (mâu thuẫn
+hay thiếu chất liệu là câu hỏi cho bạn, không bao giờ tự đoán).
 
 ### Làm bằng app
 
-Ảnh tĩnh từ các phim mẫu làm bằng Moworks Studio, mỗi phim một style. Câu chuyện là sáng tác mới; style và tác giả của nó ghi dưới từng
-ảnh.
-
 <table>
 <tr>
-<td width="33%" valign="top"><img src="images/film-pebble.jpg" alt="Pebble, ra mắt một chiếc đèn"><br><sub><b>Pebble, ra mắt một chiếc đèn</b> · Launch · style của HeyGen</sub></td>
-<td width="33%" valign="top"><img src="images/film-sundial.jpg" alt="Đồng hồ mặt trời hoạt động thế nào"><br><sub><b>Đồng hồ mặt trời hoạt động thế nào</b> · Explainer · style của HeyGen</sub></td>
-<td width="33%" valign="top"><img src="images/film-garden.jpg" alt="Khu vườn cộng đồng qua những con số"><br><sub><b>Khu vườn cộng đồng qua những con số</b> · Data · style của HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-pebble.jpg" alt="Pebble, ra mắt chiếc đèn"><br><sub><b>Pebble, ra mắt chiếc đèn</b> · Launch · HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-sundial.jpg" alt="Đồng hồ mặt trời hoạt động thế nào"><br><sub><b>Đồng hồ mặt trời hoạt động thế nào</b> · Explainer · HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-garden.jpg" alt="Khu vườn cộng đồng qua những con số"><br><sub><b>Khu vườn cộng đồng qua những con số</b> · Data · HeyGen</sub></td>
 </tr>
 <tr>
-<td width="33%" valign="top"><img src="images/film-isometric.jpg" alt="Hai cửa lên xe buýt"><br><sub><b>Hai cửa lên xe buýt</b> · Isometric Picture Book · style của Lemomo</sub></td>
-<td width="33%" valign="top"><img src="images/film-night-music.jpg" alt="Thành phố sáng đèn theo nhịp"><br><sub><b>Thành phố sáng đèn theo nhịp</b> · Music video · style của HeyGen</sub></td>
-<td width="33%" valign="top"><img src="images/film-papercraft.jpg" alt="Thị trấn sân khấu giấy"><br><sub><b>Thị trấn sân khấu giấy</b> · Toy-theatre paper collage · style của Alex Greenshpun</sub></td>
+<td width="33%" valign="top"><img src="images/film-isometric.jpg" alt="Hai cửa trên xe buýt"><br><sub><b>Hai cửa trên xe buýt</b> · Isometric Picture Book · Lemomo</sub></td>
+<td width="33%" valign="top"><img src="images/film-night-music.jpg" alt="Thành phố sáng theo nhịp"><br><sub><b>Thành phố sáng theo nhịp</b> · Music video · HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-papercraft.jpg" alt="Thị trấn sân khấu giấy"><br><sub><b>Thị trấn sân khấu giấy</b> · Toy-theatre paper collage · Alex Greenshpun</sub></td>
 </tr>
 <tr>
-<td width="33%" valign="top"><img src="images/film-clouds.jpg" alt="Nếu ta gấp được mây thì sao?"><br><sub><b>Nếu ta gấp được mây thì sao?</b> · What If · Moworks Studio</sub></td>
-<td width="33%" valign="top"><img src="images/film-slideshow.jpg" alt="Một ngày leo núi"><br><sub><b>Một ngày leo núi</b> · Slideshow · style của HeyGen</sub></td>
-<td width="33%" valign="top"><img src="images/film-puzzle-cube.jpg" alt="Khối lập phương tách rời"><br><sub><b>Khối lập phương tách rời</b> · 3D · style của HeyGen</sub></td>
-</tr>
-</table>
-
-<p align="center"><img src="images/formats-films.jpg" alt="Phim vuông, dọc và đứng"><br>
-<sub>Mọi khổ hình mà style cho phép: <b>Geometric Bauhaus</b> (style của Vincentwei1021) 1:1 · <b>tiệm bánh mở cửa</b> (General Style của Moworks) 4:5 ·
-<b>Spoke &amp; Brew</b> (Vertical · style của HeyGen) 9:16 · <b>khối lập phương</b> (3D · style của HeyGen) 1:1</sub></p>
-
-<table>
-<tr>
-<td width="50%" valign="top"><img src="images/film-bolt.gif" alt="Nhân vật đồng hồ báo thức thức dậy"><br><sub><b>Ngày đầu của chiếc đồng hồ báo thức</b> · Character · style của HeyGen</sub></td>
-<td width="50%" valign="top"><img src="images/film-lighthouse.gif" alt="Chú mèo thắp đèn hải đăng"><br><sub><b>Chú mèo gác hải đăng</b> · Brush cartoon · style của John Heibel, do một nhân vật vẽ bằng Character maker của app diễn</sub></td>
-</tr>
-</table>
-
-## Các màn khác trong app
-
-| Màn | Nội dung |
-|---|---|
-| **Projects** | Các phim của bạn, mới nhất ở trên; mỗi phim mở trong Editor |
-| **Brand Kits** | Màu, font và các thành phần của một thương hiệu, áp cho cả phim. Có sẵn 13 frame preset của HyperFrames; bạn tự tạo Brand Kit từ cả thư mục của thương hiệu (PDF, PowerPoint, ảnh, font, AI, PSD, ZIP) rồi kiểm lại trước khi dùng; phim làm từ kit có sẵn logo và font của kit |
-| **Film Styles** | Thư viện style ở trên, kèm phim mẫu, ghi công và huy hiệu AE |
-| **Motion Library** | Thư viện riêng của studio: Motions (889), Blocks (454 block và component) và Vocabulary (168 thuật ngữ chuyển động), xếp theo loại và nhóm. Giấy phép của các nguồn được dùng nằm trong [THIRD-PARTY.md](THIRD-PARTY.md) |
-| **Characters** | Nhân vật của dự án: vẽ bằng Character maker, hoặc lấy từ các rig nhân vật của tác giả Anidoodle |
-| **Writers Room** | Research đưa 10 ý tưởng theo đúng cách của từng film style, có nguồn đã kiểm; Ideas giữ ý tưởng của bạn và các mẫu (brief mẫu của mọi film style, 98 prompt OPUSCAR); Scripts viết kịch bản từ ý tưởng theo từng cảnh, và **Start a project with this script** mở New project với kịch bản đó. Việc chạy tiếp khi bạn sang trang khác |
-| **Settings** | General (tài khoản Claude, thư mục dự án, giao diện, render, thông báo khi app chờ bạn), Director (model và effort của Claude), System (thành phần, lời đọc, backup và tình trạng máy), Update (cả Uninstall) |
-
-<table>
-<tr>
-<td width="50%" valign="top"><img src="images/desk-motion-library.jpg" alt="Motion Library: mục nào cũng có bản xem trước, xếp theo loại và nhóm"><br><sub>Motion Library: mục nào cũng có bản xem trước, xếp theo loại và nhóm</sub></td>
-<td width="50%" valign="top"><img src="images/desk-brand-kits.jpg" alt="Brand Kits: 13 frame preset của HyperFrames và Brand Kit của bạn"><br><sub>Brand Kits: 13 frame preset của HyperFrames và Brand Kit của bạn</sub></td>
+<td width="33%" valign="top"><img src="images/film-clouds.jpg" alt="Nếu gấp được mây thì sao?"><br><sub><b>Nếu gấp được mây thì sao?</b> · What If · Moworks Studio</sub></td>
+<td width="33%" valign="top"><img src="images/film-slideshow.jpg" alt="Một ngày leo núi"><br><sub><b>Một ngày leo núi</b> · Slideshow · HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-puzzle-cube.jpg" alt="Khối rubik tách rời"><br><sub><b>Khối rubik tách rời</b> · 3D · HeyGen</sub></td>
 </tr>
 <tr>
-<td width="50%" valign="top"><img src="images/desk-writers-room.jpg" alt="The Desk · Writers Room: mười ý tưởng tìm theo một film style"><br><sub>The Desk · Writers Room: mười ý tưởng tìm theo một film style</sub></td>
-<td width="50%" valign="top"><img src="images/studio-writers-room.jpg" alt="The Studio · Writers Room dạng thẻ trên bàn"><br><sub>The Studio · Writers Room dạng thẻ trên bàn</sub></td>
+<td width="33%" valign="top"><img src="images/film-bolt.gif" alt="Nhân vật đồng hồ báo thức thức dậy"><br><sub><b>Ngày đầu của đồng hồ báo thức</b> · Character · HeyGen</sub></td>
+<td width="33%" valign="top"><img src="images/film-lighthouse.gif" alt="Chú mèo thắp ngọn hải đăng"><br><sub><b>Chú mèo hải đăng</b> · Brush cartoon · Moworks</sub></td>
+<td width="33%" valign="top"></td>
 </tr>
 </table>
 
@@ -203,184 +189,73 @@ Mọi style còn theo hai bộ luật chung của app: **phim luôn sống độ
 
 | | |
 |---|---|
-| **Hệ thống** | Windows 10 hoặc 11, 64-bit; vài GB đĩa trống cho app và các thành phần, cộng chỗ cho dự án |
-| **Node.js** | 22 trở lên ([nodejs.org](https://nodejs.org)) |
-| **Git** | [Git for Windows](https://git-scm.com/download/win) |
-| **Claude Code** | App Claude desktop đã có sẵn, hoặc [bản native](https://claude.com/claude-code); cần tài khoản Claude có Claude Code, đăng nhập ngay trong app |
-| **Python và FFmpeg** | Python 3.12 và FFmpeg 9.0. App tự cài khi còn thiếu (qua winget, chỉ cho tài khoản của bạn) |
-| *Tuỳ chọn* | API key ElevenLabs để làm lời đọc, hoặc giọng miễn phí Kokoro (khoảng 375 MB, chọn lúc cài đầu tiên hoặc trong Settings › System; không có tiếng Việt) · After Effects để port AE · card đồ hoạ NVIDIA (từ 4 GB) để chép lời nhanh hơn |
+| **Hệ thống** | Windows 10 hoặc 11, 64-bit; vài GB trống, cộng chỗ cho phim của bạn |
+| **Cần có trước** | [Git for Windows](https://git-scm.com/download/win), [Node.js](https://nodejs.org) 22 trở lên, và Claude Code (có sẵn trong app Claude desktop) với tài khoản Claude có Claude Code |
+| **App tự cài** | HyperFrames 0.8.214 và Chrome của nó, Python 3.12, FFmpeg 9.0, các thành phần Python và model chuyển giọng nói thành chữ (Whisper turbo): tổng khoảng 2,6 GB |
+| *Tuỳ chọn* | Key ElevenLabs cho lời đọc (hoặc giọng Kokoro miễn phí, khoảng 375 MB, không có tiếng Việt) · After Effects cho AE Export · card NVIDIA (4 GB trở lên) để canh giờ lời đọc nhanh hơn |
 
 ## Bắt đầu nhanh
 
-1. **Chuẩn bị** (chi tiết ở [Yêu cầu](#yêu-cầu)): Windows 10 hoặc 11, [Git](https://git-scm.com/download/win),
-   [Node.js](https://nodejs.org) 22 trở lên và Claude Code (app Claude desktop đã có sẵn). App tự cài phần còn lại.
-2. **Clone repo này** về thư mục `app` nằm trong một thư mục riêng:
+1. Cài Git, Node.js 22+ và Claude Code.
+2. Clone vào thư mục `app` nằm trong một thư mục riêng, trên ổ đĩa của máy (không dùng Google Drive, OneDrive hay Dropbox: đồng bộ khoá file khi phim đang render):
    ```bash
    git clone https://github.com/moworksstudio/moworks-studio "Moworks Studio\app"
    ```
-   App lưu công việc của bạn ngay cạnh bản clone, nên thư mục sẽ có dạng:
-   ```
-   Moworks Studio\
-     app\       ← bản clone: mã nguồn, HyperFrames đã cài, cài đặt
-     projects\  ← các phim
-     library\   ← Brand Kits, nhân vật của bạn, thư viện
-     models\    ← chỉ có khi đã cài Whisper
-   ```
-   Hãy dùng ổ đĩa trên máy, không dùng thư mục đồng bộ (Google Drive, OneDrive, Dropbox): việc đồng bộ khoá file khi phim đang render.
-   Màn hình lần đầu cho phép chọn thư mục khác để lưu các project của bạn.
-3. **Bấm đúp `Moworks Studio\app\Moworks Studio.bat`**. Lần đầu, file này cài các gói của app (khoảng 80 MB) và dựng giao diện, rồi mở
-   cửa sổ app. Các lần sau chỉ mất vài giây.
-4. **Hoàn tất trong app**, mỗi lần một màn hình. Chọn giao diện (The Desk hoặc The Studio); rồi **Set up Moworks Studio** hỏi hai
-   việc: thư mục lưu các project của bạn, và **Install**, cài một lần mọi thành phần app cần. Sau đó bấm chip Claude trên thanh trên cùng
-   để đăng nhập; trang đăng nhập của chính Claude Code mở trong trình duyệt và app không bao giờ thấy mật khẩu của bạn.
+3. Bấm đúp `Moworks Studio\app\Moworks Studio.bat`. Lần đầu app cài các gói của nó (khoảng 80 MB) rồi mở cửa sổ.
+4. Trong app: chọn giao diện, rồi **Set up Moworks Studio**: chọn thư mục chứa phim và bấm **Install**. Bấm chip Claude trên thanh trên
+   cùng để đăng nhập (đăng nhập của chính Claude Code; app không bao giờ thấy mật khẩu của bạn).
+5. *Tuỳ chọn:* thêm key ElevenLabs ở Studio Settings › System › Voice-over. Rồi **Productions › New production**.
 
-   | Thành phần | Dung lượng | |
-   |---|---|---|
-   | HyperFrames 0.8.214 và Chrome của nó | khoảng 550 MB | cài bằng **Install** |
-   | Thành phần Python (xuất After Effects, đọc PSD / PowerPoint / PDF, phân tích nhịp nhạc, canh thời gian lời bài hát) | tối đa 160 MB (ít hơn nếu Python của bạn đã có sẵn một phần) | cài bằng **Install** |
-   | Model speech-to-text (Whisper turbo), để canh thời gian lời đọc | khoảng 1,7 GB kèm engine | cài bằng **Install** |
-   | Whisper chạy trên card đồ hoạ NVIDIA (thư viện CUDA) | khoảng 1,3 GB | tuỳ chọn, trong Settings › System khi máy có card phù hợp |
-   | FFmpeg 9.0 (và Python 3.12 nếu máy chưa có) | khoảng 210 MB | cài bằng **Install** qua winget, chỉ cho tài khoản của bạn; máy không có winget thì màn hình hiện dòng lệnh để bạn tự chạy |
-   | Skill và registry của HyperFrames, font, thư viện code, nguồn film style, thư viện | có sẵn trong repo | không cần tải |
-5. **Thêm key giọng đọc** *(tuỳ chọn)*: Settings › System › Voice-over. Key được mã hoá cho tài khoản Windows của bạn.
-6. **Làm phim:** Projects › New project.
+Dữ liệu của bạn nằm cạnh app: `projects\` (phim), `library\` (Brand Kit, nhân vật bạn tạo), `models\` (khi đã cài Whisper).
 
 ### Hoặc để Claude cài
 
-Dán câu này vào Claude Code (giữ nguyên tiếng Anh):
+Dán câu này vào Claude Code:
 
 > Install Moworks Studio from https://github.com/moworksstudio/moworks-studio: clone it and follow its .claude/CLAUDE.md.
 
-Claude làm theo `.claude/CLAUDE.md` của repo: kiểm tra Git, Node.js 22 và Claude Code (và hỏi trước khi cài những gì còn thiếu),
-clone vào `Moworks Studio\app` rồi chạy `Moworks Studio.bat`; màn hình lần đầu của app làm nốt phần còn lại.
-
-## Làm thử một phim
-
-Một phim 30 giây, từ brief tới MP4:
-
-1. **New project.** Đặt tiêu đề, chọn film style và định dạng (khổ hình, độ dài), rồi dán brief ("Phim kể chuyện 30 giây về cuộc
-   marathon Olympic 1904, khổ 4:5, lời đọc tiếng Việt"). Thêm Brand Kit, nhân vật và chất liệu nếu có. Bấm **Create project**.
-2. **Prepare.** Claude đọc hết và có thể dừng lại hỏi ("Style này là phim câm; giữ lời đọc hay dùng thẻ chữ?"). Trả lời trong chat; Claude
-   viết `BRIEF.md`.
-3. **Lời đọc.** Màn Voice mở sẵn kịch bản. Chọn giọng và tạo lời đọc; Whisper canh thời gian từng chữ tự động
-   và storyboard tự bắt đầu.
-4. **Storyboard.** Xem bảng. Góp ý một khung (`@Panel_3: cho người chạy nhỏ lại`) hoặc duyệt.
-5. **Motion Plan.** Kiểm thời gian và chuyển động của từng shot. **Approve and build** cho biết thời gian ước tính.
-6. **Production** tự chạy: dựng phim, nhạc và âm thanh, rồi Version 1. Ô quy trình cho biết bước nào đang chạy và còn bao lâu; chat cho biết
-   Claude đang làm gì.
-7. **Xem Version 1** và trả lời một câu: Claude sửa lỗi, sửa và làm hay hơn, hay giữ nguyên?
-8. **Play** phim trong Editor. Nhờ Claude sửa trong chat (bấm vào một phần tử trước để chỉ đúng chỗ), hoặc tự sửa chữ bằng tay.
-9. **Render** MP4, và **Port to After Effects** nếu huy hiệu của style cho phép.
-
-<p align="center"><img src="images/studio-editor.jpg" alt="Một phim đã xong trong Editor (The Studio): các bước dọc phía trên, ghi chú của Claude bên phải"><br><sub>Một phim đã xong trong Editor (The Studio): các bước dọc phía trên, ghi chú của Claude bên phải</sub></p>
-
-Để tham khảo: một phim 34 giây ở một style Lemo-Opuscar mất 1 giờ 17 phút từ lúc Create tới MP4 hoàn chỉnh, trong đó 44 phút tính từ
-**Approve and build**; lượng dùng Claude cho cả phim tương đương khoảng 13 USD theo giá API.
-
-## File nằm ở đâu
-
-| Thư mục | Nội dung | Trong git |
-|---|---|---|
-| `app\` | Repo này: mã nguồn của app, cấu hình, bộ luật và các nguồn bên thứ ba đóng gói kèm | có |
-| `app\runtime\` | Cài đặt, key đã mã hoá, các bản HyperFrames đã cài, nhật ký | không |
-| `projects\` (cạnh `app\`, trong thư mục làm việc) | Phim của bạn: mỗi phim một thư mục; file của HyperFrames ở ngoài cùng (`index.html`, `BRIEF.md`, `STORYBOARD.md`, composition, assets), tài liệu của app trong `docs\` (ghi chú, ghi công, Review, nhân vật, Motion Plan), storyboard và `renders\` | không |
-| `library\`, `models\` (cạnh `app\`, trong thư mục làm việc) | Thư viện, Brand Kits và nhân vật của bạn; Whisper, khi đã cài | không |
-
-Các nhân vật đi kèm app (Clawd, Mira, Theo, Bit, chú báo) nằm trong `app\bundle\library\characters\` và được đọc tại đó. `library\characters\` chỉ chứa nhân vật do bạn làm, nên bản cập nhật không thể đổi hay trộn lẫn chúng. Nhân vật mới có tên trùng với nhân vật của app sẽ có id riêng (`mira-2`).
-
-Settings › General › Projects folder đổi nơi lưu dự án mới. Mỗi phim có một `docs\CREDITS.md` ghi công nhạc và hiệu ứng âm thanh phim dùng
-(tên, tác giả, nguồn, giấy phép); font tải về đi kèm file giấy phép của nó.
+Claude kiểm Git, Node.js và Claude Code (hỏi trước khi cài thứ còn thiếu), clone app và mở nó; màn hình lần đầu lo phần còn lại.
 
 ## Cập nhật
 
-Settings › Update đưa thư mục app lên bản mới nhất của repo này: tải về, fast-forward, cài lại gói khi `package-lock.json` thay đổi, dựng
-lại giao diện, kiểm tra app khởi động được rồi khởi động lại. Nếu một bước lỗi, thư mục quay về đúng commit trước đó. Chỉ những file git
-theo dõi mới thay đổi; dự án, thư viện, cài đặt và key của bạn không bao giờ bị đụng tới.
-
-Bạn cũng có thể cập nhật bằng tay: đóng app, chạy `git pull`, `npm install` và `npm run build` trong thư mục app, rồi mở lại `Moworks Studio.bat`.
+Studio Settings › Update đưa app lên bản mới nhất: tải về, cài lại gói nếu cần, build lại, kiểm app mở được rồi khởi động lại. Nếu một
+bước hỏng, app quay về đúng bản cũ. Phim, thư viện, cài đặt và key của bạn không bao giờ bị đụng tới.
 
 ## Gỡ cài đặt
 
-Settings › Update › **Uninstall Moworks Studio…** gỡ app khỏi máy để cài sạch lại. App hỏi một lần, rồi mọi thứ vào Thùng rác (món nào
-quá to so với Thùng rác thì Windows hỏi trước khi xoá hẳn):
-
-- thư mục app: app, HyperFrames, Chromium, dữ liệu của cửa sổ app, cài đặt và key;
-- chỉ khi bạn chọn: các model đã tải, và phim cùng thư viện của bạn.
-
-Git, Node.js, Python, FFmpeg và Claude Code được giữ (chương trình khác cũng dùng), thư mục làm việc và các phim mở từ thư mục khác cũng
-vậy. Bản app có thay đổi riêng chưa lên GitHub được giữ lại, kèm lý do. App đóng lại, rồi một cửa sổ cho biết những gì đã gỡ. Muốn cài
-lại: clone repo này và mở `Moworks Studio.bat`.
-
-Nếu app không mở được: chạy `tools\uninstall.bat` trong thư mục app (thêm `--models` hoặc `--films` để gỡ cả những thứ đó).
+Studio Settings › Update › **Uninstall Moworks Studio…** chuyển app vào Thùng rác, và chỉ khi bạn đánh dấu: các model đã tải, phim và
+thư viện của bạn. Git, Node.js, Python, FFmpeg và Claude Code được giữ lại. Nếu app không mở được, chạy `tools\uninstall.bat` trong thư
+mục app (thêm `--models` hoặc `--films` để xoá cả những thứ đó).
 
 ## Xử lý sự cố
 
 | Sự cố | Cách xử lý |
 |---|---|
-| "Node.js was not found" | Cài Node.js 22 trở lên, rồi mở lại `Moworks Studio.bat` |
-| Lần mở đầu dừng ở "Installing the app's packages" | Kiểm tra kết nối mạng; các dòng phía trên thông báo cho biết lỗi gì. Chạy lại file .bat |
-| "Claude is not connected" | Bấm chip Claude trên thanh trên cùng và đăng nhập. Trong terminal, `claude auth status` cho biết trạng thái của Claude Code |
-| Một thành phần báo thiếu | Settings › System liệt kê mọi thành phần, trạng thái và bước tiếp theo; FFmpeg cần lệnh `winget` hiện ở đó |
-| "The local service is not running" | Dịch vụ nền của app đã dừng. Mở lại `Moworks Studio.bat`; nhật ký ở `runtime\logs\app.log` |
-| Một style hiện ổ khoá | Một file nguồn của style không còn khớp bản đã ghim. Settings › System cho tải lại |
-| Không tạo được lời đọc | Thêm hoặc kiểm tra key ElevenLabs ở Settings › System › Voice-over; key cần quyền text-to-speech |
-| Port After Effects lỗi | Cài After Effects, đóng mọi hộp thoại đang mở trong đó rồi port lại; thông báo lỗi trong app nêu bước bị lỗi |
+| "Node.js was not found" | Cài Node.js 22 trở lên rồi mở lại `Moworks Studio.bat` |
+| Lần đầu mở dừng lại khi đang cài | Kiểm tra mạng rồi chạy lại file .bat; các dòng phía trên cho biết bước nào hỏng |
+| "Claude is not connected" | Bấm chip Claude trên thanh trên cùng và đăng nhập |
+| Thiếu một thành phần | Studio Settings › System cho biết trạng thái từng thành phần và bước tiếp theo |
+| "The local service is not running" | Mở lại `Moworks Studio.bat` |
+| Không tạo được lời đọc | Kiểm key ElevenLabs ở Studio Settings › System › Voice-over (key cần quyền text-to-speech) |
+| AE Export lỗi | Mở After Effects, đóng mọi hộp thoại trong đó rồi xuất lại; thông báo nêu bước bị hỏng |
 
-Các giới hạn đã biết nằm ở [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
+Giới hạn đã biết: [KNOWN-ISSUES.md](KNOWN-ISSUES.md).
 
 ## Quyền riêng tư
 
-- **Key nằm lại trên máy.** Key dịch vụ (ElevenLabs) được mã hoá bằng Windows DPAPI cho tài khoản Windows của bạn. Key không
-  bao giờ tới trình duyệt, nhật ký, file dự án hay tiến trình render.
-- **Claude** chạy qua Claude Code bằng tài khoản của chính bạn; app không bao giờ xử lý mật khẩu của bạn.
-- **Dự án nằm trên máy.** Brief, chất liệu và phim nằm trong thư mục dự án. Claude đọc chúng qua Claude Code để làm việc; ngoài ra không gì
-  tải chúng lên.
-- **Backup của app:** tắt, trừ khi một thư mục backup (`storage.backupRoot`) được đặt trong cài đặt cục bộ của máy này.
-- **Không telemetry.** Telemetry và kiểm tra cập nhật của HyperFrames bị tắt; app không gửi dữ liệu sử dụng. Truy cập mạng chỉ dành cho các
-  dịch vụ bạn dùng (Claude, dịch vụ giọng đọc, Mixkit và Openverse khi bạn cần nhạc hoặc hiệu ứng âm thanh, EOX khi phim Map Explainer lấy ảnh vệ tinh, và việc tải thành phần).
+- **Trên máy bạn.** Brief, chất liệu và phim nằm trong thư mục phim của bạn; Claude đọc chúng qua Claude Code để làm việc, ngoài ra không gì tải chúng lên.
+- **Key** (ElevenLabs) được mã hoá theo tài khoản Windows của bạn và không bao giờ vào log, file dự án hay tiến trình render.
+- **Claude** chạy bằng tài khoản của chính bạn; app không bao giờ cầm mật khẩu của bạn.
+- **Không thu thập dữ liệu sử dụng.** App chỉ lên mạng cho các dịch vụ bạn dùng: Claude, dịch vụ giọng đọc, nhạc và hiệu ứng âm thanh
+  (Mixkit, Openverse), ảnh vệ tinh cho Map Explainer (EOX) và tải các thành phần.
 
-## Dành cho người phát triển
+## Ghi công và giấy phép
 
-| Lệnh | Công dụng |
-|---|---|
-| `npm start` | Chạy server cục bộ của app (file .bat đã làm việc này) |
-| `npm run build` | Dựng giao diện vào `ui/dist` |
-| `npm run dev:ui` | Giao diện tự tải lại khi sửa, để làm phần giao diện |
+Render bằng engine mã nguồn mở [HyperFrames](https://github.com/heygen-com/hyperframes) (HeyGen, Apache-2.0), ghim ở 0.8.214 và dùng
+nguyên bản. Moworks Studio phát triển từ [Moworks Motion](https://github.com/moworksstudio/moworks-motion), bộ công cụ motion trước đây
+của Moworks cho Claude Code. Mọi nguồn đi kèm hoặc tải về, với tác giả, đường dẫn đúng commit và giấy phép, có trong
+[THIRD-PARTY.md](THIRD-PARTY.md). Mỗi phiên bản có gì: [CHANGELOG.md](CHANGELOG.md).
 
-Bản phát hành công khai không kèm bộ test, nên `npm test` không có gì để chạy.
-
-## Tài liệu
-
-| Tài liệu | Nội dung |
-|---|---|
-| [CHANGELOG.md](CHANGELOG.md) | Nội dung của phiên bản này |
-| [KNOWN-ISSUES.md](KNOWN-ISSUES.md) | Vấn đề còn mở và giới hạn, kèm cách xử lý |
-| [THIRD-PARTY.md](THIRD-PARTY.md) | Mọi nguồn đóng gói kèm hoặc tải về: tác giả, link đúng commit đã ghim, giấy phép, cách dùng |
-
-## Công nghệ
-
-| Thành phần | Vai trò |
-|---|---|
-| [HyperFrames](https://github.com/heygen-com/hyperframes) 0.8.214 (HeyGen, Apache-2.0) | Engine render mã nguồn mở, ghim phiên bản và dùng nguyên bản: định dạng composition, trình phát, lint, renderer, skill và registry |
-| Claude Code (Anthropic) | Chạy mọi tác vụ của Claude: Prepare, Storyboard, Motion Plan, Build, Review, chat |
-| Node.js, React 18, Vite | Server cục bộ và giao diện của app |
-| GSAP, three.js, p5.js / p5.brush, d3 | Thư viện chuyển động chép vào từng phim để phim phát và render offline |
-| Chromium headless shell, FFmpeg | Chụp khung hình và mã hoá video |
-| faster-whisper (Whisper large-v3 turbo) | Thời gian từng chữ của lời đọc, chạy trên CPU hoặc card NVIDIA |
-| ExtendScript + Python | Port sang After Effects |
-
-## Nguồn gốc và ghi công
-
-Render bằng engine mã nguồn mở [HyperFrames](https://github.com/heygen-com/hyperframes) (HeyGen, Apache-2.0), ghim ở bản 0.8.214 và dùng
-nguyên bản, không sửa đổi.
-
-Moworks Studio phát triển từ **[Moworks Motion](https://github.com/moworksstudio/moworks-motion)**, bộ kit motion cho Claude Code trước
-đây của Moworks: quy trình, gu thẩm mỹ và luật review của kit trở thành General Style và các bộ luật chung của app. Các film style khác là
-tác phẩm của HeyGen, Lemomo, Vincentwei1021, Alex Greenshpun, John Heibel và FreshStack, dùng nguyên như tác giả phát hành. Danh sách đầy
-đủ, kèm link đúng commit và giấy phép: [THIRD-PARTY.md](THIRD-PARTY.md).
-
-## Giấy phép
-
-Miễn phí để dùng cá nhân, phi thương mại; không phát tán lại, bán hay chia sẻ, kể cả bản đã sửa
-([LICENSE](LICENSE)). © 2026 Moworks. Các thành phần bên thứ ba giữ giấy phép riêng, liệt kê trong [THIRD-PARTY.md](THIRD-PARTY.md);
-giấy phép này không giới hạn quyền mà các giấy phép đó trao.
+Miễn phí cho mục đích cá nhân, phi thương mại; không phân phối lại, bán hay chia sẻ, kể cả bản đã sửa ([LICENSE](LICENSE)).
+© 2026 Moworks. Thành phần bên thứ ba giữ giấy phép riêng, liệt kê trong [THIRD-PARTY.md](THIRD-PARTY.md); giấy phép này không giới hạn
+chúng.

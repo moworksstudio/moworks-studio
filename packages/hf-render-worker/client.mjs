@@ -56,6 +56,15 @@ export function normalizeFps(fps) {
   return { num: fps.num, den: fps.den };
 }
 
+/** HyperFrames' answer to a render as the app's (audit/112b b2.4: the export, a size's render and the background render each read it their
+ *  own way): the answer when it is done; else an error, CANCELLED ("<what> stopped"), or HF's code (RENDER_FAILED when it has none) with
+ *  its message and { retryable, logFile, hf } in .detail. */
+export function renderOutcome(res, { what = "Render" } = {}) {
+  if (res?.type === "done") return res;
+  if (res?.type === "cancelled") throw Object.assign(new Error(`${what} stopped`), { code: "CANCELLED" });
+  throw Object.assign(new Error(res?.message ?? "The render failed"), { code: res?.code ?? "RENDER_FAILED", detail: { retryable: res?.retryable ?? null, logFile: res?.logFile ?? null, hf: res?.hf ?? null } });
+}
+
 export function render(job, { onEvent = () => {}, signal, version = null, logFile = null, root = APP_ROOT, envOverride = null, onChild = null, background = false } = {}) {
   const rt = resolveRuntime(version, root);
   // the frames stream into the encoder while they are captured instead of going to disk first (HF's opt-in for multi-worker screenshot

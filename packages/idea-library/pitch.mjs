@@ -188,19 +188,15 @@ export async function stageLab(dir, styleId, root) {
   mkdirSync(join(dir, "tools"), { recursive: true });
   for (const f of ["check-ideas.mjs", "check-script.mjs"]) cpSync(join(HERE, "lab-tools", f), join(dir, "tools", f));
   writeFileSync(join(dir, "tools", "app-root.txt"), `${root}\n`);
-  const { prepareRules } = await import("../agent/index.mjs");
-  const { first } = prepareRules(dir, styleId, root);
-  // the style's source skill or engine guide where a film reads it (only the owner's styles and What If name files there in the brief step)
-  try {
-    const ms = await import("../moworks-styles/index.mjs");
-    if (ms.isMoworksStyle(styleId)) ms.stageGuide(dir, styleId, root);
-    else if (styleId === "what-if") (await import("../what-if-styles/index.mjs")).stageEngine(dir, root);
-  } catch { /* the rules are enough */ }
-  const { requiredReads } = await import("../agent/reads.mjs");
+  // the style's rules and its own sources (source skill, engine and the author's guides) as a film's brief step stages them (agent/rules.mjs)
+  const { stageFor } = await import("../agent/rules.mjs");
+  const { first } = stageFor(dir, styleId, { step: "brief", root });
+  const { requiredReads, missingReads } = await import("../agent/reads.mjs");
   const pack = join(dir, ".moworks", "pitch", "SKILL.md");
   mkdirSync(dirname(pack), { recursive: true });
   cpSync(join(root, "config", "rules", "idea-pitch", "SKILL.md"), pack);
-  return { lab: dir, reads: [".moworks/pitch/SKILL.md", ...requiredReads(dir, { styleId, first, step: "brief" })] };
+  // a rules file the step should read and cannot: said in the run's log by the caller, never dropped in silence (audit/112 3.3)
+  return { lab: dir, reads: [".moworks/pitch/SKILL.md", ...requiredReads(dir, { styleId, first, step: "brief" })], missing: missingReads(dir, { styleId, first, step: "brief" }) };
 }
 
 const LANG_NAME = { vi: "Vietnamese", en: "English" };
@@ -237,25 +233,49 @@ const STEPS = {
   pitch: [["style", "Reading the film style"], ["web", "Searching the web"], ["write", "Writing the ideas"], ["check", "Checking the ideas"]],
   script: [["style", "Reading the film style"], ["write", "Writing the scenes"], ["check", "Checking the script"]],
 };
+// how long each step takes of a whole run (Test 40's runs: the reading is short, the writing long), and a run's usual length (the middle of
+// PITCH_ESTIMATE / SCRIPT_ESTIMATE): the percent moves through the running step with the time it has taken (owner #1324, T42-3: the chip
+// said 0% through the whole first step, and stood still through the long writing)
+export const STEP_SHARE = { style: 0.08, web: 0.35, write: 0.4, check: 0.17 };
+export const RUN_MS = { pitch: 7.5 * 60000, script: 3.5 * 60000 };
+/** The percent of a run: the share of the steps done (a skipped one gives its share to the others), and of the running step as much of its
+ *  share as its time so far is of its usual time, at most 90 % of it (it ends when Claude's call says so, not the clock). */
+export function runPercent(steps, kind, now = Date.now()) {
+  const live = steps.filter((x) => x.state !== "skip"), sum = live.reduce((a, x) => a + (STEP_SHARE[x.id] ?? 0.2), 0) || 1;
+  let p = 0;
+  for (const x of live) {
+    const w = (STEP_SHARE[x.id] ?? 0.2) / sum;
+    if (x.state === "done") p += w;
+    else if (x.state === "run" && x.at) p += w * Math.min(0.9, (now - x.at) / (w * (RUN_MS[kind] ?? 5 * 60000)));
+  }
+  return Math.min(99, Math.floor(100 * p));
+}
 /** The run's steps, kept on the job, moved only by what Claude really did (T41-1): set(id) runs that step and finishes the ones before
  *  it that ran (one that never ran, a search with no page read, is left out, not ticked); read() counts a page read. onProgress(stage,
- *  percent): the job's stage and its percent (0-100) for the top bar's chip (T41-2). */
+ *  percent): the job's stage and its percent (0-100) for the top bar's chip (T41-2), moving every two seconds while a step runs and never
+ *  going back. stop() ends the ticking. */
 function stepper(kind, web, onSteps, onProgress) {
   const steps = STEPS[kind].filter(([id]) => web || id !== "web").map(([id, label]) => ({ id, label, state: "todo", count: 0 }));
+  let last = 0, ended = false;
   const send = () => {
-    onSteps(steps.map((x) => ({ ...x })));
-    const live = steps.filter((x) => x.state !== "skip"), cur = steps.find((x) => x.state === "run");
-    onProgress(cur?.label ?? "Done", Math.round(100 * live.filter((x) => x.state === "done").length / Math.max(1, live.length)));
+    onSteps(steps.map(({ at: _at, ...x }) => ({ ...x })));
+    const cur = steps.find((x) => x.state === "run");
+    last = ended ? 100 : Math.max(last, runPercent(steps, kind));
+    onProgress(cur?.label ?? "Done", last);
   };
+  const tick = setInterval(() => { if (!ended && steps.some((x) => x.state === "run")) { const cur = steps.find((x) => x.state === "run"); last = Math.max(last, runPercent(steps, kind)); onProgress(cur.label, last); } }, 2000);
+  tick.unref?.();
   return {
     set(id) {
       // forward only: a page read after the ideas were begun counts, it does not take the run back (T40-1)
       const i = steps.findIndex((x) => x.id === id), cur = steps.findIndex((x) => x.state === "run");
       if (i < 0 || steps[i].state === "run" || steps[i].state === "done" || (cur >= 0 && i < cur)) return;
-      steps.forEach((x, k) => { x.state = k < i ? (x.state === "todo" || x.state === "skip" ? "skip" : "done") : k === i ? "run" : x.state === "done" ? "done" : "todo"; }); send();
+      steps.forEach((x, k) => { x.state = k < i ? (x.state === "todo" || x.state === "skip" ? "skip" : "done") : k === i ? "run" : x.state === "done" ? "done" : "todo"; });
+      steps[i].at = Date.now(); send();
     },
     read() { const w = steps.find((x) => x.id === "web"); if (!w) return; w.count++; if (w.state === "todo") this.set("web"); else send(); },
-    done() { steps.forEach((x) => { x.state = x.state === "skip" || (x.state === "todo" && x.id === "web") ? "skip" : "done"; }); send(); },
+    done() { steps.forEach((x) => { x.state = x.state === "skip" || (x.state === "todo" && x.id === "web") ? "skip" : "done"; }); ended = true; clearInterval(tick); send(); },
+    stop() { clearInterval(tick); },
   };
 }
 /** What one of Claude's tool calls is, from the call itself (T41-1): the round's own file written, its own check run, the web; anything
@@ -277,8 +297,12 @@ async function run({ kind, root, jobId, styleId, request, round, file, check, cl
   try {
     steps.set("style");
     const st = await stageLab(lab, styleId, root);
+    if (st.missing.length) {
+      const { missingLine } = await import("../agent/reads.mjs");
+      log(missingLine(st.missing.length)); console.error(`[rules] ${styleId ?? "no style"} ${kind}: not found ${st.missing.join(", ")}`);
+    }
     writeFileSync(join(lab, "tools", "round.json"), JSON.stringify(round, null, 1) + "\n");
-    const { agentSettings, OAUTH_RACE } = await import("../agent/index.mjs");
+    const { agentSettings } = await import("../agent/index.mjs"), { OAUTH_RACE } = await import("../system-status/claude-run.mjs");
     const s = agentSettings(root);
     const tools = `Read,Write,Edit,Glob,Grep,Bash${web ? ",WebSearch,WebFetch" : ""}`, allowed = [...ALLOWED, ...(web ? ["WebSearch", "WebFetch"] : [])];
     const ask = async (brief) => {
@@ -317,7 +341,7 @@ async function run({ kind, root, jobId, styleId, request, round, file, check, cl
     }
     steps.done();
     return { ...got, costUsd: cost, ms, reads: st.reads };
-  } finally { rmSync(lab, { recursive: true, force: true }); }
+  } finally { steps.stop(); rmSync(lab, { recursive: true, force: true }); }
 }
 const readJsonFile = (f) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return null; } };
 

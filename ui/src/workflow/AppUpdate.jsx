@@ -7,9 +7,9 @@
 // Data: GET /api/app/update (with the last check's answer); POST /api/app/update/check; POST /api/app/update/apply (a job "app-update").
 import { useState } from "react";
 import { AlertTriangle, Check, Clock, Download, Loader2, RefreshCw, RotateCcw, Trash2 } from "lucide-react";
-import { get, post, watchJob } from "../api.js";
+import { get, post } from "../api.js";
 import { Banner, Dialog } from "../components.jsx";
-import { ago, useData, useToast } from "../lib.jsx";
+import { ago, useData, useToast, useJob } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 import { UPDATE_CHANGED, versionDay as day } from "./UpdateNotice.jsx";
 
@@ -38,27 +38,27 @@ function Uninstall() {
   const [open, setOpen] = useState(false), [plan, setPlan] = useState(null), [models, setModels] = useState(false), [films, setFilms] = useState(false);
   const [busy, setBusy] = useState(false), [err, setErr] = useState(null);
   const size = (b) => (b == null ? "…" : b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : `${Math.max(1, Math.round(b / 1e6))} MB`);
-  const show = () => { setOpen(true); setErr(null); setPlan(null); setModels(false); setFilms(false); get("/api/app/uninstall").then(setPlan).catch((e) => setErr(e.message)); };
+  const show = () => { setOpen(true); setErr(null); setPlan(null); setModels(false); setFilms(false); get("/api/app/uninstall").then((p) => { setPlan(p); if (p?.cached) get("/api/app/uninstall?fresh=1").then(setPlan).catch(() => {}); }).catch((e) => setErr(e.message)); };          // the last sizes at once, then the new ones (1.14)
   const go = async () => { setBusy(true); setErr(null); try { await post("/api/app/uninstall", { models, films }); } catch (e) { setErr(e.message); setBusy(false); } };
   const filmsSize = plan?.films?.length ? plan.films.reduce((a, f) => a + f.size, 0) : null;
   return <div className="panel upd-uninstall">
     <div className="panel-head"><h2>{t("Uninstall")}</h2>
-      <button className="btn danger sm end" onClick={show}><Trash2 size={14} />{t("Uninstall Moworks Studio…")}</button></div>
-    <p className="hint">{t("Removes the app from this PC, to install it clean again. Everything goes to the Recycle Bin.")}</p>
+      <button className="btn danger sm end" onClick={show}><Trash2 size={14} />{t("Uninstall…")}</button></div>
+    <p className="hint">{t("Remove the app from this PC.")}</p>
     {open && <Dialog danger title={t("Uninstall Moworks Studio?")} onClose={busy ? undefined : () => setOpen(false)} footer={<>
       {err && <span className="state-line stop"><AlertTriangle size={14} />{t(err)}</span>}<span className="spacer" />
       <button className="btn" onClick={() => setOpen(false)} disabled={busy}>{t("Cancel")}</button>
       <button className="btn danger" onClick={go} disabled={busy || !plan}>{busy ? <Loader2 size={14} className="spin" /> : <Trash2 size={14} />}{t("Uninstall")}</button></>}>
       <div className="dlg-lines">
-        <p>{t("The app, HyperFrames, Chromium, its settings and keys go to the Recycle Bin.")} <span className="muted num">{size(plan?.app?.size)}</span></p>
-        {plan?.app?.keep && <p className="dlg-warn">{t("This copy of the app stays: {why}.", { why: t(plan.app.keep) })}</p>}
+        <p>{plan?.app?.size != null ? t("Moves the app to the Recycle Bin ({size}).", { size: size(plan.app.size) }) : t("Moves the app to the Recycle Bin.")}</p>
+        {plan?.app?.keep && <p className="dlg-warn">{t("The app folder stays ({why}).", { why: t(plan.app.keep) })}</p>}
         {!plan && !err && <p className="muted"><Loader2 size={13} className="spin" /> {t("Measuring…")}</p>}
         {plan?.models && <label className="check"><input type="checkbox" checked={models} disabled={busy} onChange={(e) => setModels(e.target.checked)} />
-          {t("Also the downloaded models ({size}): they download again when needed", { size: size(plan.models.size) })}</label>}
+          {t("Also remove models ({size})", { size: size(plan.models.size) })}</label>}
         {filmsSize != null && <label className="check"><input type="checkbox" checked={films} disabled={busy} onChange={(e) => setFilms(e.target.checked)} />
-          {t("Also my films and my library ({size})", { size: size(filmsSize) })}</label>}
-        {films && <p className="dlg-warn">{t("Your films and characters go too. Copy them somewhere first if you want to keep them.")}</p>}
-        <p className="hint">{t("Kept: Git, Node.js, Python, FFmpeg and Claude Code. The app closes, then a window shows what was removed.")}</p>
+          {t("Also remove films and library ({size})", { size: size(filmsSize) })}</label>}
+        {films && <p className="dlg-warn">{t("Back up your films first.")}</p>}
+        <p className="hint">{t("Git, Python, FFmpeg and Claude Code stay installed.")}</p>
       </div>
     </Dialog>}
   </div>;
@@ -73,7 +73,11 @@ export default function AppUpdate() {
   const [err, setErr] = useState(null);               // a check or apply error: { code, message, command }
   const [wait, setWait] = useState(null);             // what an update waits for (Claude's task, a render): their titles
   const [ask, setAsk] = useState(false);
-  const [job, setJob] = useState(null);               // the running update: { stage, status, result, error }
+  // the running update: { stage, status, result, error }; its end says how it went (jobs.mjs error: { code, message, detail })
+  const [job, follow] = useJob((x) => {
+    if (x.status === "failed") { setErr({ code: x.error?.code, message: x.error?.message ?? t("The update did not finish."), command: x.error?.detail?.command, tail: x.error?.detail?.tail }); q.reload(); }
+    if (x.status === "done") toast(t("Updated: the app restarts in a moment"));
+  });
   if (q.error) return q.error.status === 404 ? <p className="hint">{t("Updating from here is not available in this version.")}</p> : <Banner kind="error">{q.error.message}</Banner>;
   const d = q.data;
   if (!d) return <div className="skeleton" style={{ height: "12rem" }} />;
@@ -92,10 +96,7 @@ export default function AppUpdate() {
   const apply = async () => {
     setAsk(false); setErr(null);
     try {
-      const r = await post("/api/app/update/apply"); const j = r.job ?? r; setJob(j);
-      watchJob(j.id, (x) => { if (!x) return; setJob(x);
-        if (x.status === "failed") { setErr({ code: x.error?.code, message: x.error?.message ?? t("The update did not finish."), command: x.error?.detail?.command, tail: x.error?.detail?.tail }); q.reload(); }          // jobs.mjs: { code, message, detail }
-        if (x.status === "done") toast(t("Updated: the app restarts in a moment")); }, 1000);
+      const r = await post("/api/app/update/apply"); follow(r.job ?? r);
     } catch (e) {
       // something started meanwhile: the service's own answer names it ("Update when nothing is running: …")
       if (e.code === "BUSY") { const busy = await runningNow(); setWait(busy.length ? busy : [String(e.message).replace(/^[^:]*:\s*/, "")]); }
@@ -144,7 +145,7 @@ export default function AppUpdate() {
     {ask && <Dialog title={t("Update and restart?")} onClose={() => setAsk(false)} footer={<><span className="spacer" />
       <button className="btn" onClick={() => setAsk(false)}>{t("Not now")}</button>
       <button className="btn ok" onClick={apply}><Download size={14} />{t("Update and restart")}</button></>}>
-      <p>{t("The app updates to the version of {date} and restarts. Your projects stay as they are. If a step fails, it goes back to the version you have now.", { date: day(check?.latest?.date) })}</p>
+      <p>{t("The app updates to the version of {date} and restarts. Your productions stay as they are. If a step fails, it goes back to the version you have now.", { date: day(check?.latest?.date) })}</p>
     </Dialog>}
 
     <Uninstall />

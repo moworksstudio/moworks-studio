@@ -7,15 +7,15 @@
 // in the item, or a Google Fonts family with the vietnamese subset; HF's built-in fallbacks are latin-only).
 import { createHash } from "node:crypto";
 import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
-import { createRequire } from "node:module";
 import { dirname, join, resolve, sep } from "node:path";
-import { APP_ROOT, expandEnv, loadPins, resolveRuntime, sourceHead } from "../version-manager/index.mjs";
+import { APP_ROOT, expandEnv, loadPins, sourceHead } from "../version-manager/index.mjs";
+import { VI_MARKED, fontkitFor } from "../hf-qa/vietnamese.mjs";
 import { workRoot } from "../project-service/index.mjs";
 import { recodePreview } from "../library/preview-media.mjs";
 import { declaredFamilies, familyStacks, fontMap } from "../hf-edit/finalize.mjs";
 import { viStatus } from "../hf-edit/googleFontsVi.mjs";
+import { readJson } from "../util/json.mjs";
 
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
 /** A short hash of every file of a registry item (paths and bytes): a rendered preview stays valid while it is unchanged. */
 export function sourceHash(dir) {
   const h = createHash("sha256");
@@ -88,8 +88,6 @@ export function registryItems(root = APP_ROOT) {
 }
 
 // ---- Vietnamese font check
-const BASES = "aăâeêioôơuưyAĂÂEÊIOÔƠUƯY", TONES = ["", "̀", "́", "̉", "̃", "̣"];
-const VI_MARKED = [...new Set([...[...BASES].flatMap((b) => TONES.map((t) => (b + t).normalize("NFC"))), "đ", "Đ"])].filter((c) => !"aeiouyAEIOUY".includes(c));
 
 /** Does Google Fonts serve this family with the vietnamese subset? true / false / null (not on Google Fonts or offline). */
 export async function googleHasVietnamese(family, { fetchImpl = fetch } = {}) {
@@ -106,21 +104,27 @@ export async function googleHasVietnamese(family, { fetchImpl = fetch } = {}) {
 }
 /** Windows fonts that have Vietnamese letters (what a render on this PC falls back to when such a family is named). */
 export const WINDOWS_VI = new Set(["arial", "segoe ui", "tahoma", "times new roman", "verdana", "georgia", "calibri", "cambria", "consolas", "courier new", "trebuchet ms", "segoe ui emoji"]);
-
-function fontkitOf(root) {
-  try { return createRequire(join(resolveRuntime(null, root).dir, "node_modules", "fontkit", "package.json"))("fontkit"); } catch { return null; }
+/** One font family's Vietnamese, the same answer for a Brand Kit's fonts and a block's (audit/112 2.4): bundled with the app, a Windows font,
+ *  else Google Fonts (asked once a family: cache). { vi: true | false | null, via }. A font file of the item or the look answers before it. */
+export async function familyVi(fam, { google = googleHasVietnamese, cache = new Map() } = {}) {
+  const key = fam.toLowerCase();
+  if (new Set(Object.keys(fontMap()).map((k) => k.toLowerCase())).has(key)) return { vi: true, via: "bundled with the app" };
+  if (WINDOWS_VI.has(key)) return { vi: true, via: "Windows font" };
+  if (!cache.has(key)) cache.set(key, await google(fam));
+  return { vi: cache.get(key), via: cache.get(key) === null ? "not on Google Fonts" : "Google Fonts" };
 }
+
+const fontkitOf = (root) => fontkitFor(root);          // vietnamese.mjs
 
 /** { status, families: [{ family, vi, via, fallback? }] } for one registry item. Status: "ok" (every font stack starts with a font that has
  *  Vietnamese), "mixed" (a stack's first font lacks it but a later one in the same stack has it: tone-marked letters show in that other
  *  font), "missing" (no font in a stack has it), "unknown" (a font that is neither bundled, in the item nor on Google Fonts, e.g. a Mac
  *  system font), "no-text" (the item writes no words). */
-export async function vietnameseCheck(entry, { root = APP_ROOT, google = googleHasVietnamese, cache = new Map() } = {}) {
+export async function blockVietnamese(entry, { root = APP_ROOT, google = googleHasVietnamese, cache = new Map() } = {}) {
   const { dir } = registryInfo(root);
   const itemDir = join(dir, entry.folder);
   const htmls = (entry.item.files ?? []).filter((f) => /\.html?$/i.test(f.path)).map((f) => join(itemDir, f.path)).filter(existsSync);
   if (!htmls.length) for (const n of readdirSync(itemDir)) if (/\.html$/i.test(n) && n !== "demo.html") htmls.push(join(itemDir, n));
-  const bundled = new Set(Object.keys(fontMap()).map((k) => k.toLowerCase()));
   const fontkit = fontkitOf(root);
   const fams = new Map();
   let hasText = (entry.item.variables ?? []).some((v) => v.type === "string");
@@ -131,14 +135,11 @@ export async function vietnameseCheck(entry, { root = APP_ROOT, google = googleH
     const faces = new Map([...html.matchAll(/@font-face\s*{([^}]*)}/gi)].map((m) => [/font-family\s*:\s*['"]?([^;'"]+)/i.exec(m[1])?.[1]?.trim().toLowerCase(), /url\(\s*['"]?([^'")]+)['"]?\s*\)/i.exec(m[1])?.[1]]).filter(([k, v]) => k && v));
     const judge = async (fam) => {
       const key = fam.toLowerCase();
-      if (bundled.has(key)) return { vi: true, via: "bundled with the app" };
-      if (WINDOWS_VI.has(key)) return { vi: true, via: "Windows font" };
       if (declared.has(key) && faces.get(key) && !faces.get(key).startsWith("http") && !faces.get(key).startsWith("data:")) {
         try { const font = fontkit?.openSync(resolve(dirname(h), faces.get(key))); return { vi: font ? VI_MARKED.every((c) => font.hasGlyphForCodePoint(c.codePointAt(0))) : null, via: "font file in the item" }; }
         catch { return { vi: null, via: "font file in the item" }; }
       }
-      if (!cache.has(key)) cache.set(key, await google(fam));
-      return { vi: cache.get(key), via: cache.get(key) === null ? "not on Google Fonts" : "Google Fonts" };
+      return familyVi(fam, { google, cache });
     };
     for (const stack of familyStacks(html)) {
       const key = stack[0].toLowerCase();
@@ -239,7 +240,7 @@ export async function importFromRegistry({ root = APP_ROOT, onProgress = () => {
       for (const f of [old.preview.video, old.preview.poster].filter(Boolean)) if (existsSync(join(prev.dir, f))) copyFileSync(join(prev.dir, f), join(tmp, f));
       preview = old.preview;
     }
-    const vi = await vietnameseCheck(e, { root, google, cache });
+    const vi = await blockVietnamese(e, { root, google, cache });
     items.push({ id: e.id, name: e.name, kind: e.kind, folder: e.folder, file, title: it.title ?? e.name, description: it.description ?? "", tags: it.tags ?? [],
       category: categoryOf(it.tags), collection: "HyperFrames", author: it.author ?? HF_AUTHOR, authorUrl: it.authorUrl ?? null,
       licence: it.license ?? "Apache-2.0", dimensions: it.dimensions ?? null, duration: it.duration ?? null,

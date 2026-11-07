@@ -44,7 +44,7 @@ function Timing({ projectId, shot, locked, onChanged }) {
   const [busy, setBusy] = useState(false);
   const set = async (body) => {
     setBusy(true);
-    try { await post(`/api/projects/${projectId}/edit/shot`, { mountId: shot.mountId, index: shot.index, number: shot.number, ...body }); toast(t("Shot {n} changed", { n: shot.number })); onChanged(true); }
+    try { await post(`/api/projects/${projectId}/edit/shot`, { mountId: shot.mountId, number: shot.number, ...body }); toast(t("Shot {n} changed", { n: shot.number })); onChanged(true); }
     catch (e) { toast(e.message, "error"); } finally { setBusy(false); }
   };
   return <div className="sl-timing">

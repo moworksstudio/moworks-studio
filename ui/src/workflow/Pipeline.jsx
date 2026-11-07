@@ -86,7 +86,7 @@ export default function Pipeline({ projectId, data, starting = false, onOpen, on
     // the time left while Claude builds: the estimate less the time since the build started; none once the checks run
     const checking = data?.steps?.some((x) => x.id === "checks" && x.status === "running");
     if ((s.id === "build" || s.id === "review") && s.status === "running" && !app && !checking && data?.estimate?.minutes) {
-      const since = data.estimate.startedAt ?? data.build?.startedAt;
+      const since = data.estimate.startedAt;
       line = `${noWait(line)} · ${etaLeft(t, { minutes: stageMinutes(data.estimate), high: data.estimate.planned ? Math.round(data.estimate.planned * 1.5) : data.estimate.high, startedAt: since })}`;
     }
     // the Storyboard and the Motion Plan: the server's line ends with its time left; the time is worked out again from its estimate
@@ -164,7 +164,7 @@ export default function Pipeline({ projectId, data, starting = false, onOpen, on
 // whose sheet lies on the light table is lifted and lit by the lamp. A station opens its sheet on the table (Build and review: the film
 // itself); every action of the column above is here: Waiting for you, Continue, Keep it as it is / Approve again, Run checks again, the
 // Prepare links, "Press Stop in the chat to change this" and the brief that changed after the build.
-const SUB = { build: "Build", sound: "Final Mix", firstVersion: "Version 1", qcReview: "Review", adaptation: "Adaptation", checks: "Tech checks" };
+const SUB = { build: "Build", sound: "Final Mix", firstVersion: "Version 1", qcReview: "Review", adaptation: "Formats", checks: "Tech checks" };
 // The Desk's column holds them in one row: the whole name on hover
 const SUB_SHORT = { checks: "Checks", adaptation: "Sizes" };
 /** The Adaptation step opens its sheet once the film is built (sizes are added there; Adapt itself waits for the Review); how many sizes

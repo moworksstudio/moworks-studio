@@ -9,6 +9,22 @@ const WARNING_CODES = {
   vfx_failure: "VFX_FAILED",
 };
 
+/** What each of HyperFrames' render warnings means, in a few plain words for the chat (never its code or a file's path). */
+const WARNING_WORDS = {
+  MEDIA_LOAD_FAILED: "a video or picture did not load",
+  AUDIO_FAILED: "part of the sound could not be made",
+  SCRIPT_ERROR: "a scene's code had an error",
+  TIMELINE_NOT_REGISTERED: "a scene was not ready in time",
+  VFX_FAILED: "an effect could not be drawn",
+};
+/** The chat's yellow line for a render HyperFrames finished with warnings (audit/112b b1.2, owner Q-b1: "có hiện cảnh báo, nội dung thông
+ *  báo ngắn gọn"): the render stands, the line says what to watch. null when there were none. */
+export function renderWarningNote(warnings) {
+  const what = [...new Set((warnings ?? []).map((w) => WARNING_WORDS[w?.code] ?? "HyperFrames reported a problem"))];
+  if (!what.length) return null;
+  return { kind: "render", status: "warning", text: "The render finished with a problem: {what}. Watch those parts before you send the film.", vars: { what: what.join("; ") } };
+}
+
 export function warningCode(hfCode) {
   return WARNING_CODES[hfCode] ?? `HF_WARNING:${hfCode}`;
 }

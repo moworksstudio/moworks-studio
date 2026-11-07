@@ -38,11 +38,11 @@ export function appKeepReason(root = APP_ROOT) {
   const git = (...a) => execFileSync("git", ["-C", root, ...a], { encoding: "utf8", windowsHide: true, stdio: ["ignore", "pipe", "ignore"] }).trim();
   try {
     const changed = git("status", "--porcelain").split(/\r?\n/).filter(Boolean).length;
-    if (changed) return `${changed} changed file(s) here are not on GitHub`;
+    if (changed) return "local changes";
     let ahead;
-    try { ahead = Number(git("rev-list", "--count", "@{u}..HEAD")); } catch { return "this copy is not a plain clone of the app's GitHub repo (no upstream)"; }
-    if (ahead > 0) return `${ahead} commit(s) here are not on GitHub`;
-  } catch { return "git could not read this folder"; }
+    try { ahead = Number(git("rev-list", "--count", "@{u}..HEAD")); } catch { return "a development copy"; }
+    if (ahead > 0) return "local changes";
+  } catch { return "a development copy"; }
   return null;
 }
 

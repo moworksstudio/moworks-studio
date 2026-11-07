@@ -6,17 +6,19 @@
 // (sfx.json picks): the next placement asks again only for a cue whose shot, name or candidates changed.
 // Order of a named sound (owner #1096): the library's exact sound -> Claude's pick of the library -> made by ElevenLabs -> online -> code.
 import { createHash } from "node:crypto";
-import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { APP_ROOT } from "../version-manager/index.mjs";
-import { claudeEnv, findClaude } from "../system-status/index.mjs";
+import { claudeJson } from "../system-status/claude-run.mjs";
 import { patchState, readState, useLibrarySound } from "./index.mjs";
 import { SUSTAINED_MIN_S, familyOf, matchLocal, rankLocal, sustainedCue, variantsOf } from "./library.mjs";
 
 export const PICK_CANDIDATES = 8;
 /** At most this many names in one run (a long film's named sounds; the rest keep the library's own match). */
 export const PICK_MAX = 80;
+// the pick's one run (owner Qb2, 07/11: "chọn sfx với sonnet low ra outcome ko đủ hay… đưa về opus medium"); slower than Sonnet at low
+// (Test 43's 58 named sounds, one run: 13 s on Sonnet at low, 34 s on Opus at medium), still far inside its time
+export const PICK_MODEL = "claude-opus-5-5", PICK_EFFORT = "medium";
 export const PICK_TIMEOUT_MS = 4 * 60 * 1000;
 
 const SKIP_KEYS = new Set(["sfx", "sound", "number", "index", "start", "duration", "end", "id", "frames", "cuts", "image", "images"]);
@@ -67,7 +69,7 @@ export const askOf = (name, list, shots, candidates, family = null) => ({ name, 
  *  has nothing of its kind): Map name -> { pick } | { make, seconds }. */
 export async function askClaude(asks, { ask = null, maker = null, dir, style = null, root = APP_ROOT, filmStyle = null, makeAll = false, never = [] } = {}) {
   if (!asks.length) return new Map();
-  if (ask) return readPicks(await ask(pickPrompt(asks, { style, never }), { cwd: join(dir, ".moworks") }).catch(() => null), asks);
+  if (ask) return readPicks(await ask(pickPrompt(asks, { style, never, rules: await styleSoundRules(dir, root) }), { cwd: join(dir, ".moworks") }).catch(() => null), asks);
   const out = new Map();
   if (maker) for (const a of asks) { let m = null; if (!makeAll) try { m = matchLocal(a.name, { family: a.family, root, filmStyle, oneShot: true }); } catch { /* none */ }
     if (makeAll || !m?.good) out.set(a.name, { make: a.name, seconds: a.seconds }); }
@@ -78,6 +80,8 @@ export async function askClaude(asks, { ask = null, maker = null, dir, style = n
  *  record says it came ("claude", "made"). { settled, picked, made, none }. */
 export async function settleAsks(dir, asks, answers, { root = APP_ROOT, maker = null } = {}) {
   const settled = new Set(), picked = [], made = [], none = [];
+  // the chat says what ElevenLabs is about to make before the first sound (owner Qa2)
+  maker?.announce?.(asks.map((a) => answers.get(a.name)).filter((r) => r && !r.pick && r.make).map((r) => ({ text: r.make, seconds: r.seconds })));
   for (const a of asks) {
     const r = answers.get(a.name);
     if (!r) continue;
@@ -94,12 +98,22 @@ export async function settleAsks(dir, asks, answers, { root = APP_ROOT, maker = 
   return { settled, picked, made, none };
 }
 
-/** The prompt of one run: every name, its moments and candidates; the answer is JSON only. */
-export function pickPrompt(asks, { style = null, never = [] } = {}) {
+/** The film style's own sound rules (its file's Sound section, or the owner's style pack's: agent/index.mjs styleSound), "" when it has
+ *  none: the picker follows them as every step does (#1198; audit/112a A12, owner Qa5). */
+export async function styleSoundRules(dir, root = APP_ROOT) {
+  try {
+    const meta = JSON.parse(readFileSync(join(dir, ".moworks", "project.json"), "utf8"));
+    const { styleSound } = await import("../agent/index.mjs");          // late: the agent imports the sound modules
+    return String(styleSound(meta, root) ?? "").trim().slice(0, 2500);
+  } catch { return ""; }
+}
+
+/** The prompt of one run: every name, its moments and candidates, the style's own sound rules; the answer is JSON only. */
+export function pickPrompt(asks, { style = null, never = [], rules = "" } = {}) {
   const rows = asks.map((a, i) => ({ n: i + 1, name: a.name, family: a.family ?? undefined, moments: a.moments, seconds: a.seconds,
     library: a.candidates.map((e) => ({ id: e.id, is: [...new Set([...(e.tags ?? []), e.family].filter(Boolean))].slice(0, 8).join(", "), s: e.duration != null ? Math.round(e.duration * 10) / 10 : undefined })) }));
   return `You are the sound designer of a short motion-graphics film${style ? ` (its style: ${style})` : ""}. Each cue below is a sound the storyboard names, with the moment it plays (the shot and what moves) and the closest sounds of the studio's library (id, what the sound is, its length in seconds).
-${never.length ? `This film style never plays these kinds of sound, so never pick or describe one: ${never.join(", ")}.\n` : ""}For each cue, pick the library sound you would really use for that moment: it must be that kind of sound made by that thing (a bicycle pump's squeak is not an animal's squeak; a soft pop for a coin landing is wrong). If none of them is, answer "make" with a short English description of the exact sound for a sound-effect generator (what makes it, how it sounds, how many hits; no music, no voice) and its length in seconds (0.5 to 6).
+${rules ? `The film style's own sound rules, which win over any habit of yours:\n${rules}\n\n` : ""}${never.length ? `This film style never plays these kinds of sound, so never pick or describe one: ${never.join(", ")}.\n` : ""}For each cue, pick the library sound you would really use for that moment: it must be that kind of sound made by that thing (a bicycle pump's squeak is not an animal's squeak; a soft pop for a coin landing is wrong). If none of them is, answer "make" with a short English description of the exact sound for a sound-effect generator (what makes it, how it sounds, how many hits; no music, no voice) and its length in seconds (0.5 to 6).
 Answer with JSON only, no other text: {"cues":[{"n":1,"pick":"<library id>"},{"n":2,"make":"<description>","seconds":1.2}]}
 
 ${JSON.stringify(rows)}`;
@@ -120,23 +134,9 @@ export function readPicks(text, asks) {
 }
 
 /** One short Claude run with no tools of use (the owner's Claude, as freshEyes): the text it answers, or null. */
-export async function claudeOnce(prompt, { root = APP_ROOT, model = "claude-sonnet-5-5", effort = "low", cwd = process.cwd(), timeoutMs = PICK_TIMEOUT_MS } = {}) {
-  const exe = findClaude(root);
-  if (!exe) return null;
-  const env = claudeEnv();
-  for (const k of Object.keys(env)) if (/^ANTHROPIC_(API_KEY|AUTH_TOKEN|BASE_URL)$/i.test(k)) delete env[k];
-  const args = ["-p", "--output-format", "json", "--restricted", "--tools", "Read", "--permission-mode", "auto", "--permission-prompts", "none", "--strict-mcp-config",
-    "--disable-slash-commands", "--model", model, "--effort", effort, "--no-session-persistence"];
-  return new Promise((ok) => {
-    const c = spawn(exe, args, { cwd, env, windowsHide: true, stdio: ["pipe", "pipe", "pipe"] });
-    let out = "";
-    const t = setTimeout(() => c.kill(), timeoutMs);
-    c.stdout.on("data", (d) => { out += d; });
-    c.stderr.resume();
-    c.stdin.end(prompt, "utf8");
-    c.on("close", () => { clearTimeout(t); try { const j = JSON.parse(out); ok(j.is_error ? null : String(j.result ?? "").trim() || null); } catch { ok(null); } });
-    c.on("error", () => ok(null));
-  });
+export async function claudeOnce(prompt, { root = APP_ROOT, model = PICK_MODEL, effort = PICK_EFFORT, cwd = process.cwd(), timeoutMs = PICK_TIMEOUT_MS } = {}) {
+  const r = await claudeJson(prompt, { cwd, root, tools: "Read", mode: "auto", model, effort, timeoutMs });          // system-status/claude-run.mjs
+  return r.ok ? r.result || null : null;
 }
 
 /** The app's asker for a placement, or null in a test or with MW_SFX_PICK=none. */

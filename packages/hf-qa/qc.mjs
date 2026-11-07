@@ -14,10 +14,11 @@ import { againIfBusy, runHfJsonAsync, snapOnceMore, snapshotAtAsync, STILL_IDLE_
 import { ffmpegExe } from "../library/preview-media.mjs";
 import { measureStills, stillLines } from "./stillness.mjs";
 import { freshFilm } from "../hf-edit/codeFilm.mjs";
+import { outOfTimeText } from "./checks.mjs";
 import { dropDecorationContrast } from "./contrastDecor.mjs";
 import { filmSequences, measureProduct, sequenceLines, sequenceReport } from "./sequence.mjs";
 import { sungLines, sungReport } from "./lyricSync.mjs";
-import { voiceCheck, voiceLines } from "../sfx/voicecheck.mjs";
+import { voiceCheck, voiceLines } from "../sfx/mix/index.mjs";
 import { beatTimes, trackClips } from "../hf-edit/tracks.mjs";
 import { ensureSequencePlayer, htmlFiles } from "../hf-edit/finalize.mjs";
 import { syncLines, syncReport } from "./wordSync.mjs";
@@ -88,7 +89,7 @@ export const CHECK_ARGS_PLAIN = ["--frame-check"];
 /** HF's check stops after a fixed 120 s (cli/src/utils/checkDeadline.ts, not an option) and reports it as a runtime error; sampling every
  *  tween seam of a long, text-heavy film can take longer than that (6 shots took 125 s; 13 s without the seams). That is the tool's
  *  budget, not a script error in the film. */
-export const ranOutOfTime = (j) => (j?.runtime?.findings ?? []).some((x) => x.code === "check_runtime_failure" && /deadline/i.test(String(x.message ?? "")));
+export const ranOutOfTime = (j) => (j?.runtime?.findings ?? []).some((x) => x.code === "check_runtime_failure" && outOfTimeText(x.message));          // "timed out" too (audit/112b b2.2)
 /** The note that stands in for the seam samples the retry did not take: a layout warning, never a blocking finding. */
 export const SEAMS_NOTE = { severity: "warning", code: "transition_seams_not_sampled",
   message: "HyperFrames' check ran out of its 120 s at the transition seams, so it was run again at its regular sample points: overlaps that last only during a transition were not checked." };
@@ -159,6 +160,13 @@ const LYRIC_STILL = 0.5;
 const STYLE_STILL = Object.freeze({ "explainer-2d": 0.5 });
 const styleStill = (dir) => { try { return STYLE_STILL[JSON.parse(readFileSync(join(dir, ".moworks", "project.json"), "utf8")).style?.id] ?? null; } catch { return null; } };
 const lyricFilm = (dir) => { try { return isLyricVideo(JSON.parse(readFileSync(join(dir, ".moworks", "project.json"), "utf8")), { dir }); } catch { return false; } };
+/** The film's own limit for a still stretch, the one both the Review and Tech checks measure with (audit/112b b1.6: Tech checks' G-STILL used
+ *  the house floor alone, so a 2D Explainer still of 0.7 s failed the Review and passed the checks): { nearLimit, nearWhy } for measureStills. */
+export function stillLimit(dir) {
+  if (lyricFilm(dir)) return { nearLimit: LYRIC_STILL, nearWhy: "a lyrics video allows" };
+  const s = styleStill(dir);
+  return s ? { nearLimit: s, nearWhy: "the film style allows" } : { nearLimit: null, nearWhy: null };
+}
 /** The pictures stopped twice (STILLS_BUSY): the round is said as busy, with no sheet and no check, never as a round that worked; its
  *  folder goes (the next round takes its number). */
 const busyRound = (res, out) => { rmSync(out, { recursive: true, force: true }); return { ...res, sheets: {}, busy: true, failed: [...res.failed, STILLS_BUSY] }; };
@@ -242,7 +250,7 @@ export async function qcRound(dir, { shots, total, signal = null, parallel = fal
   };
   const stretches = async () => {
     if (!(total > 0)) return { failed: [] };
-    try { return { still: await measureStills(dir, { shots, total, dynamic: dynamicOf(dir), nearLimit: lyricFilm(dir) ? LYRIC_STILL : styleStill(dir), signal: partSignal, workDir: join(out, "still"), snap, pauseMs }), failed: [] }; }
+    try { return { still: await measureStills(dir, { shots, total, dynamic: dynamicOf(dir), ...stillLimit(dir), signal: partSignal, workDir: join(out, "still"), snap, pauseMs }), failed: [] }; }
     catch (e) { if (signal?.aborted) throw e; return { failed: [`still stretches: ${String(e.message).split(/\r?\n/)[0]}`] }; }
   };
   const checked = async () => {

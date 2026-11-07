@@ -1,0 +1,76 @@
+{
+  "id": "moworks-june",
+  "name": "June",
+  "about": "One of the 3D Cartoon office cast: a coral top and a dark bun.",
+  "engine": "cartoon-3d",
+  "kind": "human",
+  "heightM": 1.62,
+  "heightBy": "inferred",
+  "heightNote": "the source skill gives no height: an everyday adult's",
+  "hand": "cartoon",
+  "hands": [
+    "cartoon"
+  ],
+  "def": {
+    "name": "June",
+    "top": "#ff7a6b",
+    "skin": "#f6dcc8",
+    "hair": "#2b2b38",
+    "style": "bun"
+  },
+  "palette": {
+    "top": "#ff7a6b",
+    "skin": "#f6dcc8",
+    "hair": "#2b2b38"
+  },
+  "can": {
+    "views": "any angle (a 3D rig): front, three-quarter, profile, back and between",
+    "faces": [
+      "neutral",
+      "happy",
+      "laugh",
+      "surprised",
+      "worried",
+      "angry",
+      "talk",
+      "blink",
+      "calm",
+      "eager"
+    ],
+    "faceNotes": "happy = the source skill's smile, surprised = alarmed, worried = wince; laugh and angry are the app's (mw:c3d-cast setFace)",
+    "poses": [
+      "stand",
+      "walk",
+      "point",
+      "wave",
+      "reach",
+      "sit"
+    ],
+    "poseNotes": "setPose with the source skill's STAND, SIT, walkPose, mixPose; poseReach and legIK (two-bone IK); POINT and WAVE from mw:c3d-cast",
+    "hands": "n/a: hand spheres, gripping a prop at its userData.grip",
+    "walk": "walkPose(phase) with legIK for planted feet",
+    "talk": "one open mouth (talk), flapped by talkFace(t); no lip sync"
+  },
+  "sheet": "MW Character Sheet v1",
+  "credit": {
+    "author": "Moworks Studio (the owner's 3D Cartoon source skill)",
+    "link": null,
+    "licence": "the owner's own",
+    "made": "as shipped",
+    "source": {
+      "skill": "3D Cartoon Animation Toolkit",
+      "version": "1.0.0",
+      "sha256": "794b432693b5c2111d3004063f536af4ebe9a84e36ee3fdcc42d597ff7d88caf",
+      "file": "src/kit/character.ts CAST.june"
+    },
+    "gate": {
+      "passed": 26,
+      "failed": 0
+    }
+  },
+  "version": 1,
+  "module": [
+    "moworks-june.ts"
+  ],
+  "savedAt": "2026-11-06T15:08:20.740Z"
+}

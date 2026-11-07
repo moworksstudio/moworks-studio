@@ -1,5 +1,5 @@
 // The Projects intro: shown while there is no project yet, in place of the empty box's buttons
-// (New project and Import project stay at the top right; in The Studio the pitch card on the left, so it passes its own `hint`). A five-second logo sting that shows what the app is for: motion graphics.
+// (New production and Import production stay at the top right; in The Studio the pitch card on the left, so it passes its own `hint`). A five-second logo sting that shows what the app is for: motion graphics.
 // Drawn here, nothing downloaded: the lockup is the studio's own outlined logo (glyphs.js), moved with the browser's Web Animations
 // API, plus one canvas of sparks. With reduced motion the finished lockup shows at once. A click on the logo plays it again.
 //
@@ -10,7 +10,7 @@
 // 1.75-2.45  the badge settles to the left; MOWORKS rises letter by letter with an accent trail
 // 2.60-3.50  "AI motion studio" focuses in under the lockup, letter by letter; an accent rule wipes under the name
 // 3.35-4.05  a glint runs across the lockup; the hint comes up; the corner timecode stops at 00:00:05:00
-// then        the hint keeps fading in and out to point at New project
+// then        the hint keeps fading in and out to point at New production
 //
 // The badge sits on the same centre line as MOWORKS, and the line under the logo is "AI motion studio",
 // centred below it (the logo file's "production studio" is not used).
@@ -32,7 +32,7 @@ const IMPACT = 1300;            // ms: the M lands
 const FPS = 30;
 const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const COPY = { hint: "Start with New project, top right.", again: "Play again" };
+const COPY = { hint: "Start with New production, top right.", again: "Play again" };
 
 function Badge({ cls = "" }) {
   return (

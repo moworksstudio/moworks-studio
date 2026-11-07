@@ -639,6 +639,7 @@ details.diag pre { white-space: pre-wrap; overflow-wrap: anywhere; background: v
 .ae-badge.editable { color: var(--state-done); background: var(--state-done-soft); border-color: var(--state-done-line); }
 .ae-badge.partial { color: var(--state-run); background: var(--state-run-soft); border-color: var(--state-run-line); }
 .ae-badge.video { color: var(--state-stop); background: var(--state-stop-soft); border-color: var(--state-stop-line); }
+.ae-badge.unchecked { color: var(--text-muted); background: transparent; border-color: var(--border); }
 /* on a tile's picture: the mark alone, on the media label like the 2D / 3D mark, bottom left (the check sits bottom right) */
 .ae-badge.compact { position: absolute; left: 0.35rem; bottom: 0.35rem; height: 1.25rem; padding: 0 0.3rem; border: 0; background: var(--media-label); }
 .warn-note { margin: 0; display: flex; gap: 0.5rem; align-items: flex-start; padding: 0.5rem 0.65rem; border-radius: var(--r-md); border: 1px solid var(--state-stop-line);
@@ -732,9 +733,6 @@ details.diag pre { white-space: pre-wrap; overflow-wrap: anywhere; background: v
 .lk-noimg { position: absolute; inset: 0; display: grid; place-items: center; background: var(--surface-2); }
 .lk-stills { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.35rem; }
 .lk-stills img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--r-sm); display: block; }
-.lk-versions summary { cursor: pointer; display: flex; align-items: center; gap: 0.4rem; font-size: var(--fs-meta); color: var(--text-secondary); }
-.lk-versions ul { display: flex; flex-direction: column; gap: 0.25rem; margin: 0.4rem 0 0; font-size: var(--fs-meta); }
-.lk-versions li { display: flex; align-items: center; gap: 0.5rem; } .lk-versions li .btn { margin-left: auto; }
 .textarea.lk-frame { min-height: 22rem; font: var(--fs-code) / 1.5 var(--font-mono); }
 .lk-drop { display: flex; align-items: center; gap: 0.75rem; }
 .lk-up { display: flex; flex-direction: column; gap: 0.3rem; margin: 0; max-height: 12rem; overflow-y: auto; }
@@ -790,13 +788,6 @@ details.diag pre { white-space: pre-wrap; overflow-wrap: anywhere; background: v
 @keyframes sk-sheen { from { background-position: 100% 0; } to { background-position: -100% 0; } }
 @media (prefers-reduced-motion: reduce) { .sgb-skel .sk { animation: none; } .sgb-card .shot img { transition: opacity 120ms linear; } .sgb-card:hover .shot img.in { transform: none; } }
 @media (max-width: 1100px) { .sgb-layout { grid-template-columns: minmax(0, 1fr); } .sgb-skel .sgb-facets, .sgb-skel .sgb-insp { display: none; } .sgb-grid { grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); } }
-/* Characters page, step D: the project picker of "Use in a project" */
-.ch-projects { display: flex; flex-direction: column; gap: 0.25rem; max-height: 22rem; overflow-y: auto; }
-.ch-projects button { display: flex; align-items: center; gap: 0.625rem; width: 100%; padding: 0.5rem 0.625rem; border: 1px solid transparent; border-radius: var(--r-md); background: none; color: var(--text-primary); font: inherit; text-align: left; cursor: pointer; }
-.ch-projects button b { font-weight: var(--strong-weight); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ch-projects button .muted { font-size: var(--fs-meta); }
-.ch-projects button.on { border-color: var(--select); background: var(--select-soft); }
-@media (hover: hover) and (pointer: fine) { .ch-projects button:not(.on):hover { background: var(--surface-2); } }
 .sgb-big video { width: 100%; height: 100%; object-fit: cover; display: block; background: var(--surface-2); }
 /* ---- the state rule on buttons and badges: red stopped / error, yellow working, green chosen / done.
    A finishing action ("Approve") is a green button with the same lift and glow as the primary one; a state badge reads at a glance. */
@@ -884,7 +875,6 @@ details.diag pre { white-space: pre-wrap; overflow-wrap: anywhere; background: v
 .cc-est { font-size: var(--fs-dense); color: var(--text-muted); }
 .cc-log { display: flex; flex-direction: column; gap: 0.2rem; font-size: var(--fs-meta); color: var(--text-secondary); }
 @media (max-width: 1100px) { .cc-form { grid-template-columns: minmax(0, 1fr); } .cc-styles { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.cc-credit { grid-column: 1 / -1; margin: 0.15rem 0 0; }
 .ch-tag.k-soon { background: var(--surface-3); color: var(--text-secondary); font-weight: 500; }          /* neutral: waiting, not banned */
 /* Change with Claude's outcome and the character's run history */
 .cc-result { display: flex; flex-direction: column; gap: 0.35rem; padding: 0.625rem 0.75rem; border-radius: var(--r-md); border: 1px solid var(--border-strong); background: var(--surface-1); }
@@ -1011,6 +1001,22 @@ details.diag pre { white-space: pre-wrap; overflow-wrap: anywhere; background: v
 .wr-truth.ok { color: var(--success); border-color: color-mix(in srgb, var(--success) 45%, transparent); background: color-mix(in srgb, var(--success) 10%, transparent); }
 .wr-truth.warn { color: var(--warning); border-color: color-mix(in srgb, var(--warning) 45%, transparent); background: color-mix(in srgb, var(--warning) 10%, transparent); }
 .wr-card .wr-hook { font-size: var(--fs-control); line-height: 1.45; font-style: italic; color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* what Claude is pitching or writing holds its place (owner #1324, the form of Characters' "making" tile): dashed, in the running colour, how
+   far in big figures, the step it is on and a thin bar; a click opens its steps */
+.wr-card.wr-making { border-style: dashed; border-color: var(--state-run-line); background: var(--state-run-soft); }
+.wr-making-h { display: flex; align-items: center; gap: var(--sp-2); min-width: 0; }
+.wr-making-h b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wr-making-ic { flex: none; color: var(--state-run); }
+.wr-making-pct { flex: none; font-size: var(--fs-heading); font-weight: var(--strong-weight); line-height: 1; color: var(--state-run); }
+.wr-making-sub { font-size: var(--fs-meta); color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wr-making-step { margin-top: auto; font-size: var(--fs-control); color: var(--text-primary); }
+.wr-making-bar { display: block; width: 100%; height: 4px; border-radius: var(--r-pill); background: var(--surface-3); overflow: hidden; }
+.wr-making-bar > span { display: block; width: 100%; height: 100%; background: var(--state-run); transform-origin: left center; transition: transform 220ms var(--ease-out); }
+.wr-sitem.wr-making-row { align-items: stretch; border: 1px dashed var(--state-run-line); background: var(--state-run-soft); }
+.wr-sitem.wr-making-row .wr-making-pct { font-size: var(--fs-control); }
+.wr-making-dsub { margin: 0 0 var(--sp-2); }
+.wr-making-log { margin-top: var(--sp-3); }
+@media (prefers-reduced-motion: reduce) { .wr-making-bar > span { transition: none; } }
 .wr-card-f { display: flex; align-items: center; gap: var(--sp-3); margin-top: auto; padding-top: 0.4rem; border-top: 1px solid var(--border); font-size: var(--fs-meta); }
 .wr-state { color: var(--text-muted); }
 .wr-card-f .wr-kept { font-size: var(--fs-meta); }
@@ -1211,18 +1217,24 @@ html .dialog, html .sheet, html .np-overlay .np-dialog, html .scx, html .plx, ht
 .ch-viewer img, .ch-viewer video { max-width: 100%; max-height: 72vh; border-radius: var(--r-md); background: var(--surface-1); }
 .ch-hist { display: flex; flex-direction: column; gap: 0.35rem; margin: 0; font-size: var(--fs-meta); }
 .ch-hist li { display: grid; grid-template-columns: 5.5rem auto minmax(0, 1fr) auto; gap: 0.5rem; align-items: baseline; }
-/* The Create a character dialog, wide like New project: a narrow left column for the brief, most of the width for the drawing
-   styles at 5 a row with bigger pictures, full names on up to two lines and time / cost on one; no scroll from 1280 x 720. Its confirm step
-   (one picture and a few lines) keeps the width of the Sheet and Walk dialogs (owner 30/10: stretched across the screen it looked odd). */
-.dialog.wide:has(.cc-form) { width: min(120rem, calc(100vw - 2 * var(--sp-5))); }
-.dialog .cc-form:not(.one) { grid-template-columns: minmax(15rem, 21rem) minmax(0, 1fr); gap: 1.5rem; }
-.dialog .cc-styles { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.625rem; }
-.dialog .cc-style { padding: 0.375rem; gap: 0.3rem; }
-.dialog .cc-nm { font-size: var(--fs-control); line-height: 1.3; min-height: 2.6em; white-space: normal; }
-.dialog .cc-est { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* The Create a character dialog: a narrow left column for the brief, the drawing styles beside it; no scroll from 1280 x 720. Sized to what
+   it holds (owner 06/11 #1319: at 120rem it ran across the whole screen): at most five tiles a row, fewer as the window narrows, each at least
+   10.5rem. A tile reads like every gallery card of the app (sgb-card): the picture, the style's name on ONE line (never broken), a muted gloss
+   under it on at most two balanced lines (no word left alone on a line), the time on one. Its confirm step (one picture and a few lines)
+   keeps the width of the Sheet and Walk dialogs (owner 30/10: stretched across the screen it looked odd). */
+.dialog.wide:has(.cc-form) { width: min(86rem, calc(100vw - 2 * var(--sp-5))); }
+.dialog .cc-form:not(.one) { grid-template-columns: minmax(15rem, 19rem) minmax(0, 1fr); gap: 1.5rem; }
+.dialog .cc-styles { grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr)); gap: 0.625rem; }
+.dialog .cc-style { padding: 0.375rem; gap: 0.2rem; }
+.dialog .cc-pic { margin-bottom: 0.15rem; }
+/* legible at a glance (owner 06/11 #1319: the tiles' words were too faint): the name in the primary ink, the gloss in the secondary ink
+   (never the muted one), the time in the accent ink at the meta size and the strong weight, so it reads as the tile's one figure */
+.dialog .cc-nm { display: block; font-size: var(--fs-control); line-height: 1.3; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cc-gloss { font-size: var(--fs-meta); line-height: 1.35; color: var(--text-secondary); text-wrap: balance; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.dialog .cc-est { margin-top: auto; padding-top: 0.2rem; font-size: var(--fs-meta); font-weight: var(--strong-weight); color: var(--accent-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dialog .cc-desc { min-height: 11rem; }
 @media (max-height: 800px) { .dialog .cc-pic { aspect-ratio: 16 / 10; } .dialog .cc-desc { min-height: 8rem; } }
-@media (max-width: 1100px) { .dialog .cc-form:not(.one) { grid-template-columns: minmax(0, 1fr); } .dialog .cc-styles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 1100px) { .dialog .cc-form:not(.one) { grid-template-columns: minmax(0, 1fr); } }
 /* the logo is the black badge on a light grey rounded tile, like the app icon (brand/logo-mark.svg), in every theme */
 .brand-mark { background: url("/brand/logo-mark.svg") center / contain no-repeat; -webkit-mask: none; mask: none; border-radius: 22%; }
 /* focus is never hidden under a sticky bar, the top bar or a dialog's head and foot; dialog and sheet
@@ -1286,7 +1298,7 @@ input[inputmode="numeric"], .num, time, .pager-count, .pager-nums { font-variant
 .set-general { display: flex; flex-direction: column; gap: var(--sp-4); }
 .set-group > .panel-head { margin-bottom: var(--sp-1); }
 .set-group .setting-row:first-of-type { padding-top: var(--sp-2); }
-.acct-line, .folder-line, .set-line, .key-row, .comp-head { display: flex; align-items: center; gap: 0.625rem; min-width: 0; }
+.acct-line, .folder-line, .set-line, .key-row { display: flex; align-items: center; gap: 0.625rem; min-width: 0; }
 .acct-who { display: flex; flex-direction: column; gap: 0.125rem; min-width: 0; }
 .acct-who .muted { font-size: var(--fs-meta); }
 .path-link { display: inline-flex; align-items: center; gap: 0.5rem; min-width: 0; max-width: 100%; padding: 0.375rem 0.625rem; border: 1px solid var(--border); border-radius: var(--r-sm);

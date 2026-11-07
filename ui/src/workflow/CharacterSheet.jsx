@@ -6,9 +6,9 @@
 // sheet in the film's hand and a poster; Claude draws them (no Draw again here), and Check runs each character's own tests in seconds.
 import { useEffect, useState } from "react";
 import { AlertTriangle, ArrowRight, Check, Loader2, MessageSquare, RefreshCw, Save, ShieldCheck } from "lucide-react";
-import { get, post, watchJob } from "../api.js";
+import { get, post } from "../api.js";
 import { Banner } from "../components.jsx";
-import { ago, useData, useToast } from "../lib.jsx";
+import { ago, useData, useToast, useJobWatch } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 import { useClaudeDone, useStage } from "./stage.jsx";
 import { CreditLine } from "../screens/StyleGallery.jsx";
@@ -52,6 +52,7 @@ export function drawFailure(job, cast = [], ids = null) {
 }
 
 export default function CharacterSheet({ projectId, onChanged }) {
+  const watch = useJobWatch();          // its job watches stop with it (audit/112c c5.1)
   const t = useT();
   const toast = useToast();
   const q = useData(() => get(`/api/projects/${projectId}/characters`), [projectId]);
@@ -71,7 +72,7 @@ export default function CharacterSheet({ projectId, onChanged }) {
     try {
       setDrawErr(null);
       const r = await post(`/api/projects/${projectId}/characters/sheets`, ids ? { ids } : {}); const j = r.job ?? r; setJob({ ...j, ids });
-      watchJob(j.id, (x) => { if (!x) return; setJob((o) => ({ ...o, ...x })); if (x.status !== "running") { setJob(null); q.reload(); setDrawErr(drawFailure(x, d.characters ?? [], ids)); } }, 1500);
+      watch(j.id, (x) => { if (!x) return; setJob((o) => ({ ...o, ...x })); if (x.status !== "running") { setJob(null); q.reload(); setDrawErr(drawFailure(x, d.characters ?? [], ids)); } }, 1500);
     } catch (e) { setDrawErr({ names: [], why: e.message }); }
   };
   const save = async (c) => {

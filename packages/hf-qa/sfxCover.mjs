@@ -39,7 +39,7 @@ export function sfxCover(dir, shots, plan) {
   // what was merged into another sound at its moment is heard as that sound; what was thinned for the density or left out as a repeat is not
   // (fewer sounds asked for, normal or low: what was thinned for it counts as placed, as before)
   const lively = (st.policy?.density ?? "lively") === "lively";
-  // (a repeat past MAX_REPEATS left out is the owner's own rule against one file over and over, Test 26: counted as placed)
+  // (a repeat left out by the cap of 30/10, gone since #1113, is still read from a film placed before: counted as placed)
   // a place's sound left to the scene's ambience bed (auto.mjs planCues, T42-12) is heard there
   const merged = (st.thinned ?? []).filter((m) => !lively || m.why === "same moment" || m.why === "named" || m.why === "repeat" || m.why === "ambience");
   const times = [...(st.mounted ?? []).map((m) => m.start), ...clips, ...merged.map((m) => m.start), ...(st.muted ?? []).map((m) => m.start)];

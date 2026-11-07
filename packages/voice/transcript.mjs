@@ -1,7 +1,7 @@
 // The project's voice-over transcript for review: segments with word timings in .moworks/voice/transcript.json (kept in
 // the project's revisions), and HyperFrames' transcript.json (word level) written from it through HF's own import. Editing text keeps the
 // timing: same number of words -> each word keeps its time; otherwise the words are spread over the segment's own start..end.
-import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { spokenText } from "./tags.mjs";
 import { join } from "node:path";
 import { importTranscript } from "../hf-audio/index.mjs";
@@ -195,19 +195,35 @@ export async function save(dir, segments, { workDir }) {
   return { transcript: data, hf };
 }
 
-export const exists = (dir) => existsSync(at(dir));
+
+// The one place the voice file's seconds become film seconds (112a B8): a clip plays its file from `mediaStart` for `duration` seconds,
+// at its own `start` on the film. A moment belongs to the clip that plays it; a span is cut to that clip's part.
+const spansOf = (clips) => clips.map((c) => { const a = c.mediaStart ?? 0; return { c, a, b: c.duration != null ? a + c.duration : Infinity }; });
+const spanAt = (spans, t) => spans.find((x) => t >= x.a - 1e-6 && t < x.b);
+const place = ({ c, a, b }, start, end, text) => ({ start: round(Math.max(a, start) + c.start - a), end: round(Math.min(b, end) + c.start - a), text });
+
+/** The transcript's words on the film (words: { text, start, end } in the voice file's seconds; clips: { start, mediaStart, duration }),
+ *  sorted: a word sits in the clip that plays its middle; a word no clip plays is left out. */
+export function wordsOnFilm(words, clips) {
+  const spans = spansOf(clips ?? []), out = [];
+  for (const w of words ?? []) {
+    if (!Number.isFinite(w?.start) || !Number.isFinite(w?.end)) continue;
+    const s = spanAt(spans, (w.start + w.end) / 2);
+    if (s) out.push(place(s, w.start, w.end, w.text));
+  }
+  return out.sort((x, y) => x.start - y.start);
+}
 
 /** The segments where the film plays them: a voice-over cut into clips of one file (`data-media-start` .. + `data-duration`)
  *  puts each segment at the start of the clip that holds most of it; a segment no clip plays is left out. Clips: { start, mediaStart, duration }.
  *  A sentence the cut splits (a pause put between two of its words) shows in each clip the words that clip plays. */
 export function onFilm(segments, clips) {
   if (!clips.length) return segments.map((g) => ({ start: round(g.start), end: round(g.end), text: g.text }));
-  const spans = clips.map((c) => { const a = c.mediaStart ?? 0; return { c, a, b: c.duration != null ? a + c.duration : Infinity }; });
-  const place = ({ c, a, b }, start, end, text) => ({ start: round(Math.max(a, start) + c.start - a), end: round(Math.min(b, end) + c.start - a), text });
+  const spans = spansOf(clips);
   return segments.flatMap((g) => {
     const runs = [];
     for (const w of g.words ?? []) {
-      const mid = (w.start + w.end) / 2, s = Number.isFinite(mid) && w.text ? spans.find((x) => mid >= x.a && mid < x.b) : null;
+      const mid = (w.start + w.end) / 2, s = Number.isFinite(mid) && w.text ? spanAt(spans, mid) : null;
       if (!s) continue;
       const r = runs.at(-1);
       if (r?.s === s) { r.end = w.end; r.words.push(w.text); } else runs.push({ s, start: w.start, end: w.end, words: [w.text] });

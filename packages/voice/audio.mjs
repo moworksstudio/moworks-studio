@@ -1,13 +1,12 @@
 // Audio files of the voice-over: accepted types, facts (ffprobe) and a waveform (peaks) for the Voice screen, with the pinned FFmpeg.
 import { execFile } from "node:child_process";
-import { join } from "node:path";
 import { promisify } from "node:util";
-import { expandEnv, loadPins, APP_ROOT } from "../version-manager/index.mjs";
+import { APP_ROOT, ffmpegExe, ffprobeExe } from "../version-manager/index.mjs";
 
 const run = promisify(execFile);
 export const AUDIO_TYPES = { ".mp3": "audio/mpeg", ".wav": "audio/wav", ".m4a": "audio/mp4", ".aac": "audio/aac", ".flac": "audio/flac", ".ogg": "audio/ogg", ".opus": "audio/ogg" };
 export const MAX_BYTES = 1024 * 1024 * 1024;   // 1 GB
-const bin = (name, root) => join(expandEnv(loadPins(root).ffmpeg.dir), `${name}.exe`);
+const bin = (name, root) => (name === "ffprobe" ? ffprobeExe(root) : ffmpegExe(root));          // version-manager: the one way to find them (audit/112a B9)
 
 /** { duration, codec, sampleRate, channels, bitRate } of an audio file. */
 export async function probe(file, root = APP_ROOT) {

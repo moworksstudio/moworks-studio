@@ -6,13 +6,15 @@
 // storyboard.md / storyboard-format.md for the storyboard, motion.md for the motion, format.md / runtimes.md for the build), Claude reads
 // them in its first turn, and opens the rest by name and purpose when it needs them. A guard (read-guard.mjs) checks before the first
 // edit that the required files were read.
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { docRelIn } from "../project-service/docs.mjs";
 import { APP_ROOT } from "../version-manager/index.mjs";
 import { HF_SKILL } from "../hf-edit/hf-scripts.mjs";
 import { isLyricVideo } from "../style-catalog/traits.mjs";
+import { styleFamily } from "../style-catalog/family.mjs";
 import { isMoworksStyle, skillReads } from "../moworks-styles/index.mjs";
+import { readJson } from "../util/json.mjs";
 
 const R = (...p) => `.moworks/rules/${p.join("/")}`;
 // HyperFrames' knowledge (skills/hyperframes at the pinned commit): the entry with the contract, and the references each step writes from
@@ -33,7 +35,7 @@ const GENERAL = {
   motionSpec: [R("general-style", "SKILL.md"), R("general-style", "references", "motion-spec.md"), R("general-style", "references", "motion-craft.md"), HF.motion],
   build: [R("general-style", "SKILL.md"), HF.entry, HF.format, HF.runtimes, HF.motion, R("general-style", "references", "motion-craft.md")],
   qcReview: [R("moworks-qc", "SKILL.md")],
-  checks: [HF.entry],
+  checks: [R("general-style", "SKILL.md"), HF.entry],
   sound: [R("general-style", "references", "sound.md")],
   chat: [R("general-style", "SKILL.md")],
 };
@@ -42,7 +44,7 @@ const MAP_PACK = R("map-explainer", "SKILL.md"), MAP_ENGINE = ".moworks/library/
 const MAP = {
   brief: [MAP_PACK, ...GENERAL.brief], storyboard: [MAP_PACK, MAP_ENGINE, ".moworks/library/map-explainer/example/film.js", ...GENERAL.storyboard],
   motionSpec: [MAP_PACK, ...GENERAL.motionSpec], build: [MAP_PACK, MAP_ENGINE, ".moworks/library/map-explainer/example/f3.html", ...GENERAL.build],
-  qcReview: GENERAL.qcReview, checks: GENERAL.checks, sound: GENERAL.sound, chat: [MAP_PACK, ...GENERAL.chat],
+  qcReview: GENERAL.qcReview, checks: [MAP_PACK, ...GENERAL.checks], sound: [MAP_PACK, ...GENERAL.sound], chat: [MAP_PACK, ...GENERAL.chat],
 };
 // The owner's film styles (Paper Collage, Stickman Explainer, Inner Voice Short, 3D Cartoon, 2D Explainer, Ricks Clip): the app's pack in every step, over General's
 // table, and the style's source skill as shipped (.moworks/library/<style>/skill): its skill and look for the brief, its look, worked examples and the app's page for the
@@ -54,7 +56,7 @@ const SKILL = (styleId) => {
     brief: uniq([pack, ...k.steps.brief, ...GENERAL.brief]), storyboard: uniq([pack, ...k.look, ...k.steps.storyboard, ...k.app, ...GENERAL.storyboard]),
     motionSpec: uniq([pack, ...k.steps.motionSpec, ...GENERAL.motionSpec]), build: uniq([pack, ...k.look, ...k.steps.build, ...k.examples, ...k.app, ...GENERAL.build]),
     // the Review: the house review, then this style's pack (its Review row) and the source skill's own checklists (#947); GENERAL's own list is unchanged
-    qcReview: uniq([...GENERAL.qcReview, pack, ...k.steps.review, k.look[0]]), checks: GENERAL.checks, sound: [pack, ...k.sound, ...GENERAL.sound], chat: [pack, ...GENERAL.chat],
+    qcReview: uniq([...GENERAL.qcReview, pack, ...k.steps.review, k.look[0]]), checks: uniq([pack, ...GENERAL.checks]), sound: [pack, ...k.sound, ...GENERAL.sound], chat: [pack, ...GENERAL.chat],
   };
 };
 // A Lemo-Opuscar style: its STYLE.md (.moworks/rules/lemo-<slug>) and the app's lemo-opuscar pack in every step, HF's
@@ -68,8 +70,8 @@ const LEMO = (slug) => {
     motionSpec: [own, pack, HF.motion],
     build: [own, pack, demo, HF.entry, HF.runtimes],
     qcReview: [R("moworks-qc", "SKILL.md"), own, demo],
-    checks: [HF.entry],
-    sound: [own],
+    checks: [own, pack, HF.entry],
+    sound: [own, pack],          // the pack's Sound / Final Mix row: the app's music and sound effects only (audit/112a R4, owner Qa6)
     chat: [own, pack],
   };
 };
@@ -83,13 +85,12 @@ const MG = (id) => {
     motionSpec: [own, pack, HF.motion],
     build: [own, pack, credit, HF.entry, HF.runtimes],
     qcReview: [R("moworks-qc", "SKILL.md"), own, rubric],
-    checks: [HF.entry],
-    sound: [own],
+    checks: [own, pack, HF.entry],
+    sound: [own, pack],          // the pack's Sound / Final Mix row: the app's music and sound effects only (audit/112a R4, owner Qa6)
     chat: [own, pack],
   };
 };
-const readJson = (f, d) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
-/** The anidoodle film kind of a project: its New project answer, with its entry in config/anidoodle-pipeline.json. */
+
 /** The project's film kind: one every style offers (config/film-kinds.json, e.g. whatIf: { scope: "all" }),
  *  or an anidoodle medium's own (anidoodleKind, scope "anidoodle"); null for a film as the brief says. */
 export function filmKind(dir, root = APP_ROOT) {
@@ -99,6 +100,7 @@ export function filmKind(dir, root = APP_ROOT) {
   const a = anidoodleKind(dir, root);
   return a ? { ...a, scope: "anidoodle" } : null;
 }
+/** The anidoodle film kind of a project: its New project answer, with its entry in config/anidoodle-pipeline.json. */
 export function anidoodleKind(dir, root = APP_ROOT) {
   const id = readJson(join(dir, ".moworks", "project.json"), {})?.brief?.answers?.filmKind;
   const k = id && readJson(join(root, "config", "anidoodle-pipeline.json"), {}).filmKinds?.[id];
@@ -119,8 +121,9 @@ const ANIDOODLE = (id) => {
     build: [own, pack, laws, contract, HF.entry, HF.runtimes, "docs/CHARACTERS.json"],
     // the pack too: the Review once read the turtle as a second cheetah, and the pack names every character in every still
     qcReview: [R("moworks-qc", "SKILL.md"), own, pack, `${lib}/references/workflows/review.md`],
-    checks: [HF.entry],
-    sound: [own],
+    // Claude's fix of what stops the render (G-POSE, G-CONTRACT, G-BUILD): the build's code rules without its design (audit/112b b3.1)
+    checks: [own, pack, laws, contract, HF.entry],
+    sound: [own, pack],          // the pack's Sound / Final Mix row: the app's music and sound effects only (audit/112a R4, owner Qa6)
     chat: [own, pack],
   };
 };
@@ -141,8 +144,8 @@ const BRUSH = () => {
     motionSpec: [own, pack, cast, HF.motion],
     build: [own, pack, cast, `${lib}/src/character.js`, HF.entry, HF.runtimes],
     qcReview: [R("moworks-qc", "SKILL.md"), own],
-    checks: [HF.entry],
-    sound: [own],
+    checks: [own, pack, HF.entry],
+    sound: [own, pack],          // the pack's Sound / Final Mix row: the app's music and sound effects only (audit/112a R4, owner Qa6)
     chat: [own, pack],
   };
 };
@@ -159,41 +162,64 @@ const WHATIF = () => {
     motionSpec: [own, pack, ...refs("motionSpec"), "whatif/episode.json", HF.motion],
     build: [own, pack, ...refs("build"), "whatif/episode.json", HF.entry],
     qcReview: [R("moworks-qc", "SKILL.md"), own, pack, ...refs("qcReview")],
-    checks: [HF.entry],
+    checks: [own, pack, ...refs("build"), HF.entry],          // G-BUILD's fix: the build's references (audit/112b b3.1)
     sound: [own, pack, ...refs("sound")],
     chat: [own, pack],
   };
 };
 
+/** The step table of a style that has one of its own (General, Map Explainer, the owner's styles, Lemo-Opuscar, mg-styles-15, anidoodle,
+ *  Brush cartoon, What If), or null for a HyperFrames style (its reads are HyperFrames' own references, below). */
+function tableFor(dir, styleId) {
+  const id = String(styleId ?? "");
+  const { family, slug } = styleFamily(id), lemo = family === "lemo" && slug, mg = family === "mg" && slug, ani = family === "anidoodle" && slug;
+  if (id === "general") return GENERAL;
+  if (id === "map-explainer") return MAP;
+  if (isMoworksStyle(id)) return SKILL(id);
+  if (lemo) return LEMO(lemo);
+  if (mg) return MG(mg);
+  if (ani) { const t = ANIDOODLE(ani), more = dir ? ANIDOODLE_MORE(dir) : {}; return Object.fromEntries(Object.entries(t).map(([k, xs]) => [k, [...xs, ...(more[k] ?? [])]])); }
+  if (id === "brush-cartoon") return BRUSH();
+  if (id === "what-if") return WHATIF();
+  return null;
+}
+/** Is this step's reading list written here? (A style's Claude step that is not would read as the chat.) The style's own table, HyperFrames'
+ *  own steps, and the steps every style shares (the chat, Adaptation, Thumbnails). */
+export function stepHasReads(styleId, step) {
+  if (["chat", "adaptation", "thumbnails"].includes(step)) return true;
+  const t = tableFor(null, styleId);
+  return t ? Object.hasOwn(t, step) : ["brief", "storyboard", "motionSpec", "build", "sound", "checks", "qcReview"].includes(step);
+}
+const exists = (dir) => (p) => existsSync(join(dir, ...p.split("/")));
+// the app's own files (the style's rules, the staged source skills and engines): one missing is a fault of the app, never of the film
+const appFile = (p) => p.startsWith(".moworks/rules/") || p.startsWith(".moworks/library/");
+
 /**
- * The files a task must read: [project-relative paths] that exist in the project's copy of the rules. styleId "general" uses its table,
+ * Every file a task should read, whether it is there or not ([project-relative paths]). styleId "general" uses its table,
  * a Lemo-Opuscar style ("lemo-<slug>"), an mg-styles-15 style ("mg-<id>") an anidoodle medium ("anidoodle-<id>") or the Brush cartoon style its own; a HyperFrames style
  * (HyperFrames' entry SKILL.md, or Slideshow's, is `first`; a film type "hf-<type>" adds its references/types/<type>.md) reads them in every step,
  * plus HyperFrames' references for what the step writes.
  */
-export function requiredReads(dir, { styleId, first = [], step = null } = {}) {
+export function readsList(dir, { styleId, first = [], step = null } = {}) {
   const key = step ?? "chat";
-  const lemo = /^lemo-([a-z0-9-]+)$/.exec(String(styleId ?? ""))?.[1], mg = /^mg-(\d\d-[a-z0-9-]+)$/.exec(String(styleId ?? ""))?.[1];
-  const ani = /^anidoodle-([A-Za-z0-9]+)$/.exec(String(styleId ?? ""))?.[1];
   let list;
   // the Adaptation step (one film, another size): its rules, HyperFrames' vertical, captions and overlays references, the style's own pack
   // or source skill's look (its staging and format rules come first, #1198), the film's design and the alive rule
   if (key === "adaptation") {
-    const own = isMoworksStyle(styleId) ? (() => { const k = skillReads(styleId); return [R(styleId, "SKILL.md"), ...k.look]; })() : styleId === "general" || styleId === "map-explainer" ? [R("general-style", "SKILL.md")] : first;
+    // an anidoodle medium: the author's formats.md too, which the Adaptation rule names first for it (audit/112b b3.2; staged with the engine)
+    const own = isMoworksStyle(styleId) ? (() => { const k = skillReads(styleId); return [R(styleId, "SKILL.md"), ...k.look]; })() : styleId === "general" || styleId === "map-explainer" ? [R("general-style", "SKILL.md")]
+      : styleFamily(styleId).family === "anidoodle" ? [...first, ".moworks/library/anidoodle/references/formats.md"] : first;
     list = [R("adaptation", "SKILL.md"), ...own, R(HF_SKILL, "references", "types", "vertical.md"), R(HF_SKILL, "references", "captions.md"), R(HF_SKILL, "references", "overlays.md"),
       "frame.md", "design.md", R("moworks-alive", "SKILL.md")];
-    return [...new Set([R("moworks-studio", "SKILL.md"), ...list])].filter((p) => existsSync(join(dir, ...p.split("/"))));
+    return [...new Set([R("moworks-studio", "SKILL.md"), ...list])];
   }
-  if (styleId === "general") list = GENERAL[key] ?? GENERAL.chat;
-  else if (styleId === "map-explainer") list = MAP[key] ?? MAP.chat;
-  else if (isMoworksStyle(styleId)) { const t = SKILL(styleId); list = t[key] ?? t.chat; }
-  else if (lemo) { const t = LEMO(lemo); list = t[key] ?? t.chat; }
-  else if (mg) { const t = MG(mg); list = t[key] ?? t.chat; }
-  else if (ani) { const t = ANIDOODLE(ani); list = [...(t[key] ?? t.chat), ...(ANIDOODLE_MORE(dir)[key] ?? [])]; }
-  else if (styleId === "brush-cartoon") { const t = BRUSH(); list = t[key] ?? t.chat; }
-  else if (styleId === "what-if") { const t = WHATIF(); list = t[key] ?? t.chat; }
+  // the Thumbnails page (two upload pictures of a finished film): the style's look only, its fonts, colours and titles (the owner's styles keep
+  // theirs in the source skill: its look files), never the house rules of making a film; the thumbnails' own rule comes first in its lab
+  if (key === "thumbnails") return [...new Set(isMoworksStyle(styleId) ? [R(styleId, "SKILL.md"), ...skillReads(styleId).look] : first)];
+  const t = tableFor(dir, styleId);
+  if (t) list = t[key] ?? t.chat;
   else {
-    const type = /^hf-([a-z0-9]+)$/.exec(String(styleId ?? ""))?.[1];
+    const type = styleFamily(styleId).family === "hf" ? styleFamily(styleId).slug : null;
     const typeFile = HF_TYPES.includes(type) ? [R(HF_SKILL, "references", "types", `${type}.md`)] : [];
     // the music step picks the tracks and writes a line of notes: the house rules (their music and sound rules) and the style's own file,
     // never HyperFrames' entry skill, which is the render contract and the work loop of the steps that write the film. Test 23's music
@@ -201,7 +227,8 @@ export function requiredReads(dir, { styleId, first = [], step = null } = {}) {
     const own = key === "sound" ? (typeFile.length ? typeFile : first.filter((p) => p !== HF.entry)) : [...first, ...(typeFile.length ? [HF.entry, ...typeFile] : [])];
     const hf = { brief: [HF.story], storyboard: [HF.spec, HF.look, HF.storyboard, HF.boardFormat], motionSpec: [HF.motion],
       build: [HF.entry, HF.format, HF.runtimes, HF.motion], checks: [HF.entry], qcReview: [R("moworks-qc", "SKILL.md"), HF.review] }[key] ?? [];
-    list = key === "qcReview" ? hf : [...own, ...hf];
+    // the Review: the house's review rules and HF's, and the film type's own file as every other step reads it (its safe zones, its pace: b3.3)
+    list = key === "qcReview" ? [...hf, ...typeFile] : [...own, ...hf];
   }
   // the film's design: frame.md (the Look the app wrote) or design.md (one Claude wrote), read in
   // every step that designs, moves, builds or checks the picture (HyperFrames' design spec; listed only when there is one)
@@ -222,10 +249,18 @@ export function requiredReads(dir, { styleId, first = [], step = null } = {}) {
   }
   // the product's facts from the web, once the owner said yes and Claude wrote them
   if (["storyboard", "motionSpec", "build", "qcReview"].includes(key)) list = [...list, "docs/RESEARCH.md"];
-  // the studio's house rules: every step of every style, first, before the style's own
   // a film kind every style offers (What If): its rule in the steps it names
   const kind = filmKind(dir);
   if (kind?.scope === "all") list = [...list, ...(kind.reads?.[key] ?? [])];
+  // the studio's house rules: every step of every style, first, before the style's own
   list = [R("moworks-studio", "SKILL.md"), ...list];
-  return [...new Set(list.map((p) => (p.startsWith("docs/") ? docRelIn(dir, p.slice(5)) : p)))].filter((p) => existsSync(join(dir, ...p.split("/"))));
+  return [...new Set(list.map((p) => (p.startsWith("docs/") ? docRelIn(dir, p.slice(5)) : p)))];
 }
+/** The files a task must read that are there ([project-relative paths]): readsList without the film's files not written yet (frame.md before
+ *  the Look, docs/RESEARCH.md before the web search…) and without an app file that is missing (missingReads names those). */
+export const requiredReads = (dir, opts = {}) => readsList(dir, opts).filter(exists(dir));
+/** The app's own files a task should read and cannot (a rules file renamed, a source skill or engine not staged): never dropped in silence. */
+/** The task's status line for the app files a step could not read: how many, never their paths (the paths are in the server's log). */
+export const missingLine = (n) => (n === 1 ? "App: 1 rules file of this step was not found; Claude goes on without it"
+  : `App: ${n} rules files of this step were not found; Claude goes on without them`);
+export const missingReads = (dir, opts = {}) => readsList(dir, opts).filter((p) => appFile(p) && !exists(dir)(p));

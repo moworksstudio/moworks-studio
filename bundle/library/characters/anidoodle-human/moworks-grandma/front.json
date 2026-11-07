@@ -1,0 +1,24 @@
+{
+  "sheetMarker": {
+    "box": [
+      123,
+      132,
+      171,
+      489
+    ],
+    "file": "sheet-marker.webp",
+    "size": 131516,
+    "mtimeMs": 1792776654321
+  },
+  "sheetStorybook": {
+    "box": [
+      123,
+      132,
+      170,
+      490
+    ],
+    "file": "sheet-storybook.webp",
+    "size": 122196,
+    "mtimeMs": 1792776654698
+  }
+}

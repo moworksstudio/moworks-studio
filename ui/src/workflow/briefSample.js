@@ -13,6 +13,7 @@
 // - Brush cartoon: written from ClaudeAnimationBase's ANIMATION_GUIDE.md (John Heibel, MIT, 0ac8bf2). Never Clawd.
 // - What If (style and film kind): our own premises from the What If formula (FreshStack, MIT, 3725a22); no channel's episode.
 // Two languages, the same content; the words inside the film stay English in both, as in the original.
+import { styleFamily } from "../../../packages/style-catalog/family.mjs";
 import DATA from "../../../packages/idea-library/samples.json" with { type: "json" };
 
 export const BRIEF_SAMPLES = DATA.styles;
@@ -23,12 +24,11 @@ export const WHAT_IF_SAMPLES = DATA.whatIf;
 /** OPUSCAR 98 prompt number → the Lemo-Opuscar style with the same look (none when no style matches). */
 export const OPUSCAR_STYLES = DATA.opuscarStyles;
 
-const WHAT_IF_DRAWN = /^(anidoodle-|brush-cartoon$)/;
-const ANIDOODLE = /^anidoodle-/;
+const whatIfDrawn = (styleId) => ["anidoodle", "brush"].includes(styleFamily(styleId).family);          // a style that draws its cast
 /** The sample a style and a film kind use: the What If kind's own (any style), else the style's. An Anidoodle style's Sample brief is
  *  "A picture that draws itself" (owner #1004); its Story film and the product launch stay in the Idea Library. */
-export const sampleOf = (styleId, kind = null) => (kind === "whatIf" ? WHAT_IF_SAMPLES[WHAT_IF_DRAWN.test(String(styleId ?? "")) ? "characters" : "general"]
-  : ANIDOODLE.test(String(styleId ?? "")) && ANIDOODLE_KIND_SAMPLES[kind ?? "drawing"] ? ANIDOODLE_KIND_SAMPLES[kind ?? "drawing"] : BRIEF_SAMPLES[styleId] ?? BRIEF_SAMPLES.general);
+export const sampleOf = (styleId, kind = null) => (kind === "whatIf" ? WHAT_IF_SAMPLES[whatIfDrawn(styleId) ? "characters" : "general"]
+  : styleFamily(styleId).family === "anidoodle" && ANIDOODLE_KIND_SAMPLES[kind ?? "drawing"] ? ANIDOODLE_KIND_SAMPLES[kind ?? "drawing"] : BRIEF_SAMPLES[styleId] ?? BRIEF_SAMPLES.general);
 /** The samples a style offers on its Sample brief button: [kind or null, label]; one for every style. The OPUSCAR 98 prompts and
  *  Anidoodle's other kinds are never samples here: they are in the Idea Library (owner #1002, #1004). */
 export const samplesFor = () => [[null, "Sample brief"]];

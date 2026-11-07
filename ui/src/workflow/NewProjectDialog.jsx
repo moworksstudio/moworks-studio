@@ -22,8 +22,8 @@ import { AssetPicker, uploadAll } from "./assets.jsx";
 import { NeedsClaude, useClaude } from "./claude.jsx";
 import { FolderField } from "./folder.jsx";
 import { ALL_SAMPLES, briefSampleFor, sampleFieldsFor, sampleOf, samplesFor } from "./briefSample.js";
-import StyleQuestions from "./answers.jsx";
 import "../workflow.css";
+import { stillFromIdea } from "./ideaBrief.js";
 
 // Format: rates 24 · 25 · 30 · 60 with the author's default (else 30), no 60 for Brush; a size
 // typed like After Effects (its ratio shown beside it) or one of four presets; even numbers, the long side at most 3840; Lemo and MG list
@@ -39,8 +39,8 @@ const aspectOf = (w, h) => SIZES.find(([, pw, ph]) => pw * h === ph * w)?.[0] ??
 /** What a style allows: { fps: [..], fpsDefault, sizes: [[label, w, h]], typed, locked, own ("1080 × 1080"), ownSize ([w, h]: the size the
  *  style's author draws in, the film's Size when the style is picked) }. */
 export function formatRule(style) {
-  const au = style ? authorOf(style) : null;
-  const allowed = (style?.fps?.choices ?? style?.fps?.allowed)?.length ? (style.fps.choices ?? style.fps.allowed).map(String) : au === "johnheibel" ? ["24", "25", "30"] : FPS;
+  const au = style ? authorOf(style) : null, brush = style?.characterEngine === "brush-kit";          // Brush cartoon: a Moworks style since #1311
+  const allowed = (style?.fps?.choices ?? style?.fps?.allowed)?.length ? (style.fps.choices ?? style.fps.allowed).map(String) : brush ? ["24", "25", "30"] : FPS;
   const fpsDefault = String(style?.fps?.default ?? style?.mg?.fps ?? (au === "alexgreensh" ? 24 : 30));
   const presets = SIZES.filter(([a]) => !style?.aspects || style.aspects.includes(a));
   const own = style?.mg?.size ?? style?.lemo?.size ?? null;
@@ -58,7 +58,7 @@ export function formatRule(style) {
     return { fps: choices, fpsDefault: choices.includes(def) ? def : choices[0], sizes: list, typed, locked: locked || (!typed && list.length === 1), slowAt: fm.fps?.slowAt != null ? String(fm.fps.slowAt) : null, slower: fm.fps?.slower ?? 2,
       own: au2 ? `${au2[0]} × ${au2[1]}` : null, ownSize: au2 ?? null };
   }
-  if (au === "johnheibel") return { fps: allowed, fpsDefault, sizes: [["16:9", 1920, 1080]], typed: false, locked: true };
+  if (brush) return { fps: allowed, fpsDefault, sizes: [["16:9", 1920, 1080]], typed: false, locked: true };
   return { fps: allowed, fpsDefault: allowed.includes(fpsDefault) ? fpsDefault : allowed[0], sizes, typed: au !== "alexgreensh", locked: false, own: own ? own.join(" × ") : null, ownSize: own ?? null };
 }
 /** The size a style gives the film when it is picked (`fresh`): its author's own size (Hand embroidery draws 1080 × 1080: T26-2 kept
@@ -77,7 +77,7 @@ const KEY_V = 6;          // 6: a size in pixels; 5: length is a timecode, setti
 const DEFAULTS = { model: "opus", effort: "high", web: "on" };          // the user's defaults for a new project
 // a new film starts at 15 s
 const LYRIC_BRIEF = /lyric|karaoke|lời bài hát|lời ca|phụ đề bài hát/i, NO_LYRICS = /(?:\bno\b|\bwithout\b|không(?: có| chạy| dùng| cần)?|bỏ)\s+(?:the\s+|any\s+|chữ\s+|phần\s+)*(?:lyric|karaoke|lời)/i;
-const blank = { v: KEY_V, title: "", folderName: "", styleId: "general", look: "", characters: [], length: "0:00:15:00", width: 1920, height: 1080, fps: "30", brief: "", answers: {},
+const blank = { v: KEY_V, title: "", folderName: "", styleId: "general", look: "", characters: [], length: "0:00:15:00", width: 1920, height: 1080, fps: "30", brief: "",
   model: DEFAULTS.model, effort: DEFAULTS.effort, mode: "global", web: DEFAULTS.web, voice: "global" };
 const WEB = { ask: "Ask first", on: "On", off: "Off" };
 /** "Opus (most capable)" -> "Opus": the select shows the short name, the full wording stays in Settings. */
@@ -206,12 +206,14 @@ function SizeField({ w, h, rule, onChange, invalid }) {
  *  HyperFrames' Story, whose films are acted by characters; its Social clips draw none); the painted, printed, game, cartoon, 3D,
  *  cinema and documentary styles of other authors keep "Follows film style". */
 const REDRAW_OK = ["Custom", "Explainer", "Motion graphics", "Music / Lyrics", "Brand / Product", "Story", "Presentation", "Video overlays", "Information & Keynote", "Graphic & Type"];
-const ENGINE_OF = { johnheibel: ["brush-kit"], alexgreensh: ["anidoodle-human"] };          // Anidoodle's people, animals and things all use this engine
-function castRule(style) {
+const ENGINE_OF = { alexgreensh: ["anidoodle-human"] };          // Anidoodle's people, animals and things all use this engine
+export function castRule(style) {
   // Ricks Clip takes its own characters as they are (its cast layer, #1076), never "redrawn" (T39-1)
   if (style?.id === "ricks-clip") return { mode: "own", allow: (c) => c.engine === "ricks-clip" };
   // 3D Cartoon likewise: its own characters, built by its rig (#1267)
   if (style?.id === "cartoon-3d") return { mode: "own", allow: (c) => c.engine === "cartoon-3d" };
+  // Brush cartoon: its own Brush characters (a Moworks style since #1311, before that by its author's id)
+  if (style?.characterEngine === "brush-kit") return { mode: "own", allow: (c) => c.engine === "brush-kit" };
   const au = style ? authorOf(style) : null;
   if (ENGINE_OF[au]) return { mode: "own", allow: (c) => ENGINE_OF[au].includes(c.engine) && (au !== "alexgreensh" || c.kind !== "human" || style.characterEngine === "anidoodle-human") };
   if (REDRAW_OK.includes(style?.category)) return { mode: "redraw", allow: () => true };
@@ -255,7 +257,6 @@ export default function NewProjectDialog({ onClose }) {
   const [sampleMenu, setSampleMenu] = useState(false);   // Anidoodle's three kinds of film as samples
   const sampleBox = useRef(null);
   useOutside(sampleBox, sampleMenu, () => setSampleMenu(false));
-  const [, setFieldsSet] = useState(false);      // what the user set; a sample brief never changes the boxes now
   const [lenBack, setLenBack] = useState(null);     // the length the field went back to when what was typed was no length
   const [phase, setPhase] = useState(null);         // null | "creating" | "copying"
   const [err, setErr] = useState(null);
@@ -316,13 +317,11 @@ export default function NewProjectDialog({ onClose }) {
     const fps = lyric ? "60" : rule.fpsDefault;
     setD((x) => { const s = fromTimecode(x.length, x.fps); return { ...x, fps, length: s == null ? x.length : toTimecode(s, fps) }; });
   }, [d.brief]); // eslint-disable-line react-hooks/exhaustive-deps
-  const setFps = (e) => { const fps = e.target.value; fpsPicked.current = true; setFieldsSet(true); setD((x) => { const s = fromTimecode(x.length, x.fps); return { ...x, fps, length: s == null ? x.length : toTimecode(s, fps) }; }); };
+  const setFps = (e) => { const fps = e.target.value; fpsPicked.current = true; setD((x) => { const s = fromTimecode(x.length, x.fps); return { ...x, fps, length: s == null ? x.length : toTimecode(s, fps) }; }); };
   // the minimum to create: a name, a save folder, an available style, a length, and a signed-in Claude. The first thing
   // missing is told next to the button, so a disabled Create never looks like a hang.
   const folder = slug(d.title);                 // the folder comes from the name (the Folder name field went)
-  const [known, setKnown] = useState([]);     // paths of the projects the app already lists (a stand-in while the server cannot tell)
   const [real, setReal] = useState(null);     // the server's answer: { folder, taken }
-  useEffect(() => { get("/api/projects").then((r) => setKnown((r.projects ?? []).map((x) => String(x.path ?? "").replace(/[\\/]+$/, "").toLowerCase()))).catch(() => {}); }, []);
   useEffect(() => {
     if (!loc?.path || !folder) { setReal(null); return undefined; }
     const h = setTimeout(() => {
@@ -331,13 +330,6 @@ export default function NewProjectDialog({ onClose }) {
     }, 350);
     return () => clearTimeout(h);
   }, [loc?.path, d.title]); // eslint-disable-line react-hooks/exhaustive-deps (the server answers with the folder it will really use: POST /api/projects/folder)
-  const predicted = useMemo(() => {
-    if (!loc?.path || !folder) return folder;
-    const base = loc.path.replace(/[\\/]+$/, "").toLowerCase() + "\\";
-    let n = folder, k = 2;
-    while (known.includes(base + n.toLowerCase())) n = `${folder}-${k++}`;
-    return n;
-  }, [known, loc?.path, folder]);
   const answered = real?.for === folder ? real : null;          // the server's answer for the name as it is now (no flicker while typing)
   const reserved = !!folder && RESERVED.test(folder);
   const missing = !d.title.trim() ? "Name the project first." : reserved ? "Windows keeps that name: choose another." : !loc?.path ? "Choose where to save the project."
@@ -380,8 +372,8 @@ export default function NewProjectDialog({ onClose }) {
       // the size: one of the four presets as its aspect, else "custom" with the typed width and height
       const p = await post("/api/projects", { title: d.title.trim(), styleId: d.styleId, aspect: aspect ?? "custom", width: d.width, height: d.height, fps: Number(d.fps) || 30, durationSec: seconds,
         brief: d.brief, look: d.look ? { id: d.look } : null,
-        // the idea it came from, while the brief is still the one the Writers Room handed over
-        ...(d.ideaId && d.brief === d.ideaText ? { ideaId: d.ideaId, ...(d.briefMode === "script" ? { briefMode: "script" } : {}) } : {}),
+        // the idea it came from, while the brief still holds most of what the Writers Room handed over (a line added keeps it, T43-12)
+        ...(d.ideaId && stillFromIdea(d.brief, d.ideaText) ? { ideaId: d.ideaId, ...(d.briefMode === "script" ? { briefMode: "script" } : {}) } : {}),
         settings: { model: d.model, effort: d.effort, web: d.web }, location: loc?.path,
         characters: cast.mode !== "locked" && d.characters?.length ? d.characters : undefined,          // the box's own rule decides; written into the film at creation
         kickoff: true });
@@ -437,19 +429,19 @@ export default function NewProjectDialog({ onClose }) {
 
   return <div className="overlay np-overlay">          {/* a click beside it does not close it; Esc, Cancel and the close button do */}
     <div className="dialog np-dialog np2" role="dialog" aria-modal="true" aria-labelledby="np-h" ref={box} onKeyDown={onKey} style={{ zoom: scale, "--np-zoom": scale, width: fitW }}>
-      <div className="dialog-head np2-head"><h2 id="np-h">{t("New project")}</h2>
+      <div className="dialog-head np2-head"><h2 id="np-h">{t("New production")}</h2>
         {draftBack && <span className="np2-draft" role="status"><FileText size={13} />{t("Draft saved")}<button type="button" className="clink" onClick={clearDraft}>{t("Clear draft")}</button></span>}
         <button className="btn ghost icon sm x" onClick={close} disabled={!!phase} aria-label={t("Close")} title={t("Close")}><X size={16} /></button></div>
       <div className="dialog-body np2-body" ref={bodyRef}>
         <div className="np2-cols">
           <div className="np2-col">
             <Step n={1} title={t("Title")}>
-              <input id="np-title" spellCheck={false} className={"input np2-title" + (touched && !d.title.trim() ? " invalid" : "")} value={d.title} onChange={set("title")} placeholder={t("Name the project")} aria-label={t("Project name")} maxLength={120}
+              <input id="np-title" spellCheck={false} className={"input np2-title" + (touched && !d.title.trim() ? " invalid" : "")} value={d.title} onChange={set("title")} placeholder={t("Name the production")} aria-label={t("Production name")} maxLength={120}
                 aria-invalid={(touched && !d.title.trim()) || reserved || undefined} aria-describedby={(touched && !d.title.trim()) || reserved ? "np-title-e" : undefined} />
               <div className="np2-saved"><span className="np2-l">{t("Saved in")}</span>
-                {loc && <FolderField value={loc.path} drive={loc.drive} title={t("Where to save the project")} onChange={(path, drive) => setLoc({ path, drive })} />}</div>
-              {touched && !d.title.trim() && <span className="np2-err" id="np-title-e" role="alert">{t("Give the project a name.")}</span>}
-              {touched && !loc?.path && <span className="np2-err" role="alert">{t("Choose where to save the project.")}</span>}
+                {loc && <FolderField value={loc.path} drive={loc.drive} title={t("Where to save the production")} onChange={(path, drive) => setLoc({ path, drive })} />}</div>
+              {touched && !d.title.trim() && <span className="np2-err" id="np-title-e" role="alert">{t("Give the production a name.")}</span>}
+              {touched && !loc?.path && <span className="np2-err" role="alert">{t("Choose where to save the production.")}</span>}
               {!reserved && answered && answered.folder !== folder && <span className="np2-desc np-taken">{t("That folder name is taken, so the folder will be {name}.", { name: answered.folder })}</span>}
               {reserved && <span className="np2-err" id="np-title-e" role="alert">{t("Windows keeps that name: choose another.")}</span>}
             </Step>
@@ -472,10 +464,10 @@ export default function NewProjectDialog({ onClose }) {
 
             <Step n={5} title={t("Format")}>
               <div className="np2-row3">
-                <div className="np2-field"><label className="np2-l" htmlFor="np-len">{t("Length")}</label><LengthField value={d.length} fps={d.fps} onChange={(v, o) => { setFieldsSet(true); set("length")(v); if (!o?.tidy) setLenBack(null); }}
+                <div className="np2-field"><label className="np2-l" htmlFor="np-len">{t("Length")}</label><LengthField value={d.length} fps={d.fps} onChange={(v, o) => { set("length")(v); if (!o?.tidy) setLenBack(null); }}
                   onReverted={setLenBack} invalid={lenBad} describedBy={lenBad || (lenBack && lenBack === d.length) ? "np-len-d" : undefined} /></div>
                 <div className="np2-field"><span className="np2-l">{t("Size")}</span>
-                  <SizeField w={d.width} h={d.height} rule={rule} invalid={sizeBad} onChange={(width, height) => { setFieldsSet(true); setD((x) => ({ ...x, width, height, sizeByHand: true, sizeByStyle: false })); }} /></div>
+                  <SizeField w={d.width} h={d.height} rule={rule} invalid={sizeBad} onChange={(width, height) => { setD((x) => ({ ...x, width, height, sizeByHand: true, sizeByStyle: false })); }} /></div>
                 <div className="np2-field"><label className="np2-l" htmlFor="np-fps">{t("Frame rate")}</label>
                   <select id="np-fps" className="select num" value={d.fps} onChange={setFps}>{fpsList.map((f) => <option key={f} value={f}>{f} fps</option>)}</select></div>
               </div>
@@ -519,7 +511,6 @@ export default function NewProjectDialog({ onClose }) {
                 onPaste={(e) => { if (!sampleNow) return; e.preventDefault(); replaceSample(e.clipboardData.getData("text")); }}
                 onBeforeInput={(e) => { if (!sampleNow || !e.data) return; e.preventDefault(); replaceSample(e.data); }}
                 placeholder={t("What the video says and how: the topic, the idea, your narration if you have it, notes, links, tone, what to stress, what to avoid…")} />
-              <StyleQuestions styleId={d.styleId} value={d.answers} onChange={(v) => setD((x) => ({ ...x, answers: v }))} idPrefix="np" />
             </Step>
 
             <Step n={8} title={t("Assets")} note={t("optional")} className="np2-assets">
@@ -531,17 +522,17 @@ export default function NewProjectDialog({ onClose }) {
       </div>
       <div className="np-fold-wrap" aria-hidden={!fold}>{fold && <button type="button" className="np-fold" onClick={() => bodyRef.current?.scrollBy({ top: bodyRef.current.clientHeight * 0.8, behavior: "smooth" })}><ArrowDown size={14} />{t("More below")}</button>}</div>
       <div className="dialog-foot np-foot np2-foot">
-        {claude?.status && !claude.connected ? <NeedsClaude text={t("Claude needs a sign-in to start the project")} /> : null}
+        {claude?.status && !claude.connected ? <NeedsClaude text={t("Claude needs a sign-in to start the production")} /> : null}
         {err && <div className="np-err" role="alert"><AlertCircle size={15} /><span>{err} {t("Your answers are kept.")}</span></div>}
         {reason ? <span className="np-why" role="status" id="np-why"><AlertCircle size={14} />{t(reason)}</span>
           : <span className="hint kbd-hint"><kbd>Ctrl</kbd><kbd>Enter</kbd> {t("to create")}</span>}
         <span className="spacer" />
-        <button type="button" className="btn ghost" onClick={() => setIdeas(true)} disabled={!!phase} aria-haspopup="dialog"><Lightbulb size={15} />{t("Writers Room")}</button>
+        <button type="button" className="btn ghost" onClick={() => setIdeas(true)} disabled={!!phase} aria-haspopup="dialog"><Lightbulb size={15} />{t("Writers' Room")}</button>
         <button className="btn" onClick={close} disabled={!!phase}>{t("Cancel")}</button>
         {phase === "copying" && <button className="btn" onClick={() => job.current?.cancel()}>{t("Stop copying")}</button>}
         {ideas && <IdeaPicker onAdd={addToBrief} onClose={() => setIdeas(false)} />}
         <button className={"btn primary" + (missing ? " blocked" : "")} onClick={create} disabled={!!phase || (!missing && !canCreate)} aria-disabled={!!missing || undefined} aria-describedby={reason ? "np-why" : undefined} title={reason ? t(reason) : undefined}>
-          {phase ? <><Loader2 size={15} className="spin" />{phase === "copying" ? t("Copying files {done}/{n}…", { done: files.filter((f) => f.status === "done").length, n: files.length }) : t("Creating…")}</> : <><Sparkles size={15} />{t("Create project")}</>}</button>
+          {phase ? <><Loader2 size={15} className="spin" />{phase === "copying" ? t("Copying files {done}/{n}…", { done: files.filter((f) => f.status === "done").length, n: files.length }) : t("Creating…")}</> : <><Sparkles size={15} />{t("Create production")}</>}</button>
       </div>
     </div>
   </div>;

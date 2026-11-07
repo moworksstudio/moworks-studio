@@ -105,16 +105,37 @@ export async function blobUrl(path) {
   return URL.createObjectURL(await r.blob());
 }
 
-/** Poll a background job until it ends; onUpdate gets every state. */
-export function watchJob(id, onUpdate, every = 1000) {
-  let alive = true;
+/** The state a watch ends with when the job cannot be read any more: the app restarted (the job is gone), or the service did not answer. */
+export const lostJob = (id, e) => ({ id, status: "failed", lost: true, error: { code: e?.status === 404 ? "LOST" : "NO_ANSWER",
+  message: e?.status === 404 ? "This stopped when the app restarted. Start it again." : "The app did not answer. Open this page again to see how it ended." } });
+/** Poll a background job until it ends; onUpdate gets every state, and always an end: a read the server did not answer is asked again (a
+ *  busy computer: Test 24's server was silent ~30 s), and a job it no longer has, or one it never answers for, ends "failed" with plain
+ *  words (lostJob) instead of a page that waits for it forever (audit/112 5.1). */
+// one read loop per job, whoever follows it (a sheet opened again joined a second loop on the same job: audit/112c c5.1)
+const watching = new Map();          // job id -> { listeners: Set<{ onUpdate }>, last }
+export function watchJob(id, onUpdate, every = 1000, { tries = 20, wait = 3000 } = {}) {
+  const me = { onUpdate };
+  const was = watching.get(id);
+  if (was) { was.listeners.add(me); if (was.last) onUpdate(was.last); return () => { was.listeners.delete(me); }; }
+  const w = { listeners: new Set([me]), last: null };
+  watching.set(id, w);
+  let missed = 0;
+  const send = (x, e) => { w.last = x; for (const l of [...w.listeners]) l.onUpdate(x, e); };
+  const end = () => { if (watching.get(id) === w) watching.delete(id); };
   const tick = async () => {
-    if (!alive) return;
-    try { const j = await api("GET", `/api/jobs/${id}`); onUpdate(j); if (j.status !== "running") return; } catch (e) { onUpdate(null, e); return; }
+    if (!w.listeners.size) { end(); return; }          // nobody follows it any more (the sheet closed, the page left)
+    try {
+      const j = await api("GET", `/api/jobs/${id}`); missed = 0;
+      send(j); if (j.status !== "running") { end(); return; }
+    } catch (e) {
+      if (!w.listeners.size) { end(); return; }
+      if (e?.status === 404 || ++missed >= tries) { send(lostJob(id, e), e); end(); return; }
+      setTimeout(tick, wait); return;
+    }
     setTimeout(tick, every);
   };
   tick();
-  return () => { alive = false; };
+  return () => { w.listeners.delete(me); };
 }
 
 /** Download a file the API serves (the session token goes in the header, so a plain link cannot): saved under `name`. */

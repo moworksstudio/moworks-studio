@@ -19,14 +19,17 @@ export function FolderField({ id, value, drive, onChange, title, editable = fals
   const t = useT();
   const toast = useToast();
   const [busy, setBusy] = useState(false);
+  // a folder chosen in the dialog shows by its name only, its path kept for the request (no path on screen: audit/112c c5.2, owner Q-c3);
+  // a field the owner may type in stays a box until then
+  const [chosen, setChosen] = useState(false);
   const choose = async () => {
     setBusy(true);
-    try { const r = await post("/api/dialog/folder", { title: title ?? t("Choose a folder"), initial: value ?? "" }); if (r.path) onChange(r.path, r.drive); }
+    try { const r = await post("/api/dialog/folder", { title: title ?? t("Choose a folder"), initial: value ?? "" }); if (r.path) { setChosen(true); onChange(r.path, r.drive); } }
     catch (e) { toast(e.message, "error"); } finally { setBusy(false); }
   };
   return <div className="folder-field">
     <div className="row">
-      {editable ? <input id={id} className="input mono" value={value ?? ""} onChange={(e) => onChange(e.target.value, null)} placeholder={placeholder} spellCheck={false} />
+      {editable && !chosen ? <input id={id} className="input mono" value={value ?? ""} onChange={(e) => onChange(e.target.value, null)} placeholder={placeholder} spellCheck={false} />
         : <span id={id} className="path">{folderName(value)}</span>}
       <button type="button" className="btn sm" onClick={choose} disabled={busy}>{busy ? <Loader2 size={14} className="spin" /> : <FolderOpen size={14} />}{t("Choose…")}</button>
     </div>

@@ -12,6 +12,7 @@
 //                library (pins.codeLibs) to assets/_app/vendor/lib/<lib>/<version>/; a module import is rewritten relative to its own file,
 //                anything else relative to the document; its fonts.css goes (R-FONTS declares the families the film uses)
 // Credit: Lemo-Opuscar, Lemomo (LemoLab), MIT; mg-styles-15, Vincentwei1021, MIT; at the commits pinned in config/pins.json.
+import { styleFamily } from "../style-catalog/family.mjs";
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
@@ -231,7 +232,7 @@ export function refreshBridge(projectDir) {
 
 /** The source a project's style names (lemo-<slug> / mg-<id> / anidoodle-<id>), or null. */
 export function projectSource(projectDir) {
-  try { const id = JSON.parse(readFileSync(join(projectDir, ".moworks", "project.json"), "utf8")).style?.id ?? ""; return id.startsWith("lemo-") ? "lemo" : id.startsWith("mg-") ? "mg" : id.startsWith("anidoodle-") ? "anidoodle" : null; }
+  try { const id = JSON.parse(readFileSync(join(projectDir, ".moworks", "project.json"), "utf8")).style?.id ?? ""; const f = styleFamily(id).family; return ["lemo", "mg", "anidoodle"].includes(f) ? f : null; }
   catch { return null; }
 }
 

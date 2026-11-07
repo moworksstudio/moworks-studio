@@ -10,23 +10,23 @@
 // every film is rendered once it is built, at the export's quality (Brush: high), and Render reuses that file when
 // neither the picture nor the sound changed; when only the sound changed (the picture and sound hashes kept apart), HyperFrames' own
 // audio mix is put onto the rendered picture (remix.mjs) in seconds. An HTML film still plays live in the Editor.
+import { filmHash, filmParts } from "../project-service/film-hash.mjs";
+import { chooseGpu } from "../hf-render-worker/gpu.mjs";
+import { prepareFilm } from "./prepare.mjs";
+import { renderWarningNote } from "../hf-render-worker/errors.mjs";
 import { execFile, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, linkSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { basename, join, relative, sep } from "node:path";
+import { basename, join } from "node:path";
 import { promisify } from "node:util";
-import { remixAudio, render } from "../hf-render-worker/client.mjs";
+import { remixAudio, render, renderOutcome } from "../hf-render-worker/client.mjs";
+import { deliverFile } from "./deliver.mjs";
 import { isCodeFilm, reviewPending } from "../pipeline/index.mjs";
-import { expandEnv, loadPins, renderSettings } from "../version-manager/index.mjs";
+import { renderSettings, ffmpegExe, ffprobeExe } from "../version-manager/index.mjs";
 import * as projects from "../project-service/index.mjs";
-import { docPath } from "../project-service/docs.mjs";
-import { SIZE_FILE } from "../project-service/sizes.mjs";
-import { refreshBridge } from "../hf-edit/lemoPage.mjs";
-import { applyLanes, readLanes, readMuted } from "../sfx/lanes.mjs";
-import { fitMusicToFilm } from "../hf-edit/tracks.mjs";
-import { levelTracks } from "../sfx/mixlevels.mjs";
-import { capWebBitrate, smoothCopy, smoothWithSound } from "../hf-qa/webBitrate.mjs";
+import { readLanes, readMuted } from "../sfx/lanes.mjs";
+import { smoothCopy, smoothWithSound } from "../hf-qa/webBitrate.mjs";
 
 const { projectFps } = projects;
 
@@ -36,71 +36,15 @@ const VERSIONS = [".moworks", "cache", "versions"];
 /** Where a sound is mixed again: the computer's temp folder, not the film's. HF makes long-named folders inside it, and a film deep in the user's
  *  folders went past Windows' 248 characters for a folder (ENOENT from mkdtemp: the new sound never mixed). */
 export const remixWorkDir = (hash) => join(tmpdir(), `mw-remix-${hash}`);
-const AUDIO_TAG = /<(audio|hf-audio-group)\b[^>]*>(?:[\s\S]*?<\/\1>)?/gi;
-const AUDIO_FILE = /\.(mp3|wav|m4a|aac|flac|ogg|opus)$/i;
-// a lane's fader on the page: part of the sound, but no part of what each lane's own file holds (`heard`)
-const LANE_TAGS = /<hf-audio-group\b[^>]*\bid="mw-lane-[^>]*>\s*<\/hf-audio-group>|\s+data-audio-group="mw-lane-[^"]*"/g;
-// HF's element ids, written into the film's HTML when the Editor opens it (not a film change; older films also carry the ones HF Studio
-// wrote). Opening the Editor stamped them on every element and <audio>, and the film's render and pre-render went stale with nothing drawn or heard changed.
-const STUDIO_ID = /\s+data-hf-id="[^"]*"/g;
-/** A page's text with its blank lines and the spaces at the ends of its lines left out: what an <audio> tag taken out leaves behind. */
-const drawnText = (s) => s.split(/\r?\n/).map((l) => l.trimEnd()).filter(Boolean).join("\n");
-/** The film's files, hashed in two parts: the picture (index.html and the compositions without their <audio> tags,
- *  CHARACTERS.json, every asset but sound files: names, sizes and dates) at its fps, and the sound (every <audio> tag and the sound files
- *  under assets/ and audio/). HF's element ids count in neither. `drawn`: the picture once more with the pages' blank lines left out. The
- *  Final Mix taking a sound out leaves its tag's line empty, so the picture read as changed: a full render (3 min) for a sound alone,
- *  never the sound mixed again onto the picture (T25-3). `picture` stays as it was: the checks' hash and an export's reuse read it. */
-export function filmParts(dir, fps, { stamps = false } = {}) {
-  const pic = createHash("sha256"), snd = createHash("sha256"), drw = createHash("sha256"), hrd = createHash("sha256");
-  const both = (x) => { pic.update(x); drw.update(x); };
-  const page = (s) => { pic.update(s); drw.update(drawnText(s)); };
-  both(`fps:${fps}`);
-  const text = (p) => { const s0 = readFileSync(p, "utf8"), s = stamps ? s0 : s0.replace(STUDIO_ID, ""); const tags = s.match(AUDIO_TAG) ?? []; snd.update(tags.join("\n")); hrd.update(tags.map((x) => x.replace(LANE_TAGS, "")).filter(Boolean).join("\n")); return s.replace(AUDIO_TAG, ""); };
-  const walk = (d, deep, only = null) => {
-    if (!existsSync(d)) return;
-    for (const n of readdirSync(d).sort()) {
-      const p = join(d, n), s = statSync(p), rel = relative(dir, p).split(sep).join("/");
-      if (s.isDirectory()) { if (!n.startsWith(".") && n !== "_app" && n !== "rounds") walk(p, deep, only); continue; }
-      // a file of one other size only (compositions/shot-03.9x16.html): no part of the master's picture (project-service/sizes.mjs)
-      if (SIZE_FILE.test(n)) continue;
-      const sound = AUDIO_FILE.test(n);
-      if (only === "sound" && !sound) continue;
-      const add = sound ? (x) => { snd.update(x); hrd.update(x); } : both;
-      add(rel);
-      if (deep && /\.html?$/i.test(n)) page(text(p));
-      else if (deep && /\.(js|mjs|json|css|ts)$/i.test(n)) add(readFileSync(p)); else add(`${s.size}:${Math.floor(s.mtimeMs)}`);
-    }
-  };
-  if (existsSync(join(dir, "index.html"))) { both("index.html"); page(text(join(dir, "index.html"))); }
-  if (existsSync(docPath(dir, "CHARACTERS.json"))) { both("CHARACTERS.json"); both(readFileSync(docPath(dir, "CHARACTERS.json"))); }
-  walk(join(dir, "compositions"), true);
-  // a 2D Explainer film (one of the owner's film styles) keeps its code in story/, the page's own scripts, timed to the voice's words (STORY_WORDS, from
-  // transcript.json): both are its picture. Test 38's final render was Version 1's picture with none of the Review's fixes in it (T38-8)
-  if (existsSync(join(dir, "story"))) {
-    walk(join(dir, "story"), true);
-    if (existsSync(join(dir, "transcript.json"))) { both("transcript.json"); both(readFileSync(join(dir, "transcript.json"))); }
-  }
-  // the 3D Cartoon's film code (src/videos/…) and Ricks Clip's (film/): their picture too (T41-6: a Review fix in them was checked with old answers)
-  walk(join(dir, "src"), true);
-  walk(join(dir, "film"), true);
-  walk(join(dir, "assets"), false);
-  walk(join(dir, "audio"), false, "sound");
-  return { picture: pic.digest("hex").slice(0, 16), sound: snd.digest("hex").slice(0, 16), drawn: drw.digest("hex").slice(0, 16), heard: hrd.digest("hex").slice(0, 16) };
-}
 /** Whether every sound of the film sits on its root page (where Final Mix places music, voice and effects): only then can the sound
  *  be mixed again onto a rendered picture (remix.mjs); a sound inside a sub-composition sends the film to a full render. */
 export function soundOnRoot(dir) {
   const walk = (d) => existsSync(d) && readdirSync(d).some((n) => { const p = join(d, n); return statSync(p).isDirectory() ? walk(p) : /\.html?$/i.test(n) && /<(audio|video)\b/i.test(readFileSync(p, "utf8")); });
   return !walk(join(dir, "compositions"));
 }
-/** The hash of what the film is drawn and heard from, at which fps. */
-export function filmHash(dir, fps = null) {
-  const { picture, sound } = filmParts(dir, fps);
-  return createHash("sha256").update(`${picture}:${sound}`).digest("hex").slice(0, 16);
-}
 /** The proxy's length and whether it has sound (the film's own audio, mixed by HF like an export): the player mutes itself while it plays. */
 async function probe(file, root) {
-  const exe = join(expandEnv(loadPins(root).ffmpeg.dir), "ffprobe.exe");
+  const exe = ffprobeExe(root);
   const { stdout } = await promisify(execFile)(exe, ["-v", "error", "-show_entries", "format=duration:stream=codec_type", "-of", "json", file], { windowsHide: true });
   const j = JSON.parse(stdout);
   return { duration: Number(j.format?.duration) || null, audio: (j.streams ?? []).some((s) => s.codec_type === "audio") };
@@ -159,14 +103,9 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
   const view = (p, { self = false } = {}) => {
     const hasFilm = existsSync(join(p.path, "index.html")), codeFilm = isCodeFilm(p.meta?.style?.id) && hasFilm;
     if (!hasFilm) return { codeFilm: false, mode: null, status: "none", url: null, at: null, fps: null, job: null };
-    let st = readState(p.path);
+    const st = readState(p.path);
     const file = st?.file && existsSync(join(p.path, ...st.file.split("/"))) ? st.file : null, pre = prerendered(p.meta?.style?.id);
     const fps = projectFps(p), parts = filmParts(p.path, fps);
-    // a render recorded before Studio's ids left the hash (its hash read them): the same film, recorded again in today's terms, once
-    if (file && st.picture !== parts.picture) {
-      const old = filmParts(p.path, fps, { stamps: true });
-      if (st.picture === old.picture) { st = { ...st, picture: parts.picture, sound: st.sound === old.sound ? parts.sound : st.sound }; writeState(p.path, st); }
-    }
     // the Editor plays the Smooth copy of this very file (a keyframe every second) when it is there; Render reuses the file itself
     const smooth = file && st.smooth?.of === st.hash && existsSync(join(p.path, ...st.smooth.file.split("/"))) ? st.smooth.file : null;
     // a file counts when its picture is the film's now, at the quality this style renders at (an older draft preview does not); a page
@@ -207,7 +146,7 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
   const makeStems = async (p, st, heard, { signal = null } = {}) => {
     const dir = join(p.path, ...STEMS), old = existsSync(dir) ? readdirSync(dir) : [];
     const res = await remixAudio({ projectDir: p.path, stemsDir: dir, stem: heard, fps: st.fps, duration: st.duration ?? filmSeconds(p.path), workDir: remixWorkDir(`s${heard}`) },
-      { signal, root, background: true, ffmpeg: join(expandEnv(loadPins(root).ffmpeg.dir), "ffmpeg.exe") });
+      { signal, root, background: true, ffmpeg: ffmpegExe(root) });
     if (res.type !== "done") throw Object.assign(new Error(res.message ?? "The sound lanes could not be made"), { code: "STEMS_FAILED" });
     writeFileSync(join(dir, "stems.json"), JSON.stringify({ heard, files: res.files, master: res.master }, null, 2) + "\n");
     for (const f of old) if (!f.startsWith(heard) && f !== "stems.json") rmSync(join(dir, f), { force: true });
@@ -235,13 +174,14 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
     const dir = join(p.path, ...DIR), rel = `${DIR.join("/")}/${hash}.mp4`, out = join(p.path, ...rel.split("/")), src = join(p.path, ...st.file.split("/"));
     const tmp = out === src ? out.replace(/\.mp4$/, ".remix.mp4") : out, t0 = Date.now();
     const res = await remixAudio({ projectDir: p.path, picture: src, outputPath: tmp, fps, duration: st.duration ?? filmSeconds(p.path), workDir: remixWorkDir(hash) },
-      { signal, root, background, ffmpeg: join(expandEnv(loadPins(root).ffmpeg.dir), "ffmpeg.exe") });
+      { signal, root, background, ffmpeg: ffmpegExe(root) });
     if (res.type !== "done") throw Object.assign(new Error(res.message ?? "The new sound could not be mixed onto the film"), { code: res.type === "cancelled" ? "CANCELLED" : "REMIX_FAILED" });
     if (tmp !== out) renameSync(tmp, out);
+    await deliverFile(out, { format: "mp4", quality: "high", master: "standard", root, signal });          // the new sound mastered as the render's is (the picture stays: b2.4)
     keepOnly(dir, basename(out), ...(keep ? [basename(keep)] : []));
     const facts = await probe(out, root).catch(() => ({ duration: st.duration ?? null, audio: res.tracks > 0 }));
     // the picture as it reads now (only a blank line may differ: soundOnly), so the file is the film's now
-    const next = { ...st, hash, file: rel, picture: parts.picture, drawn: parts.drawn, sound: parts.sound, at: new Date().toISOString(), remixed: { at: new Date().toISOString(), ms: Date.now() - t0, tracks: res.tracks }, ...facts };
+    const next = { ...st, hash, file: rel, picture: parts.picture, drawn: parts.drawn, sound: parts.sound, at: new Date().toISOString(), remixed: { at: new Date().toISOString(), ms: Date.now() - t0, tracks: res.tracks, ...(res.loweredDb ? { loweredDb: res.loweredDb } : {}), ...(res.warning ? { warning: res.warning } : {}) }, ...facts };
     writeState(p.path, next);
     return next;
   };
@@ -276,16 +216,14 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
     const job = ctx.jobs.start("preview-proxy", { projectId: p.id, title: pre || !v.codeFilm ? "Rendering the film" : "Smooth preview" }, async (j) => {
       let ok = false, err = null;
       try {
+        let chosen = null;          // the GPU test's answer (chooseGpu), once
         for (let attempt = 0; ; attempt++) {
           for (let b = blocker(p); b && !j.signal.aborted; b = blocker(p)) { j.update({ stage: "waiting", waitingFor: b }); await pause(2000, j.signal); }
           if (j.signal.aborted) throw Object.assign(new Error("Stopped"), { code: "CANCELLED" });
           const fresh = projects.getProject(p.id, root) ?? p;
-          projects.keepRootFps(fresh);          // the film's data-fps on its root, as an export does (so the export finds this file fresh)
-          fitMusicToFilm(p.path);          // the music fitted to the film's end, as an export does
-          // a version's render: the levels as an export sets them, so its Tech checks and its Render find the film as this file has it
-          if (level) await levelTracks(p.path, { root }).catch(() => null);
-          refreshBridge(p.path);          // today's bridge, as an export does
-          applyLanes(p.path);          // a clip placed since the lane's fader moved joins its lane
+          // made ready as an export makes it (server/prepare.mjs: data-fps, music, bridge, lanes, a code film bundled); a version's render with the
+          // levels as an export sets them, so its Tech checks and its Render find the film as this file has it
+          await prepareFilm(fresh, { root, level, log: (m) => j.log?.(m) });
           const fps = projectFps(fresh), parts = filmParts(p.path, fps), hash = filmHash(p.path, fps), dir = join(p.path, ...DIR), rel = `${DIR.join("/")}/${hash}.mp4`;
           mkdirSync(dir, { recursive: true });
           // (asked without `self` it read "rendering", never sound-only: every sound changed on a finished film rendered the whole film again)
@@ -304,16 +242,22 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
           j.signal.addEventListener("abort", stop, { once: true });
           let yielded = null;
           const watch = setInterval(() => { const b = blocker(p); if (b) { yielded = b; ac.abort(); } }, 1000);
-          const t0 = Date.now(), workers = bgWorkers(), gpu = renderSettings(root).gpu === "cpu" ? "software" : "auto";          // Settings' GPU choice, as an export
+          // GPU or CPU as an export chooses it (audit/112b b1.10): a WebGL film whose test frame comes out blank on the GPU renders on the CPU,
+          // or Version 1 (and the Render that reuses it) was a blank film; one test per render of this film, not per attempt
+          chosen ??= await chooseGpu(p.path, { root, signal: j.signal }).catch(() => ({ mode: renderSettings(root).gpu === "cpu" ? "software" : "auto" }));
+          const t0 = Date.now(), workers = bgWorkers(), gpu = chosen.mode;
           j.update({ workers });
           const res = await render({ projectDir: p.path, outputPath: join(p.path, ...rel.split("/")), fps, format: "mp4", quality, workers, browserGpuMode: gpu }, {
             signal: ac.signal, root, background: true, onEvent: (e) => { if (e.type === "progress" && typeof e.pct === "number" && Math.round(e.pct) !== lastPct) { lastPct = Math.round(e.pct); j.update({ progress: lastPct, movedAt: Date.now() }); } } });
           clearInterval(watch); j.signal.removeEventListener("abort", stop);
           if (res.type === "cancelled" && yielded && !j.signal.aborted && attempt < 5) continue;          // gave way: start again once it is quiet
-          if (res.type !== "done") throw Object.assign(new Error(res.message ?? "The film could not be rendered"), { code: res.type === "cancelled" ? "CANCELLED" : res.code ?? "RENDER_FAILED" });
-          // a Standard pre-render is what Render hands over and what Smooth plays: held to the web ceiling as the export is (a grainy
-          // 1920s film was 26 Mbps; Smooth stalled a second at a cut)
-          if (quality === "standard") await capWebBitrate(join(p.path, ...rel.split("/")), { root, signal: j.signal }).catch(() => null);
+          renderOutcome(res, { what: "The background render" });          // HF's answer read as an export reads it (audit/112b b2.4)
+          // what HyperFrames warned of while rendering Version 1: the same short yellow line as an export's (audit/112b b1.2)
+          { const said = renderWarningNote(res.warnings); if (said) { try { projects.addNote(p.path, said); } catch { /* notes are best effort */ } } }
+          // delivered as an export is (server/deliver.mjs, audit/112b b2.4): a Standard pre-render, what Render hands over and what Smooth
+          // plays, held to the web ceiling (Smooth stalled a second at a cut of a 26 Mbps film), its sound mastered to -14 LUFS (Standard,
+          // true peak at most -1 dBTP), so Version 1 and what Render reuses sound as the export would
+          await deliverFile(join(p.path, ...rel.split("/")), { format: "mp4", quality, master: "standard", root, signal: j.signal });
           const facts = await probe(join(p.path, ...rel.split("/")), root).catch(() => ({ duration: null, audio: false }));
           keepOnly(dir, `${hash}.mp4`);          // only the newest file
           const frames = res.totalFrames ?? Math.round((facts.duration ?? 0) * fps), msPerFrame = frames ? Math.round((Date.now() - t0) / frames) : null;
@@ -388,13 +332,15 @@ export function proxyRoutes(ctx, { r, P, mustProject }) {
   ctx.preRenderInfo = (p) => { const st = readState(p.path); return st ? { at: st.at ?? null, ms: st.ms ?? null, gpu: st.gpu ?? null, workers: st.workers ?? null, remixed: st.remixed ?? null } : null; };
   /** An export reuses the film's background render: when neither its picture nor its sound changed, the file as it
    *  is; when only the sound changed (every sound on the root page), the sound mixed again onto it first. A render of the film as it is
-   *  now that is still running is waited for. The file, or null (a webm or mov, another fps, a lower quality than asked, a changed picture). */
-  ctx.preRendered = async (p, { format, fps, quality = "standard", signal = null }, onWait = () => {}) => {
+   *  now that is still running is waited for. The file, or null (a webm or mov, another fps, a lower quality than asked, a changed picture).
+   *  picture: the caller takes the picture only (Export to AE): a render whose sound changed is given as it is, never mixed again (audit/112d d4). */
+  ctx.preRendered = async (p, { format, fps, quality = "standard", signal = null, picture = false }, onWait = () => {}) => {
     if (format !== "mp4" || !existsSync(join(p.path, "index.html"))) return null;
     for (let v = view(p); v.status === "rendering"; v = view(p)) { onWait(`waiting for the film's render (${pub(running.get(p.id))?.progress ?? 0}%)`); await pause(2000, signal); if (signal?.aborted) return null; }
     const v = view(p), st = readState(p.path);
     if (!st || st.fps !== fps || (QUALITY_RANK[st.quality] ?? -1) < (QUALITY_RANK[quality] ?? 1)) return null;
     if (v.status === "fresh") return join(p.path, ...st.file.split("/"));
+    if (picture && v.soundOnly) return join(p.path, ...st.file.split("/"));
     if (!v.soundOnly || !soundOnRoot(p.path)) return null;
     onWait("mixing the new sound onto the rendered film");
     const next = await remixOnto(p, st, fps, { signal });

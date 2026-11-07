@@ -10,9 +10,9 @@
 // Old addresses (ai, workspace, voice, styles, ae, models) land in their new place. Whatever waits on the server shows a skeleton at once.
 import { useEffect, useState } from "react";
 import { ALargeSmall, Bell, Bot, Brain, Clapperboard, Cpu, Download, FlaskConical, FolderOpen, Gauge as GaugeIcon, Globe, Languages, Loader2, LogOut, Palette, RefreshCw, RotateCcw, RotateCw, ShieldCheck, SlidersHorizontal, Volume2 } from "lucide-react";
-import { get, patch, post, watchJob } from "../api.js";
+import { get, patch, post } from "../api.js";
 import { BackButton, Banner, Dialog, StatusIcon, useChecks } from "../components.jsx";
-import { go, useData, usePref, useToast } from "../lib.jsx";
+import { go, useData, usePref, useToast, useJob } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 import { SignInFlow, useClaude } from "../workflow/claude.jsx";
 import { DriveNote, folderName } from "../workflow/folder.jsx";
@@ -78,7 +78,7 @@ function Account({ claude, onRecheck }) {
     {askOut && <Dialog icon={<LogOut size={18} />} danger title={t("Sign out of Claude Code on this PC?")} onClose={() => setAskOut(false)} footer={<><span className="spacer" />
       <button className="btn" onClick={() => setAskOut(false)}>{t("Cancel")}</button>
       <button className="btn danger" onClick={out} disabled={busy}>{busy ? <Loader2 size={14} className="spin" /> : <LogOut size={14} />}{t("Sign out")}</button></>}>
-      <div className="dlg-lines"><p className="dlg-warn">{t("Claude Code in the terminal signs out too.")}</p><p className="hint">{t("New projects and the chat pause until you sign in again.")}</p></div></Dialog>}
+      <div className="dlg-lines"><p className="dlg-warn">{t("Claude Code in the terminal signs out too.")}</p><p className="hint">{t("New productions and the chat pause until you sign in again.")}</p></div></Dialog>}
   </Group>;
 }
 
@@ -89,16 +89,16 @@ function ProjectsFolder() {
   const toast = useToast();
   const place = useData(() => get("/api/storage/location"));
   const [busy, setBusy] = useState(false);
-  const set = async (path) => { try { await patch("/api/storage/location", { path }); toast(t("Projects folder changed")); place.reload(); } catch (e) { toast(e.message, "error"); } };
+  const set = async (path) => { try { await patch("/api/storage/location", { path }); toast(t("Productions folder changed")); place.reload(); } catch (e) { toast(e.message, "error"); } };
   const choose = async () => {
     setBusy(true);
-    try { const r = await post("/api/dialog/folder", { title: t("Projects folder"), initial: place.data?.location ?? "" }); if (r.path) await set(r.path); }
+    try { const r = await post("/api/dialog/folder", { title: t("Productions folder"), initial: place.data?.location ?? "" }); if (r.path) await set(r.path); }
     catch (e) { toast(e.message, "error"); } finally { setBusy(false); }
   };
   const open = async () => { try { await post("/api/storage/location/open"); } catch (e) { toast(e.message, "error"); } };          // a missing folder says so
   const d = place.data;
-  return <Group title={t("Projects folder")}>
-    <p className="hint">{t("Choose the folder that stores your projects.")}</p>
+  return <Group title={t("Productions folder")}>
+    <p className="hint">{t("Choose the folder that stores your productions.")}</p>
     {d ? <><div className="folder-line">
       <button type="button" className="path-link mono" onClick={open} title={t("Open in Explorer")}><FolderOpen size={14} />{d.location === d.standard ? t("Standard folder") : folderName(d.location)}</button>
       <span className="spacer" />
@@ -124,7 +124,7 @@ function Appearance() {
       <div className="segmented" role="group" aria-label={t("Text size")}>{SIZES.map(([k, , label]) => <button key={k} type="button" aria-pressed={size === k} onClick={() => setSize(k)}>{t(label)}</button>)}</div></Row>
     {ask && <Dialog icon={<RotateCcw size={18} />} title={t("Reset the panel layout?")} onClose={() => setAsk(false)} footer={<><span className="spacer" /><button className="btn" onClick={() => setAsk(false)}>{t("Cancel")}</button>
       <button className="btn primary" onClick={reset}><RotateCcw size={14} />{t("Reset layout")}</button></>}>
-        <div className="dlg-lines"><p>{t("Panel widths, views and filters go back to their defaults.")}</p><p>{t("Projects are not touched.")}</p></div></Dialog>}          {/* one idea a line */}
+        <div className="dlg-lines"><p>{t("Panel widths, views and filters go back to their defaults.")}</p><p>{t("Productions are not touched.")}</p></div></Dialog>}          {/* one idea a line */}
   </Group>;
 }
 
@@ -203,7 +203,7 @@ function Director() {
   const save = async (k, v) => { try { await patch("/api/agent/settings", { [k]: v }); toast(t("Saved")); reload(); } catch (e) { toast(e.message, "error"); } };
   if (!data) return <Waiting rows={5} label={t("Loading…")} />;
   return <section className="section"><div className="panel settings-compact">
-    <Row icon={<Brain size={16} />} title={t("Model")} desc={t("For every project that does not pick its own.")} more={t("Each reply in the chat shows the model and the time.")}>
+    <Row icon={<Brain size={16} />} title={t("Model")} desc={t("For every production that does not pick its own.")} more={t("Each reply in the chat shows the model and the time.")}>
       <select className="select" value={data.model} onChange={(e) => save("model", e.target.value)} aria-label={t("Model")}>{data.models.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
     </Row>
     {/* High is the default, as in New project; only the Motion Plan runs at Medium, the other steps at High at least */}
@@ -214,17 +214,17 @@ function Director() {
     <Row icon={<ShieldCheck size={16} />} title={t("Mode")} desc={t("How freely it works, as in Claude Code.")} more={t("As in Claude Code. Auto: Claude decides and goes on. Manual: you allow every change. Accept edits: edits go through, the web asks. Plan: Claude only plans, no file changes.")}>
       <select className="select" value={data.mode} onChange={(e) => save("mode", e.target.value)} aria-label={t("Mode")}>{data.modes.map(([k, l]) => <option key={k} value={k}>{t(l)}</option>)}</select>
     </Row>
-    <Row icon={<Globe size={16} />} title={t("Web")} desc={t("Each project can change it in the Editor.")} more={t("Research, the client's website, a pull request. Ask: Claude asks you the first time in a project. Each project can change it in the Editor.")}>
+    <Row icon={<Globe size={16} />} title={t("Web")} desc={t("Each production can change it in the Editor.")} more={t("Research, the client's website, a pull request. Ask: Claude asks you the first time in a production. Each production can change it in the Editor.")}>
       <select className="select" value={data.web} onChange={(e) => save("web", e.target.value)} aria-label={t("Web")}>{data.webChoices.map((k) => <option key={k} value={k}>{t(WEB_LABEL[k])}</option>)}</select>
     </Row>
-    <Row icon={<FlaskConical size={16} />} title={t("Bypass permissions (experiment)")} desc={t("For testing only.")} more={t("Adds a Bypass mode. Claude then leaves the project folder: it can run commands and change any file on this PC. Off by default; for testing only.")}>
+    <Row icon={<FlaskConical size={16} />} title={t("Bypass permissions (experiment)")} desc={t("For testing only.")} more={t("Adds a Bypass mode. Claude then leaves the production folder: it can run commands and change any file on this PC. Off by default; for testing only.")}>
       <label className="check"><input type="checkbox" checked={!!data.allowBypass} onChange={(e) => save("allowBypass", e.target.checked)} />{t("Allow Bypass permissions")}</label>
     </Row>
     <Row icon={<ShieldCheck size={16} />} title={t("What it may do")} desc={t("Set by the app; a film style cannot change it.")}>
       <details className="diag"><summary>{t("Details")}</summary><ul className="steps-list">
-        <li>{t("Read and edit files in the open project folder only.")}</li>
+        <li>{t("Read and edit files in the open production folder only.")}</li>
         <li>{t("No commands, installs or other folders (unless you test Bypass permissions).")}</li>
-        <li>{t("The web only as each project allows: ask first, on or off.")}</li>
+        <li>{t("The web only as each production allows: ask first, on or off.")}</li>
         <li>{t("Nothing changes without a request you send; every change can be undone.")}</li>
         <li>{t("After each change, it reviews the work and the tech checks run.")}</li>
       </ul></details>
@@ -236,9 +236,9 @@ function Director() {
 function SetupJob({ url, label, done }) {
   const t = useT();
   const toast = useToast();
-  const [job, setJob] = useState(null);
+  const [job, follow] = useJob((x) => { if (x.status === "failed") toast(x.error?.message ?? t("It did not finish"), "error"); done(); });
   const start = async () => {
-    try { const j = await post(url); setJob(j); watchJob(j.id, (x) => { if (!x) return; setJob(x); if (x.status !== "running") { if (x.status === "failed") toast(x.error?.message ?? t("It did not finish"), "error"); done(); } }, 1000); }
+    try { follow(await post(url)); }
     catch (e) { toast(e.message, "error"); }
   };
   return job?.status === "running" ? <div className="a"><Loader2 size={13} className="spin" /> {job.stage ?? t("Working…")}</div>
@@ -299,7 +299,7 @@ export default function Settings({ section, claude, onRecheckClaude, updateReady
   useEffect(() => { if (section && ALIAS[section]) go(`/settings/${ALIAS[section]}`); }, [section]);          // an old address shows its new one
   return (
     <div className="page page-settings">
-      <div className="page-head"><div><BackButton /><h1>{t("Settings")}</h1></div></div>
+      <div className="page-head"><div><BackButton /><h1>{t("Studio Settings")}</h1></div></div>
       {sys.error && <Banner kind="error" action={<button className="btn sm" onClick={sys.reload}><RotateCw size={13} />{t("Retry")}</button>}>{t("Could not run the checks.")} {sys.error.message}</Banner>}
       <div className="settings">
         <nav className="settings-nav" aria-label={t("Settings sections")}>{SECTIONS.map(([k, label, Icon]) => {

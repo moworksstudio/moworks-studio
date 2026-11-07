@@ -4,32 +4,26 @@
 // A film of several sizes (the Adaptation step) ticks the sizes to render, every made size by default: one file each, named with its size.
 import { useEffect, useRef, useState } from "react";
 import { Bot, Check, CheckCircle2, Film, FolderOpen, Hand, Loader2, Play, RefreshCw, Square, XCircle } from "lucide-react";
-import { get, post, watchJob } from "../api.js";
+import { get, post } from "../api.js";
 import { Banner } from "../components.jsx";
-import { ago, useData, useToast } from "../lib.jsx";
+import { ago, useData, useToast, useJobWatch } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 import { size } from "./assets.jsx";
-import { stampName } from "../../../packages/render-names/index.mjs";
+import { stampName, typedName } from "../../../packages/render-names/index.mjs";
+// the checks' words and their two not-a-result states, as the server says them (packages/hf-qa/checks.mjs)
+import { NOT_CHECKED_WORDS, checkProblem, outOfTime, unchecked } from "../../../packages/hf-qa/checks.mjs";
 import { useStage } from "./stage.jsx";
 
-// plain words for each check, English keys for t
-export const CHECK_WORDS = { "G-AUDIO-FILES": "Sound files that are missing", "G-CANVAS-TEXT": "Text drawn into the picture", "G-FLICKER": "Flicker in the render", "G-SOUND-SHAPE": "The sound from start to end", "G-HF-LINT": "Composition files", "G-HF-SCRIPT": "Script errors in the preview", "G-REMOTE": "Loads something from the internet",
-  "G-FONT": "A font that is not on this computer", "G-GLYPH": "A font without Vietnamese letters",
-  "G-GLYPH-CODE": "A font without Vietnamese letters in the film's code", "G-VI-MARKS": "Vietnamese written without its marks", "G-BLANK": "Scenes that look empty",
-  "G-HF-LAYOUT": "Layout: text overlapping, hidden or cut", "G-HF-CONTRAST": "Contrast too low to read", "G-HF-MOTION": "Motion",
-  "G-VOICE": "Effects or music over the voice", "G-SFX": "Actions with no sound", "G-LYRIC": "Sung words off their time", "G-SYNC": "Moves off their words", "G-SEQ-CRAWL": "A sequence that crawls", "G-SEQ-JUMP": "A sequence that jumps", "G-SEQ-PRODUCT": "A product cut by the frame" };          // warnings, never a block
 /** A check that did not run says so instead of reporting the film. G-HF-SCRIPT's skippedReason: "deadline" (ran
  *  out of time, no error found before it stopped), "lint" (HF skipped its browser stages after a lint error), "failed" (HF's browser
  *  check did not run); G-HF-LAYOUT / -CONTRAST / -MOTION carry notChecked when HF never ran them: "Not checked", not a pass or a problem. */
-export const scriptTimedOut = (g) => g.id === "G-HF-SCRIPT" && (g.skippedReason === "deadline" || g.timedOut === true || ((g.findings ?? []).length > 0 && g.findings.every((f) => f.code === "check_timed_out")));
-export const notChecked = (g) => g.notChecked === true || (g.id === "G-HF-SCRIPT" && (g.skippedReason === "lint" || g.skippedReason === "failed"));
+export const scriptTimedOut = outOfTime, notChecked = unchecked;
 export function checkLabel(g, t) {
   if (scriptTimedOut(g)) return t("Could not finish checking the scripts in time");
-  const name = t(CHECK_WORDS[g.id] ?? g.title ?? g.id);
+  const name = t(checkProblem(g));
   if (g.id === "G-HF-SCRIPT" && notChecked(g)) return t("Not checked: scripts in the preview");
   return notChecked(g) ? t("Not checked: {what}", { what: t(NOT_CHECKED_WORDS[g.id] ?? name) }) : name;
 }
-const NOT_CHECKED_WORDS = { "G-HF-LAYOUT": "layout", "G-HF-CONTRAST": "contrast", "G-HF-MOTION": "motion", "G-FLICKER": "flicker (waiting for the preview)", "G-SOUND-SHAPE": "the sound from start to end (waiting for the preview)" };
 /** The server's reasons name the file in brackets ("… (compositions/scene-2.html)"); the UI shows no paths. */
 export const noPaths = (s) => String(s ?? "").replace(/\s*\([^()]*[\\/][^()]*\)/g, "").trim();
 /** Why a check did not run, in plain words (no "HF", no "browser stages"): the lint error itself, without its file. */
@@ -44,7 +38,7 @@ const findingText = (f) => f.message ?? f.reason ?? (f.url ? "a file it loads is
 
 /** The text "Ask Claude to fix" sends: each render-breaking finding, in Claude's own terms. */
 export const fixText = (t, blocking) => t("The render is blocked. Fix only these issues, change nothing else:") + "\n" +
-  blocking.map((g) => `- ${g.id} (${t(CHECK_WORDS[g.id] ?? g.id)}): ${(g.findings ?? []).slice(0, 6).map(findingText).join("; ")}`).join("\n");
+  blocking.map((g) => `- ${g.id} (${t(checkProblem(g))}): ${(g.findings ?? []).slice(0, 6).map(findingText).join("; ")}`).join("\n");
 
 /** The render's loudness in words ("Standard for web and social ✓"); the LUFS and peak numbers only in the details under it. */
 export function LoudLine({ l, master }) {
@@ -72,7 +66,11 @@ export function reusedLine(from, t, now = Date.now()) {
 const relPath = (p) => { const s = String(p ?? "").replace(/\\/g, "/"); const i = s.lastIndexOf("/renders/"); return i >= 0 ? s.slice(i + 1) : s; };
 /** The name the file gets: the server's own rule (packages/render-names, which the server's stampedName uses), at this minute. (The server adds
  *  the seconds, or -2, when that name is taken.) */
-export const stampedPreview = (name, ext, now = new Date()) => stampName(name, ext ? `.${ext}` : "", now);
+// the name the server gives (render-names typedName: made safe, a typed ending taken off), with the size's tag after it for a film of several sizes
+export const stampedPreview = (name, ext, now = new Date(), tag = null) => {
+  const e = ext ? `.${ext}` : "", n = typedName(name, e, "film");
+  return stampName(tag ? `${n}_${tag}` : n, e, now);
+};
 const CODEC = { mp4: "H.264", mov: "QuickTime", webm: "WebM" };
 /** What the render makes, in one line: size · aspect · length · codec; the frame rate has its own field above. */
 export function specLine(d, film, format) {
@@ -107,6 +105,7 @@ export function renderProgress(job, framesSince, now = Date.now()) {
 const leftText = (s, t) => (s == null ? null : s < 60 ? t("about {n} s left", { n: Math.max(5, Math.round(s / 5) * 5) }) : t("about {n} min left", { n: Math.round(s / 60) }));
 
 export default function RenderSheet({ projectId, format: initialFormat = "mp4" }) {
+  const watch = useJobWatch();          // its job watches stop with it (audit/112c c5.1)
   const t = useT();
   const toast = useToast();
   const stage = useStage(projectId);
@@ -128,7 +127,7 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
     const r = run.find((j) => j.stage !== "waiting") ?? run.at(-1); if (r && r.id !== job?.id) follow(r);
     else if (!r && !job && ex.data?.jobs?.[0]) setJob(ex.data.jobs[0]);          // the last render, its result and its checks stay here after reopening
   }, [ex.data]); // eslint-disable-line react-hooks/exhaustive-deps
-  const follow = (j) => { framesSince.current = null; setJob(j); watchJob(j.id, (x) => { if (!x) return;
+  const follow = (j) => { framesSince.current = null; setJob(j); watch(j.id, (x) => { if (!x) return;
     // the frames begin at HF's capture (its "rendering: capture" stage, at about 25 %): the setup before it is quick and said nothing of the frames
     if (framesSince.current == null && /^rendering: (capture|encode)/.test(x.stage ?? "")) framesSince.current = { at: Date.now(), from: Math.max(0, Math.min(100, Number(x.progress) || 0)) };
     setJob(x); if (x.status !== "running") { ex.reload(); if (queued.current > 1) { queued.current -= 1; setTimeout(() => ex.reload(), 1500); } } }, 1000); };
@@ -163,7 +162,7 @@ export default function RenderSheet({ projectId, format: initialFormat = "mp4" }
         <label className="field"><span>{t("File name")}</span><input className="input" value={form.filename} onChange={(e) => set("filename", e.target.value)} maxLength={80} disabled={running} />
           {/* a film of several sizes: one name per size ticked, each with its size (the server's rule: <film>_9x16) */}
           {form.filename.trim() && <span className="hint num render-name" title={t("The date and time of the render are added to the name")}>{(ex.data.sizes && form.sizes?.length
-            ? form.sizes.map((a) => stampedPreview(`${form.filename.trim()}_${a.replace(":", "x")}`, form.format, now)) : [stampedPreview(form.filename, form.format, now)]).join(" · ")}</span>}</label>
+            ? form.sizes.map((a) => stampedPreview(form.filename, form.format, now, a.replace(":", "x"))) : [stampedPreview(form.filename, form.format, now)]).join(" · ")}</span>}</label>
         <label className="field"><span>{t("Format")}</span><select className="select" value={form.format} onChange={(e) => set("format", e.target.value)} disabled={running}>
           <option value="mp4">MP4 (H.264)</option><option value="mov">MOV</option><option value="webm">WebM</option></select></label>
         <label className="field"><span>{t("Quality")}</span><select className="select" value={form.quality} onChange={(e) => set("quality", e.target.value)} disabled={running}>

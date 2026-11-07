@@ -5,7 +5,7 @@
   {
    "id": "brief",
    "stage": 1,
-   "title": "Prepare",
+   "title": "Pre-production",
    "what": "Brief, files read and what the style needs; Claude asks only what is missing",
    "needs": [],
    "done": {
@@ -16,7 +16,7 @@
    },
    "action": {
     "kind": "claude",
-    "label": "Prepare",
+    "label": "Pre-production",
     "prompt": "Read the brief, the answers from the New project dialog and what the app found in my files (its scan). Write BRIEF.md in a few short lines: who the film speaks to, the one thing it says (\"This film tells [audience] that [promise].\"), what must be in it (the names, facts and lines the brief gives) and the length and format New project set. Do not ask what the dialog already answered. Write docs/ASSETS.md: each file I gave, what it is, where the film can use it, what is missing. The look, motion, camera and sound come from the style's STYLE.md: keep all of it; the story is this brief's own. When the style cuts from real material (your rules say so), gather it now, before the treatment, as your rules say (§3a: my files first, then the sources the style names, with the demo's material tools; say what you will fetch, from where and under which licence; every item in CREDITS, every fact in FACTS.md) and list it in docs/ASSETS.md. When I gave no files at all and the style draws everything in code, go on without asking. Every conflict (the brief against this style's own design or what it can draw, against the New project fields) and every missing thing the brief needs (a file, a link, a logo it names) goes in one message as moworks-studio §2b says (what each side says, two or three choices, your suggestion first), and then stop without writing BRIEF.md: the owner answers in the chat. Write BRIEF.md last. Change nothing in the film yet; then stop."
    },
    "review": {
@@ -95,7 +95,7 @@
   {
    "id": "sound",
    "stage": 4,
-   "title": "Music and sound effects",
+   "title": "Sound Design",
    "what": "Claude picks the music; the app places it and the sound effects",
    "needs": [
     "build"

@@ -9,8 +9,6 @@ import { usePref, useToast } from "../lib.jsx";
 import { useT } from "../i18n.jsx";
 import { clockTenths } from "./Timeline.jsx";
 
-// the kinds a person looks for (the server's SOUND_GROUPS): they sort the app's own sounds
-const GROUPS = [["all", "All"], ["whooshes", "Whooshes"], ["hits", "Hits & pops"], ["clicks", "Clicks & keys"], ["bells", "Bells & magic"], ["things", "Everyday things"], ["nature", "Nature"], ["places", "Crowds & places"]];
 const PAGE = 60;
 
 /** A sound's length as people read it: "0.3 s", "4 s", "1:05". */
@@ -77,10 +75,12 @@ export default function SoundDrawer({ time = 0, duration = 0, clips = [], off = 
   const t = useT();
   const toast = useToast();
   const [group, setGroup] = usePref("editor:sound-group", "all");
+  const [groups, setGroups] = useState([]);          // the kinds a person looks for, as the server sorts the app's own sounds (112a B12)
   const [q, setQ] = useState(""), [dq, setDq] = useState("");
   const [local, setLocal] = useState(null);
   const [net, setNet] = useState({ status: "idle", results: [] });          // idle | running | ok | down
   const [again, setAgain] = useState(0);
+  const wake = useRef(false);          // "Try again" wakes the resting services for that one search, never for every word typed after (audit/112a A7)
   const [n, setN] = useState(PAGE);
   const [adding, setAdding] = useState(null);
   const [done, setDone] = useState(null);
@@ -92,7 +92,7 @@ export default function SoundDrawer({ time = 0, duration = 0, clips = [], off = 
   useEffect(() => { setN(PAGE); list.current?.scrollTo({ top: 0 }); }, [group, dq]);
   useEffect(() => {
     let alive = true;
-    get(`/api/sfx/search?q=${encodeURIComponent(dq)}&group=${encodeURIComponent(group)}`).then((r) => { if (alive) setLocal(r.results); }).catch(() => { if (alive) setLocal([]); });
+    get(`/api/sfx/search?q=${encodeURIComponent(dq)}&group=${encodeURIComponent(group)}`).then((r) => { if (alive) { setLocal(r.results); if (r.groups) setGroups(r.groups); } }).catch(() => { if (alive) setLocal([]); });
     return () => { alive = false; };
   }, [dq, group]);
   // online on its own request: the app's own sounds never wait on a service that does not answer
@@ -100,7 +100,8 @@ export default function SoundDrawer({ time = 0, duration = 0, clips = [], off = 
     if (!dq) { setNet({ status: "idle", results: [] }); return undefined; }
     const c = new AbortController();
     setNet({ status: "running", results: [] });
-    get(`/api/sfx/search/online?q=${encodeURIComponent(dq)}${again ? "&again=1" : ""}`, { signal: c.signal }).then((r) => setNet({ status: r.status, results: r.results }))
+    const w = wake.current; wake.current = false;
+    get(`/api/sfx/search/online?q=${encodeURIComponent(dq)}${w ? "&again=1" : ""}`, { signal: c.signal }).then((r) => setNet({ status: r.status, results: r.results }))
       .catch(() => { if (!c.signal.aborted) setNet({ status: "down", results: [] }); });
     return () => c.abort();
   }, [dq, again]);
@@ -119,7 +120,7 @@ export default function SoundDrawer({ time = 0, duration = 0, clips = [], off = 
   return <div className="mdr sdr" role="dialog" aria-label={t("Sounds")}>
     <div className="mdr-head">
       <b className="mdr-title">{t("Sounds")}</b>
-      <div className="mdr-groups" role="group" aria-label={t("Kind")}>{GROUPS.map(([k, label]) => <button key={k} className="mdr-chip" aria-pressed={group === k} onClick={() => setGroup(k)}>{t(label)}</button>)}</div>
+      <div className="mdr-groups" role="group" aria-label={t("Kind")}>{groups.map(({ id: k, title: label }) => <button key={k} className="mdr-chip" aria-pressed={group === k} onClick={() => setGroup(k)}>{t(label)}</button>)}</div>
       <label className="mdr-search"><Search size={13} /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("Search sounds")} aria-label={t("Search the sounds")} /></label>
       <span className="mdr-for">{t("Adds at {time}", { time: clockTenths(time) })}</span>
       <span className="mdr-count num">{rows.length}</span>
@@ -132,7 +133,7 @@ export default function SoundDrawer({ time = 0, duration = 0, clips = [], off = 
       {rows.slice(0, n).map((row) => <Row key={row.id} row={row} playing={on === row.id} adding={adding === row.id} added={done === row.id} failed={failed[row.id] ?? null} off={off} onToggle={toggle} onAdd={add} />)}
       {net.status === "running" && <li className="sdr-note" role="status"><Loader2 size={13} className="spin" />{t("Searching online…")}</li>}
       {net.status === "down" && <li className="sdr-note warn" role="status"><CloudOff size={13} />{t("The online sound services are not answering. The app's own sounds still work.")}
-        <button type="button" className="clink" onClick={() => setAgain((x) => x + 1)}>{t("Try again")}</button></li>}
+        <button type="button" className="clink" onClick={() => { wake.current = true; setAgain((x) => x + 1); }}>{t("Try again")}</button></li>}
       {nothing && <li className="sdr-note">{t("Nothing found. Try another word or kind.")}</li>}
     </ul>
   </div>;

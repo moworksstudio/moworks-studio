@@ -7,7 +7,7 @@ import { basename, join } from "node:path";
 import { htmlFiles } from "../hf-edit/finalize.mjs";
 import { scriptFiles, threeIn } from "../hf-edit/vendorLibs.mjs";
 import { snapshotAtAsync } from "../hf-qa/cli.mjs";
-import { stillStd } from "../hf-qa/gates.mjs";
+import { stillStd } from "../hf-qa/grey.mjs";
 import { APP_ROOT, renderSettings, saveRenderSettings } from "../version-manager/index.mjs";
 
 const FLAT = 2;          // the G-BLANK threshold: grey-level standard deviation of a 320 px wide still

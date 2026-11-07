@@ -4,6 +4,7 @@
 // back at 0 dB leaves the film again, and the last one takes the groups with it. Clips placed later join their lane the next time the film is mixed.
 // Mute (owner 03/11, 3b): HyperFrames' own mute of a bus, `data-hidden` on its group (core audioGroups; the render's mixer drops a hidden bus's
 // members: "mute-by-drop, never mute-by-volume-0"), so a muted lane is heard neither in the Editor nor in the render. Its fader is kept.
+import { attrsOf } from "../hf-edit/tag.mjs";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { audioKind } from "../hf-edit/tracks.mjs";
@@ -13,7 +14,6 @@ export const LANE_MIN_DB = -30, LANE_MAX_DB = 12;          // 12: HyperFrames' o
 const groupId = (lane) => `mw-lane-${lane}`;
 const GROUP = /[ \t]*<hf-audio-group\b[^>]*\bid="mw-lane-(voice|sfx|music)"[^>]*>\s*<\/hf-audio-group>[ \t]*\r?\n?/g;
 const AUDIO = /<audio\b[^>]*>/gi;
-const attrsOf = (tag) => Object.fromEntries([...tag.matchAll(/([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*"([^"]*)"/g)].map((m) => [m[1], m[2]]));
 const page = (dir) => { try { return readFileSync(join(dir, "index.html"), "utf8"); } catch { return null; } };
 const toDb = (gain) => Math.round(20 * Math.log10(gain) * 10) / 10;
 const toGain = (db) => Math.round(10 ** (db / 20) * 10000) / 10000;

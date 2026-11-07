@@ -44,11 +44,15 @@
   };
 
   // what HF's mixer takes of a clip (engine audioMixer parseAudioElements): one it hides stays out; its volume lane goes on (data-automation);
-  // speed, loop and effects are named so the port can say it does not carry them
-  A.audio = () => [...document.querySelectorAll("audio[data-start]")].filter(a => !a.closest("[data-hidden]")).map(a => ({
+  // speed, loop and effects are named so the port can say it does not carry them. Its audio group bus (core audioGroups: the clip names it in
+  // data-audio-group, the <hf-audio-group> never holds it): a muted bus (data-hidden) drops the clip, the bus's data-volume multiplies its level
+  // (the timeline's lane faders and mutes, sfx/lanes.mjs; audit/112d d1: closest() never saw a bus, so a muted lane played in the export)
+  const busOf = a => { const id = a.getAttribute("data-audio-group"); const el = id ? document.getElementById(id) : null; return el && el.tagName.toLowerCase() === "hf-audio-group" ? el : null; };
+  const busVolume = el => { const v = el ? parseFloat(el.getAttribute("data-volume") || "1") : 1; return Number.isFinite(v) ? v : 1; };
+  A.audio = () => [...document.querySelectorAll("audio[data-start]")].filter(a => !a.closest("[data-hidden]") && !(busOf(a) && busOf(a).hasAttribute("data-hidden"))).map(a => ({
     id: a.id || "", src: a.getAttribute("src") || "", start: +startOf(a).toFixed(5),
     dur: parseFloat(a.getAttribute("data-duration") || "0") || 0, media_start: parseFloat(a.getAttribute("data-media-start") || "0") || 0,
-    volume: a.hasAttribute("data-volume") ? parseFloat(a.getAttribute("data-volume")) : 1,
+    volume: (a.hasAttribute("data-volume") ? parseFloat(a.getAttribute("data-volume")) : 1) * busVolume(busOf(a)),
     role: a.getAttribute("data-timeline-role") || a.getAttribute("data-role") || "",
     fade_in: parseFloat(a.getAttribute("data-fade-in") || "0") || 0, fade_out: parseFloat(a.getAttribute("data-fade-out") || "0") || 0,
     automation: a.getAttribute("data-automation") || "", rate: parseFloat(a.getAttribute("data-playback-rate") || "1") || 1,

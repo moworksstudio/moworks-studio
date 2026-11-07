@@ -3,6 +3,7 @@
 // Claude cannot run commands here, so it calls the app's hf_script tool and the app runs the script as HF ships it, from HF's skills at the
 // pinned commit (bundle/hf, as the app ships them; never edited), in the project folder. Only the skills the project loaded, only
 // allow-listed scripts and CLI commands, no path outside the project; a run that goes online (needsWeb) follows the project's web setting.
+import { killTree } from "../system-status/kill-tree.mjs";
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync } from "node:fs";
 import { isAbsolute, join, normalize, resolve, sep } from "node:path";
@@ -99,7 +100,7 @@ export async function runScript(dir, { name, args: asked = [], skills = [], root
     if (!s) throw Object.assign(new Error(`No script "${base}" in this project's skills (${skills.join(", ") || "none"})`), { code: "NOT_FOUND" });
     if (s.kind === "python") {
       const py = python();
-      if (!py) throw Object.assign(new Error("Python 3 is not on this computer: install Python 3.12 (Settings › System shows how)"), { code: "NO_PYTHON" });
+      if (!py) throw Object.assign(new Error("Python 3 is not on this computer: install Python 3.12 (Studio Settings › System shows how)"), { code: "NO_PYTHON" });
       cmd = py; argv = [...(py === "py" ? ["-3"] : []), s.file, ...args];
     } else {
       cmd = process.execPath; argv = [s.file, ...args];
@@ -112,7 +113,7 @@ export async function runScript(dir, { name, args: asked = [], skills = [], root
     let out = "", err = "";
     c.stdout.on("data", (d) => { out = (out + d).slice(-60000); });
     c.stderr.on("data", (d) => { err = (err + d).slice(-20000); });
-    const kill = () => spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true });
+    const kill = () => killTree(c);
     const t = setTimeout(kill, timeoutMs);
     signal?.addEventListener("abort", kill, { once: true });
     c.on("error", (e) => { clearTimeout(t); ok({ ok: false, exitCode: null, stdout: out, stderr: String(e.message), command: shown }); });

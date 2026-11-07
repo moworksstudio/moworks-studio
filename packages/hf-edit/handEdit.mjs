@@ -8,6 +8,7 @@
 // Words animated letter by letter are one line here (hf-preview/splitText.js): written back into the letter spans, so the film's script still
 // animates them (T28-8). A line with more or fewer letters than before asks the film to load again.
 // HF: https://github.com/heygen-com/hyperframes/blob/490ecafbc4d1fba3dd9246d516390d4a1a188089/packages/studio-server/src/helpers/sourceMutation.ts
+import { attrsOf } from "./tag.mjs";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join, normalize, resolve, sep } from "node:path";
@@ -369,7 +370,6 @@ export async function setShotTiming(dir, mountId, { duration = null, rate = null
 // removeElementFromHtml). The app's lanes are its data-timeline-role: voiceover, music, sfx (old sound effects carry none).
 export const AUDIO_ROLE = { voice: "voiceover", music: "music", sfx: "sfx" };
 const AUDIO_ELEMENT = /<audio\b[^>]*>(?:\s*<\/audio>)?/gi;
-const attrsOf = (tag) => Object.fromEntries([...tag.matchAll(/([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*"([^"]*)"/g)].map((m) => [m[1], m[2]]));
 /** A sound effect, not a track: the app's own clips (a placed cue, one from the Sounds drawer or the SFX lane, an ambience bed), or a file of the sfx folder
  *  still on the SFX lane. A file of that folder the user dropped on the voice's or the music's lane from Assets is that track (el-voice, el-music). */
 export const isEffectClip = (a) => /^el-(sfx|clip|amb)-/.test(a?.id ?? "") || ((a?.["data-timeline-role"] ?? "sfx") === "sfx" && /(^|\/)sfx\//.test(a?.src ?? ""));

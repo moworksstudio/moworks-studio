@@ -7,6 +7,17 @@
 // picks the drawing. Credit: the layer is Moworks Studio's ("written from the idea"); toon.ts is Mr omi's (MIT); roman.js is the owner's.
 
 export const VIEWS = ["front", "back", "profile"];
+// MW Character Sheet v1 (owner #1287-#1293, method A): what the standard asks for that the cast has not, in the same hand:
+//   the three-quarter view   romanFront as shipped, its head turned all the way it turns (its own `facing`, 1): the face slides to one side, the torso follows
+//   sit                      the front (or three-quarter) body down on a seat, cut at the hips, over bent legs drawn here in roman.js's way
+//   talk                     a face of toon.ts's own parts (its lid eyes, an "o" mouth), as roman.js adds snore, stubborn, squint
+/** Every view a card can be drawn in (the sheet's order). */
+export const ALL_VIEWS = ["front", "three-quarter", "profile", "back"];
+FACE.talk = { eye: ["lid", "lid"], brow: [-1, -1], mouth: "o" };
+/** The sheet standard's faces in this cast's own names (+ blink, a lid), its order. */
+export const STANDARD_FACES = Object.freeze({ neutral: "neutral", happy: "grin", laugh: "laugh", surprised: "shock", worried: "nervous", angry: "stern", talk: "talk", blink: "neutral" });
+/** A talking flap: the open mouth and the closed one by turns, about four a second (t in seconds); no lip sync. */
+export const talkExpr = (t) => (Math.floor(t * 8) % 2 ? "neutral" : "talk");
 export const ARM_POSES = ["hang", "spear", "point", "up", "wave", "hip", "belly", "temple", "lift", "reach", "cheek", "shield", "cross", "thumb"];
 export const EXPRESSIONS = Object.keys(FACE);
 /** The film's characters: id -> definition { id, name, about, heightM, seed, outfit, extra? }. */
@@ -188,6 +199,17 @@ export const castProfile = (p, who, opts = {}) => {
   }
   bodySide(p, sideOutfit(O), { mode, phase, pose, expr, blink: lidOf(blink), light, seed });
   p.rot = lean ? [rad(lean), 300, hipY] : null;
+  // a dress and an apron seen from the side (bodySide has neither; MW Character Sheet v1, #1287-#1293): the dress from the waist to the shins, the
+  // apron on the front, in the outfit's own colours, shaded and inked as the front draws them
+  const waist = hipY - 0.28 * HH;
+  if (O.dress) {
+    const hem = 975 - 0.3 * (975 - hipY), dp = [[300 - 0.3 * W, waist], [300 + 0.32 * W, waist], [300 + 0.42 * W, hem - 0.04 * HH], [300 + 0.36 * W, hem], [300 - 0.36 * W, hem], [300 - 0.4 * W, hem - 0.04 * HH]];
+    p.gradFill(dp, O.dress, mul(O.dress, [0.62, 0.6, 0.7]), light); p.inkRing(dp, ow * 0.85, thick);
+  }
+  if (O.apron) {
+    const bot = hipY + 0.42 * HH, ap = [[300 + 0.18 * W, waist + 0.02 * HH], [300 + 0.36 * W, waist], [300 + 0.4 * W, bot], [300 + 0.2 * W, bot + 0.02 * HH]];
+    p.gradFill(ap, O.apron, mul(O.apron, [0.7, 0.68, 0.72]), light); p.inkRing(ap, ow * 0.7, thick);
+  }
   if (O.helmet && !nohelmet) {
     // the bowl and the crest seen from the side: a cap over the crown and the fin of the crest along the top
     const bowl = old ? "#8f8a7e" : STEEL, crest = old ? "#8d4b3f" : "#d2372f";
@@ -213,17 +235,65 @@ export const castProfile = (p, who, opts = {}) => {
   p.rot = null;
 };
 
-/** Draw a character in a view: { view: "front" | "back" | "profile", expr, L, R, walk, phase, step, tilt, headTilt, bob, blink, look, light,
+/** Sitting (the sheet standard's sit): the body as the front draws it, cut at the hips and set down by about half its legs, over thighs coming toward
+ *  the viewer and shins down to the floor, in roman.js's own strokes (its leg colour, its sandals and their straps). */
+const castSit = (p, O, o, front) => {
+  const G = castGeometry(O, o), { cx, u, HH, sole, hipY } = G, legs = sole - hipY, drop = 0.42 * legs, g = p.g;
+  const legCol = mix(O.tunic, INK, 0.62), sandal = O.helmet ? LEATHER : "#5a3b2a", cut = hipY + 0.08 * HH, under = cut + drop;
+  // a plain stool in the world's own wood under the seat (a film may set the character on its own seat instead)
+  const wood = "#8a5a34", top = under - 4 * u;
+  for (const side of [-1, 1]) p.stroke([[cx + side * 34 * u, top], [cx + side * 40 * u, sole - 2 * u]], 3.5 * u, mix(wood, INK, 0.35));
+  p.poly(rrect(cx - 46 * u, top - 3 * u, cx + 46 * u, top + 8 * u, 3 * u), wood, 2.2 * u);
+  // the body cut at the hips and set down onto the stool
+  g.save(); g.translate(0, drop); g.beginPath(); g.rect(-600, -2000, 1800, cut + 2000); g.clip();
+  front({ ...o, step: 0 });
+  g.restore();
+  // the legs over the stool's edge: thighs toward the viewer and out to the knees (short and thick), shins down to the floor, the sandals
+  for (const side of [-1, 1]) {
+    const hx = cx + side * 15 * u, hy = under - 6 * u, kx = cx + side * 30 * u, ky = under + 8 * u, fx = cx + side * 31 * u, fy = sole - 4 * u;
+    p.stroke([[hx, hy], [kx, ky]], 10 * u, legCol);
+    p.stroke(curve([kx, ky], [kx + side * 2 * u, (ky + fy) / 2], [fx, fy]), 5.8 * u, legCol);
+    p.stroke([[fx - 6 * u, fy], [fx + 6 * u, fy + 0.5 * u]], 7.5 * u + 3, INK);
+    p.stroke([[fx - 6 * u, fy], [fx + 6 * u, fy + 0.5 * u]], 7.5 * u, sandal);
+    if (O.helmet) for (let k = 1; k <= 2; k++) p.stroke([[fx - 4 * u, fy - k * 0.07 * HH], [fx + 4 * u, fy - k * 0.07 * HH - 2 * u]], 2 * u, LEATHER);
+  }
+};
+/** Sitting seen from the side (the clearest sit on a card): the profile as castProfile draws it, cut at the hips and set down onto a stool, the thigh
+ *  straight out ahead, the shin down to the floor, the foot ahead, in the profile's own leg colour and sandal. */
+const castSitSide = (p, O, o) => {
+  const Ly = sideLayout(O, { mode: "stand", phase: 0, pose: 0, seed: o.seed ?? 3 }), { u, HH, hipY } = Ly, sole = 975, legs = sole - hipY, drop = 0.4 * legs, g = p.g;
+  const legCol = mix(O.tunic, INK, 0.62), sandal = O.helmet ? LEATHER : "#5a3b2a", cut = hipY + 0.06 * HH, seat = cut + drop;
+  const wood = "#8a5a34";
+  for (const dx of [-26, 22]) p.stroke([[300 + dx * u, seat], [300 + (dx + (dx < 0 ? -3 : 3)) * u, sole - 2 * u]], 3.5 * u, mix(wood, INK, 0.35));
+  p.poly(rrect(300 - 34 * u, seat - 2 * u, 300 + 30 * u, seat + 8 * u, 3 * u), wood, 2.2 * u);
+  g.save(); g.translate(0, drop); g.beginPath(); g.rect(-600, -2000, 1800, cut + 2000); g.clip();
+  castProfile(p, O, { ...o, walk: false });
+  g.restore();
+  const hip = [300 + 2 * u, seat - 5 * u], knee = [300 + 0.36 * legs, seat - 3 * u], foot = [300 + 0.38 * legs, sole - 4 * u];
+  p.stroke([hip, knee], 7 * u, legCol);
+  p.stroke(curve(knee, [knee[0] + 2 * u, (knee[1] + foot[1]) / 2], foot), 5.8 * u, legCol);
+  p.stroke([[foot[0] - 3 * u, foot[1]], [foot[0] + 12 * u, foot[1] + 0.5 * u]], 7.5 * u + 3, INK);
+  p.stroke([[foot[0] - 3 * u, foot[1]], [foot[0] + 12 * u, foot[1] + 0.5 * u]], 7.5 * u, sandal);
+};
+/** The three-quarter view: the front as shipped with its head turned (its own `facing`) and the body narrowed about its middle, as a turned body
+ *  shows less of its width. */
+const castThreeQuarter = (front, g, q) => { g.save(); g.translate(300, 0); g.scale(0.84, 1); g.translate(-300, 0); front(q); g.restore(); };
+
+/** Draw a character in a view: { view: "front" | "three-quarter" | "profile" | "back", sit, expr, L, R, walk, phase, step, tilt, headTilt, bob, blink, look, light,
  *  lift, wv, swirl, nohelmet }. Its own extra parts (a hat, glasses, a bag, written in the same hand) draw after the body, on castGeometry's
  *  measures, in the view they belong to. */
 export const castDraw = (p, who, opts = {}) => {
   const c = typeof who === "string" ? CAST[who] : who, O = outfitOf(who);
   if (!O) throw new Error(`castDraw: no character "${typeof who === "string" ? who : "?"}"`);
-  const seed = opts.seed ?? c?.seed ?? 3, view = VIEWS.includes(opts.view) ? opts.view : "front", o = { ...opts, seed, view };
-  if (view === "front") romanFront(p, O, { ...o, step: opts.walk ? opts.phase ?? 0 : opts.step ?? 0 });
+  const seed = opts.seed ?? c?.seed ?? 3, view = ALL_VIEWS.includes(opts.view) ? opts.view : "front", o = { ...opts, seed, view };
+  const front = (q) => romanFront(p, O, q);
+  if ((view === "front" || view === "three-quarter") && opts.sit) castSit(p, O, view === "three-quarter" ? { ...o, facing: opts.facing ?? 1 } : o, view === "three-quarter" ? (q) => castThreeQuarter(front, p.g, q) : front);
+  else if (view === "three-quarter") castThreeQuarter(front, p.g, { ...o, facing: opts.facing ?? 1, step: opts.walk ? opts.phase ?? 0 : opts.step ?? 0 });
+  else if (view === "profile" && opts.sit) castSitSide(p, O, o);
+  else if (view === "front") romanFront(p, O, { ...o, step: opts.walk ? opts.phase ?? 0 : opts.step ?? 0 });
   else if (view === "back") castBack(p, O, { ...o, step: opts.walk ? opts.phase ?? 0 : opts.step ?? 0 });
   else castProfile(p, O, o);
-  const extra = c?.extra?.[view];
+  const extra = c?.extra?.[view] ?? (view === "three-quarter" ? c?.extra?.front : undefined);
   if (typeof extra === "function") {
     const G = view === "profile" ? { ...castGeometry(O, o), ...sideLayout(O, { mode: opts.walk ? "march" : "stand", phase: opts.phase ?? 0, seed }), cx: 300 } : castGeometry(O, o);
     p.rot = null; extra(p, G, o); p.rot = null;

@@ -6,10 +6,9 @@
 // which the Review kept on purpose for the camera's pan) and a turning point measured 35,200 px away. One kind in many shots is one line
 // with its shots and its count; what the Review kept on purpose, and a measuring slip, are "meant this way", never a warning.
 
-/** A check HF never ran (its browser stages skipped), or the script check that ran out of its time: neither a pass nor a problem in the film. */
-export const unchecked = (g) => g.notChecked === true || (g.id === "G-HF-SCRIPT" && (g.skippedReason === "lint" || g.skippedReason === "failed"));
-export const outOfTime = (g) => g.id === "G-HF-SCRIPT" && (g.skippedReason === "deadline" || g.timedOut === true
-  || ((g.findings ?? []).length > 0 && g.findings.every((f) => f.code === "check_timed_out")));
+// a check HF never ran, or the script check that ran out of its time: neither a pass nor a problem (checks.mjs)
+import { outOfTime, unchecked, withWords } from "./checks.mjs";
+export { outOfTime, unchecked };
 
 // an element HF names by its tag (an <svg> has no words of its own) is said for what it is; "the words … is" reads "are" (reports written
 // before plain.mjs said so keep their line)
@@ -123,10 +122,11 @@ export function keptFor(f, kept) {
 
 /** { blocking, warnings, visual, skipped, intended, count } from a Tech checks report: each check with `items` (its grouped findings);
  *  `count` is the number of lines under Warnings and Visual review, the one number every place shows. A warning the Review kept on purpose
- *  (`intended`) or a measuring slip (`artefact`) is no warning: `intended` holds them as one check, "Meant this way", which is also the
+ *  (`intended`) or a measuring slip (`artefact`) is no warning: `intended` holds them as one check, "It's OK", which is also the
  *  last of `visual` (shown, not counted). A blocking check stays blocking whatever the Review kept. */
 export function lookAt(report) {
-  const checks = report?.checks ?? report?.gates ?? [];
+  // the registry's words as they are now: a report saved before the registry had words for a check showed its id (#1439)
+  const checks = withWords(report?.checks ?? report?.gates ?? []);
   const blocking = checks.filter((c) => c.blocking && !c.pass && !unchecked(c)).map((c) => ({ ...c, items: groupFindings(c.findings) }));
   // a check that could not run is said as not checked whatever its pass (G-FLICKER waiting for the preview passes, so the render is not held:
   // T43-3, the dialog said nothing of it)
@@ -140,7 +140,7 @@ export function lookAt(report) {
     }).filter((c) => c.items.length > 0);
   const warnings = flagged.filter((c) => c.kind !== "heuristic"), visual = flagged.filter((c) => c.kind === "heuristic");
   const count = flagged.reduce((n, c) => n + c.items.length, 0);
-  const intended = meant.length ? [{ id: "intended", title: "Meant this way", kind: "heuristic", blocking: false, pass: true, intended: true,
+  const intended = meant.length ? [{ id: "intended", title: "It's OK", kind: "heuristic", blocking: false, pass: true, intended: true,
     explain: "The Review kept these on purpose, or the check mis-measured them: they are not problems in the film.", findings: meant, items: groupFindings(meant) }] : [];
   return { blocking, warnings, visual: [...visual, ...intended], skipped, intended, count };
 }

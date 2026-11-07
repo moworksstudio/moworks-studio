@@ -1,0 +1,52 @@
+{
+  "id": "moworks-tofu",
+  "name": "Tofu",
+  "about": "A small cream-white square tofu cube with soft rounded corners, very short stubby legs, tiny arms, big sleepy eyes and pink cheeks. A fresh green spring onion sprig grows from the top of its head (painted in the film with the character's draw hook, standing on head.top). Wants to keep napping on its chopping board.",
+  "credit": {
+    "author": "Moworks Studio · made in the app",
+    "link": null,
+    "licence": "Moworks Studio's own",
+    "made": "written from the idea",
+    "madeNote": "a definition for the app's character layer, made in the app; faces, emotions and moves are ClaudeAnimationBase's (MIT)"
+  },
+  "colors": {
+    "col": "#FBF5E6",
+    "dk": "#CDBE9C",
+    "lt": "#FFFDF7"
+  },
+  "body": {
+    "shape": "round",
+    "r": 0.22,
+    "w": 8,
+    "h": 7,
+    "bottom": -1.3
+  },
+  "face": {
+    "y": -5.4,
+    "dx": 2.5,
+    "mouth": 1.7,
+    "bx": 3.1
+  },
+  "head": {
+    "top": -8.3,
+    "width": 7
+  },
+  "legs": {
+    "xs": [
+      -2.5,
+      1.4
+    ],
+    "w": 1.1,
+    "h": 1.5
+  },
+  "arms": {
+    "x": 3.9,
+    "y": -4.2,
+    "len": 1.5,
+    "th": 0.8
+  },
+  "savedAt": "2026-10-23T09:39:52.633Z",
+  "heightM": 0.2,
+  "heightBy": "inferred",
+  "heightNote": "a small tofu cube on stubby legs, its spring-onion sprig included; the layer draws in pixels, with no real size"
+}

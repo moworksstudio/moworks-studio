@@ -3,14 +3,15 @@
 // libraries for CTranslate2 (cuBLAS 12, cuDNN 9, NVRTC 12) as one optional first-run item; installed only when the user says yes, pinned
 // and hash-checked (pip --require-hashes) into <work folder>/models/whisper-cuda. Whisper then tries the card and falls back to the CPU
 // (tools/asr/whisper_transcribe.py); the device of the last run is recorded for Settings › System. With no NVIDIA card nothing is offered.
+import { killTree } from "../system-status/kill-tree.mjs";
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
 import { modelsRoot } from "./asr.mjs";
+import { readJson } from "../util/json.mjs";
 
 const MB = 1048576;
-const readJson = (f, d) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
 
 /** The pinned wheels (PyPI, win_amd64, read 26/10/2026): name, version, SHA-256 of the wheel, its size, the folder its DLLs land in. */
 export const WHEELS = [
@@ -62,18 +63,12 @@ export function packStatus(root = APP_ROOT) {
   return { installed, version: installed ? meta.version : null };
 }
 
-/** What Settings › System and the first-run question need: the card, whether the pack is offered, installed, asked, and the device the
- *  last transcription ran on ({ device: "gpu" | "cpu", reason, at }). `ask`: a computer past its first run with a strong card and no pack,
- *  not asked yet (the app asks once; Settings › System keeps the item). */
+/** What Settings › System needs: the card, whether the pack is offered and installed, and the device the last transcription ran on
+ *  ({ device: "gpu" | "cpu", reason, at }). */
 export function gpuState(root = APP_ROOT) {
   const gpu = detectGpu(), offer = eligible(gpu), pack = packStatus(root), st = readState(root);
-  return { gpu, offer, pack: { ...PACK, ...pack }, answer: st.answer ?? null, ask: offer && !pack.installed && !st.answer,
+  return { gpu, offer, pack: { ...PACK, ...pack },
     device: pack.installed && offer ? "gpu" : "cpu", lastRun: st.lastRun ?? null };
-}
-/** The user's answer to the one question: "yes" (the app installs it) or "no" (not asked again; Settings › System can still install it). */
-export function answer(a, root = APP_ROOT) {
-  if (!["yes", "no"].includes(a)) throw Object.assign(new Error("The answer is yes or no"), { code: "INVALID" });
-  return writeState(root, { answer: a, answeredAt: new Date().toISOString() });
 }
 /** The device a transcription ran on, for Settings › System. */
 export const recordRun = ({ device, reason = null }, root = APP_ROOT) => writeState(root, { lastRun: { device: device === "cuda" ? "gpu" : "cpu", reason, at: new Date().toISOString() } });
@@ -92,7 +87,7 @@ export function install(root = APP_ROOT, { signal = null, onLine = () => {}, pip
     let log = "";
     const take = (d) => { const s = String(d); log = (log + s).slice(-20000); for (const l of s.split(/\r?\n/)) if (l.trim()) onLine(l.trim().slice(0, 160)); };
     c.stdout.on("data", take); c.stderr.on("data", take);
-    const kill = () => spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true });
+    const kill = () => killTree(c);
     signal?.addEventListener("abort", kill, { once: true });
     c.on("close", (code) => { signal?.removeEventListener("abort", kill); code === 0 ? ok() : bad(Object.assign(new Error(`pip failed (exit ${code}): ${log.trim().split(/\r?\n/).slice(-2).join(" ")}`), { code: "PIP_FAILED" })); });
   });

@@ -157,7 +157,7 @@ function shotOf(shots, from, to) {
 
 /** The measured film as the check reports it: the held stretches over 2 s (the final hold apart), the 1-2 s ones for a strong film, and
  *  the final hold, each with its shot and where in the frame. */
-export function stillReport(ages, { shots = [], total = null, step = STILL.step, dynamic = null, nearLimit = null, source = "stills", measured = 0, tune = {} } = {}) {
+export function stillReport(ages, { shots = [], total = null, step = STILL.step, dynamic = null, nearLimit = null, nearWhy = null, source = "stills", measured = 0, tune = {} } = {}) {
   const end = total ?? ages.timeline.at(-1)?.t ?? 0;
   const item = (x) => { const s = shotOf(shots, x.from, x.to); return { from: r2(x.from), to: r2(x.to), seconds: r2(x.to - x.from), shot: s?.number ?? null, title: s?.title ?? null, held: r2(x.share), where: x.where }; };
   const atEnd = (x) => x.to >= end - step - 0.011;
@@ -168,12 +168,12 @@ export function stillReport(ages, { shots = [], total = null, step = STILL.step,
   const nearAt = nearLimit ?? STILL.strong;          // a lyrics video: 0.5 s (lyric-video.md)
   const near = strong || nearLimit ? heldRuns(ages, { ...tune, minAge: nearAt }).filter((x) => x.to - x.from > nearAt + 1e-6 && !atEnd(x)
     && !over.some((o) => o.from < x.to && x.from < o.to)) : [];
-  return { source, step, limit: STILL.limit, dynamic: dynamic ?? null, measured, ...(nearLimit ? { nearLimit } : {}),
+  return { source, step, limit: STILL.limit, dynamic: dynamic ?? null, measured, ...(nearLimit ? { nearLimit, nearWhy: nearWhy ?? "a lyrics video allows" } : {}),
     stretches: over.filter((x) => x !== final).map(item), near: near.map(item), finalHold: final ? item(final) : null };
 }
 
 /** The film's held stretches from HyperFrames' stills every `step` s (in batches; the stills are deleted after). */
-export async function measureStills(dir, { shots = [], total, dynamic = null, nearLimit = null, signal = null, workDir, step = STILL.step, snap = snapshotAtAsync, pauseMs = 3000 } = {}) {
+export async function measureStills(dir, { shots = [], total, dynamic = null, nearLimit = null, nearWhy = null, signal = null, workDir, step = STILL.step, snap = snapshotAtAsync, pauseMs = 3000 } = {}) {
   const st = Math.max(step, (total || 0) / STILL.maxStills);
   const times = [];
   for (let t = 0; t < total - 0.02 - 1e-6; t += st) times.push(r2(t));
@@ -193,7 +193,7 @@ export async function measureStills(dir, { shots = [], total, dynamic = null, ne
     }
     const g = await greyFrames(files.map((x) => x.f), { workDir });
     const kept = files.slice(0, g.frames.length);
-    const report = stillReport(blockAges(g.frames, kept.map((x) => x.t), g.w, g.h), { shots, total, step: st, dynamic, nearLimit, source: "stills", measured: kept.length });
+    const report = stillReport(blockAges(g.frames, kept.map((x) => x.t), g.w, g.h), { shots, total, step: st, dynamic, nearLimit, nearWhy, source: "stills", measured: kept.length });
     report.slides = slideCuts(g.frames, kept.map((x) => x.t), g.w, g.h);
     return { ...report, ...(failed.length || kept.length < times.length ? { failed: failed.length ? failed : [`${kept.length} of ${times.length} stills`] } : {}) };
   } finally { rmSync(workDir, { recursive: true, force: true }); }
@@ -217,7 +217,7 @@ export function stillLines(r) {
   const lines = [`Held stretches (the app's measured check, moworks-alive): ${r.source === "video" ? "the render's frames" : "stills"} every ${r.step} s; held = at least ${Math.round(STILL.share * 100)} % of the picture's objects do not move visibly (a drift of about ±3 px or a slight tilt does not count).`];
   if (r.stretches.length) for (const x of r.stretches) lines.push(`- Over ${r.limit} s: ${where(x)}, ${x.seconds} s held (${what(x)}). Give those objects, the background and the camera a visible slow movement there (moworks-alive §2).`);
   else lines.push(`- None over ${r.limit} s.`);
-  for (const x of r.near) lines.push(`- ${r.nearLimit ?? STILL.strong}-${r.limit} s (${r.nearLimit ? "a lyrics video allows" : "the strong level allows"} ${r.nearLimit ?? STILL.strong} s at most${r.nearLimit ? ", words while read apart" : ""}): ${where(x)}, ${x.seconds} s (${what(x)}).`);
+  for (const x of r.near) lines.push(`- ${r.nearLimit ?? STILL.strong}-${r.limit} s (${r.nearLimit ? r.nearWhy ?? "a lyrics video allows" : "the strong level allows"} ${r.nearLimit ?? STILL.strong} s at most${r.nearLimit && (r.nearWhy ?? "a lyrics video allows") === "a lyrics video allows" ? ", words while read apart" : ""}): ${where(x)}, ${x.seconds} s (${what(x)}).`);
   if (r.finalHold) lines.push(`- Final hold: ${r.finalHold.seconds} s (${r.finalHold.from}–${r.finalHold.to} s), allowed.`);
   if (r.failed) lines.push(`- Not every still could be taken: ${r.failed.join("; ")}`);
   return lines;
@@ -229,8 +229,11 @@ export function stillGate(r, error = null) {
   const slides = (r.slides ?? []).length >= SLIDES_MIN ? r.slides : [];
   const slideFinding = slides.length ? [{ code: "slides", time: slides[0], count: slides.length,
     message: `${slides.length} cuts read like a slideshow (${slides.slice(0, 5).map((t) => `${t} s`).join(", ")}${slides.length > 5 ? "…" : ""}): a still picture is replaced at once by another still picture. Carry a movement across the cut (a push, a move that continues, an object that travels into the next shot), as the storyboard's frames carry something from the one before.` }] : [];
-  return { id: "G-STILL", blocking: false, pass: r.stretches.length === 0 && !slides.length, warnings: r.stretches.length + slideFinding.length,
+  // a film with a limit of its own (a lyrics video, the film style's: stillLimit): what holds past it is said too, as the Review says it (audit/112b b1.6)
+  const own = r.nearLimit ? (r.near ?? []).map((x) => ({ shot: x.shot, from: x.from, to: x.to, seconds: x.seconds, held: x.held, where: x.where,
+    message: `Held still for ${x.seconds} s (${x.from}–${x.to} s): ${what(x)}; ${r.nearWhy ?? "a lyrics video allows"} ${r.nearLimit} s at most.` })) : [];
+  return { id: "G-STILL", blocking: false, pass: r.stretches.length === 0 && !slides.length && !own.length, warnings: r.stretches.length + slideFinding.length + own.length,
     findings: [...r.stretches.map((x) => ({ shot: x.shot, from: x.from, to: x.to, seconds: x.seconds, held: x.held, where: x.where,
-      message: `Held still for ${x.seconds} s (${x.from}–${x.to} s): ${what(x)}. Nothing should hold still for more than ${r.limit} s, except the final hold.` })), ...slideFinding],
+      message: `Held still for ${x.seconds} s (${x.from}–${x.to} s): ${what(x)}. Nothing should hold still for more than ${r.limit} s, except the final hold.` })), ...own, ...slideFinding],
     finalHold: r.finalHold };
 }

@@ -36,7 +36,7 @@ does each part (§4). Its `kit-setup`, `style-note` and `original-music` skills 
 | `src/videos/film/Video.tsx` | The composition, from `templates/inner-voice/Video.template.tsx` filled in as `new-video.mjs` would (`__SLUG__` → `film`), exporting the component, `FPS`, `FRAMES`, `WIDTH`, `HEIGHT` and `SOUND` |
 | `src/videos/film/film.js` | The scenes and the beat table `T`, from `templates/inner-voice/video.template.js`, drawn with `../../inner-voice/kit.js` (the source skill's code as shipped) |
 
-`compositions/film/film.js` is the app's; never write it.
+`compositions/film/film.js` is the app's (the app bundles it again before every qc_sheets and film_frames, so you can look at your drawing in the same turn, in the Build as in the Review (T40-12, T42-15); and finalize bundles the composition with the source skill's code and React); never write it.
 
 ## 3. The look in short (STYLE.md has every number)
 
@@ -77,10 +77,8 @@ casual build that has them (a declared name, so no system font is ever used); th
 
 ## 5. Sound
 
-**Where the sounds come from** (owner 05/11/2026, #1034, in place of "code-made sounds only" of 04/11: Test 38's code-made sounds were dull
-and did not match the picture): as for every film, the library's exact sound first, then the app's pick (by Claude) of the library's closest sounds, then a sound made with ElevenLabs from its description (owner #1096), then the online search, then a sound made by code (the source skill's own
-sounds, new takes from its recipes and the app's) only for a cue none of them has. Name each sound by the thing on screen and its action, so the library
-finds the one that matches (moworks-studio §7b).
+**Where the sounds come from:** as for every film, in the house rules' order (moworks-studio §7b, owner #1034, #1096). Name each sound by
+the thing on screen and its action, so the library finds the one that matches.
 
 The source skill's own sounds are in the app's library, made by the source skill's code: `room` under each scene, `tap`, `alarm`, `clock-spin`, `whisper` under a red line,
 `harmonics`, `strum-sour`, `string-mute`, `dread` on the shadow's arrival (SOUND.md's gains). Quiet and close; **silence is part of the design**: the low

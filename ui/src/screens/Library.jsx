@@ -11,7 +11,7 @@ export default function Library() {
   const t = useT();
   const toast = useToast();
   const copy = async (item) => {
-    try { await navigator.clipboard.writeText(item.spec); toast(t("Copied “{title}”. Paste it into a project's Claude panel.", { title: item.title })); return true; }
+    try { await navigator.clipboard.writeText(item.spec); toast(t("Copied “{title}”. Paste it into a production's Claude panel.", { title: item.title })); return true; }
     catch { toast(t("Could not copy to the clipboard"), "error"); return false; }
   };
   // The Studio: the same library as a cabinet of flipbooks in the room, the item in hand on the light table (studio-shell.css, .st-motionlib)

@@ -27,5 +27,56 @@
     "mira/palettes.ts",
     "mira/poses.ts"
   ],
-  "savedAt": "2026-10-23T17:30:52.121Z"
+  "savedAt": "2026-10-23T17:30:52.121Z",
+  "palette": {
+    "skin": "#f7d5bb",
+    "hair": "#7b4630",
+    "coat": "#f6d04d",
+    "tights": "#415182",
+    "boots": "#4ea79d",
+    "satchel": "#bb7a4b",
+    "satchelDark": "#9a5f37",
+    "glasses": "#d8443a"
+  },
+  "can": {
+    "views": [
+      "front",
+      "three-quarter",
+      "profile",
+      "back"
+    ],
+    "viewNotes": "any yaw: a 3D skeleton drawn by the hand's renderer (toScene(pose, camera))",
+    "faces": [
+      "neutral",
+      "happy",
+      "laugh",
+      "surprised",
+      "worried",
+      "angry",
+      "talk",
+      "blink"
+    ],
+    "faceNotes": "the engine's named expressions (neutral, happy, laughing, surprised, worried, determined, curious) as blendable weights; angry, talk and blink are its own weights (browFurrow, mouthOpen, lidUpper)",
+    "poses": [
+      "stand",
+      "walk",
+      "point",
+      "wave",
+      "reach",
+      "sit"
+    ],
+    "poseNotes": "pose(p) on the skeleton inside its joint limits: reach and stand (balance.ts), the walk from footsteps; sit on a stool prop",
+    "hands": [
+      "relaxed",
+      "open",
+      "point",
+      "fist",
+      "grip",
+      "pinch"
+    ],
+    "walk": "planWalk / walkAt: feet planted from footsteps",
+    "talk": "mouthOpen by turns; no lip sync (word times too coarse)"
+  },
+  "sheet": "MW Character Sheet v1",
+  "sheetBy": "Moworks Studio: packages/anidoodle-styles/v1 (the app's sheet film; every figure drawn by the author's engine as pinned)"
 }

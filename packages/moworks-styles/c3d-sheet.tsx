@@ -1,8 +1,10 @@
-// The model sheet and the checks of a 3D Cartoon character made on the Characters page (owner #1267, audit/111 B6): the app's own composition,
-// drawn by the owner's 3D Cartoon source skill as shipped (its ToonVideo, its rig, its looks), in a small staged project (c3d-page.mjs copies this
-// file to src/videos/film/Video.tsx with __ID__ filled in, and the character's file to src/videos/film/cast/__ID__.ts). Seconds 0-3: three rows of
-// the sheet, one a second (views, faces, poses); 3-7: the life clip (a turn through the views, then a walk). SheetCheck (?skill-check=1) runs
-// the gate on the character's module and prints "PASS …" / "FAIL …" lines.
+// The model sheet and the checks of a 3D Cartoon character (owner #1267, audit/111 B6; MW Character Sheet v1, owner #1287-#1293): the app's own
+// composition, drawn by the owner's 3D Cartoon source skill as shipped (its ToonVideo, its rig, its looks) with the app's cast layer (c3d-cast.ts:
+// the laugh and angry faces, the point and wave poses), in a small staged project (c3d-page.mjs copies this file to src/videos/film/Video.tsx with
+// __ID__ and __SHIPPED__ filled in, and the character's file to src/videos/film/cast/__ID__.ts). Seconds 0-22: the sheet's 22 cells, one a second, in
+// the standard's order (views, faces, poses, the walk's phases; c3d-page.mjs lays them on the one sheet frame); 22-28: the life clip (idle with a blink, a turn through the views, a walk, a talk).
+// No credit or other text on the sheet but the name and the row and column labels (#1290). SheetCheck (?skill-check=1) runs the gate on the
+// character's module and prints "PASS …" / "FAIL …" lines.
 import React, { useEffect, useState } from "react";
 import * as THREE from "three";
 import { AbsoluteFill, continueRender, delayRender, useCurrentFrame } from "remotion";
@@ -10,18 +12,26 @@ import { ToonVideo } from "../../kit/ToonVideo";
 import { CAST, SIT, STAND, buildCharacter, mixPose, poseReach, walkPose, type Character, type Pose } from "../../kit/character";
 import { box, plane, setFlatChars, setLook, toon } from "../../kit/lib";
 import { LOOKS } from "../../kit/looks";
+import { FACES, POINT, WAVE, WAVE_AT, setFace, talkFace } from "mw:c3d-cast";
 import { CHARACTER } from "./cast/__ID__";
 
-export const FPS = 30, FRAMES = 7 * FPS, WIDTH = 1920, HEIGHT = 1080;
+export const FPS = 30, ROWS_S = 22, LIFE_S = 6, FRAMES = (ROWS_S + LIFE_S) * FPS, WIDTH = 1920, HEIGHT = 1080;
 const ID = "__ID__";
+/** A character the app ships from a source skill's own cast or its examples (moworks-…): checked as shipped, not as a new original. */
+const SHIPPED: boolean = __SHIPPED__;
 export const EXPRS = ["neutral", "calm", "blink", "smile", "eager", "wince", "alarmed", "talk"] as const;
 const STYLES = ["tuft", "glasses", "bun", "beanie"];
 const ROWS = [
   { title: "Views", cols: ["front", "three-quarter", "profile", "back"] },
-  { title: "Faces", cols: ["neutral", "smile", "eager", "wince", "alarmed", "talk"] },
-  { title: "Poses", cols: ["stand", "walk", "walk", "reach", "sit"] },
+  { title: "Faces", cols: [...FACES] as string[] },
+  { title: "Poses", cols: ["stand", "walk", "point", "wave", "reach", "sit"] },
+  { title: "Walk", cols: ["contact", "pass", "contact", "pass"] },
 ];
-const GAP = 1.15, CAM_Z = 6.2, FOV = 30;
+const FOV = 30;
+/** The sheet's cells one a second (the one sheet frame of every engine, packages/character-kit/sheet-frame.js): the character alone in the
+ *  middle, the same camera for every cell so the sizes keep to one another; c3d-page.mjs cuts each still's middle into its cell. */
+export const CELLS = ROWS.flatMap((r) => r.cols.map((col, i) => ({ row: r.title, col, i })));
+const CAM_Z = 4.4;
 
 type W = { scene: THREE.Scene; lights: any; setSky: (s: "day" | "dawn") => void; copies: Character[] };
 
@@ -32,63 +42,51 @@ const buildWorld = (): W => {
   const key = new THREE.DirectionalLight("#fff3df", 2.0);
   key.position.set(-3, 9, 8);
   scene.add(hemi, key, key.target);
-  const floor = plane(30, 30, toon("#efe3cc"));
+  const floor = plane(40, 30, toon("#efe3cc"));
   floor.rotation.x = -Math.PI / 2;
-  scene.add(floor, box(30, 6, 0.2, "#f3ead8", 0, 0, -3));
-  const copies = Array.from({ length: 6 }, () => { const c = CHARACTER.build(); scene.add(c.root); return c; });
+  scene.add(floor, box(40, 7, 0.2, "#f3ead8", 0, 0, -3));
+  const copies = Array.from({ length: 8 }, () => { const c = CHARACTER.build(); scene.add(c.root); return c; });
   return { scene, lights: { hemi, key, practicals: [] }, setSky: () => {}, copies };
 };
 
-const xOf = (i: number, n: number) => (i - (n - 1) / 2) * (n > 4 ? 0.92 : GAP);          // six columns fit the frame closer together
-const pose = (c: Character, p: Partial<Pose>, base: Pose = STAND) => c.setPose({ ...base, ...p });
 
 const apply = (w: W, cam: THREE.PerspectiveCamera, out: number) => {
   const T = out / FPS;
-  w.copies.forEach((c) => { c.root.visible = false; c.root.rotation.set(0, 0, 0); c.root.position.set(0, 0, 0); c.setPose(STAND); c.setExpr("neutral"); });
+  w.copies.forEach((c) => { c.root.visible = false; c.root.rotation.set(0, 0, 0); c.root.position.set(0, 0, 0); c.setPose(STAND); setFace(c, "neutral"); });
   cam.fov = FOV;
-  if (T < 3) {
-    const row = ROWS[Math.floor(T)], n = row.cols.length;
-    row.cols.forEach((col, i) => {
-      const c = w.copies[i];
-      c.root.visible = true;
-      c.root.position.set(xOf(i, n), 0, 0);
-      if (row.title === "Views") c.root.rotation.y = [0, -Math.PI / 4, -Math.PI / 2, Math.PI][i];
-      if (row.title === "Faces") c.setExpr(col as any);
-      if (row.title === "Poses") {
-        if (col === "walk") c.setPose(walkPose(i === 1 ? 0.25 : 0.75));
-        if (col === "sit") c.setPose(SIT);
-        if (col === "reach") { c.root.updateMatrixWorld(true); poseReach(c, STAND, { r: c.parts.torso.localToWorld(new THREE.Vector3(-0.42, 0.75, 0.25)) }); }
-      }
-    });
-    cam.position.set(0, 1.05, CAM_Z);
-    cam.lookAt(0, 0.85, 0);
-  } else {
-    // the life clip: a turn through the views (2 s), then a walk on the spot (2 s), breathing and blinking
-    const t = T - 3, c = w.copies[0];
+  if (T < ROWS_S) {
+    // one cell a second: the character alone in the middle (its row and column), the same camera for all
+    const { row: title, col, i } = CELLS[Math.floor(T)], c = w.copies[0];
     c.root.visible = true;
-    c.root.rotation.y = t < 2 ? -Math.PI * 2 * Math.min(1, t / 2) : -Math.PI / 2;
-    const base = t < 2 ? { ...STAND, bob: 0.01 * Math.sin(t * 5) } : walkPose(t * 1.4);
-    c.setPose(base);
-    c.setExpr(Math.floor(T * FPS) % 50 < 3 ? "blink" : t > 1 && t < 2 ? "smile" : "neutral");
+    if (title === "Views") c.root.rotation.y = [0, -Math.PI / 4, -Math.PI / 2, Math.PI][i];
+    if (title === "Faces") setFace(c, col as any);
+    if (title === "Poses") {
+      if (col === "walk") c.setPose(walkPose(0.25));
+      // the pointing arm reaches out to the left: the figure stands a little right of the middle, so the hand stays in its cell
+      if (col === "point") { c.setPose(POINT); c.root.position.x = 0.28; }
+      if (col === "wave") { c.setPose(WAVE); setFace(c, "happy"); }
+      if (col === "sit") c.setPose(SIT);
+      if (col === "reach") { c.root.updateMatrixWorld(true); poseReach(c, STAND, { r: c.parts.torso.localToWorld(new THREE.Vector3(-0.42, 0.75, 0.25)) }); }
+    }
+    if (title === "Walk") { c.root.rotation.y = -Math.PI / 2; c.setPose(walkPose(i * 0.25)); }
+    cam.position.set(0, 1.05, CAM_Z);
+    cam.lookAt(0, 0.95, 0);
+  } else {
+    // the life clip: idle with a blink (1.5 s), a turn through the views (2 s), a walk on the spot (1.5 s), a talk (1 s)
+    const t = T - ROWS_S, c = w.copies[0];
+    c.root.visible = true;
+    if (t < 1.5) { c.setPose({ ...STAND, bob: 0.012 * Math.sin(t * 5), headTilt: 0.03 * Math.sin(t * 2.3) }); setFace(c, t > 0.8 && t < 0.95 ? "blink" : "neutral"); }
+    else if (t < 3.5) { c.root.rotation.y = -Math.PI * 2 * ((t - 1.5) / 2); c.setPose({ ...STAND, bob: 0.01 * Math.sin(t * 5) }); setFace(c, t > 2.4 && t < 3 ? "happy" : "neutral"); }
+    else if (t < 5) { c.root.rotation.y = -Math.PI / 2; c.setPose(walkPose((t - 3.5) * 1.4)); setFace(c, "neutral"); }
+    else { c.setPose({ ...WAVE_AT(t), headTilt: 0.02 * Math.sin(t * 7) }); setFace(c, talkFace(t)); }
     cam.position.set(0, 1.1, 5.2);
     cam.lookAt(0, 1.0, 0);
-    cam.fov = 32;          // the whole figure, the bun included, with a margin
+    cam.fov = 32;          // the whole figure, the hair included, with a margin
   }
   return { look: LOOKS.wideBright, focus: new THREE.Vector3(0, 0.9, 0) };
 };
 
-/** The labels under each column of a sheet row (the life clip has none). */
-function Labels() {
-  const f = useCurrentFrame(), T = f / FPS;
-  if (T >= 3) return null;
-  const row = ROWS[Math.floor(T)], n = row.cols.length, half = Math.tan(((FOV / 2) * Math.PI) / 180) * CAM_Z * (WIDTH / HEIGHT);
-  return <AbsoluteFill style={{ fontFamily: "Outfit", fontWeight: 800, color: "#241726" }}>
-    <div style={{ position: "absolute", left: 48, top: 36, fontSize: 44 }}>{`${CHARACTER?.name ?? ID} · ${row.title}`}</div>
-    {row.cols.map((col, i) => <div key={i} style={{ position: "absolute", top: HEIGHT - 110, left: WIDTH / 2 + (xOf(i, n) / half) * (WIDTH / 2) - 160, width: 320, textAlign: "center", fontSize: 30 }}>{col}</div>)}
-  </AbsoluteFill>;
-}
-
-export const Sheet: React.FC = () => <AbsoluteFill><ToonVideo build={buildWorld} apply={apply} words={[]} /><Labels /></AbsoluteFill>;
+export const Sheet: React.FC = () => <AbsoluteFill><ToonVideo build={buildWorld} apply={apply} words={[]} /></AbsoluteFill>;
 export default Sheet;
 
 // ---- the gate
@@ -115,9 +113,14 @@ export function checkLines(): string[] {
   ok(STYLES.includes(d.style), `def: a hair style the source skill draws (${STYLES.join(", ")})`, `style ${d.style}`);
   const cast = Object.values(CAST);
   const same = cast.find((x) => ["top", "skin", "hair", "style"].every((k) => String((x as any)[k]).toLowerCase() === String(d[k]).toLowerCase()));
-  ok(!same, "an original: not one of the source skill's own four", same ? `it is ${same.name}` : "");
-  const near = HEX.test(String(d.top ?? "")) ? cast.find((x) => dist(x.top, d.top) < 40) : null;
-  ok(!near, "a top colour none of the cast wears (STYLE.md: contrast)", near ? `too close to ${near.name}'s ${near.top}` : "");
+  if (SHIPPED) {
+    // the source skill's own cast or an example's extra, shipped by the app (moworks-…): as shipped, so the two originality lines do not apply
+    ok(ID.startsWith("moworks-"), "a shipped character's id takes the prefix moworks-");
+  } else {
+    ok(!same, "an original: not one of the source skill's own four", same ? `it is ${same.name}` : "");
+    const near = HEX.test(String(d.top ?? "")) ? cast.find((x) => dist(x.top, d.top) < 40) : null;
+    ok(!near, "a top colour none of the cast wears (STYLE.md: contrast)", near ? `too close to ${near.name}'s ${near.top}` : "");
+  }
   let a: Character | null = null, b: Character | null = null;
   try { a = C.build(); b = C.build(); } catch (e) { ok(false, "build() makes it", String((e as Error)?.message ?? e).split("\n")[0]); return out; }
   const parts = a?.parts ?? ({} as any);
@@ -141,11 +144,15 @@ export function checkLines(): string[] {
   const bad: string[] = [];
   for (const e of EXPRS) { try { a.setExpr(e as any); } catch (x) { bad.push(`${e}: ${String((x as Error)?.message ?? x).split("\n")[0]}`); } }
   ok(!bad.length, `every face of the source skill draws (${EXPRS.join(", ")})`, bad.join("; "));
-  const poses: [string, Pose][] = [["stand", STAND], ["sit", SIT], ["walk", walkPose(0.25)], ["walk", walkPose(0.75)], ["half walk", mixPose(STAND, walkPose(0.5), 0.5)]];
+  const badStd: string[] = [];
+  for (const f of FACES) { try { setFace(a, f as any); } catch (x) { badStd.push(`${f}: ${String((x as Error)?.message ?? x).split("\n")[0]}`); } }
+  setFace(a, "neutral");
+  ok(!badStd.length, `every face of the sheet standard draws (${FACES.join(", ")})`, badStd.join("; "));
+  const poses: [string, Pose][] = [["stand", STAND], ["sit", SIT], ["walk", walkPose(0.25)], ["walk", walkPose(0.75)], ["half walk", mixPose(STAND, walkPose(0.5), 0.5)], ["point", POINT], ["wave", WAVE]];
   const broken: string[] = [];
   for (const [n, p] of poses) { try { a.setPose(p); const z = sizeOf(a.root); if (![z.min.x, z.min.y, z.max.x, z.max.y].every(Number.isFinite)) broken.push(n); } catch (x) { broken.push(`${n}: ${String((x as Error)?.message ?? x).split("\n")[0]}`); } }
   try { a.setPose(STAND); a.root.updateMatrixWorld(true); poseReach(a, STAND, { r: a.parts.torso.localToWorld(new THREE.Vector3(-0.42, 0.75, 0.25)) }); } catch (x) { broken.push(`reach: ${String((x as Error)?.message ?? x).split("\n")[0]}`); }
-  ok(!broken.length, "every pose holds together (stand, sit, walk, a reach with poseReach)", broken.join("; "));
+  ok(!broken.length, "every pose holds together (stand, sit, walk, point, wave, a reach with poseReach)", broken.join("; "));
   return out;
 }
 
@@ -157,6 +164,7 @@ export const SheetCheck: React.FC = () => {
     try { l = checkLines(); } catch (e) { l = [`FAIL  the checks ran: ${String((e as Error)?.message ?? e).split("\n")[0]}`]; }
     l.forEach((x) => console.log(x));
     (window as any).__c3Lines = l;
+    try { const C: any = CHARACTER; (window as any).__c3Record = { id: C?.id ?? null, name: C?.name ?? null, about: C?.about ?? null, heightM: Number(C?.heightM) || null, def: C?.def ? { name: C.def.name, top: C.def.top, skin: C.def.skin, hair: C.def.hair, style: C.def.style } : null }; } catch { /* the lines say what is wrong */ }
     setLines(l);
     continueRender(handle);
   }, [handle]);

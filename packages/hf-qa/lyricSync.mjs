@@ -5,9 +5,10 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { htmlFiles } from "../hf-edit/finalize.mjs";
 import { openFilmPage } from "./filmPage.mjs";
+import { readJson } from "../util/json.mjs";
 
 export const SUNG = { lateS: 0.1, earlyS: 0.4, maxMarks: 400 };
-const readJson = (f) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return null; } };
+
 const r2 = (n) => Math.round(n * 100) / 100;
 
 /** The timed words of the film's lyrics (without their backing vocals, unless asked), each with its number; [] with none. */

@@ -3,13 +3,16 @@
 // returns { status: "ok" | "warning" | "error", label, detail, action? } in plain words.
 import { execFileSync, spawn } from "node:child_process";
 import { existsSync, readdirSync, statSync } from "node:fs";
-import { join, normalize } from "node:path";
+import { join, normalize, dirname } from "node:path";
 import { APP_ROOT, checkFfmpeg, expandEnv, installed, loadPins, readState, resolveRuntime } from "../version-manager/index.mjs";
 import { aeRunning, checkPython } from "../ae-export/index.mjs";
 import { status as offlineStatus } from "../offline-assets/index.mjs";
 import { verifySkills } from "../setup/hf-skills.mjs";
 import { status as pyStatus } from "../setup/python.mjs";
 import { projectsRoot, workRoot } from "../project-service/index.mjs";
+// the environment and the stop of every Claude Code run (claude-run.mjs imports claudeEnv and findClaude from here: used at call time only)
+import { claudeRunEnv } from "./claude-run.mjs";
+import { killTree } from "./kill-tree.mjs";
 
 const ok = (label, detail, extra = {}) => ({ status: "ok", label, detail, ...extra });
 const warn = (label, detail, action, extra = {}) => ({ status: "warning", label, detail, action, ...extra });
@@ -74,13 +77,15 @@ const parseStatus = (exe, version, stdout) => {
     subscriptionType: s.subscriptionType ?? null, email: s.email ?? null, orgName: s.orgName ?? null };
 };
 
-/** Run one Claude Code command without blocking the server; resolves { code, stdout, stderr, timedOut } (a timeout ends it). */
+/** Run one Claude Code command without blocking the server; resolves { code, stdout, stderr, timedOut } (a timeout ends it). Its environment is
+ *  every run's (claudeRunEnv: no key, token or other endpoint of this computer), so the sign-in Settings shows is the one a run uses
+ *  (audit/112 r2.3: a token in this computer's environment read as "signed in" here while the runs had none). */
 function runClaude(exe, args, timeout = 20000) {
   return new Promise((ok) => {
-    const c = spawn(exe, args, { windowsHide: true, env: claudeEnv(), stdio: ["ignore", "pipe", "pipe"] });
+    const c = spawn(exe, args, { windowsHide: true, env: claudeRunEnv(), stdio: ["ignore", "pipe", "pipe"] });
     let stdout = "", stderr = "";
     let timedOut = false;
-    const h = setTimeout(() => { timedOut = true; c.kill(); }, timeout);
+    const h = setTimeout(() => { timedOut = true; killTree(c); }, timeout);
     c.stdout.on("data", (d) => { stdout += d; }); c.stderr.on("data", (d) => { stderr += d; });
     c.on("error", (e) => { clearTimeout(h); ok({ code: -1, stdout, stderr: String(e.message), timedOut }); });
     c.on("close", (code) => { clearTimeout(h); ok({ code, stdout, stderr, timedOut }); });
@@ -103,7 +108,7 @@ export async function claudeStatusAsync(root = APP_ROOT) {
 export function claudeLogin(root = APP_ROOT) {
   const exe = findClaude(root);
   if (!exe) throw Object.assign(new Error("Claude Code was not found on this computer"), { code: "NO_CLAUDE" });
-  const c = spawn(exe, ["auth", "login", "--claudeai"], { windowsHide: true, env: claudeEnv(), stdio: ["pipe", "pipe", "pipe"] });
+  const c = spawn(exe, ["auth", "login", "--claudeai"], { windowsHide: true, env: claudeRunEnv(root), stdio: ["pipe", "pipe", "pipe"] });
   const out = { process: c, url: null, output: "" };
   const read = (d) => { out.output = (out.output + d).slice(-4000); out.url ??= /https:\/\/\S+/.exec(out.output)?.[0] ?? null; };
   c.stdout.on("data", read); c.stderr.on("data", read);
@@ -121,11 +126,21 @@ export async function claudeLogout(root = APP_ROOT) {
 
 function tryCheck(label, fn) { try { return fn(); } catch (e) { return bad(label, String(e.message ?? e).split("\n")[0], "See details"); } }
 
+/** After Effects installs on this PC (Program Files\Adobe\Adobe After Effects*). */
+export function aeInstalls() {
+  const base = join(process.env.ProgramFiles ?? "C:\\Program Files", "Adobe");
+  if (!existsSync(base)) return [];
+  return readdirSync(base).filter((n) => /^Adobe After Effects/i.test(n)).map((n) => {
+    const sf = join(base, n, "Support Files");
+    const exe = existsSync(sf) ? readdirSync(sf).find((f) => /^AfterFX.*\.exe$/i.test(f)) : null;   // AfterFX.exe, or "AfterFX (Beta).exe"
+    return { name: n, exe: exe ? join(sf, exe) : null, version: /\(Beta\)/i.test(n) ? "Beta" : (/(\d{4})/.exec(n) ?? [])[1] ?? null };
+  }).filter((x) => x.exe);
+}
+
+/** The install folders (Settings › System's After Effects line), or null. */
 function aeInstall() {
-  const base = "C:/Program Files/Adobe";
-  if (!existsSync(base)) return null;
-  const dirs = readdirSync(base).filter((d) => /^Adobe After Effects/i.test(d));
-  return dirs.length ? dirs.map((d) => join(base, d)) : null;
+  const list = aeInstalls();
+  return list.length ? list.map((x) => dirname(dirname(x.exe))) : null;
 }
 
 /** Runtime & Media, After Effects and storage checks. */
@@ -145,7 +160,7 @@ export function runtimeStatus(root = APP_ROOT) {
   checks.ffmpeg = tryCheck("FFmpeg", () => { const f = checkFfmpeg(root); return ok("FFmpeg / ffprobe", `${f.ffmpeg.split(" Copyright")[0]}`); });
   checks.node = ok("Node.js", process.version);
   // normalize(): one kind of slash (pins.json writes them forward, so the path showed half and half)
-  checks.python = (() => { const p = checkPython(root); return p.ok ? ok("Python (AE export)", normalize(p.message)) : bad("Python (AE export)", p.message, "Install from Settings › System"); })();
+  checks.python = (() => { const p = checkPython(root); return p.ok ? ok("Python (AE export)", normalize(p.message)) : bad("Python (AE export)", p.message, "Install from Studio Settings › System"); })();
   const skills = verifySkills(root, { fresh: true });
   const bad0 = Object.entries(skills.skills).filter(([, x]) => !x.ok).map(([n]) => n);
   checks.hfSkills = skills.error ? bad("HyperFrames skills", `${skills.error}. The app fetches only skills/ and registry/ at the pinned commit (about 120 MB).`, "Click Download")

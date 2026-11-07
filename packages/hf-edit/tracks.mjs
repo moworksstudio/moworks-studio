@@ -3,17 +3,18 @@
 // Studio shows them at once and `hyperframes beats` finds the music. Attributes Studio or the user changed later (data-hf-id, the start,
 // the volume) are kept when the same file is placed again. The music's beats: HyperFrames' own analyser (Node, no Python), written by HF
 // to beats/<audio path>.json.
+import { attrsOf, audioLine } from "./tag.mjs";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { runHf } from "../hf-qa/cli.mjs";
 import { endFade, fadeOfTotal, filmEnding, filmLength } from "./ending.mjs";
 import { isStarterPage } from "./shots.mjs";
 import { isSongFilm } from "../style-catalog/traits.mjs";
-import { MUSIC_DUCK, duckLane, sig, speechSpans } from "../sfx/actions.mjs";
+import { duckLane, sig, speechSpans } from "../sfx/actions.mjs";
+import { MUSIC_DUCK, VOICE_CEILING_DB, VOICE_CEILING_MARGIN } from "../sfx/mix/levels.mjs";
 
 const ROLES = { voice: { id: "el-voice", role: "voiceover", track: 10, volume: 1 }, music: { id: "el-music", role: "music", track: 11, volume: 0.6 } };
 const BEGIN = "<!-- mw:tracks -->", END = "<!-- /mw:tracks -->";
-const attrsOf = (s) => Object.fromEntries([...s.matchAll(/([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*"([^"]*)"/g)].map((m) => [m[1], m[2]]));
 const r3 = (n) => Math.round(n * 1000) / 1000;
 /** The music plays to the film's end and fades down with the picture (ending.mjs): HyperFrames' own clip-edge fade (data-fade-out,
  *  core/src/audioFade.ts at the pinned version: linear, anchored at the clip's end, honoured in Studio's preview and in the render). HF's render
@@ -210,21 +211,9 @@ export function trackClips(html, kind) {
       duration: num(a["data-duration"], null), volume: num(a["data-volume"], 1), fadeIn: num(a["data-fade-in"], 0), fadeOut: num(a["data-fade-out"], 0) }))
     .sort((x, y) => x.start - y.start);
 }
-/** The voice-over's words (HF's transcript.json: [{ text, start, end }], in the voice file's seconds) where the film speaks them: each word at
- *  the place of the clip that plays it (the clip whose part of the file holds the word's middle), kept inside that part; a word no clip plays
- *  is left out. clips: trackClips(…, "voice"). [{ text, start, end }], film seconds, by start. */
-export function wordsOnFilm(words, clips) {
-  const out = [];
-  for (const w of words ?? []) {
-    if (!Number.isFinite(w?.start) || !Number.isFinite(w?.end)) continue;
-    const mid = (w.start + w.end) / 2;
-    const c = (clips ?? []).find((x) => mid >= x.mediaStart - 1e-6 && (x.duration == null || mid < x.mediaStart + x.duration));
-    if (!c) continue;
-    const a = c.mediaStart, b = c.duration == null ? Infinity : a + c.duration, shift = c.start - a;
-    out.push({ text: w.text, start: r3(Math.max(a, w.start) + shift), end: r3(Math.min(b, w.end) + shift) });
-  }
-  return out.sort((x, y) => x.start - y.start);
-}
+// the words' film seconds: voice/transcript.mjs, beside the sentences' (112a B8)
+export { wordsOnFilm } from "../voice/transcript.mjs";
+import { wordsOnFilm } from "../voice/transcript.mjs";
 /** The film's spoken words, in film seconds: the reviewed transcript (transcript.json) through the clips that play the voice-over's file
  *  (the project's voice file; every voice clip when none of them is it); null with no transcript or no voice on the timeline. */
 export function filmWords(dir) {
@@ -238,7 +227,6 @@ export function filmWords(dir) {
 // the film's whole length: its root's; before the Build (the starter page) the length New project set with the ending's fade after it
 const filmOf = (html, dir) => (isStarterPage(html) ? filmLength(metaOf(dir), { dir }).total || 0
   : Number(attrsOf(/<[a-z]+\b[^>]*\bdata-composition-id="[^"]*"[^>]*>/i.exec(html)?.[0] ?? "")["data-duration"]) || 0);
-const audioLine = (a) => `<audio ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}>`;
 
 /** Fit the film's music to the film as it is now (its length and ending): before a render and the checks, after the film was built.
  *  Returns the music's attributes, or null when nothing changed (no music, a stop, the user's own fade). */
@@ -258,7 +246,7 @@ export function fitMusicToFilm(dir) {
 
 // ---- The levels the app sets on the voice-over and the music (sfx/actions.mjs trackGains, measured by sfx/mixlevels.mjs) and the music
 // ducked under the spoken words, the HyperFrames way: media-use's scripts/audio-duck.mjs writes a volume lane (data-automation) on the
-// bed, a quarter of its level from each spoken span's first word to its last (attack 0.15 s, release 0.4 s, spans closer than 0.6 s one;
+// bed, a quarter of its level from each spoken span's first word to its last (attack 0.15 s, release 1 s, spans closer than 2 s one: actions.mjs DUCK_RELEASE, SPEECH_GAP;
 // Apache-2.0). Each music clip (a repeat of the song too) gets its lane in its own seconds. What the app wrote is kept beside it (data-mw-gain,
 // data-mw-duck: its signature), so a level or a lane the user changed in Studio stays theirs; the earlier fixed levels (voice 1, music 0.6)
 // count as the app's.
@@ -289,6 +277,33 @@ export function setTrackGain(dir, kind, gain) {
     const a = attrsOf(tag);
     if (audioKind(a) !== kind || !gainIsOurs(a, kind) || (a["data-volume"] === v && a["data-mw-gain"] === v && a["data-mw-gain-mark"] === gainMark(v))) return tag;
     a["data-volume"] = v; a["data-mw-gain"] = v; a["data-mw-gain-mark"] = gainMark(v); n++;
+    return audioLine(a);
+  });
+  if (out !== html) writeFileSync(f, out);
+  return n;
+}
+// ---- The voice-over's peak ceiling (owner 07/11, audit/112a A10, Qa3: "ok thêm bộ chặn đỉnh"): its gain brings it to about -16 LUFS and
+// a loud word then went over full scale (Test 41: +5.1 dBFS). HyperFrames' own true-peak limiter (the "truepeak" effect of its fx chain,
+// data-fx-chain) holds it at -1 dBTP, last in the voice's chain; with a chain the engine puts the clip's gain ahead of it, so the ceiling is
+// on the voice as the mix hears it, in the render and in Studio's preview alike. The master after the mix stays -14 LUFS (loudness.mjs).
+export const VOICE_CEILING_ID = "mw-voice-ceiling";          // its numbers: sfx/mix/levels.mjs (VOICE_CEILING_DB, VOICE_CEILING_MARGIN)
+const ceilingNode = () => ({ type: "truepeak", id: VOICE_CEILING_ID, label: "Voice ceiling", params: { ceiling: VOICE_CEILING_DB - VOICE_CEILING_MARGIN } });
+/** Whether a clip's chain (its data-fx-chain, as written on the page) holds the voice's ceiling. */
+export const hasVoiceCeiling = (chainAttr) => { try { return JSON.parse(String(chainAttr ?? "").replace(/&quot;/g, '"')).nodes?.some((n) => n.id === VOICE_CEILING_ID && n.enabled !== false) ?? false; } catch { return false; } };
+/** Put the ceiling on every clip of the voice-over that does not have it, after the effects already in its chain (a chain the page cannot
+ *  read is left as it is). Returns how many clips changed. */
+export function limitVoice(dir) {
+  const f = join(dir, "index.html");
+  let html; try { html = readFileSync(f, "utf8"); } catch { return 0; }
+  let n = 0;
+  const out = html.replace(/<audio\b[^>]*>/gi, (tag) => {
+    const a = attrsOf(tag);
+    if (audioKind(a) !== "voice") return tag;
+    let chain = { version: 1, nodes: [] };
+    if (a["data-fx-chain"] != null) { try { chain = JSON.parse(a["data-fx-chain"].replace(/&quot;/g, '"')); } catch { return tag; } }
+    if (!Array.isArray(chain.nodes) || chain.nodes.some((x) => x.id === VOICE_CEILING_ID)) return tag;
+    chain.nodes.push(ceilingNode());
+    a["data-fx-chain"] = JSON.stringify(chain).replace(/"/g, "&quot;"); n++;
     return audioLine(a);
   });
   if (out !== html) writeFileSync(f, out);
@@ -358,7 +373,7 @@ export function placeTrack(dir, { kind, src, duration, start = null }) {
   // the music stopped at a second (the twist) stays stopped when the same track is placed again; else it is fitted to the film
   const stop = kind === "music" && same && was["data-mw-stop"] != null ? Number(was["data-mw-stop"]) : null;
   const loops = kind !== "music" ? null : stop != null ? cutMusic(a, stop, beatTimes(dir, src)) : fitMusic(a, filmOf(html, dir), endingOf(dir), beatTimes(dir, src));
-  const line = `<audio ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}></audio>`;
+  const line = audioLine(a, { close: true });
   const block = new RegExp(`(${BEGIN.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})([\\s\\S]*?)(${END.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`);
   if (block.test(html)) html = html.replace(block, (m0, b, inner, e) => `${b}${inner.replace(/\s*$/, "")}\n    ${line}\n    ${e}`);
   else {
@@ -468,7 +483,7 @@ export function placeClip(dir, { src, duration, start = 0, volume = CLIP_VOLUME,
   }
   const a = { id: `el-clip-${n}`, src, "data-start": String(at), "data-duration": String(r3(duration)),
     "data-track-index": String(track), "data-volume": String(volume), ...(fadeOut > 0 ? { "data-fade-out": String(r3(fadeOut)) } : {}), "data-timeline-role": role };
-  const line = `<audio ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}></audio>`;
+  const line = audioLine(a, { close: true });
   const block = new RegExp(`(${esc(CLIPS_BEGIN)})([\\s\\S]*?)(${esc(CLIPS_END)})`);
   if (block.test(html)) html = html.replace(block, (m0, b, inner, e) => `${b}${inner.replace(/\s*$/, "")}\n    ${line}\n    ${e}`);
   else {

@@ -2,11 +2,12 @@
 // transcribed (Whisper); the user checks the words, edits them and presses Send again: Claude reads the new words and moves the timings.
 // The transcript is saved as HyperFrames' transcript.json (word timings). Editing text keeps the timing; there is no recording
 // or voice-gap editing. Where the voice comes from (an upload, ElevenLabs, Kokoro on this computer) is folded under "Other ways".
+import { VI_ONLY_RE } from "../../../packages/hf-qa/vi-letters.mjs";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, AudioLines, Bot, Check, ChevronDown, Download, FileAudio, Info, Loader2, Mic2, Pause, Play, RefreshCw, Save, Search, Settings2, Sparkles, Square, Upload, X } from "lucide-react";
-import { api, blobUrl, get, patch, post, upload, watchJob } from "../api.js";
+import { api, blobUrl, get, patch, post, upload } from "../api.js";
 import { Banner, Dialog, StatusIcon } from "../components.jsx";
-import { ago, clock, go, locale, useData, useToast, words } from "../lib.jsx";
+import { ago, clock, go, locale, useData, useToast, words, useJobWatch } from "../lib.jsx";
 import { tr, useT } from "../i18n.jsx";
 import { useCloseGuard, useStage } from "../workflow/stage.jsx";
 import { mb, useSetupJob } from "../workflow/FirstRun.jsx";
@@ -97,6 +98,7 @@ function AudioFiles({ id, voiceFile, voiceName = null, voiceTyped = false, onJob
 }
 
 export default function Voice({ id, path = null, setCrumbs = () => {} }) {
+  const watch = useJobWatch();          // its job watches stop with it (audit/112c c5.1)
   const t = useT();
   const stage = useStage(id);
   const toast = useToast();
@@ -119,7 +121,7 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
   const player = useRef(null);
   const fileInput = useRef(null);
   const [drag, setDrag] = useState(false);
-  useEffect(() => { setCrumbs(project.data ? [t("Projects"), project.data.title, t("Voice-over")] : null); }, [project.data, t]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setCrumbs(project.data ? [t("Productions"), project.data.title, t("Voice-over")] : null); }, [project.data, t]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const d = v.data, voice = d?.voice, tr = d?.transcript;
   useCloseGuard(dirty);                           // closing the dialog with unsaved words asks first
@@ -137,16 +139,11 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
     return () => { alive = false; if (url) URL.revokeObjectURL(url); };
   }, [voice?.file]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // a read the server did not answer (a busy computer: Test 24's server was silent ~30 s) no longer ends the watch with the job shown
-  // running: it looks again a little later, and reads the voice-over again once the job is gone
-  function follow(j, tries = 0) {
+  // a read the server did not answer is asked again by watchJob itself (a busy computer: Test 24's server was silent ~30 s); a job it no
+  // longer has ends the watch as failed, in plain words, and the voice-over is read again
+  function follow(j) {
     setJob(j);
-    watchJob(j.id, (x, e) => {
-      if (!x) {
-        if (e?.status === 404 || tries >= 20) { setJob(null); v.reload(); project.reload(); }
-        else setTimeout(() => follow(j, tries + 1), 3000);
-        return;
-      }
+    watch(j.id, (x) => {
       setJob(x);
       if (x.status !== "running") { v.reload(); project.reload(); if (x.status === "failed") toast(x.error?.message ?? t("Failed"), "error"); }
     }, 1200);
@@ -248,7 +245,7 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
           {!models.some((m) => m.ready) && <button className="btn ghost sm" onClick={() => go("/settings/runtime")}><Settings2 size={14} />{t("Install a model")}</button>}
         </div>}
       {(tstat === "failed" || tstat === "cancelled") && !running && <Banner kind={tstat === "failed" ? "error" : "warning"}>{tstat === "failed" ? t("The last transcription failed.") + (job?.error ? ` ${job.error.message}` : "") + " " + t("Try again, or pick another model.") : t("The last transcription was stopped.")}</Banner>}
-      {tstat === "pending" && !running && !tr && <Banner kind="warning">{t("Not transcribed yet.")} {models.some((m) => m.ready) ? t("Press Transcribe.") : t("Install a speech-to-text model first (Settings › System).")}</Banner>}
+      {tstat === "pending" && !running && !tr && <Banner kind="warning">{t("Not transcribed yet.")} {models.some((m) => m.ready) ? t("Press Transcribe.") : t("Install a speech-to-text model first (Studio Settings › System).")}</Banner>}
 
       {segs && <>
         <div className="transcript-tools">
@@ -276,7 +273,7 @@ export default function Voice({ id, path = null, setCrumbs = () => {} }) {
 
 // A Vietnamese project opened on "Roger · en, american" with its Vietnamese voices (★) at the end of 30+. The project's
 // language is its brief's (Vietnamese letters), else the app's; the voices that speak it come first, then the user's own (★), then the rest
-const VI_LETTERS = /[ăâđêôơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]/i;
+const VI_LETTERS = VI_ONLY_RE;
 const SPEAKS = { vi: /(^|[^a-z])(vi|vie|vietnamese|tiếng việt)([^a-z]|$)/i, en: /(^|[^a-z])(en|english)([^a-z]|$)/i };
 const plainWords = (x) => String(x ?? "").normalize("NFC").replace(/[“”"«»]/g, "").replace(/\s+/g, " ").trim();
 /** True when every line of Claude's voice-over draft is in the brief word for word: the narration is the user's. */
@@ -481,7 +478,7 @@ function TtsPanel({ id, provider, keySaved, brief, draft = "", language = "vi", 
     });
     return () => { alive = false; clearTimeout(again); };
   }, [provider, keySaved, attempt]); // eslint-disable-line react-hooks/exhaustive-deps
-  if (!keySaved) return <section className="panel"><Banner kind="warning" action={<button className="btn sm" onClick={() => go("/settings/runtime")}>{t("Add key")}</button>}>{t("Add your {name} key in Settings › General › Voice-over to choose a voice.", { name })}</Banner></section>;
+  if (!keySaved) return <section className="panel"><Banner kind="warning" action={<button className="btn sm" onClick={() => go("/settings/runtime")}>{t("Add key")}</button>}>{t("Add your {name} key in Studio Settings › General › Voice-over to choose a voice.", { name })}</Banner></section>;
   const voice = list?.voices.find((x) => x.id === voiceId);
   // the voice settings are left at the service's defaults: only what the user changed is sent
   // a setting the chosen model does not have (Eleven v4: Speed, Style) stays in its place, off (owner #1063: keep the layout)

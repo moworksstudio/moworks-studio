@@ -121,5 +121,3 @@ export function ding() {
   } catch { /* no sound on this computer */ }
 }
 
-/** For the tests: forget what was taken. */
-export function resetAttention() { seen = null; away = null; }

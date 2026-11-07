@@ -1,11 +1,12 @@
 // The app's own leftovers on this PC, cleaned when the launcher starts the service (the window's browser profile when it stops) (never in tests, never while anything runs: nothing
 // runs yet). Only what the app made itself and makes again when needed: old render and export logs, the logs grown too long, After
-// Effects work folders of exports long done, and the HyperFrames versions that are neither the current one nor the one to roll back to.
+// Effects work folders of exports long done, the shared stage's sets no film used for a month, and the HyperFrames versions that are neither the current one nor the one to roll back to.
 // The user's films, renders, library and models are never touched here.
 import { existsSync, readdirSync, renameSync, rmSync, statSync } from "node:fs";
 import { rm } from "node:fs/promises";
 import { join } from "node:path";
 import { hfDir, installed, readState } from "../version-manager/index.mjs";
+import { pruneStage } from "../project-service/shared-stage.mjs";
 
 export const KEEP_LOGS = 200;          // render-*.log and export-*.log: the newest kept (about 300 a day were written, none ever removed)
 export const LOG_MAX = 5 * 1024 * 1024;          // app.log, backup.log: past this, the older half is kept once as <name>.1
@@ -82,6 +83,9 @@ export async function housekeep(root, { log = () => {} } = {}) {
   const logs = pruneLogs(join(runtime, "logs"));
   const work = pruneWork(join(runtime, "work"));
   const hf = await pruneHf(root);
-  if (logs || work.length || hf.length) log(`[housekeeping] ${logs} old log(s), ${work.length} work folder(s), HyperFrames ${hf.join(", ") || "none"} removed`);
-  return { logs, work: work.length, hf };
+  // the shared stage's sets (a style's rules at one hash, an engine at one commit) no film task touched for 30 days: a film that needs one
+  // again makes it again (shared-stage.mjs ensureShared); 35 sets, 98 MB had piled up by 07/11/2026
+  const stage = pruneStage(root);
+  if (logs || work.length || hf.length || stage.length) log(`[housekeeping] ${logs} old log(s), ${work.length} work folder(s), ${stage.length} stage set(s), HyperFrames ${hf.join(", ") || "none"} removed`);
+  return { logs, work: work.length, hf, stage };
 }

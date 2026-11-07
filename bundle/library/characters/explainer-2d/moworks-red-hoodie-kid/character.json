@@ -1,0 +1,76 @@
+{
+  "id": "moworks-red-hoodie-kid",
+  "name": "Red Hoodie Kid",
+  "about": "The 2D Explainer's own hero: a young person in a red hoodie, jeans and white sneakers, the on-screen you of every explainer.",
+  "engine": "explainer-2d",
+  "kind": "human",
+  "heightM": 1.45,
+  "heightBy": "inferred",
+  "heightNote": "the source skill gives no height: a young teenager's",
+  "hand": "explainer-2d",
+  "hands": [
+    "explainer-2d"
+  ],
+  "palette": {
+    "hoodie": "#e8323e",
+    "jeans": "#2f4fb3",
+    "shoes": "#f2eefc",
+    "skin": "#d8916f",
+    "hair": "#2a1432"
+  },
+  "can": {
+    "views": [
+      "front",
+      "three-quarter",
+      "profile",
+      "back"
+    ],
+    "viewNotes": "the kit's front, back and profile (faces left); three-quarter is the front with its own head turn (headTurn), the body narrowed by the app",
+    "faces": [
+      "neutral",
+      "happy",
+      "laugh",
+      "surprised",
+      "worried",
+      "angry",
+      "talk",
+      "blink"
+    ],
+    "faceNotes": "the kit's mouth (-1..1), worry and blink; laugh, surprised, angry and talk add the app's hooks to its own brows and mouth (brow lift, inner brow press, mouth opening)",
+    "poses": [
+      "stand",
+      "walk",
+      "point",
+      "wave",
+      "reach",
+      "sit"
+    ],
+    "poseNotes": "the kit's own sleeves and legs cut at the elbow and knee and turned by the app about the shoulder, elbow, hip and knee: point, wave, reach in front; walk and sit in profile (sit on a plain stool the app paints)",
+    "hands": "n/a: the kit's one relaxed hand",
+    "walk": "the app's cycle of the kit's profile legs (thigh and shin turned; the kit has no walk of its own)",
+    "talk": "the mouth opens and closes by turns; no lip sync"
+  },
+  "sheet": "MW Character Sheet v1",
+  "credit": {
+    "author": "Moworks Studio (the owner's 2D Explainer source skill)",
+    "link": null,
+    "licence": "the owner's own",
+    "made": "as shipped",
+    "madeNote": "the source skill's own hero as shipped; its name is the app's (the source gives none); what its drawing lacks is drawn by the app (house/explainer-2d.js, posing the kit's own pieces through house/explainer-2d-hooks.mjs)",
+    "source": {
+      "skill": "2D Explainer Animation Toolkit",
+      "version": "1.0.0",
+      "sha256": "e1e2df8e064e0efbd5faa0832e890b6bb3e8074dd73545934376d9771ef66c53",
+      "file": "engine/house-hero.js HOUSE.hero (the house character)"
+    },
+    "gate": {
+      "passed": 15,
+      "failed": 0
+    }
+  },
+  "version": 1,
+  "module": [
+    "moworks-red-hoodie-kid.js"
+  ],
+  "savedAt": "2026-11-06T15:06:14.147Z"
+}

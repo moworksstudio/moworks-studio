@@ -2,17 +2,17 @@
 // strength are HyperFrames' own (`hyperframes beats`, hf-edit/beats.mjs); the rest comes from the scan's own reading of the track (tools/intake/intake.py music, librosa: hits, kicks,
 // sections, loudest passages). No second analysis of the beats: the librosa grid stands in only when HF's file is not there. HF's file has no metre, so the bars are every 4th beat,
 // from the phase whose first beats are strongest (a guess at the downbeat, said as one).
-import { existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { writeDoc } from "../project-service/docs.mjs";
 import { runPy } from "../setup/python.mjs";
 import { APP_ROOT } from "../version-manager/index.mjs";
 import { readBeats, tempoOf } from "./beats.mjs";
+import { readJson } from "../util/json.mjs";
 
 const r3 = (n) => Math.round(n * 1000) / 1000;
 const slug = (p) => p.replace(/[^\w.-]+/g, "_");
 const mmss = (t) => `${Math.floor(t / 60)}:${(t % 60).toFixed(2).padStart(5, "0")}`;
-const readJson = (f, d = null) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
 
 /** The scan's reading of a track, read now when the scan has none yet. { hits, kicks, sections, loudest, beat_times, duration } or null. */
 export async function trackAnalysis(dir, src, { root = APP_ROOT } = {}) {

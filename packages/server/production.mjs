@@ -1,8 +1,18 @@
-// Production routes: voice-over (upload, transcription first, transcript review, ElevenLabs / Kokoro
-// Audio), service keys, speech-to-text models, Export Video, QA and Export to AE. Long work runs as background jobs (jobs.mjs); nothing here
+// Production routes: the voice-over's files (upload, its sample and its audio; its other routes: voice.mjs), service keys, speech-to-text
+// models, the film's music placed, Export Video, Tech checks and the jobs (Export to AE: ae.mjs). Long work runs as background jobs (jobs.mjs); nothing here
 // blocks the server's event loop on HyperFrames, FFmpeg or After Effects (child processes or the render worker).
-import { stampBase, stampParts } from "../render-names/index.mjs";
-import { spawn, spawnSync } from "node:child_process";
+import { killTree } from "../system-status/kill-tree.mjs";
+import { stampedName } from "./renders.mjs";
+import { recordMusic } from "../sfx/film-music.mjs";
+import { err, readJson, writeJson } from "./files.mjs";
+import { voiceRoutes } from "./voice.mjs";
+import { aeRoutes } from "./ae.mjs";
+import { prepareFilm } from "./prepare.mjs";
+import { renderWarningNote } from "../hf-render-worker/errors.mjs";
+import { safeName, typedName } from "../render-names/index.mjs";
+import { aeInstalls } from "../system-status/index.mjs";
+import { CHECKS, checkWords, renderVerdict } from "../hf-qa/checks.mjs";
+import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { copyFileSync, createReadStream, createWriteStream, existsSync, linkSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, join, resolve, sep } from "node:path";
@@ -20,86 +30,120 @@ import { placedShots, readShots } from "../hf-edit/shots.mjs";
 import { filmSubtitles, toSrt, toVtt } from "../hf-edit/subtitles.mjs";
 import { qaFacts } from "../pipeline/index.mjs";
 import { snapshotAtAsync } from "../hf-qa/cli.mjs";
-import { dynamicOf } from "../hf-qa/qc.mjs";
+import { dynamicOf, stillLimit } from "../hf-qa/qc.mjs";
 import { findingShot, measuringSlip, plainFinding } from "../hf-qa/plain.mjs";
 import { keptFor, keptOnPurpose } from "../hf-qa/look.mjs";
 import { measureStills, stillGate } from "../hf-qa/stillness.mjs";
 import { endingGate, measureEnding } from "../hf-qa/ending.mjs";
 import { filmEnding } from "../hf-edit/ending.mjs";
-import { remixAudio, render } from "../hf-render-worker/client.mjs";
+import { remixAudio, render, renderOutcome } from "../hf-render-worker/client.mjs";
+import { deliverFile } from "./deliver.mjs";
 import { extraSizes, masterAspect, sizeStage, tagOf, updateSize } from "../project-service/sizes.mjs";
 import { sizesOf } from "./sizes.mjs";
 import { chooseGpu } from "../hf-render-worker/gpu.mjs";
-import { aeRunningAsync, canvasCount, plainLog } from "../ae-export/index.mjs";
 import * as secrets from "../secrets/index.mjs";
-import { PROVIDERS, clearVoiceLists, filmVietnamese, isVietnamese, pickModel, retryOnce, ttsFailedText, voiceList, voiceSettings } from "../voice/tts.mjs";
-import * as kokoro from "../voice/kokoro.mjs";
-import { plainMessage } from "./plainError.mjs";
-import { AUDIO_TYPES, MAX_BYTES, extractAudio, peaks, probe, quietParts } from "../voice/audio.mjs";
+import { PROVIDERS, clearVoiceLists, voiceList } from "../voice/tts.mjs";
+import { AUDIO_TYPES, MAX_BYTES, extractAudio, probe } from "../voice/audio.mjs";
 import * as asr from "../voice/asr.mjs";
-import * as transcript from "../voice/transcript.mjs";
 import * as lyrics from "../voice/lyrics.mjs";
-import { briefScript, firstLines, scriptDraft, scriptGap } from "../voice/script.mjs";
-import { MASTER, loudness, masterLoudness, masterName } from "../hf-qa/loudness.mjs";
-import { capWebBitrate } from "../hf-qa/webBitrate.mjs";
-import { analyseBeats, dropMissingAudio, fitMusicToFilm, gateAudioFiles, musicRepeats, musicUsed, placeTrack } from "../hf-edit/tracks.mjs";
-import { levelTracks } from "../sfx/mixlevels.mjs";
-import { refreshBridge } from "../hf-edit/lemoPage.mjs";
-import { applyLanes } from "../sfx/lanes.mjs";
-import { expandEnv, loadPins, resolveRuntime } from "../version-manager/index.mjs";
-import { filmHash, filmParts, soundOnRoot } from "./proxy.mjs";
+import { MASTER, masterName } from "../hf-qa/loudness.mjs";
+import { analyseBeats, fitMusicToFilm, musicRepeats, musicUsed, placeTrack } from "../hf-edit/tracks.mjs";
+import { levelTracks } from "../sfx/mix/index.mjs";
+import { resolveRuntime, ffmpegExe } from "../version-manager/index.mjs";
+import { soundOnRoot } from "./proxy.mjs";
+import { filmHash, filmParts } from "../project-service/film-hash.mjs";
 import { withSoundChecks } from "../hf-qa/gates.mjs";
 import { gateCuts } from "../moworks-styles/cuts.mjs";
 import { freshFilm } from "../hf-edit/codeFilm.mjs";
 import { fetchSlides, saveSlides, slidesLinks } from "./slides.mjs";
 
 const APP_ROOT_DIR = resolve(import.meta.dirname, "..", "..");
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
-const writeJson = (p, v) => { mkdirSync(join(p, ".."), { recursive: true }); writeFileSync(p, JSON.stringify(v, null, 2) + "\n"); };
 
 /** What the checks read, as one hash: the film's picture (filmHash: index.html, compositions/, CHARACTERS.json,
  *  the assets) and its sound (assets/ and audio/: names, sizes, dates), the bundled fonts and libraries (assets/_app), the HyperFrames
  *  version and the checks' own code. The same hash means the same answers, so a Render after Tech checks on an unchanged film does not
  *  run them again; any change to the picture, the sound or the checks runs them again. */
-export function gateHash(projectDir, fps = null, root = APP_ROOT_DIR) {
+export const gateHash = (projectDir, fps = null, root = APP_ROOT_DIR) => checksKey(projectDir, fps, root, { sound: true });
+/** The one key of what the checks read (audit/112b b2.6: gateHash and pictureKey were two copies of it): the film (its picture, and with
+ *  sound its sound too: filmHash), the bundled fonts and libraries (assets/_app), with sound the audio folder, the boards (the film's checks
+ *  read them: G-CONTRACT on an anidoodle board, so a board fixed is checked again, T41-6), the HyperFrames version and the checks' own code.
+ *  The same parts in the same order as the two had, so no film's saved checks are lost to it. */
+function checksKey(projectDir, fps, root, { sound }) {
   const h = createHash("sha256");
-  h.update(filmHash(projectDir, fps));
-  const walk = (d) => {
-    if (!existsSync(d)) return;
-    for (const n of readdirSync(d).sort()) {
-      const p = join(d, n), st = statSync(p);
-      if (st.isDirectory()) { if (!n.startsWith(".")) walk(p); continue; }
-      h.update(`${p.slice(projectDir.length)}:${st.size}:${Math.floor(st.mtimeMs)}`);
-    }
-  };
-  walk(join(projectDir, "assets", "_app")); walk(join(projectDir, "audio"));
-  // the boards: the film's checks read them too (G-CONTRACT on an anidoodle board), so a board fixed is checked again (T41-6)
-  walk(join(projectDir, "boards"));
-  try { h.update(resolveRuntime(null, root).version ?? ""); } catch { /* no runtime: the hash still changes with the film */ }
+  h.update(sound ? filmHash(projectDir, fps) : filmParts(projectDir, fps).picture);
+  hashTree(h, projectDir, join(projectDir, "assets", "_app"));
+  if (sound) hashTree(h, projectDir, join(projectDir, "audio"));
+  hashTree(h, projectDir, join(projectDir, "boards"));
+  try { h.update(resolveRuntime(null, root).version ?? ""); } catch { /* no runtime: the key still changes with the film */ }
   h.update(checksCode(root));
   return h.digest("hex").slice(0, 16);
 }
+/** A folder of the film into a hash by its files' names, sizes and dates. */
+function hashTree(h, projectDir, d) {
+  if (!existsSync(d)) return;
+  for (const n of readdirSync(d).sort()) {
+    const p = join(d, n), st = statSync(p);
+    if (st.isDirectory()) { if (!n.startsWith(".")) hashTree(h, projectDir, p); continue; }
+    h.update(`${p.slice(projectDir.length)}:${st.size}:${Math.floor(st.mtimeMs)}`);
+  }
+}
+/** What the picture's checks read, the sound left out: Tech checks' "only the sound changed" shortcut keys on it (audit/112b b1.8: it keyed on
+ *  the picture alone, so a board fixed, the bundled fonts and libraries or a HyperFrames update kept the old answers, T41-6). */
+export const pictureKey = (projectDir, fps = null, root = APP_ROOT_DIR) => checksKey(projectDir, fps, root, { sound: false });
 /** The checks' own code as this app run has it, read once (read from disk at every call, an edit of the checks' files by
  *  another process between the automatic checks and Render made the Render run them again; an update restarts the app, so it still counts). */
 const codeHashes = new Map();
 function checksCode(root) {
   if (!codeHashes.has(root)) {
     const h = createHash("sha256");
-    for (const m of ["gates.mjs", "qc.mjs", "gates-cli.mjs"]) { try { h.update(readFileSync(join(root, "packages", "hf-qa", m))); } catch { /* fine */ } }
+    for (const f of checksFiles(root)) { try { h.update(f.slice(root.length)); h.update(readFileSync(f)); } catch { /* fine */ } }
     codeHashes.set(root, h.digest("hex"));
   }
   return codeHashes.get(root);
 }
+/** The app's own modules the checks run: every module of hf-qa and everything they import, followed through the app's packages (audit/112b
+ *  b1.7: three files were hashed, so an update of a check's own module, anatomy or the stills, reused the old answers). */
+export function checksFiles(root = APP_ROOT_DIR) {
+  const pkgs = join(root, "packages"), seen = new Set(), todo = readdirSync(join(pkgs, "hf-qa")).filter((m) => /\.mjs$/.test(m)).map((m) => join(pkgs, "hf-qa", m));          // every check module (G-END, G-STILL run from here)
+  while (todo.length) {
+    const f = todo.pop();
+    if (seen.has(f) || !existsSync(f)) continue;
+    seen.add(f);
+    let s = ""; try { s = readFileSync(f, "utf8"); } catch { continue; }
+    for (const m of s.matchAll(/(?:^|\n)\s*(?:import|export)\s[^;'"]*?from\s+["'](\.[^"']+)["']|import\(\s*["'](\.[^"']+)["']\s*\)/g)) {
+      const p = resolve(dirname(f), m[1] ?? m[2]);
+      if (/\.m?js$/.test(p) && p.startsWith(pkgs)) todo.push(p);
+    }
+  }
+  return [...seen].sort();
+}
 /** The last checks of a film, kept by its gate hash: .moworks/cache/gates/checked.json { key, blank, at, gates }. */
 const checkedFile = (projectDir) => join(projectDir, ".moworks", "cache", "gates", "checked.json");
+/** Tech checks may run the sound's checks alone and keep the rest of their last report (T32-7: 10 minutes for a chair louder) only when
+ *  that report is of the very checks saved in checked.json (its checkedAt: a Render's own checks since are newer than the report, and the
+ *  report would show the picture as it was checked before them), the picture and the checks' code are as they were then, and a code film's
+ *  source builds (one that does not keeps its older film.js, so the picture's key stays: G-BUILD must run). audit/112b b7.1. */
+export function soundOnlyStands(was, lastReport, { picture, code, bundled = null }) {
+  if (bundled?.error || buildFailed(was?.gates)) return false;
+  return was?.picture === picture && was?.code === code && !!was?.gates?.gates && !!lastReport?.checks?.length
+    && lastReport.checkedAt != null && lastReport.checkedAt === was.at;
+}
+
 /** Checks that can stand for a new run: the same hash, with the blank-scene stills when they are asked for, and a script check that
- *  finished (one that ran out of time checked only part of the film: it runs again). */
-export function reusableChecks(projectDir, key, { blank = false } = {}) {
+ *  finished (one that ran out of time checked only part of the film: it runs again). bundled: freshFilm's answer for a code film; its
+ *  source that does not build leaves the older film.js in place, so the hash stays and the old checks would let the old film render:
+ *  they run again, and G-BUILD says why (audit/112b b6.1). */
+export function reusableChecks(projectDir, key, { blank = false, bundled = null } = {}) {
+  if (bundled?.error) return null;
   const c = readJson(checkedFile(projectDir), null);
   if (!c || c.key !== key || (blank && !c.blank) || !c.gates) return null;
   if ((c.gates.gates ?? []).some((g) => g.timedOut)) return null;
+  if (buildFailed(c.gates)) return null;
   return c;
 }
+/** Saved checks whose G-BUILD was red: of a source that did not build, which no key reads (the key hashes the film.js it left). The source
+ *  fixed builds that very film.js again, so the key is the same: those checks must never stand for it (audit/112b b7.1, found trying it). */
+const buildFailed = (gates) => (gates?.gates ?? []).some((g) => g.id === "G-BUILD" && g.pass === false);
 
 /** The Review's own files as look.mjs's keptOnPurpose reads them: { json: QC-REVIEW.json, md: QC-REVIEW.md } (each null / "" when absent). */
 export function reviewFiles(projectDir) {
@@ -119,33 +163,6 @@ export function checksCarryOn(p) {
 /** A render's check results live in the project's own folder, so renders/ holds only the films;
  *  .moworks/renders/<film file>.gates.json. */
 export const gatesFile = (projectDir, film) => join(projectDir, ".moworks", "renders", basename(film) + ".gates.json");
-/** The results of an older render, next to its film in renders/, move into the project's own folder (the next time the app touches it). */
-export function moveOldGates(projectDir) {
-  const dir = join(projectDir, "renders");
-  if (!existsSync(dir)) return 0;
-  let n = 0;
-  for (const f of readdirSync(dir).filter((x) => x.endsWith(".gates.json"))) {
-    const to = gatesFile(projectDir, f.slice(0, -".gates.json".length));
-    try {
-      mkdirSync(join(to, ".."), { recursive: true });
-      if (existsSync(to) && statSync(to).mtimeMs >= statSync(join(dir, f)).mtimeMs) rmSync(join(dir, f), { force: true });          // a newer one is there
-      else renameSync(join(dir, f), to);
-      n++;
-    } catch { /* in use: next time */ }
-  }
-  return n;
-}
-const err = (code, message) => Object.assign(new Error(message), { code });
-const safeName = (s, fallback) => (String(s ?? "").normalize("NFC").replace(/[<>:"/\\|?*\u0000-\u001f]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 80) || fallback);
-/** A render's name (sorted by date first, then the film's name, then the time of the render):
- *  <YYMMDD>_<name>_<HHMM><ext> at local time; the seconds join when that name is taken, then -2, -3…; never
- *  a "", never an existing file. `ext` "" names a folder (Export to AE). */
-export function stampedName(dir, name, ext = "", now = new Date()) {
-  const { day, hm, sec } = stampParts(now), base = stampBase(name);          // the rule itself is shared with the Render dialog (packages/render-names)
-  const stem = (tail) => `${day}_${base}_${tail}`;
-  for (const s of [stem(hm), stem(hm + sec)]) if (!existsSync(join(dir, s + ext))) return s + ext;
-  for (let i = 2; ; i++) { const s = stem(`${hm}${sec}-${i}`); if (!existsSync(join(dir, s + ext))) return s + ext; }
-}
 const FORMATS = { mp4: ".mp4", webm: ".webm", mov: ".mov" };
 /** What Play / Open may hand to Windows: films, sounds, pictures, documents and text, each opened by its own program. Never a script or a
  *  program (.bat, .exe, .vbs…) a project folder might hold. */
@@ -160,74 +177,23 @@ const QUALITIES = ["draft", "standard", "high"];
  *  background render takes BG_WORKERS, 2). */
 export const FG_WORKERS = 4;
 
-/** After Effects installs on this PC (Program Files\Adobe\Adobe After Effects*). */
-export function aeInstalls() {
-  const base = join(process.env.ProgramFiles ?? "C:\\Program Files", "Adobe");
-  if (!existsSync(base)) return [];
-  return readdirSync(base).filter((n) => /^Adobe After Effects/i.test(n)).map((n) => {
-    const sf = join(base, n, "Support Files");
-    const exe = existsSync(sf) ? readdirSync(sf).find((f) => /^AfterFX.*\.exe$/i.test(f)) : null;   // AfterFX.exe, or "AfterFX (Beta).exe"
-    return { name: n, exe: exe ? join(sf, exe) : null, version: /\(Beta\)/i.test(n) ? "Beta" : (/(\d{4})/.exec(n) ?? [])[1] ?? null };
-  }).filter((x) => x.exe);
-}
+// After Effects installs on this PC: system-status (kept importable from here)
+export { aeInstalls };
 
-/** Render any time: only what would break the render stops it (script errors, missing files, remote URLs, fonts that are not here or
- *  lack Vietnamese letters); every other finding is a warning shown next to the result. */
-const RENDER_LINT = new Set(["missing_local_asset", "placeholder_media_url"]);
-export function renderVerdict(gates) {
-  const blocking = [], warnings = [];
-  for (const g of gates.gates ?? []) {
-    if (g.pass) continue;
-    if (g.id === "G-HF-LINT") {
-      const hard = (g.findings ?? []).filter((f) => !f.code || RENDER_LINT.has(f.code));          // no code: HF's check gave no answer at all
-      const soft = (g.findings ?? []).filter((f) => !hard.includes(f));
-      if (hard.length) blocking.push({ ...g, findings: hard });
-      if (soft.length) warnings.push({ ...g, blocking: false, findings: soft });
-    } else if (g.id === "G-HF-SCRIPT") {          // a check that ran out of time is a warning (results saved before the fix too)
-      const late = (f) => f.code === "check_timed_out" || (f.code === "check_runtime_failure" && /deadline|timed? ?out/i.test(String(f.message ?? "")));
-      const hard = g.blocking === false ? [] : (g.findings ?? []).filter((f) => !late(f));
-      const soft = (g.findings ?? []).filter(late);
-      if (hard.length || (!soft.length && g.blocking !== false)) blocking.push({ ...g, findings: hard.length ? hard : g.findings });
-      if (soft.length) warnings.push({ ...g, blocking: false, findings: soft.map((f) => ({ ...f, severity: "warning", code: "check_timed_out", message: "Could not finish checking the scripts in time: no script error was found before the check stopped." })) });
-    } else if (["G-BUILD", "G-REMOTE", "G-FONT", "G-GLYPH", "G-CONTRACT"].includes(g.id) || (g.id === "G-POSE" && g.blocking !== false)) blocking.push(g);
-    else warnings.push({ ...g, blocking: false });
+// the film checks' words and what stops a render: packages/hf-qa/checks.mjs (kept importable from here)
+export { CHECKS, renderVerdict };
+
+
+/** Start the next size of a render (fn throws { code: "BUSY" } while it cannot): while Claude changes the film it waits for it, as the
+ *  background render does (up to 30 minutes); the last size's job closing, a few seconds; else giveUp(why) at once, in words (audit/112b b1.3). */
+export function nextSize(fn, { claudeBusy = () => false, giveUp = () => {}, now = Date.now, wait = setTimeout, t0 = now() } = {}) {
+  try { fn(); }
+  catch (e) {
+    const claude = claudeBusy();
+    if (e.code === "BUSY" && now() - t0 < (claude ? 30 * 60000 : 10000)) { wait(() => nextSize(fn, { claudeBusy, giveUp, now, wait, t0 }), claude ? 2000 : 500); return; }
+    giveUp(e.code === "BUSY" ? "the app was busy with another render" : String(e?.message ?? e).slice(0, 200));
   }
-  return { pass: blocking.length === 0, blocking, warnings };
 }
-
-/** Plain words for each check (deterministic checks apart from heuristic visual review). */
-export const CHECKS = {
-  "G-HF-LINT": { title: "Composition files", explain: "The film's files are well formed: their structure, timing and settings.", kind: "deterministic" },
-  "G-HF-SCRIPT": { title: "Scripts in the preview", explain: "Plays the film in the background and looks for errors in its code.", kind: "deterministic" },
-  "G-REMOTE": { title: "Works offline", explain: "Nothing is loaded from the internet while rendering (fonts, pictures, scripts must be local).", kind: "deterministic" },
-  "G-FONT": { title: "Fonts available", explain: "Every font the film uses is on this computer.", kind: "deterministic" },
-  "G-GLYPH": { title: "Vietnamese characters", explain: "Each font has every character the film writes, Vietnamese tone marks included.", kind: "deterministic" },
-  "G-GLYPH-CODE": { title: "Vietnamese characters in the film's code", explain: "Words a film drawn by code writes (What If, anidoodle) in a face that lacks some Vietnamese letters: they would show in another face, or as a dash in anidoodle's drawn capitals. Read from the code: a warning, never a block.", kind: "heuristic" },
-  "G-VI-MARKS": { title: "Vietnamese written without its marks", explain: "Words on screen in a Vietnamese film that are Vietnamese with their tone marks left off (NHAT KY for NHẬT KÝ), whatever the style's look. Read from the film's pages and code: a warning, never a block.", kind: "heuristic" },
-  "G-BUILD": { title: "The film's code compiles", explain: "A film drawn by code is built from its source first; a source that does not build would leave an older film to render.", kind: "deterministic" },
-  "G-VOICE": { title: "The voice stays clear", explain: "Under a voice-over, the effects and the music stay at least 3 dB under the voice on every spoken word. A warning, never a block.", kind: "deterministic" },
-  "G-SFX": { title: "A sound on every action", explain: "Once the sound effects are placed, every visible action of the Motion Plan (an entrance, an exit, a landing, a step, a door…) has a sound within about 0.3 s, unless you, the brief or the film style asked for silence or keep that kind of sound out. A warning, never a block.", kind: "deterministic" },
-  "G-POSE": { title: "Poses inside their limits", explain: "Draws every frame of an anidoodle film and checks each character's pose against its joint limits, and that nothing throws or logs an error.", kind: "deterministic" },
-  "G-COLLISION": { title: "Nothing walks through anything", explain: "A 3D Cartoon film, every frame: no character walks through furniture or another character, and no foot goes below the floor (the style's own check). A warning, never a block.", kind: "deterministic" },
-  "G-CUTS": { title: "Cuts on the shot table", explain: "A film in one of the owner's film styles, once it is rendered: the hard cuts in the picture match the cuts its own shot table declares (an Inner Voice film has none: every change is a fade). A warning, never a block.", kind: "deterministic" },
-  "G-CONTRACT": { title: "Same film every time", explain: "An anidoodle film draws each frame the same way every time, so the render matches what you saw.", kind: "deterministic" },
-  "G-HF-LAYOUT": { title: "Layout", explain: "At every cut: text that overlaps, hides, is cut off or runs out of the frame or its box.", kind: "deterministic" },
-  "G-HF-CONTRAST": { title: "Contrast", explain: "Every text stands out enough from what is behind it to read easily.", kind: "deterministic" },
-  "G-HF-MOTION": { title: "Motion", explain: "The moves the Motion Plan asks for are in the film.", kind: "deterministic" },
-  "G-BLANK": { title: "Empty-looking scenes", explain: "Takes a few stills of each scene and flags a scene whose stills are all flat. A heuristic: it can miss or misjudge.", kind: "heuristic" },
-  "G-END": { title: "The ending", explain: "Compares a still half a second before the end with the last frame: a film whose picture is still full and lit on its last frame stops dead. The picture should fade out with the music (or after the end card). In a style whose author's ending the Motion Plan names and plays, a dark screen, a dot or a held end card ends the film too.", kind: "deterministic" },
-  "G-SYNC": { title: "Moves on their words", explain: "A move of the Motion Plan that names a spoken word starts or lands on it, within about 3 frames, and the word is said in that shot. A warning, never a block.", kind: "deterministic" },
-  "G-ANATOMY": { title: "Anatomy", explain: "Reads the film's code for the characters' bodies. Today: in an Inner Voice Short film, a hand raised to or above the shoulder bends its elbow down, under the forearm (the film style's rule). More body parts and film styles to come. A warning, never a block.", kind: "deterministic" },
-  "G-SOUND-SHAPE": { title: "The sound from start to end", explain: "Reads the sound of the film's render in 100 ms steps: it should start with the picture, never drop out to silence in the middle (a room tone or a quiet bed counts as sound), and last to the film's end. It needs a render of the film as it is. A warning, never a block.", kind: "deterministic" },
-  "G-FLICKER": { title: "Flicker in the render", explain: "Reads every frame of the film's render: a part of the picture that jumps to another picture for one frame and back, again and again (two surfaces at the same height in 3D, a light that blinks). It needs a render of the film as it is: the preview made after the Build and after each change. A warning, never a block.", kind: "deterministic" },
-  "G-CANVAS-TEXT": { title: "Text drawn into the picture", explain: "Finds text the film's code draws into its picture (a canvas), which Studio and After Effects cannot edit. Text the film style performs (its own drawing) may stay, with a line saying so in the film's notes. A warning, never a block.", kind: "deterministic" },
-  "G-AUDIO-FILES": { title: "Sound files that are missing", explain: "Every sound the film plays has its file. A missing one is left out of the render and said; place it again, relink it, or remove it. A warning, never a block.", kind: "deterministic" },
-  "G-LYRIC": { title: "The sung words", explain: "In a lyrics video: each word sung is on screen, with the count sung, and shows around its sung time (the times are a draft, so only clear misses are named). A warning, never a block.", kind: "deterministic" },
-  "G-SEQ-CRAWL": { title: "Image sequence: smooth turns", explain: "A product sequence turning under 1 picture a film frame, or one picture held where the product is mid-turn: it looks like it stutters. A warning, never a block.", kind: "deterministic" },
-  "G-SEQ-JUMP": { title: "Image sequence: no sudden jump", explain: "One film frame that skips far more pictures than the frames around it, where the two pictures differ. Fast turns are fine; a cut of the film is fine. A warning, never a block.", kind: "deterministic" },
-  "G-SEQ-PRODUCT": { title: "Image sequence: the whole product in the frame", explain: "Reads where the product is on screen every 0.2 s: the frame must not cut it, outside a shot marked as a close-up. A warning, never a block.", kind: "deterministic" },
-  "G-STILL": { title: "Still stretches", explain: "Takes a still every 0.25 s and flags where the film's objects hold still for more than 2 s (the final hold excepted): the film should never look like a slideshow. A drift of a few pixels or a slight tilt counts as still. A heuristic: it can misjudge.", kind: "heuristic" },
-};
 
 export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   const { root, jobs } = ctx;
@@ -271,8 +237,6 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   /** What the batch's commit says: one file by its name, more by their number. */
   const addToBatch = (b, n, message) => { b.message = b.count ? `Assets added (${b.count + n} files)` : message; b.count += n; };
   const workDir = (p, ...xs) => join(p.path, ".moworks", "cache", ...xs);
-  const voiceOf = (p) => projects.getProject(p.id, root)?.meta?.voice ?? null;
-  const audioPath = (p) => { const v = voiceOf(p); return v?.file ? join(p.path, ...v.file.split("/")) : null; };
   /** The film's music track (project-relative): the one placed as music, else the first audio file in assets/3_audio/music/ (or the old assets/audio/). */
   const musicTrack = (p) => {
     const f = projects.getProject(p.id, root)?.meta?.music?.file;
@@ -300,85 +264,6 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     return { title: (m?.file === src && m.title) || basename(src).replace(/\.[^.]+$/, ""), duration: await trackLength(p, src), beats: await readBeats(p.path, src) };
   };
 
-  // ---- transcription: always the first step after new audio
-  /** Words to expect, for Whisper's spelling: what the user typed for this project, else the brand and the start of the script. */
-  const hintsFor = (p) => {
-    const m = projects.getProject(p.id, root)?.meta ?? {};
-    if (typeof m.voice?.hints === "string") return m.voice.hints;
-    return [m.brand, m.brief?.mode === "script" ? m.brief.text : ""].filter(Boolean).join(". ").replace(/\s+/g, " ").slice(0, 600);
-  };
-
-  function startTranscribe(p, { model, language, hints } = {}) {
-    const s = asr.voiceSettings(root);
-    const all = asr.models(root);
-    const ready = (m) => m && m.installed && m.runtime.ok;
-    // no model asked for: the default when it is ready, else any ready one (Turbo is the only model)
-    const id = model ?? (ready(all.find((m) => m.id === s.defaultModel)) ? s.defaultModel : all.find(ready)?.id ?? s.defaultModel), lang = language ?? (p.meta?.voice?.source === "kokoro" ? kokoro.whisperLanguage(p.meta.voice.voiceId) : null) ?? p.meta?.language?.id ?? s.language;          // Whisper's "Spoken in" follows the film's language; a Kokoro voice-over is in its voice's own (a film with no language set yet read an English voice as Vietnamese and heard nothing)
-    const file = audioPath(p);
-    if (!file || !existsSync(file)) throw err("INVALID", "Add the voice-over audio first");
-    const card = all.find((m) => m.id === id);
-    if (!card) throw err("INVALID", "Unknown speech-to-text model");
-    if (typeof hints === "string") meta(p.id, (m) => { m.voice = { ...(m.voice ?? {}), hints: hints.slice(0, 600) }; });
-    const prompt = typeof hints === "string" ? hints : hintsFor(p);
-    if (!card.installed || !card.runtime.ok) throw err("MODEL_MISSING", !card.installed ? `${card.short} is not installed yet` : `${card.short} cannot run yet: ${card.runtime.message}`);
-    meta(p.id, (m) => { m.voice = { ...(m.voice ?? {}), transcript: { status: "transcribing", model: id, language: lang, at: new Date().toISOString() } }; });
-    // when the words are in, a Prepare waiting for them starts (or one that ran before them checks them)
-    const onEnd = (job) => { if (job.status === "done") { try { ctx.autopilot?.transcriptLanded?.(p.id)?.catch?.(() => {}); } catch { /* the user can go on */ } } };
-    return jobs.start("transcribe", { projectId: p.id, title: `Transcribing (${card.short})`, model: id, onEnd }, async (job) => {
-      job.update({ stage: "loading model" });
-      const result = await asr.transcribe(file, { model: id, language: lang, prompt, workDir: workDir(p, "asr"), signal: job.signal, root,
-        onEvent: (e) => {
-          if (e.type === "info") job.update({ stage: "transcribing", detected: { language: e.language, probability: e.probability, device: e.device } });
-          if (e.type === "progress") job.update({ progress: e.pct, segments: e.segments });
-          if (e.type === "log") job.log(e.line);
-        } }).catch((e) => { meta(p.id, (m) => { if (m.voice?.transcript) m.voice.transcript.status = e.code === "CANCELLED" ? "cancelled" : "failed"; }); throw e; });
-      const t = transcript.fromEngine(p.path, { audio: voiceOf(p).file, result });
-      meta(p.id, (m) => { m.voice.transcript = { status: "review", model: id, language: result.language, at: t.createdAt, segments: t.segments.length };
-        (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "voice", text: `Transcript ready (${card.short}, ${result.segments.length} segments)` }); });
-      await commit(p, "Voice-over transcribed");
-      // a voice-over the app read from a script (ElevenLabs, Kokoro; a film made earlier with Fish Audio too) says that script word for word: its
-      // words are the script's, at Whisper's times; when what was heard is far from the script (another take, an edited file) the user checks them
-      const v0 = voiceOf(p), read = ["elevenlabs", "kokoro", "fishaudio"].includes(v0?.source) && v0?.script && v0.file === t.audio ? transcript.fromScript(t.segments, v0.script) : null;
-      if (read && read.match < 0.6) {
-        note(p, { kind: "voice", status: "warning", text: "The words heard differ from the script the voice was read from ({pct}% the same): check them in Transcript before the film is timed to them",
-          vars: { pct: Math.round(read.match * 100) } });
-        return { segments: result.segments.length, language: result.language, device: result.device, words: 0, script: { match: read.match } };
-      }
-      // words with nothing heard for them: the voice left out a line, so the film is not timed to it until the user has listened (Whisper's words alone say "9 of 10 the same")
-      if (read?.skipped.length) {
-        note(p, { kind: "voice", status: "warning", text: "The voice-over seems to leave out: {words}. Listen to it: make it again if the words are missing, or send the words from Transcript if they are there",
-          vars: { words: read.skipped.map((x) => `“${x.text}”`).join(", ").slice(0, 300) } });
-        return { segments: result.segments.length, language: result.language, device: result.device, words: 0, script: { match: read.match, skipped: read.skipped } };
-      }
-      // the words' times from the service that read them, when it gave them; else Whisper's
-      const aligned = read ? transcript.readAlignment(p.path, t.audio) : null;
-      const exact = aligned ? transcript.exactTimes(read.segments, aligned, await quietParts(file, root).catch(() => [])) : null;
-      if (aligned && !exact) job.log("The service's times are not for these words: Whisper's times are used");
-      // the app uses Whisper's words at once: saved and on the timeline; the user corrects them in the
-      // transcript dialog and sends them again when needed
-      const words = await saveTranscript(projects.getProject(p.id, root), exact ?? (read ? read.segments : t.segments));
-      note(p, { kind: "voice", text: read && read.changed + read.missed ? "Transcript ready: {n} words, the film is timed to them; {k} word(s) taken from the script the voice was read from"
-        : "Transcript ready: {n} words, the film is timed to them; open Transcript to correct them", vars: { n: words, k: read ? read.changed + read.missed : 0 } });
-      return { segments: result.segments.length, language: result.language, device: result.device, words, ...(read ? { script: { match: read.match, changed: read.changed, missed: read.missed } } : {}) };
-    });
-  }
-
-  /** The checks before a voice service reads anything: { provider, key, local }. */
-  function readingAsked(p, b) {
-    const provider = PROVIDERS[b.provider] ? b.provider : null;
-    if (!provider) throw err("INVALID", "Choose ElevenLabs or Kokoro");
-    const local = !!PROVIDERS[provider].local;
-    const key = local ? null : secrets.getSecret(provider, root);
-    if (!key && !local) throw err("INVALID", `Add the ${PROVIDERS[provider].title} key in Settings first`);
-    if (local) {
-      if (!kokoro.packStatus(root).installed) throw err("MODEL_MISSING", "The free voice is not installed yet: install it on the Voice screen");
-      // a film in Vietnamese, or Vietnamese words in a film whose language is not set yet (an English film may quote a Vietnamese name)
-      if (filmVietnamese(p.meta) || (!p.meta?.language?.id && isVietnamese(String(b.text ?? "")))) throw err("INVALID", "Kokoro has no Vietnamese voice: choose ElevenLabs or upload a recording");
-    }
-    return { provider, key, local };
-  }
-  const sampleFile = (p, hash) => join(p.path, ".moworks", "cache", "voice-samples", `${hash}.mp3`);
-
   /** All the gates (the blank-scene stills included) in a child process; Stop kills it. */
   const checkTimeFile = (p) => join(p.path, ".moworks", "cache", "qa", "check-time.json");
   // span: the job's progress from..to across the parts (the Tech checks job: its own bar moves with them)
@@ -400,7 +285,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
           ...(span && total > 0 ? { progress: Math.round(span[0] + (span[1] - span[0]) * Math.min(1, done / total)) } : {}) });
       }
     });
-    const kill = () => spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true });
+    const kill = () => killTree(c);
     job.signal.addEventListener("abort", kill, { once: true });
     c.on("close", (code) => {
       job.signal.removeEventListener("abort", kill);
@@ -417,13 +302,17 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   /** The checks for this film as it is now: the last ones when nothing they read changed since (gateHash), else a new run that is
    *  kept for the next time. The result says reused: { at } when it is the earlier run. */
   const gatesFor = async (p, job, { blank = true } = {}) => {
-    const key = gateHash(p.path, projects.projectFps(projects.getProject(p.id, root) ?? p), root);
-    const prev = reusableChecks(p.path, key, { blank });
+    // a code film bundled from its source first, as Tech checks do: a source changed by hand (or a task stopped before it was bundled) is the film the hash reads (b1.9)
+    const bundled = await freshFilm(p.path).catch((e) => { job.log?.(`bundle: ${e.message}`); return { error: e.message }; });
+    const fps = projects.projectFps(projects.getProject(p.id, root) ?? p), key = gateHash(p.path, fps, root);
+    const prev = reusableChecks(p.path, key, { blank, bundled });          // a source that does not build: checked again (b6.1)
     if (prev) { job.log?.(`checks: the film is unchanged since ${prev.at}: their results are reused`); return { ...prev.gates, reused: { at: prev.at } }; }
     // why a Render runs the checks itself: "changed" (the film changed since its last checks, e.g. a chat fix) or "never"
     job.update?.({ checksWhy: readJson(checkedFile(p.path), null) ? "changed" : "never" });
     const gates = await gatesChild(p, job, { blank });
-    try { writeJson(checkedFile(p.path), { key, blank, at: new Date().toISOString(), gates }); } catch { /* the cache is best effort */ }
+    // what Tech checks' sound-only shortcut reads too (the picture's key, the checks' code): a Render's own checks no longer cost the next
+    // Tech checks a whole run for a sound change (audit/112b b6.4)
+    try { writeJson(checkedFile(p.path), { key, blank, at: new Date().toISOString(), gates, picture: pictureKey(p.path, fps, root), code: checksCode(root) }); } catch { /* the cache is best effort */ }
     return gates;
   };
 
@@ -434,7 +323,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     if (!g) return null;
     const f = workDir(p, "qa", "last.json"), last = readJson(f, null);
     if (!last?.checks?.length) return null;
-    const c = { ...g, ...(CHECKS[g.id] ?? { title: g.id, explain: "", kind: "deterministic" }) };
+    const c = { ...g, ...checkWords(g.id) };
     writeJson(f, { ...last, checks: [...last.checks.filter((x) => x.id !== g.id), c] });
     return g;
   }
@@ -444,8 +333,8 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     const beats = await analyseBeats(p.path, rel);
     if (beats.ok) { try { fitMusicToFilm(p.path); } catch { /* fitted again before the checks */ } }          // a song shorter than the film repeats on its beats
     await levelTracks(p.path, { root }).catch(() => null);          // under the voice, ducked under its words (sfx/actions.mjs trackGains)
-    meta(p.id, (m) => { m.music = { file: rel, duration: info?.duration ?? null, beats: beats.ok ? beats.file : null, at: new Date().toISOString() };
-      (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "music", text: `Music on the timeline: ${basename(rel)}` }); });
+    recordMusic(p.id, { placed: { file: rel, duration: info?.duration ?? null, beats: beats.ok ? beats.file : null } }, root);          // sfx/film-music.mjs
+    meta(p.id, (m) => { (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "music", text: `Music on the timeline: ${basename(rel)}` }); });
     note(p, { kind: "voice", text: beats.ok ? "Music on the timeline, beats measured: {file}" : "Music on the timeline: {file}", vars: { file: basename(rel) } });
     repeatNote(p);
     if (isLyricVideo(projects.getProject(p.id, root)?.meta, { dir: p.path, root })) await writeBeatMap(p.path, rel, { root, fps: projects.projectFps(p) }).catch(() => false);
@@ -469,7 +358,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     const r = musicRepeats(p.path);
     const cur = projects.getProject(p.id, root)?.meta?.music;
     if (!r?.short || !cur || cur.repeatNoted === r.from) return;
-    meta(p.id, (m) => { if (m.music) m.music.repeatNoted = r.from; });
+    recordMusic(p.id, { repeatNoted: r.from }, root);
     note(p, { kind: "music", status: "warning", open: "mix", text: "The song is shorter than the film; it repeats from {at}. Pick a longer track in Final Mix if you hear the repeat.", vars: { at: r.at } });
   };
 
@@ -485,9 +374,10 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     if (!made.size || !want.length) return startExport(p, b);
     // the master first, then the others in the order they were made
     const order = [own, ...extraSizes(p.meta).map((x) => x.aspect)].filter((a) => want.includes(a));
-    // the next size when one ends (its record may still read "running" for a moment: tried again for a few seconds)
-    const again = (fn, n = 20) => { try { fn(); } catch (e) { if (e.code === "BUSY" && n > 0) setTimeout(() => again(fn, n - 1), 500); } };
-    const run = (i) => startExport(projects.getProject(p.id, root) ?? p, b, { size: order[i], sized: true, then: i + 1 < order.length ? () => again(() => run(i + 1)) : null });
+    // the next size when one ends; one that cannot start says so in the chat (audit/112b b1.3: it was dropped without a word)
+    const said = (size) => (why) => { try { projects.addNote(p.path, { kind: "render", status: "warning", text: "The {size} size was not rendered: {why}. Press Render again to make it.", vars: { size, why } }); } catch { /* notes are best effort */ } };
+    const run = (i) => startExport(projects.getProject(p.id, root) ?? p, b, { size: order[i], sized: true,
+      then: i + 1 < order.length ? () => nextSize(() => run(i + 1), { claudeBusy: () => !!ctx.agent?.running?.has(p.id), giveUp: said(order[i + 1]) }) : null });
     return { ...run(0), queue: order.map((size) => ({ size })) };
   }
   function startExport(p, b, { size = null, sized = false, then = null } = {}) {
@@ -499,14 +389,12 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     // frame-stepped motion and the film's data-fps follow the project's; a separate choice only disagreed with the timeline. b.fps is ignored.
     const fps = projects.projectFps(projects.getProject(p.id, root) ?? p);
     // a name typed with the format's ending ("film.mp4") loses it: the date and the ending are the app's ("…_film.mp4_0529.mp4", T38-10)
-    const ext = FORMATS[format], typed = safeName(b.filename, basename(p.path));
-    const name0 = typed.toLowerCase().endsWith(ext.toLowerCase()) && typed.length > ext.length ? typed.slice(0, -ext.length).trim() || basename(p.path) : typed;
+    const ext = FORMATS[format], name0 = typedName(b.filename, ext, basename(p.path));          // render-names: as the Render dialog shows it
     // a film of several sizes: each file says its size (<film>_16x9, <film>_9x16); `other`: one of the sizes made from the master
     const other = !!size && size !== (masterAspect(p.meta) ?? p.meta?.format?.aspect);
     const name = sized && size ? `${name0}_${tagOf(size)}` : name0;
     const dir = join(p.path, "renders");
     mkdirSync(dir, { recursive: true });
-    moveOldGates(p.path);
     const out = join(dir, stampedName(dir, name, FORMATS[format]));          // the date and time in the name, never ""
     // not while Claude changes the film (the render would catch it half-done); one render at a time in the app
     if (ctx.agent?.running?.has(p.id)) throw err("BUSY", "Claude is changing the film: render when it finishes");
@@ -520,76 +408,75 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       catch (e) { if (e.code === "CANCELLED" || job.signal?.aborted) go = false; throw e; }          // a Stop stops the sizes after it too
       finally { release(); if (go) setTimeout(then, 300); }
     });
-    /** One of the film's other sizes: its root page through its own folder (sizeStage), checked there (Tech checks per root page), rendered,
-     *  then the master's own mix put onto its picture; delivered as the master's render is (web size, subtitles, loudness). */
-    async function renderSizeNow(job) {
-      projects.keepRootFps(projects.getProject(p.id, root) ?? p);
-      fitMusicToFilm(p.path); await levelTracks(p.path, { root }).catch(() => null); applyLanes(p.path);          // the master's sound, as for its own render
+    /** The film made ready (server/prepare.mjs) and committed; a sound whose file is gone is left out of the render, said in the chat
+     *  (owner #1109; T38b-9: HF failed after a minute on it). The master's render and each size's (audit/112b b2.4: two copies). */
+    async function readied(job) {
+      const ready = await prepareFilm(p, { root, dropLost: true, log: job.log });
+      repeatNote(p);
+      if (ready.lost.length) note(p, { kind: "render", status: "warning", open: "mix", text: ready.lost.map((f) => f.message).join(" ") });
       await commit(p, "Changes before render");
-      const stageDir = sizeStage(p.path, size);
-      if (!stageDir) throw err("NOT_FOUND", `The ${size} size is not made yet: adapt it first`);
+    }
+    /** The checks of the root page in `dir` (Tech checks' results when the film is unchanged); throws RENDER_BLOCKED when they stop it. */
+    async function checked(job, dir, { size: sz = null } = {}) {
       job.update({ stage: "checks", revision: await rev.headAsync(p.path) });
-      const gates = await gatesFor({ ...p, path: stageDir }, job, { blank: false }).catch((e) => {
+      const gates = await gatesFor(dir === p.path ? p : { ...p, path: dir }, job, { blank: false }).catch((e) => {
+        // the quick check did not finish on a busy machine: said in the chat too (a render left blocked went unseen for 70 min, T22)
         if (e.code === "CHECK_BUSY") note(p, { kind: "render", status: "warning", text: e.message, open: "render" });
         throw e;
       });
       verdict = renderVerdict(gates);
-      writeJson(gatesFile(p.path, out), { ...gates, verdict, size });
+      writeJson(gatesFile(p.path, out), { ...gates, verdict, ...(sz ? { size: sz } : {}) });          // never in renders/
       job.update({ gates: { pass: verdict.pass, blockingFailures: verdict.blocking.map((g) => g.id), ...(gates.reused ? { reused: gates.reused } : {}) }, warnings: verdict.warnings });
-      if (!verdict.pass) throw Object.assign(err("RENDER_BLOCKED", `Render of ${size} stopped: ${verdict.blocking.map((g) => CHECKS[g.id]?.title ?? g.id).join(", ")}`), { detail: { verdict } });
-      job.update({ stage: "gpu check" });
-      const gpu = await chooseGpu(stageDir, { root, signal: job.signal });
-      job.update({ gpu: { mode: gpu.mode, reason: gpu.reason, renderer: gpu.renderer }, stage: "rendering", progress: 0 });
-      // the master's mix onto the picture where it can be (every sound on the master's root page, an MP4 or MOV); else the page's own copy of it
-      const remix = format !== "webm" && soundOnRoot(p.path);
-      const pic = remix ? out.replace(/(\.[^.\\/]+)$/, ".picture$1") : out;
-      const res = await render({ projectDir: stageDir, outputPath: pic, fps, format, quality, workers: FG_WORKERS, browserGpuMode: gpu.mode }, { signal: job.signal, root,
+      if (!verdict.pass) throw Object.assign(err("RENDER_BLOCKED", `Render${sz ? ` of ${sz}` : ""} stopped: ${verdict.blocking.map((g) => checkWords(g.id).title).join(", ")}`), { detail: { verdict } });
+    }
+    /** HyperFrames renders the root page in `dir` to `to`: its progress on the job, its errors as the app's (CANCELLED, RENDER_FAILED…). */
+    async function hfRender(job, dir, to, gpu) {
+      const res = await render({ projectDir: dir, outputPath: to, fps, format, quality, workers: FG_WORKERS, browserGpuMode: gpu.mode }, { signal: job.signal, root,
         logFile: join(root, "runtime", "logs", `export-${Date.now()}.log`),
         onEvent: (e) => {
           if (e.type === "progress") job.update({ stage: e.stage ? `rendering: ${e.stage}` : "rendering", progress: typeof e.pct === "number" ? Math.round(e.pct) : job.progress });
           if (e.type === "log" && e.level === "error") job.log(e.message);
         } });
       job.update({ logFile: res.logFile });
-      if (res.type === "cancelled") throw err("CANCELLED", "Export stopped");
-      if (res.type !== "done") throw Object.assign(err(res.code ?? "RENDER_FAILED", res.message ?? "The render failed"), { detail: { retryable: res.retryable ?? null, logFile: res.logFile, hf: res.hf ?? null } });
+      return renderOutcome(res, { what: "Export" });          // HF's answer read one way for every render (audit/112b b2.4)
+    }
+    /** One of the film's other sizes: its root page through its own folder (sizeStage), checked there (Tech checks per root page), rendered,
+     *  then the master's own mix put onto its picture; delivered as the master's render is (web size, subtitles, loudness). */
+    async function renderSizeNow(job) {
+      await readied(job);
+      const stageDir = sizeStage(p.path, size);
+      if (!stageDir) throw err("NOT_FOUND", `The ${size} size is not made yet: adapt it first`);
+      await checked(job, stageDir, { size });
+      job.update({ stage: "gpu check" });
+      const gpu = await chooseGpu(stageDir, { root, signal: job.signal });
+      job.update({ gpu: { mode: gpu.mode, reason: gpu.reason, renderer: gpu.renderer }, stage: "rendering", progress: 0 });
+      // the master's mix onto the picture where it can be (every sound on the master's root page, an MP4 or MOV); else the page's own copy of it
+      const remix = format !== "webm" && soundOnRoot(p.path);
+      const pic = remix ? out.replace(/(\.[^.\\/]+)$/, ".picture$1") : out;
+      const res = await hfRender(job, stageDir, pic, gpu);
       if (remix) {
         job.update({ stage: "the master's sound" });
         const mixed = await remixAudio({ projectDir: p.path, picture: pic, outputPath: out, fps, duration: res.duration ?? null, workDir: join(p.path, ".moworks", "cache", "sizes", `remix-${tagOf(size)}`) },
-          { signal: job.signal, root, ffmpeg: join(expandEnv(loadPins(root).ffmpeg.dir), "ffmpeg.exe") });
+          { signal: job.signal, root, ffmpeg: ffmpegExe(root) });
         rmSync(pic, { force: true });
         if (mixed.type === "cancelled") throw err("CANCELLED", "Export stopped");
         if (mixed.type !== "done") throw err("REMIX_FAILED", mixed.message ?? "The master's sound could not be put onto this size");
+        // what the mix said is kept on the job, as the master's render keeps it (they were dropped: audit/112b, sent to S5)
+        if (mixed.warning) job.log(`the sound of this size: ${mixed.warning}`);
+        if (mixed.loweredDb) job.update({ loweredDb: mixed.loweredDb });
       }
-      return delivered(res, gpu);
+      return delivered(job, res, gpu);
     }
     async function renderNow(job) {
-      projects.keepRootFps(projects.getProject(p.id, root) ?? p);          // the film's data-fps back on the root before HF reads it
-      fitMusicToFilm(p.path);          // the music ends with the film, fading down with the picture (ending.mjs)
-      await levelTracks(p.path, { root }).catch(() => null);          // the voice and the music at their levels, the music ducked under the words
-      repeatNote(p);
-      refreshBridge(p.path);          // a code film built before a bridge change gets today's bridge
-      applyLanes(p.path);
-      // a sound whose file is gone is left out of the render, said in the chat (owner #1109; T38b-9: HF failed after a minute on it)
-      const lost = gateAudioFiles(p.path);
-      if (!lost.pass) { dropMissingAudio(p.path); note(p, { kind: "render", status: "warning", open: "mix", text: lost.findings.map((f) => f.message).join(" ") }); }
-      await commit(p, "Changes before render");
-      job.update({ stage: "checks", revision: await rev.headAsync(p.path) });
-      const gates = await gatesFor(p, job, { blank: false }).catch((e) => {          // Tech checks' results when the film is unchanged
-        // the quick check did not finish on a busy machine: said in the chat too (a render left blocked went unseen for 70 min, T22)
-        if (e.code === "CHECK_BUSY") note(p, { kind: "render", status: "warning", text: e.message, open: "render" });
-        throw e;
-      });
-      verdict = renderVerdict(gates);
-      writeJson(gatesFile(p.path, out), { ...gates, verdict });          // never in renders/
-      job.update({ gates: { pass: verdict.pass, blockingFailures: verdict.blocking.map((g) => g.id), ...(gates.reused ? { reused: gates.reused } : {}) }, warnings: verdict.warnings });
-      if (!verdict.pass) throw Object.assign(err("RENDER_BLOCKED", `Render stopped: ${verdict.blocking.map((g) => CHECKS[g.id]?.title ?? g.id).join(", ")}`), { detail: { verdict } });
+      await readied(job);
+      await checked(job, p.path);
       // a Brush cartoon film was rendered once when it was finished: when nothing changed since, that file is the export
       const pre = await ctx.preRendered?.(p, { format, fps, quality, signal: job.signal }, (stage) => job.update({ stage })).catch((e) => { job.log?.(`reuse: ${e.message}`); return null; });
       if (pre) {
         job.update({ stage: "copying the film", progress: 100, reused: true });
         // the same file twice takes the room once: a hard link on one disk (either name can go, the other stays; the pre-render is replaced, never written over), a copy where links do not work (Google Drive, another disk)
         try { rmSync(out, { force: true }); linkSync(pre, out); } catch { copyFileSync(pre, out); }
-        return delivered({ type: "done", reused: true, reusedFrom: ctx.preRenderInfo?.(p) ?? null, logFile: null, totalFrames: null, duration: null, wallMs: 0, hfVersion: null }, { mode: "reused", reason: "pre-rendered", renderer: null, ms: 0 });
+        return delivered(job, { type: "done", reused: true, reusedFrom: ctx.preRenderInfo?.(p) ?? null, logFile: null, totalFrames: null, duration: null, wallMs: 0, hfVersion: null }, { mode: "reused", reason: "pre-rendered", renderer: null, ms: 0 });
       }
       // GPU or CPU: one test frame on the GPU first; a failed or blank one sends this render to the CPU, said in one line
       job.update({ stage: "gpu check" });
@@ -598,24 +485,15 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       if (gpu.fellBack) note(p, { kind: "render", status: "warning", text: "The GPU test frame came out {why}, so this render runs on the CPU (slower)",
         vars: { why: gpu.reason === "test-blank" ? "blank" : "wrong" } });
       job.update({ stage: "rendering", progress: 0 });
-      const res = await render({ projectDir: p.path, outputPath: out, fps, format, quality, workers: FG_WORKERS, browserGpuMode: gpu.mode }, { signal: job.signal, root,
-        logFile: join(root, "runtime", "logs", `export-${Date.now()}.log`),
-        onEvent: (e) => {
-          if (e.type === "progress") job.update({ stage: e.stage ? `rendering: ${e.stage}` : "rendering", progress: typeof e.pct === "number" ? Math.round(e.pct) : job.progress });
-          if (e.type === "log" && e.level === "error") job.log(e.message);
-        } });
-      job.update({ logFile: res.logFile });
-      if (res.type === "cancelled") throw err("CANCELLED", "Export stopped");
-      if (res.type !== "done") throw Object.assign(err(res.code ?? "RENDER_FAILED", res.message ?? "The render failed"), { detail: { retryable: res.retryable ?? null, logFile: res.logFile, hf: res.hf ?? null } });
-      return delivered(res, gpu);
-    // the rendered (or reused) file: its sound mastered and measured, the export recorded, a version kept
-    async function delivered(res, gpu) {
-      // Standard is for the web: an MP4 over the web ceiling (grain, flicker) is encoded once more with a maxrate; High stays as HF made it
-      let web = null;
-      if (format === "mp4" && quality === "standard" && existsSync(out)) {
-        job.update({ stage: "web size" });
-        web = await capWebBitrate(out, { root, signal: job.signal }).catch((e) => { job.log?.(`web size: ${e.message}`); return null; });
-      }
+      const res = await hfRender(job, p.path, out, gpu);
+      return delivered(job, res, gpu);
+    }
+    // the rendered (or reused) file: its sound mastered and measured, the export recorded, a version kept. The master's render and a size's
+    // (it sat inside renderNow, so a size's render ended in "delivered is not defined")
+    async function delivered(job, res, gpu) {
+      // the delivery every render of the film goes through (server/deliver.mjs, audit/112b b2.4): Standard held to the web ceiling (High
+      // stays as HF made it), the sound mastered to the studio rule (-14 LUFS, true peak at most -1 dBTP; -16 when Quieter is chosen), measured
+      const { web, loud } = await deliverFile(out, { format, quality, master, measure: true, root, signal: job.signal, onStage: (stage) => job.update({ stage }), log: (l) => job.log?.(l) });
       const fileSize = existsSync(out) ? statSync(out).size : 0;
       let subs = null;
       if (subtitles && existsSync(out)) {
@@ -629,25 +507,19 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
           } else subs = { lines: 0, files: [], why: "The film has no words to subtitle." };
         } catch (e) { job.log?.(`subtitles: ${e.message}`); subs = { lines: 0, files: [], why: "The subtitles could not be made." }; }
       }
-      job.update({ stage: "loudness" });
-      // the master to the studio rule (-14 LUFS, true peak at most -1 dBTP; -16 when Quieter is chosen), HyperFrames' two-pass loudnorm; then measured
-      let loud = null;
-      if (format === "mp4" || format === "mov") {
-        const target = MASTER[master] ?? null;
-        if (target) { job.update({ stage: "master loudness" }); await masterLoudness(out, { target, root }).catch((e) => job.log(`master loudness: ${e.message}`)); }
-        loud = await loudness(out, { root, target: { lufs: (target ?? MASTER.standard).lufs, peak: (target ?? MASTER.standard).tp, tolerance: 1 } }).catch((e) => ({ error: e.message }));
-        if (loud && !loud.error) loud.master = target ? master : "off";
-      }
       // the film's hash beside it: a check that reads a render (G-CUTS) reads this one while the film is as it was rendered (T38-7)
-      let filmAt = null; try { if (!other) filmAt = filmHash(p.path, Number(fps) || null); } catch { /* no hash: never read as the film's */ }
+      let filmAt = null, pictureAt = null;          // pictureAt: what AE takes of the file, its picture (renders.mjs lastRender, audit/112d d4)
+      try { if (!other) { filmAt = filmHash(p.path, Number(fps) || null); pictureAt = filmParts(p.path, Number(fps) || null).picture; } } catch { /* no hash: never read as the film's */ }
       // a render of the film as it is now goes on with the new version waiting for a press (Version 2 after a Review), as a chat message does:
       // the Editor stopped showing Version 1 and the chat saying Version 2 was not rendered (T38b-3)
       if (!other) meta(p.id, (m) => { const x = m.pipeline?.version1; if (x?.holding && x.next) { delete x.holding; x.next.opened = new Date().toISOString(); x.next.render = "done"; } });
       // one of the other sizes: its own last export, beside the master's
       if (other) meta(p.id, (m) => { updateSize(m, size, (x) => { x.lastExport = { file: relativeTo(p.path, out), at: new Date().toISOString(), size: fileSize, format, fps, quality, loudness: loud }; }); });
-      else meta(p.id, (m) => { (m.stages ??= {}).export = { status: "done" }; m.lastExport = { file: relativeTo(p.path, out), at: new Date().toISOString(), size: fileSize, format, fps, quality, loudness: loud, ...(web?.capped ? { web } : {}), ...(filmAt ? { hash: filmAt } : {}) };
+      else meta(p.id, (m) => { (m.stages ??= {}).export = { status: "done" }; m.lastExport = { file: relativeTo(p.path, out), at: new Date().toISOString(), size: fileSize, format, fps, quality, loudness: loud, ...(web?.capped ? { web } : {}), ...(filmAt ? { hash: filmAt, picture: pictureAt } : {}) };
         (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "export", text: `Exported ${basename(out)}` }); });
       note(p, { kind: "render", text: "Render finished: {file}", vars: { file: basename(out) }, file: relativeTo(p.path, out), warnings: verdict.warnings.length });
+      const hfSaid = renderWarningNote(res.warnings);          // what HyperFrames warned of while rendering: a short yellow line (b1.2)
+      if (hfSaid) note(p, hfSaid);
       try { await ctx.autopilot?.saveVersion(p.id, "render"); } catch { /* a version is best effort */ }          // each render is a version
       // the cuts read from this render into the last Tech checks at once (T38b-2), in the background: the render is done whatever they find
       if (!other) cutsIntoChecks(p).catch(() => null);
@@ -656,7 +528,6 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       const whole = job.startedAt ? Date.now() - Date.parse(job.startedAt) : res.wallMs;
       return { loudness: loud, file: out, size: fileSize, ...(size ? { filmSize: size } : {}), ...(subs ? { subtitles: subs } : {}), frames: res.totalFrames ?? null, duration: res.duration ?? null, wallMs: whole, renderMs: res.wallMs, hfVersion: res.hfVersion, logFile: res.logFile,
         gpu: { mode: gpu.mode, reason: gpu.reason, renderer: gpu.renderer, checkMs: gpu.ms }, ...(web?.capped ? { web } : {}), ...(res.reused ? { reused: true, reusedFrom: res.reusedFrom ?? null } : {}) };
-    }
     }
   }
   const relativeTo = (base, f) => f.slice(resolve(base).length + 1).split(sep).join("/");
@@ -675,29 +546,29 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
   // ---- QA: the same gates + a contact sheet of HF stills (Visual Review, heuristic), report in .moworks/cache/qa/last.json
   function startQa(p, { onEnd = null, background = false } = {}) {
     return jobs.start("qa", { projectId: p.id, title: "Running checks", onEnd, ...(background ? { background: true } : {}) }, async (job) => {
-      projects.keepRootFps(projects.getProject(p.id, root) ?? p);          // `hyperframes check` and the stills read the root's data-fps
-      fitMusicToFilm(p.path);
-      await levelTracks(p.path, { root }).catch(() => null);
+      // the film made ready as a render makes it (server/prepare.mjs), a lost sound kept for G-AUDIO-FILES to name; before the commit (G-BUILD would bundle it after)
+      const ready = await prepareFilm(p, { root, log: job.log });
       repeatNote(p);
-      refreshBridge(p.path);
-      await freshFilm(p.path);          // the film as it is now, before the commit (G-BUILD would bundle it after)
       await commit(p, "Changes before checks");
       const revision = (await rev.headAsync(p.path)) ?? "none";
       job.update({ stage: "checks", progress: 10 });
       // Tech checks run every time they are asked for, and keep their results for a Render of the same film
-      const fps0 = projects.projectFps(projects.getProject(p.id, root) ?? p), key = gateHash(p.path, fps0, root), picture = filmParts(p.path, fps0).picture, code = checksCode(root);
+      const fps0 = projects.projectFps(projects.getProject(p.id, root) ?? p), key = gateHash(p.path, fps0, root), picture = pictureKey(p.path, fps0, root), code = checksCode(root);
       // only the sound changed: the picture's checks stand, the sound's run (T32-7: 10 minutes for a chair louder, the picture's hash the same)
       const was = readJson(checkedFile(p.path), null), lastReport = readJson(workDir(p, "qa", "last.json"), null);
-      if (was?.picture === picture && was?.code === code && was?.gates?.gates && lastReport?.checks?.length) {
+      if (soundOnlyStands(was, lastReport, { picture, code, bundled: ready.bundled })) {
         const fresh = await gatesChild(p, job, { soundOnly: true, span: [10, 90] });
-        const report = { ...lastReport, at: new Date().toISOString(), revision, soundOnly: true, checks: withSoundChecks(lastReport.checks, fresh.gates.map((g) => ({ ...g, ...(CHECKS[g.id] ?? { title: g.id, explain: "", kind: "deterministic" }) }))) };
-        try { writeJson(checkedFile(p.path), { ...was, key, at: report.at, gates: { ...was.gates, gates: withSoundChecks(was.gates.gates, fresh.gates) } }); } catch { /* best effort */ }
+        const at = new Date().toISOString();
+        const report = { ...lastReport, at, checkedAt: at, revision, soundOnly: true, checks: withSoundChecks(lastReport.checks, fresh.gates.map((g) => ({ ...g, ...checkWords(g.id) }))) };
+        try { writeJson(checkedFile(p.path), { ...was, key, at: report.checkedAt, gates: { ...was.gates, gates: withSoundChecks(was.gates.gates, fresh.gates) } }); } catch { /* best effort */ }
         writeJson(workDir(p, "qa", "last.json"), report);
         meta(p.id, (m) => { m.lastQa = { at: report.at, pass: report.pass, revision, blocking: report.blockingFailures.length }; });
         return { pass: report.pass, blocking: report.blockingFailures.length, soundOnly: true };
       }
       const gates = await gatesChild(p, job, { span: [10, 60] });          // the top bar's "Running checks 10%" stood ~10 min
-      try { writeJson(checkedFile(p.path), { key, blank: true, at: new Date().toISOString(), gates, picture, code }); } catch { /* best effort */ }
+      // the report names the checks it is made from (their time in checked.json): a Render's own checks since are newer than it (b7.1)
+      const checkedAt = new Date().toISOString();
+      try { writeJson(checkedFile(p.path), { key, blank: true, at: checkedAt, gates, picture, code }); } catch { /* best effort */ }
       job.update({ stage: "contact sheet", progress: 60 });
       const { shots, root: comp } = await readShots(p.path);
       const placed = shots.filter((s) => s.start != null && s.duration);
@@ -716,7 +587,7 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       job.update({ stage: "still stretches", progress: 80 });
       let still = null, stillErr = null;
       if (comp?.duration > 0) {
-        try { still = await measureStills(p.path, { shots: placedShots(shots, comp.duration), total: comp.duration, dynamic: dynamicOf(p.path), signal: job.signal, workDir: workDir(p, "still") }); }
+        try { still = await measureStills(p.path, { shots: placedShots(shots, comp.duration), total: comp.duration, dynamic: dynamicOf(p.path), ...stillLimit(p.path), signal: job.signal, workDir: workDir(p, "still") }); }
         catch (e) { if (job.signal.aborted) throw e; stillErr = String(e.message).split(/\r?\n/)[0]; }
       } else stillErr = "the film has no length yet";
       gates.gates.push(stillGate(still, stillErr));
@@ -741,8 +612,8 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
         return { ...f, file: at.file ?? f.file, shot, plain: plainFinding(f, { shot: at.shot, check: title, frame }),
           ...(measuringSlip(f, frame) ? { artefact: true } : {}), ...(k ? { intended: true, ...(k.why ? { why: k.why } : {}) } : {}) };
       };
-      const report = { at: new Date().toISOString(), revision, pass: gates.pass, blockingFailures: gates.blockingFailures,
-        checks: gates.gates.map((g) => { const c = CHECKS[g.id] ?? { title: g.id, explain: "", kind: "deterministic" };
+      const report = { at: new Date().toISOString(), checkedAt, revision, pass: gates.pass, blockingFailures: gates.blockingFailures,
+        checks: gates.gates.map((g) => { const c = checkWords(g.id);
           return { ...g, ...c, findings: (g.findings ?? []).map((f) => g.id.startsWith("G-HF-") ? hfFinding(f, c.title)
             : ({ ...f, shot: shotOf(f.file) ?? (f.composition ? placed.find((s) => s.src?.includes(f.composition))?.number ?? null : f.shot ?? null) })) }; }),
         stills };
@@ -753,114 +624,12 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       // said once, in plain words: what would stop the render (a check that ran out of time is not one). A pass after a failure
       // writes a quiet "checks" note the Editor clears its card with.
       if (!report.pass) note(p, { kind: "checks", status: "error", text: "Something would stop the render: {what}",
-        vars: { n: report.blockingFailures.length, what: report.blockingFailures.map((id) => CHECKS[id]?.title ?? id).join(", ") } });
+        vars: { n: report.blockingFailures.length, what: report.blockingFailures.map((id) => checkWords(id).title).join(", ") } });
       else if (wasFailing) note(p, { kind: "checks", status: "done", text: "Nothing stops the render any more" });
       return { pass: report.pass, blocking: report.blockingFailures.length };
     });
   }
 
-  // ---- Export to AE: the existing aeExport() in a child process (packages/ae-export/cli.mjs --events)
-  async function startAe(p, b) {
-    // always the film's own rate, like the render: b.fps is ignored; PortAE shows the rate from GET /ae
-    const fps = String(projects.projectFps(projects.getProject(p.id, root) ?? p));
-    const estimate = b.estimate === true;
-    // tasklist off the server's thread (about 1 s while the computer renders)
-    if (!estimate && !(await aeRunningAsync())) throw err("AE_NOT_RUNNING", "Open After Effects first (with no dialog showing), then try again");
-    // each export in its own folder named like a render (<YYMMDD>_<film>_<HHMM>), never over the one before; a size check writes nothing
-    const aeRoot = join(p.path, "renders", "ae");
-    const outDir = estimate ? join(p.path, ".moworks", "cache", "ae-estimate") : join(aeRoot, stampedName(aeRoot, basename(p.path)));
-    return jobs.start(estimate ? "ae-estimate" : "ae", { projectId: p.id, title: estimate ? "Checking the AE export size" : "Export to After Effects", outDir }, async (job) => {
-      projects.keepRootFps(projects.getProject(p.id, root) ?? p);
-      fitMusicToFilm(p.path);
-      await levelTracks(p.path, { root }).catch(() => null);
-      await commit(p, "Changes before Export to AE");
-      // the Log the user reads has no addresses (plainLog); the whole log as written stays in the film's cache (port.log)
-      // a Python traceback is one plain line in it (T40-17: the dialog showed the traceback's code lines); the whole of it stays in port.log
-      let inTrace = false;
-      const raw = [], log = (line) => {
-        raw.push(line);
-        if (/^Traceback \(most recent call last\)/.test(line)) { inTrace = true; job.log("The export's code stopped with an error."); return; }
-        // its frames are left out; its last line, the error itself, stays (T43-10: the Log kept the frames' place and lost what went wrong)
-        if (inTrace) { if (/^\s/.test(line) || !line.trim()) return; inTrace = false; job.log(plainLog(line.replace(/^[\w.]+(?:Error|Exception):\s*/, ""))); return; }
-        job.log(plainLog(line));
-      };
-      // Stop is the user's, not a failure: no exit code, said plainly
-      const STOPPED = { status: "cancelled", code: "CANCELLED", message: "You stopped the export." };
-      const port = (film) => job.signal.aborted ? Promise.resolve(STOPPED) : new Promise((ok) => {
-        const args = [join(root, "packages", "ae-export", "cli.mjs"), p.path, "--fps", fps, "--out", outDir, "--events", ...(estimate ? ["--estimate"] : []), ...(film ? ["--film", film] : [])];
-        const c = spawn(process.execPath, args, { cwd: root, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
-        const kill = () => spawnSync("taskkill", ["/PID", String(c.pid), "/T", "/F"], { windowsHide: true });
-        job.signal.addEventListener("abort", kill, { once: true });
-        let buf = "", final = null;
-        const onLine = (line) => {
-          if (line.startsWith("EVENT ")) {
-            let e; try { e = JSON.parse(line.slice(6)); } catch { return; }
-            if (e.type === "stage") job.update({ stage: e.stage, progress: e.total ? Math.round((e.done / e.total) * 100) : job.progress });
-            if (e.type === "log") log(e.line);
-          } else if (line.startsWith("RESULT ")) { try { final = JSON.parse(line.slice(7)); } catch { /* bad line */ } } else if (line.trim()) log(line);
-        };
-        c.stdout.on("data", (d) => { buf += d.toString("utf8"); let i; while ((i = buf.indexOf("\n")) >= 0) { onLine(buf.slice(0, i).replace(/\r$/, "")); buf = buf.slice(i + 1); } });
-        c.stderr.on("data", (d) => log(d.toString("utf8").trim()));
-        c.on("close", (code) => { job.signal.removeEventListener("abort", kill); if (buf) onLine(buf); ok(job.signal.aborted ? STOPPED : final ?? { status: "failed", code: "PORT_FAILED", message: `port exit ${code}` }); });
-      });
-      // a film drawn on a canvas only goes into AE as its rendered film: the film's background render when it is of the film
-      // as it is now (a running one is waited for); a canvas film the port finds with none renders it here, then ports again
-      const rendered = async (start) => {
-        if (start) ctx.previewProxy?.(p.id);
-        const f = await ctx.preRendered?.(p, { format: "mp4", fps: Number(fps), quality: "draft", signal: job.signal }, () => job.update({ stage: "film" })).catch(() => null);
-        return f ?? null;
-      };
-      const film = estimate || !canvasCount(p.path) ? null : await rendered(false);
-      let result = await port(film);
-      if (result.code === "NEEDS_FILM" && !film && !job.signal.aborted) { const f = await rendered(true); if (f) result = await port(f); }
-      if (job.signal.aborted) result = { ...STOPPED, outDir: result.outDir };
-      // an exit code is no answer for the user (T40-17): said plainly; the notes carry no addresses either (T40-19: a font file's full path)
-      if (/^port exit \d+$/.test(result.message ?? "")) result = { ...result, message: "The export stopped with an error. Export again; if it happens again, tell Claude in the chat." };
-      if (result.message) result = { ...result, message: plainLog(result.message) };
-      if (result.notes?.length) result = { ...result, notes: result.notes.map(plainLog) };
-      try { writeFileSync(workDir(p, "ae", estimate ? "estimate.log" : "port.log"), raw.join("\n") + "\n"); } catch { /* the cache folder is made by the export */ }
-      // the size check is kept with the film it measured: the dialog says what AE gets (a canvas film) without checking again
-      if (estimate && result.estimate) writeJson(workDir(p, "ae", "estimate.json"), { ...result.estimate, at: new Date().toISOString(), hash: filmHash(p.path, Number(fps)) });
-      if (!estimate) writeJson(workDir(p, "ae", "last.json"), { ...result, at: new Date().toISOString(), fps, log: job.lines().slice(-80) });
-      if (result.status === "cancelled") throw Object.assign(err("CANCELLED", STOPPED.message), { detail: result });
-      if (result.status !== "done" && result.status !== "estimate") throw Object.assign(err(result.code ?? "PORT_FAILED", result.message ?? "The port failed"), { detail: result });
-      if (!estimate) meta(p.id, (m) => { (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "ae", text: `Ported to After Effects (${basename(result.aep ?? "")})` }); });
-      const lost = result.layers?.lost?.length ?? 0;
-      if (!estimate) note(p, { kind: "ae", ...(lost ? { status: "error" } : {}), text: lost ? "Export to AE finished, {n} layers are not in the project: {file}" : "Export to AE finished: {file}", vars: { file: basename(result.aep ?? ""), n: lost } });
-      if (!estimate) { try { ctx.styleAe?.filmPorted(projects.getProject(p.id, root) ?? p); } catch { /* the badge waits for the next start */ } }          // its style's AE badge, when not measured yet
-      return result;
-    });
-  }
-
-  /** The transcript saved as HyperFrames' transcript.json and the voice-over put on the timeline (a talking-head clip's own sound stays in
-   *  its video); byOwner: the user's corrected words (the transcript dialog's resend). Resolves the number of words. */
-  async function saveTranscript(p, segments, { byOwner = false } = {}) {
-    const out = await transcript.save(p.path, segments, { workDir: workDir(p, "asr") });
-    meta(p.id, (m) => { m.voice = { ...(m.voice ?? {}), transcript: { ...(m.voice?.transcript ?? {}), status: "saved", savedAt: out.transcript.savedAt, segments: out.transcript.segments.length, by: byOwner ? "owner" : "app" } };
-      (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "voice", text: `Transcript saved (${out.hf.words} words in transcript.json${byOwner ? ", corrected by the owner" : ""})` }); });
-    const v = projects.getProject(p.id, root)?.meta?.voice;
-    if (v?.file && !v.from && !v.offTimeline) { try { placeTrack(p.path, { kind: "voice", src: v.file, duration: Number(v.info?.duration) || 1 }); } catch { /* an index.html Studio cannot read stays as it is */ } }
-    await levelTracks(p.path, { root }).catch(() => null);          // the words known: the voice at its level, the music ducked under them
-    await commit(p, "Transcript saved");
-    return out.hf.words;
-  }
-
-  /** Another voice than the one Version 1 was timed to, put in by the owner (the Voice screen's Create voice-over or an upload there, as Assets'
-   *  Use as the film's voice-over): recorded, so Claude is not started to re-time the film and the Review looks for the picture off it (owner #920;
-   *  T38-5: a voice made on the Voice screen after Version 1 started a Claude turn). { replaced } to keep in m.voice, or {}. */
-  const swapOf = (m, rel) => (m.pipeline?.version1?.at && m.voice?.file && m.voice.file !== rel ? { replaced: { at: new Date().toISOString(), from: m.voice.file, afterVersion1: true } }
-    : m.voice?.replaced ? { replaced: m.voice.replaced } : {});          // still not the voice Version 1 was timed to
-  /** The project's voice-over is now this file: recorded in the project, committed, and transcribed at once. Resolves once committed
-   *  (the transcription's files go in a later revision of their own). */
-  async function useVoice(p, dest, info, { source = "upload", size = 0, from = null } = {}) {
-    const rel = relativeTo(p.path, dest);
-    meta(p.id, (m) => { const was = swapOf(m, rel); m.voice = { source, file: rel, name: basename(dest), size, info, addedAt: new Date().toISOString(), transcript: { status: "pending" }, ...(from ? { from } : {}), ...was };
-      (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "voice", text: `Voice-over added: ${basename(dest)}` }); });
-    await commit(p, `Voice-over added: ${basename(dest)}`);
-    let job = null, needsModel = null;
-    try { job = startTranscribe(projects.getProject(p.id, root)); } catch (e) { needsModel = e.message; }
-    return { voice: voiceOf(p), job, needsModel };
-  }
 
   /** Copy one file into the project by kind, as an upload is (a short sound goes to sfx once it is measured): its import entry. */
   async function placeFile(p, from, name, size) {
@@ -960,6 +729,12 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     return { file, voice };
   }
 
+  // the voice-over and Export to AE, their own files (audit/112 §2.9); the film's helpers they share with the rest of this file
+  const film = { jobs, meta, workDir, commit, note, relativeTo };
+  const voice = voiceRoutes(ctx, { r, P, mustProject, HttpError, film });
+  const { voiceOf, audioPath, sampleFile, useVoice, startTranscribe } = voice;
+  const ae = aeRoutes(ctx, { r, P, mustProject, HttpError, film });
+
   const raw = [
     // Import assets: the body is the file; it is copied into the project by kind (assets/<kind>/ or sources/). An audio file
     // with the role "voiceover" (or a talking-head video) becomes the voice-over and is transcribed at once; Claude is told in the chat.
@@ -1025,73 +800,13 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
     }),
     r("GET", "/voice/providers/(elevenlabs|kokoro)/voices", async ([name], _b, q) => {
       const key = PROVIDERS[name].local ? null : secrets.getSecret(name, root);
-      if (!key && !PROVIDERS[name].local) throw err("INVALID", `Add the ${PROVIDERS[name].title} key in Settings first`);
+      if (!key && !PROVIDERS[name].local) throw err("INVALID", `Add the ${PROVIDERS[name].title} key in Studio Settings first`);
       // read at once with 45 s a call and kept 10 min per service and language (T25: a busy computer's 25 s failure); ?lang= the film's
       // language, ?fresh=1 reads it again
-      return voiceList(name, key, { q: q.get("q") ?? "", lang: q.get("lang") === "en" ? "en" : "vi", fresh: q.get("fresh") === "1" });
-    }),
-    r("POST", "/voice/models/([a-z0-9-]+)/install", ([mid]) => {
-      const card = asr.models(root).find((m) => m.id === mid);
-      if (!card) throw err("NOT_FOUND", "Unknown model");
-      return jobs.start("model-install", { key: mid, title: `Downloading ${card.short}`, model: mid }, async (job) => {
-        job.update({ stage: "downloading from Hugging Face", progress: 0 });
-        const res = await asr.install(mid, { signal: job.signal, root, onProgress: ({ done, total, file }) => job.update({ progress: Math.floor((done / total) * 100), file, bytes: { done, total } }) });
-        return { installed: res.installed, path: res.path };
-      });
-    }),
-    r("POST", "/voice/models/([a-z0-9-]+)/remove", ([mid]) => {
-      if (jobs.running().some((j) => j.kind === "transcribe" && j.model === mid)) throw err("BUSY", "A transcription is using this model; stop it first");
-      return asr.remove(mid, root);
+      return voiceList(name, key, { lang: q.get("lang") === "en" ? "en" : "vi", fresh: q.get("fresh") === "1" });
     }),
 
-    // ---- the project's voice-over
-    r("GET", `/projects/${P}/voice`, ([id]) => {
-      const p = mustProject(id, root);
-      const t = transcript.read(p.path);
-      return { voice: p.meta?.voice ?? null, hints: hintsFor(p), transcript: t, hfTranscript: existsSync(join(p.path, "transcript.json")), settings: asr.voiceSettings(root),
-        models: asr.models(root).map(({ id: mid, short, installed, runtime, isDefault, languages }) => ({ id: mid, short, installed, ready: installed && runtime.ok, isDefault, languages })),
-        keys: secrets.status(root), jobs: jobs.list({ projectId: id }).filter((j) => ["transcribe", "tts"].includes(j.kind)).slice(0, 3),
-        // the free voice: on this computer or not, its download, and whether this film can use it (it has no Vietnamese)
-        kokoro: { installed: kokoro.packStatus(root).installed, mb: kokoro.PACK.mb, blocked: filmVietnamese(p.meta) },
-        scriptDraft: scriptDraft(p.path),          // the words Claude wrote to read, for the Script box ({ text, from } or null)
-        // the owner's own script in the brief and the lines of it the words to read leave out (Test 24: 9 of 12 went in)
-        ownScript: (() => { const lines = briefScript(p.meta?.brief?.text); return lines.length >= 2 ? { text: lines.join("\n"), leftOut: scriptGap(p.path, p.meta?.brief?.text)?.left.length ?? 0 } : null; })() };
-    }),
-    r("PATCH", `/projects/${P}/voice`, ([id], b) => {
-      mustProject(id, root);
-      const source = ["upload", "elevenlabs", "kokoro", "none"].includes(b.source) ? b.source : null;
-      if (!source) throw err("INVALID", "Unknown voice-over source");
-      // the user's own "No voice-over" (noVoice, never a source a new project starts with) lets the Storyboard go on without one
-      const out = meta(id, (m) => { const { noVoice, ...v } = m.voice ?? {}; m.voice = { ...v, source, ...(source === "none" ? { file: null, noVoice: { at: new Date().toISOString() } } : {}) }; }).meta.voice;
-      if (source === "none") { try { ctx.autopilot?.advance?.(id)?.catch?.(() => {}); } catch { /* the user can go on */ } }          // the Storyboard stops waiting
-      return out;
-    }),
-    r("GET", `/projects/${P}/voice/peaks`, async ([id]) => {
-      const p = mustProject(id, root);
-      const f = audioPath(p);
-      if (!f || !existsSync(f)) return { peaks: [] };
-      const cache = workDir(p, "voice-peaks.json");
-      const c = readJson(cache, null);
-      const st = statSync(f);
-      if (c && c.file === f && c.mtime === st.mtimeMs) return { peaks: c.peaks };
-      const pk = await peaks(f, 600, root);
-      writeJson(cache, { file: f, mtime: st.mtimeMs, peaks: pk });
-      return { peaks: pk };
-    }),
-    r("POST", `/projects/${P}/voice/transcribe`, ([id], b) => startTranscribe(mustProject(id, root), { model: b.model, language: b.language, hints: b.hints })),
-    r("PUT", `/projects/${P}/voice/transcript`, async ([id], b) => {
-      const p = mustProject(id, root);
-      if (ctx.renders?.isRendering(id)) throw err("RENDERING", "The film is being rendered: wait until the render finishes");
-      const words = await saveTranscript(p, b.segments, { byOwner: true });
-      note(p, { kind: "voice", text: "Transcript saved: {n} words, the film can be timed to it", vars: { n: words } });
-      // the film is built already: Claude reads the corrected words and moves what was timed to them
-      let retime = null;
-      if (p.meta?.pipeline?.ran?.build && !ctx.agent?.running?.has(id)) {
-        retime = await ctx.agent.start(id, { scope: { kind: "project" }, by: "app", text: "The owner corrected the voice-over's words (transcript.json). Read them and move what is timed to them (shot starts, captions, kinetic text) to the new times; change nothing else. Say in one line what moved." })
-          .then((t) => t.id).catch(() => null);
-      } else if (!p.meta?.pipeline?.ran?.build) { try { ctx.autopilot?.transcriptLanded?.(id)?.catch?.(() => {}); } catch { /* the user can go on */ } }
-      return { transcript: transcript.read(p.path), words, retime };
-    }),
+    ...voice.routes,          // the voice-over (server/voice.mjs)
     // ---- the music map for the user to read, with the timed lyrics: the beat file `hyperframes beats` writes for the music track, read
     // the way HF reads it (hf-edit/beats.mjs); its length is the track's own, never the last beat
     r("GET", `/projects/${P}/beats`, async ([id]) => {
@@ -1143,81 +858,13 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
         return r;
       });
     }),
-    // a voice on the script's first lines, to hear it before paying for the whole take (only on the user's click; the same words, voice and settings are never paid for twice)
-    r("POST", `/projects/${P}/voice/tts/sample`, async ([id], b) => {
-      const p = mustProject(id, root);
-      const { provider, key } = readingAsked(p, b);
-      const text = firstLines(b.text);
-      if (!text) throw err("INVALID", "Write the script to be read");
-      const settings = voiceSettings(provider, b.settings ?? null);
-      const model = provider === "elevenlabs" ? pickModel(await retryOnce(() => PROVIDERS.elevenlabs.models(key)), { text, asked: b.model ?? null, lang: p.meta?.language?.id ?? null }) : b.model ?? null;
-      if (provider === "elevenlabs" && !model) throw err("INVALID", "This ElevenLabs account has no model that reads Vietnamese");
-      const sample = createHash("sha256").update(JSON.stringify([provider, b.voiceId, model, settings, text])).digest("hex").slice(0, 24), out = sampleFile(p, sample);
-      if (existsSync(out)) return { sample, chars: text.length, again: true };
-      mkdirSync(dirname(out), { recursive: true });
-      try { await PROVIDERS[provider].generate(key, { voiceId: b.voiceId, model: model ?? undefined, text, out, settings, lang: p.meta?.language?.id ?? null, root }); }
-      catch (e) { rmSync(out, { force: true }); throw e; }
-      return { sample, chars: text.length };
-    }),
-    r("POST", `/projects/${P}/voice/tts`, ([id], b) => {
-      const p = mustProject(id, root);
-      const { provider, key, local } = readingAsked(p, b);
-      const text = String(b.text ?? "").normalize("NFC").trim();
-      if (!text) throw err("INVALID", "Write the script to be read");
-      if (text.length > 20000) throw err("INVALID", "The script is too long for one request (20,000 characters)");
-      // only what the user set on the Voice screen (none: the service's defaults); `speed` alone is the older shape
-      const settings = voiceSettings(provider, b.settings ?? (b.speed != null ? { speed: b.speed } : null));
-      // Test 24: the first voice-over failed while the computer was loaded (the server did not answer for about 30 s) and the step went
-      // quietly back to "make the voice-over", with nothing in the Voice box or the chat. A failure that may pass is tried once more; one
-      // that stays is said in both, kept on the voice (ttsFailed: the Voice box and the Pipeline say it), and the step says so too
-      const title = PROVIDERS[provider].title;
-      meta(id, (m) => { if (m.voice?.ttsFailed) delete m.voice.ttsFailed; });
-      return jobs.start("tts", { projectId: id, title: `Voice-over from ${title}` }, async (job) => {
-        job.update({ stage: "generating" });
-        const out = join(p.path, "assets", "3_audio", "voiceover", `${provider}-${new Date().toISOString().replace(/[:.]/g, "-")}.mp3`);
-        rememberAssets(p.path, [relativeTo(p.path, out)]);          // the app's own file, before it is written: never one "the user added" (T22-2)
-        const again =(what) => (e) => job.log(`${what} failed, trying once more: ${plainMessage(e)}`);
-        let model = b.model ?? null, made = null;
-        try {
-          // Vietnamese text is read by a model that reads Vietnamese, never eleven_multilingual_v2 by default
-          if (provider === "elevenlabs") {
-            model = pickModel(await retryOnce(() => PROVIDERS.elevenlabs.models(key), { signal: job.signal, onRetry: again("the model list") }), { text, asked: model, lang: p.meta?.language?.id ?? null });
-            if (!model) throw err("INVALID", "This ElevenLabs account has no model that reads Vietnamese");
-            job.update({ model });
-          }
-          made = await retryOnce(() => PROVIDERS[provider].generate(key, { voiceId: b.voiceId, model: model ?? undefined, text, out, signal: job.signal, settings, lang: p.meta?.language?.id ?? null, root,
-            onProgress: ({ part }) => job.update({ progress: Math.floor(part * 100) }) }),
-            { signal: job.signal, onRetry: again("reading the script") });
-        } catch (e) {
-          rmSync(out, { force: true });          // no half-written file left behind
-          if (e.detail) job.log(String(e.detail));
-          if (!job.signal.aborted) {
-            const said = ttsFailedText({ message: plainMessage(e) }, title);
-            meta(id, (m) => { m.voice = { ...(m.voice ?? {}), ttsFailed: { at: new Date().toISOString(), message: said } }; });
-            note(p, { kind: "voice", status: "error", text: said });
-            try { ctx.autopilot?.advance?.(id)?.catch?.(() => {}); } catch { /* the Pipeline says it on its next read */ }
-          }
-          throw e;
-        }
-        const info = await probe(out, root);
-        const rel = relativeTo(p.path, out);
-        transcript.saveAlignment(p.path, rel, made?.alignment ?? null);
-        meta(id, (m) => { const was = swapOf(m, rel); m.voice = { source: provider, file: rel, name: basename(out), size: statSync(out).size, info, voiceId: b.voiceId ?? null, voiceName: b.voiceName ?? null,
-          model: model ?? null, settings, script: text, addedAt: new Date().toISOString(), transcript: { status: "pending" }, ...was };
-          (m.activity ??= []).unshift({ at: new Date().toISOString(), kind: "voice", text: `Voice-over generated with ${PROVIDERS[provider].title}` }); });
-        await commit(p, `Voice-over generated (${PROVIDERS[provider].title})`);
-        let next = null; try { next = startTranscribe(projects.getProject(id, root)).id; } catch (e) { job.log(`transcription not started: ${e.message}`); }
-        return { file: rel, duration: info.duration, transcribeJob: next };
-      });
-    }),
 
     // ---- export
     r("GET", `/projects/${P}/exports`, ([id]) => {
       const p = mustProject(id, root);
       const dir = join(p.path, "renders");
-      moveOldGates(p.path);          // an older render's results leave renders/
       const files = existsSync(dir) ? readdirSync(dir).filter((f) => Object.values(FORMATS).includes(extname(f).toLowerCase()))
-        .map((f) => { const s = statSync(join(dir, f)); return { name: f, path: join(dir, f), size: s.size, at: s.mtime.toISOString(), gates: existsSync(gatesFile(p.path, f)) || existsSync(join(dir, f + ".gates.json")) }; })
+        .map((f) => { const s = statSync(join(dir, f)); return { name: f, path: join(dir, f), size: s.size, at: s.mtime.toISOString(), gates: existsSync(gatesFile(p.path, f)) }; })
         .sort((a, b) => (a.at < b.at ? 1 : -1)) : [];
       // the film's sizes for the dialog's boxes: the master, and each other size made (ready or out of date) with its state
       const sizes = extraSizes(p.meta).length ? { master: masterAspect(p.meta) ?? p.meta?.format?.aspect ?? null, rows: sizesOf(ctx, p).map(({ aspect, tag, width, height, status }) => ({ aspect, tag, width, height, status })) } : null;
@@ -1244,33 +891,14 @@ export function productionRoutes(ctx, { r, P, mustProject, HttpError }) {
       const p = mustProject(id, root);
       const last = readJson(workDir(p, "qa", "last.json"), null);
       const head = existsSync(join(p.path, ".git")) ? await rev.headAsync(p.path) : null;
-      return { report: last ? { ...last, stills: last.stills.map((s) => ({ ...s, url: `${ctx.preview.base}/p/${id}/${s.path}` })) } : null,
+      return { report: last ? { ...last, stills: (last.stills ?? []).map((s) => ({ ...s, url: `${ctx.preview.base}/p/${id}/${s.path}` })) } : null,
         // the film changed, not the app's own records (a version, the pre-render, the Editor's opening write .moworks/ only)
         changedSince: !!last && !!head && last.revision !== head && await rev.changedSinceAsync(p.path, last.revision), job: jobs.list({ kind: "qa", projectId: id })[0] ?? null };
     }),
     r("POST", `/projects/${P}/qa`, ([id]) => startQa(mustProject(id, root), { onEnd: () => qaEnded(id) })),
 
     // ---- After Effects
-    r("GET", "/ae/status", async () => ({ installs: aeInstalls(), running: await aeRunningAsync() })),          // off the server's thread
-    r("GET", `/projects/${P}/ae`, async ([id]) => {
-      const p = mustProject(id, root);
-      // a one-page code film (What If, anidoodle…) has no scene files (scenes 0) and is built all the same: built is the root's own word
-      // (not the starter film, whose one title card is a scene too), its count the film's shots
-      const { shots, root: comp } = await readShots(p.path).catch(() => ({ shots: [], root: null }));
-      const count = placedShots(shots, comp?.duration).filter((s) => s.duration).length;
-      const fps = projects.projectFps(p), last = readJson(workDir(p, "ae", "last.json"), null);
-      // the last size check while the film is unchanged (what AE gets: a canvas film is one video layer), and the film's canvases
-      // (a check from before it measured the film counted HF's seeks only and no picture, T28-24: "about 4 min" for 78 and more; it is made again)
-      const est = readJson(workDir(p, "ae", "estimate.json"), null);
-      const measured = est && (est.frames != null || ["canvas", "dynamic", "empty"].includes(est.kind));
-      return { fps, built: p.built === true || (p.built !== false && (p.scenes ?? 0) > 0), scenes: p.scenes ?? 0, shots: count,
-        canvas: canvasCount(p.path), estimate: measured && est.hash === filmHash(p.path, Number(fps)) ? est : null,
-        // an export made before the Log lost its addresses reads the same; lastExport is the Render's (the dialog shows the AE export's time)
-        last: last && { ...last, message: last.message && plainLog(last.message), log: (last.log ?? []).map(plainLog) },
-        running: await aeRunningAsync(), installs: aeInstalls(), lastExport: p.meta?.lastExport ?? null,
-        jobs: jobs.list({ projectId: id }).filter((j) => j.kind === "ae" || j.kind === "ae-estimate").slice(0, 3) };
-    }),
-    r("POST", `/projects/${P}/ae`, ([id], b) => startAe(mustProject(id, root), b)),
+    ...ae.routes,          // Export to AE (server/ae.mjs)
 
     // ---- jobs
     r("GET", `/jobs/${J}`, ([jid]) => { const j = jobs.get(jid); if (!j) throw err("NOT_FOUND", "Job not found"); return j; }),

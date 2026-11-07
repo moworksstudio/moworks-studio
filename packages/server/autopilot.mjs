@@ -6,6 +6,7 @@
 // and runs nothing of Claude's until it is answered: Fix mistakes only, Fix mistakes and improve it (the Review and the checks run, Claude fixes a
 // failure once, a changed film is rendered again as a new version), or No (the film is ready to export). Version 1 stays in Versions; a new version
 // loads only when the user presses. Render: one at a time in the whole app, and a project being rendered is not edited.
+import { styleFamily } from "../style-catalog/family.mjs";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import * as projects from "../project-service/index.mjs";
@@ -28,10 +29,9 @@ import { createHash } from "node:crypto";
 import { STILLS_BUSY } from "../hf-qa/cli.mjs";
 import { WAIT_MOMENT } from "./attention.mjs";
 import { execFile } from "node:child_process";
+import { readJson } from "../util/json.mjs";
 /** Is commit a in b's history (git merge-base --is-ancestor)? false on any doubt. */
 const inHistory = (dir, a, b) => new Promise((ok) => { if (!a || !b) return ok(false); execFile("git", ["merge-base", "--is-ancestor", a, b], { cwd: dir, windowsHide: true }, (e) => ok(!e)); });
-
-const readJson = (f, fallback) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return fallback; } };
 
 const now = () => new Date().toISOString();
 /** "chạy tiếp", "tiếp tục", "làm tiếp", "continue": the user's word to carry on a stopped step. */
@@ -59,11 +59,11 @@ function buildTimesFile(root) { return join(process.env.MW_STATE_DIR ?? join(roo
 // and "110 min left" on the page: a Lemo or mg film's time hardly grows with its length (34 s 44 min, 105 s 65, 110 s 36), so its rate is
 // flatter, 24 + 0.2 a second (110 s: 46-69), and each film above still falls in its range
 // a HyperFrames film past a minute grows far slower too (build-times.json: 105 s 81 min, 120 s 82 against "112-168", T28-13): 0.3 a second past 60 s
-const RATES = [[/^anidoodle-/, [26, 0.56]], [/^brush-cartoon$/, [15, 0.9]], [/^(lemo-|mg-)/, [24, 0.2]], [/^what-if$/, [10, 0.6]]];
+const RATES = { anidoodle: [26, 0.56], brush: [15, 0.9], lemo: [24, 0.2], mg: [24, 0.2], "what-if": [10, 0.6] };          // by the style's family (style-catalog/family.mjs)
 const HIGH = 1.5, LONG_FILM = 60, PAST_A_MINUTE = 0.3, TO_VERSION_1 = 0.62;
 export function estimateMinutes(shots, root, { seconds = null, styleId = null, three = false } = {}) {
   const sec = Number(seconds) > 0 ? Number(seconds) : Math.max(1, Number(shots) || 1) * 4;
-  const own = RATES.find(([re]) => re.test(String(styleId ?? "")))?.[1];
+  const own = RATES[styleFamily(styleId).family];
   const raw = own ? own[0] + own[1] * sec : 16 + 0.8 * Math.min(sec, LONG_FILM) + PAST_A_MINUTE * Math.max(0, sec - LONG_FILM);
   // the rates above were fitted on the whole old stage (Build, Review, music, checks); Version 1 is the Build and the music of them, then its render
   const render = renderMinutes(sec, { styleId, three });
@@ -419,14 +419,25 @@ export function createAutopilot(ctx) {
     if (!x.choice) meta(id, (m) => { const y = m.pipeline.version1; y.choice = "none"; y.choiceAt = now(); y.by = "chat"; });
     else if (x.holding && x.next) meta(id, (m) => { delete m.pipeline.version1.holding; });
   }
-  /** The Review and its checks have ended: nothing changed, the film stays as it is; else the film is kept as a new version and rendered, a 3D film only after asking. */
-  async function closeReview(id, { checksFailed = false } = {}) {
+  /** The Review and its checks have ended: nothing changed, the film stays as it is; else the film is kept as a new version and rendered, a 3D film only after asking.
+   *  One close per film at a time: the autopilot and every read of the Pipeline (the T41-8 safety net) both call it, and two calls that passed the
+   *  first check before either marked the Review closed each saved a version (T42-14: one Review made Version 2 and Version 3). */
+  const closing = new Set();
+  async function closeReview(id, opts = {}) {
+    if (closing.has(id)) return null;
+    closing.add(id);
+    try { return await closeReviewOnce(id, opts); } finally { closing.delete(id); }
+  }
+  async function closeReviewOnce(id, { checksFailed = false } = {}) {
     const p = projects.getProject(id, root), x = p?.meta?.pipeline?.version1;
     if (!pipe.reviewPending(x) || x.stoppedAt || ctx.agent.running.has(id)) return null;
     if (ctx.jobs?.list?.({ projectId: id }).some((j) => j.status === "running" && ["mix", "mix-sfx", "qa"].includes(j.kind))) return null;
     const { state } = await ctx.pipelineOf(id);
     const st = (s0) => state.find((y) => y.id === s0)?.status;
     if (!["done", "skipped"].includes(st("qcReview")) || !(["done", "skipped"].includes(st("checks")) || checksFailed)) return null;
+    // read again after the wait: the Review may have been closed, stopped or started again meanwhile
+    const fresh = projects.getProject(id, root)?.meta?.pipeline?.version1;
+    if (!pipe.reviewPending(fresh) || fresh.stoppedAt || ctx.agent.running.has(id)) return null;
     meta(id, (m) => { m.pipeline.version1.closed = now(); });
     const same = ctx.filmRendered ? ctx.filmRendered(id) : !(x.rev && await rev.changedSinceAsync(p.path, x.rev));
     if (same) {

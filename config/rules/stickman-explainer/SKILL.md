@@ -51,6 +51,11 @@ number on screen that differs from the voice, an unsourced statistic, a whoosh n
 
 **Faces:** Open Sans draws Vietnamese as it is.
 
+**Characters from the library (owner #1302).** A character made on the Characters page in Stickman Explainer's way is a look on the same rig: one
+file the app puts in `characters/house/<id>.js` (a line in `docs/CHARACTERS.json` names it and gives its `opts`). Draw it with the source skill's
+own `figure(x, { tone: "hero", ...opts, x, y, s, pose, face })`, its `opts` (outfit colours, build, hair, shoes) exactly as given: never another
+colour or piece. The video's hero is that character; others picked stand beside it as side characters on the same rig, each in its own look.
+
 ## 4. Each step
 
 | Step | What this style adds |
@@ -66,10 +71,8 @@ number on screen that differs from the voice, an unsourced statistic, a whoosh n
 
 ## 5. Sound
 
-**Where the sounds come from** (owner 05/11/2026, #1034, in place of "code-made sounds only" of 04/11: Test 38's code-made sounds were dull
-and did not match the picture): as for every film, the library's exact sound first, then the app's pick (by Claude) of the library's closest sounds, then a sound made with ElevenLabs from its description (owner #1096), then the online search, then a sound made by code (the source skill's own
-sounds, new takes from its recipes and the app's) only for a cue none of them has. Name each sound by the thing on screen and its action, so the library
-finds the one that matches (moworks-studio §7b).
+**Where the sounds come from:** as for every film, in the house rules' order (moworks-studio §7b, owner #1034, #1096). Name each sound by
+the thing on screen and its action, so the library finds the one that matches.
 
 The source skill's own sounds are in the app's library, made by the source skill's code (`tag-d`, `tag-fs`, `tag-a` marimba tags for a label pill landing, `ui`, `boom` for the
 title with `swell` before it, `shimmer`, `reveal`, foley, beds: SOUND.md's table and gains). One or two sounds per shot, a power moment alone; hits in the

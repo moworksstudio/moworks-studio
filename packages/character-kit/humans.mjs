@@ -10,11 +10,12 @@ import { docPath, writeDoc } from "../project-service/docs.mjs";
 import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
 import { HUMAN_ENGINE, humanCharacters, humanFolder, ownRig } from "./index.mjs";
 import { humanHandOf } from "../style-catalog/hands.mjs";
+import { readJson } from "../util/json.mjs";
 
 /** The hand of a film's style when it draws anidoodle's people (config/anidoodle-pipeline.json humanHands), else null. */
 export const handOfStyle = (styleId, root = APP_ROOT) => humanHandOf(styleId, root);
 export const HUMANS_FILE = "CHARACTERS.json";          // an anidoodle film's cast, as a Brush film's (the Brush pipeline reads it); entries carry engine "anidoodle-human"
-const readJson = (f, d = null) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
+
 /** The film's humans: [{ id, name, about, hand, import, check, made, credit, from }]; a bare list in the file is read as the cast too. */
 export const readHumans = (projectDir) => { const j = readJson(docPath(projectDir, HUMANS_FILE), { characters: [] }); return Array.isArray(j) ? j : j?.characters ?? []; };
 

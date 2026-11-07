@@ -18,6 +18,7 @@ import { workRoot } from "../project-service/index.mjs";
 import { googleHasVietnamese } from "../blocks-library/index.mjs";
 import { vietnameseCheck } from "../looks-library/index.mjs";
 import { fontMap } from "../hf-edit/finalize.mjs";
+import { readJson } from "../util/json.mjs";
 
 export const AUTHOR = { id: "lemomo", name: "Lemomo (LemoLab)", source: "Lemo-Opuscar" };
 export const LICENCE = "MIT (style prompt, code); demo film and stills CC BY 4.0, credit LemoLab";
@@ -28,7 +29,7 @@ const VOICE_EXCLUDED = {          // README › Licence: excluded from CC BY 4.0
   "news-package": "the narration is Doubao TTS (Volcengine's terms)",
 };
 const CJK_ONLY = /\b(SC|TC|HK|JP|KR)$|^ZCOOL\b/;          // fonts the styles use for Chinese or Japanese lines only
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
+
 const readText = (p) => { try { return readFileSync(p, "utf8"); } catch { return ""; } };
 const sha256 = (s) => createHash("sha256").update(s).digest("hex");
 

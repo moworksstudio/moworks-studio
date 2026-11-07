@@ -23,7 +23,7 @@ import { lemoSource, readStyles as lemoStyles } from "../lemo-styles/index.mjs";
 import { mgSource, readStyles as mgStyles } from "../mg-styles/index.mjs";
 import { anidoodleSource } from "../anidoodle-styles/index.mjs";
 import { DEMO as WI_DEMO, whatIfSource } from "../what-if-styles/index.mjs";
-import { filmHash } from "../server/proxy.mjs";
+import { filmHash } from "../project-service/film-hash.mjs";
 import { isStarterPage } from "../hf-edit/shots.mjs";
 
 /** The badge of one size check (aeExport's estimate), or null when it says nothing about the film's kind. */
@@ -35,6 +35,23 @@ export function aeLevel(est) {
 }
 
 export { aeBadge, localFile, measurements, shippedFile } from "./badge.mjs";
+
+/** What an export to AE learned of its film (audit/112d d11): the film's own size check, made as it exported, recorded as its style's measure on
+ *  this computer, the same record a measuring job writes. No second job measures the film again (at 25 fps). The record, or null (no kind). */
+export function recordFilm(styleId, dir, name, est, { root = APP_ROOT, file = localFile(root) } = {}) {
+  const level = aeLevel(est);
+  if (!level) return null;
+  const d = filmCandidate(styleId, dir, name, "exported to After Effects");
+  const out = readJson(file) ?? { about: "Each film style's After Effects badge, measured on its demo by the AE export's size check (packages/style-ae)", styles: {} };
+  out.failed ??= {};
+  out.styles[styleId] = { level, kind: est.kind, layers: est.layers, canvas: est.canvas, later: est.later ?? 0, pictures: est.pictures ?? 0, measured: new Date().toISOString().slice(0, 10), demo: d.demo, source: d.source };
+  delete out.failed[styleId];
+  const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => a.localeCompare(b)));
+  out.styles = sorted(out.styles); out.failed = sorted(out.failed);
+  mkdirSync(join(file, ".."), { recursive: true });
+  writeFileSync(file, JSON.stringify(out, null, 1) + "\n");
+  return out.styles[styleId];
+}
 
 const LIMIT_MS = 5 * 60000;
 const MEDIA = /\.(mp4|mov|webm|wav|mp3|m4a|flac|ogg|ply)$/i, SKIP_DIR = /[\\/](out|stills|work|node_modules)([\\/]|$)/;

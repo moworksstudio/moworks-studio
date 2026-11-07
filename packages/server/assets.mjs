@@ -2,6 +2,7 @@
 // files with "missing" / "new", and what the user does with one: relink a missing file, delete (to .moworks/trash, never for good), move
 // to another folder (the film's paths follow), transcribe any audio (it becomes the voice the film is timed to), put an audio file on the
 // timeline. No change while the film is being rendered or Claude is changing it.
+import { recordMusic } from "../sfx/film-music.mjs";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, join, normalize, sep } from "node:path";
 import * as projects from "../project-service/index.mjs";
@@ -15,7 +16,7 @@ import { filmLength } from "../hf-edit/ending.mjs";
 import { ADDED, muteMounted, readState as readSfx, writeCredits } from "../sfx/index.mjs";
 import { placeAdded } from "../sfx/added.mjs";
 import { updatePrefs } from "../sfx/prefs.mjs";
-import { levelTracks } from "../sfx/mixlevels.mjs";
+import { levelTracks } from "../sfx/mix/index.mjs";
 
 /** After a sound was taken off the timeline (the Editor's Remove; the element itself is removed by HF's own source mutation in
  *  editor.mjs): the music stops being the film's music, the voice-over stays off the timeline until it is put back (its words are kept),
@@ -27,7 +28,7 @@ export function soundTakenOff(p, { id = null, src = null, cue = null } = {}, roo
   // its repeats with it (tracks.mjs musicLoop), one repeat taken off leaves the music
   let html = ""; try { html = readFileSync(join(p.path, "index.html"), "utf8"); } catch { /* no film page yet */ }
   const left = (kind) => trackClips(html, kind).filter((c) => c.src === src && !(id && c.id === id));          // the clip taken off is gone
-  if (src && m0.music?.file === src && !left("music").some((c) => c.id === "el-music")) { removeRepeats(p.path); projects.updateMeta(p.id, (m) => { delete m.music; }, root); }
+  if (src && m0.music?.file === src && !left("music").some((c) => c.id === "el-music")) { removeRepeats(p.path); recordMusic(p.id, { gone: src }, root); }
   if (src && m0.voice?.file === src && !left("voice").length) projects.updateMeta(p.id, (m) => { if (m.voice) m.voice.offTimeline = true; }, root);
   const bed = id && /^el-amb-\d+$/.test(id) ? readSfx(p.path).ambience?.placed?.[Number(id.slice(7))] : null;
   if (bed?.key) updatePrefs(p.path, { skip: [bed.key] });
@@ -136,7 +137,8 @@ export function assetRoutes(ctx, { r, P, mustProject, HttpError }) {
       mkdirSync(join(p.path, ...folder.split("/")), { recursive: true });
       renameSync(join(p.path, ...rel.split("/")), join(p.path, ...to.split("/")));
       const changed = rewriteRefs(p.path, rel, to);
-      projects.updateMeta(id, (m) => { if (m.voice?.file === rel) m.voice.file = to; if (m.music?.file === rel) m.music.file = to; }, root);
+      projects.updateMeta(id, (m) => { if (m.voice?.file === rel) m.voice.file = to; }, root);
+      recordMusic(id, { renamed: { from: rel, to } }, root);
       rememberAssets(p.path, [to]);
       await commit(p, `Moved ${rel} → ${to}`);
       return { path: to, changed };

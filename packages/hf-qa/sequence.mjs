@@ -10,11 +10,12 @@ import { join } from "node:path";
 import "../hf-edit/seq-player.js";
 import { htmlFiles } from "../hf-edit/finalize.mjs";
 import { openFilmPage } from "./filmPage.mjs";
+import { readJson } from "../util/json.mjs";
 
 const { keyAt, pictureAt, snap } = globalThis.__mwSeqMath;
 export const SEQ = { crawlRunS: 0.12, holdS: 0.1, jumpMin: 4, jumpOver: 3, sameDiff: 0.006, productStep: 0.2, margin: 2 };
 const r2 = (n) => Math.round(n * 100) / 100;
-const readJson = (f, d = null) => { try { return JSON.parse(readFileSync(f, "utf8")); } catch { return d; } };
+
 const unescape = (s) => s.replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
 // not "\\b": the film's id was read from data-hf-id, the product's poses were never found, and the check measured the whole picture, transparent margin too (T31-6, T35-7)
 const attr = (tag, name) => { const m = new RegExp(`(?<![-\\w])${name}=(?:"([^"]*)"|'([^']*)')`).exec(tag); return m ? unescape(m[1] ?? m[2]) : null; };

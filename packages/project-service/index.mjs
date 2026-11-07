@@ -2,9 +2,12 @@
 // A project = an HF project folder (index.html, compositions/, STORYBOARD.md) + `.moworks/project.json` (our metadata: brief, format, style,
 // voice, stages, activity). New projects are made by hf-edit's scaffold (HF's own storyboard parser); existing HF folders can be opened.
 // The list lives in runtime/state/projects.json (paths only); a folder that has moved shows as "missing", never recreated or dropped.
+import { writeJson } from "../util/json.mjs";
+import { VI_MARKED_RE } from "../hf-qa/vi-letters.mjs";
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, statSync, writeFileSync } from "node:fs";
+import { styleFamily } from "../style-catalog/family.mjs";
 import { open as openFile } from "node:fs/promises";
-import { basename, dirname, join, relative, resolve, sep } from "node:path";
+import { basename, join, relative, resolve, sep } from "node:path";
 import { randomBytes } from "node:crypto";
 import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
 import { scaffold } from "../hf-edit/scaffold.mjs";
@@ -18,6 +21,8 @@ import { isLyricVideo } from "../style-catalog/traits.mjs";
 export { A as LAYOUT, APP_OWN, LAYOUT_VERSION } from "./layout.mjs";
 
 import { ASPECTS, extraSizes, filmSizes } from "./sizes.mjs";
+import { docPath } from "./docs.mjs";
+import { readJson } from "../util/json.mjs";
 export { ASPECTS };          // one table with the sizes a film is adapted to (sizes.mjs)
 export const STAGES = ["brief", "storyboard", "motionPlan", "build", "review", "export"];
 /** General style only: how Claude uses what the user imported (the kit's "what did the user give"). */
@@ -44,9 +49,6 @@ export function setDefaultLocation(path, root = APP_ROOT) {
 const registryFile = (root) => join(process.env.MW_STATE_DIR ?? join(root, "runtime", "state"), "projects.json");
 const metaFile = (dir) => join(dir, ".moworks", "project.json");
 
-function readJson(p, dflt) { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return dflt; } }
-function writeJson(p, v) { mkdirSync(dirname(p), { recursive: true }); const tmp = p + ".tmp"; writeFileSync(tmp, JSON.stringify(v, null, 2) + "\n"); renameSync(tmp, p); }
-
 function readRegistry(root) { return readJson(registryFile(root), { projects: [] }); }
 function writeRegistry(root, reg) { writeJson(registryFile(root), reg); }
 
@@ -63,7 +65,7 @@ export const ANSWER_KEYS = ["filmKind"];
 /** The film kinds a style offers: every style's (config/film-kinds.json), and an anidoodle medium's own. */
 function kindsOf(styleId) {
   const keys = (f, sub) => { try { const j = JSON.parse(readFileSync(join(APP_ROOT, "config", f), "utf8")); return Object.keys(sub ? j[sub] ?? {} : j).filter((k) => !k.startsWith("_")); } catch { return []; } };
-  return [...keys("film-kinds.json"), ...(/^anidoodle-[A-Za-z0-9]+$/.test(String(styleId ?? "")) ? keys("anidoodle-pipeline.json", "filmKinds") : [])];
+  return [...keys("film-kinds.json"), ...(styleFamily(styleId).family === "anidoodle" ? keys("anidoodle-pipeline.json", "filmKinds") : [])];
 }
 export function cleanAnswers(a, styleId = null) {
   const out = {};
@@ -388,10 +390,12 @@ async function castFromLibrary(dir, input, root) {
   // a Ricks Clip film: its own characters themselves (film/cast/, as Characters › Use in a project does), any other as a reference (T39-1:
   // New project dropped the Ricks characters picked there, and the film had no cast)
   // a 3D Cartoon film likewise (#1267): its own characters' modules into src/videos/film/cast/
-  if (input.style?.id === "ricks-clip" || input.style?.id === "cartoon-3d") {
+  // a Stickman Explainer film likewise (#1302): its own characters' files into characters/house/, their opts for its figure()
+  if (input.style?.id === "ricks-clip" || input.style?.id === "cartoon-3d" || input.style?.id === "what-if" || input.style?.id === "stickman-explainer" || input.style?.id === "explainer-2d") {
     try {
-      const c3 = input.style.id === "cartoon-3d", lib = c3 ? await import("../character-kit/c3d.mjs") : await import("../character-kit/ricks.mjs");
-      const ricks = { useRicks: c3 ? lib.useC3d : lib.useRicks }, mine = c3 ? lib.c3dCharacters(root) : lib.ricksCharacters(root);
+      const e = input.style.id, lib = await import(e === "cartoon-3d" ? "../character-kit/c3d.mjs" : e === "what-if" ? "../character-kit/whatif.mjs" : e === "stickman-explainer" || e === "explainer-2d" ? "../character-kit/house.mjs" : "../character-kit/ricks.mjs");
+      const ricks = { useRicks: e === "cartoon-3d" ? lib.useC3d : e === "what-if" ? lib.useWhatIf : e === "stickman-explainer" || e === "explainer-2d" ? lib.useHouse : lib.useRicks };
+      const mine = e === "cartoon-3d" ? lib.c3dCharacters(root) : e === "what-if" ? lib.wiCharacters(root) : e === "stickman-explainer" || e === "explainer-2d" ? lib.houseCharacters(root).filter((c) => c.engine === e) : lib.ricksCharacters(root);
       const picked0 = (Array.isArray(input.characters) ? input.characters : input.characters?.ids ?? []).map(String);
       const own = [...new Set([...picked0.filter((id) => mine.some((c) => c.id === id)), ...mine.filter((c) => namedIn(input.brief, c.name)).map((c) => c.id)])];
       const added = own.length ? ricks.useRicks(dir, own, { root }) : [];
@@ -409,7 +413,7 @@ async function castFromLibrary(dir, input, root) {
   if (!want.size) return [];
   // the author's rigged characters (Bit, the cheetah) come into any anidoodle film as their rig (the engine is staged there),
   // also in a medium with no Character step; the other picked characters stay references there
-  const rigs = !has && /^anidoodle-[A-Za-z0-9]+$/.test(String(input.style.id)) ? [...want].filter((id) => kit.humanCharacters(root).some((c) => c.id === id && c.rig)) : [];
+  const rigs = !has && styleFamily(input.style.id).family === "anidoodle" ? [...want].filter((id) => kit.humanCharacters(root).some((c) => c.id === id && c.rig)) : [];
   if (rigs.length) {
     try { const humans = await import("../character-kit/humans.mjs"); await humans.useHumans(dir, rigs, { styleId: input.style.id, root }); } catch { return []; }
     const rest = [...want].filter((id) => !rigs.includes(id));
@@ -430,6 +434,18 @@ async function castFromLibrary(dir, input, root) {
   const kitIds = [...want].filter((id) => kit.getCharacter(id, root));          // a Brush film: the character layer's ones
   if (!kitIds.length) return [];
   try { kit.useCharacters(dir, kitIds, root); return kitIds; } catch { return []; }
+}
+
+/** Characters picked from the library for a film already made (owner #1319 2b: the Film Editor's Characters, the Storyboard feedback's): put in
+ *  its cast the way a new film takes them (castFromLibrary: a style's own characters as they are, any other as a reference), then
+ *  [{ id, name, file }] of each one now in the film (file: where the film keeps it, or null for a reference). Never throws. */
+export async function addLibraryCharacters(id, ids, root = APP_ROOT) {
+  const p = getProject(id, root), want = [...new Set((ids ?? []).map(String).filter((x) => /^[a-z0-9][a-z0-9-]*$/.test(x)))].slice(0, 8);
+  if (!p || !want.length || !p.meta?.style?.id) return [];
+  let added = [];
+  try { added = await castFromLibrary(p.path, { style: p.meta.style, characters: want, brief: "" }, root); } catch { return []; }
+  const cast = (() => { try { const j = JSON.parse(readFileSync(docPath(p.path, "CHARACTERS.json"), "utf8")); return Array.isArray(j) ? j : j?.characters ?? []; } catch { return []; } })();
+  return want.filter((x) => added.includes(x) || cast.some((c) => c.id === x)).map((x) => { const c = cast.find((y) => y.id === x); return { id: x, name: c?.name ?? x, file: c?.file ?? null }; });
 }
 
 /** Open an existing HF project folder (index.html with a composition root). Adds our metadata file if it has none. */
@@ -560,7 +576,6 @@ export function revealProject(id, root = APP_ROOT) {
   showInExplorer(p.path);
   return { ok: true };
 }
-
 
 /** Change our metadata of a project with fn(meta); returns the project. */
 export function updateMeta(id, fn, root = APP_ROOT) {
@@ -725,7 +740,7 @@ export function briefLanguage(text) {
   const en = /tiếng\s*anh|\benglish\b|\bin\s+eng\b|\beng\s+voice\b/i.test(t), vi = /tiếng\s*việt|\bvietnamese\b/i.test(t);
   if (en !== vi) return en ? "en" : "vi";
   if (en && vi) return null;          // both named (a bilingual film, or a question): the user says which is spoken
-  return /[ăâđêôơưàáạảãằắặẳẵầấậẩẫèéẹẻẽềếệểễìíịỉĩòóọỏõồốộổỗờớợởỡùúụủũừứựửữỳýỵỷỹ]/i.test(t) ? "vi" : null;
+  return VI_MARKED_RE.test(t) ? "vi" : null;
 }
 
 /** Set the film's language (the user's answer to Prepare's question, or a change in the Editor): "vi" or "en". */

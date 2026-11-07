@@ -12,6 +12,30 @@
 .claude-kv { grid-template-columns: 6rem minmax(0, 1fr); }
 .claude-pop-confirm { display: flex; flex-direction: column; gap: var(--sp-2); font-size: var(--fs-control); color: var(--text-secondary); }
 .claude-pop-confirm .row { justify-content: flex-end; }
+/* the work list (ActivityChip, #1322): the Claude chip's popover, a checklist of what runs and what just ended. Status by icon, word and
+   colour (yellow running, green done, red failed, muted stopped); a running line with a percent gets the number and a thin bar */
+.claude-pop.act-pop { width: 21rem; max-height: min(70vh, 34rem); overflow-y: auto; gap: var(--sp-2); font-size: var(--fs-control); }
+.act-list { display: flex; flex-direction: column; gap: 0.125rem; margin: 0 calc(-1 * var(--sp-2)); }
+.act-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0.625rem; align-items: start; padding: 0.5rem var(--sp-2); border-radius: var(--r-md);
+  color: inherit; text-decoration: none; transition: background-color 150ms var(--ease-out); }
+a.act-row:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+@media (hover: hover) and (pointer: fine) { a.act-row:hover { background: var(--surface-3); } }
+.act-ic { margin-top: 0.15rem; }
+.act-row.s-run .act-ic { color: var(--status-pending); }
+.act-row.s-done .act-ic { color: var(--status-ok); }
+.act-row.s-failed .act-ic, .act-row.s-failed .act-sub { color: var(--status-stop); }
+.act-row.s-cancelled .act-ic { color: var(--text-muted); }
+.act-txt { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.act-txt b { font-size: var(--fs-control); font-weight: var(--strong-weight, 600); line-height: 1.3; color: var(--text-primary); }
+.act-sub { font-size: var(--fs-meta); line-height: 1.35; color: var(--text-secondary); }
+/* one line each (owner #1322): the name and the line under it never wrap; the full name shows on hover */
+.act-txt b, .act-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.act-pct { font-size: var(--fs-meta); font-weight: var(--strong-weight, 600); color: var(--status-pending); margin-top: 0.1rem; }
+.act-bar { display: block; height: 3px; margin-top: 0.3rem; border-radius: var(--r-pill); background: var(--surface-3); overflow: hidden; }
+.act-bar span { display: block; height: 100%; background: var(--status-pending); transform-origin: left; transition: transform 400ms linear; }
+.act-n { display: inline-grid; place-items: center; min-width: 1.15rem; height: 1.15rem; padding: 0 0.3rem; margin-left: 0.1rem; border-radius: var(--r-pill);
+  font-size: var(--fs-dense); background: var(--status-pending-soft); color: var(--status-pending); }
+@media (prefers-reduced-motion: reduce) { .act-bar span, .act-row { transition: none; } }
 .signin-flow { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-start; min-width: 0; }
 .signin-wait { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--status-pending); font-size: var(--fs-control); }
 .signin-code { display: flex; gap: 0.375rem; width: 100%; }
@@ -103,8 +127,6 @@ ul.pick-list { width: min(30rem, 80vw); }
 .render-sheet, .import-sheet { display: flex; flex-direction: column; gap: var(--sp-4); }
 .render-sheet .row { align-items: center; gap: var(--sp-2); }
 .render-sheet .checklist.blocking li { display: flex; gap: 0.5rem; align-items: flex-start; }
-.warn-list summary { cursor: pointer; display: inline-flex; align-items: center; gap: 0.375rem; color: var(--status-pending); font-size: var(--fs-control); }
-.warn-list ul { padding: 0.5rem 0 0 1.25rem; display: flex; flex-direction: column; gap: 0.25rem; font-size: var(--fs-control); }
 .spacer { flex: 1; }
 @media (max-width: 900px) { .sheet-cols { grid-template-columns: 1fr; } .sheet { height: calc(100vh - 2 * var(--sp-4)); } }
 
@@ -345,7 +367,6 @@ ul.pick-list { width: min(30rem, 80vw); }
 .mix-sfx-x:hover:not(:disabled) { color: var(--text-primary); }
 .mix-density { gap: var(--sp-2); align-items: center; flex-wrap: wrap; margin: var(--sp-2) 0; }
 .mix-amb { display: inline-flex; align-items: center; gap: 0.375rem; font-size: var(--fs-meta); color: var(--text-secondary); }
-.mix-duck { margin-top: var(--sp-2); }
 @media (max-width: 760px) { .mix-row { grid-template-columns: auto minmax(0, 1fr); } .mix-time { display: none; } .mix-act { grid-column: 1 / -1; } }
 .mix .tag.ok { color: var(--state-done); background: var(--state-done-soft); }
 
@@ -427,8 +448,6 @@ ul.pick-list { width: min(30rem, 80vw); }
 .plx-sub { display: block; font-size: var(--fs-dense); color: var(--text-muted); }
 .plx-grid { overflow-y: auto; padding: 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 1.25rem 0.875rem; align-content: start; scrollbar-width: thin; }
 .plx-detail { border-left: 1px solid var(--border); background: var(--surface-2); padding: 1rem; display: flex; flex-direction: column; gap: 0.875rem; overflow-y: auto; scrollbar-width: thin; }
-.plx-tags { margin: 0; display: flex; flex-wrap: wrap; gap: 0.3rem; }
-.plx-tags span { display: inline-flex; align-items: center; min-height: 1.375rem; padding: 0.15rem 0.5rem; line-height: 1.3; border-radius: var(--r-pill); border: 1px solid var(--border); font-size: var(--fs-dense); color: var(--text-secondary); }
 .plx-prompt { flex: none; font: var(--fs-control) / 1.6 var(--font-body); color: var(--text-primary); background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-md);
   padding: 0.75rem 0.875rem; white-space: pre-wrap; }
 .plx-detail .credit-line { margin-top: auto; padding-top: 0.5rem; border-top: 1px solid var(--border); }
@@ -682,11 +701,6 @@ ul.pick-list { width: min(30rem, 80vw); }
 .upd .panel > .state-line { margin-top: 0.25rem; }
 .upd-kv { grid-template-columns: 7rem minmax(0, 1fr); font-size: var(--fs-meta); row-gap: 0.3rem; }
 .upd-kv dd { display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap; min-width: 0; overflow-wrap: anywhere; }
-.upd-commits { display: flex; flex-direction: column; max-height: 18rem; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--r-md); }
-/* a change is its date and subject (no commit code): the subject takes the rest of the row */
-.upd-commits li { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: 0.75rem; padding: 0.35rem 0.75rem; font-size: var(--fs-meta); }
-.upd-commits li + li { border-top: 1px solid var(--border); }
-.upd-commits li > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .upd-log summary { cursor: pointer; font-size: var(--fs-meta); color: var(--text-secondary); }
 .upd-log pre, .upd-cmd { margin: 0.5rem 0 0; padding: 0.75rem; max-height: 20rem; overflow: auto; border-radius: var(--r-md); background: var(--surface-1); border: 1px solid var(--border); font-size: var(--fs-code); white-space: pre-wrap; }
 .upd-wait { margin-bottom: 0.5rem; }
@@ -762,10 +776,9 @@ ul.pick-list { width: min(30rem, 80vw); }
 .loud-line > summary { display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer; }
 .loud-line > summary .ok { color: var(--status-ok); }
 .loud-line > .hint { display: block; margin-top: 0.15rem; }
-.mix-loud { gap: 0.5rem; align-items: baseline; }
 .usage-hint > svg { flex: none; margin-top: 0.3rem; color: var(--state-run); }
 
-/* New project's Size typed as in After Effects with its ratio beside it, the locked boxes, What If "Coming soon" */
+/* New project's Size typed as in After Effects with its ratio beside it, the locked boxes */
 .np-size-wrap { position: relative; display: block; }
 .pick-btn.np-size { gap: 0.3rem; }
 .pick-btn.np-size input { width: 2.9em; min-width: 0; padding: 0; background: transparent; border: 0; font: inherit; outline: none; }
@@ -786,7 +799,6 @@ ul.pick-list { width: min(30rem, 80vw); }
 .np-size-list.up { top: auto; bottom: calc(100% + 0.375rem); }
 .np-locked { width: 100%; cursor: default; }
 .np2-desc > svg { vertical-align: -1px; }
-.scx-tab.soon { opacity: 0.55; cursor: default; }
 .scx-tab .au-name small { font-size: var(--fs-dense); }
 
 .np-sample-list { position: absolute; z-index: 30; right: 0; top: calc(100% + 0.375rem); min-width: 15rem; }
@@ -831,6 +843,17 @@ ul.pick-list { width: min(30rem, 80vw); }
 .bd-fb-field { position: relative; }
 .bd-fb .textarea { width: 100%; min-height: 9rem; resize: vertical; }
 .bd-fb .row { display: flex; align-items: center; gap: var(--sp-2); }
+/* the feedback's Characters (#1319 2b): the film style's characters as small portraits; a click puts the name in the note */
+.bd-cast { display: flex; gap: 0.5rem; overflow-x: auto; scrollbar-width: thin; padding: 2px 2px 0.25rem; }
+.bd-cast-it { flex: none; width: 4.75rem; display: flex; flex-direction: column; gap: 0.25rem; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; text-align: left; }
+.bd-cast-pic { display: block; aspect-ratio: 4 / 5; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-2); overflow: hidden; }
+.bd-cast-pic img { width: 100%; height: 100%; object-fit: contain; }
+.bd-cast-it.on .bd-cast-pic { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+@media (hover: hover) and (pointer: fine) { .bd-cast-it:not(.on):hover .bd-cast-pic { border-color: var(--accent-line); } }
+.bd-cast-it:focus-visible .bd-cast-pic { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+.bd-cast-n { display: inline-flex; align-items: center; gap: 0.2rem; font-size: var(--fs-dense); color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bd-cast-it.on .bd-cast-n { color: var(--accent-ink); font-weight: var(--strong-weight); }
+.bd-cast-none { margin: 0; }
 .bd-fb .bd-fb-warn { color: var(--warning); min-width: 0; }          /* a panel number the board does not have */
 .bd-at { width: 100%; max-height: 16rem; }
 .bd-at b { flex: none; }

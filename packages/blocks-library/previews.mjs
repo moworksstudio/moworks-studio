@@ -12,9 +12,10 @@ import { APP_ROOT, expandEnv, loadPins } from "../version-manager/index.mjs";
 import { render } from "../hf-render-worker/client.mjs";
 import { encodePosterAsync, encodeVideoAsync, posterAt } from "../library/preview-media.mjs";
 import { currentStore, ensureHosted, placeHosted, registryItems, reloadItems } from "./index.mjs";
+import { readJson } from "../util/json.mjs";
 
 const METHOD = "rendered here from the HF original with HyperFrames' own catalog preview method (24 fps draft, web encode)";
-const readJson = (p, d) => { try { return JSON.parse(readFileSync(p, "utf8")); } catch { return d; } };
+
 const inside = (root, rel) => { const p = resolve(root, rel); return p.startsWith(resolve(root) + sep) ? p : null; };
 
 /** HF's resolveEntryFile: an authored demo first; a component without one has no preview; a block renders its composition. */

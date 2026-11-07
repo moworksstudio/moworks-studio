@@ -273,8 +273,10 @@ Only when the film has a voice-over with its reviewed transcript (transcript.jso
   voice, and 8 dB under it on a spoken word; the render masters the whole film to -14 LUFS, true peak -1 dBTP (Render's Standard, the web's level;
   Quieter -16 LUFS when chosen, owner #1073). The app sets them (Final Mix, Balance again); a source skill's own mix
   numbers (a music bed far under the voice, a louder master) give way to these. A level the owner sets stays theirs.
-- **The voice stays on top:** the app's voice check lists every spoken word where the effects come within 8 dB of the voice or the music
-  within 3 dB (a warning, never a block); fix each by moving the effect into the pause after the word or lowering it.
+- **The voice stays on top:** the app's voice check lists every spoken word where the effects come within 8 dB of the voice, and every
+  spoken passage (a sentence, cut short at a pause of 2 s) where the music comes within 10 dB of the voice over its words (a warning, never a block); fix an
+  effect by moving it into the pause after the word or lowering it, the music of a passage with a dip on the music over that sentence (Balance again
+  sets one level for the whole film, never a song's own swells).
 
 ### 7b. A sound on every action (owner 30/10)
 
@@ -306,7 +308,7 @@ mood"):
 - **Motion Plan:** every motion row carries `"sound"`: a short name for what the row does on screen, or `"none"`.
 - **The app does the rest at Final Mix:** it gives every action the names leave out a sound of its own, varies the repeats, keeps a sound
   on every action (only two of one kind within 0.1 s are one sound; a small action's sound plays quieter, never left out), sets each kind
-  of sound under the music and the voice, crossfades the ambience between places and fades it out with the film's ending (§9). Tech checks'
+  of sound at its level (under the voice, 8 dB on a spoken word; between the lines an effect's peak a little over the music, 1.5 dB), crossfades the ambience between places and fades it out with the film's ending (§9). Tech checks'
   G-SFX ("Actions with no sound") is to be zero once the sounds are placed.
 - **Where the sounds come from (owner 05/11/2026 #1034, #1096):** the app's offline library when it has the very sound; else the app shows Claude
   the cue's moment and the library's closest sounds and Claude picks the one a sound designer would use there, or describes the sound and the app

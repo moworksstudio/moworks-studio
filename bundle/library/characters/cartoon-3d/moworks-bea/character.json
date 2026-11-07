@@ -1,0 +1,77 @@
+{
+  "id": "moworks-bea",
+  "name": "Bea",
+  "about": "A vault inspector from the 3D Cartoon worked example: a white lab coat with a blue pen, grey hair in a bun.",
+  "engine": "cartoon-3d",
+  "kind": "human",
+  "heightM": 1.63,
+  "heightBy": "inferred",
+  "heightNote": "the source skill gives no height: an everyday adult's",
+  "hand": "cartoon",
+  "hands": [
+    "cartoon"
+  ],
+  "def": {
+    "name": "Bea",
+    "top": "#f4f2ec",
+    "skin": "#e9c3a0",
+    "hair": "#8e93a3",
+    "style": "bun"
+  },
+  "palette": {
+    "top": "#f4f2ec",
+    "skin": "#e9c3a0",
+    "hair": "#8e93a3"
+  },
+  "can": {
+    "views": "any angle (a 3D rig): front, three-quarter, profile, back and between",
+    "faces": [
+      "neutral",
+      "happy",
+      "laugh",
+      "surprised",
+      "worried",
+      "angry",
+      "talk",
+      "blink",
+      "calm",
+      "eager"
+    ],
+    "faceNotes": "happy = the source skill's smile, surprised = alarmed, worried = wince; laugh and angry are the app's (mw:c3d-cast setFace)",
+    "poses": [
+      "stand",
+      "walk",
+      "point",
+      "wave",
+      "reach",
+      "sit"
+    ],
+    "poseNotes": "setPose with the source skill's STAND, SIT, walkPose, mixPose; poseReach and legIK (two-bone IK); POINT and WAVE from mw:c3d-cast",
+    "hands": "n/a: hand spheres, gripping a prop at its userData.grip",
+    "walk": "walkPose(phase) with legIK for planted feet",
+    "talk": "one open mouth (talk), flapped by talkFace(t); no lip sync"
+  },
+  "sheet": "MW Character Sheet v1",
+  "credit": {
+    "author": "Moworks Studio (the owner's 3D Cartoon source skill)",
+    "link": null,
+    "licence": "the owner's own",
+    "made": "adapted",
+    "madeNote": "the example's CharDef and coat, copied into the app's wrapper (the example keeps them in its world.ts); her torch, a light of its scene, left out",
+    "source": {
+      "skill": "3D Cartoon Animation Toolkit",
+      "version": "1.0.0",
+      "sha256": "794b432693b5c2111d3004063f536af4ebe9a84e36ee3fdcc42d597ff7d88caf",
+      "file": "src/examples/cheese-bank-vault/world.ts BEA, coatTex"
+    },
+    "gate": {
+      "passed": 26,
+      "failed": 0
+    }
+  },
+  "version": 1,
+  "module": [
+    "moworks-bea.ts"
+  ],
+  "savedAt": "2026-11-06T15:09:44.510Z"
+}

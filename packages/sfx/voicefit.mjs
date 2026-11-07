@@ -10,26 +10,50 @@
 // started from (sfx.json mounted[].base), so each fit starts again from the placement's levels; a level or a lane the user set in Studio stays
 // theirs and counts as it is. A sound the user added from the Sounds drawer (sfx.json added[]) is fitted the same way: it stays where they put it,
 // and it still may not drown the words. Run after a placement and whenever the tracks are levelled (mixlevels.mjs), skipped while nothing changed.
+import { MIX_PEAK } from "./mix/levels.mjs";
+import { attrsOf, audioLine } from "../hf-edit/tag.mjs";
 import { execFile } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { promisify } from "node:util";
-import { ffmpegExe } from "../library/preview-media.mjs";
+import { ffmpegExe } from "../version-manager/index.mjs";
 import { readMounts } from "../hf-edit/shots.mjs";
-import { audioKind, duckMusic, filmWords } from "../hf-edit/tracks.mjs";
-import { EFFECTS_MARGIN_DB, HIT_UNDER_VOICE, MAX_GAIN, dipLane, sig } from "./actions.mjs";
+import { audioKind, duckMusic, filmWords, hasVoiceCeiling } from "../hf-edit/tracks.mjs";
+import { VOICE_CEILING_DB } from "./mix/levels.mjs";
+import { dipLane, sig } from "./actions.mjs";
+import { EFFECTS_MARGIN_DB, HIT_UNDER_VOICE, MAX_GAIN } from "./mix/levels.mjs";
 import { patchState, readState } from "./index.mjs";
+import { offThread } from "./offThread.mjs";
+import { isMainThread } from "node:worker_threads";
 
 const run = promisify(execFile);
-const breathe = () => new Promise((done) => setImmediate(done));          // the server's other requests between the long sums
+const breathe = () => new Promise((done) => setImmediate(done));
+/** The page with each fitted clip's level and lane on its own <audio> tag (by id, while it plays the clip's src), every other byte as it is:
+ *  { id -> { base, fit, lane, clip } }. */
+export function levelTags(html, done) {
+  return html.replace(/<audio\b[^>]*>/gi, (tag) => {
+    const a = attrsOf(tag), c = done.get(a.id);
+    // only the tag that still plays the sound the fit measured: a placement meanwhile writes el-sfx-N again with other sounds (audit/112a N5)
+    if (!c || (c.clip && c.clip.src !== a.src)) return tag;
+    a["data-volume"] = String(Math.min(MAX_GAIN, Math.max(0.005, r3(c.base * c.fit))));
+    delete a["data-automation"]; delete a["data-mw-duck"];
+    if (c.lane) { a["data-automation"] = JSON.stringify(c.lane).replace(/"/g, "&quot;"); a["data-mw-duck"] = sig(a["data-automation"]); }
+    return audioLine(a);
+  });
+}          // the server's other requests between the long sums
 const SR = 48000;
 /** A word's room for the effects: the margin and half a dB for what the sums cannot know (two sounds in phase). */
 const FIT_MARGIN_DB = EFFECTS_MARGIN_DB + 0.5;
-/** The mix's loudest sample, dBFS: under HF's -1 dBFS true-peak step with what oversampling and the AAC encode add. */
-export const MIX_PEAK = -2.5;
 const LOWEST_FIT = 0.25;          // the peak rule takes at most 12 dB off one effect: over that the music itself is the peak
 const LOWEST_DIP = 0.01;
-const FIT_VERSION = 3;          // 2: the pauses rule (T38b-1); 3: the beds take their share of the pauses
+const FIT_VERSION = 4;          // 2: the pauses rule (T38b-1); 3: the beds take their share of the pauses; 4: the voice's ceiling (Qa3)
+/** A stem's samples held at a ceiling (dB): the voice as the render plays it behind its true-peak limiter (tracks.mjs limitVoice), close
+ *  enough for the room the effects have (the limiter lowers the few samples over it; the words' loudness barely moves). */
+export function capStem(stem, db) {
+  const c = 10 ** (db / 20);
+  for (let i = 0; i < stem.length; i++) { if (stem[i] > c) stem[i] = c; else if (stem[i] < -c) stem[i] = -c; }
+  return stem;
+}
 const r3 = (n) => Math.round(n * 1000) / 1000;
 
 /** The file's samples as the film plays it: 48 kHz stereo, interleaved Float32. A mono file goes to both channels at its full level, as HF's mixer
@@ -114,12 +138,19 @@ function clipPower(s, a, b) {
   return whole > 0 ? e / whole : 0;
 }
 
-const attrsOf = (tag) => Object.fromEntries([...tag.matchAll(/([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*"([^"]*)"/g)].map((m) => [m[1], m[2]]));
-const audioLine = (a) => `<audio ${Object.entries(a).map(([k, v]) => `${k}="${v}"`).join(" ")}>`;
+
+/** An effect the app placed (m: its sfx.json record) is still the app's to fit: the file, the level and the lane the app gave it (a: its tag's
+ *  attributes). The user's own file under the app's id is theirs (112a N7: the fit wrote a new level on it and never in sfx.json). */
+export function stillOurs(m, a) {
+  if (!m || !a || (m.file && a.src !== m.file) || !Number.isFinite(m.volume) || Math.abs((Number(a["data-volume"]) || 0) - m.volume) > 0.0005) return false;
+  return a["data-automation"] == null || a["data-mw-duck"] === sig(a["data-automation"]);
+}
 
 /** Fit the app's placed effects to the voice and the mix (above), the music's duck first. The music's lanes are as tracks.mjs duckMusic wrote
  *  them just now (the callers run it first). Returns { fitted, laned, lowered, peakDb } or { fitted: 0, skipped }. */
-export async function fitEffects(dir, { root } = {}) {
+export const fitEffects = (dir, opts = {}) => (isMainThread ? offThread(import.meta.url, "fitEffectsHere", [dir, opts]) : fitEffectsHere(dir, opts));          // off the server's thread (112a A9)
+/** fitEffects on this thread (a worker's). */
+export async function fitEffectsHere(dir, { root } = {}) {
   const f = join(dir, "index.html");
   let html; try { html = readFileSync(f, "utf8"); } catch { return { fitted: 0, skipped: "no page" }; }
   const st = readState(dir), mounted = st.mounted ?? [];
@@ -129,12 +160,7 @@ export async function fitEffects(dir, { root } = {}) {
   const tagList = [...html.matchAll(/<audio\b[^>]*>/gi)].map((m) => attrsOf(m[0])), tags = new Map(tagList.map((a) => [a.id, a]));
   audio.forEach((c, i) => { c.id = tagList[i]?.id ?? c.id; });
   for (const m of st.added ?? []) if (tags.get(m.id)?.src === m.file) placed.set(m.id, m);
-  // ours: an effect still at the level and with the lane the app gave it
-  const isOurs = (c) => {
-    const m = placed.get(c.id), a = tags.get(c.id);
-    if (!m || !a || !Number.isFinite(m.volume) || Math.abs((Number(a["data-volume"]) || 0) - m.volume) > 0.0005) return false;
-    return a["data-automation"] == null || a["data-mw-duck"] === sig(a["data-automation"]);
-  };
+  const isOurs = (c) => stillOurs(placed.get(c.id), tags.get(c.id));
   const ours = audio.filter(isOurs);
   const words = (filmWords(dir) ?? []).filter((w) => w.end - w.start >= 0.04);
   const others = audio.filter((c) => !ours.includes(c)), voice = others.filter((c) => audioKind(c) === "voice"), songs = others.filter((c) => audioKind(c) === "music");
@@ -143,11 +169,13 @@ export async function fitEffects(dir, { root } = {}) {
   // what the fit hears; the music's own lane follows the words and this fit, so only a lane the user drew counts
   const drawn = (c) => { const a = tags.get(c.id); return a?.["data-automation"] != null && a["data-mw-duck"] !== sig(a["data-automation"]) ? c.lane : null; };
   // FIT_VERSION: a fit made before the pauses rule is made again
-  const key = sig(JSON.stringify([FIT_VERSION, total, words.map((w) => [w.start, w.end]), others.map((c) => [c.src, c.start, c.mediaStart, c.duration, c.volume, audioKind(c) === "music" ? drawn(c) : c.lane, c.fadeIn, c.fadeOut]),
+  const key = sig(JSON.stringify([FIT_VERSION, total, voice.map((c) => hasVoiceCeiling(tags.get(c.id)?.["data-fx-chain"])), words.map((w) => [w.start, w.end]), others.map((c) => [c.src, c.start, c.mediaStart, c.duration, c.volume, audioKind(c) === "music" ? drawn(c) : c.lane, c.fadeIn, c.fadeOut]),
     ours.map((c) => [c.src, c.start, c.duration, placed.get(c.id).base ?? placed.get(c.id).volume, c.fadeIn, c.fadeOut])]));
   if (st.fit?.key === key) return { fitted: 0, skipped: "unchanged" };
   const pcms = await decodeClips(dir, audio, root);
   const voiceStem = voice.length ? renderStem(voice, total, pcms) : null;
+  // the voice behind its ceiling, as the render hears it (owner Qa3): its own peak no longer lifts the film's ceiling for the effects
+  if (voiceStem && voice.every((c) => hasVoiceCeiling(tags.get(c.id)?.["data-fx-chain"]))) capStem(voiceStem, VOICE_CEILING_DB);
   await breathe();
 
   // ---- the music: the usual duck, written afresh. No span goes deeper for its weakest word (owner 01/11, Test 36: one quiet word took 6 dB off a poem read without a pause, all 138 s; a lane's fader is the user's)
@@ -193,16 +221,26 @@ export async function fitEffects(dir, { root } = {}) {
     const ref = wp.length ? wp[Math.floor(wp.length / 2)] : 0;
     const N = Math.ceil(total * SR) * 2, W = Math.round(0.4 * SR) * 2, HOP = Math.round(0.1 * SR) * 2;
     const limit = ref * 10 ** (-HIT_UNDER_VOICE / 10);
+    // the running sum of the energy kept only where a window starts or ends, every HOP samples, a window being K of them (audit/112a A9: kept
+    // for every sample, twice in Float64, it was about 920 MB for a 10-minute film); summed sample by sample as before, so every window reads
+    // the same number. The beds' once: they do not change between the passes
+    const K = W / HOP, nb = Math.floor(N / HOP) + 1;
+    const running = (arr) => {
+      const at = new Float64Array(nb);
+      let s = 0;
+      for (let i = 0; i < N; i++) { if (i % HOP === 0) at[i / HOP] = s; const v = arr?.[i] ?? 0; s += v * v; }
+      if (N % HOP === 0) at[N / HOP] = s;
+      return at;
+    };
+    const bed = running(fixed);
     for (let pass = 0; ref > 0 && pass < 4; pass++) {
       const fx = new Float32Array(N);
       for (const c of clips) for (let i = 0; i < c.sound.buf.length && c.sound.i0 + i < N; i++) fx[c.sound.i0 + i] += c.sound.buf[i];
-      const cum = new Float64Array(N + 1), bed = new Float64Array(N + 1);
-      for (let i = 0; i < N; i++) { cum[i + 1] = cum[i] + fx[i] * fx[i]; const b = fixed?.[i] ?? 0; bed[i + 1] = bed[i] + b * b; }
-      const asked = new Map();
-      for (let i = 0; i + W <= N; i += HOP) {
-        const pw = (cum[i + W] - cum[i]) / W;
+      const cum = running(fx), asked = new Map();
+      for (let k = 0, i = 0; i + W <= N; k++, i += HOP) {
+        const pw = (cum[k + K] - cum[k]) / W;
         // the ambience beds heard there take their share (T38b-1: a roof's night bed with a hit at 0:03 came to 1.4 dB under the voice)
-        const room = Math.max(limit - (bed[i + W] - bed[i]) / W, limit * 0.25);
+        const room = Math.max(limit - (bed[k + K] - bed[k]) / W, limit * 0.25);
         if (pw <= room) continue;
         const scale = Math.sqrt(room / pw);
         for (const c of clips) { const a = c.sound.i0, b = a + c.sound.buf.length; if (b > i && a < i + W) asked.set(c, Math.min(asked.get(c) ?? 1, scale)); }
@@ -260,17 +298,13 @@ export async function fitEffects(dir, { root } = {}) {
 
   // ---- written: the level and the lane on each tag, HF's own attributes; the rest of the page as it is
   const done = new Map(clips.map((c) => [c.clip.id, c]));
-  const out = html.replace(/<audio\b[^>]*>/gi, (tag) => {
-    const a = attrsOf(tag), c = done.get(a.id);
-    if (!c) return tag;
-    a["data-volume"] = String(Math.min(MAX_GAIN, Math.max(0.005, r3(c.base * c.fit))));
-    delete a["data-automation"]; delete a["data-mw-duck"];
-    if (c.lane) { a["data-automation"] = JSON.stringify(c.lane).replace(/"/g, "&quot;"); a["data-mw-duck"] = sig(a["data-automation"]); }
-    return audioLine(a);
-  });
-  if (out !== html) writeFileSync(f, out);
+  // on the page as it is now, read again at the write: the fit took seconds, and HF Studio, Claude or a Final Mix change may have written
+  // it meanwhile (2 of 45 such writes were lost: audit/112a A8); only the tags the fit levelled change
+  let now = html; try { now = readFileSync(f, "utf8"); } catch { /* gone: nothing to write */ }
+  const out = levelTags(now, done);
+  if (out !== now) writeFileSync(f, out);
   patchState(dir, (x) => {
-    for (const [i, m] of (x.mounted ?? []).entries()) { const c = done.get(`el-sfx-${i}`); if (c) { m.base = c.base; m.volume = Math.min(MAX_GAIN, Math.max(0.005, r3(c.base * c.fit))); } }
+    for (const [i, m] of (x.mounted ?? []).entries()) { const c = done.get(`el-sfx-${i}`); if (c && c.clip.src === m.file) { m.base = c.base; m.volume = Math.min(MAX_GAIN, Math.max(0.005, r3(c.base * c.fit))); } }
     for (const m of x.added ?? []) { const c = done.get(m.id); if (c && c.clip.src === m.file) { m.base = c.base; m.volume = Math.min(MAX_GAIN, Math.max(0.005, r3(c.base * c.fit))); } }
     x.fit = { key, at: new Date().toISOString() };
   });
